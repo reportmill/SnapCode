@@ -163,7 +163,7 @@ public class JavaTextBox extends TextBox {
             // Create TextToken
             JavaTextToken textToken = new JavaTextToken(line, style, tokenStart, tokenEnd);
             textToken._tokenizer = _parser.getTokenizer(); textToken._token = token;
-            textToken.setXLocal(x); textToken.setWidth(w); x += w; w = 0;
+            textToken.setX(x); textToken.setWidth(w); x += w; w = 0;
             Color color = getColor(token); if(color!=null) textToken.setColor(color);
             line.addToken(textToken);
 
@@ -187,7 +187,7 @@ public class JavaTextBox extends TextBox {
 
             // Create TextToken
             JavaTextToken textToken = new JavaTextToken(line, style, tokenStart, tokenEnd);
-            textToken.setXLocal(x); textToken.setWidth(w); x += w; w = 0;
+            textToken.setX(x); textToken.setWidth(w); x += w; w = 0;
             line.addToken(textToken);
         }
 

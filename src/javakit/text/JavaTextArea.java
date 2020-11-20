@@ -323,15 +323,15 @@ public class JavaTextArea extends TextArea {
         // Paint boxes around selected tokens
         Color tcolor = new Color("#FFF3AA");
         for(TextBoxToken token : getSelectedTokens()) {
-            double x = Math.round(token.getX()) - 1, w = Math.ceil(token.getMaxX()) - x + 1;
-            double y = Math.round(token.getY()) - 1, h = Math.ceil(token.getMaxY()) - y + 1;
+            double x = Math.round(token.getTextBoxX()) - 1, w = Math.ceil(token.getTextBoxMaxX()) - x + 1;
+            double y = Math.round(token.getTextBoxY()) - 1, h = Math.ceil(token.getTextBoxMaxY()) - y + 1;
             aPntr.setColor(tcolor); aPntr.fillRect(x,y,w,h);
         }
 
         // If HoverNode, underline
         if(_hoverNode!=null) {
             TextBoxToken ttoken = (TextBoxToken)_hoverNode.getStartToken();
-            double x1 = ttoken.getX(), y = ttoken.getBaseline() + 1, x2 = x1 + ttoken.getWidth();
+            double x1 = ttoken.getTextBoxX(), y = ttoken.getTextBoxStringY() + 1, x2 = x1 + ttoken.getWidth();
             aPntr.setColor(Color.BLACK); aPntr.drawLine(x1,y,x2,y);
         }
     }
