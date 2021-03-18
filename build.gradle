@@ -1,8 +1,6 @@
 
 plugins {
-    id 'java'
     id 'application'
-    id 'idea'
 }
 
 sourceSets.main.java.srcDirs = ['src']
@@ -15,10 +13,15 @@ java {
 
 repositories {
     mavenCentral()
+    flatDir {
+        dirs 'lib'
+    }
 }
 
 dependencies {
     compile project(':SnapKit')
+    implementation name: 'tools'
+    implementation name: 'eawt'
     implementation 'org.eclipse.jgit:org.eclipse.jgit:5.7.0.202003110725-r'
 }
 
