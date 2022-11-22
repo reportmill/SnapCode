@@ -1,0 +1,86 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'com.reportmill'
+version '1.0.0'
+
+sourceSets.main.java.srcDirs = ['src']
+sourceSets.main.resources.srcDirs = ['src']
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+}
+
+// SnapKit version (might want 'master-SNAPSHOT', '2021.06.29', '<tag_hash>', etc.)
+project.ext.snapkitVersion = 'master-SNAPSHOT'
+
+// JavaKit version (might want 'master-SNAPSHOT', '2021.06.29', '<tag_hash>', etc.)
+project.ext.javakitVersion = 'master-SNAPSHOT'
+
+// SnapCharts version (might want 'master-SNAPSHOT', '2021.06.29', '<tag_hash>', etc.)
+project.ext.snapchartsVersion = 'master-SNAPSHOT'
+
+// SnapKitGL version (might want 'master-SNAPSHOT', '2021.06.29', '<tag_hash>', etc.)
+project.ext.snapkitglVersion = 'master-SNAPSHOT'
+
+dependencies {
+
+    // If Local SnapKit project, use it
+    if (findProject(':SnapKit') != null) {
+        println 'Using local SnapKit project'
+        implementation project(':SnapKit')
+    }
+
+    // Otherwise use GitHub SnapKit repo build
+    else {
+        println 'Using GitHub/Jitpack SnapKit package'
+        implementation "com.github.reportmill:SnapKit:$snapkitVersion"
+    }
+
+    // If Local JavaKit project, use it
+    if (findProject(':JavaKit') != null) {
+        println 'Using local JavaKit project'
+        implementation project(':JavaKit')
+    }
+
+    // Otherwise use GitHub JavaKit repo build
+    else {
+        println 'Using GitHub/Jitpack JavaKit package'
+        implementation "com.github.reportmill:JavaKit:$javakitVersion"
+    }
+
+    // If Local SnapCharts project, use it
+    if (findProject(':SnapCharts') != null) {
+        println 'Using local SnapCharts project'
+        implementation project(':SnapCharts')
+    }
+
+    // Otherwise use GitHub SnapCharts repo build
+    else {
+        println 'Using GitHub/Jitpack SnapCharts package'
+        implementation "com.github.reportmill:SnapCharts:$snapchartsVersion"
+    }
+
+    // If Local SnapKit project, use it
+    if (findProject(':SnapKitGL') != null) {
+        println 'Using local SnapKitGL project'
+        implementation project(':SnapKitGL')
+    }
+
+    // Otherwise use GitHub SnapKitGL repo build
+    else {
+        println 'Using GitHub/Jitpack SnapKitGL package'
+        implementation "com.github.reportmill:SnapKitGL:$snapkitglVersion"
+    }
+}
+
+mainClassName = 'snapcode.app.App'
+
+

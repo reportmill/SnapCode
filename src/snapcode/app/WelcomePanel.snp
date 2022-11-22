@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView PrefWidth="400" PrefHeight="600" Spacing="5" FillWidth="true">
+  <ColView Padding="2,8,8,8" GrowHeight="true" Spacing="5" FillWidth="true">
+    <TitleView Name="FileSystemTitleView" MinWidth="120" MinHeight="60" Text="File System">
+      <font name="Arial" size="14" />
+      <ColView Padding="6,6,6,8" GrowHeight="true" Spacing="6">
+        <font name="Arial" size="11" />
+        <RadioButton Name="LocalButton" text="Local" Selected="true" />
+        <RowView GrowWidth="true" Spacing="4">
+          <RadioButton Name="CloudButton" text="Cloud" />
+          <Label PrefHeight="20" Margin="0,0,0,24" text="User Email:" />
+          <TextField Name="EmailText" GrowWidth="true" PromptText="Used only to define unique home dir" />
+        </RowView>
+        <Button Name="SamplesButton" PrefWidth="120" PrefHeight="24" Padding="2" text="Show Samples" />
+      </ColView>
+    </TitleView>
+    <RowView GrowWidth="true" Spacing="4">
+      <Label Padding="4,0,0,0" text="Select file:">
+        <font name="Arial" size="14" />
+      </Label>
+      <ProgressBar Name="ProgressBar" PrefWidth="110" PrefHeight="20" LeanX="RIGHT" />
+    </RowView>
+    <TableView Name="SitesTable" GrowHeight="true">
+      <font name="Arial" size="14" />
+      <TableCol PrefWidth="120" Header="Name" />
+    </TableView>
+    <RowView Align="CENTER" Spacing="10">
+      <Button Name="NewButton" PrefWidth="80" PrefHeight="22" text="New" />
+      <Button Name="OpenPanelButton" PrefWidth="80" PrefHeight="22" text="Open..." />
+      <Button Name="OpenButton" PrefWidth="80" PrefHeight="22" text="Open" />
+      <Button Name="QuitButton" PrefWidth="80" PrefHeight="22" text="Quit" />
+    </RowView>
+  </ColView>
+</ColView>

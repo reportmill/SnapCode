@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView GrowHeight="true" FillWidth="true" MinWidth="200">
+  <RowView Name="ToolBar" Padding="6,10,6,20" Spacing="6">
+    <Button Name="RunButton" PrefWidth="80" Margin="4" Padding="1" LeanX="CENTER" Text="Run">
+      <Font Name="Arial Bold" Size="14" />
+    </Button>
+    <CheckBox Name="AutoRunCheckBox" ToolTip="Automatically run when enter key is pressed" LeanX="RIGHT" Text="Auto Run" />
+    <Button Name="DeleteButton" PrefWidth="22" PrefHeight="22" Margin="6" ToolTip="Delete" ShowArea="false" />
+  </RowView>
+</ColView>
