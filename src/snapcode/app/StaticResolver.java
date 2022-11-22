@@ -39,9 +39,9 @@ public class StaticResolver extends javakit.resolver.StaticResolver {
 
             // Handle snapcharts.data.DoubleArray
             case "snapcharts.data.DoubleArray":
-                mb.name("fromMinMaxCount").paramTypes(double.class,double.class,int.class).returnType(snapcharts.data.DoubleArray.class).save();
-                mb.name("fromMinMax").paramTypes(double.class,double.class).returnType(snapcharts.data.DoubleArray.class).save();
                 mb.name("doubleArray").returnType(double[].class).save();
+                mb.name("fromMinMax").paramTypes(double.class,double.class).returnType(snapcharts.data.DoubleArray.class).save();
+                mb.name("fromMinMaxCount").paramTypes(double.class,double.class,int.class).returnType(snapcharts.data.DoubleArray.class).save();
                 mb.name("clone").returnType(snapcharts.data.DoubleArray.class).save();
                 mb.name("clone").returnType(snapcharts.data.DataArray.class).save();
                 mb.name("clone").returnType(snapcharts.data.NumberArray.class).save();
@@ -66,32 +66,32 @@ public class StaticResolver extends javakit.resolver.StaticResolver {
                 mb.name("clone").returnType(snapcharts.data.DataSet.class).save();
                 return mb.name("getName").returnType(java.lang.String.class).buildAll();
 
-            // Handle snapjava.app.ChartsREPL
-            case "snapjava.app.ChartsREPL":
+            // Handle snapcode.app.ChartsREPL
+            case "snapcode.app.ChartsREPL":
                 mb.name("println").paramTypes(java.lang.Object.class).returnType(void.class).save();
                 return mb.name("print").paramTypes(java.lang.Object.class).returnType(void.class).buildAll();
 
-            // Handle snapjava.app.Quick3D
-            case "snapjava.app.Quick3D":
-                mb.name("createImage3D").paramTypes(snap.gfx.Image.class).returnType(snap.gfx3d.CameraView.class).save();
-                return mb.name("createCube").returnType(snap.gfx3d.CameraView.class).buildAll();
+            // Handle snapcode.app.Quick3D
+            case "snapcode.app.Quick3D":
+                mb.name("createCube").returnType(snap.gfx3d.CameraView.class).save();
+                return mb.name("createImage3D").paramTypes(snap.gfx.Image.class).returnType(snap.gfx3d.CameraView.class).buildAll();
 
-            // Handle snapjava.app.QuickCharts
-            case "snapjava.app.QuickCharts":
+            // Handle snapcode.app.QuickCharts
+            case "snapcode.app.QuickCharts":
                 mb.name("chart").paramTypes(java.lang.Object[].class).returnType(snapcharts.model.Chart.class).varArgs().save();
                 return mb.name("chart3D").paramTypes(java.lang.Object[].class).returnType(snapcharts.model.Chart.class).varArgs().buildAll();
 
-            // Handle snapjava.app.QuickData
-            case "snapjava.app.QuickData":
-                mb.name("getImageForSource").paramTypes(java.lang.Object.class).returnType(snap.gfx.Image.class).save();
-                mb.name("dataArray").paramTypes(java.lang.Object.class).returnType(snapcharts.data.DataArray.class).save();
-                mb.name("getTextForSource").paramTypes(java.lang.Object.class).returnType(java.lang.String.class).save();
-                mb.name("minMaxArray").paramTypes(double.class,double.class,int.class).returnType(snapcharts.data.DoubleArray.class).save();
-                mb.name("minMaxArray").paramTypes(double.class,double.class).returnType(snapcharts.data.DoubleArray.class).save();
-                mb.name("doubleArray").paramTypes(java.lang.Object[].class).returnType(snapcharts.data.DoubleArray.class).varArgs().save();
+            // Handle snapcode.app.QuickData
+            case "snapcode.app.QuickData":
                 mb.name("dataSet").paramTypes(java.lang.Object[].class).returnType(snapcharts.data.DataSet.class).varArgs().save();
                 mb.name("mapXY").paramTypes(double[].class,double[].class,java.util.function.DoubleBinaryOperator.class).returnType(snapcharts.data.DoubleArray.class).save();
-                return mb.name("mapXY").paramTypes(snapcharts.data.DoubleArray.class,snapcharts.data.DoubleArray.class,java.util.function.DoubleBinaryOperator.class).returnType(snapcharts.data.DoubleArray.class).buildAll();
+                mb.name("mapXY").paramTypes(snapcharts.data.DoubleArray.class,snapcharts.data.DoubleArray.class,java.util.function.DoubleBinaryOperator.class).returnType(snapcharts.data.DoubleArray.class).save();
+                mb.name("doubleArray").paramTypes(java.lang.Object[].class).returnType(snapcharts.data.DoubleArray.class).varArgs().save();
+                mb.name("dataArray").paramTypes(java.lang.Object.class).returnType(snapcharts.data.DataArray.class).save();
+                mb.name("minMaxArray").paramTypes(double.class,double.class).returnType(snapcharts.data.DoubleArray.class).save();
+                mb.name("minMaxArray").paramTypes(double.class,double.class,int.class).returnType(snapcharts.data.DoubleArray.class).save();
+                mb.name("getTextForSource").paramTypes(java.lang.Object.class).returnType(java.lang.String.class).save();
+                return mb.name("getImageForSource").paramTypes(java.lang.Object.class).returnType(snap.gfx.Image.class).buildAll();
 
             // Handle anything else
             default:
@@ -108,10 +108,10 @@ public class StaticResolver extends javakit.resolver.StaticResolver {
         switch (anId) {
 
             // Handle snapcharts.data.DoubleArray
-            case "snapcharts.data.DoubleArray.fromMinMaxCount(double,double,int)":
-                return snapcharts.data.DoubleArray.fromMinMaxCount(doubleVal(theArgs[0]),doubleVal(theArgs[1]),intVal(theArgs[2]));
             case "snapcharts.data.DoubleArray.fromMinMax(double,double)":
                 return snapcharts.data.DoubleArray.fromMinMax(doubleVal(theArgs[0]),doubleVal(theArgs[1]));
+            case "snapcharts.data.DoubleArray.fromMinMaxCount(double,double,int)":
+                return snapcharts.data.DoubleArray.fromMinMaxCount(doubleVal(theArgs[0]),doubleVal(theArgs[1]),intVal(theArgs[2]));
             case "snapcharts.data.DoubleArray.clone()":
                 return ((snapcharts.data.DoubleArray) anObj).clone();
             case "snapcharts.data.DoubleArray.toArray()":
@@ -135,43 +135,43 @@ public class StaticResolver extends javakit.resolver.StaticResolver {
             case "snapcharts.data.DataSet.getName()":
                 return ((snapcharts.data.DataSet) anObj).getName();
 
-            // Handle snapjava.app.ChartsREPL
-            case "snapjava.app.ChartsREPL.println(java.lang.Object)":
+            // Handle snapcode.app.ChartsREPL
+            case "snapcode.app.ChartsREPL.println(java.lang.Object)":
                 snapcode.app.ChartsREPL.println(theArgs[0]); return null;
-            case "snapjava.app.ChartsREPL.print(java.lang.Object)":
+            case "snapcode.app.ChartsREPL.print(java.lang.Object)":
                 snapcode.app.ChartsREPL.print(theArgs[0]); return null;
 
-            // Handle snapjava.app.Quick3D
-            case "snapjava.app.Quick3D.createImage3D(snap.gfx.Image)":
-                return snapcode.app.Quick3D.createImage3D((snap.gfx.Image) theArgs[0]);
-            case "snapjava.app.Quick3D.createCube()":
+            // Handle snapcode.app.Quick3D
+            case "snapcode.app.Quick3D.createCube()":
                 return snapcode.app.Quick3D.createCube();
+            case "snapcode.app.Quick3D.createImage3D(snap.gfx.Image)":
+                return snapcode.app.Quick3D.createImage3D((snap.gfx.Image) theArgs[0]);
 
-            // Handle snapjava.app.QuickCharts
-            case "snapjava.app.QuickCharts.chart(java.lang.Object[])":
+            // Handle snapcode.app.QuickCharts
+            case "snapcode.app.QuickCharts.chart(java.lang.Object[])":
                 return snapcode.app.QuickCharts.chart(theArgs);
-            case "snapjava.app.QuickCharts.chart3D(java.lang.Object[])":
+            case "snapcode.app.QuickCharts.chart3D(java.lang.Object[])":
                 return snapcode.app.QuickCharts.chart3D(theArgs);
 
-            // Handle snapjava.app.QuickData
-            case "snapjava.app.QuickData.getImageForSource(java.lang.Object)":
-                return snapcode.app.QuickData.getImageForSource(theArgs[0]);
-            case "snapjava.app.QuickData.dataArray(java.lang.Object)":
-                return snapcode.app.QuickData.dataArray(theArgs[0]);
-            case "snapjava.app.QuickData.getTextForSource(java.lang.Object)":
-                return snapcode.app.QuickData.getTextForSource(theArgs[0]);
-            case "snapjava.app.QuickData.minMaxArray(double,double,int)":
-                return snapcode.app.QuickData.minMaxArray(doubleVal(theArgs[0]),doubleVal(theArgs[1]),intVal(theArgs[2]));
-            case "snapjava.app.QuickData.minMaxArray(double,double)":
-                return snapcode.app.QuickData.minMaxArray(doubleVal(theArgs[0]),doubleVal(theArgs[1]));
-            case "snapjava.app.QuickData.doubleArray(java.lang.Object[])":
-                return snapcode.app.QuickData.doubleArray(theArgs);
-            case "snapjava.app.QuickData.dataSet(java.lang.Object[])":
+            // Handle snapcode.app.QuickData
+            case "snapcode.app.QuickData.dataSet(java.lang.Object[])":
                 return snapcode.app.QuickData.dataSet(theArgs);
-            case "snapjava.app.QuickData.mapXY(double[],double[],java.util.function.DoubleBinaryOperator)":
+            case "snapcode.app.QuickData.mapXY(double[],double[],java.util.function.DoubleBinaryOperator)":
                 return snapcode.app.QuickData.mapXY((double[]) theArgs[0],(double[]) theArgs[1],(java.util.function.DoubleBinaryOperator) theArgs[2]);
-            case "snapjava.app.QuickData.mapXY(snapcharts.data.DoubleArray,snapcharts.data.DoubleArray,java.util.function.DoubleBinaryOperator)":
+            case "snapcode.app.QuickData.mapXY(snapcharts.data.DoubleArray,snapcharts.data.DoubleArray,java.util.function.DoubleBinaryOperator)":
                 return snapcode.app.QuickData.mapXY((snapcharts.data.DoubleArray) theArgs[0],(snapcharts.data.DoubleArray) theArgs[1],(java.util.function.DoubleBinaryOperator) theArgs[2]);
+            case "snapcode.app.QuickData.doubleArray(java.lang.Object[])":
+                return snapcode.app.QuickData.doubleArray(theArgs);
+            case "snapcode.app.QuickData.dataArray(java.lang.Object)":
+                return snapcode.app.QuickData.dataArray(theArgs[0]);
+            case "snapcode.app.QuickData.minMaxArray(double,double)":
+                return snapcode.app.QuickData.minMaxArray(doubleVal(theArgs[0]),doubleVal(theArgs[1]));
+            case "snapcode.app.QuickData.minMaxArray(double,double,int)":
+                return snapcode.app.QuickData.minMaxArray(doubleVal(theArgs[0]),doubleVal(theArgs[1]),intVal(theArgs[2]));
+            case "snapcode.app.QuickData.getTextForSource(java.lang.Object)":
+                return snapcode.app.QuickData.getTextForSource(theArgs[0]);
+            case "snapcode.app.QuickData.getImageForSource(java.lang.Object)":
+                return snapcode.app.QuickData.getImageForSource(theArgs[0]);
 
             // Handle anything else
             default:

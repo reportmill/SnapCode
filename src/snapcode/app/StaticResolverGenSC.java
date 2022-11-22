@@ -7,7 +7,7 @@ import snap.web.WebURL;
 /**
  * A StaticResolverGen for SnapCharts.
  */
-public class StaticResolverGenSJ extends StaticResolverGen {
+public class StaticResolverGenSC extends StaticResolverGen {
 
     /**
      * Standard main implementation.
@@ -19,7 +19,7 @@ public class StaticResolverGenSJ extends StaticResolverGen {
         _whiteListStrings = ArrayUtils.addAll(_whiteListStrings, StaticResolverGen._whiteListStrings);
 
         _package = "snapcode.app";
-        StaticResolverGenSJ codeGen = new StaticResolverGenSJ();
+        StaticResolverGenSC codeGen = new StaticResolverGenSC();
         codeGen.generateStaticResolverForClasses(_javaClasses, _whiteListStrings, _blackListStrings);
 
         WebFile webFile = WebURL.getURL("/tmp/StaticResolver.java").createFile(false);
