@@ -1,4 +1,25 @@
-# SnapCode - a Java workbench for Data Science and Education
+<!-- title: "SnapCode - a Java workbench for Data Science and Education" -->
+
+<div style="position:relative;left:-25px;top:-40px;height:60px;">
+  <script src="https://reportmill.com/shared/navbar.js"></script>
+  <font size="1" face="Verdana, Helvetica, Arial" color="#CB0017">
+    <a href="http://www.reportmill.com">HOME</a> &gt; SnapCode
+  </font>
+</div>
+
+# <a name="title">SnapCode - a Java workbench for Data Science and Education</a>
+
+<div align="center">
+  <a href="https://reportmill.com/SnapCode/app">
+    <img src="https://reportmill.com/SnapCode/SnapCode.png">
+  </a>
+  <br>
+  <a href="https://reportmill.com/SnapCode/app">( Run SnapCode )</a>
+</div>
+
+<!-- [ ![SnapCode](https://reportmill.com/SnapCode/SnapCode.png)](http://www.reportmill.com/SnapCode/app/) -->
+
+## <a name="Overview">Overview</a>
 
 SnapCode makes it fast and easy to start coding in Java. SnapCode offers modern IDE coding features, support for
 Java REPL (Read-Eval-Print-Loop), and full featured library support for UI, graphics, charting, 3D and more.
@@ -10,7 +31,7 @@ SnapCode gets things started quickly with these features:
 - "No Compile" run using Java interpreter
 - Incremental REPL style output (shows values for each line as interactive views)
 
-## Modern IDE Features
+## <a name="ModernFeatures">Modern IDE Features</a>
 
 SnapCode has everything you would expect from a modern IDE to make writing code fast and easy:
 
@@ -22,7 +43,7 @@ SnapCode has everything you would expect from a modern IDE to make writing code 
 - One click access to JRE JavaDoc and source
 - Editor shows the AST hierarchy of selected symbol
 
-## Java REPL (Read-Eval-Print-Loop)
+## <a name="JavaRepl">Java REPL (Read-Eval-Print-Loop)</a>
 
 SnapCode allows you to avoid boilerplate code and evaluates code snippets as you type for instant feedback.
 
@@ -35,7 +56,7 @@ SnapCode allows you to avoid boilerplate code and evaluates code snippets as you
 Java REPL support is optional - full Java is supported, and can be auto-generated, for when code needs to be
 portable and compliant.
 
-## Full Featured Library Support
+## <a name="FullLibrary">Full Featured Library Support</a>
 
 SnapCode is built using the SnapKit and SnapCharts libraries giving access to advanced application features.
 
@@ -53,11 +74,11 @@ SnapCode is built using the SnapKit and SnapCharts libraries giving access to ad
   - Log Axes, Multi-Y axes
   - Pan, Zoom, Mouse-Over labels
 
-## Interactive Help System
+## <a name="HelpSystem">Interactive Help System</a>
 
 SnapCode also has an integrated help system to quickly find templates for almost any kind of code.
 
-## Coming Soon
+## <a name="ComingSoon">Coming Soon</a>
 
 Many features are on the immediate roadmap:
 
@@ -67,3 +88,13 @@ Many features are on the immediate roadmap:
 - Image processing
 - Puzzle block coding
 - File/project sharing via cloud and Github integration
+
+## <a name="Technology">Technology</a>
+
+This project is built with the following tools:
+
+- [SnapCode](https://github.com/reportmill/SnapCode) - Source for SnapCode (Github)
+- [SnapKit](https://github.com/reportmill/SnapKit) - Java UI Kit (Github)
+- [JavaKit](https://github.com/reportmill/JavaKit) - Java Parsing library (Github)
+- [SnapCharts](https://github.com/reportmill/SnapCharts) - Java charting library (Github)
+- [TeaVM](https://teavm.org/) - A Java to JavaScript transpiler (Github)
