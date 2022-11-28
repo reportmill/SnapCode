@@ -51,9 +51,10 @@ public class DocPaneUtils {
             javakit.resolver.ClassTreeWeb.addCommonClassNames(MORE_COMMON_CLASS_NAMES);
         }
 
-        // Add class paths for SnapKit and SnapCharts
+        // Add class paths for SnapKit, SnapCode and SnapCharts
         if (!SnapUtils.isTeaVM) {
             resolver.addClassPathForClass(PropObject.class);
+            resolver.addClassPathForClass(QuickCharts.class);
             resolver.addClassPathForClass(DoubleArray.class);
         }
 
