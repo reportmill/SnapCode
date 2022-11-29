@@ -37,7 +37,7 @@ class QuickDrawPenAnim extends QuickDrawPen {
     private long  _instrElapsedTime;
 
     // Last X/Y when adding instructions
-    private double  _lastX, _lastY;
+    private double  _lastX, _lastY, _lastMoveX, _lastMoveY;
 
     // Last Direction when adding instructions
     private double  _lastDir;
@@ -48,8 +48,9 @@ class QuickDrawPenAnim extends QuickDrawPen {
     private static final int Direction_Id = 3;
     private static final int MoveTo_Id = 4;
     private static final int LineTo_Id = 5;
-    private static final int Forward_Id = 6;
-    private static final int Turn_Id = 7;
+    private static final int Close_Id = 6;
+    private static final int Forward_Id = 7;
+    private static final int Turn_Id = 8;
 
     /**
      * Constructor.
@@ -95,8 +96,8 @@ class QuickDrawPenAnim extends QuickDrawPen {
     public void moveTo(double aX, double aY)
     {
         addInstruction(MoveTo_Id, new Object[] { aX, aY }, 0);
-        _lastX = aX;
-        _lastY = aY;
+        _lastX = _lastMoveX = aX;
+        _lastY = _lastMoveY = aY;
     }
 
     /**
@@ -115,6 +116,24 @@ class QuickDrawPenAnim extends QuickDrawPen {
         addInstruction(LineTo_Id, new Object[] { aX, aY }, time);
         _lastX = aX;
         _lastY = aY;
+    }
+
+    /**
+     * Override to add instruction.
+     */
+    @Override
+    public void closePath()
+    {
+        // Calculate time
+        double lineX = _lastMoveX - _lastX;
+        double lineY = _lastMoveY - _lastY;
+        double length = Math.sqrt(lineX * lineX + lineY * lineY);
+        int time = (int) Math.round(length * 1000 / 200);
+
+        // Add instruction and update LastX/Y
+        addInstruction(Close_Id, new Object[] { _lastMoveX, _lastMoveY }, time);
+        _lastX = _lastMoveX = lineX;
+        _lastY = _lastMoveY = lineY;
     }
 
     /**
@@ -249,6 +268,7 @@ class QuickDrawPenAnim extends QuickDrawPen {
             }
 
             // Handle LineTo
+            case Close_Id:
             case LineTo_Id: {
 
                 // If instruction is continued from previous processing, remove last path seg
@@ -283,6 +303,10 @@ class QuickDrawPenAnim extends QuickDrawPen {
                 if (timeRatio >= 1) {
                     _instrStart++;
                     _instrElapsedTime = 0;
+                    if (instrId == Close_Id) {
+                        penPath.removeLastSeg();
+                        penPath.close();
+                    }
                 }
                 break;
             }

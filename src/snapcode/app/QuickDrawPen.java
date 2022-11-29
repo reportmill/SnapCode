@@ -159,6 +159,23 @@ public class QuickDrawPen {
     }
 
     /**
+     * Adds a close segment to current draw path.
+     */
+    public void closePath()
+    {
+        // If auto animating, forward to anim
+        if (isAutoAnimate()) {
+            getAnimPen().closePath();
+            return;
+        }
+
+        // Forward to pen and repaint
+        PenPath penPath = getPenPath();
+        penPath.close();
+        _drawView.repaint();
+    }
+
+    /**
      * Moves the default draw path forward by given length for current Direction.
      */
     public void forward(double aLength)

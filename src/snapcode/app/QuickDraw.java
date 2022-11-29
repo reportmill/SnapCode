@@ -58,34 +58,58 @@ public class QuickDraw extends View {
     }
 
     /**
-     * Returns the current pen color.
-     */
-    public Color getPenColor()  { return getPen().getColor(); }
-
-    /**
      * Sets the current pen color.
      */
-    public void setPenColor(Color aColor)  { getPen().setColor(aColor); }
+    public void setPenColor(Color aColor)
+    {
+        QuickDrawPen pen = getPen().getAnimPen();
+        pen.setColor(aColor);
+    }
 
     /**
      * Moves the current path point to given point.
      */
-    public void moveTo(double aX, double aY)  { getPen().moveTo(aX, aY); }
+    public void moveTo(double aX, double aY)
+    {
+        QuickDrawPen pen = getPen().getAnimPen();
+        pen.moveTo(aX, aY);
+    }
 
     /**
      * Adds a line segment to current draw path from last path point to given point.
      */
-    public void lineTo(double aX, double aY)  { getPen().lineTo(aX, aY); }
+    public void lineTo(double aX, double aY)
+    {
+        QuickDrawPen pen = getPen().getAnimPen();
+        pen.lineTo(aX, aY);
+    }
+
+    /**
+     * Adds a line segment to current draw path from last path point to last moveTo point.
+     */
+    public void closePath()
+    {
+        QuickDrawPen pen = getPen().getAnimPen();
+        pen.closePath();
+    }
 
     /**
      * Moves the default pen forward by given length for current Direction.
      */
-    public void forward(double aLength)  { getPen().forward(aLength); }
+    public void forward(double aLength)
+    {
+        QuickDrawPen pen = getPen().getAnimPen();
+        pen.forward(aLength);
+    }
 
     /**
      * Sets the path drawing direction to the current direction plus given angle.
      */
-    public void turn(double anAngle)  { getPen().turn(anAngle); }
+    public void turn(double anAngle)
+    {
+        QuickDrawPen pen = getPen().getAnimPen();
+        pen.turn(anAngle);
+    }
 
     /**
      * Override to paint pen paths.
