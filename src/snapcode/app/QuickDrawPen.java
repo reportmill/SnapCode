@@ -67,7 +67,13 @@ public class QuickDrawPen {
         }
 
         _color = aColor;
-        _penPath = null;
+
+        // If PenPath has segment, clear it
+        if (_penPath != null) {
+            if (_penPath.getPointCount() <= 1)
+                _penPath._color = aColor;
+            else _penPath = null;
+        }
     }
 
     /**
@@ -87,7 +93,13 @@ public class QuickDrawPen {
         }
 
         _width = aValue;
-        _penPath = null;
+
+        // If PenPath has segment, clear it
+        if (_penPath != null) {
+            if (_penPath.getPointCount() <= 1)
+                _penPath._width = aValue;
+            else _penPath = null;
+        }
     }
 
     /**
@@ -102,20 +114,14 @@ public class QuickDrawPen {
      */
     public void setDirection(double theDegrees)
     {
+        // If auto animating, forward to anim
+        if (isAutoAnimate()) {
+            getAnimPen().setDirection(theDegrees);
+            return;
+        }
+
+        // Set direction
         _direction = theDegrees;
-    }
-
-    /**
-     * Returns whether to auto animate pen moves.
-     */
-    public boolean isAutoAnimate()  { return _autoAnimate; }
-
-    /**
-     * Sets whether to auto animate pen moves.
-     */
-    public void setAutoAnimate(boolean aValue)
-    {
-        _autoAnimate = aValue;
     }
 
     /**
@@ -123,6 +129,13 @@ public class QuickDrawPen {
      */
     public void moveTo(double aX, double aY)
     {
+        // If auto animating, forward to anim
+        if (isAutoAnimate()) {
+            getAnimPen().moveTo(aX, aY);
+            return;
+        }
+
+        // Forward to pen and repaint
         PenPath penPath = getPenPath();
         penPath.moveTo(aX, aY);
         _drawView.repaint();
@@ -133,6 +146,13 @@ public class QuickDrawPen {
      */
     public void lineTo(double aX, double aY)
     {
+        // If auto animating, forward to anim
+        if (isAutoAnimate()) {
+            getAnimPen().lineTo(aX, aY);
+            return;
+        }
+
+        // Forward to pen and repaint
         PenPath penPath = getPenPath();
         penPath.lineTo(aX, aY);
         _drawView.repaint();
@@ -174,7 +194,6 @@ public class QuickDrawPen {
             return;
         }
 
-        // Set direction
         setDirection(_direction + anAngle);
     }
 
@@ -188,6 +207,15 @@ public class QuickDrawPen {
 
         // If no current path, create/add
         _penPath = new PenPath(getColor(), getWidth());
+
+        // If previous path exists, initialize PenPath to last point
+        if (_penPaths.size() > 0) {
+            PenPath lastPenPath = _penPaths.get(_penPaths.size() - 1);
+            Point lastPoint = lastPenPath.getLastPoint();
+            _penPath.moveTo(lastPoint.x, lastPoint.y);
+        }
+
+        // Add new path
         _penPaths.add(_penPath);
 
         // Return
@@ -204,6 +232,19 @@ public class QuickDrawPen {
             aPntr.setStroke(Stroke.getStroke(penPath.getWidth()));
             aPntr.draw(penPath);
         }
+    }
+
+    /**
+     * Returns whether to auto animate pen moves.
+     */
+    public boolean isAutoAnimate()  { return _autoAnimate; }
+
+    /**
+     * Sets whether to auto animate pen moves.
+     */
+    public void setAutoAnimate(boolean aValue)
+    {
+        _autoAnimate = aValue;
     }
 
     /**
@@ -245,7 +286,8 @@ public class QuickDrawPen {
         public PenPath(Color aColor, double aWidth)
         {
             super();
-            _color = aColor; _width = aWidth;
+            _color = aColor;
+            _width = aWidth;
         }
 
         /**

@@ -2,7 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
+import snap.geom.Point;
 import snap.gfx.Color;
+import snap.util.MathUtils;
 import java.util.Arrays;
 
 /**
@@ -34,11 +36,20 @@ class QuickDrawPenAnim extends QuickDrawPen {
     // The cumulative elapsed time for current (continuing) instruction
     private long  _instrElapsedTime;
 
+    // Last X/Y when adding instructions
+    private double  _lastX, _lastY;
+
+    // Last Direction when adding instructions
+    private double  _lastDir;
+
     // Constants for instructions
-    private static final int Forward_Id = 1;
-    private static final int Turn_Id = 2;
-    private static final int Color_Id = 3;
-    private static final int Width_Id = 4;
+    private static final int Color_Id = 1;
+    private static final int Width_Id = 2;
+    private static final int Direction_Id = 3;
+    private static final int MoveTo_Id = 4;
+    private static final int LineTo_Id = 5;
+    private static final int Forward_Id = 6;
+    private static final int Turn_Id = 7;
 
     /**
      * Constructor.
@@ -50,36 +61,84 @@ class QuickDrawPenAnim extends QuickDrawPen {
     }
 
     /**
-     * Sets pen color.
+     * Override to add instruction.
      */
+    @Override
     public void setColor(Color aColor)
     {
         addInstruction(Color_Id, aColor, 0);
     }
 
     /**
-     * Sets pen width.
+     * Override to add instruction.
      */
+    @Override
     public void setWidth(double aValue)
     {
         addInstruction(Width_Id, aValue, 0);
     }
 
     /**
-     * Animates pen forward.
+     * Override to add instruction.
      */
+    @Override
+    public void setDirection(double theDegrees)
+    {
+        addInstruction(Direction_Id, theDegrees, 0);
+        _lastDir = theDegrees;
+    }
+
+    /**
+     * Override to add instruction.
+     */
+    @Override
+    public void moveTo(double aX, double aY)
+    {
+        addInstruction(MoveTo_Id, new Object[] { aX, aY }, 0);
+        _lastX = aX;
+        _lastY = aY;
+    }
+
+    /**
+     * Override to add instruction.
+     */
+    @Override
+    public void lineTo(double aX, double aY)
+    {
+        // Calculate time
+        double lineX = aX - _lastX;
+        double lineY = aY - _lastY;
+        double length = Math.sqrt(lineX * lineX + lineY * lineY);
+        int time = (int) Math.round(length * 1000 / 200);
+
+        // Add instruction and update LastX/Y
+        addInstruction(LineTo_Id, new Object[] { aX, aY }, time);
+        _lastX = aX;
+        _lastY = aY;
+    }
+
+    /**
+     * Override to add instruction.
+     */
+    @Override
     public void forward(double aLength)
     {
         int time = (int) Math.round(aLength * 1000 / 200);
         addInstruction(Forward_Id, aLength, time);
+
+        // Calculate next point using Direction and length
+        _lastX = _lastX + aLength * Math.cos(Math.toRadians(_lastDir));
+        _lastY = _lastY + aLength * Math.sin(Math.toRadians(_lastDir));
     }
 
     /**
-     * Animates pen turn.
+     * Override to add instruction.
      */
-    public void turn(double theDegrees)
+    @Override
+    public void turn(double anAngle)
     {
-        addInstruction(Turn_Id, theDegrees, 0);
+        addInstruction(Turn_Id, anAngle, 0);
+        _lastDir += anAngle;
     }
 
     /**
@@ -179,14 +238,64 @@ class QuickDrawPenAnim extends QuickDrawPen {
                 _instrStart++;
                 break;
 
+            // Handle MoveTo
+            case MoveTo_Id: {
+                Object[] argsArray = (Object[]) args;
+                double moveX = (Double) argsArray[0];
+                double moveY = (Double) argsArray[1];
+                _realPen.moveTo(moveX, moveY);
+                _instrStart++;
+                break;
+            }
+
+            // Handle LineTo
+            case LineTo_Id: {
+
+                // If instruction is continued from previous processing, remove last path seg
+                PenPath penPath = _realPen.getPenPath();
+                if (_instrElapsedTime > 0) {
+                    penPath.removeLastSeg();
+                    elapsedTime += _instrElapsedTime;
+                }
+                _instrElapsedTime = elapsedTime;
+
+                // Get previous point
+                Point lastPoint = penPath.getLastPoint();
+                if (lastPoint == null) {
+                    penPath.moveTo(0, 0);
+                    lastPoint = penPath.getLastPoint();
+                }
+
+                // Get adjusted length for ElapsedTime
+                double timeRatio = Math.min(elapsedTime / (double) instrTime, 1);
+
+                // Get LineTo args
+                Object[] argsArray = (Object[]) args;
+                double lineToX = (Double) argsArray[0];
+                double lineToY = (Double) argsArray[1];
+
+                // Get next X/Y and do lineTo
+                double nextX = MathUtils.mapFractionalToRangeValue(timeRatio, lastPoint.x, lineToX);
+                double nextY = MathUtils.mapFractionalToRangeValue(timeRatio, lastPoint.y, lineToY);
+                _realPen.lineTo(nextX, nextY);
+
+                // If completed, increment InstrStart and reset Continued
+                if (timeRatio >= 1) {
+                    _instrStart++;
+                    _instrElapsedTime = 0;
+                }
+                break;
+            }
+
             // Handle Turn
-            case Turn_Id:
+            case Turn_Id: {
                 _realPen.turn((Double) args);
                 _instrStart++;
                 break;
+            }
 
             // Handle Forward
-            case Forward_Id:
+            case Forward_Id: {
 
                 // If instruction is continued from previous processing, remove last path seg
                 if (_instrElapsedTime > 0) {
@@ -209,6 +318,8 @@ class QuickDrawPenAnim extends QuickDrawPen {
                     _instrStart++;
                     _instrElapsedTime = 0;
                 }
+                break;
+            }
         }
 
         // Return
