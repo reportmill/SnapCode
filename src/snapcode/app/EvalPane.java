@@ -71,6 +71,8 @@ public class EvalPane extends ViewOwner {
     {
         try { _evalView.resetView(); }
         finally { _resetEvalValuesRun = null; }
+
+        ((DocPaneX) _docPane).hideDrawer();
     }
 
     /**
