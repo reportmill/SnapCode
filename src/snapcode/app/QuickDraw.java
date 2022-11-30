@@ -122,6 +122,15 @@ public class QuickDraw extends View {
     }
 
     /**
+     * Sets the current pen width.
+     */
+    public void setPenWidth(double aWidth)
+    {
+        QuickDrawPen pen = getPen().getAnimPen();
+        pen.setWidth(aWidth);
+    }
+
+    /**
      * Moves the current path point to given point.
      */
     public void moveTo(double aX, double aY)

@@ -22,7 +22,7 @@ public class QuickDrawPen {
     private Color  _color = Color.BLUE;
 
     // Pen width
-    private double  _width = 2;
+    private double  _width = 3;
 
     // Angle
     private double  _direction = 0;

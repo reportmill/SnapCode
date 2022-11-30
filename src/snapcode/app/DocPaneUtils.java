@@ -69,6 +69,8 @@ public class DocPaneUtils {
             Quick3D.class.getName(),
             QuickCharts.class.getName(),
             QuickData.class.getName(),
+            QuickDraw.class.getName(),
+            QuickDrawPen.class.getName(),
             DoubleArray.class.getName()
     };
 }

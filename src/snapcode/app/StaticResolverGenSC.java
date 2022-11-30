@@ -14,7 +14,6 @@ public class StaticResolverGenSC extends StaticResolverGen {
      */
     public static void main(String[] args)
     {
-
         // Add WhiteList strings from parent?
         _whiteListStrings = ArrayUtils.addAll(_whiteListStrings, StaticResolverGen._whiteListStrings);
 
@@ -37,6 +36,8 @@ public class StaticResolverGenSC extends StaticResolverGen {
             Quick3D.class,
             QuickCharts.class,
             QuickData.class,
+            QuickDraw.class,
+            QuickDrawPen.class,
     };
 
     // WhiteList
@@ -64,6 +65,11 @@ public class StaticResolverGenSC extends StaticResolverGen {
             // QuickData
             "doubleArray", "dataArray", "dataSet", "minMaxArray", "mapXY",
             "getTextForSource", "getImageForSource",
+
+            // QuickDraw, QuickDrawPen
+            "setGridSpacing", "getPen", "setPenColor", "createDrawView",
+            "getColor", "setColor", "getWidth", "setWidth", "getDirection", "setDirection",
+            "moveTo", "lineTo", "closePath", "forward", "turn", "getAnimPen",
     };
     private static String[] _blackListStrings = {
 

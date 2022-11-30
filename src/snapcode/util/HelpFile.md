@@ -93,6 +93,31 @@
     dataSet = dataSet(x, y, z)
     chart = chart3D(dataSet)
 ```
+
+# Draw Vector Graphics
+
+## Draw box
+
+```
+    drawView = QuickDraw.createDrawView()
+    drawView.moveTo(100, 100)
+    for (int i = 0; i < 4; i++) {
+        drawView.forward(200)
+        drawView.turn(90)
+    }
+```
+
+## Draw Spiral
+
+```
+    drawView = QuickDraw.createDrawView()
+    drawView.moveTo(200, 200)
+    for (int i = 0; i < 1080; i++) {
+        drawView.forward(i / 360d)
+        drawView.turn(1)
+    }
+```
+
 # Fetch remote data / images
 
 ## Text
