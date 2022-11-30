@@ -10,6 +10,7 @@ import javakit.parse.JeplTextDoc;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.props.PropChange;
+import snap.text.TextBoxLine;
 import snap.text.TextDoc;
 import snap.text.TextStyle;
 import snap.util.CharSequenceUtils;
@@ -173,14 +174,8 @@ public class EditPane extends TextPane {
         if (anEvent.isKeyPress()) {
 
             // Handle Enter key: Re-evaluate if not inside method
-            if (anEvent.isEnterKey()) {
-                JNode selNode = getTextArea().getSelNode();
-                if (selNode != null && selNode.getParent(JMethodDecl.class) == null) {
-                    EvalPane evalPane = getEvalPane();
-                    if (evalPane.isAutoRun())
-                        evalPane.resetEvalValues();
-                }
-            }
+            if (anEvent.isEnterKey())
+                autoRunIfDesirable();
 
             // Handle Backspace/Delete: Clear EvalPane
             if ((anEvent.isBackSpaceKey() || anEvent.isDeleteKey()) && _textArea.length() == 0)
@@ -277,5 +272,31 @@ public class EditPane extends TextPane {
 
         if (propName == JavaTextArea.SelectedNode_Prop)
             resetLater();
+    }
+
+    /**
+     * Triggers auto run if it makes sense. Called when newline is entered.
+     */
+    private void autoRunIfDesirable()
+    {
+        // If EvalPane.AutoRun not set, just return
+        EvalPane evalPane = getEvalPane();
+        if (!evalPane.isAutoRun())
+            return;
+
+        // If inside method decl, just return
+        JavaTextArea textArea = getTextArea();
+        JNode selNode = textArea.getSelNode();
+        if (selNode != null && selNode.getParent(JMethodDecl.class) != null)
+            return;
+
+        // If previous line is empty whitespace, just return
+        TextBoxLine textLine = textArea.getSel().getStartLine();
+        TextBoxLine prevLine = textLine.getPrevious();
+        if (prevLine.isWhiteSpace())
+            return;
+
+        // Trigger auto run
+        evalPane.resetEvalValues();
     }
 }
