@@ -2,7 +2,7 @@
 <ColView>
   <Font name="Arial" size="12" />
   <RowView Padding="4" GrowWidth="true">
-    <TextField Name="SearchTextField" Margin="4,12,4,80" PrefWidth="260" PrefHeight="26" LeanX="CENTER" PromptText="Search" BorderRadius="10"/>
+    <TextField Name="SearchTextField" Margin="4,12,4,80" PrefWidth="260" PrefHeight="26" LeanX="CENTER" GrowWidth="true" PromptText="Search" BorderRadius="10"/>
     <Button Name="AddCodeButton" Margin="5,12,5,8" Padding="4,10,4,10" LeanX="RIGHT" Text="Add Code" />
   </RowView>
   <SplitView Name="SplitView" Vertical="true" GrowWidth="true" GrowHeight="true">
