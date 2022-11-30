@@ -117,6 +117,12 @@ public class HelpPane extends ViewOwner {
         HelpFile helpFile = getHelpFile();
         HelpSection[] sections = helpFile.getSections();
         topicListArea.setItems(sections);
+
+        // Set ScrollView BarSize to mini
+        ScrollView topicListScrollView = topicListView.getScrollView();
+        ScrollView helpTextScrollView = helpTextView.getScrollView();
+        topicListScrollView.setBarSize(14);
+        helpTextScrollView.setBarSize(14);
     }
 
     private void configureTopicListAreaCell(ListCell<HelpSection> aCell)
