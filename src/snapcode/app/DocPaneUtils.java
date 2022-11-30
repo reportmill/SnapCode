@@ -45,18 +45,20 @@ public class DocPaneUtils {
         // Create resolver
         Resolver resolver = Resolver.newResolverForClassLoader(JavaTextDoc.class.getClassLoader());
 
-        // Link up StaticResolver for TeaVM
+        // For TeaVM: Link up StaticResolver
         if (Resolver.isTeaVM) {
             javakit.resolver.StaticResolver.shared()._next = new StaticResolver();
-            javakit.resolver.ClassTreeWeb.addCommonClassNames(MORE_COMMON_CLASS_NAMES);
         }
 
-        // Add class paths for SnapKit, SnapCode and SnapCharts
+        // For Desktop: Add class paths for SnapKit, SnapCode and SnapCharts
         if (!SnapUtils.isTeaVM) {
             resolver.addClassPathForClass(PropObject.class);
             resolver.addClassPathForClass(QuickCharts.class);
             resolver.addClassPathForClass(DoubleArray.class);
         }
+
+        // Add more common class names from SnapCode
+        javakit.resolver.ClassTreeWeb.addCommonClassNames(MORE_COMMON_CLASS_NAMES);
 
         // Return
         return resolver;
