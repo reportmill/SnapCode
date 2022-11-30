@@ -163,5 +163,9 @@ public class EvalPane extends ViewOwner {
         // Handle DeleteButton
         if (anEvent.equals("DeleteButton"))
             _evalView.removeChildren();
+
+        // Handle SamplesButton
+        if (anEvent.equals("SamplesButton"))
+            ((DocPaneX) _docPane).showSamples();
     }
 }

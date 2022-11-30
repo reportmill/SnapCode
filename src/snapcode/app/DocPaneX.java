@@ -4,6 +4,7 @@
 package snapcode.app;
 import snap.gfx.Color;
 import snap.view.*;
+import snapcode.util.SamplesPane;
 import snapcode.util.HelpPane;
 
 /**
@@ -104,6 +105,15 @@ public class DocPaneX extends DocPane {
     public void hideDrawer()
     {
         _drawerView.hide();
+    }
+
+    /**
+     * Shows samples.
+     */
+    public void showSamples()
+    {
+        hideDrawer();
+        new SamplesPane().showSamples(this);
     }
 
     /**
