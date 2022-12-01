@@ -38,8 +38,8 @@ public class SamplesPane extends ViewOwner {
     private static final String SAMPLES_EXT = ".jepl";
     private static final String SAMPLES_LABEL = "Select a Java REPL file:";
     private static final Size DOC_SIZE = new Size(130, 102);
-    private static final Effect SHADOW = new ShadowEffect();
-    private static final Effect SHADOW_SEL = new ShadowEffect(10, Color.get("#038ec3"), 0, 0);
+    private static final Effect SHADOW = new ShadowEffect(20, Color.GRAY, 0, 0);
+    private static final Effect SHADOW_SEL = new ShadowEffect(20, Color.get("#038ec3"), 0, 0);
 
     /**
      * Shows the samples pane.
@@ -218,7 +218,6 @@ public class SamplesPane extends ViewOwner {
         // Create ImageViewX for sample
         ImageView imageView = new ImageView();
         imageView.setPrefSize(DOC_SIZE);
-        imageView.setFill(Color.WHITE);
         imageView.setName("ImageView" + anIndex);
 
         // Create label for sample

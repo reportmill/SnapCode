@@ -167,7 +167,6 @@ public class DocPaneX extends DocPane {
         _drawerView = new DrawerView();
         _drawerView.getDrawerLabel().setText("Help Pane");
         _drawerView.getTabLabel().setText("Help");
-        _drawerView.setFill(new Color(.98));
         _drawerView.showTabButton(topView);
     }
 
