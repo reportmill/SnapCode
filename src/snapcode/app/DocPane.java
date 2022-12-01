@@ -114,6 +114,13 @@ public class DocPane extends ViewOwner {
         // Set new doc
         setJeplDoc(aJeplDoc);
 
+        // Bogus!!
+        if (_editPane != null) {
+            _editPane.setJeplDoc(aJeplDoc);
+            _editPane.getTextArea().setTextDoc(aJeplDoc);
+            resetEvalValues();
+        }
+
         // If source is string, add to recent files menu
         WebURL url = aJeplDoc.getSourceURL();
         String urls = url != null ? url.getString() : null;
@@ -359,6 +366,8 @@ public class DocPane extends ViewOwner {
                 _evalPane.resetEvalValues();
             else _evalPane.cancelRun();
         }
+
+        // Handle AutoRunAction
         if (anEvent.equals("AutoRunAction")) {
             _evalPane.setAutoRun(!_evalPane.isAutoRun());
             _evalPane.resetLater();

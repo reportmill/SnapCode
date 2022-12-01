@@ -37,7 +37,7 @@ public class SamplesPane extends ViewOwner {
     private static final String SAMPLES_ROOT = "https://reportmill.com/SnapCode/Samples/";
     private static final String SAMPLES_EXT = ".jepl";
     private static final String SAMPLES_LABEL = "Select a Java REPL file:";
-    private static final Size DOC_SIZE = new Size(102, 102);
+    private static final Size DOC_SIZE = new Size(130, 102);
     private static final Effect SHADOW = new ShadowEffect();
     private static final Effect SHADOW_SEL = new ShadowEffect(10, Color.get("#038ec3"), 0, 0);
 
@@ -68,18 +68,19 @@ public class SamplesPane extends ViewOwner {
     /**
      * Creates UI.
      */
+    @Override
     protected View createUI()
     {
         // Create main ColView to hold RowViews for samples
         ColView colView = new ColView();
         colView.setName("ItemColView");
-        colView.setSpacing(25);
-        colView.setPadding(25, 15, 20, 15);
+        colView.setSpacing(10);
+        colView.setPadding(15, 15, 15, 15);
         colView.setAlign(Pos.TOP_CENTER);
         colView.setFillWidth(true);
         colView.setFill(new Color(.97, .97, 1d));
         colView.setBorder(Color.GRAY, 1);
-        colView.setPrefWidth(557);
+        colView.setPrefWidth(640);
 
         // Add loading label
         Label loadLabel = new Label("Loading...");
@@ -89,7 +90,7 @@ public class SamplesPane extends ViewOwner {
 
         // Create ScrollView
         ScrollView scroll = new ScrollView(colView);
-        scroll.setPrefHeight(420);
+        scroll.setPrefHeight(450);
         scroll.setShowHBar(false);
         scroll.setShowVBar(true);
 
@@ -229,7 +230,7 @@ public class SamplesPane extends ViewOwner {
 
         // Create/add ItemBox for Sample and add ImageView + Label
         ColView itemBox = new ColView();
-        itemBox.setPrefSize(175, 175);
+        itemBox.setPrefSize(200, 200);
         itemBox.setAlign(Pos.CENTER);
         itemBox.setPadding(0, 0, 8, 0);
         itemBox.setName("ItemBox" + anIndex);
