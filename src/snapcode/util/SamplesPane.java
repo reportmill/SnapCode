@@ -40,6 +40,7 @@ public class SamplesPane extends ViewOwner {
     private static final Size DOC_SIZE = new Size(130, 102);
     private static final Effect SHADOW = new ShadowEffect(20, Color.GRAY, 0, 0);
     private static final Effect SHADOW_SEL = new ShadowEffect(20, Color.get("#038ec3"), 0, 0);
+    private static final Color CONTENT_FILL = new Color(.98, .98, 1d);
 
     /**
      * Shows the samples pane.
@@ -78,7 +79,7 @@ public class SamplesPane extends ViewOwner {
         colView.setPadding(15, 15, 15, 15);
         colView.setAlign(Pos.TOP_CENTER);
         colView.setFillWidth(true);
-        colView.setFill(new Color(.97, .97, 1d));
+        colView.setFill(CONTENT_FILL);
         colView.setBorder(Color.GRAY, 1);
         colView.setPrefWidth(640);
 
@@ -89,10 +90,8 @@ public class SamplesPane extends ViewOwner {
         colView.addChild(loadLabel);
 
         // Create ScrollView
-        ScrollView scroll = new ScrollView(colView);
-        scroll.setPrefHeight(450);
-        scroll.setShowHBar(false);
-        scroll.setShowVBar(true);
+        ScrollView scrollView = new ScrollView(colView);
+        scrollView.setPrefHeight(450);
 
         // Create "Select template" label
         Label selectLabel = new Label(SAMPLES_LABEL);
@@ -106,13 +105,16 @@ public class SamplesPane extends ViewOwner {
         ColView boxView = new ColView();
         boxView.setSpacing(8);
         boxView.setFillWidth(true);
-        boxView.setChildren(headerRow, scroll);
+        boxView.setChildren(headerRow, scrollView);
+
+        // Return
         return boxView;
     }
 
     /**
      * Initialize UI.
      */
+    @Override
     protected void initUI()
     {
         if (_docNames == null)
@@ -222,7 +224,8 @@ public class SamplesPane extends ViewOwner {
 
         // Create label for sample
         String name = getDocName(anIndex);
-        Label label = new Label(name + SAMPLES_EXT);
+        String labelText = name.replace('_', ' ');
+        Label label = new Label(labelText);
         label.setFont(Font.Arial13);
         label.setPadding(3, 4, 3, 4);
         label.setLeanY(VPos.BOTTOM);
@@ -308,8 +311,8 @@ public class SamplesPane extends ViewOwner {
     private Image getDocImage(int anIndex)
     {
         // If image already set, just return
-        Image img = _docImages[anIndex];
-        if (img != null) return img;
+        Image image = _docImages[anIndex];
+        if (image != null) return image;
 
         // Get image name, URL string, and URL
         String name = getDocName(anIndex);
@@ -317,9 +320,9 @@ public class SamplesPane extends ViewOwner {
         WebURL imgURL = WebURL.getURL(urls);
 
         // Create Image. Then make sure image is loaded by requesting Image.Native.
-        img = _docImages[anIndex] = Image.get(imgURL);
-        img.getNative();
-        return img;
+        image = _docImages[anIndex] = Image.get(imgURL);
+        image.getNative();
+        return image;
     }
 
     /**
