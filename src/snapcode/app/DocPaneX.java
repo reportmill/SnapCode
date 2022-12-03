@@ -146,12 +146,12 @@ public class DocPaneX extends DocPane {
         super.initUI();
 
         // Configure TopView
-        ParentView topView = (ParentView) getUI();
-        topView.setFill(BACK_FILL);
+        ParentView docPaneUI = (ParentView) getUI();
+        docPaneUI.setFill(BACK_FILL);
 
         // Configure TopView to send ShortCut events to MenuBar first
         MenuBar menuBar = getView("MenuBar", MenuBar.class);
-        topView.addEventHandler(e -> {
+        docPaneUI.addEventHandler(e -> {
             if (e.isShortcutDown())
                 ViewUtils.processEvent(menuBar, e);
         }, KeyPress);
@@ -167,7 +167,7 @@ public class DocPaneX extends DocPane {
         _drawerView = new DrawerView();
         _drawerView.getDrawerLabel().setText("Help Pane");
         _drawerView.getTabLabel().setText("Help");
-        _drawerView.showTabButton(topView);
+        _drawerView.showTabButton(docPaneUI);
     }
 
     /**

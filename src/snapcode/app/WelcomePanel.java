@@ -64,10 +64,7 @@ public class WelcomePanel extends ViewOwner {
     /**
      * Returns wether file system is cloud.
      */
-    public boolean isCloud()
-    {
-        return _isCloud;
-    }
+    public boolean isCloud()  { return _isCloud; }
 
     /**
      * Sets whether file system is cloud.
@@ -189,9 +186,7 @@ public class WelcomePanel extends ViewOwner {
         anim.playAnimDeep();
 
         // Hide FileSystemTitleView for now
-        View fileSystemTitleView = getView("FileSystemTitleView");
-        fileSystemTitleView.setVisible(false);
-        getUI().setPrefHeight(500);
+        getUI().setPrefHeight(580);
 
         // Configure SitesTable
         TableView<WebFile> sitesTable = getView("SitesTable", TableView.class);
@@ -243,7 +238,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Handle SamplesButton
         if (anEvent.equals("SamplesButton"))
-            openSamples();
+            newFile(true);
 
         // Handle EmailText
         if (anEvent.equals("EmailText")) {
@@ -260,9 +255,8 @@ public class WelcomePanel extends ViewOwner {
             setSelFile((WebFile) anEvent.getSelItem());
 
         // Handle NewButton
-        if (anEvent.equals("NewButton")) {
-            newFile();
-        }
+        if (anEvent.equals("NewButton"))
+            newFile(false);
 
         // Handle OpenPanelButton
         if (anEvent.equals("OpenPanelButton"))
@@ -309,23 +303,16 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
-     * Opens the Samples.
-     */
-    protected void openSamples()
-    {
-        DocPane docPane = newDocPane().newDoc();
-        docPane.setWindowVisible(true);
-        hide();
-    }
-
-    /**
      * Creates a new file.
      */
-    protected void newFile()
+    protected void newFile(boolean showSamples)
     {
-        DocPane docPane = newDocPane();
+        DocPaneX docPane = newDocPane();
         docPane.setWindowVisible(true);
         hide();
+
+        if (showSamples)
+            runLaterDelayed(300, () -> docPane.showSamples());
     }
 
     /**
@@ -363,7 +350,7 @@ public class WelcomePanel extends ViewOwner {
     /**
      * Creates the NotebookPane (as a hook, so it can be overriden).
      */
-    protected DocPane newDocPane()
+    protected DocPaneX newDocPane()
     {
         return new DocPaneX();
     }

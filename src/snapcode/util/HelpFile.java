@@ -3,7 +3,6 @@
  */
 package snapcode.util;
 import snap.web.WebURL;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +15,15 @@ public class HelpFile {
     private WebURL  _sourceURL;
 
     // The sections
-    private HelpSection[]  _sections;
+    private HelpSection[]  _sections = new HelpSection[0];
+
+    /**
+     * Constructor.
+     */
+    public HelpFile()
+    {
+        super();
+    }
 
     /**
      * Constructor.

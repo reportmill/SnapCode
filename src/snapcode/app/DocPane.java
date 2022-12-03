@@ -85,14 +85,6 @@ public class DocPane extends ViewOwner {
     }
 
     /**
-     * Creates a new default DocPane.
-     */
-    public DocPane newDoc()
-    {
-        return this;
-    }
-
-    /**
      * Creates a new DocPane from an open panel.
      */
     public DocPane showOpenPanel(View aView)
