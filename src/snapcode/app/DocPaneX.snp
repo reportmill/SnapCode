@@ -36,6 +36,7 @@
       <MenuItem Name="SubscriptMenuItem" text="Subscript" />
     </Menu>
     <Menu Name="ToolsMenu" text="Tools">
+      <MenuItem Name="ShowSamplesMenuItem" text="Show Samples" />
       <MenuItem Name="ShowHelpMenuItem" text="Show/Hide Help" key="meta shift H" />
       <MenuItem Name="DevPaneMenuItem" text="Show Developer Tools" />
     </Menu>

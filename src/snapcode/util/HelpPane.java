@@ -25,6 +25,9 @@ public class HelpPane extends ViewOwner {
     // The selected section
     private HelpSection  _selSection;
 
+    // The ListArea showing HelpSections
+    private ListArea<HelpSection>  _topicListArea;
+
     // The TextArea showing the help text
     private TextArea  _helpTextArea;
 
@@ -35,11 +38,7 @@ public class HelpPane extends ViewOwner {
     {
         super();
         _docPane = aDocPane;
-
-        // Set HelpFile
-        WebURL helpFileURL = WebURL.getURL(getClass(), "HelpFile.md");
-        HelpFile helpFile = new HelpFile(helpFileURL);
-        setHelpFile(helpFile);
+        _helpFile = new HelpFile();
     }
 
     /**
@@ -52,7 +51,20 @@ public class HelpPane extends ViewOwner {
      */
     public void setHelpFile(HelpFile aHelpFile)
     {
+        // If already set, just return
+        if (aHelpFile == _helpFile) return;
+
+        // Set
         _helpFile = aHelpFile;
+
+        // If UI is set, update
+        if (_topicListArea != null) {
+            HelpSection[] sections = _helpFile.getSections();
+            _topicListArea.setItems(sections);
+            HelpSection selSection = sections.length > 0 ? sections[0] : null;
+            setSelSection(selSection);
+            _topicListArea.setSelItem(selSection);
+        }
     }
 
     /**
@@ -102,11 +114,11 @@ public class HelpPane extends ViewOwner {
         // Get TopicListArea and configure
         ListView<HelpSection> topicListView = getView("TopicListView", ListView.class);
         topicListView.setFocusWhenPressed(false);
-        ListArea<HelpSection> topicListArea = topicListView.getListArea();
-        topicListArea.setName("TopicListArea");
-        topicListArea.setFocusWhenPressed(false);
-        topicListArea.setCellConfigure(cell -> configureTopicListAreaCell(cell));
-        topicListArea.setCellPadding(new Insets(4, 4, 3, 4));
+        _topicListArea = topicListView.getListArea();
+        _topicListArea.setName("TopicListArea");
+        _topicListArea.setFocusWhenPressed(false);
+        _topicListArea.setCellConfigure(cell -> configureTopicListAreaCell(cell));
+        _topicListArea.setCellPadding(new Insets(4, 4, 3, 4));
 
         // Get SectionTextArea
         TextView helpTextView = getView("HelpTextView", TextView.class);
@@ -116,7 +128,7 @@ public class HelpPane extends ViewOwner {
         // Get HelpSections and set in TopicListArea
         HelpFile helpFile = getHelpFile();
         HelpSection[] sections = helpFile.getSections();
-        topicListArea.setItems(sections);
+        _topicListArea.setItems(sections);
 
         // Set ScrollView BarSize to mini
         ScrollView topicListScrollView = topicListView.getScrollView();
@@ -136,14 +148,12 @@ public class HelpPane extends ViewOwner {
     }
 
     /**
-     * Override to select first item when showing.
+     * Override to load real help file.
      */
     @Override
     protected void initShowing()
     {
-        HelpFile helpFile = getHelpFile();
-        HelpSection firstSection = helpFile.getSections()[0];
-        setSelSection(firstSection);
+        loadRealHelpFile();
     }
 
     /**
@@ -153,9 +163,8 @@ public class HelpPane extends ViewOwner {
     protected void resetUI()
     {
         // Update TopicListArea
-        ListArea<HelpSection> topicListArea = getView("TopicListArea", ListArea.class);
-        if (topicListArea.getSelItem() != getSelSection())
-            topicListArea.setSelItem(getSelSection());
+        if (_topicListArea.getSelItem() != getSelSection())
+            _topicListArea.setSelItem(getSelSection());
     }
 
     /**
@@ -185,6 +194,24 @@ public class HelpPane extends ViewOwner {
             return;
 
         _docPane.addHelpCode(helpCode);
+    }
+
+    /**
+     * Loads the real help file.
+     */
+    private void loadRealHelpFile()
+    {
+        if (_helpFile.getSections().length > 0) return;
+
+        // Create run to load real HelpFile and set
+        Runnable loadHelpFileRun = () -> {
+            WebURL helpFileURL = WebURL.getURL(getClass(), "HelpFile.md");
+            HelpFile helpFile = new HelpFile(helpFileURL);
+            runLater(() -> setHelpFile(helpFile));
+        };
+
+        // Create, start thead for loadHelpFileRun
+        new Thread(loadHelpFileRun).start();
     }
 
     /**

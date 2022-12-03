@@ -27,7 +27,7 @@ public class DocPane extends ViewOwner {
     protected EditPane  _editPane;
 
     // The EvalPane
-    private EvalPane  _evalPane;
+    protected EvalPane  _evalPane;
 
     // The SplitView to hold EditPane and EvalPane
     private SplitView  _splitView;
@@ -111,6 +111,7 @@ public class DocPane extends ViewOwner {
             _editPane.setJeplDoc(aJeplDoc);
             _editPane.getTextArea().setTextDoc(aJeplDoc);
             resetEvalValues();
+            resetLater();
         }
 
         // If source is string, add to recent files menu

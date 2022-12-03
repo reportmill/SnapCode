@@ -9,7 +9,7 @@
         <RowView GrowWidth="true" Spacing="4">
           <RadioButton Name="CloudButton" text="Cloud" />
           <Label PrefHeight="20" Margin="0,0,0,24" text="User Email:" />
-          <TextField Name="EmailText" GrowWidth="true" PromptText="Used only to define unique home dir" />
+          <TextField Name="EmailText" GrowWidth="true" BorderRadius="3" PromptText="Used only to define unique home dir" />
         </RowView>
         <Button Name="SamplesButton" PrefWidth="120" PrefHeight="24" Padding="2" text="Show Samples" />
       </ColView>

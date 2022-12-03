@@ -43,59 +43,10 @@ public class DocPaneX extends DocPane {
     }
 
     /**
-     * Shows the HelpPane.
-     */
-    public void showHelpPane()
-    {
-        // Get HelpPane (just return if already showing)
-        HelpPane helpPane = getHelpPane();
-        if (helpPane.isShowing())
-            return;
-
-        // Show Drawer
-        showDrawer();
-    }
-
-    /**
-     * Shows the HelpPane after loaded.
-     */
-    private void showHelpPaneWhenLoaded()
-    {
-        Runnable run = () -> {
-            HelpPane helpPane = getHelpPane();
-            View helpPaneUI = helpPane.getUI();
-            helpPaneUI.addPropChangeListener(pc -> resetLater(), View.Showing_Prop);
-            ViewUtils.runLater(() -> showHelpPane());
-        };
-        new Thread(run).start();
-    }
-
-    /**
      * Shows the Drawer.
      */
     public void showDrawer()
     {
-        // If DocPane not yet showing, come back
-        if (!isShowing()) {
-            runLater(() -> showDrawer()); return; }
-
-        // Install/configure HelpPane for first time
-        HelpPane helpPane = getHelpPane();
-        View helpPaneUI = helpPane.getUI();
-        if (helpPaneUI.getParent() == null) {
-            int HELP_PANE_DEFAULT_WIDTH = 460;
-            int HELP_PANE_DEFAULT_HEIGHT = 530;
-            double docPaneW = getUI().getWidth();
-            double docPaneH = getUI().getHeight();
-            double maxW = Math.round(docPaneW * .4);
-            double maxH = Math.round(docPaneH * .6);
-            double helpW = Math.min(HELP_PANE_DEFAULT_WIDTH, maxW);
-            double helpH = Math.min(HELP_PANE_DEFAULT_HEIGHT, maxH);
-            helpPaneUI.setPrefSize(helpW, helpH);
-            _drawerView.setContent(helpPaneUI);
-        }
-
-        // Show Drawer
         _drawerView.show();
     }
 
@@ -112,6 +63,7 @@ public class DocPaneX extends DocPane {
      */
     public void showSamples()
     {
+        stopSamplesButtonAnim();
         hideDrawer();
         new SamplesPane().showSamples(this);
     }
@@ -179,7 +131,29 @@ public class DocPaneX extends DocPane {
         super.initShowing();
 
         // Load HelpPane in background and show
-        showHelpPaneWhenLoaded();
+        runLater(() -> initDrawer());
+    }
+
+    /**
+     * Special init to make sure drawer is right size.
+     */
+    private void initDrawer()
+    {
+        // Install/configure HelpPane for first time
+        HelpPane helpPane = getHelpPane();
+        View helpPaneUI = helpPane.getUI();
+        if (helpPaneUI.getParent() == null) {
+            int HELP_PANE_DEFAULT_WIDTH = 460;
+            int HELP_PANE_DEFAULT_HEIGHT = 530;
+            double docPaneW = getUI().getWidth();
+            double docPaneH = getUI().getHeight();
+            double maxW = Math.round(docPaneW * .4);
+            double maxH = Math.round(docPaneH * .6);
+            double helpW = Math.min(HELP_PANE_DEFAULT_WIDTH, maxW);
+            double helpH = Math.min(HELP_PANE_DEFAULT_HEIGHT, maxH);
+            helpPaneUI.setPrefSize(helpW, helpH);
+            _drawerView.setContent(helpPaneUI);
+        }
     }
 
     /**
@@ -204,8 +178,12 @@ public class DocPaneX extends DocPane {
         // Handle MenuBar and ToolBar
         respondUIForMenus(anEvent);
 
+        // Handle ShowSamplesMenuItem
+        if (anEvent.equals("ShowSamplesMenuItem"))
+            showSamples();
+
         // Handle ShowHelpMenuItem
-        if (anEvent.equals("ShowHelpMenuItem")) {
+        else if (anEvent.equals("ShowHelpMenuItem")) {
             if (_helpPane != null && _helpPane.isShowing())
                 hideDrawer();
             else showDrawer();
@@ -259,5 +237,29 @@ public class DocPaneX extends DocPane {
         // Submit entry
         resetEvalValues();
         textArea.requestFocus();
+    }
+
+    /**
+     * Animate SampleButton.
+     */
+    protected void startSamplesButtonAnim()
+    {
+        // Get button
+        View samplesButton = _evalPane.getView("SamplesButton");
+
+        // Configure anim
+        ViewAnim anim = samplesButton.getAnim(0);
+        anim.getAnim(400).setScale(1.3).getAnim(800).setScale(1.1).getAnim(1200).setScale(1.3).getAnim(1600).setScale(1.0)
+                .getAnim(2400).setRotate(360);
+        anim.setLoopCount(3).play();
+    }
+
+    /**
+     * Stops SampleButton animation.
+     */
+    private void stopSamplesButtonAnim()
+    {
+        View samplesButton = _evalPane.getView("SamplesButton");
+        samplesButton.getAnim(0).finish();
     }
 }

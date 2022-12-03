@@ -313,6 +313,7 @@ public class WelcomePanel extends ViewOwner {
 
         if (showSamples)
             runLaterDelayed(300, () -> docPane.showSamples());
+        else runLater(() -> docPane.startSamplesButtonAnim());
     }
 
     /**
