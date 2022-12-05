@@ -8,9 +8,8 @@ import snap.viewx.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcharts.app.DropBox;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -19,22 +18,22 @@ import java.util.stream.Stream;
 public class WelcomePanel extends ViewOwner {
 
     // Whether file system is cloud
-    private boolean _isCloud;
+    private boolean  _isCloud;
 
     // The cloud email account
-    private String _email;
+    private String  _email;
 
     // The selected file
-    private WebFile _selFile;
+    private WebFile  _selFile;
 
     // Whether welcome panel should exit on hide
-    private boolean _exit;
+    private boolean  _exit;
 
     // The Runnable to be called when app quits
-    private Runnable _onQuit;
+    private Runnable  _onQuit;
 
     // The RecentFiles
-    private List<WebFile> _recentFiles;
+    private WebFile[]  _recentFiles;
 
     // The shared instance
     private static WelcomePanel _shared;
@@ -93,7 +92,10 @@ public class WelcomePanel extends ViewOwner {
      */
     public void setCloudEmail(String aString)
     {
-        if (aString == getCloudEmail()) return;
+        // If already set, just return
+        if (Objects.equals(aString, getCloudEmail())) return;
+
+        // Set and clear RecentFiles
         _email = aString;
         _recentFiles = null;
 
@@ -194,9 +196,9 @@ public class WelcomePanel extends ViewOwner {
         sitesTable.getCol(0).setItemTextFunction(i -> i.getName());
 
         // Enable SitesTable MouseReleased
-        List<WebFile> recentFiles = getRecentFiles();
-        if (recentFiles.size() > 0)
-            _selFile = recentFiles.get(0);
+        WebFile[] recentFiles = getRecentFiles();
+        if (recentFiles.length > 0)
+            _selFile = recentFiles[0];
         enableEvents(sitesTable, MouseRelease);
 
         // Hide ProgressBar
@@ -359,19 +361,19 @@ public class WelcomePanel extends ViewOwner {
     /**
      * Returns the list of the recent documents as a list of strings.
      */
-    public List<WebFile> getRecentFiles()
+    public WebFile[] getRecentFiles()
     {
         // If already set, just return
         if (_recentFiles != null) return _recentFiles;
 
         // Get DropBox
-        DropBox dbox = getDropBox();
+        DropBox dropBox = getDropBox();
         if (isCloud())
-            FilePanel.setSiteDefault(dbox);
+            FilePanel.setSiteDefault(dropBox);
 
         // Handle Local
         if (!isCloud()) {
-            List<WebFile> recentFiles = RecentFiles.getFiles(DocPane.RECENT_FILES_ID);
+            WebFile[] recentFiles = RecentFiles.getFiles(DocPane.RECENT_FILES_ID);
             return _recentFiles = recentFiles;
         }
 
@@ -384,7 +386,7 @@ public class WelcomePanel extends ViewOwner {
         new Thread(() -> setRecentFilesInBackground()).start();
 
         // Handle Cloud
-        return Collections.EMPTY_LIST;
+        return _recentFiles = new WebFile[0];
     }
 
     /**
@@ -400,7 +402,7 @@ public class WelcomePanel extends ViewOwner {
         WebFile[] jeplFiles = jeplFilesStream.toArray(size -> new WebFile[size]);
 
         // Set files and trigger reload
-        _recentFiles = Arrays.asList(jeplFiles);
+        _recentFiles = jeplFiles;
         runLater(() -> recentFilesLoaded());
     }
 
