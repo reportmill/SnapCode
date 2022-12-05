@@ -8,7 +8,6 @@ import snap.viewx.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcharts.app.DropBox;
-
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -36,7 +35,7 @@ public class WelcomePanel extends ViewOwner {
     private WebFile[]  _recentFiles;
 
     // The shared instance
-    private static WelcomePanel _shared;
+    private static WelcomePanel  _shared;
 
     // Constants
     private static final String FILE_SYSTEM = "FileSystem";
@@ -61,7 +60,16 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
-     * Returns wether file system is cloud.
+     * Returns the shared instance.
+     */
+    public static WelcomePanel getShared()
+    {
+        if (_shared != null) return _shared;
+        return _shared = new WelcomePanel();
+    }
+
+    /**
+     * Returns whether file system is cloud.
      */
     public boolean isCloud()  { return _isCloud; }
 
@@ -82,10 +90,7 @@ public class WelcomePanel extends ViewOwner {
     /**
      * Returns the cloud email.
      */
-    public String getCloudEmail()
-    {
-        return _email;
-    }
+    public String getCloudEmail()  { return _email; }
 
     /**
      * Sets the cloud email.
@@ -104,46 +109,9 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
-     * Returns the shared instance.
-     */
-    public static WelcomePanel getShared()
-    {
-        if (_shared != null) return _shared;
-        return _shared = new WelcomePanel();
-    }
-
-    /**
-     * Shows the welcome panel.
-     */
-    public void showPanel()
-    {
-        getUI(); // This is bogus - if this isn't called, Window node get reset
-        _recentFiles = null;
-        getWindow().setVisible(true); //getTimeline().play();
-        resetLater();
-    }
-
-    /**
-     * Hides the welcome panel.
-     */
-    public void hide()
-    {
-        // Hide window and stop animation
-        getWindow().setVisible(false); //getTimeline().stop();
-
-        // Write current list of sites, flush prefs and mayb exit
-        //writeSites();         // Write data file for open/selected sites
-        Prefs.get().flush();    // Flush preferences
-        if (_exit) quitApp(); // If exit requested, quit app
-    }
-
-    /**
      * Returns the selected file.
      */
-    public WebFile getSelFile()
-    {
-        return _selFile;
-    }
+    public WebFile getSelFile()  { return _selFile; }
 
     /**
      * Sets the selected file.
@@ -154,12 +122,34 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
+     * Shows the welcome panel.
+     */
+    public void showPanel()
+    {
+        //getUI(); // This is bogus - if this isn't called, Window node get reset
+        _recentFiles = null;
+        getWindow().setVisible(true);
+        resetLater();
+    }
+
+    /**
+     * Hides the welcome panel.
+     */
+    public void hide()
+    {
+        // Hide window and flush prefs
+        getWindow().setVisible(false);
+        Prefs.get().flush();
+
+        // If exit requested, quit app
+        if (_exit)
+            quitApp();
+    }
+
+    /**
      * Returns the Runnable to be called to quit app.
      */
-    public Runnable getOnQuit()
-    {
-        return _onQuit;
-    }
+    public Runnable getOnQuit()  { return _onQuit; }
 
     /**
      * Sets the Runnable to be called to quit app.
@@ -289,18 +279,27 @@ public class WelcomePanel extends ViewOwner {
     private void handleCloudButton()
     {
         if (getCloudEmail() == null || getCloudEmail().length() == 0) {
+
+            // Show Set Cloud Email DialogBox
             String msg = "The cloud file system needs an email to provide a unique folder for user files.\n";
             msg += "This information is not used for any other purposes. Though feel free to email\n";
             msg += "me at jeff@reportmill.com";
             String email = DialogBox.showInputDialog(getUI(), "Set Cloud Email", msg, "guest@guest");
-            if (email == null || !email.contains("@")) return;
+            if (email == null || !email.contains("@"))
+                return;
+
+            // Normalize and validate email
             email = email.trim().toLowerCase();
             if (email.equalsIgnoreCase("jeff@reportmill.com")) {
                 DialogBox.showErrorDialog(getUI(), "Joker Alert", "Nice try.");
                 return;
             }
+
+            // Set email
             setCloudEmail(email);
         }
+
+        // Turn cloud on
         setCloud(true);
     }
 
@@ -351,12 +350,9 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
-     * Creates the NotebookPane (as a hook, so it can be overriden).
+     * Creates the DocPane (as a hook, so it can be overridden).
      */
-    protected DocPaneX newDocPane()
-    {
-        return new DocPaneX();
-    }
+    protected DocPaneX newDocPane()  { return new DocPaneX(); }
 
     /**
      * Returns the list of the recent documents as a list of strings.
@@ -455,12 +451,12 @@ public class WelcomePanel extends ViewOwner {
         page.setEffect(null);
 
         // Set BuildText and JavaText
-        View bt = page.getChildForName("BuildText");
-        View jt = page.getChildForName("JVMText");
-        bt.setText("Build: " + SnapUtils.getBuildInfo());
-        jt.setText("JVM: " + System.getProperty("java.runtime.version"));
+        View buildText = page.getChildForName("BuildText");
+        View jvmText = page.getChildForName("JVMText");
+        buildText.setText("Build: " + SnapUtils.getBuildInfo());
+        jvmText.setText("JVM: " + System.getProperty("java.runtime.version"));
 
-        // Return doc
+        // Return
         return doc;
     }
 }
