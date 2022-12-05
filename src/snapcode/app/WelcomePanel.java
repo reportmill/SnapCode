@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.gfx.Color;
 import snap.util.Prefs;
 import snap.util.SnapUtils;
 import snap.view.*;
@@ -177,8 +178,15 @@ public class WelcomePanel extends ViewOwner {
         getUI(ChildView.class).addChild(anim, 0);
         anim.playAnimDeep();
 
-        // Hide FileSystemTitleView for now
+        // Size main UI view
         getUI().setPrefHeight(580);
+
+        // Disable Cloud UI for now
+        setViewDisabled("CloudButton", true);
+        setViewDisabled("EmailText", true);
+        getView("EmailLabel", Label.class).setTextFill(Color.GRAY);
+        getView("EmailText", TextField.class).setPickable(false);
+        _isCloud = false;
 
         // Configure SitesTable
         TableView<WebFile> sitesTable = getView("SitesTable", TableView.class);
