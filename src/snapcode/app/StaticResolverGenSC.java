@@ -67,7 +67,8 @@ public class StaticResolverGenSC extends StaticResolverGen {
             "getTextForSource", "getImageForSource",
 
             // QuickDraw, QuickDrawPen
-            "setGridSpacing", "getPen", "setPenColor", "createDrawView",
+            "createDrawView", "isShowGrid", "setShowGrid", "getGridSpacing", "setGridSpacing", "isAnimate", "setAnimate",
+            "getPen", "setPenColor",
             "getColor", "setColor", "getWidth", "setWidth", "getDirection", "setDirection",
             "moveTo", "lineTo", "closePath", "forward", "turn", "getAnimPen",
     };

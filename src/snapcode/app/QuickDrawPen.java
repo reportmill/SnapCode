@@ -9,6 +9,7 @@ import snap.gfx.Painter;
 import snap.gfx.Stroke;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class supports convenient drawing methods for quick and convenient vector graphics drawing.
@@ -26,9 +27,6 @@ public class QuickDrawPen {
 
     // Angle
     private double  _direction = 0;
-
-    // Whether to auto animate pen move
-    private boolean  _autoAnimate;
 
     // The path
     private PenPath  _penPath;
@@ -60,12 +58,10 @@ public class QuickDrawPen {
      */
     public void setColor(Color aColor)
     {
-        // If auto animating, forward to anim
-        if (isAutoAnimate()) {
-            getAnimPen().setColor(aColor);
-            return;
-        }
+        // If already set, just return
+        if (Objects.equals(aColor, getColor())) return;
 
+        // Set
         _color = aColor;
 
         // If PenPath has segment, clear it
@@ -86,12 +82,10 @@ public class QuickDrawPen {
      */
     public void setWidth(double aValue)
     {
-        // If auto animating, forward to anim
-        if (isAutoAnimate()) {
-            getAnimPen().setWidth(aValue);
-            return;
-        }
+        // If already set, just return
+        if (aValue == getWidth()) return;
 
+        // Set
         _width = aValue;
 
         // If PenPath has segment, clear it
@@ -114,13 +108,10 @@ public class QuickDrawPen {
      */
     public void setDirection(double theDegrees)
     {
-        // If auto animating, forward to anim
-        if (isAutoAnimate()) {
-            getAnimPen().setDirection(theDegrees);
-            return;
-        }
+        // If already set, just return
+        if (theDegrees == getDirection()) return;
 
-        // Set direction
+        // Set
         _direction = theDegrees;
     }
 
@@ -129,12 +120,6 @@ public class QuickDrawPen {
      */
     public void moveTo(double aX, double aY)
     {
-        // If auto animating, forward to anim
-        if (isAutoAnimate()) {
-            getAnimPen().moveTo(aX, aY);
-            return;
-        }
-
         // Forward to pen and repaint
         PenPath penPath = getPenPath();
         penPath.moveTo(aX, aY);
@@ -146,12 +131,6 @@ public class QuickDrawPen {
      */
     public void lineTo(double aX, double aY)
     {
-        // If auto animating, forward to anim
-        if (isAutoAnimate()) {
-            getAnimPen().lineTo(aX, aY);
-            return;
-        }
-
         // Forward to pen and repaint
         PenPath penPath = getPenPath();
         penPath.lineTo(aX, aY);
@@ -163,12 +142,6 @@ public class QuickDrawPen {
      */
     public void closePath()
     {
-        // If auto animating, forward to anim
-        if (isAutoAnimate()) {
-            getAnimPen().closePath();
-            return;
-        }
-
         // Forward to pen and repaint
         PenPath penPath = getPenPath();
         penPath.close();
@@ -180,12 +153,6 @@ public class QuickDrawPen {
      */
     public void forward(double aLength)
     {
-        // If auto animating, forward to anim
-        if (isAutoAnimate()) {
-            getAnimPen().forward(aLength);
-            return;
-        }
-
         // Get last point
         PenPath penPath = getPenPath();
         Point point = penPath.getLastPoint();
@@ -205,12 +172,6 @@ public class QuickDrawPen {
      */
     public void turn(double anAngle)
     {
-        // If auto animating, forward to anim
-        if (isAutoAnimate()) {
-            getAnimPen().turn(anAngle);
-            return;
-        }
-
         setDirection(_direction + anAngle);
     }
 
@@ -249,19 +210,6 @@ public class QuickDrawPen {
             aPntr.setStroke(Stroke.getStroke(penPath.getWidth()));
             aPntr.draw(penPath);
         }
-    }
-
-    /**
-     * Returns whether to auto animate pen moves.
-     */
-    public boolean isAutoAnimate()  { return _autoAnimate; }
-
-    /**
-     * Sets whether to auto animate pen moves.
-     */
-    public void setAutoAnimate(boolean aValue)
-    {
-        _autoAnimate = aValue;
     }
 
     /**

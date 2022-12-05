@@ -19,15 +19,18 @@ import java.util.Arrays;
 public class QuickDraw extends View {
 
     // Whether to draw the grid
-    private boolean _showGrid;
+    private boolean  _showGrid;
 
     // Whether to draw the grid
     private double  _gridSpacing = DEFAULT_GRID_SPACING;
 
+    // Whether to animate drawing (by returning pens that animate).
+    private boolean  _animate = true;
+
     // The pens
     private QuickDrawPen[]  _pens = new QuickDrawPen[1];
 
-    // Whether this view is animating
+    // Array of current animating pens
     private QuickDrawPenAnim[]  _animPens = new QuickDrawPenAnim[0];
 
     // A run to trigger anim pen updates
@@ -86,6 +89,19 @@ public class QuickDraw extends View {
     }
 
     /**
+     * Returns whether to animate drawing (by returning pens that animate).
+     */
+    public boolean isAnimate()  { return _animate; }
+
+    /**
+     * Sets whether to animate drawing (by returning pens that animate).
+     */
+    public void setAnimate(boolean aValue)
+    {
+        _animate = aValue;
+    }
+
+    /**
      * Returns the main pen.
      */
     public QuickDrawPen getPen()
@@ -108,6 +124,10 @@ public class QuickDraw extends View {
         if (pen == null)
             pen = _pens[index] = new QuickDrawPen(this);
 
+        // If animate is set, get anim pen
+        if (isAnimate())
+            pen = pen.getAnimPen();
+
         // Return
         return pen;
     }
@@ -117,7 +137,7 @@ public class QuickDraw extends View {
      */
     public void setPenColor(Color aColor)
     {
-        QuickDrawPen pen = getPen().getAnimPen();
+        QuickDrawPen pen = getPen();
         pen.setColor(aColor);
     }
 
@@ -126,7 +146,7 @@ public class QuickDraw extends View {
      */
     public void setPenWidth(double aWidth)
     {
-        QuickDrawPen pen = getPen().getAnimPen();
+        QuickDrawPen pen = getPen();
         pen.setWidth(aWidth);
     }
 
@@ -135,7 +155,7 @@ public class QuickDraw extends View {
      */
     public void moveTo(double aX, double aY)
     {
-        QuickDrawPen pen = getPen().getAnimPen();
+        QuickDrawPen pen = getPen();
         pen.moveTo(aX, aY);
     }
 
@@ -144,7 +164,7 @@ public class QuickDraw extends View {
      */
     public void lineTo(double aX, double aY)
     {
-        QuickDrawPen pen = getPen().getAnimPen();
+        QuickDrawPen pen = getPen();
         pen.lineTo(aX, aY);
     }
 
@@ -153,7 +173,7 @@ public class QuickDraw extends View {
      */
     public void closePath()
     {
-        QuickDrawPen pen = getPen().getAnimPen();
+        QuickDrawPen pen = getPen();
         pen.closePath();
     }
 
@@ -162,7 +182,7 @@ public class QuickDraw extends View {
      */
     public void forward(double aLength)
     {
-        QuickDrawPen pen = getPen().getAnimPen();
+        QuickDrawPen pen = getPen();
         pen.forward(aLength);
     }
 
@@ -171,7 +191,7 @@ public class QuickDraw extends View {
      */
     public void turn(double anAngle)
     {
-        QuickDrawPen pen = getPen().getAnimPen();
+        QuickDrawPen pen = getPen();
         pen.turn(anAngle);
     }
 

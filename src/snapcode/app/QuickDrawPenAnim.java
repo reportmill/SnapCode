@@ -209,10 +209,6 @@ class QuickDrawPenAnim extends QuickDrawPen {
         long currTime = System.currentTimeMillis();
         long elapsedTime = currTime - _lastAnimTime;
 
-        // Disable AutoAnimate
-        boolean autoAnim = _realPen.isAutoAnimate();
-        _realPen.setAutoAnimate(false);
-
         // Process available instructions within ElapsedTime
         int procTime = 0;
         while (_instrStart < _instrEnd && procTime < elapsedTime) {
@@ -220,8 +216,7 @@ class QuickDrawPenAnim extends QuickDrawPen {
             procTime += instrTime;
         }
 
-        // Restore AutoAnimate and update LastTime
-        _realPen.setAutoAnimate(autoAnim);
+        // Update LastTime
         _lastAnimTime = currTime;
 
         // If done, stop animating
