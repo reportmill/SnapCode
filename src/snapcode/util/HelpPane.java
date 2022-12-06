@@ -116,7 +116,6 @@ public class HelpPane extends ViewOwner {
         topicListView.setFocusWhenPressed(false);
         _topicListArea = topicListView.getListArea();
         _topicListArea.setName("TopicListArea");
-        _topicListArea.setFocusWhenPressed(false);
         _topicListArea.setCellConfigure(cell -> configureTopicListAreaCell(cell));
         _topicListArea.setCellPadding(new Insets(4, 4, 3, 4));
 
