@@ -297,6 +297,6 @@ public class EditPane extends TextPane {
             return;
 
         // Trigger auto run
-        evalPane.resetEvalValues();
+        evalPane.runApp(true);
     }
 }

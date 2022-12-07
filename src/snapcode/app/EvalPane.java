@@ -16,6 +16,9 @@ public class EvalPane extends ViewOwner {
     // Whether to auto run code
     private boolean  _autoRun = true;
 
+    // Whether auto run was requested
+    private boolean  _autoRunRequested;
+
     // EvalView
     protected EvalView  _evalView;
 
@@ -23,7 +26,7 @@ public class EvalPane extends ViewOwner {
     private Runnable  _resetEvalValuesRun;
 
     // For resetEntriesLater
-    private Runnable  _resetEvalValuesRunReal = () -> resetEvalValuesNow();
+    private Runnable  _resetEvalValuesRunReal = () -> runAppNow();
 
     /**
      * Constructor.
@@ -55,10 +58,11 @@ public class EvalPane extends ViewOwner {
     public void setAutoRun(boolean aValue)  { _autoRun = aValue; }
 
     /**
-     * Reset Repl values.
+     * Runs Java code.
      */
-    public void resetEvalValues()
+    public void runApp(boolean autoRunRequested)
     {
+        _autoRunRequested = autoRunRequested;
         if (_resetEvalValuesRun == null)
             runLater(_resetEvalValuesRun = _resetEvalValuesRunReal);
         resetLater();
@@ -67,10 +71,13 @@ public class EvalPane extends ViewOwner {
     /**
      * Reset Repl values.
      */
-    protected void resetEvalValuesNow()
+    protected void runAppNow()
     {
-        try { _evalView.resetView(); }
-        finally { _resetEvalValuesRun = null; }
+        try { _evalView.runApp(_autoRunRequested); }
+        finally {
+            _resetEvalValuesRun = null;
+            _autoRunRequested = false;
+        }
 
         ((DocPaneX) _docPane).hideDrawer();
     }
@@ -152,7 +159,7 @@ public class EvalPane extends ViewOwner {
         // Handle RunButton
         if (anEvent.equals("RunButton")) {
             if (!isRunning())
-                resetEvalValues();
+                runApp(false);
             else cancelRun();
         }
 

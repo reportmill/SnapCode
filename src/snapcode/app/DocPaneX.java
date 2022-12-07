@@ -235,7 +235,7 @@ public class DocPaneX extends DocPane {
         textArea.replaceCharsWithContent(aString);
 
         // Submit entry
-        resetEvalValues();
+        runApp();
         textArea.requestFocus();
     }
 

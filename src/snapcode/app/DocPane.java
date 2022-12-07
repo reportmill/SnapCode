@@ -76,12 +76,12 @@ public class DocPane extends ViewOwner {
     public EvalPane getEvalPane()  { return _evalPane; }
 
     /**
-     * Reset Repl values.
+     * Runs the app.
      */
-    public void resetEvalValues()
+    public void runApp()
     {
         if (_evalPane.isAutoRun())
-            _evalPane.resetEvalValues();
+            _evalPane.runApp(false);
     }
 
     /**
@@ -110,7 +110,7 @@ public class DocPane extends ViewOwner {
         if (_editPane != null) {
             _editPane.setJeplDoc(aJeplDoc);
             _editPane.getTextArea().setTextDoc(aJeplDoc);
-            resetEvalValues();
+            runApp();
             resetLater();
         }
 
@@ -325,7 +325,7 @@ public class DocPane extends ViewOwner {
     @Override
     protected void initShowing()
     {
-        resetEvalValues();
+        runApp();
     }
 
     /**
@@ -356,7 +356,7 @@ public class DocPane extends ViewOwner {
         // Handle RunAction, AutoRunAction
         if (anEvent.equals("RunAction")) {
             if (!_evalPane.isRunning())
-                _evalPane.resetEvalValues();
+                _evalPane.runApp(false);
             else _evalPane.cancelRun();
         }
 

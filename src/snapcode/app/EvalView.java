@@ -27,7 +27,10 @@ class EvalView extends ColView implements JavaShell.ShellClient {
     private Map<Object,View>  _replViewsCache = new HashMap<>();
 
     // The thread to reset views
-    private Thread  _resetViewsThread;
+    private Thread _runAppThread;
+
+    // Whether run was an auto run
+    private boolean  _autoRunRequested;
 
     // Whether last run was pre-empted
     private boolean  _preemptedForNewRun;
@@ -60,30 +63,31 @@ class EvalView extends ColView implements JavaShell.ShellClient {
     /**
      * Called to update when textView changes.
      */
-    public void resetView()
+    public void runApp(boolean isAutoRun)
     {
         // Remove children
         removeChildren();
 
         // Reset actual values
-        resetEvalValues();
+        _autoRunRequested = isAutoRun;
+        runAppNow();
     }
 
     /**
-     * Updates the notebook.
+     * Runs the app.
      */
-    protected void resetEvalValues()
+    protected void runAppNow()
     {
         // If previous thread is running, kill it
-        if (_resetViewsThread != null) {
+        if (_runAppThread != null) {
             _preemptedForNewRun = true;
             _javaShell.interrupt();
             return;
         }
 
         // Run
-        _resetViewsThread = new Thread(() -> runJavaCode());
-        _resetViewsThread.start();
+        _runAppThread = new Thread(() -> runAppImpl());
+        _runAppThread.start();
 
         // Check back in half a second to see if we need to show progress bar
         ViewUtils.runDelayed(() -> handleExtendedRun(), 500, true);
@@ -95,7 +99,7 @@ class EvalView extends ColView implements JavaShell.ShellClient {
     /**
      * Runs Java Code.
      */
-    protected void runJavaCode()
+    protected void runAppImpl()
     {
         // Clear value/views cache
         _replViewsCache.clear();
@@ -110,7 +114,7 @@ class EvalView extends ColView implements JavaShell.ShellClient {
         // If Preempted, kick off another run
         if (_preemptedForNewRun) {
             _preemptedForNewRun = false;
-            ViewUtils.runLater(() -> resetEvalValues());
+            ViewUtils.runLater(() -> runAppNow());
         }
 
         // If otherwise interrupted, add last run cancelled UI
@@ -118,7 +122,7 @@ class EvalView extends ColView implements JavaShell.ShellClient {
             ViewUtils.runLater(() -> addLastRunCancelledUI());
 
         // Reset thread
-        _resetViewsThread = null;
+        _runAppThread = null;
 
         // Reset EvalPane
         _evalPane.resetLater();
@@ -163,7 +167,7 @@ class EvalView extends ColView implements JavaShell.ShellClient {
     {
         // If too much output, bail
         if (getChildCount() > MAX_OUTPUT_COUNT) {
-            if (_resetViewsThread == null)
+            if (_runAppThread == null)
                 return;
             cancelRun();
             return;
@@ -178,7 +182,7 @@ class EvalView extends ColView implements JavaShell.ShellClient {
     /**
      * Returns whether evaluation is running.
      */
-    public boolean isRunning()  { return _resetViewsThread != null; }
+    public boolean isRunning()  { return _runAppThread != null; }
 
     /**
      * Creates a view for given Repl value.
@@ -216,8 +220,14 @@ class EvalView extends ColView implements JavaShell.ShellClient {
      */
     protected void handleExtendedRun()
     {
-        if (_resetViewsThread == null)
+        if (_runAppThread == null)
             return;
+
+        // If AutoRunRequested, just cancel run
+        if (_autoRunRequested) {
+            cancelRun();
+            return;
+        }
 
         // Get/add ExtendedRunView
         View extendedRunView = getExtendedRunView();
@@ -230,11 +240,11 @@ class EvalView extends ColView implements JavaShell.ShellClient {
     protected void cancelRun()
     {
         // If already cancelled, just return
-        if (_resetViewsThread == null) return;
+        if (_runAppThread == null) return;
 
         // Interrupt and clear
         _javaShell.interrupt();
-        _resetViewsThread = null;
+        _runAppThread = null;
     }
 
     /**
@@ -245,6 +255,10 @@ class EvalView extends ColView implements JavaShell.ShellClient {
         Label label = new Label("Last run cancelled");
         label.setLeanX(HPos.CENTER);
         addChild(label, 0);
+
+        // Handle AutoRun timeout
+        if (_autoRunRequested)
+            label.setText(label.getText() + " - exceeded AutoRun timeout");
 
         if (getChildCount() > MAX_OUTPUT_COUNT)
             label.setText(label.getText() + " - Too much output");
