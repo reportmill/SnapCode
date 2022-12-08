@@ -13,7 +13,14 @@ public class App {
      */
     public static void main(String[] args)
     {
+        // Set Prefs Root
+        Prefs prefs = Prefs.getPrefsForName("SnapCode");
+        Prefs.setPrefsDefault(prefs);
+
+        // Set UI Theme
         ViewTheme.setThemeForName("Light");
+
+        // Show WelcomePanel
         WelcomePanel.getShared().setOnQuit(() -> quitApp());
         WelcomePanel.getShared().showPanel();
     }
