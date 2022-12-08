@@ -50,11 +50,11 @@ public class WelcomePanel extends ViewOwner {
     protected WelcomePanel()
     {
         // Get FileSystem
-        String fileSys = Prefs.get().getString(FILE_SYSTEM);
+        String fileSys = Prefs.getDefaultPrefs().getString(FILE_SYSTEM);
         _isCloud = fileSys != null && fileSys.equals(FILE_SYSTEM_CLOUD);
 
         // Get Email
-        _email = Prefs.get().getString(USER_EMAIL);
+        _email = Prefs.getDefaultPrefs().getString(USER_EMAIL);
 
         // Set as Shared (there should only be one instance)
         _shared = this;
@@ -85,7 +85,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Update Prefs
         String fileSys = aValue ? FILE_SYSTEM_CLOUD : FILE_SYSTEM_LOCAL;
-        Prefs.get().setValue(FILE_SYSTEM, fileSys);
+        Prefs.getDefaultPrefs().setValue(FILE_SYSTEM, fileSys);
     }
 
     /**
@@ -106,7 +106,7 @@ public class WelcomePanel extends ViewOwner {
         _recentFiles = null;
 
         // Update Prefs
-        Prefs.get().setValue(USER_EMAIL, _email);
+        Prefs.getDefaultPrefs().setValue(USER_EMAIL, _email);
     }
 
     /**
@@ -140,7 +140,7 @@ public class WelcomePanel extends ViewOwner {
     {
         // Hide window and flush prefs
         getWindow().setVisible(false);
-        Prefs.get().flush();
+        Prefs.getDefaultPrefs().flush();
 
         // If exit requested, quit app
         if (_exit)
@@ -441,7 +441,7 @@ public class WelcomePanel extends ViewOwner {
      */
     public void clearRecentFiles()
     {
-        Prefs.get().getChild("RecentDocuments").clear();
+        Prefs.getDefaultPrefs().getChild("RecentDocuments").clear();
     }
 
     /**

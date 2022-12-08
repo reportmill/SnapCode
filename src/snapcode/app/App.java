@@ -15,7 +15,7 @@ public class App {
     {
         // Set Prefs Root
         Prefs prefs = Prefs.getPrefsForName("SnapCode");
-        Prefs.setPrefsDefault(prefs);
+        Prefs.setDefaultPrefs(prefs);
 
         // Set UI Theme
         ViewTheme.setThemeForName("Light");
@@ -30,7 +30,7 @@ public class App {
      */
     public static void quitApp()
     {
-        Prefs.get().flush();
+        Prefs.getDefaultPrefs().flush();
         GFXEnv.getEnv().exit(0);
     }
 }
