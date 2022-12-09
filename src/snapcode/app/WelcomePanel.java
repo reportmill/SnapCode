@@ -451,7 +451,7 @@ public class WelcomePanel extends ViewOwner {
     {
         // Unarchive WelcomePaneAnim.snp as DocView
         WebURL url = WebURL.getURL(WelcomePanel.class, "WelcomePanelAnim.snp");
-        DocView doc = (DocView) new ViewArchiver().getView(url);
+        DocView doc = (DocView) new ViewArchiver().getViewForSource(url);
 
         // Get page and clear border/shadow
         PageView page = doc.getPage();
