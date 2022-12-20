@@ -8,16 +8,15 @@ import snap.gfx.Font;
 import snap.gfx.Image;
 import snap.text.TextDoc;
 import snap.text.TextStyle;
+import snap.util.Convert;
 import snap.util.StringUtils;
 import snap.view.*;
 import snapcharts.app.DataSetPane;
 import snapcharts.data.DataSet;
-import snapcharts.data.DataUtils;
 import snapcharts.data.DoubleArray;
 import snapcharts.doc.ChartArchiver;
 import snapcharts.model.Chart;
 import snapcharts.view.ChartView;
-
 import java.lang.reflect.Array;
 
 /**
@@ -258,7 +257,7 @@ public class EvalViewUtils {
 
         // Handle double[], DoubleArray
         if (aValue instanceof double[])
-            return "double[] " + DataUtils.getStringForDoubleArray((double[]) aValue);
+            return "double[] " + Convert.doubleArrayToString((double[]) aValue);
         if (aValue instanceof DoubleArray) {
             double[] doubleArray = ((DoubleArray) aValue).doubleArray();
             return "DoubleArray " + getStringForValue(doubleArray);
