@@ -14,7 +14,7 @@ public class EvalPane extends ViewOwner {
     private DocPane  _docPane;
 
     // Whether to auto run code
-    private boolean  _autoRun = true;
+    private boolean  _autoRun;
 
     // Whether auto run was requested
     private boolean  _autoRunRequested;
@@ -164,8 +164,11 @@ public class EvalPane extends ViewOwner {
         }
 
         // Handle AutoRunCheckBox
-        if (anEvent.equals("AutoRunCheckBox"))
+        if (anEvent.equals("AutoRunCheckBox")) {
             setAutoRun(!isAutoRun());
+            if (isAutoRun())
+                runApp(true);
+        }
 
         // Handle DeleteButton
         if (anEvent.equals("DeleteButton"))

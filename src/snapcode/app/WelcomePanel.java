@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.geom.Polygon;
 import snap.gfx.Color;
 import snap.util.Prefs;
 import snap.util.SnapUtils;
@@ -34,6 +35,9 @@ public class WelcomePanel extends ViewOwner {
 
     // The RecentFiles
     private WebFile[]  _recentFiles;
+
+    // The SitesTable
+    private TableView<WebFile>  _sitesTable;
 
     // The shared instance
     private static WelcomePanel  _shared;
@@ -189,15 +193,22 @@ public class WelcomePanel extends ViewOwner {
         _isCloud = false;
 
         // Configure SitesTable
-        TableView<WebFile> sitesTable = getView("SitesTable", TableView.class);
-        sitesTable.setRowHeight(24);
-        sitesTable.getCol(0).setItemTextFunction(i -> i.getName());
+        _sitesTable = getView("SitesTable", TableView.class);
+        _sitesTable.setRowHeight(24);
+        _sitesTable.getScrollView().setFillWidth(false);
+        _sitesTable.getScrollView().setBarSize(14);
+
+        // Configure SitesTable columns
+        TableCol<WebFile> nameCol = _sitesTable.getCol(0);
+        nameCol.setCellConfigure(cell -> configureSitesTableNameColCell(cell));
+        TableCol<WebFile> pathCol = _sitesTable.getCol(1);
+        pathCol.setCellConfigure(cell -> configureSitesTablePathColCell(cell));
 
         // Enable SitesTable MouseReleased
         WebFile[] recentFiles = getRecentFiles();
         if (recentFiles.length > 0)
             _selFile = recentFiles[0];
-        enableEvents(sitesTable, MouseRelease);
+        enableEvents(_sitesTable, MouseRelease);
 
         // Hide ProgressBar
         getView("ProgressBar").setVisible(false);
@@ -216,8 +227,8 @@ public class WelcomePanel extends ViewOwner {
     public void resetUI()
     {
         setViewEnabled("OpenButton", getSelFile() != null);
-        setViewItems("SitesTable", getRecentFiles());
-        setViewSelItem("SitesTable", getSelFile());
+        _sitesTable.setItems(getRecentFiles());
+        _sitesTable.setSelItem(getSelFile());
 
         // Update file system buttons/text: LocalButton, CloudButton, EmailText
         setViewValue("LocalButton", !isCloud());
@@ -439,7 +450,7 @@ public class WelcomePanel extends ViewOwner {
     /**
      * Clears recent documents from preferences.
      */
-    public void clearRecentFiles()
+    private void clearRecentFiles()
     {
         Prefs.getDefaultPrefs().getChild("RecentDocuments").clear();
     }
@@ -447,7 +458,7 @@ public class WelcomePanel extends ViewOwner {
     /**
      * Loads the WelcomePaneAnim.snp DocView.
      */
-    DocView getAnimView()
+    private DocView getAnimView()
     {
         // Unarchive WelcomePaneAnim.snp as DocView
         WebURL url = WebURL.getURL(WelcomePanel.class, "WelcomePanelAnim.snp");
@@ -466,5 +477,79 @@ public class WelcomePanel extends ViewOwner {
 
         // Return
         return doc;
+    }
+
+    /**
+     * Called to configure a SitesTable.ListCell for Name Column.
+     */
+    private void configureSitesTableNameColCell(ListCell<WebFile> aCell)
+    {
+        WebFile file = aCell.getItem();
+        if (file == null) return;
+        String dirPath = file.getName();
+        aCell.setText(dirPath);
+    }
+
+    /**
+     * Called to configure a SitesTable.ListCell for Path Column.
+     */
+    private void configureSitesTablePathColCell(ListCell<WebFile> aCell)
+    {
+        WebFile file = aCell.getItem();
+        if (file == null) return;
+        String dirPath = file.getParent().getPath();
+        aCell.setText(dirPath);
+        aCell.setTextFill(Color.DARKGRAY);
+
+        // Add button to clear item from recent files
+        View clearButton = createClearButton();
+        aCell.setGraphic(clearButton);
+    }
+
+    /**
+     * Creates a button to clear.
+     */
+    private View createClearButton()
+    {
+        // Create/configure
+        Polygon poly = new Polygon(0, 2, 2, 0, 5, 3, 8, 0, 10, 2, 7, 5, 10, 8, 8, 10, 5, 7, 2, 10, 0, 8, 3, 5);
+        ShapeView closeBox = new ShapeView(poly);
+        closeBox.setMargin(0, 4, 0, 4);
+        closeBox.setBorder(Color.GRAY, .5);
+        closeBox.setPrefSize(11, 11);
+
+        // Configure handers to reset fill
+        closeBox.addEventHandler(e -> closeBox.setFill(Color.CRIMSON), ViewEvent.Type.MouseEnter, View.MouseMove);
+        closeBox.addEventHandler(e -> closeBox.setFill(null), ViewEvent.Type.MouseExit);
+        closeBox.addEventHandler(e -> handleCloseBoxClicked(closeBox), ViewEvent.Type.MousePress);
+
+        // Return
+        return closeBox;
+    }
+
+    /**
+     * Called when SitesTable.ListCell close box is clicked.
+     */
+    private void handleCloseBoxClicked(View aView)
+    {
+        // Get SitesTable ListCell holding given view
+        ListCell<?> listCell = aView.getParent(ListCell.class);
+        if (listCell == null)
+            return;
+
+        // Get recent file for ListCell
+        WebFile file = (WebFile) listCell.getItem();
+        if (file == null)
+            return;
+
+        // Clear RecentFile
+        String filePath = file.getURL().getString();
+        RecentFiles.removePath(DocPane.RECENT_FILES_ID, filePath);
+
+        // Clear RecentFiles, SelFile and trigger reset
+        _recentFiles = null;
+        if (getSelFile() == file)
+            setSelFile(null);
+        resetLater();
     }
 }
