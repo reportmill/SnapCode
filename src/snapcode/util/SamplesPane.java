@@ -61,9 +61,16 @@ public class SamplesPane extends ViewOwner {
      */
     private void dialogBoxClosed()
     {
+        // If cancelled, just return
         if (_dialogSheet.isCancelled()) return;
+
+        // Get selected doc and open
         WebURL url = getDocURL(_selIndex);
         _docPane.openDocFromSource(url);
+
+        // Kick off run
+        if (!_docPane.getEvalPane().isAutoRun())
+            _docPane.getEvalPane().runApp(false);
     }
 
     /**
