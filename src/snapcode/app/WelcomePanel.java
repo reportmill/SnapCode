@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.geom.Insets;
 import snap.geom.Polygon;
 import snap.gfx.Color;
 import snap.util.Prefs;
@@ -194,14 +195,16 @@ public class WelcomePanel extends ViewOwner {
 
         // Configure SitesTable
         _sitesTable = getView("SitesTable", TableView.class);
-        _sitesTable.setRowHeight(24);
+        //_sitesTable.setRowHeight(24);
         _sitesTable.getScrollView().setFillWidth(false);
         _sitesTable.getScrollView().setBarSize(14);
 
         // Configure SitesTable columns
         TableCol<WebFile> nameCol = _sitesTable.getCol(0);
+        nameCol.setCellPadding(new Insets(4, 8, 4, 5));
         nameCol.setCellConfigure(cell -> configureSitesTableNameColCell(cell));
         TableCol<WebFile> pathCol = _sitesTable.getCol(1);
+        pathCol.setCellPadding(new Insets(4, 5, 4, 5));
         pathCol.setCellConfigure(cell -> configureSitesTablePathColCell(cell));
 
         // Enable SitesTable MouseReleased
