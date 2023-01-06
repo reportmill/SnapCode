@@ -106,6 +106,7 @@ class EvalView extends ColView implements JavaShell.ShellClient {
 
         // Get code and run
         JeplTextDoc jeplDoc = getJeplDoc();
+        _javaShell.compileJavaCode(jeplDoc);
         _javaShell.runJavaCode(jeplDoc);
 
         // Remove ExtendedRunView
