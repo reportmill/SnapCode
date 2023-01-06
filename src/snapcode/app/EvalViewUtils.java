@@ -64,6 +64,8 @@ public class EvalViewUtils {
             return createContentViewForImage((Image) value);
 
         // Handle NodeError[]
+        if (value instanceof NodeError)
+            return createContentViewForNodeError((NodeError) value);
         if (value instanceof NodeError[])
             return createContentViewForNodeErrors((NodeError[]) value);
 
@@ -122,6 +124,15 @@ public class EvalViewUtils {
 
         // Return
         return textArea;
+    }
+
+    /**
+     * Creates content view for ViewOwner.
+     */
+    private static View createContentViewForNodeError(NodeError nodeError)
+    {
+        NodeError[] nodeErrors = new NodeError[] { nodeError };
+        return createContentViewForNodeErrors(nodeErrors);
     }
 
     /**

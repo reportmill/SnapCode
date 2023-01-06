@@ -2,8 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
+import javakit.parse.JNode;
 import javakit.parse.JStmt;
 import javakit.parse.JeplTextDoc;
+import javakit.parse.NodeError;
 import javakit.runner.JavaShell;
 import snap.geom.HPos;
 import snap.gfx.Color;
@@ -106,8 +108,24 @@ class EvalView extends ColView implements JavaShell.ShellClient {
 
         // Get code and run
         JeplTextDoc jeplDoc = getJeplDoc();
+
+        // Compile and get compile errors
         _javaShell.compileJavaCode(jeplDoc);
-        _javaShell.runJavaCode(jeplDoc);
+        NodeError[] errors = _javaShell.getCompileErrors();
+
+        // If errors, send to output
+        if (errors.length > 0) {
+
+            for (NodeError error : errors) {
+                JNode node = error.getNode();
+                JStmt stmt = node instanceof JStmt ? (JStmt) node : node.getParent(JStmt.class);
+                if (stmt != null)
+                    processOutput(stmt, error);
+            }
+        }
+
+        // If no errors, run
+        else _javaShell.runJavaCode(jeplDoc);
 
         // Remove ExtendedRunView
         ViewUtils.runLater(() -> removeExtendedRunView());
