@@ -9,31 +9,21 @@ import javakit.parse.JNode;
 import javakit.parse.JeplTextDoc;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.props.PropChange;
 import snap.text.TextBoxLine;
-import snap.text.TextDoc;
 import snap.text.TextStyle;
-import snap.util.CharSequenceUtils;
 import snap.view.*;
-import snap.viewx.TextPane;
 import java.util.Objects;
 
 /**
- * This TextPane subclass adds customizations for JavaShell.
+ * This JavaTextPane subclass adds customizations for JavaShell.
  */
-public class EditPane extends TextPane {
+public class EditPane extends JavaTextPane {
 
     // The DocPane
     private DocPane  _docPane;
 
     // The JeplTextDoc
     protected JeplTextDoc  _jeplDoc;
-
-    // The TextArea
-    private JavaTextArea  _textArea;
-
-    // LineNumView
-    private LineHeaderView  _lineNumView;
 
     /**
      * Constructor.
@@ -60,28 +50,6 @@ public class EditPane extends TextPane {
     public void setJeplDoc(JeplTextDoc aJeplDoc)
     {
         _jeplDoc = aJeplDoc;
-        _jeplDoc.addPropChangeListener(pc -> textDocDidPropChange(pc));
-    }
-
-    /**
-     * Returns the default font.
-     */
-    public Font getCodeFont()  { return JavaTextUtils.getCodeFont(); }
-
-    /**
-     * Override to return a JavaTextArea.
-     */
-    public JavaTextArea getTextArea()  { return (JavaTextArea) super.getTextArea(); }
-
-    /**
-     * Creates the TextArea.
-     */
-    protected TextArea createTextArea()
-    {
-        JavaTextArea textArea = new JavaTextArea();
-        textArea.setShowPrintMargin(false);
-        textArea.setFocusPainted(true);
-        return textArea;
     }
 
     /**
@@ -102,67 +70,15 @@ public class EditPane extends TextPane {
         toolBar.setPadding(6, 6, 6, 6);
         toolBar.setSpacing(5);
 
-        // Get/configure TextArea
-        _textArea = getTextArea();
-        _textArea.setGrowWidth(true);
-        enableEvents(_textArea, KeyPress);
-        _textArea.addPropChangeListener(pc -> textAreaDidPropChange(pc), JavaTextArea.SelectedNode_Prop);
-
-        // Create/config LineNumView
-        _lineNumView = new LineHeaderView(null, _textArea);
-        _lineNumView.setShowLineMarkers(false);
-        Font codeFont = getCodeFont();
-        //_lineNumView.setDefaultStyle(_lineNumView.getDefaultStyle().copyFor(codeFont));
-        //_lineNumView.updateLines();
-
-        // Create ScrollGroup for TextArea and LineNumView
-        ScrollGroup scrollGroup = new ScrollGroup();
-        scrollGroup.setBorder(Color.GRAY9, 1);
-        scrollGroup.setGrowWidth(true);
-        scrollGroup.setContent(_textArea);
-        scrollGroup.setLeftView(_lineNumView);
-        scrollGroup.setMinWidth(200);
-
-        // Replace TextPane center with scrollGroup
-        borderView.setCenter(scrollGroup);
+        // Hide LineFooterView
+        getUI(BorderView.class).setRight(null);
 
         // Get/set JeplTextDoc
         JeplTextDoc jeplDoc = _docPane.getJeplDoc();
+        Font codeFont = JavaTextUtils.getCodeFont();
         jeplDoc.setDefaultStyle(new TextStyle(codeFont));
         setJeplDoc(jeplDoc);
         _textArea.setTextDoc(jeplDoc);
-    }
-
-    /**
-     * Reset UI.
-     */
-    @Override
-    protected void resetUI()
-    {
-        // Do normal version
-        super.resetUI();
-
-        // Reset NodePathBox
-        resetNodePathBox();
-    }
-
-    /**
-     * Resets the NodePath box.
-     */
-    private void resetNodePathBox()
-    {
-        // Clear path box and add Lin/Col position label
-        RowView nodePathBox = getView("BottomBox", RowView.class);
-        while (nodePathBox.getChildCount() > 1)
-            nodePathBox.removeChild(1);
-
-        // Get Path node labels
-        Label[] pathNodeLabels = getLabelsForSelNodePath();
-        for (Label pathNodeLabel : pathNodeLabels) {
-            pathNodeLabel.setOwner(this);
-            enableEvents(pathNodeLabel, MouseRelease);
-            nodePathBox.addChild(pathNodeLabel);
-        }
     }
 
     /**
@@ -186,16 +102,6 @@ public class EditPane extends TextPane {
         else if (anEvent.equals("SaveButton"))
             _docPane.save();
 
-
-        // Handle NodePathLabel
-        else if (anEvent.equals("NodePathLabel")) {
-            JNode clickedNode = (JNode) anEvent.getView().getProp("JNode");
-            JavaTextArea javaTextArea = getTextArea();
-            JNode deepNode = javaTextArea.getDeepNode();
-            javaTextArea.setSel(clickedNode.getStartCharIndex(), clickedNode.getEndCharIndex());
-            _textArea.setDeepNode(deepNode);
-        }
-
         // Handle JavaDocLabel
         else if (anEvent.equals("JavaDocLabel")) {
             JavaTextArea javaTextArea = getTextArea();
@@ -210,26 +116,20 @@ public class EditPane extends TextPane {
     }
 
     /**
-     * Override to add trailing colon.
-     */
-    @Override
-    public String getSelectionInfo()  { return super.getSelectionInfo() + ": "; }
-
-    /**
      * Returns labels for
      */
-    private Label[] getLabelsForSelNodePath()
+    @Override
+    protected Label[] getLabelsForSelNodePath()
     {
         // Get JavaTextPane version
-        JavaTextArea javaTextArea = getTextArea();
-        Label[] pathNodeLabels = JavaTextPane.getLabelsForSelNodePath(javaTextArea, JClassDecl.class);
+        Label[] pathNodeLabels = JavaTextPane.getLabelsForSelNodePath(_textArea, JClassDecl.class);
 
         // If last label is ClassLabel, reconfigure
         Label lastLabel = pathNodeLabels[pathNodeLabels.length - 1];
         if (Objects.equals(lastLabel.getName(), "ClassLabel")) {
 
             // Get JavaDoc URL for sel node
-            JNode selNode = javaTextArea.getSelNode();
+            JNode selNode = _textArea.getSelNode();
             JavaDoc javaDoc = JavaDoc.getJavaDocForNode(selNode);
 
             // If JavaDoc found, modify label
@@ -241,37 +141,6 @@ public class EditPane extends TextPane {
 
         // Return
         return pathNodeLabels;
-    }
-
-    /**
-     * Called when TextDoc does prop change.
-     */
-    private void textDocDidPropChange(PropChange aPC)
-    {
-        // Get PropName
-        String propName = aPC.getPropName();
-
-        // Handle CharsChange
-        if (propName == TextDoc.Chars_Prop) {
-            CharSequence chars = (CharSequence) (aPC.getNewValue() != null ? aPC.getNewValue() : aPC.getOldValue());
-            if (CharSequenceUtils.indexOfNewline(chars, 0) >= 0)
-                _lineNumView.repaint();
-        }
-
-        // Handle DefaultTextStyle, ParentTextStyle changes (reset to update font size)
-        else if (propName == TextDoc.DefaultTextStyle_Prop || propName == TextDoc.ParentTextStyle_Prop)
-            _lineNumView.resetAll();
-    }
-
-    /**
-     * Called when JavaTextArea does prop change.
-     */
-    private void textAreaDidPropChange(PropChange aPC)
-    {
-        String propName = aPC.getPropName();
-
-        if (propName == JavaTextArea.SelectedNode_Prop)
-            resetLater();
     }
 
     /**
