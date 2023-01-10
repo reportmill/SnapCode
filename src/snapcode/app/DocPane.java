@@ -2,10 +2,13 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
+import javakit.ide.JavaTextUtils;
 import javakit.parse.JeplTextDoc;
 import snap.gfx.Color;
+import snap.gfx.Font;
 import snap.props.PropChange;
 import snap.props.Undoer;
+import snap.text.TextStyle;
 import snap.util.SnapUtils;
 import snap.view.*;
 import snap.viewx.DialogBox;
@@ -317,6 +320,12 @@ public class DocPane extends ViewOwner {
         // Add RunAction
         addKeyActionHandler("RunAction", "Shortcut+R");
         addKeyActionHandler("AutoRunAction", "Shortcut+Shift+R");
+
+        // Install the JeplDoc
+        JeplTextDoc jeplDoc = getJeplDoc();
+        Font codeFont = JavaTextUtils.getCodeFont();
+        jeplDoc.setDefaultStyle(new TextStyle(codeFont));
+        _editPane.setJeplDoc(jeplDoc);
     }
 
     /**

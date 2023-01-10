@@ -8,9 +8,7 @@ import javakit.parse.JMethodDecl;
 import javakit.parse.JNode;
 import javakit.parse.JeplTextDoc;
 import snap.gfx.Color;
-import snap.gfx.Font;
 import snap.text.TextBoxLine;
-import snap.text.TextStyle;
 import snap.view.*;
 import java.util.Objects;
 
@@ -50,6 +48,10 @@ public class EditPane extends JavaTextPane {
     public void setJeplDoc(JeplTextDoc aJeplDoc)
     {
         _jeplDoc = aJeplDoc;
+
+        if (_textArea != null)
+            _textArea.setTextDoc(aJeplDoc);
+        else System.out.println("EditPane.setJeplDoc: Should never get called before UI set");
     }
 
     /**
@@ -62,23 +64,10 @@ public class EditPane extends JavaTextPane {
 
         // Basic config
         BorderView borderView = getUI(BorderView.class);
-        borderView.setGrowHeight(true);
         borderView.getBottom().setBorder(Color.GRAY9, 1);
 
-        // Configure ToolBar
-        RowView toolBar = (RowView) borderView.getTop();
-        toolBar.setPadding(6, 6, 6, 6);
-        toolBar.setSpacing(5);
-
-        // Hide LineFooterView
-        getUI(BorderView.class).setRight(null);
-
-        // Get/set JeplTextDoc
-        JeplTextDoc jeplDoc = _docPane.getJeplDoc();
-        Font codeFont = JavaTextUtils.getCodeFont();
-        jeplDoc.setDefaultStyle(new TextStyle(codeFont));
-        setJeplDoc(jeplDoc);
-        _textArea.setTextDoc(jeplDoc);
+        // Hide LineFootView
+        borderView.setRight(null);
     }
 
     /**
