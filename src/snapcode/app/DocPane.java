@@ -66,6 +66,9 @@ public class DocPane extends ViewOwner {
     public void setJeplDoc(JeplTextDoc aJeplDoc)
     {
         _jeplDoc = aJeplDoc;
+
+        // Forward to EditPane
+        _editPane.setJeplDoc(aJeplDoc);
     }
 
     /**
@@ -109,13 +112,7 @@ public class DocPane extends ViewOwner {
         // Set new doc
         setJeplDoc(aJeplDoc);
 
-        // Bogus!!
-        if (_editPane != null) {
-            _editPane.setJeplDoc(aJeplDoc);
-            _editPane.getTextArea().setTextDoc(aJeplDoc);
-            runApp();
-            resetLater();
-        }
+        resetLater();
 
         // If source is string, add to recent files menu
         WebURL url = aJeplDoc.getSourceURL();
@@ -252,8 +249,7 @@ public class DocPane extends ViewOwner {
             docPane.getEditPane().getTextArea().requestFocus();
 
         // If no other open editor, show WelcomePanel
-        else if (docPane == null)
-            WelcomePanel.getShared().showPanel();
+        else WelcomePanel.getShared().showPanel();
     }
 
     /**

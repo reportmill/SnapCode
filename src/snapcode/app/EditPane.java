@@ -49,9 +49,9 @@ public class EditPane extends JavaTextPane {
     {
         _jeplDoc = aJeplDoc;
 
-        if (_textArea != null)
-            _textArea.setTextDoc(aJeplDoc);
-        else System.out.println("EditPane.setJeplDoc: Should never get called before UI set");
+        // Set in TextArea
+        JavaTextArea textArea = getTextArea();
+        textArea.setTextDoc(aJeplDoc);
     }
 
     /**
