@@ -2,13 +2,11 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
-import javakit.ide.JavaTextUtils;
+import javakit.parse.JavaTextDoc;
 import javakit.parse.JeplTextDoc;
 import snap.gfx.Color;
-import snap.gfx.Font;
 import snap.props.PropChange;
 import snap.props.Undoer;
-import snap.text.TextStyle;
 import snap.util.SnapUtils;
 import snap.view.*;
 import snap.viewx.DialogBox;
@@ -23,11 +21,8 @@ import java.util.Objects;
  */
 public class DocPane extends ViewOwner {
 
-    // The JeplTextDoc
-    protected JeplTextDoc  _jeplDoc;
-
     // The EditPane
-    protected EditPane  _editPane;
+    protected EditPane<JavaTextDoc>  _editPane;
 
     // The EvalPane
     protected EvalPane  _evalPane;
@@ -48,27 +43,29 @@ public class DocPane extends ViewOwner {
         super();
 
         // Create EditPane, EvalPane
-        _editPane = new EditPane(this);
+        _editPane = new EditPane<>(this);
         _evalPane = new EvalPane(this);
 
-        // Create/set JeplTextDoc
-        _jeplDoc = DocPaneUtils.createJeplTextDoc();
+        // Install the JeplDoc
+        JeplTextDoc jeplDoc = DocPaneUtils.createJeplTextDoc();
+        setJeplDoc(jeplDoc);
     }
 
     /**
      * Returns the JeplTextDoc.
      */
-    public JeplTextDoc getJeplDoc()  { return _jeplDoc; }
+    public JeplTextDoc getJeplDoc()
+    {
+        JavaTextDoc javaTextDoc = _editPane.getTextDoc();
+        return javaTextDoc instanceof JeplTextDoc ? (JeplTextDoc) javaTextDoc : null;
+    }
 
     /**
      * Sets the JeplTextDoc.
      */
     public void setJeplDoc(JeplTextDoc aJeplDoc)
     {
-        _jeplDoc = aJeplDoc;
-
-        // Forward to EditPane
-        _editPane.setJeplDoc(aJeplDoc);
+        _editPane.setTextDoc(aJeplDoc);
     }
 
     /**
@@ -316,12 +313,6 @@ public class DocPane extends ViewOwner {
         // Add RunAction
         addKeyActionHandler("RunAction", "Shortcut+R");
         addKeyActionHandler("AutoRunAction", "Shortcut+Shift+R");
-
-        // Install the JeplDoc
-        JeplTextDoc jeplDoc = getJeplDoc();
-        Font codeFont = JavaTextUtils.getCodeFont();
-        jeplDoc.setDefaultStyle(new TextStyle(codeFont));
-        _editPane.setJeplDoc(jeplDoc);
     }
 
     /**

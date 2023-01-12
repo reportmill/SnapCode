@@ -3,10 +3,7 @@
  */
 package snapcode.app;
 import javakit.ide.*;
-import javakit.parse.JClassDecl;
-import javakit.parse.JMethodDecl;
-import javakit.parse.JNode;
-import javakit.parse.JeplTextDoc;
+import javakit.parse.*;
 import snap.gfx.Color;
 import snap.text.TextBoxLine;
 import snap.view.*;
@@ -15,13 +12,10 @@ import java.util.Objects;
 /**
  * This JavaTextPane subclass adds customizations for JavaShell.
  */
-public class EditPane extends JavaTextPane {
+public class EditPane<T extends JavaTextDoc> extends JavaTextPane<T> {
 
     // The DocPane
     private DocPane  _docPane;
-
-    // The JeplTextDoc
-    protected JeplTextDoc  _jeplDoc;
 
     /**
      * Constructor.
@@ -36,23 +30,6 @@ public class EditPane extends JavaTextPane {
      * Returns the EvalPane.
      */
     public EvalPane getEvalPane()  { return _docPane.getEvalPane(); }
-
-    /**
-     * Returns the JeplTextDoc.
-     */
-    public JeplTextDoc getJeplDoc()  { return _jeplDoc; }
-
-    /**
-     * Sets the JeplTextDoc.
-     */
-    public void setJeplDoc(JeplTextDoc aJeplDoc)
-    {
-        _jeplDoc = aJeplDoc;
-
-        // Set in TextArea
-        JavaTextArea textArea = getTextArea();
-        textArea.setTextDoc(aJeplDoc);
-    }
 
     /**
      * Initialize UI.

@@ -2,11 +2,14 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
+import javakit.ide.JavaTextUtils;
 import javakit.parse.JavaTextDoc;
 import javakit.parse.JavaTextDocBuilder;
 import javakit.parse.JeplTextDoc;
 import javakit.resolver.Resolver;
+import snap.gfx.Font;
 import snap.props.PropObject;
+import snap.text.TextStyle;
 import snap.util.SnapUtils;
 import snapcharts.data.DoubleArray;
 
@@ -32,6 +35,10 @@ public class DocPaneUtils {
         // Create/set resolver
         Resolver resolver = createResolver();
         jeplDoc.setResolver(resolver);
+
+        // Set code font
+        Font codeFont = JavaTextUtils.getCodeFont();
+        jeplDoc.setDefaultStyle(new TextStyle(codeFont));
 
         // Return
         return jeplDoc;
