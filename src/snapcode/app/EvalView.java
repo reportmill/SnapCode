@@ -2,6 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
+import javakit.ide.BuildIssue;
+import javakit.ide.BuildIssues;
+import javakit.ide.JavaTextArea;
+import javakit.ide.Project;
 import javakit.parse.JNode;
 import javakit.parse.JStmt;
 import javakit.parse.JeplTextDoc;
@@ -10,6 +14,7 @@ import javakit.runner.JavaShell;
 import snap.geom.HPos;
 import snap.gfx.Color;
 import snap.view.*;
+import snap.web.WebFile;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -113,14 +118,31 @@ class EvalView extends ColView implements JavaShell.ShellClient {
         _javaShell.compileJavaCode(jeplDoc);
         NodeError[] errors = _javaShell.getCompileErrors();
 
+        // Get Project.BuildIssues and clear
+        EditPane editPane = _evalPane.getDocPane()._editPane;
+        JavaTextArea javaTextArea = editPane.getTextArea();
+        WebFile sourceFile = javaTextArea.getSourceFile();
+        Project proj = javaTextArea.getProject();
+        BuildIssues projBuildIssues = proj.getBuildIssues();
+        projBuildIssues.clear();
+        editPane.buildIssueOrBreakPointMarkerChanged();
+
         // If errors, send to output
         if (errors.length > 0) {
 
+            // Send errors to output
             for (NodeError error : errors) {
                 JNode node = error.getNode();
                 JStmt stmt = node instanceof JStmt ? (JStmt) node : node.getParent(JStmt.class);
                 if (stmt != null)
                     processOutput(stmt, error);
+            }
+
+            // Convert NodeErrors to BuildIssue
+            for (NodeError error : errors) {
+                BuildIssue buildIssue = BuildIssue.createIssueForNodeError(error, sourceFile);
+                if (buildIssue != null)
+                    projBuildIssues.add(buildIssue);
             }
         }
 
