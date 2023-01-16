@@ -4,7 +4,6 @@
 package snapcode.app;
 import javakit.ide.JavaTextUtils;
 import javakit.parse.JavaTextDoc;
-import javakit.parse.JavaTextDocBuilder;
 import javakit.parse.JeplTextDoc;
 import javakit.resolver.Resolver;
 import snap.gfx.Font;
@@ -27,10 +26,9 @@ public class DocPaneUtils {
         JeplTextDoc jeplDoc = new JeplTextDoc();
 
         // Get template Java text string
-        JavaTextDocBuilder javaTextDocBuilder = jeplDoc.getJavaTextDocBuilder();
-        javaTextDocBuilder.setSuperClassName(ChartsREPL.class.getName());
-        javaTextDocBuilder.addImport("snapcharts.data.*");
-        javaTextDocBuilder.addImport("snapcode.app.*");
+        jeplDoc.setSuperClassName(ChartsREPL.class.getName());
+        jeplDoc.addImport("snapcharts.data.*");
+        jeplDoc.addImport("snapcode.app.*");
 
         // Create/set resolver
         Resolver resolver = createResolver();
