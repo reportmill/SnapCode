@@ -2,10 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
-import javakit.ide.BuildIssue;
-import javakit.ide.BuildIssues;
+import javakit.project.BuildIssue;
+import javakit.project.BuildIssues;
 import javakit.ide.JavaTextArea;
-import javakit.ide.Project;
+import javakit.project.Project;
 import javakit.parse.JNode;
 import javakit.parse.JStmt;
 import javakit.parse.JeplTextDoc;
