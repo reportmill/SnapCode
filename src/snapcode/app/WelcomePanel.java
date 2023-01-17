@@ -391,7 +391,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Handle Local
         if (!isCloud()) {
-            WebFile[] recentFiles = RecentFiles.getFiles(DocPane.RECENT_FILES_ID);
+            WebFile[] recentFiles = RecentFiles.getFiles(DocPaneDocHpr.RECENT_FILES_ID);
             return _recentFiles = recentFiles;
         }
 
@@ -416,7 +416,7 @@ public class WelcomePanel extends ViewOwner {
         DropBox dropBox = getDropBox();
         WebFile[] dropBoxfiles = dropBox.getRootDir().getFiles();
         Stream<WebFile> dropBoxfilesStream = Stream.of(dropBoxfiles);
-        Stream<WebFile> jeplFilesStream = dropBoxfilesStream.filter(f -> DocPane.JAVA_FILE_EXT.equals(f.getType()));
+        Stream<WebFile> jeplFilesStream = dropBoxfilesStream.filter(f -> DocPaneDocHpr.JAVA_FILE_EXT.equals(f.getType()));
         WebFile[] jeplFiles = jeplFilesStream.toArray(size -> new WebFile[size]);
 
         // Set files and trigger reload
@@ -547,7 +547,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Clear RecentFile
         String filePath = file.getURL().getString();
-        RecentFiles.removePath(DocPane.RECENT_FILES_ID, filePath);
+        RecentFiles.removePath(DocPaneDocHpr.RECENT_FILES_ID, filePath);
 
         // Clear RecentFiles, SelFile and trigger reset
         _recentFiles = null;

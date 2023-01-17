@@ -6,13 +6,8 @@ import javakit.parse.JavaTextDoc;
 import javakit.parse.JeplTextDoc;
 import snap.gfx.Color;
 import snap.props.PropChange;
-import snap.props.Undoer;
 import snap.util.SnapUtils;
 import snap.view.*;
-import snap.viewx.DialogBox;
-import snap.viewx.FilePanel;
-import snap.viewx.RecentFiles;
-import snap.web.WebFile;
 import snap.web.WebURL;
 import java.util.Objects;
 
@@ -20,6 +15,9 @@ import java.util.Objects;
  * This class provides UI and editing for a JeplDoc.
  */
 public class DocPane extends ViewOwner {
+
+    // A helper class for doc IO
+    private DocPaneDocHpr _docHpr;
 
     // The EditPane
     protected EditPane<JavaTextDoc>  _editPane;
@@ -32,8 +30,6 @@ public class DocPane extends ViewOwner {
 
     // Constants
     public static Color BACK_FILL = Color.WHITE;
-    public static final String JAVA_FILE_EXT = "jepl";
-    public static final String RECENT_FILES_ID = "RecentJeplDocs";
 
     /**
      * Constructor.
@@ -42,12 +38,15 @@ public class DocPane extends ViewOwner {
     {
         super();
 
+        // Create/set doc helper
+        _docHpr = new DocPaneDocHpr(this);
+
         // Create EditPane, EvalPane
         _editPane = new EditPane<>(this);
         _evalPane = new EvalPane(this);
 
         // Install the JeplDoc
-        JeplTextDoc jeplDoc = DocPaneUtils.createJeplTextDoc();
+        JeplTextDoc jeplDoc = DocPaneDocHpr.createJeplTextDoc(null);
         setJeplDoc(jeplDoc);
     }
 
@@ -69,6 +68,42 @@ public class DocPane extends ViewOwner {
     }
 
     /**
+     * Creates a new DocPane from an open panel.
+     */
+    public DocPane showOpenPanel(View aView)
+    {
+        return _docHpr.showOpenPanel(aView);
+    }
+
+    /**
+     * Creates a new DocPane by opening doc from given source.
+     */
+    public DocPane openDocFromSource(Object aSource)
+    {
+        return _docHpr.openDocFromSource(aSource);
+    }
+
+    /**
+     * Saves the current editor document, running the save panel.
+     */
+    public void saveAs()  { _docHpr.saveAs(); }
+
+    /**
+     * Saves the current editor document, running the save panel if needed.
+     */
+    public void save()  { _docHpr.save(); }
+
+    /**
+     * Reloads the current editor document from the last saved version.
+     */
+    public void revert()  { _docHpr.revert(); }
+
+    /**
+     * Closes this editor pane
+     */
+    public void closeWindow(ViewEvent anEvent)  { _docHpr.closeWindow(anEvent); }
+
+    /**
      * Returns the edit pane.
      */
     public EditPane getEditPane()  { return _editPane; }
@@ -85,187 +120,6 @@ public class DocPane extends ViewOwner {
     {
         if (_evalPane.isAutoRun())
             _evalPane.runApp(false);
-    }
-
-    /**
-     * Creates a new DocPane from an open panel.
-     */
-    public DocPane showOpenPanel(View aView)
-    {
-        // Get path from open panel for supported file extensions
-        String[] extensions = { DocPane.JAVA_FILE_EXT };
-        String path = FilePanel.showOpenPanel(aView, "Snap Java File", extensions);
-        if (path == null) return null;
-
-        // Create/return DocPane for path
-        return openDocFromSource(path);
-    }
-
-    /**
-     * Creates a new DocPane by opening the given doc.
-     */
-    public DocPane openDoc(JeplTextDoc aJeplDoc)
-    {
-        // Set new doc
-        setJeplDoc(aJeplDoc);
-
-        resetLater();
-
-        // If source is string, add to recent files menu
-        WebURL url = aJeplDoc.getSourceURL();
-        String urls = url != null ? url.getString() : null;
-        if(urls != null)
-            RecentFiles.addPath(RECENT_FILES_ID, urls, 10);
-
-        // Return the editor
-        return this;
-    }
-
-    /**
-     * Creates a new DocPane by opening doc from given source.
-     */
-    public DocPane openDocFromSource(Object aSource)
-    {
-        // Get URL for source
-        WebURL url = WebURL.getURL(aSource);
-
-        // Get doc for URL
-        JeplTextDoc jeplTextDoc = DocPaneUtils.createJeplTextDoc();
-        jeplTextDoc.readFromSourceURL(url);
-
-        // Return call to openDoc
-        return openDoc(jeplTextDoc);
-    }
-
-    /**
-     * Saves the current editor document, running the save panel.
-     */
-    public void saveAs()
-    {
-        // Run save panel, set Document.Source to path and re-save (or just return if cancelled)
-        String[] exts = new String[] { JAVA_FILE_EXT };
-        //String path = FilePanel.showSavePanel(getUI(), "Snap Charts File", exts); if (path==null) return;
-        WebFile file = FilePanel.showSavePanelWeb(getUI(), "Snap Java file", exts);
-        if (file == null)
-            return;
-
-        // Set JeplDoc.SourceURL and save
-        JeplTextDoc jeplDoc = getJeplDoc();
-        jeplDoc.setSourceURL(file.getURL());
-        save();
-    }
-
-    /**
-     * Saves the current editor document, running the save panel if needed.
-     */
-    public void save()
-    {
-        // If can't save to current source, do SaveAs instead
-        JeplTextDoc jeplDoc = getJeplDoc();
-        WebURL url = jeplDoc.getSourceURL();
-        if (url == null) {
-            saveAs();
-            return;
-        }
-
-        // Do actual save - if exception, print stack trace and set error string
-        try {
-            jeplDoc.writeToSourceFile();
-        }
-        catch(Throwable e) {
-            e.printStackTrace();
-            String msg = "The file " + url.getPath() + " could not be saved (" + e + ").";
-            DialogBox dbox = new DialogBox("Error on Save"); dbox.setErrorMessage(msg);
-            dbox.showMessageDialog(getUI());
-            return;
-        }
-
-        // Add URL.String to RecentFilesMenu,
-        String urls = url.getString();
-        RecentFiles.addPath(RECENT_FILES_ID, urls, 10);
-
-        // Clear TextArea.Undoer and EditPane.TextModified
-        EditPane editPane = getEditPane();
-        TextArea textArea = editPane.getTextArea();
-        Undoer undoer = textArea.getUndoer();
-        undoer.reset();
-        editPane.setTextModified(false);
-
-        // Focus
-        textArea.requestFocus();
-    }
-
-    /**
-     * Reloads the current editor document from the last saved version.
-     */
-    public void revert()
-    {
-        // Get filename (just return if null)
-        JeplTextDoc jeplDoc = getJeplDoc();
-        WebURL sourceURL = jeplDoc.getSourceURL();
-        if (sourceURL == null)
-            return;
-
-        // Run option panel for revert confirmation (just return if denied)
-        String msg = "Revert to saved version of " + sourceURL.getPathName() + "?";
-        DialogBox dbox = new DialogBox("Revert to Saved");
-        dbox.setQuestionMessage(msg);
-        if (!dbox.showConfirmDialog(getUI()))
-            return;
-
-        // Re-open filename
-        sourceURL.getFile().reload();
-        openDocFromSource(sourceURL);
-
-        // Clear TextArea.Undoer and EditPane.TextModified
-        EditPane editPane = getEditPane();
-        TextArea textArea = editPane.getTextArea();
-        Undoer undoer = textArea.getUndoer();
-        undoer.reset();
-        editPane.setTextModified(false);
-    }
-
-    /**
-     * Closes this editor pane
-     */
-    public void closeWindow(ViewEvent anEvent)
-    {
-        getWindow().hide();
-        anEvent.consume();
-        windowClosed();
-    }
-
-    /**
-     * Called when DocPane Window is closed.
-     */
-    protected void windowClosed()
-    {
-        // If another open editor is available focus on it
-        DocPane docPane = WindowView.getOpenWindowOwner(DocPane.class);
-        if (docPane != null)
-            docPane.getEditPane().getTextArea().requestFocus();
-
-        // If no other open editor, show WelcomePanel
-        else WelcomePanel.getShared().showPanel();
-    }
-
-    /**
-     * Returns the window title.
-     */
-    public String getWindowTitle()
-    {
-        // Get window title: Basic filename + optional "Doc edited asterisk + optional "Doc Scaled"
-        JeplTextDoc jeplDoc = getJeplDoc();
-        WebURL sourceURL = jeplDoc.getSourceURL();
-        String title = sourceURL != null ? sourceURL.getPath() : null;
-        if (title == null)
-            title = "Untitled.jepl";
-
-        // If has undos, add asterisk
-        EditPane editPane = getEditPane();
-        if (editPane.isTextModified())
-            title = "* " + title;
-        return "SnapCode  –  " + title;
     }
 
     /**
@@ -332,7 +186,7 @@ public class DocPane extends ViewOwner {
     {
         // If title has changed, update window title
         if(isWindowVisible()) {
-            String title = getWindowTitle();
+            String title = _docHpr.getWindowTitle();
             WindowView win = getWindow();
             if(!Objects.equals(title, win.getTitle())) {
                 win.setTitle(title);
