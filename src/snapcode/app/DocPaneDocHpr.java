@@ -6,6 +6,7 @@ import javakit.ide.JavaTextUtils;
 import javakit.parse.JavaTextDoc;
 import javakit.parse.JeplTextDoc;
 import javakit.project.Project;
+import javakit.project.ProjectUtils;
 import javakit.resolver.Resolver;
 import snap.gfx.Font;
 import snap.props.PropObject;
@@ -52,6 +53,15 @@ public class DocPaneDocHpr {
      */
     public static JeplTextDoc createJeplTextDoc(WebURL aSourceURL)
     {
+        // Make sure URL is for project source file (if null, get temp source file URL)
+        WebURL sourceURL = aSourceURL;
+        if (sourceURL != null)
+            sourceURL = ProjectUtils.getProjectSourceURLForURL(aSourceURL);
+        else {
+            WebFile tempFile = ProjectUtils.getTempSourceFile(null, "jepl");
+            sourceURL = tempFile.getURL();
+        }
+
         // Create/config/set Doc
         JeplTextDoc jeplDoc = new JeplTextDoc();
 
@@ -69,8 +79,7 @@ public class DocPaneDocHpr {
         jeplDoc.setDefaultStyle(new TextStyle(codeFont));
 
         // Read from URL
-        if (aSourceURL != null)
-            jeplDoc.readFromSourceURL(aSourceURL);
+        jeplDoc.readFromSourceURL(sourceURL);
 
         // Return
         return jeplDoc;
