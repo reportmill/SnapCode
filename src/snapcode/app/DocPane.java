@@ -67,12 +67,13 @@ public class DocPane extends ViewOwner {
      */
     public void setJeplDoc(JeplTextDoc aJeplDoc)
     {
-        _editPane.setTextDoc(aJeplDoc);
-
         // This needs to go!!!
         JavaAgent javaAgent = aJeplDoc.getJavaAgent();
         Project proj = javaAgent.getProject();
         ProjectUtils.setProjectResolver(proj, DocPaneDocHpr.createResolver());
+
+        // Forward to EditPane
+        _editPane.setTextDoc(aJeplDoc);
     }
 
     /**
