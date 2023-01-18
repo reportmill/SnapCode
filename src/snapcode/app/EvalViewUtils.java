@@ -3,6 +3,7 @@
  */
 package snapcode.app;
 import javakit.parse.NodeError;
+import javakit.project.BuildIssue;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Image;
@@ -65,9 +66,13 @@ public class EvalViewUtils {
 
         // Handle NodeError[]
         if (value instanceof NodeError)
-            return createContentViewForNodeError((NodeError) value);
+            return createContentViewForNodeErrors(new NodeError[] { (NodeError) value });
         if (value instanceof NodeError[])
             return createContentViewForNodeErrors((NodeError[]) value);
+
+        // Handle BuildIssue[]
+        if (value instanceof BuildIssue[])
+            return createContentViewForBuildIssues((BuildIssue[]) value);
 
         // Handle Exception
         if (value instanceof Exception)
@@ -129,27 +134,44 @@ public class EvalViewUtils {
     /**
      * Creates content view for ViewOwner.
      */
-    private static View createContentViewForNodeError(NodeError nodeError)
-    {
-        NodeError[] nodeErrors = new NodeError[] { nodeError };
-        return createContentViewForNodeErrors(nodeErrors);
-    }
-
-    /**
-     * Creates content view for ViewOwner.
-     */
     private static View createContentViewForNodeErrors(NodeError[] nodeErrors)
     {
         // Get exception string
-        String exceptionStr = "";
+        String errorString = "";
         for (int i = 0; i < nodeErrors.length; i++) {
-            exceptionStr += "Error: " + nodeErrors[i].getString();
+            errorString += "Error: " + nodeErrors[i].getString();
             if (i + 1 < nodeErrors.length)
-                exceptionStr += '\n';
+                errorString += '\n';
         }
 
+        // Return view for error string
+        return createContentViewForErrorString(errorString);
+    }
+
+    /**
+     * Creates content view for BuildIssues.
+     */
+    private static View createContentViewForBuildIssues(BuildIssue[] buildIssues)
+    {
+        // Get error string
+        String errorString = "";
+        for (int i = 0; i < buildIssues.length; i++) {
+            errorString += "Error: " + buildIssues[i].getText();
+            if (i + 1 < buildIssues.length)
+                errorString += '\n';
+        }
+
+        // Return view for error string
+        return createContentViewForErrorString(errorString);
+    }
+
+    /**
+     * Creates content view for BuildIssues.
+     */
+    private static View createContentViewForErrorString(String errorString)
+    {
         // Create TextArea
-        TextArea textArea = createTextAreaForText(exceptionStr);
+        TextArea textArea = createTextAreaForText(errorString);
         TextDoc textDoc = textArea.getTextDoc();
         TextStyle textStyle = textDoc.getStyleForCharIndex(0);
         TextStyle textStyle2 = textStyle.copyFor(ERROR_COLOR).copyFor(Font.Arial12);

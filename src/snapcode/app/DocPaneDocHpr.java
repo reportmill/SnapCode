@@ -61,26 +61,6 @@ public class DocPaneDocHpr {
     }
 
     /**
-     * Creates a new DocPane by opening the given doc.
-     */
-    public DocPane openDoc(JeplTextDoc aJeplDoc)
-    {
-        // Set new doc
-        _docPane.setJeplDoc(aJeplDoc);
-
-        _docPane.resetLater();
-
-        // If source is string, add to recent files menu
-        WebURL url = aJeplDoc.getSourceURL();
-        String urls = url != null ? url.getString() : null;
-        if(urls != null)
-            RecentFiles.addPath(RECENT_FILES_ID, urls, 10);
-
-        // Return
-        return _docPane;
-    }
-
-    /**
      * Creates a new DocPane by opening doc from given source.
      */
     public DocPane openDocFromSource(Object aSource)
@@ -91,8 +71,18 @@ public class DocPaneDocHpr {
         // Get doc for URL
         JeplTextDoc jeplTextDoc = JeplTextDoc.getJeplTextDocForSourceURL(url);
 
-        // Forward to openDoc
-        return openDoc(jeplTextDoc);
+        // Set new doc
+        _docPane.setJeplDoc(jeplTextDoc);
+
+        _docPane.resetLater();
+
+        // If source is string, add to recent files menu
+        String urls = url != null ? url.getString() : null;
+        if(urls != null)
+            RecentFiles.addPath(RECENT_FILES_ID, urls, 10);
+
+        // Return
+        return _docPane;
     }
 
     /**

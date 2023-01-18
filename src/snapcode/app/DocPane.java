@@ -68,7 +68,7 @@ public class DocPane extends ViewOwner {
     public void setJeplDoc(JeplTextDoc aJeplDoc)
     {
         // This needs to go!!!
-        JavaAgent javaAgent = aJeplDoc.getJavaAgent();
+        JavaAgent javaAgent = aJeplDoc.getAgent();
         Project proj = javaAgent.getProject();
         ProjectUtils.setProjectResolver(proj, DocPaneDocHpr.createResolver());
 

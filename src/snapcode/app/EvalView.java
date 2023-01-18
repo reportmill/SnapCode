@@ -2,10 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
-import javakit.parse.JNode;
-import javakit.parse.JStmt;
 import javakit.parse.JeplTextDoc;
-import javakit.parse.NodeError;
+import javakit.project.BuildIssue;
+import javakit.project.JeplAgent;
 import javakit.runner.JavaShell;
 import snap.geom.HPos;
 import snap.gfx.Color;
@@ -106,23 +105,21 @@ class EvalView extends ColView implements JavaShell.ShellClient {
         // Clear value/views cache
         _replViewsCache.clear();
 
-        // Get code and run
+        // Notify EditPane of possible BuildIssue changes
+        EditPane<?> editPane = _evalPane.getDocPane()._editPane;
+        editPane.buildIssueOrBreakPointMarkerChanged();
+
+        // Get JeplTextDoc, JeplAgent
         JeplTextDoc jeplDoc = getJeplDoc();
+        JeplAgent jeplAgent = jeplDoc.getAgent();
 
-        // Compile
-        _javaShell.compileJavaCode(jeplDoc);
+        // Build file
+        boolean success = jeplAgent.buildFile();
 
-        // If errors, send to output
-        NodeError[] errors = _javaShell.getCompileErrors();
-        if (errors.length > 0) {
-
-            // Send errors to output
-            for (NodeError error : errors) {
-                JNode node = error.getNode();
-                JStmt stmt = node instanceof JStmt ? (JStmt) node : node.getParent(JStmt.class);
-                if (stmt != null)
-                    processOutput(stmt, error);
-            }
+        // If build failed, report errors
+        if (!success) {
+            BuildIssue[] buildIssues = jeplAgent.getBuildIssues();
+            processOutput(buildIssues);
         }
 
         // If no errors, run
@@ -146,16 +143,12 @@ class EvalView extends ColView implements JavaShell.ShellClient {
 
         // Reset EvalPane
         _evalPane.resetLater();
-
-        // Notify EditPane of possible BuildIssue changes
-        EditPane<?> editPane = _evalPane.getDocPane()._editPane;
-        editPane.buildIssueOrBreakPointMarkerChanged();
     }
 
     /**
      * Called by shell when there is output.
      */
-    public void processOutput(JStmt aStmt, Object aValue)
+    public void processOutput(Object aValue)
     {
         // synchronized (_outputList) {
         //     if (_outputList.size() + getChildCount() > MAX_OUTPUT_COUNT)
