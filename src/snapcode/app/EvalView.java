@@ -2,10 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
-import javakit.project.BuildIssue;
-import javakit.project.BuildIssues;
-import javakit.ide.JavaTextArea;
-import javakit.project.Project;
 import javakit.parse.JNode;
 import javakit.parse.JStmt;
 import javakit.parse.JeplTextDoc;
@@ -14,7 +10,6 @@ import javakit.runner.JavaShell;
 import snap.geom.HPos;
 import snap.gfx.Color;
 import snap.view.*;
-import snap.web.WebFile;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -114,20 +109,11 @@ class EvalView extends ColView implements JavaShell.ShellClient {
         // Get code and run
         JeplTextDoc jeplDoc = getJeplDoc();
 
-        // Compile and get compile errors
+        // Compile
         _javaShell.compileJavaCode(jeplDoc);
-        NodeError[] errors = _javaShell.getCompileErrors();
-
-        // Get Project.BuildIssues and clear
-        EditPane editPane = _evalPane.getDocPane()._editPane;
-        JavaTextArea javaTextArea = editPane.getTextArea();
-        WebFile sourceFile = javaTextArea.getSourceFile();
-        Project proj = javaTextArea.getProject();
-        BuildIssues projBuildIssues = proj.getBuildIssues();
-        projBuildIssues.clear();
-        editPane.buildIssueOrBreakPointMarkerChanged();
 
         // If errors, send to output
+        NodeError[] errors = _javaShell.getCompileErrors();
         if (errors.length > 0) {
 
             // Send errors to output
@@ -136,13 +122,6 @@ class EvalView extends ColView implements JavaShell.ShellClient {
                 JStmt stmt = node instanceof JStmt ? (JStmt) node : node.getParent(JStmt.class);
                 if (stmt != null)
                     processOutput(stmt, error);
-            }
-
-            // Convert NodeErrors to BuildIssue
-            for (NodeError error : errors) {
-                BuildIssue buildIssue = BuildIssue.createIssueForNodeError(error, sourceFile);
-                if (buildIssue != null)
-                    projBuildIssues.add(buildIssue);
             }
         }
 
@@ -167,6 +146,10 @@ class EvalView extends ColView implements JavaShell.ShellClient {
 
         // Reset EvalPane
         _evalPane.resetLater();
+
+        // Notify EditPane of possible BuildIssue changes
+        EditPane<?> editPane = _evalPane.getDocPane()._editPane;
+        editPane.buildIssueOrBreakPointMarkerChanged();
     }
 
     /**

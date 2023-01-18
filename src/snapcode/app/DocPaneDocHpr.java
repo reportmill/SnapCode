@@ -5,8 +5,6 @@ package snapcode.app;
 import javakit.ide.JavaTextUtils;
 import javakit.parse.JavaTextDoc;
 import javakit.parse.JeplTextDoc;
-import javakit.project.Project;
-import javakit.project.ProjectUtils;
 import javakit.resolver.Resolver;
 import snap.gfx.Font;
 import snap.props.PropObject;
@@ -32,9 +30,6 @@ public class DocPaneDocHpr {
     // The DocPane
     private DocPane  _docPane;
 
-    // A temp file to be used if file hasn't been saved
-    private WebFile  _tempFile;
-
     // Constants
     public static final String JAVA_FILE_EXT = "jepl";
     public static final String RECENT_FILES_ID = "RecentJeplDocs";
@@ -46,43 +41,9 @@ public class DocPaneDocHpr {
     {
         super();
         _docPane = aDocPane;
-    }
 
-    /**
-     * Creates a JavaTextDoc for given source URL.
-     */
-    public static JeplTextDoc createJeplTextDoc(WebURL aSourceURL)
-    {
-        // Make sure URL is for project source file (if null, get temp source file URL)
-        WebURL sourceURL = aSourceURL;
-        if (sourceURL != null)
-            sourceURL = ProjectUtils.getProjectSourceURLForURL(aSourceURL);
-        else {
-            WebFile tempFile = ProjectUtils.getTempSourceFile(null, "jepl");
-            sourceURL = tempFile.getURL();
-        }
-
-        // Create/config/set Doc
-        JeplTextDoc jeplDoc = new JeplTextDoc();
-
-        // Get template Java text string
-        jeplDoc.setSuperClassName(ChartsREPL.class.getName());
-        jeplDoc.addImport("snapcharts.data.*");
-        jeplDoc.addImport("snapcode.app.*");
-
-        // Create/set resolver
-        Resolver resolver = createResolver();
-        jeplDoc.setResolver(resolver);
-
-        // Set code font
-        Font codeFont = JavaTextUtils.getCodeFont();
-        jeplDoc.setDefaultStyle(new TextStyle(codeFont));
-
-        // Read from URL
-        jeplDoc.readFromSourceURL(sourceURL);
-
-        // Return
-        return jeplDoc;
+        // Set JeplAgent config
+        JeplTextDoc.setJeplDocConfig(jtd -> configureJeplDoc(jtd));
     }
 
     /**
@@ -128,7 +89,7 @@ public class DocPaneDocHpr {
         WebURL url = WebURL.getURL(aSource);
 
         // Get doc for URL
-        JeplTextDoc jeplTextDoc = DocPaneDocHpr.createJeplTextDoc(url);
+        JeplTextDoc jeplTextDoc = JeplTextDoc.getJeplTextDocForSourceURL(url);
 
         // Forward to openDoc
         return openDoc(jeplTextDoc);
@@ -266,24 +227,24 @@ public class DocPaneDocHpr {
     }
 
     /**
-     * Returns a temp file.
+     * Configures default JeplTextDocs.
      */
-    private WebFile getTempFile()
+    private static void configureJeplDoc(JeplTextDoc jeplTextDoc)
     {
-        if (_tempFile != null) return _tempFile;
+        // Set imports and SuperClassName
+        jeplTextDoc.addImport("snapcharts.data.*");
+        jeplTextDoc.addImport("snapcode.app.*");
+        jeplTextDoc.setSuperClassName(ChartsREPL.class.getName());
 
-        // Get temp project and create temp file
-        Project tempProj = Project.getTempProject();
-        WebFile tempFile = tempProj.getSourceFile("Untitled.java", true, false);
-
-        // Set, return
-        return _tempFile = tempFile;
+        // Set code font
+        Font codeFont = JavaTextUtils.getCodeFont();
+        jeplTextDoc.setDefaultStyle(new TextStyle(codeFont));
     }
 
     /**
      * Creates the Resolver.
      */
-    private static Resolver createResolver()
+    protected static Resolver createResolver()
     {
         // Create resolver
         Resolver resolver = Resolver.newResolverForClassLoader(JavaTextDoc.class.getClassLoader());
