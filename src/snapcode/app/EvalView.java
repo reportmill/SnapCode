@@ -105,16 +105,16 @@ class EvalView extends ColView implements JavaShell.ShellClient {
         // Clear value/views cache
         _replViewsCache.clear();
 
-        // Notify EditPane of possible BuildIssue changes
-        EditPane<?> editPane = _evalPane.getDocPane()._editPane;
-        editPane.buildIssueOrBreakPointMarkerChanged();
-
         // Get JeplTextDoc, JeplAgent
         JeplTextDoc jeplDoc = getJeplDoc();
         JeplAgent jeplAgent = jeplDoc.getAgent();
 
         // Build file
         boolean success = jeplAgent.buildFile();
+
+        // Notify EditPane of possible BuildIssue changes
+        EditPane<?> editPane = _evalPane.getDocPane()._editPane;
+        editPane.buildIssueOrBreakPointMarkerChanged();
 
         // If build failed, report errors
         if (!success) {
