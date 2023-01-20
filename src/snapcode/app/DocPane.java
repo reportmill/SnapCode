@@ -4,9 +4,6 @@
 package snapcode.app;
 import javakit.parse.JavaTextDoc;
 import javakit.parse.JeplTextDoc;
-import javakit.project.JavaAgent;
-import javakit.project.Project;
-import javakit.project.ProjectUtils;
 import snap.gfx.Color;
 import snap.props.PropChange;
 import snap.util.SnapUtils;
@@ -67,10 +64,8 @@ public class DocPane extends ViewOwner {
      */
     public void setJeplDoc(JeplTextDoc aJeplDoc)
     {
-        // This needs to go!!!
-        JavaAgent javaAgent = aJeplDoc.getAgent();
-        Project proj = javaAgent.getProject();
-        ProjectUtils.setProjectResolver(proj, DocPaneDocHpr.createResolver());
+        // JeplTextDoc Project should reference
+        DocPaneDocHpr.configureJeplDocProject(aJeplDoc);
 
         // Forward to EditPane
         _editPane.setTextDoc(aJeplDoc);
@@ -115,7 +110,7 @@ public class DocPane extends ViewOwner {
     /**
      * Returns the edit pane.
      */
-    public EditPane getEditPane()  { return _editPane; }
+    public EditPane<?> getEditPane()  { return _editPane; }
 
     /**
      * Returns the eval pane.

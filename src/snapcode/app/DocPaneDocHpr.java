@@ -3,14 +3,15 @@
  */
 package snapcode.app;
 import javakit.ide.JavaTextUtils;
-import javakit.parse.JavaTextDoc;
 import javakit.parse.JeplTextDoc;
+import javakit.project.JeplAgent;
+import javakit.project.Project;
+import javakit.project.ProjectConfig;
 import javakit.resolver.Resolver;
 import snap.gfx.Font;
 import snap.props.PropObject;
 import snap.props.Undoer;
 import snap.text.TextStyle;
-import snap.util.SnapUtils;
 import snap.view.TextArea;
 import snap.view.View;
 import snap.view.ViewEvent;
@@ -235,22 +236,19 @@ public class DocPaneDocHpr {
     }
 
     /**
-     * Creates the Resolver.
+     * Configures JeplTextDoc project to make sure it references SnapKit, SnapCode and SnapCharts.
      */
-    protected static Resolver createResolver()
+    protected static void configureJeplDocProject(JeplTextDoc jeplTextDoc)
     {
-        // Create resolver
-        Resolver resolver = Resolver.newResolverForClassLoader(JavaTextDoc.class.getClassLoader());
+        // Get JeplTextDoc Project, ProjectConfig
+        JeplAgent jeplAgent = jeplTextDoc.getAgent();
+        Project proj = jeplAgent.getProject();
+        ProjectConfig projectConfig = proj.getProjectConfig();
 
-        // For Desktop: Add class paths for SnapKit, SnapCode and SnapCharts
-        if (!SnapUtils.isTeaVM) {
-            resolver.addClassPathForClass(PropObject.class);
-            resolver.addClassPathForClass(QuickCharts.class);
-            resolver.addClassPathForClass(DoubleArray.class);
-        }
-
-        // Return
-        return resolver;
+        // Add lib path to ProjectConfig for SnapKit, SnapCode and SnapCharts
+        projectConfig.addLibPathForClass(PropObject.class);
+        projectConfig.addLibPathForClass(QuickCharts.class);
+        projectConfig.addLibPathForClass(DoubleArray.class);
     }
 
     /**
