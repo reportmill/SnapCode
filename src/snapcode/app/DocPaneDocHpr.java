@@ -12,6 +12,7 @@ import snap.gfx.Font;
 import snap.props.PropObject;
 import snap.props.Undoer;
 import snap.text.TextStyle;
+import snap.util.SnapUtils;
 import snap.view.TextArea;
 import snap.view.View;
 import snap.view.ViewEvent;
@@ -240,6 +241,9 @@ public class DocPaneDocHpr {
      */
     protected static void configureJeplDocProject(JeplTextDoc jeplTextDoc)
     {
+        // If TeaVM, just return
+        if (SnapUtils.isTeaVM) return;
+
         // Get JeplTextDoc Project, ProjectConfig
         JeplAgent jeplAgent = jeplTextDoc.getAgent();
         Project proj = jeplAgent.getProject();
