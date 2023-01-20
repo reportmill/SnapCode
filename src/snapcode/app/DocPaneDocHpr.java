@@ -30,6 +30,9 @@ public class DocPaneDocHpr {
     // The DocPane
     private DocPane  _docPane;
 
+    // Whether JavaKit has been configured for this app
+    private static boolean  _didInitJavaKit;
+
     // Constants
     public static final String JAVA_FILE_EXT = "jepl";
     public static final String RECENT_FILES_ID = "RecentJeplDocs";
@@ -42,8 +45,8 @@ public class DocPaneDocHpr {
         super();
         _docPane = aDocPane;
 
-        // Set JeplAgent config
-        JeplTextDoc.setJeplDocConfig(jtd -> configureJeplDoc(jtd));
+        // JavaKit init
+        initJavaKitForThisApp();
     }
 
     /**
@@ -239,11 +242,6 @@ public class DocPaneDocHpr {
         // Create resolver
         Resolver resolver = Resolver.newResolverForClassLoader(JavaTextDoc.class.getClassLoader());
 
-        // For TeaVM: Link up StaticResolver
-        if (Resolver.isTeaVM) {
-            javakit.resolver.StaticResolver.shared()._next = new StaticResolver();
-        }
-
         // For Desktop: Add class paths for SnapKit, SnapCode and SnapCharts
         if (!SnapUtils.isTeaVM) {
             resolver.addClassPathForClass(PropObject.class);
@@ -251,11 +249,29 @@ public class DocPaneDocHpr {
             resolver.addClassPathForClass(DoubleArray.class);
         }
 
-        // Add more common class names from SnapCode
-        javakit.resolver.ClassTreeWeb.addCommonClassNames(MORE_COMMON_CLASS_NAMES);
-
         // Return
         return resolver;
+    }
+
+    /**
+     * Initialize JavaKit for this app.
+     */
+    private static void initJavaKitForThisApp()
+    {
+        // If already did init, just return
+        if (_didInitJavaKit) return;
+        _didInitJavaKit = true;
+
+        // Set JeplAgent config
+        JeplTextDoc.setJeplDocConfig(jtd -> configureJeplDoc(jtd));
+
+        // For TeaVM: Link up StaticResolver
+        if (Resolver.isTeaVM) {
+            javakit.resolver.StaticResolver.shared()._next = new StaticResolver();
+        }
+
+        // Add more common class names from SnapCode
+        javakit.resolver.ClassTreeWeb.addCommonClassNames(MORE_COMMON_CLASS_NAMES);
     }
 
     /**
