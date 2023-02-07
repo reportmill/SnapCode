@@ -22,23 +22,11 @@ public class AppPane extends ProjectPane {
     // The AppPaneToolBar
     protected AppPaneToolBar  _toolBar;
 
-    // The FilesPane
-    protected FilesPane  _filesPane;
-
-    // The SupportTray
-    private SupportTray  _supportTray;
-
     // The main SplitView that holds sidebar and browser
     private SplitView  _mainSplit;
 
-    // The side bar view holding FilesPane
-    private BoxView  _sideBarBox;
-
     // The StatusBar
     private StatusBar  _statusBar;
-
-    // Whether to show side bar
-    private boolean  _showSideBar = true;
 
     // The currently open AppPane
     private static AppPane  _openAppPane;
@@ -55,8 +43,6 @@ public class AppPane extends ProjectPane {
 
         // Create parts
         _toolBar = new AppPaneToolBar(this);
-        _filesPane = new FilesPane(this);
-        _supportTray = new SupportTray(this);
         _statusBar = new StatusBar(this);
     }
 
@@ -68,7 +54,7 @@ public class AppPane extends ProjectPane {
     /**
      * Returns the files pane.
      */
-    public FilesPane getFilesPane()  { return _filesPane; }
+    public FilesPane getFilesPane()  { return _projTools.getFilesPane(); }
 
     /**
      * Returns the processes pane.
@@ -76,26 +62,9 @@ public class AppPane extends ProjectPane {
     public ProcPane getProcPane()  { return _projTools.getDebugTool().getProcPane(); }
 
     /**
-     * Returns whether is showing SideBar (holds FilesPane and ProcPane).
-     */
-    public boolean isShowSideBar()  { return _showSideBar; }
-
-    /**
-     * Sets whether to show SideBar (holds FilesPane and ProcPane).
-     */
-    public void setShowSideBar(boolean aValue)
-    {
-        if (aValue == isShowSideBar()) return;
-        _showSideBar = aValue;
-        if (aValue)
-            _mainSplit.addItemWithAnim(_sideBarBox, 220, 0);
-        else _mainSplit.removeItemWithAnim(_sideBarBox);
-    }
-
-    /**
      * Returns the support tray.
      */
-    public SupportTray getSupportTray()  { return _supportTray; }
+    public SupportTray getSupportTray()  { return _projTools.getSupportTray(); }
 
     /**
      * Adds a site to sites list.
@@ -128,7 +97,8 @@ public class AppPane extends ProjectPane {
             addSite(p.getSite());
 
         // Clear root files
-        _filesPane._rootFiles = null;
+        FilesPane filesPane = getFilesPane();
+        filesPane.resetRootFiles();
     }
 
     /**
@@ -144,7 +114,8 @@ public class AppPane extends ProjectPane {
         aSite.removeFileChangeListener(_siteFileLsnr);
 
         // Clear root files
-        _filesPane._rootFiles = null;
+        FilesPane filesPane = getFilesPane();
+        filesPane.resetRootFiles();
     }
 
     /**
@@ -195,8 +166,10 @@ public class AppPane extends ProjectPane {
     {
         // Get file and update in FilesPane
         WebFile file = (WebFile) aPC.getSource();
-        if (file.getExists())
-            _filesPane.updateFile(file);
+        if (file.getExists()) {
+            FilesPane filesPane = getFilesPane();
+            filesPane.updateFile(file);
+        }
     }
 
     /**
@@ -229,19 +202,16 @@ public class AppPane extends ProjectPane {
         // Listen to PagePane
         _pagePane.addPropChangeListener(pc -> pagePaneDidPropChange(pc), PagePane.SelFile_Prop);
 
-        // Get SideBarBox
-        _sideBarBox = getView("SideBarBox", BoxView.class);
-        _sideBarBox.setClipToBounds(true);
-
         // Add FilesPane
-        View filesPaneUI = _filesPane.getUI();
-        filesPaneUI.setGrowHeight(true);
-
-        // Add ProcPane
-        _sideBarBox.setContent(filesPaneUI);
+        SupportTray sideBar = _projTools.getSideBar();
+        View sideBarUI = sideBar.getUI();
+        sideBarUI.setGrowHeight(true);
+        sideBar.setSelToolForClass(FilesPane.class);
+        pagePaneSplitView.addItem(sideBarUI, 0);
 
         // Add SupportTray to MainSplit
-        TabView supportTrayUI = (TabView) _supportTray.getUI();
+        SupportTray supportTray = _projTools.getSupportTray();
+        TabView supportTrayUI = (TabView) supportTray.getUI();
         _mainSplit.addItem(supportTrayUI);
 
         // Add StatusBar
@@ -266,8 +236,7 @@ public class AppPane extends ProjectPane {
         getWindow().setTitle(page != null ? page.getTitle() : "SnapCode");
 
         // Reset FilesPane and SupportTray
-        _filesPane.resetLater();
-        _supportTray.resetLater();
+        _projTools.resetLater();
         _statusBar.resetLater();
     }
 
@@ -322,7 +291,8 @@ public class AppPane extends ProjectPane {
     public void saveFiles()
     {
         WebFile rootDir = getSelSite().getRootDir();
-        _filesPane.saveFiles(rootDir, true);
+        FilesPane filesPane = getFilesPane();
+        filesPane.saveFiles(rootDir, true);
     }
 
     /**
@@ -330,7 +300,8 @@ public class AppPane extends ProjectPane {
      */
     public void showNewFilePanel()
     {
-        _filesPane.showNewFilePanel();
+        FilesPane filesPane = getFilesPane();
+        filesPane.showNewFilePanel();
     }
 
     /**
@@ -340,8 +311,10 @@ public class AppPane extends ProjectPane {
     {
         // Handle SelFile
         String propName = aPC.getPropName();
-        if (propName == PagePane.SelFile_Prop)
-            _filesPane.resetLater();
+        if (propName == PagePane.SelFile_Prop) {
+            FilesPane filesPane = getFilesPane();
+            filesPane.resetLater();
+        }
     }
 
     /**

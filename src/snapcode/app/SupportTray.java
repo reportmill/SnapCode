@@ -9,30 +9,22 @@ import snapcode.apptools.*;
  */
 public class SupportTray extends ViewOwner {
 
-    // The AppPane
-    private AppPane  _appPane;
-
-    // The tab view
-    private TabView  _tabView;
+    // The side
+    private Side  _side;
 
     // The array of ProjectTools
     private ProjectTool[]  _trayTools;
 
+    // The tab view
+    private TabView  _tabView;
+
     /**
-     * Creates a new SupportTray for given AppPane.
+     * Creates a new SupportTray for given ProjectPane.
      */
-    public SupportTray(AppPane anAppPane)
+    public SupportTray(ProjectPane projPane, Side aSide, ProjectTool[] trayTools)
     {
-        _appPane = anAppPane;
-
-        ProjectTools projTools = anAppPane.getProjectTools();
-
-        // Set tools
-        _trayTools = new ProjectTool[] {
-                projTools.getProblemsPane(), projTools.getDebugTool(),
-                projTools.getRunConsole(), projTools.getBreakpointsPanel(),
-                projTools.getSearchTool()
-        };
+        _side = aSide;
+        _trayTools = trayTools;
     }
 
     /**
@@ -113,14 +105,20 @@ public class SupportTray extends ViewOwner {
         _tabView = new TabView();
         _tabView.setName("TabView");
         _tabView.setFont(_tabView.getFont().deriveFont(12));
-        _tabView.setTabSide(Side.BOTTOM);
+        _tabView.setTabSide(_side);
         _tabView.getTabBar().setTabMinWidth(70);
         _tabView.getTabBar().setAllowEmptySelection(true);
 
         // Bogus: Manually set TabView PrefHeight
         _tabView.addPropChangeListener(pc -> {
-            double prefH = _tabView.getContent() != null ? 280 : 30;
-            _tabView.setPrefHeight(prefH);
+            if (_side.isTopOrBottom()) {
+                double prefH = _tabView.getContent() != null ? 280 : 30;
+                _tabView.setPrefHeight(prefH);
+            }
+            else {
+                double prefW = _tabView.getContent() != null ? 250 : 30;
+                _tabView.setPrefWidth(prefW);
+            }
         }, TabView.SelIndex_Prop);
 
         // Get TabBuilder

@@ -70,6 +70,11 @@ public class FilesPane extends ProjectTool {
     }
 
     /**
+     * Resets root files.
+     */
+    public void resetRootFiles()  { _rootFiles = null; }
+
+    /**
      * Returns an AppFile for given WebFile.
      */
     public AppFile getAppFile(WebFile aFile)
@@ -113,8 +118,10 @@ public class FilesPane extends ProjectTool {
             }
         }
 
-        _filesTree.updateItems(appFiles.toArray(new AppFile[0]));
-        _filesList.updateItems(appFiles.toArray(new AppFile[0]));
+        if (_filesTree != null) {
+            _filesTree.updateItems(appFiles.toArray(new AppFile[0]));
+            _filesList.updateItems(appFiles.toArray(new AppFile[0]));
+        }
         if (aFile.isDir())
             resetLater();
     }
@@ -815,7 +822,7 @@ public class FilesPane extends ProjectTool {
      * Override for title.
      */
     @Override
-    public String getTitle()  { return "Problems"; }
+    public String getTitle()  { return "Project"; }
 
     // Constants
     private static Border CLOSE_BOX_BORDER1 = Border.createLineBorder(Color.LIGHTGRAY, .5);

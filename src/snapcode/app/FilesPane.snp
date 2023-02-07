@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="200" FillWidth="true">
+<ColView PrefWidth="200" GrowWidth="true" FillWidth="true">
   <RowView Name="RowView" MinHeight="32">
     <Button Name="AllFilesButton" PrefWidth="22" PrefHeight="20" Margin="4" ToolTip="Toggle Files Tree/List" ShowArea="false" Image="FilesTree.png" />
     <Label Name="FilesLabel" Text="Project">

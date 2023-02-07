@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RowView PrefWidth="500" PrefHeight="50" Padding="8,8,8,8" Spacing="8">
+<RowView PrefWidth="500" PrefHeight="50" Padding="8,12,8,8" Spacing="8">
   <LineBorder Color="#666666" />
   <fill type="gradient" roll="90" color="#85b5e6" color2="#628fc3" color3="#85b5e6" stop2="0.6" nstops="3" />
   <PathView Name="HomeButton" PrefWidth="36" PrefHeight="36">

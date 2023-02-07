@@ -6,7 +6,6 @@ import snap.viewx.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.app.RunConfigsPage;
 import snapcode.apptools.DebugTool;
 import snapcode.apptools.SearchPane;
 import java.util.*;
@@ -16,18 +15,11 @@ import java.util.*;
  */
 public class AppPaneToolBar extends ProjectTool {
 
-    // The AppPane
-    private AppPane  _appPane;
-
     // A placeholder for fill from toolbar button under mouse
     private Paint  _tempFill;
 
     // RunConfigsPage
     private RunConfigsPage _runConfigsPage;
-
-    // Shared images
-    static Image SIDEBAR_EXPAND = Image.get(AppPane.class, "SideBar_Expand.png");
-    static Image SIDEBAR_COLLAPSE = Image.get(AppPane.class, "SideBar_Collapse.png");
 
     /**
      * Creates a new AppPaneToolBar.
@@ -35,7 +27,6 @@ public class AppPaneToolBar extends ProjectTool {
     public AppPaneToolBar(AppPane anAppPane)
     {
         super(anAppPane);
-        _appPane = anAppPane;
     }
 
     /**
@@ -62,14 +53,6 @@ public class AppPaneToolBar extends ProjectTool {
         menuButton.setItems(Arrays.asList(getRunMenuButtonItems()));
         menuButton.getGraphicAfter().setPadding(0, 0, 0, 0);
         superUI.addChild(menuButton, 5);
-
-        // Add Expand button
-        Button expandButton = new Button();
-        expandButton.setName("ExpandButton");
-        expandButton.setImage(SIDEBAR_EXPAND);
-        expandButton.setShowArea(false);
-        expandButton.setPrefSize(16, 16);
-        superUI.addChild(expandButton);
 
         // Return
         return superUI;
@@ -104,16 +87,6 @@ public class AppPaneToolBar extends ProjectTool {
         String[] buttonNames = { "HomeButton", "BackButton", "NextButton", "RefreshButton", "RunButton" };
         for (String name : buttonNames)
             enableEvents(name, MouseRelease, MouseEnter, MouseExit);
-    }
-
-    /**
-     * Reset UI.
-     */
-    @Override
-    protected void resetUI()
-    {
-        Image img = _appPane.isShowSideBar() ? SIDEBAR_EXPAND : SIDEBAR_COLLAPSE;
-        getView("ExpandButton", Button.class).setImage(img);
     }
 
     /**
@@ -179,12 +152,6 @@ public class AppPaneToolBar extends ProjectTool {
         // Handle SearchComboBox
         if (anEvent.equals("SearchComboBox"))
             handleSearchComboBox(anEvent);
-
-        // Handle ExpandButton
-        if (anEvent.equals("ExpandButton")) {
-            boolean showSideBar = !_appPane.isShowSideBar();
-            _appPane.setShowSideBar(showSideBar);
-        }
     }
 
     /**

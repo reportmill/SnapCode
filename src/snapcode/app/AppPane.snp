@@ -27,8 +27,6 @@
         <MenuItem Name="ShowJavaHomeMenuItem" Text="Show Java Home" />
       </Menu>
     </MenuBar>
-    <SplitView Name="PagePaneSplitView" GrowHeight="true">
-      <BoxView Name="SideBarBox" PrefWidth="220" FillWidth="true" FillHeight="true" />
-    </SplitView>
+    <SplitView Name="PagePaneSplitView" GrowHeight="true" />
   </ColView>
 </SplitView>
