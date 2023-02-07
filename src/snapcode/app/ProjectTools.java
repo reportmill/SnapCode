@@ -1,11 +1,19 @@
 package snapcode.app;
-import snapcode.apptools.DebugTool;
-import snapcode.apptools.SearchPane;
+import snapcode.apptools.*;
 
 /**
  * This class manages all of the ProjectTools for a ProjectPane.
  */
 public class ProjectTools {
+
+    // The Problems pane
+    private ProblemsPane _problemsPane;
+
+    // The RunConsole
+    private RunConsole _runConsole;
+
+    // The BreakpointsPanel
+    private BreakpointsPanel _breakpointsPanel;
 
     // The ProjectPane
     private ProjectPane  _projPane;
@@ -30,9 +38,27 @@ public class ProjectTools {
      */
     protected void createTools()
     {
+        _problemsPane = new ProblemsPane(_projPane);
+        _runConsole = new RunConsole(_projPane);
+        _breakpointsPanel = new BreakpointsPanel(_projPane);
         _debugTool = new DebugTool(_projPane);
         _searchTool = new SearchPane(_projPane);
     }
+
+    /**
+     * Returns the problems pane.
+     */
+    public ProblemsPane getProblemsPane()  { return _problemsPane; }
+
+    /**
+     * Returns the RunConsole.
+     */
+    public RunConsole getRunConsole()  { return _runConsole; }
+
+    /**
+     * Returns the BreakpointsPanel.
+     */
+    public BreakpointsPanel getBreakpointsPanel()  { return _breakpointsPanel; }
 
     /**
      * Returns the debug tool.
@@ -52,6 +78,4 @@ public class ProjectTools {
         SupportTray supportTray = ((AppPane) _projPane).getSupportTray();
         supportTray.setSelToolForClass(aClass);
     }
-
-
 }

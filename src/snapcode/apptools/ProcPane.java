@@ -69,7 +69,7 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
     /**
      * Returns the RunConsole.
      */
-    public RunConsole getRunConsole()  { return _appPane.getRunConsole(); }
+    public RunConsole getRunConsole()  { return _projTools.getRunConsole(); }
 
     /**
      * Returns the DebugVarsPane.

@@ -1,5 +1,5 @@
 package snapcode.apptools;
-import snapcode.app.AppPane;
+import snapcode.app.ProjectPane;
 import snapcode.app.ProjectTool;
 import snapcode.debug.RunApp;
 import snap.gfx.Color;
@@ -17,9 +17,6 @@ import snap.web.WebFile;
  */
 public class RunConsole extends ProjectTool {
 
-    // The ProcPane
-    private ProcPane _procPane;
-
     // The output text
     private RCTextView  _textView;
 
@@ -29,16 +26,20 @@ public class RunConsole extends ProjectTool {
     /**
      * Creates a new DebugPane.
      */
-    public RunConsole(AppPane projPane)
+    public RunConsole(ProjectPane projPane)
     {
         super(projPane);
-        _procPane = projPane.getProcPane();
     }
 
     /**
-     * Returns the ProcPane.
+     * Returns the selected app.
      */
-    public ProcPane getProcPane()  { return _procPane; }
+    public RunApp getSelApp()
+    {
+        DebugTool debugTool = _projTools.getDebugTool();
+        ProcPane procPane = debugTool.getProcPane();
+        return procPane.getSelApp();
+    }
 
     /**
      * Clears the RunConsole text.
@@ -186,10 +187,12 @@ public class RunConsole extends ProjectTool {
     @Override
     protected void resetUI()
     {
-        ProcPane procPane = getProcPane();
-        RunApp selApp = procPane.getSelApp();
+        // Update NameLabel
+        RunApp selApp = getSelApp();
         String labelText = selApp != null ? selApp.getName() + " Console" : null;
         setViewText("NameLabel", labelText);
+
+        // Update TerminateButton.Enabled
         setViewEnabled("TerminateButton", selApp != null && !selApp.isTerminated());
     }
 
@@ -198,8 +201,7 @@ public class RunConsole extends ProjectTool {
      */
     public void respondUI(ViewEvent anEvent)
     {
-        ProcPane procPane = getProcPane();
-        RunApp selApp = procPane.getSelApp();
+        RunApp selApp = getSelApp();
 
         // Handle ClearButton
         if (anEvent.equals("ClearButton")) {
@@ -238,7 +240,7 @@ public class RunConsole extends ProjectTool {
          */
         protected void processEnterAction()
         {
-            RunApp proc = _runConsole.getProcPane().getSelApp();
+            RunApp proc = _runConsole.getSelApp();
             if (proc == null) return;
             String str = getInput();
             proc.sendInput(str);

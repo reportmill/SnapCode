@@ -2,6 +2,7 @@ package snapcode.apptools;
 import javakit.project.Breakpoint;
 import javakit.project.Breakpoints;
 import snap.view.ListView;
+import snap.view.View;
 import snap.view.ViewEvent;
 import snapcode.app.ProjectPane;
 import snapcode.app.ProjectTool;
@@ -44,8 +45,8 @@ public class BreakpointsPanel extends ProjectTool {
     protected void initUI()
     {
         _breakpointsList = getView("BreakpointList", ListView.class);
-        enableEvents(_breakpointsList, MouseRelease);
         _breakpointsList.setRowHeight(24);
+        _breakpointsList.addEventFilter(e -> breakpointsListDidMouseRelease(e), View.MouseRelease);
         getBreakpoints().addPropChangeListener(pce -> resetLater());
     }
 
@@ -72,12 +73,18 @@ public class BreakpointsPanel extends ProjectTool {
         // Handle DeleteAllButton
         if (anEvent.equals("DeleteAllButton"))
             getBreakpoints().clear();
+    }
 
-        // Handle BreakpointList
-        if (anEvent.equals("BreakpointList") && anEvent.getClickCount() == 2) {
-            Breakpoint bp = getSelBreakpoint();
-            String urls = bp.getFile().getURL().getString() + "#LineNumber=" + (bp.getLine() + 1);
-            getBrowser().setURLString(urls);
+    /**
+     * Called when BreakpointsList gets MouseRelease.
+     */
+    private void breakpointsListDidMouseRelease(ViewEvent anEvent)
+    {
+        if (anEvent.getClickCount() == 2) {
+            Breakpoint breakpoint = getSelBreakpoint();
+            String urlStr = breakpoint.getFile().getURL().getString();
+            String urlStrForLine = urlStr + "#LineNumber=" + (breakpoint.getLine() + 1);
+            getBrowser().setURLString(urlStrForLine);
         }
     }
 

@@ -16,7 +16,6 @@ import snap.web.WebURL;
 import snap.web.WebUtils;
 import snapcode.apptools.DebugTool;
 import snapcode.apptools.VcsPane;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

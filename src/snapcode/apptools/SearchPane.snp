@@ -5,7 +5,6 @@
     <Label Margin="0,8,0,8" text="Search:" />
     <TextField Name="SearchText" PrefWidth="300" />
     <Label Name="SearchResultsText" Margin="0,0,0,8" GrowWidth="true" />
-    <Button Name="SearchButton" PrefWidth="75" PrefHeight="22" text="Search" />
     <Button Name="ClearButton" PrefWidth="75" PrefHeight="22" Margin="0,8,0,5" text="Clear" />
   </RowView>
   <ListView Name="ResultsList" Margin="0,5,5,5" GrowHeight="true" />

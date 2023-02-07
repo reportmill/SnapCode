@@ -21,7 +21,13 @@ import snap.web.WebSite;
 public class AppPane extends ProjectPane {
 
     // The AppPaneToolBar
-    protected AppPaneToolBar _toolBar;
+    protected AppPaneToolBar  _toolBar;
+
+    // The FilesPane
+    protected FilesPane  _filesPane;
+
+    // The SupportTray
+    private SupportTray  _supportTray;
 
     // The main SplitView that holds sidebar and browser
     private SplitView  _mainSplit;
@@ -29,23 +35,8 @@ public class AppPane extends ProjectPane {
     // The side bar view holding FilesPane
     private BoxView  _sideBarBox;
 
-    // The FilesPane
-    protected FilesPane _filesPane;
-
-    // The SupportTray
-    private SupportTray _supportTray;
-
-    // The Problems pane
-    private ProblemsPane _problemsPane = new ProblemsPane(this);
-
-    // The RunConsole
-    private RunConsole  _runConsole = new RunConsole(this);
-
-    // The BreakpointsPanel
-    private BreakpointsPanel _breakpointsPanel = new BreakpointsPanel(this);
-
     // The StatusBar
-    private StatusBar _statusBar;
+    private StatusBar  _statusBar;
 
     // Whether to show side bar
     private boolean  _showSideBar = true;
@@ -329,27 +320,12 @@ public class AppPane extends ProjectPane {
     }
 
     /**
-     * Returns the problems pane.
-     */
-    public ProblemsPane getProblemsPane()  { return _problemsPane; }
-
-    /**
-     * Returns the RunConsole.
-     */
-    public RunConsole getRunConsole()  { return _runConsole; }
-
-    /**
-     * Returns the BreakpointsPanel.
-     */
-    public BreakpointsPanel getBreakpointsPanel()  { return _breakpointsPanel; }
-
-    /**
      * Saves any unsaved files.
      */
-    public int saveFiles()
+    public void saveFiles()
     {
         WebFile rootDir = getSelSite().getRootDir();
-        return _filesPane.saveFiles(rootDir, true);
+        _filesPane.saveFiles(rootDir, true);
     }
 
     /**
