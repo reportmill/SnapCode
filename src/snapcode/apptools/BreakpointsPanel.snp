@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView FillWidth="true">
+  <Font Name="Arial" Size="12" />
+  <RowView MinHeight="32">
+    <Label Margin="0,8,0,8" text="Breakpoints:" />
+    <Button Name="DeleteButton" PrefWidth="80" PrefHeight="22" LeanX="RIGHT" text="Delete" />
+    <Button Name="DeleteAllButton" PrefWidth="80" PrefHeight="22" Margin="0,8,0,5" text="Delete All" />
+  </RowView>
+  <ListView Name="BreakpointList" Margin="0,5,5,5" GrowHeight="true" ItemKey="Descriptor" />
+</ColView>

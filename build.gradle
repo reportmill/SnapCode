@@ -79,6 +79,10 @@ dependencies {
         println 'Using GitHub/Jitpack SnapKitGL package'
         implementation "com.github.reportmill:SnapKitGL:$snapkitglVersion"
     }
+
+    // Tools jar
+    //implementation name: 'tools'
+    implementation files('lib/tools.jar')
 }
 
 mainClassName = 'snapcode.app.App'

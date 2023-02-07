@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpringView width="400" height="400" PrefWidth="400" PrefHeight="400">
+  <Button Name="StartButton" x="7" y="28" width="100" height="20" text="Start" />
+  <Button Name="ClearButton" x="313" y="28" width="80" height="20" text="Clear" LeanX="RIGHT" />
+  <TextView Name="LogText" x="8" y="54" width="386" height="340" GrowWidth="true" GrowHeight="true" />
+</SpringView>

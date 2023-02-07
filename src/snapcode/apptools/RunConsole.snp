@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView FillWidth="true">
+  <font name="Arial" size="12" />
+  <RowView Margin="0,5,0,0" MinHeight="32">
+    <Label Margin="0,8,0,8" text="Console:" />
+    <Label Name="NameLabel" />
+    <Button Name="ClearButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" image="Clear.png" ShowBorder="false" />
+    <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" image="Terminate.gif" ShowBorder="false" />
+  </RowView>
+  <ScrollView Margin="0,5,5,5" GrowHeight="true">
+    <View Name="OutputText" Class="snapcode.apptools.RunConsole$RCTextView" />
+  </ScrollView>
+</ColView>

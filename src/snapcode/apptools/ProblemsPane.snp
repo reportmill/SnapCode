@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView FillWidth="true">
+  <font name="Arial" size="12" />
+  <RowView MinHeight="32">
+    <Label Margin="0,8,0,8" text="Problems:" />
+    <Label Name="BuildStatusLabel" />
+  </RowView>
+  <ListView Name="ErrorsList" Margin="0,5,5,5" GrowWidth="true" GrowHeight="true">
+    <font name="Arial" size="14" />
+  </ListView>
+</ColView>

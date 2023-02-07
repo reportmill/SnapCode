@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DocView Align="CENTER">
+  <PageView width="700" height="612" PrefWidth="700" PrefHeight="612">
+    <effect type="shadow" radius="10" dx="0" dy="0" />
+    <TextArea x="36" y="36" width="457" height="42" Rich="true">
+      <effect type="shadow" radius="10" dx="5" dy="5" color="#000000a6" />
+      <RichText>
+        <font name="Arial Bold" size="36" />
+        <string>Run Configurations</string>
+      </RichText>
+    </TextArea>
+    <Button Name="AddButton" x="60" y="518" width="80" height="22" text="Add" />
+    <Button Name="RemoveButton" x="144" y="518" width="80" height="22" text="Remove" />
+    <Label x="289" y="131" width="67" height="22" Align="CENTER_RIGHT" text="Name:" />
+    <TextField Name="NameText" x="364" y="131" width="291" height="22" />
+    <Label x="289" y="162" width="67" height="22" Align="CENTER_RIGHT" text="Main Class:" />
+    <TextField Name="MainClassText" x="364" y="162" width="291" height="22" />
+    <ListView Name="RunConfigsList" x="36" y="102" width="217" height="410" ItemKey="Name">
+    </ListView>
+    <Label x="289" y="194" width="67" height="22" Align="CENTER_RIGHT" text="App Args:" />
+    <TextView Name="AppArgsText" x="369" y="196" width="283" height="60" GrowWidth="true" GrowHeight="true" />
+    <Label x="289" y="268" width="67" height="22" Align="CENTER_RIGHT" text="VM Args:" />
+    <TextView Name="VMArgsText" x="369" y="270" width="283" height="60" GrowWidth="true" GrowHeight="true" />
+  </PageView>
+</DocView>

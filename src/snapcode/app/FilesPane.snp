@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView PrefWidth="200" FillWidth="true">
+  <RowView Name="RowView" MinHeight="32">
+    <Button Name="AllFilesButton" PrefWidth="22" PrefHeight="20" Margin="4" ToolTip="Toggle Files Tree/List" ShowArea="false" Image="FilesTree.png" />
+    <Label Name="FilesLabel" Text="Project">
+      <font name="Arial" size="14" />
+    </Label>
+    <MenuButton Name="MenuButton" PrefWidth="20" PrefHeight="20" Margin="4" ShowArea="false">
+      <MenuItem Name="NewFileMenuItem" text="New File..." />
+      <MenuItem Name="RemoveFileMenuItem" text="Remove File(s)..." />
+      <MenuItem Name="RenameFileMenuItem" text="Rename File..." />
+      <MenuItem Name="DuplicateFileMenuItem" text="Duplicate File..." />
+      <MenuItem Name="RefreshFileMenuItem" text="Refresh File(s)" />
+      <MenuItem />
+      <MenuItem Name="OpenInTextEditorMenuItem" text="Open File in Text Editor" />
+      <MenuItem Name="OpenInBrowserMenuItem" text="Open File in Separate Browser" />
+      <MenuItem Name="ShowFileMenuItem" text="Show File in Explorer/Finder" />
+      <MenuItem />
+      <MenuItem Name="RunFileMenuItem" text="Run File" />
+      <MenuItem Name="DebugFileMenuItem" text="Debug File" />
+      <MenuItem />
+      <MenuItem Name="UpdateFilesMenuItem" text="Update File(s) from Remote Source" />
+      <MenuItem Name="ReplaceFilesMenuItem" text="Replace File(s) from Remote Source" />
+      <MenuItem Name="CommitFilesMenuItem" text="Commit File(s) to Remote Source" />
+      <MenuItem Name="DiffFilesMenuItem" text="Compare File to Remote File" />
+      <MenuItem />
+      <MenuItem Name="CleanProjectMenuItem" text="Clean Project" />
+      <MenuItem Name="BuildProjectMenuItem" text="Build Project" />
+      <MenuItem />
+      <MenuItem Name="ShowClassInfoMenuItem" text="Show Class File Info" />
+    </MenuButton>
+    <Button Name="NewFileButton" PrefWidth="20" PrefHeight="20" Margin="5" LeanX="RIGHT" ShowArea="false" Image="Add.png" />
+  </RowView>
+  <TreeView Name="FilesTree" GrowHeight="true" />
+  <ListView Name="FilesList" GrowHeight="true" ItemKey="Text" Visible="false" />
+</ColView>

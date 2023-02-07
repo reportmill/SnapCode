@@ -9,7 +9,7 @@ import snap.viewx.DialogBox;
 import snap.viewx.DialogSheet;
 import snap.web.WebResponse;
 import snap.web.WebURL;
-import snapcode.app.DocPane;
+import snapcode.appjr.DocPane;
 import java.util.ArrayList;
 import java.util.List;
 

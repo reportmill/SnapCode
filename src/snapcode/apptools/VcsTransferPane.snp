@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VBox PrefWidth="420" PrefHeight="500" Padding="5,10,5,5" GrowHeight="true" Spacing="8" FillWidth="true">
+  <font name="Arial" size="12" />
+  <Label text="Transfer Files:">
+    <font name="Arial" size="16" />
+  </Label>
+  <SplitView Name="SplitView" Vertical="true" GrowHeight="true">
+    <ListView Name="FilesList" GrowHeight="true" />
+    <TextView Name="CommentText" PrefHeight="120" WrapText="true">
+      <font name="Arial" size="11" />
+    </TextView>
+  </SplitView>
+</VBox>

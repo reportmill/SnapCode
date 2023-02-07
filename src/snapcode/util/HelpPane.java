@@ -9,7 +9,7 @@ import snap.text.TextDoc;
 import snap.view.*;
 import snap.viewx.TextPane;
 import snap.web.WebURL;
-import snapcode.app.DocPaneX;
+import snapcode.appjr.DocPaneX;
 
 /**
  * This class shows a help file for the app.

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView FillWidth="true">
+  <font name="Arial" size="12" />
+  <RowView Name="RowView" MinHeight="32">
+    <Label Margin="0,8,0,8" text="Debug:" />
+    <Button Name="DebugButton" PrefWidth="24" PrefHeight="24" Image="Debug.gif" ShowBorder="false" />
+  </RowView>
+  <SplitView Name="SplitView" GrowHeight="true" />
+</ColView>

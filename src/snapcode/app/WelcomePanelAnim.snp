@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<DocView version="14">
-  <PageView PrefWidth="400" PrefHeight="220">
-    <animator max-time="5000" loop="true" />
-    <ImageView width="400" height="220" resource="1902610833" PreserveRatio="false">
+<DocView Align="CENTER">
+  <PageView width="400" height="220" PrefWidth="400" PrefHeight="220">
+    <effect type="shadow" radius="10" dx="0" dy="0" />
+    <ImageView width="400" height="220" resource="1902610833">
       <effect type="emboss" altitude="90" />
     </ImageView>
-    <TextArea x="11" y="1" width="380" height="140" Align="CENTER">
+    <TextArea x="11" y="1" width="380" height="140" Align="CENTER_LEFT" Rich="true">
       <effect type="blur" radius="12" />
       <RichText>
-        <font name="Arial Black" size="58" />
-        <pgraph align="CENTER" line-space="0.65" />
+        <font name="Arial Black" size="70" />
+        <pgraph align="center" line-space="0.65" />
         <char-spacing value="-1.9" />
         <string>SnapCode</string>
       </RichText>
     </TextArea>
-    <TextArea x="11" y="-1" width="380" height="140" Align="CENTER">
+    <TextArea x="11" y="-1" width="380" height="140" Align="CENTER_LEFT" Rich="true" Editable="false">
       <effect type="emboss" radius="5" />
       <RichText>
-        <font name="Arial Black" size="58" />
+        <font name="Arial Black" size="70" />
         <color value="#ff5a5a" />
-        <pgraph align="CENTER" line-space="0.65" />
+        <pgraph align="center" line-space="0.65" />
         <char-spacing value="-1.9" />
         <string>Snap</string>
         <color value="#bed0ff" />
         <string>Code</string>
       </RichText>
     </TextArea>
-    <PathView x="333" y="147" width="45" height="66" roll="40">
+    <PathView x="333" y="147" width="45" height="66" Rotate="40">
       <LineBorder />
-      <fill color="#e0e0f5" />
+      <color value="#e0e0f5" />
       <effect type="emboss" radius="5" />
       <KeyFrame time="1000">
         <KeyValue key="Rotate" value="40" />
@@ -41,12 +41,6 @@
       </KeyFrame>
       <KeyFrame time="5000" Loops="true" />
       <path>
-        <mv x="49" y="0.361" />
-        <ln x="49" y="0.361" />
-        <cv cp1x="49" cp1y="0.361" cp2x="49" cp2y="0.361" x="49" y="0.361" />
-        <ln x="49" y="0.361" />
-        <ln x="49" y="0.361" />
-        <cl />
         <mv x="-12" y="-11" />
         <cv cp1x="-18.075" cp1y="-11" cp2x="-23" cp2y="-6.075" x="-23" y="0" />
         <ln x="-23" y="44" />
@@ -90,41 +84,41 @@
         <cl />
       </path>
     </PathView>
-    <TextArea x="73" y="145" width="264" height="38" WrapText="true">
+    <TextArea x="73" y="145" width="264" height="38" Rich="true" Editable="false" WrapText="true">
       <effect type="blur" radius="5" />
       <RichText>
         <font name="Arial Bold" size="14" />
-        <pgraph align="CENTER" />
-        <string>The Java workbench app</string>
+        <pgraph align="center" />
+        <string>A Rich Application Workbench for learning, teaching, creating, exploring</string>
       </RichText>
     </TextArea>
-    <TextArea x="73" y="141" width="264" height="38" WrapText="true">
+    <TextArea x="73" y="141" width="264" height="38" Rich="true" Editable="false" WrapText="true">
       <RichText>
         <font name="Arial Bold" size="14" />
         <color value="#ffffff" />
-        <pgraph align="CENTER" />
-        <string>The Java workbench app</string>
+        <pgraph align="center" />
+        <string>A Rich Application Workbench for learning, teaching, creating, exploring</string>
       </RichText>
     </TextArea>
-    <TextArea name="JVMText" x="73" y="180" width="264" height="15" Rich="true">
+    <TextArea Name="JVMText" x="73" y="180" width="264" height="15" Rich="true">
       <RichText>
         <font name="Arial Bold" size="10" />
         <color value="#ffffff" />
-        <pgraph align="CENTER" />
+        <pgraph align="center" />
         <string>JVM: XXX</string>
       </RichText>
     </TextArea>
-    <TextArea name="BuildText" x="73" y="191" width="264" height="15" Rich="true">
+    <TextArea Name="BuildText" x="73" y="191" width="264" height="15" Rich="true">
       <RichText>
         <font name="Arial Bold" size="10" />
         <color value="#ffffff" />
-        <pgraph align="CENTER" />
+        <pgraph align="center" />
         <string>Build: XXX</string>
       </RichText>
     </TextArea>
-    <PathView x="36" y="130" width="19" height="82" roll="-35">
+    <PathView x="36" y="130" width="19" height="82" Rotate="-35">
       <LineBorder />
-      <fill color="#e0e0f5" />
+      <color value="#e0e0f5" />
       <effect type="emboss" radius="5" />
       <KeyFrame time="1760">
         <KeyValue key="Rotate" value="-35" />

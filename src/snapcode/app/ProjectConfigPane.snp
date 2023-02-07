@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView PrefWidth="500" PrefHeight="500" Padding="16" Spacing="10">
+  <RowView Spacing="5">
+    <Label text="Home Page:" />
+    <TextField Name="HomePageText" PrefWidth="255" />
+    <Button Name="ResetHomePageButton" PrefWidth="47" text="Reset" />
+  </RowView>
+  <RowView Spacing="5">
+    <Label text="Source Directory:" />
+    <TextField Name="SourcePathText" PrefWidth="255" />
+  </RowView>
+  <RowView Spacing="5">
+    <Label text="Build Directory:" />
+    <TextField Name="BuildPathText" PrefWidth="255" />
+  </RowView>
+  <Label text="Dependencies:" />
+  <TabView PrefWidth="360" PrefHeight="160">
+    <BevelBorder />
+    <Box Padding="3" FillWidth="true" FillHeight="true" title="    Jars    ">
+      <ListView Name="JarPathsList">
+        <font name="Arial" size="12" />
+      </ListView>
+    </Box>
+    <Box Padding="3" FillWidth="true" FillHeight="true" title="  Projects  ">
+      <ListView Name="ProjectPathsList">
+        <font name="Arial" size="12" />
+      </ListView>
+    </Box>
+  </TabView>
+  <CheckBox Name="AutoBuildCheckBox" text="Build Project Automatically" />
+  <TitleView name="LOCTitleView" PrefWidth="120" PrefHeight="22" Title="Show Lines of Code" TitleStyle="Plain" Collapsible="true" Expanded="false">
+    <TextView name="LOCText" PrefWidth="300" Padding="5">
+      <Font name="Arial" size="14" />
+      <LineBorder Color="#808080" />
+    </TextView>
+  </TitleView>
+  <TitleView name="SymbolCheckTitleView" PrefWidth="120" PrefHeight="22" Title="Show Undefined Symbols" TitleStyle="Plain" Collapsible="true" Expanded="false">
+    <TextView name="SymbolCheckText" PrefWidth="800" PrefHeight="350" Padding="5">
+      <Font2 name="Arial" size="12" />
+      <LineBorder Color="#808080" />
+    </TextView>
+  </TitleView>
+</ColView>
