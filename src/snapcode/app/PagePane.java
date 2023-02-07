@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
+import snap.props.PropChange;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.ColView;
@@ -297,7 +298,8 @@ public class PagePane extends ViewOwner {
         // Create browser
         _browser = new AppBrowser();
         _browser.setGrowHeight(true);
-        //_browser.setMargin(0, 4, 0, 4);
+        _browser.addPropChangeListener(pc -> browserDidPropChange(pc),
+                WebBrowser.Activity_Prop, WebBrowser.Status_Prop, WebBrowser.Loading_Prop);
 
         // Create ColView to hold TabsBox and Browser
         ColView colView = new ColView();
@@ -323,6 +325,17 @@ public class PagePane extends ViewOwner {
         WebSite[] projSites = _projPane.getSites();
         WebSite fileSite = aFile.getSite();
         return ArrayUtils.containsId(projSites, fileSite);
+    }
+
+    /**
+     * Called when Browser does prop change.
+     */
+    private void browserDidPropChange(PropChange aPC)
+    {
+        // Handle Activity, Status, Loading
+        String propName = aPC.getPropName();
+        if (propName == WebBrowser.Activity_Prop || propName == WebBrowser.Loading_Prop || propName == WebBrowser.Status_Prop)
+            _projPane.resetLater();
     }
 
     /**

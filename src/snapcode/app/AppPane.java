@@ -3,7 +3,6 @@ import javakit.ide.JavaTextPane;
 import javakit.project.Breakpoints;
 import javakit.project.BuildIssue;
 import snap.util.ArrayUtils;
-import snap.viewx.WebBrowser;
 import snapcode.apptools.*;
 import snapcode.project.ProjectX;
 import snap.props.PropChange;
@@ -227,10 +226,8 @@ public class AppPane extends ProjectPane {
         View pagePaneUI = _pagePane.getUI();
         pagePaneSplitView.addItem(pagePaneUI);
 
-        // Listen to PagePane and PagePane.Browser changes
+        // Listen to PagePane
         _pagePane.addPropChangeListener(pc -> pagePaneDidPropChange(pc), PagePane.SelFile_Prop);
-        _pagePane.getBrowser().addPropChangeListener(pc -> pagePaneBrowserDidPropChange(pc),
-                WebBrowser.Activity_Prop, WebBrowser.Status_Prop, WebBrowser.Loading_Prop);
 
         // Get SideBarBox
         _sideBarBox = getView("SideBarBox", BoxView.class);
@@ -345,17 +342,6 @@ public class AppPane extends ProjectPane {
         String propName = aPC.getPropName();
         if (propName == PagePane.SelFile_Prop)
             _filesPane.resetLater();
-    }
-
-    /**
-     * Called when PagePane.Browser does prop change.
-     */
-    private void pagePaneBrowserDidPropChange(PropChange aPC)
-    {
-        // Handle Activity, Status, Loading
-        String propName = aPC.getPropName();
-        if (propName == WebBrowser.Activity_Prop || propName == WebBrowser.Loading_Prop || propName == WebBrowser.Status_Prop)
-            resetLater();
     }
 
     /**
