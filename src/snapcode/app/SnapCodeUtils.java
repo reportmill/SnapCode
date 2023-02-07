@@ -1,12 +1,10 @@
 package snapcode.app;
-
 import snap.util.FileUtils;
 import snap.web.WebURL;
-
 import java.io.File;
 
 /**
- * Utilities for SnapCodePro.
+ * Utilities for SnapCode.
  */
 public class SnapCodeUtils {
 

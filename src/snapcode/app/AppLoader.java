@@ -19,7 +19,7 @@ public class AppLoader {
     static final String JarName = "SnapCode1.jar";
     static final String JarURL = "https://reportmill.com/snap1/SnapCode1.jar";
     static final String LoaderJarName = "AppLoader.jar"; // 
-    static final String MainClass = "snapcodepro.app.App";
+    static final String MainClass = "snapcode.app.App";
 
     /**
      * Main method - reinvokes main1() on app event thread in exception handler.
