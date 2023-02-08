@@ -1,7 +1,5 @@
 package snapcode.app;
 import javakit.project.Project;
-import snap.geom.Polygon;
-import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
@@ -16,6 +14,7 @@ import snap.web.WebURL;
 import snap.web.WebUtils;
 import snapcode.apptools.DebugTool;
 import snapcode.apptools.VcsPane;
+import snapcode.util.CloseBox;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -643,14 +642,17 @@ public class FilesPane extends ProjectTool {
             form.addRadioButton("EntryType", option, i == 0);
         }
 
-        // Run dialog panel (just return if null), select type and extension
-        if (!form.showPanel(_projPane.getUI(), "New Project File", DialogBox.infoImage)) return;
+        // Run dialog panel (just return if null)
+        if (!form.showPanel(_projPane.getUI(), "New Project File", DialogBox.infoImage))
+            return;
+
+        // Select type and extension
         String desc = form.getStringValue("EntryType");
-        int index = 0;
-        for (int i = 0; i < options.length; i++) if (desc.equals(options[i][0])) index = i;
+        int index = ArrayUtils.findMatchIndex(options, optionInfo -> desc.equals(optionInfo[0]));
         String extension = options[index][1];
         boolean isDir = extension.equals(".dir");
-        if (isDir) extension = "";
+        if (isDir)
+            extension = "";
 
         // Get source dir
         WebSite selSite = getSelSite();
@@ -668,12 +670,13 @@ public class FilesPane extends ProjectTool {
         WebFile file = selSite.createFileForPath(path, isDir);
         WebPage page = _pagePane.createPageForURL(file.getURL());
 
-        // ShowNewFilePanel and save returned file
+        // ShowNewFilePanel (just return if cancelled)
         file = page.showNewFilePanel(_projPane.getUI(), file);
-        if (file == null) return;
-        try {
-            file.save();
-        }
+        if (file == null)
+            return;
+
+        // Save file
+        try { file.save(); }
         catch (Exception e) {
             _pagePane.showException(file.getURL(), e);
             return;
@@ -777,41 +780,30 @@ public class FilesPane extends ProjectTool {
      */
     private void configureFilesListCell(ListCell<AppFile> aCell)
     {
+        // Get item
         AppFile item = aCell.getItem();
-        if (item == null) return;
+        if (item == null)
+            return;
+
+        // Configure cell
         aCell.setPadding(2, 6, 2, 4);
         aCell.setGraphic(item.getGraphic());
         aCell.setGrowWidth(true);
         aCell.getStringView().setGrowWidth(true);
-        Polygon poly = new Polygon(0, 2, 2, 0, 5, 3, 8, 0, 10, 2, 7, 5, 10, 8, 8, 10, 5, 7, 2, 10, 0, 8, 3, 5);
 
-        ShapeView sview = new ShapeView(poly);
-        sview.setPrefSize(11, 11);
-        sview.setFillSize(true);
-        sview.setFill(Color.WHITE);
-        sview.setBorder(CLOSE_BOX_BORDER1);
-        sview.setProp("File", item.getFile());
-        sview.addEventFilter(e -> handleBookmarkEvent(e), MouseEnter, MouseExit, MouseRelease);
-        aCell.setGraphicAfter(sview);
+        CloseBox closeBox = new CloseBox();
+        closeBox.addEventHandler(e -> closeFile(item.getFile()), View.Action);
+
+        aCell.setGraphicAfter(closeBox);
     }
 
     /**
-     * Called for events on bookmark close button.
+     * Closes the given file.
      */
-    private void handleBookmarkEvent(ViewEvent anEvent)
+    private void closeFile(WebFile buttonFile)
     {
-        View cbox = anEvent.getView();
-        if (anEvent.isMouseEnter()) {
-            cbox.setFill(Color.CRIMSON);
-            cbox.setBorder(CLOSE_BOX_BORDER2);
-        }
-        else if (anEvent.isMouseExit()) {
-            cbox.setFill(Color.WHITE);
-            cbox.setBorder(CLOSE_BOX_BORDER1);
-        }
-        else if (anEvent.isMouseRelease())
-            _pagePane.removeOpenFile((WebFile) cbox.getProp("File"));
-        anEvent.consume();
+        _pagePane.removeOpenFile(buttonFile);
+        resetLater();
     }
 
     /**
@@ -819,8 +811,4 @@ public class FilesPane extends ProjectTool {
      */
     @Override
     public String getTitle()  { return "Project"; }
-
-    // Constants
-    private static Border CLOSE_BOX_BORDER1 = Border.createLineBorder(Color.LIGHTGRAY, .5);
-    private static Border CLOSE_BOX_BORDER2 = Border.createLineBorder(Color.BLACK, 1);
 }
