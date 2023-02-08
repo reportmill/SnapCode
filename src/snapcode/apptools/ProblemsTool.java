@@ -12,7 +12,7 @@ import snapcode.app.ProjectTool;
 /**
  * A pane/panel to show current build issues.
  */
-public class ProblemsPane extends ProjectTool {
+public class ProblemsTool extends ProjectTool {
 
     // The selected issue
     private BuildIssue  _selIssue;
@@ -22,9 +22,9 @@ public class ProblemsPane extends ProjectTool {
     private static Image WarningImage = Image.get(JavaTextUtils.class, "WarningMarker.png");
 
     /**
-     * Creates a new ProblemsPane.
+     * Constructor.
      */
-    public ProblemsPane(ProjectPane projPane)
+    public ProblemsTool(ProjectPane projPane)
     {
         super(projPane);
     }

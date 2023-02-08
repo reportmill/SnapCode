@@ -11,13 +11,13 @@ public class ProjectTools {
     protected FilesPane  _filesPane;
 
     // The Problems pane
-    private ProblemsPane _problemsPane;
+    private ProblemsTool _problemsTool;
 
     // The RunConsole
     private RunConsole _runConsole;
 
-    // The BreakpointsPanel
-    private BreakpointsPanel _breakpointsPanel;
+    // The BreakpointsTool
+    private BreakpointsTool _breakpointsTool;
 
     // The ProjectPane
     private ProjectPane  _projPane;
@@ -52,15 +52,15 @@ public class ProjectTools {
     protected void createTools()
     {
         _filesPane = new FilesPane((AppPane) _projPane);
-        _problemsPane = new ProblemsPane(_projPane);
+        _problemsTool = new ProblemsTool(_projPane);
         _runConsole = new RunConsole(_projPane);
-        _breakpointsPanel = new BreakpointsPanel(_projPane);
+        _breakpointsTool = new BreakpointsTool(_projPane);
         _debugTool = new DebugTool(_projPane);
         _searchTool = new SearchPane(_projPane);
         _runConfigsTool = new RunConfigsTool(_projPane);
 
         // Set tools
-        ProjectTool[] bottomTools = { _problemsPane, _debugTool, _runConsole, _breakpointsPanel, _searchTool, _runConfigsTool };
+        ProjectTool[] bottomTools = {_problemsTool, _debugTool, _runConsole, _breakpointsTool, _searchTool, _runConfigsTool };
         _supportTray = new SupportTray(_projPane, Side.BOTTOM, bottomTools);
 
 
@@ -69,14 +69,14 @@ public class ProjectTools {
     }
 
     /**
-     * Returns the files pane.
+     * Returns the files tool.
      */
     public FilesPane getFilesPane()  { return _filesPane; }
 
     /**
-     * Returns the problems pane.
+     * Returns the problems tool.
      */
-    public ProblemsPane getProblemsPane()  { return _problemsPane; }
+    public ProblemsTool getProblemsTool()  { return _problemsTool; }
 
     /**
      * Returns the RunConsole.
@@ -84,9 +84,9 @@ public class ProjectTools {
     public RunConsole getRunConsole()  { return _runConsole; }
 
     /**
-     * Returns the BreakpointsPanel.
+     * Returns the BreakpointsTool.
      */
-    public BreakpointsPanel getBreakpointsPanel()  { return _breakpointsPanel; }
+    public BreakpointsTool getBreakpointsTool()  { return _breakpointsTool; }
 
     /**
      * Returns the debug tool.

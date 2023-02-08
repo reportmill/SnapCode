@@ -10,15 +10,15 @@ import snapcode.app.ProjectTool;
 /**
  * This class displays and edits project breakpoints.
  */
-public class BreakpointsPanel extends ProjectTool {
+public class BreakpointsTool extends ProjectTool {
 
     // The breakpoints list
     private ListView<Breakpoint>  _breakpointsList;
 
     /**
-     * Creates a new BreakpointsPanel.
+     * Constructor.
      */
-    public BreakpointsPanel(ProjectPane projPane)
+    public BreakpointsTool(ProjectPane projPane)
     {
         super(projPane);
     }

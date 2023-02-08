@@ -5,7 +5,7 @@ import snap.view.*;
 import snapcode.apptools.*;
 
 /**
- * A class to hold TabView for ProblemsPane, RunConsole, DebugPane.
+ * A class to hold TabView for ProjectTools (ProblemsTool, DebugTool, etc.).
  */
 public class SupportTray extends ViewOwner {
 
@@ -79,7 +79,7 @@ public class SupportTray extends ViewOwner {
     /**
      * Shows the problems tool.
      */
-    public void showProblemsTool()  { setSelToolForClass(ProblemsPane.class); }
+    public void showProblemsTool()  { setSelToolForClass(ProblemsTool.class); }
 
     /**
      * Shows the run tool.

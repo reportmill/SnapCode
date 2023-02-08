@@ -5,7 +5,7 @@ import javakit.ide.NodeMatcher;
 import javakit.project.JavaAgent;
 import javakit.project.Project;
 import javakit.project.ProjectConfig;
-import snapcode.apptools.ProblemsPane;
+import snapcode.apptools.ProblemsTool;
 import snapcode.project.ProjectX;
 import snapcode.project.ProjectSet;
 import snapcode.project.VersionControl;
@@ -476,14 +476,14 @@ public class ProjectConfigPane extends ViewOwner {
         int errorCount = _proj.getRootProject().getBuildIssues().getErrorCount();
         if (errorCount > 0) {
             SupportTray supportTray = _appPane.getSupportTray();
-            if (supportTray.getSelTool() instanceof ProblemsPane)
+            if (supportTray.getSelTool() instanceof ProblemsTool)
                 supportTray.showProblemsTool();
         }
 
         // If error count zero and SupportTray showing problems, close
         if (errorCount == 0) {
             SupportTray supportTray = _appPane.getSupportTray();
-            if (supportTray.getSelTool() instanceof ProblemsPane)
+            if (supportTray.getSelTool() instanceof ProblemsTool)
                 supportTray.hideTools();
         }
     }

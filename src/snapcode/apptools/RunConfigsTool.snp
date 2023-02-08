@@ -7,7 +7,7 @@
     <Button Name="RemoveButton" PrefWidth="24" PrefHeight="24" ShowArea="false" Image="ExprRemove.png" />
   </RowView>
   <RectView PrefHeight="1">
-    <fill Color="#C0" />
+    <Fill Color="#C0" />
   </RectView>
   <RowView Margin="5,5,5,5" Spacing="8" GrowHeight="true" FillHeight="true">
     <ListView Name="RunConfigsList" PrefWidth="220" ItemKey="Name" />
