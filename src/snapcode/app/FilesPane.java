@@ -150,10 +150,6 @@ public class FilesPane extends ProjectTool {
      */
     protected void initUI()
     {
-        // Configure RowView
-        RowView rowView = getView("RowView", RowView.class);
-        rowView.setBorder(Color.GRAY7, 1);
-
         // Get the FilesTree
         _filesTree = getView("FilesTree", TreeView.class);
         _filesTree.setResolver(new AppFile.AppFileTreeResolver());

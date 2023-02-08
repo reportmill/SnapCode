@@ -31,6 +31,9 @@
     </MenuButton>
     <Button Name="NewFileButton" PrefWidth="20" PrefHeight="20" Margin="5" LeanX="RIGHT" ShowArea="false" Image="Add.png" />
   </RowView>
+  <RectView PrefHeight="1">
+    <Fill Color="#B2" />
+  </RectView>
   <TreeView Name="FilesTree" GrowHeight="true" />
   <ListView Name="FilesList" GrowHeight="true" ItemKey="Text" Visible="false" />
 </ColView>

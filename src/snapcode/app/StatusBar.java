@@ -6,17 +6,14 @@ import snap.viewx.WebBrowser;
 /**
  * Manages status bar.
  */
-public class StatusBar extends ViewOwner {
-
-    // The AppPane
-    private AppPane  _appPane;
+public class StatusBar extends ProjectTool {
 
     /**
      * Constructor.
      */
-    public StatusBar(AppPane appPane)
+    public StatusBar(ProjectPane projectPane)
     {
-        _appPane = appPane;
+        super(projectPane);
     }
 
     /**
@@ -38,7 +35,7 @@ public class StatusBar extends ViewOwner {
     public void resetUI()
     {
         // Set ActivityText, StatusText
-        WebBrowser browser = _appPane.getBrowser();
+        WebBrowser browser = getBrowser();
         setViewText("ActivityText", browser.getActivity());
         setViewText("StatusText", browser.getStatus());
 

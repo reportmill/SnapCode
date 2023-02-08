@@ -19,17 +19,8 @@ import snap.web.WebSite;
  */
 public class AppPane extends ProjectPane {
 
-    // The AppPaneToolBar
-    protected AppPaneToolBar  _toolBar;
-
     // The main SplitView that holds sidebar and browser
     private SplitView  _mainSplit;
-
-    // The StatusBar
-    private StatusBar  _statusBar;
-
-    // The currently open AppPane
-    private static AppPane  _openAppPane;
 
     // A PropChangeListener to watch for site file changes
     private PropChangeListener  _siteFileLsnr = pc -> siteFileChanged(pc);
@@ -40,16 +31,12 @@ public class AppPane extends ProjectPane {
     public AppPane()
     {
         super();
-
-        // Create parts
-        _toolBar = new AppPaneToolBar(this);
-        _statusBar = new StatusBar(this);
     }
 
     /**
      * Returns the toolbar.
      */
-    public AppPaneToolBar getToolBar()  { return _toolBar; }
+    public MainToolBar getToolBar()  { return _toolBar; }
 
     /**
      * Returns the files pane.
@@ -125,7 +112,6 @@ public class AppPane extends ProjectPane {
     {
         // Set AppPane as OpenSite and show window
         getUI();
-        _openAppPane = this;
         getWindow().setSaveName("AppPane");
         getWindow().setSaveSize(true);
         getWindow().setVisible(true);
@@ -143,21 +129,11 @@ public class AppPane extends ProjectPane {
         // Flush and refresh sites
         for (WebSite site : getSites()) {
             SitePane.get(site).closeSite();
-            try {
-                site.flush();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            }
+            try { site.flush(); }
+            catch (Exception e) { throw new RuntimeException(e); }
             site.resetFiles();
         }
-        _openAppPane = null;
     }
-
-    /**
-     * Returns the current open AppPane.
-     */
-    public static AppPane getOpenAppPane()  { return _openAppPane; }
 
     /**
      * Called when site file changes with File PropChange.
@@ -224,20 +200,6 @@ public class AppPane extends ProjectPane {
 
         // Register for WelcomePanel on close
         enableEvents(getWindow(), WinClose);
-    }
-
-    /**
-     * Resets UI panel.
-     */
-    public void resetUI()
-    {
-        // Reset window title
-        WebPage page = _pagePane.getSelPage();
-        getWindow().setTitle(page != null ? page.getTitle() : "SnapCode");
-
-        // Reset FilesPane and SupportTray
-        _projTools.resetLater();
-        _statusBar.resetLater();
     }
 
     /**

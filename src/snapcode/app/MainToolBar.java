@@ -6,24 +6,20 @@ import snap.viewx.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.apptools.DebugTool;
 import snapcode.apptools.SearchPane;
 import java.util.*;
 
 /**
  * ToolBar.
  */
-public class AppPaneToolBar extends ProjectTool {
-
-    // A placeholder for fill from toolbar button under mouse
-    private Paint  _tempFill;
+public class MainToolBar extends ProjectTool {
 
     /**
-     * Creates a new AppPaneToolBar.
+     * Constructor.
      */
-    public AppPaneToolBar(AppPane anAppPane)
+    public MainToolBar(ProjectPane projectPane)
     {
-        super(anAppPane);
+        super(projectPane);
     }
 
     /**
@@ -58,11 +54,6 @@ public class AppPaneToolBar extends ProjectTool {
         searchText.setPromptText("Search");
         searchText.getLabel().setImage(Image.get(TextPane.class, "Find.png"));
         TextField.setBackLabelAlignAnimatedOnFocused(searchText, true);
-
-        // Enable events on buttons
-        String[] buttonNames = { "HomeButton", "BackButton", "NextButton", "RefreshButton", "RunButton" };
-        for (String name : buttonNames)
-            enableEvents(name, MouseRelease, MouseEnter, MouseExit);
     }
 
     /**
@@ -71,44 +62,6 @@ public class AppPaneToolBar extends ProjectTool {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Get AppPane and AppBrowser
-        WebBrowser appBrowser = getBrowser();
-
-        // Handle MouseEnter: Make buttons glow
-        if (anEvent.isMouseEnter()) {
-            View view = anEvent.getView();
-            _tempFill = view.getFill();
-            view.setFill(Color.WHITE);
-            return;
-        }
-
-        // Handle MouseExit: Restore fill
-        if (anEvent.isMouseExit()) {
-            View view = anEvent.getView();
-            view.setFill(_tempFill);
-            return;
-        }
-
-        // Handle HomeButton
-        if (anEvent.equals("HomeButton") && anEvent.isMouseRelease())
-            _pagePane.showHomePage();
-
-        // Handle LastButton, NextButton
-        if (anEvent.equals("BackButton") && anEvent.isMouseRelease())
-            appBrowser.trackBack();
-        if (anEvent.equals("NextButton") && anEvent.isMouseRelease())
-            appBrowser.trackForward();
-
-        // Handle RefreshButton
-        if (anEvent.equals("RefreshButton") && anEvent.isMouseRelease())
-            appBrowser.reloadPage();
-
-        // Handle RunButton
-        if (anEvent.equals("RunButton") && anEvent.isMouseRelease()) {
-            DebugTool debugTool = _projTools.getDebugTool();
-            debugTool.runDefaultConfig(false);
-        }
-
         // Handle SearchComboBox
         if (anEvent.equals("SearchComboBox"))
             handleSearchComboBox(anEvent);

@@ -4,6 +4,7 @@
 package snapcode.app;
 import snap.util.Prefs;
 import snap.util.SnapUtils;
+import snap.view.WindowView;
 import snap.viewx.ExceptionReporter;
 import javax.swing.*;
 
@@ -17,9 +18,6 @@ public class App {
      */
     public static void main(final String[] args)
     {
-        // Mac specific stuff
-        //if (SnapUtils.isMac) new AppleAppHandler().init();
-
         // Config/init JavaFX and invoke real main on event thread
         SwingUtilities.invokeLater(() -> new App(args));
     }
@@ -57,48 +55,13 @@ public class App {
      */
     private static void quitAppImpl()
     {
-        if (AppPane.getOpenAppPane() != null) AppPane.getOpenAppPane().hide();
+        // Hide open ProjectPane
+        AppPane projectPane = WindowView.getOpenWindowOwner(AppPane.class);
+        if (projectPane != null)
+            projectPane.hide();
+
+        // Flush prefs and exit
         Prefs.getDefaultPrefs().flush();
         System.exit(0);
     }
-
-//    /**
-//     * A class to handle apple events.
-//     */
-//    private static class AppleAppHandler implements PreferencesHandler, QuitHandler {
-//
-//        /**
-//         * Initializes Apple Application handling.
-//         */
-//        public void init()
-//        {
-//            //System.setProperty("apple.laf.useScreenMenuBar", "true"); // 1.4
-//            System.setProperty("com.apple.mrj.application.apple.menu.about.name", "SnapCode");
-//            com.apple.eawt.Application app = com.apple.eawt.Application.getApplication();
-//            app.setPreferencesHandler(this);
-//            app.setQuitHandler(this);
-//            _appHand = this;
-//        }
-//
-//        /**
-//         * Handle Preferences.
-//         */
-//        public void handlePreferences(PreferencesEvent arg0)
-//        {
-//            AppPane appPane = AppPane.getOpenAppPane();
-//            if (appPane == null) return;
-//            appPane.getBrowser().setFile(appPane.getRootSite().getRootDir());
-//        }
-//
-//        /**
-//         * Handle QuitRequest.
-//         */
-//        public void handleQuitRequestWith(QuitEvent arg0, QuitResponse arg1)
-//        {
-//            App.quitApp();
-//        }
-//    }
-//
-//    static AppleAppHandler _appHand;
-
 }

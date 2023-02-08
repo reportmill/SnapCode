@@ -3,6 +3,7 @@ import javakit.project.Project;
 import snap.util.ArrayUtils;
 import snap.view.ViewOwner;
 import snap.viewx.WebBrowser;
+import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.apptools.DebugTool;
@@ -19,11 +20,17 @@ public class ProjectPane extends ViewOwner {
     // The project
     private Project  _proj;
 
+    // The MainToolBar
+    protected MainToolBar  _toolBar;
+
     // The PagePane to display project files for editing
     protected PagePane  _pagePane;
 
+    // The StatusBar
+    protected StatusBar  _statusBar;
+
     // The ProjectTool manager
-    protected ProjectTools _projTools;
+    protected ProjectTools  _projTools;
 
     /**
      * Constructor.
@@ -32,8 +39,12 @@ public class ProjectPane extends ViewOwner {
     {
         super();
 
-        // Create parts
+        // Create MainToolBar, PagePane, StatusBar
+        _toolBar = new MainToolBar(this);
         _pagePane = new PagePane(this);
+        _statusBar = new StatusBar(this);
+
+        // Create ProjectTools
         _projTools = new ProjectTools(this);
         _projTools.createTools();
     }
@@ -151,5 +162,20 @@ public class ProjectPane extends ViewOwner {
     {
         Project proj = getProject();
         return proj != null ? proj.getBuildDir() : null;
+    }
+
+    /**
+     * Resets UI panel.
+     */
+    @Override
+    public void resetUI()
+    {
+        // Reset window title
+        WebPage page = _pagePane.getSelPage();
+        getWindow().setTitle(page != null ? page.getTitle() : "SnapCode");
+
+        // Reset FilesPane and SupportTray
+        _projTools.resetLater();
+        _statusBar.resetLater();
     }
 }
