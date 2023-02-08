@@ -1,5 +1,4 @@
-package snapcode.app;
-
+package snapcode.apptools;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -15,10 +14,10 @@ import snap.util.StringUtils;
 import snap.view.TextArea;
 import snap.view.TextView;
 import snap.view.ViewEvent;
-import snap.view.ViewOwner;
 import snap.viewx.DialogBox;
 import snap.web.*;
-
+import snapcode.app.ProjectPane;
+import snapcode.app.ProjectTool;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,52 +29,60 @@ import java.util.List;
 import java.util.TimeZone;
 
 /**
- * HTTPServerPane provides UI for managing an HTTP-Server for this project.
+ * HttpServerTool provides UI for managing an HTTP-Server for the project.
  */
-public class HttpServerPane extends ViewOwner {
-
-    // The SitePane
-    SitePane _sitePane;
+public class HttpServerTool extends ProjectTool {
 
     // The WebSite path
-    String _sitePath;
+    private String  _sitePath;
 
     // The HTTPServer
-    HttpServer _server;
+    private HttpServer  _server;
 
     // The port
-    int _port = 8080;
+    private int  _port = 8080;
 
     // Cache-control: max-age=20
-    String _cacheControl = "max-age=20";
+    private String  _cacheControl = "max-age=20";
 
     // Whether server is running
-    boolean _running;
+    private boolean  _running;
 
     // The TextView
-    TextView _textView;
+    private TextView  _textView;
 
     // The last response code
-    int _respCode;
+    private int  _respCode;
 
     // DateFormat for GMT time
-    static DateFormat _fmt;
+    private static DateFormat _fmt;
 
     // Colors
     static Color OK_COLOR = Color.LIGHTBLUE;
     static Color ERR_COLOR = Color.RED;
 
     /**
-     * Creates a new HTTPServerPane for SitePane.
+     * Constructor.
      */
-    public HttpServerPane(SitePane aSitePane)
+    public HttpServerTool(ProjectPane projectPane)
     {
-        _sitePane = aSitePane;
+        super(projectPane);
+    }
 
-        WebSite site = aSitePane.getSite();
+    /**
+     * Returns the Site path.
+     */
+    public String getSitePath()
+    {
+        if (_sitePath != null) return _sitePath;
+
+        WebSite site = getRootSite();
         File file = site.getRootDir().getJavaFile();
-        _sitePath = FilePathUtils.getStandardized(file.getAbsolutePath());
-        _sitePath = FilePathUtils.getChild(_sitePath, "/bin/");
+        String sitePath = FilePathUtils.getStandardized(file.getAbsolutePath());
+        sitePath = FilePathUtils.getChild(sitePath, "/bin/");
+
+        // Set, return
+        return _sitePath = sitePath;
     }
 
     /**
@@ -83,7 +90,8 @@ public class HttpServerPane extends ViewOwner {
      */
     public WebURL getURL(String aPath)
     {
-        String path = FilePathUtils.getChild(_sitePath, aPath);
+        String sitePath = getSitePath();
+        String path = FilePathUtils.getChild(sitePath, aPath);
         return WebURL.getURL(path);
     }
 
@@ -138,11 +146,8 @@ public class HttpServerPane extends ViewOwner {
     public HttpServer getServer()
     {
         if (_server != null) return _server;
-        try {
-            _server = createServer();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        try { _server = createServer(); }
+        catch (Exception e) { throw new RuntimeException(e); }
         return _server;
     }
 
@@ -170,9 +175,8 @@ public class HttpServerPane extends ViewOwner {
     public void startServer()
     {
         if (_running) return;
-        try {
-            getServer().start();
-        } catch (Exception e) {
+        try { getServer().start(); }
+        catch (Exception e) {
             DialogBox.showConfirmDialog(getUI(), "Server Error", e.toString());
             return;
         }
@@ -372,4 +376,6 @@ public class HttpServerPane extends ViewOwner {
         }
     }
 
+    @Override
+    public String getTitle()  { return "HTTP Server"; }
 }

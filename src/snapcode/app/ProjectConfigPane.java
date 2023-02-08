@@ -508,7 +508,7 @@ public class ProjectConfigPane extends ViewOwner {
     {
         // Update HomePageText, AutoBuildCheckBox
         SitePane sitePane = getSitePane();
-        setViewValue("HomePageText", sitePane.getHomePageURLString());
+        //setViewValue("HomePageText", sitePane.getHomePageURLString());
         setViewValue("AutoBuildCheckBox", sitePane.isAutoBuild());
 
         // Update SourcePathText, BuildPathText
@@ -534,8 +534,7 @@ public class ProjectConfigPane extends ViewOwner {
         ProjectConfig projConfig = proj.getProjectConfig();
 
         // Handle HomePageText, AutoBuildCheckBox
-        if (anEvent.equals("HomePageText"))
-            sitePane.setHomePageURLString(anEvent.getStringValue());
+        //if (anEvent.equals("HomePageText")) sitePane.setHomePageURLString(anEvent.getStringValue());
         if (anEvent.equals("AutoBuildCheckBox"))
             sitePane.setAutoBuild(anEvent.getBoolValue());
 
@@ -546,8 +545,7 @@ public class ProjectConfigPane extends ViewOwner {
             projConfig.setBuildPath(anEvent.getStringValue());
 
         // Handle ResetHomePageButton
-        if (anEvent.equals("ResetHomePageButton"))
-            _sitePane.setHomePageURLString(null);
+        //if (anEvent.equals("ResetHomePageButton")) _sitePane.setHomePageURLString(null);
 
         // Handle JarPathsList
         if (anEvent.equals("JarPathsList")) {

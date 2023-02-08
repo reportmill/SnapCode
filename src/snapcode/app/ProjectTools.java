@@ -34,6 +34,9 @@ public class ProjectTools {
     // The RunConfigs tool
     private RunConfigsTool  _runConfigsTool;
 
+    // The HttpServerTool
+    private HttpServerTool  _httpServerTool;
+
     // The SupportTray
     private SupportTray  _supportTray;
 
@@ -62,9 +65,10 @@ public class ProjectTools {
         _debugTool = new DebugTool(_projPane);
         _searchTool = new SearchPane(_projPane);
         _runConfigsTool = new RunConfigsTool(_projPane);
+        _httpServerTool = new HttpServerTool(_projPane);
 
         // Set tools
-        ProjectTool[] bottomTools = {_problemsTool, _debugTool, _runConsole, _breakpointsTool, _searchTool, _runConfigsTool };
+        ProjectTool[] bottomTools = {_problemsTool, _debugTool, _runConsole, _breakpointsTool, _searchTool, _runConfigsTool, _httpServerTool };
         _supportTray = new SupportTray(_projPane, Side.BOTTOM, bottomTools);
 
 
@@ -132,5 +136,13 @@ public class ProjectTools {
     {
         _supportTray.resetLater();
         _sideBar.resetLater();
+    }
+
+    /**
+     * Closes the project.
+     */
+    public void closeProject()
+    {
+        _httpServerTool.stopServer();
     }
 }

@@ -12,7 +12,7 @@ import snap.viewx.DialogBox;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import snap.web.WebURL;
+
 import java.util.List;
 
 /**
@@ -38,9 +38,6 @@ public class SitePane extends WebPage {
     // The BuildPane
     private BuildPane _buildPane;
 
-    // The HttpServerPane
-    private HttpServerPane _httpServerPane;
-
     // The top level TabView
     private TabView  _tabView;
 
@@ -60,9 +57,6 @@ public class SitePane extends WebPage {
 
         // Set BuildPane
         _buildPane = new BuildPane(this);
-
-        // Set HttpServerPane
-        _httpServerPane = new HttpServerPane(this);
     }
 
     /**
@@ -120,56 +114,6 @@ public class SitePane extends WebPage {
     public VcsPane getVersionControlPane()
     {
         return _vcp;
-    }
-
-    /**
-     * Returns the HttpServerPane.
-     */
-    public HttpServerPane getHttpServerPane()
-    {
-        return _httpServerPane;
-    }
-
-    /**
-     * Returns the HomePageURL.
-     */
-    public WebURL getHomePageURL()
-    {
-        if (_hpu == null) {
-            String hpu = getHomePageURLString();
-            if (hpu != null) _hpu = getSite().getURL(hpu);
-        }
-        return _hpu;
-    }
-
-    WebURL _hpu;
-
-    /**
-     * Sets the HomePageURL.
-     */
-    public void setHomePageURL(WebURL aURL)
-    {
-        setHomePageURLString(aURL != null ? aURL.getString() : null);
-        _hpu = aURL;
-    }
-
-    /**
-     * Returns the HomePageURL.String.
-     */
-    public String getHomePageURLString()
-    {
-        return _homePageURLS;
-    }
-
-    String _homePageURLS;
-
-    /**
-     * Sets the HomePageURL.
-     */
-    public void setHomePageURLString(String aURL)
-    {
-        _homePageURLS = aURL;
-        _hpu = null;
     }
 
     /**
@@ -288,9 +232,6 @@ public class SitePane extends WebPage {
         _consolePane = null;
         _projPane = null;
         _vcp = null;
-
-        _httpServerPane.stopServer();
-        _httpServerPane = null;
     }
 
     /**
@@ -417,10 +358,6 @@ public class SitePane extends WebPage {
         // Add BuildPane
         BuildPane buildPane = _buildPane;
         _tabView.addTab("Build Dir", buildPane.getUI());
-
-        // Add HttpServerPane
-        HttpServerPane httpServPane = _httpServerPane;
-        _tabView.addTab("HTTP-Server", httpServPane.getUI());
 
         // Return
         return _tabView;

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView FillWidth="true">
+  <font name="Arial" size="12" />
+  <RowView Margin="0,5,0,0" MinHeight="32">
+    <Label Margin="0,8,0,8" text="HTTP Server:" />
+    <Button Name="StartButton" PrefWidth="100" PrefHeight="22" Text="Start" />
+    <Button Name="ClearButton" PrefWidth="80" PrefHeight="22" Text="Clear" LeanX="RIGHT" />
+  </RowView>
+  <TextView Name="LogText" Margin="0,5,5,5" GrowHeight="true" />
+</ColView>

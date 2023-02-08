@@ -128,6 +128,8 @@ public class AppPane extends ProjectPane {
             catch (Exception e) { throw new RuntimeException(e); }
             site.resetFiles();
         }
+
+        _projTools.closeProject();
     }
 
     /**
