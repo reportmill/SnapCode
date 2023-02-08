@@ -4,8 +4,8 @@
   <RowView MinHeight="32">
     <Label Margin="0,8,0,8" text="Expressions:" />
     <TextField Name="ExprText" PrefWidth="200" GrowWidth="true" />
-    <Button Name="AddButton" PrefWidth="32" PrefHeight="24" LeanX="RIGHT" Image="ExprAdd.png" />
-    <Button Name="RemoveButton" PrefWidth="32" PrefHeight="24" Margin="0,8,0,0" Image="ExprRemove.png" />
+    <Button Name="AddButton" PrefWidth="24" PrefHeight="24" Margin="0,0,0,5" ShowArea="false" Image="ExprAdd.png" />
+    <Button Name="RemoveButton" PrefWidth="24" PrefHeight="24" Margin="0,8,0,0" ShowArea="false" Image="ExprRemove.png" />
   </RowView>
   <SplitView Vertical="true" Margin="0,5,5,5" GrowHeight="true">
     <TreeView Name="TreeView" PrefHeight="100" GrowHeight="true" />

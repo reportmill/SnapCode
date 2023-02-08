@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView FillWidth="true">
+  <Font Name="Arial" Size="12" />
+  <RowView MinHeight="32">
+    <Label Margin="0,8,0,8" text="Run Configs:" />
+    <Button Name="AddButton" PrefWidth="24" PrefHeight="24" Margin="0,0,0,12" ShowArea="false" Image="ExprAdd.png" />
+    <Button Name="RemoveButton" PrefWidth="24" PrefHeight="24" ShowArea="false" Image="ExprRemove.png" />
+  </RowView>
+  <RectView PrefHeight="1">
+    <fill Color="#C0" />
+  </RectView>
+  <RowView Margin="5,5,5,5" Spacing="8" GrowHeight="true" FillHeight="true">
+    <ListView Name="RunConfigsList" PrefWidth="220" ItemKey="Name" />
+    <ColView Padding="5,0,0,0" Spacing="8">
+      <RowView Spacing="8">
+        <Label PrefWidth="67" PrefHeight="22" Align="CENTER_RIGHT" Text="Name:" />
+        <TextField Name="NameText" PrefWidth="290" PrefHeight="22" />
+      </RowView>
+      <RowView Spacing="8">
+        <Label PrefWidth="67" PrefHeight="22" Align="CENTER_RIGHT" Text="Main Class:" />
+        <TextField Name="MainClassText" PrefWidth="290" PrefHeight="22" />
+      </RowView>
+      <RowView Spacing="8">
+        <Label PrefWidth="67" PrefHeight="22" Align="CENTER_RIGHT" Text="App Args:" />
+        <TextView Name="AppArgsText" PrefWidth="290" PrefHeight="60" GrowWidth="true" GrowHeight="true" />
+      </RowView>
+      <RowView Spacing="8">
+        <Label PrefWidth="67" PrefHeight="22" Align="CENTER_RIGHT" Text="VM Args:" />
+        <TextView Name="VMArgsText" PrefWidth="290" PrefHeight="60" GrowWidth="true" GrowHeight="true" />
+      </RowView>
+    </ColView>
+  </RowView>
+</ColView>

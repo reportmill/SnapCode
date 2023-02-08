@@ -18,9 +18,6 @@ public class AppPaneToolBar extends ProjectTool {
     // A placeholder for fill from toolbar button under mouse
     private Paint  _tempFill;
 
-    // RunConfigsPage
-    private RunConfigsPage _runConfigsPage;
-
     /**
      * Creates a new AppPaneToolBar.
      */
@@ -35,27 +32,6 @@ public class AppPaneToolBar extends ProjectTool {
     public void selectSearchText()
     {
         runLater(() -> requestFocus("SearchComboBox"));
-    }
-
-    /**
-     * Override to add menu button.
-     */
-    protected View createUI()
-    {
-        // Do normal version
-        RowView superUI = (RowView) super.createUI();
-
-        // Add MenuButton
-        MenuButton menuButton = new MenuButton();
-        menuButton.setName("RunMenuButton");
-        menuButton.setPrefSize(15, 14);
-        menuButton.setMargin(22, 0, 0, 0);
-        menuButton.setItems(Arrays.asList(getRunMenuButtonItems()));
-        menuButton.getGraphicAfter().setPadding(0, 0, 0, 0);
-        superUI.addChild(menuButton, 5);
-
-        // Return
-        return superUI;
     }
 
     /**
@@ -133,44 +109,9 @@ public class AppPaneToolBar extends ProjectTool {
             debugTool.runDefaultConfig(false);
         }
 
-        // Handle RunConfigMenuItems
-        if (anEvent.getName().endsWith("RunConfigMenuItem")) {
-            String configName = anEvent.getName().replace("RunConfigMenuItem", "");
-            DebugTool debugTool = _projTools.getDebugTool();
-            debugTool.runConfigForName(configName, false);
-            setRunMenuButtonItems();
-        }
-
-        // Handle RunConfigsMenuItem
-        if (anEvent.equals("RunConfigsMenuItem"))
-            appBrowser.setURL(getRunConfigsPageURL());
-
-        // Show history
-        if (anEvent.equals("ShowHistoryMenuItem"))
-            _pagePane.showHistory();
-
         // Handle SearchComboBox
         if (anEvent.equals("SearchComboBox"))
             handleSearchComboBox(anEvent);
-    }
-
-    /**
-     * Returns the RunConfigsPage.
-     */
-    public RunConfigsPage getRunConfigsPage()
-    {
-        if (_runConfigsPage != null) return _runConfigsPage;
-        _runConfigsPage = new RunConfigsPage();
-        _pagePane.setPageForURL(_runConfigsPage.getURL(), _runConfigsPage);
-        return _runConfigsPage;
-    }
-
-    /**
-     * Returns the RunConfigsPageURL.
-     */
-    public WebURL getRunConfigsPageURL()
-    {
-        return getRunConfigsPage().getURL();
     }
 
     /**
@@ -202,43 +143,6 @@ public class AppPaneToolBar extends ProjectTool {
 
         // Clear SearchComboBox
         setViewText("SearchComboBox", null);
-    }
-
-    /**
-     * Creates a pop-up menu for preview edit button (currently with look and feel options).
-     */
-    private MenuItem[] getRunMenuButtonItems()
-    {
-        ViewBuilder<MenuItem> mib = new ViewBuilder<>(MenuItem.class);
-
-        // Add RunConfigs MenuItems
-        List<RunConfig> runConfigs = RunConfigs.get(getRootSite()).getRunConfigs();
-        for (RunConfig runConfig : runConfigs) {
-            String name = runConfig.getName() + "RunConfigMenuItem";
-            mib.name(name).text(name).save();
-        }
-
-        // Add separator
-        if (runConfigs.size() > 0)
-            mib.save();
-
-        // Add RunConfigsMenuItem
-        mib.name("RunConfigsMenuItem").text("Run Configurations...").save();
-        mib.name("ShowHistoryMenuItem").text("Show History...").save();
-
-        // Return MenuItems
-        return mib.buildAll();
-    }
-
-    /**
-     * Sets the RunMenuButton items.
-     */
-    public void setRunMenuButtonItems()
-    {
-        MenuButton rmb = getView("RunMenuButton", MenuButton.class);
-        rmb.setItems(Arrays.asList(getRunMenuButtonItems()));
-        for (MenuItem mi : rmb.getItems())
-            mi.setOwner(this);
     }
 
     /**

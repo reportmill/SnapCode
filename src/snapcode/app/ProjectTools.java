@@ -28,10 +28,13 @@ public class ProjectTools {
     // The SearchTool
     private SearchPane  _searchTool;
 
+    // The RunConfigs tool
+    private RunConfigsTool  _runConfigsTool;
+
     // The SupportTray
     private SupportTray  _supportTray;
 
-    // The SupportTray
+    // The SideBar
     private SupportTray  _sideBar;
 
     /**
@@ -54,9 +57,10 @@ public class ProjectTools {
         _breakpointsPanel = new BreakpointsPanel(_projPane);
         _debugTool = new DebugTool(_projPane);
         _searchTool = new SearchPane(_projPane);
+        _runConfigsTool = new RunConfigsTool(_projPane);
 
         // Set tools
-        ProjectTool[] bottomTools = { _problemsPane, _debugTool, _runConsole, _breakpointsPanel, _searchTool };
+        ProjectTool[] bottomTools = { _problemsPane, _debugTool, _runConsole, _breakpointsPanel, _searchTool, _runConfigsTool };
         _supportTray = new SupportTray(_projPane, Side.BOTTOM, bottomTools);
 
 

@@ -1,35 +1,23 @@
-package snapcode.app;
-import snap.view.ScrollView;
-import snap.view.View;
-import snap.view.ViewEvent;
-import snap.viewx.WebBrowser;
-import snap.viewx.WebPage;
-import snap.web.WebSite;
+package snapcode.apptools;
+import snap.view.*;
+import snapcode.app.*;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * Manages a list of run configurations for project.
  */
-public class RunConfigsPage extends WebPage {
+public class RunConfigsTool extends ProjectTool {
 
     // The selected RunConfig
-    RunConfig _runConfig;
+    private RunConfig  _runConfig;
 
     /**
-     * Returns the AppPane.
+     * Constructor.
      */
-    public AppPane getAppPane()
+    public RunConfigsTool(ProjectPane projectPane)
     {
-        WebBrowser browser = getBrowser();
-        return browser.getOwner(AppPane.class);
-    }
-
-    /**
-     * Returns the Project.
-     */
-    public WebSite getSelectedSite()
-    {
-        return getAppPane().getRootSite();
+        super(projectPane);
     }
 
     /**
@@ -37,7 +25,7 @@ public class RunConfigsPage extends WebPage {
      */
     public List<RunConfig> getRunConfigs()
     {
-        return RunConfigs.get(getSelectedSite()).getRunConfigs();
+        return RunConfigs.get(getRootSite()).getRunConfigs();
     }
 
     /**
@@ -58,13 +46,26 @@ public class RunConfigsPage extends WebPage {
         _runConfig = aConfig;
     }
 
-    /**
-     * Override to put in Page pane.
-     */
-    protected View createUI()
-    {
-        return new ScrollView(super.createUI());
-    }
+//    /**
+//     * Override to add menu button.
+//     */
+//    protected View createUI()
+//    {
+//        // Do normal version
+//        RowView superUI = (RowView) super.createUI();
+//
+//        // Add MenuButton - was from AppPaneToolBar
+//        MenuButton menuButton = new MenuButton();
+//        menuButton.setName("RunMenuButton");
+//        menuButton.setPrefSize(15, 14);
+//        menuButton.setMargin(22, 0, 0, 0);
+//        menuButton.setItems(Arrays.asList(getRunMenuButtonItems()));
+//        menuButton.getGraphicAfter().setPadding(0, 0, 0, 0);
+//        superUI.addChild(menuButton, 5);
+//
+//        // Return
+//        return superUI;
+//    }
 
     @Override
     protected void resetUI()
@@ -130,16 +131,53 @@ public class RunConfigsPage extends WebPage {
             setSelectedRunConfig(null);
         }
 
+//        // Handle RunConfigMenuItems
+//        if (anEvent.getName().endsWith("RunConfigMenuItem")) {
+//            String configName = anEvent.getName().replace("RunConfigMenuItem", "");
+//            DebugTool debugTool = _projTools.getDebugTool();
+//            debugTool.runConfigForName(configName, false);
+//            setRunMenuButtonItems();
+//        }
+
         // Save RunConfigs
-        RunConfigs.get(getSelectedSite()).writeFile();
-        getAppPane().getToolBar().setRunMenuButtonItems();
+        RunConfigs.get(getRootSite()).writeFile();
+        //getAppPane().getToolBar().setRunMenuButtonItems();
     }
 
     /**
-     * Override to suppress.
+     * Sets the RunMenuButton items.
      */
-    public void reload()
+    public void setRunMenuButtonItems()
     {
+        MenuButton rmb = getView("RunMenuButton", MenuButton.class);
+        rmb.setItems(Arrays.asList(getRunMenuButtonItems()));
+        for (MenuItem mi : rmb.getItems())
+            mi.setOwner(this);
+    }
+
+    /**
+     * Creates a pop-up menu for preview edit button (currently with look and feel options).
+     */
+    private MenuItem[] getRunMenuButtonItems()
+    {
+        ViewBuilder<MenuItem> mib = new ViewBuilder<>(MenuItem.class);
+
+        // Add RunConfigs MenuItems
+        List<RunConfig> runConfigs = getRunConfigs();
+        for (RunConfig runConfig : runConfigs) {
+            String name = runConfig.getName() + "RunConfigMenuItem";
+            mib.name(name).text(name).save();
+        }
+
+        // Add separator
+        if (runConfigs.size() > 0)
+            mib.save();
+
+        // Add RunConfigsMenuItem
+        mib.name("RunConfigsMenuItem").text("Run Configurations...").save();
+
+        // Return MenuItems
+        return mib.buildAll();
     }
 
     /**
@@ -147,7 +185,6 @@ public class RunConfigsPage extends WebPage {
      */
     public String getTitle()
     {
-        return getSelectedSite().getName() + " Run Configurations";
+        return "Run Configs";
     }
-
 }
