@@ -8,7 +8,10 @@ import snapcode.apptools.*;
 public class ProjectTools {
 
     // The FilesPane
-    protected FilesPane  _filesPane;
+    protected FilesTool  _filesTool;
+
+    // The FilesPane
+    protected FileTreeTool _fileTreeTool;
 
     // The Problems pane
     private ProblemsTool _problemsTool;
@@ -51,7 +54,8 @@ public class ProjectTools {
      */
     protected void createTools()
     {
-        _filesPane = new FilesPane((AppPane) _projPane);
+        _filesTool = new FilesTool(_projPane);
+        _fileTreeTool = new FileTreeTool((AppPane) _projPane);
         _problemsTool = new ProblemsTool(_projPane);
         _runConsole = new RunConsole(_projPane);
         _breakpointsTool = new BreakpointsTool(_projPane);
@@ -64,14 +68,19 @@ public class ProjectTools {
         _supportTray = new SupportTray(_projPane, Side.BOTTOM, bottomTools);
 
 
-        ProjectTool[] sideTools = { _filesPane };
+        ProjectTool[] sideTools = {_fileTreeTool};
         _sideBar = new SupportTray(_projPane, Side.LEFT, sideTools);
     }
 
     /**
      * Returns the files tool.
      */
-    public FilesPane getFilesPane()  { return _filesPane; }
+    public FilesTool getFilesTool()  { return _filesTool; }
+
+    /**
+     * Returns the FileTreeTool.
+     */
+    public FileTreeTool getFileTreeTool()  { return _fileTreeTool; }
 
     /**
      * Returns the problems tool.

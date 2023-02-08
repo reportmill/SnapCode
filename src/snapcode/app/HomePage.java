@@ -9,6 +9,7 @@ import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
+import snapcode.apptools.FilesTool;
 
 /**
  * A WebPage subclass that is the default homepage for SnapCode projects.
@@ -103,13 +104,12 @@ public class HomePage extends WebPage {
             addSceneFiles(getRootSite(), "Scene1");
         }
 
-        // Handle NewJavaFile
-        if (anEvent.equals("NewJavaFile") && anEvent.isMouseRelease())
-            getAppPane().showNewFilePanel();
-
-        // Handle NewFile
-        if (anEvent.equals("NewFile") && anEvent.isMouseRelease())
-            getAppPane().showNewFilePanel();
+        // Handle NewJavaFile, NewFile
+        if ((anEvent.equals("NewJavaFile") || anEvent.equals("NewFile")) && anEvent.isMouseRelease()) {
+            ProjectTools projectTools = getAppPane().getProjectTools();
+            FilesTool filesTool = projectTools.getFilesTool();
+            filesTool.showNewFilePanel();
+        }
 
         // Handle SnapDocs
         if (anEvent.equals("SnapDocs") && anEvent.isMouseRelease())
@@ -143,7 +143,6 @@ public class HomePage extends WebPage {
 
         // Select and show snp file
         getBrowser().setFile(snpFile);
-        getAppPane().getFilesPane().showInTree(snpFile);
     }
 
     /**
@@ -164,11 +163,8 @@ public class HomePage extends WebPage {
         // Create file, set content, save and return
         sfile = aSite.createFileForPath(path, false);
         sfile.setText(str);
-        try {
-            sfile.save();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        try { sfile.save(); }
+        catch (Exception e) { throw new RuntimeException(e); }
         sfile.setProp("OpenInEditor", true);
         return sfile;
     }

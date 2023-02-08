@@ -1,9 +1,10 @@
-package snapcode.app;
+package snapcode.apptools;
 import javakit.project.BuildIssue;
 import javakit.ide.JavaTextUtils;
+import javakit.project.BuildIssues;
+import javakit.project.Project;
 import snap.geom.Pos;
 import snap.gfx.Image;
-import snapcode.project.ProjectX;
 import snapcode.project.VersionControl;
 import snap.view.*;
 import snap.web.WebFile;
@@ -12,125 +13,123 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A class to represent a project file in FilesPane.
+ * A class to represent a project file in FileTreeTool.
  */
-public class AppFile implements Comparable<AppFile> {
+public class FileTreeFile implements Comparable<FileTreeFile> {
 
     // The parent file
-    AppFile _parent;
+    protected FileTreeFile _parent;
 
     // The WebFile
-    WebFile _file;
+    protected WebFile  _file;
 
     // The children
-    AppFile[] _children;
+    protected FileTreeFile[]  _children;
 
     // The file type
-    FileType _type = FileType.PLAIN;
+    protected FileType  _type = FileType.PLAIN;
 
     // The project
-    ProjectX _proj;
+    protected Project  _proj;
 
     // The WebFile ProjectFileInfo
-    VersionControl _vc;
+    protected VersionControl  _vc;
 
     // The priority of this item
-    int _priority;
+    protected int  _priority;
 
     // The file type
-    public enum FileType {PLAIN, PACKAGE_DIR, SOURCE_DIR}
+    public enum FileType { PLAIN, PACKAGE_DIR, SOURCE_DIR }
 
     // Icons
-    static Image ErrorBadge = Image.get(AppFile.class, "ErrorBadge.png");
-    static Image WarningBadge = Image.get(AppFile.class, "WarningBadge.png");
-    static Image Package = JavaTextUtils.PackageImage;
+    private static Image ErrorBadge = Image.get(FileTreeFile.class, "ErrorBadge.png");
+    private static Image WarningBadge = Image.get(FileTreeFile.class, "WarningBadge.png");
+    private static Image Package = JavaTextUtils.PackageImage;
 
     /**
      * Creates a new file.
      */
-    public AppFile(AppFile aPar, WebFile aFile)
+    public FileTreeFile(FileTreeFile aPar, WebFile aFile)
     {
         _parent = aPar;
         _file = aFile;
-        _proj = ProjectX.getProjectForSite(aFile.getSite());
+        _proj = Project.getProjectForSite(aFile.getSite());
         _vc = VersionControl.get(_file.getSite());
     }
 
     /**
      * Returns the parent.
      */
-    public AppFile getParent()
-    {
-        return _parent;
-    }
+    public FileTreeFile getParent()  { return _parent; }
 
     /**
      * Returns the real file.
      */
-    public WebFile getFile()
-    {
-        return _file;
-    }
+    public WebFile getFile()  { return _file; }
 
     /**
      * Returns whether file is parent.
      */
-    public boolean isParent()
-    {
-        return _file.isDir();
-    }
+    public boolean isParent()  { return _file.isDir(); }
 
     /**
      * Returns the children.
      */
-    public AppFile[] getChildren()
+    public FileTreeFile[] getChildren()
     {
+        // If already set, just return
         if (_children != null) return _children;
+
+        // Get files
         WebFile[] files = getChildFiles();
-        List<AppFile> children = new ArrayList<>();
+        List<FileTreeFile> children = new ArrayList<>();
         for (WebFile file : files) {
-            AppFile child = createChildAppFile(file);
+            FileTreeFile child = createChildAppFile(file);
             if (child != null)
                 children.add(child);
         }
 
         // Sort and return
         Collections.sort(children);
-        return _children = children.toArray(new AppFile[0]);
+        return _children = children.toArray(new FileTreeFile[0]);
     }
 
     /**
      * Returns a AppPaneTreeItem for child file.
      */
-    protected AppFile createChildAppFile(WebFile aFile)
+    protected FileTreeFile createChildAppFile(WebFile aFile)
     {
         // Get basic file info
-        String name = aFile.getName(), path = aFile.getPath();
+        String name = aFile.getName();
         boolean dir = aFile.isDir();
         String type = aFile.getType();
-        int tlen = type.length();
+        int typeLen = type.length();
 
         // Skip hidden files, build dir, child packages
-        if (name.startsWith(".")) return null;
-        if (dir && _proj != null && aFile == _proj.getBuildDir()) return null;
-        if (_type == FileType.PACKAGE_DIR && dir && tlen == 0) return null;  // Skip child packages
+        if (name.startsWith("."))
+            return null;
+        if (dir && _proj != null && aFile == _proj.getBuildDir())
+            return null;
+        if (_type == FileType.PACKAGE_DIR && dir && typeLen == 0)
+            return null;
 
         // Create AppFile
-        AppFile fitem = new AppFile(this, aFile);
+        FileTreeFile treeFile = new FileTreeFile(this, aFile);
         if (dir && _proj != null && aFile == _proj.getSourceDir() && !aFile.isRoot()) {
-            fitem._type = FileType.SOURCE_DIR;
-            fitem._priority = 1;
-        } else if (_type == FileType.SOURCE_DIR && dir && tlen == 0) {
-            fitem._type = FileType.PACKAGE_DIR;
-            fitem._priority = -1;
+            treeFile._type = FileType.SOURCE_DIR;
+            treeFile._priority = 1;
+        }
+        else if (_type == FileType.SOURCE_DIR && dir && typeLen == 0) {
+            treeFile._type = FileType.PACKAGE_DIR;
+            treeFile._priority = -1;
         }
 
         // Set priorities for special files
-        if (type.equals("java")) fitem._priority = 1;
-        if (type.equals("snp")) fitem._priority = 1;
+        if (type.equals("java") || type.equals("snp"))
+            treeFile._priority = 1;
 
-        // Otherwise just add FileItem
-        return fitem;
+        // Return
+        return treeFile;
     }
 
     /**
@@ -200,7 +199,9 @@ public class AppFile implements Comparable<AppFile> {
         grf.setPrefSize(18, 18);
 
         // If error/warning add Error/Warning badge as composite icon
-        BuildIssue.Kind status = _proj != null ? _proj.getRootProject().getBuildIssues().getBuildStatusForFile(_file) : null;
+        Project proj = _proj.getRootProject();
+        BuildIssues buildIssues = proj.getBuildIssues();
+        BuildIssue.Kind status = buildIssues != null ? buildIssues.getBuildStatusForFile(_file) : null;
         if (status != null) {
             Image badge = status == BuildIssue.Kind.Error ? ErrorBadge : WarningBadge;
             ImageView bview = new ImageView(badge);
@@ -217,7 +218,7 @@ public class AppFile implements Comparable<AppFile> {
     /**
      * Comparable method to order FileItems by Priority then File.
      */
-    public int compareTo(AppFile aAF)
+    public int compareTo(FileTreeFile aAF)
     {
         if (_priority != aAF._priority) return _priority > aAF._priority ? -1 : 1;
         return _file.compareTo(aAF._file);
@@ -236,7 +237,7 @@ public class AppFile implements Comparable<AppFile> {
      */
     public boolean equals(Object anObj)
     {
-        AppFile other = anObj instanceof AppFile ? (AppFile) anObj : null;
+        FileTreeFile other = anObj instanceof FileTreeFile ? (FileTreeFile) anObj : null;
         if (other == null) return false;
         return other._file == _file;
     }
@@ -252,12 +253,12 @@ public class AppFile implements Comparable<AppFile> {
     /**
      * A resolver for AppFiles.
      */
-    public static class AppFileTreeResolver extends TreeResolver<AppFile> {
+    public static class AppFileTreeResolver extends TreeResolver<FileTreeFile> {
 
         /**
          * Returns the parent of given item.
          */
-        public AppFile getParent(AppFile anItem)
+        public FileTreeFile getParent(FileTreeFile anItem)
         {
             return anItem.getParent();
         }
@@ -265,7 +266,7 @@ public class AppFile implements Comparable<AppFile> {
         /**
          * Whether given object is a parent (has children).
          */
-        public boolean isParent(AppFile anItem)
+        public boolean isParent(FileTreeFile anItem)
         {
             return anItem.isParent();
         }
@@ -273,7 +274,7 @@ public class AppFile implements Comparable<AppFile> {
         /**
          * Returns the children.
          */
-        public AppFile[] getChildren(AppFile aParent)
+        public FileTreeFile[] getChildren(FileTreeFile aParent)
         {
             return aParent.getChildren();
         }
@@ -281,7 +282,7 @@ public class AppFile implements Comparable<AppFile> {
         /**
          * Returns the text to be used for given item.
          */
-        public String getText(AppFile anItem)
+        public String getText(FileTreeFile anItem)
         {
             return anItem.getText();
         }
@@ -289,10 +290,9 @@ public class AppFile implements Comparable<AppFile> {
         /**
          * Return the image to be used for given item.
          */
-        public View getGraphic(AppFile anItem)
+        public View getGraphic(FileTreeFile anItem)
         {
             return anItem.getGraphic();
         }
     }
-
 }

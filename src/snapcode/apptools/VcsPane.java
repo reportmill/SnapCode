@@ -56,16 +56,9 @@ public class VcsPane extends ProjectTool {
         // Add listener to update FilesPane.FilesTree when file status changed
         _vc.addPropChangeListener(pc -> {
             WebFile file = (WebFile) pc.getSource();
-            if (_appPane != null) _appPane.getFilesPane().updateFile(file);
+            FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
+            fileTreeTool.updateFile(file);
         });
-    }
-
-    /**
-     * Returns the anAppPane.
-     */
-    public AppPane getAppPane()
-    {
-        return _appPane;
     }
 
     /**
@@ -73,40 +66,28 @@ public class VcsPane extends ProjectTool {
      */
     public void setAppPane(AppPane anAP)
     {
-        _appPane = anAP;
+        _projPane = anAP;
     }
 
     /**
      * Returns the project site.
      */
-    public WebSite getSite()
-    {
-        return _site;
-    }
+    public WebSite getSite()  { return _site; }
 
     /**
      * Returns the VersionControl.
      */
-    public VersionControl getVC()
-    {
-        return _vc;
-    }
+    public VersionControl getVC()  { return _vc; }
 
     /**
      * Returns the remote site.
      */
-    private WebSite getRemoteSite()
-    {
-        return _vc.getRemoteSite();
-    }
+    private WebSite getRemoteSite()  { return _vc.getRemoteSite(); }
 
     /**
      * Returns the repository site.
      */
-    private WebSite getRepoSite()
-    {
-        return _vc.getRepoSite();
-    }
+    private WebSite getRepoSite()  { return _vc.getRepoSite(); }
 
     /**
      * Initialize UI panel.
@@ -195,9 +176,10 @@ public class VcsPane extends ProjectTool {
         if (_vc.getRemoteURL() == null) return;
 
         String msg = "Do you want to load remote files into project directory?";
-        DialogBox dbox = new DialogBox("Checkout Project Files");
-        dbox.setMessage(msg);
-        if (!dbox.showConfirmDialog(_appPane.getUI())) return;
+        DialogBox dialogBox = new DialogBox("Checkout Project Files");
+        dialogBox.setMessage(msg);
+        if (!dialogBox.showConfirmDialog(_projPane.getUI()))
+            return;
 
         // Perform checkout
         checkout();
@@ -210,10 +192,12 @@ public class VcsPane extends ProjectTool {
     {
         try {
             _vc.disconnect(new TaskMonitor.Text(System.out));
-        } catch (Exception e) {
-            DialogBox db = new DialogBox("Disconnect Error");
-            db.setErrorMessage(e.toString());
-            db.showMessageDialog(_appPane.getUI());
+        }
+
+        catch (Exception e) {
+            DialogBox dialogBox = new DialogBox("Disconnect Error");
+            dialogBox.setErrorMessage(e.toString());
+            dialogBox.showMessageDialog(_projPane.getUI());
         }
     }
 
@@ -222,7 +206,7 @@ public class VcsPane extends ProjectTool {
      */
     public void checkout()
     {
-        TaskRunner runner = new TaskRunnerPanel(_appPane.getUI(), "Checkout from " + _vc.getRemoteURLString()) {
+        TaskRunner<?> runner = new TaskRunnerPanel(_projPane.getUI(), "Checkout from " + _vc.getRemoteURLString()) {
             boolean _oldAutoBuildEnabled;
 
             public Object run() throws Exception
@@ -242,7 +226,7 @@ public class VcsPane extends ProjectTool {
             {
                 _sitePane.setAutoBuildEnabled(_oldAutoBuildEnabled);
                 if (ClientUtils.setAccess(getRemoteSite())) checkout();
-                else if (new LoginPage().showPanel(_appPane.getUI(), getRemoteSite())) checkout();
+                else if (new LoginPage().showPanel(_projPane.getUI(), getRemoteSite())) checkout();
                 else super.failure(e);
             }
         };
@@ -257,7 +241,7 @@ public class VcsPane extends ProjectTool {
         getSite().getRootDir().reload();
         ProjectX proj = ProjectX.getProjectForSite(getSite());
         if (proj != null) proj.readSettings();
-        _appPane.resetLater(); // Reset UI
+        _projPane.resetLater(); // Reset UI
         _sitePane.setAutoBuildEnabled(oldAutoBuildEnabled);
         if (oldAutoBuildEnabled) _sitePane.buildSite(true);
     }
@@ -273,13 +257,14 @@ public class VcsPane extends ProjectTool {
         }
 
         // Get base files and all files to transfer
-        List<WebFile> bfiles = theFiles != null ? theFiles : _appPane.getFilesPane().getSelFiles();
-        List<WebFile> sfiles = getCommitFiles(bfiles);
+        List<WebFile> selFiles = theFiles != null ? theFiles : getSelFiles();
+        List<WebFile> sfiles = getCommitFiles(selFiles);
 
         // Run VersionControlFilesPane for files and op
-        VcsTransferPane fpane = new VcsTransferPane();
-        if (!fpane.showPanel(this, sfiles, VersionControl.Op.Commit)) return;
-        commitFilesImpl(sfiles, fpane.getCommitMessage());
+        VcsTransferPane transferPane = new VcsTransferPane();
+        if (!transferPane.showPanel(this, sfiles, VersionControl.Op.Commit))
+            return;
+        commitFilesImpl(sfiles, transferPane.getCommitMessage());
     }
 
     /**
@@ -289,18 +274,22 @@ public class VcsPane extends ProjectTool {
     {
         // Create list
         List<WebFile> fromFiles = theFromFiles != null ? theFromFiles : Arrays.asList(getSite().getRootDir());
-        List<WebFile> xfiles = new ArrayList();
+        List<WebFile> commitFiles = new ArrayList<>();
 
         try {
-            for (WebFile file : fromFiles) _vc.getCommitFiles(file, xfiles);
-        } catch (AccessException e) {
-            if (ClientUtils.setAccess(e.getSite())) return getCommitFiles(theFromFiles);
+            for (WebFile file : fromFiles)
+                _vc.getCommitFiles(file, commitFiles);
+        }
+
+        catch (AccessException e) {
+            if (ClientUtils.setAccess(e.getSite()))
+                return getCommitFiles(theFromFiles);
             throw e;
         }
 
         // Sort files and return
-        Collections.sort(xfiles);
-        return xfiles;
+        Collections.sort(commitFiles);
+        return commitFiles;
     }
 
     /**
@@ -309,25 +298,16 @@ public class VcsPane extends ProjectTool {
     protected void commitFilesImpl(final List<WebFile> theFiles, final String aMessage)
     {
         // Create TaskRunner and start
-        new TaskRunnerPanel(_appPane.getUI(), "Commit files to remote site") {
+        new TaskRunnerPanel(_projPane.getUI(), "Commit files to remote site") {
             public Object run() throws Exception
             {
                 _vc.commitFiles(theFiles, aMessage, this);
                 return null;
             }
 
-            public void success(Object anObj)
-            {
-            }
-
-            public void failure(Exception e)
-            {
-                super.failure(e);
-            }
-
-            public void finished()
-            {
-            }
+            public void success(Object anObj)  { }
+            public void failure(Exception e)  { super.failure(e); }
+            public void finished() { }
         }.start();
     }
 
@@ -367,7 +347,7 @@ public class VcsPane extends ProjectTool {
         } catch (Exception e) {
             DialogBox db = new DialogBox("Disconnect Error");
             db.setErrorMessage(e.toString());
-            db.showMessageDialog(_appPane.getUI());
+            db.showMessageDialog(_projPane.getUI());
         }
 
         // Sort files and return
@@ -384,7 +364,7 @@ public class VcsPane extends ProjectTool {
         final boolean oldAutoBuild = _sitePane.setAutoBuildEnabled(false);
 
         // Create TaskRunner and start
-        new TaskRunnerPanel(_appPane.getUI(), "Update files from remote site") {
+        new TaskRunnerPanel(_projPane.getUI(), "Update files from remote site") {
             public Object run() throws Exception
             {
                 _vc.updateFiles(theFiles, this);
@@ -393,9 +373,11 @@ public class VcsPane extends ProjectTool {
 
             public void success(Object anObj)
             {
-                for (WebFile file : theFiles) file.reload();
-                for (WebFile file : theFiles) _appPane.getBrowser().reloadFile(file); // Refresh replaced files
-                _appPane.resetLater(); // Reset UI
+                for (WebFile file : theFiles)
+                    file.reload();
+                for (WebFile file : theFiles)
+                    getBrowser().reloadFile(file); // Refresh replaced files
+                _projPane.resetLater(); // Reset UI
             }
 
             public void finished()
@@ -436,18 +418,22 @@ public class VcsPane extends ProjectTool {
     {
         // Create list
         List<WebFile> fromFiles = theFromFiles != null ? theFromFiles : Arrays.asList(getSite().getRootDir());
-        List<WebFile> xfiles = new ArrayList();
+        List<WebFile> replaceFiles = new ArrayList<>();
 
         try {
-            for (WebFile file : fromFiles) _vc.getReplaceFiles(file, xfiles);
-        } catch (AccessException e) {
-            if (ClientUtils.setAccess(e.getSite())) return getReplaceFiles(theFromFiles);
+            for (WebFile file : fromFiles)
+                _vc.getReplaceFiles(file, replaceFiles);
+        }
+
+        catch (AccessException e) {
+            if (ClientUtils.setAccess(e.getSite()))
+                return getReplaceFiles(theFromFiles);
             throw e;
         }
 
         // Sort files and return
-        Collections.sort(xfiles);
-        return xfiles;
+        Collections.sort(replaceFiles);
+        return replaceFiles;
     }
 
     /**
@@ -457,7 +443,8 @@ public class VcsPane extends ProjectTool {
     {
         // Create TaskRunner and start
         final boolean oldAutoBuild = _sitePane.setAutoBuildEnabled(false);
-        new TaskRunnerPanel(_appPane.getUI(), "Replace files from remote site") {
+
+        new TaskRunnerPanel(_projPane.getUI(), "Replace files from remote site") {
             public Object run() throws Exception
             {
                 _vc.replaceFiles(theFiles, this);
@@ -466,9 +453,11 @@ public class VcsPane extends ProjectTool {
 
             public void success(Object anObj)
             {
-                for (WebFile file : theFiles) file.reload();
-                for (WebFile file : theFiles) _appPane.getBrowser().reloadFile(file); // Refresh replaced files
-                _appPane.resetLater(); // Reset UI
+                for (WebFile file : theFiles)
+                    file.reload();
+                for (WebFile file : theFiles)
+                    getBrowser().reloadFile(file);
+                _projPane.resetLater();
             }
 
             public void finished()
@@ -514,5 +503,4 @@ public class VcsPane extends ProjectTool {
     {
         return (VcsPane) aSite.getProp(VcsPane.class.getName());
     }
-
 }

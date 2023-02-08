@@ -39,11 +39,6 @@ public class AppPane extends ProjectPane {
     public MainToolBar getToolBar()  { return _toolBar; }
 
     /**
-     * Returns the files pane.
-     */
-    public FilesPane getFilesPane()  { return _projTools.getFilesPane(); }
-
-    /**
      * Returns the processes pane.
      */
     public ProcPane getProcPane()  { return _projTools.getDebugTool().getProcPane(); }
@@ -84,8 +79,8 @@ public class AppPane extends ProjectPane {
             addSite(p.getSite());
 
         // Clear root files
-        FilesPane filesPane = getFilesPane();
-        filesPane.resetRootFiles();
+        FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
+        fileTreeTool.resetRootFiles();
     }
 
     /**
@@ -101,8 +96,8 @@ public class AppPane extends ProjectPane {
         aSite.removeFileChangeListener(_siteFileLsnr);
 
         // Clear root files
-        FilesPane filesPane = getFilesPane();
-        filesPane.resetRootFiles();
+        FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
+        fileTreeTool.resetRootFiles();
     }
 
     /**
@@ -143,8 +138,8 @@ public class AppPane extends ProjectPane {
         // Get file and update in FilesPane
         WebFile file = (WebFile) aPC.getSource();
         if (file.getExists()) {
-            FilesPane filesPane = getFilesPane();
-            filesPane.updateFile(file);
+            FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
+            fileTreeTool.updateFile(file);
         }
     }
 
@@ -182,7 +177,7 @@ public class AppPane extends ProjectPane {
         SupportTray sideBar = _projTools.getSideBar();
         View sideBarUI = sideBar.getUI();
         sideBarUI.setGrowHeight(true);
-        sideBar.setSelToolForClass(FilesPane.class);
+        sideBar.setSelToolForClass(FileTreeTool.class);
         pagePaneSplitView.addItem(sideBarUI, 0);
 
         // Add SupportTray to MainSplit
@@ -221,7 +216,8 @@ public class AppPane extends ProjectPane {
 
         // Handle NewFileMenuItem, NewFileButton
         if (anEvent.equals("NewFileMenuItem") || anEvent.equals("NewFileButton")) {
-            showNewFilePanel();
+            FilesTool filesTool = _projTools.getFilesTool();
+            filesTool.showNewFilePanel();
             anEvent.consume();
         }
 
@@ -248,25 +244,6 @@ public class AppPane extends ProjectPane {
     }
 
     /**
-     * Saves any unsaved files.
-     */
-    public void saveFiles()
-    {
-        WebFile rootDir = getSelSite().getRootDir();
-        FilesPane filesPane = getFilesPane();
-        filesPane.saveFiles(rootDir, true);
-    }
-
-    /**
-     * Runs a panel for a new file.
-     */
-    public void showNewFilePanel()
-    {
-        FilesPane filesPane = getFilesPane();
-        filesPane.showNewFilePanel();
-    }
-
-    /**
      * Called when PagePane does prop change.
      */
     private void pagePaneDidPropChange(PropChange aPC)
@@ -274,8 +251,8 @@ public class AppPane extends ProjectPane {
         // Handle SelFile
         String propName = aPC.getPropName();
         if (propName == PagePane.SelFile_Prop) {
-            FilesPane filesPane = getFilesPane();
-            filesPane.resetLater();
+            FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
+            fileTreeTool.resetLater();
         }
     }
 
@@ -308,7 +285,8 @@ public class AppPane extends ProjectPane {
             }
 
             // Update FilesPane.FilesTree
-            getFilesPane().updateFile(issueFile);
+            FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
+            fileTreeTool.updateFile(issueFile);
         }
 
         // Handle BuildIssue removed
@@ -325,7 +303,8 @@ public class AppPane extends ProjectPane {
             }
 
             // Update FilesPane.FilesTree
-            getFilesPane().updateFile(issueFile);
+            FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
+            fileTreeTool.updateFile(issueFile);
         }
     }
 }

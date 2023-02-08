@@ -97,7 +97,7 @@ public class DebugTool extends ProjectTool {
             runConfigs.getRunConfigs().remove(runConfig);
             runConfigs.getRunConfigs().add(0, runConfig);
             runConfigs.writeFile();
-            runDefaultConfig(false);
+            runConfigOrFile(runConfig, null, withDebug);
         }
     }
 
@@ -107,10 +107,8 @@ public class DebugTool extends ProjectTool {
     public void runConfigOrFile(RunConfig aConfig, WebFile aFile, boolean isDebug)
     {
         // Automatically save all files
-        AppPane appPane = (AppPane) _projPane;
-        FilesPane filesPane = appPane.getFilesPane();
-        filesPane.saveAllFiles();
-        appPane.saveFiles();
+        FilesTool filesTool = _projTools.getFilesTool();
+        filesTool.saveAllFiles();
 
         // Get site and RunConfig (if available)
         WebSite site = getRootSite();
