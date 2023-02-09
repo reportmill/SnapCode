@@ -26,9 +26,6 @@ public class SitePane extends WebPage {
     // The WebSite
     private WebSite  _site;
 
-    // The ConsolePane
-    private AppConsole _consolePane = new AppConsole();
-
     // The ProjectPane
     private ProjectConfigPane _projPane;
 
@@ -73,7 +70,6 @@ public class SitePane extends WebPage {
     protected void setAppPane(AppPane anAP)
     {
         _appPane = anAP;
-        _consolePane._appPane = anAP;
         if (_projPane != null)
             _projPane.setAppPane(anAP);
 
@@ -90,14 +86,6 @@ public class SitePane extends WebPage {
     public WebSite getSite()
     {
         return _site;
-    }
-
-    /**
-     * Returns the ConsolePane.
-     */
-    public AppConsole getConsolePane()
-    {
-        return _consolePane;
     }
 
     /**
@@ -189,24 +177,6 @@ public class SitePane extends WebPage {
     }
 
     /**
-     * Returns whether app should use visual SnapCode Java editor by default.
-     */
-    public boolean getUseSnapEditor()
-    {
-        return _useSnapEditor;
-    }
-
-    boolean _useSnapEditor;
-
-    /**
-     * Sets whether app should use visual SnapCode Java editor by default.
-     */
-    public void setUseSnapEditor(boolean aValue)
-    {
-        _useSnapEditor = aValue;
-    }
-
-    /**
      * Opens the Site.
      */
     public void openSite()
@@ -229,7 +199,6 @@ public class SitePane extends WebPage {
         _site.setProp(SitePane.class.getName(), null);
         _appPane = null;
         _site = null;
-        _consolePane = null;
         _projPane = null;
         _vcp = null;
     }
@@ -351,10 +320,6 @@ public class SitePane extends WebPage {
             _tabView.addTab(title, vcp.getUI()); //tab.setTooltip(new Tooltip("Manage Remote Site"));
         }
 
-        // Add console pane and return
-        AppConsole consolePane = getConsolePane();
-        _tabView.addTab("Console", consolePane.getUI());  //tab.setTooltip(new Tooltip("Console Text"));
-
         // Add BuildPane
         BuildPane buildPane = _buildPane;
         _tabView.addTab("Build Dir", buildPane.getUI());
@@ -403,5 +368,4 @@ public class SitePane extends WebPage {
             return getURL().getSite().getName() + " - Site Settings";
         }
     }
-
 }

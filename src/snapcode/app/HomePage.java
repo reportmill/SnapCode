@@ -133,8 +133,6 @@ public class HomePage extends WebPage {
             return;
 
         // Add run config
-        SitePane spane = SitePane.get(aSite);
-        spane.setUseSnapEditor(true);
         RunConfigs rc = RunConfigs.get(aSite);
         if (rc.getRunConfig() == null) {
             rc.getRunConfigs().add(new RunConfig().setName("StudioApp").setMainClassName("Scene1"));
