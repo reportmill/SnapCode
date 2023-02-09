@@ -37,6 +37,9 @@ public class ProjectTools {
     // The HttpServerTool
     private HttpServerTool  _httpServerTool;
 
+    // The VcsTools
+    private VcsTools  _vcsTools;
+
     // The SupportTray
     private SupportTray  _supportTray;
 
@@ -66,6 +69,7 @@ public class ProjectTools {
         _searchTool = new SearchPane(_projPane);
         _runConfigsTool = new RunConfigsTool(_projPane);
         _httpServerTool = new HttpServerTool(_projPane);
+        _vcsTools = new VcsTools(_projPane);
 
         // Set tools
         ProjectTool[] bottomTools = {_problemsTool, _debugTool, _runConsole, _breakpointsTool, _searchTool, _runConfigsTool, _httpServerTool };

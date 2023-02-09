@@ -1,9 +1,4 @@
 package snapcode.app;
-import snap.util.ListUtils;
-import snap.view.Tab;
-import snapcode.apptools.VcsPane;
-import snapcode.project.VersionControl;
-//import snapcode.project.VersionControlGit;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.view.TabView;
@@ -12,8 +7,6 @@ import snap.viewx.DialogBox;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
-
-import java.util.List;
 
 /**
  * A class to manage UI aspects of a WebSite for app.
@@ -28,9 +21,6 @@ public class SitePane extends WebPage {
 
     // The ProjectPane
     private ProjectConfigPane _projPane;
-
-    // The VersionControl pane
-    private VcsPane _vcp;
 
     // The BuildPane
     private BuildPane _buildPane;
@@ -72,12 +62,6 @@ public class SitePane extends WebPage {
         _appPane = anAP;
         if (_projPane != null)
             _projPane.setAppPane(anAP);
-
-        // Set VersionControlPane
-        String urls = getRemoteURLString();
-        //_vcp = VersionControl.get(_site) instanceof VersionControlGit ? new VcsPaneGit(this) : new VcsPane(this);
-        _vcp = new VcsPane(this);
-        _vcp.setAppPane(anAP);
     }
 
     /**
@@ -94,54 +78,6 @@ public class SitePane extends WebPage {
     public ProjectConfigPane getProjPane()
     {
         return _projPane;
-    }
-
-    /**
-     * Returns the VersionControlPane.
-     */
-    public VcsPane getVersionControlPane()
-    {
-        return _vcp;
-    }
-
-    /**
-     * Returns the RemoteURL string.
-     */
-    public String getRemoteURLString()
-    {
-        return VersionControl.getRemoteURLString(_site);
-    }
-
-    /**
-     * Sets the RemoteURL string.
-     */
-    public void setRemoteURLString(String urls)
-    {
-        // Sanity check
-        if (_tabView == null) return;
-
-        // Get VC tab
-        List<Tab> tabs = _tabView.getTabBar().getTabs();
-        Tab vcTab = ListUtils.findMatch(tabs, tab -> tab.getContentOwner() instanceof VcsPane);
-        int vcIndex = vcTab.getIndex();
-
-        // Deactivate Version control pane and re-open site
-        _vcp.deactivate();
-        VersionControl.setRemoteURLString(_site, urls);
-
-        // Recreate VC and set in tab
-        //_vcp = VersionControl.get(_site) instanceof VersionControlGit ? new VcsPaneGit(this) : new VcsPane(this);
-        _vcp = new VcsPane(this);
-        if (_appPane != null)
-            _vcp.setAppPane(_appPane);
-        vcTab.setContentOwner(_vcp);
-
-        // Reopen site
-        _vcp.openSite();
-
-        // Reset UI
-        _tabView.setSelIndex(-1);
-        _tabView.setSelIndex(vcIndex);
     }
 
     /**
@@ -181,10 +117,6 @@ public class SitePane extends WebPage {
      */
     public void openSite()
     {
-        // Activate VersionControlPane
-        if (_vcp != null)
-            _vcp.openSite();
-
         // Activate ProjectPane
         if (_projPane != null)
             _projPane.openSite();
@@ -200,7 +132,6 @@ public class SitePane extends WebPage {
         _appPane = null;
         _site = null;
         _projPane = null;
-        _vcp = null;
     }
 
     /**
@@ -211,9 +142,8 @@ public class SitePane extends WebPage {
         if (_projPane != null)
             _projPane.deleteProject(aView);
         else {
-            try {
-                _site.deleteSite();
-            } catch (Exception e) {
+            try { _site.deleteSite(); }
+            catch (Exception e) {
                 e.printStackTrace();
                 DialogBox.showExceptionDialog(null, "Delete Site Failed", e);
             }
@@ -274,9 +204,8 @@ public class SitePane extends WebPage {
      */
     void fileAdded(WebFile aFile)
     {
-        if (_projPane != null) _projPane.fileAdded(aFile);
-        if (_vcp != null)
-            _vcp.fileAdded(aFile);
+        if (_projPane != null)
+            _projPane.fileAdded(aFile);
     }
 
     /**
@@ -284,9 +213,8 @@ public class SitePane extends WebPage {
      */
     void fileRemoved(WebFile aFile)
     {
-        if (_projPane != null) _projPane.fileRemoved(aFile);
-        if (_vcp != null)
-            _vcp.fileRemoved(aFile);
+        if (_projPane != null)
+            _projPane.fileRemoved(aFile);
     }
 
     /**
@@ -294,9 +222,8 @@ public class SitePane extends WebPage {
      */
     void fileSaved(WebFile aFile)
     {
-        if (_projPane != null) _projPane.fileSaved(aFile);
-        if (_vcp != null)
-            _vcp.fileSaved(aFile);
+        if (_projPane != null)
+            _projPane.fileSaved(aFile);
     }
 
     /**
@@ -311,14 +238,6 @@ public class SitePane extends WebPage {
         ProjectConfigPane projPane = getProjPane();
         if (projPane != null)
             _tabView.addTab("Settings", projPane.getUI()); //tab.setTooltip(new Tooltip("Project Settings"));
-
-        // Add VersionControlPane
-        VcsPane vcp = getVersionControlPane();
-        if (vcp != null) {
-            //String title = vcp instanceof VcsPaneGit ? "Git" : "Versioning";
-            String title = "Versioning";
-            _tabView.addTab(title, vcp.getUI()); //tab.setTooltip(new Tooltip("Manage Remote Site"));
-        }
 
         // Add BuildPane
         BuildPane buildPane = _buildPane;

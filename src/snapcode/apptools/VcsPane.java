@@ -1,7 +1,6 @@
 package snapcode.apptools;
 import snapcode.app.AppPane;
 import snapcode.app.ProjectTool;
-import snapcode.app.SitePane;
 import snapcode.project.ProjectX;
 import snapcode.project.VersionControl;
 import snap.util.ClientUtils;
@@ -28,10 +27,7 @@ import java.util.List;
 public class VcsPane extends ProjectTool {
 
     // The AppPane
-    AppPane _appPane;
-
-    // The site pane
-    SitePane _sitePane;
+    private VcsTools  _vscTools;
 
     // The site
     WebSite _site;
@@ -45,11 +41,11 @@ public class VcsPane extends ProjectTool {
     /**
      * Creates new VersionControl.
      */
-    public VcsPane(SitePane aSitePane)
+    public VcsPane(VcsTools vcsTools)
     {
-        super(aSitePane.getAppPane());
-        _sitePane = aSitePane;
-        _site = _sitePane.getSite();
+        super(vcsTools.getProjectPane());
+        _vscTools = vcsTools;
+        _site = getRootSite();
         _site.setProp(VcsPane.class.getName(), this);
         _vc = VersionControl.get(_site);
 
@@ -136,7 +132,7 @@ public class VcsPane extends ProjectTool {
     {
         // Handle RemoteURLText
         if (anEvent.equals("RemoteURLText"))
-            _sitePane.setRemoteURLString(anEvent.getStringValue());
+            _vscTools.setRemoteURLString(anEvent.getStringValue());
 
         // Handle ConnectButton
         if (anEvent.equals("ConnectButton")) {
@@ -211,7 +207,7 @@ public class VcsPane extends ProjectTool {
 
             public Object run() throws Exception
             {
-                _oldAutoBuildEnabled = _sitePane.setAutoBuildEnabled(false);
+                _oldAutoBuildEnabled = _vscTools.setAutoBuildEnabled(false);
                 if (!getSite().getRootDir().getExists()) getSite().getRootDir().save(); // So refresh will work later
                 _vc.checkout(this);
                 return null;
@@ -224,7 +220,7 @@ public class VcsPane extends ProjectTool {
 
             public void failure(Exception e)
             {
-                _sitePane.setAutoBuildEnabled(_oldAutoBuildEnabled);
+                _vscTools.setAutoBuildEnabled(_oldAutoBuildEnabled);
                 if (ClientUtils.setAccess(getRemoteSite())) checkout();
                 else if (new LoginPage().showPanel(_projPane.getUI(), getRemoteSite())) checkout();
                 else super.failure(e);
@@ -240,10 +236,18 @@ public class VcsPane extends ProjectTool {
     {
         getSite().getRootDir().reload();
         ProjectX proj = ProjectX.getProjectForSite(getSite());
-        if (proj != null) proj.readSettings();
-        _projPane.resetLater(); // Reset UI
-        _sitePane.setAutoBuildEnabled(oldAutoBuildEnabled);
-        if (oldAutoBuildEnabled) _sitePane.buildSite(true);
+        if (proj != null)
+            proj.readSettings();
+
+        // Reset UI
+        _projPane.resetLater();
+
+        //
+        _vscTools.setAutoBuildEnabled(oldAutoBuildEnabled);
+
+        //
+        if (oldAutoBuildEnabled)
+            _vscTools.buildSite(true);
     }
 
     /**
@@ -326,7 +330,8 @@ public class VcsPane extends ProjectTool {
         List<WebFile> sfiles = getUpdateFiles(bfiles);
 
         // Run VersionControlFilesPane for files and op
-        if (!new VcsTransferPane().showPanel(this, sfiles, VersionControl.Op.Update)) return;
+        if (!new VcsTransferPane().showPanel(this, sfiles, VersionControl.Op.Update))
+            return;
         updateFilesImpl(sfiles);
     }
 
@@ -361,7 +366,7 @@ public class VcsPane extends ProjectTool {
     protected void updateFilesImpl(final List<WebFile> theFiles)
     {
         // Get old Autobuild
-        final boolean oldAutoBuild = _sitePane.setAutoBuildEnabled(false);
+        final boolean oldAutoBuild = _vscTools.setAutoBuildEnabled(false);
 
         // Create TaskRunner and start
         new TaskRunnerPanel(_projPane.getUI(), "Update files from remote site") {
@@ -383,8 +388,9 @@ public class VcsPane extends ProjectTool {
             public void finished()
             {
                 // Reset AutoBuildEnabled and build Project
-                _sitePane.setAutoBuildEnabled(oldAutoBuild);
-                if (oldAutoBuild) _sitePane.buildSite(false);
+                _vscTools.setAutoBuildEnabled(oldAutoBuild);
+                if (oldAutoBuild)
+                    _vscTools.buildSite(false);
 
                 // Connect to remote site
                 if (isUISet()) connectToRemoteSite();
@@ -442,7 +448,7 @@ public class VcsPane extends ProjectTool {
     protected void replaceFilesImpl(final List<WebFile> theFiles)
     {
         // Create TaskRunner and start
-        final boolean oldAutoBuild = _sitePane.setAutoBuildEnabled(false);
+        final boolean oldAutoBuild = _vscTools.setAutoBuildEnabled(false);
 
         new TaskRunnerPanel(_projPane.getUI(), "Replace files from remote site") {
             public Object run() throws Exception
@@ -463,8 +469,9 @@ public class VcsPane extends ProjectTool {
             public void finished()
             {
                 // Reset AutoBuildEnabled and build Project
-                _sitePane.setAutoBuildEnabled(oldAutoBuild);
-                if (oldAutoBuild) _sitePane.buildSite(false);
+                _vscTools.setAutoBuildEnabled(oldAutoBuild);
+                if (oldAutoBuild)
+                    _vscTools.buildSite(false);
 
                 // Connect to remote site
                 if (isUISet()) connectToRemoteSite();
