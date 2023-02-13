@@ -2,13 +2,13 @@ package snapcode.app;
 import javakit.ide.*;
 import javakit.parse.*;
 import javakit.project.JavaAgent;
+import javakit.project.Project;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMember;
 import javakit.parse.JavaTextDoc;
 import snap.util.Convert;
 import snap.util.ListUtils;
 import snapcode.apptools.SearchPane;
-import snapcode.project.ProjectX;
 import snap.text.TextBoxLine;
 import snap.view.View;
 import snap.view.ViewEvent;
@@ -214,7 +214,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         WebFile file = super.createNewFile(aPath);
 
         // Get project
-        ProjectX proj = ProjectX.getProjectForFile(file);
+        Project proj = Project.getProjectForFile(file);
 
         // Append package declaration
         StringBuilder sb = new StringBuilder();
@@ -283,7 +283,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         }
 
         // Get project
-        ProjectX proj = ProjectX.getProjectForSite(getSite());
+        Project proj = Project.getProjectForSite(getSite());
         if (proj == null) return;
 
         // Get source file

@@ -11,7 +11,6 @@ import snap.web.WebURL;
 import snapcode.app.*;
 import snapcode.debug.DebugApp;
 import snapcode.debug.RunApp;
-import snapcode.project.ProjectX;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,7 +119,7 @@ public class DebugTool extends PodTool {
             runFile = getSelFile();
 
         // Try to replace file with project file
-        Project proj = ProjectX.getProjectForFile(runFile);
+        Project proj = Project.getProjectForFile(runFile);
         if (proj == null) {
             System.err.println("DebugTool: not project file: " + runFile);
             return;

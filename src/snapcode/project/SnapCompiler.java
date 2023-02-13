@@ -3,6 +3,7 @@
  */
 package snapcode.project;
 import javakit.project.BuildIssue;
+import javakit.project.Project;
 import snap.util.FilePathUtils;
 import snap.web.WebFile;
 import javax.tools.*;
@@ -16,30 +17,33 @@ import java.util.*;
 public class SnapCompiler implements DiagnosticListener {
 
     // The Project
-    ProjectX _proj;
+    Project  _proj;
 
     // The shared compiler
-    JavaCompiler _compiler;
+    JavaCompiler  _compiler;
 
     // The options for compile
-    List<String> _options;
+    List<String>  _options;
 
     // The shared file manager for any project compile
-    SnapCompilerFM _fm;
+    SnapCompilerFM  _fm;
 
     // Whether compile succeeded (no errors encountered)
-    boolean _succeeded;
+    boolean  _succeeded;
+
+    // The Set of source files compiled by last compile
+    Set<WebFile>  _compJFs = new HashSet<>();
 
     // The Set of source files that had class files modified by last compile
-    Set<WebFile> _compJFs = new HashSet(), _modJFs = new HashSet();
+    Set<WebFile>  _modJFs = new HashSet<>();
 
     // The number of errors currently encountered
     int _errorCount;
 
     /**
-     * Creates a new compiler for given site.
+     * Constructor.
      */
-    public SnapCompiler(ProjectX aProject)
+    public SnapCompiler(Project aProject)
     {
         _proj = aProject;
     }
@@ -47,10 +51,7 @@ public class SnapCompiler implements DiagnosticListener {
     /**
      * Returns the Project.
      */
-    public ProjectX getProject()
-    {
-        return _proj;
-    }
+    public Project getProject()  { return _proj; }
 
     /**
      * Returns the java compiler.
@@ -67,11 +68,11 @@ public class SnapCompiler implements DiagnosticListener {
 
         // Get compiler class and instance and return
         try {
-            Class cls = Class.forName("com.sun.tools.javac.api.JavacTool", true, getClass().getClassLoader());
+            Class<?> cls = Class.forName("com.sun.tools.javac.api.JavacTool", true, getClass().getClassLoader());
             return _compiler = (JavaCompiler) cls.newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
+
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**

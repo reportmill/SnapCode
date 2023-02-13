@@ -1,5 +1,5 @@
 package snapcode.app;
-import snapcode.project.ProjectX;
+import javakit.project.Project;
 import snap.view.*;
 import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
@@ -19,7 +19,7 @@ public class BuildPane extends ViewOwner {
     WebSite _site;
 
     // The Project
-    ProjectX _proj;
+    Project _proj;
 
     // The Build dir
     WebFile _buildDir;
@@ -37,7 +37,7 @@ public class BuildPane extends ViewOwner {
     {
         _sitePane = aSP;
         _site = aSP.getSite();
-        _proj = ProjectX.getProjectForSite(_site);
+        _proj = Project.getProjectForSite(_site);
     }
 
     /**

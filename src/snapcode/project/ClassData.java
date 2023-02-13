@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
+import javakit.project.Project;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
 import javakit.resolver.Resolver;
@@ -20,7 +21,7 @@ public class ClassData {
     private WebFile  _file;
 
     // The project
-    private ProjectX _proj;
+    private Project  _proj;
 
     // The Resolver
     private Resolver  _resolver;
@@ -34,7 +35,7 @@ public class ClassData {
     public ClassData(WebFile aFile)
     {
         _file = aFile;
-        _proj = ProjectX.getProjectForFile(_file);
+        _proj = Project.getProjectForFile(_file);
         _resolver = _proj.getResolver();
     }
 

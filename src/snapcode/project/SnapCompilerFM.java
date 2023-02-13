@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
+import javakit.project.Project;
 import javakit.project.ProjectFiles;
 import snap.web.WebFile;
 import javax.tools.*;
@@ -18,7 +19,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     protected SnapCompiler  _compiler;
 
     // The project
-    private ProjectX _proj;
+    private Project  _proj;
 
     // A map of previously accessed SnapFileObjects for paths
     private Map<String, SnapCompilerJFO>  _jfos = new HashMap<>();

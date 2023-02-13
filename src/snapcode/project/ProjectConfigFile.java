@@ -1,4 +1,5 @@
 package snapcode.project;
+import javakit.project.Project;
 import javakit.project.ProjectConfig;
 import snap.props.PropChange;
 import snap.util.XMLElement;
@@ -14,7 +15,7 @@ import java.util.List;
 public class ProjectConfigFile {
 
     // The Project
-    private ProjectX _proj;
+    private Project  _proj;
 
     // The ProjectConfig
     private ProjectConfig  _projConfig;
@@ -28,7 +29,7 @@ public class ProjectConfigFile {
     /**
      * Constructor.
      */
-    public ProjectConfigFile(ProjectX aProject)
+    public ProjectConfigFile(Project aProject)
     {
         _proj = aProject;
 
@@ -362,7 +363,7 @@ public class ProjectConfigFile {
     /**
      * Creates the ClassPath file for given project.
      */
-    public static WebFile createFile(ProjectX aProj)
+    public static WebFile createFile(Project aProj)
     {
         // Get default text
         StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");

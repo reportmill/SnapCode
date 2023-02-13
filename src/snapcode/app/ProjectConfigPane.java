@@ -7,7 +7,6 @@ import javakit.project.Project;
 import javakit.project.ProjectConfig;
 import javakit.project.ProjectSet;
 import snapcode.apptools.ProblemsTool;
-import snapcode.project.ProjectX;
 import snapcode.project.VersionControl;
 import snap.util.ClientUtils;
 import snap.util.TaskRunner;
@@ -36,7 +35,7 @@ public class ProjectConfigPane extends ViewOwner {
     private WebSite  _site;
 
     // The project
-    private ProjectX  _proj;
+    private Project  _proj;
 
     // Whether to auto build project when files change
     private boolean  _autoBuild = true;
@@ -62,7 +61,7 @@ public class ProjectConfigPane extends ViewOwner {
     public ProjectConfigPane(SitePane aSitePane)
     {
         _site = aSitePane.getSite();
-        _proj = ProjectX.getProjectForSite(_site);
+        _proj = Project.getProjectForSite(_site);
         _sitePane = aSitePane;
         _site.setProp(ProjectConfigPane.class.getName(), this);
     }
@@ -83,7 +82,7 @@ public class ProjectConfigPane extends ViewOwner {
     /**
      * Returns the project.
      */
-    public ProjectX getProject()  { return _proj; }
+    public Project getProject()  { return _proj; }
 
     /**
      * Returns whether to automatically build files when changes are detected.
@@ -200,7 +199,7 @@ public class ProjectConfigPane extends ViewOwner {
 
                 // Add new project site to app pane and build
                 _podPane.addSite(site);
-                ProjectX proj = ProjectX.getProjectForSite(site);
+                Project proj = Project.getProjectForSite(site);
                 proj.addBuildFilesAll();
                 buildProjectLater(false);
             }
@@ -264,7 +263,7 @@ public class ProjectConfigPane extends ViewOwner {
     public void buildProjectLater(boolean doAddFiles)
     {
         // If not root ProjectConfigPane, forward on to it
-        ProjectX rootProj = _proj.getRootProject();
+        Project rootProj = _proj.getRootProject();
         ProjectConfigPane rootProjPane = _proj != rootProj ? ProjectConfigPane.getProjectPane(rootProj.getSite()) : this;
         if (this != rootProjPane) {
             rootProjPane.buildProjectLater(doAddFiles);
@@ -494,7 +493,7 @@ public class ProjectConfigPane extends ViewOwner {
         setViewValue("AutoBuildCheckBox", sitePane.isAutoBuild());
 
         // Update SourcePathText, BuildPathText
-        ProjectX proj = getProject();
+        Project proj = getProject();
         ProjectConfig projConfig = proj.getProjectConfig();
         setViewValue("SourcePathText", projConfig.getSourcePath());
         setViewValue("BuildPathText", projConfig.getBuildPath());
@@ -512,7 +511,7 @@ public class ProjectConfigPane extends ViewOwner {
     public void respondUI(ViewEvent anEvent)
     {
         SitePane sitePane = getSitePane();
-        ProjectX proj = getProject();
+        Project proj = getProject();
         ProjectConfig projConfig = proj.getProjectConfig();
 
         // Handle HomePageText, AutoBuildCheckBox

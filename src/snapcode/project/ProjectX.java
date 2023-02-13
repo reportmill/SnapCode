@@ -15,7 +15,7 @@ public class ProjectX extends Project {
     private ProjectConfigFile  _projConfigFile;
 
     /**
-     * Creates a new Project for WebSite.
+     * Constructor.
      */
     public ProjectX(WorkSpace aWorkSpace, WebSite aSite)
     {
@@ -49,26 +49,6 @@ public class ProjectX extends Project {
     /**
      * Reads the settings from project settings file(s).
      */
-    public void readSettings()
-    {
-        _projConfigFile.readFile();
-    }
-
-    /**
-     * Returns the project for a given site.
-     */
-    public static ProjectX getProjectForFile(WebFile aFile)
-    {
-        WebSite fileSite = aFile.getSite();
-        return getProjectForSite(fileSite);
-    }
-
-    /**
-     * Returns the project for a given site.
-     */
-    public static synchronized ProjectX getProjectForSite(WebSite aSite)
-    {
-        Project proj = Project.getProjectForSite(aSite);
-        return (ProjectX) proj;
-    }
+    @Override
+    public void readSettings()  { _projConfigFile.readFile(); }
 }

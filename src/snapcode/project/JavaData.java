@@ -17,7 +17,7 @@ public class JavaData {
     private WebFile  _javaFile;
 
     // The Project that owns this file
-    private ProjectX _proj;
+    private Project  _proj;
 
     // The set of declarations in this JavaFile
     private Set<JavaDecl>  _decls = new HashSet<>();
@@ -45,13 +45,13 @@ public class JavaData {
     /**
      * Returns the project for this JavaFile.
      */
-    public ProjectX getProject()
+    public Project getProject()
     {
         // If already set, just return
         if (_proj != null) return _proj;
 
         // Get, set, return
-        ProjectX proj = ProjectX.getProjectForFile(_javaFile);
+        Project proj = Project.getProjectForFile(_javaFile);
         return _proj = proj;
     }
 
@@ -60,7 +60,7 @@ public class JavaData {
      */
     public WebFile[] getClassFiles()
     {
-        ProjectX proj = getProject();
+        Project proj = getProject();
         ProjectFiles projectFiles = proj.getProjectFiles();
         WebFile[] classFiles = projectFiles.getClassFilesForJavaFile(_javaFile);
         return classFiles;
@@ -75,7 +75,7 @@ public class JavaData {
         if (_decls.size() > 0) return _decls;
 
         // Get Resolver
-        ProjectX proj = getProject();
+        Project proj = getProject();
         Resolver resolver = proj.getResolver();
 
         // Iterate over JavaFile.Class files
@@ -117,7 +117,7 @@ public class JavaData {
     public synchronized boolean updateDependencies()
     {
         // Get Project and Resolver
-        ProjectX proj = getProject();
+        Project proj = getProject();
         Resolver resolver = proj.getResolver();
 
         // Get Class files

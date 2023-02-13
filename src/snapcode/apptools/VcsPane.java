@@ -1,7 +1,7 @@
 package snapcode.apptools;
+import javakit.project.Project;
 import snapcode.app.PodPane;
 import snapcode.app.PodTool;
-import snapcode.project.ProjectX;
 import snapcode.project.VersionControl;
 import snap.util.ClientUtils;
 import snap.util.TaskMonitor;
@@ -235,7 +235,7 @@ public class VcsPane extends PodTool {
     protected void checkoutSuccess(boolean oldAutoBuildEnabled)
     {
         getSite().getRootDir().reload();
-        ProjectX proj = ProjectX.getProjectForSite(getSite());
+        Project proj = Project.getProjectForSite(getSite());
         if (proj != null)
             proj.readSettings();
 

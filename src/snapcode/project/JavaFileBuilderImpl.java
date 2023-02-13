@@ -13,9 +13,6 @@ import java.util.*;
  */
 public class JavaFileBuilderImpl extends JavaFileBuilder {
 
-    // The project we work for
-    private ProjectX  _projX;
-
     // The SnapCompiler used for last compiles
     private SnapCompiler  _compiler;
 
@@ -28,10 +25,9 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
     /**
      * Creates a new JavaFileBuilder for given Project.
      */
-    public JavaFileBuilderImpl(ProjectX aProject)
+    public JavaFileBuilderImpl(Project aProject)
     {
         super(aProject);
-        _projX = aProject;
     }
 
     /**
@@ -104,7 +100,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
         _buildFiles.clear();
 
         // Get Compiler and sets for compiled/error files
-        SnapCompiler compiler = new SnapCompiler(_projX);
+        SnapCompiler compiler = new SnapCompiler(_proj);
         Set<WebFile> compiledFiles = new HashSet<>();
         Set<WebFile> errorFiles = new HashSet<>();
 
@@ -155,7 +151,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
 
             // If there were modified files, clear Project.ClassLoader
             if (compiler.getModifiedJavaFiles().size() > 0) {
-                WorkSpace workSpace = _projX.getWorkSpace();
+                WorkSpace workSpace = _proj.getWorkSpace();
                 workSpace.clearClassLoader();
             }
 
@@ -176,7 +172,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
                 for (WebFile updateFile : updateFiles) {
 
                     //
-                    ProjectX proj = ProjectX.getProjectForFile(updateFile);
+                    Project proj = Project.getProjectForFile(updateFile);
                     if (proj == _proj) {
                         if (!compiledFiles.contains(updateFile)) {
                             if (!ListUtils.containsId(sourceFiles, updateFile))

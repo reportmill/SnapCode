@@ -1,5 +1,5 @@
 package snapcode.app;
-import snapcode.project.ProjectX;
+import javakit.project.Project;
 import snap.util.FilePathUtils;
 import snap.web.WebURL;
 import java.io.*;
@@ -16,13 +16,13 @@ import java.util.jar.Manifest;
 public class JarBuilder {
 
     // The Jar URL
-    WebURL _jarURL;
+    private WebURL  _jarURL;
 
     // The list of files to add
-    List<File> _files = new ArrayList();
+    private List<File>  _files = new ArrayList<>();
 
     // THe list of dirs each file is relative to
-    List<File> _dirs = new ArrayList();
+    private List<File>  _dirs = new ArrayList<>();
 
     /**
      * Sets the Jar URL.
@@ -152,7 +152,7 @@ public class JarBuilder {
     /**
      * Builds a Jar file for given project.
      */
-    public static void build(ProjectX aProj) throws IOException
+    public static void build(Project aProj) throws IOException
     {
         // Get build path and jar path
         String buildPath = aProj.getProjectConfig().getBuildPathAbsolute();
@@ -173,5 +173,4 @@ public class JarBuilder {
         // Build jar
         jb.build();
     }
-
 }

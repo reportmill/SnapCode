@@ -1,10 +1,10 @@
 package snapcode.apptools;
+import javakit.project.Project;
 import snapcode.app.PodPane;
 import snapcode.app.PodTool;
 import snapcode.debug.RunApp;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snapcode.project.ProjectX;
 import snap.text.TextLink;
 import snap.text.TextStyle;
 import snap.util.SnapUtils;
@@ -155,8 +155,11 @@ public class RunConsole extends PodTool {
             return "https://reportmill.com/jars/8u05/src.zip!" + aPath;
         if (aPath.startsWith("/javafx/"))
             return "https://reportmill.com/jars/8u05/javafx-src.zip!" + aPath;
-        ProjectX proj = ProjectX.getProjectForSite(getRootSite());
-        if (proj == null) return aPath;
+
+        Project proj = Project.getProjectForSite(getRootSite());
+        if (proj == null)
+            return aPath;
+
         WebFile file = proj.getProjectSet().getSourceFile(aPath);
         return file != null ? file.getURL().getString() : aPath;
     }
