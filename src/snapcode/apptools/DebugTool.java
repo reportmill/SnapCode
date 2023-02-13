@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * This project tool class handles running/debugging a process.
  */
-public class DebugTool extends ProjectTool {
+public class DebugTool extends PodTool {
 
     // The ProcPane manages run/debug processes
     private ProcPane  _procPane;
@@ -103,7 +103,7 @@ public class DebugTool extends ProjectTool {
     public void runConfigOrFile(RunConfig aConfig, WebFile aFile, boolean isDebug)
     {
         // Automatically save all files
-        FilesTool filesTool = _projTools.getFilesTool();
+        FilesTool filesTool = _podTools.getFilesTool();
         filesTool.saveAllFiles();
 
         // Get site and RunConfig (if available)

@@ -330,9 +330,9 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     private void showReferences(JNode aNode)
     {
         if (getPodPane() == null) return;
-        ProjectTools projTools = getPodPane().getProjectTools();
-        projTools.getSearchTool().searchReference(aNode);
-        projTools.showToolForClass(SearchPane.class);
+        PodTools podTools = getPodPane().getPodTools();
+        podTools.getSearchTool().searchReference(aNode);
+        podTools.showToolForClass(SearchPane.class);
     }
 
     /**
@@ -341,9 +341,9 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     private void showDeclarations(JNode aNode)
     {
         if (getPodPane() == null) return;
-        ProjectTools projTools = getPodPane().getProjectTools();
-        projTools.getSearchTool().searchDeclaration(aNode);
-        projTools.showToolForClass(SearchPane.class);
+        PodTools podTools = getPodPane().getPodTools();
+        podTools.getSearchTool().searchDeclaration(aNode);
+        podTools.showToolForClass(SearchPane.class);
     }
 
     /**

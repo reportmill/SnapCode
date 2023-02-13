@@ -5,15 +5,15 @@ import snap.view.*;
 import snapcode.apptools.*;
 
 /**
- * A class to hold TabView for ProjectTools (ProblemsTool, DebugTool, etc.).
+ * A class to hold TabView to show PodTool instances (ProblemsTool, DebugTool, etc.).
  */
 public class SupportTray extends ViewOwner {
 
     // The side
     private Side  _side;
 
-    // The array of ProjectTools
-    private ProjectTool[]  _trayTools;
+    // The array of PodTool instances for this tray
+    private PodTool[]  _trayTools;
 
     // The tab view
     private TabView  _tabView;
@@ -21,7 +21,7 @@ public class SupportTray extends ViewOwner {
     /**
      * Creates a new SupportTray for given ProjectPane.
      */
-    public SupportTray(PodPane projPane, Side aSide, ProjectTool[] trayTools)
+    public SupportTray(Side aSide, PodTool[] trayTools)
     {
         _side = aSide;
         _trayTools = trayTools;
@@ -30,7 +30,7 @@ public class SupportTray extends ViewOwner {
     /**
      * Returns the tool for given class.
      */
-    public ProjectTool getToolForClass(Class<? extends ProjectTool> aToolClass)
+    public PodTool getToolForClass(Class<? extends PodTool> aToolClass)
     {
         return ArrayUtils.findMatch(_trayTools, tool -> aToolClass.isInstance(tool));
     }
@@ -51,17 +51,17 @@ public class SupportTray extends ViewOwner {
     /**
      * Returns the selected tool.
      */
-    public ProjectTool getSelTool()
+    public PodTool getSelTool()
     {
         Tab selTab = _tabView.getSelItem();
-        ProjectTool selTool = selTab != null ? (ProjectTool) selTab.getContentOwner() : null;
+        PodTool selTool = selTab != null ? (PodTool) selTab.getContentOwner() : null;
         return selTool;
     }
 
     /**
      * Sets the selected tool.
      */
-    public void setSelTool(ProjectTool aTool)
+    public void setSelTool(PodTool aTool)
     {
         int index = ArrayUtils.indexOfId(_trayTools, aTool);
         setSelIndex(index);
@@ -70,9 +70,9 @@ public class SupportTray extends ViewOwner {
     /**
      * Sets the selected index for given class.
      */
-    public void setSelToolForClass(Class<? extends ProjectTool> aClass)
+    public void setSelToolForClass(Class<? extends PodTool> aClass)
     {
-        ProjectTool tool = getToolForClass(aClass);
+        PodTool tool = getToolForClass(aClass);
         setSelTool(tool);
     }
 
@@ -125,7 +125,7 @@ public class SupportTray extends ViewOwner {
         Tab.Builder tabBuilder = new Tab.Builder(_tabView.getTabBar());
 
         // Iterate over tools and add tab for each
-        for (ProjectTool tool : _trayTools) {
+        for (PodTool tool : _trayTools) {
             String title = tool.getTitle();
             tabBuilder.title(title).contentOwner(tool).add();
         }

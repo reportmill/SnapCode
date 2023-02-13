@@ -1,6 +1,6 @@
 package snapcode.apptools;
 import snapcode.app.PodPane;
-import snapcode.app.ProjectTool;
+import snapcode.app.PodTool;
 import snapcode.project.ProjectX;
 import snapcode.project.VersionControl;
 import snap.util.ClientUtils;
@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Manages VersionControl operations in application.
  */
-public class VcsPane extends ProjectTool {
+public class VcsPane extends PodTool {
 
     // The VcsTools
     private VcsTools  _vscTools;
@@ -52,7 +52,7 @@ public class VcsPane extends ProjectTool {
         // Add listener to update FilesPane.FilesTree when file status changed
         _vc.addPropChangeListener(pc -> {
             WebFile file = (WebFile) pc.getSource();
-            FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
+            FileTreeTool fileTreeTool = _podTools.getFileTreeTool();
             fileTreeTool.updateFile(file);
         });
     }

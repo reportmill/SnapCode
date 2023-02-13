@@ -10,7 +10,7 @@ import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.app.DiffPage;
 import snapcode.app.PodPane;
-import snapcode.app.ProjectTool;
+import snapcode.app.PodTool;
 import snapcode.app.SitePane;
 import snapcode.util.CloseBox;
 import java.io.File;
@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * A class to handle visual management of project files.
  */
-public class FileTreeTool extends ProjectTool {
+public class FileTreeTool extends PodTool {
 
     // The file tree
     private TreeView<FileTreeFile>  _filesTree;
@@ -194,7 +194,7 @@ public class FileTreeTool extends ProjectTool {
             // Handle MouseClick (double-click): RunSelectedFile
             if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
                 if (getSelFile().isFile()) {
-                    DebugTool debugTool = _projTools.getDebugTool();
+                    DebugTool debugTool = _podTools.getDebugTool();
                     debugTool.runConfigOrFile(null, getSelFile(), false);
                 }
             }
@@ -212,7 +212,7 @@ public class FileTreeTool extends ProjectTool {
                     List<File> files = clipboard.getJavaFiles();
                     if (files == null || files.size() == 0)
                         return;
-                    FilesTool filesTool = _projTools.getFilesTool();
+                    FilesTool filesTool = _podTools.getFilesTool();
                     filesTool.addFiles(files);
                     anEvent.dropComplete();
                 }
@@ -245,13 +245,13 @@ public class FileTreeTool extends ProjectTool {
 
         // Handle NewFileMenuItem, NewFileButton
         if (anEvent.equals("NewFileMenuItem") || anEvent.equals("NewFileButton")) {
-            FilesTool filesTool = _projTools.getFilesTool();
+            FilesTool filesTool = _podTools.getFilesTool();
             filesTool.showNewFilePanel();
         }
 
         // Handle RemoveFileMenuItem
         if (anEvent.equals("RemoveFileMenuItem")) {
-            FilesTool filesTool = _projTools.getFilesTool();
+            FilesTool filesTool = _podTools.getFilesTool();
             filesTool.showRemoveFilePanel();
         }
 
@@ -300,11 +300,11 @@ public class FileTreeTool extends ProjectTool {
 
         // Handle RunFileMenuItem, DebugFileMenuItem
         if (anEvent.equals("RunFileMenuItem")) {
-            DebugTool debugTool = _projTools.getDebugTool();
+            DebugTool debugTool = _podTools.getDebugTool();
             debugTool.runConfigOrFile(null, getSelFile(), false);
         }
         if (anEvent.equals("DebugFileMenuItem")) {
-            DebugTool debugTool = _projTools.getDebugTool();
+            DebugTool debugTool = _podTools.getDebugTool();
             debugTool.runConfigOrFile(null, getSelFile(), true);
         }
 
@@ -363,7 +363,7 @@ public class FileTreeTool extends ProjectTool {
         dbox.setMessage("Enter new name for " + selFile.getName());
         String newName = dbox.showInputDialog(_podPane.getUI(), selFile.getName());
         if (newName != null) {
-            FilesTool filesTool = _projTools.getFilesTool();
+            FilesTool filesTool = _podTools.getFilesTool();
             filesTool.renameFile(selFile, newName);
         }
     }
@@ -391,7 +391,7 @@ public class FileTreeTool extends ProjectTool {
     {
         Clipboard clipboard = Clipboard.get();
         if (clipboard.hasFiles()) {
-            FilesTool filesTool = _projTools.getFilesTool();
+            FilesTool filesTool = _podTools.getFilesTool();
             List<File> files = clipboard.getJavaFiles();
             filesTool.addFiles(files);
         }

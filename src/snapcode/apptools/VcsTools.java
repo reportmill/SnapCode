@@ -5,14 +5,14 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.app.ProjectConfigPane;
 import snapcode.app.PodPane;
-import snapcode.app.ProjectTool;
+import snapcode.app.PodTool;
 import snapcode.project.VersionControl;
 //import snapcode.project.VersionControlGit;
 
 /**
  * This is project tool to manage all project VcsTool instances.
  */
-public class VcsTools extends ProjectTool {
+public class VcsTools extends PodTool {
 
     // The VcsTool for main project
     private VcsPane _vcp;

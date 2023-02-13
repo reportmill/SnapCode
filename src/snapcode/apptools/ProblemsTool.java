@@ -7,12 +7,12 @@ import snap.gfx.Image;
 import snap.view.*;
 import snap.web.WebFile;
 import snapcode.app.PodPane;
-import snapcode.app.ProjectTool;
+import snapcode.app.PodTool;
 
 /**
  * A pane/panel to show current build issues.
  */
-public class ProblemsTool extends ProjectTool {
+public class ProblemsTool extends PodTool {
 
     // The selected issue
     private BuildIssue  _selIssue;

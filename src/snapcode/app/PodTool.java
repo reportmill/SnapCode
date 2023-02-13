@@ -8,15 +8,15 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This is the base class for project tools.
+ * This is the base class for pod tools.
  */
-public class ProjectTool extends ViewOwner {
+public class PodTool extends ViewOwner {
 
     // The PodPane
     protected PodPane  _podPane;
 
-    // The ProjectTools
-    protected ProjectTools  _projTools;
+    // The PodTools
+    protected PodTools  _podTools;
 
     // The PagePane
     protected PagePane  _pagePane;
@@ -24,11 +24,11 @@ public class ProjectTool extends ViewOwner {
     /**
      * Constructor.
      */
-    public ProjectTool(PodPane podPane)
+    public PodTool(PodPane podPane)
     {
         super();
         _podPane = podPane;
-        _projTools = podPane.getProjectTools();
+        _podTools = podPane.getPodTools();
         _pagePane = podPane.getPagePane();
     }
 

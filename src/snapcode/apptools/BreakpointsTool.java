@@ -5,12 +5,12 @@ import snap.view.ListView;
 import snap.view.View;
 import snap.view.ViewEvent;
 import snapcode.app.PodPane;
-import snapcode.app.ProjectTool;
+import snapcode.app.PodTool;
 
 /**
  * This class displays and edits project breakpoints.
  */
-public class BreakpointsTool extends ProjectTool {
+public class BreakpointsTool extends PodTool {
 
     // The breakpoints list
     private ListView<Breakpoint>  _breakpointsList;

@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Manages a list of run configurations for project.
  */
-public class RunConfigsTool extends ProjectTool {
+public class RunConfigsTool extends PodTool {
 
     // The selected RunConfig
     private RunConfig  _runConfig;
@@ -134,7 +134,7 @@ public class RunConfigsTool extends ProjectTool {
 //        // Handle RunConfigMenuItems
 //        if (anEvent.getName().endsWith("RunConfigMenuItem")) {
 //            String configName = anEvent.getName().replace("RunConfigMenuItem", "");
-//            DebugTool debugTool = _projTools.getDebugTool();
+//            DebugTool debugTool = _podTools.getDebugTool();
 //            debugTool.runConfigForName(configName, false);
 //            setRunMenuButtonItems();
 //        }

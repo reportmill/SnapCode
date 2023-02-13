@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * The ProcPane manages run/debug processes.
  */
-public class ProcPane extends ProjectTool implements RunApp.AppListener {
+public class ProcPane extends PodTool implements RunApp.AppListener {
 
     // The DebugTool
     private DebugTool _debugTool;
@@ -57,7 +57,7 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
     /**
      * Returns the RunConsole.
      */
-    public RunConsole getRunConsole()  { return _projTools.getRunConsole(); }
+    public RunConsole getRunConsole()  { return _podTools.getRunConsole(); }
 
     /**
      * Returns the DebugVarsPane.

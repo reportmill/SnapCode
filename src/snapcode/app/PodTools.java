@@ -9,24 +9,24 @@ import snap.web.WebFile;
 import snapcode.apptools.*;
 
 /**
- * This class manages all of the ProjectTools for a PodPane.
+ * This class manages all the PodTool instances for a PodPane.
  */
-public class ProjectTools {
+public class PodTools {
 
     // The FilesPane
     protected FilesTool  _filesTool;
 
     // The FilesPane
-    protected FileTreeTool _fileTreeTool;
+    protected FileTreeTool  _fileTreeTool;
 
     // The Problems pane
-    private ProblemsTool _problemsTool;
+    private ProblemsTool  _problemsTool;
 
     // The RunConsole
-    private RunConsole _runConsole;
+    private RunConsole  _runConsole;
 
     // The BreakpointsTool
-    private BreakpointsTool _breakpointsTool;
+    private BreakpointsTool  _breakpointsTool;
 
     // The PodPane
     private PodPane  _podPane;
@@ -55,7 +55,7 @@ public class ProjectTools {
     /**
      * Constructor.
      */
-    public ProjectTools(PodPane podPane)
+    public PodTools(PodPane podPane)
     {
         super();
         _podPane = podPane;
@@ -78,12 +78,12 @@ public class ProjectTools {
         _vcsTools = new VcsTools(_podPane);
 
         // Set tools
-        ProjectTool[] bottomTools = {_problemsTool, _debugTool, _runConsole, _breakpointsTool, _searchTool, _runConfigsTool, _httpServerTool };
-        _supportTray = new SupportTray(_podPane, Side.BOTTOM, bottomTools);
+        PodTool[] bottomTools = { _problemsTool, _debugTool, _runConsole, _breakpointsTool, _searchTool, _runConfigsTool, _httpServerTool };
+        _supportTray = new SupportTray(Side.BOTTOM, bottomTools);
 
 
-        ProjectTool[] sideTools = {_fileTreeTool};
-        _sideBar = new SupportTray(_podPane, Side.LEFT, sideTools);
+        PodTool[] sideTools = { _fileTreeTool };
+        _sideBar = new SupportTray(Side.LEFT, sideTools);
     }
 
     /**
@@ -134,7 +134,7 @@ public class ProjectTools {
     /**
      * Sets the selected index for given class.
      */
-    public void showToolForClass(Class<? extends ProjectTool> aClass)
+    public void showToolForClass(Class<? extends PodTool> aClass)
     {
         _supportTray.setSelToolForClass(aClass);
     }

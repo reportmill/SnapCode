@@ -6,7 +6,7 @@ import snap.viewx.WebBrowser;
 /**
  * Manages status bar.
  */
-public class StatusBar extends ProjectTool {
+public class StatusBar extends PodTool {
 
     /**
      * Constructor.

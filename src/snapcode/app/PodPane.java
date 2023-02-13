@@ -37,8 +37,8 @@ public class PodPane extends ViewOwner {
     // The StatusBar
     protected StatusBar  _statusBar;
 
-    // The ProjectTool manager
-    protected ProjectTools  _projTools;
+    // The PodTools
+    protected PodTools  _podTools;
 
     // A PropChangeListener to watch for site file changes
     private PropChangeListener _siteFileLsnr = pc -> siteFileChanged(pc);
@@ -58,9 +58,9 @@ public class PodPane extends ViewOwner {
         _pagePane = new PagePane(this);
         _statusBar = new StatusBar(this);
 
-        // Create ProjectTools
-        _projTools = new ProjectTools(this);
-        _projTools.createTools();
+        // Create PodTools
+        _podTools = new PodTools(this);
+        _podTools.createTools();
     }
 
     /**
@@ -79,9 +79,9 @@ public class PodPane extends ViewOwner {
     public WebBrowser getBrowser()  { return _pagePane.getBrowser(); }
 
     /**
-     * Returns the ProjectTools helper.
+     * Returns the PodTools helper.
      */
-    public ProjectTools getProjectTools()  { return _projTools; }
+    public PodTools getPodTools()  { return _podTools; }
 
     /**
      * Returns the toolbar.
@@ -91,12 +91,12 @@ public class PodPane extends ViewOwner {
     /**
      * Returns the processes pane.
      */
-    public ProcPane getProcPane()  { return _projTools.getDebugTool().getProcPane(); }
+    public ProcPane getProcPane()  { return _podTools.getDebugTool().getProcPane(); }
 
     /**
      * Returns the support tray.
      */
-    public SupportTray getSupportTray()  { return _projTools.getSupportTray(); }
+    public SupportTray getSupportTray()  { return _podTools.getSupportTray(); }
 
     /**
      * Returns the array of sites.
@@ -132,8 +132,8 @@ public class PodPane extends ViewOwner {
         Project proj = pod.getProjectForSite(aSite);
 
         // Add listener to update tools when Breakpoint/BuildIssue added/removed
-        proj.getBreakpoints().addPropChangeListener(pc -> _projTools.projBreakpointsDidChange(pc));
-        proj.getBuildIssues().addPropChangeListener(pc -> _projTools.projBuildIssuesDidChange(pc));
+        proj.getBreakpoints().addPropChangeListener(pc -> _podTools.projBreakpointsDidChange(pc));
+        proj.getBuildIssues().addPropChangeListener(pc -> _podTools.projBuildIssuesDidChange(pc));
 
         // Add site
         SitePane sitePane = SitePane.get(aSite, true);
@@ -144,7 +144,7 @@ public class PodPane extends ViewOwner {
             addSite(p.getSite());
 
         // Clear root files
-        FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
+        FileTreeTool fileTreeTool = _podTools.getFileTreeTool();
         fileTreeTool.resetRootFiles();
 
         // Reset UI
@@ -163,7 +163,7 @@ public class PodPane extends ViewOwner {
         aSite.removeFileChangeListener(_siteFileLsnr);
 
         // Clear root files
-        FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
+        FileTreeTool fileTreeTool = _podTools.getFileTreeTool();
         fileTreeTool.resetRootFiles();
 
         // Reset UI
@@ -238,7 +238,7 @@ public class PodPane extends ViewOwner {
             site.resetFiles();
         }
 
-        _projTools.closeProject();
+        _podTools.closeProject();
     }
 
     /**
@@ -281,14 +281,14 @@ public class PodPane extends ViewOwner {
         _pagePane.addPropChangeListener(pc -> pagePaneDidPropChange(pc), PagePane.SelFile_Prop);
 
         // Add FilesPane
-        SupportTray sideBar = _projTools.getSideBar();
+        SupportTray sideBar = _podTools.getSideBar();
         View sideBarUI = sideBar.getUI();
         sideBarUI.setGrowHeight(true);
         sideBar.setSelToolForClass(FileTreeTool.class);
         pagePaneSplitView.addItem(sideBarUI, 0);
 
         // Add SupportTray to MainSplit
-        SupportTray supportTray = _projTools.getSupportTray();
+        SupportTray supportTray = _podTools.getSupportTray();
         TabView supportTrayUI = (TabView) supportTray.getUI();
         mainSplit.addItem(supportTrayUI);
 
@@ -315,7 +315,7 @@ public class PodPane extends ViewOwner {
         getWindow().setTitle(page != null ? page.getTitle() : "SnapCode");
 
         // Reset FilesPane and SupportTray
-        _projTools.resetLater();
+        _podTools.resetLater();
         _statusBar.resetLater();
     }
 
@@ -338,7 +338,7 @@ public class PodPane extends ViewOwner {
 
         // Handle NewFileMenuItem, NewFileButton
         if (anEvent.equals("NewFileMenuItem") || anEvent.equals("NewFileButton")) {
-            FilesTool filesTool = _projTools.getFilesTool();
+            FilesTool filesTool = _podTools.getFilesTool();
             filesTool.showNewFilePanel();
             anEvent.consume();
         }
@@ -373,7 +373,7 @@ public class PodPane extends ViewOwner {
         // Get file and update in FilesPane
         WebFile file = (WebFile) aPC.getSource();
         if (file.getExists()) {
-            FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
+            FileTreeTool fileTreeTool = _podTools.getFileTreeTool();
             fileTreeTool.updateFile(file);
         }
     }
@@ -386,7 +386,7 @@ public class PodPane extends ViewOwner {
         // Handle SelFile
         String propName = aPC.getPropName();
         if (propName == PagePane.SelFile_Prop) {
-            FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
+            FileTreeTool fileTreeTool = _podTools.getFileTreeTool();
             fileTreeTool.resetLater();
         }
     }

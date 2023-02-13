@@ -12,16 +12,15 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebUtils;
 import snapcode.app.PodPane;
-import snapcode.app.ProjectTool;
+import snapcode.app.PodTool;
 import snapcode.app.SitePane;
-
 import java.io.File;
 import java.util.List;
 
 /**
- * This class is a ProjectTool to manage file operations on project files: create, add, remove, rename.
+ * This class is a PodTool to manage file operations on project files: create, add, remove, rename.
  */
-public class FilesTool extends ProjectTool {
+public class FilesTool extends PodTool {
 
     /**
      * Constructor.

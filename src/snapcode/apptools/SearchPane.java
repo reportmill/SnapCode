@@ -12,7 +12,7 @@ import javakit.ide.NodeMatcher;
 import javakit.ide.JavaTextUtils;
 import snap.gfx.Image;
 import snapcode.app.PodPane;
-import snapcode.app.ProjectTool;
+import snapcode.app.PodTool;
 import snapcode.app.SitePane;
 import snapcode.project.JavaData;
 import snap.util.ArrayUtils;
@@ -26,7 +26,7 @@ import java.util.Set;
 /**
  * This class manages project search.
  */
-public class SearchPane extends ProjectTool {
+public class SearchPane extends PodTool {
 
     // The current search
     private Search  _search;

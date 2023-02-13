@@ -17,7 +17,7 @@ import snap.view.ViewEvent;
 import snap.viewx.DialogBox;
 import snap.web.*;
 import snapcode.app.PodPane;
-import snapcode.app.ProjectTool;
+import snapcode.app.PodTool;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,7 +31,7 @@ import java.util.TimeZone;
 /**
  * HttpServerTool provides UI for managing an HTTP-Server for the project.
  */
-public class HttpServerTool extends ProjectTool {
+public class HttpServerTool extends PodTool {
 
     // The WebSite path
     private String  _sitePath;

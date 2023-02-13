@@ -106,8 +106,8 @@ public class HomePage extends WebPage {
 
         // Handle NewJavaFile, NewFile
         if ((anEvent.equals("NewJavaFile") || anEvent.equals("NewFile")) && anEvent.isMouseRelease()) {
-            ProjectTools projectTools = getPodPane().getProjectTools();
-            FilesTool filesTool = projectTools.getFilesTool();
+            PodTools podTools = getPodPane().getPodTools();
+            FilesTool filesTool = podTools.getFilesTool();
             filesTool.showNewFilePanel();
         }
 

@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * ToolBar.
  */
-public class MainToolBar extends ProjectTool {
+public class MainToolBar extends PodTool {
 
     /**
      * Constructor.
@@ -88,9 +88,9 @@ public class MainToolBar extends ProjectTool {
                 _pagePane.setBrowserURL(url);
             }
             else {
-                SearchPane searchTool = _projTools.getSearchTool();
+                SearchPane searchTool = _podTools.getSearchTool();
                 searchTool.search(text);
-                _projTools.showToolForClass(SearchPane.class);
+                _podTools.showToolForClass(SearchPane.class);
             }
         }
 
