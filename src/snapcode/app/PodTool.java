@@ -45,7 +45,7 @@ public class PodTool extends ViewOwner {
     /**
      * Returns the selected project.
      */
-    public Project getProject()  { return _podPane.getProject(); }
+    public Project getProject()  { return _podPane.getRootProject(); }
 
     /**
      * Returns the selected file.

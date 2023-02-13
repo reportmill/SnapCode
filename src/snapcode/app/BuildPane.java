@@ -12,8 +12,8 @@ import snap.web.WebSite;
  */
 public class BuildPane extends ViewOwner {
 
-    // The SitePane that owns this BuildPane
-    SitePane _sitePane;
+    // The ProjectPane that owns this BuildPane
+    ProjectPane  _projectPane;
 
     // The Site
     WebSite _site;
@@ -33,9 +33,9 @@ public class BuildPane extends ViewOwner {
     /**
      * Creates a new BuildPane for given site.
      */
-    protected BuildPane(SitePane aSP)
+    protected BuildPane(ProjectPane aSP)
     {
-        _sitePane = aSP;
+        _projectPane = aSP;
         _site = aSP.getSite();
         _proj = Project.getProjectForSite(_site);
     }
@@ -102,11 +102,11 @@ public class BuildPane extends ViewOwner {
 
         // Handle BuildButton
         if (anEvent.equals("BuildButton"))
-            _sitePane.buildSite(true);
+            _projectPane.buildSite(true);
 
         // Handle CleanButton
         if (anEvent.equals("CleanButton"))
-            _sitePane.cleanSite();
+            _projectPane.cleanSite();
     }
 
     /**

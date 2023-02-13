@@ -20,13 +20,10 @@ import snapcode.project.WorkSpaceX;
 public class PodPane extends ViewOwner {
 
     // The Pod
-    private WorkSpace _workSpace;
+    private WorkSpace  _workSpace;
 
-    // The list of sites
-    protected WebSite[]  _sites = new WebSite[0];
-
-    // The project
-    private Project  _proj;
+    // The array of ProjectPanes
+    protected ProjectPane[]  _projectPanes = new ProjectPane[0];
 
     // The MainToolBar
     protected MainToolBar  _toolBar;
@@ -41,7 +38,7 @@ public class PodPane extends ViewOwner {
     protected PodTools  _podTools;
 
     // A PropChangeListener to watch for site file changes
-    private PropChangeListener _siteFileLsnr = pc -> siteFileChanged(pc);
+    private PropChangeListener  _siteFileLsnr = pc -> siteFileChanged(pc);
 
     /**
      * Constructor.
@@ -66,7 +63,7 @@ public class PodPane extends ViewOwner {
     /**
      * Returns the pod.
      */
-    public WorkSpace getPod()  { return _workSpace; }
+    public WorkSpace getWorkSpace()  { return _workSpace; }
 
     /**
      * Returns the PagePane.
@@ -99,89 +96,116 @@ public class PodPane extends ViewOwner {
     public SupportTray getSupportTray()  { return _podTools.getSupportTray(); }
 
     /**
+     * Returns the projects.
+     */
+    public Project[] getProjects()  { return _workSpace.getProjects(); }
+
+    /**
+     * Adds a project to workspace.
+     */
+    public void addProject(Project aProject)
+    {
+        // If project already added, just return
+        Project[] projects = getProjects();
+        if (ArrayUtils.contains(projects, aProject)) return;
+
+        // Add project
+        _workSpace.addProject(aProject);
+
+        // Start listening to file changes
+        WebSite projSite = aProject.getSite();
+        projSite.addFileChangeListener(_siteFileLsnr);
+
+        // Add listener to update tools when Breakpoint/BuildIssue added/removed
+        aProject.getBreakpoints().addPropChangeListener(pc -> _podTools.projBreakpointsDidChange(pc));
+        aProject.getBuildIssues().addPropChangeListener(pc -> _podTools.projBuildIssuesDidChange(pc));
+
+        // Create/add ProjectPane
+        ProjectPane projPane = new ProjectPane(this, aProject);
+        _projectPanes = ArrayUtils.addId(_projectPanes, projPane);
+
+        // Add dependent sites
+        Project[] childProjects = aProject.getProjects();
+        for (Project proj : childProjects)
+            addProject(proj);
+
+        // Clear root files
+        FileTreeTool fileTreeTool = _podTools.getFileTreeTool();
+        fileTreeTool.resetRootFiles();
+
+        // Reset UI
+        resetLater();
+    }
+
+    /**
+     * Removes a project from workspace.
+     */
+    public void removeProject(Project aProject)
+    {
+        // Remove project
+        _workSpace.removeProject(aProject);
+
+        // Remove ProjectPane
+        ProjectPane projPane = getProjectPaneForProject(aProject);
+        _projectPanes = ArrayUtils.remove(_projectPanes, projPane);
+
+        // Stop listening to file changes
+        WebSite projSite = aProject.getSite();
+        projSite.removeFileChangeListener(_siteFileLsnr);
+
+        // Clear root files
+        FileTreeTool fileTreeTool = _podTools.getFileTreeTool();
+        fileTreeTool.resetRootFiles();
+
+        // Reset UI
+        resetLater();
+    }
+
+    /**
+     * Returns the ProjectPanes.
+     */
+    public ProjectPane getProjectPaneForProject(Project aProject)
+    {
+        return ArrayUtils.findMatch(_projectPanes, prjPane -> prjPane.getProject() == aProject);
+    }
+
+    /**
      * Returns the array of sites.
      */
-    public WebSite[] getSites()  { return _sites; }
+    public WebSite[] getSites()  { return _workSpace.getSites(); }
 
     /**
      * Returns the number of sites.
      */
-    public int getSiteCount()  { return _sites.length; }
+    public int getSiteCount()  { return getSites().length; }
 
     /**
      * Returns the individual site at the given index.
      */
-    public WebSite getSite(int anIndex)  { return _sites[anIndex]; }
+    public WebSite getSite(int anIndex)  { return getSites()[anIndex]; }
 
     /**
      * Adds a site to sites list.
      */
-    public void addSite(WebSite aSite)
+    public Project addProjectForSite(WebSite aSite)
     {
-        // If site already added, just return
-        if (ArrayUtils.contains(_sites, aSite)) return;
-
-        // Add site
-        _sites = ArrayUtils.add(_sites, aSite);
-
-        // Start listening to file changes
-        aSite.addFileChangeListener(_siteFileLsnr);
-
-        // Get project for site
-        WorkSpace workSpace = getPod();
-        Project proj = workSpace.getProjectForSite(aSite);
-
-        // Add listener to update tools when Breakpoint/BuildIssue added/removed
-        proj.getBreakpoints().addPropChangeListener(pc -> _podTools.projBreakpointsDidChange(pc));
-        proj.getBuildIssues().addPropChangeListener(pc -> _podTools.projBuildIssuesDidChange(pc));
-
-        // Add site
-        SitePane sitePane = SitePane.get(aSite, true);
-        sitePane.setPodPane(this);
-
-        // Add dependent sites
-        for (Project p : proj.getProjects())
-            addSite(p.getSite());
-
-        // Clear root files
-        FileTreeTool fileTreeTool = _podTools.getFileTreeTool();
-        fileTreeTool.resetRootFiles();
-
-        // Reset UI
-        resetLater();
+        Project proj = _workSpace.getProjectForSite(aSite);
+        addProject(proj);
+        return proj;
     }
-
-    /**
-     * Removes a site from sites list.
-     */
-    public void removeSite(WebSite aSite)
-    {
-        // Remove site
-        _sites = ArrayUtils.remove(_sites, aSite);
-
-        // Stop listening to file changes
-        aSite.removeFileChangeListener(_siteFileLsnr);
-
-        // Clear root files
-        FileTreeTool fileTreeTool = _podTools.getFileTreeTool();
-        fileTreeTool.resetRootFiles();
-
-        // Reset UI
-        resetLater();
-    }
-
-    /**
-     * Returns the top level site.
-     */
-    public WebSite getRootSite()  { return _sites[0]; }
 
     /**
      * Returns the selected project.
      */
-    public Project getProject()
+    public Project getRootProject()  { return _workSpace.getRootProject(); }
+
+    /**
+     * Returns the top level site.
+     */
+    public WebSite getRootSite()
     {
-        if (_proj != null) return _proj;
-        return _proj = Project.getProjectForSite(getRootSite());
+        Project rootProj = _workSpace.getRootProject();
+        return rootProj.getSite();
     }
 
     /**
@@ -220,8 +244,11 @@ public class PodPane extends ViewOwner {
         getWindow().setSaveSize(true);
         getWindow().setVisible(true);
 
-        // Open site and show home page
-        SitePane.get(getSite(0)).openSite();
+        // Open Projects
+        for (ProjectPane projPane : _projectPanes)
+            projPane.openSite();
+
+        // Show HomePage
         _pagePane.showHomePage();
     }
 
@@ -232,7 +259,7 @@ public class PodPane extends ViewOwner {
     {
         // Flush and refresh sites
         for (WebSite site : getSites()) {
-            SitePane.get(site).closeSite();
+            ProjectPane.get(site).closeSite();
             try { site.flush(); }
             catch (Exception e) { throw new RuntimeException(e); }
             site.resetFiles();
@@ -246,7 +273,7 @@ public class PodPane extends ViewOwner {
      */
     public WebFile getBuildDir()
     {
-        Project proj = getProject();
+        Project proj = getRootProject();
         return proj != null ? proj.getBuildDir() : null;
     }
 

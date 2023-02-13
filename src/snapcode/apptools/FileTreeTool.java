@@ -11,7 +11,7 @@ import snap.web.WebURL;
 import snapcode.app.DiffPage;
 import snapcode.app.PodPane;
 import snapcode.app.PodTool;
-import snapcode.app.SitePane;
+import snapcode.app.ProjectPane;
 import snapcode.util.CloseBox;
 import java.io.File;
 import java.util.ArrayList;
@@ -330,11 +330,11 @@ public class FileTreeTool extends PodTool {
 
         // Handle CleanProjectMenuItem
         if (anEvent.equals("CleanProjectMenuItem"))
-            SitePane.get(getRootSite()).cleanSite();
+            ProjectPane.get(getRootSite()).cleanSite();
 
         // Handle BuildProjectMenuItem
         if (anEvent.equals("BuildProjectMenuItem"))
-            SitePane.get(getRootSite()).buildSite(false);
+            ProjectPane.get(getRootSite()).buildSite(false);
 
         // Handle ShowClassInfoMenuItem
         if (anEvent.equals("ShowClassInfoMenuItem")) {

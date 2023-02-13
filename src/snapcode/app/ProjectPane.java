@@ -1,4 +1,5 @@
 package snapcode.app;
+import javakit.project.Project;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.view.TabView;
@@ -9,18 +10,18 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 
 /**
- * A class to manage UI aspects of a WebSite for app.
+ * A class to manage UI aspects of a Project.
  */
-public class SitePane extends WebPage {
+public class ProjectPane extends WebPage {
 
-    // The PodPane that owns this SitePane
-    private PodPane  _podPane;
+    // The WorkSpacePane that owns this ProjectPane
+    private PodPane  _workSpacePane;
 
-    // The WebSite
-    private WebSite  _site;
+    // The Project
+    private Project  _project;
 
     // The ProjectConfigPane
-    private ProjectConfigPane  _projPane;
+    private ProjectConfigPane  _configPane;
 
     // The BuildPane
     private BuildPane _buildPane;
@@ -32,44 +33,48 @@ public class SitePane extends WebPage {
     private PropChangeListener  _siteFileLsnr = pc -> siteFileChanged(pc);
 
     /**
-     * Creates a new SitePane for given site.
+     * Constructor.
      */
-    protected SitePane(WebSite aSite)
+    protected ProjectPane(PodPane workSpacePane, Project aProject)
     {
-        _site = aSite;
-        _site.addFileChangeListener(_siteFileLsnr);
+        _workSpacePane = workSpacePane;
+        _project = aProject;
+
+        //
+        WebSite projSite = aProject.getSite();
+        projSite.addFileChangeListener(_siteFileLsnr);
 
         // Set ProjectConfigPane
-        _projPane = new ProjectConfigPane(this);
+        _configPane = new ProjectConfigPane(this);
 
         // Set BuildPane
         _buildPane = new BuildPane(this);
+
+        // Set this ProjectPane as Site prop
+        projSite.setProp(ProjectPane.class.getName(), this);
     }
 
     /**
-     * Sets the PodPane.
+     * Returns the WorkSpacePane.
      */
-    protected void setPodPane(PodPane anAP)
-    {
-        _podPane = anAP;
-        if (_projPane != null)
-            _projPane.setPodPane(anAP);
-    }
+    public PodPane getWorkSpacePane()  { return _workSpacePane; }
+
+    /**
+     * Returns the project.
+     */
+    public Project getProject()  { return _project; }
 
     /**
      * Returns the site.
      */
-    public WebSite getSite()
-    {
-        return _site;
-    }
+    public WebSite getSite()  { return _project.getSite(); }
 
     /**
      * Returns the ProjectConfigPane for this site.
      */
     public ProjectConfigPane getProjPane()
     {
-        return _projPane;
+        return _configPane;
     }
 
     /**
@@ -77,7 +82,7 @@ public class SitePane extends WebPage {
      */
     public boolean isAutoBuild()
     {
-        return _projPane != null && _projPane.isAutoBuild();
+        return _configPane != null && _configPane.isAutoBuild();
     }
 
     /**
@@ -85,7 +90,7 @@ public class SitePane extends WebPage {
      */
     public void setAutoBuild(boolean aValue)
     {
-        if (_projPane != null) _projPane.setAutoBuild(aValue);
+        if (_configPane != null) _configPane.setAutoBuild(aValue);
     }
 
     /**
@@ -93,7 +98,7 @@ public class SitePane extends WebPage {
      */
     public boolean isAutoBuildEnabled()
     {
-        return _projPane != null && _projPane.isAutoBuildEnabled();
+        return _configPane != null && _configPane.isAutoBuildEnabled();
     }
 
     /**
@@ -101,7 +106,7 @@ public class SitePane extends WebPage {
      */
     public boolean setAutoBuildEnabled(boolean aFlag)
     {
-        return _projPane != null && _projPane.setAutoBuildEnabled(aFlag);
+        return _configPane != null && _configPane.setAutoBuildEnabled(aFlag);
     }
 
     /**
@@ -110,8 +115,8 @@ public class SitePane extends WebPage {
     public void openSite()
     {
         // Activate ProjectConfigPane
-        if (_projPane != null)
-            _projPane.openSite();
+        if (_configPane != null)
+            _configPane.openSite();
     }
 
     /**
@@ -119,11 +124,11 @@ public class SitePane extends WebPage {
      */
     public void closeSite()
     {
-        _site.removeFileChangeListener(_siteFileLsnr);
-        _site.setProp(SitePane.class.getName(), null);
-        _podPane = null;
-        _site = null;
-        _projPane = null;
+        WebSite projSite = _project.getSite();
+        projSite.removeFileChangeListener(_siteFileLsnr);
+        projSite.setProp(ProjectPane.class.getName(), null);
+        _workSpacePane = null;
+        _configPane = null;
     }
 
     /**
@@ -131,10 +136,14 @@ public class SitePane extends WebPage {
      */
     public void deleteSite(View aView)
     {
-        if (_projPane != null)
-            _projPane.deleteProject(aView);
+        if (_configPane != null)
+            _configPane.deleteProject(aView);
+
         else {
-            try { _site.deleteSite(); }
+            try {
+                WebSite projSite = _project.getSite();
+                projSite.deleteSite();
+            }
             catch (Exception e) {
                 e.printStackTrace();
                 DialogBox.showExceptionDialog(null, "Delete Site Failed", e);
@@ -147,8 +156,8 @@ public class SitePane extends WebPage {
      */
     public void buildSite(boolean doAddFiles)
     {
-        if (_projPane != null)
-            _projPane.buildProjectLater(doAddFiles);
+        if (_configPane != null)
+            _configPane.buildProjectLater(doAddFiles);
     }
 
     /**
@@ -156,8 +165,8 @@ public class SitePane extends WebPage {
      */
     public void cleanSite()
     {
-        if (_projPane != null)
-            _projPane.cleanProject();
+        if (_configPane != null)
+            _configPane.cleanProject();
     }
 
     /**
@@ -165,7 +174,7 @@ public class SitePane extends WebPage {
      */
     public boolean isHiddenFile(WebFile aFile)
     {
-        if (aFile == _projPane.getProject().getBuildDir())
+        if (aFile == _configPane.getProject().getBuildDir())
             return true;
         return aFile.getPath().startsWith("/.git");
     }
@@ -196,8 +205,8 @@ public class SitePane extends WebPage {
      */
     void fileAdded(WebFile aFile)
     {
-        if (_projPane != null)
-            _projPane.fileAdded(aFile);
+        if (_configPane != null)
+            _configPane.fileAdded(aFile);
     }
 
     /**
@@ -205,8 +214,8 @@ public class SitePane extends WebPage {
      */
     void fileRemoved(WebFile aFile)
     {
-        if (_projPane != null)
-            _projPane.fileRemoved(aFile);
+        if (_configPane != null)
+            _configPane.fileRemoved(aFile);
     }
 
     /**
@@ -214,8 +223,8 @@ public class SitePane extends WebPage {
      */
     void fileSaved(WebFile aFile)
     {
-        if (_projPane != null)
-            _projPane.fileSaved(aFile);
+        if (_configPane != null)
+            _configPane.fileSaved(aFile);
     }
 
     /**
@@ -242,23 +251,13 @@ public class SitePane extends WebPage {
     /**
      * Returns the site pane for a site.
      */
-    public static SitePane get(WebSite aSite)
+    public static ProjectPane get(WebSite aSite)
     {
-        return get(aSite, false);
+        return (ProjectPane) aSite.getProp(ProjectPane.class.getName());
     }
 
     /**
-     * Returns the site pane for a site.
-     */
-    public synchronized static SitePane get(WebSite aSite, boolean doCreate)
-    {
-        SitePane sp = (SitePane) aSite.getProp(SitePane.class.getName());
-        if (sp == null && doCreate) aSite.setProp(SitePane.class.getName(), sp = new SitePane(aSite));
-        return sp;
-    }
-
-    /**
-     * A WebPage subclass for SitePane.
+     * A WebPage subclass for ProjectPane.
      */
     public static class SitePage extends WebPage {
 
@@ -267,7 +266,7 @@ public class SitePane extends WebPage {
          */
         protected View createUI()
         {
-            SitePane sp = SitePane.get(getSite());
+            ProjectPane sp = ProjectPane.get(getSite());
             return sp.getUI();
         }
 

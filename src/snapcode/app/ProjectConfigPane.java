@@ -25,11 +25,11 @@ import java.util.List;
  */
 public class ProjectConfigPane extends ViewOwner {
 
-    // The PodPane
-    private PodPane  _podPane;
+    // The WorkSpacePane
+    private PodPane  _workSpacePane;
 
-    // The SitePane
-    private SitePane  _sitePane;
+    // The ProjectPane
+    private ProjectPane _projPane;
 
     // The WebSite
     private WebSite  _site;
@@ -58,26 +58,19 @@ public class ProjectConfigPane extends ViewOwner {
     /**
      * Constructor.
      */
-    public ProjectConfigPane(SitePane aSitePane)
+    public ProjectConfigPane(ProjectPane projectPane)
     {
-        _site = aSitePane.getSite();
-        _proj = Project.getProjectForSite(_site);
-        _sitePane = aSitePane;
+        _workSpacePane = projectPane.getWorkSpacePane();
+        _projPane = projectPane;
+        _site = projectPane.getSite();
+        _proj = projectPane.getProject();
         _site.setProp(ProjectConfigPane.class.getName(), this);
     }
 
     /**
-     * Sets the PodPane.
+     * Returns the ProjectPane.
      */
-    protected void setPodPane(PodPane podPane)
-    {
-        _podPane = podPane;
-    }
-
-    /**
-     * Returns the SitePane.
-     */
-    public SitePane getSitePane()  { return _sitePane; }
+    public ProjectPane getSitePane()  { return _projPane; }
 
     /**
      * Returns the project.
@@ -115,7 +108,7 @@ public class ProjectConfigPane extends ViewOwner {
     public void openSite()
     {
         // Kick off site build
-        if (_sitePane.isAutoBuildEnabled())
+        if (_projPane.isAutoBuildEnabled())
             buildProjectLater(true);
     }
 
@@ -124,10 +117,12 @@ public class ProjectConfigPane extends ViewOwner {
      */
     public void deleteProject(View aView)
     {
-        _sitePane.setAutoBuild(false);
+        _projPane.setAutoBuild(false);
         try {
             _proj.deleteProject(new TaskMonitorPanel(aView, "Delete Project"));
-        } catch (Exception e) {
+        }
+
+        catch (Exception e) {
             DialogBox.showExceptionDialog(aView, "Delete Project Failed", e);
         }
     }
@@ -137,7 +132,7 @@ public class ProjectConfigPane extends ViewOwner {
      */
     public void addProject(String aName, String aURLString)
     {
-        View view = isUISet() && getUI().isShowing() ? getUI() : _podPane.getUI();
+        View view = isUISet() && getUI().isShowing() ? getUI() : _workSpacePane.getUI();
         addProject(aName, aURLString, view);
     }
 
@@ -171,8 +166,8 @@ public class ProjectConfigPane extends ViewOwner {
 
         // Add project for name
         _proj.getProjectSet().addProject(aName);
-        if (_podPane != null)
-            _podPane.addSite(site);
+        if (_workSpacePane != null)
+            _workSpacePane.addProjectForSite(site);
     }
 
     /**
@@ -183,7 +178,7 @@ public class ProjectConfigPane extends ViewOwner {
         WebSite site = aVC.getSite();
         String title = "Checkout from " + aVC.getRemoteURLString();
 
-        TaskRunner<Object> runner = new TaskRunnerPanel<Object>(_podPane.getUI(), title) {
+        TaskRunner<Object> runner = new TaskRunnerPanel<Object>(_workSpacePane.getUI(), title) {
 
             public Object run() throws Exception
             {
@@ -195,10 +190,10 @@ public class ProjectConfigPane extends ViewOwner {
             {
                 // Add new project to root project
                 _proj.getProjectSet().addProject(site.getName());
-                if (_podPane == null) return;
+                if (_workSpacePane == null) return;
 
                 // Add new project site to app pane and build
-                _podPane.addSite(site);
+                _workSpacePane.addProjectForSite(site);
                 Project proj = Project.getProjectForSite(site);
                 proj.addBuildFilesAll();
                 buildProjectLater(false);
@@ -208,7 +203,7 @@ public class ProjectConfigPane extends ViewOwner {
             {
                 if (ClientUtils.setAccess(aVC.getRemoteSite()))
                     checkout(aView, aVC);
-                else if (new LoginPage().showPanel(_podPane.getUI(), aVC.getRemoteSite()))
+                else if (new LoginPage().showPanel(_workSpacePane.getUI(), aVC.getRemoteSite()))
                     checkout(aView, aVC);
                 else super.failure(e);
             }
@@ -231,15 +226,14 @@ public class ProjectConfigPane extends ViewOwner {
         ProjectSet projectSet = _proj.getProjectSet();
         Project proj = projectSet.getProject(aName);
         if (proj == null) {
-            View view = isUISet() && getUI().isShowing() ? getUI() : _podPane.getUI();
+            View view = isUISet() && getUI().isShowing() ? getUI() : _workSpacePane.getUI();
             DialogBox.showWarningDialog(view, "Error Removing Project", "Project not found");
             return;
         }
 
         // Remove dependent project from root project and PodPane
         _proj.getProjectSet().removeProject(aName);
-        WebSite site = proj.getSite();
-        _podPane.removeSite(site);
+        _workSpacePane.removeProject(proj);
     }
 
     /**
@@ -342,7 +336,7 @@ public class ProjectConfigPane extends ViewOwner {
 
         void setActivity(String aStr)
         {
-            if (_podPane != null) _podPane.getBrowser().setActivity(aStr);
+            if (_workSpacePane != null) _workSpacePane.getBrowser().setActivity(aStr);
         }
 
         public void failure(final Exception e)
@@ -370,7 +364,7 @@ public class ProjectConfigPane extends ViewOwner {
     {
         if (_proj.getBuildDir().contains(aFile)) return;
         _proj.fileAdded(aFile);
-        if (_sitePane.isAutoBuild() && _sitePane.isAutoBuildEnabled())
+        if (_projPane.isAutoBuild() && _projPane.isAutoBuildEnabled())
             buildProjectLater(false);
     }
 
@@ -381,7 +375,7 @@ public class ProjectConfigPane extends ViewOwner {
     {
         if (_proj.getBuildDir().contains(aFile)) return;
         _proj.fileRemoved(aFile);
-        if (_sitePane.isAutoBuild() && _sitePane.isAutoBuildEnabled())
+        if (_projPane.isAutoBuild() && _projPane.isAutoBuildEnabled())
             buildProjectLater(false);
     }
 
@@ -392,7 +386,7 @@ public class ProjectConfigPane extends ViewOwner {
     {
         if (_proj.getBuildDir().contains(aFile)) return;
         _proj.fileSaved(aFile);
-        if (_sitePane.isAutoBuild() && _sitePane.isAutoBuildEnabled())
+        if (_projPane.isAutoBuild() && _projPane.isAutoBuildEnabled())
             buildProjectLater(false);
     }
 
@@ -456,14 +450,14 @@ public class ProjectConfigPane extends ViewOwner {
         // If final error count non-zero, show problems pane
         int errorCount = _proj.getRootProject().getBuildIssues().getErrorCount();
         if (errorCount > 0) {
-            SupportTray supportTray = _podPane.getSupportTray();
+            SupportTray supportTray = _workSpacePane.getSupportTray();
             if (supportTray.getSelTool() instanceof ProblemsTool)
                 supportTray.showProblemsTool();
         }
 
         // If error count zero and SupportTray showing problems, close
         if (errorCount == 0) {
-            SupportTray supportTray = _podPane.getSupportTray();
+            SupportTray supportTray = _workSpacePane.getSupportTray();
             if (supportTray.getSelTool() instanceof ProblemsTool)
                 supportTray.hideTools();
         }
@@ -488,9 +482,9 @@ public class ProjectConfigPane extends ViewOwner {
     protected void resetUI()
     {
         // Update HomePageText, AutoBuildCheckBox
-        SitePane sitePane = getSitePane();
+        ProjectPane projectPane = getSitePane();
         //setViewValue("HomePageText", sitePane.getHomePageURLString());
-        setViewValue("AutoBuildCheckBox", sitePane.isAutoBuild());
+        setViewValue("AutoBuildCheckBox", projectPane.isAutoBuild());
 
         // Update SourcePathText, BuildPathText
         Project proj = getProject();
@@ -510,14 +504,14 @@ public class ProjectConfigPane extends ViewOwner {
      */
     public void respondUI(ViewEvent anEvent)
     {
-        SitePane sitePane = getSitePane();
+        ProjectPane projectPane = getSitePane();
         Project proj = getProject();
         ProjectConfig projConfig = proj.getProjectConfig();
 
         // Handle HomePageText, AutoBuildCheckBox
         //if (anEvent.equals("HomePageText")) sitePane.setHomePageURLString(anEvent.getStringValue());
         if (anEvent.equals("AutoBuildCheckBox"))
-            sitePane.setAutoBuild(anEvent.getBoolValue());
+            projectPane.setAutoBuild(anEvent.getBoolValue());
 
         // Update SourcePathText, BuildPathText
         if (anEvent.equals("SourcePathText"))
@@ -542,7 +536,7 @@ public class ProjectConfigPane extends ViewOwner {
                          String path = file.getAbsolutePath(); //if(StringUtils.endsWithIC(path, ".jar"))
                          _proj.getProjectConfig().addLibPath(path);
                      }
-                     _sitePane.buildSite(false);
+                     _projPane.buildSite(false);
                      anEvent.dropComplete();
                  }
              }

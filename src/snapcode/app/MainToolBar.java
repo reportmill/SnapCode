@@ -118,8 +118,8 @@ public class MainToolBar extends PodTool {
     private void getFilesForPrefix(String aPrefix, WebFile aFile, List<WebFile> theFiles)
     {
         // If hidden file, just return
-        SitePane sitePane = SitePane.get(aFile.getSite());
-        if (sitePane.isHiddenFile(aFile))
+        ProjectPane projectPane = ProjectPane.get(aFile.getSite());
+        if (projectPane.isHiddenFile(aFile))
             return;
 
         // If directory, recurse

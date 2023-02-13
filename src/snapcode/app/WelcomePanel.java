@@ -1,4 +1,5 @@
 package snapcode.app;
+import javakit.project.Project;
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.DialogBox;
@@ -396,13 +397,15 @@ public class WelcomePanel extends ViewOwner {
      */
     public void openSites()
     {
-        // Create PodPane and add selected sites
-        PodPane podPane = new PodPane();
-        for (WebSite site : getSelectedSites())
-            podPane.addSite(site);
+        // Create WorkSpacePane and add selected sites
+        PodPane workSpacePane = new PodPane();
+
+        List<WebSite> projectSites = getSelectedSites();
+        for (WebSite site : projectSites)
+            workSpacePane.addProjectForSite(site);
 
         // Show PodPane
-        podPane.show();
+        workSpacePane.show();
     }
 
     /**
@@ -427,8 +430,12 @@ public class WelcomePanel extends ViewOwner {
         boolean deleteLocal = dbox.showConfirmDialog(getUI());
 
         // If requested, delete site files and sandbox (if "local" site)
-        if (deleteLocal && site.getURL().getScheme().equals("local"))
-            SitePane.get(site, true).deleteSite(getUI());
+        if (deleteLocal && site.getURL().getScheme().equals("local")) {
+            PodPane workSpacePane = new PodPane();
+            Project proj = workSpacePane.addProjectForSite(site);
+            ProjectPane projPane = workSpacePane.getProjectPaneForProject(proj);
+            projPane.deleteSite(getUI());
+        }
 
         // Get site index and select next index
         int index = ListUtils.indexOfId(getSites(), site);
@@ -457,10 +464,10 @@ public class WelcomePanel extends ViewOwner {
         WebURL url = WebURL.getURL(path);
         if (url == null || url.getFile() == null) return;
         Prefs.getDefaultPrefs().setValue("SnapFileViewerPath", path);
-        PodPane podPane = new PodPane();
+        PodPane workSpacePane = new PodPane();
         WebSite site = url.getAsSite();
-        podPane.addSite(site);
-        podPane.show();
+        workSpacePane.addProjectForSite(site);
+        workSpacePane.show();
         hide();
     }
 

@@ -13,7 +13,7 @@ import snap.web.WebSite;
 import snap.web.WebUtils;
 import snapcode.app.PodPane;
 import snapcode.app.PodTool;
-import snapcode.app.SitePane;
+import snapcode.app.ProjectPane;
 import java.io.File;
 import java.util.List;
 
@@ -116,9 +116,9 @@ public class FilesTool extends PodTool {
             selFile = site.getRootDir();
         WebFile selDir = selFile.isDir() ? selFile : selFile.getParent();
 
-        // Get SitePane and disable AutoBuild
-        SitePane sitePane = SitePane.get(site);
-        sitePane.setAutoBuildEnabled(false);
+        // Get ProjectPane and disable AutoBuild
+        ProjectPane projectPane = ProjectPane.get(site);
+        projectPane.setAutoBuildEnabled(false);
 
         // Add files (disable site build)
         boolean success = true;
@@ -130,8 +130,8 @@ public class FilesTool extends PodTool {
         }
 
         // Enable auto build and build
-        sitePane.setAutoBuildEnabled(true);
-        sitePane.buildSite(false);
+        projectPane.setAutoBuildEnabled(true);
+        projectPane.buildSite(false);
 
         // Return files
         return success && theFiles.size() > 0;
@@ -213,14 +213,14 @@ public class FilesTool extends PodTool {
      */
     public void removeFiles(List<WebFile> theFiles)
     {
-        // Get SitePane and disable AutoBuild
+        // Get ProjectPane and disable AutoBuild
         WebFile file0 = theFiles.size() > 0 ? theFiles.get(0) : null;
         if (file0 == null) {
             beep();
             return;
         }
-        SitePane sitePane = SitePane.get(file0.getSite());
-        sitePane.setAutoBuildEnabled(false);
+        ProjectPane projectPane = ProjectPane.get(file0.getSite());
+        projectPane.setAutoBuildEnabled(false);
 
         // Add files (disable site build)
         for (WebFile file : theFiles) {
@@ -235,8 +235,8 @@ public class FilesTool extends PodTool {
         }
 
         // Enable auto build and build
-        sitePane.setAutoBuildEnabled(true);
-        sitePane.buildSite(false);
+        projectPane.setAutoBuildEnabled(true);
+        projectPane.buildSite(false);
     }
 
     /**

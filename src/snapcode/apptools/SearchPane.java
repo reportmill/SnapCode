@@ -13,7 +13,7 @@ import javakit.ide.JavaTextUtils;
 import snap.gfx.Image;
 import snapcode.app.PodPane;
 import snapcode.app.PodTool;
-import snapcode.app.SitePane;
+import snapcode.app.ProjectPane;
 import snapcode.project.JavaData;
 import snap.util.ArrayUtils;
 import snap.view.*;
@@ -161,8 +161,8 @@ public class SearchPane extends PodTool {
     protected void search(WebFile aFile, List<Result> theResults, String aString)
     {
         // If hidden file, just return
-        SitePane sitePane = SitePane.get(aFile.getSite());
-        if (sitePane.isHiddenFile(aFile))
+        ProjectPane projectPane = ProjectPane.get(aFile.getSite());
+        if (projectPane.isHiddenFile(aFile))
             return;
 
         // Handle directory
@@ -239,8 +239,8 @@ public class SearchPane extends PodTool {
     public void searchReference(WebFile aFile, List<Result> theResults, JavaDecl aDecl)
     {
         // If hidden file, just return
-        SitePane sitePane = SitePane.get(aFile.getSite());
-        if (sitePane.isHiddenFile(aFile))
+        ProjectPane projectPane = ProjectPane.get(aFile.getSite());
+        if (projectPane.isHiddenFile(aFile))
             return;
 
         // Handle directory
@@ -313,8 +313,8 @@ public class SearchPane extends PodTool {
     public void searchDeclaration(WebFile aFile, List<Result> theResults, JavaDecl aDecl)
     {
         // If hidden file, just return
-        SitePane sitePane = SitePane.get(aFile.getSite());
-        if (sitePane.isHiddenFile(aFile))
+        ProjectPane projectPane = ProjectPane.get(aFile.getSite());
+        if (projectPane.isHiddenFile(aFile))
             return;
 
         // Handle directory
