@@ -5,9 +5,9 @@ import javakit.ide.NodeMatcher;
 import javakit.project.JavaAgent;
 import javakit.project.Project;
 import javakit.project.ProjectConfig;
+import javakit.project.ProjectSet;
 import snapcode.apptools.ProblemsTool;
 import snapcode.project.ProjectX;
-import snapcode.project.ProjectSet;
 import snapcode.project.VersionControl;
 import snap.util.ClientUtils;
 import snap.util.TaskRunner;
@@ -38,9 +38,6 @@ public class ProjectConfigPane extends ViewOwner {
     // The project
     private ProjectX  _proj;
 
-    // The project set
-    private ProjectSet  _projSet;
-
     // Whether to auto build project when files change
     private boolean  _autoBuild = true;
 
@@ -68,7 +65,6 @@ public class ProjectConfigPane extends ViewOwner {
         _proj = ProjectX.getProjectForSite(_site);
         if (_proj == null)
             _proj = new ProjectX(_site);
-        _projSet = _proj.getProjectSet();
     }
 
     /**
@@ -336,11 +332,12 @@ public class ProjectConfigPane extends ViewOwner {
          */
         public Object run()
         {
+            ProjectSet projectSet = _proj.getProjectSet();
             if (_addFiles) {
                 _addFiles = false;
-                _projSet.addBuildFilesAll();
+                projectSet.addBuildFilesAll();
             }
-            _projSet.buildProjects(this);
+            projectSet.buildProjects(this);
             return true;
         }
 
@@ -624,13 +621,13 @@ public class ProjectConfigPane extends ViewOwner {
         int total = 0;
 
         // Get projects
-        ProjectX proj = getProject();
-        List<ProjectX> projects = new ArrayList<>();
+        Project proj = getProject();
+        List<Project> projects = new ArrayList<>();
         projects.add(proj);
         Collections.addAll(projects, proj.getProjects());
 
         // Iterate over projects and add: ProjName: xxx
-        for (ProjectX prj : projects) {
+        for (Project prj : projects) {
             int loc = getLinesOfCode(prj.getSourceDir());
             total += loc;
             sb.append(prj.getName()).append(": ").append(fmt.format(loc)).append('\n');

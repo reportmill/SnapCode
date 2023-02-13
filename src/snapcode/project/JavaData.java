@@ -1,5 +1,7 @@
 package snapcode.project;
+import javakit.project.Project;
 import javakit.project.ProjectFiles;
+import javakit.project.ProjectSet;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
 import javakit.resolver.Resolver;
@@ -178,7 +180,7 @@ public class JavaData {
         _refs = newRefs;
 
         // Get project
-        ProjectX rootProj = proj.getRootProject();
+        Project rootProj = proj.getRootProject();
         ProjectSet projSet = rootProj.getProjectSet();
 
         // Iterate over added refs and add dependencies

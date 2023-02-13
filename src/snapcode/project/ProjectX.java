@@ -2,10 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import javakit.project.BuildIssues;
-import javakit.project.JavaFileBuilder;
-import javakit.project.Project;
-import javakit.project.ProjectConfig;
+import javakit.project.*;
 import javakit.resolver.Resolver;
 import snap.util.FilePathUtils;
 import snap.util.TaskMonitor;
@@ -20,12 +17,6 @@ import java.net.URLClassLoader;
  */
 public class ProjectX extends Project {
 
-    // The project that loaded us
-    protected ProjectX  _parent;
-
-    // The set of projects this project depends on
-    private ProjectSet  _projSet = new ProjectSet(this);
-
     // A class to read .classpath file
     private ProjectConfigFile  _projConfigFile;
 
@@ -39,32 +30,13 @@ public class ProjectX extends Project {
         // Create/set ProjectBuilder.JavaFileBuilderImpl
         JavaFileBuilder javaFileBuilder = new JavaFileBuilderImpl(this);
         _projBuilder.setJavaFileBuilder(javaFileBuilder);
-
-        // Load dependent projects
-        getProjects();
     }
 
     /**
      * Returns the top most project.
      */
     @Override
-    public ProjectX getRootProject()
-    {
-        return _parent != null ? _parent.getRootProject() : this;
-    }
-
-    /**
-     * Returns the list of projects this project depends on.
-     */
-    public ProjectX[] getProjects()
-    {
-        return _projSet.getProjects();
-    }
-
-    /**
-     * Returns the set of projects this project depends on.
-     */
-    public ProjectSet getProjectSet()  { return _projSet; }
+    public ProjectX getRootProject()  { return this; }
 
     /**
      * Returns the project class loader.

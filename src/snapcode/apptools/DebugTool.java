@@ -1,8 +1,5 @@
 package snapcode.apptools;
-import javakit.project.Breakpoint;
-import javakit.project.Breakpoints;
-import javakit.project.Project;
-import javakit.project.ProjectFiles;
+import javakit.project.*;
 import snap.gfx.Color;
 import snap.props.PropChange;
 import snap.util.FilePathUtils;
@@ -14,7 +11,6 @@ import snap.web.WebURL;
 import snapcode.app.*;
 import snapcode.debug.DebugApp;
 import snapcode.debug.RunApp;
-import snapcode.project.ProjectSet;
 import snapcode.project.ProjectX;
 import java.io.File;
 import java.util.ArrayList;
@@ -292,7 +288,7 @@ public class DebugTool extends ProjectTool {
         }
 
         // Get Class path and add to list
-        ProjectSet projectSet = ((ProjectX) aProj).getProjectSet();
+        ProjectSet projectSet = aProj.getProjectSet();
         String[] classPaths = projectSet.getClassPaths();
         String[] classPathsNtv = FilePathUtils.getNativePaths(classPaths);
         String classPath = FilePathUtils.getJoinedPath(classPathsNtv);
