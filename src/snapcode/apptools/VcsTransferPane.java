@@ -50,7 +50,7 @@ public class VcsTransferPane extends ViewOwner {
             String msg = "No " + getOp() + " files to transfer.", title = "Synchronize Files";
             DialogBox dbox = new DialogBox(title);
             dbox.setWarningMessage(msg);
-            dbox.showMessageDialog(aVC._appPane.getUI());
+            dbox.showMessageDialog(aVC.getUI());
             return false;
         }
 
@@ -60,7 +60,7 @@ public class VcsTransferPane extends ViewOwner {
         DialogBox dbox = new DialogBox(mode + " Files Panel");
         dbox.setContent(getUI());
         dbox.setOptions(options);
-        if (dbox.showOptionDialog(aVC._appPane.getUI(), mode) != 0) return false;
+        if (dbox.showOptionDialog(aVC.getUI(), mode) != 0) return false;
 
         // If commit, get message
         if (anOp == Op.Commit) {
@@ -69,7 +69,7 @@ public class VcsTransferPane extends ViewOwner {
             if (_commitMsg == null || _commitMsg.length() == 0) {
                 DialogBox db = new DialogBox("Commit Files Message Panel");
                 db.setMessage("Enter Commit Message");
-                db.showMessageDialog(aVC._appPane.getUI());
+                db.showMessageDialog(aVC.getUI());
                 return showPanel(aVC, theFiles, anOp);
             }
         }

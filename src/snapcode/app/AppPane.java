@@ -2,6 +2,7 @@ package snapcode.app;
 import javakit.ide.JavaTextPane;
 import javakit.project.Breakpoints;
 import javakit.project.BuildIssue;
+import javakit.project.Project;
 import snap.util.ArrayUtils;
 import snapcode.apptools.*;
 import snapcode.project.ProjectX;
@@ -75,7 +76,7 @@ public class AppPane extends ProjectPane {
         sitePane.setAppPane(this);
 
         // Add dependent sites
-        for (ProjectX p : proj.getProjects())
+        for (Project p : proj.getProjects())
             addSite(p.getSite());
 
         // Clear root files

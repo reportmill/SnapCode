@@ -26,7 +26,11 @@ public class VcsTools extends ProjectTool {
     public VcsTools(ProjectPane projectPane)
     {
         super(projectPane);
+    }
 
+    @Override
+    protected void initUI()
+    {
         // Set VersionControlPane
         String urls = getRemoteURLString();
         //_vcp = VersionControl.get(_site) instanceof VersionControlGit ? new VcsPaneGit(this) : new VcsPane(this);

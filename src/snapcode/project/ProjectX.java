@@ -24,10 +24,10 @@ public class ProjectX extends Project {
     protected ProjectX  _parent;
 
     // The set of projects this project depends on
-    private ProjectSet _projSet = new ProjectSet(this);
+    private ProjectSet  _projSet = new ProjectSet(this);
 
     // A class to read .classpath file
-    private ProjectConfigFile _projConfigFile;
+    private ProjectConfigFile  _projConfigFile;
 
     /**
      * Creates a new Project for WebSite.
@@ -43,11 +43,6 @@ public class ProjectX extends Project {
         // Load dependent projects
         getProjects();
     }
-
-    /**
-     * Returns the parent project for this project.
-     */
-    public ProjectX getParent()  { return _parent; }
 
     /**
      * Returns the top most project.
@@ -137,11 +132,6 @@ public class ProjectX extends Project {
         // Clear
         _classLoader = null;
         _resolver = null;
-
-        // If parent, forward on
-        ProjectX parent = getParent();
-        if (parent != null)
-            parent.clearClassLoader();
     }
 
     /**
