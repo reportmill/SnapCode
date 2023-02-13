@@ -4,13 +4,9 @@
 package snapcode.project;
 import javakit.project.*;
 import javakit.resolver.Resolver;
-import snap.util.FilePathUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import java.io.Closeable;
-import java.net.URL;
-import java.net.URLClassLoader;
 
 /**
  * A class to manage build attributes and behavior for a WebSite.
@@ -23,9 +19,9 @@ public class ProjectX extends Project {
     /**
      * Creates a new Project for WebSite.
      */
-    public ProjectX(WebSite aSite)
+    public ProjectX(Pod aPod, WebSite aSite)
     {
-        super(aSite);
+        super(aPod, aSite);
 
         // Create/set ProjectBuilder.JavaFileBuilderImpl
         JavaFileBuilder javaFileBuilder = new JavaFileBuilderImpl(this);
@@ -37,74 +33,6 @@ public class ProjectX extends Project {
      */
     @Override
     public ProjectX getRootProject()  { return this; }
-
-    /**
-     * Returns the project class loader.
-     */
-    @Override
-    protected ClassLoader createClassLoader()
-    {
-        // If RootProject, return RootProject.ClassLoader
-        ProjectX rproj = getRootProject();
-        if (rproj != this)
-            return rproj.createClassLoader();
-
-        // Get all project ClassPath URLs
-        ProjectSet projectSet = getProjectSet();
-        String[] projSetClassPaths = projectSet.getClassPaths();
-        URL[] urls = FilePathUtils.getURLs(projSetClassPaths);
-
-        // Get System ClassLoader
-        ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader().getParent();
-
-        // Create special URLClassLoader subclass so when debugging SnapCode, we can ignore classes loaded by Project
-        ClassLoader urlClassLoader = new ProjectClassLoaderX(urls, sysClassLoader);
-
-        // Return
-        return urlClassLoader;
-    }
-
-    /**
-     * Needs unique name so that when debugging SnapCode, we can ignore classes loaded by Project.
-     */
-    public static class ProjectClassLoaderX extends URLClassLoader {
-        public ProjectClassLoaderX(URL[] urls, ClassLoader aPar)
-        {
-            super(urls, aPar);
-        }
-    }
-
-    /**
-     * Returns the project class loader.
-     */
-    public ClassLoader createLibClassLoader()
-    {
-        // Create ClassLoader for ProjectSet.ClassPath URLs and SystemClassLoader.Parent and return
-        ProjectSet projectSet = getProjectSet();
-        String[] libPaths = projectSet.getLibPaths();
-        URL[] urls = FilePathUtils.getURLs(libPaths);
-
-        // Get System ClassLoader
-        ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader().getParent();
-
-        // Create special URLClassLoader subclass so when debugging SnapCode, we can ignore classes loaded by Project
-        return new ProjectClassLoaderX(urls, systemClassLoader);
-    }
-
-    /**
-     * Clears the class loader.
-     */
-    protected void clearClassLoader()
-    {
-        // If ClassLoader closeable, close it
-        if (_classLoader instanceof Closeable)
-            try {  ((Closeable) _classLoader).close(); }
-            catch (Exception e) { throw new RuntimeException(e); }
-
-        // Clear
-        _classLoader = null;
-        _resolver = null;
-    }
 
     /**
      * Returns the class for given file.
@@ -194,7 +122,8 @@ public class ProjectX extends Project {
         aTM.beginTask("Deleting files", -1);
 
         // Clear ClassLoader
-        clearClassLoader();
+        Pod pod = getPod();
+        pod.clearClassLoader();
 
         // Delete SandBox, Site
         WebSite projSite = getSite();
@@ -204,14 +133,6 @@ public class ProjectX extends Project {
 
         // Finish TaskMonitor
         aTM.endTask();
-    }
-
-    /**
-     * Standard toString implementation.
-     */
-    public String toString()
-    {
-        return "Project: " + getSite();
     }
 
     /**

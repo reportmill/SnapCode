@@ -154,8 +154,10 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
             compiledFiles.addAll(compiler.getCompiledJavaFiles());
 
             // If there were modified files, clear Project.ClassLoader
-            if (compiler.getModifiedJavaFiles().size() > 0)
-                _projX.clearClassLoader();
+            if (compiler.getModifiedJavaFiles().size() > 0) {
+                Pod pod = _projX.getPod();
+                pod.clearClassLoader();
+            }
 
             // Iterate over JavaFiles for modified ClassFiles and update
             for (WebFile jfile : compiler.getModifiedJavaFiles()) {

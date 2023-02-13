@@ -1,4 +1,5 @@
 package snapcode.app;
+import javakit.project.Pod;
 import javakit.project.Project;
 import snap.util.ArrayUtils;
 import snap.view.ViewOwner;
@@ -8,11 +9,15 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.apptools.DebugTool;
 import snapcode.apptools.SearchPane;
+import snapcode.project.PodX;
 
 /**
  * This class is the top level controller for an open project.
  */
 public class ProjectPane extends ViewOwner {
+
+    // The Pod
+    private Pod  _pod;
 
     // The list of sites
     protected WebSite[]  _sites = new WebSite[0];
@@ -39,6 +44,9 @@ public class ProjectPane extends ViewOwner {
     {
         super();
 
+        // Create Pod
+        _pod = new PodX();
+
         // Create MainToolBar, PagePane, StatusBar
         _toolBar = new MainToolBar(this);
         _pagePane = new PagePane(this);
@@ -48,6 +56,11 @@ public class ProjectPane extends ViewOwner {
         _projTools = new ProjectTools(this);
         _projTools.createTools();
     }
+
+    /**
+     * Returns the pod.
+     */
+    public Pod getPod()  { return _pod; }
 
     /**
      * Returns the PagePane.

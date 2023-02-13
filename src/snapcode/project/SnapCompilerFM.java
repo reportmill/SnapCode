@@ -24,7 +24,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     private Map<String, SnapCompilerJFO>  _jfos = new HashMap<>();
 
     // The class loader to find project lib classes
-    private ClassLoader _cldr;
+    private ClassLoader  _classLoader;
 
     // Whether compile includes SnapKit
     protected boolean  _excludeSnapKit;
@@ -49,7 +49,10 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
      */
     public ClassLoader getClassLoader(Location aLoc)
     {
-        return _cldr != null ? _cldr : (_cldr = _proj.createLibClassLoader());
+        if (_classLoader != null) return _classLoader;
+        PodX pod = (PodX) _proj.getPod();
+        ClassLoader classLoader = pod.createLibClassLoader();
+        return _classLoader = classLoader;
     }
 
     /**
@@ -217,5 +220,4 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         // Return
         return jfo;
     }
-
 }

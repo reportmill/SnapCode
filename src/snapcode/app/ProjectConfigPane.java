@@ -57,22 +57,12 @@ public class ProjectConfigPane extends ViewOwner {
     private Runnable  _buildLaterRun;
 
     /**
-     * Constructor for given project.
-     */
-    public ProjectConfigPane(WebSite aSite)
-    {
-        _site = aSite;
-        _proj = ProjectX.getProjectForSite(_site);
-        if (_proj == null)
-            _proj = new ProjectX(_site);
-    }
-
-    /**
-     * Creates a new ProjectPane for given project.
+     * Constructor.
      */
     public ProjectConfigPane(SitePane aSitePane)
     {
-        this(aSitePane.getSite());
+        _site = aSitePane.getSite();
+        _proj = ProjectX.getProjectForSite(_site);
         _sitePane = aSitePane;
         _site.setProp(ProjectConfigPane.class.getName(), this);
     }

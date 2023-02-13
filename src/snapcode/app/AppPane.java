@@ -2,10 +2,10 @@ package snapcode.app;
 import javakit.ide.JavaTextPane;
 import javakit.project.Breakpoints;
 import javakit.project.BuildIssue;
+import javakit.project.Pod;
 import javakit.project.Project;
 import snap.util.ArrayUtils;
 import snapcode.apptools.*;
-import snapcode.project.ProjectX;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.FileUtils;
@@ -63,9 +63,8 @@ public class AppPane extends ProjectPane {
         aSite.addFileChangeListener(_siteFileLsnr);
 
         // Create project for site
-        ProjectX proj = ProjectX.getProjectForSite(aSite);
-        if (proj == null)
-            proj = new ProjectX(aSite);
+        Pod pod = getPod();
+        Project proj = pod.getProjectForSite(aSite);
 
         // Add listener to update ProcPane and JavaPage.TextArea(s) when Breakpoint/BuildIssue added/removed
         proj.getBreakpoints().addPropChangeListener(pc -> projBreakpointsDidChange(pc));
