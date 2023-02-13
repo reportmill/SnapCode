@@ -2,24 +2,23 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import javakit.project.Pod;
+import javakit.project.WorkSpace;
 import javakit.project.Project;
 import javakit.project.ProjectSet;
 import snap.util.FilePathUtils;
 import snap.web.WebSite;
-
 import java.net.URL;
 import java.net.URLClassLoader;
 
 /**
- * This Pod subclass is enhanced to work with full JDK.
+ * This WorkSpace subclass is enhanced to work with full JDK.
  */
-public class PodX extends Pod {
+public class WorkSpaceX extends WorkSpace {
 
     /**
      * Constructor.
      */
-    public PodX()
+    public WorkSpaceX()
     {
         super();
     }

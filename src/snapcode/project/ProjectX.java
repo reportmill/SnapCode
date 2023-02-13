@@ -3,8 +3,6 @@
  */
 package snapcode.project;
 import javakit.project.*;
-import javakit.resolver.Resolver;
-import snap.util.TaskMonitor;
 import snap.web.WebFile;
 import snap.web.WebSite;
 
@@ -19,29 +17,13 @@ public class ProjectX extends Project {
     /**
      * Creates a new Project for WebSite.
      */
-    public ProjectX(Pod aPod, WebSite aSite)
+    public ProjectX(WorkSpace aWorkSpace, WebSite aSite)
     {
-        super(aPod, aSite);
+        super(aWorkSpace, aSite);
 
         // Create/set ProjectBuilder.JavaFileBuilderImpl
         JavaFileBuilder javaFileBuilder = new JavaFileBuilderImpl(this);
         _projBuilder.setJavaFileBuilder(javaFileBuilder);
-    }
-
-    /**
-     * Returns the top most project.
-     */
-    @Override
-    public ProjectX getRootProject()  { return this; }
-
-    /**
-     * Returns the class for given file.
-     */
-    public Class<?> getClassForFile(WebFile aFile)
-    {
-        String className = getClassNameForFile(aFile);
-        Resolver resolver = getResolver();
-        return resolver.getClassForName(className);
     }
 
     /**
@@ -70,69 +52,6 @@ public class ProjectX extends Project {
     public void readSettings()
     {
         _projConfigFile.readFile();
-    }
-
-    /**
-     * Called when file added.
-     */
-    public void fileAdded(WebFile aFile)
-    {
-        if (isConfigFile(aFile))
-            readSettings();
-
-        // Add build file
-        _projBuilder.addBuildFile(aFile, false);
-    }
-
-    /**
-     * Called when file removed.
-     */
-    public void fileRemoved(WebFile aFile)
-    {
-        // Remove build files
-        _projBuilder.removeBuildFile(aFile);
-
-        // Remove BuildIssues for file
-        ProjectX rootProj = getRootProject();
-        BuildIssues buildIssues = rootProj.getBuildIssues();
-        buildIssues.removeIssuesForFile(aFile);
-    }
-
-    /**
-     * Called when file saved.
-     */
-    public void fileSaved(WebFile aFile)
-    {
-        // If File is config file, read file
-        if (isConfigFile(aFile))
-            readSettings();
-
-        // If plain file, add as BuildFile
-        if (!aFile.isDir())
-            _projBuilder.addBuildFile(aFile, false);
-    }
-
-    /**
-     * Deletes the project.
-     */
-    public void deleteProject(TaskMonitor aTM) throws Exception
-    {
-        // Start TaskMonitor
-        aTM.startTasks(1);
-        aTM.beginTask("Deleting files", -1);
-
-        // Clear ClassLoader
-        Pod pod = getPod();
-        pod.clearClassLoader();
-
-        // Delete SandBox, Site
-        WebSite projSite = getSite();
-        WebSite projSiteSandbox = projSite.getSandbox();
-        projSiteSandbox.deleteSite();
-        projSite.deleteSite();
-
-        // Finish TaskMonitor
-        aTM.endTask();
     }
 
     /**

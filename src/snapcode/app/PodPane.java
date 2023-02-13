@@ -1,5 +1,5 @@
 package snapcode.app;
-import javakit.project.Pod;
+import javakit.project.WorkSpace;
 import javakit.project.Project;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
@@ -12,7 +12,7 @@ import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.apptools.*;
-import snapcode.project.PodX;
+import snapcode.project.WorkSpaceX;
 
 /**
  * This class is the top level controller for an open project.
@@ -20,7 +20,7 @@ import snapcode.project.PodX;
 public class PodPane extends ViewOwner {
 
     // The Pod
-    private Pod  _pod;
+    private WorkSpace _workSpace;
 
     // The list of sites
     protected WebSite[]  _sites = new WebSite[0];
@@ -51,7 +51,7 @@ public class PodPane extends ViewOwner {
         super();
 
         // Create Pod
-        _pod = new PodX();
+        _workSpace = new WorkSpaceX();
 
         // Create MainToolBar, PagePane, StatusBar
         _toolBar = new MainToolBar(this);
@@ -66,7 +66,7 @@ public class PodPane extends ViewOwner {
     /**
      * Returns the pod.
      */
-    public Pod getPod()  { return _pod; }
+    public WorkSpace getPod()  { return _workSpace; }
 
     /**
      * Returns the PagePane.
@@ -128,8 +128,8 @@ public class PodPane extends ViewOwner {
         aSite.addFileChangeListener(_siteFileLsnr);
 
         // Get project for site
-        Pod pod = getPod();
-        Project proj = pod.getProjectForSite(aSite);
+        WorkSpace workSpace = getPod();
+        Project proj = workSpace.getProjectForSite(aSite);
 
         // Add listener to update tools when Breakpoint/BuildIssue added/removed
         proj.getBreakpoints().addPropChangeListener(pc -> _podTools.projBreakpointsDidChange(pc));
