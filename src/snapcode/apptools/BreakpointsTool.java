@@ -4,7 +4,7 @@ import javakit.project.Breakpoints;
 import snap.view.ListView;
 import snap.view.View;
 import snap.view.ViewEvent;
-import snapcode.app.ProjectPane;
+import snapcode.app.PodPane;
 import snapcode.app.ProjectTool;
 
 /**
@@ -18,9 +18,9 @@ public class BreakpointsTool extends ProjectTool {
     /**
      * Constructor.
      */
-    public BreakpointsTool(ProjectPane projPane)
+    public BreakpointsTool(PodPane podPane)
     {
-        super(projPane);
+        super(podPane);
     }
 
     /**

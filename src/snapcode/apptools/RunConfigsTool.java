@@ -15,9 +15,9 @@ public class RunConfigsTool extends ProjectTool {
     /**
      * Constructor.
      */
-    public RunConfigsTool(ProjectPane projectPane)
+    public RunConfigsTool(PodPane podPane)
     {
-        super(projectPane);
+        super(podPane);
     }
 
     /**
@@ -54,7 +54,7 @@ public class RunConfigsTool extends ProjectTool {
 //        // Do normal version
 //        RowView superUI = (RowView) super.createUI();
 //
-//        // Add MenuButton - was from AppPaneToolBar
+//        // Add MenuButton - was from MainToolBar
 //        MenuButton menuButton = new MenuButton();
 //        menuButton.setName("RunMenuButton");
 //        menuButton.setPrefSize(15, 14);
@@ -141,7 +141,7 @@ public class RunConfigsTool extends ProjectTool {
 
         // Save RunConfigs
         RunConfigs.get(getRootSite()).writeFile();
-        //getAppPane().getToolBar().setRunMenuButtonItems();
+        // getToolBar().setRunMenuButtonItems();
     }
 
     /**

@@ -16,7 +16,7 @@ import snap.view.TextView;
 import snap.view.ViewEvent;
 import snap.viewx.DialogBox;
 import snap.web.*;
-import snapcode.app.ProjectPane;
+import snapcode.app.PodPane;
 import snapcode.app.ProjectTool;
 import java.io.File;
 import java.io.IOException;
@@ -64,9 +64,9 @@ public class HttpServerTool extends ProjectTool {
     /**
      * Constructor.
      */
-    public HttpServerTool(ProjectPane projectPane)
+    public HttpServerTool(PodPane podPane)
     {
-        super(projectPane);
+        super(podPane);
     }
 
     /**

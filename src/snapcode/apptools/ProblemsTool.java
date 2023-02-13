@@ -6,7 +6,7 @@ import javakit.project.Project;
 import snap.gfx.Image;
 import snap.view.*;
 import snap.web.WebFile;
-import snapcode.app.ProjectPane;
+import snapcode.app.PodPane;
 import snapcode.app.ProjectTool;
 
 /**
@@ -24,9 +24,9 @@ public class ProblemsTool extends ProjectTool {
     /**
      * Constructor.
      */
-    public ProblemsTool(ProjectPane projPane)
+    public ProblemsTool(PodPane podPane)
     {
-        super(projPane);
+        super(podPane);
     }
 
     /**

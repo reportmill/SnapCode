@@ -39,9 +39,9 @@ public class DebugTool extends ProjectTool {
     /**
      * Constructor.
      */
-    public DebugTool(ProjectPane projectPane)
+    public DebugTool(PodPane podPane)
     {
-        super(projectPane);
+        super(podPane);
 
         // Create parts
         _procPane = new ProcPane(this);

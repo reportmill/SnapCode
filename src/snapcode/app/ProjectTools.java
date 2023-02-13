@@ -1,9 +1,15 @@
 package snapcode.app;
+import javakit.ide.JavaTextPane;
+import javakit.project.Breakpoints;
+import javakit.project.BuildIssue;
 import snap.geom.Side;
+import snap.props.PropChange;
+import snap.viewx.WebPage;
+import snap.web.WebFile;
 import snapcode.apptools.*;
 
 /**
- * This class manages all of the ProjectTools for a ProjectPane.
+ * This class manages all of the ProjectTools for a PodPane.
  */
 public class ProjectTools {
 
@@ -22,8 +28,8 @@ public class ProjectTools {
     // The BreakpointsTool
     private BreakpointsTool _breakpointsTool;
 
-    // The ProjectPane
-    private ProjectPane  _projPane;
+    // The PodPane
+    private PodPane  _podPane;
 
     // The DebugTool
     private DebugTool  _debugTool;
@@ -49,10 +55,10 @@ public class ProjectTools {
     /**
      * Constructor.
      */
-    public ProjectTools(ProjectPane projectPane)
+    public ProjectTools(PodPane podPane)
     {
         super();
-        _projPane = projectPane;
+        _podPane = podPane;
     }
 
     /**
@@ -60,24 +66,24 @@ public class ProjectTools {
      */
     protected void createTools()
     {
-        _filesTool = new FilesTool(_projPane);
-        _fileTreeTool = new FileTreeTool((AppPane) _projPane);
-        _problemsTool = new ProblemsTool(_projPane);
-        _runConsole = new RunConsole(_projPane);
-        _breakpointsTool = new BreakpointsTool(_projPane);
-        _debugTool = new DebugTool(_projPane);
-        _searchTool = new SearchPane(_projPane);
-        _runConfigsTool = new RunConfigsTool(_projPane);
-        _httpServerTool = new HttpServerTool(_projPane);
-        _vcsTools = new VcsTools(_projPane);
+        _filesTool = new FilesTool(_podPane);
+        _fileTreeTool = new FileTreeTool(_podPane);
+        _problemsTool = new ProblemsTool(_podPane);
+        _runConsole = new RunConsole(_podPane);
+        _breakpointsTool = new BreakpointsTool(_podPane);
+        _debugTool = new DebugTool(_podPane);
+        _searchTool = new SearchPane(_podPane);
+        _runConfigsTool = new RunConfigsTool(_podPane);
+        _httpServerTool = new HttpServerTool(_podPane);
+        _vcsTools = new VcsTools(_podPane);
 
         // Set tools
         ProjectTool[] bottomTools = {_problemsTool, _debugTool, _runConsole, _breakpointsTool, _searchTool, _runConfigsTool, _httpServerTool };
-        _supportTray = new SupportTray(_projPane, Side.BOTTOM, bottomTools);
+        _supportTray = new SupportTray(_podPane, Side.BOTTOM, bottomTools);
 
 
         ProjectTool[] sideTools = {_fileTreeTool};
-        _sideBar = new SupportTray(_projPane, Side.LEFT, sideTools);
+        _sideBar = new SupportTray(_podPane, Side.LEFT, sideTools);
     }
 
     /**
@@ -148,5 +154,39 @@ public class ProjectTools {
     public void closeProject()
     {
         _httpServerTool.stopServer();
+    }
+
+    /**
+     * Called when Project.BreakPoints change.
+     */
+    protected void projBreakpointsDidChange(PropChange pc)
+    {
+        DebugTool debugTool = getDebugTool();
+        debugTool.projBreakpointsDidChange(pc);
+    }
+
+    /**
+     * Called when Project.BuildIssues change.
+     */
+    protected void projBuildIssuesDidChange(PropChange pc)
+    {
+        if (pc.getPropertyName() != Breakpoints.ITEMS_PROP) return;
+
+        // Get issue added or removed
+        BuildIssue issue = (BuildIssue) pc.getNewValue();
+        if (issue == null)
+            issue = (BuildIssue) pc.getOldValue();
+
+        // Make current JavaPage.TextArea resetLater
+        WebFile issueFile = issue.getFile();
+        WebPage page = _podPane.getBrowser().getPageForURL(issueFile.getURL());
+        if (page instanceof JavaPage) {
+            JavaTextPane<?> javaTextPane = ((JavaPage) page).getTextPane();
+            javaTextPane.buildIssueOrBreakPointMarkerChanged();
+        }
+
+        // Update FilesPane.FilesTree
+        FileTreeTool fileTreeTool = getFileTreeTool();
+        fileTreeTool.updateFile(issueFile);
     }
 }

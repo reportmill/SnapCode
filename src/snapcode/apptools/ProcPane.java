@@ -6,21 +6,15 @@ import snap.view.*;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebURL;
-import snapcode.app.AppPane;
-import snapcode.app.JavaPage;
-import snapcode.app.ProjectTool;
-import snapcode.app.SupportTray;
+import snapcode.app.*;
 import snapcode.debug.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The ProcPane manages run/debug processes for AppPane.
+ * The ProcPane manages run/debug processes.
  */
 public class ProcPane extends ProjectTool implements RunApp.AppListener {
-
-    // The AppPane
-    private AppPane  _appPane;
 
     // The DebugTool
     private DebugTool _debugTool;
@@ -56,15 +50,9 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
      */
     public ProcPane(DebugTool aDebugTool)
     {
-        super(aDebugTool.getProjectPane());
+        super(aDebugTool.getPodPane());
         _debugTool = aDebugTool;
-        _appPane = (AppPane) _projPane;
     }
-
-    /**
-     * Returns the AppPane.
-     */
-    public AppPane getAppPane()  { return _appPane; }
 
     /**
      * Returns the RunConsole.
@@ -145,7 +133,7 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
         setSelApp(null);
         addProc(aProc);
         setSelApp(aProc);
-        SupportTray supportTray = getAppPane().getSupportTray();
+        SupportTray supportTray = _podPane.getSupportTray();
         supportTray.showRunTool();
         aProc.exec();
     }
@@ -264,7 +252,7 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
         // Update proc items and reset UI
         _procTree.updateItems(aProc);
         resetLater();
-        _appPane.resetLater();
+        _podPane.resetLater();
 
         // If debug app, reset Debug vars, expressions and current line counter
         if (aProc instanceof DebugApp) {
@@ -321,7 +309,7 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
         }
 
         // Make DebugVarsPane visible and updateVarTable
-        getAppPane().getSupportTray().showDebugTool();
+        _podPane.getSupportTray().showDebugTool();
 
         DebugFrame frame = aProc.getFrame();
         if (frame == null) return;
@@ -338,7 +326,7 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
         WebURL url = WebURL.getURL(path);
         WebFile file = url.getFile();
         setProgramCounter(file, lineNum - 1);
-        _appPane.getBrowser().setURL(url);
+        getBrowser().setURL(url);
     }
 
     /**
@@ -386,10 +374,10 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
         _progCounterLine = aLine;
 
         // Reset JavaPage.TextArea for old/new files
-        WebPage page = oldPCF != null ? getAppPane().getBrowser().getPageForURL(oldPCF.getURL()) : null;
+        WebPage page = oldPCF != null ? getBrowser().getPageForURL(oldPCF.getURL()) : null;
         if (page instanceof JavaPage)
             ((JavaPage) page).getTextArea().repaint();
-        page = _progCounterFile != null ? getAppPane().getBrowser().getPageForURL(_progCounterFile.getURL()) : null;
+        page = _progCounterFile != null ? getBrowser().getPageForURL(_progCounterFile.getURL()) : null;
         if (page instanceof JavaPage)
             ((JavaPage) page).getTextArea().repaint();
     }
@@ -481,7 +469,7 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
 
         // Handle RunToLineButton
         else if (anEvent.equals("RunToLineButton")) {
-            WebPage page = getAppPane().getBrowser().getPage();
+            WebPage page = getBrowser().getPage();
             JavaPage jpage = page instanceof JavaPage ? (JavaPage) page : null;
             if (jpage == null) return;
             JavaTextArea tarea = jpage.getTextArea();
@@ -498,7 +486,7 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
             else if (item instanceof DebugFrame) {
                 DebugFrame frame = (DebugFrame) item;
                 frame.select();
-                getAppPane().getSupportTray().showDebugTool();
+                _podPane.getSupportTray().showDebugTool();
             }
         }
     }

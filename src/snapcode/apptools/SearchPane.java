@@ -11,7 +11,7 @@ import javakit.resolver.JavaParameterizedType;
 import javakit.ide.NodeMatcher;
 import javakit.ide.JavaTextUtils;
 import snap.gfx.Image;
-import snapcode.app.ProjectPane;
+import snapcode.app.PodPane;
 import snapcode.app.ProjectTool;
 import snapcode.app.SitePane;
 import snapcode.project.JavaData;
@@ -35,11 +35,11 @@ public class SearchPane extends ProjectTool {
     private Result  _selResult;
 
     /**
-     * Creates a new search pane for app pane.
+     * Constructor.
      */
-    public SearchPane(ProjectPane projPane)
+    public SearchPane(PodPane podPane)
     {
-        super(projPane);
+        super(podPane);
     }
 
     /**
@@ -150,7 +150,7 @@ public class SearchPane extends ProjectTool {
     {
         _search = new Search();
         _search._string = aString;
-        for (WebSite site : _projPane.getSites())
+        for (WebSite site : _podPane.getSites())
             search(site.getRootDir(), _search._results, aString.toLowerCase());
         resetLater();
     }
@@ -167,7 +167,7 @@ public class SearchPane extends ProjectTool {
 
         // Handle directory
         if (aFile.isDir()) {
-            if (aFile == _projPane.getBuildDir())
+            if (aFile == _podPane.getBuildDir())
                 return;
             for (WebFile file : aFile.getFiles())
                 search(file, theResults, aString);
@@ -226,7 +226,7 @@ public class SearchPane extends ProjectTool {
         _search._kind = Search.Kind.Reference;
 
         // Iterate over all project sites
-        for (WebSite site : _projPane.getSites())
+        for (WebSite site : _podPane.getSites())
             searchReference(site.getRootDir(), _search._results, decl);
 
         // Update UI
@@ -245,7 +245,7 @@ public class SearchPane extends ProjectTool {
 
         // Handle directory
         if (aFile.isDir()) {
-            if (aFile == _projPane.getBuildDir())
+            if (aFile == _podPane.getBuildDir())
                 return;
             WebFile[] dirFiles = aFile.getFiles();
             for (WebFile file : dirFiles)
@@ -300,7 +300,7 @@ public class SearchPane extends ProjectTool {
         _search._kind = Search.Kind.Declaration;
 
         // Iterate over all project sites
-        for (WebSite site : _projPane.getSites())
+        for (WebSite site : _podPane.getSites())
             searchDeclaration(site.getRootDir(), _search._results, decl);
 
         // Update UI
@@ -319,7 +319,7 @@ public class SearchPane extends ProjectTool {
 
         // Handle directory
         if (aFile.isDir()) {
-            if (aFile == _projPane.getBuildDir())
+            if (aFile == _podPane.getBuildDir())
                 return;
 
             WebFile[] dirFiles = aFile.getFiles();

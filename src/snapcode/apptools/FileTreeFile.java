@@ -95,7 +95,7 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
     }
 
     /**
-     * Returns a AppPaneTreeItem for child file.
+     * Returns a FileTreeItem for child file.
      */
     protected FileTreeFile createChildAppFile(WebFile aFile)
     {

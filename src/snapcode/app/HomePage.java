@@ -20,20 +20,20 @@ public class HomePage extends WebPage {
     boolean _stupidAnim;
 
     /**
-     * Returns the AppPane.
+     * Returns the PodPane.
      */
-    public AppPane getAppPane()
+    public PodPane getPodPane()
     {
         WebBrowser browser = getBrowser();
-        return browser.getOwner(AppPane.class);
+        return browser.getOwner(PodPane.class);
     }
 
     /**
-     * Returns the AppPane RootSite.
+     * Returns the PodPane RootSite.
      */
     public WebSite getRootSite()
     {
-        return getAppPane().getRootSite();
+        return getPodPane().getRootSite();
     }
 
     /**
@@ -106,7 +106,7 @@ public class HomePage extends WebPage {
 
         // Handle NewJavaFile, NewFile
         if ((anEvent.equals("NewJavaFile") || anEvent.equals("NewFile")) && anEvent.isMouseRelease()) {
-            ProjectTools projectTools = getAppPane().getProjectTools();
+            ProjectTools projectTools = getPodPane().getProjectTools();
             FilesTool filesTool = projectTools.getFilesTool();
             filesTool.showNewFilePanel();
         }

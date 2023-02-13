@@ -26,8 +26,8 @@ import java.util.List;
  */
 public class ProjectConfigPane extends ViewOwner {
 
-    // The AppPane
-    private AppPane  _appPane;
+    // The PodPane
+    private PodPane  _podPane;
 
     // The SitePane
     private SitePane  _sitePane;
@@ -68,16 +68,11 @@ public class ProjectConfigPane extends ViewOwner {
     }
 
     /**
-     * Returns the AppPane.
+     * Sets the PodPane.
      */
-    public AppPane getAppPane()  { return _appPane; }
-
-    /**
-     * Sets the AppPane.
-     */
-    protected void setAppPane(AppPane anAP)
+    protected void setPodPane(PodPane podPane)
     {
-        _appPane = anAP;
+        _podPane = podPane;
     }
 
     /**
@@ -143,7 +138,7 @@ public class ProjectConfigPane extends ViewOwner {
      */
     public void addProject(String aName, String aURLString)
     {
-        View view = isUISet() && getUI().isShowing() ? getUI() : getAppPane().getUI();
+        View view = isUISet() && getUI().isShowing() ? getUI() : _podPane.getUI();
         addProject(aName, aURLString, view);
     }
 
@@ -177,8 +172,8 @@ public class ProjectConfigPane extends ViewOwner {
 
         // Add project for name
         _proj.getProjectSet().addProject(aName);
-        if (_appPane != null)
-            _appPane.addSite(site);
+        if (_podPane != null)
+            _podPane.addSite(site);
     }
 
     /**
@@ -189,7 +184,7 @@ public class ProjectConfigPane extends ViewOwner {
         WebSite site = aVC.getSite();
         String title = "Checkout from " + aVC.getRemoteURLString();
 
-        TaskRunner<Object> runner = new TaskRunnerPanel<Object>(_appPane.getUI(), title) {
+        TaskRunner<Object> runner = new TaskRunnerPanel<Object>(_podPane.getUI(), title) {
 
             public Object run() throws Exception
             {
@@ -201,10 +196,10 @@ public class ProjectConfigPane extends ViewOwner {
             {
                 // Add new project to root project
                 _proj.getProjectSet().addProject(site.getName());
-                if (_appPane == null) return;
+                if (_podPane == null) return;
 
                 // Add new project site to app pane and build
-                _appPane.addSite(site);
+                _podPane.addSite(site);
                 ProjectX proj = ProjectX.getProjectForSite(site);
                 proj.addBuildFilesAll();
                 buildProjectLater(false);
@@ -214,7 +209,7 @@ public class ProjectConfigPane extends ViewOwner {
             {
                 if (ClientUtils.setAccess(aVC.getRemoteSite()))
                     checkout(aView, aVC);
-                else if (new LoginPage().showPanel(_appPane.getUI(), aVC.getRemoteSite()))
+                else if (new LoginPage().showPanel(_podPane.getUI(), aVC.getRemoteSite()))
                     checkout(aView, aVC);
                 else super.failure(e);
             }
@@ -237,15 +232,15 @@ public class ProjectConfigPane extends ViewOwner {
         ProjectSet projectSet = _proj.getProjectSet();
         Project proj = projectSet.getProject(aName);
         if (proj == null) {
-            View view = isUISet() && getUI().isShowing() ? getUI() : getAppPane().getUI();
+            View view = isUISet() && getUI().isShowing() ? getUI() : _podPane.getUI();
             DialogBox.showWarningDialog(view, "Error Removing Project", "Project not found");
             return;
         }
 
-        // Remove dependent project from root project and AppPane
+        // Remove dependent project from root project and PodPane
         _proj.getProjectSet().removeProject(aName);
         WebSite site = proj.getSite();
-        getAppPane().removeSite(site);
+        _podPane.removeSite(site);
     }
 
     /**
@@ -268,7 +263,7 @@ public class ProjectConfigPane extends ViewOwner {
      */
     public void buildProjectLater(boolean doAddFiles)
     {
-        // If not root ProjectPane, forward on to it
+        // If not root ProjectConfigPane, forward on to it
         ProjectX rootProj = _proj.getRootProject();
         ProjectConfigPane rootProjPane = _proj != rootProj ? ProjectConfigPane.getProjectPane(rootProj.getSite()) : this;
         if (this != rootProjPane) {
@@ -348,7 +343,7 @@ public class ProjectConfigPane extends ViewOwner {
 
         void setActivity(String aStr)
         {
-            if (_appPane != null) _appPane.getBrowser().setActivity(aStr);
+            if (_podPane != null) _podPane.getBrowser().setActivity(aStr);
         }
 
         public void failure(final Exception e)
@@ -462,14 +457,14 @@ public class ProjectConfigPane extends ViewOwner {
         // If final error count non-zero, show problems pane
         int errorCount = _proj.getRootProject().getBuildIssues().getErrorCount();
         if (errorCount > 0) {
-            SupportTray supportTray = _appPane.getSupportTray();
+            SupportTray supportTray = _podPane.getSupportTray();
             if (supportTray.getSelTool() instanceof ProblemsTool)
                 supportTray.showProblemsTool();
         }
 
         // If error count zero and SupportTray showing problems, close
         if (errorCount == 0) {
-            SupportTray supportTray = _appPane.getSupportTray();
+            SupportTray supportTray = _podPane.getSupportTray();
             if (supportTray.getSelTool() instanceof ProblemsTool)
                 supportTray.hideTools();
         }
@@ -722,7 +717,7 @@ public class ProjectConfigPane extends ViewOwner {
     }
 
     /**
-     * Returns the ProjectPane for a site.
+     * Returns the ProjectConfigPane for a site.
      */
     public synchronized static ProjectConfigPane getProjectPane(WebSite aSite)
     {

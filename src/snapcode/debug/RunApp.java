@@ -58,7 +58,7 @@ public class RunApp {
     List<AppListener> _lsnrs = new ArrayList();
 
     /**
-     * Creates a new RunApp for AppPane and args.
+     * Creates a new RunApp for URL and args.
      */
     public RunApp(WebURL aURL, String[] theArgs)
     {

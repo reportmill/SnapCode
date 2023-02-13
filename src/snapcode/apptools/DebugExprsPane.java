@@ -28,7 +28,7 @@ public class DebugExprsPane extends ProjectTool {
      */
     public DebugExprsPane(DebugTool debugTool)
     {
-        super(debugTool.getProjectPane());
+        super(debugTool.getPodPane());
         _debugTool = debugTool;
     }
 

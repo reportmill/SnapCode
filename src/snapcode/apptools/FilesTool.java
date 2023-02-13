@@ -11,7 +11,7 @@ import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebUtils;
-import snapcode.app.ProjectPane;
+import snapcode.app.PodPane;
 import snapcode.app.ProjectTool;
 import snapcode.app.SitePane;
 
@@ -26,9 +26,9 @@ public class FilesTool extends ProjectTool {
     /**
      * Constructor.
      */
-    public FilesTool(ProjectPane projectPane)
+    public FilesTool(PodPane podPane)
     {
-        super(projectPane);
+        super(podPane);
     }
 
     /**
@@ -58,8 +58,8 @@ public class FilesTool extends ProjectTool {
         }
 
         // Run dialog panel (just return if null)
-        View projPaneUI = _projPane.getUI();
-        if (!form.showPanel(projPaneUI, "New Project File", DialogBox.infoImage))
+        View podPaneUI = _podPane.getUI();
+        if (!form.showPanel(podPaneUI, "New Project File", DialogBox.infoImage))
             return null;
 
         // Select type and extension
@@ -79,7 +79,7 @@ public class FilesTool extends ProjectTool {
         if (extension.equals(".java") && selDir == selSite.getRootDir())
             selDir = Project.getProjectForSite(selSite).getSourceDir();
 
-        // Get suggested "Untitled.xxx" path for AppPane.SelectedFile and extension
+        // Get suggested "Untitled.xxx" path for SelDir and extension
         String path = selDir.getDirPath() + "Untitled" + extension;
 
         // Create suggested file and page
@@ -87,7 +87,7 @@ public class FilesTool extends ProjectTool {
         WebPage page = _pagePane.createPageForURL(file.getURL());
 
         // ShowNewFilePanel (just return if cancelled)
-        file = page.showNewFilePanel(projPaneUI, file);
+        file = page.showNewFilePanel(podPaneUI, file);
         if (file == null)
             return null;
 
@@ -179,7 +179,7 @@ public class FilesTool extends ProjectTool {
                     DialogBox dbox = new DialogBox("Add File");
                     dbox.setWarningMessage(msg);
                     dbox.setOptions(options);
-                    option = dbox.showOptionDialog(_projPane.getUI(), defaultOption);
+                    option = dbox.showOptionDialog(_podPane.getUI(), defaultOption);
                     if (option < 0 || options[option].equals("Cancel")) return false;
                 }
 
@@ -188,7 +188,7 @@ public class FilesTool extends ProjectTool {
                     if (isDuplicating) name = "Duplicate " + name;
                     DialogBox dbox = new DialogBox("Rename File");
                     dbox.setQuestionMessage("Enter new file name:");
-                    name = dbox.showInputDialog(_projPane.getUI(), name);
+                    name = dbox.showInputDialog(_podPane.getUI(), name);
                     if (name == null) return false;
                     name = name.replace(" ", "");
                     if (!StringUtils.endsWithIC(name, '.' + siteFile.getType())) name = name + '.' + siteFile.getType();
@@ -269,7 +269,7 @@ public class FilesTool extends ProjectTool {
         if (aFile.isDir()) {
 
             // Skip build dir
-            if (aFile == _projPane.getBuildDir())
+            if (aFile == _podPane.getBuildDir())
                 return doSaveAll ? 1 : 0;
 
             // Iterate over child files
@@ -290,7 +290,7 @@ public class FilesTool extends ProjectTool {
             DialogBox dialogBox = new DialogBox("Save Modified File");
             dialogBox.setMessage("File has been modified:\n" + aFile.getPath());
             dialogBox.setOptions("Save File", "Save All Files", "Cancel");
-            int choice = doSaveAll ? 1 : dialogBox.showOptionDialog(_projPane.getUI(), "Save File");
+            int choice = doSaveAll ? 1 : dialogBox.showOptionDialog(_podPane.getUI(), "Save File");
 
             // Handle Save file
             if (choice == 0 || choice == 1) {
@@ -316,7 +316,7 @@ public class FilesTool extends ProjectTool {
             //File file = getLocalFile(aFile), file2 = new File(file.getParentFile(), aName); file.renameTo(file2);
             DialogBox dbox = new DialogBox("Can't rename non-empty directory");
             dbox.setErrorMessage("I know this is bogus, but app can't yet rename non-empty directory");
-            dbox.showMessageDialog(_projPane.getUI()); //getAppPaneUI()
+            dbox.showMessageDialog(_podPane.getUI());
             return false;
         }
 
@@ -363,7 +363,7 @@ public class FilesTool extends ProjectTool {
         // Give the user one last chance to bail
         DialogBox dialogBox = new DialogBox("Remove File(s)");
         dialogBox.setQuestionMessage("Are you sure you want to remove the currently selected File(s)?");
-        if (!dialogBox.showConfirmDialog(_projPane.getUI()))
+        if (!dialogBox.showConfirmDialog(_podPane.getUI()))
             return;
 
         // Get top parent

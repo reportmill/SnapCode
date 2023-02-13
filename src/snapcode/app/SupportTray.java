@@ -21,7 +21,7 @@ public class SupportTray extends ViewOwner {
     /**
      * Creates a new SupportTray for given ProjectPane.
      */
-    public SupportTray(ProjectPane projPane, Side aSide, ProjectTool[] trayTools)
+    public SupportTray(PodPane projPane, Side aSide, ProjectTool[] trayTools)
     {
         _side = aSide;
         _trayTools = trayTools;

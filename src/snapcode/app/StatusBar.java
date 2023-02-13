@@ -11,9 +11,9 @@ public class StatusBar extends ProjectTool {
     /**
      * Constructor.
      */
-    public StatusBar(ProjectPane projectPane)
+    public StatusBar(PodPane podPane)
     {
-        super(projectPane);
+        super(podPane);
     }
 
     /**

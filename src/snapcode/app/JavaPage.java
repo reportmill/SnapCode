@@ -37,12 +37,12 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     }
 
     /**
-     * Return the AppPane.
+     * Return the PodPane.
      */
-    AppPane getAppPane()
+    PodPane getPodPane()
     {
         WebBrowser browser = getBrowser();
-        return browser.getOwner(AppPane.class);
+        return browser.getOwner(PodPane.class);
     }
 
     /**
@@ -329,8 +329,8 @@ public class JavaPage extends WebPage implements WebFile.Updater {
      */
     private void showReferences(JNode aNode)
     {
-        if (getAppPane() == null) return;
-        ProjectTools projTools = getAppPane().getProjectTools();
+        if (getPodPane() == null) return;
+        ProjectTools projTools = getPodPane().getProjectTools();
         projTools.getSearchTool().searchReference(aNode);
         projTools.showToolForClass(SearchPane.class);
     }
@@ -340,8 +340,8 @@ public class JavaPage extends WebPage implements WebFile.Updater {
      */
     private void showDeclarations(JNode aNode)
     {
-        if (getAppPane() == null) return;
-        ProjectTools projTools = getAppPane().getProjectTools();
+        if (getPodPane() == null) return;
+        ProjectTools projTools = getPodPane().getProjectTools();
         projTools.getSearchTool().searchDeclaration(aNode);
         projTools.showToolForClass(SearchPane.class);
     }
@@ -367,8 +367,8 @@ public class JavaPage extends WebPage implements WebFile.Updater {
      */
     private int getProgramCounterLine()
     {
-        AppPane ap = getAppPane();
-        return ap != null ? ap.getProcPane().getProgramCounter(getFile()) : -1;
+        PodPane podPane = getPodPane();
+        return podPane != null ? podPane.getProcPane().getProgramCounter(getFile()) : -1;
     }
 
     /**

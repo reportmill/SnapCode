@@ -1,5 +1,5 @@
 package snapcode.apptools;
-import snapcode.app.ProjectPane;
+import snapcode.app.PodPane;
 import snapcode.app.ProjectTool;
 import snapcode.debug.RunApp;
 import snap.gfx.Color;
@@ -26,7 +26,7 @@ public class RunConsole extends ProjectTool {
     /**
      * Creates a new DebugPane.
      */
-    public RunConsole(ProjectPane projPane)
+    public RunConsole(PodPane projPane)
     {
         super(projPane);
     }

@@ -4,7 +4,7 @@ import snap.props.PropChangeListener;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.app.ProjectConfigPane;
-import snapcode.app.ProjectPane;
+import snapcode.app.PodPane;
 import snapcode.app.ProjectTool;
 import snapcode.project.VersionControl;
 //import snapcode.project.VersionControlGit;
@@ -23,9 +23,9 @@ public class VcsTools extends ProjectTool {
     /**
      * Constructor.
      */
-    public VcsTools(ProjectPane projectPane)
+    public VcsTools(PodPane podPane)
     {
-        super(projectPane);
+        super(podPane);
     }
 
     @Override
@@ -37,12 +37,12 @@ public class VcsTools extends ProjectTool {
         _vcp = new VcsPane(this);
 
         // Should be called for all projects/sites, not just root
-        WebSite rootSite = _projPane.getRootSite();
+        WebSite rootSite = _podPane.getRootSite();
         rootSite.addFileChangeListener(_siteFileLsnr);
     }
 
     /**
-     * Opens the Site. Was called when AppPane.Show
+     * Opens the Site. Was called when PodPane.Show
      */
     public void openSite()
     {

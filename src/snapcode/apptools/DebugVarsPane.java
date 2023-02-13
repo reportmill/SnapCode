@@ -30,7 +30,7 @@ public class DebugVarsPane extends ProjectTool {
      */
     public DebugVarsPane(DebugTool debugTool)
     {
-        super(debugTool.getProjectPane());
+        super(debugTool.getPodPane());
         _debugTool = debugTool;
     }
 

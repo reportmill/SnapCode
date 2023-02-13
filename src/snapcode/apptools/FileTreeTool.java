@@ -9,7 +9,7 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.app.DiffPage;
-import snapcode.app.ProjectPane;
+import snapcode.app.PodPane;
 import snapcode.app.ProjectTool;
 import snapcode.app.SitePane;
 import snapcode.util.CloseBox;
@@ -36,11 +36,11 @@ public class FileTreeTool extends ProjectTool {
     private static Image FILES_LIST_ICON = Image.get(FileTreeTool.class, "FilesList.png");
 
     /**
-     * Constructor..
+     * Constructor.
      */
-    public FileTreeTool(ProjectPane projPane)
+    public FileTreeTool(PodPane podPane)
     {
-        super(projPane);
+        super(podPane);
     }
 
     /**
@@ -52,9 +52,9 @@ public class FileTreeTool extends ProjectTool {
         if (_rootFiles != null) return _rootFiles;
 
         // Create RootFiles
-        List<FileTreeFile> rootFiles = new ArrayList<>(_projPane.getSiteCount());
-        for (int i = 0, iMax = _projPane.getSiteCount(); i < iMax; i++) {
-            WebSite site = _projPane.getSite(i);
+        List<FileTreeFile> rootFiles = new ArrayList<>(_podPane.getSiteCount());
+        for (int i = 0, iMax = _podPane.getSiteCount(); i < iMax; i++) {
+            WebSite site = _podPane.getSite(i);
             rootFiles.add(new FileTreeFile(null, site.getRootDir()));
         }
 
@@ -152,7 +152,7 @@ public class FileTreeTool extends ProjectTool {
         addKeyActionHandler("PasteAction", "Shortcut+V");
 
         // Register for Window.Focused change
-        _projPane.getWindow().addPropChangeListener(pc -> windowFocusChanged(), View.Focused_Prop);
+        _podPane.getWindow().addPropChangeListener(pc -> windowFocusChanged(), View.Focused_Prop);
     }
 
     /**
@@ -356,12 +356,12 @@ public class FileTreeTool extends ProjectTool {
     public void renameFile()
     {
         WebFile selFile = getSelFile();
-        if (selFile == null || !ArrayUtils.containsId(_projPane.getSites(), selFile.getSite()))
+        if (selFile == null || !ArrayUtils.containsId(_podPane.getSites(), selFile.getSite()))
             return;
 
         DialogBox dbox = new DialogBox("Rename File");
         dbox.setMessage("Enter new name for " + selFile.getName());
-        String newName = dbox.showInputDialog(_projPane.getUI(), selFile.getName());
+        String newName = dbox.showInputDialog(_podPane.getUI(), selFile.getName());
         if (newName != null) {
             FilesTool filesTool = _projTools.getFilesTool();
             filesTool.renameFile(selFile, newName);
@@ -402,7 +402,7 @@ public class FileTreeTool extends ProjectTool {
      */
     protected void windowFocusChanged()
     {
-        if (_projPane.getWindow().isFocused()) {
+        if (_podPane.getWindow().isFocused()) {
             for (FileTreeFile file : getRootFiles())
                 checkForExternalMods(file.getFile());
         }

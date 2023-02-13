@@ -17,9 +17,9 @@ public class MainToolBar extends ProjectTool {
     /**
      * Constructor.
      */
-    public MainToolBar(ProjectPane projectPane)
+    public MainToolBar(PodPane podPane)
     {
-        super(projectPane);
+        super(podPane);
     }
 
     /**
@@ -106,7 +106,7 @@ public class MainToolBar extends ProjectTool {
         if (aPrefix.length() == 0) return Collections.EMPTY_LIST;
         List<WebFile> files = new ArrayList<>();
 
-        for (WebSite site : _projPane.getSites())
+        for (WebSite site : _podPane.getSites())
             getFilesForPrefix(aPrefix, site.getRootDir(), files);
         files.sort(_fileComparator);
         return files;

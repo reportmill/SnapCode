@@ -12,11 +12,11 @@ import java.util.List;
  */
 public class ProjectTool extends ViewOwner {
 
-    // The ProjectPane
-    protected ProjectPane  _projPane;
+    // The PodPane
+    protected PodPane  _podPane;
 
     // The ProjectTools
-    protected ProjectTools _projTools;
+    protected ProjectTools  _projTools;
 
     // The PagePane
     protected PagePane  _pagePane;
@@ -24,40 +24,40 @@ public class ProjectTool extends ViewOwner {
     /**
      * Constructor.
      */
-    public ProjectTool(ProjectPane projPane)
+    public ProjectTool(PodPane podPane)
     {
         super();
-        _projPane = projPane;
-        _projTools = projPane.getProjectTools();
-        _pagePane = projPane.getPagePane();
+        _podPane = podPane;
+        _projTools = podPane.getProjectTools();
+        _pagePane = podPane.getPagePane();
     }
 
     /**
-     * Returns the ProjectPane.
+     * Returns the PodPane.
      */
-    public ProjectPane getProjectPane()  { return _projPane; }
+    public PodPane getPodPane()  { return _podPane; }
 
     /**
      * Returns the top level site.
      */
-    public WebSite getRootSite()  { return _projPane.getRootSite(); }
+    public WebSite getRootSite()  { return _podPane.getRootSite(); }
 
     /**
      * Returns the selected project.
      */
-    public Project getProject()  { return _projPane.getProject(); }
+    public Project getProject()  { return _podPane.getProject(); }
 
     /**
      * Returns the selected file.
      */
-    public WebFile getSelFile()  { return _projPane.getSelFile(); }
+    public WebFile getSelFile()  { return _podPane.getSelFile(); }
 
     /**
      * Sets the selected site file.
      */
     public void setSelFile(WebFile aFile)
     {
-        _projPane.setSelFile(aFile);
+        _podPane.setSelFile(aFile);
     }
 
     /**
@@ -72,12 +72,12 @@ public class ProjectTool extends ViewOwner {
     /**
      * Returns the selected site.
      */
-    public WebSite getSelSite()  { return _projPane.getSelSite(); }
+    public WebSite getSelSite()  { return _podPane.getSelSite(); }
 
     /**
      * Returns the browser.
      */
-    public WebBrowser getBrowser()  { return _projPane.getBrowser(); }
+    public WebBrowser getBrowser()  { return _podPane.getBrowser(); }
 
     /**
      * Returns the title.

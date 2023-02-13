@@ -396,13 +396,13 @@ public class WelcomePanel extends ViewOwner {
      */
     public void openSites()
     {
-        // Create AppPane and add selected sites
-        AppPane appPane = new AppPane();
+        // Create PodPane and add selected sites
+        PodPane podPane = new PodPane();
         for (WebSite site : getSelectedSites())
-            appPane.addSite(site);
+            podPane.addSite(site);
 
-        // Show AppPane
-        appPane.show();
+        // Show PodPane
+        podPane.show();
     }
 
     /**
@@ -457,10 +457,10 @@ public class WelcomePanel extends ViewOwner {
         WebURL url = WebURL.getURL(path);
         if (url == null || url.getFile() == null) return;
         Prefs.getDefaultPrefs().setValue("SnapFileViewerPath", path);
-        AppPane apane = new AppPane();
+        PodPane podPane = new PodPane();
         WebSite site = url.getAsSite();
-        apane.addSite(site);
-        apane.show();
+        podPane.addSite(site);
+        podPane.show();
         hide();
     }
 

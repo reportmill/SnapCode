@@ -1,38 +1,87 @@
 package snapcode.app;
-import javakit.ide.JavaTextPane;
-import javakit.project.Breakpoints;
-import javakit.project.BuildIssue;
 import javakit.project.Pod;
 import javakit.project.Project;
-import snap.util.ArrayUtils;
-import snapcode.apptools.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
+import snap.util.ArrayUtils;
 import snap.util.FileUtils;
 import snap.util.Prefs;
 import snap.view.*;
+import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
+import snapcode.apptools.*;
+import snapcode.project.PodX;
 
 /**
- * The main view class for Projects.
+ * This class is the top level controller for an open project.
  */
-public class AppPane extends ProjectPane {
+public class PodPane extends ViewOwner {
 
-    // The main SplitView that holds sidebar and browser
-    private SplitView  _mainSplit;
+    // The Pod
+    private Pod  _pod;
+
+    // The list of sites
+    protected WebSite[]  _sites = new WebSite[0];
+
+    // The project
+    private Project  _proj;
+
+    // The MainToolBar
+    protected MainToolBar  _toolBar;
+
+    // The PagePane to display project files for editing
+    protected PagePane  _pagePane;
+
+    // The StatusBar
+    protected StatusBar  _statusBar;
+
+    // The ProjectTool manager
+    protected ProjectTools  _projTools;
 
     // A PropChangeListener to watch for site file changes
-    private PropChangeListener  _siteFileLsnr = pc -> siteFileChanged(pc);
+    private PropChangeListener _siteFileLsnr = pc -> siteFileChanged(pc);
 
     /**
      * Constructor.
      */
-    public AppPane()
+    public PodPane()
     {
         super();
+
+        // Create Pod
+        _pod = new PodX();
+
+        // Create MainToolBar, PagePane, StatusBar
+        _toolBar = new MainToolBar(this);
+        _pagePane = new PagePane(this);
+        _statusBar = new StatusBar(this);
+
+        // Create ProjectTools
+        _projTools = new ProjectTools(this);
+        _projTools.createTools();
     }
+
+    /**
+     * Returns the pod.
+     */
+    public Pod getPod()  { return _pod; }
+
+    /**
+     * Returns the PagePane.
+     */
+    public PagePane getPagePane()  { return _pagePane; }
+
+    /**
+     * Returns the PagePane.Browser.
+     */
+    public WebBrowser getBrowser()  { return _pagePane.getBrowser(); }
+
+    /**
+     * Returns the ProjectTools helper.
+     */
+    public ProjectTools getProjectTools()  { return _projTools; }
 
     /**
      * Returns the toolbar.
@@ -50,29 +99,45 @@ public class AppPane extends ProjectPane {
     public SupportTray getSupportTray()  { return _projTools.getSupportTray(); }
 
     /**
+     * Returns the array of sites.
+     */
+    public WebSite[] getSites()  { return _sites; }
+
+    /**
+     * Returns the number of sites.
+     */
+    public int getSiteCount()  { return _sites.length; }
+
+    /**
+     * Returns the individual site at the given index.
+     */
+    public WebSite getSite(int anIndex)  { return _sites[anIndex]; }
+
+    /**
      * Adds a site to sites list.
      */
-    @Override
     public void addSite(WebSite aSite)
     {
-        // Do normal version
+        // If site already added, just return
         if (ArrayUtils.contains(_sites, aSite)) return;
-        super.addSite(aSite);
+
+        // Add site
+        _sites = ArrayUtils.add(_sites, aSite);
 
         // Start listening to file changes
         aSite.addFileChangeListener(_siteFileLsnr);
 
-        // Create project for site
+        // Get project for site
         Pod pod = getPod();
         Project proj = pod.getProjectForSite(aSite);
 
-        // Add listener to update ProcPane and JavaPage.TextArea(s) when Breakpoint/BuildIssue added/removed
-        proj.getBreakpoints().addPropChangeListener(pc -> projBreakpointsDidChange(pc));
-        proj.getBuildIssues().addPropChangeListener(pc -> projBuildIssuesDidChange(pc));
+        // Add listener to update tools when Breakpoint/BuildIssue added/removed
+        proj.getBreakpoints().addPropChangeListener(pc -> _projTools.projBreakpointsDidChange(pc));
+        proj.getBuildIssues().addPropChangeListener(pc -> _projTools.projBuildIssuesDidChange(pc));
 
         // Add site
         SitePane sitePane = SitePane.get(aSite, true);
-        sitePane.setAppPane(this);
+        sitePane.setPodPane(this);
 
         // Add dependent sites
         for (Project p : proj.getProjects())
@@ -81,16 +146,18 @@ public class AppPane extends ProjectPane {
         // Clear root files
         FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
         fileTreeTool.resetRootFiles();
+
+        // Reset UI
+        resetLater();
     }
 
     /**
      * Removes a site from sites list.
      */
-    @Override
     public void removeSite(WebSite aSite)
     {
-        // Do normal version
-        super.removeSite(aSite);
+        // Remove site
+        _sites = ArrayUtils.remove(_sites, aSite);
 
         // Stop listening to file changes
         aSite.removeFileChangeListener(_siteFileLsnr);
@@ -98,14 +165,56 @@ public class AppPane extends ProjectPane {
         // Clear root files
         FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
         fileTreeTool.resetRootFiles();
+
+        // Reset UI
+        resetLater();
     }
 
     /**
-     * Shows the AppPane window.
+     * Returns the top level site.
+     */
+    public WebSite getRootSite()  { return _sites[0]; }
+
+    /**
+     * Returns the selected project.
+     */
+    public Project getProject()
+    {
+        if (_proj != null) return _proj;
+        return _proj = Project.getProjectForSite(getRootSite());
+    }
+
+    /**
+     * Returns the selected file.
+     */
+    public WebFile getSelFile()  { return _pagePane.getSelectedFile(); }
+
+    /**
+     * Sets the selected site file.
+     */
+    public void setSelFile(WebFile aFile)
+    {
+        _pagePane.setSelectedFile(aFile);
+    }
+
+    /**
+     * Returns the selected site.
+     */
+    public WebSite getSelSite()
+    {
+        WebFile file = getSelFile();
+        WebSite site = file != null ? file.getSite() : null;
+        if (!ArrayUtils.containsId(getSites(), site))
+            site = getSite(0);
+        return site;
+    }
+
+    /**
+     * Shows the PodPane window.
      */
     public void show()
     {
-        // Set AppPane as OpenSite and show window
+        // Show window
         getUI();
         getWindow().setSaveName("AppPane");
         getWindow().setSaveSize(true);
@@ -117,7 +226,7 @@ public class AppPane extends ProjectPane {
     }
 
     /**
-     * Close this AppPane.
+     * Close this PodPane.
      */
     public void hide()
     {
@@ -133,16 +242,12 @@ public class AppPane extends ProjectPane {
     }
 
     /**
-     * Called when site file changes with File PropChange.
+     * Returns the build directory.
      */
-    void siteFileChanged(PropChange aPC)
+    public WebFile getBuildDir()
     {
-        // Get file and update in FilesPane
-        WebFile file = (WebFile) aPC.getSource();
-        if (file.getExists()) {
-            FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
-            fileTreeTool.updateFile(file);
-        }
+        Project proj = getProject();
+        return proj != null ? proj.getBuildDir() : null;
     }
 
     /**
@@ -151,9 +256,9 @@ public class AppPane extends ProjectPane {
     protected void initUI()
     {
         // Get MainSplit
-        _mainSplit = getUI(SplitView.class);
-        _mainSplit.setBorder(null);
-        _mainSplit.setDividerSpan(5);
+        SplitView mainSplit = getUI(SplitView.class);
+        mainSplit.setBorder(null);
+        mainSplit.setDividerSpan(5);
 
         // Get MenuBar and register to process events
         MenuBar menuBar = getView("MenuBar", MenuBar.class);
@@ -185,7 +290,7 @@ public class AppPane extends ProjectPane {
         // Add SupportTray to MainSplit
         SupportTray supportTray = _projTools.getSupportTray();
         TabView supportTrayUI = (TabView) supportTray.getUI();
-        _mainSplit.addItem(supportTrayUI);
+        mainSplit.addItem(supportTrayUI);
 
         // Add StatusBar
         TabBar tabBar = supportTrayUI.getTabBar();
@@ -197,6 +302,21 @@ public class AppPane extends ProjectPane {
 
         // Register for WelcomePanel on close
         enableEvents(getWindow(), WinClose);
+    }
+
+    /**
+     * Resets UI panel.
+     */
+    @Override
+    public void resetUI()
+    {
+        // Reset window title
+        WebPage page = _pagePane.getSelPage();
+        getWindow().setTitle(page != null ? page.getTitle() : "SnapCode");
+
+        // Reset FilesPane and SupportTray
+        _projTools.resetLater();
+        _statusBar.resetLater();
     }
 
     /**
@@ -246,67 +366,28 @@ public class AppPane extends ProjectPane {
     }
 
     /**
+     * Called when site file changes with File PropChange.
+     */
+    protected void siteFileChanged(PropChange aPC)
+    {
+        // Get file and update in FilesPane
+        WebFile file = (WebFile) aPC.getSource();
+        if (file.getExists()) {
+            FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
+            fileTreeTool.updateFile(file);
+        }
+    }
+
+    /**
      * Called when PagePane does prop change.
      */
-    private void pagePaneDidPropChange(PropChange aPC)
+    protected void pagePaneDidPropChange(PropChange aPC)
     {
         // Handle SelFile
         String propName = aPC.getPropName();
         if (propName == PagePane.SelFile_Prop) {
             FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
             fileTreeTool.resetLater();
-        }
-    }
-
-    /**
-     * Called when Project.BreakPoints change.
-     */
-    private void projBreakpointsDidChange(PropChange pc)
-    {
-        DebugTool debugTool = _projTools.getDebugTool();
-        debugTool.projBreakpointsDidChange(pc);
-    }
-
-    /**
-     * Called when Project.BuildIssues change.
-     */
-    private void projBuildIssuesDidChange(PropChange pc)
-    {
-        if (pc.getPropertyName() != Breakpoints.ITEMS_PROP) return;
-
-        // Handle BuildIssue added
-        BuildIssue issueAdded = (BuildIssue) pc.getNewValue();
-        if (issueAdded != null) {
-
-            // Make current JavaPage.TextArea resetLater
-            WebFile issueFile = issueAdded.getFile();
-            WebPage page = getBrowser().getPageForURL(issueFile.getURL());
-            if (page instanceof JavaPage) {
-                JavaTextPane<?> javaTextPane = ((JavaPage) page).getTextPane();
-                javaTextPane.buildIssueOrBreakPointMarkerChanged();
-            }
-
-            // Update FilesPane.FilesTree
-            FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
-            fileTreeTool.updateFile(issueFile);
-        }
-
-        // Handle BuildIssue removed
-        else {
-
-            BuildIssue issueRemoved = (BuildIssue) pc.getOldValue();
-            WebFile issueFile = issueRemoved.getFile();
-
-            // Make current JavaPage.TextArea resetLater
-            WebPage page = getBrowser().getPageForURL(issueFile.getURL());
-            if (page instanceof JavaPage) {
-                JavaTextPane<?> javaTextPane = ((JavaPage) page).getTextPane();
-                javaTextPane.buildIssueOrBreakPointMarkerChanged();
-            }
-
-            // Update FilesPane.FilesTree
-            FileTreeTool fileTreeTool = _projTools.getFileTreeTool();
-            fileTreeTool.updateFile(issueFile);
         }
     }
 }

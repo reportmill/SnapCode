@@ -13,14 +13,14 @@ import snap.web.WebSite;
  */
 public class SitePane extends WebPage {
 
-    // The AppPane that owns this SitePane
-    private AppPane  _appPane;
+    // The PodPane that owns this SitePane
+    private PodPane  _podPane;
 
     // The WebSite
     private WebSite  _site;
 
-    // The ProjectPane
-    private ProjectConfigPane _projPane;
+    // The ProjectConfigPane
+    private ProjectConfigPane  _projPane;
 
     // The BuildPane
     private BuildPane _buildPane;
@@ -39,7 +39,7 @@ public class SitePane extends WebPage {
         _site = aSite;
         _site.addFileChangeListener(_siteFileLsnr);
 
-        // Set ProjectPane
+        // Set ProjectConfigPane
         _projPane = new ProjectConfigPane(this);
 
         // Set BuildPane
@@ -47,21 +47,13 @@ public class SitePane extends WebPage {
     }
 
     /**
-     * Returns the AppPane.
+     * Sets the PodPane.
      */
-    public AppPane getAppPane()
+    protected void setPodPane(PodPane anAP)
     {
-        return _appPane;
-    }
-
-    /**
-     * Sets the AppPane.
-     */
-    protected void setAppPane(AppPane anAP)
-    {
-        _appPane = anAP;
+        _podPane = anAP;
         if (_projPane != null)
-            _projPane.setAppPane(anAP);
+            _projPane.setPodPane(anAP);
     }
 
     /**
@@ -73,7 +65,7 @@ public class SitePane extends WebPage {
     }
 
     /**
-     * Returns the ProjectPane for this site.
+     * Returns the ProjectConfigPane for this site.
      */
     public ProjectConfigPane getProjPane()
     {
@@ -117,7 +109,7 @@ public class SitePane extends WebPage {
      */
     public void openSite()
     {
-        // Activate ProjectPane
+        // Activate ProjectConfigPane
         if (_projPane != null)
             _projPane.openSite();
     }
@@ -129,7 +121,7 @@ public class SitePane extends WebPage {
     {
         _site.removeFileChangeListener(_siteFileLsnr);
         _site.setProp(SitePane.class.getName(), null);
-        _appPane = null;
+        _podPane = null;
         _site = null;
         _projPane = null;
     }
@@ -234,7 +226,7 @@ public class SitePane extends WebPage {
         // Create TabView
         _tabView = new TabView();
 
-        // Add ProjectPane
+        // Add ProjectConfigPane
         ProjectConfigPane projPane = getProjPane();
         if (projPane != null)
             _tabView.addTab("Settings", projPane.getUI()); //tab.setTooltip(new Tooltip("Project Settings"));

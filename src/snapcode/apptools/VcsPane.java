@@ -1,5 +1,5 @@
 package snapcode.apptools;
-import snapcode.app.AppPane;
+import snapcode.app.PodPane;
 import snapcode.app.ProjectTool;
 import snapcode.project.ProjectX;
 import snapcode.project.VersionControl;
@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class VcsPane extends ProjectTool {
 
-    // The AppPane
+    // The VcsTools
     private VcsTools  _vscTools;
 
     // The site
@@ -43,7 +43,7 @@ public class VcsPane extends ProjectTool {
      */
     public VcsPane(VcsTools vcsTools)
     {
-        super(vcsTools.getProjectPane());
+        super(vcsTools.getPodPane());
         _vscTools = vcsTools;
         _site = getRootSite();
         _site.setProp(VcsPane.class.getName(), this);
@@ -58,11 +58,11 @@ public class VcsPane extends ProjectTool {
     }
 
     /**
-     * Sets the anAppPane.
+     * Sets the PodPane.
      */
-    public void setAppPane(AppPane anAP)
+    public void setPodPane(PodPane podPane)
     {
-        _projPane = anAP;
+        _podPane = podPane;
     }
 
     /**
@@ -174,7 +174,7 @@ public class VcsPane extends ProjectTool {
         String msg = "Do you want to load remote files into project directory?";
         DialogBox dialogBox = new DialogBox("Checkout Project Files");
         dialogBox.setMessage(msg);
-        if (!dialogBox.showConfirmDialog(_projPane.getUI()))
+        if (!dialogBox.showConfirmDialog(_podPane.getUI()))
             return;
 
         // Perform checkout
@@ -193,7 +193,7 @@ public class VcsPane extends ProjectTool {
         catch (Exception e) {
             DialogBox dialogBox = new DialogBox("Disconnect Error");
             dialogBox.setErrorMessage(e.toString());
-            dialogBox.showMessageDialog(_projPane.getUI());
+            dialogBox.showMessageDialog(_podPane.getUI());
         }
     }
 
@@ -202,7 +202,7 @@ public class VcsPane extends ProjectTool {
      */
     public void checkout()
     {
-        TaskRunner<?> runner = new TaskRunnerPanel(_projPane.getUI(), "Checkout from " + _vc.getRemoteURLString()) {
+        TaskRunner<?> runner = new TaskRunnerPanel(_podPane.getUI(), "Checkout from " + _vc.getRemoteURLString()) {
             boolean _oldAutoBuildEnabled;
 
             public Object run() throws Exception
@@ -222,7 +222,7 @@ public class VcsPane extends ProjectTool {
             {
                 _vscTools.setAutoBuildEnabled(_oldAutoBuildEnabled);
                 if (ClientUtils.setAccess(getRemoteSite())) checkout();
-                else if (new LoginPage().showPanel(_projPane.getUI(), getRemoteSite())) checkout();
+                else if (new LoginPage().showPanel(_podPane.getUI(), getRemoteSite())) checkout();
                 else super.failure(e);
             }
         };
@@ -240,7 +240,7 @@ public class VcsPane extends ProjectTool {
             proj.readSettings();
 
         // Reset UI
-        _projPane.resetLater();
+        _podPane.resetLater();
 
         //
         _vscTools.setAutoBuildEnabled(oldAutoBuildEnabled);
@@ -302,7 +302,7 @@ public class VcsPane extends ProjectTool {
     protected void commitFilesImpl(final List<WebFile> theFiles, final String aMessage)
     {
         // Create TaskRunner and start
-        new TaskRunnerPanel(_projPane.getUI(), "Commit files to remote site") {
+        new TaskRunnerPanel(_podPane.getUI(), "Commit files to remote site") {
             public Object run() throws Exception
             {
                 _vc.commitFiles(theFiles, aMessage, this);
@@ -352,7 +352,7 @@ public class VcsPane extends ProjectTool {
         } catch (Exception e) {
             DialogBox db = new DialogBox("Disconnect Error");
             db.setErrorMessage(e.toString());
-            db.showMessageDialog(_projPane.getUI());
+            db.showMessageDialog(_podPane.getUI());
         }
 
         // Sort files and return
@@ -369,7 +369,7 @@ public class VcsPane extends ProjectTool {
         final boolean oldAutoBuild = _vscTools.setAutoBuildEnabled(false);
 
         // Create TaskRunner and start
-        new TaskRunnerPanel(_projPane.getUI(), "Update files from remote site") {
+        new TaskRunnerPanel(_podPane.getUI(), "Update files from remote site") {
             public Object run() throws Exception
             {
                 _vc.updateFiles(theFiles, this);
@@ -382,7 +382,7 @@ public class VcsPane extends ProjectTool {
                     file.reload();
                 for (WebFile file : theFiles)
                     getBrowser().reloadFile(file); // Refresh replaced files
-                _projPane.resetLater(); // Reset UI
+                _podPane.resetLater(); // Reset UI
             }
 
             public void finished()
@@ -450,7 +450,7 @@ public class VcsPane extends ProjectTool {
         // Create TaskRunner and start
         final boolean oldAutoBuild = _vscTools.setAutoBuildEnabled(false);
 
-        new TaskRunnerPanel(_projPane.getUI(), "Replace files from remote site") {
+        new TaskRunnerPanel(_podPane.getUI(), "Replace files from remote site") {
             public Object run() throws Exception
             {
                 _vc.replaceFiles(theFiles, this);
@@ -463,7 +463,7 @@ public class VcsPane extends ProjectTool {
                     file.reload();
                 for (WebFile file : theFiles)
                     getBrowser().reloadFile(file);
-                _projPane.resetLater();
+                _podPane.resetLater();
             }
 
             public void finished()
