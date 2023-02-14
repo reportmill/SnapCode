@@ -435,7 +435,7 @@ public class ProjectConfigTool extends ProjectTool {
     protected void handleBuildCompleted()
     {
         // If final error count non-zero, show problems pane
-        int errorCount = _proj.getRootProject().getBuildIssues().getErrorCount();
+        int errorCount = _workspace.getBuildIssues().getErrorCount();
         if (errorCount > 0) {
             SupportTray supportTray = _workspacePane.getSupportTray();
             if (supportTray.getSelTool() instanceof ProblemsTool)

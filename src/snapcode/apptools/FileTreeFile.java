@@ -3,6 +3,7 @@ import javakit.project.BuildIssue;
 import javakit.ide.JavaTextUtils;
 import javakit.project.BuildIssues;
 import javakit.project.Project;
+import javakit.project.Workspace;
 import snap.geom.Pos;
 import snap.gfx.Image;
 import snapcode.project.VersionControl;
@@ -194,25 +195,27 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
     public View getGraphic()
     {
         // Get image for file
-        Image img = _type == FileType.PACKAGE_DIR ? Package : ViewUtils.getFileIconImage(_file);
-        View grf = new ImageView(img);
-        grf.setPrefSize(18, 18);
+        Image fileImage = _type == FileType.PACKAGE_DIR ? Package : ViewUtils.getFileIconImage(_file);
+        View fileIconView = new ImageView(fileImage);
+        fileIconView.setPrefSize(18, 18);
 
         // If error/warning add Error/Warning badge as composite icon
-        Project proj = _proj.getRootProject();
-        BuildIssues buildIssues = proj.getBuildIssues();
+        Workspace workspace = _proj.getWorkspace();
+        BuildIssues buildIssues = workspace.getBuildIssues();
         BuildIssue.Kind status = buildIssues != null ? buildIssues.getBuildStatusForFile(_file) : null;
         if (status != null) {
             Image badge = status == BuildIssue.Kind.Error ? ErrorBadge : WarningBadge;
-            ImageView bview = new ImageView(badge);
-            bview.setLean(Pos.BOTTOM_LEFT);
-            StackView spane = new StackView();
-            spane.setChildren(grf, bview);
-            grf = spane;
+            ImageView badgeImageView = new ImageView(badge);
+            badgeImageView.setLean(Pos.BOTTOM_LEFT);
+
+            // Create StackView
+            StackView stackView = new StackView();
+            stackView.setChildren(fileIconView, badgeImageView);
+            fileIconView = stackView;
         }
 
-        // Return node
-        return grf;
+        // Return
+        return fileIconView;
     }
 
     /**

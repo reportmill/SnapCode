@@ -2,8 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
+import javakit.project.BuildIssues;
 import javakit.project.Project;
 import javakit.project.ProjectFiles;
+import javakit.project.Workspace;
 import snap.web.WebFile;
 
 import javax.tools.SimpleJavaFileObject;
@@ -20,14 +22,22 @@ import java.util.Arrays;
 class SnapCompilerJFO extends SimpleJavaFileObject {
 
     // The Project
-    private Project _proj;
+    private Project  _proj;
 
-    protected SnapCompiler _compiler;
+    // The Compiler
+    protected SnapCompiler  _compiler;
 
-    // The SnapCompiler and JavaFile (if available)
-    WebFile _file;
-    WebFile _sourceFile;
-    String _bname, _str;
+    // The class file
+    private WebFile  _file;
+
+    // The Java source file
+    protected WebFile  _sourceFile;
+
+    // The binary name
+    private String  _binaryName;
+
+    // The contents of java file
+    private String  _javaTextStr;
 
     /**
      * Creates a new SnapFileJFO with WebFile, SnapCompiler and (optional) source file.
@@ -64,11 +74,16 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
      */
     public String getBinaryName()
     {
-        if (_bname != null) return _bname;
+        // If already set, just return
+        if (_binaryName != null) return _binaryName;
+
+        // Get binary name from file
         String path = _file.getPath();
         int index = path.lastIndexOf('.');
-        String name = path.substring(1, index).replace('/', '.');
-        return _bname = name;
+        String binaryName = path.substring(1, index).replace('/', '.');
+
+        // Set, return
+        return _binaryName = binaryName;
     }
 
     /**
@@ -76,10 +91,19 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
      */
     public CharSequence getCharContent(boolean ignoreEncodingErrors)
     {
-        if (_str != null) return _str;
-        _str = _file.getText();
-        _proj.getRootProject().getBuildIssues().removeIssuesForFile(_file);
-        return _str;
+        // If already set, just return
+        if (_javaTextStr != null) return _javaTextStr;
+
+        // Get string
+        _javaTextStr = _file.getText();
+
+        // Since compiler just read new file contents, clear buildIssues for file
+        Workspace workspace = _proj.getWorkspace();
+        BuildIssues buildIssues = workspace.getBuildIssues();
+        buildIssues.removeIssuesForFile(_file);
+
+        // Return
+        return _javaTextStr;
     }
 
     /**
@@ -98,32 +122,35 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
         return new ByteArrayOutputStream() {
             public void close() throws IOException
             {
-
-                // Do normal close and add SourceFile to Compiler.CompiledFiles
                 super.close();
-                _compiler._compJFs.add(_sourceFile);
-
-                // Get bytes and whether class file is modified
-                byte[] bytes = toByteArray();
-                boolean modified = !Arrays.equals(bytes, _file.getBytes());
-
-                // If modified, set File.Bytes and add ClassFile to ModifiedFiles and SourceFile to ModifiedSources
-                if (modified) {
-                    _file.setBytes(bytes);
-                    _compiler._modJFs.add(_sourceFile);
-                }
-
-                // If file was modified or a real compile file, save
-                if (modified || _file.getLastModTime() < _sourceFile.getLastModTime()) {
-                    try {
-                        _file.save();
-                    }
-                    catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+                byte[] classFileBytes = toByteArray();
+                compileFinished(classFileBytes);
             }
         };
+    }
+
+    /**
+     * Called after file is read/compiled/closed.
+     */
+    private void compileFinished(byte[] classFileBytes)
+    {
+        // Add SourceFile to Compiler.CompiledJFs
+        _compiler._compJFs.add(_sourceFile);
+
+        // Get bytes and whether class file is modified
+        boolean modified = !Arrays.equals(classFileBytes, _file.getBytes());
+
+        // If modified, set File.Bytes and add ClassFile to ModifiedFiles and SourceFile to ModifiedSources
+        if (modified) {
+            _file.setBytes(classFileBytes);
+            _compiler._modJFs.add(_sourceFile);
+        }
+
+        // If file was modified or a real compile file, save
+        if (modified || _file.getLastModTime() < _sourceFile.getLastModTime()) {
+            try { _file.save(); }
+            catch (Exception e) { throw new RuntimeException(e); }
+        }
     }
 
     /**

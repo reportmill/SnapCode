@@ -2,6 +2,7 @@ package snapcode.app;
 import javakit.ide.JavaTextPane;
 import javakit.project.Breakpoints;
 import javakit.project.BuildIssue;
+import javakit.project.BuildIssues;
 import javakit.project.Workspace;
 import snap.geom.Side;
 import snap.props.PropChange;
@@ -90,6 +91,10 @@ public class WorkspaceTools {
         Workspace workspace = _workspacePane.getWorkspace();
         Breakpoints breakpoints = workspace.getBreakpoints();
         breakpoints.addPropChangeListener(pc -> breakpointsDidChange(pc));
+
+        // Start listening to BuildIssues helper
+        BuildIssues buildIssues = workspace.getBuildIssues();
+        buildIssues.addPropChangeListener(pc -> buildIssuesDidChange(pc));
     }
 
     /**
@@ -174,7 +179,7 @@ public class WorkspaceTools {
     /**
      * Called when Project.BuildIssues change.
      */
-    protected void projBuildIssuesDidChange(PropChange pc)
+    protected void buildIssuesDidChange(PropChange pc)
     {
         if (pc.getPropertyName() != Breakpoints.ITEMS_PROP) return;
 

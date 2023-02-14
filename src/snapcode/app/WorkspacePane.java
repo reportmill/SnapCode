@@ -116,9 +116,6 @@ public class WorkspacePane extends ViewOwner {
         WebSite projSite = aProject.getSite();
         projSite.addFileChangeListener(_siteFileLsnr);
 
-        // Add listener to update tools when BuildIssue added/removed
-        aProject.getBuildIssues().addPropChangeListener(pc -> _workspaceTools.projBuildIssuesDidChange(pc));
-
         // Create/add ProjectPane
         ProjectPane projPane = new ProjectPane(this, aProject);
         _projectPanes = ArrayUtils.addId(_projectPanes, projPane);

@@ -1,5 +1,6 @@
 package snapcode.app;
 import javakit.project.Project;
+import javakit.project.Workspace;
 import snap.view.ViewOwner;
 
 /**
@@ -8,10 +9,13 @@ import snap.view.ViewOwner;
 public class ProjectTool extends ViewOwner {
 
     // The WorkspacePane
-    protected WorkspacePane _workspacePane;
+    protected WorkspacePane  _workspacePane;
 
     // The ProjectPane
     protected ProjectPane  _projPane;
+
+    // The Workspace
+    protected Workspace  _workspace;
 
     // The project
     protected Project  _proj;
@@ -24,6 +28,7 @@ public class ProjectTool extends ViewOwner {
         super();
         _workspacePane = projectPane.getWorkspacePane();
         _projPane = projectPane;
+        _workspace = projectPane.getWorkspace();
         _proj = projectPane.getProject();
     }
 }

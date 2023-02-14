@@ -2,10 +2,10 @@ package snapcode.apptools;
 import javakit.project.BuildIssue;
 import javakit.ide.JavaTextUtils;
 import javakit.project.BuildIssues;
-import javakit.project.Project;
 import snap.gfx.Image;
 import snap.view.*;
 import snap.web.WebFile;
+import snap.web.WebURL;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 
@@ -34,8 +34,8 @@ public class ProblemsTool extends WorkspaceTool {
      */
     public BuildIssue[] getIssues()
     {
-        Project proj = getProject();
-        return proj.getBuildIssues().getIssues();
+        BuildIssues buildIssues = _workspace.getBuildIssues();
+        return buildIssues.getIssues();
     }
 
     /**
@@ -56,8 +56,7 @@ public class ProblemsTool extends WorkspaceTool {
      */
     public String getBuildStatusText()
     {
-        Project proj = getProject();
-        BuildIssues buildIssues = proj.getBuildIssues();
+        BuildIssues buildIssues = _workspace.getBuildIssues();
         int errorCount = buildIssues.getErrorCount();
         int warningCount = buildIssues.getWarningCount();
         String error = errorCount == 1 ? "error" : "errors";
@@ -95,10 +94,16 @@ public class ProblemsTool extends WorkspaceTool {
     {
         // Handle ErrorsList
         if (anEvent.equals("ErrorsList")) {
-            BuildIssue issue = getSelIssue();
+
+            // Set issue
+            BuildIssue issue = (BuildIssue) anEvent.getSelItem();
+            setSelIssue(issue);
+
+            // Open File
             if (issue != null) {
                 WebFile file = issue.getFile();
-                String urls = file.getURL().getString() + "#LineNumber=" + issue.getLineNumber();
+                WebURL fileURL = file.getURL();
+                String urls = fileURL.getString() + "#LineNumber=" + issue.getLineNumber();
                 getBrowser().setURLString(urls);
             }
         }
@@ -110,10 +115,18 @@ public class ProblemsTool extends WorkspaceTool {
     protected void configureErrorsCell(ListCell<BuildIssue> aCell)
     {
         BuildIssue buildIssue = aCell.getItem();
-        if (buildIssue == null) return;
-        String text = String.format("%s (%s:%d)", buildIssue.getText(), buildIssue.getFile().getName(), buildIssue.getLine() + 1);
+        if (buildIssue == null)
+            return;
+
+        // Get/set cell text
+        String issueText = buildIssue.getText();
+        String issueFilename = buildIssue.getFile().getName();
+        int issueLineNum = buildIssue.getLine() + 1;
+        String text = String.format("%s (%s:%d)", issueText, issueFilename, issueLineNum);
         text = text.replace('\n', ' ');
         aCell.setText(text);
+
+        // Set cell image
         aCell.setImage(buildIssue.isError() ? ErrorImage : WarningImage);
         aCell.getGraphic().setPadding(2, 5, 2, 5);
     }

@@ -1,5 +1,6 @@
 package snapcode.app;
 import javakit.project.Project;
+import javakit.project.Workspace;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.view.TabView;
@@ -57,6 +58,11 @@ public class ProjectPane extends WebPage {
      * Returns the WorkspacePane.
      */
     public WorkspacePane getWorkspacePane()  { return _workspacePane; }
+
+    /**
+     * Returns the Workspace.
+     */
+    public Workspace getWorkspace()  { return _workspacePane.getWorkspace(); }
 
     /**
      * Returns the project.
