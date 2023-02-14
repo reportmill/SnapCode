@@ -1,6 +1,6 @@
 package snapcode.apptools;
 import javakit.project.Project;
-import snapcode.app.WorkspaceBuilder;
+import javakit.project.WorkspaceBuilder;
 import snapcode.app.WorkspaceTool;
 import snapcode.project.VersionControl;
 import snap.util.ClientUtils;
@@ -199,7 +199,7 @@ public class VcsPane extends WorkspaceTool {
 
             public Object run() throws Exception
             {
-                WorkspaceBuilder builder = _workspacePane.getBuilder();
+                WorkspaceBuilder builder = _workspace.getBuilder();
                 _oldAutoBuildEnabled = builder.setAutoBuildEnabled(false);
 
                 WebFile rootDir = getSite().getRootDir();
@@ -216,7 +216,7 @@ public class VcsPane extends WorkspaceTool {
 
             public void failure(Exception e)
             {
-                WorkspaceBuilder builder = _workspacePane.getBuilder();
+                WorkspaceBuilder builder = _workspace.getBuilder();
                 builder.setAutoBuildEnabled(_oldAutoBuildEnabled);
 
                 if (ClientUtils.setAccess(getRemoteSite()))
@@ -243,7 +243,7 @@ public class VcsPane extends WorkspaceTool {
         _workspacePane.resetLater();
 
         //
-        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        WorkspaceBuilder builder = _workspace.getBuilder();
         builder.setAutoBuildEnabled(oldAutoBuildEnabled);
 
         //
@@ -374,7 +374,7 @@ public class VcsPane extends WorkspaceTool {
     protected void updateFilesImpl(final List<WebFile> theFiles)
     {
         // Get old Autobuild
-        final boolean oldAutoBuild = _workspacePane.getBuilder().setAutoBuildEnabled(false);
+        final boolean oldAutoBuild = _workspace.getBuilder().setAutoBuildEnabled(false);
 
         // Create TaskRunner and start
         new TaskRunnerPanel(_workspacePane.getUI(), "Update files from remote site") {
@@ -396,7 +396,7 @@ public class VcsPane extends WorkspaceTool {
             public void finished()
             {
                 // Reset AutoBuildEnabled and build Project
-                WorkspaceBuilder builder = _workspacePane.getBuilder();
+                WorkspaceBuilder builder = _workspace.getBuilder();
                 builder.setAutoBuildEnabled(oldAutoBuild);
                 if (oldAutoBuild)
                     builder.buildProjectLater(false);
@@ -458,7 +458,7 @@ public class VcsPane extends WorkspaceTool {
     protected void replaceFilesImpl(final List<WebFile> theFiles)
     {
         // Create TaskRunner and start
-        final boolean oldAutoBuild = _workspacePane.getBuilder().setAutoBuildEnabled(false);
+        final boolean oldAutoBuild = _workspace.getBuilder().setAutoBuildEnabled(false);
 
         new TaskRunnerPanel(_workspacePane.getUI(), "Replace files from remote site") {
             public Object run() throws Exception
@@ -479,7 +479,7 @@ public class VcsPane extends WorkspaceTool {
             public void finished()
             {
                 // Reset AutoBuildEnabled and build Project
-                WorkspaceBuilder builder = _workspacePane.getBuilder();
+                WorkspaceBuilder builder = _workspace.getBuilder();
                 builder.setAutoBuildEnabled(oldAutoBuild);
                 if (oldAutoBuild)
                     builder.buildProjectLater(false);

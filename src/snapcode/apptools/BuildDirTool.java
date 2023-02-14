@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import javakit.project.WorkspaceBuilder;
 import snap.view.*;
 import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
@@ -8,7 +9,6 @@ import snap.web.WebSite;
 import snapcode.app.ClassInfoPage;
 import snapcode.app.ProjectPane;
 import snapcode.app.ProjectTool;
-import snapcode.app.WorkspaceBuilder;
 
 /**
  * A UI pane to show and manage the build directory.
@@ -95,13 +95,13 @@ public class BuildDirTool extends ProjectTool {
 
         // Handle BuildButton
         if (anEvent.equals("BuildButton")) {
-            WorkspaceBuilder builder = _workspacePane.getBuilder();
+            WorkspaceBuilder builder = _workspace.getBuilder();
             builder.buildProjectLater(true);
         }
 
         // Handle CleanButton
         if (anEvent.equals("CleanButton")) {
-            WorkspaceBuilder builder = _workspacePane.getBuilder();
+            WorkspaceBuilder builder = _workspace.getBuilder();
             builder.cleanProject();
         }
     }

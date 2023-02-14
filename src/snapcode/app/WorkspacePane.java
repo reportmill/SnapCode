@@ -37,9 +37,6 @@ public class WorkspacePane extends ViewOwner {
     // The WorkspaceTools
     protected WorkspaceTools  _workspaceTools;
 
-    // The WorkspaceBuilder
-    private WorkspaceBuilder  _builder;
-
     // A PropChangeListener to watch for site file changes
     private PropChangeListener  _siteFileLsnr = pc -> siteFileChanged(pc);
 
@@ -52,6 +49,7 @@ public class WorkspacePane extends ViewOwner {
 
         // Create workspace
         _workspace = new WorkspaceX();
+        _workspace.addPropChangeListener(pc -> workspaceDidPropChange(pc));
 
         // Create MainToolBar, PagePane, StatusBar
         _toolBar = new MainToolBar(this);
@@ -61,9 +59,6 @@ public class WorkspacePane extends ViewOwner {
         // Create WorkspaceTools
         _workspaceTools = new WorkspaceTools(this);
         _workspaceTools.createTools();
-
-        // Create WorkspaceBuilder
-        _builder = new WorkspaceBuilder(this);
     }
 
     /**
@@ -100,11 +95,6 @@ public class WorkspacePane extends ViewOwner {
      * Returns the support tray.
      */
     public SupportTray getSupportTray()  { return _workspaceTools.getSupportTray(); }
-
-    /**
-     * Returns the builder.
-     */
-    public WorkspaceBuilder getBuilder()  { return _builder; }
 
     /**
      * Returns the projects.
@@ -400,6 +390,29 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
+     * Called when Workspace does a property change.
+     */
+    private void workspaceDidPropChange(PropChange aPC)
+    {
+        String propName = aPC.getPropName();
+
+        // Handle Status, Activity
+        if (propName == Workspace.Status_Prop)
+            getBrowser().setStatus(_workspace.getStatus());
+        else if (propName == Workspace.Activity_Prop)
+            getBrowser().setActivity(_workspace.getActivity());
+
+        // Handle Building
+        else if (propName == Workspace.Building_Prop) {
+            if (!_workspace.isBuilding())
+                handleBuildCompleted();
+        }
+
+        // Handle Loading, Building
+        _statusBar.resetLater();
+    }
+
+    /**
      * Called when site file changes with File PropChange.
      */
     protected void siteFileChanged(PropChange aPC)
@@ -422,6 +435,27 @@ public class WorkspacePane extends ViewOwner {
         if (propName == PagePane.SelFile_Prop) {
             FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
             fileTreeTool.resetLater();
+        }
+    }
+
+    /**
+     * Called when a build is completed.
+     */
+    private void handleBuildCompleted()
+    {
+        // If final error count non-zero, show problems pane
+        int errorCount = _workspace.getBuildIssues().getErrorCount();
+        if (errorCount > 0) {
+            SupportTray supportTray = getSupportTray();
+            if (!(supportTray.getSelTool() instanceof ProblemsTool))
+                supportTray.showProblemsTool();
+        }
+
+        // If error count zero and SupportTray showing problems, close
+        else if (errorCount == 0) {
+            SupportTray supportTray = getSupportTray();
+            if (supportTray.getSelTool() instanceof ProblemsTool)
+                supportTray.hideTools();
         }
     }
 }

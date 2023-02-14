@@ -2,10 +2,7 @@ package snapcode.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JNode;
 import javakit.ide.NodeMatcher;
-import javakit.project.JavaAgent;
-import javakit.project.Project;
-import javakit.project.ProjectConfig;
-import javakit.project.ProjectSet;
+import javakit.project.*;
 import snapcode.app.*;
 import snapcode.project.VersionControl;
 import snap.util.ClientUtils;
@@ -54,7 +51,7 @@ public class ProjectConfigTool extends ProjectTool {
     public void openSite()
     {
         // Do AutoBuild
-        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        WorkspaceBuilder builder = _workspace.getBuilder();
         if (builder.isAutoBuildEnabled())
             builder.buildProjectLater(true);
     }
@@ -64,7 +61,7 @@ public class ProjectConfigTool extends ProjectTool {
      */
     public void deleteProject(View aView)
     {
-        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        WorkspaceBuilder builder = _workspace.getBuilder();
         builder.setAutoBuild(false);
 
         try { _proj.deleteProject(new TaskMonitorPanel(aView, "Delete Project")); }
@@ -144,7 +141,7 @@ public class ProjectConfigTool extends ProjectTool {
                 Project proj = Project.getProjectForSite(site);
                 proj.addBuildFilesAll();
 
-                WorkspaceBuilder builder = _workspacePane.getBuilder();
+                WorkspaceBuilder builder = _workspace.getBuilder();
                 builder.buildProjectLater(false);
             }
 
@@ -209,7 +206,7 @@ public class ProjectConfigTool extends ProjectTool {
         _proj.fileAdded(aFile);
 
         // Do AutoBuild
-        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        WorkspaceBuilder builder = _workspace.getBuilder();
         if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
             builder.buildProjectLater(false);
     }
@@ -223,7 +220,7 @@ public class ProjectConfigTool extends ProjectTool {
         _proj.fileRemoved(aFile);
 
         // Do AutoBuild
-        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        WorkspaceBuilder builder = _workspace.getBuilder();
         if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
             builder.buildProjectLater(false);
     }
@@ -237,7 +234,7 @@ public class ProjectConfigTool extends ProjectTool {
         _proj.fileSaved(aFile);
 
         // Do AutoBuild
-        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        WorkspaceBuilder builder = _workspace.getBuilder();
         if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
             builder.buildProjectLater(false);
     }
@@ -314,7 +311,7 @@ public class ProjectConfigTool extends ProjectTool {
     {
         // Update HomePageText, AutoBuildCheckBox
         //setViewValue("HomePageText", sitePane.getHomePageURLString());
-        setViewValue("AutoBuildCheckBox", _workspacePane.getBuilder().isAutoBuild());
+        setViewValue("AutoBuildCheckBox", _workspace.getBuilder().isAutoBuild());
 
         // Update SourcePathText, BuildPathText
         Project proj = getProject();
@@ -340,7 +337,7 @@ public class ProjectConfigTool extends ProjectTool {
         // Handle HomePageText, AutoBuildCheckBox
         //if (anEvent.equals("HomePageText")) sitePane.setHomePageURLString(anEvent.getStringValue());
         if (anEvent.equals("AutoBuildCheckBox"))
-            _workspacePane.getBuilder().setAutoBuild(anEvent.getBoolValue());
+            _workspace.getBuilder().setAutoBuild(anEvent.getBoolValue());
 
         // Update SourcePathText, BuildPathText
         if (anEvent.equals("SourcePathText"))
@@ -373,7 +370,7 @@ public class ProjectConfigTool extends ProjectTool {
                      }
 
                      // Trigger build
-                     WorkspaceBuilder builder = _workspacePane.getBuilder();
+                     WorkspaceBuilder builder = _workspace.getBuilder();
                      builder.buildProjectLater(false);
                      anEvent.dropComplete();
                  }

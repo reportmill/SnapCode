@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
+import javakit.project.Workspace;
 import snap.props.PropChange;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
@@ -27,6 +28,9 @@ public class PagePane extends ViewOwner {
     // The WorkspacePane
     private WorkspacePane  _workspacePane;
 
+    // The Workspace
+    private Workspace  _workspace;
+
     // A list of open files
     List<WebFile>  _openFiles = new ArrayList<>();
 
@@ -50,6 +54,7 @@ public class PagePane extends ViewOwner {
     {
         super();
         _workspacePane = workspacePane;
+        _workspace = workspacePane.getWorkspace();
     }
 
     /**
@@ -332,10 +337,15 @@ public class PagePane extends ViewOwner {
      */
     private void browserDidPropChange(PropChange aPC)
     {
-        // Handle Activity, Status, Loading
         String propName = aPC.getPropName();
-        if (propName == WebBrowser.Activity_Prop || propName == WebBrowser.Loading_Prop || propName == WebBrowser.Status_Prop)
-            _workspacePane.resetLater();
+
+        // Handle Activity, Status, Loading
+        if (propName == WebBrowser.Status_Prop)
+            _workspace.setStatus(_browser.getStatus());
+        else if (propName == WebBrowser.Activity_Prop)
+            _workspace.setActivity(_browser.getActivity());
+        else if (propName == WebBrowser.Loading_Prop)
+            _workspace.setLoading(_browser.isLoading());
     }
 
     /**

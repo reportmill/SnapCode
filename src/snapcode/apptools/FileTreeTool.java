@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import javakit.project.WorkspaceBuilder;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
@@ -327,13 +328,13 @@ public class FileTreeTool extends WorkspaceTool {
 
         // Handle CleanProjectMenuItem
         if (anEvent.equals("CleanProjectMenuItem")) {
-            WorkspaceBuilder builder = _workspacePane.getBuilder();
+            WorkspaceBuilder builder = _workspace.getBuilder();
             builder.cleanProject();
         }
 
         // Handle BuildProjectMenuItem
         if (anEvent.equals("BuildProjectMenuItem")) {
-            WorkspaceBuilder builder = _workspacePane.getBuilder();
+            WorkspaceBuilder builder = _workspace.getBuilder();
             builder.buildProjectLater(false);
         }
 

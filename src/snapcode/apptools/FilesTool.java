@@ -1,5 +1,6 @@
 package snapcode.apptools;
 import javakit.project.Project;
+import javakit.project.WorkspaceBuilder;
 import snap.util.ArrayUtils;
 import snap.util.FileUtils;
 import snap.util.SnapUtils;
@@ -11,7 +12,6 @@ import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebUtils;
-import snapcode.app.WorkspaceBuilder;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import java.io.File;
@@ -117,7 +117,7 @@ public class FilesTool extends WorkspaceTool {
         WebFile selDir = selFile.isDir() ? selFile : selFile.getParent();
 
         // Get builder and disable AutoBuild
-        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        WorkspaceBuilder builder = _workspace.getBuilder();
         builder.setAutoBuildEnabled(false);
 
         // Add files (disable site build)
@@ -221,7 +221,7 @@ public class FilesTool extends WorkspaceTool {
         }
 
         // Get builder and disable AutoBuild
-        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        WorkspaceBuilder builder = _workspace.getBuilder();
         builder.setAutoBuildEnabled(false);
 
         // Add files (disable site build)
