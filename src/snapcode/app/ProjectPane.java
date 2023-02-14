@@ -83,38 +83,6 @@ public class ProjectPane extends WebPage {
     }
 
     /**
-     * Returns whether to automatically build files when changes are detected.
-     */
-    public boolean isAutoBuild()
-    {
-        return _configPane != null && _configPane.isAutoBuild();
-    }
-
-    /**
-     * Sets whether to automatically build files when changes are detected.
-     */
-    public void setAutoBuild(boolean aValue)
-    {
-        if (_configPane != null) _configPane.setAutoBuild(aValue);
-    }
-
-    /**
-     * Returns whether to project AutoBuild has been disabled (possibly for batch processing).
-     */
-    public boolean isAutoBuildEnabled()
-    {
-        return _configPane != null && _configPane.isAutoBuildEnabled();
-    }
-
-    /**
-     * Sets whether to project AutoBuild has been disabled (possibly for batch processing).
-     */
-    public boolean setAutoBuildEnabled(boolean aFlag)
-    {
-        return _configPane != null && _configPane.setAutoBuildEnabled(aFlag);
-    }
-
-    /**
      * Opens the Site.
      */
     public void openSite()
@@ -154,24 +122,6 @@ public class ProjectPane extends WebPage {
                 DialogBox.showExceptionDialog(null, "Delete Site Failed", e);
             }
         }
-    }
-
-    /**
-     * Builds the site (if site has project).
-     */
-    public void buildSite(boolean doAddFiles)
-    {
-        if (_configPane != null)
-            _configPane.buildProjectLater(doAddFiles);
-    }
-
-    /**
-     * Removes build files from site.
-     */
-    public void cleanSite()
-    {
-        if (_configPane != null)
-            _configPane.cleanProject();
     }
 
     /**

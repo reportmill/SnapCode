@@ -1,5 +1,6 @@
 package snapcode.apptools;
 import javakit.project.Project;
+import snapcode.app.WorkspaceBuilder;
 import snapcode.app.WorkspaceTool;
 import snapcode.project.VersionControl;
 import snap.util.ClientUtils;
@@ -16,7 +17,6 @@ import snap.web.AccessException;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -134,15 +134,15 @@ public class VcsPane extends WorkspaceTool {
 
         // Handle UpdateFilesButton
         if (anEvent.equals("UpdateFilesButton"))
-            updateFiles(Arrays.asList(getSite().getRootDir()));
+            updateFiles(getSiteRootDirAsList());
 
         // Handle ReplaceFilesButton
         if (anEvent.equals("ReplaceFilesButton"))
-            replaceFiles(Arrays.asList(getSite().getRootDir()));
+            replaceFiles(getSiteRootDirAsList());
 
         // Handle CommitFilesButton
         if (anEvent.equals("CommitFilesButton"))
-            commitFiles(Arrays.asList(getSite().getRootDir()));
+            commitFiles(getSiteRootDirAsList());
     }
 
     /**
@@ -199,8 +199,12 @@ public class VcsPane extends WorkspaceTool {
 
             public Object run() throws Exception
             {
-                _oldAutoBuildEnabled = _vscTools.setAutoBuildEnabled(false);
-                if (!getSite().getRootDir().getExists()) getSite().getRootDir().save(); // So refresh will work later
+                WorkspaceBuilder builder = _workspacePane.getBuilder();
+                _oldAutoBuildEnabled = builder.setAutoBuildEnabled(false);
+
+                WebFile rootDir = getSite().getRootDir();
+                if (!rootDir.getExists())
+                    rootDir.save(); // So refresh will work later
                 _vc.checkout(this);
                 return null;
             }
@@ -212,9 +216,13 @@ public class VcsPane extends WorkspaceTool {
 
             public void failure(Exception e)
             {
-                _vscTools.setAutoBuildEnabled(_oldAutoBuildEnabled);
-                if (ClientUtils.setAccess(getRemoteSite())) checkout();
-                else if (new LoginPage().showPanel(_workspacePane.getUI(), getRemoteSite())) checkout();
+                WorkspaceBuilder builder = _workspacePane.getBuilder();
+                builder.setAutoBuildEnabled(_oldAutoBuildEnabled);
+
+                if (ClientUtils.setAccess(getRemoteSite()))
+                    checkout();
+                else if (new LoginPage().showPanel(_workspacePane.getUI(), getRemoteSite()))
+                    checkout();
                 else super.failure(e);
             }
         };
@@ -235,11 +243,12 @@ public class VcsPane extends WorkspaceTool {
         _workspacePane.resetLater();
 
         //
-        _vscTools.setAutoBuildEnabled(oldAutoBuildEnabled);
+        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        builder.setAutoBuildEnabled(oldAutoBuildEnabled);
 
         //
         if (oldAutoBuildEnabled)
-            _vscTools.buildSite(true);
+            builder.buildProjectLater(true);
     }
 
     /**
@@ -269,7 +278,7 @@ public class VcsPane extends WorkspaceTool {
     protected List<WebFile> getCommitFiles(List<WebFile> theFromFiles)
     {
         // Create list
-        List<WebFile> fromFiles = theFromFiles != null ? theFromFiles : Arrays.asList(getSite().getRootDir());
+        List<WebFile> fromFiles = theFromFiles != null ? theFromFiles : getSiteRootDirAsList();
         List<WebFile> commitFiles = new ArrayList<>();
 
         try {
@@ -333,15 +342,22 @@ public class VcsPane extends WorkspaceTool {
     protected List<WebFile> getUpdateFiles(List<WebFile> theFromFiles)
     {
         // Create list
-        List<WebFile> fromFiles = theFromFiles != null ? theFromFiles : Arrays.asList(getSite().getRootDir());
-        List<WebFile> xfiles = new ArrayList();
+        List<WebFile> fromFiles = theFromFiles != null ? theFromFiles : getSiteRootDirAsList();
+        List<WebFile> xfiles = new ArrayList<>();
 
         try {
-            for (WebFile file : fromFiles) _vc.getUpdateFiles(file, xfiles);
-        } catch (AccessException e) {
+            for (WebFile file : fromFiles)
+                _vc.getUpdateFiles(file, xfiles);
+        }
+
+        // Handle AccessException:
+        catch (AccessException e) {
             if (ClientUtils.setAccess(e.getSite())) return getUpdateFiles(theFromFiles);
             throw e;
-        } catch (Exception e) {
+        }
+
+        // Handle Exception
+        catch (Exception e) {
             DialogBox db = new DialogBox("Disconnect Error");
             db.setErrorMessage(e.toString());
             db.showMessageDialog(_workspacePane.getUI());
@@ -358,7 +374,7 @@ public class VcsPane extends WorkspaceTool {
     protected void updateFilesImpl(final List<WebFile> theFiles)
     {
         // Get old Autobuild
-        final boolean oldAutoBuild = _vscTools.setAutoBuildEnabled(false);
+        final boolean oldAutoBuild = _workspacePane.getBuilder().setAutoBuildEnabled(false);
 
         // Create TaskRunner and start
         new TaskRunnerPanel(_workspacePane.getUI(), "Update files from remote site") {
@@ -380,12 +396,14 @@ public class VcsPane extends WorkspaceTool {
             public void finished()
             {
                 // Reset AutoBuildEnabled and build Project
-                _vscTools.setAutoBuildEnabled(oldAutoBuild);
+                WorkspaceBuilder builder = _workspacePane.getBuilder();
+                builder.setAutoBuildEnabled(oldAutoBuild);
                 if (oldAutoBuild)
-                    _vscTools.buildSite(false);
+                    builder.buildProjectLater(false);
 
                 // Connect to remote site
-                if (isUISet()) connectToRemoteSite();
+                if (isUISet())
+                    connectToRemoteSite();
             }
         }.start();
     }
@@ -415,7 +433,7 @@ public class VcsPane extends WorkspaceTool {
     protected List<WebFile> getReplaceFiles(List<WebFile> theFromFiles)
     {
         // Create list
-        List<WebFile> fromFiles = theFromFiles != null ? theFromFiles : Arrays.asList(getSite().getRootDir());
+        List<WebFile> fromFiles = theFromFiles != null ? theFromFiles : getSiteRootDirAsList();
         List<WebFile> replaceFiles = new ArrayList<>();
 
         try {
@@ -440,7 +458,7 @@ public class VcsPane extends WorkspaceTool {
     protected void replaceFilesImpl(final List<WebFile> theFiles)
     {
         // Create TaskRunner and start
-        final boolean oldAutoBuild = _vscTools.setAutoBuildEnabled(false);
+        final boolean oldAutoBuild = _workspacePane.getBuilder().setAutoBuildEnabled(false);
 
         new TaskRunnerPanel(_workspacePane.getUI(), "Replace files from remote site") {
             public Object run() throws Exception
@@ -461,12 +479,14 @@ public class VcsPane extends WorkspaceTool {
             public void finished()
             {
                 // Reset AutoBuildEnabled and build Project
-                _vscTools.setAutoBuildEnabled(oldAutoBuild);
+                WorkspaceBuilder builder = _workspacePane.getBuilder();
+                builder.setAutoBuildEnabled(oldAutoBuild);
                 if (oldAutoBuild)
-                    _vscTools.buildSite(false);
+                    builder.buildProjectLater(false);
 
                 // Connect to remote site
-                if (isUISet()) connectToRemoteSite();
+                if (isUISet())
+                    connectToRemoteSite();
             }
         }.start();
     }
@@ -493,6 +513,15 @@ public class VcsPane extends WorkspaceTool {
     public void fileSaved(WebFile aFile)
     {
         _vc.fileSaved(aFile);
+    }
+
+    /**
+     * Returns the Site.RootDir as list.
+     */
+    private List<WebFile> getSiteRootDirAsList()
+    {
+        WebFile rootDir = getSite().getRootDir();
+        return Collections.singletonList(rootDir);
     }
 
     /**

@@ -82,34 +82,6 @@ public class VcsTools extends WorkspaceTool {
     }
 
     /**
-     * Returns whether to automatically build files when changes are detected.
-     */
-    public boolean isAutoBuild()  { return false; } // return _projPane != null && _projPane.isAutoBuild();
-
-    /**
-     * Sets whether to automatically build files when changes are detected.
-     */
-    public void setAutoBuild(boolean aValue)  { } // if (_projPane != null) _projPane.setAutoBuild(aValue);
-
-    /**
-     * Returns whether to project AutoBuild has been disabled (possibly for batch processing).
-     */
-    public boolean isAutoBuildEnabled()  { return false; } // return _projPane != null && _projPane.isAutoBuildEnabled();
-
-    /**
-     * Sets whether to project AutoBuild has been disabled (possibly for batch processing).
-     */
-    public boolean setAutoBuildEnabled(boolean aFlag)  { return false; } // return _projPane != null && _projPane.setAutoBuildEnabled(aFlag);
-
-
-    public void buildSite(boolean doAddFiles)
-    {
-        WebSite rootSite = getRootSite();
-        ProjectConfigTool rootProjPane = ProjectConfigTool.getProjectPane(rootSite);
-        rootProjPane.buildProjectLater(doAddFiles);
-    }
-
-    /**
      * Called when a site file changes.
      */
     private void siteFileChanged(PropChange aPC)

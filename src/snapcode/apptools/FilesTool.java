@@ -11,9 +11,9 @@ import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebUtils;
+import snapcode.app.WorkspaceBuilder;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
-import snapcode.app.ProjectPane;
 import java.io.File;
 import java.util.List;
 
@@ -116,9 +116,9 @@ public class FilesTool extends WorkspaceTool {
             selFile = site.getRootDir();
         WebFile selDir = selFile.isDir() ? selFile : selFile.getParent();
 
-        // Get ProjectPane and disable AutoBuild
-        ProjectPane projectPane = ProjectPane.get(site);
-        projectPane.setAutoBuildEnabled(false);
+        // Get builder and disable AutoBuild
+        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        builder.setAutoBuildEnabled(false);
 
         // Add files (disable site build)
         boolean success = true;
@@ -130,8 +130,8 @@ public class FilesTool extends WorkspaceTool {
         }
 
         // Enable auto build and build
-        projectPane.setAutoBuildEnabled(true);
-        projectPane.buildSite(false);
+        builder.setAutoBuildEnabled(true);
+        builder.buildProjectLater(false);
 
         // Return files
         return success && theFiles.size() > 0;
@@ -219,8 +219,10 @@ public class FilesTool extends WorkspaceTool {
             beep();
             return;
         }
-        ProjectPane projectPane = ProjectPane.get(file0.getSite());
-        projectPane.setAutoBuildEnabled(false);
+
+        // Get builder and disable AutoBuild
+        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        builder.setAutoBuildEnabled(false);
 
         // Add files (disable site build)
         for (WebFile file : theFiles) {
@@ -235,8 +237,8 @@ public class FilesTool extends WorkspaceTool {
         }
 
         // Enable auto build and build
-        projectPane.setAutoBuildEnabled(true);
-        projectPane.buildSite(false);
+        builder.setAutoBuildEnabled(true);
+        builder.buildProjectLater(false);
     }
 
     /**

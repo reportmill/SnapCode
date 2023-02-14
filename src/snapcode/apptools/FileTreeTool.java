@@ -8,10 +8,7 @@ import snap.viewx.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.app.DiffPage;
-import snapcode.app.WorkspacePane;
-import snapcode.app.WorkspaceTool;
-import snapcode.app.ProjectPane;
+import snapcode.app.*;
 import snapcode.util.CloseBox;
 import java.io.File;
 import java.util.ArrayList;
@@ -329,12 +326,16 @@ public class FileTreeTool extends WorkspaceTool {
         }
 
         // Handle CleanProjectMenuItem
-        if (anEvent.equals("CleanProjectMenuItem"))
-            ProjectPane.get(getRootSite()).cleanSite();
+        if (anEvent.equals("CleanProjectMenuItem")) {
+            WorkspaceBuilder builder = _workspacePane.getBuilder();
+            builder.cleanProject();
+        }
 
         // Handle BuildProjectMenuItem
-        if (anEvent.equals("BuildProjectMenuItem"))
-            ProjectPane.get(getRootSite()).buildSite(false);
+        if (anEvent.equals("BuildProjectMenuItem")) {
+            WorkspaceBuilder builder = _workspacePane.getBuilder();
+            builder.buildProjectLater(false);
+        }
 
         // Handle ShowClassInfoMenuItem
         if (anEvent.equals("ShowClassInfoMenuItem")) {

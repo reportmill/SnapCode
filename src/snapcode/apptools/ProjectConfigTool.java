@@ -6,10 +6,7 @@ import javakit.project.JavaAgent;
 import javakit.project.Project;
 import javakit.project.ProjectConfig;
 import javakit.project.ProjectSet;
-import snapcode.app.ProjectPane;
-import snapcode.app.ProjectTool;
-import snapcode.app.SupportTray;
-import snapcode.app.WelcomePanel;
+import snapcode.app.*;
 import snapcode.project.VersionControl;
 import snap.util.ClientUtils;
 import snap.util.TaskRunner;
@@ -28,23 +25,11 @@ import java.util.List;
  */
 public class ProjectConfigTool extends ProjectTool {
 
-    // Whether to auto build project when files change
-    private boolean  _autoBuild = true;
-
-    // Whether to auto build project feature is enabled
-    private boolean  _autoBuildEnabled = true;
-
-    // The runner to build files
-    private BuildFilesRunner  _buildFilesRunner;
-
     // The selected JarPath
     private String  _jarPath;
 
     // The selected ProjectPath
     private String  _projPath;
-
-    // Runnable for build later
-    private Runnable  _buildLaterRun;
 
     /**
      * Constructor.
@@ -64,38 +49,14 @@ public class ProjectConfigTool extends ProjectTool {
     public Project getProject()  { return _proj; }
 
     /**
-     * Returns whether to automatically build files when changes are detected.
-     */
-    public boolean isAutoBuild()  { return _autoBuild; }
-
-    /**
-     * Sets whether to automatically build files when changes are detected.
-     */
-    public void setAutoBuild(boolean aValue)  { _autoBuild = aValue; }
-
-    /**
-     * Returns whether to project AutoBuild has been disabled (possibly for batch processing).
-     */
-    public boolean isAutoBuildEnabled()  { return isAutoBuild() && _autoBuildEnabled; }
-
-    /**
-     * Sets whether to project AutoBuild has been disabled (possibly for batch processing).
-     */
-    public boolean setAutoBuildEnabled(boolean aFlag)
-    {
-        boolean o = _autoBuildEnabled;
-        _autoBuildEnabled = aFlag;
-        return o;
-    }
-
-    /**
      * Activate project.
      */
     public void openSite()
     {
-        // Kick off site build
-        if (_projPane.isAutoBuildEnabled())
-            buildProjectLater(true);
+        // Do AutoBuild
+        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        if (builder.isAutoBuildEnabled())
+            builder.buildProjectLater(true);
     }
 
     /**
@@ -103,11 +64,10 @@ public class ProjectConfigTool extends ProjectTool {
      */
     public void deleteProject(View aView)
     {
-        _projPane.setAutoBuild(false);
-        try {
-            _proj.deleteProject(new TaskMonitorPanel(aView, "Delete Project"));
-        }
+        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        builder.setAutoBuild(false);
 
+        try { _proj.deleteProject(new TaskMonitorPanel(aView, "Delete Project")); }
         catch (Exception e) {
             DialogBox.showExceptionDialog(aView, "Delete Project Failed", e);
         }
@@ -183,7 +143,9 @@ public class ProjectConfigTool extends ProjectTool {
                 _workspacePane.addProjectForSite(site);
                 Project proj = Project.getProjectForSite(site);
                 proj.addBuildFilesAll();
-                buildProjectLater(false);
+
+                WorkspaceBuilder builder = _workspacePane.getBuilder();
+                builder.buildProjectLater(false);
             }
 
             public void failure(Exception e)
@@ -239,120 +201,17 @@ public class ProjectConfigTool extends ProjectTool {
     }
 
     /**
-     * Build project.
-     */
-    public void buildProjectLater(boolean doAddFiles)
-    {
-        // If not root ProjectConfigPane, forward on to it
-        Project rootProj = _proj.getRootProject();
-        ProjectConfigTool rootProjPane = _proj != rootProj ? ProjectConfigTool.getProjectPane(rootProj.getSite()) : this;
-        if (this != rootProjPane) {
-            rootProjPane.buildProjectLater(doAddFiles);
-            return;
-        }
-
-        // If not already set, register for buildLater run
-        if (_buildLaterRun != null) return;
-        runLater(_buildLaterRun = () -> buildProject(doAddFiles));
-    }
-
-    /**
-     * Build project.
-     */
-    public void buildProject(boolean doAddFiles)
-    {
-        getBuildFilesRunner(doAddFiles);
-        _buildLaterRun = null;
-    }
-
-    /**
-     * Returns the build files runner.
-     */
-    private synchronized void getBuildFilesRunner(boolean addBuildFiles)
-    {
-        if (_buildFilesRunner != null) {
-            if (addBuildFiles)
-                _buildFilesRunner._addFiles = addBuildFiles;
-            _buildFilesRunner._runAgain = true;
-            _proj.interruptBuild();
-        }
-
-        else {
-            _buildFilesRunner = new BuildFilesRunner();
-            _buildFilesRunner._addFiles = addBuildFiles;
-            _buildFilesRunner.start();
-        }
-    }
-
-    /**
-     * An Runner subclass to build project files in the background.
-     */
-    public class BuildFilesRunner extends TaskRunner<Object> {
-
-        // Whether to add files and run again
-        boolean _addFiles, _runAgain;
-
-        /**
-         * BuildFiles.
-         */
-        public Object run()
-        {
-            ProjectSet projectSet = _proj.getProjectSet();
-            if (_addFiles) {
-                _addFiles = false;
-                projectSet.addBuildFilesAll();
-            }
-            projectSet.buildProjects(this);
-            return true;
-        }
-
-        public void beginTask(final String aTitle, int theTotalWork)
-        {
-            setActivity(aTitle);
-        }
-
-        public void finished()
-        {
-            boolean runAgain = _runAgain;
-            _runAgain = false;
-            if (runAgain) start();
-            else _buildFilesRunner = null;
-            setActivity("Build Completed");
-            runLater(() -> handleBuildCompleted());
-        }
-
-        void setActivity(String aStr)
-        {
-            if (_workspacePane != null) _workspacePane.getBrowser().setActivity(aStr);
-        }
-
-        public void failure(final Exception e)
-        {
-            e.printStackTrace();
-            runLater(() -> DialogBox.showExceptionDialog(null, "Build Failed", e));
-            _runAgain = false;
-        }
-    }
-
-    /**
-     * Removes build files from the project.
-     */
-    public void cleanProject()
-    {
-        boolean old = setAutoBuildEnabled(false);
-        _proj.cleanProject();
-        setAutoBuildEnabled(old);
-    }
-
-    /**
      * Called when file added to project.
      */
     public void fileAdded(WebFile aFile)
     {
         if (_proj.getBuildDir().contains(aFile)) return;
         _proj.fileAdded(aFile);
-        if (_projPane.isAutoBuild() && _projPane.isAutoBuildEnabled())
-            buildProjectLater(false);
+
+        // Do AutoBuild
+        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
+            builder.buildProjectLater(false);
     }
 
     /**
@@ -362,8 +221,11 @@ public class ProjectConfigTool extends ProjectTool {
     {
         if (_proj.getBuildDir().contains(aFile)) return;
         _proj.fileRemoved(aFile);
-        if (_projPane.isAutoBuild() && _projPane.isAutoBuildEnabled())
-            buildProjectLater(false);
+
+        // Do AutoBuild
+        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
+            builder.buildProjectLater(false);
     }
 
     /**
@@ -373,8 +235,11 @@ public class ProjectConfigTool extends ProjectTool {
     {
         if (_proj.getBuildDir().contains(aFile)) return;
         _proj.fileSaved(aFile);
-        if (_projPane.isAutoBuild() && _projPane.isAutoBuildEnabled())
-            buildProjectLater(false);
+
+        // Do AutoBuild
+        WorkspaceBuilder builder = _workspacePane.getBuilder();
+        if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
+            builder.buildProjectLater(false);
     }
 
     /**
@@ -430,27 +295,6 @@ public class ProjectConfigTool extends ProjectTool {
     }
 
     /**
-     * Called when a build is completed.
-     */
-    protected void handleBuildCompleted()
-    {
-        // If final error count non-zero, show problems pane
-        int errorCount = _workspace.getBuildIssues().getErrorCount();
-        if (errorCount > 0) {
-            SupportTray supportTray = _workspacePane.getSupportTray();
-            if (supportTray.getSelTool() instanceof ProblemsTool)
-                supportTray.showProblemsTool();
-        }
-
-        // If error count zero and SupportTray showing problems, close
-        if (errorCount == 0) {
-            SupportTray supportTray = _workspacePane.getSupportTray();
-            if (supportTray.getSelTool() instanceof ProblemsTool)
-                supportTray.hideTools();
-        }
-    }
-
-    /**
      * Initialize UI.
      */
     protected void initUI()
@@ -470,7 +314,7 @@ public class ProjectConfigTool extends ProjectTool {
     {
         // Update HomePageText, AutoBuildCheckBox
         //setViewValue("HomePageText", sitePane.getHomePageURLString());
-        setViewValue("AutoBuildCheckBox", _projPane.isAutoBuild());
+        setViewValue("AutoBuildCheckBox", _workspacePane.getBuilder().isAutoBuild());
 
         // Update SourcePathText, BuildPathText
         Project proj = getProject();
@@ -496,7 +340,7 @@ public class ProjectConfigTool extends ProjectTool {
         // Handle HomePageText, AutoBuildCheckBox
         //if (anEvent.equals("HomePageText")) sitePane.setHomePageURLString(anEvent.getStringValue());
         if (anEvent.equals("AutoBuildCheckBox"))
-            _projPane.setAutoBuild(anEvent.getBoolValue());
+            _workspacePane.getBuilder().setAutoBuild(anEvent.getBoolValue());
 
         // Update SourcePathText, BuildPathText
         if (anEvent.equals("SourcePathText"))
@@ -515,13 +359,22 @@ public class ProjectConfigTool extends ProjectTool {
                  anEvent.acceptDrag(); //TransferModes(TransferMode.COPY);
                  anEvent.consume();
                  if (anEvent.isDragDropEvent()) {
-                     List<File> files = anEvent.getClipboard().getJavaFiles();
-                     if (files == null || files.size() == 0) return;
-                     for (File file : files) {
-                         String path = file.getAbsolutePath(); //if(StringUtils.endsWithIC(path, ".jar"))
-                         _proj.getProjectConfig().addLibPath(path);
+
+                     // Get dropped jar files
+                     List<File> jarFiles = anEvent.getClipboard().getJavaFiles();
+                     if (jarFiles != null) {
+
+                         // Add JarPaths
+                         for (File jarFile : jarFiles) {
+                             String jarFilePath = jarFile.getAbsolutePath();
+                             //if(StringUtils.endsWithIC(path, ".jar"))
+                             _proj.getProjectConfig().addLibPath(jarFilePath);
+                         }
                      }
-                     _projPane.buildSite(false);
+
+                     // Trigger build
+                     WorkspaceBuilder builder = _workspacePane.getBuilder();
+                     builder.buildProjectLater(false);
                      anEvent.dropComplete();
                  }
              }

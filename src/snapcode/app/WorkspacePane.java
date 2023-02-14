@@ -37,6 +37,9 @@ public class WorkspacePane extends ViewOwner {
     // The WorkspaceTools
     protected WorkspaceTools  _workspaceTools;
 
+    // The WorkspaceBuilder
+    private WorkspaceBuilder  _builder;
+
     // A PropChangeListener to watch for site file changes
     private PropChangeListener  _siteFileLsnr = pc -> siteFileChanged(pc);
 
@@ -58,6 +61,9 @@ public class WorkspacePane extends ViewOwner {
         // Create WorkspaceTools
         _workspaceTools = new WorkspaceTools(this);
         _workspaceTools.createTools();
+
+        // Create WorkspaceBuilder
+        _builder = new WorkspaceBuilder(this);
     }
 
     /**
@@ -94,6 +100,11 @@ public class WorkspacePane extends ViewOwner {
      * Returns the support tray.
      */
     public SupportTray getSupportTray()  { return _workspaceTools.getSupportTray(); }
+
+    /**
+     * Returns the builder.
+     */
+    public WorkspaceBuilder getBuilder()  { return _builder; }
 
     /**
      * Returns the projects.

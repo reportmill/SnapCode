@@ -8,6 +8,7 @@ import snap.web.WebSite;
 import snapcode.app.ClassInfoPage;
 import snapcode.app.ProjectPane;
 import snapcode.app.ProjectTool;
+import snapcode.app.WorkspaceBuilder;
 
 /**
  * A UI pane to show and manage the build directory.
@@ -93,18 +94,22 @@ public class BuildDirTool extends ProjectTool {
             snap.gfx.GFXEnv.getEnv().openFile(_proj.getBuildDir());
 
         // Handle BuildButton
-        if (anEvent.equals("BuildButton"))
-            _projPane.buildSite(true);
+        if (anEvent.equals("BuildButton")) {
+            WorkspaceBuilder builder = _workspacePane.getBuilder();
+            builder.buildProjectLater(true);
+        }
 
         // Handle CleanButton
-        if (anEvent.equals("CleanButton"))
-            _projPane.cleanSite();
+        if (anEvent.equals("CleanButton")) {
+            WorkspaceBuilder builder = _workspacePane.getBuilder();
+            builder.cleanProject();
+        }
     }
 
     /**
      * The TreeResolver to provide data to File browser.
      */
-    private class FileResolver extends TreeResolver<WebFile> {
+    private static class FileResolver extends TreeResolver<WebFile> {
 
         /**
          * Returns the parent of given item.
