@@ -2,6 +2,7 @@ package snapcode.app;
 import javakit.ide.JavaTextPane;
 import javakit.project.Breakpoints;
 import javakit.project.BuildIssue;
+import javakit.project.Workspace;
 import snap.geom.Side;
 import snap.props.PropChange;
 import snap.viewx.WebPage;
@@ -84,6 +85,11 @@ public class WorkspaceTools {
 
         WorkspaceTool[] sideTools = { _fileTreeTool };
         _sideBar = new SupportTray(Side.LEFT, sideTools);
+
+        // Start listening to Breakpoints helper
+        Workspace workspace = _workspacePane.getWorkspace();
+        Breakpoints breakpoints = workspace.getBreakpoints();
+        breakpoints.addPropChangeListener(pc -> breakpointsDidChange(pc));
     }
 
     /**
@@ -157,12 +163,12 @@ public class WorkspaceTools {
     }
 
     /**
-     * Called when Project.BreakPoints change.
+     * Called when Workspace.BreakPoints change.
      */
-    protected void projBreakpointsDidChange(PropChange pc)
+    protected void breakpointsDidChange(PropChange pc)
     {
         DebugTool debugTool = getDebugTool();
-        debugTool.projBreakpointsDidChange(pc);
+        debugTool.breakpointsDidChange(pc);
     }
 
     /**

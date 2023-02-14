@@ -26,10 +26,7 @@ public class BreakpointsTool extends WorkspaceTool {
     /**
      * Returns the list of Breakpoints.
      */
-    public Breakpoints getBreakpoints()
-    {
-        return getProject().getBreakpoints();
-    }
+    public Breakpoints getBreakpoints()  { return _workspace.getBreakpoints(); }
 
     /**
      * Returns the selected Breakpoint.

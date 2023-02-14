@@ -19,8 +19,8 @@ import snapcode.project.WorkspaceX;
  */
 public class WorkspacePane extends ViewOwner {
 
-    // The Pod
-    private Workspace _workspace;
+    // The Workspace
+    private Workspace  _workspace;
 
     // The array of ProjectPanes
     protected ProjectPane[]  _projectPanes = new ProjectPane[0];
@@ -116,8 +116,7 @@ public class WorkspacePane extends ViewOwner {
         WebSite projSite = aProject.getSite();
         projSite.addFileChangeListener(_siteFileLsnr);
 
-        // Add listener to update tools when Breakpoint/BuildIssue added/removed
-        aProject.getBreakpoints().addPropChangeListener(pc -> _workspaceTools.projBreakpointsDidChange(pc));
+        // Add listener to update tools when BuildIssue added/removed
         aProject.getBuildIssues().addPropChangeListener(pc -> _workspaceTools.projBuildIssuesDidChange(pc));
 
         // Create/add ProjectPane

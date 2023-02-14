@@ -1,5 +1,6 @@
 package snapcode.app;
 import javakit.project.Project;
+import javakit.project.Workspace;
 import snap.view.ViewOwner;
 import snap.viewx.WebBrowser;
 import snap.web.WebFile;
@@ -15,6 +16,9 @@ public class WorkspaceTool extends ViewOwner {
     // The WorkspacePane
     protected WorkspacePane  _workspacePane;
 
+    // The Workspace
+    protected Workspace  _workspace;
+
     // The WorkspaceTools
     protected WorkspaceTools  _workspaceTools;
 
@@ -28,6 +32,7 @@ public class WorkspaceTool extends ViewOwner {
     {
         super();
         _workspacePane = workspacePane;
+        _workspace = workspacePane.getWorkspace();
         _workspaceTools = workspacePane.getWorkspaceTools();
         _pagePane = workspacePane.getPagePane();
     }
@@ -36,6 +41,11 @@ public class WorkspaceTool extends ViewOwner {
      * Returns the WorkspacePane.
      */
     public WorkspacePane getWorkspacePane()  { return _workspacePane; }
+
+    /**
+     * Returns the workspace.
+     */
+    public Workspace getWorkspace()  { return _workspace; }
 
     /**
      * Returns the top level site.

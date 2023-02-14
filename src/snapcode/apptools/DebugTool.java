@@ -162,10 +162,12 @@ public class DebugTool extends WorkspaceTool {
         RunApp proc;
         if (!isDebug)
             proc = new RunApp(aURL, args);
+
+        // Handle isDebug: Create DebugApp with Workspace.Breakpoints
         else {
             proc = new DebugApp(aURL, args);
-            Project proj = getProject();
-            for (Breakpoint breakpoint : proj.getBreakpoints())
+            Breakpoints breakpoints = _workspace.getBreakpoints();
+            for (Breakpoint breakpoint : breakpoints)
                 proc.addBreakpoint(breakpoint);
         }
 
@@ -237,9 +239,9 @@ public class DebugTool extends WorkspaceTool {
     public String getTitle()  { return "Debug"; }
 
     /**
-     * Called when Project.BreakPoints change.
+     * Called when Workspace.BreakPoints change.
      */
-    public void projBreakpointsDidChange(PropChange pc)
+    public void breakpointsDidChange(PropChange pc)
     {
         if (pc.getPropName() != Breakpoints.ITEMS_PROP) return;
 
