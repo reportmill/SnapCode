@@ -39,6 +39,7 @@ public class BreakpointsTool extends WorkspaceTool {
     /**
      * Initialize UI.
      */
+    @Override
     protected void initUI()
     {
         _breakpointsList = getView("BreakpointList", ListView.class);
@@ -55,12 +56,13 @@ public class BreakpointsTool extends WorkspaceTool {
     {
         setViewEnabled("DeleteButton", getSelBreakpoint() != null);
 
-        setViewItems("BreakpointList", getBreakpoints());
+        setViewItems("BreakpointList", getBreakpoints().getArray());
     }
 
     /**
      * Respond to UI changes.
      */
+    @Override
     protected void respondUI(ViewEvent anEvent)
     {
         // Handle DeleteButton

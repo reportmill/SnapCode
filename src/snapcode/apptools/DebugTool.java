@@ -166,7 +166,8 @@ public class DebugTool extends WorkspaceTool {
         // Handle isDebug: Create DebugApp with Workspace.Breakpoints
         else {
             proc = new DebugApp(aURL, args);
-            Breakpoints breakpoints = _workspace.getBreakpoints();
+            Breakpoints breakpointsHpr = _workspace.getBreakpoints();
+            Breakpoint[] breakpoints = breakpointsHpr.getArray();
             for (Breakpoint breakpoint : breakpoints)
                 proc.addBreakpoint(breakpoint);
         }
