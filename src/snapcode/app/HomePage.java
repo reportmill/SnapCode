@@ -21,20 +21,20 @@ public class HomePage extends WebPage {
     boolean _stupidAnim;
 
     /**
-     * Returns the PodPane.
+     * Returns the WorkspacePane.
      */
-    public PodPane getPodPane()
+    public WorkspacePane getWorkspacePane()
     {
         WebBrowser browser = getBrowser();
-        return browser.getOwner(PodPane.class);
+        return browser.getOwner(WorkspacePane.class);
     }
 
     /**
-     * Returns the PodPane RootSite.
+     * Returns the WorkspacePane RootSite.
      */
     public WebSite getRootSite()
     {
-        return getPodPane().getRootSite();
+        return getWorkspacePane().getRootSite();
     }
 
     /**
@@ -107,8 +107,8 @@ public class HomePage extends WebPage {
 
         // Handle NewJavaFile, NewFile
         if ((anEvent.equals("NewJavaFile") || anEvent.equals("NewFile")) && anEvent.isMouseRelease()) {
-            PodTools podTools = getPodPane().getPodTools();
-            FilesTool filesTool = podTools.getFilesTool();
+            WorkspaceTools workspaceTools = getWorkspacePane().getWorkspaceTools();
+            FilesTool filesTool = workspaceTools.getFilesTool();
             filesTool.showNewFilePanel();
         }
 

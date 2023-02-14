@@ -17,9 +17,9 @@ public class ProjectX extends Project {
     /**
      * Constructor.
      */
-    public ProjectX(WorkSpace aWorkSpace, WebSite aSite)
+    public ProjectX(Workspace aWorkspace, WebSite aSite)
     {
-        super(aWorkSpace, aSite);
+        super(aWorkspace, aSite);
 
         // Create/set ProjectBuilder.JavaFileBuilderImpl
         JavaFileBuilder javaFileBuilder = new JavaFileBuilderImpl(this);

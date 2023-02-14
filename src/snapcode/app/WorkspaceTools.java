@@ -9,9 +9,9 @@ import snap.web.WebFile;
 import snapcode.apptools.*;
 
 /**
- * This class manages all the PodTool instances for a PodPane.
+ * This class manages all the WorkspaceTool instances for a WorkspacePane.
  */
-public class PodTools {
+public class WorkspaceTools {
 
     // The FilesPane
     protected FilesTool  _filesTool;
@@ -28,8 +28,8 @@ public class PodTools {
     // The BreakpointsTool
     private BreakpointsTool  _breakpointsTool;
 
-    // The PodPane
-    private PodPane  _podPane;
+    // The WorkspacePane
+    private WorkspacePane  _workspacePane;
 
     // The DebugTool
     private DebugTool  _debugTool;
@@ -55,10 +55,10 @@ public class PodTools {
     /**
      * Constructor.
      */
-    public PodTools(PodPane podPane)
+    public WorkspaceTools(WorkspacePane workspacePane)
     {
         super();
-        _podPane = podPane;
+        _workspacePane = workspacePane;
     }
 
     /**
@@ -66,23 +66,23 @@ public class PodTools {
      */
     protected void createTools()
     {
-        _filesTool = new FilesTool(_podPane);
-        _fileTreeTool = new FileTreeTool(_podPane);
-        _problemsTool = new ProblemsTool(_podPane);
-        _runConsole = new RunConsole(_podPane);
-        _breakpointsTool = new BreakpointsTool(_podPane);
-        _debugTool = new DebugTool(_podPane);
-        _searchTool = new SearchPane(_podPane);
-        _runConfigsTool = new RunConfigsTool(_podPane);
-        _httpServerTool = new HttpServerTool(_podPane);
-        _vcsTools = new VcsTools(_podPane);
+        _filesTool = new FilesTool(_workspacePane);
+        _fileTreeTool = new FileTreeTool(_workspacePane);
+        _problemsTool = new ProblemsTool(_workspacePane);
+        _runConsole = new RunConsole(_workspacePane);
+        _breakpointsTool = new BreakpointsTool(_workspacePane);
+        _debugTool = new DebugTool(_workspacePane);
+        _searchTool = new SearchPane(_workspacePane);
+        _runConfigsTool = new RunConfigsTool(_workspacePane);
+        _httpServerTool = new HttpServerTool(_workspacePane);
+        _vcsTools = new VcsTools(_workspacePane);
 
         // Set tools
-        PodTool[] bottomTools = { _problemsTool, _debugTool, _runConsole, _breakpointsTool, _searchTool, _runConfigsTool, _httpServerTool };
+        WorkspaceTool[] bottomTools = { _problemsTool, _debugTool, _runConsole, _breakpointsTool, _searchTool, _runConfigsTool, _httpServerTool };
         _supportTray = new SupportTray(Side.BOTTOM, bottomTools);
 
 
-        PodTool[] sideTools = { _fileTreeTool };
+        WorkspaceTool[] sideTools = { _fileTreeTool };
         _sideBar = new SupportTray(Side.LEFT, sideTools);
     }
 
@@ -134,7 +134,7 @@ public class PodTools {
     /**
      * Sets the selected index for given class.
      */
-    public void showToolForClass(Class<? extends PodTool> aClass)
+    public void showToolForClass(Class<? extends WorkspaceTool> aClass)
     {
         _supportTray.setSelToolForClass(aClass);
     }
@@ -179,7 +179,7 @@ public class PodTools {
 
         // Make current JavaPage.TextArea resetLater
         WebFile issueFile = issue.getFile();
-        WebPage page = _podPane.getBrowser().getPageForURL(issueFile.getURL());
+        WebPage page = _workspacePane.getBrowser().getPageForURL(issueFile.getURL());
         if (page instanceof JavaPage) {
             JavaTextPane<?> javaTextPane = ((JavaPage) page).getTextPane();
             javaTextPane.buildIssueOrBreakPointMarkerChanged();

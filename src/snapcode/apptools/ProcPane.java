@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * The ProcPane manages run/debug processes.
  */
-public class ProcPane extends PodTool implements RunApp.AppListener {
+public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
 
     // The DebugTool
     private DebugTool _debugTool;
@@ -50,14 +50,14 @@ public class ProcPane extends PodTool implements RunApp.AppListener {
      */
     public ProcPane(DebugTool aDebugTool)
     {
-        super(aDebugTool.getPodPane());
+        super(aDebugTool.getWorkspacePane());
         _debugTool = aDebugTool;
     }
 
     /**
      * Returns the RunConsole.
      */
-    public RunConsole getRunConsole()  { return _podTools.getRunConsole(); }
+    public RunConsole getRunConsole()  { return _workspaceTools.getRunConsole(); }
 
     /**
      * Returns the DebugVarsPane.
@@ -133,7 +133,7 @@ public class ProcPane extends PodTool implements RunApp.AppListener {
         setSelApp(null);
         addProc(aProc);
         setSelApp(aProc);
-        SupportTray supportTray = _podPane.getSupportTray();
+        SupportTray supportTray = _workspacePane.getSupportTray();
         supportTray.showRunTool();
         aProc.exec();
     }
@@ -252,7 +252,7 @@ public class ProcPane extends PodTool implements RunApp.AppListener {
         // Update proc items and reset UI
         _procTree.updateItems(aProc);
         resetLater();
-        _podPane.resetLater();
+        _workspacePane.resetLater();
 
         // If debug app, reset Debug vars, expressions and current line counter
         if (aProc instanceof DebugApp) {
@@ -309,7 +309,7 @@ public class ProcPane extends PodTool implements RunApp.AppListener {
         }
 
         // Make DebugVarsPane visible and updateVarTable
-        _podPane.getSupportTray().showDebugTool();
+        _workspacePane.getSupportTray().showDebugTool();
 
         DebugFrame frame = aProc.getFrame();
         if (frame == null) return;
@@ -486,7 +486,7 @@ public class ProcPane extends PodTool implements RunApp.AppListener {
             else if (item instanceof DebugFrame) {
                 DebugFrame frame = (DebugFrame) item;
                 frame.select();
-                _podPane.getSupportTray().showDebugTool();
+                _workspacePane.getSupportTray().showDebugTool();
             }
         }
     }

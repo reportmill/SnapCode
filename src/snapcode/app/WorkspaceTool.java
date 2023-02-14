@@ -8,15 +8,15 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This is the base class for pod tools.
+ * This is the base class for workspace tools.
  */
-public class PodTool extends ViewOwner {
+public class WorkspaceTool extends ViewOwner {
 
-    // The PodPane
-    protected PodPane  _podPane;
+    // The WorkspacePane
+    protected WorkspacePane  _workspacePane;
 
-    // The PodTools
-    protected PodTools  _podTools;
+    // The WorkspaceTools
+    protected WorkspaceTools  _workspaceTools;
 
     // The PagePane
     protected PagePane  _pagePane;
@@ -24,40 +24,40 @@ public class PodTool extends ViewOwner {
     /**
      * Constructor.
      */
-    public PodTool(PodPane podPane)
+    public WorkspaceTool(WorkspacePane workspacePane)
     {
         super();
-        _podPane = podPane;
-        _podTools = podPane.getPodTools();
-        _pagePane = podPane.getPagePane();
+        _workspacePane = workspacePane;
+        _workspaceTools = workspacePane.getWorkspaceTools();
+        _pagePane = workspacePane.getPagePane();
     }
 
     /**
-     * Returns the PodPane.
+     * Returns the WorkspacePane.
      */
-    public PodPane getPodPane()  { return _podPane; }
+    public WorkspacePane getWorkspacePane()  { return _workspacePane; }
 
     /**
      * Returns the top level site.
      */
-    public WebSite getRootSite()  { return _podPane.getRootSite(); }
+    public WebSite getRootSite()  { return _workspacePane.getRootSite(); }
 
     /**
      * Returns the selected project.
      */
-    public Project getProject()  { return _podPane.getRootProject(); }
+    public Project getProject()  { return _workspacePane.getRootProject(); }
 
     /**
      * Returns the selected file.
      */
-    public WebFile getSelFile()  { return _podPane.getSelFile(); }
+    public WebFile getSelFile()  { return _workspacePane.getSelFile(); }
 
     /**
      * Sets the selected site file.
      */
     public void setSelFile(WebFile aFile)
     {
-        _podPane.setSelFile(aFile);
+        _workspacePane.setSelFile(aFile);
     }
 
     /**
@@ -72,12 +72,12 @@ public class PodTool extends ViewOwner {
     /**
      * Returns the selected site.
      */
-    public WebSite getSelSite()  { return _podPane.getSelSite(); }
+    public WebSite getSelSite()  { return _workspacePane.getSelSite(); }
 
     /**
      * Returns the browser.
      */
-    public WebBrowser getBrowser()  { return _podPane.getBrowser(); }
+    public WebBrowser getBrowser()  { return _workspacePane.getBrowser(); }
 
     /**
      * Returns the title.

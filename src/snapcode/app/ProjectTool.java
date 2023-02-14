@@ -8,7 +8,7 @@ import snap.view.ViewOwner;
 public class ProjectTool extends ViewOwner {
 
     // The WorkspacePane
-    protected PodPane  _workspacePane;
+    protected WorkspacePane _workspacePane;
 
     // The ProjectPane
     protected ProjectPane  _projPane;
@@ -22,7 +22,7 @@ public class ProjectTool extends ViewOwner {
     public ProjectTool(ProjectPane projectPane)
     {
         super();
-        _workspacePane = projectPane.getWorkSpacePane();
+        _workspacePane = projectPane.getWorkspacePane();
         _projPane = projectPane;
         _proj = projectPane.getProject();
     }

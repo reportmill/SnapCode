@@ -218,7 +218,7 @@ public class ProjectConfigTool extends ProjectTool {
             return;
         }
 
-        // Remove dependent project from root project and PodPane
+        // Remove dependent project from root project and WorkspacePane
         _proj.getProjectSet().removeProject(aName);
         _workspacePane.removeProject(proj);
     }

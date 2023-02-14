@@ -151,8 +151,8 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
 
             // If there were modified files, clear Project.ClassLoader
             if (compiler.getModifiedJavaFiles().size() > 0) {
-                WorkSpace workSpace = _proj.getWorkSpace();
-                workSpace.clearClassLoader();
+                Workspace workspace = _proj.getWorkspace();
+                workspace.clearClassLoader();
             }
 
             // Iterate over JavaFiles for modified ClassFiles and update

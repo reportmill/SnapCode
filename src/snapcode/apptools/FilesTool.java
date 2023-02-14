@@ -11,23 +11,23 @@ import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebUtils;
-import snapcode.app.PodPane;
-import snapcode.app.PodTool;
+import snapcode.app.WorkspacePane;
+import snapcode.app.WorkspaceTool;
 import snapcode.app.ProjectPane;
 import java.io.File;
 import java.util.List;
 
 /**
- * This class is a PodTool to manage file operations on project files: create, add, remove, rename.
+ * This class is a WorkspaceTool to manage file operations on project files: create, add, remove, rename.
  */
-public class FilesTool extends PodTool {
+public class FilesTool extends WorkspaceTool {
 
     /**
      * Constructor.
      */
-    public FilesTool(PodPane podPane)
+    public FilesTool(WorkspacePane workspacePane)
     {
-        super(podPane);
+        super(workspacePane);
     }
 
     /**
@@ -57,8 +57,8 @@ public class FilesTool extends PodTool {
         }
 
         // Run dialog panel (just return if null)
-        View podPaneUI = _podPane.getUI();
-        if (!form.showPanel(podPaneUI, "New Project File", DialogBox.infoImage))
+        View workspacePaneUI = _workspacePane.getUI();
+        if (!form.showPanel(workspacePaneUI, "New Project File", DialogBox.infoImage))
             return null;
 
         // Select type and extension
@@ -86,7 +86,7 @@ public class FilesTool extends PodTool {
         WebPage page = _pagePane.createPageForURL(file.getURL());
 
         // ShowNewFilePanel (just return if cancelled)
-        file = page.showNewFilePanel(podPaneUI, file);
+        file = page.showNewFilePanel(workspacePaneUI, file);
         if (file == null)
             return null;
 
@@ -178,7 +178,7 @@ public class FilesTool extends PodTool {
                     DialogBox dbox = new DialogBox("Add File");
                     dbox.setWarningMessage(msg);
                     dbox.setOptions(options);
-                    option = dbox.showOptionDialog(_podPane.getUI(), defaultOption);
+                    option = dbox.showOptionDialog(_workspacePane.getUI(), defaultOption);
                     if (option < 0 || options[option].equals("Cancel")) return false;
                 }
 
@@ -187,7 +187,7 @@ public class FilesTool extends PodTool {
                     if (isDuplicating) name = "Duplicate " + name;
                     DialogBox dbox = new DialogBox("Rename File");
                     dbox.setQuestionMessage("Enter new file name:");
-                    name = dbox.showInputDialog(_podPane.getUI(), name);
+                    name = dbox.showInputDialog(_workspacePane.getUI(), name);
                     if (name == null) return false;
                     name = name.replace(" ", "");
                     if (!StringUtils.endsWithIC(name, '.' + siteFile.getType())) name = name + '.' + siteFile.getType();
@@ -268,7 +268,7 @@ public class FilesTool extends PodTool {
         if (aFile.isDir()) {
 
             // Skip build dir
-            if (aFile == _podPane.getBuildDir())
+            if (aFile == _workspacePane.getBuildDir())
                 return doSaveAll ? 1 : 0;
 
             // Iterate over child files
@@ -289,7 +289,7 @@ public class FilesTool extends PodTool {
             DialogBox dialogBox = new DialogBox("Save Modified File");
             dialogBox.setMessage("File has been modified:\n" + aFile.getPath());
             dialogBox.setOptions("Save File", "Save All Files", "Cancel");
-            int choice = doSaveAll ? 1 : dialogBox.showOptionDialog(_podPane.getUI(), "Save File");
+            int choice = doSaveAll ? 1 : dialogBox.showOptionDialog(_workspacePane.getUI(), "Save File");
 
             // Handle Save file
             if (choice == 0 || choice == 1) {
@@ -315,7 +315,7 @@ public class FilesTool extends PodTool {
             //File file = getLocalFile(aFile), file2 = new File(file.getParentFile(), aName); file.renameTo(file2);
             DialogBox dbox = new DialogBox("Can't rename non-empty directory");
             dbox.setErrorMessage("I know this is bogus, but app can't yet rename non-empty directory");
-            dbox.showMessageDialog(_podPane.getUI());
+            dbox.showMessageDialog(_workspacePane.getUI());
             return false;
         }
 
@@ -362,7 +362,7 @@ public class FilesTool extends PodTool {
         // Give the user one last chance to bail
         DialogBox dialogBox = new DialogBox("Remove File(s)");
         dialogBox.setQuestionMessage("Are you sure you want to remove the currently selected File(s)?");
-        if (!dialogBox.showConfirmDialog(_podPane.getUI()))
+        if (!dialogBox.showConfirmDialog(_workspacePane.getUI()))
             return;
 
         // Get top parent

@@ -9,8 +9,8 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.app.DiffPage;
-import snapcode.app.PodPane;
-import snapcode.app.PodTool;
+import snapcode.app.WorkspacePane;
+import snapcode.app.WorkspaceTool;
 import snapcode.app.ProjectPane;
 import snapcode.util.CloseBox;
 import java.io.File;
@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * A class to handle visual management of project files.
  */
-public class FileTreeTool extends PodTool {
+public class FileTreeTool extends WorkspaceTool {
 
     // The file tree
     private TreeView<FileTreeFile>  _filesTree;
@@ -38,9 +38,9 @@ public class FileTreeTool extends PodTool {
     /**
      * Constructor.
      */
-    public FileTreeTool(PodPane podPane)
+    public FileTreeTool(WorkspacePane workspacePane)
     {
-        super(podPane);
+        super(workspacePane);
     }
 
     /**
@@ -52,9 +52,9 @@ public class FileTreeTool extends PodTool {
         if (_rootFiles != null) return _rootFiles;
 
         // Create RootFiles
-        List<FileTreeFile> rootFiles = new ArrayList<>(_podPane.getSiteCount());
-        for (int i = 0, iMax = _podPane.getSiteCount(); i < iMax; i++) {
-            WebSite site = _podPane.getSite(i);
+        List<FileTreeFile> rootFiles = new ArrayList<>(_workspacePane.getSiteCount());
+        for (int i = 0, iMax = _workspacePane.getSiteCount(); i < iMax; i++) {
+            WebSite site = _workspacePane.getSite(i);
             rootFiles.add(new FileTreeFile(null, site.getRootDir()));
         }
 
@@ -152,7 +152,7 @@ public class FileTreeTool extends PodTool {
         addKeyActionHandler("PasteAction", "Shortcut+V");
 
         // Register for Window.Focused change
-        _podPane.getWindow().addPropChangeListener(pc -> windowFocusChanged(), View.Focused_Prop);
+        _workspacePane.getWindow().addPropChangeListener(pc -> windowFocusChanged(), View.Focused_Prop);
     }
 
     /**
@@ -194,7 +194,7 @@ public class FileTreeTool extends PodTool {
             // Handle MouseClick (double-click): RunSelectedFile
             if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
                 if (getSelFile().isFile()) {
-                    DebugTool debugTool = _podTools.getDebugTool();
+                    DebugTool debugTool = _workspaceTools.getDebugTool();
                     debugTool.runConfigOrFile(null, getSelFile(), false);
                 }
             }
@@ -212,7 +212,7 @@ public class FileTreeTool extends PodTool {
                     List<File> files = clipboard.getJavaFiles();
                     if (files == null || files.size() == 0)
                         return;
-                    FilesTool filesTool = _podTools.getFilesTool();
+                    FilesTool filesTool = _workspaceTools.getFilesTool();
                     filesTool.addFiles(files);
                     anEvent.dropComplete();
                 }
@@ -245,13 +245,13 @@ public class FileTreeTool extends PodTool {
 
         // Handle NewFileMenuItem, NewFileButton
         if (anEvent.equals("NewFileMenuItem") || anEvent.equals("NewFileButton")) {
-            FilesTool filesTool = _podTools.getFilesTool();
+            FilesTool filesTool = _workspaceTools.getFilesTool();
             filesTool.showNewFilePanel();
         }
 
         // Handle RemoveFileMenuItem
         if (anEvent.equals("RemoveFileMenuItem")) {
-            FilesTool filesTool = _podTools.getFilesTool();
+            FilesTool filesTool = _workspaceTools.getFilesTool();
             filesTool.showRemoveFilePanel();
         }
 
@@ -300,11 +300,11 @@ public class FileTreeTool extends PodTool {
 
         // Handle RunFileMenuItem, DebugFileMenuItem
         if (anEvent.equals("RunFileMenuItem")) {
-            DebugTool debugTool = _podTools.getDebugTool();
+            DebugTool debugTool = _workspaceTools.getDebugTool();
             debugTool.runConfigOrFile(null, getSelFile(), false);
         }
         if (anEvent.equals("DebugFileMenuItem")) {
-            DebugTool debugTool = _podTools.getDebugTool();
+            DebugTool debugTool = _workspaceTools.getDebugTool();
             debugTool.runConfigOrFile(null, getSelFile(), true);
         }
 
@@ -356,14 +356,14 @@ public class FileTreeTool extends PodTool {
     public void renameFile()
     {
         WebFile selFile = getSelFile();
-        if (selFile == null || !ArrayUtils.containsId(_podPane.getSites(), selFile.getSite()))
+        if (selFile == null || !ArrayUtils.containsId(_workspacePane.getSites(), selFile.getSite()))
             return;
 
         DialogBox dbox = new DialogBox("Rename File");
         dbox.setMessage("Enter new name for " + selFile.getName());
-        String newName = dbox.showInputDialog(_podPane.getUI(), selFile.getName());
+        String newName = dbox.showInputDialog(_workspacePane.getUI(), selFile.getName());
         if (newName != null) {
-            FilesTool filesTool = _podTools.getFilesTool();
+            FilesTool filesTool = _workspaceTools.getFilesTool();
             filesTool.renameFile(selFile, newName);
         }
     }
@@ -391,7 +391,7 @@ public class FileTreeTool extends PodTool {
     {
         Clipboard clipboard = Clipboard.get();
         if (clipboard.hasFiles()) {
-            FilesTool filesTool = _podTools.getFilesTool();
+            FilesTool filesTool = _workspaceTools.getFilesTool();
             List<File> files = clipboard.getJavaFiles();
             filesTool.addFiles(files);
         }
@@ -402,7 +402,7 @@ public class FileTreeTool extends PodTool {
      */
     protected void windowFocusChanged()
     {
-        if (_podPane.getWindow().isFocused()) {
+        if (_workspacePane.getWindow().isFocused()) {
             for (FileTreeFile file : getRootFiles())
                 checkForExternalMods(file.getFile());
         }

@@ -6,13 +6,13 @@ import javakit.project.Project;
 import snap.gfx.Image;
 import snap.view.*;
 import snap.web.WebFile;
-import snapcode.app.PodPane;
-import snapcode.app.PodTool;
+import snapcode.app.WorkspacePane;
+import snapcode.app.WorkspaceTool;
 
 /**
  * A pane/panel to show current build issues.
  */
-public class ProblemsTool extends PodTool {
+public class ProblemsTool extends WorkspaceTool {
 
     // The selected issue
     private BuildIssue  _selIssue;
@@ -24,9 +24,9 @@ public class ProblemsTool extends PodTool {
     /**
      * Constructor.
      */
-    public ProblemsTool(PodPane podPane)
+    public ProblemsTool(WorkspacePane workspacePane)
     {
-        super(podPane);
+        super(workspacePane);
     }
 
     /**

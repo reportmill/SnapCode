@@ -37,12 +37,12 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     }
 
     /**
-     * Return the PodPane.
+     * Return the WorkspacePane.
      */
-    PodPane getPodPane()
+    WorkspacePane getWorkspacePane()
     {
         WebBrowser browser = getBrowser();
-        return browser.getOwner(PodPane.class);
+        return browser.getOwner(WorkspacePane.class);
     }
 
     /**
@@ -329,10 +329,10 @@ public class JavaPage extends WebPage implements WebFile.Updater {
      */
     private void showReferences(JNode aNode)
     {
-        if (getPodPane() == null) return;
-        PodTools podTools = getPodPane().getPodTools();
-        podTools.getSearchTool().searchReference(aNode);
-        podTools.showToolForClass(SearchPane.class);
+        if (getWorkspacePane() == null) return;
+        WorkspaceTools workspaceTools = getWorkspacePane().getWorkspaceTools();
+        workspaceTools.getSearchTool().searchReference(aNode);
+        workspaceTools.showToolForClass(SearchPane.class);
     }
 
     /**
@@ -340,10 +340,10 @@ public class JavaPage extends WebPage implements WebFile.Updater {
      */
     private void showDeclarations(JNode aNode)
     {
-        if (getPodPane() == null) return;
-        PodTools podTools = getPodPane().getPodTools();
-        podTools.getSearchTool().searchDeclaration(aNode);
-        podTools.showToolForClass(SearchPane.class);
+        if (getWorkspacePane() == null) return;
+        WorkspaceTools workspaceTools = getWorkspacePane().getWorkspaceTools();
+        workspaceTools.getSearchTool().searchDeclaration(aNode);
+        workspaceTools.showToolForClass(SearchPane.class);
     }
 
     /**
@@ -367,8 +367,8 @@ public class JavaPage extends WebPage implements WebFile.Updater {
      */
     private int getProgramCounterLine()
     {
-        PodPane podPane = getPodPane();
-        return podPane != null ? podPane.getProcPane().getProgramCounter(getFile()) : -1;
+        WorkspacePane workspacePane = getWorkspacePane();
+        return workspacePane != null ? workspacePane.getProcPane().getProgramCounter(getFile()) : -1;
     }
 
     /**

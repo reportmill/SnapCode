@@ -1,6 +1,6 @@
 package snapcode.apptools;
 import com.sun.jdi.*;
-import snapcode.app.PodTool;
+import snapcode.app.WorkspaceTool;
 import snapcode.debug.DebugApp;
 import snap.gfx.Font;
 import snap.view.*;
@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * A debug pane.
  */
-public class DebugVarsPane extends PodTool {
+public class DebugVarsPane extends WorkspaceTool {
 
     // The DebugTool
     private DebugTool  _debugTool;
@@ -30,7 +30,7 @@ public class DebugVarsPane extends PodTool {
      */
     public DebugVarsPane(DebugTool debugTool)
     {
-        super(debugTool.getPodPane());
+        super(debugTool.getWorkspacePane());
         _debugTool = debugTool;
     }
 

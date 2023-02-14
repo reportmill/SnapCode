@@ -6,14 +6,14 @@ import snap.viewx.WebBrowser;
 /**
  * Manages status bar.
  */
-public class StatusBar extends PodTool {
+public class StatusBar extends WorkspaceTool {
 
     /**
      * Constructor.
      */
-    public StatusBar(PodPane podPane)
+    public StatusBar(WorkspacePane workspacePane)
     {
-        super(podPane);
+        super(workspacePane);
     }
 
     /**

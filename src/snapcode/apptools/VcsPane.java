@@ -1,7 +1,6 @@
 package snapcode.apptools;
 import javakit.project.Project;
-import snapcode.app.PodPane;
-import snapcode.app.PodTool;
+import snapcode.app.WorkspaceTool;
 import snapcode.project.VersionControl;
 import snap.util.ClientUtils;
 import snap.util.TaskMonitor;
@@ -24,26 +23,27 @@ import java.util.List;
 /**
  * Manages VersionControl operations in application.
  */
-public class VcsPane extends PodTool {
+public class VcsPane extends WorkspaceTool {
 
     // The VcsTools
     private VcsTools  _vscTools;
 
     // The site
-    WebSite _site;
+    private WebSite  _site;
 
     // The VersionControl
-    VersionControl _vc;
+    private VersionControl  _vc;
 
     // The WebBrowser for remote files
-    WebBrowser _remoteBrowser;
+    private WebBrowser  _remoteBrowser;
 
     /**
      * Creates new VersionControl.
      */
     public VcsPane(VcsTools vcsTools)
     {
-        super(vcsTools.getPodPane());
+        super(vcsTools.getWorkspacePane());
+
         _vscTools = vcsTools;
         _site = getRootSite();
         _site.setProp(VcsPane.class.getName(), this);
@@ -52,17 +52,9 @@ public class VcsPane extends PodTool {
         // Add listener to update FilesPane.FilesTree when file status changed
         _vc.addPropChangeListener(pc -> {
             WebFile file = (WebFile) pc.getSource();
-            FileTreeTool fileTreeTool = _podTools.getFileTreeTool();
+            FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
             fileTreeTool.updateFile(file);
         });
-    }
-
-    /**
-     * Sets the PodPane.
-     */
-    public void setPodPane(PodPane podPane)
-    {
-        _podPane = podPane;
     }
 
     /**
@@ -174,7 +166,7 @@ public class VcsPane extends PodTool {
         String msg = "Do you want to load remote files into project directory?";
         DialogBox dialogBox = new DialogBox("Checkout Project Files");
         dialogBox.setMessage(msg);
-        if (!dialogBox.showConfirmDialog(_podPane.getUI()))
+        if (!dialogBox.showConfirmDialog(_workspacePane.getUI()))
             return;
 
         // Perform checkout
@@ -193,7 +185,7 @@ public class VcsPane extends PodTool {
         catch (Exception e) {
             DialogBox dialogBox = new DialogBox("Disconnect Error");
             dialogBox.setErrorMessage(e.toString());
-            dialogBox.showMessageDialog(_podPane.getUI());
+            dialogBox.showMessageDialog(_workspacePane.getUI());
         }
     }
 
@@ -202,7 +194,7 @@ public class VcsPane extends PodTool {
      */
     public void checkout()
     {
-        TaskRunner<?> runner = new TaskRunnerPanel(_podPane.getUI(), "Checkout from " + _vc.getRemoteURLString()) {
+        TaskRunner<?> runner = new TaskRunnerPanel(_workspacePane.getUI(), "Checkout from " + _vc.getRemoteURLString()) {
             boolean _oldAutoBuildEnabled;
 
             public Object run() throws Exception
@@ -222,7 +214,7 @@ public class VcsPane extends PodTool {
             {
                 _vscTools.setAutoBuildEnabled(_oldAutoBuildEnabled);
                 if (ClientUtils.setAccess(getRemoteSite())) checkout();
-                else if (new LoginPage().showPanel(_podPane.getUI(), getRemoteSite())) checkout();
+                else if (new LoginPage().showPanel(_workspacePane.getUI(), getRemoteSite())) checkout();
                 else super.failure(e);
             }
         };
@@ -240,7 +232,7 @@ public class VcsPane extends PodTool {
             proj.readSettings();
 
         // Reset UI
-        _podPane.resetLater();
+        _workspacePane.resetLater();
 
         //
         _vscTools.setAutoBuildEnabled(oldAutoBuildEnabled);
@@ -302,7 +294,7 @@ public class VcsPane extends PodTool {
     protected void commitFilesImpl(final List<WebFile> theFiles, final String aMessage)
     {
         // Create TaskRunner and start
-        new TaskRunnerPanel(_podPane.getUI(), "Commit files to remote site") {
+        new TaskRunnerPanel(_workspacePane.getUI(), "Commit files to remote site") {
             public Object run() throws Exception
             {
                 _vc.commitFiles(theFiles, aMessage, this);
@@ -352,7 +344,7 @@ public class VcsPane extends PodTool {
         } catch (Exception e) {
             DialogBox db = new DialogBox("Disconnect Error");
             db.setErrorMessage(e.toString());
-            db.showMessageDialog(_podPane.getUI());
+            db.showMessageDialog(_workspacePane.getUI());
         }
 
         // Sort files and return
@@ -369,7 +361,7 @@ public class VcsPane extends PodTool {
         final boolean oldAutoBuild = _vscTools.setAutoBuildEnabled(false);
 
         // Create TaskRunner and start
-        new TaskRunnerPanel(_podPane.getUI(), "Update files from remote site") {
+        new TaskRunnerPanel(_workspacePane.getUI(), "Update files from remote site") {
             public Object run() throws Exception
             {
                 _vc.updateFiles(theFiles, this);
@@ -382,7 +374,7 @@ public class VcsPane extends PodTool {
                     file.reload();
                 for (WebFile file : theFiles)
                     getBrowser().reloadFile(file); // Refresh replaced files
-                _podPane.resetLater(); // Reset UI
+                _workspacePane.resetLater(); // Reset UI
             }
 
             public void finished()
@@ -450,7 +442,7 @@ public class VcsPane extends PodTool {
         // Create TaskRunner and start
         final boolean oldAutoBuild = _vscTools.setAutoBuildEnabled(false);
 
-        new TaskRunnerPanel(_podPane.getUI(), "Replace files from remote site") {
+        new TaskRunnerPanel(_workspacePane.getUI(), "Replace files from remote site") {
             public Object run() throws Exception
             {
                 _vc.replaceFiles(theFiles, this);
@@ -463,7 +455,7 @@ public class VcsPane extends PodTool {
                     file.reload();
                 for (WebFile file : theFiles)
                     getBrowser().reloadFile(file);
-                _podPane.resetLater();
+                _workspacePane.resetLater();
             }
 
             public void finished()

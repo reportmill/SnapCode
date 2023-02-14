@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import javakit.project.WorkSpace;
+import javakit.project.Workspace;
 import javakit.project.Project;
 import javakit.project.ProjectSet;
 import snap.util.FilePathUtils;
@@ -11,14 +11,14 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 /**
- * This WorkSpace subclass is enhanced to work with full JDK.
+ * This Workspace subclass is enhanced to work with full JDK.
  */
-public class WorkSpaceX extends WorkSpace {
+public class WorkspaceX extends Workspace {
 
     /**
      * Constructor.
      */
-    public WorkSpaceX()
+    public WorkspaceX()
     {
         super();
     }

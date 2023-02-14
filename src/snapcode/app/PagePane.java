@@ -24,8 +24,8 @@ import java.util.List;
  */
 public class PagePane extends ViewOwner {
 
-    // The PodPane
-    private PodPane  _podPane;
+    // The WorkspacePane
+    private WorkspacePane  _workspacePane;
 
     // A list of open files
     List<WebFile>  _openFiles = new ArrayList<>();
@@ -46,10 +46,10 @@ public class PagePane extends ViewOwner {
     /**
      * Constructor.
      */
-    public PagePane(PodPane podPane)
+    public PagePane(WorkspacePane workspacePane)
     {
         super();
-        _podPane = podPane;
+        _workspacePane = workspacePane;
     }
 
     /**
@@ -322,7 +322,7 @@ public class PagePane extends ViewOwner {
      */
     protected boolean isProjectFile(WebFile aFile)
     {
-        WebSite[] projSites = _podPane.getSites();
+        WebSite[] projSites = _workspacePane.getSites();
         WebSite fileSite = aFile.getSite();
         return ArrayUtils.containsId(projSites, fileSite);
     }
@@ -335,7 +335,7 @@ public class PagePane extends ViewOwner {
         // Handle Activity, Status, Loading
         String propName = aPC.getPropName();
         if (propName == WebBrowser.Activity_Prop || propName == WebBrowser.Loading_Prop || propName == WebBrowser.Status_Prop)
-            _podPane.resetLater();
+            _workspacePane.resetLater();
     }
 
     /**

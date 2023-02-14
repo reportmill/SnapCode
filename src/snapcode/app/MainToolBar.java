@@ -12,14 +12,14 @@ import java.util.*;
 /**
  * ToolBar.
  */
-public class MainToolBar extends PodTool {
+public class MainToolBar extends WorkspaceTool {
 
     /**
      * Constructor.
      */
-    public MainToolBar(PodPane podPane)
+    public MainToolBar(WorkspacePane workspacePane)
     {
-        super(podPane);
+        super(workspacePane);
     }
 
     /**
@@ -88,9 +88,9 @@ public class MainToolBar extends PodTool {
                 _pagePane.setBrowserURL(url);
             }
             else {
-                SearchPane searchTool = _podTools.getSearchTool();
+                SearchPane searchTool = _workspaceTools.getSearchTool();
                 searchTool.search(text);
-                _podTools.showToolForClass(SearchPane.class);
+                _workspaceTools.showToolForClass(SearchPane.class);
             }
         }
 
@@ -106,7 +106,7 @@ public class MainToolBar extends PodTool {
         if (aPrefix.length() == 0) return Collections.EMPTY_LIST;
         List<WebFile> files = new ArrayList<>();
 
-        for (WebSite site : _podPane.getSites())
+        for (WebSite site : _workspacePane.getSites())
             getFilesForPrefix(aPrefix, site.getRootDir(), files);
         files.sort(_fileComparator);
         return files;

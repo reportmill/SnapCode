@@ -1,5 +1,5 @@
 package snapcode.apptools;
-import snapcode.app.PodTool;
+import snapcode.app.WorkspaceTool;
 import snapcode.debug.DebugApp;
 import snapcode.debug.ExprEval;
 import snap.view.*;
@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * A debug pane.
  */
-public class DebugExprsPane extends PodTool {
+public class DebugExprsPane extends WorkspaceTool {
 
     // The DebugTool
     private DebugTool  _debugTool;
@@ -28,7 +28,7 @@ public class DebugExprsPane extends PodTool {
      */
     public DebugExprsPane(DebugTool debugTool)
     {
-        super(debugTool.getPodPane());
+        super(debugTool.getWorkspacePane());
         _debugTool = debugTool;
     }
 

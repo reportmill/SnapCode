@@ -11,8 +11,8 @@ import javakit.resolver.JavaParameterizedType;
 import javakit.ide.NodeMatcher;
 import javakit.ide.JavaTextUtils;
 import snap.gfx.Image;
-import snapcode.app.PodPane;
-import snapcode.app.PodTool;
+import snapcode.app.WorkspacePane;
+import snapcode.app.WorkspaceTool;
 import snapcode.app.ProjectPane;
 import snapcode.project.JavaData;
 import snap.util.ArrayUtils;
@@ -26,7 +26,7 @@ import java.util.Set;
 /**
  * This class manages project search.
  */
-public class SearchPane extends PodTool {
+public class SearchPane extends WorkspaceTool {
 
     // The current search
     private Search  _search;
@@ -37,9 +37,9 @@ public class SearchPane extends PodTool {
     /**
      * Constructor.
      */
-    public SearchPane(PodPane podPane)
+    public SearchPane(WorkspacePane workspacePane)
     {
-        super(podPane);
+        super(workspacePane);
     }
 
     /**
@@ -150,7 +150,7 @@ public class SearchPane extends PodTool {
     {
         _search = new Search();
         _search._string = aString;
-        for (WebSite site : _podPane.getSites())
+        for (WebSite site : _workspacePane.getSites())
             search(site.getRootDir(), _search._results, aString.toLowerCase());
         resetLater();
     }
@@ -167,7 +167,7 @@ public class SearchPane extends PodTool {
 
         // Handle directory
         if (aFile.isDir()) {
-            if (aFile == _podPane.getBuildDir())
+            if (aFile == _workspacePane.getBuildDir())
                 return;
             for (WebFile file : aFile.getFiles())
                 search(file, theResults, aString);
@@ -226,7 +226,7 @@ public class SearchPane extends PodTool {
         _search._kind = Search.Kind.Reference;
 
         // Iterate over all project sites
-        for (WebSite site : _podPane.getSites())
+        for (WebSite site : _workspacePane.getSites())
             searchReference(site.getRootDir(), _search._results, decl);
 
         // Update UI
@@ -245,7 +245,7 @@ public class SearchPane extends PodTool {
 
         // Handle directory
         if (aFile.isDir()) {
-            if (aFile == _podPane.getBuildDir())
+            if (aFile == _workspacePane.getBuildDir())
                 return;
             WebFile[] dirFiles = aFile.getFiles();
             for (WebFile file : dirFiles)
@@ -300,7 +300,7 @@ public class SearchPane extends PodTool {
         _search._kind = Search.Kind.Declaration;
 
         // Iterate over all project sites
-        for (WebSite site : _podPane.getSites())
+        for (WebSite site : _workspacePane.getSites())
             searchDeclaration(site.getRootDir(), _search._results, decl);
 
         // Update UI
@@ -319,7 +319,7 @@ public class SearchPane extends PodTool {
 
         // Handle directory
         if (aFile.isDir()) {
-            if (aFile == _podPane.getBuildDir())
+            if (aFile == _workspacePane.getBuildDir())
                 return;
 
             WebFile[] dirFiles = aFile.getFiles();

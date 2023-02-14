@@ -51,8 +51,8 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     public ClassLoader getClassLoader(Location aLoc)
     {
         if (_classLoader != null) return _classLoader;
-        WorkSpaceX pod = (WorkSpaceX) _proj.getWorkSpace();
-        ClassLoader classLoader = pod.createLibClassLoader();
+        WorkspaceX workspace = (WorkspaceX) _proj.getWorkspace();
+        ClassLoader classLoader = workspace.createLibClassLoader();
         return _classLoader = classLoader;
     }
 

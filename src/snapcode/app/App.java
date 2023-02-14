@@ -55,10 +55,10 @@ public class App {
      */
     private static void quitAppImpl()
     {
-        // Hide open PodPane
-        PodPane podPane = WindowView.getOpenWindowOwner(PodPane.class);
-        if (podPane != null)
-            podPane.hide();
+        // Hide open WorkspacePane
+        WorkspacePane workspacePane = WindowView.getOpenWindowOwner(WorkspacePane.class);
+        if (workspacePane != null)
+            workspacePane.hide();
 
         // Flush prefs and exit
         Prefs.getDefaultPrefs().flush();

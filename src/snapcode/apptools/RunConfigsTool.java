@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Manages a list of run configurations for project.
  */
-public class RunConfigsTool extends PodTool {
+public class RunConfigsTool extends WorkspaceTool {
 
     // The selected RunConfig
     private RunConfig  _runConfig;
@@ -15,9 +15,9 @@ public class RunConfigsTool extends PodTool {
     /**
      * Constructor.
      */
-    public RunConfigsTool(PodPane podPane)
+    public RunConfigsTool(WorkspacePane workspacePane)
     {
-        super(podPane);
+        super(workspacePane);
     }
 
     /**
@@ -134,7 +134,7 @@ public class RunConfigsTool extends PodTool {
 //        // Handle RunConfigMenuItems
 //        if (anEvent.getName().endsWith("RunConfigMenuItem")) {
 //            String configName = anEvent.getName().replace("RunConfigMenuItem", "");
-//            DebugTool debugTool = _podTools.getDebugTool();
+//            DebugTool debugTool = _workspaceTools.getDebugTool();
 //            debugTool.runConfigForName(configName, false);
 //            setRunMenuButtonItems();
 //        }

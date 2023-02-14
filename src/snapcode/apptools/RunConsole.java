@@ -1,7 +1,7 @@
 package snapcode.apptools;
 import javakit.project.Project;
-import snapcode.app.PodPane;
-import snapcode.app.PodTool;
+import snapcode.app.WorkspacePane;
+import snapcode.app.WorkspaceTool;
 import snapcode.debug.RunApp;
 import snap.gfx.Color;
 import snap.gfx.Font;
@@ -15,7 +15,7 @@ import snap.web.WebFile;
 /**
  * A panel to run a process.
  */
-public class RunConsole extends PodTool {
+public class RunConsole extends WorkspaceTool {
 
     // The output text
     private RCTextView  _textView;
@@ -26,7 +26,7 @@ public class RunConsole extends PodTool {
     /**
      * Creates a new DebugPane.
      */
-    public RunConsole(PodPane projPane)
+    public RunConsole(WorkspacePane projPane)
     {
         super(projPane);
     }
@@ -36,7 +36,7 @@ public class RunConsole extends PodTool {
      */
     public RunApp getSelApp()
     {
-        DebugTool debugTool = _podTools.getDebugTool();
+        DebugTool debugTool = _workspaceTools.getDebugTool();
         ProcPane procPane = debugTool.getProcPane();
         return procPane.getSelApp();
     }

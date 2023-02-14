@@ -16,8 +16,8 @@ import snapcode.apptools.ProjectConfigTool;
  */
 public class ProjectPane extends WebPage {
 
-    // The WorkSpacePane that owns this ProjectPane
-    private PodPane  _workSpacePane;
+    // The WorkspacePane that owns this ProjectPane
+    private WorkspacePane  _workspacePane;
 
     // The Project
     private Project  _project;
@@ -37,9 +37,10 @@ public class ProjectPane extends WebPage {
     /**
      * Constructor.
      */
-    protected ProjectPane(PodPane workSpacePane, Project aProject)
+    protected ProjectPane(WorkspacePane workspacePane, Project aProject)
     {
-        _workSpacePane = workSpacePane;
+        super();
+        _workspacePane = workspacePane;
         _project = aProject;
 
         // Create/set tools
@@ -53,9 +54,9 @@ public class ProjectPane extends WebPage {
     }
 
     /**
-     * Returns the WorkSpacePane.
+     * Returns the WorkspacePane.
      */
-    public PodPane getWorkSpacePane()  { return _workSpacePane; }
+    public WorkspacePane getWorkspacePane()  { return _workspacePane; }
 
     /**
      * Returns the project.
@@ -125,7 +126,7 @@ public class ProjectPane extends WebPage {
         WebSite projSite = _project.getSite();
         projSite.removeFileChangeListener(_siteFileLsnr);
         projSite.setProp(ProjectPane.class.getName(), null);
-        _workSpacePane = null;
+        _workspacePane = null;
         _configPane = null;
     }
 

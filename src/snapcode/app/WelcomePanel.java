@@ -397,15 +397,15 @@ public class WelcomePanel extends ViewOwner {
      */
     public void openSites()
     {
-        // Create WorkSpacePane and add selected sites
-        PodPane workSpacePane = new PodPane();
+        // Create WorkspacePane and add selected sites
+        WorkspacePane workspacePane = new WorkspacePane();
 
         List<WebSite> projectSites = getSelectedSites();
         for (WebSite site : projectSites)
-            workSpacePane.addProjectForSite(site);
+            workspacePane.addProjectForSite(site);
 
-        // Show PodPane
-        workSpacePane.show();
+        // Show WorkspacePane
+        workspacePane.show();
     }
 
     /**
@@ -431,9 +431,9 @@ public class WelcomePanel extends ViewOwner {
 
         // If requested, delete site files and sandbox (if "local" site)
         if (deleteLocal && site.getURL().getScheme().equals("local")) {
-            PodPane workSpacePane = new PodPane();
-            Project proj = workSpacePane.addProjectForSite(site);
-            ProjectPane projPane = workSpacePane.getProjectPaneForProject(proj);
+            WorkspacePane workspacePane = new WorkspacePane();
+            Project proj = workspacePane.addProjectForSite(site);
+            ProjectPane projPane = workspacePane.getProjectPaneForProject(proj);
             projPane.deleteSite(getUI());
         }
 
@@ -464,10 +464,10 @@ public class WelcomePanel extends ViewOwner {
         WebURL url = WebURL.getURL(path);
         if (url == null || url.getFile() == null) return;
         Prefs.getDefaultPrefs().setValue("SnapFileViewerPath", path);
-        PodPane workSpacePane = new PodPane();
+        WorkspacePane workspacePane = new WorkspacePane();
         WebSite site = url.getAsSite();
-        workSpacePane.addProjectForSite(site);
-        workSpacePane.show();
+        workspacePane.addProjectForSite(site);
+        workspacePane.show();
         hide();
     }
 

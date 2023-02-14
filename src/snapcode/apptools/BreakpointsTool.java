@@ -4,13 +4,13 @@ import javakit.project.Breakpoints;
 import snap.view.ListView;
 import snap.view.View;
 import snap.view.ViewEvent;
-import snapcode.app.PodPane;
-import snapcode.app.PodTool;
+import snapcode.app.WorkspacePane;
+import snapcode.app.WorkspaceTool;
 
 /**
  * This class displays and edits project breakpoints.
  */
-public class BreakpointsTool extends PodTool {
+public class BreakpointsTool extends WorkspaceTool {
 
     // The breakpoints list
     private ListView<Breakpoint>  _breakpointsList;
@@ -18,9 +18,9 @@ public class BreakpointsTool extends PodTool {
     /**
      * Constructor.
      */
-    public BreakpointsTool(PodPane podPane)
+    public BreakpointsTool(WorkspacePane workspacePane)
     {
-        super(podPane);
+        super(workspacePane);
     }
 
     /**
