@@ -8,6 +8,8 @@ import snap.viewx.DialogBox;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
+import snapcode.apptools.BuildDirTool;
+import snapcode.apptools.ProjectConfigTool;
 
 /**
  * A class to manage UI aspects of a Project.
@@ -20,11 +22,11 @@ public class ProjectPane extends WebPage {
     // The Project
     private Project  _project;
 
-    // The ProjectConfigPane
-    private ProjectConfigPane  _configPane;
+    // The ProjectConfigTool
+    private ProjectConfigTool  _configPane;
 
-    // The BuildPane
-    private BuildPane _buildPane;
+    // The BuildDirTool
+    private BuildDirTool  _buildDirTool;
 
     // The top level TabView
     private TabView  _tabView;
@@ -40,17 +42,13 @@ public class ProjectPane extends WebPage {
         _workSpacePane = workSpacePane;
         _project = aProject;
 
-        //
-        WebSite projSite = aProject.getSite();
-        projSite.addFileChangeListener(_siteFileLsnr);
-
-        // Set ProjectConfigPane
-        _configPane = new ProjectConfigPane(this);
-
-        // Set BuildPane
-        _buildPane = new BuildPane(this);
+        // Create/set tools
+        _configPane = new ProjectConfigTool(this);
+        _buildDirTool = new BuildDirTool(this);
 
         // Set this ProjectPane as Site prop
+        WebSite projSite = aProject.getSite();
+        projSite.addFileChangeListener(_siteFileLsnr);
         projSite.setProp(ProjectPane.class.getName(), this);
     }
 
@@ -72,7 +70,7 @@ public class ProjectPane extends WebPage {
     /**
      * Returns the ProjectConfigPane for this site.
      */
-    public ProjectConfigPane getProjPane()
+    public ProjectConfigTool getProjPane()
     {
         return _configPane;
     }
@@ -186,17 +184,17 @@ public class ProjectPane extends WebPage {
     {
         // Get source and property name
         WebFile file = (WebFile) aPC.getSource();
-        String pname = aPC.getPropName();
+        String propName = aPC.getPropName();
 
         // Handle Saved property: Call fileAdded or fileSaved
-        if (pname == WebFile.Saved_Prop) {
+        if (propName == WebFile.Saved_Prop) {
             if ((Boolean) aPC.getNewValue())
                 fileAdded(file);
             else fileRemoved(file);
         }
 
         // Handle ModifedTime property: Call file saved
-        if (pname == WebFile.ModTime_Prop && file.getExists())
+        if (propName == WebFile.ModTime_Prop && file.getExists())
             fileSaved(file);
     }
 
@@ -236,13 +234,13 @@ public class ProjectPane extends WebPage {
         _tabView = new TabView();
 
         // Add ProjectConfigPane
-        ProjectConfigPane projPane = getProjPane();
+        ProjectConfigTool projPane = getProjPane();
         if (projPane != null)
             _tabView.addTab("Settings", projPane.getUI()); //tab.setTooltip(new Tooltip("Project Settings"));
 
         // Add BuildPane
-        BuildPane buildPane = _buildPane;
-        _tabView.addTab("Build Dir", buildPane.getUI());
+        BuildDirTool buildDirTool = _buildDirTool;
+        _tabView.addTab("Build Dir", buildDirTool.getUI());
 
         // Return
         return _tabView;
@@ -259,7 +257,7 @@ public class ProjectPane extends WebPage {
     /**
      * A WebPage subclass for ProjectPane.
      */
-    public static class SitePage extends WebPage {
+    public static class ProjectPanePage extends WebPage {
 
         /**
          * Initialize UI panel.
@@ -275,7 +273,7 @@ public class ProjectPane extends WebPage {
          */
         public String getTitle()
         {
-            return getURL().getSite().getName() + " - Site Settings";
+            return getURL().getSite().getName() + " - Project Settings";
         }
     }
 }

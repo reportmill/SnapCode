@@ -1,4 +1,4 @@
-package snapcode.app;
+package snapcode.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JNode;
 import javakit.ide.NodeMatcher;
@@ -6,7 +6,10 @@ import javakit.project.JavaAgent;
 import javakit.project.Project;
 import javakit.project.ProjectConfig;
 import javakit.project.ProjectSet;
-import snapcode.apptools.ProblemsTool;
+import snapcode.app.ProjectPane;
+import snapcode.app.ProjectTool;
+import snapcode.app.SupportTray;
+import snapcode.app.WelcomePanel;
 import snapcode.project.VersionControl;
 import snap.util.ClientUtils;
 import snap.util.TaskRunner;
@@ -23,19 +26,7 @@ import java.util.List;
 /**
  * A class to manage UI aspects of a Project.
  */
-public class ProjectConfigPane extends ViewOwner {
-
-    // The WorkSpacePane
-    private PodPane  _workSpacePane;
-
-    // The ProjectPane
-    private ProjectPane _projPane;
-
-    // The WebSite
-    private WebSite  _site;
-
-    // The project
-    private Project  _proj;
+public class ProjectConfigTool extends ProjectTool {
 
     // Whether to auto build project when files change
     private boolean  _autoBuild = true;
@@ -58,19 +49,14 @@ public class ProjectConfigPane extends ViewOwner {
     /**
      * Constructor.
      */
-    public ProjectConfigPane(ProjectPane projectPane)
+    public ProjectConfigTool(ProjectPane projectPane)
     {
-        _workSpacePane = projectPane.getWorkSpacePane();
-        _projPane = projectPane;
-        _site = projectPane.getSite();
-        _proj = projectPane.getProject();
-        _site.setProp(ProjectConfigPane.class.getName(), this);
-    }
+        super(projectPane);
 
-    /**
-     * Returns the ProjectPane.
-     */
-    public ProjectPane getSitePane()  { return _projPane; }
+        // Set Project.Site.Prop so instances can be located easily
+        WebSite projSite = _proj.getSite();
+        projSite.setProp(ProjectConfigTool.class.getName(), this);
+    }
 
     /**
      * Returns the project.
@@ -132,7 +118,7 @@ public class ProjectConfigPane extends ViewOwner {
      */
     public void addProject(String aName, String aURLString)
     {
-        View view = isUISet() && getUI().isShowing() ? getUI() : _workSpacePane.getUI();
+        View view = isUISet() && getUI().isShowing() ? getUI() : _workspacePane.getUI();
         addProject(aName, aURLString, view);
     }
 
@@ -151,7 +137,8 @@ public class ProjectConfigPane extends ViewOwner {
         // Get site - if not present, create and clone
         WebSite site = WelcomePanel.getShared().getSite(aName);
         if ((site == null || !site.getExists()) && aURLString != null) {
-            if (site == null) site = WelcomePanel.getShared().createSite(aName, false);
+            if (site == null)
+                site = WelcomePanel.getShared().createSite(aName, false);
             VersionControl.setRemoteURLString(site, aURLString);
             VersionControl vc = VersionControl.create(site);
             checkout(aView, vc);
@@ -166,8 +153,8 @@ public class ProjectConfigPane extends ViewOwner {
 
         // Add project for name
         _proj.getProjectSet().addProject(aName);
-        if (_workSpacePane != null)
-            _workSpacePane.addProjectForSite(site);
+        if (_workspacePane != null)
+            _workspacePane.addProjectForSite(site);
     }
 
     /**
@@ -178,7 +165,7 @@ public class ProjectConfigPane extends ViewOwner {
         WebSite site = aVC.getSite();
         String title = "Checkout from " + aVC.getRemoteURLString();
 
-        TaskRunner<Object> runner = new TaskRunnerPanel<Object>(_workSpacePane.getUI(), title) {
+        TaskRunner<Object> runner = new TaskRunnerPanel<Object>(_workspacePane.getUI(), title) {
 
             public Object run() throws Exception
             {
@@ -190,10 +177,10 @@ public class ProjectConfigPane extends ViewOwner {
             {
                 // Add new project to root project
                 _proj.getProjectSet().addProject(site.getName());
-                if (_workSpacePane == null) return;
+                if (_workspacePane == null) return;
 
                 // Add new project site to app pane and build
-                _workSpacePane.addProjectForSite(site);
+                _workspacePane.addProjectForSite(site);
                 Project proj = Project.getProjectForSite(site);
                 proj.addBuildFilesAll();
                 buildProjectLater(false);
@@ -203,7 +190,7 @@ public class ProjectConfigPane extends ViewOwner {
             {
                 if (ClientUtils.setAccess(aVC.getRemoteSite()))
                     checkout(aView, aVC);
-                else if (new LoginPage().showPanel(_workSpacePane.getUI(), aVC.getRemoteSite()))
+                else if (new LoginPage().showPanel(_workspacePane.getUI(), aVC.getRemoteSite()))
                     checkout(aView, aVC);
                 else super.failure(e);
             }
@@ -226,14 +213,14 @@ public class ProjectConfigPane extends ViewOwner {
         ProjectSet projectSet = _proj.getProjectSet();
         Project proj = projectSet.getProject(aName);
         if (proj == null) {
-            View view = isUISet() && getUI().isShowing() ? getUI() : _workSpacePane.getUI();
+            View view = isUISet() && getUI().isShowing() ? getUI() : _workspacePane.getUI();
             DialogBox.showWarningDialog(view, "Error Removing Project", "Project not found");
             return;
         }
 
         // Remove dependent project from root project and PodPane
         _proj.getProjectSet().removeProject(aName);
-        _workSpacePane.removeProject(proj);
+        _workspacePane.removeProject(proj);
     }
 
     /**
@@ -258,7 +245,7 @@ public class ProjectConfigPane extends ViewOwner {
     {
         // If not root ProjectConfigPane, forward on to it
         Project rootProj = _proj.getRootProject();
-        ProjectConfigPane rootProjPane = _proj != rootProj ? ProjectConfigPane.getProjectPane(rootProj.getSite()) : this;
+        ProjectConfigTool rootProjPane = _proj != rootProj ? ProjectConfigTool.getProjectPane(rootProj.getSite()) : this;
         if (this != rootProjPane) {
             rootProjPane.buildProjectLater(doAddFiles);
             return;
@@ -336,7 +323,7 @@ public class ProjectConfigPane extends ViewOwner {
 
         void setActivity(String aStr)
         {
-            if (_workSpacePane != null) _workSpacePane.getBrowser().setActivity(aStr);
+            if (_workspacePane != null) _workspacePane.getBrowser().setActivity(aStr);
         }
 
         public void failure(final Exception e)
@@ -360,7 +347,7 @@ public class ProjectConfigPane extends ViewOwner {
     /**
      * Called when file added to project.
      */
-    void fileAdded(WebFile aFile)
+    public void fileAdded(WebFile aFile)
     {
         if (_proj.getBuildDir().contains(aFile)) return;
         _proj.fileAdded(aFile);
@@ -371,7 +358,7 @@ public class ProjectConfigPane extends ViewOwner {
     /**
      * Called when file removed from project.
      */
-    void fileRemoved(WebFile aFile)
+    public void fileRemoved(WebFile aFile)
     {
         if (_proj.getBuildDir().contains(aFile)) return;
         _proj.fileRemoved(aFile);
@@ -382,7 +369,7 @@ public class ProjectConfigPane extends ViewOwner {
     /**
      * Called when file saved in project.
      */
-    void fileSaved(WebFile aFile)
+    public void fileSaved(WebFile aFile)
     {
         if (_proj.getBuildDir().contains(aFile)) return;
         _proj.fileSaved(aFile);
@@ -450,14 +437,14 @@ public class ProjectConfigPane extends ViewOwner {
         // If final error count non-zero, show problems pane
         int errorCount = _proj.getRootProject().getBuildIssues().getErrorCount();
         if (errorCount > 0) {
-            SupportTray supportTray = _workSpacePane.getSupportTray();
+            SupportTray supportTray = _workspacePane.getSupportTray();
             if (supportTray.getSelTool() instanceof ProblemsTool)
                 supportTray.showProblemsTool();
         }
 
         // If error count zero and SupportTray showing problems, close
         if (errorCount == 0) {
-            SupportTray supportTray = _workSpacePane.getSupportTray();
+            SupportTray supportTray = _workspacePane.getSupportTray();
             if (supportTray.getSelTool() instanceof ProblemsTool)
                 supportTray.hideTools();
         }
@@ -482,9 +469,8 @@ public class ProjectConfigPane extends ViewOwner {
     protected void resetUI()
     {
         // Update HomePageText, AutoBuildCheckBox
-        ProjectPane projectPane = getSitePane();
         //setViewValue("HomePageText", sitePane.getHomePageURLString());
-        setViewValue("AutoBuildCheckBox", projectPane.isAutoBuild());
+        setViewValue("AutoBuildCheckBox", _projPane.isAutoBuild());
 
         // Update SourcePathText, BuildPathText
         Project proj = getProject();
@@ -504,14 +490,13 @@ public class ProjectConfigPane extends ViewOwner {
      */
     public void respondUI(ViewEvent anEvent)
     {
-        ProjectPane projectPane = getSitePane();
         Project proj = getProject();
         ProjectConfig projConfig = proj.getProjectConfig();
 
         // Handle HomePageText, AutoBuildCheckBox
         //if (anEvent.equals("HomePageText")) sitePane.setHomePageURLString(anEvent.getStringValue());
         if (anEvent.equals("AutoBuildCheckBox"))
-            projectPane.setAutoBuild(anEvent.getBoolValue());
+            _projPane.setAutoBuild(anEvent.getBoolValue());
 
         // Update SourcePathText, BuildPathText
         if (anEvent.equals("SourcePathText"))
@@ -712,8 +697,8 @@ public class ProjectConfigPane extends ViewOwner {
     /**
      * Returns the ProjectConfigPane for a site.
      */
-    public synchronized static ProjectConfigPane getProjectPane(WebSite aSite)
+    public synchronized static ProjectConfigTool getProjectPane(WebSite aSite)
     {
-        return (ProjectConfigPane) aSite.getProp(ProjectConfigPane.class.getName());
+        return (ProjectConfigTool) aSite.getProp(ProjectConfigTool.class.getName());
     }
 }

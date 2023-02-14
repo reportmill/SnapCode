@@ -3,7 +3,6 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import snapcode.app.ProjectConfigPane;
 import snapcode.app.PodPane;
 import snapcode.app.PodTool;
 import snapcode.project.VersionControl;
@@ -106,7 +105,7 @@ public class VcsTools extends PodTool {
     public void buildSite(boolean doAddFiles)
     {
         WebSite rootSite = getRootSite();
-        ProjectConfigPane rootProjPane = ProjectConfigPane.getProjectPane(rootSite);
+        ProjectConfigTool rootProjPane = ProjectConfigTool.getProjectPane(rootSite);
         rootProjPane.buildProjectLater(doAddFiles);
     }
 

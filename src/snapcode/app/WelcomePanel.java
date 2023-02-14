@@ -376,7 +376,7 @@ public class WelcomePanel extends ViewOwner {
     /**
      * Creates a new Site.
      */
-    protected WebSite createSite(String aName, boolean doSelect)
+    public WebSite createSite(String aName, boolean doSelect)
     {
         // Create site for name
         String urls = aName.indexOf(':') < 0 ? "local:/" + aName : aName;

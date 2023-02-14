@@ -10,6 +10,7 @@ import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.apptools.FilesTool;
+import snapcode.apptools.ProjectConfigTool;
 
 /**
  * A WebPage subclass that is the default homepage for SnapCode projects.
@@ -99,7 +100,7 @@ public class HomePage extends WebPage {
 
         // Handle NewSnapScene
         if (anEvent.equals("NewSnapScene") && anEvent.isMouseRelease()) {
-            ProjectConfigPane ppane = ProjectConfigPane.getProjectPane(getRootSite());
+            ProjectConfigTool ppane = ProjectConfigTool.getProjectPane(getRootSite());
             ppane.addProject("SnapKit", "https://github.com/reportmill/SnapKit.git");
             addSceneFiles(getRootSite(), "Scene1");
         }

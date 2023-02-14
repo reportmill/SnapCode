@@ -47,7 +47,7 @@ public class PodPane extends ViewOwner {
     {
         super();
 
-        // Create Pod
+        // Create workspace
         _workSpace = new WorkSpaceX();
 
         // Create MainToolBar, PagePane, StatusBar
@@ -61,7 +61,7 @@ public class PodPane extends ViewOwner {
     }
 
     /**
-     * Returns the pod.
+     * Returns the workspace.
      */
     public WorkSpace getWorkSpace()  { return _workSpace; }
 

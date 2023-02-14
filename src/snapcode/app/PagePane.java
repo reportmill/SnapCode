@@ -368,7 +368,7 @@ public class PagePane extends ViewOwner {
 
             // Handle Project Root directory
             if (file != null && file.isRoot() && isProjectFile(file))
-                return ProjectPane.SitePage.class;
+                return ProjectPane.ProjectPanePage.class;
 
             // Handle Java
             if (type.equals("java")) {

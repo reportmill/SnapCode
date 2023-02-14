@@ -1,43 +1,35 @@
-package snapcode.app;
-import javakit.project.Project;
+package snapcode.apptools;
 import snap.view.*;
 import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebSite;
+import snapcode.app.ClassInfoPage;
+import snapcode.app.ProjectPane;
+import snapcode.app.ProjectTool;
 
 /**
  * A UI pane to show and manage the build directory.
  */
-public class BuildPane extends ViewOwner {
-
-    // The ProjectPane that owns this BuildPane
-    ProjectPane  _projectPane;
+public class BuildDirTool extends ProjectTool {
 
     // The Site
     WebSite _site;
 
-    // The Project
-    Project _proj;
-
-    // The Build dir
-    WebFile _buildDir;
-
     // The FileBrowser
-    BrowserView<WebFile> _fileBrowser;
+    private BrowserView<WebFile>  _fileBrowser;
 
     // The PageBrowser
-    WebBrowser _pageBrowser;
+    private WebBrowser  _pageBrowser;
 
     /**
-     * Creates a new BuildPane for given site.
+     * Constructor.
      */
-    protected BuildPane(ProjectPane aSP)
+    public BuildDirTool(ProjectPane projectPane)
     {
-        _projectPane = aSP;
-        _site = aSP.getSite();
-        _proj = Project.getProjectForSite(_site);
+        super(projectPane);
+        _site = projectPane.getSite();
     }
 
     /**
@@ -102,11 +94,11 @@ public class BuildPane extends ViewOwner {
 
         // Handle BuildButton
         if (anEvent.equals("BuildButton"))
-            _projectPane.buildSite(true);
+            _projPane.buildSite(true);
 
         // Handle CleanButton
         if (anEvent.equals("CleanButton"))
-            _projectPane.cleanSite();
+            _projPane.cleanSite();
     }
 
     /**
@@ -146,5 +138,4 @@ public class BuildPane extends ViewOwner {
             return anItem.getName();
         }
     }
-
 }
