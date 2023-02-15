@@ -182,7 +182,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
 
                     // Otherwise, add build file
                     else {
-                        ProjectBuilder projectBuilder = proj.getProjectBuilder();
+                        ProjectBuilder projectBuilder = proj.getBuilder();
                         projectBuilder.addBuildFileForce(updateFile);
                     }
                 }

@@ -96,13 +96,13 @@ public class BuildDirTool extends ProjectTool {
         // Handle BuildButton
         if (anEvent.equals("BuildButton")) {
             WorkspaceBuilder builder = _workspace.getBuilder();
-            builder.buildProjectLater(true);
+            builder.buildWorkspaceLater(true);
         }
 
         // Handle CleanButton
         if (anEvent.equals("CleanButton")) {
             WorkspaceBuilder builder = _workspace.getBuilder();
-            builder.cleanProject();
+            builder.cleanWorkspace();
         }
     }
 

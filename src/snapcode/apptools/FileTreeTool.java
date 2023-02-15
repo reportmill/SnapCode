@@ -329,13 +329,13 @@ public class FileTreeTool extends WorkspaceTool {
         // Handle CleanProjectMenuItem
         if (anEvent.equals("CleanProjectMenuItem")) {
             WorkspaceBuilder builder = _workspace.getBuilder();
-            builder.cleanProject();
+            builder.cleanWorkspace();
         }
 
         // Handle BuildProjectMenuItem
         if (anEvent.equals("BuildProjectMenuItem")) {
             WorkspaceBuilder builder = _workspace.getBuilder();
-            builder.buildProjectLater(false);
+            builder.buildWorkspaceLater(false);
         }
 
         // Handle ShowClassInfoMenuItem

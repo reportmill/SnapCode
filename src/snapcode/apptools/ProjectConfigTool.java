@@ -53,7 +53,7 @@ public class ProjectConfigTool extends ProjectTool {
         // Do AutoBuild
         WorkspaceBuilder builder = _workspace.getBuilder();
         if (builder.isAutoBuildEnabled())
-            builder.buildProjectLater(true);
+            builder.buildWorkspaceLater(true);
     }
 
     /**
@@ -98,7 +98,7 @@ public class ProjectConfigTool extends ProjectTool {
                 site = WelcomePanel.getShared().createSite(aName, false);
             VersionControl.setRemoteURLString(site, aURLString);
             VersionControl vc = VersionControl.create(site);
-            checkout(aView, vc);
+            checkout(vc);
             return;
         }
 
@@ -117,7 +117,7 @@ public class ProjectConfigTool extends ProjectTool {
     /**
      * Load all remote files into project directory.
      */
-    public void checkout(View aView, VersionControl aVC)
+    public void checkout(VersionControl aVC)
     {
         WebSite site = aVC.getSite();
         String title = "Checkout from " + aVC.getRemoteURLString();
@@ -136,22 +136,35 @@ public class ProjectConfigTool extends ProjectTool {
                 _proj.getProjectSet().addProject(site.getName());
                 if (_workspacePane == null) return;
 
-                // Add new project site to app pane and build
+                // Add new project site to workspace
                 _workspacePane.addProjectForSite(site);
-                Project proj = Project.getProjectForSite(site);
-                proj.addBuildFilesAll();
 
+                // Build workspace
                 WorkspaceBuilder builder = _workspace.getBuilder();
-                builder.buildProjectLater(false);
+                builder.buildWorkspaceLater(true);
             }
 
             public void failure(Exception e)
             {
-                if (ClientUtils.setAccess(aVC.getRemoteSite()))
-                    checkout(aView, aVC);
-                else if (new LoginPage().showPanel(_workspacePane.getUI(), aVC.getRemoteSite()))
-                    checkout(aView, aVC);
-                else super.failure(e);
+                WebSite remoteSite = aVC.getRemoteSite();
+
+                // If attempt to set permissions succeeds, try again
+                boolean setPermissionsSuccess = ClientUtils.setAccess(remoteSite);
+                if (setPermissionsSuccess) {
+                    checkout(aVC);
+                    return;
+                }
+
+                // If attempt to login succeeds, try again
+                LoginPage loginPage = new LoginPage();
+                boolean loginSuccess = loginPage.showPanel(_workspacePane.getUI(), remoteSite);
+                if (loginSuccess) {
+                    checkout(aVC);
+                    return;
+                }
+
+                // Do normal version
+                super.failure(e);
             }
         };
         runner.start();
@@ -208,7 +221,7 @@ public class ProjectConfigTool extends ProjectTool {
         // Do AutoBuild
         WorkspaceBuilder builder = _workspace.getBuilder();
         if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
-            builder.buildProjectLater(false);
+            builder.buildWorkspaceLater(false);
     }
 
     /**
@@ -222,7 +235,7 @@ public class ProjectConfigTool extends ProjectTool {
         // Do AutoBuild
         WorkspaceBuilder builder = _workspace.getBuilder();
         if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
-            builder.buildProjectLater(false);
+            builder.buildWorkspaceLater(false);
     }
 
     /**
@@ -236,7 +249,7 @@ public class ProjectConfigTool extends ProjectTool {
         // Do AutoBuild
         WorkspaceBuilder builder = _workspace.getBuilder();
         if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
-            builder.buildProjectLater(false);
+            builder.buildWorkspaceLater(false);
     }
 
     /**
@@ -371,7 +384,7 @@ public class ProjectConfigTool extends ProjectTool {
 
                      // Trigger build
                      WorkspaceBuilder builder = _workspace.getBuilder();
-                     builder.buildProjectLater(false);
+                     builder.buildWorkspaceLater(false);
                      anEvent.dropComplete();
                  }
              }

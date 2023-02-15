@@ -106,15 +106,10 @@ public class VcsPane extends WorkspaceTool {
         setViewValue("RemoteURLText", _vc.getRemoteURLString());
 
         // Update ProgressBar
-        ProgressBar pb = getView("ProgressBar", ProgressBar.class);
+        ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
         boolean loading = _remoteBrowser.isLoading();
-        if (loading && !pb.isVisible()) {
-            pb.setVisible(true);
-            pb.setProgress(-1);
-        } else if (!loading && pb.isVisible()) {
-            pb.setProgress(0);
-            pb.setVisible(false);
-        }
+        progressBar.setVisible(loading);
+        progressBar.setProgress(loading ? -1 : 0);
     }
 
     /**
@@ -248,7 +243,7 @@ public class VcsPane extends WorkspaceTool {
 
         //
         if (oldAutoBuildEnabled)
-            builder.buildProjectLater(true);
+            builder.buildWorkspaceLater(true);
     }
 
     /**
@@ -399,7 +394,7 @@ public class VcsPane extends WorkspaceTool {
                 WorkspaceBuilder builder = _workspace.getBuilder();
                 builder.setAutoBuildEnabled(oldAutoBuild);
                 if (oldAutoBuild)
-                    builder.buildProjectLater(false);
+                    builder.buildWorkspaceLater(false);
 
                 // Connect to remote site
                 if (isUISet())
@@ -482,7 +477,7 @@ public class VcsPane extends WorkspaceTool {
                 WorkspaceBuilder builder = _workspace.getBuilder();
                 builder.setAutoBuildEnabled(oldAutoBuild);
                 if (oldAutoBuild)
-                    builder.buildProjectLater(false);
+                    builder.buildWorkspaceLater(false);
 
                 // Connect to remote site
                 if (isUISet())
