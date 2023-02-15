@@ -30,9 +30,8 @@ public class WorkspaceX extends Workspace {
     protected ClassLoader createClassLoader()
     {
         // Get all project ClassPath URLs
-        ProjectSet projectSet = getProjectSet();
-        String[] projSetClassPaths = projectSet.getClassPaths();
-        URL[] urls = FilePathUtils.getURLs(projSetClassPaths);
+        String[] classPaths = getClassPaths();
+        URL[] urls = FilePathUtils.getURLs(classPaths);
 
         // Get System ClassLoader
         ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader().getParent();
@@ -48,27 +47,11 @@ public class WorkspaceX extends Workspace {
      * Needs unique name so that when debugging SnapCode, we can ignore classes loaded by Project.
      */
     public static class ProjectClassLoaderX extends URLClassLoader {
+
         public ProjectClassLoaderX(URL[] urls, ClassLoader aPar)
         {
             super(urls, aPar);
         }
-    }
-
-    /**
-     * Returns the project class loader.
-     */
-    public ClassLoader createLibClassLoader()
-    {
-        // Create ClassLoader for ProjectSet.ClassPath URLs and SystemClassLoader.Parent and return
-        ProjectSet projectSet = getProjectSet();
-        String[] libPaths = projectSet.getLibPaths();
-        URL[] urls = FilePathUtils.getURLs(libPaths);
-
-        // Get System ClassLoader
-        ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader().getParent();
-
-        // Create special URLClassLoader subclass so when debugging SnapCode, we can ignore classes loaded by Project
-        return new ProjectClassLoaderX(urls, systemClassLoader);
     }
 
     /**

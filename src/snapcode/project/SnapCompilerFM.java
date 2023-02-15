@@ -50,9 +50,13 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
      */
     public ClassLoader getClassLoader(Location aLoc)
     {
+        // If already set, just return
         if (_classLoader != null) return _classLoader;
-        WorkspaceX workspace = (WorkspaceX) _proj.getWorkspace();
-        ClassLoader classLoader = workspace.createLibClassLoader();
+
+        // Get Project.CompilerClassLoader
+        ClassLoader classLoader = _proj.createCompilerClassLoader();
+
+        // Set/return
         return _classLoader = classLoader;
     }
 

@@ -3,8 +3,11 @@
  */
 package snapcode.project;
 import javakit.project.*;
+import snap.util.FilePathUtils;
 import snap.web.WebFile;
 import snap.web.WebSite;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 /**
  * A class to manage build attributes and behavior for a WebSite.
@@ -51,4 +54,21 @@ public class ProjectX extends Project {
      */
     @Override
     public void readSettings()  { _projConfigFile.readFile(); }
+
+    /**
+     * Returns a class loader to be used with compiler.
+     */
+    @Override
+    public ClassLoader createCompilerClassLoader()
+    {
+        // Get CompilerClassPaths and ClassPathUrls
+        String[] classPaths = getCompilerClassPaths();
+        URL[] classPathUrls = FilePathUtils.getURLs(classPaths);
+
+        // Get System ClassLoader
+        ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader().getParent();
+
+        // Create/Return URLClassLoader for classPath
+        return new URLClassLoader(classPathUrls, systemClassLoader);
+    }
 }

@@ -51,9 +51,11 @@ public class WorkspacePane extends ViewOwner {
         _workspace = new WorkspaceX();
         _workspace.addPropChangeListener(pc -> workspaceDidPropChange(pc));
 
-        // Create MainToolBar, PagePane, StatusBar
-        _toolBar = new MainToolBar(this);
+        // Create PagePane
         _pagePane = new PagePane(this);
+
+        // Create MainToolBar, StatusBar
+        _toolBar = new MainToolBar(this);
         _statusBar = new StatusBar(this);
 
         // Create WorkspaceTools
