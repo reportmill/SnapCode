@@ -86,7 +86,7 @@ public class SnapCompiler implements DiagnosticListener {
         if (_options != null) return _options;
 
         // Create Options list, add debug flag and source/target flag for Java 1.5
-        List<String> options = new ArrayList();
+        List<String> options = new ArrayList<>();
         options.add("-Xlint:all,-serial,-rawtypes,-unchecked,-fallthrough,-dep-ann");
         //options.add("-warn:-serial,-raw,-unchecked"); options.add("-proceedOnError");
         options.add("-g");
@@ -99,11 +99,12 @@ public class SnapCompiler implements DiagnosticListener {
         String[] libPaths = _proj.getProjectSet().getLibPaths();
         if (libPaths.length > 0) {
             String[] libPathsNtv = FilePathUtils.getNativePaths(libPaths);
-            String cpath = FilePathUtils.getJoinedPath(libPathsNtv);
+            String classPath = FilePathUtils.getJoinedPath(libPathsNtv);
             options.add("-cp");
-            options.add(cpath);
+            options.add(classPath);
         }
 
+        // Set/return
         return _options = options;
     }
 
@@ -132,7 +133,7 @@ public class SnapCompiler implements DiagnosticListener {
 
         // Get JFOs
         JavaFileObject jfo = fman.getJFO(aFile.getPath(), aFile);
-        List<JavaFileObject> jfos = Arrays.asList(jfo);
+        List<JavaFileObject> jfos = Collections.singletonList(jfo);
 
         // Get task, call and return _succeeded
         CompilationTask task = compiler.getTask(new StringWriter(), fman, this, getOptions(), null, jfos);
@@ -205,9 +206,9 @@ public class SnapCompiler implements DiagnosticListener {
         int end = (int) aDiagnostic.getEndPosition();
 
         // Bogus trim of "unchecked" warnings and "overrides equals
-        if (line < 0 && msg.indexOf("unchecked") >= 0)
+        if (line < 0 && msg.contains("unchecked"))
             return null;
-        if (msg.indexOf("overrides equals, but") > 0)
+        if (msg.contains("overrides equals, but"))
             return null;
 
         // Create and configure BuildIssue and return
