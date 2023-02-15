@@ -95,7 +95,7 @@ public class ProjectConfigTool extends ProjectTool {
         WebSite site = WelcomePanel.getShared().getSite(aName);
         if ((site == null || !site.getExists()) && aURLString != null) {
             if (site == null)
-                site = WelcomePanel.getShared().createSite(aName, false);
+                site = WelcomePanel.getShared().createSiteForName(aName, false);
             VersionControl.setRemoteURLString(site, aURLString);
             VersionControl vc = VersionControl.create(site);
             checkout(vc);
@@ -109,9 +109,7 @@ public class ProjectConfigTool extends ProjectTool {
         }
 
         // Add project for name
-        _proj.getProjectSet().addProject(aName);
-        if (_workspacePane != null)
-            _workspacePane.addProjectForSite(site);
+        _proj.addProjectForPath(aName);
     }
 
     /**
@@ -133,11 +131,8 @@ public class ProjectConfigTool extends ProjectTool {
             public void success(Object aRes)
             {
                 // Add new project to root project
-                _proj.getProjectSet().addProject(site.getName());
-                if (_workspacePane == null) return;
-
-                // Add new project site to workspace
-                _workspacePane.addProjectForSite(site);
+                String projName = site.getName();
+                _proj.addProjectForPath(projName);
 
                 // Build workspace
                 WorkspaceBuilder builder = _workspace.getBuilder();
@@ -191,8 +186,7 @@ public class ProjectConfigTool extends ProjectTool {
         }
 
         // Remove dependent project from root project and WorkspacePane
-        _proj.getProjectSet().removeProject(aName);
-        _workspacePane.removeProject(proj);
+        _proj.removeProjectForPath(aName);
     }
 
     /**

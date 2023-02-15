@@ -102,61 +102,9 @@ public class WorkspacePane extends ViewOwner {
     public Project[] getProjects()  { return _workspace.getProjects(); }
 
     /**
-     * Adds a project to workspace.
+     * Returns the project panes.
      */
-    public void addProject(Project aProject)
-    {
-        // If project already added, just return
-        Project[] projects = getProjects();
-        if (ArrayUtils.contains(projects, aProject)) return;
-
-        // Add project
-        _workspace.addProject(aProject);
-
-        // Start listening to file changes
-        WebSite projSite = aProject.getSite();
-        projSite.addFileChangeListener(_siteFileLsnr);
-
-        // Create/add ProjectPane
-        ProjectPane projPane = new ProjectPane(this, aProject);
-        _projectPanes = ArrayUtils.addId(_projectPanes, projPane);
-
-        // Add dependent sites
-        Project[] childProjects = aProject.getProjects();
-        for (Project proj : childProjects)
-            addProject(proj);
-
-        // Clear root files
-        FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
-        fileTreeTool.resetRootFiles();
-
-        // Reset UI
-        resetLater();
-    }
-
-    /**
-     * Removes a project from workspace.
-     */
-    public void removeProject(Project aProject)
-    {
-        // Remove project
-        _workspace.removeProject(aProject);
-
-        // Remove ProjectPane
-        ProjectPane projPane = getProjectPaneForProject(aProject);
-        _projectPanes = ArrayUtils.remove(_projectPanes, projPane);
-
-        // Stop listening to file changes
-        WebSite projSite = aProject.getSite();
-        projSite.removeFileChangeListener(_siteFileLsnr);
-
-        // Clear root files
-        FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
-        fileTreeTool.resetRootFiles();
-
-        // Reset UI
-        resetLater();
-    }
+    public ProjectPane[] getProjectPanes()  { return _projectPanes; }
 
     /**
      * Returns the ProjectPanes.
@@ -170,26 +118,6 @@ public class WorkspacePane extends ViewOwner {
      * Returns the array of sites.
      */
     public WebSite[] getSites()  { return _workspace.getSites(); }
-
-    /**
-     * Returns the number of sites.
-     */
-    public int getSiteCount()  { return getSites().length; }
-
-    /**
-     * Returns the individual site at the given index.
-     */
-    public WebSite getSite(int anIndex)  { return getSites()[anIndex]; }
-
-    /**
-     * Adds a site to sites list.
-     */
-    public Project addProjectForSite(WebSite aSite)
-    {
-        Project proj = _workspace.getProjectForSite(aSite);
-        addProject(proj);
-        return proj;
-    }
 
     /**
      * Returns the selected project.
@@ -223,11 +151,17 @@ public class WorkspacePane extends ViewOwner {
      */
     public WebSite getSelSite()
     {
-        WebFile file = getSelFile();
-        WebSite site = file != null ? file.getSite() : null;
-        if (!ArrayUtils.containsId(getSites(), site))
-            site = getSite(0);
-        return site;
+        // Get site for selected file
+        WebFile selFile = getSelFile();
+        WebSite selSite = selFile != null ? selFile.getSite() : null;
+
+        // If file not in Workspace.Sites, use first site
+        WebSite[] workspaceSites = getSites();
+        if (!ArrayUtils.containsId(workspaceSites, selSite))
+            selSite = workspaceSites.length > 0 ? workspaceSites[0] : null;
+
+        // Return
+        return selSite;
     }
 
     /**
@@ -242,7 +176,8 @@ public class WorkspacePane extends ViewOwner {
         getWindow().setVisible(true);
 
         // Open Projects
-        for (ProjectPane projPane : _projectPanes)
+        ProjectPane[] projectPanes = getProjectPanes();
+        for (ProjectPane projPane : projectPanes)
             projPane.openSite();
 
         // Show HomePage
@@ -254,12 +189,19 @@ public class WorkspacePane extends ViewOwner {
      */
     public void hide()
     {
+        ProjectPane[] projectPanes = getProjectPanes();
+
         // Flush and refresh sites
-        for (WebSite site : getSites()) {
-            ProjectPane.get(site).closeSite();
-            try { site.flush(); }
+        for (ProjectPane projectPane : projectPanes) {
+
+            // Close ProjectPane
+            projectPane.closeSite();
+
+            // Close project site
+            WebSite projectSite = projectPane.getSite();
+            try { projectSite.flush(); }
             catch (Exception e) { throw new RuntimeException(e); }
-            site.resetFiles();
+            projectSite.resetFiles();
         }
 
         _workspaceTools.closeProject();
@@ -408,8 +350,62 @@ public class WorkspacePane extends ViewOwner {
                 handleBuildCompleted();
         }
 
+        // Handle Projects
+        else if (propName == Workspace.Projects_Prop) {
+            Project addedProj = (Project) aPC.getNewValue();
+            if (addedProj != null)
+                workspaceDidAddProject(addedProj);
+            else {
+                Project removedProj = (Project) aPC.getOldValue();
+                if (removedProj != null)
+                    workspaceDidRemoveProject(removedProj);
+            }
+        }
+
         // Handle Loading, Building
         _statusBar.resetLater();
+    }
+
+    /**
+     * Called when Workspace adds a project.
+     */
+    private void workspaceDidAddProject(Project aProject)
+    {
+        // Start listening to file changes
+        WebSite projSite = aProject.getSite();
+        projSite.addFileChangeListener(_siteFileLsnr);
+
+        // Create/add ProjectPane
+        ProjectPane projPane = new ProjectPane(this, aProject);
+        _projectPanes = ArrayUtils.addId(_projectPanes, projPane);
+
+        // Clear root files
+        FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
+        fileTreeTool.resetRootFiles();
+
+        // Reset UI
+        resetLater();
+    }
+
+    /**
+     * Called when Workspace removes a project.
+     */
+    private void workspaceDidRemoveProject(Project aProject)
+    {
+        // Remove ProjectPane
+        ProjectPane projPane = getProjectPaneForProject(aProject);
+        _projectPanes = ArrayUtils.remove(_projectPanes, projPane);
+
+        // Stop listening to file changes
+        WebSite projSite = aProject.getSite();
+        projSite.removeFileChangeListener(_siteFileLsnr);
+
+        // Clear root files
+        FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
+        fileTreeTool.resetRootFiles();
+
+        // Reset UI
+        resetLater();
     }
 
     /**

@@ -4,6 +4,7 @@ import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
 import snap.util.FileUtils;
+import snap.util.ListUtils;
 import snap.view.*;
 import snap.viewx.*;
 import snap.web.WebFile;
@@ -49,11 +50,12 @@ public class FileTreeTool extends WorkspaceTool {
         // If already set, just return
         if (_rootFiles != null) return _rootFiles;
 
-        // Create RootFiles
-        List<FileTreeFile> rootFiles = new ArrayList<>(_workspacePane.getSiteCount());
-        for (int i = 0, iMax = _workspacePane.getSiteCount(); i < iMax; i++) {
-            WebSite site = _workspacePane.getSite(i);
-            rootFiles.add(new FileTreeFile(null, site.getRootDir()));
+        // Create RootFiles for Workspace.Sites
+        WebSite[] workspaceSites = _workspace.getSites();
+        List<FileTreeFile> rootFiles = new ArrayList<>(workspaceSites.length);
+        for (WebSite site : workspaceSites) {
+            FileTreeFile fileTreeFile = new FileTreeFile(null, site.getRootDir());
+            rootFiles.add(fileTreeFile);
         }
 
         // Set, Return
@@ -75,10 +77,8 @@ public class FileTreeTool extends WorkspaceTool {
 
         // If root, search for file in RootFiles
         if (aFile.isRoot()) {
-            for (FileTreeFile af : getRootFiles())
-                if (aFile == af.getFile())
-                    return af;
-            return null;
+            List<FileTreeFile> rootFiles = getRootFiles();
+            return ListUtils.findMatch(rootFiles, treeFile -> treeFile.getFile() == aFile);
         }
 
         // Otherwise, getAppFile for sucessive parents and search them for this file

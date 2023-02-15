@@ -1,5 +1,6 @@
 package snapcode.app;
 import javakit.project.Project;
+import javakit.project.Workspace;
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.DialogBox;
@@ -370,26 +371,30 @@ public class WelcomePanel extends ViewOwner {
         }
 
         // Create new site for name
-        createSite(name, true);
+        createSiteForName(name, true);
     }
 
     /**
      * Creates a new Site.
      */
-    public WebSite createSite(String aName, boolean doSelect)
+    public WebSite createSiteForName(String aName, boolean doSelect)
     {
         // Create site for name
-        String urls = aName.indexOf(':') < 0 ? "local:/" + aName : aName;
-        WebSite site = WebURL.getURL(urls).getAsSite();
+        String siteUrlStr = aName.indexOf(':') < 0 ? "local:/" + aName : aName;
+        WebURL siteURL = WebURL.getURL(siteUrlStr);
+        WebSite newSite = siteURL.getAsSite();
 
         // Add and select site
-        addSite(site);
-        if (doSelect) setSelectedSite(site);
+        addSite(newSite);
+        if (doSelect)
+            setSelectedSite(newSite);
 
-        // Write sites, reset UI and return site
+        // Write sites, reset UI
         writeSites();
         resetLater();
-        return site;
+
+        // Return
+        return newSite;
     }
 
     /**
@@ -399,10 +404,11 @@ public class WelcomePanel extends ViewOwner {
     {
         // Create WorkspacePane and add selected sites
         WorkspacePane workspacePane = new WorkspacePane();
+        Workspace workspace = workspacePane.getWorkspace();
 
         List<WebSite> projectSites = getSelectedSites();
         for (WebSite site : projectSites)
-            workspacePane.addProjectForSite(site);
+            workspace.addProjectForSite(site);
 
         // Show WorkspacePane
         workspacePane.show();
@@ -414,38 +420,47 @@ public class WelcomePanel extends ViewOwner {
     public void showRemoveSitePanel()
     {
         // Get selected site (if null, just return)
-        WebSite site = getSelectedSite();
-        if (site == null) return;
+        WebSite selSite = getSelectedSite();
+        if (selSite == null)
+            return;
 
         // Give the user a chance to bail (just return if canceled or closed)
         String msg = "Are you sure you want to remove the currently selected project?";
-        DialogBox dbox = new DialogBox("Remove Project");
-        dbox.setMessage(msg);
-        if (!dbox.showConfirmDialog(getUI())) return;
+        DialogBox dialogBox = new DialogBox("Remove Project");
+        dialogBox.setMessage(msg);
+        if (!dialogBox.showConfirmDialog(getUI()))
+            return;
 
         // Give the option to not delete resources (just return if closed)
         msg = "Also delete local project files and sandbox?";
-        dbox = new DialogBox("Delete Local Project Files");
-        dbox.setMessage(msg);
-        boolean deleteLocal = dbox.showConfirmDialog(getUI());
+        dialogBox = new DialogBox("Delete Local Project Files");
+        dialogBox.setMessage(msg);
+        boolean deleteLocal = dialogBox.showConfirmDialog(getUI());
 
         // If requested, delete site files and sandbox (if "local" site)
-        if (deleteLocal && site.getURL().getScheme().equals("local")) {
-            WorkspacePane workspacePane = new WorkspacePane();
-            Project proj = workspacePane.addProjectForSite(site);
-            ProjectPane projPane = workspacePane.getProjectPaneForProject(proj);
-            projPane.deleteSite(getUI());
+        if (deleteLocal) {
+
+            // Handle local site
+            String scheme = selSite.getURL().getScheme();
+            if (scheme.equals("local")) {
+                WorkspacePane workspacePane = new WorkspacePane();
+                Workspace workspace = workspacePane.getWorkspace();
+                Project proj = workspace.addProjectForSite(selSite);
+                ProjectPane projPane = workspacePane.getProjectPaneForProject(proj);
+                projPane.deleteSite(getUI());
+            }
         }
 
         // Get site index and select next index
-        int index = ListUtils.indexOfId(getSites(), site);
+        int siteIndex = ListUtils.indexOfId(getSites(), selSite);
 
         // Remove site
-        removeSite(site);
+        removeSite(selSite);
 
         // Reset SelectedSite
-        int sindex = Math.min(index, getSiteCount() - 1);
-        setSelectedSite(sindex >= 0 && sindex < getSiteCount() ? getSite(sindex) : null);
+        int newSelIndex = Math.min(siteIndex, getSiteCount() - 1);
+        WebSite newSelSite = newSelIndex >= 0 && newSelIndex < getSiteCount() ? getSite(newSelIndex) : null;
+        setSelectedSite(newSelSite);
 
         // Reset ui
         resetLater();
@@ -456,18 +471,30 @@ public class WelcomePanel extends ViewOwner {
      */
     void handleOpenButtonAlt()
     {
-        DialogBox dbox = new DialogBox("Open File Viewer");
-        dbox.setQuestionMessage("Enter path:");
-        String path = Prefs.getDefaultPrefs().getString("SnapFileViewerPath", System.getProperty("user.home"));
-        path = dbox.showInputDialog(getUI(), path);
-        if (path == null) return;
-        WebURL url = WebURL.getURL(path);
-        if (url == null || url.getFile() == null) return;
-        Prefs.getDefaultPrefs().setValue("SnapFileViewerPath", path);
+        // Show dialog to get project name
+        String defaultDirPath = Prefs.getDefaultPrefs().getString("SnapFileViewerPath", System.getProperty("user.home"));
+        DialogBox dialogBox = new DialogBox("Open File Viewer");
+        dialogBox.setQuestionMessage("Enter path:");
+        String projectPath = dialogBox.showInputDialog(getUI(), defaultDirPath);
+        if (projectPath == null)
+            return;
+
+        // Get project site from project path
+        WebURL projectURL = WebURL.getURL(projectPath);
+        WebSite projectSite = projectURL != null && projectURL.getFile() != null ? projectURL.getAsSite() : null;
+        if (projectSite == null)
+            return;
+
+        // Create Workspace for site and show
         WorkspacePane workspacePane = new WorkspacePane();
-        WebSite site = url.getAsSite();
-        workspacePane.addProjectForSite(site);
+        Workspace workspace = workspacePane.getWorkspace();
+        workspace.addProjectForSite(projectSite);
         workspacePane.show();
+
+        // Update prefs default path
+        Prefs.getDefaultPrefs().setValue("SnapFileViewerPath", projectPath);
+
+        // Hide welcome panel
         hide();
     }
 
