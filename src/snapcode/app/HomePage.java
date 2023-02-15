@@ -101,7 +101,7 @@ public class HomePage extends WebPage {
         // Handle NewSnapScene
         if (anEvent.equals("NewSnapScene") && anEvent.isMouseRelease()) {
             ProjectConfigTool ppane = ProjectConfigTool.getProjectPane(getRootSite());
-            ppane.addProject("SnapKit", "https://github.com/reportmill/SnapKit.git");
+            ppane.addProjectForName("SnapKit", "https://github.com/reportmill/SnapKit.git");
             addSceneFiles(getRootSite(), "Scene1");
         }
 

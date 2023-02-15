@@ -287,7 +287,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         if (proj == null) return;
 
         // Get source file
-        WebFile file = proj.getProjectSet().getJavaFile(className);
+        WebFile file = proj.getProjectSet().getJavaFileForClassName(className);
         if (file == null) return;
 
         // Get matching node

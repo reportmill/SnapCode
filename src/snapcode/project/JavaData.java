@@ -197,7 +197,7 @@ public class JavaData {
                 continue;
 
             //
-            WebFile file = projSet.getJavaFile(className);
+            WebFile file = projSet.getJavaFileForClassName(className);
             if (file != null && file != _javaFile && !_dependencies.contains(file)) {
                 _dependencies.add(file);
                 JavaData javaData = JavaData.getJavaDataForFile(file);
@@ -213,7 +213,7 @@ public class JavaData {
             if (javaClass == null) continue;
 
             String className = javaClass.getRootClassName();
-            WebFile file = projSet.getJavaFile(className);
+            WebFile file = projSet.getJavaFileForClassName(className);
             if (file != null && _dependencies.contains(file)) {
                 _dependencies.remove(file);
                 JavaData javaData = JavaData.getJavaDataForFile(file);

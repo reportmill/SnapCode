@@ -73,37 +73,40 @@ public class ProjectConfigTool extends ProjectTool {
     /**
      * Adds a project with given name.
      */
-    public void addProject(String aName, String aURLString)
+    public void addProjectForName(String aName, String aURLString)
     {
         View view = isUISet() && getUI().isShowing() ? getUI() : _workspacePane.getUI();
-        addProject(aName, aURLString, view);
+        addProjectForName(aName, aURLString, view);
     }
 
     /**
      * Adds a project with given name.
      */
-    public void addProject(String aName, String aURLString, View aView)
+    public void addProjectForName(String aName, String aURLString, View aView)
     {
         // If already set, just return
-        ProjectSet projectSet = _proj.getProjectSet();
-        if (projectSet.getProject(aName) != null) {
+        Project existingProj = _proj.getProjectForName(aName);
+        if (existingProj != null) {
             DialogBox.showWarningDialog(aView, "Error Adding Project", "Project already present: " + aName);
             return;
         }
 
-        // Get site - if not present, create and clone
-        WebSite site = WelcomePanel.getShared().getSite(aName);
-        if ((site == null || !site.getExists()) && aURLString != null) {
-            if (site == null)
-                site = WelcomePanel.getShared().createSiteForName(aName, false);
-            VersionControl.setRemoteURLString(site, aURLString);
-            VersionControl vc = VersionControl.create(site);
-            checkout(vc);
+        // Get site
+        WelcomePanel welcomePanel = WelcomePanel.getShared();
+        WebSite projSite = welcomePanel.getSite(aName);
+
+        // If project site doesn't exist, create it
+        if ((projSite == null || !projSite.getExists()) && aURLString != null) {
+            if (projSite == null)
+                projSite = welcomePanel.createSiteForName(aName, false);
+            VersionControl.setRemoteURLString(projSite, aURLString);
+            VersionControl vc = VersionControl.create(projSite);
+            checkoutProject(vc);
             return;
         }
 
         // If site still null complain and return
-        if (site == null) {
+        if (projSite == null) {
             DialogBox.showErrorDialog(aView, "Error Adding Project", "Project not found.");
             return;
         }
@@ -113,14 +116,37 @@ public class ProjectConfigTool extends ProjectTool {
     }
 
     /**
+     * Removes a project with given name.
+     */
+    public void removeProjectForName(String aName)
+    {
+        // Just return if bogus
+        if (aName == null || aName.length() == 0) {
+            beep();
+            return;
+        }
+
+        // Get named project
+        Project proj = _proj.getProjectForName(aName);
+        if (proj == null) {
+            View view = isUISet() && getUI().isShowing() ? getUI() : _workspacePane.getUI();
+            DialogBox.showWarningDialog(view, "Error Removing Project", "Project not found");
+            return;
+        }
+
+        // Remove dependent project from root project and WorkspacePane
+        _proj.removeProjectForPath(aName);
+    }
+
+    /**
      * Load all remote files into project directory.
      */
-    public void checkout(VersionControl aVC)
+    public void checkoutProject(VersionControl aVC)
     {
         WebSite site = aVC.getSite();
         String title = "Checkout from " + aVC.getRemoteURLString();
 
-        TaskRunner<Object> runner = new TaskRunnerPanel<Object>(_workspacePane.getUI(), title) {
+        TaskRunner<Object> checkoutRunner = new TaskRunnerPanel<Object>(_workspacePane.getUI(), title) {
 
             public Object run() throws Exception
             {
@@ -146,7 +172,7 @@ public class ProjectConfigTool extends ProjectTool {
                 // If attempt to set permissions succeeds, try again
                 boolean setPermissionsSuccess = ClientUtils.setAccess(remoteSite);
                 if (setPermissionsSuccess) {
-                    checkout(aVC);
+                    checkoutProject(aVC);
                     return;
                 }
 
@@ -154,7 +180,7 @@ public class ProjectConfigTool extends ProjectTool {
                 LoginPage loginPage = new LoginPage();
                 boolean loginSuccess = loginPage.showPanel(_workspacePane.getUI(), remoteSite);
                 if (loginSuccess) {
-                    checkout(aVC);
+                    checkoutProject(aVC);
                     return;
                 }
 
@@ -162,31 +188,9 @@ public class ProjectConfigTool extends ProjectTool {
                 super.failure(e);
             }
         };
-        runner.start();
-    }
 
-    /**
-     * Removes a project with given name.
-     */
-    public void removeProject(String aName)
-    {
-        // Just return if bogus
-        if (aName == null || aName.length() == 0) {
-            beep();
-            return;
-        }
-
-        // Get named project
-        ProjectSet projectSet = _proj.getProjectSet();
-        Project proj = projectSet.getProject(aName);
-        if (proj == null) {
-            View view = isUISet() && getUI().isShowing() ? getUI() : _workspacePane.getUI();
-            DialogBox.showWarningDialog(view, "Error Removing Project", "Project not found");
-            return;
-        }
-
-        // Remove dependent project from root project and WorkspacePane
-        _proj.removeProjectForPath(aName);
+        // Start task
+        checkoutRunner.start();
     }
 
     /**
@@ -399,7 +403,7 @@ public class ProjectConfigTool extends ProjectTool {
                 dbox.setQuestionMessage("Enter Project Name:");
                 String pname = dbox.showInputDialog(getUI(), null);
                 if (pname == null || pname.length() == 0) return;
-                addProject(pname, null);
+                addProjectForName(pname, null);
             }
 
             // Handle click
@@ -414,7 +418,7 @@ public class ProjectConfigTool extends ProjectTool {
             if (getView("JarPathsList").isShowing())
                 removeJarPath(getSelectedJarPath());
             else if (getView("ProjectPathsList").isShowing())
-                removeProject(getSelectedProjectPath());
+                removeProjectForName(getSelectedProjectPath());
         }
 
         // Handle LOCButton (Lines of Code)
