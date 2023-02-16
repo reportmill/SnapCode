@@ -30,9 +30,9 @@ public class SupportTray extends ViewOwner {
     /**
      * Returns the tool for given class.
      */
-    public WorkspaceTool getToolForClass(Class<? extends WorkspaceTool> aToolClass)
+    public <T extends WorkspaceTool> T getToolForClass(Class<T> aToolClass)
     {
-        return ArrayUtils.findMatch(_trayTools, tool -> aToolClass.isInstance(tool));
+        return (T) ArrayUtils.findMatch(_trayTools, tool -> aToolClass.isInstance(tool));
     }
 
     /**
@@ -85,11 +85,6 @@ public class SupportTray extends ViewOwner {
      * Shows the run tool.
      */
     public void showRunTool()  { setSelToolForClass(RunConsole.class); }
-
-    /**
-     * Sets selected index to debug.
-     */
-    public void showDebugTool()  { setSelToolForClass(DebugTool.class); }
 
     /**
      * Hides selected tool.

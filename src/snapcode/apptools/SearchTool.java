@@ -5,11 +5,13 @@ package snapcode.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JNode;
 import javakit.project.JavaAgent;
+import javakit.project.Project;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMethod;
 import javakit.resolver.JavaParameterizedType;
 import javakit.ide.NodeMatcher;
 import javakit.ide.JavaTextUtils;
+import snap.geom.HPos;
 import snap.gfx.Image;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
@@ -26,7 +28,7 @@ import java.util.Set;
 /**
  * This class manages project search.
  */
-public class SearchPane extends WorkspaceTool {
+public class SearchTool extends WorkspaceTool {
 
     // The current search
     private Search  _search;
@@ -37,7 +39,7 @@ public class SearchPane extends WorkspaceTool {
     /**
      * Constructor.
      */
-    public SearchPane(WorkspacePane workspacePane)
+    public SearchTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
     }
@@ -73,6 +75,14 @@ public class SearchPane extends WorkspaceTool {
      */
     protected void initUI()
     {
+        // Configure SearchText
+        TextField searchText = getView("SearchText", TextField.class);
+        CloseBox closeBox = new CloseBox();
+        closeBox.setMargin(0, 4, 0, 4);
+        closeBox.setLeanX(HPos.RIGHT);
+        closeBox.addEventHandler(e -> clearSearch(), View.Action);
+        searchText.getLabel().setGraphicAfter(closeBox);
+
         // Configure ResultsList
         ListView<Result> resultsList = getView("ResultsList", ListView.class);
         resultsList.setCellConfigure(this::configureResultListCell);
@@ -86,9 +96,6 @@ public class SearchPane extends WorkspaceTool {
      */
     public void resetUI()
     {
-        // Update ClearButton
-        setViewEnabled("ClearButton", _search != null);
-
         // Update SearchResultsText
         String resultsStr = "";
         if (_search != null) {
@@ -118,10 +125,6 @@ public class SearchPane extends WorkspaceTool {
             else _search = null;
         }
 
-        // Handle ClearButton
-        if (anEvent.equals("ClearButton"))
-            _search = null;
-
         // Handle ResultsList
         if (anEvent.equals("ResultsList")) {
 
@@ -138,6 +141,15 @@ public class SearchPane extends WorkspaceTool {
     }
 
     /**
+     * Clears the search.
+     */
+    public void clearSearch()
+    {
+        _search = null;
+        resetLater();
+    }
+
+    /**
      * Override for title.
      */
     @Override
@@ -151,18 +163,19 @@ public class SearchPane extends WorkspaceTool {
         _search = new Search();
         _search._string = aString;
         for (WebSite site : _workspacePane.getSites())
-            search(site.getRootDir(), _search._results, aString.toLowerCase());
+            searchFileForString(site.getRootDir(), aString.toLowerCase(), _search._results);
         resetLater();
     }
 
     /**
      * Search for given string in given file with list for results.
      */
-    protected void search(WebFile aFile, List<Result> theResults, String aString)
+    protected void searchFileForString(WebFile aFile, String aString, List<Result> theResults)
     {
         // If hidden file, just return
-        ProjectPane projectPane = ProjectPane.get(aFile.getSite());
-        if (projectPane.isHiddenFile(aFile))
+        Project proj = Project.getProjectForFile(aFile);
+        ProjectPane projectPane = _workspacePane.getProjectPaneForProject(proj);
+        if (projectPane != null && projectPane.isHiddenFile(aFile))
             return;
 
         // Handle directory
@@ -170,7 +183,7 @@ public class SearchPane extends WorkspaceTool {
             if (aFile == _workspacePane.getBuildDir())
                 return;
             for (WebFile file : aFile.getFiles())
-                search(file, theResults, aString);
+                searchFileForString(file, aString, theResults);
         }
 
         // Handle JavaFile
@@ -239,8 +252,9 @@ public class SearchPane extends WorkspaceTool {
     public void searchReference(WebFile aFile, List<Result> theResults, JavaDecl aDecl)
     {
         // If hidden file, just return
-        ProjectPane projectPane = ProjectPane.get(aFile.getSite());
-        if (projectPane.isHiddenFile(aFile))
+        Project proj = Project.getProjectForFile(aFile);
+        ProjectPane projectPane = _workspacePane.getProjectPaneForProject(proj);
+        if (projectPane != null && projectPane.isHiddenFile(aFile))
             return;
 
         // Handle directory
@@ -313,8 +327,9 @@ public class SearchPane extends WorkspaceTool {
     public void searchDeclaration(WebFile aFile, List<Result> theResults, JavaDecl aDecl)
     {
         // If hidden file, just return
-        ProjectPane projectPane = ProjectPane.get(aFile.getSite());
-        if (projectPane.isHiddenFile(aFile))
+        Project proj = Project.getProjectForFile(aFile);
+        ProjectPane projectPane = _workspacePane.getProjectPaneForProject(proj);
+        if (projectPane != null && projectPane.isHiddenFile(aFile))
             return;
 
         // Handle directory

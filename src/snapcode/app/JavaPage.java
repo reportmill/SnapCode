@@ -8,7 +8,8 @@ import javakit.resolver.JavaMember;
 import javakit.parse.JavaTextDoc;
 import snap.util.Convert;
 import snap.util.ListUtils;
-import snapcode.apptools.SearchPane;
+import snapcode.apptools.ProcPane;
+import snapcode.apptools.SearchTool;
 import snap.text.TextBoxLine;
 import snap.view.View;
 import snap.view.ViewEvent;
@@ -332,7 +333,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         if (getWorkspacePane() == null) return;
         WorkspaceTools workspaceTools = getWorkspacePane().getWorkspaceTools();
         workspaceTools.getSearchTool().searchReference(aNode);
-        workspaceTools.showToolForClass(SearchPane.class);
+        workspaceTools.showToolForClass(SearchTool.class);
     }
 
     /**
@@ -343,7 +344,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         if (getWorkspacePane() == null) return;
         WorkspaceTools workspaceTools = getWorkspacePane().getWorkspaceTools();
         workspaceTools.getSearchTool().searchDeclaration(aNode);
-        workspaceTools.showToolForClass(SearchPane.class);
+        workspaceTools.showToolForClass(SearchTool.class);
     }
 
     /**
@@ -369,7 +370,9 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     private int getProgramCounterLine()
     {
         WorkspacePane workspacePane = getWorkspacePane();
-        return workspacePane != null ? workspacePane.getProcPane().getProgramCounter(getFile()) : -1;
+        WorkspaceTools workspaceTools = workspacePane.getWorkspaceTools();
+        ProcPane procPane = workspaceTools.getToolForClass(ProcPane.class);
+        return procPane != null ? procPane.getProgramCounter(getFile()) : -1;
     }
 
     /**

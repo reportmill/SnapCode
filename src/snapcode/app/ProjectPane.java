@@ -206,7 +206,7 @@ public class ProjectPane extends WebPage {
     /**
      * Returns the site pane for a site.
      */
-    public static ProjectPane get(WebSite aSite)
+    public static ProjectPane getProjectPaneForSite(WebSite aSite)
     {
         return (ProjectPane) aSite.getProp(ProjectPane.class.getName());
     }
@@ -221,8 +221,8 @@ public class ProjectPane extends WebPage {
          */
         protected View createUI()
         {
-            ProjectPane sp = ProjectPane.get(getSite());
-            return sp.getUI();
+            ProjectPane projectPane = ProjectPane.getProjectPaneForSite(getSite());
+            return projectPane.getUI();
         }
 
         /**

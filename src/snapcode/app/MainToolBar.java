@@ -1,4 +1,5 @@
 package snapcode.app;
+import javakit.project.Project;
 import snap.gfx.*;
 import snap.util.StringUtils;
 import snap.view.*;
@@ -6,7 +7,7 @@ import snap.viewx.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.apptools.SearchPane;
+import snapcode.apptools.SearchTool;
 import java.util.*;
 
 /**
@@ -88,9 +89,9 @@ public class MainToolBar extends WorkspaceTool {
                 _pagePane.setBrowserURL(url);
             }
             else {
-                SearchPane searchTool = _workspaceTools.getSearchTool();
+                SearchTool searchTool = _workspaceTools.getSearchTool();
                 searchTool.search(text);
-                _workspaceTools.showToolForClass(SearchPane.class);
+                _workspaceTools.showToolForClass(SearchTool.class);
             }
         }
 
@@ -118,8 +119,9 @@ public class MainToolBar extends WorkspaceTool {
     private void getFilesForPrefix(String aPrefix, WebFile aFile, List<WebFile> theFiles)
     {
         // If hidden file, just return
-        ProjectPane projectPane = ProjectPane.get(aFile.getSite());
-        if (projectPane.isHiddenFile(aFile))
+        Project project = Project.getProjectForFile(aFile);
+        ProjectPane projectPane = _workspacePane.getProjectPaneForProject(project);
+        if (projectPane != null && projectPane.isHiddenFile(aFile))
             return;
 
         // If directory, recurse

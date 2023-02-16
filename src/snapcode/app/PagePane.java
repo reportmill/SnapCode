@@ -308,8 +308,9 @@ public class PagePane extends ViewOwner {
 
         // Create ColView to hold TabsBox and Browser
         ColView colView = new ColView();
-        colView.setFillWidth(true);
+        colView.setGrowWidth(true);
         colView.setGrowHeight(true);
+        colView.setFillWidth(true);
         colView.setChildren(tabsBox.getUI(), _browser);
 
         // Return

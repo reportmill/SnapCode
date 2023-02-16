@@ -133,7 +133,7 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
         setSelApp(null);
         addProc(aProc);
         setSelApp(aProc);
-        SupportTray supportTray = _workspacePane.getSupportTray();
+        SupportTray supportTray = _workspaceTools.getBottomTray();
         supportTray.showRunTool();
         aProc.exec();
     }
@@ -309,7 +309,7 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
         }
 
         // Make DebugVarsPane visible and updateVarTable
-        _workspacePane.getSupportTray().showDebugTool();
+        _workspaceTools.showToolForClass(DebugTool.class);
 
         DebugFrame frame = aProc.getFrame();
         if (frame == null) return;
@@ -486,7 +486,7 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
             else if (item instanceof DebugFrame) {
                 DebugFrame frame = (DebugFrame) item;
                 frame.select();
-                _workspacePane.getSupportTray().showDebugTool();
+                _workspaceTools.showToolForClass(DebugTool.class);
             }
         }
     }

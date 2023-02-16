@@ -37,7 +37,7 @@ public class WorkspaceTools {
     private DebugTool  _debugTool;
 
     // The SearchTool
-    private SearchPane  _searchTool;
+    private SearchTool _searchTool;
 
     // The RunConfigs tool
     private RunConfigsTool  _runConfigsTool;
@@ -48,11 +48,14 @@ public class WorkspaceTools {
     // The VcsTools
     private VcsTools  _vcsTools;
 
-    // The SupportTray
-    private SupportTray  _supportTray;
+    // The bottom side ToolTray
+    private SupportTray  _bottomTray;
 
-    // The SideBar
-    private SupportTray  _sideBar;
+    // The left side ToolTray
+    private SupportTray  _leftTray;
+
+    // The right side ToolTray
+    private SupportTray  _rightTray;
 
     /**
      * Constructor.
@@ -74,18 +77,22 @@ public class WorkspaceTools {
         _runConsole = new RunConsole(_workspacePane);
         _breakpointsTool = new BreakpointsTool(_workspacePane);
         _debugTool = new DebugTool(_workspacePane);
-        _searchTool = new SearchPane(_workspacePane);
+        _searchTool = new SearchTool(_workspacePane);
         _runConfigsTool = new RunConfigsTool(_workspacePane);
         _httpServerTool = new HttpServerTool(_workspacePane);
         _vcsTools = new VcsTools(_workspacePane);
 
-        // Set tools
-        WorkspaceTool[] bottomTools = { _problemsTool, _debugTool, _runConsole, _breakpointsTool, _searchTool, _runConfigsTool, _httpServerTool };
-        _supportTray = new SupportTray(Side.BOTTOM, bottomTools);
+        // Create BottomTray
+        WorkspaceTool[] bottomTools = { _problemsTool, _debugTool, _runConsole, _breakpointsTool, _runConfigsTool, _httpServerTool };
+        _bottomTray = new SupportTray(Side.BOTTOM, bottomTools);
 
+        // Create LeftTray
+        WorkspaceTool[] leftTools = { _fileTreeTool };
+        _leftTray = new SupportTray(Side.LEFT, leftTools);
 
-        WorkspaceTool[] sideTools = { _fileTreeTool };
-        _sideBar = new SupportTray(Side.LEFT, sideTools);
+        // Create RightTray
+        WorkspaceTool[] rightTools = { _searchTool };
+        _rightTray = new SupportTray(Side.RIGHT, rightTools);
 
         // Start listening to Breakpoints helper
         Workspace workspace = _workspacePane.getWorkspace();
@@ -130,24 +137,37 @@ public class WorkspaceTools {
     /**
      * Returns the search tool.
      */
-    public SearchPane getSearchTool()  { return _searchTool; }
+    public SearchTool getSearchTool()  { return _searchTool; }
 
     /**
      * Returns the support tray.
      */
-    public SupportTray getSupportTray()  { return _supportTray; }
+    public SupportTray getBottomTray()  { return _bottomTray; }
 
     /**
-     * Returns the sidebar.
+     * Returns the left side tray.
      */
-    public SupportTray getSideBar()  { return _sideBar; }
+    public SupportTray getLeftTray()  { return _leftTray; }
+
+    /**
+     * Returns the right side tray.
+     */
+    public SupportTray getRightTray()  { return _rightTray; }
+
+    /**
+     * Returns the tool for given class.
+     */
+    public <T extends WorkspaceTool> T getToolForClass(Class<T> aToolClass)
+    {
+        return _bottomTray.getToolForClass(aToolClass);
+    }
 
     /**
      * Sets the selected index for given class.
      */
     public void showToolForClass(Class<? extends WorkspaceTool> aClass)
     {
-        _supportTray.setSelToolForClass(aClass);
+        _bottomTray.setSelToolForClass(aClass);
     }
 
     /**
@@ -155,8 +175,9 @@ public class WorkspaceTools {
      */
     public void resetLater()
     {
-        _supportTray.resetLater();
-        _sideBar.resetLater();
+        _bottomTray.resetLater();
+        _leftTray.resetLater();
+        _rightTray.resetLater();
     }
 
     /**
