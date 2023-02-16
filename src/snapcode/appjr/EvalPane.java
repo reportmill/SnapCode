@@ -1,7 +1,11 @@
 package snapcode.appjr;
+import javakit.ide.JavaTextArea;
+import javakit.parse.JMethodDecl;
+import javakit.parse.JNode;
 import javakit.parse.JeplTextDoc;
 import snap.gfx.Color;
 import snap.gfx.Image;
+import snap.text.TextBoxLine;
 import snap.view.*;
 import snap.viewx.TextPane;
 
@@ -102,6 +106,30 @@ public class EvalPane extends ViewOwner {
     public void clearEvalValues()
     {
         _evalView.removeChildren();
+    }
+
+    /**
+     * Triggers auto run if it makes sense. Called when newline is entered.
+     */
+    public void autoRunIfDesirable(JavaTextArea textArea)
+    {
+        // If AutoRun not set, just return
+        if (!isAutoRun())
+            return;
+
+        // If inside method decl, just return
+        JNode selNode = textArea.getSelNode();
+        if (selNode != null && selNode.getParent(JMethodDecl.class) != null)
+            return;
+
+        // If previous line is empty whitespace, just return
+        TextBoxLine textLine = textArea.getSel().getStartLine();
+        TextBoxLine prevLine = textLine.getPrevious();
+        if (prevLine.isWhiteSpace())
+            return;
+
+        // Trigger auto run
+        runApp(true);
     }
 
     /**

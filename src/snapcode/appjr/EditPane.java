@@ -5,9 +5,7 @@ package snapcode.appjr;
 import javakit.ide.*;
 import javakit.parse.*;
 import snap.gfx.Color;
-import snap.text.TextBoxLine;
 import snap.view.*;
-import java.util.Objects;
 
 /**
  * This JavaTextPane subclass adds customizations for JavaShell.
@@ -56,8 +54,10 @@ public class EditPane<T extends JavaTextDoc> extends JavaTextPane<T> {
         if (anEvent.isKeyPress()) {
 
             // Handle Enter key: Re-evaluate if not inside method
-            if (anEvent.isEnterKey())
-                autoRunIfDesirable();
+            if (anEvent.isEnterKey()) {
+                EvalPane evalPane = getEvalPane();
+                evalPane.autoRunIfDesirable(getTextArea());
+            }
 
             // Handle Backspace/Delete: Clear EvalPane
             if ((anEvent.isBackSpaceKey() || anEvent.isDeleteKey()) && _textArea.length() == 0)
@@ -79,59 +79,5 @@ public class EditPane<T extends JavaTextDoc> extends JavaTextPane<T> {
 
         // Do normal version
         else super.respondUI(anEvent);
-    }
-
-    /**
-     * Returns labels for
-     */
-    @Override
-    protected Label[] getLabelsForSelNodePath()
-    {
-        // Get JavaTextPane version
-        Label[] pathNodeLabels = JavaTextPane.getLabelsForSelNodePath(_textArea, JClassDecl.class);
-
-        // If last label is ClassLabel, reconfigure
-        Label lastLabel = pathNodeLabels[pathNodeLabels.length - 1];
-        if (Objects.equals(lastLabel.getName(), "ClassLabel")) {
-
-            // Get JavaDoc URL for sel node
-            JNode selNode = _textArea.getSelNode();
-            JavaDoc javaDoc = JavaDoc.getJavaDocForNode(selNode);
-
-            // If JavaDoc found, modify label
-            if (javaDoc != null) {
-                lastLabel.setName("JavaDocLabel");
-                lastLabel.setToolTip("Open JavaDoc");
-            }
-        }
-
-        // Return
-        return pathNodeLabels;
-    }
-
-    /**
-     * Triggers auto run if it makes sense. Called when newline is entered.
-     */
-    private void autoRunIfDesirable()
-    {
-        // If EvalPane.AutoRun not set, just return
-        EvalPane evalPane = getEvalPane();
-        if (!evalPane.isAutoRun())
-            return;
-
-        // If inside method decl, just return
-        JavaTextArea textArea = getTextArea();
-        JNode selNode = textArea.getSelNode();
-        if (selNode != null && selNode.getParent(JMethodDecl.class) != null)
-            return;
-
-        // If previous line is empty whitespace, just return
-        TextBoxLine textLine = textArea.getSel().getStartLine();
-        TextBoxLine prevLine = textLine.getPrevious();
-        if (prevLine.isWhiteSpace())
-            return;
-
-        // Trigger auto run
-        evalPane.runApp(true);
     }
 }
