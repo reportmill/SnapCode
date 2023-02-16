@@ -69,6 +69,11 @@ public class WorkspacePane extends ViewOwner {
         // Create WorkspaceTools
         _workspaceTools = new WorkspaceTools(this);
         _workspaceTools.createTools();
+
+        // Manage projects
+        Project[] projects = _workspace.getProjects();
+        for (Project proj : projects)
+            workspaceDidAddProject(proj);
     }
 
     /**

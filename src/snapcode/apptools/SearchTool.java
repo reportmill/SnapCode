@@ -82,6 +82,7 @@ public class SearchTool extends WorkspaceTool {
         closeBox.setLeanX(HPos.RIGHT);
         closeBox.addEventHandler(e -> clearSearch(), View.Action);
         searchText.getLabel().setGraphicAfter(closeBox);
+        searchText.getLabel().setPickable(true);
 
         // Configure ResultsList
         ListView<Result> resultsList = getView("ResultsList", ListView.class);
@@ -145,6 +146,7 @@ public class SearchTool extends WorkspaceTool {
      */
     public void clearSearch()
     {
+        setViewValue("SearchText", null);
         _search = null;
         resetLater();
     }
