@@ -178,11 +178,18 @@ public class DocPane extends ViewOwner {
     }
 
     /**
-     * Create UI.
+     * Initialize UI.
      */
     @Override
-    protected View createUI()
+    protected void initUI()
     {
+        // Get/configure SplitView
+        _mainSplitView = getView("MainSplitView", SplitView.class);
+        _mainSplitView.setDividerSpan(6);
+        _mainSplitView.getDivider().setFill(Color.WHITE);
+        _mainSplitView.getDivider().setBorder(null);
+        _mainSplitView.setBorder(null);
+
         // Create EditPane
         _editPane.addPropChangeListener(pc -> editPaneDidPropChange(pc));
         View editPaneUI = _editPane.getUI();
@@ -200,27 +207,8 @@ public class DocPane extends ViewOwner {
         _splitView.setBorder(null);
         _splitView.addItem(editPaneUI);
         _splitView.addItem(evalPaneUI);
+        _mainSplitView.addItem(_splitView, 0);
 
-        // Create normal DocPane UI
-        View docPaneUI = _splitView;
-
-        // Create DocPaneX UI from snp file
-        ParentView docPaneXUI = (ParentView) createUIForClass(getClass());
-
-        // Get SplitView and add superClass UI
-        _mainSplitView = (SplitView) docPaneXUI.getChildForName("MainSplitView");
-        _mainSplitView.addItem(docPaneUI, 0);
-
-        // Return DocPaneX UI
-        return docPaneXUI;
-    }
-
-    /**
-     * Initialize UI.
-     */
-    @Override
-    protected void initUI()
-    {
         // Configure window
         WindowView win = getWindow();
         win.addEventHandler(e -> closeWindow(e), WinClose);
@@ -243,13 +231,6 @@ public class DocPane extends ViewOwner {
             if (e.isShortcutDown())
                 ViewUtils.processEvent(menuBar, e);
         }, KeyPress);
-
-        // Get/configure SplitView
-        _mainSplitView = getView("MainSplitView", SplitView.class);
-        _mainSplitView.setDividerSpan(6);
-        _mainSplitView.getDivider().setFill(Color.WHITE);
-        _mainSplitView.getDivider().setBorder(null);
-        _mainSplitView.setBorder(null);
 
         // Get/configure drawer
         _drawerView = new DrawerView();
