@@ -4,7 +4,6 @@
 package snapcode.project;
 import javakit.project.Workspace;
 import javakit.project.Project;
-import javakit.project.ProjectSet;
 import snap.util.FilePathUtils;
 import snap.web.WebSite;
 import java.net.URL;

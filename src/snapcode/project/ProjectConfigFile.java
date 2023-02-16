@@ -1,12 +1,13 @@
 package snapcode.project;
 import javakit.project.Project;
 import javakit.project.ProjectConfig;
+import javakit.project.ProjectUtils;
 import snap.props.PropChange;
+import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.util.XMLElement;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,50 +48,6 @@ public class ProjectConfigFile {
     public ProjectConfig getProjectConfig()  { return _projConfig; }
 
     /**
-     * Returns the file.
-     */
-    public WebFile getFile()
-    {
-        // If already set, just return
-        if (_file != null) return _file;
-
-        // Get file
-        WebSite projSite = _proj.getSite();
-        WebFile file = projSite.getFileForPath("build.snap");
-        if (file == null)
-            file = projSite.getFileForPath(".classpath");
-
-        // If missing, create default
-        if (file == null)
-            file = createFile(_proj);
-
-        // Set/return
-        return _file = file;
-    }
-
-    /**
-     * Returns the XML for file.
-     */
-    public XMLElement getXML()
-    {
-        if (_xml != null) return _xml;
-        XMLElement xml = createXML();
-        return _xml = xml;
-    }
-
-    /**
-     * Creates the XML for file.
-     */
-    protected XMLElement createXML()
-    {
-        WebFile file = getFile();
-        if (file != null && file.getExists())
-            return XMLElement.readFromXMLSource(file);
-        XMLElement xml = new XMLElement("classpath");
-        return xml;
-    }
-
-    /**
      * Reads the class path from .classpath file.
      */
     public void readFile()
@@ -98,28 +55,33 @@ public class ProjectConfigFile {
         _xml = null;
 
         // Get file
-        WebFile file = getFile();
+        getFile();
 
-        getSourcePathRead();
-        getBuildPathRead();
-        getLibPathsRead();
-        getProjectPathsRead();
+        readSourcePath();
+        readBuildPath();
+        readLibPaths();
+        readProjectPaths();
     }
 
     /**
      * Saves the ClassPath to .classpath file.
      */
-    public void writeFile() throws Exception
+    public void writeFile()
     {
         _xml = new XMLElement("classpath");
-        getBuildPathWrite();
-        getSrcPathsWrite();
-        getLibPathsWrite();
+        writeSourcePath();
+        writeBuildPath();
+        writeLibPaths();
+        writeProjectPaths();
 
+        // Get file and XML bytes
+        WebFile configFile = getFile();
         XMLElement xml = getXML();
         byte[] xmlBytes = xml.getBytes();
-        getFile().setBytes(xmlBytes);
-        getFile().save();
+
+        // Set bytes and save
+        configFile.setBytes(xmlBytes);
+        configFile.save();
     }
 
     /**
@@ -132,115 +94,101 @@ public class ProjectConfigFile {
     }
 
     /**
-     * Returns the source path.
+     * Reads the source path.
      */
-    public void getSourcePathRead()
+    public void readSourcePath()
     {
         // Get source path from src classpathentry
-        XMLElement[] xmls = getSourcePathXMLs();
-        XMLElement xml = xmls.length > 0 ? xmls[0] : null;
-        String path = xml != null ? xml.getAttributeValue("path") : null;
+        XMLElement[] srcXMLs = getSrcXMLs();
+        XMLElement sourcePathXML = ArrayUtils.findMatch(srcXMLs, xml -> isSourcePath(xml));
+        String sourcePath = sourcePathXML != null ? sourcePathXML.getAttributeValue("path") : null;
 
         // If no path and /src exists, use it
         WebSite projSite = _proj.getSite();
-        if (path == null && projSite.getFileForPath("/src") != null)
-            path = "src";
+        if (sourcePath == null && projSite.getFileForPath("/src") != null)
+            sourcePath = "src";
 
         // Set/return
-        _projConfig._srcPath = path;
+        _projConfig.setSourcePath(sourcePath);
     }
 
     /**
-     * Returns the build path.
+     * Reads the build path.
      */
-    public void getBuildPathRead()
+    public void readBuildPath()
     {
         // Get source path from output classpathentry
-        XMLElement xml = getBuildPathXML();
-        String path = xml != null ? xml.getAttributeValue("path") : null;
+        List<XMLElement> xmls = getXML().getElements();
+        XMLElement buildPathXML = ListUtils.findMatch(xmls, xml -> isBuildKind(xml));
+        String buildPath = buildPathXML != null ? buildPathXML.getAttributeValue("path") : null;
 
         // If path not set, use bin
-        if (path == null)
-            path = "bin";
+        if (buildPath == null)
+            buildPath = "bin";
 
         // Set/return
-        _projConfig._buildPath = path;
-    }
-
-    /**
-     * Sets the build path.
-     */
-    public void getBuildPathWrite()
-    {
-        // Update XML
-        XMLElement xml = getBuildPathXML();
-        if (xml == null) {
-            xml = new XMLElement("classpathentry");
-            xml.add("kind", "output");
-            getXML().add(xml);
-        }
-
-        String _buildPath = _projConfig.getBuildPath();
-        if (_buildPath != null)
-            xml.add("path", _buildPath);
-        else getXML().removeElement(xml);
-    }
-
-    /**
-     * Returns the source paths.
-     */
-    public void getSrcPathsRead()
-    {
-        // Load from lib elements
-        List<String> paths = new ArrayList();
-        XMLElement[] srcPathXMLs = getSrcXMLs();
-        for (XMLElement xml : srcPathXMLs) {
-            String path = xml.getAttributeValue("path");
-            paths.add(path);
-        }
-
-        _projConfig._srcPaths = paths.toArray(new String[0]);
-    }
-
-    /**
-     * Adds a source path.
-     */
-    public void getSrcPathsWrite()
-    {
-        // Add XML for path
-        String[] srcPaths = _projConfig.getSrcPaths();
-        if (srcPaths == null) return;
-
-        for (String srcPath : srcPaths) {
-            String path = getRelativePath(srcPath);
-            XMLElement xml = new XMLElement("classpathentry");
-            xml.add("kind", "src");
-            xml.add("path", path);
-            getXML().add(xml);
-        }
+        _projConfig.setBuildPath(buildPath);
     }
 
     /**
      * Returns the paths.
      */
-    public void getLibPathsRead()
+    public void readLibPaths()
     {
-        // Load from lib elements
-        List<String> paths = new ArrayList();
-        XMLElement[] libPathXMLs = getLibXMLs();
-        for (XMLElement xml : libPathXMLs) {
-            String path = xml.getAttributeValue("path");
-            paths.add(path);
-        }
-
-        // Set/return
-        _projConfig._libPaths = paths.toArray(new String[0]);
+        List<XMLElement> xmls = getXML().getElements();
+        List<XMLElement> libXMLs = ListUtils.filter(xmls, xml -> isLibKind(xml));
+        XMLElement[] libPathXMLs = libXMLs.toArray(new XMLElement[0]);
+        String[] libPaths =  ArrayUtils.map(libPathXMLs, xml -> xml.getAttributeValue("path"), String.class);
+        _projConfig.setLibPaths(libPaths);
     }
 
     /**
-     * Adds a library path.
+     * Returns the project paths path.
      */
-    public void getLibPathsWrite()
+    public void readProjectPaths()
+    {
+        XMLElement[] srcXMLs = getSrcXMLs();
+        XMLElement[] projPathXMLs = ArrayUtils.filter(srcXMLs, xml -> isProjectPath(xml));
+        String[] projectPaths =  ArrayUtils.map(projPathXMLs, xml -> xml.getAttributeValue("path"), String.class);
+        _projConfig.setProjectPaths(projectPaths);
+    }
+
+    /**
+     * Writes the source path.
+     */
+    public void writeSourcePath()
+    {
+        // Update XML
+        XMLElement xml = new XMLElement("classpathentry");
+        xml.add("kind", "src");
+        getXML().add(xml);
+
+        String sourcePath = _projConfig.getSourcePath();
+        if (sourcePath != null)
+            xml.add("path", sourcePath);
+        else getXML().removeElement(xml);
+    }
+
+    /**
+     * Writes the build path.
+     */
+    public void writeBuildPath()
+    {
+        // Update XML
+        XMLElement xml = new XMLElement("classpathentry");
+        xml.add("kind", "output");
+        getXML().add(xml);
+
+        String buildPath = _projConfig.getBuildPath();
+        if (buildPath != null)
+            xml.add("path", buildPath);
+        else getXML().removeElement(xml);
+    }
+
+    /**
+     * Writes the library paths.
+     */
+    public void writeLibPaths()
     {
         // Add XML for path
         String[] libPaths = _projConfig.getLibPaths();
@@ -256,18 +204,47 @@ public class ProjectConfigFile {
     }
 
     /**
-     * Returns the project paths path.
+     * Writes the project paths.
      */
-    public void getProjectPathsRead()
+    public void writeProjectPaths()
     {
-        // Load from ProjectXMLs
-        List<String> paths = new ArrayList();
-        XMLElement[] projPathXMLs = getProjectPathXMLs();
-        for (XMLElement xml : projPathXMLs)
-            paths.add(xml.getAttributeValue("path"));
+        // Add XML for path
+        String[] srcPaths = _projConfig.getProjectPaths();
+        if (srcPaths == null) return;
+
+        for (String srcPath : srcPaths) {
+            String path = ProjectUtils.getRelativePath(_proj, srcPath);
+            XMLElement xml = new XMLElement("classpathentry");
+            xml.add("kind", "src");
+            xml.add("path", path);
+            getXML().add(xml);
+        }
+    }
+
+    /**
+     * Returns the XML for file.
+     */
+    public XMLElement getXML()
+    {
+        // If already set, just return
+        if (_xml != null) return _xml;
+
+        // Create
+        XMLElement xml = createXML();
 
         // Set/return
-        _projConfig._projPaths = paths.toArray(new String[0]);
+        return _xml = xml;
+    }
+
+    /**
+     * Creates the XML for file.
+     */
+    protected XMLElement createXML()
+    {
+        WebFile file = getFile();
+        if (file != null && file.getExists())
+            return XMLElement.readFromXMLSource(file);
+        return new XMLElement("classpath");
     }
 
     /**
@@ -275,113 +252,71 @@ public class ProjectConfigFile {
      */
     private XMLElement[] getSrcXMLs()
     {
-        List<XMLElement> paths = new ArrayList();
-        for (XMLElement x : getXML().getElements())
-            if ("src".equals(x.getAttributeValue("kind")))
-                paths.add(x);
-        return paths.toArray(new XMLElement[0]);
+        List<XMLElement> xmls = getXML().getElements();
+        List<XMLElement> srcXMLs = ListUtils.filter(xmls, xml -> isSrcKind(xml));
+        return srcXMLs.toArray(new XMLElement[0]);
     }
 
     /**
-     * Returns the lib classpathentry xmls.
+     * Returns the file.
      */
-    private XMLElement[] getLibXMLs()
+    public WebFile getFile()
     {
-        List<XMLElement> paths = new ArrayList();
-        for (XMLElement x : getXML().getElements())
-            if ("lib".equals(x.getAttributeValue("kind")))
-                paths.add(x);
-        return paths.toArray(new XMLElement[0]);
-    }
+        // If already set, just return
+        if (_file != null) return _file;
 
-    /**
-     * Returns the src classpathentry xmls that are in project directory.
-     */
-    private XMLElement[] getSourcePathXMLs()
-    {
-        List<XMLElement> paths = new ArrayList();
-        for (XMLElement src : getSrcXMLs()) {
-            String path = src.getAttributeValue("path");
-            if (path != null && !path.startsWith("/"))
-                paths.add(src);
-        }
-        return paths.toArray(new XMLElement[0]);
-    }
-
-    /**
-     * Returns the project classpathentry xmls that are outside project directory.
-     */
-    private XMLElement[] getProjectPathXMLs()
-    {
-        List<XMLElement> paths = new ArrayList();
-        for (XMLElement src : getSrcXMLs()) {
-            String path = src.getAttributeValue("path");
-            if (path != null && path.startsWith("/")) paths.add(src);
-        }
-        return paths.toArray(new XMLElement[0]);
-    }
-
-    /**
-     * Returns the output classpathentry xml.
-     */
-    private XMLElement getBuildPathXML()
-    {
-        for (XMLElement child : getXML().getElements())
-            if ("output".equals(child.getAttributeValue("kind")))
-                return child;
-        return null;
-    }
-
-    /**
-     * Returns a relative path for given path.
-     */
-    private String getRelativePath(String aPath)
-    {
-        String path = aPath;
-        if (File.separatorChar != '/') path = path.replace(File.separatorChar, '/');
-        if (!aPath.startsWith("/")) return path;
-        String root = getProjRootDirPath();
-        if (path.startsWith(root)) path = path.substring(root.length());
-        return path;
-    }
-
-
-    /**
-     * Returns the project root path.
-     */
-    private String getProjRootDirPath()
-    {
+        // Get file
         WebSite projSite = _proj.getSite();
-        String root = projSite.getRootDir().getJavaFile().getAbsolutePath();
-        if (File.separatorChar != '/') root = root.replace(File.separatorChar, '/');
-        if (!root.endsWith("/")) root = root + '/';
-        if (!root.startsWith("/")) root = '/' + root;
-        return root;
-    }
+        WebFile file = projSite.getFileForPath("build.snap");
+        if (file == null)
+            file = projSite.getFileForPath(".classpath");
 
+        // If missing, create default
+        if (file == null)
+            file = createConfigFile();
+
+        // Set/return
+        return _file = file;
+    }
 
     /**
      * Creates the ClassPath file for given project.
      */
-    public static WebFile createFile(Project aProj)
+    public WebFile createConfigFile()
     {
         // Get default text
-        StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        sb.append("<classpath>\n");
-        sb.append("\t<classpathentry kind=\"src\" path=\"src\"/>\n");
-        sb.append("\t<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n");
-        sb.append("\t<classpathentry kind=\"output\" path=\"bin\"/>\n");
-        sb.append("</classpath>\n");
+        String defaultConfigStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<classpath>\n" +
+                "\t<classpathentry kind=\"src\" path=\"src\"/>\n" +
+                "\t<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n" +
+                "\t<classpathentry kind=\"output\" path=\"bin\"/>\n" +
+                "</classpath>\n";
 
         // Create .classpath file
-        WebSite site = aProj.getSite();
+        WebSite site = _proj.getSite();
         WebFile file = site.createFileForPath(".classpath", false);
 
         // Set default text and save
-        file.setText(sb.toString());
+        file.setText(defaultConfigStr);
         file.save();
 
         // Return
         return file;
+    }
+
+    /**
+     * Utility methods.
+     */
+    private boolean isSrcKind(XMLElement xml)  { return "src".equals(xml.getAttributeValue("kind")); }
+    private boolean isLibKind(XMLElement xml)  { return "lib".equals(xml.getAttributeValue("kind")); }
+    private boolean isBuildKind(XMLElement xml)  { return "output".equals(xml.getAttributeValue("kind")); }
+    private boolean isSourcePath(XMLElement xml)
+    {
+        String path = xml.getAttributeValue("path");
+        return path != null && !path.startsWith("/");
+    }
+    private boolean isProjectPath(XMLElement xml)
+    {
+        String path = xml.getAttributeValue("path");
+        return path != null && path.startsWith("/");
     }
 }
