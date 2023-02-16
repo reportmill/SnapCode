@@ -79,7 +79,7 @@ public class EvalPane extends ViewOwner {
             _autoRunRequested = false;
         }
 
-        ((DocPaneX) _docPane).hideDrawer();
+        _docPane.hideDrawer();
     }
 
     /**
@@ -176,6 +176,6 @@ public class EvalPane extends ViewOwner {
 
         // Handle SamplesButton
         if (anEvent.equals("SamplesButton"))
-            ((DocPaneX) _docPane).showSamples();
+            _docPane.showSamples();
     }
 }

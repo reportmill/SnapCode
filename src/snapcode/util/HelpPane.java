@@ -9,7 +9,7 @@ import snap.text.TextDoc;
 import snap.view.*;
 import snap.viewx.TextPane;
 import snap.web.WebURL;
-import snapcode.appjr.DocPaneX;
+import snapcode.appjr.DocPane;
 
 /**
  * This class shows a help file for the app.
@@ -17,7 +17,7 @@ import snapcode.appjr.DocPaneX;
 public class HelpPane extends ViewOwner {
 
     // The DocPane
-    private DocPaneX _docPane;
+    private DocPane  _docPane;
 
     // The HelpFile
     private HelpFile  _helpFile;
@@ -34,7 +34,7 @@ public class HelpPane extends ViewOwner {
     /**
      * Constructor.
      */
-    public HelpPane(DocPaneX aDocPane)
+    public HelpPane(DocPane aDocPane)
     {
         super();
         _docPane = aDocPane;

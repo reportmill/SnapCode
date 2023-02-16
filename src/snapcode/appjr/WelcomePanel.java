@@ -333,7 +333,7 @@ public class WelcomePanel extends ViewOwner {
      */
     protected void newFile(boolean showSamples)
     {
-        DocPaneX docPane = newDocPane();
+        DocPane docPane = newDocPane();
         docPane.setWindowVisible(true);
         hide();
 
@@ -377,7 +377,7 @@ public class WelcomePanel extends ViewOwner {
     /**
      * Creates the DocPane (as a hook, so it can be overridden).
      */
-    protected DocPaneX newDocPane()  { return new DocPaneX(); }
+    protected DocPane newDocPane()  { return new DocPane(); }
 
     /**
      * Returns the list of the recent documents as a list of strings.
