@@ -351,7 +351,8 @@ public class JavaPage extends WebPage implements WebFile.Updater {
      */
     private void setTextModified(boolean aFlag)
     {
-        getFile().setUpdater(aFlag ? this : null);
+        WebFile javaFile = getFile();
+        javaFile.setUpdater(aFlag ? this : null);
     }
 
     /**

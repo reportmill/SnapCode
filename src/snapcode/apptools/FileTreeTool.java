@@ -136,8 +136,9 @@ public class FileTreeTool extends WorkspaceTool {
         enableEvents(_filesList, DragEvents);
 
         // Create RootFiles for TreeView (one for each open project)
-        _filesTree.setItems(getRootFiles());
-        _filesTree.expandItem(getRootFiles().get(0));
+        List<FileTreeFile> rootFiles = getRootFiles();
+        _filesTree.setItems(rootFiles);
+        _filesTree.expandItem(rootFiles.get(0));
         if (_filesTree.getItems().size() > 1)
             _filesTree.expandItem(_filesTree.getItems().get(1));
 

@@ -45,10 +45,18 @@ public class WorkspacePane extends ViewOwner {
      */
     public WorkspacePane()
     {
+        this(new WorkspaceX());
+    }
+
+    /**
+     * Constructor.
+     */
+    public WorkspacePane(Workspace workspace)
+    {
         super();
 
         // Create workspace
-        _workspace = new WorkspaceX();
+        _workspace = workspace;
         _workspace.addPropChangeListener(pc -> workspaceDidPropChange(pc));
 
         // Create PagePane

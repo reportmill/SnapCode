@@ -1,13 +1,15 @@
 package snapcode.app;
+import javakit.parse.JeplTextDoc;
 import javakit.project.Project;
+import javakit.project.ProjectUtils;
 import javakit.project.Workspace;
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.DialogBox;
+import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -149,19 +151,9 @@ public class WelcomePanel extends ViewOwner {
     /**
      * Returns the list of selected sites.
      */
-    public List<WebSite> getSelectedSites()
+    public WebSite[] getSelectedSites()
     {
-        return _selectedSite != null ? Arrays.asList(_selectedSite) : new ArrayList();
-    }
-
-    /**
-     * Returns a list of selected site names.
-     */
-    public List<String> getSelectedNames()
-    {
-        List names = new ArrayList();
-        for (WebSite site : getSelectedSites()) names.add(site.getName());
-        return names;
+        return _selectedSite != null ? new WebSite[] { _selectedSite } : new WebSite[0];
     }
 
     /**
@@ -231,9 +223,9 @@ public class WelcomePanel extends ViewOwner {
     protected void writeSites()
     {
         // Move selected sites to front of the list
-        List<WebSite> selectedSites = getSelectedSites();
-        for (int i = 0, iMax = selectedSites.size(); i < iMax; i++) {
-            WebSite site = selectedSites.get(i);
+        WebSite[] selectedSites = getSelectedSites();
+        for (int i = 0; i < selectedSites.length; i++) {
+            WebSite site = selectedSites[i];
             if (site != getSite(i) && ListUtils.removeId(_sites, site) >= 0)
                 _sites.add(i, site);
         }
@@ -296,8 +288,8 @@ public class WelcomePanel extends ViewOwner {
         setViewSelItem("SitesTable", getSelectedSite());
 
         // Update OpenButton, RemoveButton
-        setViewEnabled("OpenButton", getSelectedSites().size() > 0);
-        setViewEnabled("RemoveButton", getSelectedSites().size() > 0);
+        setViewEnabled("OpenButton", getSelectedSites().length > 0);
+        setViewEnabled("RemoveButton", getSelectedSites().length > 0);
     }
 
     /**
@@ -307,8 +299,6 @@ public class WelcomePanel extends ViewOwner {
     {
         // Handle SitesTable double-click
         if (anEvent.equals("SitesTable")) {
-
-            // Handle
 
             // Handle multi-click
             if (anEvent.getClickCount() > 1) {
@@ -329,8 +319,11 @@ public class WelcomePanel extends ViewOwner {
         }
 
         // Handle NewButton
-        if (anEvent.equals("NewButton"))
-            createSite();
+        if (anEvent.equals("NewButton")) {
+            if (anEvent.isAltDown())
+                openNewJeplProject();
+            else createSite();
+        }
 
         // Handle OpenButton
         if (anEvent.equals("OpenButton")) {
@@ -353,6 +346,38 @@ public class WelcomePanel extends ViewOwner {
         // Handle WinClosing
         if (anEvent.isWinClose())
             quitApp();
+    }
+
+    /**
+     * Creates a new Jepl project.
+     */
+    protected void openNewJeplProject()
+    {
+        // Delete temp project
+        ProjectUtils.deleteTempProject();
+
+        // Create new temp file and save
+        JeplTextDoc jeplDoc = JeplTextDoc.getJeplTextDocForSourceURL(null);
+        WebFile sourceFile = jeplDoc.getSourceFile();
+        sourceFile.setText("");
+        sourceFile.save();
+
+        // Get project/workspace
+        Project project = Project.getProjectForFile(sourceFile);
+        Workspace workspace = project.getWorkspace();
+
+        // Create WorkspacePane and show
+        WorkspacePane workspacePane = new WorkspacePane(workspace);
+        workspacePane.show();
+
+        // Show JeplDoc
+        runLater(() -> {
+            PagePane pagePane = workspacePane.getPagePane();
+            pagePane.setSelectedFile(sourceFile);
+        });
+
+        // Hide WelcomePanel
+        hide();
     }
 
     /**
@@ -406,7 +431,7 @@ public class WelcomePanel extends ViewOwner {
         WorkspacePane workspacePane = new WorkspacePane();
         Workspace workspace = workspacePane.getWorkspace();
 
-        List<WebSite> projectSites = getSelectedSites();
+        WebSite[] projectSites = getSelectedSites();
         for (WebSite site : projectSites)
             workspace.addProjectForSite(site);
 

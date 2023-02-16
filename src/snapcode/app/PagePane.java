@@ -381,7 +381,7 @@ public class PagePane extends ViewOwner {
                 return ProjectPane.ProjectPanePage.class;
 
             // Handle Java
-            if (type.equals("java")) {
+            if (type.equals("java") || type.equals("jepl")) {
                 if (file != null && SnapEditorPage.isSnapEditSet(file))
                     return SnapEditorPage.class;
                 return JavaPage.class;
