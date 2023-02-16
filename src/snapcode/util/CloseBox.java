@@ -1,9 +1,11 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snapcode.util;
 import snap.geom.Polygon;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.view.*;
-import snap.web.WebFile;
 
 /**
  * A simple view to provide a close box.

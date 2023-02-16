@@ -1,6 +1,8 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snapcode.appjr;
 import snap.geom.Insets;
-import snap.geom.Polygon;
 import snap.gfx.Color;
 import snap.util.Prefs;
 import snap.util.SnapUtils;
@@ -11,6 +13,7 @@ import snap.viewx.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcharts.app.DropBox;
+import snapcode.util.CloseBox;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -444,18 +447,10 @@ public class WelcomePanel extends ViewOwner {
     private void recentFilesLoaded()
     {
         // Turn on progress bar
-        ProgressBar pbar = getView("ProgressBar", ProgressBar.class);
-        pbar.setIndeterminate(false);
-        pbar.setVisible(false);
+        ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
+        progressBar.setIndeterminate(false);
+        progressBar.setVisible(false);
         resetLater();
-    }
-
-    /**
-     * Clears recent documents from preferences.
-     */
-    private void clearRecentFiles()
-    {
-        Prefs.getDefaultPrefs().getChild("RecentDocuments").clear();
     }
 
     /**
@@ -505,29 +500,10 @@ public class WelcomePanel extends ViewOwner {
         aCell.setTextFill(Color.DARKGRAY);
 
         // Add button to clear item from recent files
-        View clearButton = createClearButton();
-        aCell.setGraphic(clearButton);
-    }
-
-    /**
-     * Creates a button to clear.
-     */
-    private View createClearButton()
-    {
-        // Create/configure
-        Polygon poly = new Polygon(0, 2, 2, 0, 5, 3, 8, 0, 10, 2, 7, 5, 10, 8, 8, 10, 5, 7, 2, 10, 0, 8, 3, 5);
-        ShapeView closeBox = new ShapeView(poly);
+        CloseBox closeBox = new CloseBox();
         closeBox.setMargin(0, 4, 0, 4);
-        closeBox.setBorder(Color.GRAY, .5);
-        closeBox.setPrefSize(11, 11);
-
-        // Configure handers to reset fill
-        closeBox.addEventHandler(e -> closeBox.setFill(Color.CRIMSON), ViewEvent.Type.MouseEnter, View.MouseMove);
-        closeBox.addEventHandler(e -> closeBox.setFill(null), ViewEvent.Type.MouseExit);
-        closeBox.addEventHandler(e -> handleCloseBoxClicked(closeBox), ViewEvent.Type.MousePress);
-
-        // Return
-        return closeBox;
+        closeBox.addEventHandler(e -> handleCloseBoxClicked(closeBox), View.Action);
+        aCell.setGraphic(closeBox);
     }
 
     /**
