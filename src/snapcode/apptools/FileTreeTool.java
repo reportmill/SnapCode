@@ -11,7 +11,6 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.app.*;
-import snapcode.util.CloseBox;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

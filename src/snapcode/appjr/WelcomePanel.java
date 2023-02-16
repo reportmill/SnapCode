@@ -13,7 +13,6 @@ import snap.viewx.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcharts.app.DropBox;
-import snapcode.util.CloseBox;
 import java.util.Objects;
 import java.util.stream.Stream;
 
