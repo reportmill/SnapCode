@@ -252,23 +252,23 @@ public class WorkspacePane extends ViewOwner {
         _pagePane.addPropChangeListener(pc -> pagePaneDidPropChange(pc), PagePane.SelFile_Prop);
 
         // Add LeftTray
-        SupportTray leftTray = _workspaceTools.getLeftTray();
+        ToolTray leftTray = _workspaceTools.getLeftTray();
         View leftTrayUI = leftTray.getUI();
         leftTray.setSelToolForClass(FileTreeTool.class);
         pagePaneSplitView.addItem(leftTrayUI, 0);
 
         // Add RightTray
-        SupportTray rightTray = _workspaceTools.getRightTray();
+        ToolTray rightTray = _workspaceTools.getRightTray();
         View rightTrayUI = rightTray.getUI();
         pagePaneSplitView.addItem(rightTrayUI);
 
         // Add SupportTray to MainSplit
-        SupportTray supportTray = _workspaceTools.getBottomTray();
-        TabView supportTrayUI = (TabView) supportTray.getUI();
-        mainSplit.addItem(supportTrayUI);
+        ToolTray bottomTray = _workspaceTools.getBottomTray();
+        TabView bottomTrayUI = (TabView) bottomTray.getUI();
+        mainSplit.addItem(bottomTrayUI);
 
         // Add StatusBar
-        TabBar tabBar = supportTrayUI.getTabBar();
+        TabBar tabBar = bottomTrayUI.getTabBar();
         _statusBar.addToView(tabBar);
 
         // Add key binding to OpenMenuItem and CloseWindow
@@ -451,16 +451,16 @@ public class WorkspacePane extends ViewOwner {
         // If final error count non-zero, show problems pane
         int errorCount = _workspace.getBuildIssues().getErrorCount();
         if (errorCount > 0) {
-            SupportTray supportTray = _workspaceTools.getBottomTray();
-            if (!(supportTray.getSelTool() instanceof ProblemsTool))
-                supportTray.showProblemsTool();
+            ToolTray bottomTray = _workspaceTools.getBottomTray();
+            if (!(bottomTray.getSelTool() instanceof ProblemsTool))
+                bottomTray.showProblemsTool();
         }
 
         // If error count zero and SupportTray showing problems, close
         else if (errorCount == 0) {
-            SupportTray supportTray = _workspaceTools.getBottomTray();
-            if (supportTray.getSelTool() instanceof ProblemsTool)
-                supportTray.hideTools();
+            ToolTray bottomTray = _workspaceTools.getBottomTray();
+            if (bottomTray.getSelTool() instanceof ProblemsTool)
+                bottomTray.hideTools();
         }
     }
 }

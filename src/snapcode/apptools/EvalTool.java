@@ -1,21 +1,24 @@
-package snapcode.appjr;
+package snapcode.apptools;
 import javakit.ide.JavaTextArea;
+import javakit.ide.JavaTextPane;
 import javakit.parse.JMethodDecl;
 import javakit.parse.JNode;
-import javakit.parse.JeplTextDoc;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.text.TextBoxLine;
 import snap.view.*;
 import snap.viewx.TextPane;
+import snap.viewx.WebPage;
+import snapcode.app.JavaPage;
+import snapcode.app.PagePane;
+import snapcode.app.WorkspacePane;
+import snapcode.app.WorkspaceTool;
+import snapcode.appjr.EvalView;
 
 /**
  * This class manages the run/eval UI.
  */
-public class EvalPane extends ViewOwner {
-
-    // The DocPane
-    private DocPane  _docPane;
+public class EvalTool extends WorkspaceTool {
 
     // Whether to auto run code
     private boolean  _autoRun;
@@ -35,16 +38,10 @@ public class EvalPane extends ViewOwner {
     /**
      * Constructor.
      */
-    public EvalPane(DocPane aDocPane)
+    public EvalTool(WorkspacePane workspacePane)
     {
-        super();
-        _docPane = aDocPane;
+        super(workspacePane);
     }
-
-    /**
-     * Returns the DocPane.
-     */
-    public DocPane getDocPane()  { return _docPane; }
 
     /**
      * Returns whether to automatically run when enter key is pressed in edit pane.
@@ -78,7 +75,7 @@ public class EvalPane extends ViewOwner {
             _autoRunRequested = false;
         }
 
-        _docPane.hideDrawer();
+        //_docPane.hideDrawer();
     }
 
     /**
@@ -137,7 +134,16 @@ public class EvalPane extends ViewOwner {
         ColView colView = (ColView) super.createUI();
 
         // Create/config EvalView
-        _evalView = new EvalView(this);
+        _evalView = new EvalView(this) {
+            @Override
+            public JavaTextPane<?> getJavaTextPane()
+            {
+                PagePane pagePane = _workspacePane.getPagePane();
+                WebPage selPage = pagePane.getSelPage();
+                JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
+                return javaPage != null ? javaPage.getTextPane() : null;
+            }
+        };
         _evalView.setGrowHeight(true);
 
         // Create/config ScrollView
@@ -198,7 +204,12 @@ public class EvalPane extends ViewOwner {
             _evalView.removeChildren();
 
         // Handle SamplesButton
-        if (anEvent.equals("SamplesButton"))
-            _docPane.showSamples();
+        //if (anEvent.equals("SamplesButton")) _docPane.showSamples();
     }
+
+    /**
+     * Title.
+     */
+    @Override
+    public String getTitle()  { return "Run / Debug"; }
 }

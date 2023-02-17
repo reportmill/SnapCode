@@ -9,6 +9,8 @@ import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import snapcode.apptools.EvalTool;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -368,6 +370,9 @@ public class WelcomePanel extends ViewOwner {
 
         // Create WorkspacePane and show
         WorkspacePane workspacePane = new WorkspacePane(workspace);
+        workspacePane.getUI();
+        workspacePane.getWorkspaceTools().getLeftTray().setSelTool(null);
+        workspacePane.getWorkspaceTools().getRightTray().setSelToolForClass(EvalTool.class);
         workspacePane.show();
 
         // Show JeplDoc

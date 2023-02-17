@@ -7,7 +7,7 @@ import snapcode.apptools.*;
 /**
  * A class to hold TabView to show WorkspaceTool instances (ProblemsTool, DebugTool, etc.).
  */
-public class SupportTray extends ViewOwner {
+public class ToolTray extends ViewOwner {
 
     // The side
     private Side  _side;
@@ -21,7 +21,7 @@ public class SupportTray extends ViewOwner {
     /**
      * Creates a new SupportTray for given ProjectPane.
      */
-    public SupportTray(Side aSide, WorkspaceTool[] trayTools)
+    public ToolTray(Side aSide, WorkspaceTool[] trayTools)
     {
         _side = aSide;
         _trayTools = trayTools;

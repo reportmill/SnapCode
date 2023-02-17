@@ -49,13 +49,13 @@ public class WorkspaceTools {
     private VcsTools  _vcsTools;
 
     // The bottom side ToolTray
-    private SupportTray  _bottomTray;
+    private ToolTray _bottomTray;
 
     // The left side ToolTray
-    private SupportTray  _leftTray;
+    private ToolTray _leftTray;
 
     // The right side ToolTray
-    private SupportTray  _rightTray;
+    private ToolTray _rightTray;
 
     /**
      * Constructor.
@@ -84,15 +84,16 @@ public class WorkspaceTools {
 
         // Create BottomTray
         WorkspaceTool[] bottomTools = { _problemsTool, _debugTool, _runConsole, _breakpointsTool, _runConfigsTool, _httpServerTool };
-        _bottomTray = new SupportTray(Side.BOTTOM, bottomTools);
+        _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
 
         // Create LeftTray
         WorkspaceTool[] leftTools = { _fileTreeTool };
-        _leftTray = new SupportTray(Side.LEFT, leftTools);
+        _leftTray = new ToolTray(Side.LEFT, leftTools);
 
         // Create RightTray
-        WorkspaceTool[] rightTools = { _searchTool };
-        _rightTray = new SupportTray(Side.RIGHT, rightTools);
+        EvalTool evalTool = new EvalTool(_workspacePane);
+        WorkspaceTool[] rightTools = { evalTool, _searchTool };
+        _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Start listening to Breakpoints helper
         Workspace workspace = _workspacePane.getWorkspace();
@@ -142,17 +143,17 @@ public class WorkspaceTools {
     /**
      * Returns the support tray.
      */
-    public SupportTray getBottomTray()  { return _bottomTray; }
+    public ToolTray getBottomTray()  { return _bottomTray; }
 
     /**
      * Returns the left side tray.
      */
-    public SupportTray getLeftTray()  { return _leftTray; }
+    public ToolTray getLeftTray()  { return _leftTray; }
 
     /**
      * Returns the right side tray.
      */
-    public SupportTray getRightTray()  { return _rightTray; }
+    public ToolTray getRightTray()  { return _rightTray; }
 
     /**
      * Returns the tool for given class.

@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.appjr;
+import javakit.ide.JavaTextPane;
 import javakit.parse.JeplTextDoc;
 import javakit.project.BuildIssue;
 import javakit.project.JeplAgent;
@@ -16,10 +17,10 @@ import java.util.Map;
 /**
  * A TextArea subclass to show code evaluation.
  */
-class EvalView extends ColView implements JavaShell.ShellClient {
+public class EvalView extends ColView implements JavaShell.ShellClient {
 
     // The EvalPane
-    private EvalPane  _evalPane;
+    private ViewOwner  _evalPane;
 
     // The JavaShell
     protected JavaShell  _javaShell;
@@ -45,7 +46,7 @@ class EvalView extends ColView implements JavaShell.ShellClient {
     /**
      * Constructor.
      */
-    public EvalView(EvalPane anEvalPane)
+    public EvalView(ViewOwner anEvalPane)
     {
         _evalPane = anEvalPane;
         setSpacing(6);
@@ -59,7 +60,17 @@ class EvalView extends ColView implements JavaShell.ShellClient {
         _javaShell.setClient(this);
     }
 
-    public JeplTextDoc getJeplDoc()  { return _evalPane.getJeplDoc(); }
+    public JavaTextPane<?> getJavaTextPane()
+    {
+        EvalPane evalPane = (EvalPane) _evalPane;
+        return evalPane.getDocPane()._editPane;
+    }
+
+    public JeplTextDoc getJeplDoc()
+    {
+        JavaTextPane<?> javaTextPane = getJavaTextPane();
+        return (JeplTextDoc) javaTextPane.getTextDoc();
+    }
 
     /**
      * Called to update when textView changes.
@@ -113,8 +124,8 @@ class EvalView extends ColView implements JavaShell.ShellClient {
         boolean success = jeplAgent.buildFile();
 
         // Notify EditPane of possible BuildIssue changes
-        EditPane<?> editPane = _evalPane.getDocPane()._editPane;
-        editPane.buildIssueOrBreakPointMarkerChanged();
+        JavaTextPane<?> javaTextPane = getJavaTextPane();
+        javaTextPane.buildIssueOrBreakPointMarkerChanged();
 
         // If build failed, report errors
         if (!success) {
@@ -254,7 +265,7 @@ class EvalView extends ColView implements JavaShell.ShellClient {
     /**
      * Called when a run is cancelled.
      */
-    protected void cancelRun()
+    public void cancelRun()
     {
         // If already cancelled, just return
         if (_runAppThread == null) return;

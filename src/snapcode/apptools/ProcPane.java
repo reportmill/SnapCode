@@ -133,8 +133,8 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
         setSelApp(null);
         addProc(aProc);
         setSelApp(aProc);
-        SupportTray supportTray = _workspaceTools.getBottomTray();
-        supportTray.showRunTool();
+        ToolTray bottomTray = _workspaceTools.getBottomTray();
+        bottomTray.showRunTool();
         aProc.exec();
     }
 
