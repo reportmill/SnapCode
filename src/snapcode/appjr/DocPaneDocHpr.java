@@ -2,17 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.appjr;
-import javakit.ide.JavaTextUtils;
 import javakit.parse.JeplTextDoc;
-import javakit.project.JeplAgent;
-import javakit.project.Project;
-import javakit.project.ProjectConfig;
-import javakit.resolver.Resolver;
-import snap.gfx.Font;
-import snap.props.PropObject;
 import snap.props.Undoer;
-import snap.text.TextStyle;
-import snap.util.SnapUtils;
 import snap.view.TextArea;
 import snap.view.View;
 import snap.view.ViewEvent;
@@ -22,7 +13,6 @@ import snap.viewx.FilePanel;
 import snap.viewx.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
-import snapcharts.data.DoubleArray;
 
 /**
  * This class is a helper for DocPane to handle document open/save/close/etc.
@@ -31,9 +21,6 @@ public class DocPaneDocHpr {
 
     // The DocPane
     private DocPane  _docPane;
-
-    // Whether JavaKit has been configured for this app
-    private static boolean  _didInitJavaKit;
 
     // Constants
     public static final String JAVA_FILE_EXT = "jepl";
@@ -48,7 +35,7 @@ public class DocPaneDocHpr {
         _docPane = aDocPane;
 
         // JavaKit init
-        initJavaKitForThisApp();
+        JeplUtils.initJavaKitForThisApp();
     }
 
     /**
@@ -75,6 +62,7 @@ public class DocPaneDocHpr {
 
         // Get doc for URL
         JeplTextDoc jeplTextDoc = JeplTextDoc.getJeplTextDocForSourceURL(url);
+        JeplUtils.configureJeplDocProject(jeplTextDoc);
 
         // Set new doc
         _docPane.setJeplDoc(jeplTextDoc);
@@ -220,71 +208,4 @@ public class DocPaneDocHpr {
             // If no other open editor, show WelcomePanel
         else WelcomePanel.getShared().showPanel();
     }
-
-    /**
-     * Configures default JeplTextDocs.
-     */
-    private static void configureJeplDoc(JeplTextDoc jeplTextDoc)
-    {
-        // Set imports and SuperClassName
-        jeplTextDoc.addImport("snapcharts.data.*");
-        jeplTextDoc.addImport("snapcode.appjr.*");
-        jeplTextDoc.setSuperClassName(ChartsREPL.class.getName());
-
-        // Set code font
-        Font codeFont = JavaTextUtils.getCodeFont();
-        jeplTextDoc.setDefaultStyle(new TextStyle(codeFont));
-    }
-
-    /**
-     * Configures JeplTextDoc project to make sure it references SnapKit, SnapCode and SnapCharts.
-     */
-    protected static void configureJeplDocProject(JeplTextDoc jeplTextDoc)
-    {
-        // If TeaVM, just return
-        if (SnapUtils.isTeaVM) return;
-
-        // Get JeplTextDoc Project, ProjectConfig
-        JeplAgent jeplAgent = jeplTextDoc.getAgent();
-        Project proj = jeplAgent.getProject();
-        ProjectConfig projectConfig = proj.getProjectConfig();
-
-        // Add lib path to ProjectConfig for SnapKit, SnapCode and SnapCharts
-        projectConfig.addLibPathForClass(PropObject.class);
-        projectConfig.addLibPathForClass(QuickCharts.class);
-        projectConfig.addLibPathForClass(DoubleArray.class);
-    }
-
-    /**
-     * Initialize JavaKit for this app.
-     */
-    private static void initJavaKitForThisApp()
-    {
-        // If already did init, just return
-        if (_didInitJavaKit) return;
-        _didInitJavaKit = true;
-
-        // Set JeplAgent config
-        JeplTextDoc.setJeplDocConfig(jtd -> configureJeplDoc(jtd));
-
-        // For TeaVM: Link up StaticResolver
-        if (Resolver.isTeaVM) {
-            javakit.resolver.StaticResolver.shared()._next = new StaticResolver();
-        }
-
-        // Add more common class names from SnapCode
-        javakit.resolver.ClassTreeWeb.addCommonClassNames(MORE_COMMON_CLASS_NAMES);
-    }
-
-    /**
-     * Common class names for browser.
-     */
-    private static String[] MORE_COMMON_CLASS_NAMES = {
-            Quick3D.class.getName(),
-            QuickCharts.class.getName(),
-            QuickData.class.getName(),
-            QuickDraw.class.getName(),
-            QuickDrawPen.class.getName(),
-            DoubleArray.class.getName()
-    };
 }

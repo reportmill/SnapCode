@@ -2,10 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.appjr;
-import javakit.parse.JeplTextDoc;
-import javakit.project.Project;
-import javakit.project.ProjectUtils;
-import javakit.project.Workspace;
 import snap.geom.Insets;
 import snap.gfx.Color;
 import snap.util.Prefs;
@@ -17,7 +13,6 @@ import snap.viewx.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcharts.app.DropBox;
-import snapcode.app.PagePane;
 import snapcode.app.WorkspacePane;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -56,6 +51,8 @@ public class WelcomePanelJr extends ViewOwner {
     private static final String FILE_SYSTEM_LOCAL = "FileSystemLocal";
     private static final String FILE_SYSTEM_CLOUD = "FileSystemCloud";
     private static final String USER_EMAIL = "UserEmail";
+    public static final String JAVA_FILE_EXT = "jepl";
+    public static final String RECENT_FILES_ID = "RecentJeplDocs";
 
     /**
      * Constructor.
@@ -71,6 +68,9 @@ public class WelcomePanelJr extends ViewOwner {
 
         // Set as Shared (there should only be one instance)
         _shared = this;
+
+        //
+        JeplUtils.initJavaKitForThisApp();
     }
 
     /**
@@ -347,12 +347,8 @@ public class WelcomePanelJr extends ViewOwner {
      */
     protected void newFile(boolean showSamples)
     {
-        //WorkspacePane workspacePane = openWorkspaceForJeplFileSource(null);
-        WorkspacePane workspacePane = new WorkspacePane();
-        workspacePane.setWorkspaceForJeplFileSource(null);
-        workspacePane.show();
-
-        hide();
+        // Show jepl
+        WorkspacePane workspacePane = openWorkspaceForJeplFileSource(null);
 
         if (showSamples)
             runLaterDelayed(300, () -> workspacePane.getToolBar().showSamples());
@@ -364,15 +360,14 @@ public class WelcomePanelJr extends ViewOwner {
      */
     public void showOpenPanel()
     {
-        // Have DocPane run open panel (if no doc opened, just return)
-        DocPane docPane = newDocPane();
-        docPane = docPane.showOpenPanel(getUI());
-        if (docPane == null)
+        // Get path from open panel for supported file extensions
+        String[] extensions = { JAVA_FILE_EXT };
+        String path = FilePanel.showOpenPanel(getUI(), "Snap Java File", extensions);
+        if (path == null)
             return;
 
-        // Make editor window visible and hide welcome panel
-        docPane.setWindowVisible(true);
-        hide();
+        // Show jepl
+        openWorkspaceForJeplFileSource(path);
     }
 
     /**
@@ -380,34 +375,10 @@ public class WelcomePanelJr extends ViewOwner {
      */
     protected WorkspacePane openWorkspaceForJeplFileSource(Object aSource)
     {
-        // Delete temp project
-        if (aSource == null)
-            ProjectUtils.deleteTempProject();
-
-        // Create new temp file and save
-        JeplTextDoc jeplDoc = JeplTextDoc.getJeplTextDocForSourceURL(aSource);
-        WebFile sourceFile = jeplDoc.getSourceFile();
-        if (aSource == null) {
-            sourceFile.setText("");
-            sourceFile.save();
-        }
-
-        // Get project/workspace
-        Project project = Project.getProjectForFile(sourceFile);
-        Workspace workspace = project.getWorkspace();
-
-        // Create WorkspacePane and show
-        WorkspacePane workspacePane = new WorkspacePane(workspace);
-        workspacePane.getUI();
-        workspacePane.getWorkspaceTools().getLeftTray().setSelTool(null);
-        //workspacePane.getWorkspaceTools().getRightTray().setSelToolForClass(EvalTool.class);
+        // Create WorkspacePane, set Jepl source, show
+        WorkspacePane workspacePane = new WorkspacePane();
+        workspacePane.setWorkspaceForJeplFileSource(aSource);
         workspacePane.show();
-
-        // Show JeplDoc
-        runLater(() -> {
-            PagePane pagePane = workspacePane.getPagePane();
-            pagePane.setSelectedFile(sourceFile);
-        });
 
         // Hide WelcomePanel
         hide();
@@ -415,11 +386,6 @@ public class WelcomePanelJr extends ViewOwner {
         // Return
         return workspacePane;
     }
-
-    /**
-     * Creates the DocPane (as a hook, so it can be overridden).
-     */
-    protected DocPane newDocPane()  { return new DocPane(); }
 
     /**
      * Returns the list of the recent documents as a list of strings.
@@ -436,7 +402,7 @@ public class WelcomePanelJr extends ViewOwner {
 
         // Handle Local
         if (!isCloud()) {
-            WebFile[] recentFiles = RecentFiles.getFiles(DocPaneDocHpr.RECENT_FILES_ID);
+            WebFile[] recentFiles = RecentFiles.getFiles(RECENT_FILES_ID);
             return _recentFiles = recentFiles;
         }
 
@@ -461,7 +427,7 @@ public class WelcomePanelJr extends ViewOwner {
         DropBox dropBox = getDropBox();
         WebFile[] dropBoxfiles = dropBox.getRootDir().getFiles();
         Stream<WebFile> dropBoxfilesStream = Stream.of(dropBoxfiles);
-        Stream<WebFile> jeplFilesStream = dropBoxfilesStream.filter(f -> DocPaneDocHpr.JAVA_FILE_EXT.equals(f.getType()));
+        Stream<WebFile> jeplFilesStream = dropBoxfilesStream.filter(f -> JAVA_FILE_EXT.equals(f.getType()));
         WebFile[] jeplFiles = jeplFilesStream.toArray(size -> new WebFile[size]);
 
         // Set files and trigger reload
@@ -565,7 +531,7 @@ public class WelcomePanelJr extends ViewOwner {
 
         // Clear RecentFile
         String filePath = file.getURL().getString();
-        RecentFiles.removePath(DocPaneDocHpr.RECENT_FILES_ID, filePath);
+        RecentFiles.removePath(RECENT_FILES_ID, filePath);
 
         // Clear RecentFiles, SelFile and trigger reset
         _recentFiles = null;

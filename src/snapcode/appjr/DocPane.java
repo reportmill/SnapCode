@@ -59,6 +59,7 @@ public class DocPane extends ViewOwner {
 
         // Install the JeplDoc
         JeplTextDoc jeplDoc = JeplTextDoc.getJeplTextDocForSourceURL(null);
+        JeplUtils.configureJeplDocProject(jeplDoc);
         setJeplDoc(jeplDoc);
     }
 
@@ -76,10 +77,6 @@ public class DocPane extends ViewOwner {
      */
     public void setJeplDoc(JeplTextDoc aJeplDoc)
     {
-        // JeplTextDoc Project should reference
-        DocPaneDocHpr.configureJeplDocProject(aJeplDoc);
-
-        // Forward to EditPane
         _editPane.setTextDoc(aJeplDoc);
     }
 

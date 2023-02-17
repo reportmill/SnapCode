@@ -13,9 +13,9 @@ import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
+import snapcode.appjr.JeplUtils;
 import snapcode.apptools.*;
 import snapcode.project.WorkspaceX;
-import snapcode.util.SamplesPane;
 
 /**
  * This class is the top level controller for an open project.
@@ -124,6 +124,9 @@ public class WorkspacePane extends ViewOwner {
             sourceFile.setText("");
             sourceFile.save();
         }
+
+        // Configure doc
+        JeplUtils.configureJeplDocProject(jeplDoc);
 
         // Get project/workspace
         Project project = Project.getProjectForFile(sourceFile);
