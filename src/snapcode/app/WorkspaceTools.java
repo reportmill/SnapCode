@@ -6,6 +6,8 @@ import javakit.project.BuildIssues;
 import javakit.project.Workspace;
 import snap.geom.Side;
 import snap.props.PropChange;
+import snap.props.PropChangeListener;
+import snap.util.ArrayUtils;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snapcode.apptools.*;
@@ -14,6 +16,15 @@ import snapcode.apptools.*;
  * This class manages all the WorkspaceTool instances for a WorkspacePane.
  */
 public class WorkspaceTools {
+
+    // The WorkspacePane
+    private WorkspacePane  _workspacePane;
+
+    // The Workspace
+    private Workspace  _workspace;
+
+    // Array of all tools
+    protected WorkspaceTool[]  _tools;
 
     // The FilesPane
     protected FilesTool  _filesTool;
@@ -29,9 +40,6 @@ public class WorkspaceTools {
 
     // The BreakpointsTool
     private BreakpointsTool  _breakpointsTool;
-
-    // The WorkspacePane
-    private WorkspacePane  _workspacePane;
 
     // The DebugTool
     private DebugTool  _debugTool;
@@ -56,6 +64,12 @@ public class WorkspaceTools {
 
     // The right side ToolTray
     private ToolTray _rightTray;
+
+    // PropChangeListener for breakpoints
+    private PropChangeListener  _breakpointsLsnr = pc -> breakpointsDidChange(pc);
+
+    // PropChangeListener for BuildIssues
+    private PropChangeListener  _buildIssueLsnr = pc -> buildIssuesDidChange(pc);
 
     /**
      * Constructor.
@@ -95,14 +109,53 @@ public class WorkspaceTools {
         WorkspaceTool[] rightTools = { evalTool, _searchTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
+        _tools = ArrayUtils.addAll(_tools, _bottomTray._trayTools);
+        _tools = ArrayUtils.addAll(_tools, _leftTray._trayTools);
+        _tools = ArrayUtils.addAll(_tools, _rightTray._trayTools);
+
         // Start listening to Breakpoints helper
         Workspace workspace = _workspacePane.getWorkspace();
         Breakpoints breakpoints = workspace.getBreakpoints();
-        breakpoints.addPropChangeListener(pc -> breakpointsDidChange(pc));
+        breakpoints.addPropChangeListener(_breakpointsLsnr);
 
         // Start listening to BuildIssues helper
         BuildIssues buildIssues = workspace.getBuildIssues();
-        buildIssues.addPropChangeListener(pc -> buildIssuesDidChange(pc));
+        buildIssues.addPropChangeListener(_buildIssueLsnr);
+    }
+
+    /**
+     * Sets the workspace.
+     */
+    protected void setWorkspace(Workspace aWorkspace)
+    {
+        if (aWorkspace == _workspace) return;
+
+        // Remove
+        if (_workspace != null) {
+
+            // Remove listeners
+            Breakpoints breakpoints = _workspace.getBreakpoints();
+            breakpoints.removePropChangeListener(_breakpointsLsnr);
+            BuildIssues buildIssues = _workspace.getBuildIssues();
+            buildIssues.removePropChangeListener(_buildIssueLsnr);
+        }
+
+        // Set workspace
+        _workspace = aWorkspace;
+
+        // Add
+        if (_workspace != null) {
+
+            // Add listeners
+            Breakpoints breakpoints = _workspace.getBreakpoints();
+            breakpoints.addPropChangeListener(_breakpointsLsnr);
+            BuildIssues buildIssues = _workspace.getBuildIssues();
+            buildIssues.addPropChangeListener(_buildIssueLsnr);
+
+            // Update tools
+            for (WorkspaceTool tool : _tools)
+                tool._workspace = _workspace;
+        }
     }
 
     /**
@@ -116,19 +169,9 @@ public class WorkspaceTools {
     public FileTreeTool getFileTreeTool()  { return _fileTreeTool; }
 
     /**
-     * Returns the problems tool.
-     */
-    public ProblemsTool getProblemsTool()  { return _problemsTool; }
-
-    /**
      * Returns the RunConsole.
      */
     public RunConsole getRunConsole()  { return _runConsole; }
-
-    /**
-     * Returns the BreakpointsTool.
-     */
-    public BreakpointsTool getBreakpointsTool()  { return _breakpointsTool; }
 
     /**
      * Returns the debug tool.

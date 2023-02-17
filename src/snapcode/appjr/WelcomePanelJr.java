@@ -19,8 +19,6 @@ import snap.web.WebURL;
 import snapcharts.app.DropBox;
 import snapcode.app.PagePane;
 import snapcode.app.WorkspacePane;
-import snapcode.apptools.EvalTool;
-
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -349,10 +347,16 @@ public class WelcomePanelJr extends ViewOwner {
      */
     protected void newFile(boolean showSamples)
     {
-        openWorkspaceForJeplFileSource(null);
+        //WorkspacePane workspacePane = openWorkspaceForJeplFileSource(null);
+        WorkspacePane workspacePane = new WorkspacePane();
+        workspacePane.setWorkspaceForJeplFileSource(null);
+        workspacePane.show();
 
-        //if (showSamples) runLaterDelayed(300, () -> docPane.showSamples());
-        //else runLater(() -> docPane.startSamplesButtonAnim());
+        hide();
+
+        if (showSamples)
+            runLaterDelayed(300, () -> workspacePane.getToolBar().showSamples());
+        else runLater(() -> workspacePane.getToolBar().startSamplesButtonAnim());
     }
 
     /**
@@ -374,10 +378,11 @@ public class WelcomePanelJr extends ViewOwner {
     /**
      * Opens a Jepl Workspace.
      */
-    protected void openWorkspaceForJeplFileSource(Object aSource)
+    protected WorkspacePane openWorkspaceForJeplFileSource(Object aSource)
     {
         // Delete temp project
-        ProjectUtils.deleteTempProject();
+        if (aSource == null)
+            ProjectUtils.deleteTempProject();
 
         // Create new temp file and save
         JeplTextDoc jeplDoc = JeplTextDoc.getJeplTextDocForSourceURL(aSource);
@@ -395,7 +400,7 @@ public class WelcomePanelJr extends ViewOwner {
         WorkspacePane workspacePane = new WorkspacePane(workspace);
         workspacePane.getUI();
         workspacePane.getWorkspaceTools().getLeftTray().setSelTool(null);
-        workspacePane.getWorkspaceTools().getRightTray().setSelToolForClass(EvalTool.class);
+        //workspacePane.getWorkspaceTools().getRightTray().setSelToolForClass(EvalTool.class);
         workspacePane.show();
 
         // Show JeplDoc
@@ -406,6 +411,9 @@ public class WelcomePanelJr extends ViewOwner {
 
         // Hide WelcomePanel
         hide();
+
+        // Return
+        return workspacePane;
     }
 
     /**

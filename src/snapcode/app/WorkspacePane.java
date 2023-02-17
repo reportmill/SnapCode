@@ -1,4 +1,6 @@
 package snapcode.app;
+import javakit.parse.JeplTextDoc;
+import javakit.project.ProjectUtils;
 import javakit.project.Workspace;
 import javakit.project.Project;
 import snap.props.PropChange;
@@ -13,6 +15,7 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.apptools.*;
 import snapcode.project.WorkspaceX;
+import snapcode.util.SamplesPane;
 
 /**
  * This class is the top level controller for an open project.
@@ -80,6 +83,66 @@ public class WorkspacePane extends ViewOwner {
      * Returns the workspace.
      */
     public Workspace getWorkspace()  { return _workspace; }
+
+    /**
+     * Sets the workspace.
+     */
+    public void setWorkspace(Workspace aWorkspace)
+    {
+        if (aWorkspace == _workspace) return;
+
+        // Uninstall
+        Project[] projects = _workspace.getProjects();
+        for (Project proj : projects)
+            workspaceDidRemoveProject(proj);
+
+        // Set
+        _workspace = aWorkspace;
+
+        // Install
+        projects = _workspace.getProjects();
+        for (Project proj : projects)
+            workspaceDidAddProject(proj);
+
+        // Install in tools
+        _workspaceTools.setWorkspace(_workspace);
+    }
+
+    /**
+     * Opens a Jepl Workspace.
+     */
+    public void setWorkspaceForJeplFileSource(Object aSource)
+    {
+        // Delete temp project
+        if (aSource == null)
+            ProjectUtils.deleteTempProject();
+
+        // Create new temp file and save
+        JeplTextDoc jeplDoc = JeplTextDoc.getJeplTextDocForSourceURL(aSource);
+        WebFile sourceFile = jeplDoc.getSourceFile();
+        if (aSource == null) {
+            sourceFile.setText("");
+            sourceFile.save();
+        }
+
+        // Get project/workspace
+        Project project = Project.getProjectForFile(sourceFile);
+        Workspace workspace = project.getWorkspace();
+
+        // Set Workspace
+        setWorkspace(workspace);
+
+        // Create WorkspacePane and show
+        getUI();
+        _workspaceTools.getLeftTray().setSelTool(null);
+        _workspaceTools.getRightTray().setSelToolForClass(EvalTool.class);
+
+        // Show JeplDoc
+        runLater(() -> {
+            PagePane pagePane = getPagePane();
+            pagePane.setSelectedFile(sourceFile);
+        });
+    }
 
     /**
      * Returns the PagePane.

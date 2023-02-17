@@ -9,17 +9,17 @@ import snap.viewx.DialogBox;
 import snap.viewx.DialogSheet;
 import snap.web.WebResponse;
 import snap.web.WebURL;
-import snapcode.appjr.DocPane;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * A class to show samples.
  */
 public class SamplesPane extends ViewOwner {
 
-    // The DocPane
-    private DocPane  _docPane;
+    // A consumer for resulting URL
+    private Consumer<WebURL>  _handler;
 
     // The selected index
     private int  _selIndex;
@@ -45,14 +45,14 @@ public class SamplesPane extends ViewOwner {
     /**
      * Shows the samples pane.
      */
-    public void showSamples(DocPane aDP)
+    public void showSamples(ViewOwner anOwner, Consumer<WebURL> aHandler)
     {
-        _docPane = aDP;
-        ChildView aView = (ChildView) aDP.getUI();
+        View view = anOwner.getUI();
+        _handler = aHandler;
 
         _dialogSheet = new DialogSheet();
         _dialogSheet.setContent(getUI());
-        _dialogSheet.showConfirmDialog(aView);
+        _dialogSheet.showConfirmDialog(view);
         _dialogSheet.addPropChangeListener(pc -> dialogBoxClosed(), DialogBox.Showing_Prop);
     }
 
@@ -64,13 +64,9 @@ public class SamplesPane extends ViewOwner {
         // If cancelled, just return
         if (_dialogSheet.isCancelled()) return;
 
-        // Get selected doc and open
+        // Get selected URL and send to handler
         WebURL url = getDocURL(_selIndex);
-        _docPane.openDocFromSource(url);
-
-        // Kick off run
-        if (!_docPane.getEvalPane().isAutoRun())
-            _docPane.getEvalPane().runApp(false);
+        _handler.accept(url);
     }
 
     /**
@@ -362,5 +358,25 @@ public class SamplesPane extends ViewOwner {
         ImageView iview = getView(name, ImageView.class);
         iview.setImage(anImg);
         iview.setPrefSize(-1, -1);
+    }
+
+    /**
+     * Animate SampleButton.
+     */
+    public static void startSamplesButtonAnim(View samplesButton)
+    {
+        // Configure anim
+        ViewAnim anim = samplesButton.getAnim(0);
+        anim.getAnim(400).setScale(1.3).getAnim(800).setScale(1.1).getAnim(1200).setScale(1.3).getAnim(1600).setScale(1.0)
+                .getAnim(2400).setRotate(360);
+        anim.setLoopCount(3).play();
+    }
+
+    /**
+     * Stops SampleButton animation.
+     */
+    public static void stopSamplesButtonAnim(View samplesButton)
+    {
+        samplesButton.getAnim(0).finish();
     }
 }

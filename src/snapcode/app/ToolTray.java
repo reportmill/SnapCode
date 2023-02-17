@@ -13,7 +13,7 @@ public class ToolTray extends ViewOwner {
     private Side  _side;
 
     // The array of WorkspaceTool instances for this tray
-    private WorkspaceTool[]  _trayTools;
+    protected WorkspaceTool[]  _trayTools;
 
     // The tab view
     private TabView  _tabView;

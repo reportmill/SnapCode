@@ -202,9 +202,6 @@ public class EvalTool extends WorkspaceTool {
         // Handle DeleteButton
         if (anEvent.equals("DeleteButton"))
             _evalView.removeChildren();
-
-        // Handle SamplesButton
-        //if (anEvent.equals("SamplesButton")) _docPane.showSamples();
     }
 
     /**

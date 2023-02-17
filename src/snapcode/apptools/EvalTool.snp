@@ -6,6 +6,5 @@
     </Button>
     <CheckBox Name="AutoRunCheckBox" ToolTip="Automatically run when enter key is pressed" LeanX="RIGHT" Text="Auto Run" />
     <Button Name="DeleteButton" PrefWidth="22" PrefHeight="22" Margin="6" ToolTip="Delete" ShowArea="false" />
-    <Button Name="SamplesButton" PrefWidth="80" Margin="4,12,4,12" Padding="5" LeanX="RIGHT" text="Samples" />
   </RowView>
 </ColView>

@@ -165,7 +165,19 @@ public class DocPane extends ViewOwner {
     {
         stopSamplesButtonAnim();
         hideDrawer();
-        new SamplesPane().showSamples(this);
+        new SamplesPane().showSamples(this, url -> showSamplesDidReturnURL(url));
+    }
+
+    /**
+     * Called when SamplesPane returns a URL.
+     */
+    private void showSamplesDidReturnURL(WebURL aURL)
+    {
+        openDocFromSource(aURL);
+
+        // Kick off run
+        if (!getEvalPane().isAutoRun())
+            getEvalPane().runApp(false);
     }
 
     /**
@@ -394,14 +406,8 @@ public class DocPane extends ViewOwner {
      */
     protected void startSamplesButtonAnim()
     {
-        // Get button
         View samplesButton = _evalPane.getView("SamplesButton");
-
-        // Configure anim
-        ViewAnim anim = samplesButton.getAnim(0);
-        anim.getAnim(400).setScale(1.3).getAnim(800).setScale(1.1).getAnim(1200).setScale(1.3).getAnim(1600).setScale(1.0)
-                .getAnim(2400).setRotate(360);
-        anim.setLoopCount(3).play();
+        SamplesPane.startSamplesButtonAnim(samplesButton);
     }
 
     /**
@@ -410,6 +416,6 @@ public class DocPane extends ViewOwner {
     private void stopSamplesButtonAnim()
     {
         View samplesButton = _evalPane.getView("SamplesButton");
-        samplesButton.getAnim(0).finish();
+        SamplesPane.stopSamplesButtonAnim(samplesButton);
     }
 }
