@@ -1,16 +1,11 @@
 package snapcode.app;
-import javakit.parse.JeplTextDoc;
 import javakit.project.Project;
-import javakit.project.ProjectUtils;
 import javakit.project.Workspace;
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.DialogBox;
-import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.apptools.EvalTool;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -321,11 +316,8 @@ public class WelcomePanel extends ViewOwner {
         }
 
         // Handle NewButton
-        if (anEvent.equals("NewButton")) {
-            if (anEvent.isAltDown())
-                openNewJeplProject();
-            else createSite();
-        }
+        if (anEvent.equals("NewButton"))
+            createSite();
 
         // Handle OpenButton
         if (anEvent.equals("OpenButton")) {
@@ -348,41 +340,6 @@ public class WelcomePanel extends ViewOwner {
         // Handle WinClosing
         if (anEvent.isWinClose())
             quitApp();
-    }
-
-    /**
-     * Creates a new Jepl project.
-     */
-    protected void openNewJeplProject()
-    {
-        // Delete temp project
-        ProjectUtils.deleteTempProject();
-
-        // Create new temp file and save
-        JeplTextDoc jeplDoc = JeplTextDoc.getJeplTextDocForSourceURL(null);
-        WebFile sourceFile = jeplDoc.getSourceFile();
-        sourceFile.setText("");
-        sourceFile.save();
-
-        // Get project/workspace
-        Project project = Project.getProjectForFile(sourceFile);
-        Workspace workspace = project.getWorkspace();
-
-        // Create WorkspacePane and show
-        WorkspacePane workspacePane = new WorkspacePane(workspace);
-        workspacePane.getUI();
-        workspacePane.getWorkspaceTools().getLeftTray().setSelTool(null);
-        workspacePane.getWorkspaceTools().getRightTray().setSelToolForClass(EvalTool.class);
-        workspacePane.show();
-
-        // Show JeplDoc
-        runLater(() -> {
-            PagePane pagePane = workspacePane.getPagePane();
-            pagePane.setSelectedFile(sourceFile);
-        });
-
-        // Hide WelcomePanel
-        hide();
     }
 
     /**
