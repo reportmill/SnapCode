@@ -47,7 +47,7 @@ public class PagePane extends ViewOwner {
     public static final String SelFile_Prop = "SelFile";
 
     // Constant for file tab attributes
-    private static Color TAB_BAR_BORDER_COLOR = Color.GRAY7;
+    private static Color TAB_BAR_BORDER_COLOR = Color.GRAY8;
     private static Font TAB_BAR_FONT = new Font("Arial", 12);
     private static Color TAB_TEXT_COLOR = Color.GRAY2;
 
@@ -281,9 +281,9 @@ public class PagePane extends ViewOwner {
     {
         // Create TabBar for open file buttons
         _tabBar = new TabBar();
-        //_tabBar.setBorder(TAB_BAR_BORDER_COLOR, 1);
         _tabBar.setFont(TAB_BAR_FONT);
         _tabBar.setGrowWidth(true);
+        _tabBar.setTabCloseActionHandler((e,tab) -> handleTabCloseAction(tab));
 
         // Create separator
         RectView separator = new RectView();
@@ -328,7 +328,7 @@ public class PagePane extends ViewOwner {
         _tabBar.setSelIndex(selIndex);
 
         // Update TabBar Visible
-        boolean showTabBar = getOpenFiles().length > 1;
+        boolean showTabBar = getOpenFiles().length > 0;
         if (showTabBar && getOpenFiles().length == 1 && selFile != null && "jepl".equals(selFile.getType()))
             showTabBar = false;
         _tabBar.setVisible(showTabBar);
@@ -408,6 +408,18 @@ public class PagePane extends ViewOwner {
             workspace.setActivity(_browser.getActivity());
         else if (propName == WebBrowser.Loading_Prop)
             workspace.setLoading(_browser.isLoading());
+    }
+
+    /**
+     * Called when TabBar Tab button close box is triggered.
+     */
+    private void handleTabCloseAction(Tab aTab)
+    {
+        int index = ListUtils.indexOfId(_tabBar.getTabs(), aTab);
+        if (index >= 0) {
+            WebFile tabFile = getOpenFiles()[index];
+            removeOpenFile(tabFile);
+        }
     }
 
     /**
