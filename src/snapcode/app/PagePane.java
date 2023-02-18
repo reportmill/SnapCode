@@ -3,15 +3,14 @@
  */
 package snapcode.app;
 import javakit.project.Workspace;
+import snap.gfx.Color;
+import snap.gfx.Font;
 import snap.props.PropChange;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
-import snap.view.ColView;
-import snap.view.View;
-import snap.view.ViewOwner;
+import snap.view.*;
 import snap.viewx.TextPage;
 import snap.viewx.WebBrowser;
-import snap.viewx.WebBrowserHistory;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebResponse;
@@ -28,14 +27,14 @@ public class PagePane extends ViewOwner {
     // The WorkspacePane
     private WorkspacePane  _workspacePane;
 
-    // The Workspace
-    private Workspace  _workspace;
-
     // A list of open files
     List<WebFile>  _openFiles = new ArrayList<>();
 
     // The currently selected file
     private WebFile  _selFile;
+
+    // The TabBar
+    private TabBar  _tabBar;
 
     // The WebBrowser for displaying editors
     private WebBrowser  _browser;
@@ -47,6 +46,11 @@ public class PagePane extends ViewOwner {
     public static final String OpenFiles_Prop = "OpenFiles";
     public static final String SelFile_Prop = "SelFile";
 
+    // Constant for file tab attributes
+    private static Color TAB_BAR_BORDER_COLOR = Color.GRAY7;
+    private static Font TAB_BAR_FONT = new Font("Arial", 12);
+    private static Color TAB_TEXT_COLOR = Color.GRAY2;
+
     /**
      * Constructor.
      */
@@ -54,7 +58,6 @@ public class PagePane extends ViewOwner {
     {
         super();
         _workspacePane = workspacePane;
-        _workspace = workspacePane.getWorkspace();
     }
 
     /**
@@ -94,6 +97,7 @@ public class PagePane extends ViewOwner {
 
         // Fire prop change
         firePropChange(OpenFiles_Prop, null, aFile, _openFiles.size() - 1);
+        buildFileTabs();
     }
 
     /**
@@ -119,6 +123,7 @@ public class PagePane extends ViewOwner {
 
         // Fire prop change
         firePropChange(OpenFiles_Prop, aFile, null, index);
+        buildFileTabs();
     }
 
     /**
@@ -156,6 +161,7 @@ public class PagePane extends ViewOwner {
 
         // Fire prop change
         firePropChange(SelFile_Prop, oldSelFile, _selFile);
+        resetLater();
     }
 
     /**
@@ -227,33 +233,9 @@ public class PagePane extends ViewOwner {
     }
 
     /**
-     * Shows history.
-     */
-    public void showHistory()
-    {
-        // Create History string
-        WebBrowser browser = getBrowser();
-        WebBrowserHistory history = browser.getHistory();
-        StringBuilder sb = new StringBuilder();
-        for (WebURL url : history.getLastURLs())
-            sb.append(url.getString()).append('\n');
-
-        // Create temp file and show
-        WebURL fileURL = WebURL.getURL("/tmp/History.txt");
-        WebFile file = fileURL.createFile(false);
-        file.setText(sb.toString());
-        browser.setFile(file);
-    }
-
-    /**
      * Returns the HomePage URL.
      */
-    public WebURL getHomePageURL()
-    {
-        //WebURL url = SitePane.get(getRootSite()).getHomePageURL();
-        //return url != null ? url : getHomePageURL();
-        return getHomePage().getURL();
-    }
+    public WebURL getHomePageURL()  { return getHomePage().getURL(); }
 
     /**
      * Returns the HomePage.
@@ -297,8 +279,24 @@ public class PagePane extends ViewOwner {
     @Override
     protected View createUI()
     {
-        // Create TabsBox
-        PagePaneTabsBox tabsBox = new PagePaneTabsBox(this);
+        // Create TabBar for open file buttons
+        _tabBar = new TabBar();
+        //_tabBar.setBorder(TAB_BAR_BORDER_COLOR, 1);
+        _tabBar.setFont(TAB_BAR_FONT);
+        _tabBar.setGrowWidth(true);
+
+        // Create separator
+        RectView separator = new RectView();
+        separator.setFill(TAB_BAR_BORDER_COLOR);
+        separator.setPrefHeight(1);
+        ViewUtils.bind(_tabBar, View.Visible_Prop, separator, false);
+
+        // Set PrefHeight so it will show when empty
+        Tab sampleTab = new Tab();
+        sampleTab.setTitle("XXX");
+        _tabBar.addTab(sampleTab);
+        _tabBar.setPrefHeight(_tabBar.getPrefHeight());
+        _tabBar.removeTab(0);
 
         // Create browser
         _browser = new AppBrowser();
@@ -311,17 +309,79 @@ public class PagePane extends ViewOwner {
         colView.setGrowWidth(true);
         colView.setGrowHeight(true);
         colView.setFillWidth(true);
-        colView.setChildren(tabsBox.getUI(), _browser);
+        colView.setChildren(_tabBar, separator, _browser);
 
         // Return
         return colView;
     }
 
     /**
-     * Initialize UI.
+     * ResetUI.
      */
     @Override
-    protected void initUI()  { }
+    protected void resetUI()
+    {
+        // Update TabBar.SelIndex
+        WebFile selFile = getSelectedFile();
+        WebFile[] openFiles = getOpenFiles();
+        int selIndex = ArrayUtils.indexOfId(openFiles, selFile);
+        _tabBar.setSelIndex(selIndex);
+
+        // Update TabBar Visible
+        boolean showTabBar = getOpenFiles().length > 1;
+        if (showTabBar && getOpenFiles().length == 1 && selFile != null && "jepl".equals(selFile.getType()))
+            showTabBar = false;
+        _tabBar.setVisible(showTabBar);
+    }
+
+    /**
+     * Respond UI.
+     */
+    @Override
+    protected void respondUI(ViewEvent anEvent)
+    {
+        // Handle TabBar
+        if (anEvent.getView() == _tabBar) {
+            int selIndex = _tabBar.getSelIndex();
+            WebFile[] openFiles = getOpenFiles();
+            WebFile openFile = selIndex >= 0 ? openFiles[selIndex] : null;
+            getBrowser().setTransition(WebBrowser.Instant);
+            setSelectedFile(openFile);
+        }
+    }
+
+    /**
+     * Builds the file tabs.
+     */
+    private void buildFileTabs()
+    {
+        // If not on event thread, come back on that
+        if (!isEventThread()) {
+            runLater(() -> buildFileTabs());
+            return;
+        }
+
+        // Remove tabs
+        _tabBar.removeTabs();
+
+        // Iterate over OpenFiles, create FileTabs, init and add
+        WebFile[] openFiles = getOpenFiles();
+        for (WebFile file : openFiles) {
+
+            // Create/config/add Tab
+            Tab fileTab = new Tab();
+            fileTab.setTitle(file.getName());
+            fileTab.setClosable(true);
+            _tabBar.addTab(fileTab);
+
+            // Configure Tab.Button
+            ToggleButton tabButton = fileTab.getButton();
+            tabButton.setTextFill(TAB_TEXT_COLOR);
+        }
+
+        // Reset UI
+        resetLater();
+    }
 
     /**
      * Returns whether given file is a project file.
@@ -339,14 +399,15 @@ public class PagePane extends ViewOwner {
     private void browserDidPropChange(PropChange aPC)
     {
         String propName = aPC.getPropName();
+        Workspace workspace = _workspacePane.getWorkspace();
 
         // Handle Activity, Status, Loading
         if (propName == WebBrowser.Status_Prop)
-            _workspace.setStatus(_browser.getStatus());
+            workspace.setStatus(_browser.getStatus());
         else if (propName == WebBrowser.Activity_Prop)
-            _workspace.setActivity(_browser.getActivity());
+            workspace.setActivity(_browser.getActivity());
         else if (propName == WebBrowser.Loading_Prop)
-            _workspace.setLoading(_browser.isLoading());
+            workspace.setLoading(_browser.isLoading());
     }
 
     /**
