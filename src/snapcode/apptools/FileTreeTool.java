@@ -11,6 +11,8 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.app.*;
+import snapcode.util.DiffPage;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -202,7 +204,7 @@ public class FileTreeTool extends WorkspaceTool {
             // Handle MouseClick (double-click): RunSelectedFile
             if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
                 if (getSelFile().isFile()) {
-                    DebugTool debugTool = _workspaceTools.getDebugTool();
+                    DebugTool debugTool = _workspaceTools.getToolForClass(DebugTool.class);
                     debugTool.runConfigOrFile(null, getSelFile(), false);
                 }
             }
@@ -308,11 +310,11 @@ public class FileTreeTool extends WorkspaceTool {
 
         // Handle RunFileMenuItem, DebugFileMenuItem
         if (anEvent.equals("RunFileMenuItem")) {
-            DebugTool debugTool = _workspaceTools.getDebugTool();
+            DebugTool debugTool = _workspaceTools.getToolForClass(DebugTool.class);
             debugTool.runConfigOrFile(null, getSelFile(), false);
         }
         if (anEvent.equals("DebugFileMenuItem")) {
-            DebugTool debugTool = _workspaceTools.getDebugTool();
+            DebugTool debugTool = _workspaceTools.getToolForClass(DebugTool.class);
             debugTool.runConfigOrFile(null, getSelFile(), true);
         }
 

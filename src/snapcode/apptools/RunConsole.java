@@ -36,7 +36,7 @@ public class RunConsole extends WorkspaceTool {
      */
     public RunApp getSelApp()
     {
-        DebugTool debugTool = _workspaceTools.getDebugTool();
+        DebugTool debugTool = _workspaceTools.getToolForClass(DebugTool.class);
         ProcPane procPane = debugTool.getProcPane();
         return procPane.getSelApp();
     }

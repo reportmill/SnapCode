@@ -1,4 +1,4 @@
-package snapcode.app;
+package snapcode.util;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMember;

@@ -16,6 +16,9 @@ import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import snapcode.util.ClassInfoPage;
+import snapcode.views.SnapEditorPage;
+
 import java.util.ArrayList;
 import java.util.List;
 

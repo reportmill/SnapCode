@@ -96,7 +96,7 @@ public class MainToolBar extends WorkspaceTool {
                 _pagePane.setBrowserURL(url);
             }
             else {
-                SearchTool searchTool = _workspaceTools.getSearchTool();
+                SearchTool searchTool = _workspaceTools.getToolForClass(SearchTool.class);
                 searchTool.search(text);
                 _workspaceTools.showToolForClass(SearchTool.class);
             }

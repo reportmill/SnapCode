@@ -6,7 +6,7 @@ import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebSite;
-import snapcode.app.ClassInfoPage;
+import snapcode.util.ClassInfoPage;
 import snapcode.app.ProjectPane;
 import snapcode.app.ProjectTool;
 

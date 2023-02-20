@@ -1,5 +1,4 @@
-package snapcode.app;
-
+package snapcode.project;
 import snap.util.Settings;
 import snap.web.WebFile;
 import snap.web.WebSite;

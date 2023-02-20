@@ -343,6 +343,11 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
+     * Creates a WorkspacePane.
+     */
+    protected WorkspacePane createWorkspacePane()  { return  new WorkspacePaneX(); }
+
+    /**
      * Creates a new Site.
      */
     protected void createSite()
@@ -390,7 +395,7 @@ public class WelcomePanel extends ViewOwner {
     public void openSites()
     {
         // Create WorkspacePane and add selected sites
-        WorkspacePane workspacePane = new WorkspacePane();
+        WorkspacePane workspacePane = createWorkspacePane();
         Workspace workspace = workspacePane.getWorkspace();
 
         WebSite[] projectSites = getSelectedSites();
@@ -430,7 +435,7 @@ public class WelcomePanel extends ViewOwner {
             // Handle local site
             String scheme = selSite.getURL().getScheme();
             if (scheme.equals("local")) {
-                WorkspacePane workspacePane = new WorkspacePane();
+                WorkspacePane workspacePane = createWorkspacePane();
                 Workspace workspace = workspacePane.getWorkspace();
                 Project proj = workspace.addProjectForSite(selSite);
                 ProjectPane projPane = workspacePane.getProjectPaneForProject(proj);
@@ -473,7 +478,7 @@ public class WelcomePanel extends ViewOwner {
             return;
 
         // Create Workspace for site and show
-        WorkspacePane workspacePane = new WorkspacePane();
+        WorkspacePane workspacePane = createWorkspacePane();
         Workspace workspace = workspacePane.getWorkspace();
         workspace.addProjectForSite(projectSite);
         workspacePane.show();

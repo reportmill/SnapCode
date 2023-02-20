@@ -18,52 +18,22 @@ import snapcode.apptools.*;
 public class WorkspaceTools {
 
     // The WorkspacePane
-    private WorkspacePane  _workspacePane;
+    protected WorkspacePane  _workspacePane;
 
     // The Workspace
-    private Workspace  _workspace;
+    protected Workspace  _workspace;
 
     // Array of all tools
     protected WorkspaceTool[]  _tools;
 
-    // The FilesPane
-    protected FilesTool  _filesTool;
-
-    // The FilesPane
-    protected FileTreeTool  _fileTreeTool;
-
-    // The Problems pane
-    private ProblemsTool  _problemsTool;
-
-    // The RunConsole
-    private RunConsole  _runConsole;
-
-    // The BreakpointsTool
-    private BreakpointsTool  _breakpointsTool;
-
-    // The DebugTool
-    private DebugTool  _debugTool;
-
-    // The SearchTool
-    private SearchTool _searchTool;
-
-    // The RunConfigs tool
-    private RunConfigsTool  _runConfigsTool;
-
-    // The HttpServerTool
-    private HttpServerTool  _httpServerTool;
-
-    // The VcsTools
-    private VcsTools  _vcsTools;
-
-    // The bottom side ToolTray
-    private ToolTray _bottomTray;
-
     // The left side ToolTray
-    private ToolTray _leftTray;
+    protected ToolTray  _leftTray;
 
     // The right side ToolTray
-    private ToolTray _rightTray;
+    protected ToolTray  _rightTray;
+
+    // The bottom side ToolTray
+    protected ToolTray  _bottomTray;
 
     // PropChangeListener for breakpoints
     private PropChangeListener  _breakpointsLsnr = pc -> breakpointsDidChange(pc);
@@ -78,6 +48,10 @@ public class WorkspaceTools {
     {
         super();
         _workspacePane = workspacePane;
+        _tools = new WorkspaceTool[0];
+
+        // Set workspace
+        setWorkspace(_workspacePane.getWorkspace());
     }
 
     /**
@@ -85,44 +59,24 @@ public class WorkspaceTools {
      */
     protected void createTools()
     {
-        _filesTool = new FilesTool(_workspacePane);
-        _fileTreeTool = new FileTreeTool(_workspacePane);
+        // Create tools
+        FilesTool filesTool = new FilesTool(_workspacePane);
+        FileTreeTool fileTreeTool = new FileTreeTool(_workspacePane);
+        EvalTool evalTool = new EvalTool(_workspacePane);
         HelpTool helpTool = new HelpTool(_workspacePane);
-
-        _problemsTool = new ProblemsTool(_workspacePane);
-        _runConsole = new RunConsole(_workspacePane);
-        _breakpointsTool = new BreakpointsTool(_workspacePane);
-        _debugTool = new DebugTool(_workspacePane);
-        _searchTool = new SearchTool(_workspacePane);
-        _runConfigsTool = new RunConfigsTool(_workspacePane);
-        _httpServerTool = new HttpServerTool(_workspacePane);
-        _vcsTools = new VcsTools(_workspacePane);
-
-        // Create BottomTray
-        WorkspaceTool[] bottomTools = { _problemsTool, _debugTool, _runConsole, _breakpointsTool, _runConfigsTool, _httpServerTool };
-        _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
+        _tools = new WorkspaceTool[] { filesTool, fileTreeTool, evalTool, helpTool };
 
         // Create LeftTray
-        WorkspaceTool[] leftTools = { _fileTreeTool };
+        WorkspaceTool[] leftTools = { fileTreeTool };
         _leftTray = new ToolTray(Side.LEFT, leftTools);
 
         // Create RightTray
-        EvalTool evalTool = new EvalTool(_workspacePane);
-        WorkspaceTool[] rightTools = { evalTool, _searchTool, helpTool };
+        WorkspaceTool[] rightTools = { evalTool, helpTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
-        _tools = ArrayUtils.addAll(_tools, _bottomTray._trayTools);
-        _tools = ArrayUtils.addAll(_tools, _leftTray._trayTools);
-        _tools = ArrayUtils.addAll(_tools, _rightTray._trayTools);
-
-        // Start listening to Breakpoints helper
-        Workspace workspace = _workspacePane.getWorkspace();
-        Breakpoints breakpoints = workspace.getBreakpoints();
-        breakpoints.addPropChangeListener(_breakpointsLsnr);
-
-        // Start listening to BuildIssues helper
-        BuildIssues buildIssues = workspace.getBuildIssues();
-        buildIssues.addPropChangeListener(_buildIssueLsnr);
+        // Create BottomTray
+        WorkspaceTool[] bottomTools = { };
+        _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
     }
 
     /**
@@ -163,27 +117,12 @@ public class WorkspaceTools {
     /**
      * Returns the files tool.
      */
-    public FilesTool getFilesTool()  { return _filesTool; }
+    public FilesTool getFilesTool()  { return getToolForClass(FilesTool.class); }
 
     /**
      * Returns the FileTreeTool.
      */
-    public FileTreeTool getFileTreeTool()  { return _fileTreeTool; }
-
-    /**
-     * Returns the RunConsole.
-     */
-    public RunConsole getRunConsole()  { return _runConsole; }
-
-    /**
-     * Returns the debug tool.
-     */
-    public DebugTool getDebugTool()  { return _debugTool; }
-
-    /**
-     * Returns the search tool.
-     */
-    public SearchTool getSearchTool()  { return _searchTool; }
+    public FileTreeTool getFileTreeTool()  { return getToolForClass(FileTreeTool.class); }
 
     /**
      * Returns the left side tray.
@@ -235,7 +174,7 @@ public class WorkspaceTools {
      */
     public <T extends WorkspaceTool> T getToolForClass(Class<T> aToolClass)
     {
-        return _bottomTray.getToolForClass(aToolClass);
+        return (T) ArrayUtils.findMatch(_tools, tool -> aToolClass.isInstance(tool));
     }
 
     /**
@@ -243,7 +182,21 @@ public class WorkspaceTools {
      */
     public void showToolForClass(Class<? extends WorkspaceTool> aClass)
     {
-        _bottomTray.setSelToolForClass(aClass);
+        WorkspaceTool workspaceTool = getToolForClass(aClass);
+        showTool(workspaceTool);
+    }
+
+    /**
+     * Sets the selected index for given class.
+     */
+    public void showTool(WorkspaceTool workspaceTool)
+    {
+        if (ArrayUtils.containsId(_leftTray._trayTools, workspaceTool))
+            _leftTray.setSelTool(workspaceTool);
+        else if (ArrayUtils.containsId(_rightTray._trayTools, workspaceTool))
+            _rightTray.setSelTool(workspaceTool);
+        else if (ArrayUtils.containsId(_bottomTray._trayTools, workspaceTool))
+            _bottomTray.setSelTool(workspaceTool);
     }
 
     /**
@@ -259,17 +212,14 @@ public class WorkspaceTools {
     /**
      * Closes the project.
      */
-    public void closeProject()
-    {
-        _httpServerTool.stopServer();
-    }
+    public void closeProject()  { }
 
     /**
      * Called when Workspace.BreakPoints change.
      */
     protected void breakpointsDidChange(PropChange pc)
     {
-        DebugTool debugTool = getDebugTool();
+        DebugTool debugTool = getToolForClass(DebugTool.class);
         debugTool.breakpointsDidChange(pc);
     }
 

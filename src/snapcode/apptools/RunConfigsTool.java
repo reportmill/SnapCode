@@ -1,6 +1,9 @@
 package snapcode.apptools;
 import snap.view.*;
 import snapcode.app.*;
+import snapcode.project.RunConfig;
+import snapcode.project.RunConfigs;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -10,7 +13,7 @@ import java.util.List;
 public class RunConfigsTool extends WorkspaceTool {
 
     // The selected RunConfig
-    private RunConfig  _runConfig;
+    private RunConfig _runConfig;
 
     /**
      * Constructor.

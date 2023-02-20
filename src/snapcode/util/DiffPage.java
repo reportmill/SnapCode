@@ -1,4 +1,4 @@
-package snapcode.app;
+package snapcode.util;
 import javakit.parse.JavaTextDoc;
 import javakit.ide.JavaTextArea;
 import snap.geom.Path;

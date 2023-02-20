@@ -1,4 +1,4 @@
-package snapcode.app;
+package snapcode.views;
 import javakit.ide.JavaTextPane;
 import snap.view.View;
 import snap.view.ViewEvent;
@@ -7,6 +7,7 @@ import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebURL;
+import snapcode.app.JavaPage;
 import snapcode.views.SnapEditorPane;
 
 /**

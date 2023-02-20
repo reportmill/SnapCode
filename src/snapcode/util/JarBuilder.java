@@ -1,4 +1,4 @@
-package snapcode.app;
+package snapcode.util;
 import javakit.project.Project;
 import snap.util.FilePathUtils;
 import snap.web.WebURL;

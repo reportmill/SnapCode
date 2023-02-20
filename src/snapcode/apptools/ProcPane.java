@@ -57,7 +57,7 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     /**
      * Returns the RunConsole.
      */
-    public RunConsole getRunConsole()  { return _workspaceTools.getRunConsole(); }
+    public RunConsole getRunConsole()  { return _workspaceTools.getToolForClass(RunConsole.class); }
 
     /**
      * Returns the DebugVarsPane.

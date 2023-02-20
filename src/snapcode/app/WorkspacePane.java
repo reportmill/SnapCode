@@ -70,7 +70,7 @@ public class WorkspacePane extends ViewOwner {
         _statusBar = new StatusBar(this);
 
         // Create WorkspaceTools
-        _workspaceTools = new WorkspaceTools(this);
+        _workspaceTools = createWorkspaceTools();
         _workspaceTools.createTools();
 
         // Manage projects
@@ -166,6 +166,11 @@ public class WorkspacePane extends ViewOwner {
      * Returns the WorkspaceTools helper.
      */
     public WorkspaceTools getWorkspaceTools()  { return _workspaceTools; }
+
+    /**
+     * Creates the WorkspaceTools.
+     */
+    protected WorkspaceTools createWorkspaceTools()  { return new WorkspaceTools(this); }
 
     /**
      * Returns the toolbar.

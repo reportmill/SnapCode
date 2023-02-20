@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snapcode.app;
+package snapcode.project;
 
 /**
  * A class to represent a RunConfiguration.

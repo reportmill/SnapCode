@@ -11,6 +11,9 @@ import snap.web.WebURL;
 import snapcode.app.*;
 import snapcode.debug.DebugApp;
 import snapcode.debug.RunApp;
+import snapcode.project.RunConfig;
+import snapcode.project.RunConfigs;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

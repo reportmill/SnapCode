@@ -18,6 +18,8 @@ import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebURL;
+import snapcode.views.SnapEditorPage;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -332,7 +334,8 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     {
         if (getWorkspacePane() == null) return;
         WorkspaceTools workspaceTools = getWorkspacePane().getWorkspaceTools();
-        workspaceTools.getSearchTool().searchReference(aNode);
+        SearchTool searchTool = workspaceTools.getToolForClass(SearchTool.class);
+        searchTool.searchReference(aNode);
         workspaceTools.showToolForClass(SearchTool.class);
     }
 
@@ -343,7 +346,8 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     {
         if (getWorkspacePane() == null) return;
         WorkspaceTools workspaceTools = getWorkspacePane().getWorkspaceTools();
-        workspaceTools.getSearchTool().searchDeclaration(aNode);
+        SearchTool searchTool = workspaceTools.getToolForClass(SearchTool.class);
+        searchTool.searchDeclaration(aNode);
         workspaceTools.showToolForClass(SearchTool.class);
     }
 
