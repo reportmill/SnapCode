@@ -1,29 +1,33 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snapcode.util;
+package snapcode.apptools;
+import javakit.ide.JavaTextArea;
 import snap.geom.Insets;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.text.TextDoc;
 import snap.view.*;
 import snap.viewx.TextPane;
+import snap.viewx.WebPage;
 import snap.web.WebURL;
-import snapcode.appjr.DocPane;
+import snapcode.app.JavaPage;
+import snapcode.app.WorkspacePane;
+import snapcode.app.WorkspaceTool;
+import snapcode.util.HelpFile;
+import snapcode.util.HelpSection;
+import snapcode.util.MarkDownDoc;
 
 /**
  * This class shows a help file for the app.
  */
-public class HelpPane extends ViewOwner {
-
-    // The DocPane
-    private DocPane  _docPane;
+public class HelpTool extends WorkspaceTool {
 
     // The HelpFile
-    private HelpFile  _helpFile;
+    private HelpFile _helpFile;
 
     // The selected section
-    private HelpSection  _selSection;
+    private HelpSection _selSection;
 
     // The ListArea showing HelpSections
     private ListArea<HelpSection>  _topicListArea;
@@ -34,10 +38,9 @@ public class HelpPane extends ViewOwner {
     /**
      * Constructor.
      */
-    public HelpPane(DocPane aDocPane)
+    public HelpTool(WorkspacePane workspacePane)
     {
-        super();
-        _docPane = aDocPane;
+        super(workspacePane);
         _helpFile = new HelpFile();
     }
 
@@ -188,11 +191,36 @@ public class HelpPane extends ViewOwner {
      */
     private void addHelpCodeToDoc()
     {
+        // Get Help String
         String helpCode = getHelpCode();
         if (helpCode == null)
             return;
 
-        _docPane.addHelpCode(helpCode);
+        // Get JavaPage (just return if not found)
+        WebPage selPage = _pagePane.getSelPage();
+        JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
+        if (javaPage == null)
+            return;
+
+        // If current line not empty, select end
+        JavaTextArea javaTextArea = javaPage.getTextArea();
+        if (!javaTextArea.getSel().isEmpty() || javaTextArea.getSel().getStartLine().length() > 1)
+            javaTextArea.setSel(javaTextArea.length(), javaTextArea.length());
+
+        // Add help
+        javaTextArea.replaceCharsWithContent(helpCode);
+
+        // Run app
+        EvalTool evalTool = _workspaceTools.getToolForClass(EvalTool.class);
+        if (evalTool != null) {
+
+            _workspaceTools.showToolForClass(EvalTool.class);
+            if (evalTool.isAutoRun())
+                evalTool.runApp(false);
+        }
+
+        // Focus on text area
+        javaTextArea.requestFocus();
     }
 
     /**
@@ -204,7 +232,7 @@ public class HelpPane extends ViewOwner {
 
         // Create run to load real HelpFile and set
         Runnable loadHelpFileRun = () -> {
-            WebURL helpFileURL = WebURL.getURL(getClass(), "HelpFile.md");
+            WebURL helpFileURL = WebURL.getURL(HelpFile.class, "HelpFile.md");
             HelpFile helpFile = new HelpFile(helpFileURL);
             runLater(() -> setHelpFile(helpFile));
         };
@@ -236,4 +264,10 @@ public class HelpPane extends ViewOwner {
         String helpStr = markDown.subSequence(codeRun.startCharIndex, codeRun.endCharIndex).toString();
         return helpStr;
     }
+
+    /**
+     * Returns the tool title.
+     */
+    @Override
+    public String getTitle()  { return "Help"; }
 }

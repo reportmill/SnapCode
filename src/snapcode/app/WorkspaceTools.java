@@ -87,6 +87,8 @@ public class WorkspaceTools {
     {
         _filesTool = new FilesTool(_workspacePane);
         _fileTreeTool = new FileTreeTool(_workspacePane);
+        HelpTool helpTool = new HelpTool(_workspacePane);
+
         _problemsTool = new ProblemsTool(_workspacePane);
         _runConsole = new RunConsole(_workspacePane);
         _breakpointsTool = new BreakpointsTool(_workspacePane);
@@ -106,7 +108,7 @@ public class WorkspaceTools {
 
         // Create RightTray
         EvalTool evalTool = new EvalTool(_workspacePane);
-        WorkspaceTool[] rightTools = { evalTool, _searchTool };
+        WorkspaceTool[] rightTools = { evalTool, _searchTool, helpTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         _tools = ArrayUtils.addAll(_tools, _bottomTray._trayTools);

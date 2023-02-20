@@ -2,7 +2,6 @@ package snapcode.appjr;
 import javakit.ide.JavaTextArea;
 import javakit.parse.JMethodDecl;
 import javakit.parse.JNode;
-import javakit.parse.JeplTextDoc;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.text.TextBoxLine;
@@ -77,8 +76,6 @@ public class EvalPane extends ViewOwner {
             _resetEvalValuesRun = null;
             _autoRunRequested = false;
         }
-
-        _docPane.hideDrawer();
     }
 
     /**

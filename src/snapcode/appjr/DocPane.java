@@ -9,9 +9,7 @@ import snap.props.PropChange;
 import snap.util.SnapUtils;
 import snap.view.*;
 import snap.web.WebURL;
-import snapcode.util.HelpPane;
 import snapcode.util.SamplesPane;
-
 import java.util.Objects;
 
 /**
@@ -33,12 +31,6 @@ public class DocPane extends ViewOwner {
 
     // The MainSplitView
     private SplitView  _mainSplitView;
-
-    // The DrawerView
-    private DrawerView  _drawerView;
-
-    // The HelpPane
-    private HelpPane _helpPane;
 
     // Constants
     public static Color BACK_FILL = Color.WHITE;
@@ -127,41 +119,11 @@ public class DocPane extends ViewOwner {
     public EvalPane getEvalPane()  { return _evalPane; }
 
     /**
-     * Returns the HelpPane.
-     */
-    public HelpPane getHelpPane()
-    {
-        // If already set, just return
-        if (_helpPane != null) return _helpPane;
-
-        // Create, set, return
-        HelpPane helpPane = new HelpPane(this);
-        return _helpPane = helpPane;
-    }
-
-    /**
-     * Shows the Drawer.
-     */
-    public void showDrawer()
-    {
-        _drawerView.show();
-    }
-
-    /**
-     * Hides the Drawer.
-     */
-    public void hideDrawer()
-    {
-        _drawerView.hide();
-    }
-
-    /**
      * Shows samples.
      */
     public void showSamples()
     {
         stopSamplesButtonAnim();
-        hideDrawer();
         new SamplesPane().showSamples(this, url -> showSamplesDidReturnURL(url));
     }
 
@@ -240,12 +202,6 @@ public class DocPane extends ViewOwner {
             if (e.isShortcutDown())
                 ViewUtils.processEvent(menuBar, e);
         }, KeyPress);
-
-        // Get/configure drawer
-        _drawerView = new DrawerView();
-        _drawerView.getDrawerLabel().setText("Help Pane");
-        _drawerView.getTabLabel().setText("Help");
-        _drawerView.showTabButton(docPaneUI);
     }
 
     /**
@@ -254,33 +210,7 @@ public class DocPane extends ViewOwner {
     @Override
     protected void initShowing()
     {
-        // Run app
         runApp();
-
-        // Load HelpPane in background and show
-        runLater(() -> initDrawer());
-    }
-
-    /**
-     * Special init to make sure drawer is right size.
-     */
-    private void initDrawer()
-    {
-        // Install/configure HelpPane for first time
-        HelpPane helpPane = getHelpPane();
-        View helpPaneUI = helpPane.getUI();
-        if (helpPaneUI.getParent() == null) {
-            int HELP_PANE_DEFAULT_WIDTH = 460;
-            int HELP_PANE_DEFAULT_HEIGHT = 530;
-            double docPaneW = getUI().getWidth();
-            double docPaneH = getUI().getHeight();
-            double maxW = Math.round(docPaneW * .4);
-            double maxH = Math.round(docPaneH * .6);
-            double helpW = Math.min(HELP_PANE_DEFAULT_WIDTH, maxW);
-            double helpH = Math.min(HELP_PANE_DEFAULT_HEIGHT, maxH);
-            helpPaneUI.setPrefSize(helpW, helpH);
-            _drawerView.setContent(helpPaneUI);
-        }
     }
 
     /**
@@ -327,13 +257,6 @@ public class DocPane extends ViewOwner {
         // Handle ShowSamplesMenuItem
         if (anEvent.equals("ShowSamplesMenuItem"))
             showSamples();
-
-            // Handle ShowHelpMenuItem
-        else if (anEvent.equals("ShowHelpMenuItem")) {
-            if (_helpPane != null && _helpPane.isShowing())
-                hideDrawer();
-            else showDrawer();
-        }
     }
 
     /**
@@ -376,26 +299,6 @@ public class DocPane extends ViewOwner {
         String propName = aPC.getPropName();
         if (propName == EditPane.TextModified_Prop)
             resetLater();
-    }
-
-    /**
-     * Add HelpCode.
-     */
-    public void addHelpCode(String aString)
-    {
-        // Get JeplTextPane.TextArea
-        TextArea textArea = _editPane.getTextArea();
-
-        // If current line not empty, select end
-        if (!textArea.getSel().isEmpty() || textArea.getSel().getStartLine().length() > 1)
-            textArea.setSel(textArea.length(), textArea.length());
-
-        // Add help
-        textArea.replaceCharsWithContent(aString);
-
-        // Submit entry
-        runApp();
-        textArea.requestFocus();
     }
 
     /**
