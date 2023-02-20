@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RowView PrefHeight="32" Padding="0,12,0,8" Spacing="8">
   <Font Name="Arial" Size="12" />
-  <Button Name="SamplesButton" PrefWidth="80" Margin="4,12,4,12" Padding="5" LeanX="RIGHT" Visible="false" Text="Samples" />
   <ComboBox Name="SearchComboBox" PrefWidth="220" PrefHeight="22" LeanX="RIGHT" ShowTextField="true" ShowButton="false" FilterList="true" />
 </RowView>

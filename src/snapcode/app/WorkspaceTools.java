@@ -8,9 +8,12 @@ import snap.geom.Side;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
+import snap.view.*;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
+import snap.web.WebURL;
 import snapcode.apptools.*;
+import snapcode.util.SamplesPane;
 
 /**
  * This class manages all the WorkspaceTool instances for a WorkspacePane.
@@ -40,6 +43,9 @@ public class WorkspaceTools {
 
     // PropChangeListener for BuildIssues
     private PropChangeListener  _buildIssueLsnr = pc -> buildIssuesDidChange(pc);
+
+    // Samples button
+    private Button  _samplesButton;
 
     /**
      * Constructor.
@@ -77,6 +83,9 @@ public class WorkspaceTools {
         // Create BottomTray
         WorkspaceTool[] bottomTools = { };
         _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
+
+        // Add SamplesButton to RightTray
+        addSamplesButton();
     }
 
     /**
@@ -246,5 +255,80 @@ public class WorkspaceTools {
         // Update FilesPane.FilesTree
         FileTreeTool fileTreeTool = getFileTreeTool();
         fileTreeTool.updateFile(issueFile);
+    }
+
+    /**
+     * Shows samples.
+     */
+    public void showSamples()
+    {
+        stopSamplesButtonAnim();
+        new SamplesPane().showSamples(_workspacePane, url -> showSamplesDidReturnURL(url));
+    }
+
+    /**
+     * Called when SamplesPane returns a URL.
+     */
+    private void showSamplesDidReturnURL(WebURL aURL)
+    {
+        _workspacePane.setWorkspaceForJeplFileSource(aURL);
+
+        // Kick off run
+        EvalTool evalTool = getToolForClass(EvalTool.class);
+        if (evalTool != null && !evalTool.isAutoRun())
+            evalTool.runApp(false);
+    }
+
+    /**
+     * Animate SampleButton.
+     */
+    public void startSamplesButtonAnim()
+    {
+        View samplesButton = getSamplesButton();
+        samplesButton.setVisible(true);
+        SamplesPane.startSamplesButtonAnim(samplesButton);
+    }
+
+    /**
+     * Stops SampleButton animation.
+     */
+    private void stopSamplesButtonAnim()
+    {
+        View samplesButton = getSamplesButton();
+        SamplesPane.stopSamplesButtonAnim(samplesButton);
+    }
+
+    /**
+     * Adds the SamplesButton to RightTray.
+     */
+    private void addSamplesButton()
+    {
+        // Get SamplesButton
+        Button samplesButton = getSamplesButton();
+
+        // Add to RightTray.UI.TabBar.TabsBox
+        TabView tabView = _rightTray.getUI(TabView.class);
+        TabBar tabBar = tabView.getTabBar();
+        ParentView tabsBox = tabBar.getTabsBox();
+        ViewUtils.addChild(tabsBox, samplesButton);
+        tabsBox.setSpacing(4);
+    }
+
+    /**
+     * Adds the SamplesButton to RightTray.
+     */
+    private Button getSamplesButton()
+    {
+        // If already set, just return
+        if (_samplesButton != null) return _samplesButton;
+
+        // Create/config button
+        Button samplesButton = new ViewBuilder<>(Button.class).name("SamplesButton").text("Samples").build();
+        samplesButton.setPrefWidth(80);
+        samplesButton.setPadding(3, 7, 3, 7);
+        samplesButton.addEventHandler(e -> showSamples(), View.Action);
+
+        // Set/return
+        return _samplesButton = samplesButton;
     }
 }

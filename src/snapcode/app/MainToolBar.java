@@ -7,10 +7,7 @@ import snap.viewx.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.apptools.EvalTool;
 import snapcode.apptools.SearchTool;
-import snapcode.util.SamplesPane;
-
 import java.util.*;
 
 /**
@@ -69,10 +66,6 @@ public class MainToolBar extends WorkspaceTool {
         // Handle SearchComboBox
         if (anEvent.equals("SearchComboBox"))
             handleSearchComboBox(anEvent);
-
-        // Handle SamplesButton
-        if (anEvent.equals("SamplesButton"))
-            showSamples();
     }
 
     /**
@@ -104,48 +97,6 @@ public class MainToolBar extends WorkspaceTool {
 
         // Clear SearchComboBox
         setViewText("SearchComboBox", null);
-    }
-
-    /**
-     * Shows samples.
-     */
-    public void showSamples()
-    {
-        stopSamplesButtonAnim();
-        new SamplesPane().showSamples(_workspacePane, url -> showSamplesDidReturnURL(url));
-    }
-
-    /**
-     * Called when SamplesPane returns a URL.
-     */
-    public void showSamplesDidReturnURL(WebURL aURL)
-    {
-        _workspacePane.setWorkspaceForJeplFileSource(aURL);
-
-        // Kick off run
-        _workspaceTools = _workspacePane.getWorkspaceTools();
-        EvalTool evalTool = _workspaceTools.getToolForClass(EvalTool.class);
-        if (evalTool != null && !evalTool.isAutoRun())
-            evalTool.runApp(false);
-    }
-
-    /**
-     * Animate SampleButton.
-     */
-    public void startSamplesButtonAnim()
-    {
-        View samplesButton = getView("SamplesButton");
-        samplesButton.setVisible(true);
-        SamplesPane.startSamplesButtonAnim(samplesButton);
-    }
-
-    /**
-     * Stops SampleButton animation.
-     */
-    private void stopSamplesButtonAnim()
-    {
-        View samplesButton = getView("SamplesButton");
-        SamplesPane.stopSamplesButtonAnim(samplesButton);
     }
 
     /**

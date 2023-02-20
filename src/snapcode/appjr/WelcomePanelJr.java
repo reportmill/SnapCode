@@ -351,8 +351,8 @@ public class WelcomePanelJr extends ViewOwner {
         WorkspacePane workspacePane = openWorkspaceForJeplFileSource(null);
 
         if (showSamples)
-            runLaterDelayed(300, () -> workspacePane.getToolBar().showSamples());
-        else runLater(() -> workspacePane.getToolBar().startSamplesButtonAnim());
+            runLaterDelayed(300, () -> workspacePane.getWorkspaceTools().showSamples());
+        else runLater(() -> workspacePane.getWorkspaceTools().startSamplesButtonAnim());
     }
 
     /**
