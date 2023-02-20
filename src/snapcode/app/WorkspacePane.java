@@ -137,8 +137,10 @@ public class WorkspacePane extends ViewOwner {
 
         // Create WorkspacePane and show
         getUI();
+        _workspaceTools.setShowLeftTray(false);
         _workspaceTools.getLeftTray().setSelTool(null);
         _workspaceTools.getRightTray().setSelToolForClass(EvalTool.class);
+        _workspaceTools.setShowBottomTray(false);
 
         // Show JeplDoc
         runLater(() -> {
@@ -333,6 +335,17 @@ public class WorkspacePane extends ViewOwner {
         TabView bottomTrayUI = (TabView) bottomTray.getUI();
         mainSplit.addItem(bottomTrayUI);
 
+        // Configure Left/Right/BottomTrayMenuItem.Text to update with Left/Right/BottomTrayUI.Visible
+        View showLeftTrayMenuItem = getView("ShowLeftTrayMenuItem");
+        String showLeftTrayKey = "Visible ? \"Hide Left Tray\" : \"Show Left Tray\"";
+        ViewUtils.bindExpr(leftTrayUI, View.Visible_Prop, showLeftTrayMenuItem, View.Text_Prop, showLeftTrayKey);
+        View showRightTrayMenuItem = getView("ShowRightTrayMenuItem");
+        String showRightTrayKey = "Visible ? \"Hide Right Tray\" : \"Show Right Tray\"";
+        ViewUtils.bindExpr(rightTrayUI, View.Visible_Prop, showRightTrayMenuItem, View.Text_Prop, showRightTrayKey);
+        View showBottomTrayMenuItem = getView("ShowBottomTrayMenuItem");
+        String showBottomTrayKey = "Visible ? \"Hide Bottom Tray\" : \"Show Bottom Tray\"";
+        ViewUtils.bindExpr(bottomTrayUI, View.Visible_Prop, showBottomTrayMenuItem, View.Text_Prop, showBottomTrayKey);
+
         // Add StatusBar
         TabBar tabBar = bottomTrayUI.getTabBar();
         _statusBar.addToView(tabBar);
@@ -389,6 +402,14 @@ public class WorkspacePane extends ViewOwner {
             _pagePane.removeOpenFile(getSelFile());
             anEvent.consume();
         }
+
+        // Handle ShowLeftTrayMenuItem, ShowRightTrayMenuItem, ShowBottomTrayMenuItem
+        if (anEvent.equals("ShowLeftTrayMenuItem"))
+            _workspaceTools.setShowLeftTray(!_workspaceTools.isShowLeftTray());
+        if (anEvent.equals("ShowRightTrayMenuItem"))
+            _workspaceTools.setShowRightTray(!_workspaceTools.isShowRightTray());
+        if (anEvent.equals("ShowBottomTrayMenuItem"))
+            _workspaceTools.setShowBottomTray(!_workspaceTools.isShowBottomTray());
 
         // Handle ShowJavaHomeMenuItem
         if (anEvent.equals("ShowJavaHomeMenuItem")) {

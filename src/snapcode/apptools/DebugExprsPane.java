@@ -57,7 +57,8 @@ public class DebugExprsPane extends WorkspaceTool {
         c1.setPrefWidth(150);
         c1.setGrowWidth(true);
         _varTree.addCol(c1);
-        _varTree.setResolver(new DebugVarsPane.VarTreeResolver()); //_varTree.setEditable(true);
+        TreeResolver<ExprTreeItem> resolver = (TreeResolver<ExprTreeItem>) (TreeResolver<?>) new DebugVarsPane.VarTreeResolver();
+        _varTree.setResolver(resolver); //_varTree.setEditable(true);
 
         // Set default item
         _exprItems.add(new ExprTreeItem("this"));

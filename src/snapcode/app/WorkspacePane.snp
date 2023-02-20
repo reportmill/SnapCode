@@ -21,6 +21,11 @@
         <MenuItem Name="PasteMenuItem" Text="Paste" key="Shortcut+V" />
         <MenuItem Name="SelectAllMenuItem" Text="Select All" key="Shortcut+A" />
       </Menu>
+      <Menu Name="ToolsMenu" Text="Tools">
+        <MenuItem Name="ShowLeftTrayMenuItem" Text="Hide Left Tray" />
+        <MenuItem Name="ShowRightTrayMenuItem" Text="Hide Right Tray" />
+        <MenuItem Name="ShowBottomTrayMenuItem" Text="Hide Bottom Tray" />
+      </Menu>
       <Menu Name="HelpMenu" Text="Help">
         <MenuItem Name="SupportPageMenuItem" Text="Support Page" />
         <MenuItem Name="JavaDocMenuItem" Text="Tutorial" />

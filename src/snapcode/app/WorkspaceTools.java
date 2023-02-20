@@ -184,11 +184,6 @@ public class WorkspaceTools {
     public SearchTool getSearchTool()  { return _searchTool; }
 
     /**
-     * Returns the support tray.
-     */
-    public ToolTray getBottomTray()  { return _bottomTray; }
-
-    /**
      * Returns the left side tray.
      */
     public ToolTray getLeftTray()  { return _leftTray; }
@@ -197,6 +192,41 @@ public class WorkspaceTools {
      * Returns the right side tray.
      */
     public ToolTray getRightTray()  { return _rightTray; }
+
+    /**
+     * Returns the support tray.
+     */
+    public ToolTray getBottomTray()  { return _bottomTray; }
+
+    /**
+     * Returns whether left tray should be showing.
+     */
+    public boolean isShowLeftTray()  { return _leftTray.getUI().isVisible(); }
+
+    /**
+     * Sets whether left tray should be showing.
+     */
+    public void setShowLeftTray(boolean aValue)  { _leftTray.getUI().setVisible(aValue); }
+
+    /**
+     * Returns whether right tray should be showing.
+     */
+    public boolean isShowRightTray()  { return _rightTray.getUI().isVisible(); }
+
+    /**
+     * Sets whether right tray should be showing.
+     */
+    public void setShowRightTray(boolean aValue)  { _rightTray.getUI().setVisible(aValue); }
+
+    /**
+     * Returns whether bottom tray should be showing.
+     */
+    public boolean isShowBottomTray()  { return _bottomTray.getUI().isVisible(); }
+
+    /**
+     * Sets whether bottom tray should be showing.
+     */
+    public void setShowBottomTray(boolean aValue)  { _bottomTray.getUI().setVisible(aValue); }
 
     /**
      * Returns the tool for given class.

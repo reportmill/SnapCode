@@ -181,10 +181,14 @@ public class FileTreeTool extends WorkspaceTool {
 
             // Handle PopupTrigger
             if (anEvent.isPopupTrigger()) {
-                List<MenuItem> mitems = getView("MenuButton", MenuButton.class).getItems();
-                List<MenuItem> mitems2 = ViewUtils.copyMenuItems(mitems);
+                MenuButton menuButton = getView("MenuButton", MenuButton.class);
+                List<MenuItem> menuItems = menuButton.getItems();
+                ViewArchiver viewArchiver = new ViewArchiver();
                 Menu menu = new Menu();
-                for (MenuItem mi : mitems2) menu.addItem(mi);
+                for (MenuItem mi : menuItems) {
+                    MenuItem menuItemCopy = viewArchiver.copy(mi);
+                    menu.addItem(menuItemCopy);
+                }
                 menu.setOwner(this);
                 menu.show(anEvent.getView(), anEvent.getX(), anEvent.getY());
             }
