@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snapcode.appjr;
+package snapcode.apptools;
 import javakit.ide.JavaTextPane;
 import javakit.parse.JeplTextDoc;
 import javakit.project.BuildIssue;
@@ -10,6 +10,11 @@ import javakit.runner.JavaShell;
 import snap.geom.HPos;
 import snap.gfx.Color;
 import snap.view.*;
+import snap.viewx.WebPage;
+import snapcode.app.JavaPage;
+import snapcode.app.PagePane;
+import snapcode.app.WorkspacePane;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,8 +24,8 @@ import java.util.Map;
  */
 public class EvalView extends ColView implements JavaShell.ShellClient {
 
-    // The EvalPane
-    private ViewOwner  _evalPane;
+    // The EvalTool
+    private EvalTool  _evalTool;
 
     // The JavaShell
     protected JavaShell  _javaShell;
@@ -46,9 +51,9 @@ public class EvalView extends ColView implements JavaShell.ShellClient {
     /**
      * Constructor.
      */
-    public EvalView(ViewOwner anEvalPane)
+    public EvalView(EvalTool evalTool)
     {
-        _evalPane = anEvalPane;
+        _evalTool = evalTool;
         setSpacing(6);
         setFill(new Color(.98));
 
@@ -62,8 +67,11 @@ public class EvalView extends ColView implements JavaShell.ShellClient {
 
     public JavaTextPane<?> getJavaTextPane()
     {
-        EvalPane evalPane = (EvalPane) _evalPane;
-        return evalPane.getDocPane()._editPane;
+        WorkspacePane workspacePane = _evalTool.getWorkspacePane();
+        PagePane pagePane = workspacePane.getPagePane();
+        WebPage selPage = pagePane.getSelPage();
+        JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
+        return javaPage != null ? javaPage.getTextPane() : null;
     }
 
     public JeplTextDoc getJeplDoc()
@@ -105,7 +113,7 @@ public class EvalView extends ColView implements JavaShell.ShellClient {
         ViewUtils.runDelayed(() -> handleExtendedRun(), 500, true);
 
         // Reset EvalPane
-        _evalPane.resetLater();
+        _evalTool.resetLater();
     }
 
     /**
@@ -153,7 +161,7 @@ public class EvalView extends ColView implements JavaShell.ShellClient {
         _runAppThread = null;
 
         // Reset EvalPane
-        _evalPane.resetLater();
+        _evalTool.resetLater();
     }
 
     /**

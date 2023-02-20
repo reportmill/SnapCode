@@ -311,7 +311,7 @@ public class WorkspaceTools {
         TabBar tabBar = tabView.getTabBar();
         ParentView tabsBox = tabBar.getTabsBox();
         ViewUtils.addChild(tabsBox, samplesButton);
-        tabsBox.setSpacing(4);
+        tabsBox.setSpacing(6);
     }
 
     /**
@@ -325,6 +325,7 @@ public class WorkspaceTools {
         // Create/config button
         Button samplesButton = new ViewBuilder<>(Button.class).name("SamplesButton").text("Samples").build();
         samplesButton.setPrefWidth(80);
+        samplesButton.setMargin(2, 0, 2, 0);
         samplesButton.setPadding(3, 7, 3, 7);
         samplesButton.addEventHandler(e -> showSamples(), View.Action);
 

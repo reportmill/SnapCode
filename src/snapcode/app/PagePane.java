@@ -18,7 +18,6 @@ import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.util.ClassInfoPage;
 import snapcode.views.SnapEditorPage;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,9 +40,6 @@ public class PagePane extends ViewOwner {
 
     // The WebBrowser for displaying editors
     private WebBrowser  _browser;
-
-    // The default HomePage
-    private HomePage  _homePage;
 
     // Constants for properties
     public static final String OpenFiles_Prop = "OpenFiles";
@@ -119,8 +115,7 @@ public class PagePane extends ViewOwner {
         // If removed file is selected file, set browser file to last file (that is still in OpenFiles list)
         if (aFile == _selFile) {
             WebURL url = getFallbackURL();
-            if (!url.equals(getHomePageURL()))
-                getBrowser().setTransition(WebBrowser.Instant);
+            getBrowser().setTransition(WebBrowser.Instant);
             getBrowser().setURL(url);
         }
 
@@ -229,31 +224,6 @@ public class PagePane extends ViewOwner {
     }
 
     /**
-     * Shows the home page.
-     */
-    public void showHomePage()
-    {
-        WebURL url = getHomePageURL();
-        _browser.setURL(url);
-    }
-
-    /**
-     * Returns the HomePage URL.
-     */
-    public WebURL getHomePageURL()  { return getHomePage().getURL(); }
-
-    /**
-     * Returns the HomePage.
-     */
-    public HomePage getHomePage()
-    {
-        if (_homePage != null) return _homePage;
-        _homePage = new HomePage();
-        setPageForURL(_homePage.getURL(), _homePage);
-        return _homePage;
-    }
-
-    /**
      * Returns the URL to fallback on when open file is closed.
      */
     private WebURL getFallbackURL()
@@ -275,7 +245,7 @@ public class PagePane extends ViewOwner {
         }
 
         // Return
-        return getHomePageURL();
+        return null;
     }
 
     /**

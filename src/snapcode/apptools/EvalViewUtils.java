@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snapcode.appjr;
+package snapcode.apptools;
 import javakit.parse.NodeError;
 import javakit.project.BuildIssue;
 import snap.gfx.Color;

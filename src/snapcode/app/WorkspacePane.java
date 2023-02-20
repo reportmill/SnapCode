@@ -13,6 +13,7 @@ import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
+import snap.web.WebURL;
 import snapcode.appjr.JeplUtils;
 import snapcode.apptools.*;
 import snapcode.project.WorkspaceX;
@@ -217,6 +218,11 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
+     * Returns the home page URL.
+     */
+    public WebURL getHomePageURL()  { return null; }
+
+    /**
      * Returns the selected file.
      */
     public WebFile getSelFile()  { return _pagePane.getSelectedFile(); }
@@ -264,7 +270,9 @@ public class WorkspacePane extends ViewOwner {
             projPane.openSite();
 
         // Show HomePage
-        _pagePane.showHomePage();
+        WebURL homePageURL = getHomePageURL();
+        if (homePageURL != null)
+            _pagePane.setBrowserURL(homePageURL);
     }
 
     /**

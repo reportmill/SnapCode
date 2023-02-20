@@ -21,14 +21,8 @@ public class App {
         ViewTheme.setThemeForName("Light");
 
         // Show WelcomePanel
-        if (true) {
-            WelcomePanelJr.getShared().setOnQuit(() -> quitApp());
-            WelcomePanelJr.getShared().showPanel();
-        }
-        else {
-            WelcomePanel.getShared().setOnQuit(() -> quitApp());
-            WelcomePanel.getShared().showPanel();
-        }
+        WelcomePanel.getShared().setOnQuit(() -> quitApp());
+        WelcomePanel.getShared().showPanel();
     }
 
     /**

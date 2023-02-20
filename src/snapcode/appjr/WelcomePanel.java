@@ -13,6 +13,7 @@ import snap.viewx.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcharts.app.DropBox;
+import snapcode.app.WorkspacePane;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -43,13 +44,15 @@ public class WelcomePanel extends ViewOwner {
     private TableView<WebFile>  _sitesTable;
 
     // The shared instance
-    private static WelcomePanel  _shared;
+    private static WelcomePanel _shared;
 
     // Constants
     private static final String FILE_SYSTEM = "FileSystem";
     private static final String FILE_SYSTEM_LOCAL = "FileSystemLocal";
     private static final String FILE_SYSTEM_CLOUD = "FileSystemCloud";
     private static final String USER_EMAIL = "UserEmail";
+    public static final String JAVA_FILE_EXT = "jepl";
+    public static final String RECENT_FILES_ID = "RecentJeplDocs";
 
     /**
      * Constructor.
@@ -65,6 +68,9 @@ public class WelcomePanel extends ViewOwner {
 
         // Set as Shared (there should only be one instance)
         _shared = this;
+
+        //
+        JeplUtils.initJavaKitForThisApp();
     }
 
     /**
@@ -281,7 +287,7 @@ public class WelcomePanel extends ViewOwner {
         // Handle OpenButton or SitesTable double-click
         if (anEvent.equals("OpenButton") || anEvent.equals("SitesTable") && anEvent.getClickCount() > 1) {
             WebFile file = (WebFile) getViewSelItem("SitesTable");
-            openFile(file);
+            openWorkspaceForJeplFileSource(file);
         }
 
         // Handle QuitButton
@@ -332,13 +338,12 @@ public class WelcomePanel extends ViewOwner {
      */
     protected void newFile(boolean showSamples)
     {
-        DocPane docPane = newDocPane();
-        docPane.setWindowVisible(true);
-        hide();
+        // Show jepl
+        WorkspacePane workspacePane = openWorkspaceForJeplFileSource(null);
 
         if (showSamples)
-            runLaterDelayed(300, () -> docPane.showSamples());
-        else runLater(() -> docPane.startSamplesButtonAnim());
+            runLaterDelayed(300, () -> workspacePane.getWorkspaceTools().showSamples());
+        else runLater(() -> workspacePane.getWorkspaceTools().startSamplesButtonAnim());
     }
 
     /**
@@ -346,37 +351,32 @@ public class WelcomePanel extends ViewOwner {
      */
     public void showOpenPanel()
     {
-        // Have DocPane run open panel (if no doc opened, just return)
-        DocPane docPane = newDocPane();
-        docPane = docPane.showOpenPanel(getUI());
-        if (docPane == null)
+        // Get path from open panel for supported file extensions
+        String[] extensions = { JAVA_FILE_EXT };
+        String path = FilePanel.showOpenPanel(getUI(), "Snap Java File", extensions);
+        if (path == null)
             return;
 
-        // Make editor window visible and hide welcome panel
-        docPane.setWindowVisible(true);
-        hide();
+        // Show jepl
+        openWorkspaceForJeplFileSource(path);
     }
 
     /**
-     * Opens selected file.
+     * Opens a Jepl Workspace.
      */
-    public void openFile(Object aSource)
+    protected WorkspacePane openWorkspaceForJeplFileSource(Object aSource)
     {
-        // Have DocPane run open panel (if no doc opened, just return)
-        DocPane docPane = newDocPane();
-        docPane = docPane.openDocFromSource(aSource);
-        if (docPane == null)
-            return;
+        // Create WorkspacePane, set Jepl source, show
+        WorkspacePane workspacePane = new WorkspacePane();
+        workspacePane.setWorkspaceForJeplFileSource(aSource);
+        workspacePane.show();
 
-        // Make editor window visible and hide welcome panel
-        docPane.setWindowVisible(true);
+        // Hide WelcomePanel
         hide();
-    }
 
-    /**
-     * Creates the DocPane (as a hook, so it can be overridden).
-     */
-    protected DocPane newDocPane()  { return new DocPane(); }
+        // Return
+        return workspacePane;
+    }
 
     /**
      * Returns the list of the recent documents as a list of strings.
@@ -393,7 +393,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Handle Local
         if (!isCloud()) {
-            WebFile[] recentFiles = RecentFiles.getFiles(DocPaneDocHpr.RECENT_FILES_ID);
+            WebFile[] recentFiles = RecentFiles.getFiles(RECENT_FILES_ID);
             return _recentFiles = recentFiles;
         }
 
@@ -418,7 +418,7 @@ public class WelcomePanel extends ViewOwner {
         DropBox dropBox = getDropBox();
         WebFile[] dropBoxfiles = dropBox.getRootDir().getFiles();
         Stream<WebFile> dropBoxfilesStream = Stream.of(dropBoxfiles);
-        Stream<WebFile> jeplFilesStream = dropBoxfilesStream.filter(f -> DocPaneDocHpr.JAVA_FILE_EXT.equals(f.getType()));
+        Stream<WebFile> jeplFilesStream = dropBoxfilesStream.filter(f -> JAVA_FILE_EXT.equals(f.getType()));
         WebFile[] jeplFiles = jeplFilesStream.toArray(size -> new WebFile[size]);
 
         // Set files and trigger reload
@@ -522,7 +522,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Clear RecentFile
         String filePath = file.getURL().getString();
-        RecentFiles.removePath(DocPaneDocHpr.RECENT_FILES_ID, filePath);
+        RecentFiles.removePath(RECENT_FILES_ID, filePath);
 
         // Clear RecentFiles, SelFile and trigger reset
         _recentFiles = null;
