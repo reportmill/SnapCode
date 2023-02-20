@@ -142,6 +142,9 @@ public class WorkspacePane extends ViewOwner {
         _workspaceTools.getRightTray().setSelToolForClass(EvalTool.class);
         _workspaceTools.setShowBottomTray(false);
 
+        // Clear PagePane
+        _pagePane.removeAllOpenFilesExcept(null);
+
         // Show JeplDoc
         runLater(() -> {
             PagePane pagePane = getPagePane();

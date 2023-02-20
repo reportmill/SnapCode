@@ -69,7 +69,7 @@ public class FileTreeTool extends WorkspaceTool {
     /**
      * Returns an AppFile for given WebFile.
      */
-    public FileTreeFile getAppFile(WebFile aFile)
+    public FileTreeFile getTreeFile(WebFile aFile)
     {
         // Handle null
         if (aFile == null) return null;
@@ -80,13 +80,14 @@ public class FileTreeTool extends WorkspaceTool {
             return ListUtils.findMatch(rootFiles, treeFile -> treeFile.getFile() == aFile);
         }
 
-        // Otherwise, getAppFile for sucessive parents and search them for this file
-        for (WebFile par = aFile.getParent(); par != null; par = par.getParent()) {
-            FileTreeFile apar = getAppFile(par);
-            if (apar != null) // && _filesTree.isExpanded(apar))
-                for (FileTreeFile af : apar.getChildren())
-                    if (aFile == af.getFile())
-                        return af;
+        // Otherwise, getTreeFile for sucessive parents and search them for this file
+        for (WebFile parentFile = aFile.getParent(); parentFile != null; parentFile = parentFile.getParent()) {
+            FileTreeFile parentTreeFile = getTreeFile(parentFile);
+            if (parentTreeFile != null) {
+                for (FileTreeFile treeFile : parentTreeFile.getChildren())
+                    if (aFile == treeFile.getFile())
+                        return treeFile;
+            }
         }
 
         // Return not found
@@ -98,20 +99,24 @@ public class FileTreeTool extends WorkspaceTool {
      */
     public void updateFile(WebFile aFile)
     {
+        // Iterate up parent files and clear parent TreeFile.Children
         List<FileTreeFile> treeFiles = new ArrayList<>();
-        for (WebFile file = aFile; file != null; file = file.getParent()) {
-            FileTreeFile afile = getAppFile(file);
-            if (afile != null) {
-                treeFiles.add(afile);
-                if (file == aFile)
-                    afile._children = null;
+        for (WebFile parentFile = aFile; parentFile != null; parentFile = parentFile.getParent()) {
+            FileTreeFile parentTreeFile = getTreeFile(parentFile);
+            if (parentTreeFile != null) {
+                treeFiles.add(parentTreeFile);
+                if (parentFile == aFile)
+                    parentTreeFile._children = null;
             }
         }
 
+        // Update items
         if (_filesTree != null) {
             _filesTree.updateItems(treeFiles.toArray(new FileTreeFile[0]));
             _filesList.updateItems(treeFiles.toArray(new FileTreeFile[0]));
         }
+
+        // Reset UI
         if (aFile.isDir())
             resetLater();
     }
@@ -159,16 +164,17 @@ public class FileTreeTool extends WorkspaceTool {
     public void resetUI()
     {
         // Repaint tree
-        WebFile file = getSelFile();
-        FileTreeFile afile = getAppFile(file);
-        _filesTree.setItems(getRootFiles());
-        _filesTree.setSelItem(afile);
+        WebFile selFile = getSelFile();
+        FileTreeFile selTreeFile = getTreeFile(selFile);
+        List<FileTreeFile> rootTreeFiles = getRootFiles();
+        _filesTree.setItems(rootTreeFiles);
+        _filesTree.setSelItem(selTreeFile);
 
         // Update FilesList
         WebFile[] openFiles = _pagePane.getOpenFiles();
-        FileTreeFile[] treeFiles = ArrayUtils.map(openFiles, openFile -> getAppFile(openFile), FileTreeFile.class);
+        FileTreeFile[] treeFiles = ArrayUtils.map(openFiles, openFile -> getTreeFile(openFile), FileTreeFile.class);
         _filesList.setItems(treeFiles);
-        _filesList.setSelItem(afile);
+        _filesList.setSelItem(selTreeFile);
     }
 
     /**

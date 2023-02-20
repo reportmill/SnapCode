@@ -131,8 +131,10 @@ public class PagePane extends ViewOwner {
      */
     public void removeAllOpenFilesExcept(WebFile aFile)
     {
-        for (WebFile file : _openFiles.toArray(new WebFile[0]))
-            if (file != aFile) removeOpenFile(file);
+        WebFile[] openFilesCopy = _openFiles.toArray(new WebFile[0]);
+        for (WebFile openFile : openFilesCopy)
+            if (openFile != aFile)
+                removeOpenFile(openFile);
     }
 
     /**
