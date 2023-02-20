@@ -10,8 +10,14 @@ public class WorkspacePaneX extends WorkspacePane {
     private HomePage  _homePage;
 
     /**
+     * Creates the PagePane.
+     */
+    protected PagePane createPagePane()  { return new PagePaneX(this); }
+
+    /**
      * Creates the WorkspaceTools.
      */
+    @Override
     protected WorkspaceTools createWorkspaceTools()  { return new WorkspaceToolsX(this); }
 
     /**

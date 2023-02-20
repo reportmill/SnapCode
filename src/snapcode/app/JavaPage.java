@@ -8,18 +8,13 @@ import javakit.resolver.JavaMember;
 import javakit.parse.JavaTextDoc;
 import snap.util.Convert;
 import snap.util.ListUtils;
-import snapcode.apptools.ProcPane;
-import snapcode.apptools.SearchTool;
 import snap.text.TextBoxLine;
 import snap.view.View;
-import snap.view.ViewEvent;
 import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebURL;
-import snapcode.views.SnapEditorPage;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -29,7 +24,7 @@ import java.util.Objects;
 public class JavaPage extends WebPage implements WebFile.Updater {
 
     // The JavaTextPane
-    private JavaTextPane<?>  _javaTextPane = new JPJavaTextPane();
+    private JavaTextPane<?>  _javaTextPane;
 
     /**
      * Constructor.
@@ -37,6 +32,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     public JavaPage()
     {
         super();
+        _javaTextPane = createJavaTextPane();
     }
 
     /**
@@ -52,6 +48,11 @@ public class JavaPage extends WebPage implements WebFile.Updater {
      * Returns the JavaTextArea.
      */
     public JavaTextPane<?> getTextPane()  { return _javaTextPane; }
+
+    /**
+     * Creates the JavaTextPane.
+     */
+    protected JavaTextPane<?> createJavaTextPane()  { return new JPJavaTextPane(); }
 
     /**
      * Returns the JavaTextArea.
@@ -195,20 +196,6 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     }
 
     /**
-     * Reopen this page as SnapCodePage.
-     */
-    public void openAsSnapCode()
-    {
-        WebFile file = getFile();
-        WebURL url = file.getURL();
-        WebPage page = new SnapEditorPage(this);
-        page.setFile(file);
-        WebBrowser browser = getBrowser();
-        browser.setPageForURL(url, page);
-        browser.setURL(file.getURL());
-    }
-
-    /**
      * Creates a new file for use with showNewFilePanel method.
      */
     protected WebFile createNewFile(String aPath)
@@ -330,26 +317,12 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     /**
      * Show references for given node.
      */
-    private void showReferences(JNode aNode)
-    {
-        if (getWorkspacePane() == null) return;
-        WorkspaceTools workspaceTools = getWorkspacePane().getWorkspaceTools();
-        SearchTool searchTool = workspaceTools.getToolForClass(SearchTool.class);
-        searchTool.searchReference(aNode);
-        workspaceTools.showToolForClass(SearchTool.class);
-    }
+    protected void showReferences(JNode aNode)  { }
 
     /**
      * Show declarations for given node.
      */
-    private void showDeclarations(JNode aNode)
-    {
-        if (getWorkspacePane() == null) return;
-        WorkspaceTools workspaceTools = getWorkspacePane().getWorkspaceTools();
-        SearchTool searchTool = workspaceTools.getToolForClass(SearchTool.class);
-        searchTool.searchDeclaration(aNode);
-        workspaceTools.showToolForClass(SearchTool.class);
-    }
+    protected void showDeclarations(JNode aNode)  { }
 
     /**
      * Override to update Page.Modified.
@@ -371,13 +344,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     /**
      * Override to get ProgramCounter from ProcPane.
      */
-    private int getProgramCounterLine()
-    {
-        WorkspacePane workspacePane = getWorkspacePane();
-        WorkspaceTools workspaceTools = workspacePane.getWorkspaceTools();
-        ProcPane procPane = workspaceTools.getToolForClass(ProcPane.class);
-        return procPane != null ? procPane.getProgramCounter(getFile()) : -1;
-    }
+    protected int getProgramCounterLine()  { return -1; }
 
     /**
      * A JavaTextPane for a JavaPage to implement symbol features and such.
@@ -439,20 +406,6 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         public int getProgramCounterLine()
         {
             return JavaPage.this.getProgramCounterLine();
-        }
-
-        /**
-         * Respond to UI controls.
-         */
-        @Override
-        public void respondUI(ViewEvent anEvent)
-        {
-            // Handle SnapCodeButton
-            if (anEvent.equals("SnapCodeButton"))
-                openAsSnapCode();
-
-                // Do normal version
-            else super.respondUI(anEvent);
         }
     }
 }

@@ -9,15 +9,12 @@ import snap.props.PropChange;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.*;
-import snap.viewx.TextPage;
 import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.util.ClassInfoPage;
-import snapcode.views.SnapEditorPage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -398,6 +395,22 @@ public class PagePane extends ViewOwner {
     }
 
     /**
+     * Returns WebPage class for given response.
+     */
+    protected Class<? extends WebPage> getPageClass(WebResponse aResp)
+    {
+        // Get file type
+        String type = aResp.getPathType();
+
+        // Handle Java
+        if (type.equals("java") || type.equals("jepl"))
+            return JavaPage.class;
+
+        // Do normal version
+        return null;
+    }
+
+    /**
      * A custom browser subclass.
      */
     private class AppBrowser extends WebBrowser {
@@ -405,6 +418,7 @@ public class PagePane extends ViewOwner {
         /**
          * Override to make sure that PagePane is in sync.
          */
+        @Override
         public void setPage(WebPage aPage)
         {
             // Do normal version
@@ -417,32 +431,15 @@ public class PagePane extends ViewOwner {
         }
 
         /**
-         * Creates a WebPage for given file.
+         * Returns WebPage class for given response.
          */
+        @Override
         protected Class<? extends WebPage> getPageClass(WebResponse aResp)
         {
-            // Get file and data
-            WebFile file = aResp.getFile();
-            String type = aResp.getPathType();
-
-            // Handle Project Root directory
-            if (file != null && file.isRoot() && isProjectFile(file))
-                return ProjectPane.ProjectPanePage.class;
-
-            // Handle Java
-            if (type.equals("java") || type.equals("jepl")) {
-                if (file != null && SnapEditorPage.isSnapEditSet(file))
-                    return SnapEditorPage.class;
-                return JavaPage.class;
-            }
-
-            //if(type.equals("snp")) return snapbuild.app.EditorPage.class;
-            if (type.equals("rpt"))
-                return getPageClass("com.reportmill.app.ReportPageEditor", TextPage.class);
-            if (type.equals("class") && isProjectFile(file))
-                return ClassInfoPage.class;
-            if (type.equals("pgd"))
-                return JavaShellPage.class;
+            // Forward to PagePane
+            Class<? extends WebPage> pageClass = PagePane.this.getPageClass(aResp);
+            if (pageClass != null)
+                return pageClass;
 
             // Do normal version
             return super.getPageClass(aResp);
