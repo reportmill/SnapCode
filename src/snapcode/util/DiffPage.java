@@ -32,7 +32,7 @@ public class DiffPage extends WebPage {
     TextArea _ltext, _rtext;
 
     // The default font
-    static Font _dfont;
+    static Font _defaultFont;
 
     /**
      * Creates a new DiffPage for given file.
@@ -68,10 +68,11 @@ public class DiffPage extends WebPage {
     protected void initUI()
     {
         // Get texts, initialize and install
-        WebFile lfile = getLocalFile(), rfile = getRemoteFile();
-        _ltext = getText(lfile);
+        WebFile localFile = getLocalFile();
+        WebFile remoteFile = getRemoteFile();
+        _ltext = getText(localFile);
         _ltext.setGrowWidth(true);
-        _rtext = getText(rfile);
+        _rtext = getText(remoteFile);
         _rtext.setGrowWidth(true);
 
         // Get DiffPane and install texts
@@ -85,20 +86,30 @@ public class DiffPage extends WebPage {
         // Print diffs
         DiffUtil diffUtil = new DiffUtil();
         List<DiffUtil.Diff> diffs = diffUtil.diff_main(_rtext.getText(), _ltext.getText());
-        int indexL = 0, indexR = 0;
+        int localIndex = 0;
+        int remoteIndex = 0;
         for (DiffUtil.Diff diff : diffs) {
             DiffUtil.Operation op = diff.operation;
-            boolean insert = op == DiffUtil.Operation.INSERT, delete = op == DiffUtil.Operation.DELETE;
+            boolean insert = op == DiffUtil.Operation.INSERT;
+            boolean delete = op == DiffUtil.Operation.DELETE;
             int length = diff.text.length();
+
+            // Handle insert
             if (insert) {
-                lranges.add(new TextSel(_ltext.getTextBox(), indexL, indexL + length));
-                indexL += length;
-            } else if (delete) {
-                rranges.add(new TextSel(_rtext.getTextBox(), indexR, indexR + length));
-                indexR += length;
-            } else {
-                indexL += length;
-                indexR += length;
+                lranges.add(new TextSel(_ltext.getTextBox(), localIndex, localIndex + length));
+                localIndex += length;
+            }
+
+            // Handle delete
+            else if (delete) {
+                rranges.add(new TextSel(_rtext.getTextBox(), remoteIndex, remoteIndex + length));
+                remoteIndex += length;
+            }
+
+            // Handle other
+            else {
+                localIndex += length;
+                remoteIndex += length;
             }
             //String pfx = insert? ">> " : delete? "<< " : ""; Sys.out.println(pfx + diff.text.replace("\n", "\n" + pfx));
         }
@@ -107,10 +118,7 @@ public class DiffPage extends WebPage {
     /**
      * Returns the file local to project.
      */
-    public WebFile getLocalFile()
-    {
-        return _localFile;
-    }
+    public WebFile getLocalFile()  { return _localFile; }
 
     /**
      * Returns the file from Project.RemoteSite.
@@ -143,10 +151,10 @@ public class DiffPage extends WebPage {
         }
 
         // Handle normal TextFile
-        TextArea ta = new DiffTextArea();
-        ta.setFont(getDefaultFont());
-        ta.setText(aFile.getText());
-        return ta;
+        TextArea diffTextArea = new DiffTextArea();
+        diffTextArea.setFont(getDefaultFont());
+        diffTextArea.setText(aFile.getText());
+        return diffTextArea;
     }
 
     /**
@@ -154,16 +162,22 @@ public class DiffPage extends WebPage {
      */
     private Font getDefaultFont()
     {
-        if (_dfont != null) return _dfont;
-        for (String name : new String[]{"Monaco", "Consolas", "Courier"}) {
-            _dfont = new Font(name, 10);
-            if (_dfont.getFamily().startsWith(name)) return _dfont;
+        // If already set, just return
+        if (_defaultFont != null) return _defaultFont;
+
+        // Iterate over fonts
+        String[] devFontNames = new String[] { "Monaco", "Consolas", "Courier" };
+        for (String name : devFontNames) {
+            _defaultFont = new Font(name, 10);
+            if (_defaultFont.getFamily().startsWith(name))
+                return _defaultFont;
         }
-        return _dfont = new Font("Monospaced", 10);
+        return _defaultFont = new Font("Monospaced", 10);
     }
 
     // Stroke and fill colors for diffs
-    static Color fc = new Color(230, 230, 230, 192), sc = new Color(140, 140, 140);
+    private static final Color DIFF_FILL_COLOR = new Color(230, 230, 230, 192);
+    private static final Color DIFF_STROKE_COLOR = new Color(140, 140, 140);
 
     /**
      * A text area that shows diffs.
@@ -171,7 +185,7 @@ public class DiffPage extends WebPage {
     static class DiffTextArea extends TextArea {
 
         // The ranges
-        List<TextSel> ranges = new ArrayList();
+        List<TextSel> ranges = new ArrayList<>();
 
         /**
          * Create new DiffTextArea.
@@ -190,9 +204,9 @@ public class DiffPage extends WebPage {
             super.paintBack(aPntr);
             for (TextSel range : ranges) {
                 Path rpath = range.getPath();
-                aPntr.setPaint(fc);
+                aPntr.setPaint(DIFF_FILL_COLOR);
                 aPntr.fill(rpath);
-                aPntr.setPaint(sc);
+                aPntr.setPaint(DIFF_STROKE_COLOR);
                 aPntr.draw(rpath);
             }
         }
@@ -204,7 +218,7 @@ public class DiffPage extends WebPage {
     static class DiffJavaTextArea extends JavaTextArea {
 
         // The ranges
-        List<TextSel> ranges = new ArrayList();
+        List<TextSel> ranges = new ArrayList<>();
 
         /**
          * Override to add ranges.
@@ -213,17 +227,18 @@ public class DiffPage extends WebPage {
         {
             super.paintBack(aPntr);
             for (TextSel range : ranges) {
-                Path rpath = range.getPath();
-                aPntr.setPaint(fc);
-                aPntr.fill(rpath);
-                aPntr.setPaint(sc);
-                aPntr.draw(rpath);
+                Path rangePath = range.getPath();
+                aPntr.setPaint(DIFF_FILL_COLOR);
+                aPntr.fill(rangePath);
+                aPntr.setPaint(DIFF_STROKE_COLOR);
+                aPntr.draw(rangePath);
             }
         }
     }
 
     // Colors
-    static final Color _marker = new Color(181, 214, 254, 255), _markerBorder = _marker.darker();
+    private static final Color MARKER_COLOR = new Color(181, 214, 254, 255);
+    private static final Color MARKER_BORDER_COLOR = MARKER_COLOR.darker();
 
     /**
      * A component to show locations of Errors, warnings, selected symbols, etc.
@@ -263,7 +278,7 @@ public class DiffPage extends WebPage {
             if (_markers != null) return _markers;
 
             // Create list
-            List<Marker> markers = new ArrayList();
+            List<Marker> markers = new ArrayList<>();
 
             // Add markers for TextArea.JavaSource.BuildIssues
             List<TextSel> ranges = _ltext instanceof DiffTextArea ? ((DiffTextArea) _ltext).ranges :
@@ -282,9 +297,9 @@ public class DiffPage extends WebPage {
         {
             // Handle MosueClicked
             if (anEvent.isMouseClick()) {
-                for (Marker m : getMarkers()) {
-                    if (m.contains(anEvent.getX(), anEvent.getY())) {
-                        setTextSel(m.getSelStart(), m.getSelEnd());
+                for (Marker marker : getMarkers()) {
+                    if (marker.contains(anEvent.getX(), anEvent.getY())) {
+                        setTextSel(marker.getSelStart(), marker.getSelEnd());
                         return;
                     }
                 }
@@ -296,11 +311,12 @@ public class DiffPage extends WebPage {
             if (anEvent.isMouseMove()) {
                 _mx = anEvent.getX();
                 _my = anEvent.getY();
-                for (Marker m : getMarkers())
-                    if (m.contains(_mx, _my)) {
+                for (Marker marker : getMarkers()) {
+                    if (marker.contains(_mx, _my)) {
                         setCursor(Cursor.HAND);
                         return;
                     }
+                }
                 setCursor(Cursor.DEFAULT);
             }
         }
@@ -310,14 +326,15 @@ public class DiffPage extends WebPage {
          */
         protected void paintFront(Painter aPntr)
         {
-            double th = _ltext.getHeight(), h = Math.min(getHeight(), th);
+            double th = _ltext.getHeight();
+            double h = Math.min(getHeight(), th);
             aPntr.setStroke(Stroke.Stroke1);
-            for (Marker m : getMarkers()) {
-                m.setY(m._y / th * h);
-                aPntr.setPaint(_marker);
-                aPntr.fill(m);
-                aPntr.setPaint(_markerBorder);
-                aPntr.draw(m);
+            for (Marker marker : getMarkers()) {
+                marker.setY(marker._y / th * h);
+                aPntr.setPaint(MARKER_COLOR);
+                aPntr.fill(marker);
+                aPntr.setPaint(MARKER_BORDER_COLOR);
+                aPntr.draw(marker);
             }
         }
 
@@ -343,10 +360,12 @@ public class DiffPage extends WebPage {
     /**
      * The class that describes a overview marker.
      */
-    public class Marker<T> extends Rect {
+    public static class Marker extends Rect {
 
-        // The diff range and Y location of range start line in text box.
+        // The diff range
         TextSel _sel;
+
+        // Y location of range start line in text box.
         double _y;
 
         /**
@@ -363,18 +382,11 @@ public class DiffPage extends WebPage {
         /**
          * Returns the selection start.
          */
-        public int getSelStart()
-        {
-            return _sel.getStart();
-        }
+        public int getSelStart()  { return _sel.getStart(); }
 
         /**
          * Returns the selection start.
          */
-        public int getSelEnd()
-        {
-            return _sel.getEnd();
-        }
+        public int getSelEnd()  { return _sel.getEnd(); }
     }
-
 }
