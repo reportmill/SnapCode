@@ -203,10 +203,8 @@ public class FileTreeTool extends WorkspaceTool {
 
             // Handle MouseClick (double-click): RunSelectedFile
             if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
-                if (getSelFile().isFile()) {
-                    DebugTool debugTool = _workspaceTools.getToolForClass(DebugTool.class);
-                    debugTool.runConfigOrFile(null, getSelFile(), false);
-                }
+                if (getSelFile().isFile())
+                    runFile(getSelFile(), false);
             }
 
             // Handle DragEvent
@@ -309,14 +307,10 @@ public class FileTreeTool extends WorkspaceTool {
         }
 
         // Handle RunFileMenuItem, DebugFileMenuItem
-        if (anEvent.equals("RunFileMenuItem")) {
-            DebugTool debugTool = _workspaceTools.getToolForClass(DebugTool.class);
-            debugTool.runConfigOrFile(null, getSelFile(), false);
-        }
-        if (anEvent.equals("DebugFileMenuItem")) {
-            DebugTool debugTool = _workspaceTools.getToolForClass(DebugTool.class);
-            debugTool.runConfigOrFile(null, getSelFile(), true);
-        }
+        if (anEvent.equals("RunFileMenuItem"))
+            runFile(getSelFile(), false);
+        if (anEvent.equals("DebugFileMenuItem"))
+            runFile(getSelFile(), true);
 
         // Handle UpdateFilesMenuItem
         if (anEvent.equals("UpdateFilesMenuItem"))
@@ -471,6 +465,16 @@ public class FileTreeTool extends WorkspaceTool {
     {
         _pagePane.removeOpenFile(buttonFile);
         resetLater();
+    }
+
+    /**
+     * Runs the given file.
+     */
+    private void runFile(WebFile aFile, boolean isDebug)
+    {
+        System.out.println("FileTreeTool.runFile: Disabled run for " + aFile + ", " + isDebug);
+        //DebugTool debugTool = _workspaceTools.getToolForClass(DebugTool.class);
+        //debugTool.runConfigOrFile(null, aFile, false);
     }
 
     /**
