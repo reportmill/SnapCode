@@ -1,5 +1,6 @@
 package snapcode.app;
 import snap.geom.Side;
+import snap.props.PropChange;
 import snapcode.apptools.*;
 
 /**
@@ -53,6 +54,16 @@ public class WorkspaceToolsX extends WorkspaceTools {
         // Create BottomTray
         WorkspaceTool[] bottomTools = { problemsTool, debugTool, runConsole, breakpointsTool, runConfigsTool, httpServerTool };
         _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
+    }
+
+    /**
+     * Called when Workspace.BreakPoints change.
+     */
+    @Override
+    protected void breakpointsDidChange(PropChange pc)
+    {
+        DebugTool debugTool = getToolForClass(DebugTool.class);
+        debugTool.breakpointsDidChange(pc);
     }
 
     /**

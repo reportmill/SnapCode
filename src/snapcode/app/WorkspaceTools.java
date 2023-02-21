@@ -226,11 +226,7 @@ public class WorkspaceTools {
     /**
      * Called when Workspace.BreakPoints change.
      */
-    protected void breakpointsDidChange(PropChange pc)
-    {
-        DebugTool debugTool = getToolForClass(DebugTool.class);
-        debugTool.breakpointsDidChange(pc);
-    }
+    protected void breakpointsDidChange(PropChange pc)  { }
 
     /**
      * Called when Project.BuildIssues change.
