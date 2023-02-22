@@ -1,10 +1,11 @@
 package snapcode.appjr;
+import snap.gfx.GFXEnv;
 import snap.util.Prefs;
 import snap.view.ViewTheme;
+import snap.view.ViewUtils;
 import snap.view.WindowView;
 import snapcode.app.AppBase;
 import snapcode.app.WorkspacePane;
-import javax.swing.*;
 
 /**
  * Main App class for SnapCode.
@@ -16,7 +17,7 @@ public class App extends AppBase {
      */
     public static void main(final String[] args)
     {
-        SwingUtilities.invokeLater(() -> new App());
+        ViewUtils.runLater(() -> new App());
     }
 
     /**
@@ -59,6 +60,6 @@ public class App extends AppBase {
 
         // Flush prefs and exit
         Prefs.getDefaultPrefs().flush();
-        System.exit(0);
+        GFXEnv.getEnv().exit(0);
     }
 }

@@ -2,11 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
+import snap.gfx.GFXEnv;
 import snap.util.Prefs;
 import snap.util.SnapUtils;
+import snap.view.ViewUtils;
 import snap.view.WindowView;
 import snap.viewx.ExceptionReporter;
-import javax.swing.*;
 
 /**
  * SnapCode Application entry point.
@@ -18,7 +19,7 @@ public class App extends AppBase {
      */
     public static void main(final String[] args)
     {
-        SwingUtilities.invokeLater(() -> new App());
+        ViewUtils.runLater(() -> new App());
     }
 
     /**
@@ -64,6 +65,6 @@ public class App extends AppBase {
 
         // Flush prefs and exit
         Prefs.getDefaultPrefs().flush();
-        System.exit(0);
+        GFXEnv.getEnv().exit(0);
     }
 }
