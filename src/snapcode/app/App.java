@@ -11,22 +11,23 @@ import javax.swing.*;
 /**
  * SnapCode Application entry point.
  */
-public class App {
+public class App extends AppBase {
 
     /**
-     * Main method to run panel.
+     * Standard main implementation.
      */
     public static void main(final String[] args)
     {
-        // Config/init JavaFX and invoke real main on event thread
-        SwingUtilities.invokeLater(() -> new App(args));
+        SwingUtilities.invokeLater(() -> new App());
     }
 
     /**
-     * Main method to run panel.
+     * Constructor.
      */
-    public App(String[] args)
+    public App()
     {
+        super();
+
         // Set App Prefs class
         Prefs prefs = Prefs.getPrefsForName("SnapCodePro");
         Prefs.setDefaultPrefs(prefs);
@@ -37,23 +38,24 @@ public class App {
         er.setInfo("SnapCode Version 1, Build Date: " + SnapUtils.getBuildInfo());
         Thread.setDefaultUncaughtExceptionHandler(er);
 
-        // Show open data source panel
-        WelcomePanel.getShared().setOnQuit(() -> quitApp());
+        // Show WelcomePanel
+        showWelcomePanel();
+    }
+
+    /**
+     * Override to show WelcomePanel.
+     */
+    @Override
+    public void showWelcomePanel()
+    {
         WelcomePanel.getShared().showPanel();
     }
 
     /**
      * Exits the application.
      */
-    public static void quitApp()
-    {
-        SwingUtilities.invokeLater(() -> quitAppImpl());
-    }
-
-    /**
-     * Exits the application (real version).
-     */
-    private static void quitAppImpl()
+    @Override
+    public void quitApp()
     {
         // Hide open WorkspacePane
         WorkspacePane workspacePane = WindowView.getOpenWindowOwner(WorkspacePane.class);

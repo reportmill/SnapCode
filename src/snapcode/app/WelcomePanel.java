@@ -20,9 +20,6 @@ public class WelcomePanel extends ViewOwner {
     // The selected site
     private WebSite  _selectedSite;
 
-    // The Runnable to be called when app quits
-    private Runnable  _onQuit;
-
     // The shared instance
     private static WelcomePanel  _shared;
 
@@ -154,28 +151,12 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
-     * Returns the Runnable to be called to quit app.
-     */
-    public Runnable getOnQuit()
-    {
-        return _onQuit;
-    }
-
-    /**
-     * Sets the Runnable to be called to quit app.
-     */
-    public void setOnQuit(Runnable aRunnable)
-    {
-        _onQuit = aRunnable;
-    }
-
-    /**
      * Called to quit app.
      */
     public void quitApp()
     {
         hide();
-        _onQuit.run();
+        AppBase.getShared().quitApp();
     }
 
     /**

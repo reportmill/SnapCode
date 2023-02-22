@@ -8,6 +8,7 @@ import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.util.FileUtils;
 import snap.util.Prefs;
+import snap.util.SnapUtils;
 import snap.view.*;
 import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
@@ -16,7 +17,6 @@ import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.appjr.JeplUtils;
 import snapcode.apptools.*;
-import snapcode.project.WorkspaceX;
 
 /**
  * This class is the top level controller for an open project.
@@ -49,7 +49,7 @@ public class WorkspacePane extends ViewOwner {
      */
     public WorkspacePane()
     {
-        this(new WorkspaceX());
+        this(new Workspace());
     }
 
     /**
@@ -378,7 +378,12 @@ public class WorkspacePane extends ViewOwner {
         //addKeyActionHandler("CloseFileAction", "meta W");
 
         // Register for WelcomePanel on close
-        enableEvents(getWindow(), WinClose);
+        WindowView window = getWindow();
+        enableEvents(window, WinClose);
+
+        // If TeaVM, maximize window
+        if (SnapUtils.isTeaVM)
+            window.setMaximized(true);
     }
 
     /**
@@ -409,7 +414,7 @@ public class WorkspacePane extends ViewOwner {
 
         // Handle QuitMenuItem
         if (anEvent.equals("QuitMenuItem")) {
-            WelcomePanel.getShared().quitApp();
+            AppBase.getShared().quitApp();
             anEvent.consume();
         }
 
@@ -445,7 +450,7 @@ public class WorkspacePane extends ViewOwner {
             hide();
             runLater(() -> {
                 Prefs.getDefaultPrefs().flush();
-                WelcomePanel.getShared().showPanel();
+                AppBase.getShared().showWelcomePanel();
             });
         }
     }
