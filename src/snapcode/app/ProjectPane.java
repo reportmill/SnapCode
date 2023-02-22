@@ -24,7 +24,7 @@ public class ProjectPane extends WebPage {
     private Project  _project;
 
     // The ProjectConfigTool
-    private ProjectConfigTool  _configPane;
+    private ProjectConfigTool  _configTool;
 
     // The BuildDirTool
     private BuildDirTool  _buildDirTool;
@@ -45,7 +45,7 @@ public class ProjectPane extends WebPage {
         _project = aProject;
 
         // Create/set tools
-        _configPane = new ProjectConfigTool(this);
+        _configTool = new ProjectConfigTool(this);
         _buildDirTool = new BuildDirTool(this);
 
         // Set this ProjectPane as Site prop
@@ -75,21 +75,18 @@ public class ProjectPane extends WebPage {
     public WebSite getSite()  { return _project.getSite(); }
 
     /**
-     * Returns the ProjectConfigPane for this site.
+     * Returns the ProjectConfigTool for this site.
      */
-    public ProjectConfigTool getProjPane()
-    {
-        return _configPane;
-    }
+    public ProjectConfigTool getConfigTool()  { return _configTool; }
 
     /**
      * Opens the Site.
      */
     public void openSite()
     {
-        // Activate ProjectConfigPane
-        if (_configPane != null)
-            _configPane.openSite();
+        // Activate ProjectConfigTool
+        if (_configTool != null)
+            _configTool.openSite();
     }
 
     /**
@@ -101,7 +98,7 @@ public class ProjectPane extends WebPage {
         projSite.removeFileChangeListener(_siteFileLsnr);
         projSite.setProp(ProjectPane.class.getName(), null);
         _workspacePane = null;
-        _configPane = null;
+        _configTool = null;
     }
 
     /**
@@ -109,8 +106,8 @@ public class ProjectPane extends WebPage {
      */
     public void deleteSite(View aView)
     {
-        if (_configPane != null)
-            _configPane.deleteProject(aView);
+        if (_configTool != null)
+            _configTool.deleteProject(aView);
 
         else {
             try {
@@ -129,7 +126,7 @@ public class ProjectPane extends WebPage {
      */
     public boolean isHiddenFile(WebFile aFile)
     {
-        if (aFile == _configPane.getProject().getBuildDir())
+        if (aFile == _configTool.getProject().getBuildDir())
             return true;
         return aFile.getPath().startsWith("/.git");
     }
@@ -160,8 +157,8 @@ public class ProjectPane extends WebPage {
      */
     void fileAdded(WebFile aFile)
     {
-        if (_configPane != null)
-            _configPane.fileAdded(aFile);
+        if (_configTool != null)
+            _configTool.fileAdded(aFile);
     }
 
     /**
@@ -169,8 +166,8 @@ public class ProjectPane extends WebPage {
      */
     void fileRemoved(WebFile aFile)
     {
-        if (_configPane != null)
-            _configPane.fileRemoved(aFile);
+        if (_configTool != null)
+            _configTool.fileRemoved(aFile);
     }
 
     /**
@@ -178,8 +175,8 @@ public class ProjectPane extends WebPage {
      */
     void fileSaved(WebFile aFile)
     {
-        if (_configPane != null)
-            _configPane.fileSaved(aFile);
+        if (_configTool != null)
+            _configTool.fileSaved(aFile);
     }
 
     /**
@@ -190,8 +187,8 @@ public class ProjectPane extends WebPage {
         // Create TabView
         _tabView = new TabView();
 
-        // Add ProjectConfigPane
-        ProjectConfigTool projPane = getProjPane();
+        // Add ProjectConfigTool
+        ProjectConfigTool projPane = getConfigTool();
         if (projPane != null)
             _tabView.addTab("Settings", projPane.getUI()); //tab.setTooltip(new Tooltip("Project Settings"));
 

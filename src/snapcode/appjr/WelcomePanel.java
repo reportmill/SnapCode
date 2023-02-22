@@ -13,6 +13,7 @@ import snap.viewx.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcharts.app.DropBox;
+import snapcode.app.AppBase;
 import snapcode.app.WorkspacePane;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -30,12 +31,6 @@ public class WelcomePanel extends ViewOwner {
 
     // The selected file
     private WebFile  _selFile;
-
-    // Whether welcome panel should exit on hide
-    private boolean  _exit;
-
-    // The Runnable to be called when app quits
-    private Runnable  _onQuit;
 
     // The RecentFiles
     private WebFile[]  _recentFiles;
@@ -140,7 +135,6 @@ public class WelcomePanel extends ViewOwner {
      */
     public void showPanel()
     {
-        //getUI(); // This is bogus - if this isn't called, Window node get reset
         _recentFiles = null;
         getWindow().setVisible(true);
         resetLater();
@@ -154,31 +148,6 @@ public class WelcomePanel extends ViewOwner {
         // Hide window and flush prefs
         getWindow().setVisible(false);
         Prefs.getDefaultPrefs().flush();
-
-        // If exit requested, quit app
-        if (_exit)
-            quitApp();
-    }
-
-    /**
-     * Returns the Runnable to be called to quit app.
-     */
-    public Runnable getOnQuit()  { return _onQuit; }
-
-    /**
-     * Sets the Runnable to be called to quit app.
-     */
-    public void setOnQuit(Runnable aRunnable)
-    {
-        _onQuit = aRunnable;
-    }
-
-    /**
-     * Called to quit app.
-     */
-    public void quitApp()
-    {
-        _onQuit.run();
     }
 
     /**
@@ -291,16 +260,12 @@ public class WelcomePanel extends ViewOwner {
         }
 
         // Handle QuitButton
-        if (anEvent.equals("QuitButton")) {
-            _exit = true;
-            hide();
-        }
+        if (anEvent.equals("QuitButton"))
+            AppBase.getShared().quitApp();
 
         // Handle WinClosing
-        if (anEvent.isWinClose()) {
-            _exit = true;
+        if (anEvent.isWinClose())
             hide();
-        }
     }
 
     /**

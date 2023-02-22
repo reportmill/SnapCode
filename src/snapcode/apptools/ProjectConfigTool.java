@@ -136,51 +136,9 @@ public class ProjectConfigTool extends ProjectTool {
      */
     public void checkoutProject(VersionControl aVC)
     {
-        WebSite site = aVC.getSite();
+        // Create checkout task runner
         String title = "Checkout from " + aVC.getRemoteURLString();
-
-        TaskRunner<Object> checkoutRunner = new TaskRunnerPanel<Object>(_workspacePane.getUI(), title) {
-
-            public Object run() throws Exception
-            {
-                aVC.checkout(this);
-                return null;
-            }
-
-            public void success(Object aRes)
-            {
-                // Add new project to root project
-                String projName = site.getName();
-                _proj.addProjectForPath(projName);
-
-                // Build workspace
-                WorkspaceBuilder builder = _workspace.getBuilder();
-                builder.buildWorkspaceLater(true);
-            }
-
-            public void failure(Exception e)
-            {
-                WebSite remoteSite = aVC.getRemoteSite();
-
-                // If attempt to set permissions succeeds, try again
-                boolean setPermissionsSuccess = ClientUtils.setAccess(remoteSite);
-                if (setPermissionsSuccess) {
-                    checkoutProject(aVC);
-                    return;
-                }
-
-                // If attempt to login succeeds, try again
-                LoginPage loginPage = new LoginPage();
-                boolean loginSuccess = loginPage.showPanel(_workspacePane.getUI(), remoteSite);
-                if (loginSuccess) {
-                    checkoutProject(aVC);
-                    return;
-                }
-
-                // Do normal version
-                super.failure(e);
-            }
-        };
+        TaskRunner<Object> checkoutRunner = new CheckoutTaskRunner(_workspacePane.getUI(), title, aVC);
 
         // Start task
         checkoutRunner.start();
@@ -549,10 +507,69 @@ public class ProjectConfigTool extends ProjectTool {
     }
 
     /**
-     * Returns the ProjectConfigPane for a site.
+     * Returns the ProjectConfigTool for a site.
      */
     public synchronized static ProjectConfigTool getProjectPane(WebSite aSite)
     {
         return (ProjectConfigTool) aSite.getProp(ProjectConfigTool.class.getName());
+    }
+
+    /**
+     * This TaskRunner subclass checks out a project.
+     */
+    private class CheckoutTaskRunner extends TaskRunnerPanel<Object> {
+
+        // The VersionControl
+        private VersionControl  _versionControl;
+
+        /**
+         * Constructor.
+         */
+        public CheckoutTaskRunner(View aView, String aTitle, VersionControl aVC)
+        {
+            super(aView, aTitle);
+            _versionControl = aVC;
+        }
+
+        public Object run() throws Exception
+        {
+            _versionControl.checkout(this);
+            return null;
+        }
+
+        public void success(Object aRes)
+        {
+            // Add new project to root project
+            WebSite vcSite = _versionControl.getSite();
+            String projName = vcSite.getName();
+            _proj.addProjectForPath(projName);
+
+            // Build workspace
+            WorkspaceBuilder builder = _workspace.getBuilder();
+            builder.buildWorkspaceLater(true);
+        }
+
+        public void failure(Exception e)
+        {
+            WebSite remoteSite = _versionControl.getRemoteSite();
+
+            // If attempt to set permissions succeeds, try again
+            boolean setPermissionsSuccess = ClientUtils.setAccess(remoteSite);
+            if (setPermissionsSuccess) {
+                checkoutProject(_versionControl);
+                return;
+            }
+
+            // If attempt to login succeeds, try again
+            LoginPage loginPage = new LoginPage();
+            boolean loginSuccess = loginPage.showPanel(_workspacePane.getUI(), remoteSite);
+            if (loginSuccess) {
+                checkoutProject(_versionControl);
+                return;
+            }
+
+            // Do normal version
+            super.failure(e);
+        }
     }
 }

@@ -18,7 +18,7 @@ public class WelcomePanel extends ViewOwner {
     private List<WebSite>  _sites;
 
     // The selected site
-    private WebSite  _selectedSite;
+    private WebSite  _selSite;
 
     // The shared instance
     private static WelcomePanel  _shared;
@@ -75,71 +75,64 @@ public class WelcomePanel extends ViewOwner {
      */
     public List<WebSite> getSites()
     {
-        return _sites != null ? _sites : (_sites = readSites());
+        if (_sites != null) return _sites;
+        List<WebSite> sites = readSites();
+        return _sites = sites;
     }
 
     /**
-     * Adds a site.
+     * Adds a project site.
      */
     public void addSite(WebSite aSite)
     {
-        addSite(aSite, getSiteCount());
-    }
-
-    /**
-     * Adds a site at given index.
-     */
-    public void addSite(WebSite aSite, int anIndex)
-    {
-        getSites().add(anIndex, aSite);
-    }
-
-    /**
-     * Removes a site at given index.
-     */
-    public WebSite removeSite(int anIndex)
-    {
-        return getSites().remove(anIndex);
+        List<WebSite> sites = getSites();
+        int index = sites.size();
+        sites.add(index, aSite);
+        resetLater();
     }
 
     /**
      * Removes a given site from sites list.
      */
-    public int removeSite(WebSite aSite)
+    public void removeSite(WebSite aSite)
     {
         int index = ListUtils.indexOfId(getSites(), aSite);
-        if (index >= 0) removeSite(index);
-        return index;
+        if (index >= 0) {
+            List<WebSite> sites = getSites();
+            sites.remove(index);
+            resetLater();
+        }
     }
 
     /**
      * Returns a site for given URL or name, if available.
      */
-    public WebSite getSite(String aName)
+    public WebSite getProjectSiteForName(String aName)
     {
-        for (WebSite site : getSites())
-            if (site.getURL().getString().equalsIgnoreCase(aName))
-                return site;
-        for (WebSite site : getSites())
-            if (site.getName().equalsIgnoreCase(aName))
-                return site;
-        return null;
+        // Search for matching Site.URL.String
+        List<WebSite> sites = getSites();
+        WebSite projectSiteForName = ListUtils.findMatch(sites, site -> site.getURL().getString().equalsIgnoreCase(aName));
+
+        // Search for matching Site.Name
+        if (projectSiteForName == null)
+            projectSiteForName = ListUtils.findMatch(sites, site -> site.getName().equalsIgnoreCase(aName));
+
+        // Return
+        return projectSiteForName;
     }
 
     /**
      * Returns the selected site.
      */
-    public WebSite getSelectedSite()
-    {
-        return _selectedSite;
-    }
+    public WebSite getSelSite()  { return _selSite; }
 
     /**
      * Sets the selected site.
      */
-    public void setSelectedSite(WebSite aSite)
+    public void setSelSite(WebSite aSite)
     {
-        _selectedSite = aSite;
+        _selSite = aSite;
+        resetLater();
     }
 
     /**
@@ -147,7 +140,7 @@ public class WelcomePanel extends ViewOwner {
      */
     public WebSite[] getSelectedSites()
     {
-        return _selectedSite != null ? new WebSite[] { _selectedSite } : new WebSite[0];
+        return _selSite != null ? new WebSite[] { _selSite } : new WebSite[0];
     }
 
     /**
@@ -174,24 +167,25 @@ public class WelcomePanel extends ViewOwner {
             return _sites;
 
         // Get site from string
-        for (String urlString : projectUrls) {
-            if (urlString.indexOf(':') < 0)
-                urlString = "local:/" + urlString; // Turn names into local sites
-            WebURL projUrl = WebURL.getURL(urlString);
-            WebSite projSite = projUrl.getAsSite();
-            _sites.add(projSite);
+        for (String projUrlStr : projectUrls) {
+            if (!projUrlStr.contains(":"))
+                projUrlStr = "local:/" + projUrlStr;
+            WebURL projUrl = WebURL.getURL(projUrlStr);
+            WebSite projSite = projUrl != null ?  projUrl.getAsSite() : null;
+            if (projSite != null)
+                _sites.add(projSite);
         }
 
         // Get Selected Sites
         List<String> selProjectUrls = settings.getList("SelectedSites", true);
         for (String projUrl : selProjectUrls) {
-            WebSite projSite = getSite(projUrl);
+            WebSite projSite = getProjectSiteForName(projUrl);
             if (projSite != null)
-                _selectedSite = projSite;
+                _selSite = projSite;
             break;
-        } // _selectedSites.add(site);
+        }
 
-        // Return sites
+        // Return
         return _sites;
     }
 
@@ -241,8 +235,8 @@ public class WelcomePanel extends ViewOwner {
         anim.getUI().playAnimDeep();
 
         // Enable SitesTable MouseReleased
-        TableView sitesTable = getView("SitesTable", TableView.class);
-        sitesTable.setRowHeight(24); //sitesTable.setStyle(new Style().setFontSize(10).toString());
+        TableView<WebSite> sitesTable = getView("SitesTable", TableView.class);
+        sitesTable.setRowHeight(24);
         enableEvents(sitesTable, MouseRelease);
 
         // Set preferred size
@@ -263,7 +257,7 @@ public class WelcomePanel extends ViewOwner {
     {
         // Update SitesTable
         setViewItems("SitesTable", getSites());
-        setViewSelItem("SitesTable", getSelectedSite());
+        setViewSelItem("SitesTable", getSelSite());
 
         // Update OpenButton, RemoveButton
         setViewEnabled("OpenButton", getSelectedSites().length > 0);
@@ -282,7 +276,7 @@ public class WelcomePanel extends ViewOwner {
             if (anEvent.getClickCount() > 1) {
                 if (getView("OpenButton", Button.class).isEnabled()) {
                     hide();
-                    openSites();
+                    openProjectSites();
                 }
             }
 
@@ -291,14 +285,14 @@ public class WelcomePanel extends ViewOwner {
                 Object selItem = getViewSelItem("SitesTable");
                 if (selItem instanceof WebSite) {
                     WebSite site = (WebSite) selItem;
-                    setSelectedSite(site);
+                    setSelSite(site);
                 }
             }
         }
 
         // Handle NewButton
         if (anEvent.equals("NewButton"))
-            createSite();
+            createProjectSite();
 
         // Handle OpenButton
         if (anEvent.equals("OpenButton")) {
@@ -307,7 +301,7 @@ public class WelcomePanel extends ViewOwner {
                 return;
             }
             hide();
-            openSites();
+            openProjectSites();
         }
 
         // Handle RemoveButton
@@ -329,42 +323,45 @@ public class WelcomePanel extends ViewOwner {
     protected WorkspacePane createWorkspacePane()  { return  new WorkspacePaneX(); }
 
     /**
-     * Creates a new Site.
+     * Creates a new project site.
      */
-    protected void createSite()
+    protected void createProjectSite()
     {
-        // Get name for new project/site (just select and return if already exists)
-        DialogBox dbox = new DialogBox("New Project Panel");
-        dbox.setMessage("Enter name of new project");
-        String name = dbox.showInputDialog(getUI(), "Untitled");
-        if (name == null) return;
-        if (getSite(name) != null) {
-            setSelectedSite(getSite(name));
+        // Get name for new project/site
+        DialogBox dialogBox = new DialogBox("New Project Panel");
+        dialogBox.setMessage("Enter name of new project");
+        String projName = dialogBox.showInputDialog(getUI(), "Untitled");
+        if (projName == null)
+            return;
+
+        // If project site already exists for name, just return
+        if (getProjectSiteForName(projName) != null) {
+            setSelSite(getProjectSiteForName(projName));
             return;
         }
 
         // Create new site for name
-        createSiteForName(name, true);
+        WebSite newProjSite = createProjectSiteForName(projName);
+        setSelSite(newProjSite);
     }
 
     /**
-     * Creates a new Site.
+     * Creates a new project site.
      */
-    public WebSite createSiteForName(String aName, boolean doSelect)
+    public WebSite createProjectSiteForName(String aName)
     {
-        // Create site for name
+        // Create project site for name
         String siteUrlStr = aName.indexOf(':') < 0 ? "local:/" + aName : aName;
         WebURL siteURL = WebURL.getURL(siteUrlStr);
-        WebSite newSite = siteURL.getAsSite();
+        WebSite newSite = siteURL != null ? siteURL.getAsSite() : null;
+        if (newSite == null)
+            return null;
 
-        // Add and select site
+        // Add
         addSite(newSite);
-        if (doSelect)
-            setSelectedSite(newSite);
 
-        // Write sites, reset UI
+        // Write sites
         writeSites();
-        resetLater();
 
         // Return
         return newSite;
@@ -373,7 +370,7 @@ public class WelcomePanel extends ViewOwner {
     /**
      * Opens selected sites.
      */
-    public void openSites()
+    public void openProjectSites()
     {
         // Create WorkspacePane and add selected sites
         WorkspacePane workspacePane = createWorkspacePane();
@@ -393,7 +390,7 @@ public class WelcomePanel extends ViewOwner {
     public void showRemoveSitePanel()
     {
         // Get selected site (if null, just return)
-        WebSite selSite = getSelectedSite();
+        WebSite selSite = getSelSite();
         if (selSite == null)
             return;
 
@@ -433,10 +430,7 @@ public class WelcomePanel extends ViewOwner {
         // Reset SelectedSite
         int newSelIndex = Math.min(siteIndex, getSiteCount() - 1);
         WebSite newSelSite = newSelIndex >= 0 && newSelIndex < getSiteCount() ? getSite(newSelIndex) : null;
-        setSelectedSite(newSelSite);
-
-        // Reset ui
-        resetLater();
+        setSelSite(newSelSite);
     }
 
     /**
@@ -489,5 +483,4 @@ public class WelcomePanel extends ViewOwner {
             page.setBorder(null);
         }
     }
-
 }

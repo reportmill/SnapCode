@@ -58,7 +58,7 @@ public class App extends AppBase {
      */
     public WebSite getProjectSiteForName(String aName)
     {
-        return WelcomePanel.getShared().getSite(aName);
+        return WelcomePanel.getShared().getProjectSiteForName(aName);
     }
 
     /**
@@ -66,7 +66,7 @@ public class App extends AppBase {
      */
     public WebSite createProjectSiteForName(String aName)
     {
-        return WelcomePanel.getShared().createSiteForName(aName, false);
+        return WelcomePanel.getShared().createProjectSiteForName(aName);
     }
 
     /**
