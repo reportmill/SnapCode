@@ -2,7 +2,7 @@ package snapcode.app;
 import snap.geom.Side;
 import snap.util.ArrayUtils;
 import snap.view.*;
-import snapcode.apptools.*;
+import snapcode.apptools.ProblemsTool;
 
 /**
  * A class to hold TabView to show WorkspaceTool instances (ProblemsTool, DebugTool, etc.).
@@ -80,11 +80,6 @@ public class ToolTray extends ViewOwner {
      * Shows the problems tool.
      */
     public void showProblemsTool()  { setSelToolForClass(ProblemsTool.class); }
-
-    /**
-     * Shows the run tool.
-     */
-    public void showRunTool()  { setSelToolForClass(RunConsole.class); }
 
     /**
      * Hides selected tool.

@@ -26,7 +26,7 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     private RunApp  _selApp;
 
     // The Process TreeView
-    private TreeView  _procTree;
+    private TreeView<Object>  _procTree;
 
     // Whether Console needs to be reset
     private boolean  _resetConsole;
@@ -109,20 +109,19 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     /**
      * Removes a process.
      */
-    public RunApp removeProc(int anIndex)
+    public void removeProc(int anIndex)
     {
-        RunApp proc = _apps.remove(anIndex);
-        return proc;
+        _apps.remove(anIndex);
     }
 
     /**
      * Removes a process.
      */
-    public int removeProc(RunApp aProcess)
+    public void removeProc(RunApp aProcess)
     {
         int index = ListUtils.indexOfId(_apps, aProcess);
-        if (index >= 0) removeProc(index);
-        return index;
+        if (index >= 0)
+            removeProc(index);
     }
 
     /**
@@ -134,7 +133,7 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
         addProc(aProc);
         setSelApp(aProc);
         ToolTray bottomTray = _workspaceTools.getBottomTray();
-        bottomTray.showRunTool();
+        bottomTray.setSelToolForClass(RunConsole.class);
         aProc.exec();
     }
 
