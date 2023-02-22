@@ -1,5 +1,6 @@
 package snapcode.app;
 import snap.web.WebURL;
+import snapcode.project.WorkspaceX;
 
 /**
  * This WorkspacePane subclass enables full JRE dev features.
@@ -8,6 +9,14 @@ public class WorkspacePaneX extends WorkspacePane {
 
     // The default HomePage
     private HomePage  _homePage;
+
+    /**
+     * Constructor.
+     */
+    public WorkspacePaneX()
+    {
+        super(new WorkspaceX());
+    }
 
     /**
      * Creates the PagePane.
