@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView>
+<ColView PrefWidth="320">
   <Font name="Arial" size="12" />
   <RowView Padding="4" GrowWidth="true">
     <TextField Name="SearchTextField" Margin="4,12,4,80" PrefWidth="260" PrefHeight="26" LeanX="CENTER" GrowWidth="true" PromptText="Search" BorderRadius="10"/>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView FillWidth="true">
+<ColView PrefHeight="220" FillWidth="true">
   <Font Name="Arial" Size="12" />
   <RowView MinHeight="32">
     <Label Margin="0,8,0,8" text="Breakpoints:" />

@@ -1,8 +1,10 @@
 package snapcode.app;
 import snap.geom.Side;
+import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.view.*;
 import snapcode.apptools.ProblemsTool;
+import java.util.List;
 
 /**
  * A class to hold TabView to show WorkspaceTool instances (ProblemsTool, DebugTool, etc.).
@@ -98,18 +100,12 @@ public class ToolTray extends ViewOwner {
         _tabView.setTabSide(_side);
         _tabView.getTabBar().setTabMinWidth(70);
         _tabView.getTabBar().setAllowEmptySelection(true);
+        _tabView.setAnimateTabChange(true);
 
-        // Bogus: Manually set TabView PrefHeight
-        _tabView.addPropChangeListener(pc -> {
-            if (_side.isTopOrBottom()) {
-                double prefH = _tabView.getContent() != null ? 280 : 30;
-                _tabView.setPrefHeight(prefH);
-            }
-            else {
-                double prefW = _tabView.getContent() != null ? 250 : 30;
-                _tabView.setPrefWidth(prefW);
-            }
-        }, TabView.SelIndex_Prop);
+        // Have to reset tabView.PrefSize when TabView selection changes, so
+        View tabViewContentBox = _tabView.getContentBox();
+        PropChangeListener tabViewContentBoxPrefSizeLsnr = pc -> tabViewContentBoxPrefSizeChanged();
+        tabViewContentBox.addPropChangeListener(tabViewContentBoxPrefSizeLsnr, View.PrefWidth_Prop, View.PrefHeight_Prop);
 
         // Get TabBuilder
         Tab.Builder tabBuilder = new Tab.Builder(_tabView.getTabBar());
@@ -133,5 +129,21 @@ public class ToolTray extends ViewOwner {
         ViewOwner viewOwner = selTab != null ? selTab.getContentOwner() : null;
         if (viewOwner != null)
             viewOwner.resetLater();
+    }
+
+    /**
+     * Called when TabView.ContentBox has PrefSize change (always due to animation) to reset SplitView.Items.PrefSize.
+     */
+    private void tabViewContentBoxPrefSizeChanged()
+    {
+        // Get SplitView + Items for SplitView holding TabView
+        SplitView splitView = (SplitView) _tabView.getParent();
+        List<View> splitViewItems = splitView.getItems();
+
+        // Reset SplitView.Items (conditional to handle Left/RightTray special)
+        for (View item : splitViewItems) {
+            if (item == _tabView || !(item instanceof TabView))
+                item.setPrefSize(-1, -1);
+        }
     }
 }
