@@ -1,5 +1,7 @@
 package snapcode.app;
 
+import snap.web.WebSite;
+
 /**
  * Base class for app.
  */
@@ -20,6 +22,16 @@ public abstract class AppBase {
      * Called to show WelcomePanel.
      */
     public abstract void showWelcomePanel();
+
+    /**
+     * Returns a project site for given name.
+     */
+    public WebSite getProjectSiteForName(String aName)  { return null; }
+
+    /**
+     * Creates a project site for given name.
+     */
+    public WebSite createProjectSiteForName(String aName)  { return null; }
 
     /**
      * Called when app quits.

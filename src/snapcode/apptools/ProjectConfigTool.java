@@ -75,30 +75,22 @@ public class ProjectConfigTool extends ProjectTool {
      */
     public void addProjectForName(String aName, String aURLString)
     {
-        View view = isUISet() && getUI().isShowing() ? getUI() : _workspacePane.getUI();
-        addProjectForName(aName, aURLString, view);
-    }
-
-    /**
-     * Adds a project with given name.
-     */
-    public void addProjectForName(String aName, String aURLString, View aView)
-    {
         // If already set, just return
         Project existingProj = _proj.getProjectForName(aName);
         if (existingProj != null) {
-            DialogBox.showWarningDialog(aView, "Error Adding Project", "Project already present: " + aName);
+            View view = isUISet() && getUI().isShowing() ? getUI() : _workspacePane.getUI();
+            DialogBox.showWarningDialog(view, "Error Adding Project", "Project already present: " + aName);
             return;
         }
 
         // Get site
-        WelcomePanel welcomePanel = WelcomePanel.getShared();
-        WebSite projSite = welcomePanel.getSite(aName);
+        AppBase app = AppBase.getShared();
+        WebSite projSite = app.getProjectSiteForName(aName);
 
         // If project site doesn't exist, create it
         if ((projSite == null || !projSite.getExists()) && aURLString != null) {
             if (projSite == null)
-                projSite = welcomePanel.createSiteForName(aName, false);
+                projSite = app.createProjectSiteForName(aName);
             VersionControl.setRemoteURLString(projSite, aURLString);
             VersionControl vc = VersionControl.create(projSite);
             checkoutProject(vc);
@@ -107,7 +99,8 @@ public class ProjectConfigTool extends ProjectTool {
 
         // If site still null complain and return
         if (projSite == null) {
-            DialogBox.showErrorDialog(aView, "Error Adding Project", "Project not found.");
+            View view = isUISet() && getUI().isShowing() ? getUI() : _workspacePane.getUI();
+            DialogBox.showErrorDialog(view, "Error Adding Project", "Project not found.");
             return;
         }
 

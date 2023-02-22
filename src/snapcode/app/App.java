@@ -8,6 +8,7 @@ import snap.util.SnapUtils;
 import snap.view.ViewUtils;
 import snap.view.WindowView;
 import snap.viewx.ExceptionReporter;
+import snap.web.WebSite;
 
 /**
  * SnapCode Application entry point.
@@ -50,6 +51,22 @@ public class App extends AppBase {
     public void showWelcomePanel()
     {
         WelcomePanel.getShared().showPanel();
+    }
+
+    /**
+     * Returns a project site for given name.
+     */
+    public WebSite getProjectSiteForName(String aName)
+    {
+        return WelcomePanel.getShared().getSite(aName);
+    }
+
+    /**
+     * Creates a project site for given name.
+     */
+    public WebSite createProjectSiteForName(String aName)
+    {
+        return WelcomePanel.getShared().createSiteForName(aName, false);
     }
 
     /**
