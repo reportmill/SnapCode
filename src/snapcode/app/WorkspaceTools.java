@@ -156,7 +156,7 @@ public class WorkspaceTools {
     /**
      * Sets whether left tray should be showing.
      */
-    public void setShowLeftTray(boolean aValue)  { _leftTray.getUI().setVisible(aValue); }
+    public void setShowLeftTray(boolean aValue)  { setTrayVisible(_leftTray, aValue); }
 
     /**
      * Returns whether right tray should be showing.
@@ -166,7 +166,7 @@ public class WorkspaceTools {
     /**
      * Sets whether right tray should be showing.
      */
-    public void setShowRightTray(boolean aValue)  { _rightTray.getUI().setVisible(aValue); }
+    public void setShowRightTray(boolean aValue)  { setTrayVisible(_rightTray, aValue); }
 
     /**
      * Returns whether bottom tray should be showing.
@@ -176,7 +176,19 @@ public class WorkspaceTools {
     /**
      * Sets whether bottom tray should be showing.
      */
-    public void setShowBottomTray(boolean aValue)  { _bottomTray.getUI().setVisible(aValue); }
+    public void setShowBottomTray(boolean aValue)  { setTrayVisible(_bottomTray, aValue); }
+
+    /**
+     * Sets given tray UI visible - using anim if parent onscreen.
+     */
+    private void setTrayVisible(ViewOwner aTray, boolean aValue)
+    {
+        View trayUI = aTray.getUI();
+        View trayParent = trayUI.getParent();
+        if (trayParent.isShowing())
+            ViewAnimUtils.setVisible(trayUI, aValue, true, true);
+        else trayUI.setVisible(aValue);
+    }
 
     /**
      * Returns the tool for given class.
