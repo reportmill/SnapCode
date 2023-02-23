@@ -42,14 +42,19 @@ public class HomePage extends WebPage {
     /**
      * Override to put in Page pane.
      */
+    @Override
     protected View createUI()
     {
-        return new ScrollView(super.createUI());
+        View superUI = super.createUI();
+        ScrollView scrollView = new ScrollView(superUI);
+        scrollView.setBorder(null);
+        return scrollView;
     }
 
     /**
      * Initialize UI.
      */
+    @Override
     public void initUI()
     {
         enableEvents("Header", MouseRelease);
@@ -64,6 +69,7 @@ public class HomePage extends WebPage {
     /**
      * RespondUI.
      */
+    @Override
     public void respondUI(ViewEvent anEvent)
     {
         // Trigger animations on main buttons for MouseEntered/MouseExited
