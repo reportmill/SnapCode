@@ -126,12 +126,19 @@ public class EvalTool extends WorkspaceTool {
         // Do normal version
         ColView colView = (ColView) super.createUI();
 
+        // Add separator
+        RectView separator = new RectView();
+        separator.setPrefSize(1, 1);
+        separator.setFill(Color.GRAY8);
+        colView.addChild(separator);
+
         // Create/config EvalView
         _evalView = new EvalView(this);
         _evalView.setGrowHeight(true);
 
         // Create/config ScrollView
         ScrollView scrollView = new ScrollView(_evalView);
+        scrollView.setBorder(null);
         scrollView.setFillWidth(true);
         scrollView.setGrowHeight(true);
         colView.addChild(scrollView);

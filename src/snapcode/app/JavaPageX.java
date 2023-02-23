@@ -1,5 +1,6 @@
 package snapcode.app;
 import javakit.ide.JavaTextPane;
+import javakit.ide.JavaTextPaneX;
 import javakit.parse.*;
 import snap.view.ViewEvent;
 import snap.viewx.WebBrowser;
@@ -84,7 +85,64 @@ public class JavaPageX extends JavaPage {
     /**
      * A JavaTextPane for a JavaPage to implement symbol features and such.
      */
-    public class JPJavaTextPaneX extends JPJavaTextPane {
+    public class JPJavaTextPaneX extends JavaTextPaneX {
+
+        /**
+         * Override to set selection using browser.
+         */
+        public void setTextSel(int aStart, int anEnd)
+        {
+            JavaPageX.this.setTextSel(aStart, anEnd);
+        }
+
+        /**
+         * Override to open declaration.
+         */
+        public void openDeclaration(JNode aNode)
+        {
+            JavaPageX.this.openDeclaration(aNode);
+        }
+
+        /**
+         * Open a super declaration.
+         */
+        public void openSuperDeclaration(JMemberDecl aMemberDecl)
+        {
+            JavaPageX.this.openSuperDeclaration(aMemberDecl);
+        }
+
+        /**
+         * Show references for given node.
+         */
+        public void showReferences(JNode aNode)
+        {
+            JavaPageX.this.showReferences(aNode);
+        }
+
+        /**
+         * Show declarations for given node.
+         */
+        public void showDeclarations(JNode aNode)
+        {
+            JavaPageX.this.showDeclarations(aNode);
+        }
+
+        /**
+         * Override to update Page.Modified.
+         */
+        public void setTextModified(boolean aFlag)
+        {
+            super.setTextModified(aFlag);
+            JavaPageX.this.setTextModified(aFlag);
+        }
+
+        /**
+         * Override to get ProgramCounter from ProcPane.
+         */
+        public int getProgramCounterLine()
+        {
+            return JavaPageX.this.getProgramCounterLine();
+        }
 
         /**
          * Respond to UI controls.

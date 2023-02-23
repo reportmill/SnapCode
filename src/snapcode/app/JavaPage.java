@@ -230,7 +230,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     /**
      * Override to set selection using browser.
      */
-    private void setTextSel(int aStart, int anEnd)
+    protected void setTextSel(int aStart, int anEnd)
     {
         String urls = getFile().getURL().getString() + String.format("#Sel=%d-%d", aStart, anEnd);
         getBrowser().setURLString(urls);
@@ -239,7 +239,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     /**
      * Override to open declaration.
      */
-    private void openDeclaration(JNode aNode)
+    protected void openDeclaration(JNode aNode)
     {
         JavaDecl decl = aNode.getDecl();
         if (decl != null) openDecl(decl);
@@ -248,7 +248,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     /**
      * Open a super declaration.
      */
-    private void openSuperDeclaration(JMemberDecl aMemberDecl)
+    protected void openSuperDeclaration(JMemberDecl aMemberDecl)
     {
         JavaDecl sdecl = aMemberDecl.getSuperDecl();
         if (sdecl == null) return;
@@ -327,7 +327,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     /**
      * Override to update Page.Modified.
      */
-    private void setTextModified(boolean aFlag)
+    protected void setTextModified(boolean aFlag)
     {
         WebFile javaFile = getFile();
         javaFile.setUpdater(aFlag ? this : null);
@@ -349,7 +349,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     /**
      * A JavaTextPane for a JavaPage to implement symbol features and such.
      */
-    public class JPJavaTextPane extends JavaTextPaneX {
+    public class JPJavaTextPane extends JavaTextPane<JavaTextDoc> {
 
         /**
          * Override to set selection using browser.

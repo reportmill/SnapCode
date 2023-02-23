@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView PrefWidth="500" GrowHeight="true" FillWidth="true">
   <RowView Name="ToolBar" Padding="6,10,6,20" Spacing="6">
-    <Button Name="RunButton" PrefWidth="80" Margin="4" Padding="1" LeanX="CENTER" Text="Run">
+    <Button Name="RunButton" PrefWidth="80" Margin="4" LeanX="CENTER" Text="Run">
       <Font Name="Arial Bold" Size="14" />
     </Button>
     <CheckBox Name="AutoRunCheckBox" ToolTip="Automatically run when enter key is pressed" LeanX="RIGHT" Text="Auto Run" />

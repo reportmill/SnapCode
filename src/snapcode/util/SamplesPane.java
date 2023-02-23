@@ -66,7 +66,7 @@ public class SamplesPane extends ViewOwner {
 
         // Get selected URL and send to handler
         WebURL url = getDocURL(_selIndex);
-        _handler.accept(url);
+        runLater(() -> _handler.accept(url));
     }
 
     /**
