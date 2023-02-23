@@ -320,7 +320,7 @@ public class WorkspacePane extends ViewOwner {
         // Get MainSplit
         SplitView mainSplit = getUI(SplitView.class);
         mainSplit.setBorder(null);
-        mainSplit.setDividerSpan(5);
+        mainSplit.setDividerSpan(0);
 
         // Get MenuBar and register to process events
         MenuBar menuBar = getView("MenuBar", MenuBar.class);
@@ -333,7 +333,7 @@ public class WorkspacePane extends ViewOwner {
         // Get PagePaneSplitView
         SplitView pagePaneSplitView = getView("PagePaneSplitView", SplitView.class);
         pagePaneSplitView.setBorder(null);
-        pagePaneSplitView.setDividerSpan(5);
+        pagePaneSplitView.setDividerSpan(0);
 
         // Install PagePage UI
         View pagePaneUI = _pagePane.getUI();

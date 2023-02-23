@@ -199,7 +199,6 @@ public class DebugTool extends WorkspaceTool {
         Divider divider = _splitView.getDivider();
         divider.setFill(DIVIDER_FILL);
         divider.setBorder(null);
-        divider.setReach(3);
 
         // Add ProcPane
         View procPaneUI = _procPane.getUI();
