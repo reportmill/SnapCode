@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="320">
+<ColView PrefWidth="400">
   <Font name="Arial" size="12" />
   <RowView Padding="4" GrowWidth="true">
     <TextField Name="SearchTextField" Margin="4,12,4,80" PrefWidth="260" PrefHeight="26" LeanX="CENTER" GrowWidth="true" PromptText="Search" BorderRadius="10"/>
@@ -8,13 +8,13 @@
   <SplitView Name="SplitView" Vertical="true" GrowWidth="true" GrowHeight="true">
     <Font name="Arial" size="14" />
     <ColView>
-      <ListView Name="TopicListView" BorderRadius="4" PrefHeight="100" Margin="4" GrowWidth="true" GrowHeight="true">
+      <ListView Name="TopicListView" BorderRadius="4" PrefHeight="100" Margin="4,6,0,6" GrowWidth="true" GrowHeight="true">
         <Font name="Arial" size="11" />
         <LineBorder Color="#c0c0c0" />
       </ListView>
     </ColView>
     <ColView GrowHeight="true">
-      <TextView Name="HelpTextView" BorderRadius="4" Margin="4" GrowWidth="true" GrowHeight="true" PrefHeight="400" Rich="true" />
+      <TextView Name="HelpTextView" BorderRadius="4" Margin="0,6,6,6" GrowWidth="true" GrowHeight="true" PrefHeight="400" Rich="true" />
     </ColView>
   </SplitView>
 </ColView>

@@ -55,7 +55,7 @@ public class EvalView extends ColView implements JavaShell.ShellClient {
     {
         _evalTool = evalTool;
         setSpacing(6);
-        setFill(new Color(.98));
+        setFill(new Color(.99));
 
         // Set Padding to match TextArea
         setPadding(5, 5, 5, 5);

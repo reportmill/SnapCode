@@ -110,7 +110,6 @@ public class HelpTool extends WorkspaceTool {
         // Get/configure SplitView
         SplitView splitView = getView("SplitView", SplitView.class);
         splitView.setBorder(null);
-        splitView.setDividerSpan(2);
         splitView.getDivider().setPaintable(false);
 
         // Get TopicListArea and configure
