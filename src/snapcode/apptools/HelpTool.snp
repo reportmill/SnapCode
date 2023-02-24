@@ -7,14 +7,10 @@
   </RowView>
   <SplitView Name="SplitView" Vertical="true" GrowWidth="true" GrowHeight="true">
     <Font name="Arial" size="14" />
-    <ColView>
-      <ListView Name="TopicListView" BorderRadius="4" PrefHeight="100" Margin="4,6,0,6" GrowWidth="true" GrowHeight="true">
-        <Font name="Arial" size="11" />
-        <LineBorder Color="#c0c0c0" />
-      </ListView>
-    </ColView>
-    <ColView GrowHeight="true">
-      <TextView Name="HelpTextView" BorderRadius="4" Margin="0,6,6,6" GrowWidth="true" GrowHeight="true" PrefHeight="400" Rich="true" />
-    </ColView>
+    <ListView Name="TopicListView" BorderRadius="4" PrefHeight="160" Margin="4,6,0,6" GrowWidth="true">
+      <Font name="Arial" size="11" />
+      <LineBorder Color="#c0c0c0" />
+    </ListView>
+    <TextView Name="HelpTextView" BorderRadius="4" Margin="0,6,6,6" GrowWidth="true" GrowHeight="true" PrefHeight="400" Rich="true" />
   </SplitView>
 </ColView>
