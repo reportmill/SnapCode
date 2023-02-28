@@ -137,8 +137,10 @@ public class HttpServerTool extends WorkspaceTool {
         }
 
         // Handle ClearButton
-        if (anEvent.equals("ClearButton"))
-            _textView.clear();
+        if (anEvent.equals("ClearButton")) {
+            TextArea textArea = _textView.getTextArea();
+            textArea.clear();
+        }
     }
 
     /**
@@ -258,9 +260,10 @@ public class HttpServerTool extends WorkspaceTool {
         }
 
         // Append text
-        int len = _textView.length();
-        TextStyle tstyle = _textView.getStyleAt(len).copyFor(aColor);
-        _textView.replaceChars(aStr, tstyle, len, len, false);
+        TextArea textArea = _textView.getTextArea();
+        int textLength = textArea.length();
+        TextStyle textStyle = textArea.getStyleForCharIndex(textLength).copyFor(aColor);
+        textArea.replaceChars(aStr, textStyle, textLength, textLength, false);
     }
 
     /**

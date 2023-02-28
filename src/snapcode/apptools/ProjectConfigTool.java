@@ -439,16 +439,22 @@ public class ProjectConfigTool extends ProjectTool {
     {
         TitleView titleView = getView("SymbolCheckTitleView", TitleView.class);
         if (titleView.isExpanded()) return;
-        _symText = getView("SymbolCheckText", TextView.class);
-        if (_symText.length() > 0) return;
-        _symText.addChars("Undefined Symbols:\n");
-        _symText.setSel(0, 0);
+
+        // Get TextArea
+        TextView symbolCheckTextView = getView("SymbolCheckText", TextView.class);
+        _symbolCheckTextArea = symbolCheckTextView.getTextArea();
+        if (_symbolCheckTextArea.length() > 0)
+            return;
+
+        // Initialize
+        _symbolCheckTextArea.addChars("Undefined Symbols:\n");
+        _symbolCheckTextArea.setSel(0, 0);
 
         Runnable run = () -> findUndefines(getProject().getSourceDir());
         new Thread(run).start();
     }
 
-    TextView _symText;
+    TextArea _symbolCheckTextArea;
     JFile _symFile;
     int _undefCount;
 
@@ -499,7 +505,8 @@ public class ProjectConfigTool extends ProjectTool {
 
     private void showSymText(String aStr)
     {
-        runLater(() -> _symText.replaceChars(aStr, null, _symText.length(), _symText.length(), false));
+        int textAreaLength = _symbolCheckTextArea.length();
+        runLater(() -> _symbolCheckTextArea.replaceChars(aStr, null, textAreaLength, textAreaLength, false));
 
         // Sleep
         try { Thread.sleep(80); }
