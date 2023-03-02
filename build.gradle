@@ -80,6 +80,6 @@ dependencies {
     implementation files('lib/tools.jar')
 }
 
-mainClassName = 'snapcode.app.App'
+mainClassName = 'snapcode.appjr.AppGL'
 
 
