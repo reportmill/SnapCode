@@ -70,7 +70,8 @@ public class WorkspaceTools {
         FileTreeTool fileTreeTool = new FileTreeTool(_workspacePane);
         EvalTool evalTool = new EvalTool(_workspacePane);
         HelpTool helpTool = new HelpTool(_workspacePane);
-        _tools = new WorkspaceTool[] { filesTool, fileTreeTool, evalTool, helpTool };
+        ProblemsTool problemsTool = new ProblemsTool(_workspacePane);
+        _tools = new WorkspaceTool[] { filesTool, fileTreeTool, evalTool, helpTool, problemsTool };
 
         // Create LeftTray
         WorkspaceTool[] leftTools = { fileTreeTool };
@@ -81,7 +82,7 @@ public class WorkspaceTools {
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray
-        WorkspaceTool[] bottomTools = { };
+        WorkspaceTool[] bottomTools = { problemsTool };
         _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
 
         // Add SamplesButton to RightTray
@@ -263,6 +264,11 @@ public class WorkspaceTools {
         // Update FilesPane.FilesTree
         FileTreeTool fileTreeTool = getFileTreeTool();
         fileTreeTool.updateFile(issueFile);
+
+        // Update ProblemsTool
+        ProblemsTool problemsTool = getToolForClass(ProblemsTool.class);
+        if (problemsTool != null && problemsTool.isShowing())
+            problemsTool.resetLater();
     }
 
     /**

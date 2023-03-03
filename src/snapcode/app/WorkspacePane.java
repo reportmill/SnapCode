@@ -141,7 +141,6 @@ public class WorkspacePane extends ViewOwner {
         _workspaceTools.setShowLeftTray(false);
         _workspaceTools.getLeftTray().setSelTool(null);
         _workspaceTools.getRightTray().setSelToolForClass(EvalTool.class);
-        _workspaceTools.setShowBottomTray(false);
         _toolBar.getUI().setVisible(false);
         getView("MainColView", ColView.class).getChild(2).setVisible(false);
 
