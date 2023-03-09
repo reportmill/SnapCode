@@ -10,7 +10,9 @@ import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.viewx.FilePanel;
 import snap.viewx.RecentFiles;
+import snap.web.RecentFilesSite;
 import snap.web.WebFile;
+import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcharts.app.DropBox;
 import snapcode.app.AppBase;
@@ -316,6 +318,10 @@ public class WelcomePanel extends ViewOwner {
      */
     public void showOpenPanel()
     {
+        // Add recent files
+        WebSite recentFilesSite = RecentFilesSite.getRecentFilesSiteForId(RECENT_FILES_ID);
+        FilePanel.addDefaultSite(recentFilesSite);
+
         // Get path from open panel for supported file extensions
         String[] extensions = { JAVA_FILE_EXT };
         String path = FilePanel.showOpenPanel(getUI(), "Snap Java File", extensions);
