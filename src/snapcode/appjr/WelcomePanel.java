@@ -324,12 +324,12 @@ public class WelcomePanel extends ViewOwner {
 
         // Get path from open panel for supported file extensions
         String[] extensions = { JAVA_FILE_EXT };
-        String path = FilePanel.showOpenPanel(getUI(), "Snap Java File", extensions);
-        if (path == null)
+        WebFile selFile = FilePanel.showOpenPanelWeb(getUI(), "Snap Java File", extensions);
+        if (selFile == null)
             return;
 
         // Show jepl
-        openWorkspaceForJeplFileSource(path);
+        openWorkspaceForJeplFileSource(selFile);
     }
 
     /**
