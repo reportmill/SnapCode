@@ -324,7 +324,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Get path from open panel for supported file extensions
         String[] extensions = { JAVA_FILE_EXT };
-        WebFile selFile = FilePanel.showOpenPanelWeb(getUI(), "Snap Java File", extensions);
+        WebFile selFile = FilePanel.showOpenFilePanel(getUI(), "Snap Java File", extensions);
         if (selFile == null)
             return;
 
