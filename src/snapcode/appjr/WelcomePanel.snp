@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="400" PrefHeight="600" Spacing="5" FillWidth="true">
+<ColView PrefWidth="400" PrefHeight="520" Spacing="5" FillWidth="true">
   <ColView Padding="2,8,8,8" GrowHeight="true" Spacing="5" FillWidth="true">
-    <TitleView Name="FileSystemTitleView" Text="File System">
-      <font name="Arial" size="14" />
-      <ColView Padding="6,6,8,8" GrowHeight="true" Spacing="6">
-        <font name="Arial" size="11" />
-        <RadioButton Name="LocalButton" text="Local" Selected="true" />
-        <RowView GrowWidth="true" Spacing="4">
-          <RadioButton Name="CloudButton" text="Cloud" />
-          <Label Name="EmailLabel" PrefHeight="20" Margin="0,0,0,24" text="User Email:" />
-          <TextField Name="EmailText" GrowWidth="true" BorderRadius="3" PromptText="Used only to define unique home dir" />
-        </RowView>
-      </ColView>
-    </TitleView>
     <RowView GrowWidth="true" Padding="2" Spacing="4">
       <Label Padding="4,0,0,0" text="Select file:">
         <font name="Arial" size="15" />
