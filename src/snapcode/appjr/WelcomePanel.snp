@@ -8,18 +8,11 @@
       <ProgressBar Name="ProgressBar" PrefWidth="110" PrefHeight="20" LeanX="CENTER" />
       <Button Name="SamplesButton" PrefWidth="110" PrefHeight="24" Margin="2,5,2,2" Padding="3" Text="Show Samples" LeanX="RIGHT" />
     </RowView>
-    <TableView Name="SitesTable" GrowHeight="true" BorderRadius="3">
-      <font name="Arial" size="14" />
-      <TableCol Header="Name" GrowWidth="true" />
-      <TableCol Header="Path" GrowWidth="true">
-        <font name="Arial" size="12" />
-      </TableCol>
-    </TableView>
-    <RowView Align="CENTER" Spacing="10">
-      <Button Name="NewButton" PrefWidth="80" PrefHeight="22" text="New" />
-      <Button Name="OpenPanelButton" PrefWidth="80" PrefHeight="22" text="Open..." />
-      <Button Name="OpenButton" PrefWidth="80" PrefHeight="22" text="Open" />
-      <Button Name="QuitButton" PrefWidth="80" PrefHeight="22" text="Quit" />
+    <RowView Align="CENTER" Spacing="10" Margin="10,0,0,0">
+      <font name="Arial" size="13" />
+      <Button Name="NewButton" PrefWidth="100" PrefHeight="24" text="New" />
+      <Button Name="OpenButton" PrefWidth="100" PrefHeight="24" text="Open" />
+      <Button Name="QuitButton" PrefWidth="100" PrefHeight="24" text="Quit" />
     </RowView>
   </ColView>
 </ColView>

@@ -2,8 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.appjr;
-import snap.geom.Insets;
-import snap.gfx.Color;
 import snap.util.Prefs;
 import snap.util.SnapUtils;
 import snap.view.*;
@@ -17,20 +15,13 @@ import snapcode.app.WorkspacePane;
  */
 public class WelcomePanel extends ViewOwner {
 
-    // The selected file
-    private WebFile  _selFile;
-
-    // The RecentFiles
-    private WebFile[]  _recentFiles;
-
-    // The SitesTable
-    private TableView<WebFile>  _sitesTable;
+    // The FilePanel
+    private FilePanel  _filePanel;
 
     // The shared instance
     private static WelcomePanel _shared;
 
     // Constants
-    private static final String USER_EMAIL = "UserEmail";
     public static final String JAVA_FILE_EXT = "jepl";
     public static final String RECENT_FILES_ID = "RecentJeplDocs";
 
@@ -56,24 +47,10 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
-     * Returns the selected file.
-     */
-    public WebFile getSelFile()  { return _selFile; }
-
-    /**
-     * Sets the selected file.
-     */
-    public void setSelFile(WebFile aFile)
-    {
-        _selFile = aFile;
-    }
-
-    /**
      * Shows the welcome panel.
      */
     public void showPanel()
     {
-        _recentFiles = null;
         getWindow().setVisible(true);
         resetLater();
     }
@@ -101,25 +78,15 @@ public class WelcomePanel extends ViewOwner {
         // Size main UI view
         getUI().setPrefHeight(580);
 
-        // Configure SitesTable
-        _sitesTable = getView("SitesTable", TableView.class);
-        //_sitesTable.setRowHeight(24);
-        _sitesTable.getScrollView().setFillWidth(false);
-        _sitesTable.getScrollView().setBarSize(14);
+        // Create OpenPanel
+        _filePanel = createOpenPanel();
+        View filePanelUI = _filePanel.getUI();
+        filePanelUI.setGrowHeight(true);
 
-        // Configure SitesTable columns
-        TableCol<WebFile> nameCol = _sitesTable.getCol(0);
-        nameCol.setCellPadding(new Insets(4, 8, 4, 5));
-        nameCol.setCellConfigure(cell -> configureSitesTableNameColCell(cell));
-        TableCol<WebFile> pathCol = _sitesTable.getCol(1);
-        pathCol.setCellPadding(new Insets(4, 5, 4, 5));
-        pathCol.setCellConfigure(cell -> configureSitesTablePathColCell(cell));
-
-        // Enable SitesTable MouseReleased
-        WebFile[] recentFiles = getRecentFiles();
-        if (recentFiles.length > 0)
-            _selFile = recentFiles[0];
-        enableEvents(_sitesTable, MouseRelease);
+        // Add FilePanel.UI to ColView
+        ColView topColView = (ColView) getUI();
+        ColView colView2 = (ColView) topColView.getChild(1);
+        colView2.addChild(filePanelUI, 1);
 
         // Hide ProgressBar
         getView("ProgressBar").setVisible(false);
@@ -133,16 +100,6 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
-     * Resets UI.
-     */
-    public void resetUI()
-    {
-        setViewEnabled("OpenButton", getSelFile() != null);
-        _sitesTable.setItems(getRecentFiles());
-        _sitesTable.setSelItem(getSelFile());
-    }
-
-    /**
      * Responds to UI changes.
      */
     public void respondUI(ViewEvent anEvent)
@@ -151,22 +108,17 @@ public class WelcomePanel extends ViewOwner {
         if (anEvent.equals("SamplesButton"))
             newFile(true);
 
-        // Handle SitesTable
-        if (anEvent.equals("SitesTable"))
-            setSelFile((WebFile) anEvent.getSelItem());
-
         // Handle NewButton
         if (anEvent.equals("NewButton"))
             newFile(false);
 
         // Handle OpenPanelButton
-        if (anEvent.equals("OpenPanelButton"))
-            showOpenPanel();
+        //if (anEvent.equals("OpenPanelButton")) showOpenPanel();
 
-        // Handle OpenButton or SitesTable double-click
-        if (anEvent.equals("OpenButton") || anEvent.equals("SitesTable") && anEvent.getClickCount() > 1) {
-            WebFile file = (WebFile) getViewSelItem("SitesTable");
-            openWorkspaceForJeplFileSource(file);
+        // Handle OpenButton
+        if (anEvent.equals("OpenButton")) {
+            WebFile selFile = _filePanel.getSelFile();
+            openWorkspaceForJeplFileSource(selFile);
         }
 
         // Handle QuitButton
@@ -196,6 +148,21 @@ public class WelcomePanel extends ViewOwner {
      */
     public void showOpenPanel()
     {
+        // Get path from open panel for supported file extensions
+        String[] extensions = { JAVA_FILE_EXT };
+        WebFile selFile = FilePanel.showOpenFilePanel(getUI(), "Snap Java File", extensions);
+        if (selFile == null)
+            return;
+
+        // Show jepl
+        openWorkspaceForJeplFileSource(selFile);
+    }
+
+    /**
+     * Creates the OpenPanel to be added to WelcomePanel.
+     */
+    private FilePanel createOpenPanel()
+    {
         // Add recent files
         WebSite recentFilesSite = RecentFilesSite.getRecentFilesSiteForId(RECENT_FILES_ID);
         FilePanel.addDefaultSite(recentFilesSite);
@@ -207,12 +174,20 @@ public class WelcomePanel extends ViewOwner {
 
         // Get path from open panel for supported file extensions
         String[] extensions = { JAVA_FILE_EXT };
-        WebFile selFile = FilePanel.showOpenFilePanel(getUI(), "Snap Java File", extensions);
-        if (selFile == null)
-            return;
+        FilePanel filePanel = new FilePanel() {
+            @Override
+            protected void fireActionEvent(ViewEvent anEvent)
+            {
+                WelcomePanel.this.fireActionEventForObject("OpenButton", anEvent);
+            }
+        };
 
-        // Show jepl
-        openWorkspaceForJeplFileSource(selFile);
+        // Config
+        filePanel.setTypes(extensions);
+        filePanel.setSelSite(recentFilesSite);
+
+        // Return
+        return filePanel;
     }
 
     /**
@@ -230,18 +205,6 @@ public class WelcomePanel extends ViewOwner {
 
         // Return
         return workspacePane;
-    }
-
-    /**
-     * Returns the list of the recent documents as a list of strings.
-     */
-    public WebFile[] getRecentFiles()
-    {
-        // If already set, just return
-        if (_recentFiles != null) return _recentFiles;
-
-        WebFile[] recentFiles = RecentFiles.getFiles(RECENT_FILES_ID);
-        return _recentFiles = recentFiles;
     }
 
     /**
@@ -266,60 +229,5 @@ public class WelcomePanel extends ViewOwner {
 
         // Return
         return doc;
-    }
-
-    /**
-     * Called to configure a SitesTable.ListCell for Name Column.
-     */
-    private void configureSitesTableNameColCell(ListCell<WebFile> aCell)
-    {
-        WebFile file = aCell.getItem();
-        if (file == null) return;
-        String dirPath = file.getName();
-        aCell.setText(dirPath);
-    }
-
-    /**
-     * Called to configure a SitesTable.ListCell for Path Column.
-     */
-    private void configureSitesTablePathColCell(ListCell<WebFile> aCell)
-    {
-        WebFile file = aCell.getItem();
-        if (file == null) return;
-        String dirPath = file.getParent().getPath();
-        aCell.setText(dirPath);
-        aCell.setTextFill(Color.DARKGRAY);
-
-        // Add button to clear item from recent files
-        CloseBox closeBox = new CloseBox();
-        closeBox.setMargin(0, 4, 0, 4);
-        closeBox.addEventHandler(e -> handleCloseBoxClicked(closeBox), View.Action);
-        aCell.setGraphic(closeBox);
-    }
-
-    /**
-     * Called when SitesTable.ListCell close box is clicked.
-     */
-    private void handleCloseBoxClicked(View aView)
-    {
-        // Get SitesTable ListCell holding given view
-        ListCell<?> listCell = aView.getParent(ListCell.class);
-        if (listCell == null)
-            return;
-
-        // Get recent file for ListCell
-        WebFile file = (WebFile) listCell.getItem();
-        if (file == null)
-            return;
-
-        // Clear RecentFile
-        String filePath = file.getURL().getString();
-        RecentFiles.removePath(RECENT_FILES_ID, filePath);
-
-        // Clear RecentFiles, SelFile and trigger reset
-        _recentFiles = null;
-        if (getSelFile() == file)
-            setSelFile(null);
-        resetLater();
     }
 }
