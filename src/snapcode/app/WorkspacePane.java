@@ -7,7 +7,6 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.util.FileUtils;
-import snap.util.Prefs;
 import snap.util.SnapUtils;
 import snap.view.*;
 import snap.viewx.WebBrowser;
@@ -456,10 +455,7 @@ public class WorkspacePane extends ViewOwner {
         // Handle WinClosing
         if (anEvent.isWinClose()) {
             hide();
-            runLater(() -> {
-                Prefs.getDefaultPrefs().flush();
-                AppBase.getShared().showWelcomePanel();
-            });
+            AppBase.showWelcomePanelLater();
         }
     }
 

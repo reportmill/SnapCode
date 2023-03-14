@@ -1,5 +1,6 @@
 package snapcode.app;
-
+import snap.util.Prefs;
+import snap.view.ViewUtils;
 import snap.web.WebSite;
 
 /**
@@ -37,6 +38,15 @@ public abstract class AppBase {
      * Called when app quits.
      */
     public abstract void quitApp();
+
+    /**
+     * Calls showWelcomePane after delay.
+     */
+    public static void showWelcomePanelLater()
+    {
+        Prefs.getDefaultPrefs().flush();
+        ViewUtils.runLater(() -> getShared().showWelcomePanel());
+    }
 
     /**
      * Returns the shared instance.
