@@ -163,7 +163,6 @@ public class WelcomePanel extends ViewOwner {
     private FilePanel createOpenPanel()
     {
         // Add recent files
-        RecentFiles.setPrefsKey("RecentJeplDocs");
         WebSite recentFilesSite = RecentFilesSite.getShared();
         FilePanel.addDefaultSite(recentFilesSite);
 

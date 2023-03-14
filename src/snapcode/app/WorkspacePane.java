@@ -12,6 +12,7 @@ import snap.util.SnapUtils;
 import snap.view.*;
 import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
+import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
@@ -118,12 +119,20 @@ public class WorkspacePane extends ViewOwner {
         if (aSource == null)
             ProjectUtils.deleteTempProject();
 
-        // Create new temp file and save
+        // Get JeplDoc and source file for source
         JeplTextDoc jeplDoc = JeplTextDoc.getJeplTextDocForSourceURL(aSource);
         WebFile sourceFile = jeplDoc.getSourceFile();
+
+        // If no source, save file
         if (aSource == null) {
             sourceFile.setText("");
             sourceFile.save();
+        }
+
+        // Otherwise, add to RecentFiles
+        else {
+            WebURL sourceURL = sourceFile.getURL();
+            RecentFiles.addURL(sourceURL);
         }
 
         // Configure doc
