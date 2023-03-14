@@ -23,7 +23,6 @@ public class WelcomePanel extends ViewOwner {
 
     // Constants
     public static final String JAVA_FILE_EXT = "jepl";
-    public static final String RECENT_FILES_ID = "RecentJeplDocs";
 
     /**
      * Constructor.
@@ -164,7 +163,8 @@ public class WelcomePanel extends ViewOwner {
     private FilePanel createOpenPanel()
     {
         // Add recent files
-        WebSite recentFilesSite = RecentFilesSite.getRecentFilesSiteForId(RECENT_FILES_ID);
+        RecentFiles.setPrefsKey("RecentJeplDocs");
+        WebSite recentFilesSite = RecentFilesSite.getShared();
         FilePanel.addDefaultSite(recentFilesSite);
 
         // Add DropBox
