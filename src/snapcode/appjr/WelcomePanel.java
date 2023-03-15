@@ -90,7 +90,6 @@ public class WelcomePanel extends ViewOwner {
         // Configure Window: Add WindowListener to indicate app should exit when close button clicked
         WindowView win = getWindow();
         win.setTitle("Welcome");
-        win.setResizable(false);
         enableEvents(win, WinClose);
         getView("OpenButton", Button.class).setDefaultButton(true);
     }
