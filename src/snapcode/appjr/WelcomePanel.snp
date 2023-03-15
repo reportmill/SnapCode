@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="520" PrefHeight="640" Spacing="5" FillWidth="true">
+<ColView PrefWidth="540" PrefHeight="660" Spacing="5" FillWidth="true">
   <ColView Padding="2,8,8,8" GrowHeight="true" Spacing="5" FillWidth="true">
     <RowView GrowWidth="true" Padding="2" Spacing="4">
       <Label Padding="4,0,0,0" text="Select file:">
