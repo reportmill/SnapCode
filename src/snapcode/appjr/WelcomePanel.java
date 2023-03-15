@@ -70,12 +70,9 @@ public class WelcomePanel extends ViewOwner {
     protected void initUI()
     {
         // Add WelcomePaneAnim view
-        DocView anim = getAnimView();
+        View anim = getTopGraphic();
         getUI(ChildView.class).addChild(anim, 0);
         anim.playAnimDeep();
-
-        // Size main UI view
-        getUI().setPrefHeight(580);
 
         // Create OpenPanel
         _filePanel = createOpenPanel();
@@ -207,22 +204,23 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
-     * Loads the WelcomePaneAnim.snp DocView.
+     * Load/configure top graphic WelcomePaneAnim.snp.
      */
-    private DocView getAnimView()
+    private View getTopGraphic()
     {
         // Unarchive WelcomePaneAnim.snp as DocView
         WebURL url = WebURL.getURL(WelcomePanel.class, "WelcomePanelAnim.snp");
-        DocView doc = (DocView) new ViewArchiver().getViewForSource(url);
+        ChildView doc = (ChildView) new ViewArchiver().getViewForSource(url);
 
         // Get page and clear border/shadow
-        PageView page = doc.getPage();
+        ParentView page = (ParentView) doc.getChild(2);
         page.setBorder(null);
+        page.setFill(null);
         page.setEffect(null);
 
         // Set BuildText and JavaText
-        View buildText = page.getChildForName("BuildText");
-        View jvmText = page.getChildForName("JVMText");
+        View buildText = doc.getChildForName("BuildText");
+        View jvmText = doc.getChildForName("JVMText");
         buildText.setText("Build: " + SnapUtils.getBuildInfo());
         jvmText.setText("JVM: " + System.getProperty("java.runtime.version"));
 
