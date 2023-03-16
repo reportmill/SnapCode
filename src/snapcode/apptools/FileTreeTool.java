@@ -422,7 +422,7 @@ public class FileTreeTool extends WorkspaceTool {
     protected void checkForExternalMods(WebFile aFile)
     {
         // If file has been changed since last load, reload
-        if (aFile.getLastModTime() < aFile.getURL().getLastModTime()) {
+        if (aFile.isModifiedExternally()) {
             aFile.reload();
             _pagePane.reloadFile(aFile);
         }
