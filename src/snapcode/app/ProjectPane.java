@@ -1,6 +1,7 @@
 package snapcode.app;
 import javakit.project.Project;
 import javakit.project.Workspace;
+import javakit.project.WorkspaceBuilder;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.view.TabView;
@@ -155,28 +156,51 @@ public class ProjectPane extends WebPage {
     /**
      * Called when file added to project.
      */
-    void fileAdded(WebFile aFile)
+    private void fileAdded(WebFile aFile)
     {
-        if (_configTool != null)
-            _configTool.fileAdded(aFile);
+        // If BuildDir file, just return
+        if (_project.getBuildDir().containsFile(aFile)) return;
+
+        // Add file to project and build workspace
+        _project.fileAdded(aFile);
+        buildWorkspace();
     }
 
     /**
      * Called when file removed from project.
      */
-    void fileRemoved(WebFile aFile)
+    private void fileRemoved(WebFile aFile)
     {
-        if (_configTool != null)
-            _configTool.fileRemoved(aFile);
+        // If BuildDir file, just return
+        if (_project.getBuildDir().containsFile(aFile)) return;
+
+        // Remove from project and build workspace
+        _project.fileRemoved(aFile);
+        buildWorkspace();
     }
 
     /**
      * Called when file saved in project.
      */
-    void fileSaved(WebFile aFile)
+    private void fileSaved(WebFile aFile)
     {
-        if (_configTool != null)
-            _configTool.fileSaved(aFile);
+        // If BuildDir file, just return
+        if (_project.getBuildDir().containsFile(aFile)) return;
+
+        // Notify saved and build workspace
+        _project.fileSaved(aFile);
+        buildWorkspace();
+    }
+
+    /**
+     * Called to build workspace.
+     */
+    private void buildWorkspace()
+    {
+        Workspace workspace = _project.getWorkspace();
+        WorkspaceBuilder builder = workspace.getBuilder();
+        if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
+            builder.buildWorkspaceLater(false);
     }
 
     /**

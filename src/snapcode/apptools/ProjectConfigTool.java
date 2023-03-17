@@ -160,48 +160,6 @@ public class ProjectConfigTool extends ProjectTool {
     }
 
     /**
-     * Called when file added to project.
-     */
-    public void fileAdded(WebFile aFile)
-    {
-        if (_proj.getBuildDir().contains(aFile)) return;
-        _proj.fileAdded(aFile);
-
-        // Do AutoBuild
-        WorkspaceBuilder builder = _workspace.getBuilder();
-        if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
-            builder.buildWorkspaceLater(false);
-    }
-
-    /**
-     * Called when file removed from project.
-     */
-    public void fileRemoved(WebFile aFile)
-    {
-        if (_proj.getBuildDir().contains(aFile)) return;
-        _proj.fileRemoved(aFile);
-
-        // Do AutoBuild
-        WorkspaceBuilder builder = _workspace.getBuilder();
-        if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
-            builder.buildWorkspaceLater(false);
-    }
-
-    /**
-     * Called when file saved in project.
-     */
-    public void fileSaved(WebFile aFile)
-    {
-        if (_proj.getBuildDir().contains(aFile)) return;
-        _proj.fileSaved(aFile);
-
-        // Do AutoBuild
-        WorkspaceBuilder builder = _workspace.getBuilder();
-        if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
-            builder.buildWorkspaceLater(false);
-    }
-
-    /**
      * Returns the list of jar paths.
      */
     public String[] getJarPaths()
