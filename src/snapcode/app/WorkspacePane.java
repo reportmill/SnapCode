@@ -3,6 +3,7 @@ import javakit.parse.JeplTextDoc;
 import javakit.project.ProjectUtils;
 import javakit.project.Workspace;
 import javakit.project.Project;
+import javakit.project.WorkspaceBuilder;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
@@ -154,6 +155,10 @@ public class WorkspacePane extends ViewOwner {
 
         // Clear PagePane
         _pagePane.removeAllOpenFilesExcept(null);
+
+        // Disable build
+        WorkspaceBuilder workspaceBuilder = _workspace.getBuilder();
+        workspaceBuilder.setAutoBuild(false);
 
         // Show JeplDoc
         runLater(() -> {
