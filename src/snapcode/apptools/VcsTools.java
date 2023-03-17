@@ -91,7 +91,7 @@ public class VcsTools extends WorkspaceTool {
         String propName = aPC.getPropName();
 
         // Handle Saved property: Call fileAdded or fileSaved
-        if (propName == WebFile.Saved_Prop) {
+        if (propName == WebFile.Exists_Prop) {
             if ((Boolean) aPC.getNewValue())
                 fileAdded(file);
             else fileRemoved(file);
