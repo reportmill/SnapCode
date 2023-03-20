@@ -1,5 +1,4 @@
 package snapcode.views;
-
 import javakit.parse.JExprId;
 import javakit.parse.JNode;
 import javakit.parse.JavaParser;
@@ -16,19 +15,19 @@ import snap.view.*;
 public class SnapEditorPopup extends ViewOwner {
 
     // The expression part
-    JNodeView _spart;
+    private JNodeView<?>  _nodeView;
 
     // The popup
-    PopupWindow _popup = getPopup();
+    private PopupWindow  _popup = getPopup();
 
     // The ListView
-    ListView<JavaDecl> _listView;
+    private ListView<JavaDecl>  _listView;
 
     // The fixed expression
-    String _startText, _endText, _idText;
+    private String  _startText, _endText, _idText;
 
     // Expression parser
-    Parser _exprParser = JavaParser.getShared().getExprParser();
+    private Parser  _exprParser = JavaParser.getShared().getExprParser();
 
     /**
      * Returns a shared instance.
@@ -43,17 +42,16 @@ public class SnapEditorPopup extends ViewOwner {
     /**
      * Activates the popup list (shows popup if multiple suggestions, does replace for one, does nothing for none).
      */
-    public void activatePopupList(JNodeView aPart, String aString, int anIndex)
+    public void activatePopupList(JNodeView<?> aPart, String aString, int anIndex)
     {
         // Set current SnapPart
-        _spart = aPart;
+        _nodeView = aPart;
 
         // Create expression from string
         JNode node = null;
-        try {
-            node = _exprParser.parseCustom(aString, JNode.class);
-        } catch (Exception e) {
-        }
+        try { node = _exprParser.parseCustom(aString, JNode.class); }
+        catch (Exception e) { }
+
         if (node == null) {
             hide();
             return;
@@ -72,7 +70,7 @@ public class SnapEditorPopup extends ViewOwner {
         _idText = id.getName();
 
         // Get suggestions
-        JavaDecl suggestions[] = new NodeCompleter().getCompletionsForNode(id);
+        JavaDecl[] suggestions = new NodeCompleter().getCompletionsForNode(id);
         if (suggestions.length == 0) {
             hide();
             return;
@@ -91,10 +89,14 @@ public class SnapEditorPopup extends ViewOwner {
     /**
      * Show Dialog.
      */
-    public void showPopup(JNodeView aView)
+    public void showPopup(JNodeView<?> aView)
     {
-        if (getPopup().isShowing()) return;
-        getPopup().show(aView, 0, aView.getHeight());
+        // If already showing, just return
+        if (isShowing()) return;
+
+        // Show popup
+        PopupWindow popup = getPopup();
+        popup.show(aView, 0, aView.getHeight());
     }
 
     /**
@@ -102,16 +104,9 @@ public class SnapEditorPopup extends ViewOwner {
      */
     public void hide()
     {
-        getPopup().hide();
+        PopupWindow popup = getPopup();
+        popup.hide();
         _idText = null;
-    }
-
-    /**
-     * Returns whether popup is visible.
-     */
-    public boolean isShowing()
-    {
-        return getPopup().isShowing();
     }
 
     /**
@@ -119,7 +114,8 @@ public class SnapEditorPopup extends ViewOwner {
      */
     public PopupWindow getPopup()
     {
-        return _popup != null ? _popup : (_popup = createPopup());
+        if (_popup != null) return _popup;
+        return _popup = createPopup();
     }
 
     /**
@@ -137,7 +133,7 @@ public class SnapEditorPopup extends ViewOwner {
      */
     protected View createUI()
     {
-        _listView = new ListView();
+        _listView = new ListView<>();
         _listView.setFont(Font.Arial11);
         _listView.setPrefSize(320, 260);
         enableEvents(_listView, KeyEvents);
@@ -156,7 +152,8 @@ public class SnapEditorPopup extends ViewOwner {
                 anEvent.consume();
             }
             if (anEvent.isEnterKey()) {
-                if (anEvent.isKeyRelease()) ((JExprEditor) _spart).fireTextFieldAction();
+                if (anEvent.isKeyRelease())
+                    ((JExprEditor<?>) _nodeView).fireTextFieldAction();
                 anEvent.consume();
             }
         }
