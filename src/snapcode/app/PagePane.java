@@ -406,6 +406,10 @@ public class PagePane extends ViewOwner {
         if (type.equals("java") || type.equals("jepl"))
             return JavaPage.class;
 
+        // Handle Snap file
+        if (type.equals("snp"))
+            return snapbuild.app.SnapBuilderPage.class;
+
         // Do normal version
         return null;
     }
