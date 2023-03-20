@@ -184,8 +184,10 @@ public class FileTreeTool extends WorkspaceTool {
      */
     public void respondUI(ViewEvent anEvent)
     {
+        View eventView = anEvent.getView();
+
         // Handle FilesTree
-        if (anEvent.equals(_filesTree) || anEvent.equals(_filesList)) {
+        if (eventView == _filesTree || eventView == _filesList) {
 
             // Handle PopupTrigger
             if (anEvent.isPopupTrigger()) {
@@ -198,7 +200,7 @@ public class FileTreeTool extends WorkspaceTool {
                     menu.addItem(menuItemCopy);
                 }
                 menu.setOwner(this);
-                menu.show(anEvent.getView(), anEvent.getX(), anEvent.getY());
+                menu.show(eventView, anEvent.getX(), anEvent.getY());
             }
 
             // Handle MouseClick (double-click): RunSelectedFile
@@ -211,12 +213,13 @@ public class FileTreeTool extends WorkspaceTool {
             else if (anEvent.isDragEvent()) {
 
                 // If from this app, just return
-                if (anEvent.getClipboard().getDragSourceView() != null) return;
+                Clipboard clipboard = anEvent.getClipboard();
+                if (clipboard.getDragSourceView() != null)
+                    return;
 
                 // Accept drag and add files
                 anEvent.acceptDrag();
-                if (anEvent.isDragDropEvent() && anEvent.getClipboard().hasFiles()) {
-                    Clipboard clipboard = anEvent.getClipboard();
+                if (anEvent.isDragDropEvent() && clipboard.hasFiles()) {
                     List<File> files = clipboard.getJavaFiles();
                     if (files == null || files.size() == 0)
                         return;
@@ -227,11 +230,8 @@ public class FileTreeTool extends WorkspaceTool {
             }
 
             // Handle DragGesture
-            else if (anEvent.isDragGesture() && getSelFile() != null && !anEvent.isConsumed()) {
-                Clipboard cb = anEvent.getClipboard();
-                cb.addData(getSelFile().getJavaFile());
-                cb.startDrag();
-            }
+            else if (anEvent.isDragGesture())
+                handleDragGestureEvent(anEvent);
 
             // Handle Selection event: Select file for tree selection
             else if (anEvent.isActionEvent()) { //if(anEvent.isSelectionEvent()) {
@@ -356,6 +356,32 @@ public class FileTreeTool extends WorkspaceTool {
         // Handle CopyAction, PasteAction
         if (anEvent.equals("CopyAction")) copy();
         if (anEvent.equals("PasteAction")) paste();
+    }
+
+    /**
+     * Called to handle DragGesture event.
+     */
+    private void handleDragGestureEvent(ViewEvent anEvent)
+    {
+        // If too close to edge, reject it
+        if (anEvent.getView() != _filesTree)
+            return;
+        if (anEvent.getX() > _filesTree.getWidth() - 6)
+            return;
+
+        // Get row index of event Y - just return if out of bounds
+        int rowIndex = _filesTree.getRowIndexForY(anEvent.getY());
+        if (rowIndex >= _filesTree.getRowCount())
+            return;
+
+        // Add SelFile to clipboard and start drag
+        WebFile selFile = getSelFile();
+        if (selFile != null && !anEvent.isConsumed()) {
+            Clipboard clipboard = anEvent.getClipboard();
+            clipboard.addData(selFile.getJavaFile());
+            clipboard.startDrag();
+            anEvent.consume();
+        }
     }
 
     /**

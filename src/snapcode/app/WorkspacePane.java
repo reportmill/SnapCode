@@ -146,8 +146,7 @@ public class WorkspacePane extends ViewOwner {
         setWorkspace(workspace);
 
         // Create WorkspacePane and show
-        getUI();
-        _workspaceTools.setShowLeftTray(false);
+        getUI(); //_workspaceTools.setShowLeftTray(false);
         _workspaceTools.getLeftTray().setSelTool(null);
         _workspaceTools.getRightTray().setSelToolForClass(EvalTool.class);
         _toolBar.getUI().setVisible(false);
