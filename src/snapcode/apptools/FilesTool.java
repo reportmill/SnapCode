@@ -33,7 +33,7 @@ public class FilesTool extends WorkspaceTool {
     /**
      * Runs a panel for a new file (Java, JFX, Swing, table, etc.).
      */
-    public WebFile showNewFilePanel()
+    public void showNewFilePanel()
     {
         // Get new FormBuilder and configure
         FormBuilder form = new FormBuilder();
@@ -59,7 +59,7 @@ public class FilesTool extends WorkspaceTool {
         // Run dialog panel (just return if null)
         View workspacePaneUI = _workspacePane.getUI();
         if (!form.showPanel(workspacePaneUI, "New Project File", DialogBox.infoImage))
-            return null;
+            return;
 
         // Select type and extension
         String desc = form.getStringValue("EntryType");
@@ -88,20 +88,21 @@ public class FilesTool extends WorkspaceTool {
         // ShowNewFilePanel (just return if cancelled)
         file = page.showNewFilePanel(workspacePaneUI, file);
         if (file == null)
-            return null;
+            return;
 
         // Save file
         try { file.save(); }
         catch (Exception e) {
             _pagePane.showException(file.getURL(), e);
-            return null;
+            return;
         }
 
         // Select file
         setSelFile(file);
 
-        // Return
-        return file;
+        // Hide RightTray if not Java
+        if (!(extension.equals("java") || extension.equals("jepl")))
+            _workspaceTools.getRightTray().setSelTool(null);
     }
 
     /**
@@ -123,7 +124,7 @@ public class FilesTool extends WorkspaceTool {
         // Add files (disable site build)
         boolean success = true;
         for (File file : theFiles) {
-            if (!addFile(selDir, file)) {
+            if (!addFileToDirectory(selDir, file)) {
                 success = false;
                 break;
             }
@@ -140,7 +141,7 @@ public class FilesTool extends WorkspaceTool {
     /**
      * Adds a file.
      */
-    public boolean addFile(WebFile aDirectory, File aFile)
+    public boolean addFileToDirectory(WebFile aDirectory, File aFile)
     {
         // Get site
         WebSite site = aDirectory.getSite();
@@ -149,10 +150,13 @@ public class FilesTool extends WorkspaceTool {
         if (aFile.isDirectory()) {
 
             // Create new directory
-            WebFile directory = site.createFileForPath(aDirectory.getDirPath() + aFile.getName(), true);
+            String dirPath = aDirectory.getDirPath() + aFile.getName();
+            WebFile directory = site.createFileForPath(dirPath, true);
             File[] dirFiles = aFile.listFiles();
-            for (File file : dirFiles)
-                addFile(directory, file);
+            if (dirFiles != null) {
+                for (File file : dirFiles)
+                    addFileToDirectory(directory, file);
+            }
         }
 
         // Handle plain file
@@ -192,7 +196,7 @@ public class FilesTool extends WorkspaceTool {
                     name = name.replace(" ", "");
                     if (!StringUtils.endsWithIC(name, '.' + siteFile.getType())) name = name + '.' + siteFile.getType();
                     if (name.equals(aFile.getName()))
-                        return addFile(aDirectory, aFile);
+                        return addFileToDirectory(aDirectory, aFile);
                 }
             }
 
