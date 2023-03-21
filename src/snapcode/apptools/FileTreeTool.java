@@ -97,13 +97,17 @@ public class FileTreeTool extends WorkspaceTool {
     }
 
     /**
-     * Called to update a file in FilesPane.FilesTree.
+     * Called to update a file when it has changed (Modified, Exists, ModTime, BuildIssues, child Files (dir)).
      */
-    public void updateFile(WebFile aFile)
+    public void updateChangedFile(WebFile aFile)
     {
-        // Iterate up parent files and clear parent TreeFile.Children
+        // Create list for changed file and parents
         List<FileTreeFile> treeFiles = new ArrayList<>();
+
+        // Iterate up parent files and clear parent TreeFile.Children
         for (WebFile parentFile = aFile; parentFile != null; parentFile = parentFile.getParent()) {
+
+            // Get FileTreeFile for parent file and add to list
             FileTreeFile parentTreeFile = getTreeFile(parentFile);
             if (parentTreeFile != null) {
                 treeFiles.add(parentTreeFile);
@@ -112,10 +116,11 @@ public class FileTreeTool extends WorkspaceTool {
             }
         }
 
-        // Update items
+        // Update items in FilesTree/FilesList
         if (_filesTree != null) {
-            _filesTree.updateItems(treeFiles.toArray(new FileTreeFile[0]));
-            _filesList.updateItems(treeFiles.toArray(new FileTreeFile[0]));
+            FileTreeFile[] fileTreeFiles = treeFiles.toArray(new FileTreeFile[0]);
+            _filesTree.updateItems(fileTreeFiles);
+            _filesList.updateItems(fileTreeFiles);
         }
 
         // Reset UI

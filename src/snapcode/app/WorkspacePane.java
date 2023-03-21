@@ -545,11 +545,14 @@ public class WorkspacePane extends ViewOwner {
      */
     protected void siteFileChanged(PropChange aPC)
     {
-        // Get file and update in FilesPane
+        // Get file/prop
         WebFile file = (WebFile) aPC.getSource();
-        if (file.getExists()) {
+        String propName = aPC.getPropName();
+
+        // Handle ModTime/Exists: Update file in FileTreeTool
+        if (propName == WebFile.ModTime_Prop || propName == WebFile.Exists_Prop) {
             FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
-            fileTreeTool.updateFile(file);
+            fileTreeTool.updateChangedFile(file);
         }
     }
 

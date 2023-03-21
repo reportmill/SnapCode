@@ -263,7 +263,7 @@ public class WorkspaceTools {
 
         // Update FilesPane.FilesTree
         FileTreeTool fileTreeTool = getFileTreeTool();
-        fileTreeTool.updateFile(issueFile);
+        fileTreeTool.updateChangedFile(issueFile);
 
         // Update ProblemsTool
         ProblemsTool problemsTool = getToolForClass(ProblemsTool.class);

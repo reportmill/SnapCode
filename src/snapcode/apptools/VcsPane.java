@@ -53,7 +53,7 @@ public class VcsPane extends WorkspaceTool {
         _vc.addPropChangeListener(pc -> {
             WebFile file = (WebFile) pc.getSource();
             FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
-            fileTreeTool.updateFile(file);
+            fileTreeTool.updateChangedFile(file);
         });
     }
 
