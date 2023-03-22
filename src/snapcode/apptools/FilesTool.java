@@ -44,9 +44,9 @@ public class FilesTool extends WorkspaceTool {
         // Define options
         String[][] options = {
             { "Java Programming File", ".java" },
-            { "Graphics + UI File", ".snp" },
-            { "Sound File", ".wav" },
+            { "SnapKit UI File", ".snp" },
             { "Directory", ".dir" },
+            { "Sound File", ".wav" },
             { "ReportMill\u2122 Report Template", ".rpt" }
         };
 
