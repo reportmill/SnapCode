@@ -162,7 +162,7 @@ public class WorkspacePane extends ViewOwner {
         // Show JeplDoc
         runLater(() -> {
             PagePane pagePane = getPagePane();
-            pagePane.setSelectedFile(sourceFile);
+            pagePane.setSelFile(sourceFile);
         });
     }
 
@@ -241,14 +241,14 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Returns the selected file.
      */
-    public WebFile getSelFile()  { return _pagePane.getSelectedFile(); }
+    public WebFile getSelFile()  { return _pagePane.getSelFile(); }
 
     /**
      * Sets the selected site file.
      */
     public void setSelFile(WebFile aFile)
     {
-        _pagePane.setSelectedFile(aFile);
+        _pagePane.setSelFile(aFile);
     }
 
     /**

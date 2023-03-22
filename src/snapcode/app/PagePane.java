@@ -57,22 +57,6 @@ public class PagePane extends ViewOwner {
     }
 
     /**
-     * Returns whether a file is an "OpenFile" (whether it needs a file tab).
-     */
-    protected boolean shouldHaveFileTab(WebFile aFile)
-    {
-        // If directory, return false
-        if (aFile.isDir()) return false;
-
-        // Accept all Java files
-        if (aFile.getType().equals("java"))
-            return true;
-
-        // Accept all project files
-        return isProjectFile(aFile);
-    }
-
-    /**
      * Returns the open files.
      */
     public WebFile[] getOpenFiles()  { return _openFiles.toArray(new WebFile[0]); }
@@ -135,15 +119,15 @@ public class PagePane extends ViewOwner {
     /**
      * Returns the selected file.
      */
-    public WebFile getSelectedFile()  { return _selFile; }
+    public WebFile getSelFile()  { return _selFile; }
 
     /**
      * Sets the selected site file.
      */
-    public void setSelectedFile(WebFile aFile)
+    public void setSelFile(WebFile aFile)
     {
         // If file already set, just return
-        if (aFile == null || aFile == getSelectedFile()) return;
+        if (aFile == null || aFile == getSelFile()) return;
 
         // Set SelFile
         WebFile oldSelFile = _selFile;
@@ -294,7 +278,7 @@ public class PagePane extends ViewOwner {
     protected void resetUI()
     {
         // Update TabBar.SelIndex
-        WebFile selFile = getSelectedFile();
+        WebFile selFile = getSelFile();
         WebFile[] openFiles = getOpenFiles();
         int selIndex = ArrayUtils.indexOfId(openFiles, selFile);
         _tabBar.setSelIndex(selIndex);
@@ -318,7 +302,7 @@ public class PagePane extends ViewOwner {
             WebFile[] openFiles = getOpenFiles();
             WebFile openFile = selIndex >= 0 ? openFiles[selIndex] : null;
             getBrowser().setTransition(WebBrowser.Instant);
-            setSelectedFile(openFile);
+            setSelFile(openFile);
         }
     }
 
@@ -363,6 +347,22 @@ public class PagePane extends ViewOwner {
         WebSite[] projSites = _workspacePane.getSites();
         WebSite fileSite = aFile.getSite();
         return ArrayUtils.containsId(projSites, fileSite);
+    }
+
+    /**
+     * Returns whether a file is an "OpenFile" (whether it needs a file tab).
+     */
+    protected boolean shouldHaveFileTab(WebFile aFile)
+    {
+        // If directory, return false
+        if (aFile.isDir()) return false;
+
+        // Accept all Java files
+        if (aFile.getType().equals("java"))
+            return true;
+
+        // Accept all project files
+        return isProjectFile(aFile);
     }
 
     /**
@@ -431,7 +431,7 @@ public class PagePane extends ViewOwner {
 
             // Select page file
             WebFile file = aPage != null ? aPage.getFile() : null;
-            setSelectedFile(file);
+            setSelFile(file);
         }
 
         /**

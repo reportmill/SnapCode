@@ -100,9 +100,8 @@ public class FilesTool extends WorkspaceTool {
         // Select file
         setSelFile(file);
 
-        // Hide RightTray if not Java
-        if (!(extension.equals("java") || extension.equals("jepl")))
-            _workspaceTools.getRightTray().setSelTool(null);
+        // Hide RightTray
+        _workspaceTools.getRightTray().setSelTool(null);
     }
 
     /**
