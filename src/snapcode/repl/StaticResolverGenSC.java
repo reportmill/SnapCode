@@ -1,4 +1,4 @@
-package snapcode.appjr;
+package snapcode.repl;
 import javakit.resolver.StaticResolverGen;
 import snap.util.ArrayUtils;
 import snap.web.WebFile;
@@ -17,7 +17,7 @@ public class StaticResolverGenSC extends StaticResolverGen {
         // Add WhiteList strings from parent?
         _whiteListStrings = ArrayUtils.addAll(_whiteListStrings, StaticResolverGen._whiteListStrings);
 
-        _package = "snapcode.app";
+        _package = "snapcode.repl";
         StaticResolverGenSC codeGen = new StaticResolverGenSC();
         codeGen.generateStaticResolverForClasses(_javaClasses, _whiteListStrings, _blackListStrings);
 
@@ -32,7 +32,7 @@ public class StaticResolverGenSC extends StaticResolverGen {
             snapcharts.data.DoubleArray.class,
             snapcharts.data.DataArray.class,
             snapcharts.data.DataSet.class,
-            ChartsREPL.class,
+            ReplObject.class,
             Quick3D.class,
             QuickCharts.class,
             QuickData.class,
@@ -53,7 +53,7 @@ public class StaticResolverGenSC extends StaticResolverGen {
 
             // DataSet
 
-            // ChartsREPL
+            // ReplObject
             "print", "println",
 
             // Quick3D

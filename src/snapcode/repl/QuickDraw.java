@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snapcode.appjr;
+package snapcode.repl;
 import snap.geom.Point;
 import snap.geom.Rect;
 import snap.gfx.Color;

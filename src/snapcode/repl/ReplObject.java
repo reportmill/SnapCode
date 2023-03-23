@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snapcode.appjr;
+package snapcode.repl;
 
 /**
- * This is a REPL base class specific for charts.
+ * This is a REPL base class to provide some convenience methods.
  */
-public class ChartsREPL extends QuickCharts {
+public class ReplObject extends QuickCharts {
 
     /**
      * Conveniences.

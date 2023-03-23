@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snapcode.appjr;
+package snapcode.repl;
 import snapcharts.data.DataSet;
 import snapcharts.model.Chart;
 import snapcharts.model.Trace;

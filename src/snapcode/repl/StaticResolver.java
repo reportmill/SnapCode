@@ -1,4 +1,4 @@
-package snapcode.appjr;
+package snapcode.repl;
 import javakit.resolver.*;
 import java.io.PrintStream;
 
@@ -66,23 +66,23 @@ public class StaticResolver extends javakit.resolver.StaticResolver {
                 mb.name("getPropValue").paramTypes(java.lang.String.class).returnType(java.lang.Object.class).save();
                 return mb.name("setPropValue").paramTypes(java.lang.String.class,java.lang.Object.class).returnType(void.class).buildAll();
 
-            // Handle snapcode.appjr.ChartsREPL
-            case "snapcode.appjr.ChartsREPL":
+            // Handle snapcode.repl.ReplObject
+            case "snapcode.repl.ReplObject":
                 mb.name("println").paramTypes(java.lang.Object.class).returnType(void.class).save();
                 return mb.name("print").paramTypes(java.lang.Object.class).returnType(void.class).buildAll();
 
-            // Handle snapcode.appjr.Quick3D
-            case "snapcode.appjr.Quick3D":
+            // Handle snapcode.repl.Quick3D
+            case "snapcode.repl.Quick3D":
                 mb.name("createCube").returnType(snap.gfx3d.CameraView.class).save();
                 return mb.name("createImage3D").paramTypes(snap.gfx.Image.class).returnType(snap.gfx3d.CameraView.class).buildAll();
 
-            // Handle snapcode.appjr.QuickCharts
-            case "snapcode.appjr.QuickCharts":
+            // Handle snapcode.repl.QuickCharts
+            case "snapcode.repl.QuickCharts":
                 mb.name("chart").paramTypes(java.lang.Object[].class).returnType(snapcharts.model.Chart.class).varArgs().save();
                 return mb.name("chart3D").paramTypes(java.lang.Object[].class).returnType(snapcharts.model.Chart.class).varArgs().buildAll();
 
-            // Handle snapcode.appjr.QuickData
-            case "snapcode.appjr.QuickData":
+            // Handle snapcode.repl.QuickData
+            case "snapcode.repl.QuickData":
                 mb.name("dataArray").paramTypes(java.lang.Object.class).returnType(snapcharts.data.DataArray.class).save();
                 mb.name("dataSet").paramTypes(java.lang.Object[].class).returnType(snapcharts.data.DataSet.class).varArgs().save();
                 mb.name("mapXY").paramTypes(double[].class,double[].class,java.util.function.DoubleBinaryOperator.class).returnType(snapcharts.data.DoubleArray.class).save();
@@ -93,27 +93,27 @@ public class StaticResolver extends javakit.resolver.StaticResolver {
                 mb.name("getTextForSource").paramTypes(java.lang.Object.class).returnType(java.lang.String.class).save();
                 return mb.name("getImageForSource").paramTypes(java.lang.Object.class).returnType(snap.gfx.Image.class).buildAll();
 
-            // Handle snapcode.appjr.QuickDraw
-            case "snapcode.appjr.QuickDraw":
+            // Handle snapcode.repl.QuickDraw
+            case "snapcode.repl.QuickDraw":
                 mb.name("isShowGrid").returnType(boolean.class).save();
                 mb.name("isAnimate").returnType(boolean.class).save();
                 mb.name("setAnimate").paramTypes(boolean.class).returnType(void.class).save();
-                mb.name("getPen").paramTypes(int.class).returnType(snapcode.appjr.QuickDrawPen.class).save();
-                mb.name("getPen").returnType(snapcode.appjr.QuickDrawPen.class).save();
+                mb.name("getPen").paramTypes(int.class).returnType(QuickDrawPen.class).save();
+                mb.name("getPen").returnType(QuickDrawPen.class).save();
                 mb.name("moveTo").paramTypes(double.class,double.class).returnType(void.class).save();
                 mb.name("lineTo").paramTypes(double.class,double.class).returnType(void.class).save();
                 mb.name("closePath").returnType(void.class).save();
                 mb.name("forward").paramTypes(double.class).returnType(void.class).save();
                 mb.name("turn").paramTypes(double.class).returnType(void.class).save();
-                mb.name("createDrawView").paramTypes(int.class,int.class).returnType(snapcode.appjr.QuickDraw.class).save();
-                mb.name("createDrawView").returnType(snapcode.appjr.QuickDraw.class).save();
+                mb.name("createDrawView").paramTypes(int.class,int.class).returnType(QuickDraw.class).save();
+                mb.name("createDrawView").returnType(QuickDraw.class).save();
                 mb.name("setShowGrid").paramTypes(boolean.class).returnType(void.class).save();
                 mb.name("getGridSpacing").returnType(double.class).save();
                 mb.name("setGridSpacing").paramTypes(double.class).returnType(void.class).save();
                 return mb.name("setPenColor").paramTypes(snap.gfx.Color.class).returnType(void.class).buildAll();
 
-            // Handle snapcode.appjr.QuickDrawPen
-            case "snapcode.appjr.QuickDrawPen":
+            // Handle snapcode.repl.QuickDrawPen
+            case "snapcode.repl.QuickDrawPen":
                 mb.name("getColor").returnType(snap.gfx.Color.class).save();
                 mb.name("setColor").paramTypes(snap.gfx.Color.class).returnType(void.class).save();
                 mb.name("getWidth").returnType(double.class).save();
@@ -123,7 +123,7 @@ public class StaticResolver extends javakit.resolver.StaticResolver {
                 mb.name("closePath").returnType(void.class).save();
                 mb.name("forward").paramTypes(double.class).returnType(void.class).save();
                 mb.name("turn").paramTypes(double.class).returnType(void.class).save();
-                mb.name("getAnimPen").returnType(snapcode.appjr.QuickDrawPen.class).save();
+                mb.name("getAnimPen").returnType(QuickDrawPen.class).save();
                 mb.name("getDirection").returnType(double.class).save();
                 return mb.name("setDirection").paramTypes(double.class).returnType(void.class).buildAll();
 
@@ -169,103 +169,103 @@ public class StaticResolver extends javakit.resolver.StaticResolver {
             case "snapcharts.data.DataSet.getName()":
                 return ((snapcharts.data.DataSet) anObj).getName();
 
-            // Handle snapcode.appjr.ChartsREPL
-            case "snapcode.appjr.ChartsREPL.println(java.lang.Object)":
-                snapcode.appjr.ChartsREPL.println(theArgs[0]); return null;
-            case "snapcode.appjr.ChartsREPL.print(java.lang.Object)":
-                snapcode.appjr.ChartsREPL.print(theArgs[0]); return null;
+            // Handle snapcode.repl.ReplObject
+            case "snapcode.repl.ReplObject.println(java.lang.Object)":
+                ReplObject.println(theArgs[0]); return null;
+            case "snapcode.repl.ReplObject.print(java.lang.Object)":
+                ReplObject.print(theArgs[0]); return null;
 
-            // Handle snapcode.appjr.Quick3D
-            case "snapcode.appjr.Quick3D.createCube()":
-                return snapcode.appjr.Quick3D.createCube();
-            case "snapcode.appjr.Quick3D.createImage3D(snap.gfx.Image)":
-                return snapcode.appjr.Quick3D.createImage3D((snap.gfx.Image) theArgs[0]);
+            // Handle snapcode.repl.Quick3D
+            case "snapcode.repl.Quick3D.createCube()":
+                return Quick3D.createCube();
+            case "snapcode.repl.Quick3D.createImage3D(snap.gfx.Image)":
+                return Quick3D.createImage3D((snap.gfx.Image) theArgs[0]);
 
-            // Handle snapcode.appjr.QuickCharts
-            case "snapcode.appjr.QuickCharts.chart(java.lang.Object[])":
-                return snapcode.appjr.QuickCharts.chart(theArgs);
-            case "snapcode.appjr.QuickCharts.chart3D(java.lang.Object[])":
-                return snapcode.appjr.QuickCharts.chart3D(theArgs);
+            // Handle snapcode.repl.QuickCharts
+            case "snapcode.repl.QuickCharts.chart(java.lang.Object[])":
+                return QuickCharts.chart(theArgs);
+            case "snapcode.repl.QuickCharts.chart3D(java.lang.Object[])":
+                return QuickCharts.chart3D(theArgs);
 
-            // Handle snapcode.appjr.QuickData
-            case "snapcode.appjr.QuickData.dataArray(java.lang.Object)":
-                return snapcode.appjr.QuickData.dataArray(theArgs[0]);
-            case "snapcode.appjr.QuickData.dataSet(java.lang.Object[])":
-                return snapcode.appjr.QuickData.dataSet(theArgs);
-            case "snapcode.appjr.QuickData.mapXY(double[],double[],java.util.function.DoubleBinaryOperator)":
-                return snapcode.appjr.QuickData.mapXY((double[]) theArgs[0],(double[]) theArgs[1],(java.util.function.DoubleBinaryOperator) theArgs[2]);
-            case "snapcode.appjr.QuickData.mapXY(snapcharts.data.DoubleArray,snapcharts.data.DoubleArray,java.util.function.DoubleBinaryOperator)":
-                return snapcode.appjr.QuickData.mapXY((snapcharts.data.DoubleArray) theArgs[0],(snapcharts.data.DoubleArray) theArgs[1],(java.util.function.DoubleBinaryOperator) theArgs[2]);
-            case "snapcode.appjr.QuickData.doubleArray(java.lang.Object[])":
-                return snapcode.appjr.QuickData.doubleArray(theArgs);
-            case "snapcode.appjr.QuickData.minMaxArray(double,double)":
-                return snapcode.appjr.QuickData.minMaxArray(doubleVal(theArgs[0]),doubleVal(theArgs[1]));
-            case "snapcode.appjr.QuickData.minMaxArray(double,double,int)":
-                return snapcode.appjr.QuickData.minMaxArray(doubleVal(theArgs[0]),doubleVal(theArgs[1]),intVal(theArgs[2]));
-            case "snapcode.appjr.QuickData.getTextForSource(java.lang.Object)":
-                return snapcode.appjr.QuickData.getTextForSource(theArgs[0]);
-            case "snapcode.appjr.QuickData.getImageForSource(java.lang.Object)":
-                return snapcode.appjr.QuickData.getImageForSource(theArgs[0]);
+            // Handle snapcode.repl.QuickData
+            case "snapcode.repl.QuickData.dataArray(java.lang.Object)":
+                return QuickData.dataArray(theArgs[0]);
+            case "snapcode.repl.QuickData.dataSet(java.lang.Object[])":
+                return QuickData.dataSet(theArgs);
+            case "snapcode.repl.QuickData.mapXY(double[],double[],java.util.function.DoubleBinaryOperator)":
+                return QuickData.mapXY((double[]) theArgs[0],(double[]) theArgs[1],(java.util.function.DoubleBinaryOperator) theArgs[2]);
+            case "snapcode.repl.QuickData.mapXY(snapcharts.data.DoubleArray,snapcharts.data.DoubleArray,java.util.function.DoubleBinaryOperator)":
+                return QuickData.mapXY((snapcharts.data.DoubleArray) theArgs[0],(snapcharts.data.DoubleArray) theArgs[1],(java.util.function.DoubleBinaryOperator) theArgs[2]);
+            case "snapcode.repl.QuickData.doubleArray(java.lang.Object[])":
+                return QuickData.doubleArray(theArgs);
+            case "snapcode.repl.QuickData.minMaxArray(double,double)":
+                return QuickData.minMaxArray(doubleVal(theArgs[0]),doubleVal(theArgs[1]));
+            case "snapcode.repl.QuickData.minMaxArray(double,double,int)":
+                return QuickData.minMaxArray(doubleVal(theArgs[0]),doubleVal(theArgs[1]),intVal(theArgs[2]));
+            case "snapcode.repl.QuickData.getTextForSource(java.lang.Object)":
+                return QuickData.getTextForSource(theArgs[0]);
+            case "snapcode.repl.QuickData.getImageForSource(java.lang.Object)":
+                return QuickData.getImageForSource(theArgs[0]);
 
-            // Handle snapcode.appjr.QuickDraw
-            case "snapcode.appjr.QuickDraw.isShowGrid()":
-                return ((snapcode.appjr.QuickDraw) anObj).isShowGrid();
-            case "snapcode.appjr.QuickDraw.isAnimate()":
-                return ((snapcode.appjr.QuickDraw) anObj).isAnimate();
-            case "snapcode.appjr.QuickDraw.setAnimate(boolean)":
-                ((snapcode.appjr.QuickDraw) anObj).setAnimate(boolVal(theArgs[0])); return null;
-            case "snapcode.appjr.QuickDraw.getPen(int)":
-                return ((snapcode.appjr.QuickDraw) anObj).getPen(intVal(theArgs[0]));
-            case "snapcode.appjr.QuickDraw.getPen()":
-                return ((snapcode.appjr.QuickDraw) anObj).getPen();
-            case "snapcode.appjr.QuickDraw.moveTo(double,double)":
-                ((snapcode.appjr.QuickDraw) anObj).moveTo(doubleVal(theArgs[0]),doubleVal(theArgs[1])); return null;
-            case "snapcode.appjr.QuickDraw.lineTo(double,double)":
-                ((snapcode.appjr.QuickDraw) anObj).lineTo(doubleVal(theArgs[0]),doubleVal(theArgs[1])); return null;
-            case "snapcode.appjr.QuickDraw.closePath()":
-                ((snapcode.appjr.QuickDraw) anObj).closePath(); return null;
-            case "snapcode.appjr.QuickDraw.forward(double)":
-                ((snapcode.appjr.QuickDraw) anObj).forward(doubleVal(theArgs[0])); return null;
-            case "snapcode.appjr.QuickDraw.turn(double)":
-                ((snapcode.appjr.QuickDraw) anObj).turn(doubleVal(theArgs[0])); return null;
-            case "snapcode.appjr.QuickDraw.createDrawView(int,int)":
-                return snapcode.appjr.QuickDraw.createDrawView(intVal(theArgs[0]),intVal(theArgs[1]));
-            case "snapcode.appjr.QuickDraw.createDrawView()":
-                return snapcode.appjr.QuickDraw.createDrawView();
-            case "snapcode.appjr.QuickDraw.setShowGrid(boolean)":
-                ((snapcode.appjr.QuickDraw) anObj).setShowGrid(boolVal(theArgs[0])); return null;
-            case "snapcode.appjr.QuickDraw.getGridSpacing()":
-                return ((snapcode.appjr.QuickDraw) anObj).getGridSpacing();
-            case "snapcode.appjr.QuickDraw.setGridSpacing(double)":
-                ((snapcode.appjr.QuickDraw) anObj).setGridSpacing(doubleVal(theArgs[0])); return null;
-            case "snapcode.appjr.QuickDraw.setPenColor(snap.gfx.Color)":
-                ((snapcode.appjr.QuickDraw) anObj).setPenColor((snap.gfx.Color) theArgs[0]); return null;
+            // Handle snapcode.repl.QuickDraw
+            case "snapcode.repl.QuickDraw.isShowGrid()":
+                return ((QuickDraw) anObj).isShowGrid();
+            case "snapcode.repl.QuickDraw.isAnimate()":
+                return ((QuickDraw) anObj).isAnimate();
+            case "snapcode.repl.QuickDraw.setAnimate(boolean)":
+                ((QuickDraw) anObj).setAnimate(boolVal(theArgs[0])); return null;
+            case "snapcode.repl.QuickDraw.getPen(int)":
+                return ((QuickDraw) anObj).getPen(intVal(theArgs[0]));
+            case "snapcode.repl.QuickDraw.getPen()":
+                return ((QuickDraw) anObj).getPen();
+            case "snapcode.repl.QuickDraw.moveTo(double,double)":
+                ((QuickDraw) anObj).moveTo(doubleVal(theArgs[0]),doubleVal(theArgs[1])); return null;
+            case "snapcode.repl.QuickDraw.lineTo(double,double)":
+                ((QuickDraw) anObj).lineTo(doubleVal(theArgs[0]),doubleVal(theArgs[1])); return null;
+            case "snapcode.repl.QuickDraw.closePath()":
+                ((QuickDraw) anObj).closePath(); return null;
+            case "snapcode.repl.QuickDraw.forward(double)":
+                ((QuickDraw) anObj).forward(doubleVal(theArgs[0])); return null;
+            case "snapcode.repl.QuickDraw.turn(double)":
+                ((QuickDraw) anObj).turn(doubleVal(theArgs[0])); return null;
+            case "snapcode.repl.QuickDraw.createDrawView(int,int)":
+                return QuickDraw.createDrawView(intVal(theArgs[0]),intVal(theArgs[1]));
+            case "snapcode.repl.QuickDraw.createDrawView()":
+                return QuickDraw.createDrawView();
+            case "snapcode.repl.QuickDraw.setShowGrid(boolean)":
+                ((QuickDraw) anObj).setShowGrid(boolVal(theArgs[0])); return null;
+            case "snapcode.repl.QuickDraw.getGridSpacing()":
+                return ((QuickDraw) anObj).getGridSpacing();
+            case "snapcode.repl.QuickDraw.setGridSpacing(double)":
+                ((QuickDraw) anObj).setGridSpacing(doubleVal(theArgs[0])); return null;
+            case "snapcode.repl.QuickDraw.setPenColor(snap.gfx.Color)":
+                ((QuickDraw) anObj).setPenColor((snap.gfx.Color) theArgs[0]); return null;
 
-            // Handle snapcode.appjr.QuickDrawPen
-            case "snapcode.appjr.QuickDrawPen.getColor()":
-                return ((snapcode.appjr.QuickDrawPen) anObj).getColor();
-            case "snapcode.appjr.QuickDrawPen.setColor(snap.gfx.Color)":
-                ((snapcode.appjr.QuickDrawPen) anObj).setColor((snap.gfx.Color) theArgs[0]); return null;
-            case "snapcode.appjr.QuickDrawPen.getWidth()":
-                return ((snapcode.appjr.QuickDrawPen) anObj).getWidth();
-            case "snapcode.appjr.QuickDrawPen.setWidth(double)":
-                ((snapcode.appjr.QuickDrawPen) anObj).setWidth(doubleVal(theArgs[0])); return null;
-            case "snapcode.appjr.QuickDrawPen.moveTo(double,double)":
-                ((snapcode.appjr.QuickDrawPen) anObj).moveTo(doubleVal(theArgs[0]),doubleVal(theArgs[1])); return null;
-            case "snapcode.appjr.QuickDrawPen.lineTo(double,double)":
-                ((snapcode.appjr.QuickDrawPen) anObj).lineTo(doubleVal(theArgs[0]),doubleVal(theArgs[1])); return null;
-            case "snapcode.appjr.QuickDrawPen.closePath()":
-                ((snapcode.appjr.QuickDrawPen) anObj).closePath(); return null;
-            case "snapcode.appjr.QuickDrawPen.forward(double)":
-                ((snapcode.appjr.QuickDrawPen) anObj).forward(doubleVal(theArgs[0])); return null;
-            case "snapcode.appjr.QuickDrawPen.turn(double)":
-                ((snapcode.appjr.QuickDrawPen) anObj).turn(doubleVal(theArgs[0])); return null;
-            case "snapcode.appjr.QuickDrawPen.getAnimPen()":
-                return ((snapcode.appjr.QuickDrawPen) anObj).getAnimPen();
-            case "snapcode.appjr.QuickDrawPen.getDirection()":
-                return ((snapcode.appjr.QuickDrawPen) anObj).getDirection();
-            case "snapcode.appjr.QuickDrawPen.setDirection(double)":
-                ((snapcode.appjr.QuickDrawPen) anObj).setDirection(doubleVal(theArgs[0])); return null;
+            // Handle snapcode.repl.QuickDrawPen
+            case "snapcode.repl.QuickDrawPen.getColor()":
+                return ((QuickDrawPen) anObj).getColor();
+            case "snapcode.repl.QuickDrawPen.setColor(snap.gfx.Color)":
+                ((QuickDrawPen) anObj).setColor((snap.gfx.Color) theArgs[0]); return null;
+            case "snapcode.repl.QuickDrawPen.getWidth()":
+                return ((QuickDrawPen) anObj).getWidth();
+            case "snapcode.repl.QuickDrawPen.setWidth(double)":
+                ((QuickDrawPen) anObj).setWidth(doubleVal(theArgs[0])); return null;
+            case "snapcode.repl.QuickDrawPen.moveTo(double,double)":
+                ((QuickDrawPen) anObj).moveTo(doubleVal(theArgs[0]),doubleVal(theArgs[1])); return null;
+            case "snapcode.repl.QuickDrawPen.lineTo(double,double)":
+                ((QuickDrawPen) anObj).lineTo(doubleVal(theArgs[0]),doubleVal(theArgs[1])); return null;
+            case "snapcode.repl.QuickDrawPen.closePath()":
+                ((QuickDrawPen) anObj).closePath(); return null;
+            case "snapcode.repl.QuickDrawPen.forward(double)":
+                ((QuickDrawPen) anObj).forward(doubleVal(theArgs[0])); return null;
+            case "snapcode.repl.QuickDrawPen.turn(double)":
+                ((QuickDrawPen) anObj).turn(doubleVal(theArgs[0])); return null;
+            case "snapcode.repl.QuickDrawPen.getAnimPen()":
+                return ((QuickDrawPen) anObj).getAnimPen();
+            case "snapcode.repl.QuickDrawPen.getDirection()":
+                return ((QuickDrawPen) anObj).getDirection();
+            case "snapcode.repl.QuickDrawPen.setDirection(double)":
+                ((QuickDrawPen) anObj).setDirection(doubleVal(theArgs[0])); return null;
 
             // Handle anything else
             default:
@@ -287,8 +287,8 @@ public class StaticResolver extends javakit.resolver.StaticResolver {
             case "snapcharts.data.DoubleArray":
                 return cb.paramTypes(double[].class).buildAll();
 
-            // Handle snapcode.appjr.QuickDraw
-            case "snapcode.appjr.QuickDraw":
+            // Handle snapcode.repl.QuickDraw
+            case "snapcode.repl.QuickDraw":
                 return cb.paramTypes(int.class,int.class).buildAll();
 
             // Handle anything else
@@ -309,9 +309,9 @@ public class StaticResolver extends javakit.resolver.StaticResolver {
             case "snapcharts.data.DoubleArray(double[])":
                 return new snapcharts.data.DoubleArray((double[]) theArgs[0]);
 
-            // Handle snapcode.appjr.QuickDraw
-            case "snapcode.appjr.QuickDraw(int,int)":
-                return new snapcode.appjr.QuickDraw(intVal(theArgs[0]),intVal(theArgs[1]));
+            // Handle snapcode.repl.QuickDraw
+            case "snapcode.repl.QuickDraw(int,int)":
+                return new QuickDraw(intVal(theArgs[0]),intVal(theArgs[1]));
 
             // Handle anything else
             default:

@@ -10,6 +10,7 @@ import snap.props.PropObject;
 import snap.text.TextStyle;
 import snap.util.SnapUtils;
 import snapcharts.data.DoubleArray;
+import snapcode.repl.*;
 
 public class JeplUtils {
 
@@ -44,8 +45,8 @@ public class JeplUtils {
     {
         // Set imports and SuperClassName
         jeplTextDoc.addImport("snapcharts.data.*");
-        jeplTextDoc.addImport("snapcode.appjr.*");
-        jeplTextDoc.setSuperClassName(ChartsREPL.class.getName());
+        jeplTextDoc.addImport("snapcode.repl.*");
+        jeplTextDoc.setSuperClassName(ReplObject.class.getName());
 
         // Set code font
         Font codeFont = JavaTextUtils.getCodeFont();

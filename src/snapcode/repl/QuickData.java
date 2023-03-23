@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snapcode.appjr;
+package snapcode.repl;
 import snap.gfx.Image;
 import snap.web.WebURL;
 import snapcharts.data.*;
@@ -61,7 +61,7 @@ public class QuickData {
 
         // Return if empty
         if (dataArraysList.size() < 2)
-            throw new IllegalArgumentException("ChartsREPL.dataSet: Not enough data arrays");
+            throw new IllegalArgumentException("ReplObject.dataSet: Not enough data arrays");
 
         // Create DataArrays and get DataType
         DataArray[] dataArrays = dataArraysList.toArray(new DataArray[0]);
