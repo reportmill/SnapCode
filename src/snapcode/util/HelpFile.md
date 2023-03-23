@@ -34,6 +34,7 @@
     x = new double[] { 1, 2, 3, 4 }
     y = new double[] { 1, 4, 9, 16 }
     dataSet = dataSet(x, y)
+    show(dataSet)
 ```
 
 ## From 3D data
@@ -43,6 +44,7 @@
     y = DoubleArray.fromMinMax(-4, 4)
     z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
     dataSet = dataSet(x, y, z)
+    show(dataSet)
 ```
 
 # Create Chart
@@ -53,6 +55,7 @@
     x = new double[] { 1, 2, 3, 4 }
     y = new double[] { 1, 4, 9, 16 }
     chart = chart(x,y)
+    show(chart)
 ```
 
 ## From data set
@@ -62,6 +65,8 @@
     y = new double[] { 1, 4, 9, 16 }
     dataSet = dataSet(x, y)
     chart = chart(dataSet)
+    show(dataSet)
+    show(chart)
 ```
 
 ## From 3D data
@@ -71,6 +76,7 @@
     y = DoubleArray.fromMinMax(-4, 4)
     z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
     chart = chart(x, y, z)
+    show(chart)
 ```
 
 # Create 3D Chart
@@ -82,6 +88,7 @@
     y = DoubleArray.fromMinMax(-4, 4)
     z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
     chart = chart3D(x, y, z)
+    show(chart)
 ```
 
 ## From data set
@@ -92,6 +99,7 @@
     z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
     dataSet = dataSet(x, y, z)
     chart = chart3D(dataSet)
+    show(chart)
 ```
 
 # Draw Vector Graphics
@@ -105,6 +113,7 @@
         drawView.forward(200)
         drawView.turn(90)
     }
+    show(drawView)
 ```
 
 ## Draw Spiral
@@ -116,6 +125,7 @@
         drawView.forward(i / 360d)
         drawView.turn(1)
     }
+    show(drawView)
 ```
 
 # Fetch remote data / images
@@ -124,12 +134,14 @@
 
 ```
     text = getTextForSource("https://reportmill.com/examples/AAPL.csv")
+    show(text)
 ```
 
 ## Image
 
 ```
     image = getImageForSource("https://reportmill.com/examples/Weird.jpg")
+    show(image)
 ```
 
 # Create UI
@@ -140,6 +152,7 @@
     button = new Button("Hello World")
     button.setPrefSize(100, 25)
     button.setMargin(20,20,20,20)
+    show(button)
 ```
 
 ## Create Slider
@@ -148,6 +161,7 @@
     slider = new Slider()
     slider.setPrefSize(300, 25)
     slider.setMargin(20,20,20,20)
+    show(slider)
 ```
 
 # Animate UI
@@ -162,6 +176,7 @@
     anim.getAnim(2000).setRotate(360)
     anim.setLoopCount(4)
     anim.play()
+    show(button)
 ```
 
 # Create 3D
@@ -170,12 +185,14 @@
 
 ```
     cube = Quick3D.createCube()
+    show(cube)
 ```
 
 ## 3D image
 
 ```
     image3D = Quick3D.createImage3D(image)
+    show(image3D)
 ```
 
 # Basic Java code
@@ -187,6 +204,7 @@
     float y = 2.5f
     double pi = 3.14d
     String str = "Hello World"
+    show(str)
 ```
 
 ## System logging

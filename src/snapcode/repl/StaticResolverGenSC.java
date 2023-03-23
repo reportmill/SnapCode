@@ -54,7 +54,7 @@ public class StaticResolverGenSC extends StaticResolverGen {
             // DataSet
 
             // ReplObject
-            "print", "println",
+            "print", "println", "show",
 
             // Quick3D
             "createCube", "createImage3D",

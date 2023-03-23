@@ -69,6 +69,7 @@ public class StaticResolver extends javakit.resolver.StaticResolver {
             // Handle snapcode.repl.ReplObject
             case "snapcode.repl.ReplObject":
                 mb.name("println").paramTypes(java.lang.Object.class).returnType(void.class).save();
+                mb.name("show").paramTypes(java.lang.Object.class).returnType(void.class).save();
                 return mb.name("print").paramTypes(java.lang.Object.class).returnType(void.class).buildAll();
 
             // Handle snapcode.repl.Quick3D
@@ -174,6 +175,8 @@ public class StaticResolver extends javakit.resolver.StaticResolver {
                 ReplObject.println(theArgs[0]); return null;
             case "snapcode.repl.ReplObject.print(java.lang.Object)":
                 ReplObject.print(theArgs[0]); return null;
+            case "snapcode.repl.ReplObject.show(java.lang.Object)":
+                ReplObject.show(theArgs[0]); return null;
 
             // Handle snapcode.repl.Quick3D
             case "snapcode.repl.Quick3D.createCube()":
