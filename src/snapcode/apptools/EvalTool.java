@@ -19,7 +19,10 @@ public class EvalTool extends WorkspaceTool {
     private boolean  _autoRun;
 
     // Whether auto run was requested
-    private boolean  _autoRunRequested;
+    protected boolean  _autoRunRequested;
+
+    // EvalRunner
+    protected EvalToolRunner  _evalRunner;
 
     // EvalView
     protected EvalView  _evalView;
@@ -36,6 +39,9 @@ public class EvalTool extends WorkspaceTool {
     public EvalTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
+
+        // Create runner
+        _evalRunner = new EvalToolRunner(this);
     }
 
     /**
@@ -64,7 +70,7 @@ public class EvalTool extends WorkspaceTool {
      */
     protected void runAppNow()
     {
-        try { _evalView.runApp(_autoRunRequested); }
+        try { _evalRunner.runApp(); }
         finally {
             _resetEvalValuesRun = null;
             _autoRunRequested = false;
@@ -74,14 +80,14 @@ public class EvalTool extends WorkspaceTool {
     /**
      * Whether run is running.
      */
-    public boolean isRunning()  { return _evalView.isRunning(); }
+    public boolean isRunning()  { return _evalRunner.isRunning(); }
 
     /**
      * Cancels run.
      */
     public void cancelRun()
     {
-        _evalView.cancelRun();
+        _evalRunner.cancelRun();
         resetLater();
     }
 
@@ -90,7 +96,7 @@ public class EvalTool extends WorkspaceTool {
      */
     public void clearEvalValues()
     {
-        _evalView.removeChildren();
+        _evalView.resetDisplay();
     }
 
     /**
@@ -166,7 +172,7 @@ public class EvalTool extends WorkspaceTool {
     protected void resetUI()
     {
         // Update RunButton, AutoRunCheckBox
-        setViewText("RunButton", !_evalView.isRunning() ? "Run" : "Cancel");
+        setViewText("RunButton", !_evalRunner.isRunning() ? "Run" : "Cancel");
         setViewValue("AutoRunCheckBox", isAutoRun());
     }
 

@@ -2,19 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.apptools;
-import javakit.ide.JavaTextPane;
-import javakit.parse.JeplTextDoc;
-import javakit.project.BuildIssue;
-import javakit.project.JeplAgent;
 import javakit.runner.JavaShell;
 import snap.geom.HPos;
 import snap.gfx.Color;
 import snap.view.*;
-import snap.viewx.WebPage;
-import snapcode.app.JavaPage;
-import snapcode.app.PagePane;
-import snapcode.app.WorkspacePane;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,15 +23,6 @@ public class EvalView extends ColView implements JavaShell.ShellClient {
 
     // A cache of views for output values
     private Map<Object,View>  _replViewsCache = new HashMap<>();
-
-    // The thread to reset views
-    private Thread _runAppThread;
-
-    // Whether run was an auto run
-    private boolean  _autoRunRequested;
-
-    // Whether last run was pre-empted
-    private boolean  _preemptedForNewRun;
 
     // The view that shows when there is an extended run
     private View  _extendedRunView;
@@ -65,103 +47,13 @@ public class EvalView extends ColView implements JavaShell.ShellClient {
         _javaShell.setClient(this);
     }
 
-    public JavaTextPane<?> getJavaTextPane()
-    {
-        WorkspacePane workspacePane = _evalTool.getWorkspacePane();
-        PagePane pagePane = workspacePane.getPagePane();
-        WebPage selPage = pagePane.getSelPage();
-        JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
-        return javaPage != null ? javaPage.getTextPane() : null;
-    }
-
-    public JeplTextDoc getJeplDoc()
-    {
-        JavaTextPane<?> javaTextPane = getJavaTextPane();
-        return (JeplTextDoc) javaTextPane.getTextDoc();
-    }
-
     /**
-     * Called to update when textView changes.
+     * Resets the display.
      */
-    public void runApp(boolean isAutoRun)
+    public void resetDisplay()
     {
-        // Remove children
         removeChildren();
-
-        // Reset actual values
-        _autoRunRequested = isAutoRun;
-        runAppNow();
-    }
-
-    /**
-     * Runs the app.
-     */
-    protected void runAppNow()
-    {
-        // If previous thread is running, kill it
-        if (_runAppThread != null) {
-            _preemptedForNewRun = true;
-            _javaShell.interrupt();
-            return;
-        }
-
-        // Run
-        _runAppThread = new Thread(() -> runAppImpl());
-        _runAppThread.start();
-
-        // Check back in half a second to see if we need to show progress bar
-        ViewUtils.runDelayed(() -> handleExtendedRun(), 500, true);
-
-        // Reset EvalPane
-        _evalTool.resetLater();
-    }
-
-    /**
-     * Runs Java Code.
-     */
-    protected void runAppImpl()
-    {
-        // Clear value/views cache
         _replViewsCache.clear();
-
-        // Get JeplTextDoc, JeplAgent
-        JeplTextDoc jeplDoc = getJeplDoc();
-        JeplAgent jeplAgent = jeplDoc.getAgent();
-
-        // Build file
-        boolean success = jeplAgent.buildFile();
-
-        // Notify EditPane of possible BuildIssue changes
-        JavaTextPane<?> javaTextPane = getJavaTextPane();
-        javaTextPane.buildIssueOrBreakPointMarkerChanged();
-
-        // If build failed, report errors
-        if (!success) {
-            BuildIssue[] buildIssues = jeplAgent.getBuildIssues();
-            processOutput(buildIssues);
-        }
-
-        // If no errors, run
-        else _javaShell.runJavaCode(jeplDoc);
-
-        // Remove ExtendedRunView
-        ViewUtils.runLater(() -> removeExtendedRunView());
-
-        // If Preempted, kick off another run
-        if (_preemptedForNewRun) {
-            _preemptedForNewRun = false;
-            ViewUtils.runLater(() -> runAppNow());
-        }
-
-        // If otherwise interrupted, add last run cancelled UI
-        else if (_javaShell.isInterrupted())
-            ViewUtils.runLater(() -> addLastRunCancelledUI());
-
-        // Reset thread
-        _runAppThread = null;
-
-        // Reset EvalPane
-        _evalTool.resetLater();
     }
 
     /**
@@ -203,9 +95,10 @@ public class EvalView extends ColView implements JavaShell.ShellClient {
     {
         // If too much output, bail
         if (getChildCount() > MAX_OUTPUT_COUNT) {
-            if (_runAppThread == null)
+            boolean isRunning = _evalTool.isRunning();
+            if (!isRunning)
                 return;
-            cancelRun();
+            _evalTool.cancelRun();
             return;
         }
 
@@ -214,11 +107,6 @@ public class EvalView extends ColView implements JavaShell.ShellClient {
         if (!replView.isShowing())
             addChild(replView);
     }
-
-    /**
-     * Returns whether evaluation is running.
-     */
-    public boolean isRunning()  { return _runAppThread != null; }
 
     /**
      * Creates a view for given Repl value.
@@ -252,52 +140,30 @@ public class EvalView extends ColView implements JavaShell.ShellClient {
     }
 
     /**
-     * Called when a run is taking a long time.
-     */
-    protected void handleExtendedRun()
-    {
-        if (_runAppThread == null)
-            return;
-
-        // If AutoRunRequested, just cancel run
-        if (_autoRunRequested) {
-            cancelRun();
-            return;
-        }
-
-        // Get/add ExtendedRunView
-        View extendedRunView = getExtendedRunView();
-        addChild(extendedRunView, 0);
-    }
-
-    /**
-     * Called when a run is cancelled.
-     */
-    public void cancelRun()
-    {
-        // If already cancelled, just return
-        if (_runAppThread == null) return;
-
-        // Interrupt and clear
-        _javaShell.interrupt();
-        _runAppThread = null;
-    }
-
-    /**
      * Adds a last run cancelled UI.
      */
-    private void addLastRunCancelledUI()
+    public void addLastRunCancelledUI()
     {
         Label label = new Label("Last run cancelled");
         label.setLeanX(HPos.CENTER);
         addChild(label, 0);
 
         // Handle AutoRun timeout
-        if (_autoRunRequested)
+        if (_evalTool._autoRunRequested)
             label.setText(label.getText() + " - exceeded AutoRun timeout");
 
         if (getChildCount() > MAX_OUTPUT_COUNT)
             label.setText(label.getText() + " - Too much output");
+    }
+
+    /**
+     * Triggers an extended run.
+     */
+    public void triggerExtendedRun()
+    {
+        // Get/add ExtendedRunView
+        View extendedRunView = getExtendedRunView();
+        addChild(extendedRunView, 0);
     }
 
     /**
@@ -322,7 +188,7 @@ public class EvalView extends ColView implements JavaShell.ShellClient {
         Button button = new Button("Cancel");
         button.setPrefSize(80, 25);
         button.setLeanX(HPos.CENTER);
-        button.addEventHandler(e -> cancelRun(), Button.Action);
+        button.addEventHandler(e -> _evalTool.cancelRun(), Button.Action);
 
         // Create ColView to hold
         ColView colView = new ColView();
@@ -337,7 +203,7 @@ public class EvalView extends ColView implements JavaShell.ShellClient {
     /**
      * Removes the extended run view.
      */
-    private void removeExtendedRunView()
+    public void removeExtendedRunView()
     {
         if (_extendedRunView != null && _extendedRunView.isShowing())
             removeChild(_extendedRunView);
