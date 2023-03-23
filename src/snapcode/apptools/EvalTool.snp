@@ -7,6 +7,20 @@
     <CheckBox Name="AutoRunCheckBox" ToolTip="Automatically run when enter key is pressed" LeanX="RIGHT" Text="Auto Run" />
     <Button Name="DeleteButton" PrefWidth="22" PrefHeight="22" Margin="6" ToolTip="Delete" ShowArea="false" />
   </RowView>
+  <ColView Name="ExtendedRunView" Spacing="8" GrowWidth="true">
+    <RectView PrefHeight="1" GrowWidth="true">
+      <Fill Color="#CC" />
+    </RectView>
+    <Label LeanX="CENTER" Text="Running..." />
+    <ProgressBar Name="ProgressBar" PrefWidth="400" PrefHeight="25" LeanX="CENTER" Indeterminate="true" />
+    <Button Name="CancelExtendedRunButton" PrefWidth="80" PrefHeight="25" Margin="8" LeanX="CENTER" Text="Cancel" />
+  </ColView>
+  <ColView Name="CancelledRunView" Spacing="8" GrowWidth="true">
+    <RectView PrefHeight="1" GrowWidth="true">
+      <Fill Color="#CC" />
+    </RectView>
+    <Label Name="CancelledRunLabel" Margin="8" LeanX="CENTER" Text="Last run cancelled" />
+  </ColView>
   <RectView PrefHeight="1">
     <Fill Color="#CC" />
   </RectView>
