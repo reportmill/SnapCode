@@ -7,4 +7,8 @@
     <CheckBox Name="AutoRunCheckBox" ToolTip="Automatically run when enter key is pressed" LeanX="RIGHT" Text="Auto Run" />
     <Button Name="DeleteButton" PrefWidth="22" PrefHeight="22" Margin="6" ToolTip="Delete" ShowArea="false" />
   </RowView>
+  <RectView PrefHeight="1">
+    <Fill Color="#CC" />
+  </RectView>
+  <ScrollView Name="ScrollView" FillWidth="true" GrowHeight="true" />
 </ColView>

@@ -133,41 +133,20 @@ public class EvalTool extends WorkspaceTool {
     }
 
     /**
-     * Override to add EvalView.
-     */
-    @Override
-    protected View createUI()
-    {
-        // Do normal version
-        ColView colView = (ColView) super.createUI();
-
-        // Add separator
-        RectView separator = new RectView();
-        separator.setPrefSize(1, 1);
-        separator.setFill(Color.GRAY8);
-        colView.addChild(separator);
-
-        // Create/config EvalView
-        _evalView = new EvalView(this);
-        _evalView.setGrowHeight(true);
-
-        // Create/config ScrollView
-        ScrollView scrollView = new ScrollView(_evalView);
-        scrollView.setBorder(null);
-        scrollView.setFillWidth(true);
-        scrollView.setGrowHeight(true);
-        colView.addChild(scrollView);
-
-        // Return
-        return colView;
-    }
-
-    /**
      * Initialize UI.
      */
     @Override
     protected void initUI()
     {
+        // Create EvalView
+        _evalView = new EvalView(this);
+        _evalView.setGrowHeight(true);
+
+        // Get ScrollView and config
+        ScrollView scrollView = getView("ScrollView", ScrollView.class);
+        scrollView.setBorder(null);
+        scrollView.setContent(_evalView);
+
         // Set DeleteButton image
         getView("RunButton", ButtonBase.class).setImageAfter(getImage("pkg.images/Run.png"));
         getView("RunButton", ButtonBase.class).getLabel().setTextFill(Color.GRAY);
