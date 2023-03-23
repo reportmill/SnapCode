@@ -16,13 +16,10 @@ import snapcode.app.WorkspacePane;
 /**
  * A TextArea subclass to show code evaluation.
  */
-public class EvalToolRunner implements JavaShell.ShellClient {
+public class EvalToolRunner {
 
     // The EvalTool
     private EvalTool _evalTool;
-
-    // The EvalView
-    private EvalView _evalView;
 
     // The JavaShell
     protected JavaShell _javaShell;
@@ -42,9 +39,11 @@ public class EvalToolRunner implements JavaShell.ShellClient {
 
         // Create JavaShell
         _javaShell = new JavaShell();
-        _javaShell.setClient(this);
     }
 
+    /**
+     * Returns the current JavaTextPane.
+     */
     public JavaTextPane<?> getJavaTextPane()
     {
         WorkspacePane workspacePane = _evalTool.getWorkspacePane();
@@ -54,6 +53,9 @@ public class EvalToolRunner implements JavaShell.ShellClient {
         return javaPage != null ? javaPage.getTextPane() : null;
     }
 
+    /**
+     * Returns the current JavaTextDoc.
+     */
     public JeplTextDoc getJeplDoc()
     {
         JavaTextPane<?> javaTextPane = getJavaTextPane();
@@ -66,8 +68,7 @@ public class EvalToolRunner implements JavaShell.ShellClient {
     public void runApp()
     {
         // Reset display
-        _evalView = _evalTool._evalView;
-        _evalView.resetDisplay();
+        _evalTool.resetDisplay();
 
         // If previous thread is running, kill it
         if (_runAppThread != null) {
@@ -92,6 +93,10 @@ public class EvalToolRunner implements JavaShell.ShellClient {
      */
     protected void runAppImpl()
     {
+        // Set display
+        EvalView display = _evalTool._evalView;
+        _javaShell.setClient(display);
+
         // Get JeplTextDoc, JeplAgent
         JeplTextDoc jeplDoc = getJeplDoc();
         JeplAgent jeplAgent = jeplDoc.getAgent();
@@ -106,14 +111,14 @@ public class EvalToolRunner implements JavaShell.ShellClient {
         // If build failed, report errors
         if (!success) {
             BuildIssue[] buildIssues = jeplAgent.getBuildIssues();
-            processOutput(buildIssues);
+            display.processOutput(buildIssues);
         }
 
         // If no errors, run
         else _javaShell.runJavaCode(jeplDoc);
 
-        // Remove ExtendedRunView
-        ViewUtils.runLater(() -> _evalView.removeExtendedRunView());
+        // Remove extended run ui
+        ViewUtils.runLater(() -> _evalTool.setShowExtendedRunUI(false));
 
         // If Preempted, kick off another run
         if (_preemptedForNewRun) {
@@ -123,21 +128,13 @@ public class EvalToolRunner implements JavaShell.ShellClient {
 
         // If otherwise interrupted, add last run cancelled UI
         else if (_javaShell.isInterrupted())
-            ViewUtils.runLater(() -> _evalView.addLastRunCancelledUI());
+            ViewUtils.runLater(() -> _evalTool.setShowCancelledRunUI(true));
 
         // Reset thread
         _runAppThread = null;
 
         // Reset EvalPane
         _evalTool.resetLater();
-    }
-
-    /**
-     * Called by shell when there is output.
-     */
-    public void processOutput(Object aValue)
-    {
-        _evalView.processOutput(aValue);
     }
 
     /**
@@ -159,8 +156,8 @@ public class EvalToolRunner implements JavaShell.ShellClient {
             return;
         }
 
-        // Trigger extended run
-        _evalView.triggerExtendedRun();
+        // Show extended run UI
+        _evalTool.setShowExtendedRunUI(true);
     }
 
     /**

@@ -2,6 +2,7 @@ package snapcode.apptools;
 import javakit.ide.JavaTextArea;
 import javakit.parse.JMethodDecl;
 import javakit.parse.JNode;
+import snap.geom.HPos;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.text.TextBoxLine;
@@ -32,6 +33,12 @@ public class EvalTool extends WorkspaceTool {
 
     // For resetEntriesLater
     private Runnable  _resetEvalValuesRunReal = () -> runAppNow();
+
+    // The view that shows when there is an extended run
+    private View  _extendedRunView;
+
+    // The view that shows when there is cancelled run
+    private View  _cancelledRunView;
 
     /**
      * Constructor.
@@ -94,8 +101,10 @@ public class EvalTool extends WorkspaceTool {
     /**
      * Clear eval values.
      */
-    public void clearEvalValues()
+    public void resetDisplay()
     {
+        setShowExtendedRunUI(false);
+        setShowCancelledRunUI(false);
         _evalView.resetDisplay();
     }
 
@@ -198,7 +207,125 @@ public class EvalTool extends WorkspaceTool {
 
         // Handle DeleteButton
         if (anEvent.equals("DeleteButton"))
-            clearEvalValues();
+            resetDisplay();
+    }
+
+    /**
+     * Sets whether ExtendedRunView is showing.
+     */
+    protected void setShowExtendedRunUI(boolean aValue)
+    {
+        ColView topColView = (ColView) getUI();
+
+        // Handle Show: Get/add ExtendedRunView
+        if (aValue) {
+            View extendedRunView = getExtendedRunView();
+            if (!extendedRunView.isShowing())
+                topColView.addChild(extendedRunView, 1);
+        }
+
+        // Handle Hide: Remove ExtendedRunView
+        else {
+            if (_extendedRunView != null && _extendedRunView.isShowing())
+                topColView.removeChild(_extendedRunView);
+        }
+    }
+
+    /**
+     * Sets whether CancelledRunView is showing.
+     */
+    protected void setShowCancelledRunUI(boolean aValue)
+    {
+        ColView topColView = (ColView) getUI();
+
+        // Handle Show: Get/add CancelledRunView
+        if (aValue) {
+            View cancelledRunView = getCancelledRunView();
+            if (!cancelledRunView.isShowing())
+                topColView.addChild(cancelledRunView, 1);
+        }
+
+        // Handle Hide: Remove CancelledRunView
+        else {
+            if (_cancelledRunView != null && _cancelledRunView.isShowing())
+                topColView.removeChild(_cancelledRunView);
+            _cancelledRunView = null;
+        }
+    }
+
+    /**
+     * Returns the view to show when there is an extended run.
+     */
+    private View getExtendedRunView()
+    {
+        // If already set, just return
+        if (_extendedRunView != null) return _extendedRunView;
+
+        // Add separator
+        RectView separator = new RectView();
+        separator.setPrefSize(1, 1);
+        separator.setGrowWidth(true);
+        separator.setFill(Color.GRAY8);
+
+        // Create label
+        Label label = new Label("Running...");
+        label.setLeanX(HPos.CENTER);
+
+        // Create ProgressBar
+        ProgressBar progressBar = new ProgressBar();
+        progressBar.setPrefSize(400, 25);
+        progressBar.setLeanX(HPos.CENTER);
+        progressBar.setIndeterminate(true);
+
+        // Create Cancel button
+        Button button = new Button("Cancel");
+        button.setPrefSize(80, 25);
+        button.setLeanX(HPos.CENTER);
+        button.addEventHandler(e -> cancelRun(), Button.Action);
+        button.setMargin(8, 8, 8, 8);
+
+        // Create ColView to hold
+        ColView colView = new ColView();
+        colView.setSpacing(8);
+        colView.setGrowWidth(true);
+        colView.setChildren(separator, label, progressBar, button);
+
+        // Set, return
+        return _extendedRunView = colView;
+    }
+
+    /**
+     * Returns the view to show when there is a cancelled run.
+     */
+    protected View getCancelledRunView()
+    {
+        // If already set, just return
+        if (_cancelledRunView != null) return _cancelledRunView;
+
+        // Add separator
+        RectView separator = new RectView();
+        separator.setPrefSize(1, 1);
+        separator.setGrowWidth(true);
+        separator.setFill(Color.GRAY8);
+
+        // Create label
+        Label label = new Label("Last run cancelled");
+        label.setLeanX(HPos.CENTER);
+        label.setMargin(8, 8, 8, 8);
+
+        // Handle AutoRun timeout
+        if (_autoRunRequested)
+            label.setText(label.getText() + " - exceeded AutoRun timeout");
+        if (_evalView.getChildCount() > EvalView.MAX_OUTPUT_COUNT)
+            label.setText(label.getText() + " - Too much output");
+
+        // Create ColView to hold
+        ColView colView = new ColView();
+        colView.setGrowWidth(true);
+        colView.setChildren(separator, label);
+
+        // Return
+        return _cancelledRunView = colView;
     }
 
     /**
