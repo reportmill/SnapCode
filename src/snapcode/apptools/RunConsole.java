@@ -161,7 +161,7 @@ public class RunConsole extends WorkspaceTool {
             return aPath;
 
         WebFile file = proj.getProjectSet().getSourceFile(aPath);
-        return file != null ? file.getURL().getString() : aPath;
+        return file != null ? file.getUrlString() : aPath;
     }
 
     /**

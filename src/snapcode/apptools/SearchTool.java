@@ -443,12 +443,12 @@ public class SearchTool extends WorkspaceTool {
          */
         public String getURLString()
         {
-            String urls = _file.getURL().getString();
+            String urlString = _file.getUrlString();
             if (_search._kind == Search.Kind.Text)
-                urls += "#Find=" + _search._string;
+                urlString += "#Find=" + _search._string;
             else if (_node != null)
-                urls += String.format("#Sel=%d-%d", _node.getStartCharIndex(), _node.getEndCharIndex());
-            return urls;
+                urlString += String.format("#Sel=%d-%d", _node.getStartCharIndex(), _node.getEndCharIndex());
+            return urlString;
         }
     }
 

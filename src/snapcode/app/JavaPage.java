@@ -201,15 +201,15 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     protected WebFile createNewFile(String aPath)
     {
         // Create file
-        WebFile file = super.createNewFile(aPath);
+        WebFile newFile = super.createNewFile(aPath);
 
         // Get project
-        Project proj = Project.getProjectForFile(file);
+        Project proj = Project.getProjectForFile(newFile);
 
         // Append package declaration
         StringBuilder sb = new StringBuilder();
-        WebFile fileDir = file.getParent();
-        String pkgName = proj != null ? proj.getClassNameForFile(fileDir) : file.getSimpleName();
+        WebFile fileDir = newFile.getParent();
+        String pkgName = proj != null ? proj.getClassNameForFile(fileDir) : newFile.getSimpleName();
         if (pkgName.length() > 0)
             sb.append("package ").append(pkgName).append(";\n");
 
@@ -217,14 +217,14 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         sb.append("\n/**\n * A custom class.\n */\n");
 
         // Append class declaration: "public class <File-Name> extends Object {   }"
-        String className = file.getSimpleName();
+        String className = newFile.getSimpleName();
         sb.append("public class ").append(className).append(" extends Object {\n\n\n\n}");
 
         // Set text
-        file.setText(sb.toString());
+        newFile.setText(sb.toString());
 
         // Return
-        return file;
+        return newFile;
     }
 
     /**
@@ -232,8 +232,8 @@ public class JavaPage extends WebPage implements WebFile.Updater {
      */
     protected void setTextSel(int aStart, int anEnd)
     {
-        String urls = getFile().getURL().getString() + String.format("#Sel=%d-%d", aStart, anEnd);
-        getBrowser().setURLString(urls);
+        String urlString = getFile().getUrlString() + String.format("#Sel=%d-%d", aStart, anEnd);
+        getBrowser().setURLString(urlString);
     }
 
     /**
@@ -242,7 +242,8 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     protected void openDeclaration(JNode aNode)
     {
         JavaDecl decl = aNode.getDecl();
-        if (decl != null) openDecl(decl);
+        if (decl != null)
+            openDecl(decl);
     }
 
     /**
@@ -250,9 +251,9 @@ public class JavaPage extends WebPage implements WebFile.Updater {
      */
     protected void openSuperDeclaration(JMemberDecl aMemberDecl)
     {
-        JavaDecl sdecl = aMemberDecl.getSuperDecl();
-        if (sdecl == null) return;
-        openDecl(sdecl);
+        JavaDecl superDecl = aMemberDecl.getSuperDecl();
+        if (superDecl != null)
+            openDecl(superDecl);
     }
 
     /**
@@ -274,11 +275,13 @@ public class JavaPage extends WebPage implements WebFile.Updater {
 
         // Get project
         Project proj = Project.getProjectForSite(getSite());
-        if (proj == null) return;
+        if (proj == null)
+            return;
 
         // Get source file
         WebFile file = proj.getProjectSet().getJavaFileForClassName(className);
-        if (file == null) return;
+        if (file == null)
+            return;
 
         // Get matching node
         JavaAgent javaAgent = JavaAgent.getAgentForFile(file);
@@ -286,12 +289,12 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         JNode node = NodeMatcher.getDeclMatch(jfile, aDecl);
 
         // Get URL
-        String urls = file.getURL().getString();
+        String urlString = file.getURL().getString();
         if (node != null)
-            urls += String.format("#Sel=%d-%d", node.getStartCharIndex(), node.getEndCharIndex());
+            urlString += String.format("#Sel=%d-%d", node.getStartCharIndex(), node.getEndCharIndex());
 
         // Open URL
-        getBrowser().setURLString(urls);
+        getBrowser().setURLString(urlString);
     }
 
     /**
