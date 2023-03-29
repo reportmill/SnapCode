@@ -167,19 +167,12 @@ public class WelcomePanel extends ViewOwner {
         WebSite dropBoxSite = DropBoxSite.getSiteForEmail(dropBoxEmail);
         FilePanel.addDefaultSite(dropBoxSite);
 
-        // Get path from open panel for supported file extensions
-        String[] extensions = { JAVA_FILE_EXT };
-        FilePanel filePanel = new FilePanel() {
-            @Override
-            protected void fireActionEvent(ViewEvent anEvent)
-            {
-                WelcomePanel.this.fireActionEventForObject("OpenButton", anEvent);
-            }
-        };
-
-        // Config
-        filePanel.setTypes(extensions);
+        // Create/config FilePanel
+        FilePanel filePanel = new FilePanel();
+        String[] EXTENSIONS = { JAVA_FILE_EXT };
+        filePanel.setTypes(EXTENSIONS);
         filePanel.setSelSite(recentFilesSite);
+        filePanel.setActionHandler(e -> WelcomePanel.this.fireActionEventForObject("OpenButton", e));
 
         // Return
         return filePanel;
