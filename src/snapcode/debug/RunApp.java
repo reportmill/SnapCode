@@ -254,7 +254,7 @@ public class RunApp {
      */
     public String getName()
     {
-        String name = getURL().getPathNameSimple();
+        String name = getURL().getFilenameSimple();
         if (isTerminated()) name += " <terminated>";
         return name;
     }
