@@ -72,21 +72,21 @@ public class Quick3D {
         double width = 200;
         double height = 200;
         double z = 0;
-        Poly3D poly3D = new Poly3D();
-        poly3D.setColor(Color.LIGHTBLUE);
-        poly3D.addPoint(0, 0, z);
-        poly3D.addPoint(width, 0, z);
-        poly3D.addPoint(width, height, z);
-        poly3D.addPoint(0, height, z);
-        poly3D.addTexCoord(0, 0);
-        poly3D.addTexCoord(1, 0);
-        poly3D.addTexCoord(1, 1);
-        poly3D.addTexCoord(0, 1);
-        poly3D.setTexture(texture);
+        Polygon3D polygon3D = new Polygon3D();
+        polygon3D.setColor(Color.LIGHTBLUE);
+        polygon3D.addPoint(0, 0, z);
+        polygon3D.addPoint(width, 0, z);
+        polygon3D.addPoint(width, height, z);
+        polygon3D.addPoint(0, height, z);
+        polygon3D.addTexCoord(0, 0);
+        polygon3D.addTexCoord(1, 0);
+        polygon3D.addTexCoord(1, 1);
+        polygon3D.addTexCoord(0, 1);
+        polygon3D.setTexture(texture);
 
         // Add to scene
         Scene3D scene3D = cameraView.getScene();
-        scene3D.addChild(poly3D);
+        scene3D.addChild(polygon3D);
 
         // Return
         return cameraView;
