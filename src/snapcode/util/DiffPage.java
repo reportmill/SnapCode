@@ -1,8 +1,8 @@
 package snapcode.util;
 import javakit.parse.JavaTextDoc;
 import javakit.ide.JavaTextArea;
-import snap.geom.Path;
 import snap.geom.Rect;
+import snap.geom.Shape;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Painter;
@@ -13,7 +13,6 @@ import snap.text.TextSel;
 import snap.view.*;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -203,7 +202,7 @@ public class DiffPage extends WebPage {
         {
             super.paintBack(aPntr);
             for (TextSel range : ranges) {
-                Path rpath = range.getPath();
+                Shape rpath = range.getPath();
                 aPntr.setPaint(DIFF_FILL_COLOR);
                 aPntr.fill(rpath);
                 aPntr.setPaint(DIFF_STROKE_COLOR);
@@ -227,7 +226,7 @@ public class DiffPage extends WebPage {
         {
             super.paintBack(aPntr);
             for (TextSel range : ranges) {
-                Path rangePath = range.getPath();
+                Shape rangePath = range.getPath();
                 aPntr.setPaint(DIFF_FILL_COLOR);
                 aPntr.fill(rangePath);
                 aPntr.setPaint(DIFF_STROKE_COLOR);
