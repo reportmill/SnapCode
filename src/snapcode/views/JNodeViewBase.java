@@ -338,7 +338,7 @@ public class JNodeViewBase extends ChildView {
     {
         Path p = aPath.getPath();
         p.clear();
-        p.append(new Rect(0, 0, aW, aH - 3));
+        p.appendShape(new Rect(0, 0, aW, aH - 3));
         aPath.setSize(aW, aH - 3);
         //p.moveTo(r,0); p.hlineTo(aW-r); p.arcTo(aW,0,aW,r); p.vlineTo(aH-r); p.arcTo(aW,aH,aW-r,aH);
         //p.hlineTo(r); p.arcTo(0,aH,0,aH-r); p.vlineTo(r); p.arcTo(0,0,r,0); p.close();
@@ -417,7 +417,6 @@ public class JNodeViewBase extends ChildView {
     {
         Path p = aPath.getPath();
         p.clear();
-        double r = 0; //e.add(new MoveTo(r,0));
-        p.append(new RoundRect(1, 1, aW - 2, aH - 2, 5));
+        p.appendShape(new RoundRect(1, 1, aW - 2, aH - 2, 5));
     }
 }
