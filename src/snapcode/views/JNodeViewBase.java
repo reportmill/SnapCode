@@ -1,6 +1,5 @@
 package snapcode.views;
-
-import snap.geom.Path;
+import snap.geom.Path2D;
 import snap.geom.Pos;
 import snap.geom.Rect;
 import snap.geom.RoundRect;
@@ -40,9 +39,6 @@ public class JNodeViewBase extends ChildView {
     // Whether part is selected
     boolean _selected;
 
-    // The selection shape
-    Path _selShape;
-
     // Constants for type
     public enum Type {Piece, BlockStmt, MemberDecl, Plain, None}
 
@@ -80,10 +76,7 @@ public class JNodeViewBase extends ChildView {
     /**
      * Returns the type.
      */
-    public Type getType()
-    {
-        return _type;
-    }
+    public Type getType()  { return _type; }
 
     /**
      * Sets the type.
@@ -96,26 +89,17 @@ public class JNodeViewBase extends ChildView {
     /**
      * Returns the segment position.
      */
-    public Seg getSeg()
-    {
-        return _seg;
-    }
+    public Seg getSeg()  { return _seg; }
 
     /**
      * Sets the segment position.
      */
-    public void setSeg(Seg aSeg)
-    {
-        _seg = aSeg;
-    }
+    public void setSeg(Seg aSeg)  { _seg = aSeg; }
 
     /**
      * Returns the color.
      */
-    public Color getColor()
-    {
-        return _color;
-    }
+    public Color getColor()  { return _color; }
 
     /**
      * Sets the color.
@@ -130,10 +114,7 @@ public class JNodeViewBase extends ChildView {
     /**
      * Returns the horizontal box.
      */
-    public RowView getHBox()
-    {
-        return _hbox;
-    }
+    public RowView getHBox()  { return _hbox; }
 
     /**
      * Returns the vertical box.
@@ -158,18 +139,12 @@ public class JNodeViewBase extends ChildView {
     /**
      * Returns whether NodePane is a block.
      */
-    public boolean isBlock()
-    {
-        return false;
-    }
+    public boolean isBlock()  { return false; }
 
     /**
      * Returns whether part is selected.
      */
-    public boolean isSelected()
-    {
-        return _selected;
-    }
+    public boolean isSelected()  { return _selected; }
 
     /**
      * Sets whether part is selected.
@@ -242,18 +217,10 @@ public class JNodeViewBase extends ChildView {
     {
         aPath.setSize(aW, aH);
         switch (_type) {
-            case Piece:
-                resizeBGPiece(aPath, aW, aH);
-                break;
-            case BlockStmt:
-                resizeBGBlock(aPath, aW, aH, true);
-                break;
-            case MemberDecl:
-                resizeBGBlock(aPath, aW, aH, false);
-                break;
-            case Plain:
-                resizeBGPlain(aPath, aW, aH);
-                break;
+            case Piece: resizeBGPiece(aPath, aW, aH); break;
+            case BlockStmt: resizeBGBlock(aPath, aW, aH, true); break;
+            case MemberDecl: resizeBGBlock(aPath, aW, aH, false); break;
+            case Plain: resizeBGPlain(aPath, aW, aH); break;
         }
     }
 
@@ -263,17 +230,10 @@ public class JNodeViewBase extends ChildView {
     protected void resizeBGPiece(PathView aPath, double aW, double aH)
     {
         switch (_seg) {
-            case First:
-                resizeBGPieceFirst(aPath, aW, aH);
-                break;
-            case Middle:
-                resizeBGPieceMiddle(aPath, aW, aH);
-                break;
-            case Last:
-                resizeBGPieceLast(aPath, aW, aH);
-                break;
-            default:
-                resizeBGPieceOnly(aPath, aW, aH);
+            case First: resizeBGPieceFirst(aPath, aW, aH); break;
+            case Middle: resizeBGPieceMiddle(aPath, aW, aH); break;
+            case Last: resizeBGPieceLast(aPath, aW, aH); break;
+            default: resizeBGPieceOnly(aPath, aW, aH);
         }
     }
 
@@ -282,7 +242,7 @@ public class JNodeViewBase extends ChildView {
      */
     protected void resizeBGPieceOnly(PathView aPath, double aW, double aH)
     {
-        Path p = aPath.getPath();
+        Path2D p = aPath.getPath();
         p.clear();
         double r = 5;
         p.moveTo(r, 0);
@@ -310,7 +270,7 @@ public class JNodeViewBase extends ChildView {
      */
     protected void resizeBGPieceFirst(PathView aPath, double aW, double aH)
     {
-        Path p = aPath.getPath();
+        Path2D p = aPath.getPath();
         p.clear();
         double r = 5;
         p.moveTo(r, 0);
@@ -336,7 +296,7 @@ public class JNodeViewBase extends ChildView {
      */
     protected void resizeBGPieceMiddle(PathView aPath, double aW, double aH)
     {
-        Path p = aPath.getPath();
+        Path2D p = aPath.getPath();
         p.clear();
         p.appendShape(new Rect(0, 0, aW, aH - 3));
         aPath.setSize(aW, aH - 3);
@@ -349,7 +309,7 @@ public class JNodeViewBase extends ChildView {
      */
     protected void resizeBGPieceLast(PathView aPath, double aW, double aH)
     {
-        Path p = aPath.getPath();
+        Path2D p = aPath.getPath();
         p.clear();
         double r = 5;
         aPath.setSize(aW, aH - 3);
@@ -367,7 +327,7 @@ public class JNodeViewBase extends ChildView {
      */
     protected void resizeBGBlock(PathView aPath, double aW, double aH, boolean doOuter)
     {
-        Path p = aPath.getPath();
+        Path2D p = aPath.getPath();
         p.clear();
         double r = 5, h1 = PieceHeight, h2 = aH - BlockTailHeight;
         p.moveTo(r, 0);
@@ -415,7 +375,7 @@ public class JNodeViewBase extends ChildView {
      */
     protected void resizeBGPlain(PathView aPath, double aW, double aH)
     {
-        Path p = aPath.getPath();
+        Path2D p = aPath.getPath();
         p.clear();
         p.appendShape(new RoundRect(1, 1, aW - 2, aH - 2, 5));
     }
