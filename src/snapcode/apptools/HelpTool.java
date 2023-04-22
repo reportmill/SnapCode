@@ -9,7 +9,7 @@ import snap.gfx.Image;
 import snap.text.TextDoc;
 import snap.view.*;
 import snap.viewx.TextPane;
-import snap.viewx.WebPage;
+import snapcode.webbrowser.WebPage;
 import snap.web.WebURL;
 import snapcode.app.JavaPage;
 import snapcode.app.WorkspacePane;

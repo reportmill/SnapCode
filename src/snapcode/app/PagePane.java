@@ -9,8 +9,8 @@ import snap.props.PropChange;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.*;
-import snap.viewx.WebBrowser;
-import snap.viewx.WebPage;
+import snapcode.webbrowser.WebBrowser;
+import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebSite;
@@ -408,7 +408,7 @@ public class PagePane extends ViewOwner {
 
         // Handle Snap file
         if (type.equals("snp"))
-            return snapbuild.app.SnapBuilderPage.class;
+            return snapcode.webbrowser.SnapBuilderPage.class;
 
         // Do normal version
         return null;

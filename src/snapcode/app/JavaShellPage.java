@@ -1,7 +1,7 @@
 package snapcode.app;
 import snap.view.Label;
 import snap.view.View;
-import snap.viewx.WebPage;
+import snapcode.webbrowser.WebPage;
 
 /**
  * A WebPage for Playground.

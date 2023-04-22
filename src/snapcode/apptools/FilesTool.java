@@ -8,7 +8,7 @@ import snap.util.StringUtils;
 import snap.view.View;
 import snap.viewx.DialogBox;
 import snap.viewx.FormBuilder;
-import snap.viewx.WebPage;
+import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebUtils;

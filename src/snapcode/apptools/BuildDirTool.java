@@ -1,8 +1,8 @@
 package snapcode.apptools;
 import javakit.project.WorkspaceBuilder;
 import snap.view.*;
-import snap.viewx.WebBrowser;
-import snap.viewx.WebPage;
+import snapcode.webbrowser.WebBrowser;
+import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebSite;

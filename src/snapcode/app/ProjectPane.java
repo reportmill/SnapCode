@@ -7,7 +7,7 @@ import snap.props.PropChangeListener;
 import snap.view.TabView;
 import snap.view.View;
 import snap.viewx.DialogBox;
-import snap.viewx.WebPage;
+import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.apptools.BuildDirTool;

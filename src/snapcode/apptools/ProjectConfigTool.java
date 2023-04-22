@@ -5,6 +5,7 @@ import javakit.ide.NodeMatcher;
 import javakit.project.*;
 import snapcode.app.*;
 import snapcode.project.VersionControl;
+import snapcode.webbrowser.LoginPage;
 import snap.util.ClientUtils;
 import snap.util.TaskRunner;
 import snap.view.*;

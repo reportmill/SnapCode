@@ -3,7 +3,7 @@ import javakit.ide.JavaTextArea;
 import snap.gfx.Image;
 import snap.util.ListUtils;
 import snap.view.*;
-import snap.viewx.WebPage;
+import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.app.*;

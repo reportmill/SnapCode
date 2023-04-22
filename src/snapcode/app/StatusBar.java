@@ -1,7 +1,7 @@
 package snapcode.app;
 import snap.geom.Pos;
 import snap.view.*;
-import snap.viewx.WebBrowser;
+import snapcode.webbrowser.WebBrowser;
 
 /**
  * Manages status bar.

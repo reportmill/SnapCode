@@ -9,7 +9,7 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.view.*;
-import snap.viewx.WebPage;
+import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.apptools.*;

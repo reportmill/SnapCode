@@ -1,5 +1,5 @@
 package snapcode.app;
-import snap.viewx.WebPage;
+import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snapcode.util.ClassInfoPage;

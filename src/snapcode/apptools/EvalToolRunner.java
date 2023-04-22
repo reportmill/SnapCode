@@ -8,7 +8,7 @@ import javakit.project.BuildIssue;
 import javakit.project.JeplAgent;
 import javakit.runner.JavaShell;
 import snap.view.*;
-import snap.viewx.WebPage;
+import snapcode.webbrowser.WebPage;
 import snapcode.app.JavaPage;
 import snapcode.app.PagePane;
 import snapcode.app.WorkspacePane;

@@ -11,7 +11,7 @@ import snapcode.project.VersionControl;
 import snap.text.TextBoxLine;
 import snap.text.TextSel;
 import snap.view.*;
-import snap.viewx.WebPage;
+import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import java.util.ArrayList;
 import java.util.List;

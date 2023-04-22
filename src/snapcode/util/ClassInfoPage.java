@@ -3,7 +3,7 @@ import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMember;
 import snapcode.project.JavaData;
-import snap.viewx.TextPage;
+import snapcode.webbrowser.TextPage;
 import snap.web.WebFile;
 import java.util.Arrays;
 import java.util.Set;

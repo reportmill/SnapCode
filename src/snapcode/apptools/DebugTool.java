@@ -4,7 +4,7 @@ import snap.gfx.Color;
 import snap.props.PropChange;
 import snap.util.FilePathUtils;
 import snap.view.*;
-import snap.viewx.WebPage;
+import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;

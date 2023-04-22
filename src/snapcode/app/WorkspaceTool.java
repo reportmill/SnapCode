@@ -2,7 +2,7 @@ package snapcode.app;
 import javakit.project.Project;
 import javakit.project.Workspace;
 import snap.view.ViewOwner;
-import snap.viewx.WebBrowser;
+import snapcode.webbrowser.WebBrowser;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import java.util.Collections;
