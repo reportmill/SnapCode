@@ -6,7 +6,6 @@ import java.io.File;
 import java.util.*;
 import snap.util.FileUtils;
 import snapcode.util.Settings;
-import snap.util.SnapUtils;
 import snap.util.StringUtils;
 import snap.web.*;
 
@@ -75,7 +74,7 @@ public class ClientUtils {
         String sid = aSite.getURL().getString();
         String un1 = aSite.getUserName(), pw1 = aSite.getPassword();
         String un2 = getUserName(sid), pw2 = getPassword(sid);
-        if (!SnapUtils.equals(un1, un2) || !SnapUtils.equals(pw1, pw2)) {
+        if (!Objects.equals(un1, un2) || !Objects.equals(pw1, pw2)) {
             aSite.setUserName(un2);
             aSite.setPassword(pw2);
             return true;

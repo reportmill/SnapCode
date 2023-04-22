@@ -3,13 +3,13 @@
  */
 package snapcode.webbrowser;
 import snap.gfx.Image;
-import snap.util.SnapUtils;
 import snap.view.View;
 import snap.view.ViewEvent;
 import snap.view.ViewOwner;
 import snap.view.ViewUtils;
 import snap.viewx.DialogBox;
 import snap.web.*;
+import java.util.Objects;
 
 /**
  * A visual representation of a WebFile used in WebBrowser.
@@ -87,7 +87,7 @@ public class WebPage extends ViewOwner {
     public void setURL(WebURL aURL)
     {
         // If already set, just return
-        if (SnapUtils.equals(aURL, _url))
+        if (Objects.equals(aURL, _url))
             return;
 
         // Set URL and Response

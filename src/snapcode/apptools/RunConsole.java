@@ -1,5 +1,6 @@
 package snapcode.apptools;
 import javakit.project.Project;
+import snap.util.Convert;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.debug.RunApp;
@@ -7,7 +8,6 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.text.TextLink;
 import snap.text.TextStyle;
-import snap.util.SnapUtils;
 import snap.view.ViewEvent;
 import snap.viewx.ConsoleView;
 import snap.web.WebFile;
@@ -140,7 +140,7 @@ public class RunConsole extends WorkspaceTool {
         path = '/' + path.replace('.', '/') + ".java";
         path = getSourceURL(path);
         String lineStr = linkedText.substring(linkedText.indexOf(":") + 1);
-        int line = SnapUtils.intValue(lineStr);
+        int line = Convert.intValue(lineStr);
         if (line > 0)
             path += "#LineNumber=" + line;
         return path;

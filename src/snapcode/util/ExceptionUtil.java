@@ -4,7 +4,7 @@ import snap.text.RichText;
 import snap.text.TextDoc;
 import snap.text.TextLink;
 import snap.text.TextStyle;
-import snap.util.SnapUtils;
+import snap.util.Convert;
 import snap.util.StringUtils;
 
 /**
@@ -96,7 +96,7 @@ public class ExceptionUtil {
         path = '/' + path.replace('.', '/') + ".java";
         path = getSourceURL(path);
         String lineStr = linkedText.substring(linkedText.indexOf(":") + 1);
-        int line = SnapUtils.intValue(lineStr);
+        int line = Convert.intValue(lineStr);
         if (line > 0) path += "#LineNumber=" + line;
         return path;
     }

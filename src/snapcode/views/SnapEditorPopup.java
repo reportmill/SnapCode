@@ -6,8 +6,8 @@ import javakit.resolver.JavaDecl;
 import javakit.ide.NodeCompleter;
 import snap.gfx.Font;
 import snap.parse.Parser;
-import snap.util.SnapUtils;
 import snap.view.*;
+import java.util.Objects;
 
 /**
  * This class provides UI for editing an expression.
@@ -66,7 +66,7 @@ public class SnapEditorPopup extends ViewOwner {
         }
 
         // If same Id, just return
-        if (SnapUtils.equals(id.getName(), _idText)) return;
+        if (Objects.equals(id.getName(), _idText)) return;
         _idText = id.getName();
 
         // Get suggestions

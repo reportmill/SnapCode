@@ -3,12 +3,11 @@
  */
 package snapcode.webbrowser;
 import snap.util.ArrayUtils;
-import snap.util.SnapUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A class to manage history for a WebBrowser.
@@ -67,7 +66,7 @@ public class WebBrowserHistory {
     protected void setURL(WebURL aURL)
     {
         // If URL hasn't changed, just return
-        if (!isEnabled() || SnapUtils.equals(aURL, _url)) return;
+        if (!isEnabled() || Objects.equals(aURL, _url)) return;
 
         // If first URL to be added, just set and return
         if (_url == null && _lastURLs.size() == 0 && _nextURLs.size() == 0) {
@@ -76,7 +75,7 @@ public class WebBrowserHistory {
         }
 
         // Add to LastURLs, clear NextURLs and set URL
-        if (!SnapUtils.equals(_url, getLastURL())) addLastURL(_url);
+        if (!Objects.equals(_url, getLastURL())) addLastURL(_url);
         _nextURLs.clear();
 
         // Set URL

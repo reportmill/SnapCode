@@ -2,12 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.webbrowser;
-import snap.util.SnapUtils;
 import snap.view.Button;
 import snap.view.View;
 import snap.view.ViewEvent;
 import snap.viewx.DialogBox;
 import snap.web.WebSite;
+import java.util.Objects;
 
 /**
  * A Page to handle UNAUTHORISED responses.
@@ -27,7 +27,7 @@ public class LoginPage extends WebPage {
         DialogBox dbox = new DialogBox("Login Panel");
         dbox.setContent(getUI());
         boolean confirmed = dbox.showConfirmDialog(aView);
-        if (confirmed) confirmed = !SnapUtils.equals(usr, getName()) || !SnapUtils.equals(pw, getPassword());
+        if (confirmed) confirmed = !Objects.equals(usr, getName()) || !Objects.equals(pw, getPassword());
         if (confirmed) ClientUtils.setAccess(getSite(), getName(), getPassword());
         _site = null;
         return confirmed;

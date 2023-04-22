@@ -3,7 +3,6 @@ import javakit.project.Project;
 import javakit.project.WorkspaceBuilder;
 import snap.util.ArrayUtils;
 import snap.util.FileUtils;
-import snap.util.SnapUtils;
 import snap.util.StringUtils;
 import snap.view.View;
 import snap.viewx.DialogBox;
@@ -16,6 +15,7 @@ import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class is a WorkspaceTool to manage file operations on project files: create, add, remove, rename.
@@ -167,7 +167,7 @@ public class FilesTool extends WorkspaceTool {
 
             // See if IsDuplicating (there is a local file and it is the same as given file)
             File siteLocalFile = siteFile != null ? siteFile.getJavaFile() : null;
-            boolean isDuplicating = SnapUtils.equals(aFile, siteLocalFile);
+            boolean isDuplicating = Objects.equals(aFile, siteLocalFile);
 
             // If file exists, run option panel for replace
             if (siteFile != null) {

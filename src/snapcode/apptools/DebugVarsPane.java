@@ -318,7 +318,7 @@ public class DebugVarsPane extends WorkspaceTool {
         /** Standard Equals implementation. */
         //public boolean equals(Object anObj) {
         //    VarTreeItem other = anObj instanceof VarTreeItem? (VarTreeItem)anObj : null; if(other==null) return false;
-        //    if(!SnapUtils.equals(_name,other._name)) return false; return SnapUtils.equals(_value, other._value);  }
+        //    if(!Objects.equals(_name,other._name)) return false; return Objects.equals(_value, other._value);  }
         /** Standard hashCode implementation. */
         //public int hashCode()  { return (_name!=null? _name.hashCode() : 0) + (_value!=null? _value.hashCode() : 0); }
     }

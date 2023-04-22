@@ -129,7 +129,7 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
             return;
         }
         Object value = simplePut(aKey, aValue);
-        if (!SnapUtils.equals(aValue, value))
+        if (!Objects.equals(aValue, value))
             firePropChange(aKey, value, aValue, -1);
     }
 
@@ -154,7 +154,7 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
      */
     public String getStringValue(String aKey, String aDefault)
     {
-        return SnapUtils.stringValue(get(aKey, aDefault));
+        return Convert.stringValue(get(aKey, aDefault));
     }
 
     /**
@@ -170,7 +170,7 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
      */
     public boolean getBoolValue(String aKey, boolean aDefault)
     {
-        return SnapUtils.boolValue(get(aKey, aDefault));
+        return Convert.boolValue(get(aKey, aDefault));
     }
 
     /**
@@ -186,7 +186,7 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
      */
     public int getIntValue(String aKey, int aDefault)
     {
-        return SnapUtils.intValue(get(aKey, aDefault));
+        return Convert.intValue(get(aKey, aDefault));
     }
 
     /**
@@ -202,7 +202,7 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
      */
     public float getFloatValue(String aKey, float aDefault)
     {
-        return SnapUtils.floatValue(get(aKey, aDefault));
+        return Convert.floatValue(get(aKey, aDefault));
     }
 
     /**
