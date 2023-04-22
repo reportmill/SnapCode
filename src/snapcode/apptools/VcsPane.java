@@ -3,7 +3,7 @@ import javakit.project.Project;
 import javakit.project.WorkspaceBuilder;
 import snapcode.app.WorkspaceTool;
 import snapcode.project.VersionControl;
-import snap.util.ClientUtils;
+import snapcode.webbrowser.ClientUtils;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
 import snap.view.ProgressBar;

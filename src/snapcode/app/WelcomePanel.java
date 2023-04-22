@@ -6,6 +6,8 @@ import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import snapcode.webbrowser.ClientUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 

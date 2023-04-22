@@ -6,7 +6,7 @@ import javakit.project.*;
 import snapcode.app.*;
 import snapcode.project.VersionControl;
 import snapcode.webbrowser.LoginPage;
-import snap.util.ClientUtils;
+import snapcode.webbrowser.ClientUtils;
 import snap.util.TaskRunner;
 import snap.view.*;
 import snap.viewx.*;

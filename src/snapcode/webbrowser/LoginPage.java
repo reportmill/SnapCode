@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.webbrowser;
-import snap.util.ClientUtils;
 import snap.util.SnapUtils;
 import snap.view.Button;
 import snap.view.View;

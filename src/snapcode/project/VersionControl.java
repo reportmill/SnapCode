@@ -6,7 +6,7 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
 import snap.util.ArrayUtils;
-import snap.util.ClientUtils;
+import snapcode.webbrowser.ClientUtils;
 import snap.util.TaskMonitor;
 import snap.web.AccessException;
 import snap.web.WebFile;
