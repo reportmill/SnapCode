@@ -1,5 +1,5 @@
 package snapcode.project;
-import snap.util.Settings;
+import snapcode.util.Settings;
 import snap.web.WebFile;
 import snap.web.WebSite;
 
@@ -59,22 +59,22 @@ public class RunConfigs {
      */
     public List<RunConfig> readFile()
     {
-        List rconfs = new ArrayList();
-        List<Map> rconfMaps = getSettings().getList("RunConfigs");
+        List<RunConfig> runConfigs = new ArrayList<>();
+        List<Map<String,Object>> rconfMaps = getSettings().getList("RunConfigs");
 
         // If existing RunConfig maps found, create RunConfigs
         if (rconfMaps != null) {
-            for (Map map : rconfMaps) {
+            for (Map<String,Object> map : rconfMaps) {
                 String name = (String) map.get("Name");
                 String cname = (String) map.get("MainClassName");
                 String appArgs = (String) map.get("AppArgs");
                 String vmArgs = (String) map.get("VMArgs");
-                rconfs.add(new RunConfig().setName(name).setMainClassName(cname).setAppArgs(appArgs).setVMArgs(vmArgs));
+                runConfigs.add(new RunConfig().setName(name).setMainClassName(cname).setAppArgs(appArgs).setVMArgs(vmArgs));
             }
         }
 
-        // Return RunConfigs
-        return rconfs;
+        // Return
+        return runConfigs;
     }
 
     /**

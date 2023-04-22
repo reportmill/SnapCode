@@ -5,7 +5,7 @@ package snapcode.webbrowser;
 import java.io.File;
 import java.util.*;
 import snap.util.FileUtils;
-import snap.util.Settings;
+import snapcode.util.Settings;
 import snap.util.SnapUtils;
 import snap.util.StringUtils;
 import snap.web.*;
@@ -15,12 +15,16 @@ import snap.web.*;
  */
 public class ClientUtils {
 
+    // The file holding SnapCode settings
+    private static WebFile _userLocalSettingsFile;
+
     /**
      * Returns the settings.
      */
     public static Settings getUserLocalSettings()
     {
-        return Settings.get(getUserLocalSettingsFile());
+        WebFile userLocalSettingsFile = getUserLocalSettingsFile();
+        return Settings.get(userLocalSettingsFile);
     }
 
     /**
@@ -28,11 +32,9 @@ public class ClientUtils {
      */
     public static void saveUserLocalSettings()
     {
-        try {
-            getUserLocalSettingsFile().save();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        WebFile userLocalSettingsFile = getUserLocalSettingsFile();
+        try { userLocalSettingsFile.save(); }
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**
@@ -40,30 +42,27 @@ public class ClientUtils {
      */
     private static WebFile getUserLocalSettingsFile()
     {
-        return _ulsf != null ? _ulsf : (_ulsf = getUserLocalSettingsFileImpl());
+        if (_userLocalSettingsFile != null) return _userLocalSettingsFile;
+        return _userLocalSettingsFile = getUserLocalSettingsFileImpl();
     }
-
-    static WebFile _ulsf;
 
     /**
      * Returns the settings file.
      */
     private static WebFile getUserLocalSettingsFileImpl()
     {
-        File dir = getHomeDir(true);
+        // Get native settings file
+        File dir = FileUtils.getUserHomeDir("SnapCode", true);
         File file = new File(dir, "SnapUserLocal.settings");
-        WebURL url = WebURL.getURL(file);
-        WebFile dfile = url.getFile();
-        if (dfile == null) dfile = url.createFile(false);
-        return dfile;
-    }
 
-    /**
-     * Returns the SnapCode directory in user's home directory.
-     */
-    public static File getHomeDir(boolean doCreate)
-    {
-        return FileUtils.getUserHomeDir("SnapCode", doCreate);
+        // Get URL and web file
+        WebURL settingsFileURL = WebURL.getURL(file);
+        WebFile settingsFile = settingsFileURL.getFile();
+        if (settingsFile == null)
+            settingsFile = settingsFileURL.createFile(false);
+
+        // Return
+        return settingsFile;
     }
 
     /**
@@ -149,8 +148,9 @@ public class ClientUtils {
     {
         List<Map> ksMaps = getKnownSitesMaps(false);
         if (ksMaps == null) return Collections.emptyList();
-        List<String> ksNames = new ArrayList(ksMaps.size());
-        for (Map map : ksMaps) ksNames.add((String) map.get("URL"));
+        List<String> ksNames = new ArrayList<>(ksMaps.size());
+        for (Map map : ksMaps)
+            ksNames.add((String) map.get("URL"));
         return ksNames;
     }
 
@@ -160,12 +160,14 @@ public class ClientUtils {
     private static Map getKnownSiteMap(String aURL, boolean doCreate)
     {
         List<Map> maps = getKnownSitesMaps(doCreate);
-        if (maps == null) return null;
+        if (maps == null)
+            return null;
+
         for (Map map : maps)
             if (StringUtils.equalsIC(aURL, (String) map.get("URL")))
                 return map;
         if (doCreate) {
-            Map map = new HashMap();
+            Map map = new HashMap<>();
             map.put("URL", aURL);
             maps.add(map);
             return map;
