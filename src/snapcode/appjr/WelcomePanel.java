@@ -22,7 +22,8 @@ public class WelcomePanel extends ViewOwner {
     private static WelcomePanel _shared;
 
     // Constants
-    public static final String JAVA_FILE_EXT = "jepl";
+    public static final String JAVA_FILE_EXT = "java";
+    public static final String JEPL_FILE_EXT = "jepl";
 
     /**
      * Constructor.
@@ -107,13 +108,10 @@ public class WelcomePanel extends ViewOwner {
         if (anEvent.equals("NewButton"))
             newFile(false);
 
-        // Handle OpenPanelButton
-        //if (anEvent.equals("OpenPanelButton")) showOpenPanel();
-
         // Handle OpenButton
         if (anEvent.equals("OpenButton")) {
             WebFile selFile = _filePanel.getSelFile();
-            openWorkspaceForJeplFileSource(selFile);
+            openWorkspaceForJavaOrJeplFileSource(selFile);
         }
 
         // Handle QuitButton
@@ -131,26 +129,11 @@ public class WelcomePanel extends ViewOwner {
     protected void newFile(boolean showSamples)
     {
         // Show jepl
-        WorkspacePane workspacePane = openWorkspaceForJeplFileSource(null);
+        WorkspacePane workspacePane = openWorkspaceForJavaOrJeplFileSource(null);
 
         if (showSamples)
             runLaterDelayed(300, () -> workspacePane.getWorkspaceTools().showSamples());
         else runLater(() -> workspacePane.getWorkspaceTools().startSamplesButtonAnim());
-    }
-
-    /**
-     * Runs the open panel.
-     */
-    public void showOpenPanel()
-    {
-        // Get path from open panel for supported file extensions
-        String[] extensions = { JAVA_FILE_EXT };
-        WebFile selFile = FilePanel.showOpenFilePanel(getUI(), "Snap Java File", extensions);
-        if (selFile == null)
-            return;
-
-        // Show jepl
-        openWorkspaceForJeplFileSource(selFile);
     }
 
     /**
@@ -169,7 +152,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Create/config FilePanel
         FilePanel filePanel = new FilePanel();
-        String[] EXTENSIONS = { JAVA_FILE_EXT };
+        String[] EXTENSIONS = { JAVA_FILE_EXT, JEPL_FILE_EXT };
         filePanel.setTypes(EXTENSIONS);
         filePanel.setSelSite(recentFilesSite);
         filePanel.setActionHandler(e -> WelcomePanel.this.fireActionEventForObject("OpenButton", e));
@@ -179,11 +162,11 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
-     * Opens a Jepl Workspace.
+     * Opens a Workspace for given Java/Jepl file source.
      */
-    protected WorkspacePane openWorkspaceForJeplFileSource(Object aSource)
+    protected WorkspacePane openWorkspaceForJavaOrJeplFileSource(Object aSource)
     {
-        // Create WorkspacePane, set Jepl source, show
+        // Create WorkspacePane, set source, show
         WorkspacePane workspacePane = new WorkspacePane();
         workspacePane.setWorkspaceForJeplFileSource(aSource);
         workspacePane.show();

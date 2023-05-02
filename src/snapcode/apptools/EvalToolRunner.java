@@ -3,9 +3,9 @@
  */
 package snapcode.apptools;
 import javakit.ide.JavaTextPane;
-import javakit.parse.JeplTextDoc;
+import javakit.parse.JavaTextDoc;
 import javakit.project.BuildIssue;
-import javakit.project.JeplAgent;
+import javakit.project.JavaAgent;
 import javakit.runner.JavaShell;
 import snap.view.*;
 import snapcode.webbrowser.WebPage;
@@ -54,15 +54,6 @@ public class EvalToolRunner {
     }
 
     /**
-     * Returns the current JavaTextDoc.
-     */
-    public JeplTextDoc getJeplDoc()
-    {
-        JavaTextPane<?> javaTextPane = getJavaTextPane();
-        return (JeplTextDoc) javaTextPane.getTextDoc();
-    }
-
-    /**
      * Called to update when textView changes.
      */
     public void runApp()
@@ -97,25 +88,25 @@ public class EvalToolRunner {
         EvalView display = _evalTool._evalView;
         _javaShell.setClient(display);
 
-        // Get JeplTextDoc, JeplAgent
-        JeplTextDoc jeplDoc = getJeplDoc();
-        JeplAgent jeplAgent = jeplDoc.getAgent();
+        // Get JavaTextDoc, JavaAgent
+        JavaTextPane<?> javaTextPane = getJavaTextPane();
+        JavaTextDoc javaTextDoc = javaTextPane.getTextDoc();
+        JavaAgent javaAgent = javaTextDoc.getAgent();
 
         // Build file
-        boolean success = jeplAgent.buildFile();
+        boolean success = javaAgent.buildFile();
 
         // Notify EditPane of possible BuildIssue changes
-        JavaTextPane<?> javaTextPane = getJavaTextPane();
         javaTextPane.buildIssueOrBreakPointMarkerChanged();
 
         // If build failed, report errors
         if (!success) {
-            BuildIssue[] buildIssues = jeplAgent.getBuildIssues();
+            BuildIssue[] buildIssues = javaAgent.getBuildIssues();
             display.processOutput(buildIssues);
         }
 
         // If no errors, run
-        else _javaShell.runJavaCode(jeplDoc);
+        else _javaShell.runJavaCode(javaTextDoc);
 
         // Remove extended run ui
         ViewUtils.runLater(() -> _evalTool.setShowExtendedRunUI(false));

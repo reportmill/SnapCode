@@ -163,18 +163,26 @@ public class WebPage extends ViewOwner {
      */
     public String getTitle()
     {
-        // Get file name and path
+        // Title is at least the file name
         WebURL pageURL = getURL();
-        String filePath = pageURL.getPath();
         String filename = pageURL.getFilename();
+        String title = filename;
+
+        // Get file name and path
+        String filePath = pageURL.getPath();
         filePath = filePath.substring(0, filePath.length() - filename.length() - 1);
+        if (filePath.length() > 0)
+            title += " - " + filePath;
 
         // Get Site.Name
         WebSite site = getSite();
-        String siteName = site.getName();
+        if (!(site instanceof FileSite)) {
+            String siteName = site.getName();
+            title += " - " + siteName;
+        }
 
         // Return
-        return filename + " - " + filePath + " - " + siteName;
+        return title;
     }
 
     /**
@@ -294,11 +302,6 @@ public class WebPage extends ViewOwner {
     {
         return getSite().createFileForPath(aPath, false);
     }
-
-    /**
-     * Returns a peer object, if this page was provided by another object.
-     */
-    public Object getPeer()  { return null; }
 
     /**
      * Standard toString implementation.

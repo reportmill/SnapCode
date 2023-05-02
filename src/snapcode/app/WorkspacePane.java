@@ -1,4 +1,5 @@
 package snapcode.app;
+import javakit.parse.JavaTextDoc;
 import javakit.parse.JeplTextDoc;
 import javakit.project.ProjectUtils;
 import javakit.project.Workspace;
@@ -111,7 +112,7 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
-     * Opens a Jepl Workspace.
+     * Opens a Workspace for Java/Jepl file source.
      */
     public void setWorkspaceForJeplFileSource(Object aSource)
     {
@@ -119,9 +120,9 @@ public class WorkspacePane extends ViewOwner {
         if (aSource == null)
             ProjectUtils.deleteTempProject();
 
-        // Get JeplDoc and source file for source
-        JeplTextDoc jeplDoc = JeplTextDoc.getJeplTextDocForSourceURL(aSource);
-        WebFile sourceFile = jeplDoc.getSourceFile();
+        // Get JavaTextDoc and source file for source
+        JavaTextDoc javaTextDoc = JeplTextDoc.getJeplTextDocForSourceURL(aSource);
+        WebFile sourceFile = javaTextDoc.getSourceFile();
 
         // If no source, save file
         if (aSource == null) {
@@ -136,7 +137,8 @@ public class WorkspacePane extends ViewOwner {
         }
 
         // Configure doc
-        JeplUtils.configureJeplDocProject(jeplDoc);
+        if (javaTextDoc instanceof JeplTextDoc)
+            JeplUtils.configureJeplDocProject((JeplTextDoc) javaTextDoc);
 
         // Get project/workspace
         Project project = Project.getProjectForFile(sourceFile);

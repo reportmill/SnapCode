@@ -143,6 +143,7 @@ public class PagePane extends ViewOwner {
         // Fire prop change
         firePropChange(SelFile_Prop, oldSelFile, _selFile);
         resetLater();
+        _workspacePane.resetLater();
     }
 
     /**
