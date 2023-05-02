@@ -79,6 +79,10 @@ public class WelcomePanel extends ViewOwner {
         _filePanel = createOpenPanel();
         View filePanelUI = _filePanel.getUI();
         filePanelUI.setGrowHeight(true);
+        _filePanel.addPropChangeListener(pc -> {
+            boolean minimize = !(_filePanel.getSelSite() instanceof RecentFilesSite);
+            setTopGraphicMinimized(minimize);
+        }, FilePanel.SelSite_Prop);
 
         // Add FilePanel.UI to ColView
         ColView topColView = (ColView) getUI();
@@ -185,21 +189,66 @@ public class WelcomePanel extends ViewOwner {
     {
         // Unarchive WelcomePaneAnim.snp as DocView
         WebURL url = WebURL.getURL(WelcomePanel.class, "WelcomePanelAnim.snp");
-        ChildView doc = (ChildView) new ViewArchiver().getViewForSource(url);
+        ChildView topGraphic = (ChildView) new ViewArchiver().getViewForSource(url);
 
         // Get page and clear border/shadow
-        ParentView page = (ParentView) doc.getChild(2);
+        ParentView page = (ParentView) topGraphic.getChild(2);
         page.setBorder(null);
         page.setFill(null);
         page.setEffect(null);
 
         // Set BuildText and JavaText
-        View buildText = doc.getChildForName("BuildText");
-        View jvmText = doc.getChildForName("JVMText");
+        View buildText = topGraphic.getChildForName("BuildText");
+        View jvmText = topGraphic.getChildForName("JVMText");
         buildText.setText("Build: " + SnapUtils.getBuildInfo());
-        jvmText.setText("JVM: " + System.getProperty("java.runtime.version"));
+        jvmText.setText("JVM: " + (SnapUtils.isTeaVM ? "TeaVM" : System.getProperty("java.runtime.version")));
+
+        // Configure TopGraphic to call setTopGraphicMinimized() on click
+        topGraphic.addEventHandler(e -> setTopGraphicMinimized(!isTopGraphicMinimized()), View.MouseRelease);
 
         // Return
-        return doc;
+        return topGraphic;
+    }
+
+    /**
+     * Returns whether top graphic is minimized.
+     */
+    private boolean isTopGraphicMinimized()
+    {
+        ChildView mainView = getUI(ChildView.class);
+        View topGraphic = mainView.getChild(0);
+        return topGraphic.getHeight() < 200;
+    }
+
+    /**
+     * Toggles the top graphic.
+     */
+    private void setTopGraphicMinimized(boolean aValue)
+    {
+        // Just return if already set
+        if (aValue == isTopGraphicMinimized()) return;
+
+        // Get TopGraphic
+        ChildView mainView = getUI(ChildView.class);
+        ChildView topGraphic = (ChildView) mainView.getChild(0);
+
+        // Show/hide views below the minimize size
+        topGraphic.getChild(2).setVisible(!aValue);
+        ColView topGraphicColView = (ColView) topGraphic.getChild(1);
+        for (int i = 2; i < topGraphicColView.getChildCount(); i++)
+            topGraphicColView.getChild(i).setVisible(!aValue);
+
+        // Handle Minimize: Size PrefHeight down
+        if (aValue)
+            topGraphic.getAnimCleared(600).setPrefHeight(140);
+
+        // Handle normal: Size PrefHeight up
+        else {
+            topGraphic.setClipToBounds(true);
+            topGraphic.getAnimCleared(600).setPrefHeight(240);
+        }
+
+        // Start anim
+        topGraphic.playAnimDeep();
     }
 }
