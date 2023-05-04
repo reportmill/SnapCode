@@ -149,7 +149,7 @@ public class EvalTool extends WorkspaceTool {
         // Set RunButton, DeleteButton image
         getView("RunButton", ButtonBase.class).setImageAfter(getImage("pkg.images/Run.png"));
         getView("RunButton", ButtonBase.class).getLabel().setTextFill(Color.GRAY);
-        getView("DeleteButton", ButtonBase.class).setImage(Image.get(TextPane.class, "pkg.images/Edit_Delete.png"));
+        getView("DeleteButton", ButtonBase.class).setImage(Image.getImageForClassResource(TextPane.class, "pkg.images/Edit_Delete.png"));
 
         // Get ExtendedRunView
         _extendedRunView = getView("ExtendedRunView");

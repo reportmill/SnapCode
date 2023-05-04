@@ -87,7 +87,7 @@ public class WebBrowserPanes {
             superUI.setMaxSize(1024 * sc, 768 * sc);
 
             // Get background image
-            Image image = Image.get(getClass(), "IPadMini.png");
+            Image image = Image.getImageForClassResource(getClass(), "IPadMini.png");
             ImageView iview = new ImageView(image); //iview.setFitWidth(1289*scale); iview.setFitHeight(870*scale);
 
             // Install in StackView

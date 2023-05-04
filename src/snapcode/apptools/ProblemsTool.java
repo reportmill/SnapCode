@@ -18,8 +18,8 @@ public class ProblemsTool extends WorkspaceTool {
     private BuildIssue  _selIssue;
 
     // Constants
-    private static Image ErrorImage = Image.get(JavaTextUtils.class, "ErrorMarker.png");
-    private static Image WarningImage = Image.get(JavaTextUtils.class, "WarningMarker.png");
+    private static Image ErrorImage = Image.getImageForClassResource(JavaTextUtils.class, "ErrorMarker.png");
+    private static Image WarningImage = Image.getImageForClassResource(JavaTextUtils.class, "WarningMarker.png");
 
     /**
      * Constructor.

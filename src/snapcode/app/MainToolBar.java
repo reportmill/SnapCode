@@ -53,7 +53,7 @@ public class MainToolBar extends WorkspaceTool {
         TextField searchText = searchComboBox.getTextField();
         searchText.setBorderRadius(8);
         searchText.setPromptText("Search");
-        searchText.getLabel().setImage(Image.get(TextPane.class, "Find.png"));
+        searchText.getLabel().setImage(Image.getImageForClassResource(TextPane.class, "Find.png"));
         TextField.setBackLabelAlignAnimatedOnFocused(searchText, true);
     }
 

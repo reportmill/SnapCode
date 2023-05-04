@@ -32,8 +32,8 @@ public class FileTreeTool extends WorkspaceTool {
     protected List<FileTreeFile>  _rootFiles;
 
     // Images for files tree/list
-    private static Image FILES_TREE_ICON = Image.get(FileTreeTool.class, "FilesTree.png");
-    private static Image FILES_LIST_ICON = Image.get(FileTreeTool.class, "FilesList.png");
+    private static Image FILES_TREE_ICON = Image.getImageForClassResource(FileTreeTool.class, "FilesTree.png");
+    private static Image FILES_LIST_ICON = Image.getImageForClassResource(FileTreeTool.class, "FilesList.png");
 
     /**
      * Constructor.

@@ -27,8 +27,8 @@ public class SnapActor extends ImageView {
         if (getClass() != SnapActor.class)
             setName(getClass().getSimpleName());
 
-        Image img = Image.get(getClass(), getName() + ".png");
-        if (img == null) img = Image.get(getClass(), "images/" + getName() + ".png");
+        Image img = Image.getImageForClassResource(getClass(), getName() + ".png");
+        if (img == null) img = Image.getImageForClassResource(getClass(), "images/" + getName() + ".png");
         if (img != null) {
             setImage(img);
             setSize(img.getWidth(), img.getHeight());

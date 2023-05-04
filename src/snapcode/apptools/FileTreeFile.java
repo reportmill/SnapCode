@@ -43,8 +43,8 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
     public enum FileType { PLAIN, PACKAGE_DIR, SOURCE_DIR }
 
     // Icons
-    private static Image ErrorBadge = Image.get(FileTreeFile.class, "ErrorBadge.png");
-    private static Image WarningBadge = Image.get(FileTreeFile.class, "WarningBadge.png");
+    private static Image ErrorBadge = Image.getImageForClassResource(FileTreeFile.class, "ErrorBadge.png");
+    private static Image WarningBadge = Image.getImageForClassResource(FileTreeFile.class, "WarningBadge.png");
     private static Image Package = JavaTextUtils.PackageImage;
 
     /**

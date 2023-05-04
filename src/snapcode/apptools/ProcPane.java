@@ -41,9 +41,9 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     private int  _procLimit = 1;
 
     // Images
-    public static Image ProcImage = Image.get(ProcPane.class, "Process.png");
-    public static Image ThreadImage = Image.get(ProcPane.class, "Thread.png");
-    public static Image StackFrameImage = Image.get(ProcPane.class, "StackFrame.png");
+    public static Image ProcImage = Image.getImageForClassResource(ProcPane.class, "Process.png");
+    public static Image ThreadImage = Image.getImageForClassResource(ProcPane.class, "Thread.png");
+    public static Image StackFrameImage = Image.getImageForClassResource(ProcPane.class, "StackFrame.png");
 
     /**
      * Creates a new ProcPane.

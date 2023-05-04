@@ -26,12 +26,12 @@ public class VcsTransferPane extends ViewOwner {
     private String  _commitMsg;
 
     // Images
-    static Image AddedLocalBadge = Image.get(VcsTransferPane.class, "AddedLocalBadge.png");
-    static Image RemovedLocalBadge = Image.get(VcsTransferPane.class, "RemovedLocalBadge.png");
-    static Image UpdatedLocalBadge = Image.get(VcsTransferPane.class, "UpdatedLocalBadge.png");
-    static Image AddedRemoteBadge = Image.get(VcsTransferPane.class, "AddedRemoteBadge.png");
-    static Image RemovedRemoteBadge = Image.get(VcsTransferPane.class, "RemovedRemoteBadge.png");
-    static Image UpdatedRemoteBadge = Image.get(VcsTransferPane.class, "UpdatedRemoteBadge.png");
+    static Image AddedLocalBadge = Image.getImageForClassResource(VcsTransferPane.class, "AddedLocalBadge.png");
+    static Image RemovedLocalBadge = Image.getImageForClassResource(VcsTransferPane.class, "RemovedLocalBadge.png");
+    static Image UpdatedLocalBadge = Image.getImageForClassResource(VcsTransferPane.class, "UpdatedLocalBadge.png");
+    static Image AddedRemoteBadge = Image.getImageForClassResource(VcsTransferPane.class, "AddedRemoteBadge.png");
+    static Image RemovedRemoteBadge = Image.getImageForClassResource(VcsTransferPane.class, "RemovedRemoteBadge.png");
+    static Image UpdatedRemoteBadge = Image.getImageForClassResource(VcsTransferPane.class, "UpdatedRemoteBadge.png");
 
     /**
      * Show panel.

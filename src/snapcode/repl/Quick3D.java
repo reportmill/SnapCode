@@ -63,7 +63,7 @@ public class Quick3D {
         // Create texture
         Image image = anImage;
         if (image == null)
-            image = Image.get("https://reportmill.com/examples/Weird.jpg");
+            image = Image.getImageForSource("https://reportmill.com/examples/Weird.jpg");
         if (!SnapUtils.isTeaVM)
             image = image.getImageScaled(1);
         Texture texture = new Texture(image);

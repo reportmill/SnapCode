@@ -104,7 +104,7 @@ public class QuickData {
             return null;
 
         // Get image for URL and return
-        Image image = Image.get(url);
+        Image image = Image.getImageForSource(url);
         return image;
     }
 
