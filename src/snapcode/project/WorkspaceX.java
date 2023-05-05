@@ -30,7 +30,7 @@ public class WorkspaceX extends Workspace {
     {
         // Get all project ClassPath URLs
         String[] classPaths = getClassPaths();
-        URL[] urls = FilePathUtils.getURLs(classPaths);
+        URL[] urls = FilePathUtils.getUrlsForPaths(classPaths);
 
         // Get System ClassLoader
         ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader().getParent();

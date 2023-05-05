@@ -2,6 +2,7 @@ package snapcode.apptools;
 import javakit.project.Project;
 import javakit.project.WorkspaceBuilder;
 import snap.util.ArrayUtils;
+import snap.util.FilePathUtils;
 import snap.util.FileUtils;
 import snap.util.StringUtils;
 import snap.view.View;
@@ -31,43 +32,15 @@ public class FilesTool extends WorkspaceTool {
     }
 
     /**
-     * Runs a panel for a new file (Java, JFX, Swing, table, etc.).
+     * Runs a panel for a new file (Java, Jepl, snp, etc.).
      */
     public void showNewFilePanel()
     {
-        // Get new FormBuilder and configure
-        FormBuilder form = new FormBuilder();
-        form.setPadding(20, 5, 15, 5);
-        form.addLabel("Select file type:           ").setFont(new snap.gfx.Font("Arial", 24));
-        form.setSpacing(15);
-
-        // Define options
-        String[][] options = {
-            { "Java Programming File", ".java" },
-            { "SnapKit UI File", ".snp" },
-            { "Directory", ".dir" },
-            { "Sound File", ".wav" },
-            { "ReportMill\u2122 Report Template", ".rpt" }
-        };
-
-        // Add and configure radio buttons
-        for (int i = 0; i < options.length; i++) {
-            String option = options[i][0];
-            form.addRadioButton("EntryType", option, i == 0);
-        }
-
-        // Run dialog panel (just return if null)
+        // Run dialog panel for extension
         View workspacePaneUI = _workspacePane.getUI();
-        if (!form.showPanel(workspacePaneUI, "New Project File", DialogBox.infoImage))
+        String extension = showNewFileExtensionPanel(workspacePaneUI);
+        if (extension == null)
             return;
-
-        // Select type and extension
-        String desc = form.getStringValue("EntryType");
-        int index = ArrayUtils.findMatchIndex(options, optionInfo -> desc.equals(optionInfo[0]));
-        String extension = options[index][1];
-        boolean isDir = extension.equals(".dir");
-        if (isDir)
-            extension = "";
 
         // Get source dir
         WebSite selSite = getSelSite();
@@ -81,27 +54,41 @@ public class FilesTool extends WorkspaceTool {
         // Get suggested "Untitled.xxx" path for SelDir and extension
         String path = selDir.getDirPath() + "Untitled" + extension;
 
-        // Create suggested file and page
-        WebFile file = selSite.createFileForPath(path, isDir);
-        WebPage page = _pagePane.createPageForURL(file.getURL());
-
-        // ShowNewFilePanel (just return if cancelled)
-        file = page.showNewFilePanel(workspacePaneUI, file);
-        if (file == null)
-            return;
-
-        // Save file
-        try { file.save(); }
-        catch (Exception e) {
-            _pagePane.showException(file.getURL(), e);
-            return;
-        }
+        // Create file
+        WebFile file = createFileForPath(path, workspacePaneUI);
 
         // Select file
         setSelFile(file);
 
         // Hide RightTray
         _workspaceTools.getRightTray().setSelTool(null);
+    }
+
+    /**
+     * Creates a file for given path.
+     */
+    public WebFile createFileForPath(String aPath, View aView)
+    {
+        // Create suggested file and page
+        boolean isDir = FilePathUtils.getExtension(aPath).length() == 0;
+        WebSite selSite = getSelSite();
+        WebFile file = selSite.createFileForPath(aPath, isDir);
+        WebPage page = _pagePane.createPageForURL(file.getURL());
+
+        // ShowNewFilePanel (just return if cancelled)
+        file = page.showNewFilePanel(aView, file);
+        if (file == null)
+            return null;
+
+        // Save file
+        try { file.save(); }
+        catch (Exception e) {
+            _pagePane.showException(file.getURL(), e);
+            return null;
+        }
+
+        // Return
+        return file;
     }
 
     /**
@@ -380,5 +367,47 @@ public class FilesTool extends WorkspaceTool {
 
         // Update tree again
         setSelFile(parent);
+    }
+
+    /**
+     * Runs a panel for a new file extension (Java, Jepl, snp, etc.).
+     */
+    public static String showNewFileExtensionPanel(View aView)
+    {
+        // Get new FormBuilder and configure
+        FormBuilder form = new FormBuilder();
+        form.setPadding(20, 5, 15, 5);
+        form.addLabel("Select file type:           ").setFont(new snap.gfx.Font("Arial", 24));
+        form.setSpacing(15);
+
+        // Define options
+        String[][] options = {
+                {"Java Programming File", ".java"},
+                {"SnapKit UI File", ".snp"},
+                {"Directory", ".dir"},
+                {"Sound File", ".wav"},
+                {"ReportMill\u2122 Report Template", ".rpt"}
+        };
+
+        // Add and configure radio buttons
+        for (int i = 0; i < options.length; i++) {
+            String option = options[i][0];
+            form.addRadioButton("EntryType", option, i == 0);
+        }
+
+        // Run dialog panel (just return if null)
+        if (!form.showPanel(aView, "New Project File", DialogBox.infoImage))
+            return null;
+
+        // Select type and extension
+        String desc = form.getStringValue("EntryType");
+        int index = ArrayUtils.findMatchIndex(options, optionInfo -> desc.equals(optionInfo[0]));
+        String extension = options[index][1];
+        boolean isDir = extension.equals(".dir");
+        if (isDir)
+            extension = "";
+
+        // Return
+        return extension;
     }
 }

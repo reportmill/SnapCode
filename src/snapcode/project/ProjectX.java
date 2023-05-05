@@ -63,7 +63,7 @@ public class ProjectX extends Project {
     {
         // Get CompilerClassPaths and ClassPathUrls
         String[] classPaths = getCompilerClassPaths();
-        URL[] classPathUrls = FilePathUtils.getURLs(classPaths);
+        URL[] classPathUrls = FilePathUtils.getUrlsForPaths(classPaths);
 
         // Get System ClassLoader
         ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader().getParent();
