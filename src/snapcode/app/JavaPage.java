@@ -13,7 +13,6 @@ import snap.view.View;
 import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
-import snap.web.WebResponse;
 import snap.web.WebURL;
 import java.util.List;
 import java.util.Objects;
@@ -72,9 +71,6 @@ public class JavaPage extends WebPage implements WebFile.Updater {
      */
     protected void initUI()
     {
-        // Do normal version
-        super.initUI();
-
         // Create JavaTextDoc
         WebFile javaFile = getFile();
         JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForSource(javaFile);
@@ -83,6 +79,16 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         JavaTextArea javaTextArea = getTextArea();
         javaTextArea.setTextDoc(javaTextDoc);
         setFirstFocus(javaTextArea);
+    }
+
+    /**
+     * Override to update selection from URL.
+     */
+    @Override
+    protected void initShowing()
+    {
+        WebURL url = getURL();
+        setTextSelectionForUrlParams(url);
     }
 
     /**
@@ -105,21 +111,14 @@ public class JavaPage extends WebPage implements WebFile.Updater {
      * Override to set parameters.
      */
     @Override
-    public void setResponse(WebResponse aResp)
+    public void setURL(WebURL aURL)
     {
         // Do normal version
-        super.setResponse(aResp);
-
-        // If no real file, just return
-        if (getFile() == null)
-            return;
-
-        // Load UI
-        getUI();
+        super.setURL(aURL);
 
         // Set selection
-        WebURL url = aResp.getURL();
-        setTextSelectionForUrlParams(url);
+        if (isUISet())
+            setTextSelectionForUrlParams(aURL);
     }
 
     /**
