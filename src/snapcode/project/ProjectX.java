@@ -14,7 +14,7 @@ import java.net.URLClassLoader;
  */
 public class ProjectX extends Project {
 
-    // A class to read .classpath file
+    // An object to read ProjectConfig properties to/from project config file
     private ProjectConfigFile  _projConfigFile;
 
     /**
@@ -30,7 +30,7 @@ public class ProjectX extends Project {
     }
 
     /**
-     * Override to create ProjectConfig from .classpath file.
+     * Override to create ProjectConfig from project config file.
      */
     @Override
     protected ProjectConfig createProjectConfig()
@@ -45,7 +45,7 @@ public class ProjectX extends Project {
     @Override
     protected boolean isConfigFile(WebFile aFile)
     {
-        WebFile configFile = _projConfigFile.getFile();
+        WebFile configFile = _projConfigFile.getConfigFile();
         return aFile == configFile;
     }
 
