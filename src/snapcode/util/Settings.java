@@ -71,17 +71,23 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
     private void readFile()
     {
         _fileBytes = _file.getBytes();
-        if (_fileBytes == null) return;
+        if (_fileBytes == null)
+            return;
         _map.clear();
-        JSArchiver archiver = new JSArchiver().addImport("snap.util.*").setRootObject(this);
-        String string = StringUtils.getString(_file.getBytes());
-        string = string.replace("SnapSettings", "Settings");
-        try {
-            archiver.readString(string);
-        }
-        catch (Exception e) {
-            System.err.println("Settings.createSettings: Couldn't read bytes");
-        }
+
+        // Get/configure archiver
+        JSArchiver archiver = new JSArchiver();
+        archiver.addImport("snap.util.*");
+        archiver.setRootObject(this);
+
+        // Get JSON string
+        String jsonStr = StringUtils.getString(_fileBytes);
+        jsonStr = jsonStr.replace("SnapSettings", "Settings");
+        jsonStr = jsonStr.replace("snap.util.Settings", "snapcode.util.Settings");
+
+        // Read JSON string
+        try { archiver.readString(jsonStr); }
+        catch (Exception e) { System.err.println("Settings.createSettings: Couldn't read bytes"); }
     }
 
     /**
