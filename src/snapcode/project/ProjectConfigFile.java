@@ -1,7 +1,6 @@
 package snapcode.project;
 import javakit.project.Project;
 import javakit.project.ProjectConfig;
-import snap.props.Prop;
 import snap.props.PropArchiverJS;
 import snap.util.JSObject;
 import snap.web.WebFile;
@@ -65,15 +64,8 @@ public class ProjectConfigFile {
 
         // Read ProjectConfig from JSON
         PropArchiverJS archiver = new PropArchiverJS();
-        ProjectConfig projectConfig = (ProjectConfig) archiver.readPropObjectFromJSONString(jsonStr);
-
-        // Copy to existing ProjConfig
-        Prop[] props = projectConfig.getPropsForArchival();
-        for (Prop prop : props) {
-            String propName = prop.getName();
-            Object newValue = projectConfig.getPropValue(propName);
-            _projConfig.setPropValue(propName, newValue);
-        }
+        archiver.setRootObject(_projConfig);
+        archiver.readPropObjectFromJSONString(jsonStr);
     }
 
     /**
