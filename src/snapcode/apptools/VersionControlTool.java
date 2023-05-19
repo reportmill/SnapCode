@@ -1,7 +1,10 @@
 package snapcode.apptools;
 import javakit.project.Project;
 import javakit.project.WorkspaceBuilder;
-import snapcode.app.WorkspaceTool;
+import snap.props.PropChange;
+import snapcode.app.ProjectPane;
+import snapcode.app.ProjectTool;
+import snapcode.app.WorkspaceTools;
 import snapcode.project.VersionControl;
 import snapcode.webbrowser.ClientUtils;
 import snap.util.TaskMonitor;
@@ -21,61 +24,45 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Manages VersionControl operations in application.
+ * This ProjectTool subclass manages version control for project.
  */
-public class VcsPane extends WorkspaceTool {
-
-    // The VcsTools
-    private VcsTools  _vscTools;
-
-    // The site
-    private WebSite  _site;
+public class VersionControlTool extends ProjectTool {
 
     // The VersionControl
-    private VersionControl  _vc;
+    private VersionControl _versionControl;
 
     // The WebBrowser for remote files
-    private WebBrowser  _remoteBrowser;
+    private WebBrowser _remoteBrowser;
 
     /**
-     * Creates new VersionControl.
+     * Constructor.
      */
-    public VcsPane(VcsTools vcsTools)
+    public VersionControlTool(ProjectPane projectPane)
     {
-        super(vcsTools.getWorkspacePane());
+        super(projectPane);
 
-        _vscTools = vcsTools;
-        _site = getRootSite();
-        _site.setProp(VcsPane.class.getName(), this);
-        _vc = VersionControl.get(_site);
+        // Get VersionControl for project site
+        WebSite projectSite = getProjectSite();
+        _versionControl = VersionControl.getVersionControlForProjectSite(projectSite);
 
         // Add listener to update FilesPane.FilesTree when file status changed
-        _vc.addPropChangeListener(pc -> {
-            WebFile file = (WebFile) pc.getSource();
-            FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
-            fileTreeTool.updateChangedFile(file);
-        });
+        _versionControl.addPropChangeListener(pc -> versionControlFileStatusChanged(pc));
     }
-
-    /**
-     * Returns the project site.
-     */
-    public WebSite getSite()  { return _site; }
 
     /**
      * Returns the VersionControl.
      */
-    public VersionControl getVC()  { return _vc; }
+    public VersionControl getVC()  { return _versionControl; }
 
     /**
      * Returns the remote site.
      */
-    private WebSite getRemoteSite()  { return _vc.getRemoteSite(); }
+    private WebSite getRemoteSite()  { return _versionControl.getRemoteSite(); }
 
     /**
      * Returns the repository site.
      */
-    private WebSite getRepoSite()  { return _vc.getRepoSite(); }
+    private WebSite getRepoSite()  { return _versionControl.getRepoSite(); }
 
     /**
      * Initialize UI panel.
@@ -92,9 +79,6 @@ public class VcsPane extends WorkspaceTool {
 
         // Makes changes to RemoteBrowser update VerConPane
         _remoteBrowser.addPropChangeListener(e -> resetLater());
-
-        // Layout
-        //pane.layoutChildren();
     }
 
     /**
@@ -103,7 +87,7 @@ public class VcsPane extends WorkspaceTool {
     public void resetUI()
     {
         // Update RemoteURLText
-        setViewValue("RemoteURLText", _vc.getRemoteURLString());
+        setViewValue("RemoteURLText", _versionControl.getRemoteURLString());
 
         // Update ProgressBar
         ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
@@ -119,7 +103,7 @@ public class VcsPane extends WorkspaceTool {
     {
         // Handle RemoteURLText
         if (anEvent.equals("RemoteURLText"))
-            _vscTools.setRemoteURLString(anEvent.getStringValue());
+            _projPane.setRemoteURLString(anEvent.getStringValue());
 
         // Handle ConnectButton
         if (anEvent.equals("ConnectButton")) {
@@ -151,12 +135,12 @@ public class VcsPane extends WorkspaceTool {
     }
 
     /**
-     * Called to activate version control for project.
+     * Called when project is opened to activate version control for project.
      */
-    public void openSite()
+    public void projectDidOpen()
     {
-        if (_vc.getExists()) return;
-        if (_vc.getRemoteURL() == null) return;
+        if (_versionControl.getExists()) return;
+        if (_versionControl.getRemoteURL() == null) return;
 
         String msg = "Do you want to load remote files into project directory?";
         DialogBox dialogBox = new DialogBox("Checkout Project Files");
@@ -174,7 +158,8 @@ public class VcsPane extends WorkspaceTool {
     public void deactivate()
     {
         try {
-            _vc.disconnect(new TaskMonitor.Text(System.out));
+            TaskMonitor taskMonitor = new TaskMonitor.Text(System.out);
+            _versionControl.disconnect(taskMonitor);
         }
 
         catch (Exception e) {
@@ -189,7 +174,7 @@ public class VcsPane extends WorkspaceTool {
      */
     public void checkout()
     {
-        TaskRunner<?> runner = new TaskRunnerPanel(_workspacePane.getUI(), "Checkout from " + _vc.getRemoteURLString()) {
+        TaskRunner<?> runner = new TaskRunnerPanel<>(_workspacePane.getUI(), "Checkout from " + _versionControl.getRemoteURLString()) {
             boolean _oldAutoBuildEnabled;
 
             public Object run() throws Exception
@@ -197,10 +182,11 @@ public class VcsPane extends WorkspaceTool {
                 WorkspaceBuilder builder = _workspace.getBuilder();
                 _oldAutoBuildEnabled = builder.setAutoBuildEnabled(false);
 
-                WebFile rootDir = getSite().getRootDir();
+                WebSite projectSite = getProjectSite();
+                WebFile rootDir = projectSite.getRootDir();
                 if (!rootDir.getExists())
                     rootDir.save(); // So refresh will work later
-                _vc.checkout(this);
+                _versionControl.checkout(this);
                 return null;
             }
 
@@ -229,8 +215,9 @@ public class VcsPane extends WorkspaceTool {
      */
     protected void checkoutSuccess(boolean oldAutoBuildEnabled)
     {
-        getSite().getRootDir().reload();
-        Project proj = Project.getProjectForSite(getSite());
+        WebSite projectSite = getProjectSite();
+        projectSite.getRootDir().reload();
+        Project proj = Project.getProjectForSite(projectSite);
         if (proj != null)
             proj.readSettings();
 
@@ -251,7 +238,7 @@ public class VcsPane extends WorkspaceTool {
      */
     public void commitFiles(List<WebFile> theFiles)
     {
-        if (!_vc.getExists()) {
+        if (!_versionControl.getExists()) {
             beep();
             return;
         }
@@ -278,7 +265,7 @@ public class VcsPane extends WorkspaceTool {
 
         try {
             for (WebFile file : fromFiles)
-                _vc.getCommitFiles(file, commitFiles);
+                _versionControl.getCommitFiles(file, commitFiles);
         }
 
         catch (AccessException e) {
@@ -298,17 +285,18 @@ public class VcsPane extends WorkspaceTool {
     protected void commitFilesImpl(final List<WebFile> theFiles, final String aMessage)
     {
         // Create TaskRunner and start
-        new TaskRunnerPanel(_workspacePane.getUI(), "Commit files to remote site") {
+        TaskRunnerPanel<?> taskRunnerPanel = new TaskRunnerPanel<>(_workspacePane.getUI(), "Commit files to remote site") {
             public Object run() throws Exception
             {
-                _vc.commitFiles(theFiles, aMessage, this);
+                _versionControl.commitFiles(theFiles, aMessage, this);
                 return null;
             }
 
             public void success(Object anObj)  { }
             public void failure(Exception e)  { super.failure(e); }
             public void finished() { }
-        }.start();
+        };
+        taskRunnerPanel.start();
     }
 
     /**
@@ -316,7 +304,7 @@ public class VcsPane extends WorkspaceTool {
      */
     public void updateFiles(List<WebFile> theFiles)
     {
-        if (!_vc.getExists()) {
+        if (!_versionControl.getExists()) {
             beep();
             return;
         }
@@ -342,7 +330,7 @@ public class VcsPane extends WorkspaceTool {
 
         try {
             for (WebFile file : fromFiles)
-                _vc.getUpdateFiles(file, xfiles);
+                _versionControl.getUpdateFiles(file, xfiles);
         }
 
         // Handle AccessException:
@@ -372,10 +360,10 @@ public class VcsPane extends WorkspaceTool {
         final boolean oldAutoBuild = _workspace.getBuilder().setAutoBuildEnabled(false);
 
         // Create TaskRunner and start
-        new TaskRunnerPanel(_workspacePane.getUI(), "Update files from remote site") {
+        TaskRunnerPanel<?> taskRunnerPanel = new TaskRunnerPanel<>(_workspacePane.getUI(), "Update files from remote site") {
             public Object run() throws Exception
             {
-                _vc.updateFiles(theFiles, this);
+                _versionControl.updateFiles(theFiles, this);
                 return null;
             }
 
@@ -400,7 +388,8 @@ public class VcsPane extends WorkspaceTool {
                 if (isUISet())
                     connectToRemoteSite();
             }
-        }.start();
+        };
+        taskRunnerPanel.start();
     }
 
     /**
@@ -408,7 +397,7 @@ public class VcsPane extends WorkspaceTool {
      */
     public void replaceFiles(List<WebFile> theFiles)
     {
-        if (!_vc.getExists()) {
+        if (!_versionControl.getExists()) {
             beep();
             return;
         }
@@ -433,7 +422,7 @@ public class VcsPane extends WorkspaceTool {
 
         try {
             for (WebFile file : fromFiles)
-                _vc.getReplaceFiles(file, replaceFiles);
+                _versionControl.getReplaceFiles(file, replaceFiles);
         }
 
         catch (AccessException e) {
@@ -455,10 +444,10 @@ public class VcsPane extends WorkspaceTool {
         // Create TaskRunner and start
         final boolean oldAutoBuild = _workspace.getBuilder().setAutoBuildEnabled(false);
 
-        new TaskRunnerPanel(_workspacePane.getUI(), "Replace files from remote site") {
+        TaskRunnerPanel<?> taskRunnerPanel = new TaskRunnerPanel<>(_workspacePane.getUI(), "Replace files from remote site") {
             public Object run() throws Exception
             {
-                _vc.replaceFiles(theFiles, this);
+                _versionControl.replaceFiles(theFiles, this);
                 return null;
             }
 
@@ -483,7 +472,8 @@ public class VcsPane extends WorkspaceTool {
                 if (isUISet())
                     connectToRemoteSite();
             }
-        }.start();
+        };
+        taskRunnerPanel.start();
     }
 
     /**
@@ -491,7 +481,7 @@ public class VcsPane extends WorkspaceTool {
      */
     public void fileAdded(WebFile aFile)
     {
-        _vc.fileAdded(aFile);
+        _versionControl.fileAdded(aFile);
     }
 
     /**
@@ -499,7 +489,7 @@ public class VcsPane extends WorkspaceTool {
      */
     public void fileRemoved(WebFile aFile)
     {
-        _vc.fileRemoved(aFile);
+        _versionControl.fileRemoved(aFile);
     }
 
     /**
@@ -507,7 +497,18 @@ public class VcsPane extends WorkspaceTool {
      */
     public void fileSaved(WebFile aFile)
     {
-        _vc.fileSaved(aFile);
+        _versionControl.fileSaved(aFile);
+    }
+
+    /**
+     * Called when VersionControl changes a file status.
+     */
+    private void versionControlFileStatusChanged(PropChange aPC)
+    {
+        WebFile file = (WebFile) aPC.getSource();
+        WorkspaceTools workspaceTools = getWorkspaceTools();
+        FileTreeTool fileTreeTool = workspaceTools.getFileTreeTool();
+        fileTreeTool.updateChangedFile(file);
     }
 
     /**
@@ -515,15 +516,7 @@ public class VcsPane extends WorkspaceTool {
      */
     private List<WebFile> getSiteRootDirAsList()
     {
-        WebFile rootDir = getSite().getRootDir();
+        WebFile rootDir = getProjectSite().getRootDir();
         return Collections.singletonList(rootDir);
-    }
-
-    /**
-     * Returns the VersionControlPane for given project.
-     */
-    public synchronized static VcsPane get(WebSite aSite)
-    {
-        return (VcsPane) aSite.getProp(VcsPane.class.getName());
     }
 }

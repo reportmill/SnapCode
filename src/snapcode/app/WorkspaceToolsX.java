@@ -32,7 +32,6 @@ public class WorkspaceToolsX extends WorkspaceTools {
         RunConsole runConsole = new RunConsole(_workspacePane);
         RunConfigsTool runConfigsTool = new RunConfigsTool(_workspacePane);
         HttpServerTool httpServerTool = new HttpServerTool(_workspacePane);
-        VcsTools vcsTools = new VcsTools(_workspacePane);
 
         // Create tools
         _tools = new WorkspaceTool[] {
@@ -40,7 +39,7 @@ public class WorkspaceToolsX extends WorkspaceTools {
                 problemsTool, breakpointsTool,
                 searchTool,
                 debugTool, runConsole, runConfigsTool,
-                httpServerTool, vcsTools
+                httpServerTool
         };
 
         // Create LeftTray

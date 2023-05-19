@@ -597,7 +597,7 @@ public class VersionControl {
     /**
      * Returns the VersionControl for a site.
      */
-    public synchronized static VersionControl get(WebSite aSite)
+    public synchronized static VersionControl getVersionControlForProjectSite(WebSite aSite)
     {
         VersionControl versionControl = (VersionControl) aSite.getProp(VersionControl.class.getName());
         if (versionControl == null)

@@ -55,7 +55,7 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
         _parent = aPar;
         _file = aFile;
         _proj = Project.getProjectForSite(aFile.getSite());
-        _vc = VersionControl.get(_file.getSite());
+        _vc = VersionControl.getVersionControlForProjectSite(_file.getSite());
     }
 
     /**

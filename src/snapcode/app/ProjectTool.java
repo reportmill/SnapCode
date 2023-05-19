@@ -2,6 +2,12 @@ package snapcode.app;
 import javakit.project.Project;
 import javakit.project.Workspace;
 import snap.view.ViewOwner;
+import snap.web.WebFile;
+import snap.web.WebSite;
+import snapcode.webbrowser.WebBrowser;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This class is the base for support panes specific to individual projects.
@@ -31,4 +37,41 @@ public class ProjectTool extends ViewOwner {
         _workspace = projectPane.getWorkspace();
         _proj = projectPane.getProject();
     }
+
+    /**
+     * Returns the Project site.
+     */
+    public WebSite getProjectSite()  { return _proj.getSite(); }
+
+    /**
+     * Returns the WorkspaceTools.
+     */
+    public WorkspaceTools getWorkspaceTools()  { return _workspacePane.getWorkspaceTools(); }
+
+    /**
+     * Returns the selected file.
+     */
+    public WebFile getSelFile()  { return _workspacePane.getSelFile(); }
+
+    /**
+     * Sets the selected site file.
+     */
+    public void setSelFile(WebFile aFile)
+    {
+        _workspacePane.setSelFile(aFile);
+    }
+
+    /**
+     * Returns the list of selected files.
+     */
+    public List<WebFile> getSelFiles()
+    {
+        WebFile selFile = getSelFile();
+        return selFile == null ? Collections.EMPTY_LIST : Collections.singletonList(selFile);
+    }
+
+    /**
+     * Returns the browser.
+     */
+    public WebBrowser getBrowser()  { return _workspacePane.getBrowser(); }
 }

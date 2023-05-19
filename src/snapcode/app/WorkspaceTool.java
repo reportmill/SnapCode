@@ -85,6 +85,24 @@ public class WorkspaceTool extends ViewOwner {
     public WebSite getSelSite()  { return _workspacePane.getSelSite(); }
 
     /**
+     * Returns the selected project.
+     */
+    public Project getSelProject()
+    {
+        WebSite selSite = getSelSite();
+        return Project.getProjectForSite(selSite);
+    }
+
+    /**
+     * Returns the ProjectPane for selected file.
+     */
+    public ProjectPane getSelProjectPane()
+    {
+        Project selProject = getSelProject();
+        return _workspacePane.getProjectPaneForProject(selProject);
+    }
+
+    /**
      * Returns the browser.
      */
     public WebBrowser getBrowser()  { return _workspacePane.getBrowser(); }

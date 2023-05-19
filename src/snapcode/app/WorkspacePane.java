@@ -285,7 +285,7 @@ public class WorkspacePane extends ViewOwner {
         // Open Projects
         ProjectPane[] projectPanes = getProjectPanes();
         for (ProjectPane projPane : projectPanes)
-            projPane.openSite();
+            projPane.workspaceDidOpen();
 
         // Show HomePage
         WebURL homePageURL = getHomePageURL();
@@ -304,10 +304,10 @@ public class WorkspacePane extends ViewOwner {
         for (ProjectPane projectPane : projectPanes) {
 
             // Close ProjectPane
-            projectPane.closeSite();
+            projectPane.workspaceDidClose();
 
             // Close project site
-            WebSite projectSite = projectPane.getSite();
+            WebSite projectSite = projectPane.getProjectSite();
             try { projectSite.flush(); }
             catch (Exception e) { throw new RuntimeException(e); }
             projectSite.resetFiles();

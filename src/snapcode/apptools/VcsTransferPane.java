@@ -14,7 +14,7 @@ import java.util.List;
 public class VcsTransferPane extends ViewOwner {
 
     // The VersionControlPane
-    private VcsPane _vcp;
+    private VersionControlTool _vcp;
 
     // The list of transfer files
     private List<WebFile>  _files = new ArrayList<>();
@@ -36,7 +36,7 @@ public class VcsTransferPane extends ViewOwner {
     /**
      * Show panel.
      */
-    public boolean showPanel(VcsPane aVC, List<WebFile> theFiles, Op anOp)
+    public boolean showPanel(VersionControlTool aVC, List<WebFile> theFiles, Op anOp)
     {
         // Set component and data source
         _vcp = aVC;

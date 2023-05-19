@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import javakit.project.Project;
 import javakit.project.WorkspaceBuilder;
 import snap.gfx.Color;
 import snap.gfx.Image;
@@ -318,16 +319,25 @@ public class FileTreeTool extends WorkspaceTool {
             runFile(getSelFile(), true);
 
         // Handle UpdateFilesMenuItem
-        if (anEvent.equals("UpdateFilesMenuItem"))
-            VcsPane.get(getSelSite()).updateFiles(null);
+        if (anEvent.equals("UpdateFilesMenuItem")) {
+            ProjectPane projectPane = getSelProjectPane();
+            VersionControlTool versionControlTool = projectPane.getVersionControlTool();
+            versionControlTool.updateFiles(null);
+        }
 
         // Handle ReplaceFileMenuItem
-        if (anEvent.equals("ReplaceFilesMenuItem"))
-            VcsPane.get(getSelSite()).replaceFiles(null);
+        if (anEvent.equals("ReplaceFilesMenuItem")) {
+            ProjectPane projectPane = getSelProjectPane();
+            VersionControlTool versionControlTool = projectPane.getVersionControlTool();
+            versionControlTool.replaceFiles(null);
+        }
 
         // Handle CommitFileMenuItem
-        if (anEvent.equals("CommitFilesMenuItem"))
-            VcsPane.get(getSelSite()).commitFiles(null);
+        if (anEvent.equals("CommitFilesMenuItem")) {
+            ProjectPane projectPane = getSelProjectPane();
+            VersionControlTool versionControlTool = projectPane.getVersionControlTool();
+            versionControlTool.commitFiles(null);
+        }
 
         // Handle DiffFilesMenuItem
         if (anEvent.equals("DiffFilesMenuItem")) {

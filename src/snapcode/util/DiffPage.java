@@ -125,7 +125,7 @@ public class DiffPage extends WebPage {
     public WebFile getRemoteFile()
     {
         WebFile locFile = getLocalFile();
-        VersionControl vc = VersionControl.get(locFile.getSite());
+        VersionControl vc = VersionControl.getVersionControlForProjectSite(locFile.getSite());
         return vc.getRepoFile(locFile.getPath(), false, false);
     }
 

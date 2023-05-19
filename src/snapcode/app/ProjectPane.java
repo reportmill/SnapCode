@@ -6,6 +6,8 @@ import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.viewx.TaskMonitorPanel;
 import snapcode.apptools.ProjectAnalysisTool;
+import snapcode.apptools.VersionControlTool;
+import snapcode.project.VersionControl;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -13,19 +15,22 @@ import snap.web.WebSite;
 /**
  * A class to manage UI aspects of a Project.
  */
-public class ProjectPane extends WebPage {
+public class ProjectPane extends ViewOwner {
 
     // The WorkspacePane that owns this ProjectPane
-    private WorkspacePane  _workspacePane;
+    private WorkspacePane _workspacePane;
 
     // The Project
-    private Project  _project;
+    private Project _project;
 
     // The ProjectTools
     private ProjectTools _projectTools;
 
+    // The VcsTool for main project
+    private VersionControlTool _versionControlTool;
+
     // A PropChangeListener for Site file changes
-    private PropChangeListener  _siteFileLsnr = pc -> siteFileChanged(pc);
+    private PropChangeListener _siteFileLsnr = pc -> siteFileChanged(pc);
 
     /**
      * Constructor.
@@ -43,6 +48,11 @@ public class ProjectPane extends WebPage {
         WebSite projSite = aProject.getSite();
         projSite.addFileChangeListener(_siteFileLsnr);
         projSite.setProp(ProjectPane.class.getName(), this);
+
+        // Set VersionControlPane
+        String urls = getRemoteURLString();
+        //_vcp = VersionControl.get(_site) instanceof VersionControlGit ? new VcsPaneGit(this) : new VcsPane(this);
+        _versionControlTool = new VersionControlTool(this);
     }
 
     /**
@@ -66,26 +76,62 @@ public class ProjectPane extends WebPage {
     public ProjectTools getProjectTools()  { return _projectTools; }
 
     /**
-     * Returns the site.
+     * Returns the project site.
      */
-    public WebSite getSite()  { return _project.getSite(); }
+    public WebSite getProjectSite()  { return _project.getSite(); }
 
     /**
-     * Opens the Site.
+     * Returns the VersionControlTool.
      */
-    public void openSite()
+    public VersionControlTool getVersionControlTool()  { return _versionControlTool; }
+
+    /**
+     * Returns the RemoteURL string.
+     */
+    public String getRemoteURLString()
+    {
+        WebSite projectSite = getProjectSite();
+        return VersionControl.getRemoteURLString(projectSite);
+    }
+
+    /**
+     * Sets the RemoteURL string.
+     */
+    public void setRemoteURLString(String urls)
+    {
+        // Deactivate Version control pane and re-open site
+        _versionControlTool.deactivate();
+        WebSite projectSite = getProjectSite();
+        VersionControl.setRemoteURLString(projectSite, urls);
+
+        // Recreate VC and set in tab
+        //_vcp = VersionControl.get(_site) instanceof VersionControlGit ? new VcsPaneGit(this) : new VcsPane(this);
+        _versionControlTool = new VersionControlTool(this);
+
+        // Reopen site
+        _versionControlTool.projectDidOpen();
+    }
+
+    /**
+     * Called when project is opened.
+     */
+    public void workspaceDidOpen()
     {
         // Do AutoBuild
         Workspace workspace = getWorkspace();
         WorkspaceBuilder builder = workspace.getBuilder();
         if (builder.isAutoBuildEnabled())
             builder.buildWorkspaceLater(true);
+
+        // Activate VersionControlPane
+        if (_versionControlTool != null)
+            _versionControlTool.projectDidOpen();
     }
 
     /**
-     * Closes the site.
+     * Called when project is closed.
      */
-    public void closeSite()
+    public void workspaceDidClose()
     {
         WebSite projSite = _project.getSite();
         projSite.removeFileChangeListener(_siteFileLsnr);
@@ -146,6 +192,10 @@ public class ProjectPane extends WebPage {
      */
     private void fileAdded(WebFile aFile)
     {
+        // Forward to VersionControl
+        if (_versionControlTool != null)
+            _versionControlTool.fileAdded(aFile);
+
         // If BuildDir file, just return
         if (_project.getBuildDir().containsFile(aFile)) return;
 
@@ -159,6 +209,10 @@ public class ProjectPane extends WebPage {
      */
     private void fileRemoved(WebFile aFile)
     {
+        // Forward to VersionControl
+        if (_versionControlTool != null)
+            _versionControlTool.fileRemoved(aFile);
+
         // If BuildDir file, just return
         if (_project.getBuildDir().containsFile(aFile)) return;
 
@@ -172,6 +226,10 @@ public class ProjectPane extends WebPage {
      */
     private void fileSaved(WebFile aFile)
     {
+        // Forward to VersionControl
+        if (_versionControlTool != null)
+            _versionControlTool.fileSaved(aFile);
+
         // If BuildDir file, just return
         if (_project.getBuildDir().containsFile(aFile)) return;
 
