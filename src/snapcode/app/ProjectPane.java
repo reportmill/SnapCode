@@ -10,7 +10,6 @@ import snap.viewx.DialogBox;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import snapcode.apptools.BuildDirTool;
 import snapcode.apptools.ProjectConfigTool;
 
 /**
@@ -26,9 +25,6 @@ public class ProjectPane extends WebPage {
 
     // The ProjectConfigTool
     private ProjectConfigTool  _configTool;
-
-    // The BuildDirTool
-    private BuildDirTool  _buildDirTool;
 
     // The top level TabView
     private TabView  _tabView;
@@ -47,7 +43,6 @@ public class ProjectPane extends WebPage {
 
         // Create/set tools
         _configTool = new ProjectConfigTool(this);
-        _buildDirTool = new BuildDirTool(this);
 
         // Set this ProjectPane as Site prop
         WebSite projSite = aProject.getSite();
@@ -215,10 +210,6 @@ public class ProjectPane extends WebPage {
         ProjectConfigTool projPane = getConfigTool();
         if (projPane != null)
             _tabView.addTab("Settings", projPane.getUI()); //tab.setTooltip(new Tooltip("Project Settings"));
-
-        // Add BuildPane
-        BuildDirTool buildDirTool = _buildDirTool;
-        _tabView.addTab("Build Dir", buildDirTool.getUI());
 
         // Return
         return _tabView;

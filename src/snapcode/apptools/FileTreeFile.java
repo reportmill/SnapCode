@@ -106,10 +106,8 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
         String type = aFile.getType();
         int typeLen = type.length();
 
-        // Skip hidden files, build dir, child packages
+        // Skip hidden files, child packages
         if (name.startsWith("."))
-            return null;
-        if (dir && _proj != null && aFile == _proj.getBuildDir())
             return null;
         if (_type == FileType.PACKAGE_DIR && dir && typeLen == 0)
             return null;

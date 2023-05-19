@@ -1,4 +1,5 @@
 package snapcode.app;
+import snapcode.webbrowser.BuildDirPage;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebResponse;
@@ -18,6 +19,19 @@ public class PagePaneX extends PagePane {
     }
 
     /**
+     * Returns whether page is available for file.
+     */
+    @Override
+    protected boolean isPageAvailableForFile(WebFile aFile)
+    {
+        if (super.isPageAvailableForFile(aFile))
+            return true;
+        if (aFile == _workspacePane.getBuildDir())
+            return true;
+        return false;
+    }
+
+    /**
      * Creates a WebPage for given file.
      */
     protected Class<? extends WebPage> getPageClass(WebResponse aResp)
@@ -34,7 +48,12 @@ public class PagePaneX extends PagePane {
         if (type.equals("java") || type.equals("jepl"))
             return JavaPageX.class;
 
-        //if(type.equals("snp")) return snapbuild.app.EditorPage.class;
+        // Handle BuildDir
+        WebFile snapFile = aResp.getFile();
+        if (snapFile == _workspacePane.getBuildDir())
+            return BuildDirPage.class;
+
+        // Handle class file
         if (type.equals("class") && isProjectFile(file))
             return ClassInfoPage.class;
         if (type.equals("pgd"))

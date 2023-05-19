@@ -9,6 +9,7 @@ import snap.props.PropChange;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.*;
+import snapcode.webbrowser.SnapBuilderPage;
 import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
@@ -24,7 +25,7 @@ import java.util.List;
 public class PagePane extends ViewOwner {
 
     // The WorkspacePane
-    private WorkspacePane  _workspacePane;
+    protected WorkspacePane  _workspacePane;
 
     // A list of open files
     List<WebFile>  _openFiles = new ArrayList<>();
@@ -134,7 +135,7 @@ public class PagePane extends ViewOwner {
         _selFile = aFile;
 
         // Set selected file and update tree
-        if (_selFile.isFile() || _selFile.isRoot())
+        if (isPageAvailableForFile(_selFile))
             getBrowser().setFile(_selFile);
 
         // Add to OpenFiles
@@ -396,6 +397,18 @@ public class PagePane extends ViewOwner {
     }
 
     /**
+     * Returns whether page is available for file.
+     */
+    protected boolean isPageAvailableForFile(WebFile aFile)
+    {
+        if (_selFile.isFile())
+            return true;
+        if (_selFile.isRoot())
+            return true;
+        return false;
+    }
+
+    /**
      * Returns WebPage class for given response.
      */
     protected Class<? extends WebPage> getPageClass(WebResponse aResp)
@@ -409,7 +422,7 @@ public class PagePane extends ViewOwner {
 
         // Handle Snap file
         if (type.equals("snp"))
-            return snapcode.webbrowser.SnapBuilderPage.class;
+            return SnapBuilderPage.class;
 
         // Do normal version
         return null;

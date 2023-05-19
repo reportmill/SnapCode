@@ -1,22 +1,21 @@
-package snapcode.apptools;
+package snapcode.webbrowser;
+import javakit.project.Project;
+import javakit.project.Workspace;
 import javakit.project.WorkspaceBuilder;
-import snap.view.*;
-import snapcode.webbrowser.WebBrowser;
-import snapcode.webbrowser.WebPage;
+import snap.view.BrowserView;
+import snap.view.ChildView;
+import snap.view.ViewEvent;
 import snap.web.WebFile;
 import snap.web.WebResponse;
-import snap.web.WebSite;
 import snapcode.util.ClassInfoPage;
-import snapcode.app.ProjectPane;
-import snapcode.app.ProjectTool;
 
 /**
  * A UI pane to show and manage the build directory.
  */
-public class BuildDirTool extends ProjectTool {
+public class BuildDirPage extends WebPage {
 
-    // The Site
-    WebSite _site;
+    // The project
+    private Project _proj;
 
     // The FileBrowser
     private BrowserView<WebFile>  _fileBrowser;
@@ -27,10 +26,20 @@ public class BuildDirTool extends ProjectTool {
     /**
      * Constructor.
      */
-    public BuildDirTool(ProjectPane projectPane)
+    public BuildDirPage()
     {
-        super(projectPane);
-        _site = projectPane.getSite();
+        super();
+    }
+
+    /**
+     * Returns the project.
+     */
+    public Project getProject()
+    {
+        if (_proj != null) return _proj;
+        WebFile file = getFile();
+        Project proj = Project.getProjectForFile(file);
+        return _proj = proj;
     }
 
     /**
@@ -38,7 +47,7 @@ public class BuildDirTool extends ProjectTool {
      */
     public WebFile getBuildDir()
     {
-        return _proj.getBuildDir();
+        return getFile();
     }
 
     /**
@@ -49,7 +58,7 @@ public class BuildDirTool extends ProjectTool {
         // Get/configure FileBrowser
         _fileBrowser = getView("FileBrowser", BrowserView.class);
         _fileBrowser.setPrefColCount(3);
-        _fileBrowser.setResolver(new FileResolver());
+        _fileBrowser.setResolver(new DirFilePage.FileTreeResolver());
         _fileBrowser.setItems(getBuildDir());
 
         // Get/configure PageBrowser
@@ -69,17 +78,9 @@ public class BuildDirTool extends ProjectTool {
     }
 
     /**
-     * ResetUI.
-     */
-    protected void resetUI()
-    {
-        // Reset BuildDirText
-        setViewText("BuildDirText", _proj.getBuildDir().getPath());
-    }
-
-    /**
      * Respond to UI changes.
      */
+    @Override
     protected void respondUI(ViewEvent anEvent)
     {
         // Handle FileBrowser
@@ -89,58 +90,20 @@ public class BuildDirTool extends ProjectTool {
                 _pageBrowser.setURL(file.getURL());
         }
 
-        // Handle OpenButton
-        if (anEvent.equals("OpenButton"))
-            snap.gfx.GFXEnv.getEnv().openFile(_proj.getBuildDir());
-
         // Handle BuildButton
         if (anEvent.equals("BuildButton")) {
-            WorkspaceBuilder builder = _workspace.getBuilder();
+            Project proj = getProject();
+            Workspace workspace = proj.getWorkspace();
+            WorkspaceBuilder builder = workspace.getBuilder();
             builder.buildWorkspaceLater(true);
         }
 
         // Handle CleanButton
         if (anEvent.equals("CleanButton")) {
-            WorkspaceBuilder builder = _workspace.getBuilder();
+            Project proj = getProject();
+            Workspace workspace = proj.getWorkspace();
+            WorkspaceBuilder builder = workspace.getBuilder();
             builder.cleanWorkspace();
-        }
-    }
-
-    /**
-     * The TreeResolver to provide data to File browser.
-     */
-    private static class FileResolver extends TreeResolver<WebFile> {
-
-        /**
-         * Returns the parent of given item.
-         */
-        public WebFile getParent(WebFile anItem)
-        {
-            return anItem.getParent();
-        }
-
-        /**
-         * Whether given object is a parent (has children).
-         */
-        public boolean isParent(WebFile anItem)
-        {
-            return anItem.isDir();
-        }
-
-        /**
-         * Returns the children.
-         */
-        public WebFile[] getChildren(WebFile aPar)
-        {
-            return aPar.getFiles();
-        }
-
-        /**
-         * Returns the text to be used for given item.
-         */
-        public String getText(WebFile anItem)
-        {
-            return anItem.getName();
         }
     }
 }
