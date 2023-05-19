@@ -1,7 +1,4 @@
 package snapcode.apptools;
-import javakit.parse.JFile;
-import javakit.parse.JNode;
-import javakit.ide.NodeMatcher;
 import javakit.project.*;
 import snapcode.app.*;
 import snapcode.project.VersionControl;
@@ -10,18 +7,16 @@ import snapcode.webbrowser.ClientUtils;
 import snap.util.TaskRunner;
 import snap.view.*;
 import snap.viewx.*;
-import snap.web.WebFile;
 import snap.web.WebSite;
+import snapcode.webbrowser.WebPage;
+
 import java.io.File;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * A class to manage UI aspects of a Project.
  */
-public class ProjectConfigTool extends ProjectTool {
+public class BuildFileTool extends ProjectTool {
 
     // The selected JarPath
     private String  _jarPath;
@@ -32,44 +27,15 @@ public class ProjectConfigTool extends ProjectTool {
     /**
      * Constructor.
      */
-    public ProjectConfigTool(ProjectPane projectPane)
+    public BuildFileTool(ProjectPane projectPane)
     {
         super(projectPane);
-
-        // Set Project.Site.Prop so instances can be located easily
-        WebSite projSite = _proj.getSite();
-        projSite.setProp(ProjectConfigTool.class.getName(), this);
     }
 
     /**
      * Returns the project.
      */
     public Project getProject()  { return _proj; }
-
-    /**
-     * Activate project.
-     */
-    public void openSite()
-    {
-        // Do AutoBuild
-        WorkspaceBuilder builder = _workspace.getBuilder();
-        if (builder.isAutoBuildEnabled())
-            builder.buildWorkspaceLater(true);
-    }
-
-    /**
-     * Delete a project.
-     */
-    public void deleteProject(View aView)
-    {
-        WorkspaceBuilder builder = _workspace.getBuilder();
-        builder.setAutoBuild(false);
-
-        try { _proj.deleteProject(new TaskMonitorPanel(aView, "Delete Project")); }
-        catch (Exception e) {
-            DialogBox.showExceptionDialog(aView, "Delete Project Failed", e);
-        }
-    }
 
     /**
      * Adds a project with given name.
@@ -230,10 +196,6 @@ public class ProjectConfigTool extends ProjectTool {
     @Override
     protected void resetUI()
     {
-        // Update HomePageText, AutoBuildCheckBox
-        //setViewValue("HomePageText", sitePane.getHomePageURLString());
-        setViewValue("AutoBuildCheckBox", _workspace.getBuilder().isAutoBuild());
-
         // Update SourcePathText, BuildPathText
         Project proj = getProject();
         BuildFile projConfig = proj.getBuildFile();
@@ -255,19 +217,11 @@ public class ProjectConfigTool extends ProjectTool {
         Project proj = getProject();
         BuildFile projConfig = proj.getBuildFile();
 
-        // Handle HomePageText, AutoBuildCheckBox
-        //if (anEvent.equals("HomePageText")) sitePane.setHomePageURLString(anEvent.getStringValue());
-        if (anEvent.equals("AutoBuildCheckBox"))
-            _workspace.getBuilder().setAutoBuild(anEvent.getBoolValue());
-
         // Update SourcePathText, BuildPathText
         if (anEvent.equals("SourcePathText"))
             projConfig.setSourcePath(anEvent.getStringValue());
         if (anEvent.equals("BuildPathText"))
             projConfig.setBuildPath(anEvent.getStringValue());
-
-        // Handle ResetHomePageButton
-        //if (anEvent.equals("ResetHomePageButton")) _sitePane.setHomePageURLString(null);
 
         // Handle JarPathsList
         if (anEvent.equals("JarPathsList")) {
@@ -330,154 +284,6 @@ public class ProjectConfigTool extends ProjectTool {
             else if (getView("ProjectPathsList").isShowing())
                 removeProjectForName(getSelectedProjectPath());
         }
-
-        // Handle LOCButton (Lines of Code)
-        if (anEvent.equals("LOCTitleView")) {
-            TitleView titleView = getView("LOCTitleView", TitleView.class);
-            if (titleView.isExpanded()) return;
-            TextView tview = getView("LOCText", TextView.class);
-            tview.setText(getLinesOfCodeText());
-        }
-
-        // Shows symbol check
-        if (anEvent.equals("SymbolCheckTitleView"))
-            showSymbolCheck();
-    }
-
-    /**
-     * Returns the line of code text.
-     */
-    private String getLinesOfCodeText()
-    {
-        // Declare loop variables
-        StringBuilder sb = new StringBuilder("Lines of Code:\n\n");
-        DecimalFormat fmt = new DecimalFormat("#,##0");
-        int total = 0;
-
-        // Get projects
-        Project proj = getProject();
-        List<Project> projects = new ArrayList<>();
-        projects.add(proj);
-        Collections.addAll(projects, proj.getProjects());
-
-        // Iterate over projects and add: ProjName: xxx
-        for (Project prj : projects) {
-            int loc = getLinesOfCode(prj.getSourceDir());
-            total += loc;
-            sb.append(prj.getName()).append(": ").append(fmt.format(loc)).append('\n');
-        }
-
-        // Add total and return string (trimmed)
-        sb.append("\nTotal: ").append(fmt.format(total)).append('\n');
-        return sb.toString().trim();
-    }
-
-    /**
-     * Returns lines of code in a file (recursive).
-     */
-    private int getLinesOfCode(WebFile aFile)
-    {
-        int loc = 0;
-
-        if (aFile.isFile() && (aFile.getType().equals("java") || aFile.getType().equals("snp"))) {
-            String text = aFile.getText();
-            for (int i = text.indexOf('\n'); i >= 0; i = text.indexOf('\n', i + 1)) loc++;
-        }
-        else if (aFile.isDir()) {
-            for (WebFile child : aFile.getFiles())
-                loc += getLinesOfCode(child);
-        }
-
-        return loc;
-    }
-
-    /**
-     * Shows a list of symbols that are undefined in project source files.
-     */
-    public void showSymbolCheck()
-    {
-        TitleView titleView = getView("SymbolCheckTitleView", TitleView.class);
-        if (titleView.isExpanded()) return;
-
-        // Get TextArea
-        TextView symbolCheckTextView = getView("SymbolCheckText", TextView.class);
-        _symbolCheckTextArea = symbolCheckTextView.getTextArea();
-        if (_symbolCheckTextArea.length() > 0)
-            return;
-
-        // Initialize
-        _symbolCheckTextArea.addChars("Undefined Symbols:\n");
-        _symbolCheckTextArea.setSel(0, 0);
-
-        Runnable run = () -> findUndefines(getProject().getSourceDir());
-        new Thread(run).start();
-    }
-
-    TextArea _symbolCheckTextArea;
-    JFile _symFile;
-    int _undefCount;
-
-    /**
-     * Loads the undefined symbols in file.
-     */
-    private void findUndefines(WebFile aFile)
-    {
-        if (aFile.isFile() && aFile.getType().equals("java")) {
-            JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
-            JNode jfile = javaAgent.getJFile();
-            findUndefines(jfile);
-        }
-
-        else if (aFile.isDir())
-            for (WebFile child : aFile.getFiles())
-                findUndefines(child);
-    }
-
-    /**
-     * Loads the undefined symbols in file.
-     */
-    private void findUndefines(JNode aNode)
-    {
-        if (_undefCount > 49) return;
-
-        if (aNode.getDecl() == null && NodeMatcher.isDeclExpected(aNode)) {
-            aNode.getDecl();
-            _undefCount++;
-
-            if (aNode.getFile() != _symFile) {
-                _symFile = aNode.getFile();
-                showSymText("\n" + aNode.getFile().getSourceFile().getName() + ":\n\n");
-            }
-            try {
-                showSymText("    " + _undefCount + ". " + aNode + '\n');
-            }
-
-            catch (Exception e) {
-                showSymText(e.toString());
-            }
-        }
-
-        else if (aNode.getChildCount() > 0)
-            for (JNode child : aNode.getChildren())
-                findUndefines(child);
-    }
-
-    private void showSymText(String aStr)
-    {
-        int textAreaLength = _symbolCheckTextArea.length();
-        runLater(() -> _symbolCheckTextArea.replaceChars(aStr, null, textAreaLength, textAreaLength, false));
-
-        // Sleep
-        try { Thread.sleep(80); }
-        catch (Exception e) { throw new RuntimeException(e); }
-    }
-
-    /**
-     * Returns the ProjectConfigTool for a site.
-     */
-    public synchronized static ProjectConfigTool getProjectPane(WebSite aSite)
-    {
-        return (ProjectConfigTool) aSite.getProp(ProjectConfigTool.class.getName());
     }
 
     /**
@@ -536,6 +342,30 @@ public class ProjectConfigTool extends ProjectTool {
 
             // Do normal version
             super.failure(e);
+        }
+    }
+
+    /**
+     * A WebPage subclass for ProjectPane.
+     */
+    public static class BuildFilePage extends WebPage {
+
+        /**
+         * Initialize UI panel.
+         */
+        protected View createUI()
+        {
+            ProjectPane projectPane = ProjectPane.getProjectPaneForSite(getSite());
+            BuildFileTool buildFileTool = projectPane.getProjectTools().getBuildFileTool();
+            return buildFileTool.getUI();
+        }
+
+        /**
+         * Override to provide better title.
+         */
+        public String getTitle()
+        {
+            return getURL().getSite().getName() + " - Build File";
         }
     }
 }

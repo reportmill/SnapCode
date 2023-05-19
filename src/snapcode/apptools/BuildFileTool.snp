@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView PrefWidth="500" PrefHeight="500" Padding="16" Spacing="10">
+  <Font Name="Arial" Size="14" />
+  <RowView Padding="10,10,10,10" MinWidth="400" BorderRadius="8">
+    <Fill Color="#F8" />
+    <Font Name="Arial" Size="18" />
+    <Label Text="Build File" />
+  </RowView>
+  <RowView Spacing="5">
+    <Label text="Source Directory:" />
+    <TextField Name="SourcePathText" PrefWidth="255" />
+  </RowView>
+  <RowView Spacing="5">
+    <Label text="Build Directory:" />
+    <TextField Name="BuildPathText" PrefWidth="255" />
+  </RowView>
+  <Label text="Jar Dependencies:" />
+  <ListView Name="JarPathsList" PrefWidth="360" PrefHeight="120">
+    <font name="Arial" size="12" />
+  </ListView>
+  <Label text="Project Dependencies:" />
+  <ListView Name="ProjectPathsList" PrefWidth="360" PrefHeight="120">
+    <font name="Arial" size="12" />
+  </ListView>
+</ColView>

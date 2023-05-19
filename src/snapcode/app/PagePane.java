@@ -346,6 +346,7 @@ public class PagePane extends ViewOwner {
      */
     protected boolean isProjectFile(WebFile aFile)
     {
+        if (aFile == null) return false;
         WebSite[] projSites = _workspacePane.getSites();
         WebSite fileSite = aFile.getSite();
         return ArrayUtils.containsId(projSites, fileSite);

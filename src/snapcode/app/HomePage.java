@@ -10,7 +10,7 @@ import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.apptools.FilesTool;
-import snapcode.apptools.ProjectConfigTool;
+import snapcode.apptools.BuildFileTool;
 import snapcode.project.RunConfig;
 import snapcode.project.RunConfigs;
 
@@ -108,8 +108,9 @@ public class HomePage extends WebPage {
 
         // Handle NewSnapScene
         if (anEvent.equals("NewSnapScene") && anEvent.isMouseRelease()) {
-            ProjectConfigTool ppane = ProjectConfigTool.getProjectPane(getRootSite());
-            ppane.addProjectForName("SnapKit", "https://github.com/reportmill/SnapKit.git");
+            ProjectPane projectPane = ProjectPane.getProjectPaneForSite(getRootSite());
+            BuildFileTool buildFileTool = projectPane.getProjectTools().getBuildFileTool();
+            buildFileTool.addProjectForName("SnapKit", "https://github.com/reportmill/SnapKit.git");
             addSceneFiles(getRootSite(), "Scene1");
         }
 

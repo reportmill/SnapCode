@@ -1,4 +1,5 @@
 package snapcode.app;
+import snapcode.apptools.BuildFileTool;
 import snapcode.webbrowser.BuildDirPage;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
@@ -52,6 +53,10 @@ public class PagePaneX extends PagePane {
         WebFile snapFile = aResp.getFile();
         if (snapFile == _workspacePane.getBuildDir())
             return BuildDirPage.class;
+
+        // Handle build file (build.snapcode)
+        if (type.equals("snapcode"))
+            return BuildFileTool.BuildFilePage.class;
 
         // Handle class file
         if (type.equals("class") && isProjectFile(file))
