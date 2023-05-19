@@ -1,20 +1,14 @@
 package snapcode.app;
-import javakit.ide.NodeMatcher;
-import javakit.parse.JFile;
-import javakit.parse.JNode;
 import javakit.project.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.viewx.TaskMonitorPanel;
+import snapcode.apptools.ProjectAnalysisTool;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * A class to manage UI aspects of a Project.
@@ -237,145 +231,51 @@ public class ProjectPane extends WebPage {
             workspace.getBuilder().setAutoBuild(anEvent.getBoolValue());
         }
 
-        // Handle LOCButton (Lines of Code)
-        if (anEvent.equals("LOCTitleView")) {
-            TitleView titleView = getView("LOCTitleView", TitleView.class);
-            if (titleView.isExpanded()) return;
-            TextView tview = getView("LOCText", TextView.class);
-            tview.setText(getLinesOfCodeText());
-        }
+        // Handle LOCTitleView (Lines of Code) click
+        if (anEvent.equals("LOCTitleView"))
+            showLinesOfCode();
 
-        // Shows symbol check
+        // Handle SymbolCheckTitleView (click)
         if (anEvent.equals("SymbolCheckTitleView"))
             showSymbolCheck();
     }
 
     /**
-     * Returns the line of code text.
+     * Shows the lines of code in project and child projects.
      */
-    private String getLinesOfCodeText()
+    private void showLinesOfCode()
     {
-        // Declare loop variables
-        StringBuilder sb = new StringBuilder("Lines of Code:\n\n");
-        DecimalFormat fmt = new DecimalFormat("#,##0");
-        int total = 0;
-
-        // Get projects
-        Project proj = getProject();
-        List<Project> projects = new ArrayList<>();
-        projects.add(proj);
-        Collections.addAll(projects, proj.getProjects());
-
-        // Iterate over projects and add: ProjName: xxx
-        for (Project prj : projects) {
-            int loc = getLinesOfCode(prj.getSourceDir());
-            total += loc;
-            sb.append(prj.getName()).append(": ").append(fmt.format(loc)).append('\n');
-        }
-
-        // Add total and return string (trimmed)
-        sb.append("\nTotal: ").append(fmt.format(total)).append('\n');
-        return sb.toString().trim();
-    }
-
-    /**
-     * Returns lines of code in a file (recursive).
-     */
-    private int getLinesOfCode(WebFile aFile)
-    {
-        int loc = 0;
-
-        if (aFile.isFile() && (aFile.getType().equals("java") || aFile.getType().equals("snp"))) {
-            String text = aFile.getText();
-            for (int i = text.indexOf('\n'); i >= 0; i = text.indexOf('\n', i + 1)) loc++;
-        }
-        else if (aFile.isDir()) {
-            for (WebFile child : aFile.getFiles())
-                loc += getLinesOfCode(child);
-        }
-
-        return loc;
+        TitleView titleView = getView("LOCTitleView", TitleView.class);
+        if (titleView.isExpanded())
+            return;
+        TextView linesOfCodeText = getView("LOCText", TextView.class);
+        String linesOfCodeTextString = ProjectAnalysisTool.getLinesOfCodeText(getProject());
+        linesOfCodeText.setText(linesOfCodeTextString);
     }
 
     /**
      * Shows a list of symbols that are undefined in project source files.
      */
-    public void showSymbolCheck()
+    private void showSymbolCheck()
     {
         TitleView titleView = getView("SymbolCheckTitleView", TitleView.class);
-        if (titleView.isExpanded()) return;
+        if (titleView.isExpanded())
+            return;
 
         // Get TextArea
         TextView symbolCheckTextView = getView("SymbolCheckText", TextView.class);
-        _symbolCheckTextArea = symbolCheckTextView.getTextArea();
-        if (_symbolCheckTextArea.length() > 0)
+        TextArea symbolCheckTextArea = symbolCheckTextView.getTextArea();
+        if (symbolCheckTextArea.length() > 0)
             return;
 
         // Initialize
-        _symbolCheckTextArea.addChars("Undefined Symbols:\n");
-        _symbolCheckTextArea.setSel(0, 0);
+        symbolCheckTextArea.addChars("Undefined Symbols:\n");
+        symbolCheckTextArea.setSel(0, 0);
 
-        Runnable run = () -> findUndefines(getProject().getSourceDir());
+        // Find callbacks
+        WebFile sourceDir = getProject().getSourceDir();
+        Runnable run = () -> new ProjectAnalysisTool().findUndefines(sourceDir, symbolCheckTextArea);
         new Thread(run).start();
-    }
-
-    TextArea _symbolCheckTextArea;
-    JFile _symFile;
-    int _undefCount;
-
-    /**
-     * Loads the undefined symbols in file.
-     */
-    private void findUndefines(WebFile aFile)
-    {
-        if (aFile.isFile() && aFile.getType().equals("java")) {
-            JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
-            JNode jfile = javaAgent.getJFile();
-            findUndefines(jfile);
-        }
-
-        else if (aFile.isDir())
-            for (WebFile child : aFile.getFiles())
-                findUndefines(child);
-    }
-
-    /**
-     * Loads the undefined symbols in file.
-     */
-    private void findUndefines(JNode aNode)
-    {
-        if (_undefCount > 49) return;
-
-        if (aNode.getDecl() == null && NodeMatcher.isDeclExpected(aNode)) {
-            aNode.getDecl();
-            _undefCount++;
-
-            if (aNode.getFile() != _symFile) {
-                _symFile = aNode.getFile();
-                showSymText("\n" + aNode.getFile().getSourceFile().getName() + ":\n\n");
-            }
-            try {
-                showSymText("    " + _undefCount + ". " + aNode + '\n');
-            }
-
-            catch (Exception e) {
-                showSymText(e.toString());
-            }
-        }
-
-        else if (aNode.getChildCount() > 0)
-            for (JNode child : aNode.getChildren())
-                findUndefines(child);
-    }
-
-    private void showSymText(String aStr)
-    {
-        int textAreaLength = _symbolCheckTextArea.length();
-        runLater(() -> _symbolCheckTextArea.replaceChars(aStr, null, textAreaLength, textAreaLength, false));
-
-        // Sleep
-        try { Thread.sleep(80); }
-        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**
