@@ -33,7 +33,7 @@ public class ProjectX extends Project {
      * Override to create ProjectConfig from project config file.
      */
     @Override
-    protected ProjectConfig createProjectConfig()
+    protected BuildFile createBuildFile()
     {
         _projConfigFile = new ProjectConfigFile(this);
         return _projConfigFile.getProjectConfig();

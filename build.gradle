@@ -19,60 +19,20 @@ repositories {
 
 dependencies {
 
-    // If Local SnapKit project, use it
-    if (findProject(':SnapKit') != null) {
-        implementation project(':SnapKit')
-    }
+    // SnapKit project
+    implementation project(':SnapKit')
 
-    // Otherwise use GitHub SnapKit repo build
-    else {
-        println 'Using GitHub/Jitpack SnapKit package'
-        implementation "com.github.reportmill:SnapKit:master-SNAPSHOT"
-    }
+    // JavaKit project
+    implementation project(':JavaKit')
 
-    // If Local JavaKit project, use it
-    if (findProject(':JavaKit') != null) {
-        implementation project(':JavaKit')
-    }
+    // SnapCharts project
+    implementation project(':SnapCharts')
 
-    // Otherwise use GitHub JavaKit repo build
-    else {
-        println 'Using GitHub/Jitpack JavaKit package'
-        implementation "com.github.reportmill:JavaKit:master-SNAPSHOT"
-    }
+    // SnapKitGL project
+    implementation project(':SnapKitGL')
 
-    // If Local SnapCharts project, use it
-    if (findProject(':SnapCharts') != null) {
-        implementation project(':SnapCharts')
-    }
-
-    // Otherwise use GitHub SnapCharts repo build
-    else {
-        println 'Using GitHub/Jitpack SnapCharts package'
-        implementation "com.github.reportmill:SnapCharts:master-SNAPSHOT"
-    }
-
-    // If Local SnapKit project, use it
-    if (findProject(':SnapKitGL') != null) {
-        implementation project(':SnapKitGL')
-    }
-
-    // Otherwise use GitHub SnapKitGL repo build
-    else {
-        println 'Using GitHub/Jitpack SnapKitGL package'
-        implementation "com.github.reportmill:SnapKitGL:master-SNAPSHOT"
-    }
-
-    // If Local SnapBuilder project, use it
-    if (findProject(':SnapBuilder') != null) {
-        implementation project(':SnapBuilder')
-    }
-
-    // Otherwise use GitHub SnapBuilder repo build
-    else {
-        println 'Using GitHub/Jitpack SnapBuilder package'
-        implementation "com.github.reportmill:SnapBuilder:master-SNAPSHOTn"
-    }
+    // SnapBuilder project
+    implementation project(':SnapBuilder')
 
     // Tools jar
     implementation files('lib/tools.jar')

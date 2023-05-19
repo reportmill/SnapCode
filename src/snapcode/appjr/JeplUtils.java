@@ -3,7 +3,7 @@ import javakit.ide.JavaTextUtils;
 import javakit.parse.JeplTextDoc;
 import javakit.project.JeplAgent;
 import javakit.project.Project;
-import javakit.project.ProjectConfig;
+import javakit.project.BuildFile;
 import javakit.resolver.Resolver;
 import snap.gfx.Font;
 import snap.props.PropObject;
@@ -61,15 +61,15 @@ public class JeplUtils {
         // If TeaVM, just return
         if (SnapUtils.isTeaVM) return;
 
-        // Get JeplTextDoc Project, ProjectConfig
+        // Get BuildFile
         JeplAgent jeplAgent = jeplTextDoc.getAgent();
         Project proj = jeplAgent.getProject();
-        ProjectConfig projectConfig = proj.getProjectConfig();
+        BuildFile buildFile = proj.getBuildFile();
 
-        // Add lib path to ProjectConfig for SnapKit, SnapCode and SnapCharts
-        projectConfig.addLibPathForClass(PropObject.class);
-        projectConfig.addLibPathForClass(QuickCharts.class);
-        projectConfig.addLibPathForClass(DoubleArray.class);
+        // Add dependencies to BuildFile for SnapKit, SnapCode and SnapCharts
+        buildFile.addLibPathForClass(PropObject.class);
+        buildFile.addLibPathForClass(QuickCharts.class);
+        buildFile.addLibPathForClass(DoubleArray.class);
     }
 
     /**

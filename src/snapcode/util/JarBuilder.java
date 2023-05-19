@@ -155,7 +155,7 @@ public class JarBuilder {
     public static void build(Project aProj) throws IOException
     {
         // Get build path and jar path
-        String buildPath = aProj.getProjectConfig().getBuildPathAbsolute();
+        String buildPath = aProj.getBuildFile().getBuildPathAbsolute();
         String jarPath = buildPath + '/' + aProj.getName() + ".jar";
 
         // Create JarBuilder and set jar path

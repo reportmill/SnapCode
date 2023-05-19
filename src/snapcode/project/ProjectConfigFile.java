@@ -1,6 +1,6 @@
 package snapcode.project;
 import javakit.project.Project;
-import javakit.project.ProjectConfig;
+import javakit.project.BuildFile;
 import snap.props.PropArchiverJS;
 import snap.util.JSObject;
 import snap.web.WebFile;
@@ -15,7 +15,7 @@ public class ProjectConfigFile {
     private Project _proj;
 
     // The ProjectConfig
-    private ProjectConfig _projConfig;
+    private BuildFile _projConfig;
 
     // The web file
     private WebFile _file;
@@ -31,7 +31,7 @@ public class ProjectConfigFile {
         _proj = aProject;
 
         // Create ProjectConfig
-        _projConfig = new ProjectConfig(aProject);
+        _projConfig = new BuildFile(aProject);
 
         // Read config file if exists
         WebFile configFile = getConfigFile();
@@ -51,7 +51,7 @@ public class ProjectConfigFile {
     /**
      * Returns the ProjectConfig.
      */
-    public ProjectConfig getProjectConfig()  { return _projConfig; }
+    public BuildFile getProjectConfig()  { return _projConfig; }
 
     /**
      * Reads ProjectConfig properties from project config file.

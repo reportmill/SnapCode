@@ -157,7 +157,7 @@ public class ProjectConfigTool extends ProjectTool {
         }
 
         // Remove path from classpath
-        _proj.getProjectConfig().removeLibPath(aJarPath);
+        _proj.getBuildFile().removeLibPath(aJarPath);
     }
 
     /**
@@ -165,7 +165,7 @@ public class ProjectConfigTool extends ProjectTool {
      */
     public String[] getJarPaths()
     {
-        return _proj.getProjectConfig().getLibPaths();
+        return _proj.getBuildFile().getLibPaths();
     }
 
     /**
@@ -191,7 +191,7 @@ public class ProjectConfigTool extends ProjectTool {
      */
     public String[] getProjectPaths()
     {
-        return _proj.getProjectConfig().getProjectPaths();
+        return _proj.getBuildFile().getProjectPaths();
     }
 
     /**
@@ -236,7 +236,7 @@ public class ProjectConfigTool extends ProjectTool {
 
         // Update SourcePathText, BuildPathText
         Project proj = getProject();
-        ProjectConfig projConfig = proj.getProjectConfig();
+        BuildFile projConfig = proj.getBuildFile();
         setViewValue("SourcePathText", projConfig.getSourcePath());
         setViewValue("BuildPathText", projConfig.getBuildPath());
 
@@ -253,7 +253,7 @@ public class ProjectConfigTool extends ProjectTool {
     public void respondUI(ViewEvent anEvent)
     {
         Project proj = getProject();
-        ProjectConfig projConfig = proj.getProjectConfig();
+        BuildFile projConfig = proj.getBuildFile();
 
         // Handle HomePageText, AutoBuildCheckBox
         //if (anEvent.equals("HomePageText")) sitePane.setHomePageURLString(anEvent.getStringValue());
@@ -286,7 +286,7 @@ public class ProjectConfigTool extends ProjectTool {
                          for (File jarFile : jarFiles) {
                              String jarFilePath = jarFile.getAbsolutePath();
                              //if(StringUtils.endsWithIC(path, ".jar"))
-                             _proj.getProjectConfig().addLibPath(jarFilePath);
+                             _proj.getBuildFile().addLibPath(jarFilePath);
                          }
                      }
 

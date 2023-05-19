@@ -1,6 +1,6 @@
 package snapcode.project;
 import javakit.project.Project;
-import javakit.project.ProjectConfig;
+import javakit.project.BuildFile;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.util.XMLElement;
@@ -17,7 +17,7 @@ public class EclipseBuildFile {
     private Project  _proj;
 
     // The ProjectConfig
-    private ProjectConfig  _projConfig;
+    private BuildFile _projConfig;
 
     // The XML element
     private XMLElement  _xml;
@@ -25,7 +25,7 @@ public class EclipseBuildFile {
     /**
      * Constructor.
      */
-    public EclipseBuildFile(Project aProject, ProjectConfig projConfig)
+    public EclipseBuildFile(Project aProject, BuildFile projConfig)
     {
         _proj = aProject;
         _projConfig = projConfig;
