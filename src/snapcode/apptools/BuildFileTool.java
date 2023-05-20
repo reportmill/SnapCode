@@ -2,14 +2,10 @@ package snapcode.apptools;
 import javakit.project.*;
 import snapcode.app.*;
 import snapcode.project.VersionControl;
-import snapcode.webbrowser.LoginPage;
-import snapcode.webbrowser.ClientUtils;
-import snap.util.TaskRunner;
 import snap.view.*;
 import snap.viewx.*;
 import snap.web.WebSite;
 import snapcode.webbrowser.WebPage;
-
 import java.io.File;
 import java.util.List;
 
@@ -42,7 +38,7 @@ public class BuildFileTool extends ProjectTool {
      */
     public void addProjectForName(String aName, String aURLString)
     {
-        // If already set, just return
+        // If project already present, just return
         Project existingProj = _proj.getProjectForName(aName);
         if (existingProj != null) {
             View view = isUISet() && getUI().isShowing() ? getUI() : _workspacePane.getUI();
@@ -50,17 +46,22 @@ public class BuildFileTool extends ProjectTool {
             return;
         }
 
-        // Get site
+        // Get project site
         AppBase app = AppBase.getShared();
         WebSite projSite = app.getProjectSiteForName(aName);
 
-        // If project site doesn't exist, create it
-        if ((projSite == null || !projSite.getExists()) && aURLString != null) {
+        // If project site not found but VersionControl URL provided, try to check out project
+        boolean projectNotFound = projSite == null || !projSite.getExists();
+        if (projectNotFound && aURLString != null) {
+
+            // Create project site if missing
             if (projSite == null)
                 projSite = app.createProjectSiteForName(aName);
+
+            // Checkout project for URL
             VersionControl.setRemoteURLString(projSite, aURLString);
-            VersionControl vc = VersionControl.create(projSite);
-            checkoutProject(vc);
+            VersionControl versionControl = VersionControl.createVersionControlForProjectSite(projSite);
+            VersionControlTool.checkoutProject(_proj, versionControl, _workspacePane.getUI());
             return;
         }
 
@@ -96,19 +97,6 @@ public class BuildFileTool extends ProjectTool {
 
         // Remove dependent project from root project and WorkspacePane
         _proj.removeProjectForPath(aName);
-    }
-
-    /**
-     * Load all remote files into project directory.
-     */
-    public void checkoutProject(VersionControl aVC)
-    {
-        // Create checkout task runner
-        String title = "Checkout from " + aVC.getRemoteURLString();
-        TaskRunner<Object> checkoutRunner = new CheckoutTaskRunner(_workspacePane.getUI(), title, aVC);
-
-        // Start task
-        checkoutRunner.start();
     }
 
     /**
@@ -227,29 +215,8 @@ public class BuildFileTool extends ProjectTool {
         if (anEvent.equals("JarPathsList")) {
 
             // Handle DragEvent
-             if (anEvent.isDragEvent()) {
-                 anEvent.acceptDrag(); //TransferModes(TransferMode.COPY);
-                 anEvent.consume();
-                 if (anEvent.isDragDropEvent()) {
-
-                     // Get dropped jar files
-                     List<File> jarFiles = anEvent.getClipboard().getJavaFiles();
-                     if (jarFiles != null) {
-
-                         // Add JarPaths
-                         for (File jarFile : jarFiles) {
-                             String jarFilePath = jarFile.getAbsolutePath();
-                             //if(StringUtils.endsWithIC(path, ".jar"))
-                             _proj.getBuildFile().addLibPath(jarFilePath);
-                         }
-                     }
-
-                     // Trigger build
-                     WorkspaceBuilder builder = _workspace.getBuilder();
-                     builder.buildWorkspaceLater(false);
-                     anEvent.dropComplete();
-                 }
-             }
+             if (anEvent.isDragEvent())
+                 handleDragDropJarFilesEvent(anEvent);
 
              // Handle click
             else {
@@ -261,14 +228,9 @@ public class BuildFileTool extends ProjectTool {
         // Handle ProjectPathsList
         if (anEvent.equals("ProjectPathsList")) {
 
-            // Handle double click
-            if (anEvent.getClickCount() > 1) {
-                DialogBox dbox = new DialogBox("Add Project Dependency");
-                dbox.setQuestionMessage("Enter Project Name:");
-                String pname = dbox.showInputDialog(getUI(), null);
-                if (pname == null || pname.length() == 0) return;
-                addProjectForName(pname, null);
-            }
+            // Handle double click: Show add project panel
+            if (anEvent.getClickCount() > 1)
+                showAddProjectPanel();
 
             // Handle click
             else {
@@ -287,66 +249,51 @@ public class BuildFileTool extends ProjectTool {
     }
 
     /**
-     * This TaskRunner subclass checks out a project.
+     * Handles drag/drop jar files.
      */
-    private class CheckoutTaskRunner extends TaskRunnerPanel<Object> {
+    private void handleDragDropJarFilesEvent(ViewEvent dragEvent)
+    {
+        dragEvent.acceptDrag(); //TransferModes(TransferMode.COPY);
+        dragEvent.consume();
+        if (!dragEvent.isDragDropEvent())
+            return;
 
-        // The VersionControl
-        private VersionControl  _versionControl;
+        // Get dropped jar files
+        List<File> jarFiles = dragEvent.getClipboard().getJavaFiles();
+        if (jarFiles != null) {
 
-        /**
-         * Constructor.
-         */
-        public CheckoutTaskRunner(View aView, String aTitle, VersionControl aVC)
-        {
-            super(aView, aTitle);
-            _versionControl = aVC;
-        }
-
-        public Object run() throws Exception
-        {
-            _versionControl.checkout(this);
-            return null;
-        }
-
-        public void success(Object aRes)
-        {
-            // Add new project to root project
-            WebSite vcSite = _versionControl.getSite();
-            String projName = vcSite.getName();
-            _proj.addProjectForPath(projName);
-
-            // Build workspace
-            WorkspaceBuilder builder = _workspace.getBuilder();
-            builder.buildWorkspaceLater(true);
-        }
-
-        public void failure(Exception e)
-        {
-            WebSite remoteSite = _versionControl.getRemoteSite();
-
-            // If attempt to set permissions succeeds, try again
-            boolean setPermissionsSuccess = ClientUtils.setAccess(remoteSite);
-            if (setPermissionsSuccess) {
-                checkoutProject(_versionControl);
-                return;
+            // Add JarPaths
+            for (File jarFile : jarFiles) {
+                String jarFilePath = jarFile.getAbsolutePath();
+                //if(StringUtils.endsWithIC(path, ".jar"))
+                _proj.getBuildFile().addLibPath(jarFilePath);
             }
-
-            // If attempt to login succeeds, try again
-            LoginPage loginPage = new LoginPage();
-            boolean loginSuccess = loginPage.showPanel(_workspacePane.getUI(), remoteSite);
-            if (loginSuccess) {
-                checkoutProject(_versionControl);
-                return;
-            }
-
-            // Do normal version
-            super.failure(e);
         }
+
+        // Trigger build
+        WorkspaceBuilder builder = _workspace.getBuilder();
+        builder.buildWorkspaceLater(false);
+        dragEvent.dropComplete();
     }
 
     /**
-     * A WebPage subclass for ProjectPane.
+     * Shows an add project dialog box to add project dependency to this project.
+     */
+    private void showAddProjectPanel()
+    {
+        // Show dialog box to get project name (just return if cancelled/empty)
+        DialogBox dialogBox = new DialogBox("Add Project Dependency");
+        dialogBox.setQuestionMessage("Enter Project Name:");
+        String projectName = dialogBox.showInputDialog(getUI(), null);
+        if (projectName == null || projectName.length() == 0)
+            return;
+
+        // Add Project for name
+        addProjectForName(projectName, null);
+    }
+
+    /**
+     * A WebPage subclass for BuildFileTool.
      */
     public static class BuildFilePage extends WebPage {
 

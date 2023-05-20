@@ -1,7 +1,9 @@
 package snapcode.apptools;
 import javakit.project.Project;
+import javakit.project.Workspace;
 import javakit.project.WorkspaceBuilder;
 import snap.props.PropChange;
+import snap.view.View;
 import snapcode.app.ProjectPane;
 import snapcode.app.ProjectTool;
 import snapcode.app.WorkspaceTools;
@@ -139,8 +141,10 @@ public class VersionControlTool extends ProjectTool {
      */
     public void projectDidOpen()
     {
-        if (_versionControl.getExists()) return;
-        if (_versionControl.getRemoteURL() == null) return;
+        if (_versionControl.getExists())
+            return;
+        if (_versionControl.getRemoteURL() == null)
+            return;
 
         String msg = "Do you want to load remote files into project directory?";
         DialogBox dialogBox = new DialogBox("Checkout Project Files");
@@ -245,13 +249,13 @@ public class VersionControlTool extends ProjectTool {
 
         // Get base files and all files to transfer
         List<WebFile> selFiles = theFiles != null ? theFiles : getSelFiles();
-        List<WebFile> sfiles = getCommitFiles(selFiles);
+        List<WebFile> commitFiles = getCommitFiles(selFiles);
 
         // Run VersionControlFilesPane for files and op
         VcsTransferPane transferPane = new VcsTransferPane();
-        if (!transferPane.showPanel(this, sfiles, VersionControl.Op.Commit))
+        if (!transferPane.showPanel(this, commitFiles, VersionControl.Op.Commit))
             return;
-        commitFilesImpl(sfiles, transferPane.getCommitMessage());
+        commitFilesImpl(commitFiles, transferPane.getCommitMessage());
     }
 
     /**
@@ -407,7 +411,8 @@ public class VersionControlTool extends ProjectTool {
         List<WebFile> sfiles = getReplaceFiles(bfiles);
 
         // Run VersionControlFilesPane for files and op
-        if (!new VcsTransferPane().showPanel(this, sfiles, VersionControl.Op.Replace)) return;
+        if (!new VcsTransferPane().showPanel(this, sfiles, VersionControl.Op.Replace))
+            return;
         replaceFilesImpl(sfiles);
     }
 
@@ -518,5 +523,86 @@ public class VersionControlTool extends ProjectTool {
     {
         WebFile rootDir = getProjectSite().getRootDir();
         return Collections.singletonList(rootDir);
+    }
+
+    /**
+     * Load all remote files into project directory.
+     */
+    public static void checkoutProject(Project parentProject, VersionControl versionControl, View clientView)
+    {
+        // Create checkout task runner
+        String title = "Checkout from " + versionControl.getRemoteURLString();
+        TaskRunner<Object> checkoutRunner = new CheckoutProjectTaskRunnerPanel(clientView, title, parentProject, versionControl);
+
+        // Start task
+        checkoutRunner.start();
+    }
+
+    /**
+     * This TaskRunner subclass checks out a project.
+     */
+    private static class CheckoutProjectTaskRunnerPanel extends TaskRunnerPanel<Object> {
+
+        // The View
+        private View _view;
+
+        // The Project
+        private Project _project;
+
+        // The VersionControl
+        private VersionControl  _versionControl;
+
+        /**
+         * Constructor.
+         */
+        public CheckoutProjectTaskRunnerPanel(View aView, String aTitle, Project aProject, VersionControl aVC)
+        {
+            super(aView, aTitle);
+            _view = aView;
+            _project = aProject;
+            _versionControl = aVC;
+        }
+
+        public Object run() throws Exception
+        {
+            _versionControl.checkout(this);
+            return null;
+        }
+
+        public void success(Object aRes)
+        {
+            // Add new project to root project
+            WebSite vcSite = _versionControl.getSite();
+            String projName = vcSite.getName();
+            _project.addProjectForPath(projName);
+
+            // Build workspace
+            Workspace workspace = _project.getWorkspace();
+            WorkspaceBuilder builder = workspace.getBuilder();
+            builder.buildWorkspaceLater(true);
+        }
+
+        public void failure(Exception e)
+        {
+            WebSite remoteSite = _versionControl.getRemoteSite();
+
+            // If attempt to set permissions succeeds, try again
+            boolean setPermissionsSuccess = ClientUtils.setAccess(remoteSite);
+            if (setPermissionsSuccess) {
+                checkoutProject(_project, _versionControl, _view);
+                return;
+            }
+
+            // If attempt to login succeeds, try again
+            LoginPage loginPage = new LoginPage();
+            boolean loginSuccess = loginPage.showPanel(_view, remoteSite);
+            if (loginSuccess) {
+                checkoutProject(_project, _versionControl, _view);
+                return;
+            }
+
+            // Do normal version
+            super.failure(e);
+        }
     }
 }

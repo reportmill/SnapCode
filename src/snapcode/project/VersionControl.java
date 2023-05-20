@@ -597,26 +597,31 @@ public class VersionControl {
     /**
      * Returns the VersionControl for a site.
      */
-    public synchronized static VersionControl getVersionControlForProjectSite(WebSite aSite)
+    public synchronized static VersionControl getVersionControlForProjectSite(WebSite projectSite)
     {
-        VersionControl versionControl = (VersionControl) aSite.getProp(VersionControl.class.getName());
-        if (versionControl == null)
-            aSite.setProp(VersionControl.class.getName(), versionControl = create(aSite));
+        // Get VersionControl for project site (create if missing)
+        VersionControl versionControl = (VersionControl) projectSite.getProp(VersionControl.class.getName());
+        if (versionControl == null) {
+            versionControl = createVersionControlForProjectSite(projectSite);
+            projectSite.setProp(VersionControl.class.getName(), versionControl);
+        }
+
+        // Return
         return versionControl;
     }
 
     /**
      * Returns the VersionControl for a site.
      */
-    public static VersionControl create(WebSite aSite)
+    public static VersionControl createVersionControlForProjectSite(WebSite projectSite)
     {
-        //String urls = getRemoteURLString(aSite);
+        //String urls = getRemoteURLString(projectSite);
         //if (urls != null) urls = urls.toLowerCase();
 
         // Handle Git
-        //if (urls != null && (urls.startsWith("git:") || urls.endsWith(".git"))) return new VersionControlGit(aSite);
+        //if (urls != null && (urls.startsWith("git:") || urls.endsWith(".git"))) return new VersionControlGit(projectSite);
 
         // Handle plain
-        return new VersionControl(aSite);
+        return new VersionControl(projectSite);
     }
 }
