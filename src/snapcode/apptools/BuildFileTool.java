@@ -43,6 +43,7 @@ public class BuildFileTool extends ProjectTool {
      */
     public void addDependencyForIdString(String idString)
     {
+        // Get dependency for id string (just return if not found)
         BuildDependency dependency = BuildDependency.getDependencyForPath(_proj, idString);
         if (dependency == null)
             return;
@@ -80,7 +81,8 @@ public class BuildFileTool extends ProjectTool {
             // Checkout project for URL
             VersionControl.setRemoteURLString(projSite, aURLString);
             VersionControl versionControl = VersionControl.createVersionControlForProjectSite(projSite);
-            VersionControlTool.checkoutProject(_proj, versionControl, _workspacePane.getUI());
+            Runnable successCallback = () -> addProjectForNameImpl(aName);
+            VersionControlTool.checkoutProject(versionControl, _workspacePane.getUI(), successCallback);
             return;
         }
 
@@ -92,7 +94,20 @@ public class BuildFileTool extends ProjectTool {
         }
 
         // Add project for name
+        addProjectForNameImpl(aName);
+    }
+
+    /**
+     * Adds a project with given name.
+     */
+    public void addProjectForNameImpl(String aName)
+    {
+        // Add project for name
         _proj.addProjectForPath(aName);
+
+        // Build workspace
+        WorkspaceBuilder builder = _workspace.getBuilder();
+        builder.buildWorkspaceLater(true);
     }
 
     /**

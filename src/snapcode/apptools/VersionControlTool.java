@@ -1,6 +1,4 @@
 package snapcode.apptools;
-import javakit.project.Project;
-import javakit.project.Workspace;
 import javakit.project.WorkspaceBuilder;
 import snap.props.PropChange;
 import snap.view.View;
@@ -524,11 +522,11 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Load all remote files into project directory.
      */
-    public static void checkoutProject(Project parentProject, VersionControl versionControl, View clientView)
+    public static void checkoutProject(VersionControl versionControl, View clientView, Runnable successCallback)
     {
         // Create checkout task runner
         String title = "Checkout from " + versionControl.getRemoteURLString();
-        TaskRunner<Object> checkoutRunner = new CheckoutProjectTaskRunnerPanel(clientView, title, parentProject, versionControl);
+        TaskRunner<Object> checkoutRunner = new CheckoutProjectTaskRunnerPanel(clientView, title, versionControl, successCallback);
 
         // Start task
         checkoutRunner.start();
@@ -542,21 +540,21 @@ public class VersionControlTool extends ProjectTool {
         // The View
         private View _view;
 
-        // The Project
-        private Project _project;
-
         // The VersionControl
         private VersionControl  _versionControl;
+
+        // The callback for success
+        private Runnable _successCallback;
 
         /**
          * Constructor.
          */
-        public CheckoutProjectTaskRunnerPanel(View aView, String aTitle, Project aProject, VersionControl aVC)
+        public CheckoutProjectTaskRunnerPanel(View aView, String aTitle, VersionControl aVC, Runnable successCallback)
         {
             super(aView, aTitle);
             _view = aView;
-            _project = aProject;
             _versionControl = aVC;
+            _successCallback = successCallback;
         }
 
         public Object run() throws Exception
@@ -567,15 +565,7 @@ public class VersionControlTool extends ProjectTool {
 
         public void success(Object aRes)
         {
-            // Add new project to root project
-            WebSite vcSite = _versionControl.getSite();
-            String projName = vcSite.getName();
-            _project.addProjectForPath(projName);
-
-            // Build workspace
-            Workspace workspace = _project.getWorkspace();
-            WorkspaceBuilder builder = workspace.getBuilder();
-            builder.buildWorkspaceLater(true);
+            _successCallback.run();
         }
 
         public void failure(Exception e)
@@ -585,7 +575,7 @@ public class VersionControlTool extends ProjectTool {
             // If attempt to set permissions succeeds, try again
             boolean setPermissionsSuccess = ClientUtils.setAccess(remoteSite);
             if (setPermissionsSuccess) {
-                checkoutProject(_project, _versionControl, _view);
+                checkoutProject(_versionControl, _view, _successCallback);
                 return;
             }
 
@@ -593,7 +583,7 @@ public class VersionControlTool extends ProjectTool {
             LoginPage loginPage = new LoginPage();
             boolean loginSuccess = loginPage.showPanel(_view, remoteSite);
             if (loginSuccess) {
-                checkoutProject(_project, _versionControl, _view);
+                checkoutProject(_versionControl, _view, _successCallback);
                 return;
             }
 
