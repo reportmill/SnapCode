@@ -39,6 +39,20 @@ public class BuildFileTool extends ProjectTool {
     public BuildFile getBuildFile()  { return _proj.getBuildFile(); }
 
     /**
+     * Adds a dependency for given string.
+     */
+    public void addDependencyForIdString(String idString)
+    {
+        BuildDependency dependency = BuildDependency.getDependencyForPath(_proj, idString);
+        if (dependency == null)
+            return;
+
+        // Add dependency
+        BuildFile buildFile = getBuildFile();
+        buildFile.addDependency(dependency);
+    }
+
+    /**
      * Adds a project with given name.
      */
     public void addProjectForName(String aName, String aURLString)
@@ -179,6 +193,7 @@ public class BuildFileTool extends ProjectTool {
         // Have Backspace and Delete remove selected Jar path
         addKeyActionHandler("DeleteAction", "DELETE");
         addKeyActionHandler("BackSpaceAction", "BACK_SPACE");
+        enableEvents("DependenciesList", DragEvents);
         enableEvents("JarPathsList", DragEvents);
         enableEvents("ProjectPathsList", MouseRelease);
     }
@@ -194,6 +209,9 @@ public class BuildFileTool extends ProjectTool {
         // Update SourcePathText, BuildPathText
         setViewValue("SourcePathText", buildFile.getSourcePath());
         setViewValue("BuildPathText", buildFile.getBuildPath());
+
+        // Update DependenciesList
+        setViewItems("DependenciesList", buildFile.getDependencies());
 
         // Update JarPathsList, ProjectPathsList
         setViewItems("JarPathsList", getJarPaths());
@@ -215,12 +233,24 @@ public class BuildFileTool extends ProjectTool {
         if (anEvent.equals("BuildPathText"))
             buildFile.setBuildPath(anEvent.getStringValue());
 
+        // Handle DependenciesList
+        if (anEvent.equals("DependenciesList")) {
+
+            // Handle DragEvent
+             if (anEvent.isDragEvent())
+                 handleDependenciesListDragEvent(anEvent);
+
+            // Handle double click: Show add dependency panel
+            if (anEvent.getClickCount() > 1)
+                showAddDependencyPanel();
+        }
+
         // Handle JarPathsList
         if (anEvent.equals("JarPathsList")) {
 
             // Handle DragEvent
              if (anEvent.isDragEvent())
-                 handleDragDropJarFilesEvent(anEvent);
+                 handleJarFilesListDragEvent(anEvent);
 
              // Handle click
             else {
@@ -255,7 +285,38 @@ public class BuildFileTool extends ProjectTool {
     /**
      * Handles drag/drop jar files.
      */
-    private void handleDragDropJarFilesEvent(ViewEvent dragEvent)
+    private void handleDependenciesListDragEvent(ViewEvent dragEvent)
+    {
+        dragEvent.acceptDrag();
+        dragEvent.consume();
+        if (!dragEvent.isDragDropEvent())
+            return;
+
+        // Get dropped dependency files
+        List<File> dependencyFiles = dragEvent.getClipboard().getJavaFiles();
+        if (dependencyFiles != null) {
+
+            // Iterate over dependency files and add dependency for each
+            for (File dependencyFile : dependencyFiles) {
+                String dependencyFilePath = dependencyFile.getAbsolutePath();
+                BuildDependency dependency = BuildDependency.getDependencyForPath(_proj, dependencyFilePath);
+                if (dependency != null) {
+                    BuildFile buildFile = getBuildFile();
+                    buildFile.addDependency(dependency);
+                }
+            }
+        }
+
+        // Trigger build
+        WorkspaceBuilder builder = _workspace.getBuilder();
+        builder.buildWorkspaceLater(false);
+        dragEvent.dropComplete();
+    }
+
+    /**
+     * Handles drag/drop jar files.
+     */
+    private void handleJarFilesListDragEvent(ViewEvent dragEvent)
     {
         dragEvent.acceptDrag(); //TransferModes(TransferMode.COPY);
         dragEvent.consume();
@@ -278,6 +339,22 @@ public class BuildFileTool extends ProjectTool {
         WorkspaceBuilder builder = _workspace.getBuilder();
         builder.buildWorkspaceLater(false);
         dragEvent.dropComplete();
+    }
+
+    /**
+     * Shows an add project dialog box to add project dependency to this project.
+     */
+    private void showAddDependencyPanel()
+    {
+        // Show dialog box to get dependency name/path/string (just return if cancelled/empty)
+        DialogBox dialogBox = new DialogBox("Add Build Dependency");
+        dialogBox.setQuestionMessage("Enter dependency string:");
+        String dependencyStr = dialogBox.showInputDialog(getUI(), null);
+        if (dependencyStr == null || dependencyStr.length() == 0)
+            return;
+
+        // Add Project for name
+        addDependencyForIdString(dependencyStr);
     }
 
     /**
