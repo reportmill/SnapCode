@@ -74,7 +74,6 @@ public class WorkspacePane extends ViewOwner {
 
         // Create WorkspaceTools
         _workspaceTools = createWorkspaceTools();
-        _workspaceTools.createTools();
 
         // Manage projects
         Project[] projects = _workspace.getProjects();

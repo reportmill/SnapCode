@@ -54,7 +54,10 @@ public class WorkspaceTools {
     {
         super();
         _workspacePane = workspacePane;
-        _tools = new WorkspaceTool[0];
+        workspacePane._workspaceTools = this;
+
+        // Create tools
+        createTools();
 
         // Set workspace
         setWorkspace(_workspacePane.getWorkspace());
@@ -71,6 +74,8 @@ public class WorkspaceTools {
         EvalTool evalTool = new EvalTool(_workspacePane);
         HelpTool helpTool = new HelpTool(_workspacePane);
         ProblemsTool problemsTool = new ProblemsTool(_workspacePane);
+
+        // Create tools array
         _tools = new WorkspaceTool[] { filesTool, fileTreeTool, evalTool, helpTool, problemsTool };
 
         // Create LeftTray
