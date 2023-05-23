@@ -14,9 +14,6 @@ import java.net.URLClassLoader;
  */
 public class ProjectX extends Project {
 
-    // An object to read ProjectConfig properties to/from project config file
-    private ProjectConfigFile  _projConfigFile;
-
     /**
      * Constructor.
      */
@@ -30,30 +27,22 @@ public class ProjectX extends Project {
     }
 
     /**
-     * Override to create ProjectConfig from project config file.
+     * Override to support legacy EclipseBuildFile.
      */
     @Override
-    protected BuildFile createBuildFile()
+    protected BuildFile getBuildFileImpl()
     {
-        _projConfigFile = new ProjectConfigFile(this);
-        return _projConfigFile.getProjectConfig();
-    }
+        // Do normal version - just return if build file already exists
+        BuildFile buildFile = super.getBuildFileImpl();
+        WebFile buildFileFile = buildFile.getBuildFile();
+        if (buildFileFile.getExists())
+            return buildFile;
 
-    /**
-     * Returns whether file is config file.
-     */
-    @Override
-    protected boolean isConfigFile(WebFile aFile)
-    {
-        WebFile configFile = _projConfigFile.getConfigFile();
-        return aFile == configFile;
+        // If build file doesn't exist, try EclipseBuildFile
+        new EclipseBuildFile(this, buildFile);
+        buildFile.writeFile();
+        return buildFile;
     }
-
-    /**
-     * Reads the settings from project settings file(s).
-     */
-    @Override
-    public void readSettings()  { _projConfigFile.readFile(); }
 
     /**
      * Returns a class loader to be used with compiler.

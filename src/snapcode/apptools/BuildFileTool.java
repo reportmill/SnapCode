@@ -34,6 +34,11 @@ public class BuildFileTool extends ProjectTool {
     public Project getProject()  { return _proj; }
 
     /**
+     * Returns the BuildFile.
+     */
+    public BuildFile getBuildFile()  { return _proj.getBuildFile(); }
+
+    /**
      * Adds a project with given name.
      */
     public void addProjectForName(String aName, String aURLString)
@@ -111,7 +116,7 @@ public class BuildFileTool extends ProjectTool {
         }
 
         // Remove path from classpath
-        _proj.getBuildFile().removeLibPath(aJarPath);
+        getBuildFile().removeLibPath(aJarPath);
     }
 
     /**
@@ -119,7 +124,7 @@ public class BuildFileTool extends ProjectTool {
      */
     public String[] getJarPaths()
     {
-        return _proj.getBuildFile().getLibPaths();
+        return getBuildFile().getLibPaths();
     }
 
     /**
@@ -145,7 +150,7 @@ public class BuildFileTool extends ProjectTool {
      */
     public String[] getProjectPaths()
     {
-        return _proj.getBuildFile().getProjectPaths();
+        return getBuildFile().getProjectPaths();
     }
 
     /**
@@ -184,11 +189,11 @@ public class BuildFileTool extends ProjectTool {
     @Override
     protected void resetUI()
     {
+        BuildFile buildFile = getBuildFile();
+
         // Update SourcePathText, BuildPathText
-        Project proj = getProject();
-        BuildFile projConfig = proj.getBuildFile();
-        setViewValue("SourcePathText", projConfig.getSourcePath());
-        setViewValue("BuildPathText", projConfig.getBuildPath());
+        setViewValue("SourcePathText", buildFile.getSourcePath());
+        setViewValue("BuildPathText", buildFile.getBuildPath());
 
         // Update JarPathsList, ProjectPathsList
         setViewItems("JarPathsList", getJarPaths());
@@ -202,14 +207,13 @@ public class BuildFileTool extends ProjectTool {
      */
     public void respondUI(ViewEvent anEvent)
     {
-        Project proj = getProject();
-        BuildFile projConfig = proj.getBuildFile();
+        BuildFile buildFile = getBuildFile();
 
         // Update SourcePathText, BuildPathText
         if (anEvent.equals("SourcePathText"))
-            projConfig.setSourcePath(anEvent.getStringValue());
+            buildFile.setSourcePath(anEvent.getStringValue());
         if (anEvent.equals("BuildPathText"))
-            projConfig.setBuildPath(anEvent.getStringValue());
+            buildFile.setBuildPath(anEvent.getStringValue());
 
         // Handle JarPathsList
         if (anEvent.equals("JarPathsList")) {

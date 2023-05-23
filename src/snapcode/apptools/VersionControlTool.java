@@ -219,20 +219,16 @@ public class VersionControlTool extends ProjectTool {
      */
     protected void checkoutSuccess(boolean oldAutoBuildEnabled)
     {
+        // Reload files
         WebSite projectSite = getProjectSite();
         projectSite.getRootDir().reload();
-        Project proj = Project.getProjectForSite(projectSite);
-        if (proj != null)
-            proj.readSettings();
 
         // Reset UI
         _workspacePane.resetLater();
 
-        //
+        // Reset AutoBuildEnabled and trigger auto build
         WorkspaceBuilder builder = _workspace.getBuilder();
         builder.setAutoBuildEnabled(oldAutoBuildEnabled);
-
-        //
         if (oldAutoBuildEnabled)
             builder.buildWorkspaceLater(true);
     }
