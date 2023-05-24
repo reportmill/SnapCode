@@ -53,7 +53,23 @@ public class BuildFileTool extends ProjectTool {
         buildFile.addDependency(dependency);
 
         // Select dependency and reset
+        setViewItems("DependenciesListView", buildFile.getDependencies());
         setViewSelItem("DependenciesListView", dependency);
+        resetLater();
+    }
+
+    /**
+     * Removes a dependency.
+     */
+    public void removeDependency(BuildDependency buildDependency)
+    {
+        // Add dependency
+        BuildFile buildFile = getBuildFile();
+        buildFile.removeDependency(buildDependency);
+
+        // Select dependency and reset
+        setViewItems("DependenciesListView", buildFile.getDependencies());
+        setViewSelItem("DependenciesListView", null);
         resetLater();
     }
 
@@ -301,9 +317,13 @@ public class BuildFileTool extends ProjectTool {
 
         // Handle DeleteAction
         if (anEvent.equals("DeleteAction") || anEvent.equals("BackSpaceAction")) {
-            if (getView("JarPathsList").isShowing())
+            if (getView("DependenciesListView").isFocused()) {
+                BuildDependency dependency = (BuildDependency) getViewSelItem("DependenciesListView");
+                removeDependency(dependency);
+            }
+            else if (getView("JarPathsList").isFocused())
                 removeJarPath(getSelectedJarPath());
-            else if (getView("ProjectPathsList").isShowing())
+            else if (getView("ProjectPathsList").isFocused())
                 removeProjectForName(getSelectedProjectPath());
         }
     }
