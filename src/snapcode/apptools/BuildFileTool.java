@@ -51,6 +51,10 @@ public class BuildFileTool extends ProjectTool {
         // Add dependency
         BuildFile buildFile = getBuildFile();
         buildFile.addDependency(dependency);
+
+        // Select dependency and reset
+        setViewSelItem("DependenciesListView", dependency);
+        resetLater();
     }
 
     /**
@@ -208,7 +212,14 @@ public class BuildFileTool extends ProjectTool {
         // Have Backspace and Delete remove selected Jar path
         addKeyActionHandler("DeleteAction", "DELETE");
         addKeyActionHandler("BackSpaceAction", "BACK_SPACE");
-        enableEvents("DependenciesList", DragEvents);
+
+        // Configure DependenciesListView
+        ListView<BuildDependency> dependenciesListView = getView("DependenciesListView", ListView.class);
+        dependenciesListView.setItemTextFunction(dep -> dep.getType() + " " + dep.getId());
+        enableEvents(dependenciesListView, DragEvents);
+        dependenciesListView.addEventFilter(e -> { if (e.getClickCount() == 2) showAddDependencyPanel(); }, MousePress);
+
+        // Configure JarPathsList, ProjectPathsList
         enableEvents("JarPathsList", DragEvents);
         enableEvents("ProjectPathsList", MouseRelease);
     }
@@ -226,7 +237,7 @@ public class BuildFileTool extends ProjectTool {
         setViewValue("BuildPathText", buildFile.getBuildPath());
 
         // Update DependenciesList
-        setViewItems("DependenciesList", buildFile.getDependencies());
+        setViewItems("DependenciesListView", buildFile.getDependencies());
 
         // Update JarPathsList, ProjectPathsList
         setViewItems("JarPathsList", getJarPaths());
@@ -249,7 +260,7 @@ public class BuildFileTool extends ProjectTool {
             buildFile.setBuildPath(anEvent.getStringValue());
 
         // Handle DependenciesList
-        if (anEvent.equals("DependenciesList")) {
+        if (anEvent.equals("DependenciesListView")) {
 
             // Handle DragEvent
              if (anEvent.isDragEvent())
