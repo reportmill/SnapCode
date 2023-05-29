@@ -1,4 +1,4 @@
-package snapcode.appjr;
+package snapcode.app;
 import javakit.ide.JavaTextUtils;
 import javakit.parse.JeplTextDoc;
 import javakit.project.JeplAgent;

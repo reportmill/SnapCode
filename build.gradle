@@ -38,6 +38,6 @@ dependencies {
     implementation files('lib/tools.jar')
 }
 
-mainClassName = 'snapcode.appjr.AppGL'
+mainClassName = 'snapcode.app.AppGL'
 
 

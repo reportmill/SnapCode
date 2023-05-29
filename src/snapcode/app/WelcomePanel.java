@@ -1,30 +1,44 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snapcode.app;
-import javakit.project.Project;
 import javakit.project.Workspace;
-import snap.util.*;
+import snap.props.PropChange;
+import snap.util.ArrayUtils;
+import snap.util.ClassUtils;
+import snap.util.Prefs;
+import snap.util.SnapUtils;
 import snap.view.*;
-import snap.viewx.DialogBox;
-import snap.web.WebSite;
-import snap.web.WebURL;
-import snapcode.util.Settings;
-import snapcode.webbrowser.ClientUtils;
-
-import java.util.ArrayList;
-import java.util.List;
+import snap.viewx.FilePanel;
+import snap.web.*;
 
 /**
  * An implementation of a panel to manage/open user Snap sites (projects).
  */
 public class WelcomePanel extends ViewOwner {
 
-    // The list of sites
-    private List<WebSite>  _sites;
-
-    // The selected site
-    private WebSite  _selSite;
+    // The FilePanel
+    private FilePanel  _filePanel;
 
     // The shared instance
-    private static WelcomePanel  _shared;
+    private static WelcomePanel _shared;
+
+    // Constants
+    public static final String JAVA_FILE_EXT = "java";
+    public static final String JEPL_FILE_EXT = "jepl";
+    public static final String[] FILE_TYPES = { JAVA_FILE_EXT, JEPL_FILE_EXT };
+
+    /**
+     * Constructor.
+     */
+    protected WelcomePanel()
+    {
+        // Set as Shared (there should only be one instance)
+        _shared = this;
+
+        //
+        JeplUtils.initJavaKitForThisApp();
+    }
 
     /**
      * Returns the shared instance.
@@ -49,182 +63,9 @@ public class WelcomePanel extends ViewOwner {
      */
     public void hide()
     {
-        // Hide window and stop animation
+        // Hide window and flush prefs
         getWindow().setVisible(false);
-
-        // Write current list of sites, flush prefs
-        writeSites();
         Prefs.getDefaultPrefs().flush();
-    }
-
-    /**
-     * Returns the number of site.
-     */
-    public int getSiteCount()
-    {
-        return getSites().size();
-    }
-
-    /**
-     * Returns the site at given index.
-     */
-    public WebSite getSite(int anIndex)
-    {
-        return getSites().get(anIndex);
-    }
-
-    /**
-     * Returns the list of sites.
-     */
-    public List<WebSite> getSites()
-    {
-        if (_sites != null) return _sites;
-        List<WebSite> sites = readSites();
-        return _sites = sites;
-    }
-
-    /**
-     * Adds a project site.
-     */
-    public void addSite(WebSite aSite)
-    {
-        List<WebSite> sites = getSites();
-        int index = sites.size();
-        sites.add(index, aSite);
-        resetLater();
-    }
-
-    /**
-     * Removes a given site from sites list.
-     */
-    public void removeSite(WebSite aSite)
-    {
-        int index = ListUtils.indexOfId(getSites(), aSite);
-        if (index >= 0) {
-            List<WebSite> sites = getSites();
-            sites.remove(index);
-            resetLater();
-        }
-    }
-
-    /**
-     * Returns a site for given URL or name, if available.
-     */
-    public WebSite getProjectSiteForName(String aName)
-    {
-        // Search for matching Site.URL.String
-        List<WebSite> sites = getSites();
-        WebSite projectSiteForName = ListUtils.findMatch(sites, site -> site.getURL().getString().equalsIgnoreCase(aName));
-
-        // Search for matching Site.Name
-        if (projectSiteForName == null)
-            projectSiteForName = ListUtils.findMatch(sites, site -> site.getName().equalsIgnoreCase(aName));
-
-        // Return
-        return projectSiteForName;
-    }
-
-    /**
-     * Returns the selected site.
-     */
-    public WebSite getSelSite()  { return _selSite; }
-
-    /**
-     * Sets the selected site.
-     */
-    public void setSelSite(WebSite aSite)
-    {
-        _selSite = aSite;
-        resetLater();
-    }
-
-    /**
-     * Returns the list of selected sites.
-     */
-    public WebSite[] getSelectedSites()
-    {
-        return _selSite != null ? new WebSite[] { _selSite } : new WebSite[0];
-    }
-
-    /**
-     * Called to quit app.
-     */
-    public void quitApp()
-    {
-        hide();
-        AppBase.getShared().quitApp();
-    }
-
-    /**
-     * Reads sites from <SNAP_HOME>/UserLocal.settings.
-     */
-    protected List<WebSite> readSites()
-    {
-        // Get site names and create sites.
-        _sites = new ArrayList<>();
-        Settings settings = ClientUtils.getUserLocalSettings();
-        List<String> projectUrls = settings.getList("Projects");
-        if (projectUrls == null)
-            projectUrls = settings.getList("SnapSites");
-        if (projectUrls == null)
-            return _sites;
-
-        // Get site from string
-        for (String projUrlStr : projectUrls) {
-            if (!projUrlStr.contains(":"))
-                projUrlStr = "local:/" + projUrlStr;
-            WebURL projUrl = WebURL.getURL(projUrlStr);
-            WebSite projSite = projUrl != null ?  projUrl.getAsSite() : null;
-            if (projSite != null)
-                _sites.add(projSite);
-        }
-
-        // Get Selected Sites
-        List<String> selProjectUrls = settings.getList("SelectedSites", true);
-        for (String projUrl : selProjectUrls) {
-            WebSite projSite = getProjectSiteForName(projUrl);
-            if (projSite != null)
-                _selSite = projSite;
-            break;
-        }
-
-        // Return
-        return _sites;
-    }
-
-    /**
-     * Saves sites to <SNAP_HOME>/UserLocal.settings.
-     */
-    protected void writeSites()
-    {
-        // Move selected sites to front of the list
-        WebSite[] selectedSites = getSelectedSites();
-        for (int i = 0; i < selectedSites.length; i++) {
-            WebSite site = selectedSites[i];
-            if (site != getSite(i) && ListUtils.removeId(_sites, site) >= 0)
-                _sites.add(i, site);
-        }
-
-        // Put Site URLs
-        List<String> urls = new ArrayList<>();
-        for (WebSite site : getSites())
-            urls.add(getSimpleURLString(site));
-        ClientUtils.getUserLocalSettings().put("Projects", urls.size() > 0 ? urls : null);
-
-        // Put SelectedSites URLs
-        List<String> siteUrls = new ArrayList<>();
-        for (WebSite site : getSelectedSites())
-            siteUrls.add(getSimpleURLString(site));
-        ClientUtils.getUserLocalSettings().put("SelectedSites", siteUrls.size() > 0 ? siteUrls : null);
-        ClientUtils.saveUserLocalSettings();
-    }
-
-    /**
-     * Returns the simple URL for a site (just the name if local).
-     */
-    private String getSimpleURLString(WebSite aSite)
-    {
-        return aSite.getURL().getScheme().equals("local") ? aSite.getName() : aSite.getURLString();
     }
 
     /**
@@ -232,39 +73,29 @@ public class WelcomePanel extends ViewOwner {
      */
     protected void initUI()
     {
-        // Add WelcomePaneAnim node
-        WelcomePanelAnim anim = new WelcomePanelAnim();
-        getUI(ChildView.class).addChild(anim.getUI());
-        anim.getUI().playAnimDeep();
+        // Add WelcomePaneAnim view
+        View anim = getTopGraphic();
+        getUI(ChildView.class).addChild(anim, 0);
+        anim.playAnimDeep();
 
-        // Enable SitesTable MouseReleased
-        TableView<WebSite> sitesTable = getView("SitesTable", TableView.class);
-        sitesTable.setRowHeight(24);
-        enableEvents(sitesTable, MouseRelease);
+        // Create FilePanel
+        _filePanel = createFilePanel();
+        View filePanelUI = _filePanel.getUI();
+        filePanelUI.setGrowHeight(true);
 
-        // Set preferred size
-        getUI().setPrefSize(400, 480);
+        // Add FilePanel.UI to ColView
+        ColView topColView = (ColView) getUI();
+        ColView colView2 = (ColView) topColView.getChild(1);
+        colView2.addChild(filePanelUI, 1);
+
+        // Hide ProgressBar
+        getView("ProgressBar").setVisible(false);
 
         // Configure Window: Add WindowListener to indicate app should exit when close button clicked
         WindowView win = getWindow();
         win.setTitle("Welcome");
-        win.setResizable(false);
         enableEvents(win, WinClose);
         getView("OpenButton", Button.class).setDefaultButton(true);
-    }
-
-    /**
-     * Resets UI.
-     */
-    public void resetUI()
-    {
-        // Update SitesTable
-        setViewItems("SitesTable", getSites());
-        setViewSelItem("SitesTable", getSelSite());
-
-        // Update OpenButton, RemoveButton
-        setViewEnabled("OpenButton", getSelectedSites().length > 0);
-        setViewEnabled("RemoveButton", getSelectedSites().length > 0);
     }
 
     /**
@@ -272,218 +103,259 @@ public class WelcomePanel extends ViewOwner {
      */
     public void respondUI(ViewEvent anEvent)
     {
-        // Handle SitesTable double-click
-        if (anEvent.equals("SitesTable")) {
-
-            // Handle multi-click
-            if (anEvent.getClickCount() > 1) {
-                if (getView("OpenButton", Button.class).isEnabled()) {
-                    hide();
-                    openProjectSites();
-                }
-            }
-
-            // Handle click
-            else {
-                Object selItem = getViewSelItem("SitesTable");
-                if (selItem instanceof WebSite) {
-                    WebSite site = (WebSite) selItem;
-                    setSelSite(site);
-                }
-            }
-        }
+        // Handle SamplesButton
+        if (anEvent.equals("SamplesButton"))
+            newFile(true);
 
         // Handle NewButton
         if (anEvent.equals("NewButton"))
-            createProjectSite();
+            newFile(false);
 
         // Handle OpenButton
         if (anEvent.equals("OpenButton")) {
-            if (ViewUtils.isAltDown()) {
-                handleOpenButtonAlt();
-                return;
-            }
-            hide();
-            openProjectSites();
+            WebFile selFile = _filePanel.getSelFileAndAddToRecentFiles();
+            openWorkspaceForFile(selFile);
         }
-
-        // Handle RemoveButton
-        if (anEvent.equals("RemoveButton"))
-            showRemoveSitePanel();
 
         // Handle QuitButton
         if (anEvent.equals("QuitButton"))
-            quitApp();
+            AppBase.getShared().quitApp();
 
         // Handle WinClosing
         if (anEvent.isWinClose())
-            quitApp();
+            hide();
     }
 
     /**
-     * Creates a WorkspacePane.
+     * Creates a new file.
      */
-    protected WorkspacePane createWorkspacePane()  { return  new WorkspacePaneX(); }
+    protected void newFile(boolean showSamples)
+    {
+        // Show jepl
+        WorkspacePane workspacePane = openWorkspaceForFile(null);
+
+        if (showSamples)
+            runLaterDelayed(300, () -> workspacePane.getWorkspaceTools().showSamples());
+        else runLater(() -> workspacePane.getWorkspaceTools().startSamplesButtonAnim());
+    }
 
     /**
-     * Creates a new project site.
+     * Opens a Workspace for given Java/Jepl file or project dir/file.
      */
-    protected void createProjectSite()
+    protected WorkspacePane openWorkspaceForFile(WebFile aFile)
     {
-        // Get name for new project/site
-        DialogBox dialogBox = new DialogBox("New Project Panel");
-        dialogBox.setMessage("Enter name of new project");
-        String projName = dialogBox.showInputDialog(getUI(), "Untitled");
-        if (projName == null)
-            return;
+        // Create WorkspacePane, set source, show
+        WorkspacePane workspacePane = new WorkspacePane();
 
-        // If project site already exists for name, just return
-        if (getProjectSiteForName(projName) != null) {
-            setSelSite(getProjectSiteForName(projName));
-            return;
+        // Handle source file
+        boolean isSourceFile = aFile == null || ArrayUtils.contains(FILE_TYPES, aFile.getType());
+        if (isSourceFile)
+            workspacePane.setWorkspaceForJeplFileSource(aFile);
+
+        // Handle Project file
+        else {
+
+            // If desktop, swap in real WorkspacePaneX
+            WorkspacePane workspacePaneX = createWorkspacePaneX();
+            if (workspacePaneX != null)
+                workspacePane = workspacePaneX;
+
+            // Get project site and add to workspace
+            WebFile projectDir = aFile.isDir() ? aFile : aFile.getParent();
+            WebSite projectSite = projectDir.getURL().getAsSite();
+            Workspace workspace = workspacePane.getWorkspace();
+            workspace.addProjectForSite(projectSite);
         }
 
-        // Create new site for name
-        WebSite newProjSite = createProjectSiteForName(projName);
-        setSelSite(newProjSite);
-    }
-
-    /**
-     * Creates a new project site.
-     */
-    public WebSite createProjectSiteForName(String aName)
-    {
-        // Create project site for name
-        String siteUrlStr = aName.indexOf(':') < 0 ? "local:/" + aName : aName;
-        WebURL siteURL = WebURL.getURL(siteUrlStr);
-        WebSite newSite = siteURL != null ? siteURL.getAsSite() : null;
-        if (newSite == null)
-            return null;
-
-        // Add
-        addSite(newSite);
-
-        // Write sites
-        writeSites();
+        // Show workspace, hide WelcomePanel
+        workspacePane.show();
+        hide();
 
         // Return
-        return newSite;
+        return workspacePane;
     }
 
     /**
-     * Opens selected sites.
+     * Creates the FilePanel to be added to WelcomePanel.
      */
-    public void openProjectSites()
+    private FilePanel createFilePanel()
     {
-        // Create WorkspacePane and add selected sites
-        WorkspacePane workspacePane = createWorkspacePane();
-        Workspace workspace = workspacePane.getWorkspace();
+        // Add recent files
+        WebSite recentFilesSite = RecentFilesSite.getShared();
+        FilePanel.addDefaultSite(recentFilesSite);
 
-        WebSite[] projectSites = getSelectedSites();
-        for (WebSite site : projectSites)
-            workspace.addProjectForSite(site);
+        // Add DropBox
+        String dropBoxEmail = DropBoxSite.getDefaultEmail();
+        WebSite dropBoxSite = DropBoxSite.getSiteForEmail(dropBoxEmail);
+        FilePanel.addDefaultSite(dropBoxSite);
 
-        // Show WorkspacePane
-        workspacePane.show();
+        // Create/config FilePanel
+        FilePanel filePanel = new FilePanel();
+        filePanel.setFileValidator(file -> isValidOpenFile(file)); //filePanel.setTypes(EXTENSIONS);
+        filePanel.setSelSite(recentFilesSite);
+        filePanel.setActionHandler(e -> WelcomePanel.this.fireActionEventForObject("OpenButton", e));
+
+        // Add PropChangeListener
+        filePanel.addPropChangeListener(pc -> filePanelDidPropChange(pc));
+
+        // Return
+        return filePanel;
     }
 
     /**
-     * Shows the remove site panel.
+     * Called when FilePanel does prop change.
      */
-    public void showRemoveSitePanel()
+    private void filePanelDidPropChange(PropChange aPC)
     {
-        // Get selected site (if null, just return)
-        WebSite selSite = getSelSite();
-        if (selSite == null)
-            return;
+        String propName = aPC.getPropName();
 
-        // Give the user a chance to bail (just return if canceled or closed)
-        String msg = "Are you sure you want to remove the currently selected project?";
-        DialogBox dialogBox = new DialogBox("Remove Project");
-        dialogBox.setMessage(msg);
-        if (!dialogBox.showConfirmDialog(getUI()))
-            return;
+        // Handle SelSite change:
+        if (propName.equals(FilePanel.SelSite_Prop)) {
+            WebSite selSite = _filePanel.getSelSite();;
+            boolean minimize = !(selSite instanceof RecentFilesSite);
+            setTopGraphicMinimized(minimize);
+        }
 
-        // Give the option to not delete resources (just return if closed)
-        msg = "Also delete local project files and sandbox?";
-        dialogBox = new DialogBox("Delete Local Project Files");
-        dialogBox.setMessage(msg);
-        boolean deleteLocal = dialogBox.showConfirmDialog(getUI());
+        // Handle SelFile change: Update OpenButton.Enabled
+        else if (propName.equals(FilePanel.SelFile_Prop)) {
+            boolean isOpenFileSet = _filePanel.getSelFile() != null;
+            getView("OpenButton").setEnabled(isOpenFileSet);
+        }
+    }
 
-        // If requested, delete site files and sandbox (if "local" site)
-        if (deleteLocal) {
+    /**
+     * Load/configure top graphic WelcomePaneAnim.snp.
+     */
+    private View getTopGraphic()
+    {
+        // Unarchive WelcomePaneAnim.snp as DocView
+        WebURL url = WebURL.getURL(WelcomePanel.class, "WelcomePanelAnim.snp");
+        ChildView topGraphic = (ChildView) new ViewArchiver().getViewForSource(url);
 
-            // Handle local site
-            String scheme = selSite.getURL().getScheme();
-            if (scheme.equals("local")) {
-                WorkspacePane workspacePane = createWorkspacePane();
-                Workspace workspace = workspacePane.getWorkspace();
-                Project proj = workspace.addProjectForSite(selSite);
-                ProjectPane projPane = workspacePane.getProjectPaneForProject(proj);
-                projPane.deleteSite(getUI());
+        // Get page and clear border/shadow
+        ParentView page = (ParentView) topGraphic.getChild(2);
+        page.setBorder(null);
+        page.setFill(null);
+        page.setEffect(null);
+
+        // Set BuildText and JavaText
+        View buildText = topGraphic.getChildForName("BuildText");
+        View jvmText = topGraphic.getChildForName("JVMText");
+        buildText.setText("Build: " + SnapUtils.getBuildInfo());
+        jvmText.setText("JVM: " + (SnapUtils.isTeaVM ? "TeaVM" : System.getProperty("java.runtime.version")));
+
+        // Configure TopGraphic to call setTopGraphicMinimized() on click
+        topGraphic.addEventHandler(e -> setTopGraphicMinimized(!isTopGraphicMinimized()), View.MouseRelease);
+
+        // Return
+        return topGraphic;
+    }
+
+    /**
+     * Returns whether top graphic is minimized.
+     */
+    private boolean isTopGraphicMinimized()
+    {
+        ChildView mainView = getUI(ChildView.class);
+        View topGraphic = mainView.getChild(0);
+        return topGraphic.getHeight() < 200;
+    }
+
+    /**
+     * Toggles the top graphic.
+     */
+    private void setTopGraphicMinimized(boolean aValue)
+    {
+        // Just return if already set
+        if (aValue == isTopGraphicMinimized()) return;
+
+        // Get TopGraphic
+        ChildView mainView = getUI(ChildView.class);
+        ChildView topGraphic = (ChildView) mainView.getChild(0);
+
+        // Show/hide views below the minimize size
+        topGraphic.getChild(2).setVisible(!aValue);
+        ColView topGraphicColView = (ColView) topGraphic.getChild(1);
+        for (int i = 2; i < topGraphicColView.getChildCount(); i++)
+            topGraphicColView.getChild(i).setVisible(!aValue);
+
+        // Handle Minimize: Size PrefHeight down
+        if (aValue)
+            topGraphic.getAnimCleared(600).setPrefHeight(140);
+
+        // Handle normal: Size PrefHeight up
+        else {
+            topGraphic.setClipToBounds(true);
+            topGraphic.getAnimCleared(600).setPrefHeight(240);
+        }
+
+        // Start anim
+        topGraphic.playAnimDeep();
+    }
+
+    /**
+     * Returns whether given file can be opened by app (java, jepl, project).
+     */
+    private static boolean isValidOpenFile(WebFile aFile)
+    {
+        if (isSourceFile(aFile))
+            return true;
+        return isProjectFile(aFile);
+    }
+
+    /**
+     * Returns whether given file is Java/Jepl.
+     */
+    private static boolean isSourceFile(WebFile aFile)
+    {
+        String fileType = aFile.getType();
+        return ArrayUtils.contains(FILE_TYPES, fileType);
+    }
+
+    /**
+     * Returns whether given file is Java/Jepl.
+     */
+    private static boolean isProjectFile(WebFile aFile)
+    {
+        // If BuildFile, return true
+        String BUILD_FILE_NAME = "build.snapcode";
+        if (aFile.getName().equals(BUILD_FILE_NAME))
+            return true;
+
+        // If is dir with BuildFile or source dir or source file, return true
+        if (aFile.isDir()) {
+            String[] projectFileNames = { "build.snapcode", "src" };
+            WebFile[] dirFiles = aFile.getFiles();
+            for (WebFile file : dirFiles) {
+                if (ArrayUtils.contains(projectFileNames, file.getName()))
+                    return true;
+                if (isSourceFile(file))
+                    return true;
             }
         }
 
-        // Get site index and select next index
-        int siteIndex = ListUtils.indexOfId(getSites(), selSite);
-
-        // Remove site
-        removeSite(selSite);
-
-        // Reset SelectedSite
-        int newSelIndex = Math.min(siteIndex, getSiteCount() - 1);
-        WebSite newSelSite = newSelIndex >= 0 && newSelIndex < getSiteCount() ? getSite(newSelIndex) : null;
-        setSelSite(newSelSite);
+        // Return not project file
+        return false;
     }
 
     /**
-     * Open a file viewer site.
+     * Creates a WorkspacePaneX if available.
      */
-    void handleOpenButtonAlt()
+    private static WorkspacePane createWorkspacePaneX()
     {
-        // Show dialog to get project name
-        String defaultDirPath = Prefs.getDefaultPrefs().getString("SnapFileViewerPath", System.getProperty("user.home"));
-        DialogBox dialogBox = new DialogBox("Open File Viewer");
-        dialogBox.setQuestionMessage("Enter path:");
-        String projectPath = dialogBox.showInputDialog(getUI(), defaultDirPath);
-        if (projectPath == null)
-            return;
+        // Get WorkspacePaneX class name
+        String workspaceXClassName = SnapUtils.isTeaVM ? null : "snapcode.app.WorkspacePaneX";
+        if (workspaceXClassName == null)
+            return null;
 
-        // Get project site from project path
-        WebURL projectURL = WebURL.getURL(projectPath);
-        WebSite projectSite = projectURL != null && projectURL.getFile() != null ? projectURL.getAsSite() : null;
-        if (projectSite == null)
-            return;
-
-        // Create Workspace for site and show
-        WorkspacePane workspacePane = createWorkspacePane();
-        Workspace workspace = workspacePane.getWorkspace();
-        workspace.addProjectForSite(projectSite);
-        workspacePane.show();
-
-        // Update prefs default path
-        Prefs.getDefaultPrefs().setValue("SnapFileViewerPath", projectPath);
-
-        // Hide welcome panel
-        hide();
-    }
-
-    /**
-     * A viewer owner to load/view WelcomePanel animation from WelcomePanelAnim.snp.
-     */
-    private static class WelcomePanelAnim extends ViewOwner {
-
-        /**
-         * Initialize some fields.
-         */
-        protected void initUI()
-        {
-            setViewText("BuildText", "Build: " + SnapUtils.getBuildInfo());
-            setViewText("JVMText", "JVM: " + System.getProperty("java.runtime.version"));
-            DocView doc = getUI(DocView.class);
-            PageView page = doc.getPage();
-            page.setEffect(null);
-            page.setBorder(null);
+        // Create/return
+        try {
+            Class<? extends WorkspacePane> workspacePaneClass = (Class<? extends WorkspacePane>) Class.forName(workspaceXClassName);
+            return ClassUtils.newInstance(workspacePaneClass);
+        }
+        catch (Exception e) {
+            System.err.println("WelcomePanel.openWorkspace: Couldn't create WorkspaceX");
+            return null;
         }
     }
 }

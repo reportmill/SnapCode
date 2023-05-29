@@ -17,7 +17,6 @@ import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.appjr.JeplUtils;
 import snapcode.apptools.*;
 
 /**

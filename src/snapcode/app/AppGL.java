@@ -1,4 +1,4 @@
-package snapcode.appjr;
+package snapcode.app;
 import snapgl.JGLRenderer;
 
 /**

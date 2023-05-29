@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SpringView width="400" height="480" PrefWidth="400" PrefHeight="480">
-  <Label x="9" y="220" width="300" height="27" text="Select or Create Project:">
-    <font name="Arial Bold" size="14" />
-  </Label>
-  <TableView Name="SitesTable" x="9" y="247" width="382" height="193" GrowWidth="true" GrowHeight="true">
-    <TableCol PrefWidth="120" ItemKey="Name" Header="Name" />
-    <TableCol GrowWidth="true" ItemKey="RemoteURLString" Header="URL" />
-  </TableView>
-  <Button Name="QuitButton" x="24" y="447" width="80" height="22" LeanY="BOTTOM" text="Quit" />
-  <Button Name="NewButton" x="114" y="447" width="80" height="22" LeanY="BOTTOM" text="New..." />
-  <Button Name="RemoveButton" x="204" y="447" width="80" height="22" LeanY="BOTTOM" text="Remove" />
-  <Button Name="OpenButton" x="294" y="447" width="80" height="22" LeanY="BOTTOM" text="Open" />
-</SpringView>
+<ColView PrefWidth="540" PrefHeight="660" Spacing="5" FillWidth="true">
+  <ColView Padding="2,8,8,8" GrowHeight="true" Spacing="5" FillWidth="true">
+    <RowView GrowWidth="true" Padding="2" Spacing="4">
+      <Label Padding="4,0,0,0" text="Select file:">
+        <font name="Arial" size="15" />
+      </Label>
+      <ProgressBar Name="ProgressBar" PrefWidth="110" PrefHeight="20" LeanX="CENTER" />
+      <Button Name="SamplesButton" PrefWidth="110" PrefHeight="24" Margin="2,5,2,2" Padding="3" Text="Show Samples" LeanX="RIGHT" />
+    </RowView>
+    <RowView Align="CENTER" Spacing="10" Margin="10,0,0,0">
+      <font name="Arial" size="13" />
+      <Button Name="NewButton" PrefWidth="100" PrefHeight="24" text="New" />
+      <Button Name="OpenButton" PrefWidth="100" PrefHeight="24" text="Open" />
+      <Button Name="QuitButton" PrefWidth="100" PrefHeight="24" text="Quit" />
+    </RowView>
+  </ColView>
+</ColView>

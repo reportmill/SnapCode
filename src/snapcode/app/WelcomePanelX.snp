@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpringView width="400" height="480" PrefWidth="400" PrefHeight="480">
+  <Label x="9" y="220" width="300" height="27" text="Select or Create Project:">
+    <font name="Arial Bold" size="14" />
+  </Label>
+  <TableView Name="SitesTable" x="9" y="247" width="382" height="193" GrowWidth="true" GrowHeight="true">
+    <TableCol PrefWidth="120" ItemKey="Name" Header="Name" />
+    <TableCol GrowWidth="true" ItemKey="RemoteURLString" Header="URL" />
+  </TableView>
+  <Button Name="QuitButton" x="24" y="447" width="80" height="22" LeanY="BOTTOM" text="Quit" />
+  <Button Name="NewButton" x="114" y="447" width="80" height="22" LeanY="BOTTOM" text="New..." />
+  <Button Name="RemoveButton" x="204" y="447" width="80" height="22" LeanY="BOTTOM" text="Remove" />
+  <Button Name="OpenButton" x="294" y="447" width="80" height="22" LeanY="BOTTOM" text="Open" />
+</SpringView>

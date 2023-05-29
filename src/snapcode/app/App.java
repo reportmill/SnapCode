@@ -1,17 +1,12 @@
-/*
- * Copyright (c) 2010, ReportMill Software. All rights reserved.
- */
 package snapcode.app;
 import snap.gfx.GFXEnv;
 import snap.util.Prefs;
-import snap.util.SnapUtils;
+import snap.view.ViewTheme;
 import snap.view.ViewUtils;
 import snap.view.WindowView;
-import snap.viewx.ExceptionReporter;
-import snap.web.WebSite;
 
 /**
- * SnapCode Application entry point.
+ * Main App class for SnapCode.
  */
 public class App extends AppBase {
 
@@ -30,15 +25,12 @@ public class App extends AppBase {
     {
         super();
 
-        // Set App Prefs class
-        Prefs prefs = Prefs.getPrefsForName("SnapCodePro");
+        // Set Prefs Root
+        Prefs prefs = Prefs.getPrefsForName("SnapCode");
         Prefs.setDefaultPrefs(prefs);
 
-        // Install Exception reporter
-        ExceptionReporter er = new ExceptionReporter("SnapCode");
-        er.setToAddress("support@reportmill.com");
-        er.setInfo("SnapCode Version 1, Build Date: " + SnapUtils.getBuildInfo());
-        Thread.setDefaultUncaughtExceptionHandler(er);
+        // Set UI Theme
+        ViewTheme.setThemeForName("Light");
 
         // Show WelcomePanel
         showWelcomePanel();
@@ -51,22 +43,6 @@ public class App extends AppBase {
     public void showWelcomePanel()
     {
         WelcomePanel.getShared().showPanel();
-    }
-
-    /**
-     * Returns a project site for given name.
-     */
-    public WebSite getProjectSiteForName(String aName)
-    {
-        return WelcomePanel.getShared().getProjectSiteForName(aName);
-    }
-
-    /**
-     * Creates a project site for given name.
-     */
-    public WebSite createProjectSiteForName(String aName)
-    {
-        return WelcomePanel.getShared().createProjectSiteForName(aName);
     }
 
     /**
