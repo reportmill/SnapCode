@@ -2,7 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.appjr;
+import javakit.project.Workspace;
 import snap.props.PropChange;
+import snap.util.ArrayUtils;
+import snap.util.ClassUtils;
 import snap.util.Prefs;
 import snap.util.SnapUtils;
 import snap.view.*;
@@ -25,6 +28,7 @@ public class WelcomePanel extends ViewOwner {
     // Constants
     public static final String JAVA_FILE_EXT = "java";
     public static final String JEPL_FILE_EXT = "jepl";
+    public static final String[] FILE_TYPES = { JAVA_FILE_EXT, JEPL_FILE_EXT };
 
     /**
      * Constructor.
@@ -112,7 +116,7 @@ public class WelcomePanel extends ViewOwner {
         // Handle OpenButton
         if (anEvent.equals("OpenButton")) {
             WebFile selFile = _filePanel.getSelFileAndAddToRecentFiles();
-            openWorkspaceForJavaOrJeplFileSource(selFile);
+            openWorkspaceForFile(selFile);
         }
 
         // Handle QuitButton
@@ -130,7 +134,7 @@ public class WelcomePanel extends ViewOwner {
     protected void newFile(boolean showSamples)
     {
         // Show jepl
-        WorkspacePane workspacePane = openWorkspaceForJavaOrJeplFileSource(null);
+        WorkspacePane workspacePane = openWorkspaceForFile(null);
 
         if (showSamples)
             runLaterDelayed(300, () -> workspacePane.getWorkspaceTools().showSamples());
@@ -138,16 +142,35 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
-     * Opens a Workspace for given Java/Jepl file source.
+     * Opens a Workspace for given Java/Jepl file or project dir/file.
      */
-    protected WorkspacePane openWorkspaceForJavaOrJeplFileSource(Object aSource)
+    protected WorkspacePane openWorkspaceForFile(WebFile aFile)
     {
         // Create WorkspacePane, set source, show
         WorkspacePane workspacePane = new WorkspacePane();
-        workspacePane.setWorkspaceForJeplFileSource(aSource);
-        workspacePane.show();
 
-        // Hide WelcomePanel
+        // Handle source file
+        boolean isSourceFile = aFile == null || ArrayUtils.contains(FILE_TYPES, aFile.getType());
+        if (isSourceFile)
+            workspacePane.setWorkspaceForJeplFileSource(aFile);
+
+        // Handle Project file
+        else {
+
+            // If desktop, swap in real WorkspacePaneX
+            WorkspacePane workspacePaneX = createWorkspacePaneX();
+            if (workspacePaneX != null)
+                workspacePane = workspacePaneX;
+
+            // Get project site and add to workspace
+            WebFile projectDir = aFile.isDir() ? aFile : aFile.getParent();
+            WebSite projectSite = projectDir.getURL().getAsSite();
+            Workspace workspace = workspacePane.getWorkspace();
+            workspace.addProjectForSite(projectSite);
+        }
+
+        // Show workspace, hide WelcomePanel
+        workspacePane.show();
         hide();
 
         // Return
@@ -170,8 +193,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Create/config FilePanel
         FilePanel filePanel = new FilePanel();
-        String[] EXTENSIONS = { JAVA_FILE_EXT, JEPL_FILE_EXT };
-        filePanel.setTypes(EXTENSIONS);
+        filePanel.setFileValidator(file -> isValidOpenFile(file)); //filePanel.setTypes(EXTENSIONS);
         filePanel.setSelSite(recentFilesSite);
         filePanel.setActionHandler(e -> WelcomePanel.this.fireActionEventForObject("OpenButton", e));
 
@@ -271,5 +293,71 @@ public class WelcomePanel extends ViewOwner {
 
         // Start anim
         topGraphic.playAnimDeep();
+    }
+
+    /**
+     * Returns whether given file can be opened by app (java, jepl, project).
+     */
+    private static boolean isValidOpenFile(WebFile aFile)
+    {
+        if (isSourceFile(aFile))
+            return true;
+        return isProjectFile(aFile);
+    }
+
+    /**
+     * Returns whether given file is Java/Jepl.
+     */
+    private static boolean isSourceFile(WebFile aFile)
+    {
+        String fileType = aFile.getType();
+        return ArrayUtils.contains(FILE_TYPES, fileType);
+    }
+
+    /**
+     * Returns whether given file is Java/Jepl.
+     */
+    private static boolean isProjectFile(WebFile aFile)
+    {
+        // If BuildFile, return true
+        String BUILD_FILE_NAME = "build.snapcode";
+        if (aFile.getName().equals(BUILD_FILE_NAME))
+            return true;
+
+        // If is dir with BuildFile or source dir or source file, return true
+        if (aFile.isDir()) {
+            String[] projectFileNames = { "build.snapcode", "src" };
+            WebFile[] dirFiles = aFile.getFiles();
+            for (WebFile file : dirFiles) {
+                if (ArrayUtils.contains(projectFileNames, file.getName()))
+                    return true;
+                if (isSourceFile(file))
+                    return true;
+            }
+        }
+
+        // Return not project file
+        return false;
+    }
+
+    /**
+     * Creates a WorkspacePaneX if available.
+     */
+    private static WorkspacePane createWorkspacePaneX()
+    {
+        // Get WorkspacePaneX class name
+        String workspaceXClassName = SnapUtils.isTeaVM ? null : "snapcode.app.WorkspacePaneX";
+        if (workspaceXClassName == null)
+            return null;
+
+        // Create/return
+        try {
+            Class<? extends WorkspacePane> workspacePaneClass = (Class<? extends WorkspacePane>) Class.forName(workspaceXClassName);
+            return ClassUtils.newInstance(workspacePaneClass);
+        }
+        catch (Exception e) {
+            System.err.println("WelcomePanel.openWorkspace: Couldn't create WorkspaceX");
+            return null;
+        }
     }
 }
