@@ -4,6 +4,8 @@
 package javakit.runner;
 import javakit.parse.*;
 import snap.util.CharSequenceUtils;
+import snapcharts.repl.ReplObject;
+
 import java.io.PrintStream;
 
 /**
@@ -68,6 +70,9 @@ public class JavaShell {
      */
     public void runJavaCode(JFile jfile, JStmt[] javaStmts)
     {
+        // Set ShowHandler
+        ReplObject.setShowHandler(obj -> getClient().processOutput(obj));
+
         // Reset VarStack
         _stmtEval._exprEval._varStack.reset();
 

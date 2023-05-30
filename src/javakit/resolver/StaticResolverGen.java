@@ -41,9 +41,9 @@ public class StaticResolverGen {
         if (!_isRoot)
             appendln("import javakit.resolver.*;");
         if (_isRoot) {
-            appendln("import resolver.javakit.JavaField.FieldBuilder;");
-            appendln("import resolver.javakit.JavaMethod.MethodBuilder;");
-            appendln("import resolver.javakit.JavaConstructor.ConstructorBuilder;");
+            appendln("import javakit.resolver.JavaField.FieldBuilder;");
+            appendln("import javakit.resolver.JavaMethod.MethodBuilder;");
+            appendln("import javakit.resolver.JavaConstructor.ConstructorBuilder;");
             appendln("import snap.util.Convert;");
         }
         appendln("import java.io.PrintStream;");
@@ -680,6 +680,17 @@ public class StaticResolverGen {
 
             snap.view.ViewAnim.class,
             snap.view.ViewOwner.class,
+
+            // SnapCharts
+            snapcharts.data.DoubleArray.class,
+            snapcharts.data.DataArray.class,
+            snapcharts.data.DataSet.class,
+            snapcharts.repl.ReplObject.class,
+            snapcharts.repl.Quick3D.class,
+            snapcharts.repl.QuickCharts.class,
+            snapcharts.repl.QuickData.class,
+            snapcharts.repl.QuickDraw.class,
+            snapcharts.repl.QuickDrawPen.class
     };
 
     // WhiteList
@@ -756,6 +767,29 @@ public class StaticResolverGen {
 
             // ViewOwner
             "setWindowVisible",
+
+            // SnapCharts
+            // DoubleArray
+            "length", "map", "filter", "doubleArray", "toArray", "of", "fromMinMax", "fromMinMaxCount",
+
+            // ReplObject
+            "print", "println", "show",
+
+            // Quick3D
+            "createCube", "createImage3D",
+
+            // QuickCharts
+            "chart", "chart3D",
+
+            // QuickData
+            "doubleArray", "dataArray", "dataSet", "minMaxArray", "mapXY",
+            "getTextForSource", "getImageForSource",
+
+            // QuickDraw, QuickDrawPen
+            "createDrawView", "isShowGrid", "setShowGrid", "getGridSpacing", "setGridSpacing", "isAnimate", "setAnimate",
+            "getPen", "setPenColor",
+            "getColor", "setColor", "getWidth", "setWidth", "getDirection", "setDirection",
+            "moveTo", "lineTo", "closePath", "forward", "turn", "getAnimPen",
     };
     private static String[] _blackListStrings = {
 

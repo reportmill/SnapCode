@@ -164,7 +164,7 @@ public class HomePage extends WebPage {
         if (sfile != null) return null;
 
         // Create content
-        snapcode.repl.SnapScene scene = new snapcode.repl.SnapScene();
+        snapcharts.repl.SnapScene scene = new snapcharts.repl.SnapScene();
         scene.setSize(800, 500);
         String str = new ViewArchiver().writeToXML(scene).getString();
 

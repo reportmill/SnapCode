@@ -4,14 +4,16 @@ import snapcode.project.JeplTextDoc;
 import snapcode.project.JeplAgent;
 import snapcode.project.Project;
 import snapcode.project.BuildFile;
-import javakit.resolver.Resolver;
 import snap.gfx.Font;
 import snap.props.PropObject;
 import snap.text.TextStyle;
 import snap.util.SnapUtils;
 import snapcharts.data.DoubleArray;
-import snapcode.repl.*;
+import snapcharts.repl.*;
 
+/**
+ * Utilities to support Jepl files.
+ */
 public class JeplUtils {
 
     // Whether JavaKit has been configured for this app
@@ -30,9 +32,7 @@ public class JeplUtils {
         JeplTextDoc.setJeplDocConfig(jtd -> configureJeplDoc(jtd));
 
         // For TeaVM: Link up StaticResolver
-        if (Resolver.isTeaVM) {
-            javakit.resolver.StaticResolver.shared()._next = new StaticResolver();
-        }
+        //if (Resolver.isTeaVM) javakit.resolver.StaticResolver.shared()._next = new StaticResolver();
 
         // Add more common class names from SnapCode
         javakit.resolver.ClassTreeWeb.addCommonClassNames(MORE_COMMON_CLASS_NAMES);
@@ -45,7 +45,7 @@ public class JeplUtils {
     {
         // Set imports and SuperClassName
         jeplTextDoc.addImport("snapcharts.data.*");
-        jeplTextDoc.addImport("snapcode.repl.*");
+        jeplTextDoc.addImport("snapcharts.repl.*");
         jeplTextDoc.setSuperClassName(ReplObject.class.getName());
 
         // Set code font
@@ -66,9 +66,8 @@ public class JeplUtils {
         Project proj = jeplAgent.getProject();
         BuildFile buildFile = proj.getBuildFile();
 
-        // Add dependencies to BuildFile for SnapKit, SnapCode and SnapCharts
+        // Add dependencies to BuildFile for SnapKit and SnapCharts
         buildFile.addLibPathForClass(PropObject.class);
-        buildFile.addLibPathForClass(QuickCharts.class);
         buildFile.addLibPathForClass(DoubleArray.class);
     }
 
