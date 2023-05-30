@@ -1,4 +1,4 @@
-package javakit.project;
+package snapcode.project;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
 import snap.view.ViewUtils;

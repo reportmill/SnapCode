@@ -1,10 +1,10 @@
 package snapcode.app;
-import javakit.parse.JavaTextDoc;
-import javakit.parse.JeplTextDoc;
-import javakit.project.ProjectUtils;
-import javakit.project.Workspace;
-import javakit.project.Project;
-import javakit.project.WorkspaceBuilder;
+import snapcode.project.JavaTextDoc;
+import snapcode.project.JeplTextDoc;
+import snapcode.project.ProjectUtils;
+import snapcode.project.Workspace;
+import snapcode.project.Project;
+import snapcode.project.WorkspaceBuilder;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;

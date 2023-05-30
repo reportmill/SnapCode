@@ -3,7 +3,7 @@
  */
 package snapcode.apptools;
 import javakit.parse.NodeError;
-import javakit.project.BuildIssue;
+import snapcode.project.BuildIssue;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Image;

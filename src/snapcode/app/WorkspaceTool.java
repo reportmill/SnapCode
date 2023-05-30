@@ -1,6 +1,6 @@
 package snapcode.app;
-import javakit.project.Project;
-import javakit.project.Workspace;
+import snapcode.project.Project;
+import snapcode.project.Workspace;
 import snap.view.ViewOwner;
 import snapcode.webbrowser.WebBrowser;
 import snap.web.WebFile;

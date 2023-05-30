@@ -4,8 +4,8 @@
 package snapcode.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JNode;
-import javakit.project.JavaAgent;
-import javakit.project.Project;
+import snapcode.project.JavaAgent;
+import snapcode.project.Project;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMethod;
 import javakit.resolver.JavaParameterizedType;

@@ -3,7 +3,7 @@
  */
 package snapcode.javatext;
 import javakit.parse.*;
-import javakit.parse.JavaTextDoc;
+import snapcode.project.JavaTextDoc;
 import javakit.resolver.JavaDecl;
 import snap.gfx.*;
 import snap.props.PropChange;
@@ -12,6 +12,8 @@ import snap.text.TextDoc;
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.TextPane;
+import snapcode.project.JeplTextDoc;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

@@ -1,9 +1,9 @@
 package snapcode.app;
 import snapcode.javatext.JavaTextUtils;
-import javakit.parse.JeplTextDoc;
-import javakit.project.JeplAgent;
-import javakit.project.Project;
-import javakit.project.BuildFile;
+import snapcode.project.JeplTextDoc;
+import snapcode.project.JeplAgent;
+import snapcode.project.Project;
+import snapcode.project.BuildFile;
 import javakit.resolver.Resolver;
 import snap.gfx.Font;
 import snap.props.PropObject;

@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
-import javakit.project.Workspace;
+import snapcode.project.Workspace;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.props.PropChange;

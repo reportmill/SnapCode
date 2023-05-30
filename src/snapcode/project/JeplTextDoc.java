@@ -1,9 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package javakit.parse;
-import javakit.project.JeplAgent;
-import javakit.project.ProjectUtils;
+package snapcode.project;
 import snap.util.ArrayUtils;
 
 import java.util.Arrays;

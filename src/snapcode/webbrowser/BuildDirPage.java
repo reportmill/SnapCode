@@ -1,7 +1,7 @@
 package snapcode.webbrowser;
-import javakit.project.Project;
-import javakit.project.Workspace;
-import javakit.project.WorkspaceBuilder;
+import snapcode.project.Project;
+import snapcode.project.Workspace;
+import snapcode.project.WorkspaceBuilder;
 import snap.view.BrowserView;
 import snap.view.ChildView;
 import snap.view.ViewEvent;

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package javakit.project;
+package snapcode.project;
 import javakit.parse.JNode;
 import javakit.parse.JStmt;
 import javakit.parse.NodeError;

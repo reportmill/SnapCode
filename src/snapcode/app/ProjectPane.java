@@ -1,5 +1,4 @@
 package snapcode.app;
-import javakit.project.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.view.*;
@@ -7,7 +6,10 @@ import snap.viewx.DialogBox;
 import snap.viewx.TaskMonitorPanel;
 import snapcode.apptools.ProjectAnalysisTool;
 import snapcode.apptools.VersionControlTool;
+import snapcode.project.Project;
 import snapcode.project.VersionControl;
+import snapcode.project.Workspace;
+import snapcode.project.WorkspaceBuilder;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;

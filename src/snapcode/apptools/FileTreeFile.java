@@ -1,9 +1,9 @@
 package snapcode.apptools;
-import javakit.project.BuildIssue;
+import snapcode.project.BuildIssue;
 import snapcode.javatext.JavaTextUtils;
-import javakit.project.BuildIssues;
-import javakit.project.Project;
-import javakit.project.Workspace;
+import snapcode.project.BuildIssues;
+import snapcode.project.Project;
+import snapcode.project.Workspace;
 import snap.geom.Pos;
 import snap.gfx.Image;
 import snapcode.project.VersionControl;

@@ -3,7 +3,7 @@
  */
 package snapcode.javatext;
 import java.util.*;
-import javakit.project.BuildIssue;
+import snapcode.project.BuildIssue;
 import snap.geom.*;
 import snap.gfx.*;
 import snap.text.*;

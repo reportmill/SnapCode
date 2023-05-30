@@ -3,7 +3,7 @@ import com.sun.jdi.*;
 import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
 import com.sun.jdi.request.*;
-import javakit.project.Breakpoint;
+import snapcode.project.Breakpoint;
 import snap.util.ArrayUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;

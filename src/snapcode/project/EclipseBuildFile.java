@@ -1,6 +1,4 @@
 package snapcode.project;
-import javakit.project.Project;
-import javakit.project.BuildFile;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.util.XMLElement;

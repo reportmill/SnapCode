@@ -1,5 +1,5 @@
 package snapcode.apptools;
-import javakit.project.WorkspaceBuilder;
+import snapcode.project.WorkspaceBuilder;
 import snap.props.PropChange;
 import snap.view.View;
 import snapcode.app.ProjectPane;

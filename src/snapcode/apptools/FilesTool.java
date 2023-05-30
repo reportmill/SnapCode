@@ -1,6 +1,6 @@
 package snapcode.apptools;
-import javakit.project.Project;
-import javakit.project.WorkspaceBuilder;
+import snapcode.project.Project;
+import snapcode.project.WorkspaceBuilder;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
 import snap.util.FileUtils;

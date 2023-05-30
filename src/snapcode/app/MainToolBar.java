@@ -1,5 +1,5 @@
 package snapcode.app;
-import javakit.project.Project;
+import snapcode.project.Project;
 import snap.gfx.*;
 import snap.util.StringUtils;
 import snap.view.*;

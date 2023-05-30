@@ -1,7 +1,4 @@
 package snapcode.project;
-import javakit.project.Project;
-import javakit.project.ProjectFiles;
-import javakit.project.ProjectSet;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
 import javakit.resolver.Resolver;

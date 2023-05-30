@@ -1,9 +1,9 @@
 package snapcode.app;
 import snapcode.javatext.JavaTextPane;
-import javakit.project.Breakpoints;
-import javakit.project.BuildIssue;
-import javakit.project.BuildIssues;
-import javakit.project.Workspace;
+import snapcode.project.Breakpoints;
+import snapcode.project.BuildIssue;
+import snapcode.project.BuildIssues;
+import snapcode.project.Workspace;
 import snap.geom.Side;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;

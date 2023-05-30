@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
-import javakit.project.Workspace;
+import snapcode.project.Workspace;
 import snap.props.PropChange;
 import snap.util.ArrayUtils;
 import snap.util.ClassUtils;

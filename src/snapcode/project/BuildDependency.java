@@ -1,4 +1,4 @@
-package javakit.project;
+package snapcode.project;
 import snap.props.PropObject;
 import snap.props.PropSet;
 import snap.util.ClassUtils;

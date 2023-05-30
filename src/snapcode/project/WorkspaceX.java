@@ -2,8 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import javakit.project.Workspace;
-import javakit.project.Project;
 import snap.util.FilePathUtils;
 import snap.web.WebSite;
 import java.net.URL;

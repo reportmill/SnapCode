@@ -1,10 +1,10 @@
 package snapcode.app;
 import javakit.parse.*;
-import javakit.project.JavaAgent;
-import javakit.project.Project;
+import snapcode.project.JavaAgent;
+import snapcode.project.Project;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMember;
-import javakit.parse.JavaTextDoc;
+import snapcode.project.JavaTextDoc;
 import snap.util.Convert;
 import snap.util.ListUtils;
 import snap.text.TextBoxLine;

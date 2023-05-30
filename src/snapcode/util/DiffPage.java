@@ -1,5 +1,5 @@
 package snapcode.util;
-import javakit.parse.JavaTextDoc;
+import snapcode.project.JavaTextDoc;
 import snapcode.javatext.JavaTextArea;
 import snap.geom.Rect;
 import snap.geom.Shape;

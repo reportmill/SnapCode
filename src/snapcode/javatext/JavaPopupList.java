@@ -11,6 +11,7 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.text.*;
 import snap.view.*;
+import snapcode.project.JeplTextDoc;
 
 /**
  * A PopupList for an JavaTextPane.

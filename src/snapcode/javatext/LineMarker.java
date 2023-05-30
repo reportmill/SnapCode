@@ -1,7 +1,7 @@
 package snapcode.javatext;
 import javakit.parse.JMemberDecl;
-import javakit.project.Breakpoint;
-import javakit.project.BuildIssue;
+import snapcode.project.Breakpoint;
+import snapcode.project.BuildIssue;
 import javakit.resolver.JavaExecutable;
 import snap.geom.Rect;
 import snap.gfx.Image;

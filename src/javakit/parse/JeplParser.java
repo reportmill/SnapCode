@@ -17,13 +17,14 @@ public class JeplParser extends JavaParser {
     /**
      * Constructor.
      */
-    public JeplParser(JeplTextDoc aJeplTextDoc)
+    public JeplParser(String[] importNames, String superClassName)
     {
         super();
 
         // Get/set rule for JeplFile
         ParseRule jeplRule = getRule("JeplFile");
-        jeplRule.setHandler(new JeplFileHandler(aJeplTextDoc));
+        JeplFileHandler jeplFileHandler = new JeplFileHandler(importNames, superClassName);
+        jeplRule.setHandler(jeplFileHandler);
         setRule(jeplRule);
     }
 
@@ -32,8 +33,11 @@ public class JeplParser extends JavaParser {
      */
     public static class JeplFileHandler extends JNodeParseHandler<JFile> {
 
-        // The JeplTextDoc that created this object
-        private JeplTextDoc  _jeplTextDoc;
+        // The import names
+        private String[] _importNames;
+
+        // The super class name
+        private String _superClassName;
 
         // A running ivar for batches of statements
         JInitializerDecl  _initDecl;
@@ -41,10 +45,11 @@ public class JeplParser extends JavaParser {
         /**
          * Constructor.
          */
-        public JeplFileHandler(JeplTextDoc aJeplTextDoc)
+        public JeplFileHandler(String[] importNames, String superClassName)
         {
             super();
-            _jeplTextDoc = aJeplTextDoc;
+            _importNames = importNames;
+            _superClassName = superClassName;
         }
 
         /**
@@ -113,8 +118,7 @@ public class JeplParser extends JavaParser {
             jfile.setStartToken(startToken);
 
             // Create/add JImportDecls
-            String[] importNames = _jeplTextDoc.getImports();
-            for (String importName : importNames)
+            for (String importName : _importNames)
                 addImportToJFile(jfile, importName);
 
             // Create/add ClassDecl
@@ -124,8 +128,7 @@ public class JeplParser extends JavaParser {
             jfile.addClassDecl(classDecl);
 
             // Add Superclass
-            String superClassName = _jeplTextDoc.getSuperClassName();
-            JType extendsType = new JType.Builder().name(superClassName).token(startToken).build();
+            JType extendsType = new JType.Builder().name(_superClassName).token(startToken).build();
             classDecl.addExtendsType(extendsType);
 
             _initDecl = null;
@@ -143,7 +146,7 @@ public class JeplParser extends JavaParser {
         protected ParseHandler createBackupHandler()
         {
             System.err.println("JeplParser.createBackupHandler: This should never get called");
-            return new JeplFileHandler(_jeplTextDoc);
+            return new JeplFileHandler(_importNames, _superClassName);
         }
     }
 

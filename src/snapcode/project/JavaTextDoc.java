@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package javakit.parse;
-import javakit.project.JavaAgent;
-import javakit.project.ProjectUtils;
+package snapcode.project;
+import javakit.parse.JFile;
+import javakit.parse.JavaParser;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.parse.*;

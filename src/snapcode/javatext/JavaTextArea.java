@@ -4,9 +4,8 @@
 package snapcode.javatext;
 import java.util.*;
 import javakit.parse.*;
-import javakit.project.*;
 import javakit.resolver.JavaDecl;
-import javakit.parse.JavaTextDoc;
+import snapcode.project.JavaTextDoc;
 import snap.geom.Rect;
 import snap.gfx.*;
 import snap.text.*;
@@ -14,6 +13,7 @@ import snap.props.PropChange;
 import snap.util.CharSequenceUtils;
 import snap.view.*;
 import snap.web.WebFile;
+import snapcode.project.*;
 
 /**
  * A TextArea subclass for Java source editing.

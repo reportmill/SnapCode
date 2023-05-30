@@ -1,9 +1,9 @@
 package snapcode.apptools;
-import javakit.project.*;
 import snap.gfx.Color;
 import snap.props.PropChange;
 import snap.util.FilePathUtils;
 import snap.view.*;
+import snapcode.project.*;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -11,8 +11,6 @@ import snap.web.WebURL;
 import snapcode.app.*;
 import snapcode.debug.DebugApp;
 import snapcode.debug.RunApp;
-import snapcode.project.RunConfig;
-import snapcode.project.RunConfigs;
 
 import java.io.File;
 import java.util.ArrayList;

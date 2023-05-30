@@ -1,9 +1,8 @@
 package snapcode.apptools;
-import javakit.project.*;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.app.*;
-import snapcode.project.VersionControl;
+import snapcode.project.*;
 import snap.view.*;
 import snap.viewx.*;
 import snap.web.WebSite;

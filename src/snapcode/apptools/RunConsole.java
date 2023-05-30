@@ -1,5 +1,5 @@
 package snapcode.apptools;
-import javakit.project.Project;
+import snapcode.project.Project;
 import snap.util.Convert;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;

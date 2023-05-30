@@ -1,6 +1,6 @@
 package snapcode.apptools;
-import javakit.project.Breakpoint;
-import javakit.project.Breakpoints;
+import snapcode.project.Breakpoint;
+import snapcode.project.Breakpoints;
 import snap.view.ListView;
 import snap.view.View;
 import snap.view.ViewEvent;

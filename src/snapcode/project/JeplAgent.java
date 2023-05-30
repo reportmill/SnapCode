@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package javakit.project;
+package snapcode.project;
 import javakit.parse.*;
 import snap.text.TextDocUtils;
 import snap.util.ArrayUtils;
@@ -44,7 +44,9 @@ public class JeplAgent extends JavaAgent {
     protected JavaParser getJavaParserImpl()
     {
         JeplTextDoc jeplTextDoc = getJavaTextDoc();
-        return new JeplParser(jeplTextDoc);
+        String[] importNames = jeplTextDoc.getImports();
+        String superClassName = jeplTextDoc.getSuperClassName();
+        return new JeplParser(importNames, superClassName);
     }
 
     /**

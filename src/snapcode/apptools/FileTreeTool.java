@@ -1,5 +1,5 @@
 package snapcode.apptools;
-import javakit.project.WorkspaceBuilder;
+import snapcode.project.WorkspaceBuilder;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;

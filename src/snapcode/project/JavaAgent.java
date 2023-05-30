@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package javakit.project;
+package snapcode.project;
 import javakit.parse.*;
 import snap.props.PropChange;
 import snap.text.TextDoc;
