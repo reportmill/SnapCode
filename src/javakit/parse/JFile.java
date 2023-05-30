@@ -3,7 +3,7 @@
  */
 package javakit.parse;
 import java.util.*;
-import javakit.project.Project;
+import java.util.function.Supplier;
 import javakit.resolver.*;
 import snap.util.ListUtils;
 import snap.web.WebFile;
@@ -18,6 +18,9 @@ public class JFile extends JNode {
 
     // The resolver for source file
     protected Resolver _resolver;
+
+    // The resolver for source file
+    protected Supplier<Resolver> _resolverSupplier;
 
     // The full Java string (optional)
     private String  _javaFileString;
@@ -67,8 +70,7 @@ public class JFile extends JNode {
         if (_resolver != null) return _resolver;
 
         // Get Resolver
-        Project proj = _sourceFile != null ? Project.getProjectForFile(_sourceFile) : null;
-        Resolver resolver = proj != null ? proj.getResolver() : null;
+        Resolver resolver = _resolverSupplier != null ? _resolverSupplier.get() : null;
         if (resolver == null)
             System.err.println("JFile.getResolver: No source file or project");
 
@@ -77,11 +79,11 @@ public class JFile extends JNode {
     }
 
     /**
-     * Sets the resolver.
+     * Sets the callback to get resolver.
      */
-    public void setResolver(Resolver aResolver)
+    public void setResolverSupplier(Supplier<Resolver> aResolverSupplier)
     {
-        _resolver = aResolver;
+        _resolverSupplier = aResolverSupplier;
     }
 
     /**

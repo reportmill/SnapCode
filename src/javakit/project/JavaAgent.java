@@ -130,6 +130,8 @@ public class JavaAgent {
 
         // Set SourceFile
         jfile.setSourceFile(_file);
+        Project project = getProject();
+        jfile.setResolverSupplier(() -> project.getResolver());
 
         // Return
         return jfile;
