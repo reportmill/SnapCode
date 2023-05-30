@@ -8,7 +8,10 @@ import snap.view.WindowView;
 /**
  * Main App class for SnapCode.
  */
-public class App extends AppBase {
+public class App {
+
+    // The shared instance
+    private static App _shared;
 
     /**
      * Standard main implementation.
@@ -24,6 +27,7 @@ public class App extends AppBase {
     public App()
     {
         super();
+        _shared = this;
 
         // Set Prefs Root
         Prefs prefs = Prefs.getPrefsForName("SnapCode");
@@ -37,9 +41,8 @@ public class App extends AppBase {
     }
 
     /**
-     * Override to show WelcomePanel.
+     * Show WelcomePanel.
      */
-    @Override
     public void showWelcomePanel()
     {
         WelcomePanel.getShared().showPanel();
@@ -48,7 +51,6 @@ public class App extends AppBase {
     /**
      * Exits the application.
      */
-    @Override
     public void quitApp()
     {
         // Hide open WorkspacePane
@@ -60,4 +62,18 @@ public class App extends AppBase {
         Prefs.getDefaultPrefs().flush();
         GFXEnv.getEnv().exit(0);
     }
+
+    /**
+     * Calls showWelcomePane after delay.
+     */
+    public static void showWelcomePanelLater()
+    {
+        Prefs.getDefaultPrefs().flush();
+        ViewUtils.runLater(() -> getShared().showWelcomePanel());
+    }
+
+    /**
+     * Returns the shared instance.
+     */
+    public static App getShared()  { return _shared; }
 }

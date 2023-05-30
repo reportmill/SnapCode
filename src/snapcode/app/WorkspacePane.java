@@ -425,7 +425,7 @@ public class WorkspacePane extends ViewOwner {
 
         // Handle QuitMenuItem
         if (anEvent.equals("QuitMenuItem")) {
-            AppBase.getShared().quitApp();
+            App.getShared().quitApp();
             anEvent.consume();
         }
 
@@ -459,7 +459,7 @@ public class WorkspacePane extends ViewOwner {
         // Handle WinClosing
         if (anEvent.isWinClose()) {
             hide();
-            AppBase.showWelcomePanelLater();
+            App.showWelcomePanelLater();
         }
     }
 

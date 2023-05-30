@@ -119,7 +119,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Handle QuitButton
         if (anEvent.equals("QuitButton"))
-            AppBase.getShared().quitApp();
+            App.getShared().quitApp();
 
         // Handle WinClosing
         if (anEvent.isWinClose())
