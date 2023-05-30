@@ -3,7 +3,6 @@
  */
 package javakit.runner;
 import javakit.parse.*;
-import javakit.project.JavaAgent;
 import snap.util.CharSequenceUtils;
 import java.io.PrintStream;
 
@@ -67,18 +66,15 @@ public class JavaShell {
     /**
      * Evaluate string.
      */
-    public void runJavaCode(JavaTextDoc javaTextDoc)
+    public void runJavaCode(JFile jfile, JStmt[] javaStmts)
     {
         // Reset VarStack
         _stmtEval._exprEval._varStack.reset();
 
         // Set var stack indexes in AST
-        JavaAgent javaAgent = javaTextDoc.getAgent();
-        JFile jfile = javaAgent.getJFile();
         Simpiler.setVarStackIndexForJFile(jfile);
 
         // Get parsed statements
-        JStmt[] javaStmts = javaAgent.getJFileStatements();
         if (javaStmts == null) {
             System.err.println("JavaShell.runJavaCode: No main method");
             return;
@@ -99,11 +95,7 @@ public class JavaShell {
                 continue;
 
             // Evaluate statement
-            Object lineVal = evalStatement(stmt);
-
-            // Process output
-            //if (_client != null && lineVal != null)
-            //    _client.processOutput(lineVal);
+            evalStatement(stmt);
 
             // If StopRun hit, break
             if (_stmtEval._stopRun || _errorWasHit)
@@ -134,29 +126,22 @@ public class JavaShell {
     /**
      * Evaluate JStmt.
      */
-    protected Object evalStatement(JStmt aStmt)
+    protected void evalStatement(JStmt aStmt)
     {
         // Handle statement with errors
         if (aStmt.getErrors() != NodeError.NO_ERRORS) {
             _errorWasHit = true;
-            return aStmt.getErrors();
+            return;
         }
 
         // Eval statement
-        Object val;
-        try {
-            val = _stmtEval.evalExecutable(_thisObject, aStmt);
-        }
+        try { _stmtEval.evalExecutable(_thisObject, aStmt); }
 
         // Handle statement eval exception: Try expression
         catch (Exception e) {
             e.printStackTrace(_stdErr);
-            val = e;
             _errorWasHit = true;
         }
-
-        // Return
-        return val;
     }
 
     /**

@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.apptools;
+import javakit.parse.JFile;
+import javakit.parse.JStmt;
 import snapcode.javatext.JavaTextPane;
 import javakit.parse.JavaTextDoc;
 import javakit.project.BuildIssue;
@@ -106,7 +108,11 @@ public class EvalToolRunner {
         }
 
         // If no errors, run
-        else _javaShell.runJavaCode(javaTextDoc);
+        else {
+            JFile jfile = javaAgent.getJFile();
+            JStmt[] javaStmts = javaAgent.getJFileStatements();
+            _javaShell.runJavaCode(jfile, javaStmts);
+        }
 
         // Remove extended run ui
         ViewUtils.runLater(() -> _evalTool.setShowExtendedRunUI(false));
