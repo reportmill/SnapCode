@@ -1,6 +1,6 @@
 package snapcode.app;
-import javakit.ide.JavaTextPane;
-import javakit.ide.JavaTextPaneX;
+import snapcode.javatext.JavaTextPane;
+import snapcode.javatext.JavaTextPaneX;
 import javakit.parse.*;
 import snap.view.ViewEvent;
 import snapcode.webbrowser.WebBrowser;

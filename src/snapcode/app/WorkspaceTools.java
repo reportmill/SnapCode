@@ -1,5 +1,5 @@
 package snapcode.app;
-import javakit.ide.JavaTextPane;
+import snapcode.javatext.JavaTextPane;
 import javakit.project.Breakpoints;
 import javakit.project.BuildIssue;
 import javakit.project.BuildIssues;

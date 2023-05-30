@@ -1,5 +1,5 @@
 package snapcode.apptools;
-import javakit.ide.NodeMatcher;
+import snapcode.javatext.NodeMatcher;
 import javakit.parse.JFile;
 import javakit.parse.JNode;
 import javakit.project.JavaAgent;
@@ -7,12 +7,11 @@ import javakit.project.Project;
 import snap.view.TextArea;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
-import snapcode.app.WorkspacePane;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * This class provides analysis information about a project.

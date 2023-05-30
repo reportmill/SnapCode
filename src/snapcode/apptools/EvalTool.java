@@ -1,5 +1,5 @@
 package snapcode.apptools;
-import javakit.ide.JavaTextArea;
+import snapcode.javatext.JavaTextArea;
 import javakit.parse.JMethodDecl;
 import javakit.parse.JNode;
 import snap.gfx.Color;

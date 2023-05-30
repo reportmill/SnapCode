@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.apptools;
-import javakit.ide.JavaTextArea;
+import snapcode.javatext.JavaTextArea;
 import snap.geom.Insets;
 import snap.gfx.Color;
 import snap.gfx.Image;

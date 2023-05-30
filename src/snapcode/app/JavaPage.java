@@ -1,5 +1,4 @@
 package snapcode.app;
-import javakit.ide.*;
 import javakit.parse.*;
 import javakit.project.JavaAgent;
 import javakit.project.Project;
@@ -10,6 +9,9 @@ import snap.util.Convert;
 import snap.util.ListUtils;
 import snap.text.TextBoxLine;
 import snap.view.View;
+import snapcode.javatext.JavaTextArea;
+import snapcode.javatext.JavaTextPane;
+import snapcode.javatext.NodeMatcher;
 import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
@@ -23,7 +25,7 @@ import java.util.Objects;
 public class JavaPage extends WebPage implements WebFile.Updater {
 
     // The JavaTextPane
-    private JavaTextPane<?>  _javaTextPane;
+    private JavaTextPane<?> _javaTextPane;
 
     /**
      * Constructor.

@@ -3,7 +3,7 @@ import javakit.parse.JExprId;
 import javakit.parse.JNode;
 import javakit.parse.JavaParser;
 import javakit.resolver.JavaDecl;
-import javakit.ide.NodeCompleter;
+import snapcode.javatext.NodeCompleter;
 import snap.gfx.Font;
 import snap.parse.Parser;
 import snap.view.*;

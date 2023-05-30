@@ -1,5 +1,5 @@
 package snapcode.apptools;
-import javakit.ide.JavaTextArea;
+import snapcode.javatext.JavaTextArea;
 import snap.gfx.Image;
 import snap.util.ListUtils;
 import snap.view.*;

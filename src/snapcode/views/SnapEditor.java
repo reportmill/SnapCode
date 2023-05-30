@@ -1,7 +1,7 @@
 package snapcode.views;
 import javakit.parse.*;
 import javakit.resolver.JavaClass;
-import javakit.ide.JavaTextArea;
+import snapcode.javatext.JavaTextArea;
 import snap.text.TextBoxLine;
 import snap.view.StackView;
 import snap.view.View;

@@ -1,8 +1,8 @@
 package snapcode.views;
-import javakit.ide.JavaDoc;
+import snapcode.javatext.JavaDoc;
 import javakit.parse.JNode;
-import javakit.ide.JavaTextArea;
-import javakit.ide.JavaTextPane;
+import snapcode.javatext.JavaTextArea;
+import snapcode.javatext.JavaTextPane;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.props.Undoer;

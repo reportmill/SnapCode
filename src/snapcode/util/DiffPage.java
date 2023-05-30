@@ -1,6 +1,6 @@
 package snapcode.util;
 import javakit.parse.JavaTextDoc;
-import javakit.ide.JavaTextArea;
+import snapcode.javatext.JavaTextArea;
 import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.gfx.Color;

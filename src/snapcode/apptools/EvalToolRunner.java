@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.apptools;
-import javakit.ide.JavaTextPane;
+import snapcode.javatext.JavaTextPane;
 import javakit.parse.JavaTextDoc;
 import javakit.project.BuildIssue;
 import javakit.project.JavaAgent;

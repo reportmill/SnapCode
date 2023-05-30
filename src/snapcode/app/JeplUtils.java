@@ -1,5 +1,5 @@
 package snapcode.app;
-import javakit.ide.JavaTextUtils;
+import snapcode.javatext.JavaTextUtils;
 import javakit.parse.JeplTextDoc;
 import javakit.project.JeplAgent;
 import javakit.project.Project;

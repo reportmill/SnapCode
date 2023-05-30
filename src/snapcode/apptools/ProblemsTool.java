@@ -1,6 +1,6 @@
 package snapcode.apptools;
 import javakit.project.BuildIssue;
-import javakit.ide.JavaTextUtils;
+import snapcode.javatext.JavaTextUtils;
 import javakit.project.BuildIssues;
 import snap.gfx.Image;
 import snap.view.*;

@@ -1,5 +1,5 @@
 package snapcode.views;
-import javakit.ide.JavaTextPane;
+import snapcode.javatext.JavaTextPane;
 import snap.view.View;
 import snap.view.ViewEvent;
 import snapcode.webbrowser.WebBrowser;
@@ -8,7 +8,6 @@ import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebURL;
 import snapcode.app.JavaPage;
-import snapcode.views.SnapEditorPane;
 
 /**
  * A WebPage to wrap around SnapEditorPane.
