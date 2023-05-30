@@ -22,9 +22,6 @@ dependencies {
     // SnapKit project
     implementation project(':SnapKit')
 
-    // JavaKit project
-    implementation project(':JavaKit')
-
     // SnapCharts project
     implementation project(':SnapCharts')
 

@@ -1,0 +1,302 @@
+
+JavaFile { PackageDecl? ImportDecl* TypeDecl+ JavaFileImports* JeplFile? }
+
+JavaFileImports { PackageDecl? ImportDecl* }
+
+JeplFile
+{
+    (LookAhead(Modifiers ResultType Identifier FormalParams) Modifiers MethodDecl | BlockStatement)*
+}
+
+PackageDecl { LookAhead(Annotation* "package") Modifiers "package" Name ";" }
+
+ImportDecl { "import" "static"? Name ("." "*")? ";" }
+
+TypeDecl { ";" | Modifiers (ClassDecl | EnumDecl | AnnotationDecl) }
+
+MemberDecl
+{
+    ClassDecl | EnumDecl |
+    LookAhead(TypeParams? Identifier "(") ConstrDecl |
+    LookAhead(Type Identifier ("[" "]")* ("," | "=" | ";")) FieldDecl |
+    MethodDecl | AnnotationDecl
+}
+
+ClassDecl
+{
+    ("class" | "interface") Identifier TypeParams? ExtendsList? ImplementsList? ClassBody
+}
+
+ClassBody { "{" ClassBodyDecl* "}" }
+
+ClassBodyDecl { LookAhead(2) Initializer | Modifiers MemberDecl | ";" }
+
+Initializer { "static"? Block }
+
+EnumDecl
+{
+    "enum" Identifier ImplementsList? "{" (EnumConstant (LookAhead(2) "," EnumConstant)*)? ","? (";" ClassBodyDecl*)? "}"
+}
+
+EnumConstant { Modifiers Identifier Arguments? ClassBody? }
+
+FieldDecl { Type VarDecl ("," | VarDecl)* ";" }
+
+ConstrDecl
+{
+    TypeParams? Identifier FormalParams ThrowsList? "{" (LookAhead(ConstrCall) ConstrCall)? BlockStatement* "}"
+}
+
+ConstrCall
+{
+    (Identifier ".")* (LookAhead(2) "this" ".")? TypeArgs? ("this" | "super") Arguments ";"
+}
+
+MethodDecl
+{
+    TypeParams? ResultType Identifier FormalParams ("[" "]")* ThrowsList? (Block | ";")
+}
+
+ExtendsList { "extends" ClassType ("," ClassType)* }
+
+ImplementsList { "implements" ClassType ("," ClassType)* }
+
+ThrowsList { "throws" Name ("," Name)* }
+
+TypeParams { "<" TypeParam ("," TypeParam)* ">" }
+
+TypeParam { Identifier TypeBound? }
+
+TypeBound { "extends" ClassType ("&" ClassType)* }
+
+TypeArgs { "<" (TypeArg ("," TypeArg)*)? ">" }
+
+TypeArg { ReferenceType | "?" WildcardBounds? }
+
+WildcardBounds { "extends" ReferenceType | "super" ReferenceType }
+
+Annotation
+{
+    LookAhead("@" Name "(" (Identifier "=" | ")")) NormalAnnotation | LookAhead("@" Name "(") SingleMemberAnnotation | MarkerAnnotation
+}
+
+AnnotationDecl { "@" "interface" Identifier }
+
+SingleMemberAnnotation { "@" Name "(" MemberValue ")" }
+
+MarkerAnnotation { "@" Name }
+
+NormalAnnotation { "@" Name "(" MemberValuePairs? ")" }
+
+MemberValuePairs { MemberValuePair ("," MemberValuePair)* }
+
+MemberValuePair { Identifier "=" MemberValue }
+
+MemberValue { Annotation | MemberValueArrayInit | ConditionalExpr }
+
+MemberValueArrayInit { "{" (MemberValue (LookAhead(2) "," MemberValue)*)? "}" }
+
+Statement
+{
+    LookAhead(2) LabeledStatement | AssertStatement | Block | EmptyStatement | ExprStatement ";" | SwitchStatement |
+    IfStatement | WhileStatement | DoStatement | ForStatement | BreakStatement | ContinueStatement | ReturnStatement |
+    ThrowStatement | SynchronizedStatement | TryStatement
+}
+
+Block { "{" BlockStatement* "}" }
+
+BlockStatement
+{
+    LookAhead(Modifiers Type Identifier ("[" | "=" | "," | ";")) VarDeclStmt ";" | Statement | ClassDecl
+}
+
+Modifiers { Modifier* }
+
+Modifier
+{
+    "public" | "static" | "protected" | "private" | "final" | "abstract" | "synchronized" |
+    "default" | "native" | "transient" | "volatile" | "strictfp" | Annotation
+}
+
+VarDeclStmt { Modifiers Type VarDecl ("," VarDecl)* }
+
+VarDecl { Identifier ("[" "]")* ("=" VarInit)? }
+
+VarInit { ArrayInit | Expression }
+
+LabeledStatement { Identifier ":" Statement }
+
+AssertStatement { "assert" Expression (":" Expression)? ";" }
+
+//ExprStatement { PreIncrementExpr | PreDecrementExpr | PrimaryExpr ("++" | "--" | AssignOp Expression) }
+ExprStatement { PreIncrementExpr | PreDecrementExpr | Expression }
+
+SwitchStatement { "switch" "(" Expression ")" "{" (SwitchLabel BlockStatement*)* "}" }
+
+SwitchLabel { "case" Expression ":" | "default" ":" }
+
+IfStatement { "if" "(" Expression ")" Statement ("else" Statement)? }
+
+WhileStatement { "while" "(" Expression ")" Statement }
+
+DoStatement { "do" Statement "while" "(" Expression ")" ";" }
+
+EmptyStatement { ";" }
+
+ForStatement
+{
+    "for" "(" (LookAhead(Modifiers Type Identifier ":") Modifiers Type Identifier ":" Expression |
+    ForInit? ";" Expression? ";" ExprStmtList?) ")" Statement
+}
+
+ForInit { LookAhead(Modifiers Type Identifier) VarDeclStmt | ExprStmtList }
+
+ExprStmtList { ExprStatement ("," ExprStatement)* }
+
+BreakStatement { "break" Identifier? ";" }
+
+ContinueStatement { "continue" Identifier? ";" }
+
+ReturnStatement { "return" Expression? ";" }
+
+ThrowStatement { "throw" Expression ";" }
+
+SynchronizedStatement { "synchronized" "(" Expression | ")" Block }
+
+TryStatement { "try" Block ("catch" "(" FormalParam ")" Block)* ("finally" Block)? }
+
+Expression { ConditionalExpr (LookAhead(2) AssignOp Expression)? }
+
+ConditionalExpr { ConditionalOrExpr ("?" Expression ":" Expression)? }
+
+ConditionalOrExpr { ConditionalAndExpr ("||" ConditionalAndExpr)* }
+
+ConditionalAndExpr { InclusiveOrExpr ("&&" InclusiveOrExpr)* }
+
+InclusiveOrExpr { ExclusiveOrExpr ("|" ExclusiveOrExpr)* }
+
+ExclusiveOrExpr { AndExpr ("^" AndExpr)* }
+
+AndExpr { EqualityExpr ("&" EqualityExpr)* }
+
+EqualityExpr { InstanceOfExpr (("==" | "!=") InstanceOfExpr)* }
+
+InstanceOfExpr { RelationalExpr ("instanceof" Type)? }
+
+RelationalExpr { ShiftExpr (("<=" | ">=" | "<" | ">") ShiftExpr)* }
+
+ShiftExpr { AdditiveExpr (("<<" | ShiftRightUnsigned | ShiftRight) AdditiveExpr)* }
+
+ShiftRight { LookAhead(2) ">" ">" }
+
+ShiftRightUnsigned { LookAhead(3) ">" ">" ">" }
+
+AdditiveExpr { MultiplicativeExpr (("+" | "-") MultiplicativeExpr)* }
+
+MultiplicativeExpr { UnaryExpr (("*" | "/" | "%") UnaryExpr)* }
+
+UnaryExpr { ("+" | "-") UnaryExpr | PreIncrementExpr | PreDecrementExpr | UnaryExprNotPlusMinus }
+
+PreIncrementExpr { "++" PrimaryExpr }
+
+PreDecrementExpr { "--" PrimaryExpr }
+
+UnaryExprNotPlusMinus { ("~" | "!") UnaryExpr | LookAhead(CastLook) CastExpr | PostfixExpr }
+
+PostfixExpr { PrimaryExpr ("++" | "--")? }
+
+PrimaryExpr { PrimaryPrefix (LookAhead(2) PrimarySuffix)* }
+
+PrimaryPrefix
+{
+    Literal |
+    LookAhead((Identifier | ".")* "this") (Identifier ".")* "this" |
+    "super" "." Identifier |
+    LookAhead(ClassType "." "super" "." Identifier) ClassType "." "super" "." Identifier |
+    LambdaExpr |
+    "(" Expression ")" |
+    AllocExpr |
+    LookAhead(ResultType "." "class") ResultType "." "class" |
+    Name
+}
+
+PrimarySuffix
+{
+    LookAhead("." "super" ".") "." "super" |
+    LookAhead(2) "." "this" |
+    LookAhead(2) "." AllocExpr |
+    LookAhead(3) MemberSelector |
+    "[" Expression "]" |
+    ("." | "::") Identifier |
+    Arguments
+}
+
+MemberSelector { "." TypeArgs Identifier }
+
+AssignOp { "=" | "*=" | "/=" | "%=" | "+=" | "-=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|=" }
+
+Arguments { "(" (Expression ("," Expression)*)? ")" }
+
+AllocExpr
+{
+    LookAhead(2) "new" PrimitiveType ArrayDimsAndInits | "new" ClassType TypeArgs? (ArrayDimsAndInits | Arguments ClassBody?)
+}
+
+ArrayDimsAndInits
+{
+    LookAhead(2) (LookAhead(2) "[" Expression "]")+ (LookAhead(2) "[" "]")* | ("[" "]")+ ArrayInit
+}
+
+ArrayInit { "{" (VarInit (LookAhead(2) "," VarInit)*)? ","? "}" }
+
+CastExpr { LookAhead("(" PrimitiveType) "(" Type ")" UnaryExpr | "(" Type ")" UnaryExprNotPlusMinus }
+
+CastLook
+{
+    LookAhead(2) "(" PrimitiveType | LookAhead("(" Type "[") "(" Type "[" "]" | "(" Type ")" ("~" | "!" | "(" | Identifier | "this" | "super" | "new" | Literal)
+}
+
+LambdaExpr
+{
+    LookAhead(Identifier "->") Identifier "->" (Expression | Block) |
+    LookAhead("(" Identifier ("," Identifier)* ")" "->") "(" Identifier ("," Identifier)* ")" "->" (Expression | Block) |
+    LookAhead(FormalParams "->") FormalParams "->" (Expression | Block)
+}
+
+FormalParam { Modifiers ("final" | Annotation)? Type "..."? Identifier ("[" "]")* }
+
+FormalParams { "(" (FormalParam ("," FormalParam)*)? ")" }
+
+Name { Identifier (LookAhead(2) "." Identifier)* }
+
+Identifier { "[$_a-zA-Z][$\w]*" }
+
+Literal { IntegerLiteral | FloatLiteral | CharacterLiteral | StringLiteral | BooleanLiteral | NullLiteral }
+
+IntegerLiteral { IntLiteral | HexLiteral | OctalLiteral }
+
+IntLiteral { "[1-9][0-9]*[lL]?" }
+
+HexLiteral { "0[xX][0-9a-fA-F]+[lL]?" }
+
+OctalLiteral { "0[0-7]*[lL]?" }
+
+FloatLiteral { "([0-9]+\.[0-9]*([eE]([\+\-])?([0-9])+)?[fFdD]?)|(\.[0-9]+([eE]([\+\-])?([0-9])+)?[fFdD]?)|([0-9]+([eE]([\+\-])?([0-9])+)?[fFdD]?)" }
+
+CharacterLiteral { "'(([^'\\\n\r])|(\\([ntbrf\\'\"]|[0-7][0-7]?|[0-3][0-7][0-7]|u[\da-fA-F]{4})))'" }
+
+StringLiteral { "\"(([^\"\\\n\r])|(\\([ntbrf\\'\"]|[0-7][0-7]?|[0-3][0-7][0-7]|u[\da-fA-F]{4})))*\"" }
+
+NullLiteral { "null" }
+
+BooleanLiteral { "true" | "false" }
+
+Type { LookAhead(2) ReferenceType | PrimitiveType }
+
+ClassType { Identifier (LookAhead(2) TypeArgs)? (LookAhead(2) "." Identifier (LookAhead(2) TypeArgs)?)* }
+
+PrimitiveType { "boolean" | "char" | "byte" | "short" | "int" | "long" | "float" | "double" }
+
+ReferenceType { PrimitiveType (LookAhead(2) "[" "]")+ | ClassType (LookAhead(2) "[" "]")* }
+
+ResultType { "void" | Type }
