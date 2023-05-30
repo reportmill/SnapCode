@@ -1,5 +1,7 @@
 package snapcode.apptools;
 import javakit.project.*;
+import snap.web.WebFile;
+import snap.web.WebURL;
 import snapcode.app.*;
 import snapcode.project.VersionControl;
 import snap.view.*;
@@ -87,16 +89,14 @@ public class BuildFileTool extends ProjectTool {
         }
 
         // Get project site
-        AppBase app = AppBase.getShared();
-        WebSite projSite = app.getProjectSiteForName(aName);
+        WebSite projSite = findProjectForName(aName);
 
         // If project site not found but VersionControl URL provided, try to check out project
         boolean projectNotFound = projSite == null || !projSite.getExists();
         if (projectNotFound && aURLString != null) {
 
             // Create project site if missing
-            if (projSite == null)
-                projSite = app.createProjectSiteForName(aName);
+            //if (projSite == null) projSite = AppBase.getShared().createProjectSiteForName(aName);
 
             // Checkout project for URL
             VersionControl.setRemoteURLString(projSite, aURLString);
@@ -417,6 +417,21 @@ public class BuildFileTool extends ProjectTool {
 
         // Add Project for name
         addProjectForName(projectName, null);
+    }
+
+    /**
+     * Finds a project site for given name.
+     */
+    private WebSite findProjectForName(String aName)
+    {
+        // return AppBase.getShared().getProjectSiteForName(aName);
+        WebSite thisProjSite = getProjectSite();
+        WebURL thisProjSiteURL = thisProjSite.getURL();
+        WebURL parentURL = thisProjSiteURL.getParent();
+        WebFile parentDir = parentURL != null ? parentURL.getFile() : null;
+        WebFile projSiteDir = parentDir != null ? parentDir.getFileForName(aName) : null;
+        WebURL projSiteURL = projSiteDir != null ? projSiteDir.getURL() : null;
+        return projSiteURL != null ? projSiteURL.getAsSite() : null;
     }
 
     /**
