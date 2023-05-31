@@ -4,8 +4,8 @@
 package javakit.parse;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.util.StringUtils;
-
 import java.util.List;
 
 /**
@@ -121,18 +121,27 @@ public class JExprMethodCall extends JExpr {
     {
         // Get method name and arg types
         String name = getName();
-        JavaType[] argTypes = getArgEvalTypes();
+
+        // Get arg types
+        List<JExpr> args = getArgs();
+        int argCount = args.size();
+        JavaType[] argTypes = new JavaType[argCount];
+        for (int i = 0; i < argCount; i++) {
+            JExpr arg = args.get(i);
+            if (arg instanceof JExprLambda)
+                return getMethodForLambdaArgs();
+            JavaType argType = arg.getEvalType();
+            argTypes[i] = argType;
+        }
 
         // Get scope node type
         JNode scopeNode = getScopeNode();
-        if (scopeNode == null)
-            return null;
-        JavaType scopeType = scopeNode.getEvalType();
-        if (scopeType == null)
+        JavaType scopeType = scopeNode != null ? scopeNode.getEvalType() : null;
+        JavaClass scopeClass = scopeType != null ? scopeType.getEvalClass() : null;
+        if (scopeClass == null)
             return null;
 
         // Search for compatible method for name and arg types
-        JavaClass scopeClass = scopeType.getEvalClass();
         JavaMethod method = JavaClassUtils.getCompatibleMethodAll(scopeClass, name, argTypes);
         if (method != null)
             return method;
@@ -169,6 +178,85 @@ public class JExprMethodCall extends JExpr {
 
         // Return null since not found
         return null;
+    }
+
+    /**
+     * Tries to resolve the method declaration for this node.
+     */
+    protected JavaMethod getMethodForLambdaArgs()
+    {
+        // Get matching methods
+        List<JavaMethod> methods = getCompatibleMethods();
+        if (methods == null || methods.size() == 0)
+            return null;
+
+        // Get arg index of lambda expression
+        List<JExpr> args = getArgs();
+        int argIndex = ListUtils.findMatchIndex(args, arg -> arg instanceof JExprLambda);
+        if (argIndex < 0)
+            return null;
+
+        // Iterate over methods and return first that matches arg count
+        for (JavaMethod method : methods) {
+            JavaType paramType = method.getParamType(argIndex);
+            JavaClass paramClass = paramType.getEvalClass();
+            JavaMethod lambdaMethod = paramClass.getLambdaMethod();
+            if (lambdaMethod != null)
+                return method;
+        }
+
+        // Otherwise, let's just return first matching method (maybe TeaVM thing)
+        if (methods.size() > 0)
+            return methods.get(0);
+
+        // Return not found
+        return null;
+    }
+
+    /**
+     * Returns the method decl for the parent method call (assumes this lambda is an arg).
+     */
+    protected List<JavaMethod> getCompatibleMethods()
+    {
+        // Get method name and args
+        String name = getName();
+
+        // Get arg types
+        List<JExpr> args = getArgs();
+        int argCount = args.size();
+        JavaType[] argTypes = new JavaType[argCount];
+        for (int i = 0; i < argCount; i++) {
+            JExpr arg = args.get(i);
+            JavaType argType = arg instanceof JExprLambda ? null : arg.getEvalType();
+            argTypes[i] = argType;
+        }
+
+        // Get scope node class type and search for compatible method for name and arg types
+        JNode scopeNode = getScopeNode();
+        JavaType scopeType = scopeNode != null ? scopeNode.getEvalType() : null;
+        JavaClass scopeClass = scopeType != null ? scopeType.getEvalClass() : null;
+        if (scopeClass == null)
+            return null;
+
+        // Get scope node class type and search for compatible method for name and arg types
+        List<JavaMethod> compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argTypes);
+        if (compatibleMethods.size() > 0)
+            return compatibleMethods;
+
+        // If scope node class type is member class and not static, go up parent classes
+        while (scopeClass.isMemberClass() && !scopeClass.isStatic()) {
+            scopeClass = scopeClass.getDeclaringClass();
+            compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argTypes);
+            if (compatibleMethods.size() > 0)
+                return compatibleMethods;
+        }
+
+        // See if method is from static import
+        //decl = getFile().getImportClassMember(name, argTypes);
+        //if(decl!=null && decl.isMethod()) return decl;
+
+        // Return null since not found
+        return compatibleMethods;
     }
 
     /**

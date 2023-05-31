@@ -4,6 +4,7 @@
 package javakit.resolver;
 import javakit.parse.JClassDecl;
 import javakit.parse.JFile;
+import snap.util.ListUtils;
 import snap.util.SnapUtils;
 import java.lang.reflect.*;
 import java.util.*;
@@ -475,15 +476,19 @@ public class JavaClass extends JavaType {
     }
 
     /**
-     * Returns the lambda method.
+     * Returns the lambda method (or null if this class isn't a functional interface).
      */
-    public JavaMethod getLambdaMethod(int argCount)
+    public JavaMethod getLambdaMethod()
     {
+        // If not interface, return null
+        if (!isInterface()) {
+            System.err.println("JavaClass.getLambdaMethod: Request for lambda method from non interface class: " + getClassName());
+            return null;
+        }
+
+        // Find lambda method
         List<JavaMethod> methods = getMethods();
-        for (JavaMethod method : methods)
-            if (method.getParamCount() == argCount)
-                return method;
-        return null;
+        return ListUtils.findMatch(methods, method -> !(method.isStatic() || method.isDefault()));
     }
 
     /**

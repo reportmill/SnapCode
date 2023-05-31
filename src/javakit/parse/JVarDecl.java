@@ -86,7 +86,7 @@ public class JVarDecl extends JNode {
 
             // Get decl for this param (resolve if needed)
             JExprLambda lambda = (JExprLambda) par;
-            JavaMethod lambdaMethod = lambda.getMethod();
+            JavaMethod lambdaMethod = lambda.getLambdaMethod();
             if (lambdaMethod == null)
                 return null;
 

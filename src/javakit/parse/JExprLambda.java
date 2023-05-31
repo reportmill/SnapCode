@@ -20,8 +20,11 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     // The statement Block, if lambda has block
     protected JStmtBlock  _block;
 
-    // The declaration for the actual method for the interface this lambda represents
-    protected JavaMethod  _meth;
+    // The class this lambda
+    private JavaClass _lambdaClass;
+
+    // The actual interface method this lambda represents
+    private JavaMethod _lambdaMethod;
 
     /**
      * Returns the list of formal parameters.
@@ -101,15 +104,6 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     }
 
     /**
-     * Returns the specific method in the lambda class interface that is to be called.
-     */
-    public JavaMethod getMethod()
-    {
-        getDecl();
-        return _meth;
-    }
-
-    /**
      * WithVarDecls method.
      */
     @Override
@@ -127,7 +121,42 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     /**
      * Override to try to resolve decl from parent.
      */
+    @Override
     protected JavaType getDeclImpl()
+    {
+        return getLambdaClass();
+    }
+
+    /**
+     * Returns the specific method in the lambda class interface that is to be called.
+     */
+    public JavaMethod getLambdaMethod()
+    {
+        // If already set, just return
+        if (_lambdaMethod != null) return _lambdaMethod;
+
+        // Get lambda class and lambda method with correct arg count
+        JavaClass lambdaClass = getLambdaClass();
+        JavaMethod lambdaMethod = lambdaClass.getLambdaMethod();
+
+        // Set/return
+        return _lambdaMethod = lambdaMethod;
+    }
+
+    /**
+     * Returns the lambda class.
+     */
+    protected JavaClass getLambdaClass()
+    {
+        if (_lambdaClass != null) return _lambdaClass;
+        JavaClass lambdaClass = getLambdaClassImpl();
+        return _lambdaClass = lambdaClass;
+    }
+
+    /**
+     * Returns the lambda class.
+     */
+    private JavaClass getLambdaClassImpl()
     {
         // Get Parent (just return if null)
         JNode par = getParent();
@@ -137,52 +166,28 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
         // Handle parent is method call: Get lambda interface from method call decl param
         if (par instanceof JExprMethodCall) {
 
-            // Get methodCall and matching methods
+            // Get methodCall method
             JExprMethodCall methodCall = (JExprMethodCall) par;
-            List<JavaMethod> methods = getCompatibleMethods();
-            if (methods == null || methods.size() == 0)
+            JavaMethod method = methodCall.getDecl();
+            if (method == null)
                 return null;
 
-            // Get arg index of this lambda
-            List<JExpr> argExpressions = methodCall.getArgs();
-            int argIndex = ListUtils.indexOfId(argExpressions, this);
-            int argCount = getParamCount();
+            // Get arg index of this lambda expr
+            List<JExpr> args = methodCall.getArgs();
+            int argIndex = ListUtils.indexOfId(args, this);
             if (argIndex < 0)
                 return null;
 
-            // Iterate over methods and return first that matches arg count
-            for (JavaMethod method : methods) {
-                if (method.isDefault()) continue;
-                JavaType paramType = method.getParamType(argIndex);
-                JavaClass paramClass = paramType.getEvalClass();
-                _meth = paramClass.getLambdaMethod(argCount);
-                if (_meth != null)
-                    return paramType;
-            }
-
-            // Otherwise, let's just return param type of first matching method (maybe TeaVM thing)
-            if (methods.size() > 0) {
-                JavaMethod method = methods.get(0);
-                JavaType paramType = method.getParamType(argIndex);
-                return paramType;
-            }
-
-            // Return not found
-            return null;
+            // Get arg type at arg index
+            JavaType lambdaType = method.getParamType(argIndex);
+            JavaClass lambdaClass = lambdaType.getEvalClass();
+            return lambdaClass;
         }
 
-        // Handle parent anything else (JVarDecl, JStmtExpr): Get lambda interface from eval type
-        if (par._decl != null) {
-
-            // If type is interface, get lambda type
-            JavaType parentType = par.getEvalType();
-            if (parentType != null) {
-                JavaClass parentClass = parentType.getEvalClass();
-                _meth = parentClass.getLambdaMethod(getParamCount());
-                if (_meth != null)
-                    return parentType;
-            }
-        }
+        // Handle parent anything else (JVarDecl, JStmtExpr): Return parent eval class
+        JavaClass lambdaClass = par.getEvalClass();
+        if (lambdaClass != null)
+            return lambdaClass;
 
         // Return not found
         return null;
@@ -201,52 +206,6 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
 
         // Do normal version
         return super.getDeclForChildExprIdNode(anExprId);
-    }
-
-    /**
-     * Returns the method decl for the parent method call (assumes this lambda is an arg).
-     */
-    protected List<JavaMethod> getCompatibleMethods()
-    {
-        // Get method call, method name and args
-        JExprMethodCall methodCallExpr = (JExprMethodCall) getParent();
-        String name = methodCallExpr.getName();
-        List<JExpr> methodArgs = methodCallExpr.getArgs();
-        int argCount = methodArgs.size();
-
-        // Get arg types
-        JavaType[] argTypes = new JavaType[argCount];
-        for (int i = 0; i < argCount; i++) {
-            JExpr arg = methodArgs.get(i);
-            argTypes[i] = arg instanceof JExprLambda ? null : arg.getEvalType();
-        }
-
-        // Get scope node class type and search for compatible method for name and arg types
-        JNode scopeNode = methodCallExpr.getScopeNode();
-        JavaType scopeType = scopeNode != null ? scopeNode.getEvalType() : null;
-        JavaClass scopeClass = scopeType != null ? scopeType.getEvalClass() : null;
-        if (scopeClass == null)
-            return null;
-
-        // Get scope node class type and search for compatible method for name and arg types
-        List<JavaMethod> compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argTypes);
-        if (compatibleMethods.size() > 0)
-            return compatibleMethods;
-
-        // If scope node class type is member class and not static, go up parent classes
-        while (scopeClass.isMemberClass() && !scopeClass.isStatic()) {
-            scopeClass = scopeClass.getDeclaringClass();
-            compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argTypes);
-            if (compatibleMethods.size() > 0)
-                return compatibleMethods;
-        }
-
-        // See if method is from static import
-        //decl = getFile().getImportClassMember(name, argTypes);
-        //if(decl!=null && decl.isMethod()) return decl;
-
-        // Return null since not found
-        return compatibleMethods;
     }
 
     /**
