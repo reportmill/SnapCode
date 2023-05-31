@@ -215,7 +215,7 @@ public class JExprMethodCall extends JExpr {
                 // See if TypeVar can be resolved by ScopeNode.Type
                 JNode scopeNode = getScopeNode();
                 JavaType scopeType = scopeNode != null ? scopeNode.getEvalType() : null;
-                resolvedDecl = scopeType.getResolvedType(evalType);
+                resolvedDecl = scopeType != null ? scopeType.getResolvedType(evalType) : null;
                 if (resolvedDecl != null)
                     return resolvedDecl;
 

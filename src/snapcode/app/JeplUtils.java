@@ -1,9 +1,6 @@
 package snapcode.app;
 import snapcode.javatext.JavaTextUtils;
-import snapcode.project.JeplTextDoc;
-import snapcode.project.JeplAgent;
-import snapcode.project.Project;
-import snapcode.project.BuildFile;
+import snapcode.project.*;
 import snap.gfx.Font;
 import snap.props.PropObject;
 import snap.text.TextStyle;
@@ -46,6 +43,9 @@ public class JeplUtils {
         // Set imports and SuperClassName
         jeplTextDoc.addImport("snapcharts.data.*");
         jeplTextDoc.addImport("snapcharts.repl.*");
+        //jeplTextDoc.addImport("static snapcharts.repl.ReplObject.*");
+        //jeplTextDoc.addImport("static snapcharts.repl.QuickCharts.*");
+        //jeplTextDoc.addImport("static snapcharts.repl.QuickData.*");
         jeplTextDoc.setSuperClassName(ReplObject.class.getName());
 
         // Set code font
@@ -56,14 +56,14 @@ public class JeplUtils {
     /**
      * Configures JeplTextDoc project to make sure it references SnapKit, SnapCode and SnapCharts.
      */
-    public static void configureJeplDocProject(JeplTextDoc jeplTextDoc)
+    public static void configureJeplDocProject(JavaTextDoc javaTextDoc)
     {
         // If TeaVM, just return
         if (SnapUtils.isTeaVM) return;
 
         // Get BuildFile
-        JeplAgent jeplAgent = jeplTextDoc.getAgent();
-        Project proj = jeplAgent.getProject();
+        JavaAgent javaAgent = javaTextDoc.getAgent();
+        Project proj = javaAgent.getProject();
         BuildFile buildFile = proj.getBuildFile();
 
         // Add dependencies to BuildFile for SnapKit and SnapCharts

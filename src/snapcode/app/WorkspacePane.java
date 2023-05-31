@@ -135,8 +135,8 @@ public class WorkspacePane extends ViewOwner {
         }
 
         // Configure doc
-        if (javaTextDoc instanceof JeplTextDoc)
-            JeplUtils.configureJeplDocProject((JeplTextDoc) javaTextDoc);
+        //if (javaTextDoc instanceof JeplTextDoc)
+        JeplUtils.configureJeplDocProject(javaTextDoc);
 
         // Get project/workspace
         Project project = Project.getProjectForFile(sourceFile);

@@ -155,14 +155,20 @@ public class JeplParser extends JavaParser {
      */
     private static void addImportToJFile(JFile aFile, String anImportPathName)
     {
-        // Get inclusive and path info
-        boolean isInclusive = anImportPathName.endsWith(".*");
-        String importPathName = isInclusive ? anImportPathName.substring(0, anImportPathName.length() - 2) : anImportPathName;
+        // Get import path name and static/inclusive
+        String importPathName = anImportPathName;
+        boolean isStatic = anImportPathName.startsWith("static ");
+        if (isStatic)
+            importPathName = importPathName.substring("static ".length()).trim();
+        boolean isInclusive = importPathName.endsWith(".*");
+        if (isInclusive)
+            importPathName = importPathName.substring(0, importPathName.length() - 2);
 
         // Create/configure/add ImportDecl
         JImportDecl importDecl = new JImportDecl();
         importDecl.setName(importPathName);
         importDecl.setInclusive(isInclusive);
+        importDecl.setStatic(isStatic);
         importDecl.setStartToken(PHANTOM_TOKEN);
         importDecl.setEndToken(PHANTOM_TOKEN);
         aFile.addImportDecl(importDecl);
