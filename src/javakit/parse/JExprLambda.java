@@ -113,18 +113,18 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
      * Override to return as type.
      */
     @Override
-    public JavaType getDecl()
+    public JavaMethod getDecl()
     {
-        return (JavaType) super.getDecl();
+        return (JavaMethod) super.getDecl();
     }
 
     /**
      * Override to try to resolve decl from parent.
      */
     @Override
-    protected JavaType getDeclImpl()
+    protected JavaMethod getDeclImpl()
     {
-        return getLambdaClass();
+        return getLambdaMethod();
     }
 
     /**
@@ -146,7 +146,7 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     /**
      * Returns the lambda class.
      */
-    protected JavaClass getLambdaClass()
+    public JavaClass getLambdaClass()
     {
         if (_lambdaClass != null) return _lambdaClass;
         JavaClass lambdaClass = getLambdaClassImpl();
