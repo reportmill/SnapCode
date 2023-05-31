@@ -326,7 +326,7 @@ public class JavaParserExpr extends Parser {
                 case "*": return JExprMath.Op.Multiply;
                 case "/": return JExprMath.Op.Divide;
                 case "%": return JExprMath.Op.Mod;
-                default: throw new RuntimeException("Unknown op string: " + anId);
+                default: System.err.println("BinaryExprHandler.getOpForString: Unknown op string: " + anId); return null;
             }
         }
     }

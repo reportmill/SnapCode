@@ -4,6 +4,7 @@
 package javakit.parse;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
+import snap.util.StringUtils;
 
 import java.util.List;
 
@@ -311,32 +312,36 @@ public class JExprMethodCall extends JExpr {
         String methodName = getName();
         if (methodName == null)
             return "No name found";
-        JavaType[] argTypes = getArgEvalTypes();
+        String argTypesString = getArgTypesString();
+        String methodString = methodName + argTypesString;
 
         // Get scope node type
         JNode scopeNode = getScopeNode();
         JavaType scopeType = scopeNode != null ? scopeNode.getEvalType() : null;
         String scopeClassName = scopeType != null ? scopeType.getEvalClassName() : null;
-
-        // Add ClassName.MethodName
-        StringBuffer sb = new StringBuffer();
         if (scopeClassName != null)
-            sb.append(scopeClassName).append('.');
-        sb.append(methodName).append('(');
-
-        // Add Args
-        for (int i = 0; i < argTypes.length; i++) {
-            if (i > 0)
-                sb.append(',');
-            JavaType argType = argTypes[i];
-            if (argType != null)
-                sb.append(argType.getSimpleName());
-            else sb.append("null");
-        }
-        sb.append(')');
+            methodString = scopeClassName + '.' + methodName;
 
         // Return
-        return sb.toString();
+        return methodString;
+    }
+
+    /**
+     * Returns the parameter string.
+     */
+    private String getArgTypesString()
+    {
+        // Get arg types
+        JavaType[] argTypes = getArgEvalTypes();
+        if (argTypes.length == 0)
+            return "()";
+
+        // Get arg type string and join by comma
+        String[] argTypeStrings = ArrayUtils.map(argTypes, type -> type != null ? type.getSimpleName() : "null", String.class);
+        String argTypeString = StringUtils.join(argTypeStrings, ",");
+
+        // Return in parens
+        return '(' + argTypeString + ')';
     }
 
     /**

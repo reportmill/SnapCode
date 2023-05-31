@@ -5,6 +5,7 @@ package javakit.parse;
 import java.util.*;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
+import snap.util.StringUtils;
 
 /**
  * A JExpr subclass for Allocation expressions.
@@ -37,10 +38,7 @@ public class JExprAlloc extends JExpr {
     /**
      * Returns the allocation JType.
      */
-    public JType getType()
-    {
-        return _type;
-    }
+    public JType getType()  { return _type; }
 
     /**
      * Sets the allocation JType.
@@ -53,10 +51,7 @@ public class JExprAlloc extends JExpr {
     /**
      * Returns the allocation arguments.
      */
-    public List<JExpr> getArgs()
-    {
-        return _args;
-    }
+    public List<JExpr> getArgs()  { return _args; }
 
     /**
      * Sets the allocation arguments.
@@ -162,4 +157,70 @@ public class JExprAlloc extends JExpr {
      * Returns the part name.
      */
     public String getNodeString()  { return "Allocation"; }
+
+    /**
+     * Override to provide errors for JStmtExpr.
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()
+    {
+        NodeError[] errors = NodeError.NO_ERRORS;
+
+        // Handle can't resolve method
+        JavaDecl classOrConstructor = getDecl();
+        if (classOrConstructor == null) {
+            String errorString = null;
+            if (getArgs() != null) {
+                String constrString = getConstructorString();
+                errorString = "Can't resolve constructor: " + constrString;
+            }
+            else {
+                JType type = getType();
+                String className = type != null ? type.getName() : "Unknown";
+                errorString = "Can't resolve type: " + className;
+            }
+
+            // Create error
+            NodeError error = new NodeError(this, errorString);
+            errors = ArrayUtils.add(errors, error);
+        }
+
+        // Return
+        return errors;
+    }
+
+    /**
+     * Returns a string for constructor.
+     */
+    private String getConstructorString()
+    {
+        // Get class name and arg types
+        JType type = getType();
+        String className = type != null ? type.getName() : null;
+        if (className == null)
+            return "No name found";
+        String argTypesString = getArgTypesString();
+        String constructorString = className + argTypesString;
+
+        // Return
+        return constructorString;
+    }
+
+    /**
+     * Returns the parameter string.
+     */
+    private String getArgTypesString()
+    {
+        // Get arg types
+        JavaType[] argTypes = getArgEvalTypes();
+        if (argTypes.length == 0)
+            return "()";
+
+        // Get arg type string and join by comma
+        String[] argTypeStrings = ArrayUtils.map(argTypes, type -> type != null ? type.getSimpleName() : "null", String.class);
+        String argTypeString = StringUtils.join(argTypeStrings, ",");
+
+        // Return in parens
+        return '(' + argTypeString + ')';
+    }
 }
