@@ -128,7 +128,7 @@ public class DeclMatcher {
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
 
             // Get Class fields
-            List<JavaField> fields = cls.getFields();
+            List<JavaField> fields = cls.getDeclaredFields();
             for (JavaField field : fields)
                 if (matchesString(field.getName()))
                     matchingFields.add(field);
@@ -159,7 +159,7 @@ public class DeclMatcher {
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
 
             // Get Class methods
-            List<JavaMethod> methods = cls.getMethods();
+            List<JavaMethod> methods = cls.getDeclaredMethods();
             for (JavaMethod method : methods)
                 if (matchesString(method.getName()) && method.getSuper() == null)
                     matchingMethods.add(method);

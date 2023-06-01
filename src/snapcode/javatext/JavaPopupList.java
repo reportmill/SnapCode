@@ -169,12 +169,12 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         // If constructor
         JavaClass declClass = exec.getDeclaringClass();
         if (exec instanceof JavaConstructor) {
-            boolean multipleConstructors = declClass.getConstructors().size() > 1;
+            boolean multipleConstructors = declClass.getDeclaredConstructors().size() > 1;
             return multipleConstructors ? argStart : -1;
         }
 
         // If more methods with this name
-        List<JavaMethod> methods = declClass.getMethods();
+        List<JavaMethod> methods = declClass.getDeclaredMethods();
         JavaMethod javaMethod = (JavaMethod) exec;
         String methodName = javaMethod.getName();
         int count = 0;

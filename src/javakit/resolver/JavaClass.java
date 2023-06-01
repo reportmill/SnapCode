@@ -279,14 +279,14 @@ public class JavaClass extends JavaType {
      */
     public JavaClass[] getInterfaces()
     {
-        getFields();
+        getDeclaredFields();
         return _interfaces;
     }
 
     /**
      * Returns the fields.
      */
-    public List<JavaField> getFields()
+    public List<JavaField> getDeclaredFields()
     {
         if (_fieldDecls == null) updateDecls();
         return _fieldDecls;
@@ -295,27 +295,27 @@ public class JavaClass extends JavaType {
     /**
      * Returns the methods.
      */
-    public List<JavaMethod> getMethods()
+    public List<JavaMethod> getDeclaredMethods()
     {
-        getFields();
+        getDeclaredFields();
         return _methDecls;
     }
 
     /**
      * Returns the Constructors.
      */
-    public List<JavaConstructor> getConstructors()
+    public List<JavaConstructor> getDeclaredConstructors()
     {
-        getFields();
+        getDeclaredFields();
         return _constrDecls;
     }
 
     /**
      * Returns the inner classes.
      */
-    public List<JavaClass> getInnerClasses()
+    public List<JavaClass> getDeclaredClasses()
     {
-        getFields();
+        getDeclaredFields();
         return _innerClasses;
     }
 
@@ -324,7 +324,7 @@ public class JavaClass extends JavaType {
      */
     public List<JavaTypeVariable> getTypeVars()
     {
-        getFields();
+        getDeclaredFields();
         return _typeVarDecls;
     }
 
@@ -333,7 +333,7 @@ public class JavaClass extends JavaType {
      */
     public JavaField getFieldForName(String aName)
     {
-        List<JavaField> fields = getFields();
+        List<JavaField> fields = getDeclaredFields();
         for (JavaField field : fields)
             if (field.getName().equals(aName))
                 return field;
@@ -360,7 +360,7 @@ public class JavaClass extends JavaType {
      */
     public JavaConstructor getConstructorForTypes(JavaType[] theTypes)
     {
-        List<JavaConstructor> constructors = getConstructors();
+        List<JavaConstructor> constructors = getDeclaredConstructors();
         for (JavaConstructor constructor : constructors) {
             JavaType[] constrParamTypes = constructor.getParamTypes();
             if (isTypesEqual(constrParamTypes, theTypes))
@@ -387,7 +387,7 @@ public class JavaClass extends JavaType {
      */
     public JavaMethod getMethodForNameAndTypes(String aName, JavaType[] theTypes)
     {
-        List<JavaMethod> methods = getMethods();
+        List<JavaMethod> methods = getDeclaredMethods();
         for (JavaMethod method : methods) {
             if (method.getName().equals(aName)) {
                 JavaType[] methodParamTypes = method.getParamTypes();
@@ -416,7 +416,7 @@ public class JavaClass extends JavaType {
      */
     public JavaClass getInnerClassForName(String aName)
     {
-        List<JavaClass> innerClasses = getInnerClasses();
+        List<JavaClass> innerClasses = getDeclaredClasses();
         for (JavaClass innerClass : innerClasses)
             if (innerClass.getSimpleName().equals(aName))
                 return innerClass;
@@ -487,7 +487,7 @@ public class JavaClass extends JavaType {
         }
 
         // Find lambda method
-        List<JavaMethod> methods = getMethods();
+        List<JavaMethod> methods = getDeclaredMethods();
         return ListUtils.findMatch(methods, method -> !(method.isStatic() || method.isDefault()));
     }
 

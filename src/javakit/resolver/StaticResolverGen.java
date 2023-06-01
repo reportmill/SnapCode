@@ -248,7 +248,7 @@ public class StaticResolverGen {
     {
         // Get valid constructors (just return if none)
         JavaClass javaClass = _resolver.getJavaClassForClass(aClass);
-        JavaConstructor[] constructors = javaClass.getConstructors().toArray(new JavaConstructor[0]);
+        JavaConstructor[] constructors = javaClass.getDeclaredConstructors().toArray(new JavaConstructor[0]);
         Stream<JavaConstructor> constrStream = Stream.of(constructors);
         constrStream = constrStream.filter(c -> isValidConstructor(c));
         constructors = constrStream.toArray(size -> new JavaConstructor[size]);
@@ -333,7 +333,7 @@ public class StaticResolverGen {
     {
         // Get methods
         JavaClass javaClass = _resolver.getJavaClassForClass(aClass);
-        JavaMethod[] methods = javaClass.getMethods().toArray(new JavaMethod[0]);
+        JavaMethod[] methods = javaClass.getDeclaredMethods().toArray(new JavaMethod[0]);
 
         // Append comment for class
         String className = className(aClass);
@@ -447,7 +447,7 @@ public class StaticResolverGen {
     {
         // Get constructors for class
         JavaClass javaClass = _resolver.getJavaClassForClass(aClass);
-        JavaConstructor[] constructors = javaClass.getConstructors().toArray(new JavaConstructor[0]);
+        JavaConstructor[] constructors = javaClass.getDeclaredConstructors().toArray(new JavaConstructor[0]);
         Stream<JavaConstructor> constrStream = Stream.of(constructors);
         constrStream = constrStream.filter(c -> isValidConstructor(c));
         constructors = constrStream.toArray(size -> new JavaConstructor[size]);

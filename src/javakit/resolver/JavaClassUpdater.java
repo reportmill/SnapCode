@@ -262,7 +262,7 @@ public class JavaClassUpdater {
     private void updateArrayClass()
     {
         JavaClass aryDecl = _resolver.getJavaClassForClass(Object[].class);
-        _javaClass._fieldDecls = aryDecl.getFields();
+        _javaClass._fieldDecls = aryDecl.getDeclaredFields();
         _javaClass._interfaces = aryDecl._interfaces;
         _javaClass._methDecls = aryDecl._methDecls;
         _javaClass._constrDecls = aryDecl._constrDecls;
@@ -279,7 +279,7 @@ public class JavaClassUpdater {
         if (_allDecls != null) return _allDecls;
 
         // Create new AllDecls cached list with decls for fields, methods, constructors, inner classes and this class
-        List<JavaField> fdecls = _javaClass.getFields();
+        List<JavaField> fdecls = _javaClass.getDeclaredFields();
         int memberCount = fdecls.size() + _javaClass._methDecls.size() + _javaClass._constrDecls.size();
         int declCount = memberCount + _javaClass._innerClasses.size() + 1;
         List<JavaDecl> decls = new ArrayList<>(declCount);
@@ -334,7 +334,7 @@ public class JavaClassUpdater {
      */
     private JavaMethod getMethodForId(String anId)
     {
-        List<JavaMethod> methods = _javaClass.getMethods();
+        List<JavaMethod> methods = _javaClass.getDeclaredMethods();
         for (JavaMethod method : methods)
             if (method.getId().equals(anId))
                 return method;
@@ -367,7 +367,7 @@ public class JavaClassUpdater {
      */
     public JavaConstructor getConstructorForId(String anId)
     {
-        List<JavaConstructor> constructors = _javaClass.getConstructors();
+        List<JavaConstructor> constructors = _javaClass.getDeclaredConstructors();
         for (JavaConstructor constructor : constructors)
             if (constructor.getId().equals(anId))
                 return constructor;

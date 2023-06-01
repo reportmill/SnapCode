@@ -14,7 +14,7 @@ public class JavaClassUtils {
      */
     public static JavaConstructor getCompatibleConstructor(JavaClass aClass, JavaType[] theTypes)
     {
-        List<JavaConstructor> declaredConstructors = aClass.getConstructors();
+        List<JavaConstructor> declaredConstructors = aClass.getDeclaredConstructors();
         JavaConstructor compatibleConstructor = null;
         int rating = 0;
 
@@ -36,7 +36,7 @@ public class JavaClassUtils {
      */
     public static JavaMethod getCompatibleMethod(JavaClass aClass, String aName, JavaType[] theTypes)
     {
-        List<JavaMethod> declaredMethods = aClass.getMethods();
+        List<JavaMethod> declaredMethods = aClass.getDeclaredMethods();
         JavaMethod compatibleMethod = null;
         int rating = 0;
 
@@ -93,7 +93,7 @@ public class JavaClassUtils {
     public static List<JavaMethod> getCompatibleMethods(JavaClass aClass, String aName, JavaType[] theTypes)
     {
         List<JavaMethod> compatibleMethods = Collections.EMPTY_LIST;
-        List<JavaMethod> declaredMethods = aClass.getMethods();
+        List<JavaMethod> declaredMethods = aClass.getDeclaredMethods();
 
         // Iterate over methods to find highest rating
         for (JavaMethod method : declaredMethods) {

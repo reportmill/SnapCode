@@ -222,7 +222,7 @@ public class NodeCompleter {
                     continue;
 
                 // Get Constructors
-                List<JavaConstructor> constructors = javaClass.getConstructors();
+                List<JavaConstructor> constructors = javaClass.getDeclaredConstructors();
 
                 // Add constructors
                 for (JavaConstructor constructor : constructors)
