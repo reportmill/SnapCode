@@ -134,10 +134,9 @@ public class JExprMethodCall extends JExpr {
             argTypes[i] = argType;
         }
 
-        // Get scope node type
+        // Get scope node class
         JNode scopeNode = getScopeNode();
-        JavaType scopeType = scopeNode != null ? scopeNode.getEvalType() : null;
-        JavaClass scopeClass = scopeType != null ? scopeType.getEvalClass() : null;
+        JavaClass scopeClass = scopeNode != null ? scopeNode.getEvalClass() : null;
         if (scopeClass == null)
             return null;
 
@@ -149,18 +148,9 @@ public class JExprMethodCall extends JExpr {
         // If scope node is class and not static, go up parent classes
         while (scopeNode instanceof JClassDecl && !scopeClass.isStatic()) {
 
-            // Get parent class
+            // Get enclosing JClassDecl and JavaClass
             scopeNode = scopeNode.getEnclosingClassDecl();
-            if (scopeNode == null)
-                break;
-
-            // Get scope type
-            scopeType = (JavaType) scopeNode.getDecl();
-            if (scopeType == null)
-                break;
-
-            // Get scope class
-            scopeClass = scopeType.getEvalClass();
+            scopeClass = scopeNode != null ? scopeNode.getEvalClass() : null;
             if (scopeClass == null)
                 break;
 
@@ -233,8 +223,7 @@ public class JExprMethodCall extends JExpr {
 
         // Get scope node class type and search for compatible method for name and arg types
         JNode scopeNode = getScopeNode();
-        JavaType scopeType = scopeNode != null ? scopeNode.getEvalType() : null;
-        JavaClass scopeClass = scopeType != null ? scopeType.getEvalClass() : null;
+        JavaClass scopeClass = scopeNode != null ? scopeNode.getEvalClass() : null;
         if (scopeClass == null)
             return null;
 
@@ -403,10 +392,9 @@ public class JExprMethodCall extends JExpr {
         String argTypesString = getArgTypesString();
         String methodString = methodName + argTypesString;
 
-        // Get scope node type
+        // Get scope node class name
         JNode scopeNode = getScopeNode();
-        JavaType scopeType = scopeNode != null ? scopeNode.getEvalType() : null;
-        String scopeClassName = scopeType != null ? scopeType.getEvalClassName() : null;
+        String scopeClassName = scopeNode != null ? scopeNode.getEvalClassName() : null;
         if (scopeClassName != null)
             methodString = scopeClassName + '.' + methodName;
 
