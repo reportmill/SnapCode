@@ -216,7 +216,6 @@ public class StaticResolver {
                 mb.name("append").paramTypes(java.lang.CharSequence.class,int.class,int.class).returnType(java.lang.StringBuffer.class).save();
                 mb.name("append").paramTypes(java.lang.Object.class).returnType(java.lang.StringBuffer.class).save();
                 mb.name("append").paramTypes(java.lang.CharSequence.class).returnType(java.lang.StringBuffer.class).save();
-                mb.name("compareTo").paramTypes(java.lang.StringBuffer.class).returnType(int.class).save();
                 mb.name("compareTo").paramTypes(java.lang.Object.class).returnType(int.class).save();
                 mb.name("indexOf").paramTypes(java.lang.String.class).returnType(int.class).save();
                 mb.name("indexOf").paramTypes(java.lang.String.class,int.class).returnType(int.class).save();
@@ -249,7 +248,6 @@ public class StaticResolver {
                 mb.name("append").paramTypes(int.class).returnType(java.lang.StringBuilder.class).save();
                 mb.name("append").paramTypes(long.class).returnType(java.lang.StringBuilder.class).save();
                 mb.name("compareTo").paramTypes(java.lang.Object.class).returnType(int.class).save();
-                mb.name("compareTo").paramTypes(java.lang.StringBuilder.class).returnType(int.class).save();
                 mb.name("indexOf").paramTypes(java.lang.String.class).returnType(int.class).save();
                 mb.name("indexOf").paramTypes(java.lang.String.class,int.class).returnType(int.class).save();
                 mb.name("charAt").paramTypes(int.class).returnType(char.class).save();
@@ -262,26 +260,15 @@ public class StaticResolver {
 
             // Handle java.util.Arrays
             case "java.util.Arrays":
-                mb.name("equals").paramTypes(double[].class,int.class,int.class,double[].class,int.class,int.class).returnType(boolean.class).save();
                 mb.name("equals").paramTypes(double[].class,double[].class).returnType(boolean.class).save();
-                mb.name("equals").paramTypes(boolean[].class,int.class,int.class,boolean[].class,int.class,int.class).returnType(boolean.class).save();
                 mb.name("equals").paramTypes(boolean[].class,boolean[].class).returnType(boolean.class).save();
-                mb.name("equals").paramTypes(byte[].class,int.class,int.class,byte[].class,int.class,int.class).returnType(boolean.class).save();
-                mb.name("equals").paramTypes(java.lang.Object[].class,int.class,int.class,java.lang.Object[].class,int.class,int.class).returnType(boolean.class).save();
                 mb.name("equals").paramTypes(java.lang.Object[].class,java.lang.Object[].class).returnType(boolean.class).save();
-                mb.name("equals").paramTypes(float[].class,int.class,int.class,float[].class,int.class,int.class).returnType(boolean.class).save();
                 mb.name("equals").paramTypes(float[].class,float[].class).returnType(boolean.class).save();
                 mb.name("equals").paramTypes(short[].class,short[].class).returnType(boolean.class).save();
-                mb.name("equals").paramTypes(int[].class,int.class,int.class,int[].class,int.class,int.class).returnType(boolean.class).save();
                 mb.name("equals").paramTypes(int[].class,int[].class).returnType(boolean.class).save();
-                mb.name("equals").paramTypes(long[].class,int.class,int.class,long[].class,int.class,int.class).returnType(boolean.class).save();
                 mb.name("equals").paramTypes(long[].class,long[].class).returnType(boolean.class).save();
                 mb.name("equals").paramTypes(byte[].class,byte[].class).returnType(boolean.class).save();
-                mb.name("equals").paramTypes(char[].class,int.class,int.class,char[].class,int.class,int.class).returnType(boolean.class).save();
                 mb.name("equals").paramTypes(char[].class,char[].class).returnType(boolean.class).save();
-                mb.name("equals").paramTypes(short[].class,int.class,int.class,short[].class,int.class,int.class).returnType(boolean.class).save();
-                mb.name("equals").paramTypes(java.lang.Object[].class,java.lang.Object[].class,java.util.Comparator.class).returnType(boolean.class).save();
-                mb.name("equals").paramTypes(java.lang.Object[].class,int.class,int.class,java.lang.Object[].class,int.class,int.class,java.util.Comparator.class).returnType(boolean.class).save();
                 mb.name("toString").paramTypes(byte[].class).returnType(java.lang.String.class).save();
                 mb.name("toString").paramTypes(char[].class).returnType(java.lang.String.class).save();
                 mb.name("toString").paramTypes(short[].class).returnType(java.lang.String.class).save();
@@ -450,36 +437,35 @@ public class StaticResolver {
             // Handle snap.view.View
             case "snap.view.View":
                 mb.name("getName").returnType(java.lang.String.class).save();
-                mb.name("contains").paramTypes(snap.geom.Point.class).returnType(boolean.class).save();
                 mb.name("contains").paramTypes(double.class,double.class).returnType(boolean.class).save();
                 mb.name("contains").paramTypes(snap.geom.Shape.class).returnType(boolean.class).save();
+                mb.name("contains").paramTypes(snap.geom.Point.class).returnType(boolean.class).save();
                 mb.name("getPropValue").paramTypes(java.lang.String.class).returnType(java.lang.Object.class).save();
                 mb.name("setPropValue").paramTypes(java.lang.String.class,java.lang.Object.class).returnType(void.class).save();
-                mb.name("getPrefWidth").paramTypes(double.class).returnType(double.class).save();
                 mb.name("getPrefWidth").returnType(double.class).save();
+                mb.name("getPrefWidth").paramTypes(double.class).returnType(double.class).save();
                 mb.name("setPrefWidth").paramTypes(double.class).returnType(void.class).save();
                 mb.name("getPrefHeight").returnType(double.class).save();
                 mb.name("getPrefHeight").paramTypes(double.class).returnType(double.class).save();
                 mb.name("setPrefHeight").paramTypes(double.class).returnType(void.class).save();
                 mb.name("getPrefSize").returnType(snap.geom.Size.class).save();
-                mb.name("setPrefSize").paramTypes(snap.geom.Size.class).returnType(void.class).save();
                 mb.name("setPrefSize").paramTypes(double.class,double.class).returnType(void.class).save();
-                mb.name("setMargin").paramTypes(double.class,double.class,double.class,double.class).returnType(void.class).save();
-                mb.name("setMargin").paramTypes(snap.geom.Insets.class).returnType(void.class).save();
-                mb.name("getMargin").returnType(snap.geom.Insets.class).save();
-                mb.name("setText").paramTypes(java.lang.String.class).returnType(void.class).save();
+                mb.name("setPrefSize").paramTypes(snap.geom.Size.class).returnType(void.class).save();
                 mb.name("getBorder").returnType(snap.gfx.Border.class).save();
-                mb.name("setBorder").paramTypes(snap.gfx.Color.class,double.class).returnType(void.class).save();
                 mb.name("setBorder").paramTypes(snap.gfx.Border.class).returnType(void.class).save();
+                mb.name("setBorder").paramTypes(snap.gfx.Color.class,double.class).returnType(void.class).save();
                 mb.name("getFill").returnType(snap.gfx.Paint.class).save();
                 mb.name("setFill").paramTypes(snap.gfx.Paint.class).returnType(void.class).save();
                 mb.name("getEffect").returnType(snap.gfx.Effect.class).save();
                 mb.name("setEffect").paramTypes(snap.gfx.Effect.class).returnType(void.class).save();
                 mb.name("getOpacity").returnType(double.class).save();
                 mb.name("setOpacity").paramTypes(double.class).returnType(void.class).save();
+                mb.name("getMargin").returnType(snap.geom.Insets.class).save();
+                mb.name("setMargin").paramTypes(double.class,double.class,double.class,double.class).returnType(void.class).save();
+                mb.name("setMargin").paramTypes(snap.geom.Insets.class).returnType(void.class).save();
                 mb.name("getPadding").returnType(snap.geom.Insets.class).save();
-                mb.name("setPadding").paramTypes(double.class,double.class,double.class,double.class).returnType(void.class).save();
                 mb.name("setPadding").paramTypes(snap.geom.Insets.class).returnType(void.class).save();
+                mb.name("setPadding").paramTypes(double.class,double.class,double.class,double.class).returnType(void.class).save();
                 mb.name("getSpacing").returnType(double.class).save();
                 mb.name("setSpacing").paramTypes(double.class).returnType(void.class).save();
                 mb.name("isVisible").returnType(boolean.class).save();
@@ -492,7 +478,8 @@ public class StaticResolver {
                 mb.name("setTransY").paramTypes(double.class).returnType(void.class).save();
                 mb.name("getAnim").paramTypes(int.class).returnType(snap.view.ViewAnim.class).save();
                 mb.name("getWidth").returnType(double.class).save();
-                return mb.name("setWidth").paramTypes(double.class).returnType(void.class).buildAll();
+                mb.name("setWidth").paramTypes(double.class).returnType(void.class).save();
+                return mb.name("setText").paramTypes(java.lang.String.class).returnType(void.class).buildAll();
 
             // Handle snap.view.ChildView
             case "snap.view.ChildView":
@@ -500,8 +487,8 @@ public class StaticResolver {
                 mb.name("removeChild").paramTypes(snap.view.View.class).returnType(int.class).save();
                 mb.name("setChildren").paramTypes(snap.view.View[].class).returnType(void.class).varArgs().save();
                 mb.name("removeChildren").returnType(void.class).save();
-                mb.name("addChild").paramTypes(snap.view.View.class).returnType(void.class).save();
-                return mb.name("addChild").paramTypes(snap.view.View.class,int.class).returnType(void.class).buildAll();
+                mb.name("addChild").paramTypes(snap.view.View.class,int.class).returnType(void.class).save();
+                return mb.name("addChild").paramTypes(snap.view.View.class).returnType(void.class).buildAll();
 
             // Handle snap.view.Label
             case "snap.view.Label":
@@ -906,8 +893,6 @@ public class StaticResolver {
                 return ((java.lang.StringBuffer) anObj).append(theArgs[0]);
             case "java.lang.StringBuffer.append(java.lang.CharSequence)":
                 return ((java.lang.StringBuffer) anObj).append((java.lang.CharSequence) theArgs[0]);
-            case "java.lang.StringBuffer.compareTo(java.lang.StringBuffer)":
-                return ((java.lang.StringBuffer) anObj).compareTo((java.lang.StringBuffer) theArgs[0]);
             case "java.lang.StringBuffer.indexOf(java.lang.String)":
                 return ((java.lang.StringBuffer) anObj).indexOf((java.lang.String) theArgs[0]);
             case "java.lang.StringBuffer.indexOf(java.lang.String,int)":
@@ -956,8 +941,6 @@ public class StaticResolver {
                 return ((java.lang.StringBuilder) anObj).append(intVal(theArgs[0]));
             case "java.lang.StringBuilder.append(long)":
                 return ((java.lang.StringBuilder) anObj).append((long) theArgs[0]);
-            case "java.lang.StringBuilder.compareTo(java.lang.StringBuilder)":
-                return ((java.lang.StringBuilder) anObj).compareTo((java.lang.StringBuilder) theArgs[0]);
             case "java.lang.StringBuilder.indexOf(java.lang.String)":
                 return ((java.lang.StringBuilder) anObj).indexOf((java.lang.String) theArgs[0]);
             case "java.lang.StringBuilder.indexOf(java.lang.String,int)":
@@ -972,46 +955,24 @@ public class StaticResolver {
                 return ((java.lang.StringBuilder) anObj).delete(intVal(theArgs[0]),intVal(theArgs[1]));
 
             // Handle java.util.Arrays
-            case "java.util.Arrays.equals(double[],int,int,double[],int,int)":
-                return java.util.Arrays.equals((double[]) theArgs[0],intVal(theArgs[1]),intVal(theArgs[2]),(double[]) theArgs[3],intVal(theArgs[4]),intVal(theArgs[5]));
             case "java.util.Arrays.equals(double[],double[])":
                 return java.util.Arrays.equals((double[]) theArgs[0],(double[]) theArgs[1]);
-            case "java.util.Arrays.equals(boolean[],int,int,boolean[],int,int)":
-                return java.util.Arrays.equals((boolean[]) theArgs[0],intVal(theArgs[1]),intVal(theArgs[2]),(boolean[]) theArgs[3],intVal(theArgs[4]),intVal(theArgs[5]));
             case "java.util.Arrays.equals(boolean[],boolean[])":
                 return java.util.Arrays.equals((boolean[]) theArgs[0],(boolean[]) theArgs[1]);
-            case "java.util.Arrays.equals(byte[],int,int,byte[],int,int)":
-                return java.util.Arrays.equals((byte[]) theArgs[0],intVal(theArgs[1]),intVal(theArgs[2]),(byte[]) theArgs[3],intVal(theArgs[4]),intVal(theArgs[5]));
-            case "java.util.Arrays.equals(java.lang.Object[],int,int,java.lang.Object[],int,int)":
-                return java.util.Arrays.equals((Object[]) theArgs[0],intVal(theArgs[1]),intVal(theArgs[2]),(Object[]) theArgs[3],intVal(theArgs[4]),intVal(theArgs[5]));
             case "java.util.Arrays.equals(java.lang.Object[],java.lang.Object[])":
                 return java.util.Arrays.equals((Object[]) theArgs[0],(Object[]) theArgs[1]);
-            case "java.util.Arrays.equals(float[],int,int,float[],int,int)":
-                return java.util.Arrays.equals((float[]) theArgs[0],intVal(theArgs[1]),intVal(theArgs[2]),(float[]) theArgs[3],intVal(theArgs[4]),intVal(theArgs[5]));
             case "java.util.Arrays.equals(float[],float[])":
                 return java.util.Arrays.equals((float[]) theArgs[0],(float[]) theArgs[1]);
             case "java.util.Arrays.equals(short[],short[])":
                 return java.util.Arrays.equals((short[]) theArgs[0],(short[]) theArgs[1]);
-            case "java.util.Arrays.equals(int[],int,int,int[],int,int)":
-                return java.util.Arrays.equals((int[]) theArgs[0],intVal(theArgs[1]),intVal(theArgs[2]),(int[]) theArgs[3],intVal(theArgs[4]),intVal(theArgs[5]));
             case "java.util.Arrays.equals(int[],int[])":
                 return java.util.Arrays.equals((int[]) theArgs[0],(int[]) theArgs[1]);
-            case "java.util.Arrays.equals(long[],int,int,long[],int,int)":
-                return java.util.Arrays.equals((long[]) theArgs[0],intVal(theArgs[1]),intVal(theArgs[2]),(long[]) theArgs[3],intVal(theArgs[4]),intVal(theArgs[5]));
             case "java.util.Arrays.equals(long[],long[])":
                 return java.util.Arrays.equals((long[]) theArgs[0],(long[]) theArgs[1]);
             case "java.util.Arrays.equals(byte[],byte[])":
                 return java.util.Arrays.equals((byte[]) theArgs[0],(byte[]) theArgs[1]);
-            case "java.util.Arrays.equals(char[],int,int,char[],int,int)":
-                return java.util.Arrays.equals((char[]) theArgs[0],intVal(theArgs[1]),intVal(theArgs[2]),(char[]) theArgs[3],intVal(theArgs[4]),intVal(theArgs[5]));
             case "java.util.Arrays.equals(char[],char[])":
                 return java.util.Arrays.equals((char[]) theArgs[0],(char[]) theArgs[1]);
-            case "java.util.Arrays.equals(short[],int,int,short[],int,int)":
-                return java.util.Arrays.equals((short[]) theArgs[0],intVal(theArgs[1]),intVal(theArgs[2]),(short[]) theArgs[3],intVal(theArgs[4]),intVal(theArgs[5]));
-            case "java.util.Arrays.equals(java.lang.Object[],java.lang.Object[],java.util.Comparator)":
-                return java.util.Arrays.equals((Object[]) theArgs[0],(Object[]) theArgs[1],(java.util.Comparator) theArgs[2]);
-            case "java.util.Arrays.equals(java.lang.Object[],int,int,java.lang.Object[],int,int,java.util.Comparator)":
-                return java.util.Arrays.equals((Object[]) theArgs[0],intVal(theArgs[1]),intVal(theArgs[2]),(Object[]) theArgs[3],intVal(theArgs[4]),intVal(theArgs[5]),(java.util.Comparator) theArgs[6]);
             case "java.util.Arrays.toString(byte[])":
                 return java.util.Arrays.toString((byte[]) theArgs[0]);
             case "java.util.Arrays.toString(char[])":
@@ -1296,16 +1257,16 @@ public class StaticResolver {
             // Handle snap.view.View
             case "snap.view.View.getName()":
                 return ((snap.view.View) anObj).getName();
-            case "snap.view.View.contains(snap.geom.Point)":
-                return ((snap.view.View) anObj).contains((snap.geom.Point) theArgs[0]);
             case "snap.view.View.contains(double,double)":
                 return ((snap.view.View) anObj).contains(doubleVal(theArgs[0]),doubleVal(theArgs[1]));
             case "snap.view.View.contains(snap.geom.Shape)":
                 return ((snap.view.View) anObj).contains((snap.geom.Shape) theArgs[0]);
-            case "snap.view.View.getPrefWidth(double)":
-                return ((snap.view.View) anObj).getPrefWidth(doubleVal(theArgs[0]));
+            case "snap.view.View.contains(snap.geom.Point)":
+                return ((snap.view.View) anObj).contains((snap.geom.Point) theArgs[0]);
             case "snap.view.View.getPrefWidth()":
                 return ((snap.view.View) anObj).getPrefWidth();
+            case "snap.view.View.getPrefWidth(double)":
+                return ((snap.view.View) anObj).getPrefWidth(doubleVal(theArgs[0]));
             case "snap.view.View.setPrefWidth(double)":
                 ((snap.view.View) anObj).setPrefWidth(doubleVal(theArgs[0])); return null;
             case "snap.view.View.getPrefHeight()":
@@ -1316,24 +1277,16 @@ public class StaticResolver {
                 ((snap.view.View) anObj).setPrefHeight(doubleVal(theArgs[0])); return null;
             case "snap.view.View.getPrefSize()":
                 return ((snap.view.View) anObj).getPrefSize();
-            case "snap.view.View.setPrefSize(snap.geom.Size)":
-                ((snap.view.View) anObj).setPrefSize((snap.geom.Size) theArgs[0]); return null;
             case "snap.view.View.setPrefSize(double,double)":
                 ((snap.view.View) anObj).setPrefSize(doubleVal(theArgs[0]),doubleVal(theArgs[1])); return null;
-            case "snap.view.View.setMargin(double,double,double,double)":
-                ((snap.view.View) anObj).setMargin(doubleVal(theArgs[0]),doubleVal(theArgs[1]),doubleVal(theArgs[2]),doubleVal(theArgs[3])); return null;
-            case "snap.view.View.setMargin(snap.geom.Insets)":
-                ((snap.view.View) anObj).setMargin((snap.geom.Insets) theArgs[0]); return null;
-            case "snap.view.View.getMargin()":
-                return ((snap.view.View) anObj).getMargin();
-            case "snap.view.View.setText(java.lang.String)":
-                ((snap.view.View) anObj).setText((java.lang.String) theArgs[0]); return null;
+            case "snap.view.View.setPrefSize(snap.geom.Size)":
+                ((snap.view.View) anObj).setPrefSize((snap.geom.Size) theArgs[0]); return null;
             case "snap.view.View.getBorder()":
                 return ((snap.view.View) anObj).getBorder();
-            case "snap.view.View.setBorder(snap.gfx.Color,double)":
-                ((snap.view.View) anObj).setBorder((snap.gfx.Color) theArgs[0],doubleVal(theArgs[1])); return null;
             case "snap.view.View.setBorder(snap.gfx.Border)":
                 ((snap.view.View) anObj).setBorder((snap.gfx.Border) theArgs[0]); return null;
+            case "snap.view.View.setBorder(snap.gfx.Color,double)":
+                ((snap.view.View) anObj).setBorder((snap.gfx.Color) theArgs[0],doubleVal(theArgs[1])); return null;
             case "snap.view.View.getFill()":
                 return ((snap.view.View) anObj).getFill();
             case "snap.view.View.setFill(snap.gfx.Paint)":
@@ -1346,12 +1299,18 @@ public class StaticResolver {
                 return ((snap.view.View) anObj).getOpacity();
             case "snap.view.View.setOpacity(double)":
                 ((snap.view.View) anObj).setOpacity(doubleVal(theArgs[0])); return null;
+            case "snap.view.View.getMargin()":
+                return ((snap.view.View) anObj).getMargin();
+            case "snap.view.View.setMargin(double,double,double,double)":
+                ((snap.view.View) anObj).setMargin(doubleVal(theArgs[0]),doubleVal(theArgs[1]),doubleVal(theArgs[2]),doubleVal(theArgs[3])); return null;
+            case "snap.view.View.setMargin(snap.geom.Insets)":
+                ((snap.view.View) anObj).setMargin((snap.geom.Insets) theArgs[0]); return null;
             case "snap.view.View.getPadding()":
                 return ((snap.view.View) anObj).getPadding();
-            case "snap.view.View.setPadding(double,double,double,double)":
-                ((snap.view.View) anObj).setPadding(doubleVal(theArgs[0]),doubleVal(theArgs[1]),doubleVal(theArgs[2]),doubleVal(theArgs[3])); return null;
             case "snap.view.View.setPadding(snap.geom.Insets)":
                 ((snap.view.View) anObj).setPadding((snap.geom.Insets) theArgs[0]); return null;
+            case "snap.view.View.setPadding(double,double,double,double)":
+                ((snap.view.View) anObj).setPadding(doubleVal(theArgs[0]),doubleVal(theArgs[1]),doubleVal(theArgs[2]),doubleVal(theArgs[3])); return null;
             case "snap.view.View.getSpacing()":
                 return ((snap.view.View) anObj).getSpacing();
             case "snap.view.View.setSpacing(double)":
@@ -1378,6 +1337,8 @@ public class StaticResolver {
                 return ((snap.view.View) anObj).getWidth();
             case "snap.view.View.setWidth(double)":
                 ((snap.view.View) anObj).setWidth(doubleVal(theArgs[0])); return null;
+            case "snap.view.View.setText(java.lang.String)":
+                ((snap.view.View) anObj).setText((java.lang.String) theArgs[0]); return null;
 
             // Handle snap.view.ChildView
             case "snap.view.ChildView.removeChild(int)":
@@ -1388,10 +1349,10 @@ public class StaticResolver {
                 ((snap.view.ChildView) anObj).setChildren((snap.view.View[]) theArgs); return null;
             case "snap.view.ChildView.removeChildren()":
                 ((snap.view.ChildView) anObj).removeChildren(); return null;
-            case "snap.view.ChildView.addChild(snap.view.View)":
-                ((snap.view.ChildView) anObj).addChild((snap.view.View) theArgs[0]); return null;
             case "snap.view.ChildView.addChild(snap.view.View,int)":
                 ((snap.view.ChildView) anObj).addChild((snap.view.View) theArgs[0],intVal(theArgs[1])); return null;
+            case "snap.view.ChildView.addChild(snap.view.View)":
+                ((snap.view.ChildView) anObj).addChild((snap.view.View) theArgs[0]); return null;
 
             // Handle snap.view.Button
 
@@ -1616,10 +1577,7 @@ public class StaticResolver {
             case "java.io.PrintStream":
                 cb.paramTypes(java.io.OutputStream.class).save();
                 cb.paramTypes(java.io.OutputStream.class,boolean.class).save();
-                cb.paramTypes(java.io.OutputStream.class,boolean.class,java.lang.String.class).save();
-                cb.paramTypes(java.io.File.class,java.nio.charset.Charset.class).save();
-                cb.paramTypes(java.lang.String.class,java.nio.charset.Charset.class).save();
-                return cb.paramTypes(java.io.OutputStream.class,boolean.class,java.nio.charset.Charset.class).buildAll();
+                return cb.paramTypes(java.io.OutputStream.class,boolean.class,java.lang.String.class).buildAll();
 
             // Handle snap.view.Button
             case "snap.view.Button":
@@ -1709,12 +1667,6 @@ public class StaticResolver {
                 return new java.io.PrintStream((java.io.OutputStream) theArgs[0],boolVal(theArgs[1]));
             case "java.io.PrintStream(java.io.OutputStream,boolean,java.lang.String)":
                 return new java.io.PrintStream((java.io.OutputStream) theArgs[0],boolVal(theArgs[1]),(java.lang.String) theArgs[2]);
-            case "java.io.PrintStream(java.io.File,java.nio.charset.Charset)":
-                return new java.io.PrintStream((java.io.File) theArgs[0],(java.nio.charset.Charset) theArgs[1]);
-            case "java.io.PrintStream(java.lang.String,java.nio.charset.Charset)":
-                return new java.io.PrintStream((java.lang.String) theArgs[0],(java.nio.charset.Charset) theArgs[1]);
-            case "java.io.PrintStream(java.io.OutputStream,boolean,java.nio.charset.Charset)":
-                return new java.io.PrintStream((java.io.OutputStream) theArgs[0],boolVal(theArgs[1]),(java.nio.charset.Charset) theArgs[2]);
 
             // Handle snap.view.Button
             case "snap.view.Button(java.lang.String)":

@@ -803,6 +803,23 @@ public class StaticResolverGen {
             "java.lang.String.format(java.util.Locale,java.lang.String,java.lang.Object[])",
             "java.lang.String.format(java.lang.String,java.lang.Object[])",
 
+            // StringBuffer, StringBuilder
+            "java.lang.StringBuffer.compareTo(java.lang.StringBuffer)",
+            "java.lang.StringBuilder.compareTo(java.lang.StringBuilder)",
+
+            // Arrays
+            "java.util.Arrays.equals(boolean[],int,int,boolean[],int,int)",
+            "java.util.Arrays.equals(byte[],int,int,byte[],int,int)",
+            "java.util.Arrays.equals(char[],int,int,char[],int,int)",
+            "java.util.Arrays.equals(short[],int,int,short[],int,int)",
+            "java.util.Arrays.equals(int[],int,int,int[],int,int)",
+            "java.util.Arrays.equals(long[],int,int,long[],int,int)",
+            "java.util.Arrays.equals(float[],int,int,float[],int,int)",
+            "java.util.Arrays.equals(double[],int,int,double[],int,int)",
+            "java.util.Arrays.equals(java.lang.Object[],int,int,java.lang.Object[],int,int)",
+            "java.util.Arrays.equals(java.lang.Object[],java.lang.Object[],java.util.Comparator)",
+            "java.util.Arrays.equals(java.lang.Object[],int,int,java.lang.Object[],int,int,java.util.Comparator)",
+
             // Map
             "java.util.Map.replaceAll(java.util.function.BiFunction)",
 
@@ -814,8 +831,12 @@ public class StaticResolverGen {
             "java.io.PrintStream.print(float)",
             "java.io.PrintStream(java.lang.String)",
             "java.io.PrintStream(java.lang.String,java.lang.String)",
-            "java.io.PrintStream(java.io.File,java.lang.String)",
+            "java.io.PrintStream(java.lang.String,java.nio.charset.Charset)",
             "java.io.PrintStream(java.io.File)",
+            "java.io.PrintStream(java.io.File,java.lang.String)",
+            "java.io.PrintStream(java.io.File,java.nio.charset.Charset)",
+            "java.io.PrintStream(java.io.OutputStream,java.nio.charset.Charset)",
+            "java.io.PrintStream(java.io.OutputStream,boolean,java.nio.charset.Charset)",
             "java.io.PrintStream.append(char)",
             "java.io.PrintStream.append(java.lang.CharSequence,int,int)",
             "java.io.PrintStream.append(java.lang.CharSequence)",
