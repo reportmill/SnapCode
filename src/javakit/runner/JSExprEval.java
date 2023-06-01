@@ -629,7 +629,7 @@ public class JSExprEval {
     private Object evalLambdaExpr(Object anOR, JExprLambda aLambdaExpr)
     {
         // Get lambda class
-        JavaClass lambdaClass = aLambdaExpr.getEvalClass();
+        JavaClass lambdaClass = aLambdaExpr.getLambdaClass();
         if (lambdaClass == null)
             throw new RuntimeException("JSExprEval.evalLambdaExpr: Can't determine lambda class for expr: " + aLambdaExpr);
 
