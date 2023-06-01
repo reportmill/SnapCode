@@ -6,6 +6,8 @@ import javakit.resolver.*;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.util.StringUtils;
+
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -240,9 +242,11 @@ public class JExprMethodCall extends JExpr {
                 return compatibleMethods;
         }
 
-        // See if method is from static import
-        //decl = getFile().getImportClassMember(name, argTypes);
-        //if(decl!=null && decl.isMethod()) return decl;
+        // See if method is from static import -
+        JFile jfile = getFile();
+        JavaMember importClassMember = jfile.getImportClassMember(name, argTypes);
+        if (importClassMember instanceof JavaMethod)
+            return Collections.singletonList((JavaMethod) importClassMember);
 
         // Return null since not found
         return compatibleMethods;

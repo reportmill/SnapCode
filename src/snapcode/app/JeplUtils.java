@@ -43,10 +43,10 @@ public class JeplUtils {
         // Set imports and SuperClassName
         jeplTextDoc.addImport("snapcharts.data.*");
         jeplTextDoc.addImport("snapcharts.repl.*");
-        //jeplTextDoc.addImport("static snapcharts.repl.ReplObject.*");
-        //jeplTextDoc.addImport("static snapcharts.repl.QuickCharts.*");
-        //jeplTextDoc.addImport("static snapcharts.repl.QuickData.*");
-        jeplTextDoc.setSuperClassName(ReplObject.class.getName());
+        jeplTextDoc.addImport("static snapcharts.repl.ReplObject.*");
+        jeplTextDoc.addImport("static snapcharts.repl.QuickCharts.*");
+        jeplTextDoc.addImport("static snapcharts.repl.QuickData.*");
+        //jeplTextDoc.setSuperClassName(ReplObject.class.getName());
 
         // Set code font
         Font codeFont = JavaTextUtils.getCodeFont();
