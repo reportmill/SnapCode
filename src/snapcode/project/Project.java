@@ -11,6 +11,7 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -169,6 +170,9 @@ public class Project extends PropObject {
      */
     public String[] getCompilerClassPaths()
     {
+        if (true)
+            return getCompileClassPaths();
+
         // Get LibPaths for this proj
         String[] libPaths = _buildFile.getLibPathsAbsolute();
 
@@ -187,6 +191,26 @@ public class Project extends PropObject {
 
         // Return array
         return compilerClassPaths.toArray(new String[0]);
+    }
+
+    /**
+     * Returns the paths needed to compile project (does not include project build dir).
+     */
+    public String[] getCompileClassPaths()
+    {
+        BuildFile buildFile = getBuildFile();
+        BuildDependency[] dependencies = buildFile.getDependencies();
+        String[] compileClassPaths = new String[0];
+
+        // Iterate over compile dependencies and add runtime class paths for each
+        for (BuildDependency dependency : dependencies) {
+            String[] classPaths = BuildDependency.getClassPathsForProjectDependency(this, dependency);
+            compileClassPaths = ArrayUtils.addAll(compileClassPaths, classPaths);
+        }
+
+        // Return array
+        System.out.println("Compile ClassPaths: " + Arrays.toString(compileClassPaths));
+        return compileClassPaths;
     }
 
     /**

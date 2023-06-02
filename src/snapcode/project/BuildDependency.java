@@ -1,9 +1,7 @@
 package snapcode.project;
 import snap.props.PropObject;
 import snap.props.PropSet;
-import snap.util.ClassUtils;
-import snap.util.Convert;
-import snap.util.FilePathUtils;
+import snap.util.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import java.util.Objects;
@@ -139,6 +137,64 @@ public abstract class BuildDependency extends PropObject {
 
         // Return not found
         return null;
+    }
+
+
+    /**
+     * Returns the class path for given dependency.
+     */
+    public static String[] getClassPathsForProjectDependency(Project aProject, BuildDependency aDependency)
+    {
+        // Handle jar file
+        if (aDependency instanceof BuildDependency.JarFileDependency) {
+            BuildDependency.JarFileDependency jarFileDependency = (BuildDependency.JarFileDependency) aDependency;
+            String jarFilePathRelative = jarFileDependency.getJarFilePath();
+            String jarFilePathAbsolute = ProjectUtils.getAbsolutePath(aProject, jarFilePathRelative, true);
+            return new String[] { jarFilePathAbsolute };
+        }
+
+        // Handle project
+        if (aDependency instanceof BuildDependency.ProjectDependency) {
+            BuildDependency.ProjectDependency projDependency = (BuildDependency.ProjectDependency) aDependency;
+            String projName = projDependency.getProjectName();
+            Project project = aProject.getProjectForName(projName);
+            return project.getClassPaths();
+        }
+
+        // Handle Maven package
+        if (aDependency instanceof BuildDependency.MavenDependency)
+            return getClassPathsForMavenDependency((BuildDependency.MavenDependency) aDependency);
+
+        // Can't happen
+        throw new RuntimeException("BuildDependency.getClassPathsForProjectDependency: Unknown type: " + aDependency);
+    }
+
+    /**
+     * Returns the class path for given dependency.
+     */
+    public static String[] getClassPathsForMavenDependency(BuildDependency.MavenDependency mavenDependency)
+    {
+        // Get Repo path
+        String homeDir = System.getProperty("user.home");
+        String MAVEN_REPO_PATH = ".m2/repository";
+        String repoPath = FilePathUtils.getChild(homeDir, MAVEN_REPO_PATH);
+
+        // Get jar path
+        String group = mavenDependency.getGroup();
+        String name = mavenDependency.getName();
+        String version = mavenDependency.getVersion();
+        String[] groupNames = group.split("\\.");
+        String groupPath = StringUtils.join(groupNames, "/");
+        String packagePath = FilePathUtils.getChild(groupPath, name);
+        String versionPath = FilePathUtils.getChild(packagePath, version);
+        String jarName = name + '-' + version + ".jar";
+        String jarPath = FilePathUtils.getChild(versionPath, jarName);
+
+        // Get
+        String jarPathAbsolute = FilePathUtils.getChild(repoPath, jarPath);
+
+        // Return
+        return new String[] { jarPathAbsolute };
     }
 
     /**
