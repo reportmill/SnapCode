@@ -280,7 +280,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
             return;
 
         // Get source file
-        WebFile file = proj.getProjectSet().getJavaFileForClassName(className);
+        WebFile file = proj.getJavaFileForClassName(className);
         if (file == null)
             return;
 

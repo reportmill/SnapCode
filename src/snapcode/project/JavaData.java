@@ -178,7 +178,6 @@ public class JavaData {
 
         // Get project
         Project rootProj = proj.getRootProject();
-        ProjectSet projSet = rootProj.getProjectSet();
 
         // Iterate over added refs and add dependencies
         for (JavaDecl ref : refsAdded) {
@@ -194,7 +193,7 @@ public class JavaData {
                 continue;
 
             //
-            WebFile file = projSet.getJavaFileForClassName(className);
+            WebFile file = rootProj.getJavaFileForClassName(className);
             if (file != null && file != _javaFile && !_dependencies.contains(file)) {
                 _dependencies.add(file);
                 JavaData javaData = JavaData.getJavaDataForFile(file);
@@ -210,7 +209,7 @@ public class JavaData {
             if (javaClass == null) continue;
 
             String className = javaClass.getRootClassName();
-            WebFile file = projSet.getJavaFileForClassName(className);
+            WebFile file = rootProj.getJavaFileForClassName(className);
             if (file != null && _dependencies.contains(file)) {
                 _dependencies.remove(file);
                 JavaData javaData = JavaData.getJavaDataForFile(file);

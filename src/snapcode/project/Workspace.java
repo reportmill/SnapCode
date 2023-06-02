@@ -202,16 +202,6 @@ public class Workspace extends PropObject {
     }
 
     /**
-     * Returns the paths needed to run workspace.
-     */
-    public String[] getClassPaths()
-    {
-        Project[] projects = getProjects();
-        ProjectSet projectSet = new ProjectSet(projects);
-        return projectSet.getClassPaths();
-    }
-
-    /**
      * Returns the ClassLoader.
      */
     public ClassLoader getClassLoader()

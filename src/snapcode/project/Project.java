@@ -41,9 +41,6 @@ public class Project extends PropObject {
     // The ProjectBuilder
     protected ProjectBuilder  _projBuilder;
 
-    // The set of projects this project depends on
-    private ProjectSet  _projSet;
-
     // Constants for properties
     private static final String Projects_Prop = "Projects";
 
@@ -214,17 +211,6 @@ public class Project extends PropObject {
     }
 
     /**
-     * Returns the set of projects this project depends on.
-     */
-    public ProjectSet getProjectSet()
-    {
-        if (_projSet != null) return _projSet;
-
-        Project[] projects = ArrayUtils.add(getProjects(), this, 0);
-        return _projSet = new ProjectSet(projects);
-    }
-
-    /**
      * Returns an array of projects that this project depends on.
      */
     public Project[] getProjects()  { return _projects; }
@@ -239,7 +225,6 @@ public class Project extends PropObject {
 
         // Add project
         _projects = ArrayUtils.add(_projects, aProj);
-        _projSet = null;
 
         // Fire prop change
         int index = _projects.length - 1;
@@ -258,7 +243,6 @@ public class Project extends PropObject {
 
         // Remove project
         _projects = ArrayUtils.remove(_projects, index);
-        _projSet = null;
 
         // Fire prop change
         firePropChange(Projects_Prop, aProj, null, index);
@@ -414,6 +398,30 @@ public class Project extends PropObject {
     public String getClassNameForFile(WebFile aFile)
     {
         return _projFiles.getClassNameForFile(aFile);
+    }
+
+    /**
+     * Returns a Java file for class name.
+     */
+    public WebFile getJavaFileForClassName(String aClassName)
+    {
+        // Check this project
+        ProjectFiles projFiles = getProjectFiles();
+        WebFile file = projFiles.getJavaFileForClassName(aClassName);
+        if (file != null)
+            return file;
+
+        // Check child projects
+        Project[] projects = getProjects();
+        for (Project proj : projects) {
+            projFiles = proj.getProjectFiles();
+            file = projFiles.getJavaFileForClassName(aClassName);
+            if (file != null)
+                return file;
+        }
+
+        // Return not found
+        return null;
     }
 
     /**

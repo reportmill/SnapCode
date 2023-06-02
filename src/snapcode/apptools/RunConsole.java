@@ -156,12 +156,25 @@ public class RunConsole extends WorkspaceTool {
         if (aPath.startsWith("/javafx/"))
             return "https://reportmill.com/jars/8u05/javafx-src.zip!" + aPath;
 
-        Project proj = Project.getProjectForSite(getRootSite());
-        if (proj == null)
+        Project project = Project.getProjectForSite(getRootSite());
+        if (project == null)
             return aPath;
 
-        WebFile file = proj.getProjectSet().getSourceFile(aPath);
-        return file != null ? file.getUrlString() : aPath;
+        // Look in project
+        WebFile file = project.getSourceFile(aPath, false, false);
+        if (file != null)
+            return file.getUrlString();
+
+        // Look in child projects
+        Project[] projects = project.getProjects();
+        for (Project proj : projects) {
+            file = proj.getSourceFile(aPath, false, false);
+            if (file != null)
+                return file.getUrlString();
+        }
+
+        // Return not found
+        return aPath;
     }
 
     /**
