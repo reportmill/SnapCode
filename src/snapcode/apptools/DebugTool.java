@@ -290,7 +290,7 @@ public class DebugTool extends WorkspaceTool {
         }
 
         // Get Class path and add to list
-        String[] classPaths = aProj.getClassPaths();
+        String[] classPaths = aProj.getRuntimeClassPaths();
         String[] classPathsNtv = FilePathUtils.getNativePaths(classPaths);
         String classPath = FilePathUtils.getJoinedPath(classPathsNtv);
         commands.add("-cp");

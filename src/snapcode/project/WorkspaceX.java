@@ -4,12 +4,9 @@
 package snapcode.project;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
-import snap.util.ListUtils;
 import snap.web.WebSite;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This Workspace subclass is enhanced to work with full JDK.
@@ -34,7 +31,7 @@ public class WorkspaceX extends Workspace {
         Project[] projects = getProjects();
         String[] classPaths = new String[0];
         for (Project proj : projects) {
-            String[] projClassPaths = proj.getClassPaths();
+            String[] projClassPaths = proj.getRuntimeClassPaths();
             classPaths = ArrayUtils.addAll(classPaths, projClassPaths);
         }
 

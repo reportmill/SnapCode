@@ -12,7 +12,6 @@ import snap.web.WebSite;
 import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -147,7 +146,7 @@ public class Project extends PropObject {
     /**
      * Returns the paths needed to run project.
      */
-    public String[] getClassPaths()
+    public String[] getRuntimeClassPaths()
     {
         // Get build path
         String buildPath = _buildFile.getBuildPathAbsolute();
@@ -165,36 +164,9 @@ public class Project extends PropObject {
     /**
      * Returns the paths needed to compile project (does not include project build dir).
      */
-    public String[] getCompilerClassPaths()
-    {
-        if (true)
-            return getCompileClassPaths();
-
-        // Get LibPaths for this proj
-        String[] libPaths = _buildFile.getLibPathsAbsolute();
-
-        // Get projects
-        Project[] projects = getProjects();
-
-        // Get list for CompilerClassPaths with base paths
-        List<String> compilerClassPaths = new ArrayList<>();
-        Collections.addAll(compilerClassPaths, libPaths);
-
-        // Iterate over projects and add Project.ClassPaths for each
-        for (Project proj : projects) {
-            String[] projClassPaths = proj.getClassPaths();
-            ListUtils.addAllUnique(compilerClassPaths, projClassPaths);
-        }
-
-        // Return array
-        return compilerClassPaths.toArray(new String[0]);
-    }
-
-    /**
-     * Returns the paths needed to compile project (does not include project build dir).
-     */
     public String[] getCompileClassPaths()
     {
+        // Get build file dependencies
         BuildFile buildFile = getBuildFile();
         BuildDependency[] dependencies = buildFile.getDependencies();
         String[] compileClassPaths = new String[0];
@@ -208,6 +180,21 @@ public class Project extends PropObject {
         // Return array
         System.out.println("Compile ClassPaths: " + Arrays.toString(compileClassPaths));
         return compileClassPaths;
+
+//        // Get list for CompilerClassPaths with base paths
+//        List<String> compilerClassPaths = new ArrayList<>();
+//        String[] libPaths = _buildFile.getLibPathsAbsolute();
+//        Collections.addAll(compilerClassPaths, libPaths);
+//
+//        // Iterate over projects and add Project.ClassPaths for each
+//        Project[] projects = getProjects();
+//        for (Project proj : projects) {
+//            String[] projClassPaths = proj.getClassPaths();
+//            ListUtils.addAllUnique(compilerClassPaths, projClassPaths);
+//        }
+//
+//        // Return array
+//        return compilerClassPaths.toArray(new String[0]);
     }
 
     /**

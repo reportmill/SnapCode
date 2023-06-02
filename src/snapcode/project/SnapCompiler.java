@@ -92,7 +92,7 @@ public class SnapCompiler implements DiagnosticListener {
         options.add("1.8");
 
         // Add class paths for project dependencies (libraries and child projects)
-        String[] compilerClassPaths = _proj.getCompilerClassPaths();
+        String[] compilerClassPaths = _proj.getCompileClassPaths();
         if (compilerClassPaths.length > 0) {
             String[] classPathsNtv = FilePathUtils.getNativePaths(compilerClassPaths);
             String classPath = FilePathUtils.getJoinedPath(classPathsNtv);

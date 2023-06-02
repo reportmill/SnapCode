@@ -158,7 +158,7 @@ public abstract class BuildDependency extends PropObject {
             BuildDependency.ProjectDependency projDependency = (BuildDependency.ProjectDependency) aDependency;
             String projName = projDependency.getProjectName();
             Project project = aProject.getProjectForName(projName);
-            return project.getClassPaths();
+            return project.getRuntimeClassPaths();
         }
 
         // Handle Maven package

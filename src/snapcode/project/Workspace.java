@@ -263,7 +263,7 @@ public class Workspace extends PropObject {
         ClassLoader classLoader = getClassLoader();
         Resolver resolver = Resolver.newResolverForClassLoader(classLoader);
         Project rootProj = getRootProject();
-        String[] classPaths = rootProj.getClassPaths();
+        String[] classPaths = rootProj.getRuntimeClassPaths();
         resolver.setClassPaths(classPaths);
 
         // Set, return
