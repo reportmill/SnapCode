@@ -50,6 +50,13 @@ public abstract class JExpr extends JNode {
             }
         }
 
+        // If parent is method call and this node is name, get parent for method call
+        if (par instanceof JExprMethodCall) {
+            JExprMethodCall methodCallExpr = (JExprMethodCall) par;
+            if (methodCallExpr.getId() == this)
+                return methodCallExpr.getParentExpr();
+        }
+
         // Return not found
         return null;
     }

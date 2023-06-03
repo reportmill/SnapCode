@@ -150,15 +150,22 @@ public class Project extends PropObject {
     {
         // Get build path
         String buildPath = _buildFile.getBuildPathAbsolute();
-        String[] classPaths = { buildPath };
+        String[] runtimeClassPaths = { buildPath };
 
-        // Get library paths
-        String[] libPaths = _buildFile.getLibPathsAbsolute();
-        if (libPaths.length > 0)
-            classPaths = ArrayUtils.add(libPaths, buildPath, 0);
+        // Add CompileClassPaths
+        String[] compileClassPaths = getCompileClassPaths();
+        runtimeClassPaths = ArrayUtils.addAll(runtimeClassPaths, compileClassPaths);
 
         // Return
-        return classPaths;
+        return runtimeClassPaths;
+
+//        // Get library paths
+//        String[] libPaths = _buildFile.getLibPathsAbsolute();
+//        if (libPaths.length > 0)
+//            classPaths = ArrayUtils.add(libPaths, buildPath, 0);
+//
+//        // Return
+//        return classPaths;
     }
 
     /**
