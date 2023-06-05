@@ -129,7 +129,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         int selEnd = textArea.getSelEnd();
 
         // Replace selection with completeString
-        textArea.replaceChars(completionStr, null, selStart, selEnd, false);
+        textArea.replaceChars(completionStr, null, selStart, selEnd, true);
 
         // If completion has parens needing content, select inside parens
         int argStart = indexOfParenContent(completionDecl, completionStr);
@@ -251,6 +251,11 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         // Add import to Java text
         TextLine line = textDoc.getLine(importLineIndex);
         textDoc.addChars(importStr, null, line.getStartCharIndex());
+
+        // Update selection
+        int selStart = textArea.getSelStart();
+        int selEnd = textArea.getSelEnd();
+        textArea.setSel(selStart + importStr.length(), selEnd + importStr.length());
     }
 
     /**

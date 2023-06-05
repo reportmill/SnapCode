@@ -132,7 +132,7 @@ public class JExprMethodCall extends JExpr {
             JExpr arg = args.get(i);
             if (arg instanceof JExprLambda)
                 return getMethodForLambdaArgs();
-            JavaType argType = arg.getEvalType();
+            JavaType argType = arg != null ? arg.getEvalType() : null;
             argTypes[i] = argType;
         }
 
