@@ -11,7 +11,6 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -158,14 +157,6 @@ public class Project extends PropObject {
 
         // Return
         return runtimeClassPaths;
-
-//        // Get library paths
-//        String[] libPaths = _buildFile.getLibPathsAbsolute();
-//        if (libPaths.length > 0)
-//            classPaths = ArrayUtils.add(libPaths, buildPath, 0);
-//
-//        // Return
-//        return classPaths;
     }
 
     /**
@@ -181,27 +172,11 @@ public class Project extends PropObject {
         // Iterate over compile dependencies and add runtime class paths for each
         for (BuildDependency dependency : dependencies) {
             String[] classPaths = BuildDependency.getClassPathsForProjectDependency(this, dependency);
-            compileClassPaths = ArrayUtils.addAll(compileClassPaths, classPaths);
+            compileClassPaths = ArrayUtils.addAllUnique(compileClassPaths, classPaths);
         }
 
-        // Return array
-        System.out.println("Compile ClassPaths: " + Arrays.toString(compileClassPaths));
+        // Return
         return compileClassPaths;
-
-//        // Get list for CompilerClassPaths with base paths
-//        List<String> compilerClassPaths = new ArrayList<>();
-//        String[] libPaths = _buildFile.getLibPathsAbsolute();
-//        Collections.addAll(compilerClassPaths, libPaths);
-//
-//        // Iterate over projects and add Project.ClassPaths for each
-//        Project[] projects = getProjects();
-//        for (Project proj : projects) {
-//            String[] projClassPaths = proj.getClassPaths();
-//            ListUtils.addAllUnique(compilerClassPaths, projClassPaths);
-//        }
-//
-//        // Return array
-//        return compilerClassPaths.toArray(new String[0]);
     }
 
     /**
@@ -223,23 +198,6 @@ public class Project extends PropObject {
         // Fire prop change
         int index = _projects.length - 1;
         firePropChange(Projects_Prop, null, aProj, index);
-    }
-
-    /**
-     * Removes a project.
-     */
-    public void removeProject(Project aProj)
-    {
-        // If not present, just return
-        int index = ArrayUtils.indexOfId(_projects, aProj);
-        if (index < 0)
-            return;
-
-        // Remove project
-        _projects = ArrayUtils.remove(_projects, index);
-
-        // Fire prop change
-        firePropChange(Projects_Prop, aProj, null, index);
     }
 
     /**
@@ -288,21 +246,7 @@ public class Project extends PropObject {
 
         // Add to BuildFile
         BuildFile buildFile = getBuildFile();
-        buildFile.addProjectPath(projPath);
-    }
-
-    /**
-     * Removes a dependent project.
-     */
-    public void removeProjectForPath(String projectPath)
-    {
-        // Get project and remove
-        Project proj = getProjectForPath(projectPath);
-        removeProject(proj);
-
-        // Remove from build file
-        BuildFile buildFile = getBuildFile();
-        buildFile.removeProjectPath(projectPath);
+        buildFile.addProjectDependencyForProjectPath(projPath);
     }
 
     /**
@@ -312,7 +256,7 @@ public class Project extends PropObject {
     {
         // Create list of projects from BuildFile.ProjectPaths
         BuildFile buildFile = getBuildFile();
-        String[] projPaths = buildFile.getProjectPaths();
+        String[] projPaths = buildFile.getProjectDependenciesNames();
         List<Project> projs = new ArrayList<>();
 
         // Iterate over project paths

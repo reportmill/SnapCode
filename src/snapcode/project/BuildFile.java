@@ -4,6 +4,7 @@ import snap.props.PropObject;
 import snap.props.PropSet;
 import snap.util.ArrayUtils;
 import snap.util.Convert;
+import snap.util.FilePathUtils;
 import snap.util.JSObject;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -27,12 +28,6 @@ public class BuildFile extends PropObject {
     // The dependencies
     private BuildDependency[] _dependencies;
 
-    // The library paths
-    private String[]  _libPaths;
-
-    // The project paths
-    private String[]  _projPaths;
-
     // The actual build file
     private WebFile _buildFile;
 
@@ -43,14 +38,10 @@ public class BuildFile extends PropObject {
     public static final String SourcePath_Prop = "SourcePath";
     public static final String BuildPath_Prop = "BuildPath";
     public static final String Dependencies_Prop = "Dependencies";
-    public static final String LibPaths_Prop = "LibPaths";
-    public static final String ProjectPaths_Prop = "ProjectPaths";
 
     // Constants for defaults
     private static final String DEFAULT_SOURCE_PATH = "src";
     private static final String DEFAULT_BUILD_PATH = "bin";
-    private static final String[] DEFAULT_LIB_PATHS = new String[0];
-    private static final String[] DEFAULT_PROJECT_PATHS = new String[0];
 
     /**
      * Constructor.
@@ -63,8 +54,6 @@ public class BuildFile extends PropObject {
         _srcPath = DEFAULT_SOURCE_PATH;
         _buildPath = DEFAULT_BUILD_PATH;
         _dependencies = new BuildDependency[0];
-        _libPaths = DEFAULT_LIB_PATHS;
-        _projPaths = DEFAULT_PROJECT_PATHS;
     }
 
     /**
@@ -169,130 +158,47 @@ public class BuildFile extends PropObject {
     }
 
     /**
-     * Returns the library paths.
+     * Adds a build dependency for given Jar file class or class dir.
      */
-    public String[] getLibPaths()  { return _libPaths; }
-
-    /**
-     * Sets the library paths.
-     */
-    public void setLibPaths(String[] libPaths)
+    public void addJarFileDependencyForPath(String aPath)
     {
-        // If already set, just return
-        if (libPaths == _libPaths) return;
-
-        // Convert to relative
-        String[] relativeLibPaths = ArrayUtils.map(libPaths, path -> ProjectUtils.getRelativePath(_proj, path), String.class);
-
-        // If already set, just return
-        if (Arrays.equals(relativeLibPaths, _libPaths)) return;
-
-        // Set, fire prop change
-        firePropChange(LibPaths_Prop, _libPaths, _libPaths = relativeLibPaths);
-    }
-
-    /**
-     * Adds a library path.
-     */
-    public void addLibPath(String aPath)
-    {
-        // Get relative path if inside project
         String libPath = ProjectUtils.getRelativePath(_proj, aPath);
-
-        // If already set, just return
-        if (ArrayUtils.contains(_libPaths, libPath))
-            return;
-
-        // Add path
-        _libPaths = ArrayUtils.add(_libPaths, libPath);
-
-        // Fire prop change
-        int index = _libPaths.length - 1;
-        firePropChange(LibPaths_Prop, null, libPath, index);
-    }
-
-    /**
-     * Removes a library path.
-     */
-    public void removeLibPath(String aPath)
-    {
-        // Update paths
-        int index = ArrayUtils.indexOf(_libPaths, aPath);
-        if (index < 0)
-            return;
-
-        // Remove path
-        _libPaths = ArrayUtils.remove(_libPaths, index);
-
-        // Fire prop change
-        firePropChange(LibPaths_Prop, aPath, null, index);
+        BuildDependency.JarFileDependency jarFileDependency = new BuildDependency.JarFileDependency();
+        jarFileDependency.setId(libPath);
+        addDependency(jarFileDependency);
     }
 
     /**
      * Adds a class path for jar containing given class.
      */
-    public void addLibPathForClass(Class<?> aClass)
+    public void addJarFileDependencyForClass(Class<?> aClass)
     {
         String classPath = ProjectUtils.getClassPathForClass(aClass);
         if (classPath != null)
-            addLibPath(classPath);
+            addJarFileDependencyForPath(classPath);
         else System.out.println("BuildFile.addLibPathForClass: Couldn't find path for class: " + aClass.getName());
     }
 
     /**
-     * Returns the project paths.
+     * Returns the dependent project names.
      */
-    public String[] getProjectPaths()  { return _projPaths; }
-
-    /**
-     * Sets the project paths.
-     */
-    public void setProjectPaths(String[] projectPaths)
+    public String[] getProjectDependenciesNames()
     {
-        // If already set, just return
-        if (projectPaths == _projPaths) return;
-
-        // Convert to relative
-        String[] relativeProjPaths = ArrayUtils.map(projectPaths, path -> ProjectUtils.getRelativePath(_proj, path), String.class);
-
-        // If already set, just return
-        if (Arrays.equals(relativeProjPaths, _projPaths)) return;
-
-        // Set, fire prop change
-        firePropChange(ProjectPaths_Prop, _projPaths, _projPaths = relativeProjPaths);
+        BuildDependency[] dependencies = getDependencies();
+        BuildDependency[] projectDependencies = ArrayUtils.filter(dependencies, dependency -> dependency instanceof BuildDependency.ProjectDependency);
+        String[] projectNames = ArrayUtils.map(projectDependencies, dependency -> dependency.getId(), String.class);
+        return projectNames;
     }
 
     /**
      * Adds a project path.
      */
-    public void addProjectPath(String aPath)
+    public void addProjectDependencyForProjectPath(String aPath)
     {
-        // Add XML for path
-        String path = ProjectUtils.getRelativePath(_proj, aPath);
-
-        // Add to array
-        _projPaths = ArrayUtils.add(_projPaths, path);
-
-        // Fire property change
-        int index = _projPaths.length - 1;
-        firePropChange(ProjectPaths_Prop, null, path, index);
-    }
-
-    /**
-     * Removes a project path.
-     */
-    public void removeProjectPath(String aPath)
-    {
-        // Update paths
-        int index = ArrayUtils.indexOf(_projPaths, aPath);
-        if (index < 0)
-            return;
-
-        // Remove from array
-        _projPaths = ArrayUtils.remove(_projPaths, index);
-
-        // Fire property change
-        firePropChange(ProjectPaths_Prop, aPath, null, index);
+        String projectName = FilePathUtils.getFilename(aPath);
+        BuildDependency.ProjectDependency projectDependency = new BuildDependency.ProjectDependency();
+        projectDependency.setId(projectName);
+        addDependency(projectDependency);
     }
 
     /**
@@ -302,16 +208,6 @@ public class BuildFile extends PropObject {
     {
         String buildPath = getBuildPath();
         return ProjectUtils.getAbsolutePath(_proj, buildPath, true);
-    }
-
-    /**
-     * Returns the library paths as absolute paths.
-     */
-    public String[] getLibPathsAbsolute()
-    {
-        String[] libPaths = getLibPaths();
-        String[] absPaths = ArrayUtils.map(libPaths, path -> ProjectUtils.getAbsolutePath(_proj, path, true), String.class);
-        return absPaths;
     }
 
     /**
@@ -375,12 +271,10 @@ public class BuildFile extends PropObject {
         // Do normal version
         super.initProps(aPropSet);
 
-        // SourcePath, BuildPath, Dependencies, LibPaths, ProjectPaths
+        // SourcePath, BuildPath, Dependencies
         aPropSet.addPropNamed(SourcePath_Prop, String.class);
         aPropSet.addPropNamed(BuildPath_Prop, String.class);
         aPropSet.addPropNamed(Dependencies_Prop, BuildDependency[].class);
-        aPropSet.addPropNamed(LibPaths_Prop, String[].class);
-        aPropSet.addPropNamed(ProjectPaths_Prop, String[].class);
     }
 
     /**
@@ -392,12 +286,10 @@ public class BuildFile extends PropObject {
         // Handle properties
         switch (aPropName) {
 
-            // SourcePath, BuildPath, Dependencies, LibPaths, ProjectPaths
+            // SourcePath, BuildPath, Dependencies
             case SourcePath_Prop: return getSourcePath();
             case BuildPath_Prop: return getBuildPath();
             case Dependencies_Prop: return getDependencies();
-            case LibPaths_Prop: return getLibPaths();
-            case ProjectPaths_Prop: return getProjectPaths();
 
             // Handle super class properties (or unknown)
             default: System.err.println("BuildFile.getPropValue: Unknown prop: " + aPropName); return null;
@@ -413,12 +305,10 @@ public class BuildFile extends PropObject {
         // Handle properties
         switch (aPropName) {
 
-            // SourcePath, BuildPath, Dependencies, LibPaths, ProjectPaths
+            // SourcePath, BuildPath, Dependencies
             case SourcePath_Prop: setSourcePath(Convert.stringValue(aValue)); break;
             case BuildPath_Prop: setBuildPath(Convert.stringValue(aValue)); break;
             case Dependencies_Prop: setDependencies((BuildDependency[]) aValue); break;
-            case LibPaths_Prop: setLibPaths((String[]) aValue); break;
-            case ProjectPaths_Prop: setProjectPaths((String[]) aValue); break;
 
             // Handle super class properties (or unknown)
             default: System.err.println("BuildFile.setPropValue: Unknown prop: " + aPropName);

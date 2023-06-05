@@ -3,7 +3,6 @@
  */
 package snapcode.project;
 import snap.util.FilePathUtils;
-import snap.web.WebFile;
 import snap.web.WebSite;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -23,24 +22,6 @@ public class ProjectX extends Project {
         // Create/set ProjectBuilder.JavaFileBuilderImpl
         JavaFileBuilder javaFileBuilder = new JavaFileBuilderImpl(this);
         _projBuilder.setJavaFileBuilder(javaFileBuilder);
-    }
-
-    /**
-     * Override to support legacy EclipseBuildFile.
-     */
-    @Override
-    protected BuildFile getBuildFileImpl()
-    {
-        // Do normal version - just return if build file already exists
-        BuildFile buildFile = super.getBuildFileImpl();
-        WebFile buildFileFile = buildFile.getBuildFile();
-        if (buildFileFile.getExists())
-            return buildFile;
-
-        // If build file doesn't exist, try EclipseBuildFile
-        new EclipseBuildFile(this, buildFile);
-        buildFile.writeFile();
-        return buildFile;
     }
 
     /**

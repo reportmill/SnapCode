@@ -15,15 +15,5 @@
     <TextField Name="BuildPathText" PrefWidth="255" />
   </RowView>
   <Label text="Build Dependencies:" />
-  <ListView Name="DependenciesListView" PrefWidth="360" PrefHeight="120">
-    <font name="Arial" size="12" />
-  </ListView>
-  <Label text="Jar Dependencies:" />
-  <ListView Name="JarPathsList" PrefWidth="360" PrefHeight="120">
-    <font name="Arial" size="12" />
-  </ListView>
-  <Label text="Project Dependencies:" />
-  <ListView Name="ProjectPathsList" PrefWidth="360" PrefHeight="120">
-    <font name="Arial" size="12" />
-  </ListView>
+  <ListView Name="DependenciesListView" PrefWidth="360" PrefHeight="120" />
 </ColView>

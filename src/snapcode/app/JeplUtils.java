@@ -67,8 +67,8 @@ public class JeplUtils {
         BuildFile buildFile = proj.getBuildFile();
 
         // Add dependencies to BuildFile for SnapKit and SnapCharts
-        buildFile.addLibPathForClass(PropObject.class);
-        buildFile.addLibPathForClass(DoubleArray.class);
+        buildFile.addJarFileDependencyForClass(PropObject.class);
+        buildFile.addJarFileDependencyForClass(DoubleArray.class);
     }
 
     /**

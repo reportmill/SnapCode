@@ -15,12 +15,6 @@ import java.util.List;
  */
 public class BuildFileTool extends ProjectTool {
 
-    // The selected JarPath
-    private String  _jarPath;
-
-    // The selected ProjectPath
-    private String  _projPath;
-
     /**
      * Constructor.
      */
@@ -130,96 +124,6 @@ public class BuildFileTool extends ProjectTool {
     }
 
     /**
-     * Removes a project with given name.
-     */
-    public void removeProjectForName(String aName)
-    {
-        // Just return if bogus
-        if (aName == null || aName.length() == 0) {
-            beep();
-            return;
-        }
-
-        // Get named project
-        Project proj = _proj.getProjectForName(aName);
-        if (proj == null) {
-            View view = isUISet() && getUI().isShowing() ? getUI() : _workspacePane.getUI();
-            DialogBox.showWarningDialog(view, "Error Removing Project", "Project not found");
-            return;
-        }
-
-        // Remove dependent project from root project and WorkspacePane
-        _proj.removeProjectForPath(aName);
-    }
-
-    /**
-     * Removes the given Jar path.
-     */
-    public void removeJarPath(String aJarPath)
-    {
-        // Just return if bogus
-        if (aJarPath == null || aJarPath.length() == 0) {
-            beep();
-            return;
-        }
-
-        // Remove path from classpath
-        getBuildFile().removeLibPath(aJarPath);
-    }
-
-    /**
-     * Returns the list of jar paths.
-     */
-    public String[] getJarPaths()
-    {
-        return getBuildFile().getLibPaths();
-    }
-
-    /**
-     * Returns the selected JarPath.
-     */
-    public String getSelectedJarPath()
-    {
-        if (_jarPath == null && getJarPaths().length > 0)
-            _jarPath = getJarPaths()[0];
-        return _jarPath;
-    }
-
-    /**
-     * Sets the selected JarPath.
-     */
-    public void setSelectedJarPath(String aJarPath)
-    {
-        _jarPath = aJarPath;
-    }
-
-    /**
-     * Returns the list of dependent project paths.
-     */
-    public String[] getProjectPaths()
-    {
-        return getBuildFile().getProjectPaths();
-    }
-
-    /**
-     * Returns the selected Project Path.
-     */
-    public String getSelectedProjectPath()
-    {
-        if (_projPath == null && getProjectPaths().length > 0)
-            _projPath = getProjectPaths()[0];
-        return _projPath;
-    }
-
-    /**
-     * Sets the selected Project Path.
-     */
-    public void setSelectedProjectPath(String aProjPath)
-    {
-        _projPath = aProjPath;
-    }
-
-    /**
      * Initialize UI.
      */
     protected void initUI()
@@ -233,10 +137,8 @@ public class BuildFileTool extends ProjectTool {
         dependenciesListView.setItemTextFunction(dep -> dep.getType() + " " + dep.getId());
         enableEvents(dependenciesListView, DragEvents);
         dependenciesListView.addEventFilter(e -> { if (e.getClickCount() == 2) showAddDependencyPanel(); }, MousePress);
-
-        // Configure JarPathsList, ProjectPathsList
-        enableEvents("JarPathsList", DragEvents);
-        enableEvents("ProjectPathsList", MouseRelease);
+        ListArea<BuildDependency> dependencyListArea = dependenciesListView.getListArea();
+        dependencyListArea.setRowHeight(26);
     }
 
     /**
@@ -253,12 +155,6 @@ public class BuildFileTool extends ProjectTool {
 
         // Update DependenciesList
         setViewItems("DependenciesListView", buildFile.getDependencies());
-
-        // Update JarPathsList, ProjectPathsList
-        setViewItems("JarPathsList", getJarPaths());
-        setViewSelItem("JarPathsList", getSelectedJarPath());
-        setViewItems("ProjectPathsList", getProjectPaths());
-        setViewSelItem("ProjectPathsList", getSelectedProjectPath());
     }
 
     /**
@@ -286,44 +182,12 @@ public class BuildFileTool extends ProjectTool {
                 showAddDependencyPanel();
         }
 
-        // Handle JarPathsList
-        if (anEvent.equals("JarPathsList")) {
-
-            // Handle DragEvent
-             if (anEvent.isDragEvent())
-                 handleJarFilesListDragEvent(anEvent);
-
-             // Handle click
-            else {
-                String jarPath = anEvent.getStringValue();
-                setSelectedJarPath(jarPath);
-             }
-        }
-
-        // Handle ProjectPathsList
-        if (anEvent.equals("ProjectPathsList")) {
-
-            // Handle double click: Show add project panel
-            if (anEvent.getClickCount() > 1)
-                showAddProjectPanel();
-
-            // Handle click
-            else {
-                String projPath = anEvent.getStringValue();
-                setSelectedProjectPath(projPath);
-            }
-        }
-
         // Handle DeleteAction
         if (anEvent.equals("DeleteAction") || anEvent.equals("BackSpaceAction")) {
             if (getView("DependenciesListView").isFocused()) {
                 BuildDependency dependency = (BuildDependency) getViewSelItem("DependenciesListView");
                 removeDependency(dependency);
             }
-            else if (getView("JarPathsList").isFocused())
-                removeJarPath(getSelectedJarPath());
-            else if (getView("ProjectPathsList").isFocused())
-                removeProjectForName(getSelectedProjectPath());
         }
     }
 
@@ -349,34 +213,6 @@ public class BuildFileTool extends ProjectTool {
                     BuildFile buildFile = getBuildFile();
                     buildFile.addDependency(dependency);
                 }
-            }
-        }
-
-        // Trigger build
-        WorkspaceBuilder builder = _workspace.getBuilder();
-        builder.buildWorkspaceLater(false);
-        dragEvent.dropComplete();
-    }
-
-    /**
-     * Handles drag/drop jar files.
-     */
-    private void handleJarFilesListDragEvent(ViewEvent dragEvent)
-    {
-        dragEvent.acceptDrag(); //TransferModes(TransferMode.COPY);
-        dragEvent.consume();
-        if (!dragEvent.isDragDropEvent())
-            return;
-
-        // Get dropped jar files
-        List<File> jarFiles = dragEvent.getClipboard().getJavaFiles();
-        if (jarFiles != null) {
-
-            // Add JarPaths
-            for (File jarFile : jarFiles) {
-                String jarFilePath = jarFile.getAbsolutePath();
-                //if(StringUtils.endsWithIC(path, ".jar"))
-                _proj.getBuildFile().addLibPath(jarFilePath);
             }
         }
 
