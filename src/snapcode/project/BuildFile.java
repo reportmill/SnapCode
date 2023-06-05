@@ -202,6 +202,17 @@ public class BuildFile extends PropObject {
     }
 
     /**
+     * Adds a maven build dependency.
+     */
+    public void addMavenDependencyForGroupAndPackageAndVersion(String groupName, String packageName, String version)
+    {
+        BuildDependency.MavenDependency mavenDependency = new BuildDependency.MavenDependency();
+        String idStr = groupName + ':' + packageName + ':' + version;
+        mavenDependency.setId(idStr);
+        addDependency(mavenDependency);
+    }
+
+    /**
      * Returns the build path as absolute path.
      */
     public String getBuildPathAbsolute()
