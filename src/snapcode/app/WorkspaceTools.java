@@ -227,6 +227,11 @@ public class WorkspaceTools {
     }
 
     /**
+     * Runs the given file.
+     */
+    public void runFile(WebFile aFile, boolean isDebug)  { }
+
+    /**
      * Reset visible tools.
      */
     public void resetLater()

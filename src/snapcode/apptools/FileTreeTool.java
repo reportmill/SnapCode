@@ -512,9 +512,7 @@ public class FileTreeTool extends WorkspaceTool {
      */
     private void runFile(WebFile aFile, boolean isDebug)
     {
-        System.out.println("FileTreeTool.runFile: Disabled run for " + aFile + ", " + isDebug);
-        //DebugTool debugTool = _workspaceTools.getToolForClass(DebugTool.class);
-        //debugTool.runConfigOrFile(null, aFile, false);
+        _workspaceTools.runFile(aFile, isDebug);
     }
 
     /**
