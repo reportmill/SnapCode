@@ -24,6 +24,7 @@ public class WorkspaceToolsX extends WorkspaceTools {
     public void runFile(WebFile aFile, boolean isDebug)
     {
         DebugTool debugTool = getToolForClass(DebugTool.class);
+        showTool(debugTool);
         debugTool.runConfigOrFile(null, aFile, false);
     }
 
