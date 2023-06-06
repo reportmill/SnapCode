@@ -5,7 +5,6 @@ package javakit.runner;
 import javakit.parse.*;
 import snap.util.CharSequenceUtils;
 import snapcharts.repl.ReplObject;
-
 import java.io.PrintStream;
 
 /**
@@ -18,9 +17,6 @@ public class JavaShell {
 
     // An object to act as "this"
     private Object  _thisObject = new Object();
-
-    // The client
-    private static ShellClient  _client;
 
     // Whether error was hit
     private boolean  _errorWasHit;
@@ -53,26 +49,10 @@ public class JavaShell {
     }
 
     /**
-     * Returns the client.
-     */
-    public static ShellClient getClient()  { return _client; }
-
-    /**
-     * Sets the client.
-     */
-    public void setClient(ShellClient aClient)
-    {
-        _client = aClient;
-    }
-
-    /**
      * Evaluate string.
      */
     public void runJavaCode(JFile jfile, JStmt[] javaStmts)
     {
-        // Set ShowHandler
-        ReplObject.setShowHandler(obj -> getClient().processOutput(obj));
-
         // Reset VarStack
         _stmtEval._exprEval._varStack.reset();
 
@@ -161,7 +141,7 @@ public class JavaShell {
 
         // If newline, process and clear
         if (CharSequenceUtils.isLastCharNewline(_consoleOut.getString())) {
-            _client.processOutput(_consoleOut);
+            ReplObject.show(_consoleOut);
             _consoleOut = null;
         }
     }
@@ -178,20 +158,9 @@ public class JavaShell {
 
         // If newline, process and clear
         if (CharSequenceUtils.isLastCharNewline(_consoleErr.getString())) {
-            _client.processOutput(_consoleErr);
+            ReplObject.show(_consoleErr);
             _consoleErr = null;
         }
-    }
-
-    /**
-     * An interface to process shell output.
-     */
-    public interface ShellClient {
-
-        /**
-         * Called when a statement is evaluated with console and result output.
-         */
-        void processOutput(Object anOutput);
     }
 
     /**

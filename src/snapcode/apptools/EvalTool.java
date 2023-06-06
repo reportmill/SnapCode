@@ -9,6 +9,7 @@ import snap.view.*;
 import snap.viewx.TextPane;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
+import snapcharts.repl.EvalView;
 
 /**
  * This class manages the run/eval UI.
@@ -38,6 +39,9 @@ public class EvalTool extends WorkspaceTool {
 
     // The view that shows when there is cancelled run
     private View  _cancelledRunView;
+
+    // Constants
+    public static final int MAX_OUTPUT_COUNT = 1000;
 
     /**
      * Constructor.
@@ -138,7 +142,7 @@ public class EvalTool extends WorkspaceTool {
     protected void initUI()
     {
         // Create EvalView
-        _evalView = new EvalView(this);
+        _evalView = new EvalView();
         _evalView.setGrowHeight(true);
 
         // Get ScrollView and config
@@ -221,7 +225,7 @@ public class EvalTool extends WorkspaceTool {
             String text = "Last run cancelled";
             if (_autoRunRequested)
                 text += " - exceeded AutoRun timeout";
-            if (_evalView.getChildCount() > EvalView.MAX_OUTPUT_COUNT)
+            if (_evalView.getChildCount() > MAX_OUTPUT_COUNT)
                 text += " - Too much output";
             setViewText("CancelledRunLabel", text);
         }

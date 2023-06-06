@@ -4,6 +4,13 @@
 package snapcode.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JStmt;
+import javakit.parse.NodeError;
+import snap.gfx.Color;
+import snap.gfx.Font;
+import snap.text.TextDoc;
+import snap.text.TextStyle;
+import snapcharts.repl.ReplObject;
+import snapcharts.repl.EvalView;
 import snapcode.javatext.JavaTextPane;
 import snapcode.project.JavaTextDoc;
 import snapcode.project.BuildIssue;
@@ -41,6 +48,9 @@ public class EvalToolRunner {
 
         // Create JavaShell
         _javaShell = new JavaShell();
+
+        // Set ShowHandler
+        ReplObject.setShowHandler(obj -> processOutput(obj));
     }
 
     /**
@@ -86,10 +96,6 @@ public class EvalToolRunner {
      */
     protected void runAppImpl()
     {
-        // Set display
-        EvalView display = _evalTool._evalView;
-        _javaShell.setClient(display);
-
         // Get JavaTextDoc, JavaAgent
         JavaTextPane<?> javaTextPane = getJavaTextPane();
         JavaTextDoc javaTextDoc = javaTextPane.getTextDoc();
@@ -104,7 +110,7 @@ public class EvalToolRunner {
         // If build failed, report errors
         if (!success) {
             BuildIssue[] buildIssues = javaAgent.getBuildIssues();
-            display.processOutput(buildIssues);
+            processOutput(buildIssues);
         }
 
         // If no errors, run
@@ -132,6 +138,34 @@ public class EvalToolRunner {
 
         // Reset EvalPane
         _evalTool.resetLater();
+    }
+
+    /**
+     * Called by shell when there is output.
+     */
+    public void processOutput(Object aValue)
+    {
+        EvalView display = _evalTool._evalView;
+
+        // If too much output, bail
+        if (display.getChildCount() > EvalTool.MAX_OUTPUT_COUNT) {
+            boolean isRunning = _evalTool.isRunning();
+            if (!isRunning)
+                return;
+            _evalTool.cancelRun();
+            return;
+        }
+
+        // Handle NodeError, BuildIssue: Map to error TextDoc
+        if (aValue instanceof NodeError)
+            aValue = createTextDocForNodeErrors(new NodeError[] { (NodeError) aValue });
+        else if (aValue instanceof NodeError[])
+            aValue = createTextDocForNodeErrors((NodeError[]) aValue);
+        else if (aValue instanceof BuildIssue[])
+            aValue = createTextDocForBuildIssues((BuildIssue[]) aValue);
+
+        // Do normal version
+        display.showObject(aValue);
     }
 
     /**
@@ -168,5 +202,60 @@ public class EvalToolRunner {
         // Interrupt and clear
         _javaShell.interrupt();
         _runAppThread = null;
+    }
+
+    /**
+     * Creates content view for ViewOwner.
+     */
+    private static TextDoc createTextDocForNodeErrors(NodeError[] nodeErrors)
+    {
+        // Get exception string
+        String errorString = "";
+        for (int i = 0; i < nodeErrors.length; i++) {
+            errorString += "Error: " + nodeErrors[i].getString();
+            if (i + 1 < nodeErrors.length)
+                errorString += '\n';
+        }
+
+        // Return view for error string
+        return createTextDocForErrorString(errorString);
+    }
+
+    /**
+     * Creates content view for BuildIssues.
+     */
+    private static TextDoc createTextDocForBuildIssues(BuildIssue[] buildIssues)
+    {
+        // Get error string
+        String errorString = "";
+        for (int i = 0; i < buildIssues.length; i++) {
+            errorString += "Error: " + buildIssues[i].getText();
+            if (i + 1 < buildIssues.length)
+                errorString += '\n';
+        }
+
+        // Return view for error string
+        return createTextDocForErrorString(errorString);
+    }
+
+    /**
+     * Creates content view for BuildIssues.
+     */
+    private static TextDoc createTextDocForErrorString(String errorString)
+    {
+        // Create TextArea
+        TextDoc textDoc = new TextDoc();
+        Color ERROR_COLOR = Color.get("#CC0000");
+        TextStyle textStyle = textDoc.getStyleForCharIndex(0);
+        TextStyle textStyle2 = textStyle.copyFor(ERROR_COLOR).copyFor(Font.Arial12);
+        textDoc.setDefaultStyle(textStyle2);
+        if (textDoc.isRichText())
+            textDoc.setStyle(textStyle2, 0, textDoc.length());
+
+        // Add chars
+        textDoc.addChars(errorString);
+
+        // Return
+        return textDoc;
     }
 }
