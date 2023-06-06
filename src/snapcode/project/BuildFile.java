@@ -169,17 +169,6 @@ public class BuildFile extends PropObject {
     }
 
     /**
-     * Adds a class path for jar containing given class.
-     */
-    public void addJarFileDependencyForClass(Class<?> aClass)
-    {
-        String classPath = ProjectUtils.getClassPathForClass(aClass);
-        if (classPath != null)
-            addJarFileDependencyForPath(classPath);
-        else System.out.println("BuildFile.addLibPathForClass: Couldn't find path for class: " + aClass.getName());
-    }
-
-    /**
      * Returns the dependent project names.
      */
     public String[] getProjectDependenciesNames()

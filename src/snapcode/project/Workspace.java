@@ -219,16 +219,7 @@ public class Workspace extends PropObject {
      */
     protected ClassLoader createClassLoader()
     {
-        // Get System ClassLoader
-        ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader(); //.getParent();
-
-        // Get all project ClassPath URLs and add to class loader
-        //String[] classPaths = getClassPaths();
-        //URL[] urls = FilePathUtils.getURLs(classPaths);
-        ClassLoader urlClassLoader = sysClassLoader; //new URLClassLoader(urls, sysClassLoader);
-
-        // Return
-        return urlClassLoader;
+        return ClassLoader.getSystemClassLoader();
     }
 
     /**

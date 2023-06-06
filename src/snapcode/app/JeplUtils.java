@@ -67,10 +67,8 @@ public class JeplUtils {
         BuildFile buildFile = proj.getBuildFile();
 
         // Add dependencies to BuildFile for SnapKit and SnapCharts
-        buildFile.addJarFileDependencyForClass(PropObject.class);
-        buildFile.addJarFileDependencyForClass(DoubleArray.class);
-        //buildFile.addMavenDependencyForGroupAndPackageAndVersion("com.reportmill", "snapkit", "2023.06");
-        //buildFile.addMavenDependencyForGroupAndPackageAndVersion("com.reportmill", "snapcharts", "2023.06");
+        buildFile.addMavenDependencyForGroupAndPackageAndVersion("com.reportmill", "snapkit", "2023.06");
+        buildFile.addMavenDependencyForGroupAndPackageAndVersion("com.reportmill", "snapcharts", "2023.06");
     }
 
     /**

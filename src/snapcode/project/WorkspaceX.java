@@ -32,14 +32,24 @@ public class WorkspaceX extends Workspace {
         String[] classPaths = new String[0];
         for (Project proj : projects) {
             String[] projClassPaths = proj.getRuntimeClassPaths();
-            classPaths = ArrayUtils.addAll(classPaths, projClassPaths);
+            classPaths = ArrayUtils.addAllUnique(classPaths, projClassPaths);
         }
+
+        // Remove SnapKit/SnapCharts paths
+        String snapKitPath = ArrayUtils.findMatch(classPaths, path -> path.contains("snapkit"));
+        String snapChartsPath = ArrayUtils.findMatch(classPaths, path -> path.contains("snapcharts"));
+        if (snapKitPath != null)
+            classPaths = ArrayUtils.remove(classPaths, snapKitPath);
+        if (snapChartsPath != null)
+            classPaths = ArrayUtils.remove(classPaths, snapChartsPath);
 
         // Get all project ClassPath URLs
         URL[] urls = FilePathUtils.getUrlsForPaths(classPaths);
 
         // Get System ClassLoader
-        ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader().getParent();
+        ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
+        if (snapKitPath == null && snapChartsPath == null)
+            sysClassLoader = sysClassLoader.getParent();
 
         // Create special URLClassLoader subclass so when debugging SnapCode, we can ignore classes loaded by Project
         ClassLoader urlClassLoader = new ProjectClassLoaderX(urls, sysClassLoader);
