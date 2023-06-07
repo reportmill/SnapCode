@@ -137,7 +137,7 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
 
         // Get lambda class and lambda method with correct arg count
         JavaClass lambdaClass = getLambdaClass();
-        JavaMethod lambdaMethod = lambdaClass.getLambdaMethod();
+        JavaMethod lambdaMethod = lambdaClass != null ? lambdaClass.getLambdaMethod() : null;
 
         // Set/return
         return _lambdaMethod = lambdaMethod;
