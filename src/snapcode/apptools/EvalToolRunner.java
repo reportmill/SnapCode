@@ -4,6 +4,7 @@
 package snapcode.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JStmt;
+import snapcharts.repl.Console;
 import snapcode.javatext.JavaTextPane;
 import snapcode.project.JavaTextDoc;
 import snapcode.project.BuildIssue;
@@ -105,6 +106,7 @@ public class EvalToolRunner {
 
         // If no errors, run
         else {
+            Console.setShared(_evalTool._console);
             JFile jfile = javaAgent.getJFile();
             JStmt[] javaStmts = javaAgent.getJFileStatements();
             _javaShell.runJavaCode(jfile, javaStmts);

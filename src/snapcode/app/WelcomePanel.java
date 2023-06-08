@@ -145,12 +145,14 @@ public class WelcomePanel extends ViewOwner {
     protected WorkspacePane openWorkspaceForFile(WebFile aFile)
     {
         // Create WorkspacePane, set source, show
-        WorkspacePane workspacePane = new WorkspacePane();
+        WorkspacePane workspacePane;
 
         // Handle source file
         boolean isSourceFile = aFile == null || ArrayUtils.contains(FILE_TYPES, aFile.getType());
-        if (isSourceFile)
+        if (isSourceFile) {
+            workspacePane = new WorkspacePane();
             workspacePane.setWorkspaceForJeplFileSource(aFile);
+        }
 
         // Handle Project file
         else {
@@ -159,6 +161,7 @@ public class WelcomePanel extends ViewOwner {
             WorkspacePane workspacePaneX = createWorkspacePaneX();
             if (workspacePaneX != null)
                 workspacePane = workspacePaneX;
+            else workspacePane = new WorkspacePane();
 
             // Get project site and add to workspace
             WebFile projectDir = aFile.isDir() ? aFile : aFile.getParent();
