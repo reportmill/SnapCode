@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import snapcharts.repl.Console;
 import snapcode.javatext.JavaTextArea;
 import javakit.parse.JMethodDecl;
 import javakit.parse.JNode;
@@ -9,7 +10,6 @@ import snap.view.*;
 import snap.viewx.TextPane;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
-import snapcharts.repl.EvalView;
 
 /**
  * This class manages the run/eval UI.
@@ -25,8 +25,8 @@ public class EvalTool extends WorkspaceTool {
     // EvalRunner
     protected EvalToolRunner  _evalRunner;
 
-    // EvalView
-    protected EvalView  _evalView;
+    // The Console
+    protected Console _console;
 
     // For resetEntriesLater
     private Runnable  _resetEvalValuesRun;
@@ -40,15 +40,15 @@ public class EvalTool extends WorkspaceTool {
     // The view that shows when there is cancelled run
     private View  _cancelledRunView;
 
-    // Constants
-    public static final int MAX_OUTPUT_COUNT = 1000;
-
     /**
      * Constructor.
      */
     public EvalTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
+
+        // Create console
+        _console = new EvalToolConsole(this);
 
         // Create runner
         _evalRunner = new EvalToolRunner(this);
@@ -108,7 +108,7 @@ public class EvalTool extends WorkspaceTool {
     {
         setShowExtendedRunUI(false);
         setShowCancelledRunUI(false);
-        _evalView.resetDisplay();
+        _console.resetConsole();
     }
 
     /**
@@ -141,14 +141,14 @@ public class EvalTool extends WorkspaceTool {
     @Override
     protected void initUI()
     {
-        // Create EvalView
-        _evalView = new EvalView();
-        _evalView.setGrowHeight(true);
+        // Create Repl Console
+        View consoleView = _console.getConsoleView();
+        consoleView.setGrowHeight(true);
 
         // Get ScrollView and config
         ScrollView scrollView = getView("ScrollView", ScrollView.class);
         scrollView.setBorder(null);
-        scrollView.setContent(_evalView);
+        scrollView.setContent(consoleView);
 
         // Set RunButton, DeleteButton image
         getView("RunButton", ButtonBase.class).setImageAfter(getImage("pkg.images/Run.png"));
@@ -225,7 +225,7 @@ public class EvalTool extends WorkspaceTool {
             String text = "Last run cancelled";
             if (_autoRunRequested)
                 text += " - exceeded AutoRun timeout";
-            if (_evalView.getChildCount() > MAX_OUTPUT_COUNT)
+            if (_console.getItemCount() > EvalToolConsole.MAX_OUTPUT_COUNT)
                 text += " - Too much output";
             setViewText("CancelledRunLabel", text);
         }
