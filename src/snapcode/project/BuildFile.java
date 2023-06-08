@@ -255,8 +255,13 @@ public class BuildFile extends PropObject {
         // Get file (create if missing)
         WebSite projSite = _proj.getSite();
         WebFile file = projSite.getFileForPath(BUILD_FILE_PATH);
-        if (file == null)
+        if (file == null) {
             file = projSite.createFileForPath(BUILD_FILE_PATH, false);
+            if (!_proj.isReadOnly()) {
+                _buildFile = file;
+                writeFile();
+            }
+        }
 
         // Set/return
         return _buildFile = file;

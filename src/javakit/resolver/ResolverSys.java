@@ -80,7 +80,11 @@ public class ResolverSys extends Resolver {
      */
     public Class<?>[] getDeclaredClassesForClass(Class<?> aClass)
     {
-        return aClass.getDeclaredClasses();
+        try { return aClass.getDeclaredClasses(); }
+        catch (Throwable e) {
+            System.err.println("ResolverSys.getDeclaredClassesForClass: Can't get declared classes: " + e);
+            return new Class[0];
+        }
     }
 
     /**

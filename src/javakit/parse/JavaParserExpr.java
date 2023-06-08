@@ -700,8 +700,10 @@ public class JavaParserExpr extends Parser {
                 // Handle ClassBody
                 case "ClassBody":
                     JClassDecl classDecl = aNode.getCustomNode(JClassDecl.class);
-                    classDecl.addExtendsType(allocType);
-                    allocExpr.setClassDecl(classDecl);
+                    if (classDecl != null) {
+                        classDecl.addExtendsType(allocType);
+                        allocExpr.setClassDecl(classDecl);
+                    }
                     break;
             }
         }
