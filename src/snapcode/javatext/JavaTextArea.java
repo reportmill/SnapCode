@@ -133,8 +133,6 @@ public class JavaTextArea extends TextArea {
     {
         //JavaTextBox textBox = getTextBox();
         TextDoc textDoc = getTextDoc();
-        if (textDoc instanceof SubText)
-            textDoc = ((SubText) textDoc).getTextDoc();
 
         // Get JavaTextDoc and forward
         JavaTextDoc javaTextDoc = (JavaTextDoc) textDoc;
@@ -256,12 +254,6 @@ public class JavaTextArea extends TextArea {
         List<TextBoxToken> tokensList = new ArrayList<>(theNodes.size());
         TextBox textBox = getTextBox();
         int textBoxLineStart = 0;
-        TextDoc textDoc = getTextDoc();
-        if (textDoc instanceof SubText) {
-            TextDoc textDocReal = ((SubText) textDoc).getTextDoc();
-            int startCharIndex = textDoc.getStartCharIndex();
-            textBoxLineStart = textDocReal.getLineForCharIndex(startCharIndex).getIndex();
-        }
 
         // Iterate over nodes and convert to TextBoxTokens
         for (JNode jnode : theNodes) {
@@ -274,6 +266,8 @@ public class JavaTextArea extends TextArea {
             // Get line and token
             TextBoxLine textBoxLine = textBox.getLine(lineIndex);
             int startCharIndex = jnode.getLineCharIndex();
+            if (jnode instanceof JType && jnode.getStartToken() != jnode.getEndToken())
+                startCharIndex = jnode.getEndToken().getColumnIndex();
             TextBoxToken token = textBoxLine.getTokenForCharIndex(startCharIndex);
 
             // Add to tokens list
@@ -615,6 +609,7 @@ public class JavaTextArea extends TextArea {
                 int lineIndex = breakpoint.getLine();
                 if (startLineIndex < lineIndex) {
                     Breakpoints breakpointsHpr = getWorkspaceBreakpoints();
+                    if (breakpointsHpr == null) return;
                     if (endLineIndex <= lineIndex) {
                         breakpoint.setLine(lineIndex - lineIndexDelta);
                         breakpointsHpr.writeFile();
