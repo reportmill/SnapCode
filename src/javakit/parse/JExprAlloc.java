@@ -71,8 +71,11 @@ public class JExprAlloc extends JExpr {
         List<JExpr> args = getArgs();
         JavaType[] argTypes = new JavaType[args.size()];
 
+        // Iterate over args and map to eval types
         for (int i = 0, iMax = args.size(); i < iMax; i++) {
             JExpr arg = args.get(i);
+            if (arg instanceof JExprLambda && arg._decl == null)
+                arg = null;
             argTypes[i] = arg != null ? arg.getEvalType() : null;
         }
 
@@ -126,15 +129,17 @@ public class JExprAlloc extends JExpr {
      */
     protected JavaDecl getDeclImpl()
     {
-        // If array alloc, just return Type decl
+        // Get type - just return if null
         JType type = getType();
-        if (_arrayDims != null || _arrayInits.size() > 0)
-            return type.getDecl();
-
-        // Get class decl and constructor call arg types
         JavaType javaType = type.getDecl();
         if (javaType == null)
             return null;
+
+        // If array alloc, just return Type decl
+        if (_arrayDims != null || _arrayInits.size() > 0)
+            return javaType;
+
+        // Get class decl and constructor arg types
         JavaClass javaClass = javaType.getEvalClass();
         JavaType[] argTypes = getArgEvalTypes();
 
@@ -149,7 +154,7 @@ public class JExprAlloc extends JExpr {
         if (constructor != null)
             return constructor;
 
-        // Return null since not found
+        // Return not found
         return null;
     }
 

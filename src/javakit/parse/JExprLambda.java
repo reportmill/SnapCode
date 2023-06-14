@@ -184,6 +184,27 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
             return lambdaClass;
         }
 
+        // Handle parent is alloc expression: Get lambda interface from alloc expression param
+        if (par instanceof JExprAlloc) {
+
+            // Get alloc expr contructor
+            JExprAlloc allocExpr = (JExprAlloc) par;
+            JavaConstructor constructor = (JavaConstructor) allocExpr.getDecl();
+            if (constructor == null)
+                return null;
+
+            // Get arg index of this lambda expr
+            List<JExpr> args = allocExpr.getArgs();
+            int argIndex = ListUtils.indexOfId(args, this);
+            if (argIndex < 0)
+                return null;
+
+            // Get arg type at arg index
+            JavaType lambdaType = constructor.getParamType(argIndex);
+            JavaClass lambdaClass = lambdaType.getEvalClass();
+            return lambdaClass;
+        }
+
         // Handle parent anything else (JVarDecl, JStmtExpr): Return parent eval class
         JavaClass lambdaClass = par.getEvalClass();
         if (lambdaClass != null)

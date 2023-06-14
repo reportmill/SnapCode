@@ -168,7 +168,7 @@ public class JExprMethodCall extends JExpr {
         if (importClassMember instanceof JavaMethod)
             return (JavaMethod) importClassMember;
 
-        // Return null since not found
+        // Return not found
         return null;
     }
 
@@ -248,7 +248,7 @@ public class JExprMethodCall extends JExpr {
         if (importClassMember instanceof JavaMethod)
             return Collections.singletonList((JavaMethod) importClassMember);
 
-        // Return null since not found
+        // Return
         return compatibleMethods;
     }
 
