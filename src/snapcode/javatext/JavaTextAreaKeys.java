@@ -75,6 +75,15 @@ public class JavaTextAreaKeys extends TextAreaKeys {
             }
         }
 
+        // Handle command Slash
+        if (commandDown) {
+            if (keyCode == KeyCode.SLASH) {
+                _javaTextArea.commentLinesWithLineComment();
+                anEvent.consume();
+                return;
+            }
+        }
+
         // Do normal version
         super.keyPressed(anEvent);
     }

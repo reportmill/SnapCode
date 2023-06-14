@@ -504,6 +504,62 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
+     * Adds or removes comments from selected lines.
+     */
+    public void commentLinesWithLineComment()
+    {
+        // Get start/end lines for selection
+        TextSel textSel = getSel();
+        TextBoxLine startLine = textSel.getStartLine();
+        TextBoxLine endLine = textSel.getEndLine();
+        int selStart = textSel.getStart();
+        int selEnd = textSel.getEnd();
+
+        // Assume adding comments if any line doesn't start with comment
+        boolean addComments = false;
+        for (TextBoxLine line = startLine; line != endLine.getNext(); line = line.getNext()) {
+            String lineStr = line.getString().trim();
+            if (!lineStr.startsWith("//")) {
+                addComments = true;
+                break;
+            }
+        }
+
+        // Iterate over selected lines
+        while (true) {
+
+            int startCharIndex = startLine.getStartCharIndex();
+
+            // If adding comment, add comment chars and adjust SelStart/SelEnd
+            if (addComments) {
+                addChars("//", null, startLine.getStartCharIndex());
+                if (startCharIndex <= selStart)
+                    selStart += 2;
+                if (startCharIndex <= selEnd)
+                    selEnd += 2;
+            }
+
+            // If removing comment, remove comment chars and adjust SelStart/SelEnd
+            else {
+                int commentCharIndex = startCharIndex + startLine.getString().indexOf("//");
+                delete(commentCharIndex, commentCharIndex + 2, false);
+                if (commentCharIndex <= selStart)
+                    selStart -= 2;
+                if (commentCharIndex <= selEnd)
+                    selEnd -= 2;
+            }
+
+            // If at end line, break, otherwise get next line
+            if (startLine == endLine)
+                break;
+            startLine = startLine.getNext();
+        }
+
+        // Reset selection
+        setSel(selStart, selEnd);
+    }
+
+    /**
      * Override to setTextModified.
      */
     protected void textDocDidPropChange(PropChange anEvent)
