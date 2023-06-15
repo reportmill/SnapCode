@@ -112,14 +112,16 @@ public class JavaTextAreaKeys extends TextAreaKeys {
                 return;
             }
 
-            // Handle open bracket: If empty line, remove level of indent
+            // Handle open bracket: If empty line and indented more than previous line, remove level of indent
             if (keyChar == '{') {
                 TextBoxLine thisLine = getSel().getStartLine();
-                String thisLineStr = thisLine.getString();
-                if (thisLineStr.trim().length() == 0 && thisLineStr.length() >= 4) {
-                    int start = getSelStart();
-                    _javaTextArea.delete(thisLine.getStartCharIndex(), thisLine.getStartCharIndex() + 4, false);
-                    setSel(start - 4);
+                if (thisLine.isWhiteSpace() && thisLine.length() >= INDENT_STRING.length()) {
+                    TextBoxLine prevLine = thisLine.getPrevious();
+                    if (prevLine != null && thisLine.getIndentLength() >= prevLine.getIndentLength() + INDENT_STRING.length()) {
+                        int start = getSelStart();
+                        _javaTextArea.delete(thisLine.getStartCharIndex(), thisLine.getStartCharIndex() + 4, false);
+                        setSel(start - 4);
+                    }
                 }
             }
         }
