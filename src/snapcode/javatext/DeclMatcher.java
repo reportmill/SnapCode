@@ -4,6 +4,7 @@
 package snapcode.javatext;
 import javakit.parse.*;
 import javakit.resolver.*;
+import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
 import snap.util.StringUtils;
 import java.util.ArrayList;
@@ -12,7 +13,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * This class handles matching typed chars to JavaDecls.
@@ -58,7 +58,7 @@ public class DeclMatcher {
     public ClassTree.PackageNode[] getPackagesForClassTree(ClassTree aClassTree)
     {
         ClassTree.PackageNode rootPackage = aClassTree.getRootPackage();
-        return getMatchingPackages(rootPackage.packages);
+        return ArrayUtils.filter(rootPackage.packages, cls -> matchesString(cls.simpleName));
     }
 
     /**
@@ -70,7 +70,9 @@ public class DeclMatcher {
         ClassTree.PackageNode packageNode = aClassTree.getPackageForName(aPkgName);
         if (packageNode == null)
             return new ClassTree.PackageNode[0];
-        return getMatchingPackages(packageNode.packages);
+
+        // Return matching packages
+        return ArrayUtils.filter(packageNode.packages, pkg -> matchesString(pkg.simpleName));
     }
 
     /**
@@ -79,7 +81,10 @@ public class DeclMatcher {
     public ClassTree.ClassNode[] getClassesForClassTreePackageName(ClassTree aClassTree, String aPkgName)
     {
         ClassTree.PackageNode packageNode = aClassTree.getPackageForName(aPkgName);
-        return getMatchingClasses(packageNode.classes);
+        ClassTree.ClassNode[] classes = packageNode.classes;
+
+        // Return matching classes
+        return ArrayUtils.filter(classes, cls -> matchesString(cls.simpleName));
     }
 
     /**
@@ -91,29 +96,9 @@ public class DeclMatcher {
         ClassTree.ClassNode[] classes = aClassTree.getAllClasses();
         if (getPrefix().length() < 3)
             classes = aClassTree.getCommonClasses();
-        return getMatchingClasses(classes);
-    }
 
-    /**
-     * Returns matching packages in given packages array.
-     */
-    private ClassTree.PackageNode[] getMatchingPackages(ClassTree.PackageNode[] thePackages)
-    {
-        Stream<ClassTree.PackageNode> packagesStream = Stream.of(thePackages);
-        Stream<ClassTree.PackageNode> matchingPackagesStream = packagesStream.filter(pkg -> matchesString(pkg.simpleName));
-        ClassTree.PackageNode[] matchingPackages = matchingPackagesStream.toArray(size -> new ClassTree.PackageNode[size]);
-        return matchingPackages;
-    }
-
-    /**
-     * Returns matching classes in given classes array.
-     */
-    private ClassTree.ClassNode[] getMatchingClasses(ClassTree.ClassNode[] theClasses)
-    {
-        Stream<ClassTree.ClassNode> classesStream = Stream.of(theClasses);
-        Stream<ClassTree.ClassNode> matchingClassesStream = classesStream.filter(cls -> matchesString(cls.simpleName));
-        ClassTree.ClassNode[] matchingClasses = matchingClassesStream.toArray(size -> new ClassTree.ClassNode[size]);
-        return matchingClasses;
+        // Return matching classes
+        return ArrayUtils.filter(classes, cls -> matchesString(cls.simpleName));
     }
 
     /**
