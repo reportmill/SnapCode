@@ -3,90 +3,29 @@
  */
 package javakit.resolver;
 import java.util.*;
-import javakit.resolver.ClassTree.*;
-import snap.util.*;
+
 import snap.web.*;
 
 /**
- * A class to return class file info for Project class paths.
+ * A ClassTree subclass to provide classes/packages for an array of class paths.
  */
-public class ClassPathInfo {
+public class ClassTreeX extends ClassTree {
 
-    // The shared list of class path sites
-    private WebSite[]  _sites;
-
-    // A class tree
-    private ClassTree  _classTree;
+    // The array of class path sites
+    private WebSite[] _classPathSites;
 
     /**
      * Constructor.
      */
-    public ClassPathInfo(Resolver aResolver)
+    public ClassTreeX(String[] classPaths)
     {
-        // Handle TeaVM
-        if (SnapUtils.isTeaVM) {
-            _sites = new WebSite[0];
-            _classTree = ClassTreeWeb.getShared();
-            return;
-        }
+        super();
 
-        // Add JRE jar file site
-        WebURL jreURL = WebURL.getURL(List.class);
-        WebSite jreSite = jreURL.getSite();
-        List<WebSite> sites = new ArrayList<>();
-        sites.add(jreSite);
+        // Get ClassPathSites for ClassPaths
+        _classPathSites = getClassPathSitesForClassPaths(classPaths);
 
-        // Get Project ClassPaths (build dirs, jar files)
-        String[] classPaths = aResolver.getClassPaths(); // Was ProjectSet JK
-
-        // Add project class path sites (build dirs, jar files)
-        for (String classPath : classPaths) {
-
-            // Get URL for class path
-            WebURL classPathURL = WebURL.getURL(classPath);
-            if (classPathURL == null) {
-                System.err.println("ClassPathInfo.init: Can't resolve class path entry: " + classPath);
-                continue;
-            }
-
-            // Get site for class path entry and add to sites
-            WebSite classPathSite = classPathURL.getAsSite();
-            sites.add(classPathSite);
-        }
-
-        // Set Sites
-        _sites = sites.toArray(new WebSite[0]);
-    }
-
-    /**
-     * Returns the class path sites.
-     */
-    public WebSite[] getSites()  { return _sites; }
-
-    /**
-     * Returns the ClassTree.
-     */
-    public ClassTree getClassTree()
-    {
-        // If already set, just return
-        if (_classTree != null) return _classTree;
-
-        // Create, set, return
-        ClassTree classTree = getClassTreeImpl();
-        return _classTree = classTree;
-    }
-
-    /**
-     * Returns the ClassTree.
-     */
-    protected ClassTree getClassTreeImpl()
-    {
-        // Get Sites and create ClassTree
-        WebSite[] sites = getSites();
-        ClassTree classTree = new ClassTree();
-
-        // Iterate over sites
-        for (WebSite site : sites) {
+        // Iterate over ClassPathSites and add classes for each
+        for (WebSite site : _classPathSites) {
 
             // Get site root files
             WebFile siteRootDir = site.getRootDir();
@@ -95,18 +34,15 @@ public class ClassPathInfo {
             // Iterate over site root files and create/add packages
             for (WebFile rootFile : rootFiles) {
                 if (isPackageDir(rootFile))
-                    getClassesForPackageDir(classTree, rootFile);
+                    getClassesForPackageDir(rootFile);
             }
         }
-
-        // Return
-        return classTree;
     }
 
     /**
      * Loads classes from package dir.
      */
-    private void getClassesForPackageDir(ClassTree aClassTree, WebFile aDir)
+    private void getClassesForPackageDir(WebFile aDir)
     {
         // Get directory files
         WebFile[] dirFiles = aDir.getFiles();
@@ -121,7 +57,7 @@ public class ClassPathInfo {
             // Handle nested dir
             if (file.isDir()) {
                 if (isPackageDir(file))
-                    getClassesForPackageDir(aClassTree, file);
+                    getClassesForPackageDir(file);
             }
 
             // Handle plain file: Add to classFiles if interesting and .class
@@ -134,7 +70,7 @@ public class ClassPathInfo {
                 // Create PackageNode if needed
                 if (packageNode == null) {
                     String packageName = aDir.getPath().substring(1).replace('/', '.');
-                    packageNode = aClassTree.getPackageForName(packageName);
+                    packageNode = getPackageForName(packageName);
                     childClasses = new ArrayList<>(dirFiles.length);
                 }
 
@@ -155,9 +91,41 @@ public class ClassPathInfo {
      */
     public String toString()
     {
-        WebSite[] sites = getSites();
-        String sitesString = Arrays.toString(sites);
+        String sitesString = Arrays.toString(_classPathSites);
         return getClass().getSimpleName() + ": " + sitesString;
+    }
+
+    /**
+     * Returns an array of WebSites for given resolver class path.
+     */
+    private static WebSite[] getClassPathSitesForClassPaths(String[] classPaths)
+    {
+        // Create sites
+        List<WebSite> classFileSites = new ArrayList<>();
+
+        // Add JRE jar file site
+        WebURL jreURL = WebURL.getURL(List.class);
+        assert (jreURL != null);
+        WebSite jreSite = jreURL.getSite();
+        classFileSites.add(jreSite);
+
+        // Add project class path sites (build dirs, jar files)
+        for (String classPath : classPaths) {
+
+            // Get URL for class path
+            WebURL classPathURL = WebURL.getURL(classPath);
+            if (classPathURL == null) {
+                System.err.println("ClassTreeX.getClassFileSitesForResolver: Can't resolve class path entry: " + classPath);
+                continue;
+            }
+
+            // Get site for class path entry and add to sites
+            WebSite classPathSite = classPathURL.getAsSite();
+            classFileSites.add(classPathSite);
+        }
+
+        // Return array
+        return classFileSites.toArray(new WebSite[0]);
     }
 
     /**

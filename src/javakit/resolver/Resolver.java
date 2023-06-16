@@ -18,8 +18,8 @@ public class Resolver {
     // The ClassPaths
     private String[]  _classPaths = new String[0];
 
-    // The ClassPathInfo
-    private ClassPathInfo  _classPathInfo;
+    // The ClassTree
+    private ClassTree  _classTree;
 
     // A cache of JavaPackages by name
     private Map<String,JavaPackage>  _packages = new HashMap<>();
@@ -61,16 +61,20 @@ public class Resolver {
     }
 
     /**
-     * Returns the ClassPathInfo.
+     * Returns the ClassTree.
      */
-    public ClassPathInfo getClassPathInfo()
+    public ClassTree getClassTree()
     {
         // If already set, just return
-        if (_classPathInfo != null) return _classPathInfo;
+        if (_classTree != null) return _classTree;
+
+        // Handle TeaVM
+        if (SnapUtils.isTeaVM)
+            return _classTree = ClassTreeWeb.getShared();
 
         // Create, set, return
-        ClassPathInfo classPathInfo = new ClassPathInfo(this);
-        return _classPathInfo = classPathInfo;
+        String[] classPaths = getClassPaths();
+        return _classTree = new ClassTreeX(classPaths);
     }
 
     /**

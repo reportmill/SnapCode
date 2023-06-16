@@ -270,8 +270,7 @@ public class NodeCompleter {
      */
     private ClassTree getClassTree()
     {
-        ClassPathInfo classPathInfo = _resolver.getClassPathInfo();
-        return classPathInfo.getClassTree();
+        return _resolver.getClassTree();
     }
 
     /**
