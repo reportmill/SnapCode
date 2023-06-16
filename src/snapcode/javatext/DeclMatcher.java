@@ -58,7 +58,8 @@ public class DeclMatcher {
     public ClassTreeNode[] getPackagesForClassTree(ClassTree aClassTree)
     {
         ClassTreeNode rootPackage = aClassTree.getRootPackage();
-        return ArrayUtils.filter(rootPackage.packages, cls -> matchesString(cls.simpleName));
+        ClassTreeNode[] packages = rootPackage.getPackages();
+        return ArrayUtils.filter(packages, cls -> matchesString(cls.simpleName));
     }
 
     /**
@@ -72,7 +73,8 @@ public class DeclMatcher {
             return new ClassTreeNode[0];
 
         // Return matching packages
-        return ArrayUtils.filter(packageNode.packages, pkg -> matchesString(pkg.simpleName));
+        ClassTreeNode[] packages = packageNode.getPackages();
+        return ArrayUtils.filter(packages, pkg -> matchesString(pkg.simpleName));
     }
 
     /**
@@ -81,7 +83,7 @@ public class DeclMatcher {
     public ClassTreeNode[] getClassesForClassTreePackageName(ClassTree aClassTree, String aPkgName)
     {
         ClassTreeNode packageNode = aClassTree.getPackageForName(aPkgName);
-        ClassTreeNode[] classes = packageNode.classes;
+        ClassTreeNode[] classes = packageNode.getClasses();
 
         // Return matching classes
         return ArrayUtils.filter(classes, cls -> matchesString(cls.simpleName));

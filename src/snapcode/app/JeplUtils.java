@@ -2,7 +2,6 @@ package snapcode.app;
 import snapcode.javatext.JavaTextUtils;
 import snapcode.project.*;
 import snap.gfx.Font;
-import snap.props.PropObject;
 import snap.text.TextStyle;
 import snap.util.SnapUtils;
 import snapcharts.data.DoubleArray;
@@ -32,7 +31,7 @@ public class JeplUtils {
         //if (Resolver.isTeaVM) javakit.resolver.StaticResolver.shared()._next = new StaticResolver();
 
         // Add more common class names from SnapCode
-        javakit.resolver.ClassTreeWeb.addCommonClassNames(MORE_COMMON_CLASS_NAMES);
+        javakit.resolver.ClassTree.addCommonClassNames(MORE_COMMON_CLASS_NAMES);
     }
 
     /**

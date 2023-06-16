@@ -70,7 +70,7 @@ public class Resolver {
 
         // Handle TeaVM
         if (SnapUtils.isTeaVM)
-            return _classTree = ClassTreeWeb.getShared();
+            return _classTree = ClassTree.getShared();
 
         // Create, set, return
         String[] classPaths = getClassPaths();
