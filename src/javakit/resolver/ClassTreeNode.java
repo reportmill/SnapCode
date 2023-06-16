@@ -25,13 +25,10 @@ public class ClassTreeNode {
     public final String simpleName;
 
     // Child packages
-    public ClassTreeNode[] packages = EMPTY_NODE_ARRAY;
+    public ClassTreeNode[] packages = ClassTree.EMPTY_NODE_ARRAY;
 
     // Child classes
-    public ClassTreeNode[] classes = EMPTY_NODE_ARRAY;
-
-    // Constants
-    private static final ClassTreeNode[] EMPTY_NODE_ARRAY = new ClassTreeNode[0];
+    public ClassTreeNode[] classes = ClassTree.EMPTY_NODE_ARRAY;
 
     /**
      * Constructor.

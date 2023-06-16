@@ -20,6 +20,9 @@ public class ClassTree {
     // All classes
     private ClassTreeNode[]  _allClasses;
 
+    // Constants
+    public static final ClassTreeNode[] EMPTY_NODE_ARRAY = new ClassTreeNode[0];
+
     /**
      * Constructor.
      */

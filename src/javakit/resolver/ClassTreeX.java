@@ -4,6 +4,7 @@
 package javakit.resolver;
 import java.util.*;
 
+import snap.util.ArrayUtils;
 import snap.web.*;
 
 /**
@@ -44,46 +45,21 @@ public class ClassTreeX extends ClassTree {
      */
     private void getClassesForPackageDir(WebFile aDir)
     {
-        // Get directory files
+        // Get package for dir file
+        String packageName = getPackageNameForPackageDirFile(aDir);
+        ClassTreeNode packageNode = getPackageForName(packageName);
+
+        // Get child class tree nodes
+        ClassTreeNode[] children = getClassTreeNodesForPackageDir(packageNode, aDir);
+        packageNode.classes = ArrayUtils.filter(children, classTreeNode -> !classTreeNode.isPackage());
+        packageNode.packages = ArrayUtils.filter(children, classTreeNode -> classTreeNode.isPackage());
+
+        // Recurse to get packages
         WebFile[] dirFiles = aDir.getFiles();
-
-        // Get Package
-        ClassTreeNode packageNode = null;
-        List<ClassTreeNode> childClasses = null;
-
-        // Iterate over dir files and add to ClassFiles or PackageDirs
         for (WebFile file : dirFiles) {
-
-            // Handle nested dir
-            if (file.isDir()) {
-                if (isPackageDir(file))
-                    getClassesForPackageDir(file);
-            }
-
-            // Handle plain file: Add to classFiles if interesting and .class
-            else {
-
-                // If not class file we want, skip
-                if (!isClassFile(file))
-                    continue;
-
-                // Create PackageNode if needed
-                if (packageNode == null) {
-                    String packageName = aDir.getPath().substring(1).replace('/', '.');
-                    packageNode = getPackageForName(packageName);
-                    childClasses = new ArrayList<>(dirFiles.length);
-                }
-
-                // Create/add class node
-                String className = getClassNameForClassFile(file);
-                ClassTreeNode classNode = new ClassTreeNode(packageNode, className, false);
-                childClasses.add(classNode);
-            }
+            if (isPackageDir(file))
+                getClassesForPackageDir(file);
         }
-
-        // Set PackageNode child packages/classes
-        if (packageNode != null)
-            packageNode.classes = childClasses.toArray(new ClassTreeNode[0]);
     }
 
     /**
@@ -129,6 +105,37 @@ public class ClassTreeX extends ClassTree {
     }
 
     /**
+     * Returns ClassTreeNode array for classes and child packages in given package dir.
+     */
+    private static ClassTreeNode[] getClassTreeNodesForPackageDir(ClassTreeNode parentPackage, WebFile aDir)
+    {
+        // Get directory files and create classTreeNode array
+        WebFile[] dirFiles = aDir.getFiles();
+        List<ClassTreeNode> classTreeNodes = new ArrayList<>(dirFiles.length);
+
+        // Iterate over dir files and add to ClassFiles or PackageDirs
+        for (WebFile file : dirFiles) {
+
+            // Handle class file
+            if (isClassFile(file)) {
+                String className = getClassNameForClassFile(file);
+                ClassTreeNode classNode = new ClassTreeNode(parentPackage, className, false);
+                classTreeNodes.add(classNode);
+            }
+
+            // Handle package
+            if (isPackageDir(file)) {
+                String packageName = getPackageNameForPackageDirFile(file);
+                ClassTreeNode packageNode = new ClassTreeNode(parentPackage, packageName, true);
+                classTreeNodes.add(packageNode);
+            }
+        }
+
+        // Return array
+        return classTreeNodes.toArray(EMPTY_NODE_ARRAY);
+    }
+
+    /**
      * Returns class name for class file.
      */
     private static String getClassNameForClassFile(WebFile aFile)
@@ -137,6 +144,15 @@ public class ClassTreeX extends ClassTree {
         String filePathNoExtension = filePath.substring(1, filePath.length() - 6);
         String className = filePathNoExtension.replace('/', '.');
         return className;
+    }
+
+    /**
+     * Returns package name for package file.
+     */
+    private static String getPackageNameForPackageDirFile(WebFile aFile)
+    {
+        String filePath = aFile.getPath();
+        return filePath.substring(1).replace('/', '.');
     }
 
     /**
