@@ -48,8 +48,8 @@ public class ClassTreeX extends ClassTree {
         WebFile[] dirFiles = aDir.getFiles();
 
         // Get Package
-        PackageNode packageNode = null;
-        List<ClassNode> childClasses = null;
+        ClassTreeNode packageNode = null;
+        List<ClassTreeNode> childClasses = null;
 
         // Iterate over dir files and add to ClassFiles or PackageDirs
         for (WebFile file : dirFiles) {
@@ -76,14 +76,14 @@ public class ClassTreeX extends ClassTree {
 
                 // Create/add class node
                 String className = getClassNameForClassFile(file);
-                ClassNode classNode = new ClassNode(packageNode, className);
+                ClassTreeNode classNode = new ClassTreeNode(packageNode, className, false);
                 childClasses.add(classNode);
             }
         }
 
         // Set PackageNode child packages/classes
         if (packageNode != null)
-            packageNode.classes = childClasses.toArray(new ClassNode[0]);
+            packageNode.classes = childClasses.toArray(new ClassTreeNode[0]);
     }
 
     /**

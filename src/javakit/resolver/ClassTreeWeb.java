@@ -39,8 +39,8 @@ public class ClassTreeWeb extends ClassTree {
     protected void addClassName(String aName)
     {
         String parentName = getParentNodeName(aName);
-        PackageNode parent = getPackageForName(parentName);
-        ClassNode classNode = new ClassNode(parent, aName);
+        ClassTreeNode parent = getPackageForName(parentName);
+        ClassTreeNode classNode = new ClassTreeNode(parent, aName, false);
         parent.classes = ArrayUtils.add(parent.classes, classNode);
     }
 

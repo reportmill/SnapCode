@@ -55,21 +55,21 @@ public class DeclMatcher {
     /**
      * Returns matching root packages.
      */
-    public ClassTree.PackageNode[] getPackagesForClassTree(ClassTree aClassTree)
+    public ClassTreeNode[] getPackagesForClassTree(ClassTree aClassTree)
     {
-        ClassTree.PackageNode rootPackage = aClassTree.getRootPackage();
+        ClassTreeNode rootPackage = aClassTree.getRootPackage();
         return ArrayUtils.filter(rootPackage.packages, cls -> matchesString(cls.simpleName));
     }
 
     /**
      * Returns matching packages for given package name.
      */
-    public ClassTree.PackageNode[] getChildPackagesForClassTreePackageName(ClassTree aClassTree, String aPkgName)
+    public ClassTreeNode[] getChildPackagesForClassTreePackageName(ClassTree aClassTree, String aPkgName)
     {
         // Get dir for package name
-        ClassTree.PackageNode packageNode = aClassTree.getPackageForName(aPkgName);
+        ClassTreeNode packageNode = aClassTree.getPackageForName(aPkgName);
         if (packageNode == null)
-            return new ClassTree.PackageNode[0];
+            return new ClassTreeNode[0];
 
         // Return matching packages
         return ArrayUtils.filter(packageNode.packages, pkg -> matchesString(pkg.simpleName));
@@ -78,10 +78,10 @@ public class DeclMatcher {
     /**
      * Returns matching classes in given package name.
      */
-    public ClassTree.ClassNode[] getClassesForClassTreePackageName(ClassTree aClassTree, String aPkgName)
+    public ClassTreeNode[] getClassesForClassTreePackageName(ClassTree aClassTree, String aPkgName)
     {
-        ClassTree.PackageNode packageNode = aClassTree.getPackageForName(aPkgName);
-        ClassTree.ClassNode[] classes = packageNode.classes;
+        ClassTreeNode packageNode = aClassTree.getPackageForName(aPkgName);
+        ClassTreeNode[] classes = packageNode.classes;
 
         // Return matching classes
         return ArrayUtils.filter(classes, cls -> matchesString(cls.simpleName));
@@ -90,10 +90,10 @@ public class DeclMatcher {
     /**
      * Returns all matching classes in ClassTree.
      */
-    public ClassTree.ClassNode[] getClassesForClassTree(ClassTree aClassTree)
+    public ClassTreeNode[] getClassesForClassTree(ClassTree aClassTree)
     {
         // If less than 3 letters, return common names for prefix
-        ClassTree.ClassNode[] classes = aClassTree.getAllClasses();
+        ClassTreeNode[] classes = aClassTree.getAllClasses();
         if (getPrefix().length() < 3)
             classes = aClassTree.getCommonClasses();
 
