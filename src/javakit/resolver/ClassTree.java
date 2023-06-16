@@ -18,9 +18,6 @@ public class ClassTree {
     // The packages
     private Map<String, ClassTreeNode>  _packages = new HashMap<>();
 
-    // All classes
-    private ClassTreeNode[]  _allClasses;
-
     // Constants
     public static final ClassTreeNode[] EMPTY_NODE_ARRAY = new ClassTreeNode[0];
 
@@ -86,46 +83,6 @@ public class ClassTree {
 
         // Create/return ClassTreeNode array for class names
         return ArrayUtils.map(childClassNames, className -> new ClassTreeNode(this, parentNode, className, false), ClassTreeNode.class);
-    }
-
-    /**
-     * Returns all classes.
-     */
-    public ClassTreeNode[] getAllClasses()
-    {
-        // If already set, just return
-        if (_allClasses != null) return _allClasses;
-
-        // Get all classes
-        ClassTreeNode rootPackage = getRootPackage();
-        List<ClassTreeNode> allClasses = new ArrayList<>();
-        getAllClassesForPackageDeep(rootPackage, allClasses);
-
-        // Set, return
-        return _allClasses = allClasses.toArray(new ClassTreeNode[0]);
-    }
-
-    /**
-     * Returns all classes.
-     */
-    private void getAllClassesForPackageDeep(ClassTreeNode aPackage, List<ClassTreeNode> allClassesList)
-    {
-        // Add all package classes to list
-        Collections.addAll(allClassesList, aPackage.getClasses());
-
-        // Recurse for each child package
-        for (ClassTreeNode childPkg : aPackage.getPackages())
-            getAllClassesForPackageDeep(childPkg, allClassesList);
-    }
-
-    /**
-     * Returns an array of most common classes.
-     */
-    public ClassTreeNode[] getCommonClasses()
-    {
-        ClassTree classTree = getShared();
-        ClassTreeNode[] commonClasses = classTree.getAllClasses();
-        return commonClasses;
     }
 
     /**

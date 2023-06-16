@@ -89,18 +89,72 @@ public class DeclMatcher {
         return ArrayUtils.filter(classes, cls -> matchesString(cls.simpleName));
     }
 
+    // Preferred packages
+    private static final String[] COMMON_PACKAGES = { "java.util", "java.lang", "java.io", "snap.view", "java.awt", "javax.swing" };
+
     /**
      * Returns all matching classes in ClassTree.
      */
     public ClassTreeNode[] getClassesForClassTree(ClassTree aClassTree)
     {
-        // If less than 3 letters, return common names for prefix
-        ClassTreeNode[] classes = aClassTree.getAllClasses();
-        if (getPrefix().length() < 3)
-            classes = aClassTree.getCommonClasses();
+        // Create list
+        List<ClassTreeNode> matchingClasses = new ArrayList<>();
+        int limit = 100;
 
-        // Return matching classes
-        return ArrayUtils.filter(classes, cls -> matchesString(cls.simpleName));
+        // Search COMMON_PACKAGES
+        for (String commonPackageName : COMMON_PACKAGES) {
+            ClassTreeNode commonPackage = aClassTree.getPackageForName(commonPackageName);
+            findClassesForPackage(commonPackage, matchingClasses, limit);
+            if (matchingClasses.size() >= limit)
+                return matchingClasses.toArray(ClassTree.EMPTY_NODE_ARRAY);
+        }
+
+        // Search all packages
+        ClassTreeNode rootPackage = aClassTree.getRootPackage();
+        findClassesForPackageDeep(rootPackage, matchingClasses, limit);
+
+        // Return
+        return matchingClasses.toArray(ClassTree.EMPTY_NODE_ARRAY);
+    }
+
+    /**
+     * Find classes in package.
+     */
+    private void findClassesForPackage(ClassTreeNode packageNode, List<ClassTreeNode> matchingClasses, int limit)
+    {
+        ClassTreeNode[] classNodes = packageNode.getClasses();
+        for (ClassTreeNode classNode : classNodes) {
+            if (matchesString(classNode.simpleName)) {
+                matchingClasses.add(classNode);
+                if (matchingClasses.size() >= limit)
+                    return;
+            }
+        }
+    }
+
+    /**
+     * Find classes in package.
+     */
+    private void findClassesForPackageDeep(ClassTreeNode aPackageNode, List<ClassTreeNode> matchingClasses, int limit)
+    {
+        // If not common package, check package classes
+        if (!ArrayUtils.contains(COMMON_PACKAGES, aPackageNode.fullName)) {
+            findClassesForPackage(aPackageNode, matchingClasses, limit);
+            if (matchingClasses.size() >= limit)
+                return;
+        }
+
+        // Get child packages
+        ClassTreeNode[] childPackages = aPackageNode.getPackages();
+
+        // Iterate over child packages and look for matches
+        for (ClassTreeNode childPackage : childPackages) {
+
+            // Recurse (return if limit was hit)
+            findClassesForPackageDeep(childPackage, matchingClasses, limit);
+            if (matchingClasses.size() >= limit)
+                return;
+        }
     }
 
     /**
@@ -330,7 +384,7 @@ public class DeclMatcher {
     {
         // Start regex with first char as is
         char char0 = aStr.charAt(0);
-        StringBuffer regexSB = new StringBuffer().append(char0);
+        StringBuilder regexSB = new StringBuilder().append(char0);
 
         // Iterate over successive chars to generate regex
         for (int i = 1; i < aStr.length(); i++) {
