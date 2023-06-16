@@ -34,17 +34,9 @@ public class ClassTree {
         _rootPackage = new ClassTreeNode(null, "", true);
         _packages.put("", _rootPackage);
 
-        // Add primitives
-        _rootPackage.classes = new ClassTreeNode[] {
-                new ClassTreeNode(_rootPackage, boolean.class.getName(), false),
-                new ClassTreeNode(_rootPackage, char.class.getName(), false),
-                new ClassTreeNode(_rootPackage, byte.class.getName(), false),
-                new ClassTreeNode(_rootPackage, short.class.getName(), false),
-                new ClassTreeNode(_rootPackage, int.class.getName(), false),
-                new ClassTreeNode(_rootPackage, long.class.getName(), false),
-                new ClassTreeNode(_rootPackage, float.class.getName(), false),
-                new ClassTreeNode(_rootPackage, double.class.getName(), false)
-        };
+        // Add primitive classes
+        Class<?> primitives[] = { boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class };
+        _rootPackage.classes = ArrayUtils.map(primitives, cls -> new ClassTreeNode(_rootPackage, cls.getName(), false), ClassTreeNode.class);
     }
 
     /**

@@ -15,14 +15,17 @@ public class ClassTreeNode {
     // Whether node is package
     private boolean _isPackage;
 
-    // The parent package
-    public ClassTreeNode parentPackage;
+    // The parent node (class or package)
+    private ClassTreeNode _parent;
 
     // The package full name
     public final String fullName;
 
     // The package simple name
     public final String simpleName;
+
+    // The child nodes
+    public ClassTreeNode[] _children;
 
     // Child packages
     public ClassTreeNode[] packages = ClassTree.EMPTY_NODE_ARRAY;
@@ -33,10 +36,10 @@ public class ClassTreeNode {
     /**
      * Constructor.
      */
-    public ClassTreeNode(ClassTreeNode aParentPackage, String aPackageName, boolean isPackage)
+    public ClassTreeNode(ClassTreeNode aParent, String aPackageName, boolean isPackage)
     {
         _isPackage = isPackage;
-        parentPackage = aParentPackage;
+        _parent = aParent;
         fullName = aPackageName;
         simpleName = ClassTree.getSimpleNodeName(aPackageName);
     }
@@ -45,6 +48,37 @@ public class ClassTreeNode {
      * Returns whether node is package.
      */
     public boolean isPackage()  { return  _isPackage; }
+
+    /**
+     * Returns the parent.
+     */
+    public ClassTreeNode getParent()  { return _parent; }
+
+    /**
+     * Returns the parent package.
+     */
+    public ClassTreeNode getPackage()
+    {
+        for (ClassTreeNode parentNode = _parent; parentNode != null; parentNode = parentNode.getParent()) {
+            if (parentNode.isPackage())
+                return parentNode;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the child nodes.
+     */
+    public ClassTreeNode[] getChildren()
+    {
+        // If already set, just return
+        if (_children != null) return _children;
+
+        // Get children
+
+        // Return
+        return _children;
+    }
 
     /**
      * Standard toString implementation.
@@ -65,8 +99,8 @@ public class ClassTreeNode {
         StringBuffer sb = new StringBuffer();
         StringUtils.appendProp(sb, "FullName", fullName);
         StringUtils.appendProp(sb, "SimpleName", simpleName);
-        if (parentPackage != null)
-            StringUtils.appendProp(sb, "Parent", parentPackage.fullName);
+        if (_parent != null)
+            StringUtils.appendProp(sb, "Parent", _parent.fullName);
 
         // Add Packages
         if (packages.length > 0) {
