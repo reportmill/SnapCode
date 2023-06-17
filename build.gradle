@@ -1,9 +1,11 @@
+import java.text.SimpleDateFormat
+
 plugins {
     id 'application'
 }
 
 group 'com.reportmill'
-version '1.0.0'
+version new SimpleDateFormat("yyyy.MM").format(new Date())
 
 sourceSets.main.java.srcDirs = ['src']
 sourceSets.main.resources.srcDirs = ['src']
@@ -37,4 +39,22 @@ dependencies {
 
 mainClassName = 'snapcode.app.App'
 
+/**
+ * Custom task to build jar that includes all dependencies.
+ */
+task buildFullJar(type: Jar) {
+    archiveBaseName = 'SnapCodeAll'
+    manifest {
+        attributes(
+                'Main-Class': 'snapcode.app.App',
+                'Application-Name': 'SnapCode',
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude('**/org/**', '**/test/**', '**/font_metrics.properties')
+    with jar
+    dependsOn build
+}
 
