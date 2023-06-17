@@ -4,6 +4,7 @@
 package javakit.resolver;
 import java.util.*;
 import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.web.*;
 
 /**
@@ -36,8 +37,10 @@ public class ClassTreeX extends ClassTree {
             for (WebFile rootFile : rootFiles) {
                 if (isPackageDir(rootFile)) {
                     String packageName = rootFile.getName();
-                    ClassTreeNode rootPackage = new ClassTreeNode(this, _rootPackage, packageName, true);
-                    rootPackagesList.add(rootPackage);
+                    if (!ListUtils.hasMatch(rootPackagesList, pkgNode -> packageName.equals(pkgNode.fullName))) {
+                        ClassTreeNode rootPackage = new ClassTreeNode(this, _rootPackage, packageName, true);
+                        rootPackagesList.add(rootPackage);
+                    }
                 }
             }
         }

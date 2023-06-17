@@ -136,6 +136,8 @@ public class ClassTreeNode {
     {
         // Add FullName, SimpleName, Parent
         StringBuffer sb = new StringBuffer();
+        if (_isPackage)
+            StringUtils.appendProp(sb, "Package", true);
         StringUtils.appendProp(sb, "FullName", fullName);
         StringUtils.appendProp(sb, "SimpleName", simpleName);
         if (_parent != null)
