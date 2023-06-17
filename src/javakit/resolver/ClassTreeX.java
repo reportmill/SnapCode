@@ -3,7 +3,6 @@
  */
 package javakit.resolver;
 import java.util.*;
-
 import snap.util.ArrayUtils;
 import snap.web.*;
 
@@ -54,14 +53,47 @@ public class ClassTreeX extends ClassTree {
     @Override
     protected ClassTreeNode[] getChildNodesForNode(ClassTreeNode parentNode)
     {
-        // Get file
-        WebFile nodeFile = getFileForNode(parentNode);
-        if (nodeFile == null)
+        // Get files
+        WebFile[] nodeFiles = getFilesForNode(parentNode);
+        if (nodeFiles.length == 0)
             return EMPTY_NODE_ARRAY;
 
-        // Get directory files and create classTreeNode array
-        WebFile[] dirFiles = nodeFile.getFiles();
-        List<ClassTreeNode> classTreeNodes = new ArrayList<>(dirFiles.length);
+        // Iterate over files and Find child classes and packages for each
+        List<ClassTreeNode> classTreeNodes = new ArrayList<>(nodeFiles[0].getFileCount());
+        for (WebFile nodeFile : nodeFiles)
+            findChildNodesForDirFile(parentNode, nodeFile, classTreeNodes);
+
+        // Return array
+        return classTreeNodes.toArray(EMPTY_NODE_ARRAY);
+    }
+
+    /**
+     * Returns a file for given node.
+     */
+    private WebFile[] getFilesForNode(ClassTreeNode classTreeNode)
+    {
+        // Get file path
+        String filePath = '/' + classTreeNode.fullName.replace(".", "/");
+        WebFile[] files = new WebFile[0];
+
+        // Iterate over sites and return first match
+        for (WebSite classPathSite : _classPathSites) {
+            WebFile nodeFile = classPathSite.getFileForPath(filePath);
+            if (nodeFile != null)
+                files = ArrayUtils.add(files, nodeFile);
+        }
+
+        // Return files
+        return files;
+    }
+
+    /**
+     * Finds child packages and classes for given package node.
+     */
+    private void findChildNodesForDirFile(ClassTreeNode parentNode, WebFile dirFile, List<ClassTreeNode> classTreeNodes)
+    {
+        // Get directory files
+        WebFile[] dirFiles = dirFile.getFiles();
 
         // Iterate over dir files and add to ClassFiles or PackageDirs
         for (WebFile file : dirFiles) {
@@ -80,28 +112,6 @@ public class ClassTreeX extends ClassTree {
                 classTreeNodes.add(packageNode);
             }
         }
-
-        // Return array
-        return classTreeNodes.toArray(EMPTY_NODE_ARRAY);
-    }
-
-    /**
-     * Returns a file for given node.
-     */
-    protected WebFile getFileForNode(ClassTreeNode classTreeNode)
-    {
-        // Get file path
-        String filePath = '/' + classTreeNode.fullName.replace(".", "/");
-
-        // Iterate over sites and return first match
-        for (WebSite classPathSite : _classPathSites) {
-            WebFile nodeFile = classPathSite.getFileForPath(filePath);
-            if (nodeFile != null)
-                return nodeFile;
-        }
-
-        // Return not found
-        return null;
     }
 
     /**
@@ -126,6 +136,18 @@ public class ClassTreeX extends ClassTree {
         assert (jreURL != null);
         WebSite jreSite = jreURL.getSite();
         classFileSites.add(jreSite);
+
+        // Try again for Swing (different site for Java 9+: jrt:/java.desktop/javax/swing/JFrame.class)
+        Class<?> swingClass = null;
+        try { swingClass = Class.forName("bogus.swing.JFrame".replace("bogus", "javax")); }
+        catch (Exception ignore) { }
+        if (swingClass != null) {
+            WebURL swingURL = WebURL.getURL(swingClass);
+            assert (swingURL != null);
+            WebSite swingSite = swingURL.getSite();
+            if (swingSite != jreSite)
+                classFileSites.add(swingSite);
+        }
 
         // Add project class path sites (build dirs, jar files)
         for (String classPath : classPaths) {
