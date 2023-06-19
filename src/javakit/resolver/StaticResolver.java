@@ -781,8 +781,6 @@ public class StaticResolver {
                 return java.lang.Math.atan(doubleVal(theArgs[0]));
             case "java.lang.Math.cbrt(double)":
                 return java.lang.Math.cbrt(doubleVal(theArgs[0]));
-            case "java.lang.Math.floorDiv(long,int)":
-                return java.lang.Math.floorDiv((long) theArgs[0],intVal(theArgs[1]));
             case "java.lang.Math.floorDiv(long,long)":
                 return java.lang.Math.floorDiv((long) theArgs[0],(long) theArgs[1]);
             case "java.lang.Math.floorDiv(int,int)":
@@ -857,8 +855,6 @@ public class StaticResolver {
                 return java.lang.Math.copySign(floatVal(theArgs[0]),floatVal(theArgs[1]));
             case "java.lang.Math.floorMod(int,int)":
                 return java.lang.Math.floorMod(intVal(theArgs[0]),intVal(theArgs[1]));
-            case "java.lang.Math.floorMod(long,int)":
-                return java.lang.Math.floorMod((long) theArgs[0],intVal(theArgs[1]));
             case "java.lang.Math.floorMod(long,long)":
                 return java.lang.Math.floorMod((long) theArgs[0],(long) theArgs[1]);
 
@@ -1041,30 +1037,6 @@ public class StaticResolver {
                 return ((java.util.List) anObj).toArray();
             case "java.util.List.toArray(java.lang.Object[])":
                 return ((java.util.List) anObj).toArray((Object[]) theArgs[0]);
-            case "java.util.List.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.List.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3]);
-            case "java.util.List.of(java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.List.of(theArgs[0],theArgs[1],theArgs[2]);
-            case "java.util.List.of(java.lang.Object,java.lang.Object)":
-                return java.util.List.of(theArgs[0],theArgs[1]);
-            case "java.util.List.of(java.lang.Object)":
-                return java.util.List.of(theArgs[0]);
-            case "java.util.List.of()":
-                return java.util.List.of();
-            case "java.util.List.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.List.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6],theArgs[7]);
-            case "java.util.List.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.List.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6]);
-            case "java.util.List.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.List.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5]);
-            case "java.util.List.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.List.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4]);
-            case "java.util.List.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.List.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6],theArgs[7],theArgs[8],theArgs[9]);
-            case "java.util.List.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.List.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6],theArgs[7],theArgs[8]);
-            case "java.util.List.of(java.lang.Object[])":
-                return java.util.List.of(theArgs);
             case "java.util.List.contains(java.lang.Object)":
                 return ((java.util.List) anObj).contains(theArgs[0]);
             case "java.util.List.addAll(int,java.util.Collection)":
@@ -1097,28 +1069,6 @@ public class StaticResolver {
                 return ((java.util.Map) anObj).replace(theArgs[0],theArgs[1],theArgs[2]);
             case "java.util.Map.size()":
                 return ((java.util.Map) anObj).size();
-            case "java.util.Map.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Map.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6],theArgs[7],theArgs[8],theArgs[9]);
-            case "java.util.Map.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Map.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6],theArgs[7]);
-            case "java.util.Map.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Map.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5]);
-            case "java.util.Map.of()":
-                return java.util.Map.of();
-            case "java.util.Map.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Map.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3]);
-            case "java.util.Map.of(java.lang.Object,java.lang.Object)":
-                return java.util.Map.of(theArgs[0],theArgs[1]);
-            case "java.util.Map.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Map.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6],theArgs[7],theArgs[8],theArgs[9],theArgs[10],theArgs[11],theArgs[12],theArgs[13],theArgs[14],theArgs[15],theArgs[16],theArgs[17],theArgs[18],theArgs[19]);
-            case "java.util.Map.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Map.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6],theArgs[7],theArgs[8],theArgs[9],theArgs[10],theArgs[11],theArgs[12],theArgs[13],theArgs[14],theArgs[15],theArgs[16],theArgs[17]);
-            case "java.util.Map.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Map.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6],theArgs[7],theArgs[8],theArgs[9],theArgs[10],theArgs[11],theArgs[12],theArgs[13],theArgs[14],theArgs[15]);
-            case "java.util.Map.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Map.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6],theArgs[7],theArgs[8],theArgs[9],theArgs[10],theArgs[11],theArgs[12],theArgs[13]);
-            case "java.util.Map.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Map.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6],theArgs[7],theArgs[8],theArgs[9],theArgs[10],theArgs[11]);
 
             // Handle java.util.Random
 
@@ -1139,30 +1089,6 @@ public class StaticResolver {
                 return ((java.util.Set) anObj).toArray((Object[]) theArgs[0]);
             case "java.util.Set.toArray()":
                 return ((java.util.Set) anObj).toArray();
-            case "java.util.Set.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Set.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5]);
-            case "java.util.Set.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Set.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4]);
-            case "java.util.Set.of(java.lang.Object)":
-                return java.util.Set.of(theArgs[0]);
-            case "java.util.Set.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Set.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3]);
-            case "java.util.Set.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Set.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6],theArgs[7],theArgs[8],theArgs[9]);
-            case "java.util.Set.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Set.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6],theArgs[7],theArgs[8]);
-            case "java.util.Set.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Set.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6],theArgs[7]);
-            case "java.util.Set.of(java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Set.of(theArgs[0],theArgs[1],theArgs[2],theArgs[3],theArgs[4],theArgs[5],theArgs[6]);
-            case "java.util.Set.of(java.lang.Object[])":
-                return java.util.Set.of(theArgs);
-            case "java.util.Set.of(java.lang.Object,java.lang.Object,java.lang.Object)":
-                return java.util.Set.of(theArgs[0],theArgs[1],theArgs[2]);
-            case "java.util.Set.of()":
-                return java.util.Set.of();
-            case "java.util.Set.of(java.lang.Object,java.lang.Object)":
-                return java.util.Set.of(theArgs[0],theArgs[1]);
             case "java.util.Set.contains(java.lang.Object)":
                 return ((java.util.Set) anObj).contains(theArgs[0]);
             case "java.util.Set.addAll(java.util.Collection)":

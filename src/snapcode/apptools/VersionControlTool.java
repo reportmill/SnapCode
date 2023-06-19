@@ -176,7 +176,7 @@ public class VersionControlTool extends ProjectTool {
      */
     public void checkout()
     {
-        TaskRunner<?> runner = new TaskRunnerPanel<>(_workspacePane.getUI(), "Checkout from " + _versionControl.getRemoteURLString()) {
+        TaskRunner<?> runner = new TaskRunnerPanel(_workspacePane.getUI(), "Checkout from " + _versionControl.getRemoteURLString()) {
             boolean _oldAutoBuildEnabled;
 
             public Object run() throws Exception
@@ -283,7 +283,7 @@ public class VersionControlTool extends ProjectTool {
     protected void commitFilesImpl(final List<WebFile> theFiles, final String aMessage)
     {
         // Create TaskRunner and start
-        TaskRunnerPanel<?> taskRunnerPanel = new TaskRunnerPanel<>(_workspacePane.getUI(), "Commit files to remote site") {
+        TaskRunnerPanel<?> taskRunnerPanel = new TaskRunnerPanel(_workspacePane.getUI(), "Commit files to remote site") {
             public Object run() throws Exception
             {
                 _versionControl.commitFiles(theFiles, aMessage, this);
@@ -358,7 +358,7 @@ public class VersionControlTool extends ProjectTool {
         final boolean oldAutoBuild = _workspace.getBuilder().setAutoBuildEnabled(false);
 
         // Create TaskRunner and start
-        TaskRunnerPanel<?> taskRunnerPanel = new TaskRunnerPanel<>(_workspacePane.getUI(), "Update files from remote site") {
+        TaskRunnerPanel<?> taskRunnerPanel = new TaskRunnerPanel(_workspacePane.getUI(), "Update files from remote site") {
             public Object run() throws Exception
             {
                 _versionControl.updateFiles(theFiles, this);
@@ -443,7 +443,7 @@ public class VersionControlTool extends ProjectTool {
         // Create TaskRunner and start
         final boolean oldAutoBuild = _workspace.getBuilder().setAutoBuildEnabled(false);
 
-        TaskRunnerPanel<?> taskRunnerPanel = new TaskRunnerPanel<>(_workspacePane.getUI(), "Replace files from remote site") {
+        TaskRunnerPanel<?> taskRunnerPanel = new TaskRunnerPanel(_workspacePane.getUI(), "Replace files from remote site") {
             public Object run() throws Exception
             {
                 _versionControl.replaceFiles(theFiles, this);
