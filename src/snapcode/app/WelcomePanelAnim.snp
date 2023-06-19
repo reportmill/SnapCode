@@ -5,7 +5,8 @@
     <effect type="emboss" altitude="90" />
   </ImageView>
   <ColView PrefWidth="400" PrefHeight="220" Align="TOP_CENTER">
-    <StackView>
+    <ImageView ImageName="WP_BackgroundText.png" />
+    <StackView Visible="false">
       <TextArea Align="CENTER">
         <effect type="blur" radius="12" />
         <RichText>
