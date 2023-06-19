@@ -3,6 +3,7 @@
  */
 package snapcode.project;
 import snap.util.FilePathUtils;
+import snap.util.SnapUtils;
 import snap.web.WebSite;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -20,8 +21,10 @@ public class ProjectX extends Project {
         super(aWorkspace, aSite);
 
         // Create/set ProjectBuilder.JavaFileBuilderImpl
-        JavaFileBuilder javaFileBuilder = new JavaFileBuilderImpl(this);
-        _projBuilder.setJavaFileBuilder(javaFileBuilder);
+        if (!SnapUtils.isWebVM) {
+            JavaFileBuilder javaFileBuilder = new JavaFileBuilderImpl(this);
+            _projBuilder.setJavaFileBuilder(javaFileBuilder);
+        }
     }
 
     /**

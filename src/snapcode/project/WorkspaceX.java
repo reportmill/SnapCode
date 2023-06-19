@@ -4,6 +4,7 @@
 package snapcode.project;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
+import snap.util.SnapUtils;
 import snap.web.WebSite;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -27,6 +28,9 @@ public class WorkspaceX extends Workspace {
     @Override
     protected ClassLoader createClassLoader()
     {
+        if (SnapUtils.isWebVM)
+            return ClassLoader.getSystemClassLoader();
+
         // Iterate over projects and add Project.ClassPaths for each
         Project[] projects = getProjects();
         String[] classPaths = new String[0];
