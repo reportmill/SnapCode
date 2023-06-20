@@ -620,7 +620,7 @@ public class JavaParserExpr extends Parser {
 
                 // Handle Arguments
                 case "Arguments":
-                    List argsList = aNode.getCustomNode(List.class);
+                    List<JExpr> argsList = aNode.getCustomNode(List.class);
                     _part = new JExprMethodCall(null, argsList);
                     break;
             }
@@ -664,8 +664,9 @@ public class JavaParserExpr extends Parser {
             JExprAlloc allocExpr = getPart();
             JType allocType = allocExpr.getType();
 
-            // Handle PrimitiveType
             switch (anId) {
+
+                // Handle PrimitiveType
                 case "PrimitiveType":
                     allocExpr.setType(aNode.getCustomNode(JType.class));
                     break;
@@ -708,26 +709,7 @@ public class JavaParserExpr extends Parser {
             }
         }
 
-        /**
-         * Override to make sure there is a type.
-         */
         @Override
-        public JExprAlloc parsedAll()
-        {
-            // Do normal version
-            JExprAlloc allocExpr = super.parsedAll();
-
-            // If no type, add bogus
-            if (allocExpr.getType() == null) {
-                ParseToken token = allocExpr.getStartToken();
-                JType type = new JType.Builder().name("Object").token(token).build();
-                allocExpr.setType(type);
-            }
-
-            // Return
-            return allocExpr;
-        }
-
         protected Class<JExprAlloc> getPartClass()  { return JExprAlloc.class; }
     }
 

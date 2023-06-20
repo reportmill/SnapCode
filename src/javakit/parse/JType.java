@@ -142,10 +142,8 @@ public class JType extends JNode {
     {
         // Get base decl
         JavaType javaType = getBaseDecl();
-        if (javaType == null) {
-            System.err.println("JType.getDeclImpl: Can't find base decl: " + getName());
-            return getJavaClassForClass(Object.class);
-        }
+        if (javaType == null)
+            return null;
 
         // If type args, build array and get decl for ParamType
         int typeArgCount = getTypeArgCount();
@@ -160,12 +158,28 @@ public class JType extends JNode {
         for (int i = 0; i < _arrayCount; i++)
             javaType = javaType.getArrayType();
 
-        // If no type, complain
-        if (javaType == null)
-            System.err.println("JType.getDeclImpl: Shouldn't happen: decl not found for " + getName());
-
         // Return
         return javaType;
+    }
+
+    /**
+     * Override to provide errors for this class.
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()
+    {
+        NodeError[] errors = NodeError.NO_ERRORS;
+
+        // Handle unresolved type
+        JavaType typeClass = getDecl();
+        if (typeClass == null) {
+            String className = getName();
+            String errorString = "Can't resolve type: " + className;
+            errors = new NodeError[] { new NodeError(this, errorString) };
+        }
+
+        // Return
+        return errors;
     }
 
     /**

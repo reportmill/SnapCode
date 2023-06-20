@@ -59,4 +59,12 @@ public class NodeError {
         StringUtils.appendProp(sb, "String", getString());
         return sb.toString();
     }
+
+    /**
+     * Creates and returns an error in array.
+     */
+    public static NodeError[] newErrorArray(JNode aNode, String errorMessage)
+    {
+        return new NodeError[] { new NodeError(aNode, errorMessage) };
+    }
 }

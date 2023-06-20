@@ -131,7 +131,7 @@ public class JExprAlloc extends JExpr {
     {
         // Get type - just return if null
         JType type = getType();
-        JavaType javaType = type.getDecl();
+        JavaType javaType = type != null ? type.getDecl() : null;
         if (javaType == null)
             return null;
 
@@ -164,34 +164,30 @@ public class JExprAlloc extends JExpr {
     public String getNodeString()  { return "Allocation"; }
 
     /**
-     * Override to provide errors for JStmtExpr.
+     * Override to provide errors for this class.
      */
     @Override
     protected NodeError[] getErrorsImpl()
     {
-        NodeError[] errors = NodeError.NO_ERRORS;
-
-        // Handle can't resolve method
+        // If decl resolved, just return
         JavaDecl classOrConstructor = getDecl();
-        if (classOrConstructor == null) {
-            String errorString = null;
-            if (getArgs() != null) {
-                String constrString = getConstructorString();
-                errorString = "Can't resolve constructor: " + constrString;
-            }
-            else {
-                JType type = getType();
-                String className = type != null ? type.getName() : "Unknown";
-                errorString = "Can't resolve type: " + className;
-            }
+        if (classOrConstructor != null)
+            return NodeError.NO_ERRORS;
 
-            // Create error
-            NodeError error = new NodeError(this, errorString);
-            errors = ArrayUtils.add(errors, error);
-        }
+        // Handle unresolved type
+        JType type = getType();
+        if (type == null)
+            return NodeError.newErrorArray(this, "Identifier expected");
 
-        // Return
-        return errors;
+        // Handle unresolved type
+        JavaType typeClass = type.getDecl();
+        if (typeClass == null)
+            return type.getErrors();
+
+        // Handle can't find constructor
+        String constrString = getConstructorString();
+        String errorString = "Can't resolve constructor: " + constrString;
+        return NodeError.newErrorArray(this, errorString);
     }
 
     /**
