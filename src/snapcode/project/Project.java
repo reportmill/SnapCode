@@ -58,9 +58,9 @@ public class Project extends PropObject {
         if (isReadOnly)
             setReadOnly(isReadOnly);
 
-        // If site doesn't exist, create root directory, src and bin
-        if (!aSite.getExists()) {
-            if (!isReadOnly) {
+        // If not ReadOnly and doesn't exist, create root directory, src and bin
+        if (!isReadOnly) {
+            if (!aSite.getExists()) {
                 aSite.getRootDir().save();
                 aSite.createFileForPath("/src", true).save();
                 aSite.createFileForPath("/bin", true).save();
