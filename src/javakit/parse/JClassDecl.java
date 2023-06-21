@@ -3,8 +3,8 @@
  */
 package javakit.parse;
 import java.util.*;
-import java.util.stream.Stream;
 import javakit.resolver.*;
+import snap.util.ListUtils;
 
 /**
  * A Java member for ClassDecl.
@@ -219,12 +219,7 @@ public class JClassDecl extends JMemberDecl {
         if (_fieldDecls != null) return _fieldDecls;
 
         // Get fields from members
-        Stream<JMemberDecl> membersStream = _members.stream();
-        Stream<JMemberDecl> fieldsStream = membersStream.filter(m -> m instanceof JFieldDecl);
-        JFieldDecl[] fields = fieldsStream.toArray(size -> new JFieldDecl[size]);
-
-        // Set/return
-        return _fieldDecls = fields;
+        return _fieldDecls = ListUtils.filterToArray(_members, m -> m instanceof JFieldDecl, JFieldDecl.class);
     }
 
     /**
@@ -236,12 +231,7 @@ public class JClassDecl extends JMemberDecl {
         if (_constrDecls != null) return _constrDecls;
 
         // Get constructors from members
-        Stream<JMemberDecl> membersStream = _members.stream();
-        Stream<JMemberDecl> constructorsStream = membersStream.filter(m -> m instanceof JConstrDecl);
-        JConstrDecl[] constructors = constructorsStream.toArray(size -> new JConstrDecl[size]);
-
-        // Set/return
-        return _constrDecls = constructors;
+        return _constrDecls = ListUtils.filterToArray(_members, m -> m instanceof JConstrDecl, JConstrDecl.class);
     }
 
     /**
@@ -264,12 +254,7 @@ public class JClassDecl extends JMemberDecl {
         if (_methodDecls != null) return _methodDecls;
 
         // Get constructors from members
-        Stream<JMemberDecl> membersStream = _members.stream();
-        Stream<JMemberDecl> methodsStream = membersStream.filter(m -> m instanceof JMethodDecl);
-        JMethodDecl[] methods = methodsStream.toArray(size -> new JMethodDecl[size]);
-
-        // Set/return
-        return _methodDecls = methods;
+        return _methodDecls = ListUtils.filterToArray(_members, m -> m instanceof JMethodDecl, JMethodDecl.class);
     }
 
     /**
@@ -298,12 +283,7 @@ public class JClassDecl extends JMemberDecl {
         if (_initDecls != null) return _initDecls;
 
         // Get constructors from members
-        Stream<JMemberDecl> membersStream = _members.stream();
-        Stream<JMemberDecl> methodsStream = membersStream.filter(m -> m instanceof JInitializerDecl);
-        JInitializerDecl[] initDecls = methodsStream.toArray(size -> new JInitializerDecl[size]);
-
-        // Set/return
-        return _initDecls = initDecls;
+        return _initDecls = ListUtils.filterToArray(_members, m -> m instanceof JInitializerDecl, JInitializerDecl.class);
     }
 
     /**
