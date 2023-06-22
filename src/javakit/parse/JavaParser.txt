@@ -84,41 +84,6 @@ ClassType { Identifier (LookAhead(2) TypeArgs)? (LookAhead(2) "." Identifier (Lo
 
 ResultType { "void" | Type }
 
-TypeParams { "<" TypeParam ("," TypeParam)* ">" }
-
-TypeParam { Identifier TypeBound? }
-
-TypeBound { "extends" ClassType ("&" ClassType)* }
-
-TypeArgs { "<" (TypeArg ("," TypeArg)*)? ">" }
-
-TypeArg { ReferenceType | "?" WildcardBounds? }
-
-WildcardBounds { "extends" ReferenceType | "super" ReferenceType }
-
-Annotation
-{
-    LookAhead("@" Name "(" (Identifier "=" | ")")) NormalAnnotation |
-    LookAhead("@" Name "(") SingleMemberAnnotation |
-    MarkerAnnotation
-}
-
-AnnotationDecl { "@" "interface" Identifier }
-
-SingleMemberAnnotation { "@" Name "(" MemberValue ")" }
-
-MarkerAnnotation { "@" Name }
-
-NormalAnnotation { "@" Name "(" MemberValuePairs? ")" }
-
-MemberValuePairs { MemberValuePair ("," MemberValuePair)* }
-
-MemberValuePair { Identifier "=" MemberValue }
-
-MemberValue { Annotation | MemberValueArrayInit | ConditionalExpr }
-
-MemberValueArrayInit { "{" (MemberValue (LookAhead(2) "," MemberValue)*)? "}" }
-
 Block { "{" BlockStatement* "}" }
 
 BlockStatement
@@ -316,3 +281,38 @@ StringLiteral { "\"(([^\"\\\n\r])|(\\([ntbrf\\'\"]|[0-7][0-7]?|[0-3][0-7][0-7]|u
 NullLiteral { "null" }
 
 BooleanLiteral { "true" | "false" }
+
+TypeParams { "<" TypeParam ("," TypeParam)* ">" }
+
+TypeParam { Identifier TypeBound? }
+
+TypeBound { "extends" ClassType ("&" ClassType)* }
+
+TypeArgs { "<" (TypeArg ("," TypeArg)*)? ">" }
+
+TypeArg { ReferenceType | "?" WildcardBounds? }
+
+WildcardBounds { "extends" ReferenceType | "super" ReferenceType }
+
+Annotation
+{
+    LookAhead("@" Name "(" (Identifier "=" | ")")) NormalAnnotation |
+    LookAhead("@" Name "(") SingleMemberAnnotation |
+    MarkerAnnotation
+}
+
+AnnotationDecl { "@" "interface" Identifier }
+
+SingleMemberAnnotation { "@" Name "(" MemberValue ")" }
+
+MarkerAnnotation { "@" Name }
+
+NormalAnnotation { "@" Name "(" MemberValuePairs? ")" }
+
+MemberValuePairs { MemberValuePair ("," MemberValuePair)* }
+
+MemberValuePair { Identifier "=" MemberValue }
+
+MemberValue { Annotation | MemberValueArrayInit | ConditionalExpr }
+
+MemberValueArrayInit { "{" (MemberValue (LookAhead(2) "," MemberValue)*)? "}" }
