@@ -3,22 +3,33 @@ JavaFile { PackageDecl? ImportDecl* TypeDecl+ JavaFileImports* JeplFile? }
 
 JavaFileImports { PackageDecl? ImportDecl* }
 
-JeplFile
+JeplFile { JeplNode* }
+
+JeplNode
 {
-    (LookAhead(Modifiers ResultType Identifier FormalParams) Modifiers MethodDecl | BlockStatement)*
+    LookAhead (Modifiers ResultType Identifier FormalParams) Modifiers MethodDecl |
+    BlockStatement
 }
 
-PackageDecl { LookAhead(Annotation* "package") Modifiers "package" Name ";" }
+PackageDecl { LookAhead (Annotation* "package") Modifiers "package" Name ";" }
 
 ImportDecl { "import" "static"? Name ("." "*")? ";" }
+
+Modifiers { Modifier* }
+
+Modifier
+{
+    "public" | "static" | "protected" | "private" | "final" | "abstract" | "synchronized" |
+    "default" | "native" | "transient" | "volatile" | "strictfp" | Annotation
+}
 
 TypeDecl { ";" | Modifiers (ClassDecl | EnumDecl | AnnotationDecl) }
 
 MemberDecl
 {
     ClassDecl | EnumDecl |
-    LookAhead(TypeParams? Identifier "(") ConstrDecl |
-    LookAhead(Type Identifier ("[" "]")* ("," | "=" | ";")) FieldDecl |
+    LookAhead (TypeParams? Identifier "(") ConstrDecl |
+    LookAhead (Type Identifier ("[" "]")* ("," | "=" | ";")) FieldDecl |
     MethodDecl | AnnotationDecl
 }
 
@@ -98,13 +109,6 @@ MemberValue { Annotation | MemberValueArrayInit | ConditionalExpr }
 
 MemberValueArrayInit { "{" (MemberValue (LookAhead(2) "," MemberValue)*)? "}" }
 
-Statement
-{
-    LookAhead(2) LabeledStatement | AssertStatement | Block | EmptyStatement | ExprStatement ";" | SwitchStatement |
-    IfStatement | WhileStatement | DoStatement | ForStatement | BreakStatement | ContinueStatement | ReturnStatement |
-    ThrowStatement | SynchronizedStatement | TryStatement
-}
-
 Block { "{" BlockStatement* "}" }
 
 BlockStatement
@@ -114,48 +118,40 @@ BlockStatement
     ClassDecl
 }
 
-Modifiers { Modifier* }
-
-Modifier
-{
-    "public" | "static" | "protected" | "private" | "final" | "abstract" | "synchronized" |
-    "default" | "native" | "transient" | "volatile" | "strictfp" | Annotation
-}
-
 VarDeclStmt { Modifiers Type VarDecl ("," VarDecl)* }
 
 VarDecl { Identifier ("[" "]")* ("=" VarInit)? }
 
 VarInit { ArrayInit | Expression }
 
-LabeledStatement { Identifier ":" Statement }
-
-AssertStatement { "assert" Expression (":" Expression)? ";" }
-
-//ExprStatement { PreIncrementExpr | PreDecrementExpr | PrimaryExpr ("++" | "--" | AssignOp Expression) }
-ExprStatement { PreIncrementExpr | PreDecrementExpr | Expression }
-
-SwitchStatement { "switch" "(" Expression ")" "{" (SwitchLabel BlockStatement*)* "}" }
-
-SwitchLabel { "case" Expression ":" | "default" ":" }
+Statement
+{
+    Block |
+    IfStatement | ForStatement | WhileStatement | DoStatement |
+    BreakStatement | ContinueStatement | ReturnStatement |
+    SwitchStatement | AssertStatement | EmptyStatement |
+    ThrowStatement | SynchronizedStatement | TryStatement |
+    LookAhead(2) LabeledStatement |
+    ExprStatement ";"
+}
 
 IfStatement { "if" "(" Expression ")" Statement ("else" Statement)? }
+
+ForStatement { "for" "(" ForIteration ")" Statement }
+
+ForIteration
+{
+    LookAhead ( Modifiers Type Identifier ":" ) Modifiers Type Identifier ":" Expression |
+    ForInit? ";" Expression? ";" ForExprStmtList?
+}
+
+ForInit { LookAhead (Modifiers Type Identifier) VarDeclStmt | ForExprStmtList }
+
+ForExprStmtList { ExprStatement ("," ExprStatement)* }
 
 WhileStatement { "while" "(" Expression ")" Statement }
 
 DoStatement { "do" Statement "while" "(" Expression ")" ";" }
-
-EmptyStatement { ";" }
-
-ForStatement
-{
-    "for" "(" (LookAhead(Modifiers Type Identifier ":") Modifiers Type Identifier ":" Expression |
-    ForInit? ";" Expression? ";" ExprStmtList?) ")" Statement
-}
-
-ForInit { LookAhead(Modifiers Type Identifier) VarDeclStmt | ExprStmtList }
-
-ExprStmtList { ExprStatement ("," ExprStatement)* }
 
 BreakStatement { "break" Identifier? ";" }
 
@@ -163,11 +159,24 @@ ContinueStatement { "continue" Identifier? ";" }
 
 ReturnStatement { "return" Expression? ";" }
 
+SwitchStatement { "switch" "(" Expression ")" "{" (SwitchLabel BlockStatement*)* "}" }
+
+SwitchLabel { "case" Expression ":" | "default" ":" }
+
+AssertStatement { "assert" Expression (":" Expression)? ";" }
+
+EmptyStatement { ";" }
+
 ThrowStatement { "throw" Expression ";" }
 
 SynchronizedStatement { "synchronized" "(" Expression | ")" Block }
 
 TryStatement { "try" Block ("catch" "(" FormalParam ")" Block)* ("finally" Block)? }
+
+LabeledStatement { Identifier ":" Statement }
+
+//ExprStatement { PreIncrementExpr | PreDecrementExpr | PrimaryExpr ("++" | "--" | AssignOp Expression) }
+ExprStatement { PreIncrementExpr | PreDecrementExpr | Expression }
 
 Expression { ConditionalExpr (LookAhead(2) AssignOp Expression)? }
 

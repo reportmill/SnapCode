@@ -768,7 +768,7 @@ public class JavaParser extends JavaParserStmt {
             "LambdaExpr", "Expression", "AssignOp", "Block", "BlockStatement", "Modifiers", "Modifier", "Type", "VarDeclStmt",
             "VarDecl", "VarInit", "ArrayInit", "Statement", "LabeledStatement", "AssertStatement", "EmptyStatement", "ExprStatement",
             "PreDecrementExpr", "SwitchStatement", "SwitchLabel", "IfStatement", "WhileStatement", "DoStatement", "ForStatement",
-            "ForInit", "ExprStmtList", "BreakStatement", "ContinueStatement", "ReturnStatement", "ThrowStatement", "SynchronizedStatement",
+            "ForInit", "BreakStatement", "ContinueStatement", "ReturnStatement", "ThrowStatement", "SynchronizedStatement",
             "TryStatement", "FormalParam", "ClassDecl", "TypeParams", "TypeParam", "TypeBound", "ExtendsList", "ImplementsList",
             "ClassBody", "ClassBodyDecl", "Initializer", "MemberDecl", "EnumDecl", "EnumConstant", "Arguments", "ConstrDecl",
             "FormalParams", "ThrowsList", "ConstrCall", "FieldDecl", "MethodDecl", "ResultType", "AnnotationDecl", "AllocExpr",
