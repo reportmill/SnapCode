@@ -3,6 +3,7 @@
  */
 package javakit.parse;
 import java.util.*;
+import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaType;
 import snap.parse.ParseToken;
 import snap.util.ClassUtils;
@@ -128,8 +129,10 @@ public class JType extends JNode {
         if (javaClass != null)
             return _baseDecl = javaClass;
 
-        // If not primitive, try to resolve class
-        javaClass = (JavaType) getDeclForChildTypeNode(this);
+        // If not primitive, try to resolve class (type might be package name or unresolvable)
+        JavaDecl packageOrClassDecl = getDeclForChildTypeNode(this);
+        if (packageOrClassDecl instanceof JavaType)
+            javaClass = (JavaType) packageOrClassDecl;
 
         // Set/return
         return _baseDecl = javaClass;

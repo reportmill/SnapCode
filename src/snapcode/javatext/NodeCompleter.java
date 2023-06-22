@@ -237,17 +237,8 @@ public class NodeCompleter {
         }
 
         // Handle single token nodes
-        else if (aJType.getStartToken() == aJType.getEndToken())
+        if (aJType.getStartToken() == aJType.getEndToken())
             getCompletionsForNodeString(aJType, prefixMatcher);
-
-        // Handle normal JType
-        else {
-            System.err.println("NodeCompleter.getCompletionsForType: Not sure types can have multiple tokens here: " + aJType);
-            for (ClassTreeNode matchingClass : matchingClasses) {
-                JavaClass javaClass = _resolver.getJavaClassForName(matchingClass.fullName);
-                addCompletionDecl(javaClass);
-            }
-        }
     }
 
     /**

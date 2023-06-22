@@ -113,9 +113,19 @@ public class DeclMatcher {
                 return matchingClasses.toArray(ClassTree.EMPTY_NODE_ARRAY);
         }
 
+        // If WebVM, limit to common packages for now
+        if (SnapUtils.isWebVM) {
+            for (String commonPackageName : COMMON_PACKAGES) {
+                ClassTreeNode commonPackage = aClassTree.getPackageForName(commonPackageName);
+                findClassesForPackageDeep(commonPackage, matchingClasses, limit);
+            }
+        }
+
         // Search all packages
-        ClassTreeNode rootPackage = aClassTree.getRootPackage();
-        findClassesForPackageDeep(rootPackage, matchingClasses, limit);
+        else {
+            ClassTreeNode rootPackage = aClassTree.getRootPackage();
+            findClassesForPackageDeep(rootPackage, matchingClasses, limit);
+        }
 
         // Return
         return matchingClasses.toArray(ClassTree.EMPTY_NODE_ARRAY);
