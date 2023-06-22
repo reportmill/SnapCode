@@ -114,10 +114,10 @@ public class NodeCompleter {
         JavaClass enclosingClass = enclosingClassDecl != null ? enclosingClassDecl.getEvalClass() : null;
 
         // Add methods of enclosing class
-        while (enclosingClassDecl != null && enclosingClass != null) {
-            JavaMethod[] matchingMethods = prefixMatcher.getMethodsForClass(enclosingClass);
-            for (JavaMethod matchingMethod : matchingMethods)
-                addCompletionDecl(matchingMethod);
+        while (enclosingClass != null) {
+            JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(enclosingClass, false);
+            for (JavaMember matchingMember : matchingMembers)
+                addCompletionDecl(matchingMember);
             enclosingClassDecl = enclosingClassDecl.getEnclosingClassDecl();
             enclosingClass = enclosingClassDecl != null ? enclosingClassDecl.getEvalClass() : null;
         }
@@ -138,6 +138,13 @@ public class NodeCompleter {
         ClassTreeNode[] matchingPackages = prefixMatcher.getPackagesForClassTree(classTree);
         for (ClassTreeNode matchingPkg : matchingPackages)
             addJavaPackageForName(matchingPkg.fullName);
+
+        // Add matches for static imports
+        JFile jfile = aNode.getFile();
+        JImportDecl[] staticImportDecls = jfile.getStaticImportDecls();
+        JavaMember[] matchingMembers = prefixMatcher.getMembersForStaticImports(staticImportDecls);
+        for (JavaMember matchingMember : matchingMembers)
+            addCompletionDecl(matchingMember);
     }
 
     /**
@@ -186,15 +193,10 @@ public class NodeCompleter {
             JavaType parExprEvalType = parExpr.getEvalType();
             JavaClass parExprEvalClass = parExprEvalType.getEvalClass();
 
-            // Get matching fields for class and add
-            List<JavaField> matchingFields = prefixMatcher.getFieldsForClass(parExprEvalClass);
-            for (JavaField matchingField : matchingFields)
-                addCompletionDecl(matchingField);
-
-            // Get matching methods for class and add
-            JavaMethod[] matchingMethods = prefixMatcher.getMethodsForClass(parExprEvalClass);
-            for (JavaMethod matchingMethod : matchingMethods)
-                addCompletionDecl(matchingMethod);
+            // Get matching members (fields, methods) for class and add
+            JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(parExprEvalClass, false);
+            for (JavaMember matchingMember : matchingMembers)
+                addCompletionDecl(matchingMember);
         }
     }
 

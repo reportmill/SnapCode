@@ -164,7 +164,7 @@ public class JExprMethodCall extends JExpr {
 
         // See if method is from static import
         JFile jfile = getFile();
-        JavaMember importClassMember = jfile.getImportClassMember(name, argTypes);
+        JavaMember importClassMember = jfile.getStaticImportMemberForNameAndParams(name, argTypes);
         if (importClassMember instanceof JavaMethod)
             return (JavaMethod) importClassMember;
 
@@ -244,7 +244,7 @@ public class JExprMethodCall extends JExpr {
 
         // See if method is from static import -
         JFile jfile = getFile();
-        JavaMember importClassMember = jfile.getImportClassMember(name, argTypes);
+        JavaMember importClassMember = jfile.getStaticImportMemberForNameAndParams(name, argTypes);
         if (importClassMember instanceof JavaMethod)
             return Collections.singletonList((JavaMethod) importClassMember);
 

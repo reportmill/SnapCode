@@ -25,6 +25,13 @@ public class DeclMatcher {
     // The Matcher
     private Matcher  _matcher;
 
+    // Constant for preferred packages
+    private static final String[] COMMON_PACKAGES = { "java.util", "java.lang", "java.io", "snap.view", "java.awt", "javax.swing" };
+
+    // Constant for empty members
+    private static final JavaField[] EMPTY_FIELDS_ARRAY = new JavaField[0];
+    private static final JavaMember[] EMPTY_MEMBERS_ARRAY = new JavaMember[0];
+
     /**
      * Constructor.
      */
@@ -89,9 +96,6 @@ public class DeclMatcher {
         return ArrayUtils.filter(classes, cls -> matchesString(cls.simpleName));
     }
 
-    // Preferred packages
-    private static final String[] COMMON_PACKAGES = { "java.util", "java.lang", "java.io", "snap.view", "java.awt", "javax.swing" };
-
     /**
      * Returns all matching classes in ClassTree.
      */
@@ -99,7 +103,7 @@ public class DeclMatcher {
     {
         // Create list
         List<ClassTreeNode> matchingClasses = new ArrayList<>();
-        int limit = 100;
+        int limit = 20;
 
         // Search COMMON_PACKAGES
         for (String commonPackageName : COMMON_PACKAGES) {
@@ -158,21 +162,24 @@ public class DeclMatcher {
     }
 
     /**
-     * Returns a compatible method for given name and param types.
+     * Returns matching fields for given class (with option for static only).
      */
-    public List<JavaField> getFieldsForClass(JavaClass aClass)
+    public JavaField[] getFieldsForClass(JavaClass aClass, boolean staticOnly)
     {
         // Create return list of prefix fields
-        List<JavaField> matchingFields = new ArrayList<>();
+        JavaField[] matchingFields = EMPTY_FIELDS_ARRAY;
 
         // Iterate over classes
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
 
             // Get Class fields
             List<JavaField> fields = cls.getDeclaredFields();
-            for (JavaField field : fields)
-                if (matchesString(field.getName()))
-                    matchingFields.add(field);
+            for (JavaField field : fields) {
+                if (matchesString(field.getName())) {
+                    if (!staticOnly || field.isStatic())
+                        matchingFields = ArrayUtils.add(matchingFields, field);
+                }
+            }
 
             // Should iterate over class interfaces, too
         }
@@ -184,31 +191,32 @@ public class DeclMatcher {
     /**
      * Returns methods that match given matcher.
      */
-    public JavaMethod[] getMethodsForClass(JavaClass aClass)
+    public JavaMethod[] getMethodsForClass(JavaClass aClass, boolean staticOnly)
     {
         Set<JavaMethod> matchingMethods = new HashSet<>();
-        getMethodsForClassImpl(aClass, matchingMethods);
+        findMethodsForClass(aClass, staticOnly, matchingMethods);
         return matchingMethods.toArray(new JavaMethod[0]);
     }
 
     /**
      * Returns methods that match given matcher.
      */
-    private void getMethodsForClassImpl(JavaClass aClass, Set<JavaMethod> matchingMethods)
+    private void findMethodsForClass(JavaClass aClass, boolean staticOnly, Set<JavaMethod> matchingMethods)
     {
         // Iterate over super classes
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
 
             // Get Class methods
             List<JavaMethod> methods = cls.getDeclaredMethods();
-            for (JavaMethod method : methods)
-                if (matchesString(method.getName()) && method.getSuper() == null)
+            for (JavaMethod method : methods) {
+                if (matchesMethod(method, staticOnly))
                     matchingMethods.add(method);
+            }
 
             // Iterate over class interfaces and recurse
             JavaClass[] interfaces = cls.getInterfaces();
             for (JavaClass interf : interfaces)
-                getMethodsForClassImpl(interf, matchingMethods);
+                findMethodsForClass(interf, staticOnly, matchingMethods);
 
             // Help TeaVM: Thinks that interfaces subclass Object
             if (SnapUtils.isTeaVM && cls.isInterface()) {
@@ -217,6 +225,27 @@ public class DeclMatcher {
                     break;
             }
         }
+    }
+
+    /**
+     * Returns matching members (fields, methods) for given class.
+     */
+    public JavaMember[] getMembersForClass(JavaClass aClass, boolean staticOnly)
+    {
+        JavaMember[] matchingMembers = EMPTY_MEMBERS_ARRAY;
+
+        // Look for matching fields
+        JavaField[] matchingFields = getFieldsForClass(aClass, staticOnly);
+        if (matchingFields.length > 0)
+            matchingMembers = ArrayUtils.addAll(matchingMembers, matchingFields);
+
+        // Add matching methods
+        JavaMember[] matchingMethods = getMethodsForClass(aClass, staticOnly);
+        if (matchingMethods.length > 0)
+            matchingMembers = ArrayUtils.addAll(matchingMembers, matchingMethods);
+
+        // Return
+        return matchingMembers;
     }
 
     /**
@@ -247,6 +276,48 @@ public class DeclMatcher {
 
         // Return
         return theVariables;
+    }
+
+    /**
+     * Returns whether method matches with option for looking for statics.
+     */
+    private boolean matchesMethod(JavaMethod method, boolean staticOnly)
+    {
+        // If name doesn't match, return false
+        if (!matchesString(method.getName()))
+            return false;
+
+        // If StaticOnly, return if static
+        if (staticOnly)
+            return method.isStatic();
+
+        // If super exists, return false (will find super version when searching super class)
+        if (method.getSuper() != null)
+            return false;
+
+        // Return matches
+        return true;
+    }
+
+    /**
+     * Returns matching JavaMembers for given static imports.
+     */
+    public JavaMember[] getMembersForStaticImports(JImportDecl[] staticImportDecls)
+    {
+        JavaMember[] matchingMembers = new JavaMember[0];
+
+        // Iterate over static imports and add matching members for classes
+        for (JImportDecl staticImportDecl : staticImportDecls) {
+            JavaClass importClass = staticImportDecl.getEvalClass();
+            if (importClass == null)
+                continue;
+            JavaMember[] matchingMembersForClass = getMembersForClass(importClass, true);
+            if (matchingMembersForClass.length > 0)
+                matchingMembers = ArrayUtils.addAll(matchingMembers, matchingMembersForClass);
+        }
+
+        // Return
+        return matchingMembers;
     }
 
     /**

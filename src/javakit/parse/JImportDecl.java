@@ -162,6 +162,22 @@ public class JImportDecl extends JNode {
         if (_inclusive && isKnownPackageName(name))
             return getJavaPackageForName(name);
 
+        // If full import name contains class, return it
+        JavaClass importClass = getJavaClassForFullImportName(name);
+        if (importClass != null)
+            return importClass;
+
+        // If class not found, return as package decl anyway
+        return getJavaPackageForName(name);
+    }
+
+    /**
+     * Returns class for given name.
+     */
+    private JavaClass getJavaClassForFullImportName(String importName)
+    {
+        String name = importName;
+
         // Iterate up parts of import till we find Class in case import is like: import path.Class.InnerClass;
         while (name != null) {
 
@@ -187,9 +203,8 @@ public class JImportDecl extends JNode {
             else name = null;
         }
 
-        // If class not found, return as package decl anyway
-        String pkgName = getName();
-        return getJavaPackageForName(pkgName);
+        // Return not found
+        return null;
     }
 
     /**
@@ -208,7 +223,7 @@ public class JImportDecl extends JNode {
     /**
      * Returns the member for given name and parameter types (if method) for static import.
      */
-    public JavaMember getImportMember(String aName, JavaType[] theParams)
+    public JavaMember getImportMemberForNameAndParams(String aName, JavaType[] theParams)
     {
         JavaClass cls = (JavaClass) getEvalType();
         if (cls == null)
