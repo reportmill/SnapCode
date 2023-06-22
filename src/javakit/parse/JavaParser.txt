@@ -74,6 +74,16 @@ ImplementsList { "implements" ClassType ("," ClassType)* }
 
 ThrowsList { "throws" Name ("," Name)* }
 
+Type { LookAhead(2) ReferenceType | PrimitiveType }
+
+PrimitiveType { "boolean" | "char" | "byte" | "short" | "int" | "long" | "float" | "double" }
+
+ReferenceType { PrimitiveType (LookAhead(2) "[" "]")+ | ClassType (LookAhead(2) "[" "]")* }
+
+ClassType { Identifier (LookAhead(2) TypeArgs)? (LookAhead(2) "." Identifier (LookAhead(2) TypeArgs)?)* }
+
+ResultType { "void" | Type }
+
 TypeParams { "<" TypeParam ("," TypeParam)* ">" }
 
 TypeParam { Identifier TypeBound? }
@@ -306,13 +316,3 @@ StringLiteral { "\"(([^\"\\\n\r])|(\\([ntbrf\\'\"]|[0-7][0-7]?|[0-3][0-7][0-7]|u
 NullLiteral { "null" }
 
 BooleanLiteral { "true" | "false" }
-
-Type { LookAhead(2) ReferenceType | PrimitiveType }
-
-ClassType { Identifier (LookAhead(2) TypeArgs)? (LookAhead(2) "." Identifier (LookAhead(2) TypeArgs)?)* }
-
-PrimitiveType { "boolean" | "char" | "byte" | "short" | "int" | "long" | "float" | "double" }
-
-ReferenceType { PrimitiveType (LookAhead(2) "[" "]")+ | ClassType (LookAhead(2) "[" "]")* }
-
-ResultType { "void" | Type }
