@@ -42,19 +42,21 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            JModifiers part = getPart();
+            // Get modifiers
+            JModifiers modifiers = getPart();
+
             switch (anId) {
-                case "public": part.addValue(Modifier.PUBLIC); break;
-                case "static": part.addValue(Modifier.STATIC); break;
-                case "protected": part.addValue(Modifier.PROTECTED); break;
-                case "private": part.addValue(Modifier.PRIVATE); break;
-                case "final": part.addValue(Modifier.FINAL); break;
-                case "abstract": part.addValue(Modifier.ABSTRACT); break;
-                case "synchronized": part.addValue(Modifier.SYNCHRONIZED); break;
-                case "native": part.addValue(Modifier.NATIVE); break;
-                case "transient": part.addValue(Modifier.TRANSIENT); break;
-                case "volatile": part.addValue(Modifier.VOLATILE); break;
-                case "strictfp": part.addValue(Modifier.STRICT); break;
+                case "public": modifiers.addValue(Modifier.PUBLIC); break;
+                case "static": modifiers.addValue(Modifier.STATIC); break;
+                case "protected": modifiers.addValue(Modifier.PROTECTED); break;
+                case "private": modifiers.addValue(Modifier.PRIVATE); break;
+                case "final": modifiers.addValue(Modifier.FINAL); break;
+                case "abstract": modifiers.addValue(Modifier.ABSTRACT); break;
+                case "synchronized": modifiers.addValue(Modifier.SYNCHRONIZED); break;
+                case "native": modifiers.addValue(Modifier.NATIVE); break;
+                case "transient": modifiers.addValue(Modifier.TRANSIENT); break;
+                case "volatile": modifiers.addValue(Modifier.VOLATILE); break;
+                case "strictfp": modifiers.addValue(Modifier.STRICT); break;
                 case "default": break; // Should we really treat as modifier? No support in java.lang.reflect.Modifier.
                 default: break; // "Modifer" or Annotation
             }
@@ -183,21 +185,35 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle Type
-            if (anId == "Type")
-                getPart().setType(aNode.getCustomNode(JType.class));
+            // Get variable declaration
+            JVarDecl varDecl = getPart();
 
-            // Handle vararg
-            else if (anId == "...")
-                getPart().getType().setArrayCount(getPart().getType().getArrayCount() + 1);
+            switch (anId) {
 
-            // Handle Identifier
-            else if (anId == "Identifier")
-                getPart().setId(aNode.getCustomNode(JExprId.class));
+                // Handle Type
+                case "Type":
+                    varDecl.setType(aNode.getCustomNode(JType.class));
+                    break;
 
-            // Handle ("[" "]")*
-            else if (anId == "[")
-                getPart().getType().setArrayCount(getPart().getArrayCount() + 1);
+                // Handle vararg: Fix this
+                case "...": {
+                    JType varType = varDecl.getType();
+                    varType.setArrayCount(varType.getArrayCount() + 1);
+                    break;
+                }
+
+                // Handle Identifier
+                case "Identifier":
+                    varDecl.setId(aNode.getCustomNode(JExprId.class));
+                    break;
+
+                // Handle ("[" "]")*
+                case "[": {
+                    JType varType = varDecl.getType();
+                    varType.setArrayCount(varType.getArrayCount() + 1);
+                    break;
+                }
+            }
         }
 
         protected Class<JVarDecl> getPartClass()  { return JVarDecl.class; }
@@ -213,21 +229,31 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle Identifier
-            if (anId == "Identifier")
-                getPart().setId(aNode.getCustomNode(JExprId.class));
+            // Get variable declaration
+            JVarDecl varDecl = getPart();
 
-            // Handle ("[" "]")*
-            else if (anId == "[")
-                getPart().setArrayCount(getPart().getArrayCount() + 1);
+            switch (anId) {
 
-            // Handle VarInit ArrayInit
-            else if (anId == "ArrayInit")
-                getPart().setArrayInits(aNode.getCustomNode(List.class));
+                // Handle Identifier
+                case "Identifier":
+                    varDecl.setId(aNode.getCustomNode(JExprId.class));
+                    break;
 
-            // Handle VarInit Expression
-            else if (anId == "Expression")
-                getPart().setInitializer(aNode.getCustomNode(JExpr.class));
+                // Handle ("[" "]")*
+                case "[":
+                    varDecl.setArrayCount(varDecl.getArrayCount() + 1);
+                    break;
+
+                // Handle VarInit ArrayInit
+                case "ArrayInit":
+                    varDecl.setArrayInits(aNode.getCustomNode(List.class));
+                    break;
+
+                // Handle VarInit Expression
+                case "Expression":
+                    varDecl.setInitializer(aNode.getCustomNode(JExpr.class));
+                    break;
+            }
         }
 
         protected Class<JVarDecl> getPartClass()  { return JVarDecl.class; }
@@ -243,18 +269,26 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle Modifiers
-            if (anId == "Modifiers")
-                getPart().setMods(aNode.getCustomNode(JModifiers.class));
+            // Get variable declaration statement
+            JStmtVarDecl varDeclStmt = getPart();
 
-            // Handle Type
-            else if (anId == "Type")
-                getPart().setType(aNode.getCustomNode(JType.class));
+            switch (anId) {
 
-            // Handle VarDecl(s)
-            else if (anId == "VarDecl") {
-                JVarDecl vd = aNode.getCustomNode(JVarDecl.class);
-                getPart().addVarDecl(vd);
+                // Handle Modifiers
+                case "Modifiers":
+                    varDeclStmt.setMods(aNode.getCustomNode(JModifiers.class));
+                    break;
+
+                // Handle Type
+                case "Type":
+                    varDeclStmt.setType(aNode.getCustomNode(JType.class));
+                    break;
+
+                // Handle VarDecl(s)
+                case "VarDecl":
+                    JVarDecl varDecl = aNode.getCustomNode(JVarDecl.class);
+                    varDeclStmt.addVarDecl(varDecl);
+                    break;
             }
         }
 
@@ -347,21 +381,26 @@ public class JavaParserStmt extends JavaParserExpr {
             // Get Switch statement
             JStmtSwitch switchStmt = getPart();
 
-            // Handle Expression
-            if (anId == "Expression")
-                switchStmt.setExpr(aNode.getCustomNode(JExpr.class));
+            switch (anId) {
 
-            // Handle SwitchLabel
-            else if (anId == "SwitchLabel")
-                switchStmt.addSwitchCase(aNode.getCustomNode(JStmtSwitchCase.class));
+                // Handle Expression
+                case "Expression":
+                    switchStmt.setExpr(aNode.getCustomNode(JExpr.class));
+                    break;
 
-            // Handle BlockStatement
-            else if (anId == "BlockStatement") {
-                List<JStmtSwitchCase> switchCases = switchStmt.getSwitchCases();
-                JStmtSwitchCase switchCase = switchCases.get(switchCases.size() - 1);
-                JStmt blockStmt = aNode.getCustomNode(JStmt.class);
-                if (blockStmt != null) // Can be null when parse fails
-                    switchCase.addStatement(blockStmt);
+                // Handle SwitchLabel
+                case "SwitchLabel":
+                    switchStmt.addSwitchCase(aNode.getCustomNode(JStmtSwitchCase.class));
+                    break;
+
+                // Handle BlockStatement
+                case "BlockStatement":
+                    List<JStmtSwitchCase> switchCases = switchStmt.getSwitchCases();
+                    JStmtSwitchCase switchCase = switchCases.get(switchCases.size() - 1);
+                    JStmt blockStmt = aNode.getCustomNode(JStmt.class);
+                    if (blockStmt != null) // Can be null when parse fails
+                        switchCase.addStatement(blockStmt);
+                    break;
             }
         }
 
@@ -381,15 +420,19 @@ public class JavaParserStmt extends JavaParserExpr {
             // Get Switch case
             JStmtSwitchCase switchCase = getPart();
 
-            // Handle Expression
-            if (anId == "Expression") {
-                JExpr caseExpr = aNode.getCustomNode(JExpr.class);
-                switchCase.setExpr(caseExpr);
-            }
+            switch (anId) {
 
-            // Handle "default"
-            else if (anId == "default")
-                switchCase.setDefault(true);
+                // Handle Expression
+                case "Expression":
+                    JExpr caseExpr = aNode.getCustomNode(JExpr.class);
+                    switchCase.setExpr(caseExpr);
+                    break;
+
+                // Handle "default"
+                case "default":
+                    switchCase.setDefault(true);
+                    break;
+            }
         }
 
         protected Class<JStmtSwitchCase> getPartClass()  { return JStmtSwitchCase.class; }
