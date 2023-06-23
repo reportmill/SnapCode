@@ -38,6 +38,10 @@ ClassDecl
     ("class" | "interface") Identifier TypeParams? ExtendsList? ImplementsList? ClassBody
 }
 
+ExtendsList { "extends" ClassType ("," ClassType)* }
+
+ImplementsList { "implements" ClassType ("," ClassType)* }
+
 ClassBody { "{" ClassBodyDecl* "}" }
 
 ClassBodyDecl { LookAhead(2) Initializer | Modifiers MemberDecl | ";" }
@@ -68,10 +72,6 @@ MethodDecl
     TypeParams? ResultType Identifier FormalParams ("[" "]")* ThrowsList? (Block | ";")
 }
 
-ExtendsList { "extends" ClassType ("," ClassType)* }
-
-ImplementsList { "implements" ClassType ("," ClassType)* }
-
 ThrowsList { "throws" Name ("," Name)* }
 
 Type { LookAhead(2) ReferenceType | PrimitiveType }
@@ -98,6 +98,8 @@ VarDeclStmt { Modifiers Type VarDecl ("," VarDecl)* }
 VarDecl { Identifier ("[" "]")* ("=" VarInit)? }
 
 VarInit { ArrayInit | Expression }
+
+ArrayInit { "{" (VarInit (LookAhead(2) "," VarInit)*)? ","? "}" }
 
 Statement
 {
@@ -235,8 +237,6 @@ ArrayDimsAndInits
 {
     LookAhead(2) (LookAhead(2) "[" Expression "]")+ (LookAhead(2) "[" "]")* | ("[" "]")+ ArrayInit
 }
-
-ArrayInit { "{" (VarInit (LookAhead(2) "," VarInit)*)? ","? "}" }
 
 CastExpr { LookAhead("(" PrimitiveType) "(" Type ")" UnaryExpr | "(" Type ")" UnaryExprNotPlusMinus }
 
