@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import javakit.parse.*;
 import javakit.resolver.*;
 import snap.parse.ParseToken;
+import snap.util.StringUtils;
 
 /**
  * A class to provide code completion suggestions for a given JNode.
@@ -154,6 +155,13 @@ public class NodeCompleter {
      */
     private void getCompletionsForExprId(JExprId anId, DeclMatcher prefixMatcher)
     {
+        // Handle JVarDecl: Only offer camel case name
+        JNode parent = anId.getParent();
+        if (parent instanceof JVarDecl) {
+            getCompletionsForNewVarDecl((JVarDecl) parent);
+            return;
+        }
+
         // Get parent expression - if none, forward to basic getCompletionsForNodeString()
         JExpr parExpr = anId.getParentExpr();
         if (parExpr == null) {
@@ -256,6 +264,27 @@ public class NodeCompleter {
         for (JavaDecl literal : globalLiters)
             if (prefixMatcher.matchesString(literal.getName()))
                 addCompletionDecl(literal);
+    }
+
+    /**
+     * Adds a single completion for a new variable declaration using the type name.
+     */
+    private void getCompletionsForNewVarDecl(JVarDecl varDecl)
+    {
+        // Remove other completions
+        _list.clear();
+
+        // Get type from var decl
+        JType varDeclType = varDecl.getType();
+        if (varDeclType == null)
+            return;
+        JavaType evalType = varDeclType.getDecl();
+
+        // Create local var decl for type name and add completion
+        String typeName = evalType != null ? evalType.getSimpleName() : varDeclType.getSimpleName();
+        String varName = StringUtils.firstCharLowerCase(typeName);
+        JavaDecl nameDecl = new JavaWord(varName, JavaWord.WordType.Unknown);
+        addCompletionDecl(nameDecl);
     }
 
     /**

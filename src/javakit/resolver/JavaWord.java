@@ -1,5 +1,4 @@
 package javakit.resolver;
-
 import snap.util.ArrayUtils;
 
 /**
@@ -10,8 +9,8 @@ public class JavaWord extends JavaDecl {
     // The WordType
     private WordType  _wordType;
 
-    //
-    public enum WordType { Modifier, Declaration, Statement }
+    // Constant for word type
+    public enum WordType { Modifier, Declaration, Statement, Unknown }
 
     // Modifiers
     public static final JavaWord Public = new JavaWord("public", WordType.Modifier);
@@ -64,7 +63,7 @@ public class JavaWord extends JavaDecl {
     /**
      * Constructor.
      */
-    protected JavaWord(String aName, WordType aWordType)
+    public JavaWord(String aName, WordType aWordType)
     {
         super(null, DeclType.Word);
         _id = _name = _simpleName = aName;
@@ -79,16 +78,17 @@ public class JavaWord extends JavaDecl {
     {
         // Get full name
         String fullNameStr = getFullName();
+        String suggestionStr = fullNameStr;
 
         // Get descriptor string
-        String desc = "modifier";
-        if (_wordType == WordType.Declaration)
-            desc = "declaration word";
-        else if (_wordType == WordType.Statement)
-            desc = "statement word";
+        switch (_wordType) {
+            case Modifier: suggestionStr += " - modifier"; break;
+            case Declaration: suggestionStr += " - declaration word"; break;
+            case Statement: suggestionStr += " - statement word"; break;
+        }
 
         // Return
-        return fullNameStr + " - " + desc;
+        return suggestionStr;
     }
 
     /**
