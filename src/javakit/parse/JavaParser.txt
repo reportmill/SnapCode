@@ -88,7 +88,7 @@ Block { "{" BlockStatement* "}" }
 
 BlockStatement
 {
-    LookAhead (Modifiers Type Identifier ("[" | "=" | "," | ";")) VarDeclStmt ";" |
+    LookAhead (VarDeclStmt) VarDeclStmt ";" |
     Statement |
     ClassDecl
 }
@@ -155,7 +155,7 @@ LabeledStatement { Identifier ":" Statement }
 ExprStatement
 {
     PreIncrementExpr | PreDecrementExpr |
-    Expression // PrimaryExpr ("++" | "--" | AssignOp Expression)
+    PrimaryExpr ("++" | "--" | AssignOp Expression)?
 }
 
 Expression { ConditionalExpr (LookAhead(2) AssignOp Expression)? }

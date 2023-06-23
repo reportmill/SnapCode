@@ -287,36 +287,48 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get part and custom node
+            // Get expression statement
             JStmtExpr exprStmt = getPart();
-            Object customNode = aNode.getCustomNode();
 
-            // Handle JavaExpression rules
-            if (customNode instanceof JExpr) {
-                JExpr expr = (JExpr) customNode;
+            switch (anId) {
 
-                // If no expression yet, just set
-                JExpr stmtExpr = exprStmt.getExpr();
-                if (stmtExpr == null)
+                // Handle PreIncrementExpr, PreDecrementExpr, PrimaryExpr: Set expression statement expression
+                case "PreIncrementExpr":
+                case "PreDecrementExpr":
+                case "PrimaryExpr": {
+                    JExpr expr = (JExpr) aNode.getCustomNode();
                     exprStmt.setExpr(expr);
+                    break;
+                }
 
-                // Otherwise assume it is broken assignment stmt and fill it in
-                else {
-                    JExprAssign assignExpr = new JExprAssign("=", stmtExpr, expr);
+                // Handle "++", "--": Reset expression statement expression to pre/post increment math expression
+                case "++":
+                case "--": {
+                    JExpr expr = exprStmt.getExpr();
+                    JExprMath.Op op = anId == "++" ? JExprMath.Op.PostIncrement : JExprMath.Op.PostDecrement;
+                    JExprMath unaryExpr = new JExprMath(op, expr);
+                    exprStmt.setExpr(unaryExpr);
+                    break;
+                }
+
+                // Handle AssignOp: Reset expression statement expression to assign expression
+                case "AssignOp": {
+                    JExpr expr = exprStmt.getExpr();
+                    ParseToken token = aNode.getStartToken();
+                    String opStr = token.getString();
+                    JExprAssign assignExpr = new JExprAssign(opStr, expr, null);
                     exprStmt.setExpr(assignExpr);
+                    break;
+                }
+
+                // Handle Expression: Should be assign expression
+                case "Expression": {
+                    JExpr expr = (JExpr) aNode.getCustomNode();
+                    JExprAssign assignExpr = (JExprAssign) exprStmt.getExpr();
+                    assignExpr.setValueExpr(expr);
+                    break;
                 }
             }
-
-            // Handle post increment/decrement
-            else if (anId == "++" || anId == "--") {
-                JExpr expr = exprStmt.getExpr();
-                JExprMath.Op op = anId == "++" ? JExprMath.Op.PostIncrement : JExprMath.Op.PostDecrement;
-                JExprMath unaryExpr = new JExprMath(op, expr);
-                exprStmt.setExpr(unaryExpr);
-            }
-
-            // Shouldn't be possible
-            else System.err.println("ExprStatementHandler: Unexpected node: " + anId);
         }
 
         protected Class<JStmtExpr> getPartClass()  { return JStmtExpr.class; }
