@@ -1,5 +1,7 @@
 package snapcode.app;
 import javakit.parse.*;
+import snap.view.ViewEvent;
+import snapcode.apptools.EvalTool;
 import snapcode.project.JavaAgent;
 import snapcode.project.Project;
 import javakit.resolver.JavaDecl;
@@ -81,6 +83,9 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         JavaTextArea javaTextArea = getTextArea();
         javaTextArea.setTextDoc(javaTextDoc);
         setFirstFocus(javaTextArea);
+
+        // Register for enter action
+        addKeyActionFilter("EnterAction", "Shortcut+ENTER");
     }
 
     /**
@@ -91,6 +96,22 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     {
         WebURL url = getURL();
         setTextSelectionForUrlParams(url);
+    }
+
+    /**
+     * Respond UI.
+     */
+    @Override
+    protected void respondUI(ViewEvent anEvent)
+    {
+        // Handle EnterAction (Shortcut+Enter): Run app
+        if (anEvent.equals("EnterAction")) {
+            WorkspacePane workspacePane = getWorkspacePane();
+            WorkspaceTools workspaceTools = workspacePane.getWorkspaceTools();
+            EvalTool evalTool = workspaceTools.getToolForClass(EvalTool.class);
+            if (evalTool != null)
+                evalTool.runApp(true);
+        }
     }
 
     /**

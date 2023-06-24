@@ -39,7 +39,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     {
         // Get event info
         int keyCode = anEvent.getKeyCode();
-        boolean commandDown = anEvent.isShortcutDown();
+        boolean shortcutDown = anEvent.isShortcutDown();
         boolean shiftDown = anEvent.isShiftDown();
 
         // Handle tab
@@ -53,15 +53,16 @@ public class JavaTextAreaKeys extends TextAreaKeys {
 
         // Handle newline special
         if (keyCode == KeyCode.ENTER && isSelEmpty()) {
-            if (anEvent.isShiftDown())
+            if (shiftDown || shortcutDown)
                 _textArea.selectLineEnd();
-            processNewline();
+            if (!shortcutDown)
+                processNewline();
             anEvent.consume();
             return;
         }
 
         // Handle delete of adjacent paired chars (parens, quotes, square brackets) - TODO: don't do if in string/comment
-        boolean isDelete = keyCode == KeyCode.BACK_SPACE || commandDown && !shiftDown && keyCode == KeyCode.X;
+        boolean isDelete = keyCode == KeyCode.BACK_SPACE || shortcutDown && !shiftDown && keyCode == KeyCode.X;
         if (isDelete && getSel().getSize() <= 1) {
             int start = getSelStart();
             if (isSelEmpty())
@@ -76,7 +77,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         }
 
         // Handle command Slash
-        if (commandDown) {
+        if (shortcutDown) {
             if (keyCode == KeyCode.SLASH) {
                 _javaTextArea.commentLinesWithLineComment();
                 anEvent.consume();
