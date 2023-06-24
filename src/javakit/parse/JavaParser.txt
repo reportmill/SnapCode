@@ -3,7 +3,7 @@ JavaFile { PackageDecl? ImportDecl* TypeDecl+ JavaFileImports* JeplFile? }
 
 JavaFileImports { PackageDecl? ImportDecl* }
 
-JeplFile { JeplNode* }
+JeplFile { ImportDecl* JeplNode* }
 
 JeplNode
 {

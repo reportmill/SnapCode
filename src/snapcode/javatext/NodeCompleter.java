@@ -155,11 +155,14 @@ public class NodeCompleter {
      */
     private void getCompletionsForExprId(JExprId anId, DeclMatcher prefixMatcher)
     {
-        // Handle JVarDecl: Only offer camel case name
+        // Handle JVarDecl.Id: Only offer camel case name
         JNode parent = anId.getParent();
         if (parent instanceof JVarDecl) {
-            getCompletionsForNewVarDecl((JVarDecl) parent);
-            return;
+            JVarDecl varDecl = (JVarDecl) parent;
+            if (anId == varDecl.getId()) {
+                getCompletionsForNewVarDecl((JVarDecl) parent);
+                return;
+            }
         }
 
         // Get parent expression - if none, forward to basic getCompletionsForNodeString()
@@ -280,9 +283,17 @@ public class NodeCompleter {
             return;
         JavaType evalType = varDeclType.getDecl();
 
-        // Create local var decl for type name and add completion
+        // Get suggested var name from type name
         String typeName = evalType != null ? evalType.getSimpleName() : varDeclType.getSimpleName();
         String varName = StringUtils.firstCharLowerCase(typeName);
+
+        // If Swing class with "J" prefix, create/add suggestion for name without "J"
+        if (varName.length() > 1 && varName.charAt(0) == 'j' && Character.isUpperCase(varName.charAt(1))) {
+            String varNameNoJ = StringUtils.firstCharLowerCase(varName.substring(1));
+            addCompletionDecl(new JavaWord(varNameNoJ, JavaWord.WordType.Unknown));
+        }
+
+        // Create/add suggestion from type name
         JavaDecl nameDecl = new JavaWord(varName, JavaWord.WordType.Unknown);
         addCompletionDecl(nameDecl);
     }

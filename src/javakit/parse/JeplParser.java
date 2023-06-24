@@ -65,44 +65,51 @@ public class JeplParser extends JavaParser {
             // Get ClassDecl - create/add if not yet set
             JClassDecl classDecl = jfile.getClassDecl();
 
-            // Handle BlockStatement
-            if (anId == "BlockStatement") {
+            switch (anId) {
 
-                // If no current InitDecl, create (with statement block) and add
-                if (_initDecl == null) {
+                // Handle BlockStatement
+                case "BlockStatement":
 
-                    // Create InitDecl and add to class
-                    _initDecl = new JInitializerDecl();
-                    _initDecl.setStartToken(aNode.getStartToken());
-                    classDecl.addMemberDecl(_initDecl);
+                    // If no current InitDecl, create (with statement block) and add
+                    if (_initDecl == null) {
 
-                    // Create block statement and add to InitDecl
-                    JStmtBlock blockStmt = new JStmtBlock();
-                    blockStmt.setStartToken(aNode.getStartToken());
-                    _initDecl.setBlock(blockStmt);
-                }
+                        // Create InitDecl and add to class
+                        _initDecl = new JInitializerDecl();
+                        _initDecl.setStartToken(aNode.getStartToken());
+                        classDecl.addMemberDecl(_initDecl);
 
-                // Add block statement to current InitDecl.Block
-                JStmtBlock initDeclBlock = _initDecl.getBlock();
-                JStmt blockStmt = aNode.getCustomNode(JStmt.class);
-                initDeclBlock.addStatement(blockStmt);
+                        // Create block statement and add to InitDecl
+                        JStmtBlock blockStmt = new JStmtBlock();
+                        blockStmt.setStartToken(aNode.getStartToken());
+                        _initDecl.setBlock(blockStmt);
+                    }
 
-                // Update end tokens
-                _initDecl.setEndToken(endToken);
-                classDecl.setEndToken(endToken);
-            }
+                    // Add block statement to current InitDecl.Block
+                    JStmtBlock initDeclBlock = _initDecl.getBlock();
+                    JStmt blockStmt = aNode.getCustomNode(JStmt.class);
+                    initDeclBlock.addStatement(blockStmt);
 
-            // Handle Modifiers
-            else if (anId == "Modifiers") {
-                // Ignore for now
-            }
+                    // Update end tokens
+                    _initDecl.setEndToken(endToken);
+                    classDecl.setEndToken(endToken);
+                    break;
 
-            // Handle MethodDecl
-            else if (anId == "MethodDecl") {
-                JMethodDecl methodDecl = aNode.getCustomNode(JMethodDecl.class);
-                classDecl.addMemberDecl(methodDecl);
-                jfile.setEndToken(endToken);
-                _initDecl = null;
+                // Handle ImportDecl
+                case "ImportDecl":
+                    JImportDecl importDecl = aNode.getCustomNode(JImportDecl.class);
+                    jfile.addImportDecl(importDecl);
+                    break;
+
+                // Handle Modifiers: Ignore for now
+                case "Modifiers": break;
+
+                // Handle MethodDecl
+                case "MethodDecl":
+                    JMethodDecl methodDecl = aNode.getCustomNode(JMethodDecl.class);
+                    classDecl.addMemberDecl(methodDecl);
+                    jfile.setEndToken(endToken);
+                    _initDecl = null;
+                    break;
             }
         }
 

@@ -11,7 +11,6 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.text.*;
 import snap.view.*;
-import snapcode.project.JeplTextDoc;
 
 /**
  * A PopupList for an JavaTextPane.
@@ -232,6 +231,8 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         // Iterate over existing imports and increase line index to insert in alphabetical order
         List<JImportDecl> importDecls = aFile.getImportDecls();
         for (JImportDecl importDecl : importDecls) {
+            if (importDecl.getEndCharIndex() == 0) // Skip Jepl default imports
+                continue;
             if (classPath.compareTo(importDecl.getName()) < 0)
                 break;
             importLineIndex = importDecl.getLineIndex() + 1;
@@ -240,13 +241,6 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         // Get Java text
         TextArea textArea = getTextArea();
         TextDoc textDoc = textArea.getTextDoc();
-
-        // If JeplTextDoc, just add import to JavaTextDocBuilder
-        if (textDoc instanceof JeplTextDoc) {
-            JeplTextDoc jeplTextDoc = (JeplTextDoc) textDoc;
-            jeplTextDoc.addImport(classPath);
-            return;
-        }
 
         // Add import to Java text
         TextLine line = textDoc.getLine(importLineIndex);
