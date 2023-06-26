@@ -2,15 +2,14 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
+import snap.util.*;
 import snapcode.project.Workspace;
 import snap.props.PropChange;
-import snap.util.ArrayUtils;
-import snap.util.ClassUtils;
-import snap.util.Prefs;
-import snap.util.SnapUtils;
 import snap.view.*;
 import snap.viewx.FilePanel;
 import snap.web.*;
+import java.io.File;
+import java.util.Base64;
 
 /**
  * An implementation of a panel to manage/open user Snap sites (projects).
@@ -176,6 +175,34 @@ public class WelcomePanel extends ViewOwner {
 
         // Return
         return workspacePane;
+    }
+
+    /**
+     * Opens a base64 file.
+     */
+    protected void openBase64String(String base64Str)
+    {
+        // Decode string to plain text
+        if (base64Str.startsWith("#"))
+            base64Str = base64Str.substring(1);
+        byte[] plainTextBytes = Base64.getDecoder().decode(base64Str);
+        String plainText = new String(plainTextBytes);
+
+        // Create temp file dir
+        File tempDir = FileUtils.getTempFile("JavaFiddleProj");
+        WebURL javaFiddleProjURL = WebURL.getURL(tempDir);
+        WebFile javaFiddleProjDir = javaFiddleProjURL.createFile(true);
+        javaFiddleProjDir.save();
+
+        // Write to JavaFiddle file
+        String javaFiddlePath = javaFiddleProjDir.getPath() + "/JavaFiddle.java";
+        WebURL javaFiddleURL = WebURL.getURL(javaFiddlePath);
+        WebFile javaFiddleFile = javaFiddleURL.createFile(false);
+        javaFiddleFile.setText(plainText);
+        javaFiddleFile.save();
+
+        // Open file
+        openWorkspaceForFile(javaFiddleFile);
     }
 
     /**

@@ -13,11 +13,15 @@ public class App {
     // The shared instance
     private static App _shared;
 
+    // Launch args
+    public static String[] APP_ARGS;
+
     /**
      * Standard main implementation.
      */
     public static void main(final String[] args)
     {
+        APP_ARGS = args;
         ViewUtils.runLater(() -> new App());
     }
 
@@ -46,6 +50,7 @@ public class App {
     public void showWelcomePanel()
     {
         WelcomePanel.getShared().showPanel();
+        ViewUtils.runLater(() -> handleAppArgs());
     }
 
     /**
@@ -61,6 +66,25 @@ public class App {
         // Flush prefs and exit
         Prefs.getDefaultPrefs().flush();
         GFXEnv.getEnv().exit(0);
+    }
+
+    /**
+     * Called to process app args
+     */
+    private void handleAppArgs()
+    {
+        // Get AppArgs - just return if none
+        String[] appArgs = App.APP_ARGS;
+        if (appArgs == null)
+            return;
+
+        // Handle args
+        for (String appArg : appArgs) {
+
+            // Handle Base64
+            if (appArg.startsWith("#"))
+                WelcomePanel.getShared().openBase64String(appArg);
+        }
     }
 
     /**

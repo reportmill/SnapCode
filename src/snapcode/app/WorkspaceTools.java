@@ -1,5 +1,4 @@
 package snapcode.app;
-import snap.util.SnapUtils;
 import snapcode.javatext.JavaTextPane;
 import snapcode.project.Breakpoints;
 import snapcode.project.BuildIssue;
@@ -299,11 +298,9 @@ public class WorkspaceTools {
         _workspacePane.setWorkspaceForJeplFileSource(aURL);
 
         // Kick off run
-        if (!SnapUtils.isWebVM) {
-            EvalTool evalTool = getToolForClass(EvalTool.class);
-            if (evalTool != null && !evalTool.isAutoRun())
-                evalTool.runApp(false);
-        }
+        EvalTool evalTool = getToolForClass(EvalTool.class);
+        if (evalTool != null && !evalTool.isAutoRun())
+            evalTool.runApp(false);
     }
 
     /**
