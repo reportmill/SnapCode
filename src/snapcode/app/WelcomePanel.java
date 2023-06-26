@@ -9,7 +9,6 @@ import snap.view.*;
 import snap.viewx.FilePanel;
 import snap.web.*;
 import java.io.File;
-import java.util.Base64;
 
 /**
  * An implementation of a panel to manage/open user Snap sites (projects).
@@ -178,18 +177,13 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
-     * Opens a base64 file.
+     * Opens a Java string file.
      */
-    protected void openBase64String(String base64Str)
+    protected void openJavaString(String javaString)
     {
-        // Decode string to plain text
-        if (base64Str.startsWith("#"))
-            base64Str = base64Str.substring(1);
-        byte[] plainTextBytes = Base64.getDecoder().decode(base64Str);
-        String plainText = new String(plainTextBytes);
-
         // Create temp file dir
         File tempDir = FileUtils.getTempFile("JavaFiddleProj");
+        tempDir.deleteOnExit();
         WebURL javaFiddleProjURL = WebURL.getURL(tempDir);
         WebFile javaFiddleProjDir = javaFiddleProjURL.createFile(true);
         javaFiddleProjDir.save();
@@ -198,7 +192,7 @@ public class WelcomePanel extends ViewOwner {
         String javaFiddlePath = javaFiddleProjDir.getPath() + "/JavaFiddle.java";
         WebURL javaFiddleURL = WebURL.getURL(javaFiddlePath);
         WebFile javaFiddleFile = javaFiddleURL.createFile(false);
-        javaFiddleFile.setText(plainText);
+        javaFiddleFile.setText(javaString);
         javaFiddleFile.save();
 
         // Open file

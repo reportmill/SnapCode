@@ -73,6 +73,11 @@ public class App {
      */
     private void handleAppArgs()
     {
+//        String testJavaStr = "Java:  public class JavaFiddle\n" + "  {\n" +
+//                "    public static void main(String[] args)\n" + "    {\n" +
+//                "      System.out.println(\"HelloWorld!\");\n" + "    }\n" + "  }";
+//        APP_ARGS = new String[] { testJavaStr };
+
         // Get AppArgs - just return if none
         String[] appArgs = App.APP_ARGS;
         if (appArgs == null)
@@ -82,8 +87,10 @@ public class App {
         for (String appArg : appArgs) {
 
             // Handle Base64
-            if (appArg.startsWith("#"))
-                WelcomePanel.getShared().openBase64String(appArg);
+            if (appArg.startsWith("Java:")) {
+                String javaStr = appArg.substring("Java:".length());
+                WelcomePanel.getShared().openJavaString(javaStr);
+            }
         }
     }
 
