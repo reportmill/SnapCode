@@ -130,8 +130,15 @@ public class JFile extends JNode {
      */
     public void addImportDecl(JImportDecl anID)
     {
+        // Get index to insert after last import (JeplParser can add extra imports after Class decl added)
+        int index = getChildCount();
+        if (_importDecls.size() > 0 && _classDecls.size() > 0) {
+            JImportDecl lastImportDecl = _importDecls.get(_importDecls.size() - 1);
+            index = _children.indexOf(lastImportDecl);
+        }
+
         _importDecls.add(anID);
-        addChild(anID, -1);
+        addChild(anID, index);
     }
 
     /**
