@@ -96,4 +96,17 @@ public class JavaPackage extends JavaDecl {
         if (i > 0) cname = cname.substring(i + 1);
         return cname;
     }
+
+    /**
+     * Prints the tree.
+     */
+    protected void printTree(String indent)
+    {
+        System.out.println(indent + getSimpleName());
+        String indent2 = indent + "  ";
+        for (JavaPackage pkg : getPackages())
+            pkg.printTree(indent2);
+        for (JavaClass cls : getClasses())
+            System.out.println(indent2 + cls.getSimpleName());
+    }
 }

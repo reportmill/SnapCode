@@ -84,16 +84,16 @@ public class Resolver {
     protected JavaDecl[] getChildrenForPackageName(String aName)
     {
         ClassTree classTree = getClassTree();
-        ClassTreeNode[] childNodes = classTree.getChildNodesForPackageName(aName);
+        ClassTree.ClassTreeNode[] childNodes = classTree.getChildNodesForPackageName(aName);
         return ArrayUtils.map(childNodes, classTreeNode -> getJavaDeclForClassTreeNode(classTreeNode), JavaDecl.class);
     }
 
     /**
      * Returns a JavaDecl for given ClassTreeNode.
      */
-    private JavaDecl getJavaDeclForClassTreeNode(ClassTreeNode classTreeNode)
+    private JavaDecl getJavaDeclForClassTreeNode(ClassTree.ClassTreeNode classTreeNode)
     {
-        if (classTreeNode.isPackage())
+        if (classTreeNode.isPackage)
             return getJavaPackageForName(classTreeNode.fullName);
         return getJavaClassForName(classTreeNode.fullName);
     }

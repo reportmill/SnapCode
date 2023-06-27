@@ -38,7 +38,7 @@ public class ClassTreeX extends ClassTree {
                 if (isPackageDir(rootFile)) {
                     String packageName = rootFile.getName();
                     if (!ListUtils.hasMatch(rootPackagesList, pkgNode -> packageName.equals(pkgNode.fullName))) {
-                        ClassTreeNode rootPackage = new ClassTreeNode(this, _rootPackage, packageName, true);
+                        ClassTreeNode rootPackage = new ClassTreeNode(packageName, true);
                         rootPackagesList.add(rootPackage);
                     }
                 }
@@ -47,36 +47,36 @@ public class ClassTreeX extends ClassTree {
 
         // Add to RootPackage.Children
         ClassTreeNode[] rootPackages = rootPackagesList.toArray(EMPTY_NODE_ARRAY);
-        _rootPackage._children = ArrayUtils.addAll(_rootPackage._children, rootPackages);
+        _rootChildren = ArrayUtils.addAll(_rootChildren, rootPackages);
     }
 
     /**
-     * Returns child ClassTreeNodes for child classes/packages for given package node.
+     * Returns child ClassTreeNodes for child classes/packages for given package name.
      */
     @Override
-    protected ClassTreeNode[] getChildNodesForNode(ClassTreeNode parentNode)
+    protected ClassTreeNode[] getChildNodesForPackageName(String packageName)
     {
         // Get files
-        WebFile[] nodeFiles = getFilesForNode(parentNode);
+        WebFile[] nodeFiles = getFilesForPackageName(packageName);
         if (nodeFiles.length == 0)
             return EMPTY_NODE_ARRAY;
 
         // Iterate over files and Find child classes and packages for each
         List<ClassTreeNode> classTreeNodes = new ArrayList<>(nodeFiles[0].getFileCount());
         for (WebFile nodeFile : nodeFiles)
-            findChildNodesForDirFile(parentNode, nodeFile, classTreeNodes);
+            findChildNodesForDirFile(nodeFile, classTreeNodes);
 
         // Return array
         return classTreeNodes.toArray(EMPTY_NODE_ARRAY);
     }
 
     /**
-     * Returns a file for given node.
+     * Returns a file for given package name.
      */
-    private WebFile[] getFilesForNode(ClassTreeNode classTreeNode)
+    private WebFile[] getFilesForPackageName(String packageName)
     {
         // Get file path
-        String filePath = '/' + classTreeNode.fullName.replace(".", "/");
+        String filePath = '/' + packageName.replace(".", "/");
         WebFile[] files = new WebFile[0];
 
         // Iterate over sites and return first match
@@ -93,7 +93,7 @@ public class ClassTreeX extends ClassTree {
     /**
      * Finds child packages and classes for given package node.
      */
-    private void findChildNodesForDirFile(ClassTreeNode parentNode, WebFile dirFile, List<ClassTreeNode> classTreeNodes)
+    private void findChildNodesForDirFile(WebFile dirFile, List<ClassTreeNode> classTreeNodes)
     {
         // Get directory files
         WebFile[] dirFiles = dirFile.getFiles();
@@ -104,14 +104,14 @@ public class ClassTreeX extends ClassTree {
             // Handle class file
             if (isClassFile(file)) {
                 String className = getClassNameForClassFile(file);
-                ClassTreeNode classNode = new ClassTreeNode(this, parentNode, className, false);
+                ClassTreeNode classNode = new ClassTreeNode(className, false);
                 classTreeNodes.add(classNode);
             }
 
             // Handle package
             if (isPackageDir(file)) {
                 String packageName = getPackageNameForPackageDirFile(file);
-                ClassTreeNode packageNode = new ClassTreeNode(this, parentNode, packageName, true);
+                ClassTreeNode packageNode = new ClassTreeNode(packageName, true);
                 classTreeNodes.add(packageNode);
             }
         }

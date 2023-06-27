@@ -3,8 +3,8 @@
  */
 package javakit.resolver;
 import snap.util.ArrayUtils;
+import snap.util.StringUtils;
 
-import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -13,10 +13,7 @@ import java.util.function.Predicate;
 public class ClassTree {
 
     // The root package
-    protected ClassTreeNode _rootPackage;
-
-    // The packages
-    private Map<String, ClassTreeNode>  _packages = new HashMap<>();
+    protected ClassTreeNode[] _rootChildren;
 
     // Constants
     public static final ClassTreeNode[] EMPTY_NODE_ARRAY = new ClassTreeNode[0];
@@ -31,44 +28,9 @@ public class ClassTree {
     {
         super();
 
-        // Create RootPackage
-        _rootPackage = new ClassTreeNode(this, null, "", true);
-        _packages.put("", _rootPackage);
-
         // Add primitive classes
         Class<?>[] primitives = { boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class };
-        _rootPackage._children = ArrayUtils.map(primitives, cls -> new ClassTreeNode(this, _rootPackage, cls.getName(), false), ClassTreeNode.class);
-    }
-
-    /**
-     * Returns the root package.
-     */
-    public ClassTreeNode getRootPackage()  { return _rootPackage; }
-
-    /**
-     * Returns a package for name.
-     */
-    public ClassTreeNode getPackageForName(String aName)
-    {
-        // Get package for name from cache - just return if found
-        ClassTreeNode packageNode = _packages.get(aName);
-        if (packageNode != null)
-            return packageNode;
-
-        // Get parent node
-        String parentNodeName = getParentNodeName(aName);
-        ClassTreeNode parentNode = getPackageForName(parentNodeName);
-
-        // Create
-        packageNode = new ClassTreeNode(this, parentNode, aName, true);
-
-        // If simple ClassTree, add child
-        if (getClass() == ClassTree.class)
-            parentNode.addChild(packageNode);
-
-        // Set, return
-        _packages.put(aName, packageNode);
-        return packageNode;
+        _rootChildren = ArrayUtils.map(primitives, cls -> new ClassTreeNode(cls.getName(), false), ClassTreeNode.class);
     }
 
     /**
@@ -78,40 +40,21 @@ public class ClassTree {
     {
         // Handle root package special
         if (packageName.length() == 0)
-            return getRootPackage().getChildren();
+            return _rootChildren;
 
-        // Get package node and children
-        ClassTreeNode packageNode = getPackageForName(packageName);
-        return getChildNodesForNode(packageNode);
-    }
-
-    /**
-     * Returns ClassTreeNode array for classes and child packages for given node.
-     */
-    protected ClassTreeNode[] getChildNodesForNode(ClassTreeNode parentNode)
-    {
         // Get child class names matching package name
-        String prefix = parentNode.fullName + '.';
+        String prefix = packageName + '.';
         Predicate<String> isChildNode = className -> className.startsWith(prefix) && className.indexOf('.', prefix.length()) < 0;
+
+        // Get childClassNames
+        String[] childPackageNames = ArrayUtils.filter(COMMON_PACKAGE_NAMES, isChildNode);
         String[] childClassNames = ArrayUtils.filter(COMMON_CLASS_NAMES, isChildNode);
+        String[] childNames = childPackageNames.length == 0 ? childClassNames :
+                childClassNames.length == 0 ? childPackageNames :
+                ArrayUtils.addAll(childPackageNames, childClassNames);
 
         // Create/return ClassTreeNode array for class names
-        return ArrayUtils.map(childClassNames, className -> new ClassTreeNode(this, parentNode, className, false), ClassTreeNode.class);
-    }
-
-    /**
-     * Prints the tree.
-     */
-    protected void printTree(ClassTreeNode aNode, String indent)
-    {
-        System.out.println(indent + aNode.simpleName);
-        if (aNode.isPackage()) {
-            String indent2 = indent + "  ";
-            for (ClassTreeNode pkg : aNode.getPackages())
-                printTree(pkg, indent2);
-            for (ClassTreeNode cls : aNode.getClasses())
-                printTree(cls, indent2);
-        }
+        return ArrayUtils.map(childNames, className -> new ClassTreeNode(className, false), ClassTreeNode.class);
     }
 
     /**
@@ -129,17 +72,6 @@ public class ClassTree {
     }
 
     /**
-     * Returns a parent node name for given node name.
-     */
-    protected static String getParentNodeName(String aNodeName)
-    {
-        int sepIndex = aNodeName.lastIndexOf('.');
-        if (sepIndex < 0)
-            return "";
-        return aNodeName.substring(0, sepIndex);
-    }
-
-    /**
      * Returns the shared instance.
      */
     public static ClassTree getShared()
@@ -149,24 +81,12 @@ public class ClassTree {
 
         // Create simple class tree
         ClassTree classTree = new ClassTree();
-
-        // Get unique packages names and make packages get explicitly created
-        Set<String> packageNames = new HashSet<>();
-        for (String className : COMMON_CLASS_NAMES)
-            packageNames.add(getParentNodeName(className));
-        for (String packageName : packageNames)
-            classTree.getPackageForName(packageName);
+        String[] rooPackageNames = new String[] { "java", "snap", "snapcharts" };
+        ClassTreeNode[] rootPackages = ArrayUtils.map(rooPackageNames, pkgName -> new ClassTreeNode(pkgName, false), ClassTreeNode.class);
+        classTree._rootChildren = ArrayUtils.addAll(classTree._rootChildren, rootPackages);
 
         // Set and return
         return _shared = classTree;
-    }
-
-    /**
-     * Adds to the CommonClassNames.
-     */
-    public static void addCommonClassNames(String[] moreNames)
-    {
-        COMMON_CLASS_NAMES = ArrayUtils.addAll(COMMON_CLASS_NAMES, moreNames);
     }
 
     /**
@@ -194,6 +114,65 @@ public class ClassTree {
 
             // Snap.view
             "snap.view.Button", "snap.view.Label", "snap.view.View", "snap.view.ViewOwner",
-            "snap.view.Slider", "snap.view.TextField", "snap.view.ProgressBar", "snap.view.Spinner"
+            "snap.view.Slider", "snap.view.TextField", "snap.view.ProgressBar", "snap.view.Spinner",
+
+            // Snapcharts.data, repl
+            "snapcharts.data.DoubleArray",
+            "snapcharts.repl.Quick3D", "snapcharts.repl.QuickCharts",
+            "snapcharts.repl.QuickData", "snapcharts.repl.QuickDraw", "snapcharts.repl.QuickDrawPen"
     };
+
+    /**
+     * An array of common class names.
+     */
+    private static String[] COMMON_PACKAGE_NAMES = {
+        "java", "java.lang", "java.util", "java.io",
+        "snap", "snap.gfx", "snap.view",
+        "snapcharts", "snapcharts.data", "snapcharts.repl"
+    };
+
+    /**
+     * A class to hold package info.
+     */
+    public static class ClassTreeNode {
+
+        // Whether node is package
+        public final boolean isPackage;
+
+        // The package full name
+        public final String fullName;
+
+        // The package simple name
+        public final String simpleName;
+
+        /**
+         * Constructor.
+         */
+        public ClassTreeNode(String aPackageName, boolean isPackage)
+        {
+            super();
+            this.isPackage = isPackage;
+            fullName = aPackageName;
+            simpleName = getSimpleNodeName(aPackageName);
+        }
+
+        /**
+         * Standard toString implementation.
+         */
+        public String toString()
+        {
+            // Get class name
+            String className = getClass().getSimpleName();
+
+            // Get prop strings: FullName, SimpleName, Parent
+            StringBuffer propStrings = new StringBuffer();
+            if (isPackage)
+                StringUtils.appendProp(propStrings, "Package", true);
+            StringUtils.appendProp(propStrings, "FullName", fullName);
+            StringUtils.appendProp(propStrings, "SimpleName", simpleName);
+
+            // Return
+            return className + " { " + propStrings + " }";
+        }
+    }
 }

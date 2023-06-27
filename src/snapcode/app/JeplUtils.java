@@ -4,8 +4,6 @@ import snapcode.project.*;
 import snap.gfx.Font;
 import snap.text.TextStyle;
 import snap.util.SnapUtils;
-import snapcharts.data.DoubleArray;
-import snapcharts.repl.*;
 
 /**
  * Utilities to support Jepl files.
@@ -29,9 +27,6 @@ public class JeplUtils {
 
         // For TeaVM: Link up StaticResolver
         //if (Resolver.isTeaVM) javakit.resolver.StaticResolver.shared()._next = new StaticResolver();
-
-        // Add more common class names from SnapCode
-        javakit.resolver.ClassTree.addCommonClassNames(MORE_COMMON_CLASS_NAMES);
     }
 
     /**
@@ -69,16 +64,4 @@ public class JeplUtils {
         buildFile.addMavenDependencyForGroupAndPackageAndVersion("com.reportmill", "snapkit", "2023.06");
         buildFile.addMavenDependencyForGroupAndPackageAndVersion("com.reportmill", "snapcharts", "2023.06");
     }
-
-    /**
-     * Common class names for browser.
-     */
-    private static String[] MORE_COMMON_CLASS_NAMES = {
-            Quick3D.class.getName(),
-            QuickCharts.class.getName(),
-            QuickData.class.getName(),
-            QuickDraw.class.getName(),
-            QuickDrawPen.class.getName(),
-            DoubleArray.class.getName()
-    };
 }
