@@ -139,8 +139,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         }
 
         // Add import for suggestion Class, if not present
-        JFile jfile = selNode.getFile();
-        addImportForDecl(completionDecl, jfile);
+        addImportForNodeAndDecl(selNode, completionDecl);
 
         // Hide PopupList
         hide();
@@ -190,27 +189,33 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     }
 
     /**
-     * Inserts the import statement for suggestion into text, if missing.
+     * Adds the import statement for completed decl into text, if missing.
      */
-    protected void addImportForDecl(JavaDecl aDecl, JFile aFile)
+    protected void addImportForNodeAndDecl(JNode aNode, JavaDecl aDecl)
     {
-        // Handle JavaClass
-        if (aDecl instanceof JavaClass)
-            addImportForClass((JavaClass) aDecl, aFile);
+        // Handle JavaClass: Add import for class (unless in import decl)
+        if (aDecl instanceof JavaClass) {
+            if (aNode.getParent(JImportDecl.class) != null)
+                return;
+            addImportForNodeAndClass(aNode, (JavaClass) aDecl);
+        }
 
         // Handle JavaConstructor
         if (aDecl instanceof JavaConstructor) {
             JavaClass javaClass = ((JavaConstructor) aDecl).getDeclaringClass();
             if (javaClass != null)
-                addImportForClass(javaClass, aFile);
+                addImportForNodeAndClass(aNode, javaClass);
         }
     }
 
     /**
-     * Inserts the import statement for completed class into text, if missing.
+     * Adds the import statement for completed decl into text, if missing.
      */
-    protected void addImportForClass(JavaClass aJavaClass, JFile aFile)
+    protected void addImportForNodeAndClass(JNode aNode, JavaClass aJavaClass)
     {
+        // Get JFile
+        JFile aFile = aNode.getFile();
+
         // Get ClassName, SimpleName
         String className = aJavaClass.getClassName();
         String simpleName = aJavaClass.getSimpleName();
