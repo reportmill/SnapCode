@@ -74,6 +74,20 @@ public class ClassTree {
     /**
      * Returns ClassTreeNode array for classes and child packages for given node.
      */
+    protected ClassTreeNode[] getChildNodesForPackageName(String packageName)
+    {
+        // Handle root package special
+        if (packageName.length() == 0)
+            return getRootPackage().getChildren();
+
+        // Get package node and children
+        ClassTreeNode packageNode = getPackageForName(packageName);
+        return getChildNodesForNode(packageNode);
+    }
+
+    /**
+     * Returns ClassTreeNode array for classes and child packages for given node.
+     */
     protected ClassTreeNode[] getChildNodesForNode(ClassTreeNode parentNode)
     {
         // Get child class names matching package name

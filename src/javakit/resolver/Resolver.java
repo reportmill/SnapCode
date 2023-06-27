@@ -4,6 +4,7 @@
 package javakit.resolver;
 import java.lang.reflect.*;
 import java.util.*;
+import snap.util.ArrayUtils;
 import snap.util.ClassUtils;
 import snap.util.SnapUtils;
 
@@ -75,6 +76,26 @@ public class Resolver {
         // Create, set, return
         String[] classPaths = getClassPaths();
         return _classTree = new ClassTreeX(classPaths);
+    }
+
+    /**
+     * Returns the children for given package.
+     */
+    protected JavaDecl[] getChildrenForPackageName(String aName)
+    {
+        ClassTree classTree = getClassTree();
+        ClassTreeNode[] childNodes = classTree.getChildNodesForPackageName(aName);
+        return ArrayUtils.map(childNodes, classTreeNode -> getJavaDeclForClassTreeNode(classTreeNode), JavaDecl.class);
+    }
+
+    /**
+     * Returns a JavaDecl for given ClassTreeNode.
+     */
+    private JavaDecl getJavaDeclForClassTreeNode(ClassTreeNode classTreeNode)
+    {
+        if (classTreeNode.isPackage())
+            return getJavaPackageForName(classTreeNode.fullName);
+        return getJavaClassForName(classTreeNode.fullName);
     }
 
     /**
