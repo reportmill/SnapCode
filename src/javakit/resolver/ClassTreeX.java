@@ -111,8 +111,10 @@ public class ClassTreeX extends ClassTree {
             // Handle package
             if (isPackageDir(file)) {
                 String packageName = getPackageNameForPackageDirFile(file);
-                ClassTreeNode packageNode = new ClassTreeNode(packageName, true);
-                classTreeNodes.add(packageNode);
+                if (!ListUtils.hasMatch(classTreeNodes, classTreeNode -> classTreeNode.fullName.equals(packageName))) {
+                    ClassTreeNode packageNode = new ClassTreeNode(packageName, true);
+                    classTreeNodes.add(packageNode);
+                }
             }
         }
     }
@@ -240,6 +242,7 @@ public class ClassTreeX extends ClassTree {
         if (aPath.startsWith("/jdk")) return true;
         if (aPath.startsWith("/org/omg")) return true;
         if (aPath.startsWith("/org/w3c")) return true;
+        if (aPath.startsWith("/META-INF")) return true;
 
         // If inner class, return false
         if (aPath.contains("$"))

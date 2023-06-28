@@ -49,8 +49,7 @@ public class JavaPackage extends JavaDecl {
         if (_children != null) return _children;
 
         // Get children
-        String name = getName();
-        JavaDecl[] children = _resolver.getChildrenForPackageName(name);
+        JavaDecl[] children = _resolver.getChildrenForPackage(this);
 
         // Set and return
         return _children = children;
@@ -84,6 +83,15 @@ public class JavaPackage extends JavaDecl {
 
         // Set and return
         return _classes = classes;
+    }
+
+    /**
+     * Returns the child package for given name.
+     */
+    public JavaPackage getPackageForName(String aName)
+    {
+        JavaPackage[] childPackages = getPackages();
+        return ArrayUtils.findMatch(childPackages, pkg -> pkg.getName().equals(aName));
     }
 
     /**

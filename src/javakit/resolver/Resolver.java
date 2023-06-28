@@ -81,20 +81,21 @@ public class Resolver {
     /**
      * Returns the children for given package.
      */
-    protected JavaDecl[] getChildrenForPackageName(String aName)
+    protected JavaDecl[] getChildrenForPackage(JavaPackage parentPackage)
     {
         ClassTree classTree = getClassTree();
-        ClassTree.ClassTreeNode[] childNodes = classTree.getChildNodesForPackageName(aName);
-        return ArrayUtils.map(childNodes, classTreeNode -> getJavaDeclForClassTreeNode(classTreeNode), JavaDecl.class);
+        String packageName = parentPackage.getName();
+        ClassTree.ClassTreeNode[] childNodes = classTree.getChildNodesForPackageName(packageName);
+        return ArrayUtils.map(childNodes, classTreeNode -> getJavaDeclForClassTreeNode(parentPackage, classTreeNode), JavaDecl.class);
     }
 
     /**
      * Returns a JavaDecl for given ClassTreeNode.
      */
-    private JavaDecl getJavaDeclForClassTreeNode(ClassTree.ClassTreeNode classTreeNode)
+    private JavaDecl getJavaDeclForClassTreeNode(JavaPackage parentPackage, ClassTree.ClassTreeNode classTreeNode)
     {
         if (classTreeNode.isPackage)
-            return getJavaPackageForName(classTreeNode.fullName);
+            return new JavaPackage(this, parentPackage, classTreeNode.fullName);
         return getJavaClassForName(classTreeNode.fullName);
     }
 
@@ -165,8 +166,8 @@ public class Resolver {
      */
     public boolean isKnownPackageName(String aName)
     {
-        boolean known = _packages.containsKey(aName);
-        return known;
+        JavaPackage pkg = getJavaPackageForName(aName);
+        return pkg != null;
     }
 
     /**
@@ -179,20 +180,35 @@ public class Resolver {
         if (pkg != null)
             return pkg;
 
-        // Get parent package
-        JavaPackage parent = null;
-        int ind = aName.lastIndexOf('.');
-        if (ind >= 0) {
-            String pkgName = aName.substring(0, ind);
-            parent = getJavaPackageForName(pkgName);
-        }
-
-        // Create new JavaPackage and add to Packages cache
-        pkg = new JavaPackage(this, parent, aName);
-        _packages.put(aName, pkg);
+        // Create JavaPackage and add to Packages cache
+        pkg = getJavaPackageForNameImpl(aName);
+        if (pkg != null)
+            _packages.put(aName, pkg);
 
         // Return
         return pkg;
+    }
+
+    /**
+     * Returns a package decl.
+     */
+    private JavaPackage getJavaPackageForNameImpl(String aName)
+    {
+        // If root package, just create/return
+        if (aName.length() == 0)
+            return new JavaPackage(this, null, "");
+
+        // Get parent package name
+        int lastSeperatorIndex = aName.lastIndexOf('.');
+        String parentPackageName = lastSeperatorIndex > 0 ? aName.substring(0, lastSeperatorIndex) : "";
+
+        // Get parent package
+        JavaPackage parentPackage = getJavaPackageForName(parentPackageName);
+        if (parentPackage == null)
+            return null;
+
+        // Find and return child package
+        return parentPackage.getPackageForName(aName);
     }
 
     /**
