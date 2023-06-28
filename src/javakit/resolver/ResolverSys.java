@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.resolver;
-import snap.util.SnapUtils;
 import java.lang.reflect.*;
 import java.util.Arrays;
 
@@ -160,18 +159,6 @@ public class ResolverSys extends Resolver {
         // Create VarArgs array of proper class and set in new args array
         int varArgsCount = theArgs.length - varArgIndex;
         Object varArgArray = args[varArgIndex] = Array.newInstance(varArgClass, varArgsCount);
-
-        // Hack for WebVM error
-        if (SnapUtils.isWebVM) {
-            if (varArgArray instanceof Object[]) {
-                Object[] varArgs = (Object[]) varArgArray;
-                for (int i = 0; i < varArgsCount; i++) {
-                    Object varArg = theArgs[i + varArgIndex];
-                    varArgs[i] = varArg;
-                }
-                return args;
-            }
-        }
 
         // Copy var args over from given args array to new VarArgsArray
         for (int i = 0; i < varArgsCount; i++) {

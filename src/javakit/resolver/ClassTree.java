@@ -53,7 +53,7 @@ public class ClassTree {
                 ArrayUtils.addAll(childPackageNames, childClassNames);
 
         // Create/return ClassTreeNode array for class names
-        return ArrayUtils.map(childNames, className -> new ClassTreeNode(className, false), ClassTreeNode.class);
+        return ArrayUtils.map(childNames, className -> new ClassTreeNode(className, ArrayUtils.contains(childPackageNames, className)), ClassTreeNode.class);
     }
 
     /**
@@ -81,7 +81,7 @@ public class ClassTree {
         // Create simple class tree
         ClassTree classTree = new ClassTree();
         String[] rooPackageNames = new String[] { "java", "snap", "snapcharts" };
-        ClassTreeNode[] rootPackages = ArrayUtils.map(rooPackageNames, pkgName -> new ClassTreeNode(pkgName, false), ClassTreeNode.class);
+        ClassTreeNode[] rootPackages = ArrayUtils.map(rooPackageNames, pkgName -> new ClassTreeNode(pkgName, true), ClassTreeNode.class);
         classTree._rootChildren = ArrayUtils.addAll(classTree._rootChildren, rootPackages);
 
         // Set and return
