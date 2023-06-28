@@ -86,6 +86,8 @@ public class DeclMatcher {
             for (String commonPackageName : COMMON_PACKAGES) {
                 JavaPackage commonPackage = aResolver.getJavaPackageForName(commonPackageName);
                 findClassesForPackageDeep(commonPackage, matchingClasses, limit);
+                if (matchingClasses.size() >= limit)
+                    return matchingClasses.toArray(new JavaClass[0]);
             }
         }
 

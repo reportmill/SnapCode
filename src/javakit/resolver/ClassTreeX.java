@@ -243,6 +243,7 @@ public class ClassTreeX extends ClassTree {
         if (aPath.startsWith("/java/nio/channels")) return true;
         if (aPath.startsWith("/java/security")) return true;
         if (aPath.startsWith("/java/util/Spliterators")) return true;
+        if (aPath.startsWith("/javax/swing/plaf")) return true;
         if (aPath.startsWith("/jdk")) return true;
         if (aPath.startsWith("/org/omg")) return true;
         if (aPath.startsWith("/org/w3c")) return true;
