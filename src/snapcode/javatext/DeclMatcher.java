@@ -125,7 +125,7 @@ public class DeclMatcher {
     {
         // If not common or root package, check package classes
         String packageName = aPackageNode.getFullName();
-        if (!ArrayUtils.contains(COMMON_PACKAGES, packageName) && packageName.length() == 0) {
+        if (!ArrayUtils.contains(COMMON_PACKAGES, packageName) && packageName.length() > 0) {
             findClassesForPackage(aPackageNode, matchingClasses, limit);
             if (matchingClasses.size() >= limit)
                 return;
