@@ -56,6 +56,10 @@ public class ClassTreeX extends ClassTree {
     @Override
     protected ClassTreeNode[] getChildNodesForPackageName(String packageName)
     {
+        // Handle root package special
+        if (packageName.length() == 0)
+            return _rootChildren;
+
         // Get files
         WebFile[] nodeFiles = getFilesForPackageName(packageName);
         if (nodeFiles.length == 0)

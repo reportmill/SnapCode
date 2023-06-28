@@ -4,7 +4,6 @@
 package javakit.resolver;
 import snap.util.ArrayUtils;
 import snap.util.StringUtils;
-
 import java.util.function.Predicate;
 
 /**

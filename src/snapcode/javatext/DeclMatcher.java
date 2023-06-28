@@ -69,6 +69,10 @@ public class DeclMatcher {
         List<JavaClass> matchingClasses = new ArrayList<>();
         int limit = 20;
 
+        // Search root package
+        JavaPackage rootPackage = aResolver.getJavaPackageForName("");
+        findClassesForPackage(rootPackage, matchingClasses, limit);
+
         // Search COMMON_PACKAGES
         for (String commonPackageName : COMMON_PACKAGES) {
             JavaPackage commonPackage = aResolver.getJavaPackageForName(commonPackageName);
@@ -86,10 +90,7 @@ public class DeclMatcher {
         }
 
         // Search all packages
-        else {
-            JavaPackage rootPackage = aResolver.getJavaPackageForName("");
-            findClassesForPackageDeep(rootPackage, matchingClasses, limit);
-        }
+        else findClassesForPackageDeep(rootPackage, matchingClasses, limit);
 
         // Return
         return matchingClasses.toArray(new JavaClass[0]);
@@ -122,8 +123,9 @@ public class DeclMatcher {
      */
     private void findClassesForPackageDeep(JavaPackage aPackageNode, List<JavaClass> matchingClasses, int limit)
     {
-        // If not common package, check package classes
-        if (!ArrayUtils.contains(COMMON_PACKAGES, aPackageNode.getFullName())) {
+        // If not common or root package, check package classes
+        String packageName = aPackageNode.getFullName();
+        if (!ArrayUtils.contains(COMMON_PACKAGES, packageName) && packageName.length() == 0) {
             findClassesForPackage(aPackageNode, matchingClasses, limit);
             if (matchingClasses.size() >= limit)
                 return;
