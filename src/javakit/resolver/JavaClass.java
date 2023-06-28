@@ -23,6 +23,9 @@ public class JavaClass extends JavaType {
     // The super class type (could be ParameterizedType)
     private JavaType  _superType;
 
+    // The super class name
+    private String _superClassName;
+
     // The super class
     private JavaClass  _superClass;
 
@@ -49,6 +52,9 @@ public class JavaClass extends JavaType {
 
     // The type var decls
     protected List<JavaTypeVariable>  _typeVarDecls = new ArrayList<>();
+
+    // The Array component type name (if Array)
+    private String _componentTypeName;
 
     // The Array component type (if Array)
     private JavaClass  _componentType;
@@ -101,12 +107,12 @@ public class JavaClass extends JavaType {
         // Get type super type and set in decl
         Class<?> superClass = aClass.getSuperclass();
         if (superClass != null)
-            _superClass = _resolver.getJavaClassForClass(superClass);
+            _superClassName = superClass.getName();
 
         // If Array, set Component class
         if (aClass.isArray()) {
             Class<?> compClass = aClass.getComponentType();
-            _componentType = getJavaClassForClass(compClass);
+            _componentTypeName = compClass.getName();
         }
     }
 
@@ -151,6 +157,8 @@ public class JavaClass extends JavaType {
 
         // Get type super type and set in decl
         _superClass = aClassDecl.getSuperClass();
+        if (_superClass != null)
+            _superClassName = _superClass.getName();
     }
 
     /**
@@ -186,7 +194,11 @@ public class JavaClass extends JavaType {
     {
         // If already set or Object.class, just return
         if (_superType != null) return _superType;
-        if (_superClass == null) return null;
+
+        // Get super class (just return if null)
+        JavaClass superClass = getSuperClass();
+        if (superClass == null)
+            return null;
 
         // Get GenericSuperClass as JavaType
         Class<?> realClass = getRealClass();
@@ -202,7 +214,12 @@ public class JavaClass extends JavaType {
      */
     public JavaClass getSuperClass()
     {
-        return _superClass;
+        if (_superClass != null) return _superClass;
+        if (_superClassName == null)
+            return null;
+
+        JavaClass superClass = _resolver.getJavaClassForName(_superClassName);
+        return _superClass = superClass;
     }
 
     /**
@@ -259,12 +276,19 @@ public class JavaClass extends JavaType {
     /**
      * Returns whether is an array.
      */
-    public boolean isArray()  { return _componentType != null; }
+    public boolean isArray()  { return _componentTypeName != null; }
 
     /**
      * Returns the Array component type (if Array).
      */
-    public JavaClass getComponentType()  { return _componentType; }
+    public JavaClass getComponentType()
+    {
+        if (_componentType != null) return _componentType;
+        if (_componentTypeName == null)
+            return null;
+        JavaClass componentType = _resolver.getJavaClassForName(_componentTypeName);
+        return _componentType = componentType;
+    }
 
     /**
      * Returns whether is primitive.
@@ -348,8 +372,11 @@ public class JavaClass extends JavaType {
     public JavaField getFieldDeepForName(String aName)
     {
         JavaField field = getFieldForName(aName);
-        if (field == null && _superClass != null)
-            field = _superClass.getFieldDeepForName(aName);
+        if (field == null) {
+            JavaClass superClass = getSuperClass();
+            if (superClass != null)
+                field = superClass.getFieldDeepForName(aName);
+        }
 
         // Return
         return field;
@@ -377,8 +404,13 @@ public class JavaClass extends JavaType {
     public JavaConstructor getConstructorDeepForTypes(JavaType[] theTypes)
     {
         JavaConstructor decl = getConstructorForTypes(theTypes);
-        if (decl == null && _superClass != null)
-            decl = _superClass.getConstructorDeepForTypes(theTypes);
+        if (decl == null) {
+            JavaClass superClass = getSuperClass();
+            if (superClass != null)
+                decl = superClass.getConstructorDeepForTypes(theTypes);
+        }
+
+        // Return
         return decl;
     }
 
@@ -406,8 +438,13 @@ public class JavaClass extends JavaType {
     public JavaMethod getMethodDeepForNameAndTypes(String aName, JavaType[] theTypes)
     {
         JavaMethod method = getMethodForNameAndTypes(aName, theTypes);
-        if (method == null && _superClass != null)
-            method = _superClass.getMethodDeepForNameAndTypes(aName, theTypes);
+        if (method == null) {
+            JavaClass superClass = getSuperClass();
+            if (superClass != null)
+                method = superClass.getMethodDeepForNameAndTypes(aName, theTypes);
+        }
+
+        // Return
         return method;
     }
 
@@ -434,8 +471,11 @@ public class JavaClass extends JavaType {
         JavaClass innerClass = getInnerClassForName(aName);
 
         // Check super classes
-        if (innerClass == null && _superClass != null)
-            innerClass = _superClass.getInnerClassDeepForName(aName);
+        if (innerClass == null) {
+            JavaClass superClass = getSuperClass();
+            if (superClass != null)
+                innerClass = superClass.getInnerClassDeepForName(aName);
+        }
 
         // Check interfaces
 

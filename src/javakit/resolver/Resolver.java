@@ -86,7 +86,14 @@ public class Resolver {
         ClassTree classTree = getClassTree();
         String packageName = parentPackage.getName();
         ClassTree.ClassTreeNode[] childNodes = classTree.getChildNodesForPackageName(packageName);
-        return ArrayUtils.map(childNodes, classTreeNode -> getJavaDeclForClassTreeNode(parentPackage, classTreeNode), JavaDecl.class);
+        JavaDecl[] children = ArrayUtils.map(childNodes, classTreeNode -> getJavaDeclForClassTreeNode(parentPackage, classTreeNode), JavaDecl.class);
+
+        // Filter out null
+        if (ArrayUtils.hasMatch(children, child -> child == null))
+            children = ArrayUtils.filter(children, child -> child != null);
+
+        // Return
+        return children;
     }
 
     /**
@@ -94,9 +101,17 @@ public class Resolver {
      */
     private JavaDecl getJavaDeclForClassTreeNode(JavaPackage parentPackage, ClassTree.ClassTreeNode classTreeNode)
     {
+        // If package, create/return package
         if (classTreeNode.isPackage)
             return new JavaPackage(this, parentPackage, classTreeNode.fullName);
-        return getJavaClassForName(classTreeNode.fullName);
+
+        // Otherwise, create and return class
+        Class<?> cls = getClassForName(classTreeNode.fullName);
+        if (cls == null) { // This should never happen
+            System.err.println("Resolver.getJavaDeclForClassTreeNode: Can't find class: " + classTreeNode.fullName);
+            return null;
+        }
+        return new JavaClass(this, parentPackage, cls);
     }
 
     /**
@@ -151,14 +166,36 @@ public class Resolver {
         if (javaClass != null)
             return javaClass;
 
+        // Handle array type
+        if (aClass.isArray())
+            return new JavaClass(this, null, aClass);
+
         // Get parent package or class for class
-        JavaDecl parDecl = getParentPackageOrClassForClass(aClass);
+        JavaDecl parentPackageOrClass = getParentPackageOrClassForClass(aClass);
 
-        // Create JavaClass and add to Classes cache map (this is done in constructor)
-        javaClass = new JavaClass(this, parDecl, aClass);
+        // Handle parent package
+        if (parentPackageOrClass instanceof JavaPackage) {
+            JavaPackage javaPackage = (JavaPackage) parentPackageOrClass;
+            javaClass = javaPackage.getClassForFullName(className);
+            if (javaClass != null)
+                return javaClass;
+        }
 
-        // Return
-        return javaClass;
+        // Handle parent class
+        else if (parentPackageOrClass instanceof JavaClass) {
+            JavaClass parentClass = (JavaClass) parentPackageOrClass;
+            int separtorIndex = className.lastIndexOf('$');
+            if (separtorIndex < 0)
+                System.err.println("Resolver.getJavaClassForClass: Simple name not found for: " + className);
+            String simpleName = className.substring(separtorIndex + 1);
+            javaClass = parentClass.getInnerClassForName(simpleName);
+            if (javaClass != null)
+                return javaClass;
+        }
+
+        // Create orphan JavaClass
+        //System.err.println("Resolver.getJavaClassForClass: Can't find parent for class: " + aClass);
+        return new JavaClass(this, parentPackageOrClass, aClass);
     }
 
     /**
@@ -208,7 +245,7 @@ public class Resolver {
             return null;
 
         // Find and return child package
-        return parentPackage.getPackageForName(aName);
+        return parentPackage.getPackageForFullName(aName);
     }
 
     /**

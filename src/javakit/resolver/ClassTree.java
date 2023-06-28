@@ -28,7 +28,7 @@ public class ClassTree {
         super();
 
         // Add primitive classes
-        Class<?>[] primitives = { boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class };
+        Class<?>[] primitives = { boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class, void.class };
         _rootChildren = ArrayUtils.map(primitives, cls -> new ClassTreeNode(cls.getName(), false), ClassTreeNode.class);
     }
 

@@ -86,12 +86,21 @@ public class JavaPackage extends JavaDecl {
     }
 
     /**
-     * Returns the child package for given name.
+     * Returns the child package for given full name.
      */
-    public JavaPackage getPackageForName(String aName)
+    public JavaPackage getPackageForFullName(String aName)
     {
         JavaPackage[] childPackages = getPackages();
         return ArrayUtils.findMatch(childPackages, pkg -> pkg.getName().equals(aName));
+    }
+
+    /**
+     * Returns the child class for given full name.
+     */
+    public JavaClass getClassForFullName(String aName)
+    {
+        JavaClass[] childClasses = getClasses();
+        return ArrayUtils.findMatch(childClasses, cls -> cls.getName().equals(aName));
     }
 
     /**

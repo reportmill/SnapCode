@@ -8,10 +8,7 @@ import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
 import snap.util.StringUtils;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,6 +73,8 @@ public class DeclMatcher {
         // Search COMMON_PACKAGES
         for (String commonPackageName : COMMON_PACKAGES) {
             JavaPackage commonPackage = aResolver.getJavaPackageForName(commonPackageName);
+            if (commonPackage == null) // WebVM
+                continue;
             findClassesForPackage(commonPackage, matchingClasses, limit);
             if (matchingClasses.size() >= limit)
                 return matchingClasses.toArray(new JavaClass[0]);
@@ -85,6 +84,8 @@ public class DeclMatcher {
         if (SnapUtils.isWebVM) {
             for (String commonPackageName : COMMON_PACKAGES) {
                 JavaPackage commonPackage = aResolver.getJavaPackageForName(commonPackageName);
+                if (commonPackage == null) // WebVM
+                    continue;
                 findClassesForPackageDeep(commonPackage, matchingClasses, limit);
                 if (matchingClasses.size() >= limit)
                     return matchingClasses.toArray(new JavaClass[0]);
