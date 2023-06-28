@@ -201,7 +201,7 @@ public class ClassTreeX extends ClassTree {
         if (aFile.getName().indexOf('.') > 0)
             return false;
         String path = aFile.getPath();
-        if (!isInterestingPath(path))
+        if (isIgnorePath(path))
             return false;
         return true;
     }
@@ -214,39 +214,38 @@ public class ClassTreeX extends ClassTree {
         String path = aFile.getPath();
         if (!path.endsWith(".class"))
             return false;
-        if (!isInterestingPath(path))
+        if (isIgnorePath(path))
             return false;
         return true;
     }
 
     /**
-     * Adds an entry (override to ignore).
+     * Returns whether given package/class path should be ignored.
      */
-    private static boolean isInterestingPath(String aPath)
+    private static boolean isIgnorePath(String aPath)
     {
-        if (aPath.startsWith("/sun")) return false;
-        if (aPath.startsWith("/apple")) return false;
-        if (aPath.startsWith("/com/sun")) return false;
-        if (aPath.startsWith("/com/apple")) return false;
-        if (aPath.startsWith("/com/oracle")) return false;
-        if (aPath.startsWith("/java/applet")) return false;
-        if (aPath.startsWith("/java/awt/dnd")) return false;
-        if (aPath.startsWith("/java/awt/datatransfer")) return false;
-        if (aPath.startsWith("/java/awt/im")) return false;
-        if (aPath.startsWith("/java/lang/model")) return false;
-        if (aPath.startsWith("/java/nio/channels")) return false;
-        if (aPath.startsWith("/java/security")) return false;
-        if (aPath.startsWith("/java/util/Spliterators")) return false;
-        if (aPath.startsWith("/jdk")) return false;
-        if (aPath.startsWith("/org/omg")) return false;
-        if (aPath.startsWith("/org/w3c")) return false;
+        if (aPath.startsWith("/sun")) return true;
+        if (aPath.startsWith("/apple")) return true;
+        if (aPath.startsWith("/com/sun")) return true;
+        if (aPath.startsWith("/com/apple")) return true;
+        if (aPath.startsWith("/com/oracle")) return true;
+        if (aPath.startsWith("/java/applet")) return true;
+        if (aPath.startsWith("/java/awt/dnd")) return true;
+        if (aPath.startsWith("/java/awt/datatransfer")) return true;
+        if (aPath.startsWith("/java/awt/im")) return true;
+        if (aPath.startsWith("/java/lang/model")) return true;
+        if (aPath.startsWith("/java/nio/channels")) return true;
+        if (aPath.startsWith("/java/security")) return true;
+        if (aPath.startsWith("/java/util/Spliterators")) return true;
+        if (aPath.startsWith("/jdk")) return true;
+        if (aPath.startsWith("/org/omg")) return true;
+        if (aPath.startsWith("/org/w3c")) return true;
 
-        // If anonymous inner class, return false
-        int dollar = aPath.lastIndexOf('$');
-        if (dollar > 0 && Character.isDigit(aPath.charAt(dollar + 1)))
-            return false;
+        // If inner class, return false
+        if (aPath.contains("$"))
+            return true;
 
         // Return true
-        return true;
+        return false;
     }
 }

@@ -7,6 +7,7 @@ import javakit.resolver.*;
 import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
 import snap.util.StringUtils;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -99,12 +100,19 @@ public class DeclMatcher {
      */
     private void findClassesForPackage(JavaPackage packageNode, List<JavaClass> matchingClasses, int limit)
     {
+        // Get all package classes
         JavaClass[] classNodes = packageNode.getClasses();
+
+        // Iterate over classes and add matching public classes to list
         for (JavaClass classNode : classNodes) {
+
+            // If class name matches and is public add to list
             if (matchesString(classNode.getSimpleName())) {
-                matchingClasses.add(classNode);
-                if (matchingClasses.size() >= limit)
-                    return;
+                if (Modifier.isPublic(classNode.getModifiers())) {
+                    matchingClasses.add(classNode);
+                    if (matchingClasses.size() >= limit)
+                        return;
+                }
             }
         }
     }

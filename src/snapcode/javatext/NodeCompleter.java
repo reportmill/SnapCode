@@ -118,15 +118,10 @@ public class NodeCompleter {
             enclosingClass = enclosingClassDecl != null ? enclosingClassDecl.getEvalClass() : null;
         }
 
-        // Get matching classes
+        // Get matching classes and add completion decl
         JavaClass[] matchingClasses = prefixMatcher.getClassesForResolver(_resolver);
-
-        // Iterate over classes and add if public
-        for (JavaClass matchingClass : matchingClasses) {
-            if (!Modifier.isPublic(matchingClass.getModifiers()))
-                continue;
+        for (JavaClass matchingClass : matchingClasses)
             addCompletionDecl(matchingClass);
-        }
 
         // Get matching packages and add
         JavaPackage rootPackage = _resolver.getJavaPackageForName("");
@@ -211,19 +206,15 @@ public class NodeCompleter {
      */
     private void getCompletionsForType(JType aJType, DeclMatcher prefixMatcher)
     {
-        // Get all matching classes
-        JavaClass[] matchingClasses = prefixMatcher.getClassesForResolver(_resolver);
-
         // Handle JType as AllocExpr
         JNode typeParent = aJType.getParent();
         if (typeParent instanceof JExprAlloc) {
 
+            // Get all matching classes
+            JavaClass[] matchingClasses = prefixMatcher.getClassesForResolver(_resolver);
+
             // Iterate over classes and add constructors
             for (JavaClass matchingClass : matchingClasses) {
-
-                // Get class (skip if not found or not public)
-                if (!Modifier.isPublic(matchingClass.getModifiers()))
-                    continue;
 
                 // Get Constructors
                 List<JavaConstructor> constructors = matchingClass.getDeclaredConstructors();
