@@ -156,10 +156,7 @@ public class WelcomePanel extends ViewOwner {
         else {
 
             // If desktop, swap in real WorkspacePaneX
-            WorkspacePane workspacePaneX = createWorkspacePaneX();
-            if (workspacePaneX != null)
-                workspacePane = workspacePaneX;
-            else workspacePane = new WorkspacePane();
+            workspacePane = new WorkspacePaneX();
 
             // Get project site and add to workspace
             WebFile projectDir = aFile.isDir() ? aFile : aFile.getParent();
@@ -266,7 +263,7 @@ public class WelcomePanel extends ViewOwner {
         View buildText = topGraphic.getChildForName("BuildText");
         View jvmText = topGraphic.getChildForName("JVMText");
         buildText.setText("Build: " + SnapUtils.getBuildInfo());
-        jvmText.setText("JVM: " + (SnapUtils.isTeaVM ? "TeaVM" : System.getProperty("java.runtime.version")));
+        jvmText.setText("JVM: " + System.getProperty("java.runtime.version"));
 
         // Configure TopGraphic to call setTopGraphicMinimized() on click
         topGraphic.addEventHandler(e -> setTopGraphicMinimized(!isTopGraphicMinimized()), View.MouseRelease);
@@ -368,9 +365,7 @@ public class WelcomePanel extends ViewOwner {
     private static WorkspacePane createWorkspacePaneX()
     {
         // Get WorkspacePaneX class name
-        String workspaceXClassName = SnapUtils.isTeaVM ? null : "snapcode.app.WorkspacePaneX";
-        if (workspaceXClassName == null)
-            return null;
+        String workspaceXClassName = "snapcode.app.WorkspacePaneX";
 
         // Create/return
         try {

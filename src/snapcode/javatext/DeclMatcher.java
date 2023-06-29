@@ -203,13 +203,6 @@ public class DeclMatcher {
             JavaClass[] interfaces = cls.getInterfaces();
             for (JavaClass interf : interfaces)
                 findMethodsForClass(interf, staticOnly, matchingMethods);
-
-            // Help TeaVM: Thinks that interfaces subclass Object
-            if (SnapUtils.isTeaVM && cls.isInterface()) {
-                JavaClass superClass = cls.getSuperClass();
-                if (superClass.getClassName().equals("java.lang.Object"))
-                    break;
-            }
         }
     }
 

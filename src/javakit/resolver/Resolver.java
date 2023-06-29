@@ -6,7 +6,6 @@ import java.lang.reflect.*;
 import java.util.*;
 import snap.util.ArrayUtils;
 import snap.util.ClassUtils;
-import snap.util.SnapUtils;
 
 /**
  * A class that manages all the JavaDecls for a project.
@@ -37,9 +36,6 @@ public class Resolver {
     // Global literals
     private static JavaLocalVar[]  _literals;
 
-    // TeaVM
-    public static boolean isTeaVM = SnapUtils.isTeaVM;
-
     /**
      * Constructor.
      */
@@ -69,13 +65,9 @@ public class Resolver {
         // If already set, just return
         if (_classTree != null) return _classTree;
 
-        // Handle TeaVM
-        if (SnapUtils.isTeaVM)
-            return _classTree = ClassTree.getShared();
-
         // Create, set, return
         String[] classPaths = getClassPaths();
-        return _classTree = new ClassTreeX(classPaths);
+        return _classTree = new ClassTree(classPaths);
     }
 
     /**
@@ -375,9 +367,9 @@ public class Resolver {
             return javaClass.getTypeVarForName(typeVarName);
         }
 
-        // Handle Method/Constructor (not using Executable for TeaVM sake)
-        else if (classOrMethod instanceof Method || classOrMethod instanceof Constructor) {
-            Member method = (Member) classOrMethod;
+        // Handle Method/Constructor
+        else if (classOrMethod instanceof Executable) {
+            Executable method = (Executable) classOrMethod;
             JavaExecutable javaMethod = (JavaExecutable) getJavaMemberForMember(method);
             return javaMethod.getTypeVarForName(typeVarName);
         }
@@ -419,93 +411,6 @@ public class Resolver {
     }
 
     /**
-     * Invokes a method on given object for name and args.
-     */
-    public Object invokeMethod(Object anObj, JavaMethod javaMethod, Object[] theArgs) throws Exception
-    {
-        String sig = javaMethod.getId();
-        Object value = StaticResolver.shared().invokeMethod(sig, anObj, theArgs);
-        return value;
-    }
-
-    /**
-     * Invokes a method on given object for name and args.
-     */
-    public Object invokeConstructor(Class<?> aClass, JavaConstructor javaConstructor, Object[] theArgs) throws Exception
-    {
-        if (theArgs.length == 0)
-            return aClass.newInstance();
-
-        // Invoke
-        String sig = javaConstructor.getId();
-        Object newInstance = StaticResolver.shared().invokeConstructor(sig, theArgs);
-        return newInstance;
-    }
-
-    /**
-     * Needed for TeaVM.
-     */
-    public Type getGenericSuperClassForClass(Class<?> aClass)
-    {
-        return aClass.getSuperclass();
-    }
-
-    /**
-     * Needed for TeaVM.
-     */
-    public TypeVariable<?>[] getTypeParametersForClass(Class<?> aClass)
-    {
-        return new TypeVariable<?>[0];
-    }
-
-    /**
-     * Needed for TeaVM.
-     */
-    public Class<?>[] getDeclaredClassesForClass(Class<?> aClass)
-    {
-        return new Class<?>[0];
-    }
-
-    /**
-     * Needed for TeaVM.
-     */
-    public Type getGenericTypeForField(Field aField)
-    {
-        return aField.getType();
-    }
-
-    /**
-     * Needed for TeaVM.
-     */
-    public Type getGenericReturnTypeForMethod(Method aMethod)
-    {
-        return aMethod.getReturnType();
-    }
-
-    /**
-     * Needed for TeaVM.
-     */
-    public TypeVariable<?>[] getTypeParametersForExecutable(Member aMember)
-    {
-        return new TypeVariable<?>[0];
-    }
-
-    /**
-     * Needed for TeaVM.
-     */
-    public Type[] getGenericParameterTypesForExecutable(Member aMember)
-    {
-        if (aMember instanceof Method)
-            return ((Method) aMember).getParameterTypes();
-        return ((Constructor<?>) aMember).getParameterTypes();
-    }
-
-    /**
-     * Needed for TeaVM.
-     */
-    public boolean isDefaultMethod(Method aMethod)  { return false; }
-
-    /**
      * Returns global literals: true, false, null, this, super.
      */
     public JavaLocalVar[] getGlobalLiterals()
@@ -537,25 +442,4 @@ public class Resolver {
      */
     public String toStringProps()  { return ""; }
 
-    /**
-     * Creates a new Resolver.
-     */
-    public static Resolver newResolverForClassLoader(ClassLoader aClassLoader)
-    {
-        // If TeaVM, just use base Resolver
-        if (SnapUtils.isTeaVM)
-            return new Resolver(aClassLoader);
-
-        // Otherwise, use ResolverSys (Use reflection and silly conditional to stymie TeaVM)
-        try {
-            String className = !SnapUtils.isTeaVM ? "javakit.resolver.ResolverSys" : "don't judge me";
-            Class<?> resolverClass = Class.forName(className);
-            Resolver resolver = (Resolver) resolverClass.newInstance();
-            resolver._classLoader = aClassLoader;
-            return resolver;
-        }
-        catch(Exception e) {
-            throw new RuntimeException("Resolver.newResolverForClassLoader: Can't create: ResolverSys" + e);
-        }
-    }
 }

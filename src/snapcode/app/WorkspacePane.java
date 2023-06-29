@@ -393,7 +393,7 @@ public class WorkspacePane extends ViewOwner {
         enableEvents(window, WinClose);
 
         // If TeaVM, maximize window
-        if (SnapUtils.isTeaVM || SnapUtils.isWebVM)
+        if (SnapUtils.isWebVM)
             window.setMaximized(true);
     }
 

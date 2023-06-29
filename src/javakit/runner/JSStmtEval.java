@@ -6,7 +6,6 @@ import java.util.*;
 import javakit.parse.*;
 import snap.util.Convert;
 import snap.util.ListUtils;
-import snap.util.SnapUtils;
 
 /**
  * A class to evaluate Java statements.
@@ -24,9 +23,6 @@ public class JSStmtEval {
 
     // Holds a return value if return was hit
     protected Object  _returnValueHit;
-
-    // A Yield count
-    private long  _lastYield;
 
     // Whether to stop current run
     protected boolean  _stopRun;
@@ -450,15 +446,6 @@ public class JSStmtEval {
         // Check for continueWasHit
         if (_continueWasHit)
             _continueWasHit = false;
-
-        // If TeaVM, check whether we need a yield
-        if (SnapUtils.isTeaVM) {
-            long time = System.currentTimeMillis();
-            if (time - _lastYield > 40) {
-                Thread.yield();
-                _lastYield = time;
-            }
-        }
 
         // Return no break
         return false;

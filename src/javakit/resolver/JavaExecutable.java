@@ -31,7 +31,8 @@ public class JavaExecutable extends JavaMember {
         _varArgs = isVarArgs(aMember);
 
         // Get TypeVariables
-        TypeVariable<?>[] typeVars = aResolver.getTypeParametersForExecutable(aMember);
+        Executable executable = (Executable) aMember;
+        TypeVariable<?>[] typeVars = executable.getTypeParameters();
         _typeVars = new JavaTypeVariable[typeVars.length];
         for (int i = 0, iMax = typeVars.length; i < iMax; i++)
             _typeVars[i] = new JavaTypeVariable(_resolver, this, typeVars[i]);
@@ -42,8 +43,12 @@ public class JavaExecutable extends JavaMember {
      */
     protected void initTypes(Member aMember)
     {
-        // Get ParameterTypes
-        Type[] paramTypes = _resolver.getGenericParameterTypesForExecutable(aMember);
+        // Get GenericParameterTypes (this can fail https://bugs.openjdk.java.net/browse/JDK-8075483))
+        Executable exec = (Executable) aMember;
+        Type[] paramTypes = exec.getGenericParameterTypes();
+        if (paramTypes.length < exec.getParameterCount())
+            paramTypes = exec.getParameterTypes();
+
         _paramTypes = _resolver.getJavaTypesForTypes(paramTypes);
     }
 

@@ -136,7 +136,7 @@ public class JavaClassUpdater {
     private void updateTypeVariables(Class<?> realClass, Set<JavaDecl> removedDecls) throws SecurityException
     {
         // Get TypeVariables
-        TypeVariable<?>[] typeVariables = _resolver.getTypeParametersForClass(realClass);
+        TypeVariable<?>[] typeVariables = realClass.getTypeParameters();
 
         // Add JavaDecl for each Type parameter
         for (TypeVariable<?> typeVariable : typeVariables) {
@@ -157,7 +157,12 @@ public class JavaClassUpdater {
     private void updateInnerClasses(Class<?> realClass, Set<JavaDecl> removedDecls) throws SecurityException
     {
         // Get Inner Classes
-        Class<?>[] innerClasses = _resolver.getDeclaredClassesForClass(realClass);
+        Class<?>[] innerClasses;
+        try { innerClasses = realClass.getDeclaredClasses(); }
+        catch (Throwable e) {
+            System.err.println("JavaClassUpdater.updateInnerClasses: Can't get declared classes: " + e);
+            innerClasses = new Class[0];
+        }
 
         // Add JavaDecl for each inner class
         for (Class<?> innerClass : innerClasses) {   //if(icls.isSynthetic()) continue;
@@ -176,13 +181,6 @@ public class JavaClassUpdater {
      */
     private void updateFields(Class<?> realClass, Set<JavaDecl> removedDecls) throws SecurityException
     {
-        // Hack to use StaticResolver for browser
-        if (_resolver.isTeaVM) {
-            JavaField[] fields = StaticResolver.shared().getFieldsForClass(_resolver, realClass.getName());
-            _javaClass._fieldDecls = Arrays.asList(fields);
-            return;
-        }
-
         // Get Fields
         Field[] fields = realClass.getDeclaredFields();
 
@@ -203,13 +201,6 @@ public class JavaClassUpdater {
      */
     private void updateMethods(Class<?> realClass, Set<JavaDecl> removedDecls) throws SecurityException
     {
-        // Hack to use StaticResolver for browser
-        if (_resolver.isTeaVM) {
-            JavaMethod[] methods = StaticResolver.shared().getMethodsForClass(_resolver, realClass.getName());
-            _javaClass._methDecls = Arrays.asList(methods);
-            return;
-        }
-
         // Get Methods
         Method[] methods = realClass.getDeclaredMethods();
 
@@ -232,13 +223,6 @@ public class JavaClassUpdater {
      */
     private void updateConstructors(Class<?> realClass, Set<JavaDecl> removedDecls) throws SecurityException
     {
-        // Hack to use StaticResolver for browser
-        if (_resolver.isTeaVM) {
-            JavaConstructor[] constructors = StaticResolver.shared().getConstructorsForClass(_resolver, realClass.getName());
-            _javaClass._constrDecls = Arrays.asList(constructors);
-            return;
-        }
-
         // Get Constructors
         Constructor<?>[] constructors = realClass.getDeclaredConstructors();
 

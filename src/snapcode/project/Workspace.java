@@ -5,7 +5,6 @@ package snapcode.project;
 import javakit.resolver.Resolver;
 import snap.props.PropObject;
 import snap.util.ArrayUtils;
-import snap.util.SnapUtils;
 import snap.web.WebSite;
 import java.io.Closeable;
 
@@ -245,14 +244,9 @@ public class Workspace extends PropObject {
         // If already set, just return
         if (_resolver != null) return _resolver;
 
-        // Handle TeaVM special
-        if (SnapUtils.isTeaVM) {
-            return Resolver.newResolverForClassLoader(getClass().getClassLoader());
-        }
-
         // Create Resolver
         ClassLoader classLoader = getClassLoader();
-        Resolver resolver = Resolver.newResolverForClassLoader(classLoader);
+        Resolver resolver = new Resolver(classLoader);
         Project rootProj = getRootProject();
         String[] classPaths = rootProj.getRuntimeClassPaths();
         resolver.setClassPaths(classPaths);

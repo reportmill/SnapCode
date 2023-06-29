@@ -5,7 +5,6 @@ package javakit.parse;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
-import snap.util.SnapUtils;
 import snap.util.StringUtils;
 import java.util.Collections;
 import java.util.List;
@@ -371,8 +370,6 @@ public class JExprMethodCall extends JExpr {
     protected NodeError[] getErrorsImpl()
     {
         NodeError[] errors = NodeError.NO_ERRORS;
-        if (SnapUtils.isTeaVM)
-            return errors;
 
         // Handle can't resolve method
         JavaMethod method = getDecl();

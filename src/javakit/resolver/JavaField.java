@@ -19,7 +19,7 @@ public class JavaField extends JavaMember {
         if (aField == null) return;
 
         // Set EvalType
-        Type fieldType = aResolver.getGenericTypeForField(aField);
+        Type fieldType = aField.getGenericType();
         _evalType = _resolver.getJavaTypeForType(fieldType);
     }
 

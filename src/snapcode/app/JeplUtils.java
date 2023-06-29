@@ -3,7 +3,6 @@ import snapcode.javatext.JavaTextUtils;
 import snapcode.project.*;
 import snap.gfx.Font;
 import snap.text.TextStyle;
-import snap.util.SnapUtils;
 
 /**
  * Utilities to support Jepl files.
@@ -24,9 +23,6 @@ public class JeplUtils {
 
         // Set JeplAgent config
         JeplTextDoc.setJeplDocConfig(jtd -> configureJeplDoc(jtd));
-
-        // For TeaVM: Link up StaticResolver
-        //if (Resolver.isTeaVM) javakit.resolver.StaticResolver.shared()._next = new StaticResolver();
     }
 
     /**
@@ -52,9 +48,6 @@ public class JeplUtils {
      */
     public static void configureJeplDocProject(JavaTextDoc javaTextDoc)
     {
-        // If TeaVM, just return
-        if (SnapUtils.isTeaVM) return;
-
         // Get BuildFile
         JavaAgent javaAgent = javaTextDoc.getAgent();
         Project proj = javaAgent.getProject();

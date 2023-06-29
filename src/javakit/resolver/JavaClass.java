@@ -5,7 +5,6 @@ package javakit.resolver;
 import javakit.parse.JClassDecl;
 import javakit.parse.JFile;
 import snap.util.ListUtils;
-import snap.util.SnapUtils;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -95,8 +94,6 @@ public class JavaClass extends JavaType {
         _enum = aClass.isEnum();
         _interface = aClass.isInterface();
         _primitive = aClass.isPrimitive();
-        if (_primitive && SnapUtils.isTeaVM)
-            _mods |= Modifier.PUBLIC;
 
         // Set EvalType to this
         _evalType = this;
@@ -202,7 +199,7 @@ public class JavaClass extends JavaType {
 
         // Get GenericSuperClass as JavaType
         Class<?> realClass = getRealClass();
-        Type superType = _resolver.getGenericSuperClassForClass(realClass);
+        Type superType = realClass.getGenericSuperclass();
         JavaType javaType = _resolver.getJavaTypeForType(superType);
 
         // Set, return

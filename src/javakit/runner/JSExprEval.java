@@ -184,12 +184,8 @@ public class JSExprEval {
         if (aName.equals("length") && isArray(anOR))
             return Array.getLength(anOR);
 
-        // Bogus for TeaVM
-        if (anOR == System.class && SnapUtils.isTeaVM)
-            return aName.equals("err") ? System.err : System.out;
-
         // Look for field
-        if (anOR != null && !SnapUtils.isTeaVM) {
+        if (anOR != null) {
             Class<?> cls = anOR instanceof Class ? (Class<?>) anOR : anOR.getClass();
             Field field = ClassUtils.getFieldForName(cls, aName);
             if (field != null)
@@ -242,7 +238,7 @@ public class JSExprEval {
             return evalMethodCallExprForMethodDecl(anOR, methodDecl, argValues);
 
         // Invoke method
-        Object value = _resolver.invokeMethod(anOR, method, argValues);
+        Object value = JSExprEvalUtils.invokeMethod(anOR, method, argValues);
         return value;
     }
 
@@ -389,8 +385,8 @@ public class JSExprEval {
         }
 
         // Invoke constructor
-        Object newInstance = _resolver.invokeConstructor(realClass, javaConstructor, argValues);
-        return newInstance;
+        Constructor<?> constructor = javaConstructor.getConstructor();
+        return constructor.newInstance(argValues);
     }
 
     /**
@@ -675,9 +671,6 @@ public class JSExprEval {
      */
     protected Object setExprIdValue(JExprId idExpr, Object aValue)
     {
-        // Get name
-        String name = idExpr.getName();
-
         // Convert type
         JavaClass assignClass = idExpr.getEvalClass();
         Class<?> realClass = assignClass.getRealClass();
@@ -704,13 +697,6 @@ public class JSExprEval {
 
         // Get array
         Object array = _varStack.getStackValueForNode(arrayExpr);
-
-        // Make sure value is right type
-        if (SnapUtils.isTeaVM) {
-            Class<?> cls = array.getClass().getComponentType();
-            if (cls.isPrimitive())
-                aValue = castOrConvertValueToPrimitiveClass(aValue, cls);
-        }
 
         // Set value and return
         Array.set(array, index, aValue);
@@ -766,7 +752,7 @@ public class JSExprEval {
             Class<?> realClass = anOR instanceof Class ? (Class<?>) anOR : anOR.getClass();
             JavaClass javaClass = _resolver.getJavaClassForClass(realClass);
             String innerClassName = javaClass != null ? javaClass.getName() + '$' + aName : null;
-            JavaClass cls = javaClass.getInnerClassForName(innerClassName);
+            JavaClass cls = javaClass != null ? javaClass.getInnerClassForName(innerClassName) : null;
             if (cls != null)
                 return cls;
         }
