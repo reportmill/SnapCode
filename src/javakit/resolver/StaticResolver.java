@@ -4,6 +4,7 @@ import javakit.resolver.JavaMethod.MethodBuilder;
 import javakit.resolver.JavaConstructor.ConstructorBuilder;
 import snap.util.Convert;
 import java.io.PrintStream;
+import java.lang.reflect.Modifier;
 
 /**
  * Provide reflection info for TeaVM.
@@ -552,36 +553,36 @@ public class StaticResolver {
 
             // Handle snapcharts.repl.ReplObject
             case "snapcharts.repl.ReplObject":
-                mb.name("println").paramTypes(java.lang.Object.class).returnType(void.class).save();
-                mb.name("print").paramTypes(java.lang.Object.class).returnType(void.class).save();
-                return mb.name("show").paramTypes(java.lang.Object.class).returnType(void.class).buildAll();
+                mb.name("println").paramTypes(java.lang.Object.class).mods(Modifier.STATIC).returnType(void.class).save();
+                mb.name("print").paramTypes(java.lang.Object.class).mods(Modifier.STATIC).returnType(void.class).save();
+                return mb.name("show").paramTypes(java.lang.Object.class).mods(Modifier.STATIC).returnType(void.class).buildAll();
 
             // Handle snapcharts.repl.Quick3D
             case "snapcharts.repl.Quick3D":
-                mb.name("createImage3D").paramTypes(snap.gfx.Image.class).returnType(snap.gfx3d.CameraView.class).save();
-                return mb.name("createCube").returnType(snap.gfx3d.CameraView.class).buildAll();
+                mb.name("createImage3D").paramTypes(snap.gfx.Image.class).mods(Modifier.STATIC).returnType(snap.gfx3d.CameraView.class).save();
+                return mb.name("createCube").mods(Modifier.STATIC).returnType(snap.gfx3d.CameraView.class).buildAll();
 
             // Handle snapcharts.repl.QuickCharts
             case "snapcharts.repl.QuickCharts":
-                mb.name("chart").paramTypes(java.lang.Object[].class).returnType(snapcharts.model.Chart.class).varArgs().save();
-                return mb.name("chart3D").paramTypes(java.lang.Object[].class).returnType(snapcharts.model.Chart.class).varArgs().buildAll();
+                mb.name("chart").paramTypes(java.lang.Object[].class).mods(Modifier.STATIC).returnType(snapcharts.model.Chart.class).varArgs().save();
+                return mb.name("chart3D").paramTypes(java.lang.Object[].class).mods(Modifier.STATIC).returnType(snapcharts.model.Chart.class).varArgs().buildAll();
 
             // Handle snapcharts.repl.QuickData
             case "snapcharts.repl.QuickData":
-                mb.name("doubleArray").paramTypes(java.lang.Object[].class).returnType(snapcharts.data.DoubleArray.class).varArgs().save();
-                mb.name("minMaxArray").paramTypes(double.class,double.class).returnType(snapcharts.data.DoubleArray.class).save();
-                mb.name("minMaxArray").paramTypes(double.class,double.class,int.class).returnType(snapcharts.data.DoubleArray.class).save();
-                mb.name("getTextForSource").paramTypes(java.lang.Object.class).returnType(java.lang.String.class).save();
-                mb.name("getImageForSource").paramTypes(java.lang.Object.class).returnType(snap.gfx.Image.class).save();
-                mb.name("dataArray").paramTypes(java.lang.Object.class).returnType(snapcharts.data.DataArray.class).save();
-                mb.name("dataSet").paramTypes(java.lang.Object[].class).returnType(snapcharts.data.DataSet.class).varArgs().save();
-                mb.name("mapXY").paramTypes(snapcharts.data.DoubleArray.class,snapcharts.data.DoubleArray.class,java.util.function.DoubleBinaryOperator.class).returnType(snapcharts.data.DoubleArray.class).save();
-                return mb.name("mapXY").paramTypes(double[].class,double[].class,java.util.function.DoubleBinaryOperator.class).returnType(snapcharts.data.DoubleArray.class).buildAll();
+                mb.name("doubleArray").paramTypes(java.lang.Object[].class).mods(Modifier.STATIC).returnType(snapcharts.data.DoubleArray.class).varArgs().save();
+                mb.name("minMaxArray").paramTypes(double.class,double.class).mods(Modifier.STATIC).returnType(snapcharts.data.DoubleArray.class).save();
+                mb.name("minMaxArray").paramTypes(double.class,double.class,int.class).mods(Modifier.STATIC).returnType(snapcharts.data.DoubleArray.class).save();
+                mb.name("getTextForSource").paramTypes(java.lang.Object.class).mods(Modifier.STATIC).returnType(java.lang.String.class).save();
+                mb.name("getImageForSource").paramTypes(java.lang.Object.class).mods(Modifier.STATIC).returnType(snap.gfx.Image.class).save();
+                mb.name("dataArray").paramTypes(java.lang.Object.class).mods(Modifier.STATIC).returnType(snapcharts.data.DataArray.class).save();
+                mb.name("dataSet").paramTypes(java.lang.Object[].class).mods(Modifier.STATIC).returnType(snapcharts.data.DataSet.class).varArgs().save();
+                mb.name("mapXY").paramTypes(snapcharts.data.DoubleArray.class,snapcharts.data.DoubleArray.class,java.util.function.DoubleBinaryOperator.class).mods(Modifier.STATIC).returnType(snapcharts.data.DoubleArray.class).save();
+                return mb.name("mapXY").paramTypes(double[].class,double[].class,java.util.function.DoubleBinaryOperator.class).mods(Modifier.STATIC).returnType(snapcharts.data.DoubleArray.class).buildAll();
 
             // Handle snapcharts.repl.QuickDraw
             case "snapcharts.repl.QuickDraw":
-                mb.name("createDrawView").paramTypes(int.class,int.class).returnType(snapcharts.repl.QuickDraw.class).save();
-                mb.name("createDrawView").returnType(snapcharts.repl.QuickDraw.class).save();
+                mb.name("createDrawView").paramTypes(int.class,int.class).mods(Modifier.STATIC).returnType(snapcharts.repl.QuickDraw.class).save();
+                mb.name("createDrawView").mods(Modifier.STATIC).returnType(snapcharts.repl.QuickDraw.class).save();
                 mb.name("setShowGrid").paramTypes(boolean.class).returnType(void.class).save();
                 mb.name("getGridSpacing").returnType(double.class).save();
                 mb.name("setGridSpacing").paramTypes(double.class).returnType(void.class).save();

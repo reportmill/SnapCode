@@ -118,7 +118,8 @@ public class ClassTree {
             // Snapcharts.data, repl
             "snapcharts.data.DoubleArray",
             "snapcharts.repl.Quick3D", "snapcharts.repl.QuickCharts",
-            "snapcharts.repl.QuickData", "snapcharts.repl.QuickDraw", "snapcharts.repl.QuickDrawPen"
+            "snapcharts.repl.QuickData", "snapcharts.repl.QuickDraw", "snapcharts.repl.QuickDrawPen",
+            "snapcharts.repl.ReplObject"
     };
 
     /**
