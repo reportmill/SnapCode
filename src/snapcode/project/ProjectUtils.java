@@ -117,6 +117,7 @@ public class ProjectUtils {
         if (tempProj == null) {
             Workspace newWorkspace = new Workspace();
             tempProj = newWorkspace.addProjectForSite(tempProjSite);
+            tempProj.setReadOnly(true);
         }
 
         // Return
