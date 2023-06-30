@@ -34,6 +34,18 @@ public class JType extends JNode {
     }
 
     /**
+     * Adds an identifier.
+     */
+    public void addId(JExprId anId)
+    {
+        String nameAll = anId.getName();
+        String name = getName();
+        if (name != null)
+            nameAll = name + '.' + nameAll;
+        setName(nameAll);
+    }
+
+    /**
      * Returns whether type is primitive type.
      */
     public boolean isPrimitive()  { return _primitive; }

@@ -25,8 +25,9 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle ConditionalExpr
             switch (anId) {
+
+                // Handle ConditionalExpr
                 case "ConditionalExpr":
                     _part = aNode.getCustomNode(JExpr.class);
                     break;
@@ -62,7 +63,8 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            getPart().setName(aNode.getString());
+            String idStr = aNode.getString();
+            _part = new JExprId(idStr);
         }
 
         protected Class<JExprId> getPartClass()  { return JExprId.class; }
@@ -97,8 +99,9 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle PrimitiveType
             switch (anId) {
+
+                // Handle PrimitiveType
                 case "PrimitiveType":
                     _part = aNode.getCustomNode(JType.class);
                     break;
@@ -119,7 +122,7 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * ClassType Handler.
+     * ClassType Handler: Identifier (LookAhead(2) TypeArgs)? (LookAhead(2) "." Identifier (LookAhead(2) TypeArgs)?)*
      */
     public static class ClassTypeHandler extends JNodeParseHandler<JType> {
 
@@ -128,15 +131,22 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle: Identifier [ TypeArgs ] ( "." Identifier [ TypeArgs ] ) *
-            if (anId == "Identifier")
-                if (getPart().getName() == null) getPart().setName(aNode.getString());
-                else getPart().setName(getPart().getName() + '.' + aNode.getString());
+            // Get type
+            JType type = getPart();
 
-                // Handle TypeArgs (ReferenceType)
-            else if (aNode.getCustomNode() instanceof JType) {
-                JType type = aNode.getCustomNode(JType.class);
-                getPart().addTypeArg(type);
+            switch (anId) {
+
+                // Handle Identifier: Add to type
+                case "Identifier":
+                    JExprId id = aNode.getCustomNode(JExprId.class);
+                    type.addId(id);
+                    break;
+
+                // Handle TypeArgs
+                case "TypeArgs":
+                    JType typeArgs = aNode.getCustomNode(JType.class);
+                    type.addTypeArg(type);
+                    break;
             }
         }
 
@@ -164,7 +174,7 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * ResultType Handler.
+     * ResultType Handler: "void" | Type
      */
     public static class ResultTypeHandler extends JNodeParseHandler<JType> {
 
@@ -173,16 +183,18 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle Type
             switch (anId) {
+
+                // Handle Type
                 case "Type":
                     _part = aNode.getCustomNode(JType.class);
                     break;
 
                 // Handle void
                 case "void":
-                    getPart().setName("void");
-                    getPart().setPrimitive(true);
+                    JType type = getPart();
+                    type.setName("void");
+                    type.setPrimitive(true);
                     break;
             }
         }
@@ -191,7 +203,7 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * ConditionalExpr Handler.
+     * ConditionalExpr Handler: ConditionalOrExpr ("?" Expression ":" Expression)?
      */
     public static class ConditionalExprHandler extends JNodeParseHandler<JExpr> {
 
@@ -200,20 +212,21 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle ConditionalOrExpr
             switch (anId) {
+
+                // Handle ConditionalOrExpr
                 case "ConditionalOrExpr":
                     _part = aNode.getCustomNode(JExpr.class);
                     break;
-            }
 
-            // Handle Expression
-            if (anId == "Expression") {
-                JExpr part = aNode.getCustomNode(JExpr.class);
-                JExprMath opExpr = _part instanceof JExprMath ? (JExprMath) _part : null;
-                if (opExpr == null || opExpr.op != JExprMath.Op.Conditional)
-                    _part = new JExprMath(JExprMath.Op.Conditional, _part, part);
-                else opExpr.setOperand(part, 2);
+                // Handle Expression
+                case "Expression":
+                    JExpr part = aNode.getCustomNode(JExpr.class);
+                    JExprMath opExpr = _part instanceof JExprMath ? (JExprMath) _part : null;
+                    if (opExpr == null || opExpr.op != JExprMath.Op.Conditional)
+                        _part = new JExprMath(JExprMath.Op.Conditional, _part, part);
+                    else opExpr.setOperand(part, 2);
+                    break;
             }
         }
 
@@ -422,7 +435,7 @@ public class JavaParserExpr extends Parser {
             if (anId == "Type")
                 getPart().setType(aNode.getCustomNode(JType.class));
 
-                // Handle UnaryExpr
+            // Handle UnaryExpr
             else if (aNode.getCustomNode() != null)
                 getPart().setExpr(aNode.getCustomNode(JExpr.class));
         }
@@ -466,8 +479,9 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle PrimaryPrefix
             switch (anId) {
+
+                // Handle PrimaryPrefix
                 case "PrimaryPrefix":
                     _part = aNode.getCustomNode(JExpr.class);
                     break;
@@ -493,8 +507,9 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle Literal
             switch (anId) {
+
+                // Handle Literal
                 case "Literal":
                     _part = aNode.getCustomNode(JExprLiteral.class);
                     break;
@@ -583,8 +598,9 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle [ "." "super" ] and [ "." "this" ]
             switch (anId) {
+
+                // Handle [ "." "super" ] and [ "." "this" ]
                 case "super":
                 case "this":
                     _part = new JExprId(aNode.getString());
@@ -744,8 +760,9 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle Identifier
             switch (anId) {
+
+                // Handle Identifier
                 case "Identifier":
                     JVarDecl vd = new JVarDecl();
                     vd.setId(aNode.getCustomNode(JExprId.class));
@@ -786,8 +803,9 @@ public class JavaParserExpr extends Parser {
             JExprLiteral literalExpr = getPart();
             String valueStr = aNode.getString();
 
-            // Handle BooleanLiteral
             switch (anId) {
+
+                // Handle BooleanLiteral
                 case "BooleanLiteral":
                     literalExpr.setLiteralType(JExprLiteral.LiteralType.Boolean);
                     break;
