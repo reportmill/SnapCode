@@ -11,21 +11,27 @@ import java.util.*;
  * public class MyClass <T>
  * public <T> T myMethod(T anObj) { ... }
  */
-public class JTypeVar extends JNode {
+public class JTypeVar extends JNode implements WithId {
 
     // The name identifier
-    JExprId _id;
+    private JExprId _id;
 
     // The list of types
-    List<JType> _types = new ArrayList();
+    private List<JType> _types = new ArrayList<>();
+
+    /**
+     * Constructor.
+     */
+    public JTypeVar()
+    {
+        super();
+    }
 
     /**
      * Returns the identifier.
      */
-    public JExprId getId()
-    {
-        return _id;
-    }
+    @Override
+    public JExprId getId()  { return _id; }
 
     /**
      * Sets the identifier.
@@ -39,10 +45,7 @@ public class JTypeVar extends JNode {
     /**
      * Returns the types.
      */
-    public List<JType> getTypes()
-    {
-        return _types;
-    }
+    public List<JType> getTypes()  { return _types; }
 
     /**
      * Adds a type.
@@ -98,10 +101,6 @@ public class JTypeVar extends JNode {
     @Override
     protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
     {
-        // Handle ID
-        if (anExprId == _id)
-            return getDecl();
-
         // Handle nested case, e.g.: T extends Class <? super T>
         if (anExprId.getName().equals(getName()))
             return getJavaClassForClass(Object.class);

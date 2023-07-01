@@ -69,6 +69,15 @@ public class JExprId extends JExpr {
     @Override
     protected JavaDecl getDeclImpl()
     {
+        // Handle parent WithId (method/class/field decl id, method call/ref id, local var decl id, etc.)
+        JNode parent = getParent();
+        if (parent instanceof WithId) {
+            JExprId parentId = ((WithId) parent).getId();
+            if (this == parentId)
+                return parent.getDecl();
+        }
+
+        // Forward to parents
         return getDeclForChildExprIdNode(this);
     }
 

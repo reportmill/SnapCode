@@ -235,17 +235,6 @@ public class JClassDecl extends JMemberDecl {
     }
 
     /**
-     * Returns the JConstructorDecl for given name.
-     */
-    public JConstrDecl getConstructorDecl(String aName, Class<?>[] theClasses)
-    {
-        for (JConstrDecl cd : getConstructorDecls())
-            if (cd.getName().equals(aName))
-                return cd;
-        return null;
-    }
-
-    /**
      * Returns the class method declarations.
      */
     public JMethodDecl[] getMethodDecls()
@@ -406,7 +395,6 @@ public class JClassDecl extends JMemberDecl {
         // Get class for name - if not found, use SuperClass (assume this class not compiled)
         JavaClass javaClass = getJavaClassForName(className);
         if (javaClass == null) {
-            //javaClass = getSuperClass();
             Resolver resolver = getResolver();
             javaClass = new JavaClass(resolver, this, className);
         }
@@ -427,10 +415,6 @@ public class JClassDecl extends JMemberDecl {
     @Override
     protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
     {
-        // If class id, return class declaration
-        if (anExprId == _id)
-            return getDecl();
-
         // If it's "this", set class and return ClassField
         String name = anExprId.getName();
         if (name.equals("this"))

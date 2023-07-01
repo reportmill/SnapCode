@@ -136,10 +136,6 @@ public class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithV
     @Override
     protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
     {
-        // If node is method name, return method decl
-        if (anExprId == _id)
-            return getDecl();
-
         // Handle parameter name id: return param decl
         String name = anExprId.getName();
         JVarDecl param = getVarDeclForName(name);

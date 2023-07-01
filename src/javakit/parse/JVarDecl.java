@@ -10,7 +10,7 @@ import snap.util.ListUtils;
  * A JNode to represent a defined variable.
  * Found in JFieldDecl, JStmtVarDecl, Method/Catch FormalParam(s)
  */
-public class JVarDecl extends JNode {
+public class JVarDecl extends JNode implements WithId {
 
     // The type
     protected JType  _type;
@@ -116,6 +116,7 @@ public class JVarDecl extends JNode {
     /**
      * Returns the identifier.
      */
+    @Override
     public JExprId getId()  { return _id; }
 
     /**
@@ -221,26 +222,10 @@ public class JVarDecl extends JNode {
     }
 
     /**
-     * Override to resolve id node.
-     */
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
-    {
-        // VarDecl.Id evaluates same as whole
-        if (anExprId == _id)
-            return getDecl();
-
-        // Do normal version
-        return super.getDeclForChildExprIdNode(anExprId);
-    }
-
-    /**
      * Override to avoid NPE when parsing incomplete method def.
      */
     @Override
-    protected String getNameImpl()
-    {
-        return "";
-    }
+    protected String getNameImpl()  { return ""; }
 
     /**
      * Returns an identifier string describing where this variable declaration is defined.

@@ -6,7 +6,7 @@ package javakit.parse;
 /**
  * This JExpr subclass represents a method reference: obj::method.
  */
-public class JExprMethodRef extends JExpr {
+public class JExprMethodRef extends JExpr implements WithId {
 
     // The expression
     JExpr _expr;
@@ -44,6 +44,7 @@ public class JExprMethodRef extends JExpr {
     /**
      * Returns the identifier.
      */
+    @Override
     public JExprId getId()  { return _id; }
 
     /**

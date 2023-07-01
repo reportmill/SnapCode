@@ -9,13 +9,21 @@ import java.util.List;
  * A JNode for type members: Initializer, TypeDecl, EnumDecl, ConstrDecl, FieldDecl, MedthodDecl, AnnotationDecl.
  * For JavaParseRule: ClassBodyDecl.
  */
-public class JMemberDecl extends JNode {
+public class JMemberDecl extends JNode implements WithId {
 
     // The modifiers
     protected JModifiers  _mods;
 
     // The name identifier
     protected JExprId  _id;
+
+    /**
+     * Constructor.
+     */
+    public JMemberDecl()
+    {
+        super();
+    }
 
     /**
      * Returns the modifiers.
@@ -40,6 +48,7 @@ public class JMemberDecl extends JNode {
     /**
      * Returns the identifier.
      */
+    @Override
     public JExprId getId()  { return _id; }
 
     /**

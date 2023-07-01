@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * This class represents a method call in code.
  */
-public class JExprMethodCall extends JExpr {
+public class JExprMethodCall extends JExpr implements WithId {
 
     // The identifier
     JExprId  _id;
@@ -40,6 +40,7 @@ public class JExprMethodCall extends JExpr {
     /**
      * Returns the identifier.
      */
+    @Override
     public JExprId getId()  { return _id; }
 
     /**
@@ -249,19 +250,6 @@ public class JExprMethodCall extends JExpr {
 
         // Return
         return compatibleMethods;
-    }
-
-    /**
-     * Override to handle method name.
-     */
-    @Override
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
-    {
-        if (anExprId == _id)
-            return getDecl();
-
-        // Do normal version
-        return super.getDeclForChildExprIdNode(anExprId);
     }
 
     /**

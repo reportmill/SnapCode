@@ -65,17 +65,4 @@ public class JEnumConst extends JMemberDecl {
         JavaDecl edecl = jdecl.getFieldForName(name);
         return edecl;
     }
-
-    /**
-     * Override to resolve enum id.
-     */
-    @Override
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
-    {
-        if (anExprId == _id)
-            return getDecl();
-
-        // Do normal version
-        return super.getDeclForChildExprIdNode(anExprId);
-    }
 }
