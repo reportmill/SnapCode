@@ -121,10 +121,14 @@ public class JExprMethodCall extends JExpr implements WithId {
     @Override
     protected JavaMethod getDeclImpl()
     {
+        // Get scope node class
+        JavaDecl scopeDecl = getScopeDecl();
+        JavaClass scopeClass = scopeDecl != null ? scopeDecl.getEvalClass() : null;
+        if (scopeClass == null)
+            return null;
+
         // Get method name and arg types
         String name = getName();
-
-        // Get arg types
         List<JExpr> args = getArgs();
         int argCount = args.size();
         JavaType[] argTypes = new JavaType[argCount];
@@ -135,12 +139,6 @@ public class JExprMethodCall extends JExpr implements WithId {
             JavaType argType = arg != null ? arg.getEvalType() : null;
             argTypes[i] = argType;
         }
-
-        // Get scope node class
-        JavaDecl scopeDecl = getScopeDecl();
-        JavaClass scopeClass = scopeDecl != null ? scopeDecl.getEvalClass() : null;
-        if (scopeClass == null)
-            return null;
 
         // Search for compatible method for name and arg types
         JavaMethod method = JavaClassUtils.getCompatibleMethodAll(scopeClass, name, argTypes);
@@ -217,10 +215,14 @@ public class JExprMethodCall extends JExpr implements WithId {
      */
     protected List<JavaMethod> getCompatibleMethods()
     {
-        // Get method name and args
-        String name = getName();
+        // Get scope class and search for compatible method for name and arg types
+        JavaDecl scopeDecl = getScopeDecl();
+        JavaClass scopeClass = scopeDecl != null ? scopeDecl.getEvalClass() : null;
+        if (scopeClass == null)
+            return null;
 
-        // Get arg types
+        // Get method name and arg types
+        String name = getName();
         List<JExpr> args = getArgs();
         int argCount = args.size();
         JavaType[] argTypes = new JavaType[argCount];
@@ -229,12 +231,6 @@ public class JExprMethodCall extends JExpr implements WithId {
             JavaType argType = arg instanceof JExprLambda ? null : arg.getEvalType();
             argTypes[i] = argType;
         }
-
-        // Get scope class and search for compatible method for name and arg types
-        JavaDecl scopeDecl = getScopeDecl();
-        JavaClass scopeClass = scopeDecl != null ? scopeDecl.getEvalClass() : null;
-        if (scopeClass == null)
-            return null;
 
         // Get scope node class type and search for compatible method for name and arg types
         List<JavaMethod> compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argTypes);
