@@ -82,7 +82,7 @@ public class JExprChain extends JExpr {
     protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
     {
         // Get parent expression - if not found (first in chain) do normal version
-        JExpr parExpr = anExprId.getParentExpr();
+        JExpr parExpr = anExprId.getScopeExpr();
         if (parExpr == null)
             return super.getDeclForChildExprIdNode(anExprId);
 

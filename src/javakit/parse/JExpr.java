@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
+import javakit.resolver.JavaDecl;
 import snap.util.ArrayUtils;
 import java.util.Collections;
 import java.util.List;
@@ -20,28 +21,14 @@ public abstract class JExpr extends JNode {
     }
 
     /**
-     * Returns the node the expression should be evaluated against.
+     * Returns the prefix expression for this expression, if this expression is part of dot expression.
      */
-    public JNode getScopeNode()
-    {
-        // Get parent expression, and if found, return its type class
-        JExpr parentExpr = getParentExpr();
-        if (parentExpr != null)
-            return parentExpr;
-
-        // Otherwise, return enclosing class
-        return getEnclosingClassDecl();
-    }
-
-    /**
-     * Returns the expression prior to this expression, if parent is JExprChain and this expression isn't first.
-     */
-    public JExpr getParentExpr()
+    public JExpr getScopeExpr()
     {
         // If parent is JExprChain, iterate over expressions and return one before this expression
-        JNode par = getParent();
-        if (par instanceof JExprChain) {
-            JExprChain exprChain = (JExprChain) par;
+        JNode parent = getParent();
+        if (parent instanceof JExprChain) {
+            JExprChain exprChain = (JExprChain) parent;
             List<JExpr> chainExprs = exprChain.getExpressions();
             for (int i = 0, iMax = chainExprs.size(); i < iMax; i++) {
                 JExpr expr = exprChain.getExpr(i);
@@ -51,11 +38,30 @@ public abstract class JExpr extends JNode {
         }
 
         // If parent is method call and this node is name, get parent for method call
-        if (par instanceof JExprMethodCall) {
-            JExprMethodCall methodCallExpr = (JExprMethodCall) par;
+        if (parent instanceof JExprMethodCall) {
+            JExprMethodCall methodCallExpr = (JExprMethodCall) parent;
             if (methodCallExpr.getId() == this)
-                return methodCallExpr.getParentExpr();
+                return methodCallExpr.getScopeExpr();
         }
+
+        // Return not found
+        return null;
+    }
+
+    /**
+     * Returns the JavaDecl for the scope expression (if present) or enclosing class.
+     */
+    public JavaDecl getScopeDecl()
+    {
+        // If scope expression exists, return its decl
+        JExpr scopeExpr = getScopeExpr();
+        if (scopeExpr != null)
+            return scopeExpr.getDecl();
+
+        // Otherwise, return enclosing class
+        JClassDecl classDecl = getEnclosingClassDecl();
+        if (classDecl != null)
+            return classDecl.getDecl();
 
         // Return not found
         return null;

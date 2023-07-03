@@ -137,8 +137,8 @@ public class JExprMethodCall extends JExpr implements WithId {
         }
 
         // Get scope node class
-        JNode scopeNode = getScopeNode();
-        JavaClass scopeClass = scopeNode != null ? scopeNode.getEvalClass() : null;
+        JavaDecl scopeDecl = getScopeDecl();
+        JavaClass scopeClass = scopeDecl != null ? scopeDecl.getEvalClass() : null;
         if (scopeClass == null)
             return null;
 
@@ -147,12 +147,19 @@ public class JExprMethodCall extends JExpr implements WithId {
         if (method != null)
             return method;
 
+        // If scope expression is present, just return
+        if (getScopeExpr() != null)
+            return null;
+
+        // Get enclosing class
+        JClassDecl enclosingClass = getEnclosingClassDecl();
+
         // If scope node is class and not static, go up parent classes
-        while (scopeNode instanceof JClassDecl && !scopeClass.isStatic()) {
+        while (enclosingClass != null && !scopeClass.isStatic()) {
 
             // Get enclosing JClassDecl and JavaClass
-            scopeNode = scopeNode.getEnclosingClassDecl();
-            scopeClass = scopeNode != null ? scopeNode.getEvalClass() : null;
+            enclosingClass = enclosingClass.getEnclosingClassDecl();
+            scopeClass = enclosingClass != null ? enclosingClass.getEvalClass() : null;
             if (scopeClass == null)
                 break;
 
@@ -223,9 +230,9 @@ public class JExprMethodCall extends JExpr implements WithId {
             argTypes[i] = argType;
         }
 
-        // Get scope node class type and search for compatible method for name and arg types
-        JNode scopeNode = getScopeNode();
-        JavaClass scopeClass = scopeNode != null ? scopeNode.getEvalClass() : null;
+        // Get scope class and search for compatible method for name and arg types
+        JavaDecl scopeDecl = getScopeDecl();
+        JavaClass scopeClass = scopeDecl != null ? scopeDecl.getEvalClass() : null;
         if (scopeClass == null)
             return null;
 
@@ -281,8 +288,8 @@ public class JExprMethodCall extends JExpr implements WithId {
                     return resolvedDecl;
 
                 // See if TypeVar can be resolved by ScopeNode.Type
-                JNode scopeNode = getScopeNode();
-                JavaType scopeType = scopeNode != null ? scopeNode.getEvalType() : null;
+                JavaDecl scopeDecl = getScopeDecl();
+                JavaType scopeType = scopeDecl != null ? scopeDecl.getEvalType() : null;
                 resolvedDecl = scopeType != null ? scopeType.getResolvedType(evalType) : null;
                 if (resolvedDecl != null)
                     return resolvedDecl;
@@ -384,8 +391,8 @@ public class JExprMethodCall extends JExpr implements WithId {
         String methodString = methodName + argTypesString;
 
         // Get scope node class name
-        JNode scopeNode = getScopeNode();
-        String scopeClassName = scopeNode != null ? scopeNode.getEvalClassName() : null;
+        JavaDecl scopeDecl = getScopeDecl();
+        String scopeClassName = scopeDecl != null ? scopeDecl.getEvalClassName() : null;
         if (scopeClassName != null)
             methodString = scopeClassName + '.' + methodName;
 
