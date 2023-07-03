@@ -136,19 +136,19 @@ public class JavaParserExpr extends Parser {
             // Get type
             JType type = getPart();
 
-            switch (anId) {
+            // Handle Identifier: Add to type
+            if (anId.equals("Identifier")) {
+                JExprId id = aNode.getCustomNode(JExprId.class);
+                type.addId(id);
+            }
 
-                // Handle Identifier: Add to type
-                case "Identifier":
-                    JExprId id = aNode.getCustomNode(JExprId.class);
-                    type.addId(id);
-                    break;
-
-                // Handle TypeArgs
-                case "TypeArgs":
-                    JType typeArgs = aNode.getCustomNode(JType.class);
-                    type.addTypeArg(type);
-                    break;
+            // Handle TypeArgs (since no TypeArgsHandler, TypeArgHandler or ReferenceTypeHandler, just watch for JType)
+            else {
+                Object customNode = aNode.getCustomNode();
+                if (customNode instanceof JType) {
+                    JType typeArg = (JType) customNode;
+                    type.addTypeArg(typeArg);
+                }
             }
         }
 
