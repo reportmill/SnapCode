@@ -1,16 +1,14 @@
 package snapcode.views;
-
 import javakit.parse.JExpr;
-import javakit.parse.JExprChain;
+import javakit.parse.JExprDot;
 import snap.view.RowView;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * SnapPartExpr subclass for JExprChain.
  */
-public class JExprChainView<JNODE extends JExprChain> extends JExprView<JNODE> {
+public class JExprChainView<JNODE extends JExprDot> extends JExprView<JNODE> {
 
     /**
      * Updates UI.
@@ -25,7 +23,8 @@ public class JExprChainView<JNODE extends JExprChain> extends JExprView<JNODE> {
         hbox.setPadding(0, 0, 0, 0);
 
         // Create/add views for child expressions
-        for (JNodeView child : getJNodeViews()) hbox.addChild(child);
+        for (JNodeView child : getJNodeViews())
+            hbox.addChild(child);
         getJNodeView(0).setSeg(Seg.First);
         getJNodeViewLast().setSeg(Seg.Last);
     }
@@ -35,13 +34,22 @@ public class JExprChainView<JNODE extends JExprChain> extends JExprView<JNODE> {
      */
     protected List<JNodeView> createJNodeViews()
     {
+        JExprDot dotExpr = getJNode();
+        List<JNodeView> children = new ArrayList<>();
+
+        JExpr prefixExpr = dotExpr.getPrefixExpr();
+        JExprView<?> prefixView = createView(prefixExpr);
+        prefixView.setGrowWidth(true);
+        children.add(prefixView);
+
         // Iterate over expression chain children, create expression views and add to list
-        JExprChain echain = getJNode();
-        List children = new ArrayList();
-        for (JExpr exp : echain.getExpressions()) {
-            JExprView eview = createView(exp);
-            eview.setGrowWidth(true);
-            children.add(eview);
+        JExpr expr = dotExpr.getExpr();
+        while (expr != null) {
+            JExprView<?> exprView = createView(expr);
+            exprView.setGrowWidth(true);
+            children.add(exprView);
+            if (expr instanceof JExprDot)
+                expr = ((JExprDot) expr).getExpr();
         }
 
         // Return expression views

@@ -63,9 +63,9 @@ public class JSExprEval {
         if (anExpr instanceof JExprId)
             return evalIdExpr(anOR, (JExprId) anExpr);
 
-        // Handle expression chain
-        if (anExpr instanceof JExprChain)
-            return evalExprChain(anOR, (JExprChain) anExpr);
+        // Handle dot expression
+        if (anExpr instanceof JExprDot)
+            return evalExprDot(anOR, (JExprDot) anExpr);
 
         // Handle math expression
         if (anExpr instanceof JExprMath)
@@ -426,20 +426,19 @@ public class JSExprEval {
     }
 
     /**
-     * Evaluate JExprChain.
+     * Evaluate JExprDot.
      */
-    private Object evalExprChain(Object anOR, JExprChain anExpr) throws Exception
+    private Object evalExprDot(Object anOR, JExprDot anExpr) throws Exception
     {
         Object val = anOR;
 
-        // Iterate over chain
-        for (int i = 0, iMax = anExpr.getExprCount(); i < iMax; i++) {
-            JExpr expr = anExpr.getExpr(i);
-            val = evalExpr(val, expr);
-        }
+        // Eval prefix expression
+        JExpr prefixExpr = anExpr.getPrefixExpr();
+        Object prefixVal = evalExpr(val, prefixExpr);
 
-        // Return
-        return val;
+        // Eval expression
+        JExpr expr = anExpr.getExpr();
+        return evalExpr(prefixVal, expr);
     }
 
     /**

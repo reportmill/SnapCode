@@ -47,8 +47,8 @@ public class ExprEval {
             return evalMathExpr(anApp, anOR, (JExprMath) anExpr);
         if (anExpr instanceof JExprArrayIndex)
             return evalArrayIndex(anApp, anOR, (JExprArrayIndex) anExpr);
-        if (anExpr instanceof JExprChain)
-            return evalExprChain(anApp, anOR, (JExprChain) anExpr);
+        if (anExpr instanceof JExprDot)
+            return evalExprChain(anApp, anOR, (JExprDot) anExpr);
         return null;
     }
 
@@ -145,16 +145,19 @@ public class ExprEval {
     /**
      * Evaluate JExprChain.
      */
-    static Value evalExprChain(DebugApp anApp, ObjectReference anOR, JExprChain anExpr) throws Exception
+    static Value evalExprChain(DebugApp anApp, ObjectReference anOR, JExprDot anExpr) throws Exception
     {
         ObjectReference or = anOR;
-        Value val = null;
-        for (int i = 0, iMax = anExpr.getExprCount(); i < iMax; i++) {
-            JExpr expr = anExpr.getExpr(i);
-            val = evalExpr(anApp, or, expr);
-            if (val instanceof ObjectReference) or = (ObjectReference) val;
-        }
-        return val;
+
+        // Eval prefix
+        JExpr prefixExpr = anExpr.getPrefixExpr();
+        Object prefixVal = evalExpr(anApp, or, prefixExpr);
+        if (prefixVal instanceof ObjectReference)
+            or = (ObjectReference) prefixVal;
+
+        // Eval expression
+        JExpr expr = anExpr.getExpr();
+        return evalExpr(anApp, or, expr);
     }
 
     /**

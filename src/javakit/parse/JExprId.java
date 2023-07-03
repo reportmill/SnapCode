@@ -77,6 +77,13 @@ public class JExprId extends JExpr {
                 return parent.getDecl();
         }
 
+        // Handle parent is dot expression: Return dot expression decl
+        if (parent instanceof JExprDot) {
+            JExprDot dotExpr = (JExprDot) parent;
+            if (dotExpr.getExpr() == this)
+                return parent.getDecl();
+        }
+
         // Forward to parents
         return getDeclForChildExprIdNode(this);
     }

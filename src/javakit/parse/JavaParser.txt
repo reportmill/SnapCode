@@ -59,7 +59,7 @@ FieldDecl { Type VarDecl ("," | VarDecl)* ";" }
 
 ConstrDecl
 {
-    TypeParams? Identifier FormalParams ThrowsList? "{" (LookAhead(ConstrCall) ConstrCall)? BlockStatement* "}"
+    TypeParams? Identifier FormalParams ThrowsList? "{" (LookAhead (ConstrCall) ConstrCall)? BlockStatement* "}"
 }
 
 ConstrCall
@@ -194,7 +194,7 @@ PreIncrementExpr { "++" PrimaryExpr }
 
 PreDecrementExpr { "--" PrimaryExpr }
 
-UnaryExprNotPlusMinus { ("~" | "!") UnaryExpr | LookAhead(CastLook) CastExpr | PostfixExpr }
+UnaryExprNotPlusMinus { ("~" | "!") UnaryExpr | LookAhead (CastLook) CastExpr | PostfixExpr }
 
 PostfixExpr { PrimaryExpr ("++" | "--")? }
 
@@ -203,19 +203,19 @@ PrimaryExpr { PrimaryPrefix (LookAhead(2) PrimarySuffix)* }
 PrimaryPrefix
 {
     Literal |
-    LookAhead((Identifier | ".")* "this") (Identifier ".")* "this" |
+    LookAhead ((Identifier | ".")* "this") (Identifier ".")* "this" |
     "super" "." Identifier |
-    LookAhead(ClassType "." "super" "." Identifier) ClassType "." "super" "." Identifier |
+    LookAhead (ClassType "." "super" "." Identifier) ClassType "." "super" "." Identifier |
     LambdaExpr |
     "(" Expression ")" |
     AllocExpr |
-    LookAhead(ResultType "." "class") ResultType "." "class" |
+    LookAhead (ResultType "." "class") ResultType "." "class" |
     Name
 }
 
 PrimarySuffix
 {
-    LookAhead("." "super" ".") "." "super" |
+    LookAhead ("." "super" ".") "." "super" |
     LookAhead(2) "." "this" |
     LookAhead(2) "." AllocExpr |
     LookAhead(3) MemberSelector |
@@ -241,20 +241,24 @@ ArrayDimsAndInits
     LookAhead(2) (LookAhead(2) "[" Expression "]")+ (LookAhead(2) "[" "]")* | ("[" "]")+ ArrayInit
 }
 
-CastExpr { LookAhead("(" PrimitiveType) "(" Type ")" UnaryExpr | "(" Type ")" UnaryExprNotPlusMinus }
+CastExpr
+{
+    LookAhead ("(" PrimitiveType) "(" Type ")" UnaryExpr |
+    "(" Type ")" UnaryExprNotPlusMinus
+}
 
 CastLook
 {
     LookAhead(2) "(" PrimitiveType |
-    LookAhead("(" Type "[") "(" Type "[" "]" |
+    LookAhead ("(" Type "[") "(" Type "[" "]" |
     "(" Type ")" ("~" | "!" | "(" | Identifier | "this" | "super" | "new" | Literal)
 }
 
 LambdaExpr
 {
-    LookAhead(Identifier "->") Identifier "->" (Expression | Block) |
-    LookAhead("(" Identifier ("," Identifier)* ")" "->") "(" Identifier ("," Identifier)* ")" "->" (Expression | Block) |
-    LookAhead(FormalParams "->") FormalParams "->" (Expression | Block)
+    LookAhead (Identifier "->") Identifier "->" (Expression | Block) |
+    LookAhead ("(" Identifier ("," Identifier)* ")" "->") "(" Identifier ("," Identifier)* ")" "->" (Expression | Block) |
+    LookAhead (FormalParams "->") FormalParams "->" (Expression | Block)
 }
 
 FormalParam { Modifiers ("final" | Annotation)? Type "..."? Identifier ("[" "]")* }
@@ -299,8 +303,8 @@ WildcardBounds { "extends" ReferenceType | "super" ReferenceType }
 
 Annotation
 {
-    LookAhead("@" Name "(" (Identifier "=" | ")")) NormalAnnotation |
-    LookAhead("@" Name "(") SingleMemberAnnotation |
+    LookAhead ("@" Name "(" (Identifier "=" | ")")) NormalAnnotation |
+    LookAhead ("@" Name "(") SingleMemberAnnotation |
     MarkerAnnotation
 }
 

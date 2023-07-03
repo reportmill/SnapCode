@@ -71,7 +71,7 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * Name Handler.
+     * Name Handler: Identifier (LookAhead(2) "." Identifier)*
      */
     public static class NameHandler extends JNodeParseHandler<JExpr> {
 
@@ -82,7 +82,9 @@ public class JavaParserExpr extends Parser {
         {
             if (anId == "Identifier") {
                 JExprId idExpr = aNode.getCustomNode(JExprId.class);
-                _part = JExpr.joinExpressions(_part, idExpr);
+                if (_part == null)
+                    _part = idExpr;
+                else _part = new JExprDot(_part, idExpr);
             }
         }
 
@@ -517,18 +519,23 @@ public class JavaParserExpr extends Parser {
                 // Handle Identifier of [ (Identifier ".")* this ] and [ "super" "." Identifier ]
                 case "Identifier": {
                     JExprId idExpr = aNode.getCustomNode(JExprId.class);
-                    _part = JExpr.joinExpressions(_part, idExpr);
+                    if (_part == null)
+                        _part = idExpr;
+                    else _part = new JExprDot(_part, idExpr);
                     break;
                 }
 
                 // Handle "this"/"super" of [ (Identifier ".")* this ] and [ "super" "." Identifier ]
                 case "this":
-                case "super":
-                    JExprId id = new JExprId(aNode.getString());
-                    id.setStartToken(aNode.getStartToken());
-                    id.setEndToken(aNode.getEndToken());
-                    _part = JExpr.joinExpressions(_part, id);
+                case "super": {
+                    JExprId idExpr = new JExprId(aNode.getString());
+                    idExpr.setStartToken(aNode.getStartToken());
+                    idExpr.setEndToken(aNode.getEndToken());
+                    if (_part == null)
+                        _part = idExpr;
+                    else _part = new JExprDot(_part, idExpr);
                     break;
+                }
 
                 // Handle ClassType (using above to handle the rest: "." "super" "." Identifier
                 case "ClassType":
@@ -562,23 +569,15 @@ public class JavaParserExpr extends Parser {
                     JExprId idExpr = new JExprId("class");
                     idExpr.setStartToken(aNode.getStartToken());
                     idExpr.setEndToken(aNode.getEndToken());
-                    _part = JExpr.joinExpressions(_part, idExpr);
+                    _part = new JExprDot(_part, idExpr);
                     break;
                 }
 
                 // Handle Name
                 case "Name":
-
-                    // Handle Name chain expression
-                    JExpr namePrime = aNode.getCustomNode(JExpr.class);
-                    if (namePrime instanceof JExprChain) {
-                        JExprChain nameChain = (JExprChain) namePrime;
-                        for (int i = 0, iMax = nameChain.getExprCount(); i < iMax; i++)
-                            _part = JExpr.joinExpressions(_part, nameChain.getExpr(i));
-                    }
-
-                    // Handle simple Name
-                    else _part = JExpr.joinExpressions(_part, namePrime);
+                    if (_part != null)
+                        System.err.println("JavaParserExpr.PrimaryPrefixHandler: Can't have multiple Name - this can go");
+                    _part = (JExpr) aNode.getCustomNode();
                     break;
             }
         }

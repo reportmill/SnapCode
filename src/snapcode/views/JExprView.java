@@ -1,6 +1,6 @@
 package snapcode.views;
 import javakit.parse.JExpr;
-import javakit.parse.JExprChain;
+import javakit.parse.JExprDot;
 import javakit.parse.JExprMethodCall;
 import javakit.parse.JNode;
 import snap.view.RowView;
@@ -37,11 +37,13 @@ public abstract class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
      */
     public static JExprView createView(JNode aNode)
     {
-        JExprView sp;
-        if (aNode instanceof JExprMethodCall) sp = new JExprMethodCallView();
-        else if (aNode instanceof JExprChain) sp = new JExprChainView();
-        else sp = new JExprEditor();
-        sp.setJNode(aNode);
-        return sp;
+        JExprView exprView;
+        if (aNode instanceof JExprMethodCall)
+            exprView = new JExprMethodCallView();
+        else if (aNode instanceof JExprDot)
+            exprView = new JExprChainView();
+        else exprView = new JExprEditor();
+        exprView.setJNode(aNode);
+        return exprView;
     }
 }

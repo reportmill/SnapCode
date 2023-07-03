@@ -13,4 +13,9 @@ public interface WithId {
      * Returns the identifier.
      */
     JExprId getId();
+
+    /**
+     * Sets the identifier.
+     */
+    void setId(JExprId idExpr);
 }

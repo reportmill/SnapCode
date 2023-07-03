@@ -275,9 +275,10 @@ public class SnapEditor extends StackView {
     public int getAfterNode(JNode aNode)
     {
         int index = aNode.getEndCharIndex();
-        JExprChain cexpr = aNode.getParent() instanceof JExprChain ? (JExprChain) aNode.getParent() : null;
-        if (cexpr != null)
-            return cexpr.getExpr(cexpr.getExprCount() - 1).getEndCharIndex();
+        JNode nodeParent = aNode.getParent();
+        JExprDot dotExpr = nodeParent instanceof JExprDot ? (JExprDot) nodeParent : null;
+        if (dotExpr != null)
+            return dotExpr.getExpr().getEndCharIndex();
 
         JavaTextArea javaTextArea = getJavaTextArea();
         TextBoxLine tline = javaTextArea.getLineForCharIndex(index);
