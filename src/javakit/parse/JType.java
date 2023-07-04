@@ -13,6 +13,9 @@ import snap.util.ClassUtils;
  */
 public class JType extends JNode {
 
+    // The base expression
+    private JExpr _baseExpr;
+
     // Whether type is primitive type
     protected boolean  _primitive;
 
@@ -34,15 +37,27 @@ public class JType extends JNode {
     }
 
     /**
+     * Returns the base expression.
+     */
+    public JExpr getBaseExpr()  { return _baseExpr; }
+
+    /**
+     * Sets the base expression.
+     */
+    public void setBaseExpr(JExpr anExpr)
+    {
+        replaceChild(_baseExpr, _baseExpr = anExpr);
+    }
+
+    /**
      * Adds an identifier.
      */
     public void addId(JExprId anId)
     {
-        String nameAll = anId.getName();
-        String name = getName();
-        if (name != null)
-            nameAll = name + '.' + nameAll;
-        setName(nameAll);
+        JExpr baseExpr = anId;
+        if (_baseExpr != null)
+            baseExpr = new JExprDot(_baseExpr, anId);
+        setBaseExpr(baseExpr);
     }
 
     /**
@@ -109,8 +124,19 @@ public class JType extends JNode {
      */
     public String getSimpleName()
     {
-        int index = _name.lastIndexOf('.');
-        return index > 0 ? _name.substring(index + 1) : _name;
+        String name = getName();
+        int index = name.lastIndexOf('.');
+        return index > 0 ? name.substring(index + 1) : name;
+    }
+
+    /**
+     * Override to get name from base expression.
+     */
+    @Override
+    protected String getNameImpl()
+    {
+        JExpr baseExpr = getBaseExpr();
+        return baseExpr != null ? baseExpr.getName() : null;
     }
 
     /**
@@ -132,12 +158,13 @@ public class JType extends JNode {
         if (_baseDecl != null) return _baseDecl;
 
         // Handle primitive type
-        Class<?> primitiveClass = ClassUtils.getPrimitiveClassForName(_name);
+        String baseName = getName();
+        Class<?> primitiveClass = ClassUtils.getPrimitiveClassForName(baseName);
         if (primitiveClass != null)
             return _baseDecl = getJavaClassForClass(primitiveClass);
 
         // Try to find class directly
-        JavaType javaClass = getJavaClassForName(_name);
+        JavaType javaClass = getJavaClassForName(baseName);
         if (javaClass != null)
             return _baseDecl = javaClass;
 
@@ -198,36 +225,43 @@ public class JType extends JNode {
     }
 
     /**
-     * A convenient builder class.
+     * Creates a type for type and token.
      */
-    public static class Builder {
+    public static JType createTypeForTypeAndToken(JavaType aType, ParseToken aToken)
+    {
+        return createTypeForTypeAndNameAndToken(aType, null, aToken);
+    }
 
-        // Ivars
-        private ParseToken  _startToken, _endToken;
-        private String  _name;
-        private JavaType  _type;
+    /**
+     * Creates a type for name and token.
+     */
+    public static JType createTypeForNameAndToken(String aName, ParseToken aToken)
+    {
+        return createTypeForTypeAndNameAndToken(null, aName, aToken);
+    }
 
-        public Builder()  { }
-        public Builder token(ParseToken aToken)  { _startToken = _endToken = aToken; return this; }
-        public Builder startToken(ParseToken aToken)  { _startToken = aToken; return this; }
-        public Builder endToken(ParseToken aToken)  { _endToken = aToken; return this; }
-        public Builder name(String aName)  { _name = aName; return this; }
-        public Builder type(JavaType aType)  { _type = aType; return this; }
-        public JType build()
-        {
-            JType type = new JType();
-            type._startToken = _startToken;
-            type._endToken = _endToken;
-            type._name = _name;
-            type._decl = _type;
-            if (_type != null) {
-                type._primitive = _type.isPrimitive();
-                if (_name == null)
-                    type._name = _type.getName();
-            }
-
-            // Return
-            return type;
+    /**
+     * Creates a type for name and token.
+     */
+    private static JType createTypeForTypeAndNameAndToken(JavaType aType, String aName, ParseToken aToken)
+    {
+        JType type = new JType();
+        type._startToken = type._endToken = aToken;
+        if (aType != null) {
+            type._decl = aType;
+            type._primitive = aType.isPrimitive();
+            aName = aType.getName();
         }
+
+        // Create/add ids for name
+        String[] idStrings = aName.split("\\.");
+        for (String idStr : idStrings) {
+            JExprId id = new JExprId(idStr);
+            id._startToken = id._endToken = aToken;
+            type.addId(id);
+        }
+
+        // Return
+        return type;
     }
 }

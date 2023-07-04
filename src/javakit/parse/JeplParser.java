@@ -135,7 +135,7 @@ public class JeplParser extends JavaParser {
             jfile.addClassDecl(classDecl);
 
             // Add Superclass
-            JType extendsType = new JType.Builder().name(_superClassName).token(startToken).build();
+            JType extendsType = JType.createTypeForNameAndToken(_superClassName, startToken);
             classDecl.addExtendsType(extendsType);
 
             _initDecl = null;
@@ -255,7 +255,7 @@ public class JeplParser extends JavaParser {
         }
 
         // Create bogus type from initializer
-        JType type = new JType.Builder().token(assignTo.getStartToken()).type(initType).build();
+        JType type = JType.createTypeForTypeAndToken(initType, assignTo.getStartToken());
         varDecl.setType(type);
     }
 }

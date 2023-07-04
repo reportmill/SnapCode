@@ -156,18 +156,22 @@ public class NodeCompleter {
         }
 
         // Get parent expression - if none, forward to basic getCompletionsForNodeString()
-        JExpr parExpr = anId.getScopeExpr();
-        JavaDecl parentDecl = parExpr != null ? parExpr.getDecl() : null;
-        if (parentDecl == null) {
+        JExpr scopeExpr = anId.getScopeExpr();
+        JavaDecl scopeDecl = scopeExpr != null ? scopeExpr.getDecl() : null;
+        if (scopeDecl instanceof JavaLocalVar)
+            scopeDecl = scopeDecl.getEvalClass();
+
+        // If no scope decl, get completions for string
+        if (scopeDecl == null) {
             getCompletionsForNodeString(anId, prefixMatcher);
             return;
         }
 
         // Handle parent is Package: Add packages and classes with prefix
-        if (parentDecl instanceof JavaPackage) {
+        if (scopeDecl instanceof JavaPackage) {
 
             // Get parent package name
-            JavaPackage parentPackage = (JavaPackage) parentDecl;
+            JavaPackage parentPackage = (JavaPackage) scopeDecl;
             JavaDecl[] packageChildren = parentPackage.getChildren();
 
             // Get matching children
@@ -185,10 +189,10 @@ public class NodeCompleter {
         }
 
         // Handle anything else with a parent class
-        else if (parentDecl instanceof JavaType) {
+        else if (scopeDecl instanceof JavaType) {
 
             // Get ParentExpr.EvalClass
-            JavaClass parExprEvalClass = parentDecl.getEvalClass();
+            JavaClass parExprEvalClass = scopeDecl.getEvalClass();
 
             // Get matching members (fields, methods) for class and add
             JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(parExprEvalClass, false);

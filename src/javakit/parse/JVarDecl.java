@@ -49,7 +49,7 @@ public class JVarDecl extends JNode implements WithId {
 
         // If array count is set, replace with type to account for it
         if (_arrayCount > 0) {
-            JType type2 = new JType.Builder().name(_type._name).token(_startToken).type(_type.getEvalType()).build();
+            JType type2 = JType.createTypeForTypeAndToken(_type.getEvalType(), _startToken);
             type2._arrayCount = _type._arrayCount + _arrayCount;
             _type = type2;
             _type._parent = this;
@@ -104,7 +104,7 @@ public class JVarDecl extends JNode implements WithId {
             }
 
             // Create type for type decl and return
-            JType type = new JType.Builder().type(argType).token(_startToken).build();
+            JType type = JType.createTypeForTypeAndToken(argType, _startToken);
             type._parent = this;
             return type;
         }
