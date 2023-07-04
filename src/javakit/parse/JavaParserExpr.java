@@ -156,7 +156,7 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * PrimitiveType Handler.
+     * PrimitiveType Handler: "boolean" | "char" | "byte" | "short" | "int" | "long" | "float" | "double"
      */
     public static class PrimitiveTypeHandler extends JNodeParseHandler<JType> {
 
@@ -165,11 +165,10 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle primitive types
-            if (anId == "boolean" || anId == "char" || anId == "byte" || anId == "short" ||
-                    anId == "int" || anId == "long" || anId == "float" || anId == "double")
-                getPart().setName(anId);
-            getPart().setPrimitive(true);
+            JExprId idExpr = new JExprId(aNode);
+            _part = new JType();
+            _part.addId(idExpr);
+            _part.setPrimitive(true);
         }
 
         protected Class<JType> getPartClass()  { return JType.class; }
@@ -195,7 +194,8 @@ public class JavaParserExpr extends Parser {
                 // Handle void
                 case "void":
                     JType type = getPart();
-                    type.setName("void");
+                    JExprId idExpr = new JExprId(aNode);
+                    type.addId(idExpr);
                     type.setPrimitive(true);
                     break;
             }
@@ -528,9 +528,7 @@ public class JavaParserExpr extends Parser {
                 // Handle "this"/"super" of [ (Identifier ".")* this ] and [ "super" "." Identifier ]
                 case "this":
                 case "super": {
-                    JExprId idExpr = new JExprId(aNode.getString());
-                    idExpr.setStartToken(aNode.getStartToken());
-                    idExpr.setEndToken(aNode.getEndToken());
+                    JExprId idExpr = new JExprId(aNode);
                     if (_part == null)
                         _part = idExpr;
                     else _part = new JExprDot(_part, idExpr);
@@ -552,7 +550,6 @@ public class JavaParserExpr extends Parser {
                 case "Expression":
                     JExpr innerExpr = aNode.getCustomNode(JExpr.class);
                     _part = new JExprParen(innerExpr);
-                    _part.setStartToken(getStartToken());
                     break;
 
                 // Handle AllocExpr
@@ -566,9 +563,7 @@ public class JavaParserExpr extends Parser {
                     _part = new JExprType(resultType);
                     break;
                 case "class": {
-                    JExprId idExpr = new JExprId("class");
-                    idExpr.setStartToken(aNode.getStartToken());
-                    idExpr.setEndToken(aNode.getEndToken());
+                    JExprId idExpr = new JExprId(aNode);
                     _part = new JExprDot(_part, idExpr);
                     break;
                 }

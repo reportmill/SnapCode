@@ -122,6 +122,8 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
 
             // Get/set name
             String methodName = methodDecl.getName();
+            if (methodName == null)
+                continue;
             mb.name(methodName);
             mb.methodDecl(methodDecl);
 

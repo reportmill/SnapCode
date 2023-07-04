@@ -71,10 +71,12 @@ public class NodeCompleter {
         // Add completions for node
         if (aNode instanceof JExprId)
             getCompletionsForExprId((JExprId) aNode, prefixMatcher);
-        else if (aNode instanceof JType)
-            getCompletionsForType((JType) aNode, prefixMatcher);
         else if (aNode.getStartToken() == aNode.getEndToken())
             getCompletionsForNodeString(aNode, prefixMatcher);
+
+        // If alloc expression, replace classes with contructors
+        if (aNode instanceof JExprId && isAllocExprId((JExprId) aNode))
+            replaceClassesWithConstructors();
 
         // If no matches, just return
         if (_list.size() == 0)
@@ -112,30 +114,26 @@ public class NodeCompleter {
         // Add methods of enclosing class
         while (enclosingClass != null) {
             JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(enclosingClass, false);
-            for (JavaMember matchingMember : matchingMembers)
-                addCompletionDecl(matchingMember);
+            addCompletionDecls(matchingMembers);
             enclosingClassDecl = enclosingClassDecl.getEnclosingClassDecl();
             enclosingClass = enclosingClassDecl != null ? enclosingClassDecl.getEvalClass() : null;
         }
 
         // Get matching classes and add completion decl
         JavaClass[] matchingClasses = prefixMatcher.getClassesForResolver(_resolver);
-        for (JavaClass matchingClass : matchingClasses)
-            addCompletionDecl(matchingClass);
+        addCompletionDecls(matchingClasses);
 
         // Get matching packages and add
         JavaPackage rootPackage = _resolver.getJavaPackageForName("");
         JavaPackage[] rootPackages = rootPackage.getPackages();
         JavaPackage[] matchingPackages = ArrayUtils.filter(rootPackages, pkg -> prefixMatcher.matchesString(pkg.getSimpleName()));
-        for (JavaPackage matchingPkg : matchingPackages)
-            addCompletionDecl(matchingPkg);
+        addCompletionDecls(matchingPackages);
 
         // Add matches for static imports
         JFile jfile = aNode.getFile();
         JImportDecl[] staticImportDecls = jfile.getStaticImportDecls();
         JavaMember[] matchingMembers = prefixMatcher.getMembersForStaticImports(staticImportDecls);
-        for (JavaMember matchingMember : matchingMembers)
-            addCompletionDecl(matchingMember);
+        addCompletionDecls(matchingMembers);
     }
 
     /**
@@ -196,44 +194,8 @@ public class NodeCompleter {
 
             // Get matching members (fields, methods) for class and add
             JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(parExprEvalClass, false);
-            for (JavaMember matchingMember : matchingMembers)
-                addCompletionDecl(matchingMember);
+            addCompletionDecls(matchingMembers);
         }
-    }
-
-    /**
-     * Find completions for JType:
-     *   - Constructors (if parent is alloc expr)
-     *   - Class names (all other cases)
-     */
-    private void getCompletionsForType(JType aJType, DeclMatcher prefixMatcher)
-    {
-        // Handle JType as AllocExpr
-        JNode typeParent = aJType.getParent();
-        if (typeParent instanceof JExprAlloc) {
-
-            // Get all matching classes
-            JavaClass[] matchingClasses = prefixMatcher.getClassesForResolver(_resolver);
-
-            // Iterate over classes and add constructors
-            for (JavaClass matchingClass : matchingClasses) {
-
-                // Get Constructors
-                List<JavaConstructor> constructors = matchingClass.getDeclaredConstructors();
-
-                // Add constructors
-                for (JavaConstructor constructor : constructors)
-                    addCompletionDecl(constructor);
-
-                // Handle primitive
-                if (matchingClass.isPrimitive())
-                    addCompletionDecl(matchingClass);
-            }
-        }
-
-        // Handle single token nodes
-        if (aJType.getStartToken() == aJType.getEndToken())
-            getCompletionsForNodeString(aJType, prefixMatcher);
     }
 
     /**
@@ -292,6 +254,42 @@ public class NodeCompleter {
     }
 
     /**
+     * Adds completion.
+     */
+    private void addCompletionDecls(JavaDecl[] theDecls)
+    {
+        for (JavaDecl decl : theDecls)
+            addCompletionDecl(decl);
+    }
+
+    /**
+     * Adds completion.
+     */
+    private void addCompletionDecls(Collection<? extends JavaDecl> theDecls)
+    {
+        for (JavaDecl decl : theDecls)
+            addCompletionDecl(decl);
+    }
+
+    /**
+     * Replaces classes with constructors.
+     */
+    private void replaceClassesWithConstructors()
+    {
+        for (int i = _list.size() - 1; i >= 0; i--) {
+            JavaDecl decl = _list.get(i);
+            if (decl instanceof JavaClass) {
+                JavaClass javaClass = (JavaClass) decl;
+                if (!javaClass.isPrimitive()) {
+                    _list.remove(i);
+                    List<JavaConstructor> constructors = javaClass.getDeclaredConstructors();
+                    addCompletionDecls(constructors);
+                }
+            }
+        }
+    }
+
+    /**
      * Returns a string for node.
      */
     private String getNodeString(JNode aNode)
@@ -315,5 +313,19 @@ public class NodeCompleter {
 
         // Return not found
         return null;
+    }
+
+    /**
+     * Returns whether id expression is the type identifier of alloc expression.
+     */
+    private static boolean isAllocExprId(JExprId idExpr)
+    {
+        JNode parent = idExpr.getParent();
+        if (parent instanceof JType) {
+            JNode typeParent = parent.getParent();
+            if (typeParent instanceof JExprAlloc)
+                return true;
+        }
+        return false;
     }
 }

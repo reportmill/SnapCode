@@ -3,6 +3,7 @@
  */
 package javakit.parse;
 import javakit.resolver.*;
+import snap.parse.ParseNode;
 import snap.util.ArrayUtils;
 
 /**
@@ -24,6 +25,17 @@ public class JExprId extends JExpr {
     public JExprId(String aName)
     {
         setName(aName);
+    }
+
+    /**
+     * Constructor for given identifier name.
+     */
+    public JExprId(ParseNode parseNode)
+    {
+        super();
+        setName(parseNode.getId());
+        setStartToken(parseNode.getStartToken());
+        setEndToken(parseNode.getEndToken());
     }
 
     /**
