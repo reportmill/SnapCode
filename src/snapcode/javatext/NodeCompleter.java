@@ -156,7 +156,7 @@ public class NodeCompleter {
         // Get parent expression - if none, forward to basic getCompletionsForNodeString()
         JExpr scopeExpr = anId.getScopeExpr();
         JavaDecl scopeDecl = scopeExpr != null ? scopeExpr.getDecl() : null;
-        if (scopeDecl instanceof JavaLocalVar)
+        if (scopeDecl instanceof JavaLocalVar || scopeDecl instanceof JavaMember)
             scopeDecl = scopeDecl.getEvalClass();
 
         // If no scope decl, get completions for string
