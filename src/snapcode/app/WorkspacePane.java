@@ -1,7 +1,5 @@
 package snapcode.app;
 import snapcode.project.JavaTextDoc;
-import snapcode.project.JeplTextDoc;
-import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
 import snapcode.project.Project;
 import snapcode.project.WorkspaceBuilder;
@@ -25,25 +23,25 @@ import snapcode.apptools.*;
 public class WorkspacePane extends ViewOwner {
 
     // The Workspace
-    private Workspace  _workspace;
+    private Workspace _workspace;
 
     // The array of ProjectPanes
-    protected ProjectPane[]  _projectPanes = new ProjectPane[0];
+    protected ProjectPane[] _projectPanes = new ProjectPane[0];
 
     // The MainToolBar
-    protected MainToolBar  _toolBar;
+    protected MainToolBar _toolBar;
 
     // The PagePane to display project files for editing
-    protected PagePane  _pagePane;
+    protected PagePane _pagePane;
 
     // The StatusBar
-    protected StatusBar  _statusBar;
+    protected StatusBar _statusBar;
 
     // The WorkspaceTools
-    protected WorkspaceTools  _workspaceTools;
+    protected WorkspaceTools _workspaceTools;
 
     // A PropChangeListener to watch for site file changes
-    private PropChangeListener  _siteFileLsnr = pc -> siteFileChanged(pc);
+    private PropChangeListener _siteFileLsnr = pc -> siteFileChanged(pc);
 
     /**
      * Constructor.
@@ -112,31 +110,20 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Opens a Workspace for Java/Jepl file source.
      */
-    public void setWorkspaceForJeplFileSource(Object aSource)
+    public void openWorkspaceForSource(Object aSource)
     {
-        // Delete temp project
-        if (aSource == null)
-            ProjectUtils.deleteTempProject();
+        // Get JavaTextDoc and Configure
+        JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForSource(aSource);
+        JeplUtils.configureJeplDocProject(javaTextDoc);
 
-        // Get JavaTextDoc and source file for source
-        JavaTextDoc javaTextDoc = JeplTextDoc.getJeplTextDocForSourceURL(aSource);
+        // Get source file
         WebFile sourceFile = javaTextDoc.getSourceFile();
 
-        // If no source, save file
-        if (aSource == null) {
-            sourceFile.setText("");
-            sourceFile.save();
-        }
-
-        // Otherwise, add to RecentFiles
-        else {
+        // If not "TempProj" file, add to RecentFiles
+        if (!sourceFile.getPath().contains("TempProj")) {
             WebURL sourceURL = sourceFile.getURL();
             RecentFiles.addURL(sourceURL);
         }
-
-        // Configure doc
-        //if (javaTextDoc instanceof JeplTextDoc)
-        JeplUtils.configureJeplDocProject(javaTextDoc);
 
         // Get project/workspace
         Project project = Project.getProjectForFile(sourceFile);

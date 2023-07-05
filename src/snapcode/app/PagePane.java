@@ -287,8 +287,10 @@ public class PagePane extends ViewOwner {
 
         // Update TabBar Visible
         boolean showTabBar = getOpenFiles().length > 0;
-        if (showTabBar && getOpenFiles().length == 1 && selFile != null && "jepl".equals(selFile.getType()))
-            showTabBar = false;
+        if (showTabBar && getOpenFiles().length == 1 && selFile != null) {
+             if ("jepl".equals(selFile.getType()) || selFile.getName().contains("JavaFiddle"))
+                showTabBar = false;
+        }
         _tabBar.setVisible(showTabBar);
     }
 

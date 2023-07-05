@@ -79,15 +79,4 @@ public class JeplTextDoc extends JavaTextDoc {
     {
         _jeplDocConfig = aConfig;
     }
-
-    /**
-     * Returns the JeplTextDoc for given source.
-     */
-    public static JavaTextDoc getJeplTextDocForSourceURL(Object aSource)
-    {
-        // If Source is null, create temp file
-        if (aSource == null)
-            aSource = ProjectUtils.getTempSourceFile(null, "Untitled", "jepl");
-        return JavaTextDoc.getJavaTextDocForSource(aSource);
-    }
 }

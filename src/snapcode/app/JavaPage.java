@@ -229,24 +229,48 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         Project proj = Project.getProjectForFile(newFile);
 
         // Append package declaration
-        StringBuilder sb = new StringBuilder();
         WebFile fileDir = newFile.getParent();
-        String pkgName = proj != null ? proj.getClassNameForFile(fileDir) : newFile.getSimpleName();
-        if (pkgName.length() > 0)
-            sb.append("package ").append(pkgName).append(";\n");
+        String packageName = proj != null ? proj.getClassNameForFile(fileDir) : newFile.getSimpleName();
+        String className = newFile.getSimpleName();
+
+        // Set text
+        String javaText = getJavaContentStringForPackageAndClassName(packageName, className);
+        newFile.setText(javaText);
+
+        // Return
+        return newFile;
+    }
+
+    /**
+     * Creates a new file for use with showNewFilePanel method.
+     */
+    public static String getJavaContentStringForPackageAndClassName(String packageName, String className)
+    {
+        // Append package declaration
+        StringBuilder sb = new StringBuilder();
+        if (packageName != null && packageName.length() > 0)
+            sb.append("package ").append(packageName).append(";\n");
 
         // Append Comment
         sb.append("\n/**\n * A custom class.\n */\n");
 
         // Append class declaration: "public class <File-Name> extends Object {   }"
-        String className = newFile.getSimpleName();
-        sb.append("public class ").append(className).append(" extends Object {\n\n\n\n}");
+        sb.append("public class ").append(className).append(" {\n\n");
 
-        // Set text
-        newFile.setText(sb.toString());
+        // Append standard main implementation
+        sb.append("    /**\n");
+        sb.append("     * Standard main implementation.\n");
+        sb.append("     */\n");
+        sb.append("    public static void main(String[] args)\n");
+        sb.append("    {\n");
+        sb.append("    }\n");
+        sb.append('\n');
+
+        // Append close
+        sb.append("}");
 
         // Return
-        return newFile;
+        return sb.toString();
     }
 
     /**

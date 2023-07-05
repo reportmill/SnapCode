@@ -142,6 +142,24 @@ public class ProjectUtils {
     }
 
     /**
+     * Returns a temp java source file for given project. If null project, uses TempProject.
+     */
+    public static WebFile getTempJavaFile(String aName, String javaContents, boolean isRepl)
+    {
+        // Delete temp project
+        ProjectUtils.deleteTempProject();
+
+        // Get source file
+        String ext = isRepl ? "jepl" : "java";
+        WebFile sourceFile = ProjectUtils.getTempSourceFile(null, aName, ext);
+        sourceFile.setText(javaContents);
+        sourceFile.save();
+
+        // Return
+        return sourceFile;
+    }
+
+    /**
      * Returns a temp source file for given project and extension. If null project, uses TempProject.
      */
     public static WebFile getTempSourceFile(Project aProj, String aName, String anExt)

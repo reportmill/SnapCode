@@ -3,6 +3,7 @@
  */
 package snapcode.app;
 import snap.util.*;
+import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
 import snap.props.PropChange;
 import snap.view.*;
@@ -119,6 +120,13 @@ public class WelcomePanel extends ViewOwner {
         if (anEvent.equals("QuitButton"))
             App.getShared().quitApp();
 
+        // Handle NewJavaClassMenu
+        if (anEvent.equals("NewJavaClassMenu")) {
+            String javaContents = JavaPage.getJavaContentStringForPackageAndClassName(null, "JavaFiddle");
+            WebFile javaFile = ProjectUtils.getTempJavaFile("JavaFiddle", javaContents, false);
+            openWorkspaceForFile(javaFile);
+        }
+
         // Handle WinClosing
         if (anEvent.isWinClose())
             hide();
@@ -129,8 +137,9 @@ public class WelcomePanel extends ViewOwner {
      */
     protected void newFile(boolean showSamples)
     {
-        // Show jepl
-        WorkspacePane workspacePane = openWorkspaceForFile(null);
+        // Open workspace for new Java repl file
+        WebFile javaReplFile = ProjectUtils.getTempJavaFile("JavaFiddle", "", true);
+        WorkspacePane workspacePane = openWorkspaceForFile(javaReplFile);
 
         if (showSamples)
             runLaterDelayed(300, () -> workspacePane.getWorkspaceTools().showSamples());
@@ -146,10 +155,10 @@ public class WelcomePanel extends ViewOwner {
         WorkspacePane workspacePane;
 
         // Handle source file
-        boolean isSourceFile = aFile == null || ArrayUtils.contains(FILE_TYPES, aFile.getType());
+        boolean isSourceFile = ArrayUtils.contains(FILE_TYPES, aFile.getType());
         if (isSourceFile) {
             workspacePane = new WorkspacePane();
-            workspacePane.setWorkspaceForJeplFileSource(aFile);
+            workspacePane.openWorkspaceForSource(aFile);
         }
 
         // Handle Project file

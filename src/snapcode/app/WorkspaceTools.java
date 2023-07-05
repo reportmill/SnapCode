@@ -295,7 +295,7 @@ public class WorkspaceTools {
      */
     private void showSamplesDidReturnURL(WebURL aURL)
     {
-        _workspacePane.setWorkspaceForJeplFileSource(aURL);
+        _workspacePane.openWorkspaceForSource(aURL);
 
         // Kick off run
         EvalTool evalTool = getToolForClass(EvalTool.class);

@@ -10,7 +10,14 @@
     </RowView>
     <RowView Align="CENTER" Spacing="10" Margin="10,0,0,0">
       <font name="Arial" size="13" />
-      <Button Name="NewButton" PrefWidth="100" PrefHeight="24" text="New" />
+      <RowView>
+        <Button Name="NewButton" PrefWidth="80" PrefHeight="24" Text="New" Position="CENTER_LEFT"/>
+        <MenuButton PrefWidth="20" PrefHeight="24" Position="CENTER_RIGHT">
+          <MenuItem Name="NewButton" text="New Java REPL" />
+          <MenuItem Name="NewJavaClassMenu" text="New Java Class" />
+          <MenuItem Name="NewUIFileMenu" text="New SnapKit UI File" />
+        </MenuButton>
+      </RowView>
       <Button Name="OpenButton" PrefWidth="100" PrefHeight="24" text="Open" />
       <Button Name="QuitButton" PrefWidth="100" PrefHeight="24" text="Quit" />
     </RowView>
