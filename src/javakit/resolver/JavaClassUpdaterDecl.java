@@ -42,6 +42,11 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         if (_javaClass._fieldDecls == null)
             _javaClass._fieldDecls = Collections.EMPTY_LIST;
 
+        // Update SuperClass
+        JavaClass superClass = _classDecl.getSuperClass();
+        _javaClass._superClass = superClass;
+        _javaClass._superClassName = superClass.getName();
+
         // Update interfaces
         //updateInterfaces();
         _javaClass._interfaces = new JavaClass[0];

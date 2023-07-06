@@ -23,10 +23,10 @@ public class JavaClass extends JavaType {
     private JavaType  _superType;
 
     // The super class name
-    private String _superClassName;
+    protected String _superClassName;
 
     // The super class
-    private JavaClass  _superClass;
+    protected JavaClass  _superClass;
 
     // The modifiers
     protected int  _mods;
