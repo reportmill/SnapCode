@@ -114,10 +114,9 @@ public class WorkspacePane extends ViewOwner {
         WebFile sourceFile = javaTextDoc.getSourceFile();
 
         // If not "TempProj" file, add to RecentFiles
-        if (!sourceFile.getPath().contains("TempProj")) {
-            WebURL sourceURL = sourceFile.getURL();
+        WebURL sourceURL = sourceFile.getURL();
+        if (!sourceURL.getString().contains("TempProj"))
             RecentFiles.addURL(sourceURL);
-        }
 
         // Get project/workspace
         Project project = Project.getProjectForFile(sourceFile);
