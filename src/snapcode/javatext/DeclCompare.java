@@ -61,24 +61,24 @@ class DeclCompare implements Comparator<JavaDecl> {
         String declName = aDecl.getSimpleName();
         int rating = 0;
 
-        // Literal prefix match (case sensitive) makes us more happy
+        // If literal prefix match (case sensitive), add bonus
         if (_literal && declName.startsWith(_prefix))
             rating += 2;
 
-        // Vars, Fields, Methods and Constructors make us more happy
-        if (aDecl instanceof JavaExecutable || aDecl instanceof JavaLocalVar) {
+        // Handle Vars, Fields, Methods and Constructors: Add bonus
+        if (aDecl instanceof JavaMember || aDecl instanceof JavaLocalVar) {
 
             // Increase rating
             rating += 5;
 
-            // Matching receiving class makes us more happy
+            // If matching receiving class, add bonus
             if (_receivingClass != null) {
                 JavaType evalType = aDecl.getEvalType();
                 if (_receivingClass.isAssignable(evalType))
                     rating += 5;
             }
 
-            // Constructor for inner class makes us less happy
+            // If constructor for inner class, add penalty
             if (aDecl instanceof JavaConstructor) {
                 JavaConstructor constructor = (JavaConstructor) aDecl;
                 JavaClass evalClass = constructor.getEvalClass();
@@ -87,25 +87,19 @@ class DeclCompare implements Comparator<JavaDecl> {
             }
         }
 
-        // Class in pref package makes us more happy
+        // Handle Class: Add bonus for preferred packages or receiving class match
         else if (aDecl instanceof JavaClass) {
 
             // Get package
             JavaClass javaClass = (JavaClass) aDecl;
             JavaPackage pkg = javaClass.getPackage();
+            String packageName = pkg.getName();
 
-            // Handle root package (primitive classes mostly)
-            if (pkg == null)
+            // If root or common package, add bonus
+            if (packageName.length() == 0 || ArrayUtils.contains(DeclMatcher.COMMON_PACKAGES, packageName))
                 rating += 5;
-
-                // Handle preferred packages
-            else {
-                String pkgName = pkg.getName();
-                if (ArrayUtils.contains(PREF_PACKAGES, pkgName))
-                    rating += 5;
-                else if (pkgName.startsWith("java.util.") || pkgName.startsWith("java.lang."))
-                    rating += 2;
-            }
+            else if (packageName.startsWith("java.util.") || packageName.startsWith("java.lang."))
+                rating += 2;
 
             // If class is ReceivingClass, user might want cast
             if (javaClass == _receivingClass)
@@ -116,6 +110,11 @@ class DeclCompare implements Comparator<JavaDecl> {
                 rating -= 2;
         }
 
+        // Handle word: Add bonus
+        else if (aDecl instanceof JavaWord && _receivingClass == null) {
+            rating += 5;
+        }
+
         // Additional chars make us less happy
         int additionalCharsCount = declName.length() - _prefix.length();
         rating -= additionalCharsCount;
@@ -123,7 +122,4 @@ class DeclCompare implements Comparator<JavaDecl> {
         // Return
         return rating;
     }
-
-    // Constant for above
-    private static String PREF_PACKAGES[] = { "java.lang", "java.util", "snap.view", "snapcode.app" };
 }

@@ -695,12 +695,22 @@ public class JavaClass extends JavaType {
     @Override
     public String getSuggestionString()
     {
-        String simpleName = getSimpleName();
+        // Start with simple class name
+        String suggestionString = getSimpleName();
+
+        // If inner class, add enclosing class name
         if (_declaringClass != null)
-            return simpleName + " - " + _declaringClass.getName();
-        else if (_package != null)
-            return simpleName + " - " + _package.getName();
-        return simpleName;
+            return suggestionString + " - " + _declaringClass.getName();
+
+        // If not-root package, add package name
+        else {
+            String packageName = _package.getName();
+            if (packageName.length() > 0)
+                return suggestionString + " - " + _package.getName();
+        }
+
+        // Return
+        return suggestionString;
     }
 
     /**

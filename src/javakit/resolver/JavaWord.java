@@ -19,7 +19,7 @@ public class JavaWord extends JavaDecl {
     public static final JavaWord Abstract = new JavaWord("abstract", WordType.Modifier);
     public static final JavaWord Default = new JavaWord("default", WordType.Modifier);
     public static final JavaWord Final = new JavaWord("final", WordType.Modifier);
-    //public static final JavaWord Native = new JavaWord("native");
+    public static final JavaWord Static = new JavaWord("static", WordType.Modifier);
 
     // Declarations
     public static final JavaWord Class = new JavaWord("class", WordType.Declaration);
@@ -49,15 +49,14 @@ public class JavaWord extends JavaDecl {
     public static final JavaWord Throw = new JavaWord("throw", WordType.Statement);
     public static final JavaWord Throws = new JavaWord("throws", WordType.Statement);
     public static final JavaWord Try = new JavaWord("try", WordType.Statement);
-    public static final JavaWord Void = new JavaWord("void", WordType.Statement);
     public static final JavaWord While = new JavaWord("while", WordType.Statement);
 
     // All
     public static final JavaWord[] ALL = {
-            Public, Private, Protected, Abstract, Default, Final,
+            Public, Private, Protected, Abstract, Default, Final, Static,
             Class, Interface, Enum, Extends, Implements, Import, Package,
             Assert, Break, Case, Catch, Continue, Do, Else, Finally, For, If, Instanceof, New, Return,
-            Switch, Synchronized, Throw, Throws, Try, Void, While
+            Switch, Synchronized, Throw, Throws, Try, While
     };
 
     /**
