@@ -100,9 +100,14 @@ public class JavaTextArea extends TextArea {
         if (selStart != nodeEnd)
             return null;
 
+        // If not id expression, just return
+        JExprId idExpr = selNode instanceof JExprId ? (JExprId) selNode : null;
+        if (idExpr == null)
+            return null;
+
         // Get completions and return
         NodeCompleter javaCompleter = new NodeCompleter();
-        JavaDecl[] completions = javaCompleter.getCompletionsForNode(selNode);
+        JavaDecl[] completions = javaCompleter.getCompletionsForId(idExpr);
         return completions;
     }
 

@@ -59,8 +59,9 @@ public class SnapEditorPopup extends ViewOwner {
         node.setParent(aPart.getJNode().getParent());
 
         // Get id at editing (just return if not id)
-        JNode id = node.getNodeAtCharIndex(anIndex);
-        if (!(id instanceof JExprId)) {
+        JNode selNode = node.getNodeAtCharIndex(anIndex);
+        JExprId id = selNode instanceof JExprId ? (JExprId) selNode : null;
+        if (id == null) {
             hide();
             return;
         }
@@ -70,7 +71,7 @@ public class SnapEditorPopup extends ViewOwner {
         _idText = id.getName();
 
         // Get suggestions
-        JavaDecl[] suggestions = new NodeCompleter().getCompletionsForNode(id);
+        JavaDecl[] suggestions = new NodeCompleter().getCompletionsForId(id);
         if (suggestions.length == 0) {
             hide();
             return;

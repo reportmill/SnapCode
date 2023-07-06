@@ -8,7 +8,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javakit.parse.*;
 import javakit.resolver.*;
-import snap.parse.ParseToken;
 import snap.util.ArrayUtils;
 import snap.util.StringUtils;
 
@@ -45,14 +44,14 @@ public class NodeCompleter {
     }
 
     /**
-     * Returns completion for JNode (should be JType or JIdentifier).
+     * Returns completion for id expression node.
      */
-    public JavaDecl[] getCompletionsForNode(JNode aNode)
+    public JavaDecl[] getCompletionsForId(JExprId anId)
     {
         // Get SourceFile Project
-        _resolver = aNode.getResolver();
+        _resolver = anId.getResolver();
         if (_resolver == null) {
-            JFile jfile = aNode.getFile();
+            JFile jfile = anId.getFile();
             JClassDecl classDecl = jfile.getClassDecl();
             String className = classDecl != null ? classDecl.getName() : "Unknown";
             System.err.println("JavaCompleter: No resolver for source file: " + className);
@@ -60,22 +59,19 @@ public class NodeCompleter {
         }
 
         // Get prefix matcher
-        String prefix = getNodeString(aNode);
+        String prefix = anId.getName();
         DeclMatcher prefixMatcher = prefix != null ? new DeclMatcher(prefix) : null;
         if (prefixMatcher == null)
             return NO_MATCHES;
 
         // Add reserved word completions (public, private, for, white, etc.)
-        addWordCompletionsForMatcher(prefixMatcher);
+        addWordCompletions(prefixMatcher);
 
-        // Add completions for node
-        if (aNode instanceof JExprId)
-            getCompletionsForExprId((JExprId) aNode, prefixMatcher);
-        else if (aNode.getStartToken() == aNode.getEndToken())
-            getCompletionsForNodeString(aNode, prefixMatcher);
+        // Add completions for id
+        addCompletionsForId(anId, prefixMatcher);
 
-        // If alloc expression, replace classes with contructors
-        if (aNode instanceof JExprId && isAllocExprId((JExprId) aNode))
+        // If alloc expression, replace classes with constructors
+        if (isAllocExprId(anId))
             replaceClassesWithConstructors();
 
         // If no matches, just return
@@ -83,7 +79,7 @@ public class NodeCompleter {
             return NO_MATCHES;
 
         // Get receiving class - If just Object, clear it out
-        JavaClass receivingClass = ReceivingClass.getReceivingClass(aNode);
+        JavaClass receivingClass = ReceivingClass.getReceivingClass(anId);
         if (receivingClass != null && receivingClass.getName().equals("java.lang.Object"))
             receivingClass = null;
 
@@ -100,15 +96,32 @@ public class NodeCompleter {
      *   - Class names
      *   - Package names
      */
-    private void getCompletionsForNodeString(JNode aNode, DeclMatcher prefixMatcher)
+    private void addCompletionsForId(JExprId anId, DeclMatcher prefixMatcher)
     {
+        // If id is scoped, do special case
+        JExpr scopeExpr = anId.getScopeExpr();
+        if (scopeExpr != null) {
+            addCompletionsForScopedId(scopeExpr, prefixMatcher);
+            return;
+        }
+
+        // Handle JVarDecl.Id: Only offer camel case name
+        JNode parent = anId.getParent();
+        if (parent instanceof JVarDecl) {
+            JVarDecl varDecl = (JVarDecl) parent;
+            if (anId == varDecl.getId()) {
+                addCompletionsForNewVarDecl((JVarDecl) parent);
+                return;
+            }
+        }
+
         // Get variables with prefix of name and add to completions
-        List<JVarDecl> varDecls = prefixMatcher.getVarDeclsForJNode(aNode, new ArrayList<>());
+        List<JVarDecl> varDecls = prefixMatcher.getVarDeclsForJNode(anId, new ArrayList<>());
         for (JVarDecl varDecl : varDecls)
             addCompletionDecl(varDecl.getDecl());
 
         // Get enclosing class
-        JClassDecl enclosingClassDecl = aNode.getEnclosingClassDecl();
+        JClassDecl enclosingClassDecl = anId.getEnclosingClassDecl();
         JavaClass enclosingClass = enclosingClassDecl != null ? enclosingClassDecl.getEvalClass() : null;
 
         // Add methods of enclosing class
@@ -130,40 +143,27 @@ public class NodeCompleter {
         addCompletionDecls(matchingPackages);
 
         // Add matches for static imports
-        JFile jfile = aNode.getFile();
+        JFile jfile = anId.getFile();
         JImportDecl[] staticImportDecls = jfile.getStaticImportDecls();
         JavaMember[] matchingMembers = prefixMatcher.getMembersForStaticImports(staticImportDecls);
         addCompletionDecls(matchingMembers);
     }
 
     /**
-     * Find completions for JExprId.
+     * Find completions for scoped id (e.g.: something.something).
      *   - Class or package names (if parent is package)
      *   - Fields or methods names (if parent evaluates to type)
      */
-    private void getCompletionsForExprId(JExprId anId, DeclMatcher prefixMatcher)
+    private void addCompletionsForScopedId(JExpr scopeExpr, DeclMatcher prefixMatcher)
     {
-        // Handle JVarDecl.Id: Only offer camel case name
-        JNode parent = anId.getParent();
-        if (parent instanceof JVarDecl) {
-            JVarDecl varDecl = (JVarDecl) parent;
-            if (anId == varDecl.getId()) {
-                getCompletionsForNewVarDecl((JVarDecl) parent);
-                return;
-            }
-        }
-
         // Get parent expression - if none, forward to basic getCompletionsForNodeString()
-        JExpr scopeExpr = anId.getScopeExpr();
-        JavaDecl scopeDecl = scopeExpr != null ? scopeExpr.getDecl() : null;
+        JavaDecl scopeDecl = scopeExpr.getDecl();
         if (scopeDecl instanceof JavaLocalVar || scopeDecl instanceof JavaMember)
             scopeDecl = scopeDecl.getEvalClass();
 
         // If no scope decl, get completions for string
-        if (scopeDecl == null) {
-            getCompletionsForNodeString(anId, prefixMatcher);
+        if (scopeDecl == null)
             return;
-        }
 
         // Handle parent is Package: Add packages and classes with prefix
         if (scopeDecl instanceof JavaPackage) {
@@ -201,7 +201,7 @@ public class NodeCompleter {
     /**
      * Adds word completions for matcher.
      */
-    private void addWordCompletionsForMatcher(DeclMatcher prefixMatcher)
+    private void addWordCompletions(DeclMatcher prefixMatcher)
     {
         // Add JavaWords
         for (JavaWord word : JavaWord.ALL)
@@ -218,7 +218,7 @@ public class NodeCompleter {
     /**
      * Adds a single completion for a new variable declaration using the type name.
      */
-    private void getCompletionsForNewVarDecl(JVarDecl varDecl)
+    private void addCompletionsForNewVarDecl(JVarDecl varDecl)
     {
         // Remove other completions
         _list.clear();
@@ -287,32 +287,6 @@ public class NodeCompleter {
                 }
             }
         }
-    }
-
-    /**
-     * Returns a string for node.
-     */
-    private String getNodeString(JNode aNode)
-    {
-        // Handle simple Id node
-        if (aNode instanceof JExprId)
-            return aNode.getName();
-
-        // Handle no node: Not sure how this can happen yet
-        ParseToken startToken = aNode.getStartToken();
-        if (startToken == null) {
-            System.err.println("NodeCompleter.getNodeString: Node with no tokens: " + aNode);
-        }
-
-        // Handle any node with only one token with id string
-        else if (startToken == aNode.getEndToken()) {
-            String str = startToken.getString();
-            if (_idMatcher.reset(str).lookingAt())
-                return str;
-        }
-
-        // Return not found
-        return null;
     }
 
     /**
