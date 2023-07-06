@@ -110,6 +110,7 @@ public class ProjectUtils {
 
         // Get URL and Site for TempProjPath
         WebURL tempProjURL = WebURL.getURL(tempProjPath);
+        assert (tempProjURL != null);
         WebSite tempProjSite = tempProjURL.getAsSite();
 
         // Get project for site - create if missing
@@ -136,6 +137,7 @@ public class ProjectUtils {
 
         // Get URL and Site for TempProjPath
         WebURL tempProjURL = WebURL.getURL(tempProjPath);
+        assert (tempProjURL != null);
         WebFile tempProjFile = tempProjURL.getFile();
         if (tempProjFile != null)
             tempProjFile.delete();
@@ -234,6 +236,7 @@ public class ProjectUtils {
         WebURL url = WebURL.getURL(aClass);
 
         // If URL string has separator, use site
+        assert (url != null);
         String urlString = url.getString();
         if (urlString.contains("!/")) {
             WebSite site = url.getSite();
@@ -249,6 +252,25 @@ public class ProjectUtils {
         // Express concern and return null
         System.out.println("ProjectUtils.getClassPathForClass: Unexpected class url: " + url);
         return null;
+    }
+
+    /**
+     * Returns SnapKit and SnapCharts class paths.
+     */
+    public static String[] getSnapKitAndSnapChartsClassPaths()
+    {
+        // Get SnapKit class path
+        String snapKitClassPath = getClassPathForClass(snap.view.View.class);
+        String[] snapClassPaths = new String[] { snapKitClassPath };
+
+        // Get SnapCharts class path (different if running from project build dir)
+        String snapChartsClassPath = getClassPathForClass(snapcharts.repl.ReplObject.class);
+        assert (snapChartsClassPath != null);
+        if (!snapChartsClassPath.equals(snapKitClassPath))
+            snapClassPaths = ArrayUtils.add(snapClassPaths, snapChartsClassPath);
+
+        // Return
+        return snapClassPaths;
     }
 
     /**

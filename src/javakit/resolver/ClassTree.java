@@ -177,7 +177,7 @@ public class ClassTree {
 
         // Try again for Swing (different site for Java 9+: jrt:/java.desktop/javax/swing/JFrame.class)
         Class<?> swingClass = null;
-        try { swingClass = Class.forName("bogus.swing.JFrame".replace("bogus", "javax")); }
+        try { swingClass = Class.forName("javax.swing.JFrame"); }
         catch (Exception ignore) { }
         if (swingClass != null) {
             WebURL swingURL = WebURL.getURL(swingClass);

@@ -56,7 +56,7 @@ public class Project extends PropObject {
         // Set ReadOnly
         boolean isReadOnly = aSite.getURL().getScheme().startsWith("http");
         if (isReadOnly)
-            setReadOnly(isReadOnly);
+            setReadOnly(true);
 
         // If not ReadOnly and doesn't exist, create root directory, src and bin
         if (!isReadOnly) {
@@ -149,7 +149,7 @@ public class Project extends PropObject {
     public String[] getRuntimeClassPaths()
     {
         if (SnapUtils.isWebVM)
-            return new String[0];
+            return getCompileClassPaths();
 
         // Get build path
         String buildPath = _buildFile.getBuildPathAbsolute();
@@ -169,7 +169,7 @@ public class Project extends PropObject {
     public String[] getCompileClassPaths()
     {
         if (SnapUtils.isWebVM)
-            return new String[0];
+            return ProjectUtils.getSnapKitAndSnapChartsClassPaths();
 
         // Get build file dependencies
         BuildFile buildFile = getBuildFile();
