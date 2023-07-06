@@ -1,8 +1,5 @@
 package snapcode.app;
-import snapcode.project.JavaTextDoc;
-import snapcode.project.Workspace;
-import snapcode.project.Project;
-import snapcode.project.WorkspaceBuilder;
+import snapcode.project.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
@@ -112,11 +109,8 @@ public class WorkspacePane extends ViewOwner {
      */
     public void openWorkspaceForSource(Object aSource)
     {
-        // Get JavaTextDoc and Configure
+        // Get JavaTextDoc and source file for source
         JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForSource(aSource);
-        JeplUtils.configureJeplDocProject(javaTextDoc);
-
-        // Get source file
         WebFile sourceFile = javaTextDoc.getSourceFile();
 
         // If not "TempProj" file, add to RecentFiles
@@ -127,9 +121,14 @@ public class WorkspacePane extends ViewOwner {
 
         // Get project/workspace
         Project project = Project.getProjectForFile(sourceFile);
-        Workspace workspace = project.getWorkspace();
 
-        // Set Workspace
+        // Configure single source file project: Add dependencies for SnapKit and SnapCharts
+        BuildFile buildFile = project.getBuildFile();
+        buildFile.addMavenDependencyForGroupAndPackageAndVersion("com.reportmill", "snapkit", "2023.06");
+        buildFile.addMavenDependencyForGroupAndPackageAndVersion("com.reportmill", "snapcharts", "2023.06");
+
+        // Get/set Workspace
+        Workspace workspace = project.getWorkspace();
         setWorkspace(workspace);
 
         // Create WorkspacePane and show

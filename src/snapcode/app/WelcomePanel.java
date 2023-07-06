@@ -32,11 +32,8 @@ public class WelcomePanel extends ViewOwner {
      */
     protected WelcomePanel()
     {
-        // Set as Shared (there should only be one instance)
+        super();
         _shared = this;
-
-        //
-        JeplUtils.initJavaKitForThisApp();
     }
 
     /**
