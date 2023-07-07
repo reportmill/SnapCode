@@ -78,7 +78,7 @@ public class JNode {
     /**
      * Returns whether node is a declaration name (JClassDecl JMethodDecl, JFieldDecl, JVarDecl).
      */
-    public boolean isDecl()
+    public boolean isNodeIdNode()
     {
         JExprId id = this instanceof JExprId ? (JExprId) this : null;
         if (id == null)
@@ -573,7 +573,7 @@ public class JNode {
 
         // Append Length
         ParseToken endToken = getEndToken();
-        if (endToken != null) {
+        if (endToken != null && startToken != null) {
             int length = endToken.getEndCharIndex() - startToken.getStartCharIndex();
             StringUtils.appendProp(sb, "Length", length);
         }

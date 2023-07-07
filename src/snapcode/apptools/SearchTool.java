@@ -280,9 +280,8 @@ public class SearchTool extends WorkspaceTool {
             for (JavaDecl decl : refs) {
                 if (aDecl.matches(decl)) {
                     JFile jfile = javaAgent.getJFile();
-                    List<JNode> nodes = new ArrayList<>();
-                    NodeMatcher.getRefMatches(jfile, aDecl, nodes);
-                    for (JNode node : nodes)
+                    JNode[] referenceNodes = NodeMatcher.getReferenceNodesForDecl(jfile, aDecl);
+                    for (JNode node : referenceNodes)
                         theResults.add(new Result(node));
                     return;
                 }
@@ -356,9 +355,8 @@ public class SearchTool extends WorkspaceTool {
             for (JavaDecl decl : decls) {
                 if (aDecl.matches(decl)) {
                     JFile jfile = javaAgent.getJFile();
-                    List<JNode> nodes = new ArrayList<>();
-                    NodeMatcher.getDeclMatches(jfile, aDecl, nodes);
-                    for (JNode node : nodes)
+                    JNode[] declarationNodes = NodeMatcher.getDeclarationNodesForDecl(jfile, aDecl);
+                    for (JNode node : declarationNodes)
                         theResults.add(new Result(node));
                     return;
                 }
@@ -420,7 +418,7 @@ public class SearchTool extends WorkspaceTool {
          */
         public String getDescriptor()
         {
-            JavaDecl decl = _node != null ? _node.isDecl() ? _node.getDecl() : _node.getEnclosingDecl() : null;
+            JavaDecl decl = _node != null ? _node.isNodeIdNode() ? _node.getDecl() : _node.getEnclosingDecl() : null;
             if (decl != null) return decl.getPrettyName();
             String s = _file.getName() + " - " + _file.getParent().getPath();
             s += " (" + _count + " match" + (_count == 1 ? "" : "es") + ")";
@@ -432,7 +430,7 @@ public class SearchTool extends WorkspaceTool {
          */
         public Image getImage()
         {
-            JavaDecl decl = _node != null ? _node.isDecl() ? _node.getDecl() : _node.getEnclosingDecl() : null;
+            JavaDecl decl = _node != null ? _node.isNodeIdNode() ? _node.getDecl() : _node.getEnclosingDecl() : null;
             if (decl == null)
                 return ViewUtils.getFileIconImage(_file);
             return JavaTextUtils.getImageForJavaDecl(decl);

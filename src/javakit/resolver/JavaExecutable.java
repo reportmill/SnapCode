@@ -140,12 +140,12 @@ public class JavaExecutable extends JavaMember {
             return false;
 
         // For Method, Constructor: Check supers
-        JavaExecutable other = (JavaExecutable) aDecl;
-        for (JavaExecutable sup = other.getSuper(); sup != null; sup = other.getSuper())
-            if (sup == this)
+        JavaExecutable otherExec = (JavaExecutable) aDecl;
+        for (JavaExecutable superExec = otherExec.getSuper(); superExec != null; superExec = superExec.getSuper())
+            if (superExec == this)
                 return true;
 
-        // Return false, since no match
+        // Return no match
         return false;
     }
 

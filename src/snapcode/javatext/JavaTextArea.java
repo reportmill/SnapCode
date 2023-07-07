@@ -241,9 +241,8 @@ public class JavaTextArea extends TextArea {
             return new TextBoxToken[0];
 
         // Get other matching nodes
-        List<JNode> matchingNodes = new ArrayList<>();
-        NodeMatcher.getMatches(aNode.getFile(), nodeDecl, matchingNodes);
-        if (matchingNodes.size() == 0)
+        JNode[] matchingNodes = NodeMatcher.getMatchingNodesForDecl(aNode.getFile(), nodeDecl);
+        if (matchingNodes.length == 0)
             return new TextBoxToken[0];
 
         // Return TextBoxTokens
@@ -253,10 +252,10 @@ public class JavaTextArea extends TextArea {
     /**
      * Returns a TextBoxToken array for given JNodes.
      */
-    protected TextBoxToken[] getTokensForNodes(List<JNode> theNodes)
+    protected TextBoxToken[] getTokensForNodes(JNode[] theNodes)
     {
         // Convert matching JNodes to TextBoxTokens
-        List<TextBoxToken> tokensList = new ArrayList<>(theNodes.size());
+        List<TextBoxToken> tokensList = new ArrayList<>(theNodes.length);
         TextBox textBox = getTextBox();
         int textBoxLineStart = 0;
 
@@ -719,7 +718,7 @@ public class JavaTextArea extends TextArea {
         // Get project breakpoints
         Breakpoints breakpointsHpr = getWorkspaceBreakpoints();
         if (breakpointsHpr == null)
-            return breakpointsHpr.NO_BREAKPOINTS;
+            return Breakpoints.NO_BREAKPOINTS;
 
         // Get java file
         WebFile file = getSourceFile();

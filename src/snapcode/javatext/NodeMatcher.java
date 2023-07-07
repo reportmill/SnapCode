@@ -4,8 +4,7 @@
 package snapcode.javatext;
 import javakit.parse.*;
 import javakit.resolver.JavaDecl;
-import javakit.resolver.JavaType;
-
+import snap.util.ArrayUtils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,66 +14,67 @@ import java.util.List;
 public class NodeMatcher {
 
     /**
-     * Returns reference nodes in given JNode that match given JavaDecl.
+     * Returns matching nodes for given decl.
      */
-    public static void getMatches(JNode aNode, JavaDecl aDecl, List<JNode> theMatches)
+    public static JNode[] getMatchingNodesForDecl(JNode aNode, JavaDecl aDecl)
     {
-        // If JType check name
-        if (aNode instanceof JType || aNode instanceof JExprId) {
-            JavaDecl decl = isPossibleMatch(aNode, aDecl) ? aNode.getDecl() : null;
-            if (decl != null && aDecl.matches(decl))
-                theMatches.add(aNode);
-        }
-
-        // Recurse
-        for (JNode child : aNode.getChildren())
-            getMatches(child, aDecl, theMatches);
+        List<JNode> matchingNodes = new ArrayList<>();
+        findMatchingNodesForDecl(aNode, aDecl, matchingNodes);
+        return matchingNodes.toArray(new JNode[0]);
     }
 
     /**
-     * Returns reference nodes in given JNode that match given JavaDecl.
+     * Finds matching nodes in given JNode that match given JavaDecl.
      */
-    public static void getRefMatches(JNode aNode, JavaDecl aDecl, List<JNode> theMatches)
+    private static void findMatchingNodesForDecl(JNode aNode, JavaDecl aDecl, List<JNode> theMatches)
     {
-        // If JType check name
-        if (aNode instanceof JType || aNode instanceof JExprId) {
-            if (isPossibleMatch(aNode, aDecl) && !aNode.isDecl()) {
+        // If JExprId, check for match
+        if (aNode instanceof JExprId) {
+            if (isPossibleMatch(aNode, aDecl)) {
                 JavaDecl decl = aNode.getDecl();
-                if (decl != null && aDecl.matches(decl) && aNode.getParent(JImportDecl.class) == null)
+                if (decl != null && aDecl.matches(decl))
                     theMatches.add(aNode);
             }
         }
 
         // Recurse
         for (JNode child : aNode.getChildren())
-            getRefMatches(child, aDecl, theMatches);
+            findMatchingNodesForDecl(child, aDecl, theMatches);
     }
 
     /**
-     * Returns declaration nodes in given JNode that match given JavaDecl.
+     * Returns nodes that reference given decl.
      */
-    public static JNode getDeclMatch(JNode aNode, JavaDecl aDecl)
+    public static JNode[] getReferenceNodesForDecl(JNode aNode, JavaDecl aDecl)
     {
-        List<JNode> matches = new ArrayList<>();
-        getDeclMatches(aNode, aDecl, matches);
-        return matches.size() > 0 ? matches.get(0) : null;
+        JNode[] matchingNodex = getMatchingNodesForDecl(aNode, aDecl);
+        return ArrayUtils.filter(matchingNodex, node -> isReferenceNode(aNode));
     }
 
     /**
-     * Returns declaration nodes in given JNode that match given JavaDecl.
+     * Returns whether given node is a reference node.
      */
-    public static void getDeclMatches(JNode aNode, JavaDecl aDecl, List<JNode> theMatches)
+    private static boolean isReferenceNode(JNode aNode)
     {
-        // If JType check name
-        if (aNode instanceof JType || aNode instanceof JExprId) {
-            JavaDecl decl = aNode.isDecl() && isPossibleMatch(aNode, aDecl) ? aNode.getDecl() : null;
-            if (decl != null && aDecl.matches(decl))
-                theMatches.add(aNode);
-        }
+        return !aNode.isNodeIdNode() && aNode.getParent(JImportDecl.class) == null;
+    }
 
-        // Recurse
-        for (JNode child : aNode.getChildren())
-            getDeclMatches(child, aDecl, theMatches);
+    /**
+     * Returns the declaration node for given decl.
+     */
+    public static JNode getDeclarationNodeForDecl(JNode aNode, JavaDecl aDecl)
+    {
+        JNode[] matches = getDeclarationNodesForDecl(aNode, aDecl);
+        return matches.length > 0 ? matches[0] : null;
+    }
+
+    /**
+     * Returns nodes that are declarations or subclass declarations of given decl.
+     */
+    public static JNode[] getDeclarationNodesForDecl(JNode aNode, JavaDecl aDecl)
+    {
+        JNode[] matchingNodex = getMatchingNodesForDecl(aNode, aDecl);
+        return ArrayUtils.filter(matchingNodex, node -> node.isNodeIdNode());
     }
 
     /**
@@ -82,15 +82,6 @@ public class NodeMatcher {
      */
     private static boolean isPossibleMatch(JNode aNode, JavaDecl aDecl)
     {
-        // If Node is type and Decl is type and Decl.SimpleName contains Node.SimpleName
-        if (aNode instanceof JType && aDecl instanceof JavaType) {
-            JType type = (JType) aNode;
-            String typeName = type.getSimpleName();
-            JavaType javaType = (JavaType) aDecl;
-            String javaTypeName = javaType.getSimpleName();
-            return javaTypeName.contains(typeName);
-        }
-
         // If Node is identifier and Decl.Name contains Node.Name
         if (aNode instanceof JExprId)
             return aDecl.getName().contains(aNode.getName());
@@ -106,9 +97,8 @@ public class NodeMatcher {
         if(aNode instanceof JExprLiteral)
             return !((JExprLiteral) aNode).isNull();
 
-        try {
-            return aNode.getClass().getDeclaredMethod("getDeclImpl") != null;
-        }
+        try { aNode.getClass().getDeclaredMethod("getDeclImpl"); }
         catch(Exception e) { return false; }
+        return true;
     }
 }

@@ -332,12 +332,12 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         // Get matching node
         JavaAgent javaAgent = JavaAgent.getAgentForFile(file);
         JFile jfile = javaAgent.getJFile();
-        JNode node = NodeMatcher.getDeclMatch(jfile, aDecl);
+        JNode declarationNode = NodeMatcher.getDeclarationNodeForDecl(jfile, aDecl);
 
         // Get URL
         String urlString = file.getURL().getString();
-        if (node != null)
-            urlString += String.format("#Sel=%d-%d", node.getStartCharIndex(), node.getEndCharIndex());
+        if (declarationNode != null)
+            urlString += String.format("#Sel=%d-%d", declarationNode.getStartCharIndex(), declarationNode.getEndCharIndex());
 
         // Open URL
         getBrowser().setURLString(urlString);
@@ -357,6 +357,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
 
         // Get URL
         WebURL javaURL = WebURL.getURL("https://reportmill.com/jars/8u05/src.zip!" + javaPath);
+        assert (javaURL != null);
         String urlString = javaURL.getString() + "#Member=" + aDecl.getSimpleName();
 
         // Open URL
