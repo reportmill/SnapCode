@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
-import snap.gfx.Effect;
 import snap.util.*;
 import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
@@ -260,6 +259,10 @@ public class WelcomePanel extends ViewOwner {
         WebURL url = WebURL.getURL(WelcomePanel.class, "WelcomePanelAnim.snp");
         ChildView topGraphic = (ChildView) new ViewArchiver().getViewForSource(url);
 
+        // Bake emboss into background image for performance on TopGraphicMinized
+        //ImageView backImageView = (ImageView) topGraphic.getChild(0); backImageView.setEffect(null);
+        //backImageView.getImage().emboss(10, 120, 90);
+
         // Get page and clear border/shadow
         ParentView page = (ParentView) topGraphic.getChild(2);
         page.setBorder(null);
@@ -300,9 +303,6 @@ public class WelcomePanel extends ViewOwner {
         // Get TopGraphic
         ChildView mainView = getUI(ChildView.class);
         ChildView topGraphic = (ChildView) mainView.getChild(0);
-        ImageView backgroundImage = (ImageView) topGraphic.getChild(0);
-        Effect shadow = backgroundImage.getEffect();
-        if (SnapUtils.isWebVM) backgroundImage.setEffect(null);
 
         // Show/hide views below the minimize size
         topGraphic.getChild(2).setVisible(!aValue);
@@ -321,7 +321,6 @@ public class WelcomePanel extends ViewOwner {
         }
 
         // Start anim
-        topGraphic.getAnim(0).setOnFinish(() -> backgroundImage.setEffect(shadow));
         topGraphic.playAnimDeep();
     }
 
