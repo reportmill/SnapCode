@@ -59,7 +59,7 @@ public class BuildDirPage extends WebPage {
         _fileBrowser = getView("FileBrowser", BrowserView.class);
         _fileBrowser.setPrefColCount(3);
         _fileBrowser.setResolver(new DirFilePage.FileTreeResolver());
-        _fileBrowser.setItems(getBuildDir());
+        _fileBrowser.setItems(new WebFile[] { getBuildDir() });
 
         // Get/configure PageBrowser
         _pageBrowser = new WebBrowser() {

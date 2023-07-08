@@ -84,7 +84,7 @@ public class DebugExprsPane extends WorkspaceTool {
     protected void resetUI()
     {
         // Set items
-        _varTree.setItems(_exprItems);
+        _varTree.setItemsList(_exprItems);
         if (_varTree.getSelItem() == null && _exprItems.size() > 0) _varTree.setSelIndex(0);
 
         // Iterate over ExprTableItems and reset values
@@ -132,7 +132,7 @@ public class DebugExprsPane extends WorkspaceTool {
             ExprTreeItem nitem = new ExprTreeItem(anEvent.getStringValue());
             nitem.eval();
             _exprItems.set(_exprItems.indexOf(exitem), nitem);
-            _varTree.setItems(_exprItems);
+            _varTree.setItemsList(_exprItems);
             _varTree.setSelItem(nitem);
             resetVarTable();
         }
@@ -142,7 +142,7 @@ public class DebugExprsPane extends WorkspaceTool {
             ExprTreeItem nitem = new ExprTreeItem(anEvent.getStringValue());
             nitem.eval();
             _exprItems.add(nitem);
-            _varTree.setItems(_exprItems);
+            _varTree.setItemsList(_exprItems);
             _varTree.setSelItem(nitem);
             //runLater(() -> _varTree.edit(_exprItems.size()-1, _varTree.getCol(0)));
         }

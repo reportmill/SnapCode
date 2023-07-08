@@ -61,7 +61,8 @@ public class DebugVarsPane extends WorkspaceTool {
         c2.setHeaderText("Type");
         c2.setPrefWidth(100);
         c2.setGrowWidth(true);
-        _varTree.addCols(c1, c2);
+        _varTree.addCol(c1);
+        _varTree.addCol(c2);
         _varTree.setResolver(new VarTreeResolver());
 
         // Create VarText TextView and configure in ScrollView
@@ -79,7 +80,7 @@ public class DebugVarsPane extends WorkspaceTool {
         if (_resetVarTable) {
             _resetVarTable = false;
             List vitems = createVarItems();
-            _varTree.setItems(vitems);
+            _varTree.setItemsList(vitems);
         }
 
         // Update VarText

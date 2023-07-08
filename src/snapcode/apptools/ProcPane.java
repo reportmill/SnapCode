@@ -409,7 +409,7 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
 
         // Reset items, auto expand threads
         List<RunApp> apps = getProcs();
-        _procTree.setItems(apps);
+        _procTree.setItemsList((List<Object>) (List<?>) apps);
         for (RunApp app : apps)
             _procTree.expandItem(app);
         if (apps.size() > 0)

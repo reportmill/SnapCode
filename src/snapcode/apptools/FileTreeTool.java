@@ -148,10 +148,10 @@ public class FileTreeTool extends WorkspaceTool {
 
         // Create RootFiles for TreeView (one for each open project)
         List<FileTreeFile> rootFiles = getRootFiles();
-        _filesTree.setItems(rootFiles);
+        _filesTree.setItemsList(rootFiles);
         _filesTree.expandItem(rootFiles.get(0));
-        if (_filesTree.getItems().size() > 1)
-            _filesTree.expandItem(_filesTree.getItems().get(1));
+        if (_filesTree.getItemsList().size() > 1)
+            _filesTree.expandItem(_filesTree.getItemsList().get(1));
 
         // Enable events to get MouseUp on TreeView
         enableEvents(_filesTree, MousePress, MouseRelease, DragGesture);
@@ -174,7 +174,7 @@ public class FileTreeTool extends WorkspaceTool {
         WebFile selFile = getSelFile();
         FileTreeFile selTreeFile = getTreeFile(selFile);
         List<FileTreeFile> rootTreeFiles = getRootFiles();
-        _filesTree.setItems(rootTreeFiles);
+        _filesTree.setItemsList(rootTreeFiles);
         _filesTree.setSelItem(selTreeFile);
 
         // Update FilesList

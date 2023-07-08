@@ -49,7 +49,7 @@ public class ZipPage extends WebPage {
         _fileBrsr.setPrefColCount(3);
         _fileBrsr.setPrefHeight(350); //_fileBrsr.setGrowHeight(true);
         _fileBrsr.setResolver(new FileTreeResolver());
-        _fileBrsr.setItems(getFiles());
+        _fileBrsr.setItemsList(getFiles());
 
         // Create PageBrowser
         _pageBrsr = new WebBrowser();
