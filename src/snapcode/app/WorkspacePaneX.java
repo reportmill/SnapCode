@@ -19,11 +19,6 @@ public class WorkspacePaneX extends WorkspacePane {
     }
 
     /**
-     * Creates the PagePane.
-     */
-    protected PagePane createPagePane()  { return new PagePaneX(this); }
-
-    /**
      * Creates the WorkspaceTools.
      */
     @Override

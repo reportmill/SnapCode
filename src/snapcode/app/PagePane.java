@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
+import snapcode.apptools.BuildFileTool;
 import snapcode.project.Workspace;
 import snap.gfx.Color;
 import snap.gfx.Font;
@@ -9,6 +10,8 @@ import snap.props.PropChange;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.*;
+import snapcode.util.ClassInfoPage;
+import snapcode.webbrowser.BuildDirPage;
 import snapcode.webbrowser.SnapBuilderPage;
 import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
@@ -408,6 +411,8 @@ public class PagePane extends ViewOwner {
             return true;
         if (_selFile.isRoot())
             return true;
+        if (aFile == _workspacePane.getBuildDir())
+            return true;
         return false;
     }
 
@@ -416,8 +421,13 @@ public class PagePane extends ViewOwner {
      */
     protected Class<? extends WebPage> getPageClass(WebResponse aResp)
     {
-        // Get file type
+        // Get file and data
+        WebFile file = aResp.getFile();
         String type = aResp.getPathType();
+
+        // Handle Project Root directory
+        if (file != null && file.isRoot() && isProjectFile(file))
+            return ProjectPane.ProjectPanePage.class;
 
         // Handle Java
         if (type.equals("java") || type.equals("jepl"))
@@ -427,7 +437,22 @@ public class PagePane extends ViewOwner {
         if (type.equals("snp"))
             return SnapBuilderPage.class;
 
-        // Do normal version
+        // Handle BuildDir
+        WebFile snapFile = aResp.getFile();
+        if (snapFile == _workspacePane.getBuildDir())
+            return BuildDirPage.class;
+
+        // Handle build file (build.snapcode)
+        if (type.equals("snapcode"))
+            return BuildFileTool.BuildFilePage.class;
+
+        // Handle class file
+        if (type.equals("class") && isProjectFile(file))
+            return ClassInfoPage.class;
+        if (type.equals("pgd"))
+            return JavaShellPage.class;
+
+        // Return no page class
         return null;
     }
 

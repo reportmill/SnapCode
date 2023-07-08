@@ -2,6 +2,8 @@ package snapcode.app;
 import javakit.parse.*;
 import snap.view.ViewEvent;
 import snapcode.apptools.EvalTool;
+import snapcode.apptools.ProcPane;
+import snapcode.apptools.SearchTool;
 import snapcode.project.JavaAgent;
 import snapcode.project.Project;
 import javakit.resolver.JavaDecl;
@@ -14,6 +16,7 @@ import snap.view.View;
 import snapcode.javatext.JavaTextArea;
 import snapcode.javatext.JavaTextPane;
 import snapcode.javatext.NodeMatcher;
+import snapcode.views.SnapEditorPage;
 import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
@@ -55,7 +58,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     /**
      * Creates the JavaTextPane.
      */
-    protected JavaTextPane<?> createJavaTextPane()  { return new JPJavaTextPane(); }
+    protected JavaTextPane<?> createJavaTextPane()  { return new JavaPageJavaTextPane(); }
 
     /**
      * Returns the JavaTextArea.
@@ -367,12 +370,26 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     /**
      * Show references for given node.
      */
-    protected void showReferences(JNode aNode)  { }
+    protected void showReferences(JNode aNode)
+    {
+        if (getWorkspacePane() == null) return;
+        WorkspaceTools workspaceTools = getWorkspacePane().getWorkspaceTools();
+        SearchTool searchTool = workspaceTools.getToolForClass(SearchTool.class);
+        searchTool.searchReference(aNode);
+        workspaceTools.showToolForClass(SearchTool.class);
+    }
 
     /**
      * Show declarations for given node.
      */
-    protected void showDeclarations(JNode aNode)  { }
+    protected void showDeclarations(JNode aNode)
+    {
+        if (getWorkspacePane() == null) return;
+        WorkspaceTools workspaceTools = getWorkspacePane().getWorkspaceTools();
+        SearchTool searchTool = workspaceTools.getToolForClass(SearchTool.class);
+        searchTool.searchDeclaration(aNode);
+        workspaceTools.showToolForClass(SearchTool.class);
+    }
 
     /**
      * Override to update Page.Modified.
@@ -394,12 +411,32 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     /**
      * Override to get ProgramCounter from ProcPane.
      */
-    protected int getProgramCounterLine()  { return -1; }
+    protected int getProgramCounterLine()
+    {
+        WorkspacePane workspacePane = getWorkspacePane();
+        WorkspaceTools workspaceTools = workspacePane.getWorkspaceTools();
+        ProcPane procPane = workspaceTools.getToolForClass(ProcPane.class);
+        return procPane != null ? procPane.getProgramCounter(getFile()) : -1;
+    }
+
+    /**
+     * Reopen this page as SnapCodePage.
+     */
+    public void openAsSnapCode()
+    {
+        WebFile file = getFile();
+        WebURL url = file.getURL();
+        WebPage page = new SnapEditorPage(this);
+        page.setFile(file);
+        WebBrowser browser = getBrowser();
+        browser.setPageForURL(url, page);
+        browser.setURL(file.getURL());
+    }
 
     /**
      * A JavaTextPane for a JavaPage to implement symbol features and such.
      */
-    public class JPJavaTextPane extends JavaTextPane<JavaTextDoc> {
+    public class JavaPageJavaTextPane extends JavaTextPane<JavaTextDoc> {
 
         /**
          * Override to set selection using browser.
@@ -456,6 +493,20 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         public int getProgramCounterLine()
         {
             return JavaPage.this.getProgramCounterLine();
+        }
+
+        /**
+         * Respond to UI controls.
+         */
+        @Override
+        public void respondUI(ViewEvent anEvent)
+        {
+            // Handle SnapCodeButton
+            if (anEvent.equals("SnapCodeButton"))
+                openAsSnapCode();
+
+                // Do normal version
+            else super.respondUI(anEvent);
         }
     }
 }
