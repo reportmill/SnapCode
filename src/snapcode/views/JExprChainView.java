@@ -44,12 +44,10 @@ public class JExprChainView<JNODE extends JExprDot> extends JExprView<JNODE> {
 
         // Iterate over expression chain children, create expression views and add to list
         JExpr expr = dotExpr.getExpr();
-        while (expr != null) {
+        if (expr != null) {
             JExprView<?> exprView = createView(expr);
             exprView.setGrowWidth(true);
             children.add(exprView);
-            if (expr instanceof JExprDot)
-                expr = ((JExprDot) expr).getExpr();
         }
 
         // Return expression views
