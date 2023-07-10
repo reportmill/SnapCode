@@ -16,4 +16,6 @@
   <Separator PrefHeight="18" Vertical="true" />
   <TextField Name="FindText" PrefWidth="172" PrefHeight="22" />
   <CheckBox Name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" text="IC" Selected="true" />
+  <Button Name="JavaDocButton" PrefWidth="116" PrefHeight="22" LeanX="RIGHT" text="Documentation" />
+  <Button Name="SnapCodeButton" PrefWidth="75" PrefHeight="22" LeanX="RIGHT" ToolTip="Snap Code" text="SnapCode" />
 </RowView>

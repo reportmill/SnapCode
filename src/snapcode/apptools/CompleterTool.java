@@ -1,32 +1,37 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snapcode.javatext;
+package snapcode.apptools;
 import java.lang.reflect.Method;
 import java.util.*;
 import javakit.parse.JNode;
 import javakit.parse.JStmtBlock;
 import javakit.resolver.JavaClass;
 import snap.geom.*;
+import snap.props.PropChange;
 import snap.text.*;
 import snap.view.*;
+import snapcode.app.WorkspacePane;
+import snapcode.app.WorkspaceTool;
+import snapcode.javatext.JavaTextArea;
+import snapcode.javatext.JavaTextUtils;
 
 /**
  * A class to manage a Java inspector.
  */
-public class CodeBuilder extends ViewOwner {
+public class CompleterTool extends WorkspaceTool {
 
     // The JavaTextArea this inspector works for.
-    private JavaTextArea  _textArea;
+    private JavaTextArea _textArea;
 
     // The selected node
     private JNode  _node;
 
     // The suggestion list
-    private ListView<CodeBlock>  _suggestionsList;
+    private ListView<CompleterBlock>  _suggestionsList;
 
     // The dragging CodeBlock
-    private CodeBlock  _dragCodeBlock;
+    private CompleterBlock _dragCodeBlock;
 
     // The current drag point
     private Point  _dragPoint;
@@ -40,9 +45,9 @@ public class CodeBuilder extends ViewOwner {
     /**
      * Creates a new JavaInspector.
      */
-    public CodeBuilder(JavaTextPane aJTP)
+    public CompleterTool(WorkspacePane workspacePane)
     {
-        _textArea = aJTP.getTextArea();
+        super(workspacePane);
     }
 
     /**
@@ -80,25 +85,25 @@ public class CodeBuilder extends ViewOwner {
     /**
      * Returns suggestions for class.
      */
-    private CodeBlock[] getCodeBlocks(JNode aNode)
+    private CompleterBlock[] getCodeBlocks(JNode aNode)
     {
         JavaClass javaClass = _node != null ? _node.getEvalClass() : null;
         Class<?> realClass = javaClass != null ? javaClass.getRealClass() : null;
         Method[] methods = realClass != null ? realClass.getMethods() : null;
         if (methods == null)
-            return new CodeBlock[0];
+            return new CompleterBlock[0];
 
-        List<CodeBlock> codeBlocks = new ArrayList<>();
+        List<CompleterBlock> codeBlocks = new ArrayList<>();
 
         for (Method method : methods) {
             if (method.getDeclaringClass() == Object.class)
                 continue;
-            CodeBlock codeBlock = new CodeBlock().init(aNode, method);
+            CompleterBlock codeBlock = new CompleterBlock().init(aNode, method);
             codeBlocks.add(codeBlock);
         }
 
         // Return
-        return codeBlocks.toArray(new CodeBlock[0]);
+        return codeBlocks.toArray(new CompleterBlock[0]);
     }
 
     /**
@@ -155,7 +160,7 @@ public class CodeBuilder extends ViewOwner {
             if (anEvent.isDragGesture()) {
 
                 // Set DragSuggestion and DragString
-                _dragCodeBlock = (CodeBlock) anEvent.getSelItem();
+                _dragCodeBlock = (CompleterBlock) anEvent.getSelItem();
                 String dragString = _dragCodeBlock.getString();
 
                 // Get event dboard and start drag
@@ -172,15 +177,42 @@ public class CodeBuilder extends ViewOwner {
     }
 
     /**
+     * Init showing.
+     */
+    @Override
+    protected void initShowing()
+    {
+        JavaTextArea javaTextArea = getTextArea();
+        if (javaTextArea == null)
+            return;
+
+        // Get TextArea and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
+        javaTextArea.addEventHandler(e -> handleJavaTextAreaDragEvent(e), DragEvents);
+    }
+
+    /**
      * Called to configure ListCell.
      */
-    protected void configureSuggestionsList(ListCell<CodeBlock> aCell)
+    protected void configureSuggestionsList(ListCell<CompleterBlock> aCell)
     {
-        CodeBlock cb = aCell.getItem();
+        CompleterBlock cb = aCell.getItem();
         if (cb == null) return;
         aCell.setText(cb.getString());
         aCell.setImage(JavaTextUtils.CodeImage);
         aCell.getGraphic().setPadding(4, 4, 4, 4);
+    }
+
+    /**
+     * Called when JavaTextArea gets drag events.
+     */
+    private void handleJavaTextAreaDragEvent(ViewEvent anEvent)
+    {
+        if (anEvent.isDragOver())
+            dragOver(anEvent.getX(), anEvent.getY());
+        else if (anEvent.isDragExit())
+            dragExit();
+        else if (anEvent.isDragDropEvent())
+            drop(0, 0);
     }
 
     /**
@@ -275,7 +307,7 @@ public class CodeBuilder extends ViewOwner {
     /**
      * Returns the DragCodeBlock.
      */
-    public CodeBlock getDragCodeBlock()
+    public CompleterBlock getDragCodeBlock()
     {
         return _dragCodeBlock;
     }
@@ -374,4 +406,24 @@ public class CodeBuilder extends ViewOwner {
         for (int i = 0; i < indentCount; i++) sb.append(' ');
         return sb.toString();
     }
+
+
+    /**
+     * Called when JavaTextArea changes.
+     */
+    protected void textAreaDidPropChange(PropChange aPC)
+    {
+        // Handle SelectedNode change: Update CodeBuilder
+        String propName = aPC.getPropName();
+        if (propName == JavaTextArea.SelectedNode_Prop) {
+            if (isVisible())
+                setCodeBlocks();
+        }
+    }
+
+    /**
+     * Returns the tool title.
+     */
+    @Override
+    public String getTitle()  { return "Completer"; }
 }

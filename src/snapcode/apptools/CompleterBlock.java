@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snapcode.javatext;
+package snapcode.apptools;
 
 import java.lang.reflect.Method;
 
@@ -11,7 +11,7 @@ import javakit.parse.JNode;
 /**
  * A class to represent a block of code in the CodeBuilder.
  */
-public class CodeBlock {
+public class CompleterBlock {
 
     // The JNode
     JNode _node;
@@ -25,7 +25,7 @@ public class CodeBlock {
     /**
      * Initialize CodeBlock for given Node and Method.
      */
-    public CodeBlock init(JNode aNode, Method aMethod)
+    public CompleterBlock init(JNode aNode, Method aMethod)
     {
         _node = aNode;
         _method = aMethod;

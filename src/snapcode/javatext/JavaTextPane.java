@@ -121,6 +121,12 @@ public class JavaTextPane<T extends JavaTextDoc> extends TextPane<T> {
         setViewEnabled("UndoButton", hasUndos);
         setViewEnabled("RedoButton", hasUndos);
 
+        // Reset JavaDocButton
+        JavaDoc javaDoc = getJavaDoc();
+        setViewVisible("JavaDocButton", javaDoc != null);
+        String javaDocButtonText = javaDoc != null ? (javaDoc.getSimpleName() + " Doc") : null;
+        setViewText("JavaDocButton", javaDocButtonText);
+
         // Reset NodePathBox
         resetNodePathBox();
     }

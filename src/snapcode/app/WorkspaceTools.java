@@ -73,17 +73,18 @@ public class WorkspaceTools {
         FileTreeTool fileTreeTool = new FileTreeTool(_workspacePane);
         EvalTool evalTool = new EvalTool(_workspacePane);
         HelpTool helpTool = new HelpTool(_workspacePane);
+        CompleterTool completerTool = new CompleterTool(_workspacePane);
         ProblemsTool problemsTool = new ProblemsTool(_workspacePane);
 
         // Create tools array
-        _tools = new WorkspaceTool[] { filesTool, fileTreeTool, evalTool, helpTool, problemsTool };
+        _tools = new WorkspaceTool[] { filesTool, fileTreeTool, evalTool, helpTool, completerTool, problemsTool };
 
         // Create LeftTray
         WorkspaceTool[] leftTools = { fileTreeTool };
         _leftTray = new ToolTray(Side.LEFT, leftTools);
 
         // Create RightTray
-        WorkspaceTool[] rightTools = { evalTool, helpTool };
+        WorkspaceTool[] rightTools = { evalTool, helpTool, completerTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray
