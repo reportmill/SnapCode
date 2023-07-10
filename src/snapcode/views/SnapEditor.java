@@ -91,10 +91,7 @@ public class SnapEditor extends StackView {
     /**
      * Returns the FilePart.
      */
-    public JFileView getFilePart()
-    {
-        return _filePart;
-    }
+    public JFileView getFilePart()  { return _filePart; }
 
     /**
      * Returns the JFile JNode.
@@ -151,8 +148,9 @@ public class SnapEditor extends StackView {
      */
     protected void rebuildUI()
     {
+        JFileView fileView = getFilePart();
         JFile jfile = getJFile();
-        getFilePart().setJNode(jfile);
+        fileView.setJNode(jfile);
         setSelectedPartFromTextArea();
     }
 

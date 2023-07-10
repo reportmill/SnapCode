@@ -29,10 +29,11 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
     public static Color ClassDeclColor = MemberDeclColor; //Color.get("#27B31E");
 
     /**
-     * Creates a new JNodeView.
+     * Constructor.
      */
     public JNodeView()
     {
+        super();
     }
 
     /**
@@ -46,10 +47,7 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
     /**
      * Returns the JNode.
      */
-    public JNODE getJNode()
-    {
-        return _jnode;
-    }
+    public JNODE getJNode()  { return _jnode; }
 
     /**
      * Sets the JNode.
