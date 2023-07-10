@@ -39,7 +39,7 @@ public class JavaTextArea extends TextArea {
     protected JavaPopupList  _popup;
 
     // Constants for properties
-    public static final String SelectedNode_Prop = "SelectedNode";
+    public static final String SelNode_Prop = "SelNode";
 
     // Constants
     protected static String INDENT_STRING = "    ";
@@ -204,7 +204,7 @@ public class JavaTextArea extends TextArea {
         javaPopup.updatePopupList();
 
         // Fire prop change
-        firePropChange(SelectedNode_Prop, oldSelNode, _selNode);
+        firePropChange(SelNode_Prop, oldSelNode, _selNode);
     }
 
     /**

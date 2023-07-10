@@ -8,13 +8,18 @@ import javakit.parse.JNode;
 import javakit.parse.JStmtBlock;
 import javakit.resolver.JavaClass;
 import snap.geom.*;
-import snap.props.PropChange;
+import snap.parse.ParseToken;
+import snap.props.PropChangeListener;
 import snap.text.*;
 import snap.view.*;
+import snap.view.EventListener;
+import snapcode.app.JavaPage;
+import snapcode.app.PagePane;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.javatext.JavaTextArea;
 import snapcode.javatext.JavaTextUtils;
+import snapcode.webbrowser.WebPage;
 
 /**
  * A class to manage a Java inspector.
@@ -42,6 +47,12 @@ public class CompleterTool extends WorkspaceTool {
     // The drag text
     private TextBox _dragText;
 
+    // Listener for JavaTextArea prop change
+    private PropChangeListener _textAreaPropChangeLsnr = pc -> javaTextAreaSelNodeChanged();
+
+    // Listener for JavaTextArea drag events
+    private EventListener _textAreaDragEventLsnr = e -> handleJavaTextAreaDragEvent(e);
+
     /**
      * Creates a new JavaInspector.
      */
@@ -53,9 +64,28 @@ public class CompleterTool extends WorkspaceTool {
     /**
      * Returns the JavaTextArea associated with text pane.
      */
-    public JavaTextArea getTextArea()
+    public JavaTextArea getTextArea()  { return _textArea; }
+
+    /**
+     * Sets the JavaTextArea associated with text pane.
+     */
+    private void setTextArea(JavaTextArea textArea)
     {
-        return _textArea;
+        if (textArea == _textArea) return;
+
+        if (_textArea != null) {
+            _textArea.removePropChangeListener(_textAreaPropChangeLsnr);
+            _textArea.removeEventHandler(_textAreaDragEventLsnr);
+        }
+
+        _textArea = textArea;
+
+        // Start listening to JavaTextArea SelNode prop and drag events
+        if (_textArea != null) {
+            _textArea.addPropChangeListener(_textAreaPropChangeLsnr, JavaTextArea.SelNode_Prop);
+            _textArea.addEventHandler(_textAreaDragEventLsnr, View.DragEvents);
+            javaTextAreaSelNodeChanged();
+        }
     }
 
     /**
@@ -104,28 +134,6 @@ public class CompleterTool extends WorkspaceTool {
 
         // Return
         return codeBlocks.toArray(new CompleterBlock[0]);
-    }
-
-    /**
-     * Create UI for CodeBuilder.
-     */
-    protected View createUI()
-    {
-        Label label = new Label();
-        label.setName("ClassText");
-        label.setPrefHeight(24);
-        label.setPadding(5, 5, 5, 5);
-        ListView<?> listView = new ListView<>();
-        listView.setName("SuggestionsList");
-        listView.setGrowHeight(true);
-        listView.setRowHeight(22);
-        ScrollView spane = new ScrollView(listView);
-        spane.setGrowHeight(true);
-        ColView vbox = new ColView();
-        vbox.setChildren(label, spane);
-        vbox.setFillWidth(true);
-        vbox.setPrefWidth(260);
-        return vbox;
     }
 
     /**
@@ -182,12 +190,9 @@ public class CompleterTool extends WorkspaceTool {
     @Override
     protected void initShowing()
     {
-        JavaTextArea javaTextArea = getTextArea();
-        if (javaTextArea == null)
-            return;
-
-        // Get TextArea and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
-        javaTextArea.addEventHandler(e -> handleJavaTextAreaDragEvent(e), DragEvents);
+        // Start listening to PagePane.SelFile prop change
+        _pagePane.addPropChangeListener(pc -> pagePaneSelFileChanged(), PagePane.SelFile_Prop);
+        pagePaneSelFileChanged();
     }
 
     /**
@@ -237,6 +242,12 @@ public class CompleterTool extends WorkspaceTool {
         while (_dragBlock != null && !(_dragBlock instanceof JStmtBlock)) _dragBlock = _dragBlock.getParent();
         if (_dragBlock == null) {
             clearDrag();
+            return;
+        }
+
+        ParseToken dragNodeToken = _dragBlock.getStartToken();
+        if (!(dragNodeToken instanceof TextBoxToken)) {
+            System.out.println("CompleterTool: Node token no longer TextBoxToken - update this code");
             return;
         }
 
@@ -297,38 +308,6 @@ public class CompleterTool extends WorkspaceTool {
     }
 
     /**
-     * Returns the Drag point.
-     */
-    public Point getDragPoint()
-    {
-        return _dragPoint;
-    }
-
-    /**
-     * Returns the DragCodeBlock.
-     */
-    public CompleterBlock getDragCodeBlock()
-    {
-        return _dragCodeBlock;
-    }
-
-    /**
-     * Returns the DragNode.
-     */
-    public JNode getDragNode()
-    {
-        return _dragNode;
-    }
-
-    /**
-     * Returns the DragText.
-     */
-    public TextBox getDragText()
-    {
-        return _dragText;
-    }
-
-    /**
      * Override to provide hook for CodeBuilder to paint.
      */
     /*protected boolean paintTextSelection(JavaTextArea aTextArea, Graphics2D aGraphics)
@@ -356,8 +335,8 @@ public class CompleterTool extends WorkspaceTool {
     /*protected boolean paintLine(JavaTextArea aTextArea, Graphics2D aGraphics, TextLine aLine, double anX, double aY)
     {
         // Get DragText and DragPoint (return false if no DragText or not to DragPoint yet)
-        Text dragText = getDragText(); if(dragText==null) return false;
-        Point2D dragPoint = getDragPoint(); if(aLine.getMaxY()<=dragPoint.getY()) return false;
+        Text dragText = _dragText; if(dragText==null) return false;
+        Point2D dragPoint = _dragPoint; if(aLine.getMaxY()<=dragPoint.getY()) return false;
         double y = aY;
 
         // If Line straddles DragPoint, paint DragText.Line
@@ -407,18 +386,24 @@ public class CompleterTool extends WorkspaceTool {
         return sb.toString();
     }
 
+    /**
+     * Called when PagePane.SelFile property changes
+     */
+    private void pagePaneSelFileChanged()
+    {
+        WebPage selPage = _pagePane.getSelPage();
+        JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
+        JavaTextArea javaTextArea = javaPage != null ? javaPage.getTextArea() : null;
+        setTextArea(javaTextArea);
+    }
 
     /**
-     * Called when JavaTextArea changes.
+     * Called when JavaTextArea SelNode prop changes.
      */
-    protected void textAreaDidPropChange(PropChange aPC)
+    private void javaTextAreaSelNodeChanged()
     {
-        // Handle SelectedNode change: Update CodeBuilder
-        String propName = aPC.getPropName();
-        if (propName == JavaTextArea.SelectedNode_Prop) {
-            if (isVisible())
-                setCodeBlocks();
-        }
+        if (isVisible())
+            setCodeBlocks();
     }
 
     /**

@@ -352,7 +352,7 @@ public class JavaTextPane<T extends JavaTextDoc> extends TextPane<T> {
 
         // Handle SelectedNode change: Reset UI
         String propName = aPC.getPropName();
-        if (propName == JavaTextArea.SelectedNode_Prop)
+        if (propName == JavaTextArea.SelNode_Prop)
             resetLater();
 
         // Handle TextDoc
