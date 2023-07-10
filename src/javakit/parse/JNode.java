@@ -499,11 +499,15 @@ public class JNode {
      */
     public String getString()
     {
+        // Get start/end token - if same, just return token string
+        ParseToken startToken = getStartToken();
+        ParseToken endToken = getEndToken();
+        if (startToken == endToken && startToken != null)
+            return startToken.getString();
+
         // Java string, and start/end tokens
         JFile jfile = getFile();
         String javaString = jfile != null ? jfile.getJavaFileString() : null;
-        ParseToken startToken = getStartToken();
-        ParseToken endToken = getEndToken();
         if (javaString == null || startToken == null || endToken == null)
             return "(No string available - JFile, Java string or tokens not found)";
 
