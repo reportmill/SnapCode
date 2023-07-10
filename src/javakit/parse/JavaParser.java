@@ -145,7 +145,7 @@ public class JavaParser extends JavaParserStmt {
     /**
      * Override to ignore exception.
      */
-    protected void parseFailed(ParseRule aRule, ParseHandler aHandler)
+    protected void parseFailed(ParseRule aRule, ParseHandler<?> aHandler)
     {
         if (_exception == null) {
             _exception = new ParseException(this, aRule);

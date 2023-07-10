@@ -178,7 +178,7 @@ public class JavaTextDocUtils {
         // Parse new statement
         JStmtBlock newStmt = null;
         try { newStmt = _stmtParser.parseCustom(JStmtBlock.class); }
-        catch (Exception e) { }
+        catch (Exception ignore) { }
 
         // If parse failed, return failed
         ParseToken endToken = newStmt != null ? newStmt.getEndToken() : null;
@@ -230,6 +230,6 @@ public class JavaTextDocUtils {
         }
 
         /** Override to ignore exception. */
-        protected void parseFailed(ParseRule aRule, ParseHandler aHandler)  { }
+        protected void parseFailed(ParseRule aRule, ParseHandler<?> aHandler)  { }
     }
 }
