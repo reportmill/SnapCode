@@ -105,12 +105,20 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
+     * Returns the node at given char index.
+     */
+    public JNode getNodeForCharIndex(int charIndex)
+    {
+        return getNodeForCharRange(charIndex, charIndex);
+    }
+
+    /**
      * Returns the node at given start/end char indexes.
      */
-    public JNode getNodeAtCharIndex(int startCharIndex, int endCharIndex)
+    public JNode getNodeForCharRange(int startCharIndex, int endCharIndex)
     {
         JFile jfile = getJFile();
-        return jfile.getNodeAtCharIndex(startCharIndex, endCharIndex);
+        return jfile.getNodeForCharRange(startCharIndex, endCharIndex);
     }
 
     /**
@@ -124,7 +132,7 @@ public class JavaTextArea extends TextArea {
 
         // Get node for selection
         int selStart = getSelStart(), selEnd = getSelEnd();
-        JNode node = getNodeAtCharIndex(selStart, selEnd);
+        JNode node = getNodeForCharRange(selStart, selEnd);
 
         // Select node
         setSelNode(node);
@@ -327,7 +335,7 @@ public class JavaTextArea extends TextArea {
     /**
      * Returns the id expression at cursor, if available.
      */
-    private JExprId getIdExprAtCursor()
+    protected JExprId getIdExprAtCursor()
     {
         // If selection not empty, just return
         if (!isSelEmpty())
@@ -343,7 +351,7 @@ public class JavaTextArea extends TextArea {
         JNode selNode = getSelNode();
         JExprId selId = selNode instanceof JExprId ? (JExprId) selNode : null;
         if (selId == null)
-            return null;
+            return getVirtualIdExprForTextTokenAtCursor();
 
         // If cursor not at end of expression, get virtual id expression for prefix
         int idEnd = selId.getEndCharIndex();
@@ -367,7 +375,7 @@ public class JavaTextArea extends TextArea {
             return null;
 
         // Get previous id expression - if null, just return
-        JNode prevNode = getNodeAtCharIndex(prevCharIndex, prevCharIndex);
+        JNode prevNode = getNodeForCharIndex(prevCharIndex);
         JExprId prevId = prevNode instanceof JExprId ? (JExprId) prevNode : null;
         if (prevId == null)
             return null;
@@ -383,6 +391,37 @@ public class JavaTextArea extends TextArea {
         JExprDot newDotExpr = new JExprDot(prevId, virtualIdExpr);
         newDotExpr.setParent(prevId);
         prevId.setParent(prevIdParent);
+
+        // Return
+        return virtualIdExpr;
+    }
+
+    /**
+     * Returns a new id expression from text token at selection, if string is valid java identifier.
+     */
+    private JExprId getVirtualIdExprForTextTokenAtCursor()
+    {
+        // Get text token at cursor
+        int selStart = getSelStart();
+        JNode selNode = getSelNode();
+        TextDoc textDoc = getTextDoc();
+        TextLine textLine = textDoc.getLineForCharIndex(selStart);
+        int lineStart = textLine.getStartCharIndex();
+        int selStartInLine = selStart - lineStart;
+        TextToken textToken = textLine.getTokenForCharIndex(selStartInLine);
+
+        // Get token string - just return if not valid java identifier
+        String tokenStr = textToken != null ? textToken.getString() : null;
+        if (!isJavaIdentifier(tokenStr))
+            return null;
+
+        // Create virtual parse token and id expression
+        int tokenStart = selStart - tokenStr.length();
+        ParseToken startToken = new ParseToken.Builder().text(tokenStr).startCharIndex(tokenStart).endCharIndex(selStart).build();
+        JExprId virtualIdExpr = new JExprId(tokenStr);
+        virtualIdExpr.setStartToken(startToken);
+        virtualIdExpr.setEndToken(startToken);
+        virtualIdExpr.setParent(selNode);
 
         // Return
         return virtualIdExpr;
@@ -868,5 +907,20 @@ public class JavaTextArea extends TextArea {
 
         // Do normal version
         super.replaceCharsWithContent(theContent);
+    }
+
+    /**
+     * Returns whether string is valid java identifier.
+     */
+    private static boolean isJavaIdentifier(String aString)
+    {
+        if (aString == null || aString.length() == 0)
+            return false;
+        if (!Character.isJavaIdentifierStart(aString.charAt(0)))
+            return false;
+        for (int i = 1; i < aString.length(); i++)
+            if (!Character.isJavaIdentifierPart(aString.charAt(i)))
+                return false;
+        return true;
     }
 }

@@ -395,13 +395,13 @@ public class JNode {
     /**
      * Returns the node at given char index.
      */
-    public JNode getNodeAtCharIndex(int anIndex)
+    public JNode getNodeForCharIndex(int anIndex)
     {
         // Iterate over nodes and recurse in to one in range (return top level node in range)
         for (int i = 0, iMax = getChildCount(); i < iMax; i++) {
             JNode node = getChild(i);
             if (node.getStartCharIndex() <= anIndex && anIndex <= node.getEndCharIndex())
-                return node.getNodeAtCharIndex(anIndex);
+                return node.getNodeForCharIndex(anIndex);
         }
 
         // Return
@@ -409,15 +409,15 @@ public class JNode {
     }
 
     /**
-     * Returns the node at given char index.
+     * Returns the node for given char range.
      */
-    public JNode getNodeAtCharIndex(int aStart, int anEnd)
+    public JNode getNodeForCharRange(int aStart, int anEnd)
     {
         // Iterate over nodes and recurse in to one in range (return top level node in range)
         for (int i = 0, iMax = getChildCount(); i < iMax; i++) {
             JNode node = getChild(i);
             if (node.getStartCharIndex() <= aStart && anEnd <= node.getEndCharIndex())
-                return node.getNodeAtCharIndex(aStart, anEnd);
+                return node.getNodeForCharRange(aStart, anEnd);
         }
 
         // Return

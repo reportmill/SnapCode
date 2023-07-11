@@ -235,7 +235,7 @@ public class CompleterTool extends WorkspaceTool {
 
         // Set DragNode
         int index = textArea.getCharIndexForXY(anX, aY);
-        _dragNode = textArea.getJFile().getNodeAtCharIndex(index);
+        _dragNode = textArea.getJFile().getNodeForCharIndex(index);
 
         // Get DragBlock
         _dragBlock = _dragNode;

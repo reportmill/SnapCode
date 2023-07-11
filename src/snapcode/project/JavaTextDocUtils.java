@@ -155,7 +155,7 @@ public class JavaTextDocUtils {
             return false;
 
         // Get outer statement enclosing range
-        JNode jnode = aJFile.getNodeAtCharIndex(startCharIndex);
+        JNode jnode = aJFile.getNodeForCharIndex(startCharIndex);
         JStmtBlock oldStmt = jnode instanceof JStmtBlock ? (JStmtBlock) jnode : jnode.getParent(JStmtBlock.class);
         while (oldStmt != null && oldStmt.getEndCharIndex() < endOldCharIndex)
             oldStmt = oldStmt.getParent(JStmtBlock.class);

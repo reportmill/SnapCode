@@ -225,6 +225,8 @@ public class NodeCompleter {
         if (varDeclType == null)
             return;
         JavaType evalType = varDeclType.getDecl();
+        if (evalType != null && (evalType.isPrimitive() || evalType.isArray() && evalType.getComponentType().isPrimitive()))
+            return;
 
         // Get suggested var name from type name
         String typeName = evalType != null ? evalType.getSimpleName() : varDeclType.getSimpleName();

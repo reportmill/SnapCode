@@ -202,7 +202,7 @@ public class JavaTextPane<T extends JavaTextDoc> extends TextPane<T> {
                     return;
                 }
                 int index = _textArea.getCharIndexForXY(anEvent.getX(), anEvent.getY());
-                JNode node = _textArea.getJFile().getNodeAtCharIndex(index);
+                JNode node = _textArea.getJFile().getNodeForCharIndex(index);
                 _textArea.setHoverNode(node instanceof JExprId || node instanceof JType ? node : null);
             }
         }

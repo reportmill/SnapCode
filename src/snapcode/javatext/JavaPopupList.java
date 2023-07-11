@@ -120,22 +120,21 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         JavaDecl completionDecl = getSelItem();
         String completionStr = completionDecl.getReplaceString();
 
-        // Get start/stop char index for completion (adjust for SubText if needed)
+        // Get start/stop char index for completion
         JavaTextArea textArea = getTextArea();
-        TextDoc textDoc = textArea.getTextDoc();
-        JNode selNode = textArea.getSelNode();
-        int selStart = selNode.getStartCharIndex() - textDoc.getStartCharIndex();
-        int selEnd = textArea.getSelEnd();
+        JNode selNode = textArea.getIdExprAtCursor(); //textArea.getSelNode();
+        int nodeStart = selNode.getStartCharIndex();
+        int nodeEnd = textArea.getSelEnd();
 
         // Replace selection with completeString
-        textArea.replaceChars(completionStr, null, selStart, selEnd, true);
+        textArea.replaceChars(completionStr, null, nodeStart, nodeEnd, true);
 
         // If completion has parens needing content, select inside parens
         int argStart = indexOfParenContent(completionDecl, completionStr);
         if (argStart > 0) {
             int argEnd = completionStr.indexOf(')', argStart);
             if (argEnd > 0)
-                textArea.setSel(selStart + argStart + 1, selStart + argEnd);
+                textArea.setSel(nodeStart + argStart + 1, nodeStart + argEnd);
         }
 
         // Add import for suggestion Class, if not present
