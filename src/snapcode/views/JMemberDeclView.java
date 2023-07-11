@@ -1,5 +1,4 @@
 package snapcode.views;
-
 import javakit.parse.*;
 import snap.view.Label;
 import snap.view.RowView;
@@ -8,6 +7,14 @@ import snap.view.RowView;
  * A SnapPart subclass for JMethodDecl.
  */
 public class JMemberDeclView<JNODE extends JMemberDecl> extends JNodeView<JNODE> {
+
+    /**
+     * Constructor.
+     */
+    public JMemberDeclView()
+    {
+        super();
+    }
 
     /**
      * Creates a SnapPart for a JNode.
@@ -38,15 +45,15 @@ public class JMemberDeclView<JNODE extends JMemberDecl> extends JNodeView<JNODE>
             setColor(MemberDeclColor);
 
             // Configure HBox
-            RowView hbox = getHBox();
-            hbox.setPadding(0, 0, 0, 8);
-            hbox.setMinSize(120, PieceHeight);
+            RowView rowView = getRowView();
+            rowView.setPadding(0, 0, 0, 8);
+            rowView.setMinSize(120, PieceHeight);
 
             // Add label for method name
             JExecutableDecl md = getJNode();
             Label label = createLabel(md.getName());
             label.setFont(label.getFont().deriveFont(14));
-            hbox.addChild(label);
+            rowView.addChild(label);
         }
 
         /**

@@ -6,9 +6,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * SnapPartExpr subclass for JExprChain.
+ * SnapPartExpr subclass for JExprDot.
  */
-public class JExprChainView<JNODE extends JExprDot> extends JExprView<JNODE> {
+public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
+
+    /**
+     * Constructor.
+     */
+    public JExprDotView()
+    {
+        super();
+    }
 
     /**
      * Updates UI.
@@ -19,12 +27,12 @@ public class JExprChainView<JNODE extends JExprDot> extends JExprView<JNODE> {
         super.updateUI();
 
         // Get/configure HBox
-        RowView hbox = getHBox();
-        hbox.setPadding(0, 0, 0, 0);
+        RowView rowView = getRowView();
+        rowView.setPadding(0, 0, 0, 0);
 
         // Create/add views for child expressions
         for (JNodeView child : getJNodeViews())
-            hbox.addChild(child);
+            rowView.addChild(child);
         getJNodeView(0).setSeg(Seg.First);
         getJNodeViewLast().setSeg(Seg.Last);
     }
@@ -32,25 +40,26 @@ public class JExprChainView<JNODE extends JExprDot> extends JExprView<JNODE> {
     /**
      * Override to create children.
      */
-    protected List<JNodeView> createJNodeViews()
+    @Override
+    protected List<JNodeView<?>> createJNodeViews()
     {
         JExprDot dotExpr = getJNode();
-        List<JNodeView> children = new ArrayList<>();
+        List<JNodeView<?>> childViews = new ArrayList<>();
 
         JExpr prefixExpr = dotExpr.getPrefixExpr();
         JExprView<?> prefixView = createView(prefixExpr);
         prefixView.setGrowWidth(true);
-        children.add(prefixView);
+        childViews.add(prefixView);
 
         // Iterate over expression chain children, create expression views and add to list
         JExpr expr = dotExpr.getExpr();
         if (expr != null) {
             JExprView<?> exprView = createView(expr);
             exprView.setGrowWidth(true);
-            children.add(exprView);
+            childViews.add(exprView);
         }
 
-        // Return expression views
-        return children;
+        // Return
+        return childViews;
     }
 }

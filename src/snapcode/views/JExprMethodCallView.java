@@ -23,31 +23,37 @@ public class JExprMethodCallView<JNODE extends JExprMethodCall> extends JExprVie
         setColor(PieceColor);
 
         // Configure HBox
-        RowView hbox = getHBox();
+        RowView rowView = getRowView();
 
         // Add label for method name
         JExprMethodCall mc = getJNode();
         Label label = createLabel(mc.getName());
-        hbox.addChild(label);
+        rowView.addChild(label);
 
         // Add child UIs
         for (JNodeView child : getJNodeViews())
-            hbox.addChild(child);
+            rowView.addChild(child);
     }
 
     /**
      * Override to create children for method args.
      */
-    protected List<JNodeView> createJNodeViews()
+    @Override
+    protected List<JNodeView<?>> createJNodeViews()
     {
-        JExprMethodCall mc = getJNode();
-        List<JExpr> args = mc.getArgs();
-        List children = new ArrayList();
-        if (args != null) for (JExpr arg : args) {
-            JExprView spe = new JExprEditor();
-            spe.setJNode(arg);
-            children.add(spe);
+        JExprMethodCall methodCall = getJNode();
+        List<JExpr> args = methodCall.getArgs();
+        List<JNodeView<?>> children = new ArrayList<>();
+
+        if (args != null) {
+            for (JExpr arg : args) {
+                JExprView<? super JExpr> exprView = new JExprEditor<>();
+                exprView.setJNode(arg);
+                children.add(exprView);
+            }
         }
+
+        // Return
         return children;
     }
 }

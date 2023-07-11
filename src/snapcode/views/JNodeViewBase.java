@@ -31,7 +31,7 @@ public class JNodeViewBase extends ChildView {
     RowView _hbox;
 
     // The VBox
-    ColView _vbox;
+    ColView _colView;
 
     // The foreground shape
     PathView _fg;
@@ -114,26 +114,27 @@ public class JNodeViewBase extends ChildView {
     /**
      * Returns the horizontal box.
      */
-    public RowView getHBox()  { return _hbox; }
+    public RowView getRowView()  { return _hbox; }
 
     /**
      * Returns the vertical box.
      */
-    public ColView getVBox()
+    public ColView getColView()
     {
-        return _vbox != null ? _vbox : (_vbox = createVBox());
+        if (_colView != null) return _colView;
+        return _colView = createColView();
     }
 
     /**
      * Creates the vertical box.
      */
-    protected ColView createVBox()
+    protected ColView createColView()
     {
-        ColView vbox = new ColView();
-        vbox.setMinHeight(35);
-        vbox.setFillWidth(true); //vbox.setSpacing(2);
-        addChild(vbox);//,getChildren().size()-1); //vbox.setPadding(3,1,BlockTailHeight,12);
-        return vbox;
+        ColView colView = new ColView();
+        colView.setMinHeight(35);
+        colView.setFillWidth(true);
+        addChild(colView);
+        return colView;
     }
 
     /**
@@ -169,10 +170,10 @@ public class JNodeViewBase extends ChildView {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        double pw = getHBox().getBestWidth(aH);
-        if (_vbox != null || isBlock())
-            pw = Math.max(pw, BlockLeft + getVBox().getBestWidth(aH));
-        return pw;
+        double prefW = getRowView().getBestWidth(aH);
+        if (_colView != null || isBlock())
+            prefW = Math.max(prefW, BlockLeft + getColView().getBestWidth(aH));
+        return prefW;
     }
 
     /**
@@ -180,10 +181,10 @@ public class JNodeViewBase extends ChildView {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        double ph = getHBox().getBestHeight(aW);
-        if (_vbox != null || isBlock())
-            ph += BlockTop + getVBox().getBestHeight(aW) + BlockBottom + BlockTailHeight;
-        return ph;
+        double prefH = getRowView().getBestHeight(aW);
+        if (_colView != null || isBlock())
+            prefH += BlockTop + getColView().getBestHeight(aW) + BlockBottom + BlockTailHeight;
+        return prefH;
     }
 
     /**
@@ -192,22 +193,23 @@ public class JNodeViewBase extends ChildView {
     protected void layoutImpl()
     {
         // Get size
-        double w = getWidth(), h = getHeight();
+        double viewW = getWidth();
+        double viewH = getHeight();
 
-        // Layout HBox
-        RowView hbox = getHBox();
-        double hh = hbox.getBestHeight(w);
-        hbox.setBounds(0, 0, w, hh);
+        // Layout RowView
+        RowView rowView = getRowView();
+        double rowH = rowView.getBestHeight(viewW);
+        rowView.setBounds(0, 0, viewW, rowH);
 
         // Layout VBox
-        if (_vbox != null) {
-            ColView vbox = getVBox();
-            vbox.setBounds(BlockLeft, hh + BlockTop, w - BlockLeft, h - hh - BlockBottom - BlockTailHeight);
+        if (_colView != null) {
+            ColView colView = getColView();
+            colView.setBounds(BlockLeft, rowH + BlockTop, viewW - BlockLeft, viewH - rowH - BlockBottom - BlockTailHeight);
         }
 
         // Layout Background, Foreground pathviews
-        resizeBG(_bg, w, h);
-        resizeBG(_fg, w, h);
+        resizeBG(_bg, viewW, viewH);
+        resizeBG(_fg, viewW, viewH);
     }
 
     /**
@@ -242,27 +244,27 @@ public class JNodeViewBase extends ChildView {
      */
     protected void resizeBGPieceOnly(PathView aPath, double aW, double aH)
     {
-        Path2D p = aPath.getPath();
-        p.clear();
-        double r = 5;
-        p.moveTo(r, 0);
-        p.hlineTo(12);
-        p.lineTo(15, 3);
-        p.hlineTo(25);
-        p.lineTo(28, 0); // Divit
-        p.hlineTo(aW - r);
-        p.arcTo(aW, 0, aW, r);
-        p.vlineTo(aH - r);
-        p.arcTo(aW, aH, aW - r, aH);
-        p.hlineTo(28);
-        p.lineTo(25, aH + 3);
-        p.hlineTo(15);
-        p.lineTo(12, aH); // Divit
-        p.hlineTo(r);
-        p.arcTo(0, aH, 0, aH - r);
-        p.vlineTo(r);
-        p.arcTo(0, 0, r, 0);
-        p.close();
+        Path2D path = aPath.getPath();
+        path.clear();
+        double RADIUS = 5;
+        path.moveTo(RADIUS, 0);
+        path.hlineTo(12);
+        path.lineTo(15, 3);
+        path.hlineTo(25);
+        path.lineTo(28, 0); // Divit
+        path.hlineTo(aW - RADIUS);
+        path.arcTo(aW, 0, aW, RADIUS);
+        path.vlineTo(aH - RADIUS);
+        path.arcTo(aW, aH, aW - RADIUS, aH);
+        path.hlineTo(28);
+        path.lineTo(25, aH + 3);
+        path.hlineTo(15);
+        path.lineTo(12, aH); // Divit
+        path.hlineTo(RADIUS);
+        path.arcTo(0, aH, 0, aH - RADIUS);
+        path.vlineTo(RADIUS);
+        path.arcTo(0, 0, RADIUS, 0);
+        path.close();
     }
 
     /**
@@ -270,25 +272,25 @@ public class JNodeViewBase extends ChildView {
      */
     protected void resizeBGPieceFirst(PathView aPath, double aW, double aH)
     {
-        Path2D p = aPath.getPath();
-        p.clear();
-        double r = 5;
-        p.moveTo(r, 0);
-        p.hlineTo(12);
-        p.lineTo(15, 3);
-        p.hlineTo(25);
-        p.lineTo(28, 0); // Divit
-        p.hlineTo(aW); //e.add(new HLineTo(aW-r)); e.add(new ArcTo(r,r,0,aW,r,false,true));
-        p.vlineTo(aH); //e.add(new VLineTo(aH-r)); e.add(new ArcTo(r,r,0,aW-r,aH,false,true));
-        p.hlineTo(28);
-        p.lineTo(25, aH + 3);
-        p.hlineTo(15);
-        p.lineTo(12, aH); // Divit
-        p.hlineTo(r);
-        p.arcTo(0, aH, 0, aH - r);
-        p.vlineTo(r);
-        p.arcTo(0, 0, r, 0);
-        p.close();
+        Path2D path = aPath.getPath();
+        path.clear();
+        double RADIUS = 5;
+        path.moveTo(RADIUS, 0);
+        path.hlineTo(12);
+        path.lineTo(15, 3);
+        path.hlineTo(25);
+        path.lineTo(28, 0); // Divit
+        path.hlineTo(aW); //e.add(new HLineTo(aW-r)); e.add(new ArcTo(r,r,0,aW,r,false,true));
+        path.vlineTo(aH); //e.add(new VLineTo(aH-r)); e.add(new ArcTo(r,r,0,aW-r,aH,false,true));
+        path.hlineTo(28);
+        path.lineTo(25, aH + 3);
+        path.hlineTo(15);
+        path.lineTo(12, aH); // Divit
+        path.hlineTo(RADIUS);
+        path.arcTo(0, aH, 0, aH - RADIUS);
+        path.vlineTo(RADIUS);
+        path.arcTo(0, 0, RADIUS, 0);
+        path.close();
     }
 
     /**
@@ -296,9 +298,9 @@ public class JNodeViewBase extends ChildView {
      */
     protected void resizeBGPieceMiddle(PathView aPath, double aW, double aH)
     {
-        Path2D p = aPath.getPath();
-        p.clear();
-        p.appendShape(new Rect(0, 0, aW, aH - 3));
+        Path2D path = aPath.getPath();
+        path.clear();
+        path.appendShape(new Rect(0, 0, aW, aH - 3));
         aPath.setSize(aW, aH - 3);
         //p.moveTo(r,0); p.hlineTo(aW-r); p.arcTo(aW,0,aW,r); p.vlineTo(aH-r); p.arcTo(aW,aH,aW-r,aH);
         //p.hlineTo(r); p.arcTo(0,aH,0,aH-r); p.vlineTo(r); p.arcTo(0,0,r,0); p.close();
@@ -309,17 +311,17 @@ public class JNodeViewBase extends ChildView {
      */
     protected void resizeBGPieceLast(PathView aPath, double aW, double aH)
     {
-        Path2D p = aPath.getPath();
-        p.clear();
-        double r = 5;
+        Path2D path = aPath.getPath();
+        path.clear();
+        double RADIUS = 5;
         aPath.setSize(aW, aH - 3);
-        p.moveTo(0, 0);
-        p.hlineTo(aW - r);
-        p.arcTo(aW, 0, aW, r);
-        p.vlineTo(aH - r);
-        p.arcTo(aW, aH, aW - r, aH);
-        p.hlineTo(0);
-        p.vlineTo(0);
+        path.moveTo(0, 0);
+        path.hlineTo(aW - RADIUS);
+        path.arcTo(aW, 0, aW, RADIUS);
+        path.vlineTo(aH - RADIUS);
+        path.arcTo(aW, aH, aW - RADIUS, aH);
+        path.hlineTo(0);
+        path.vlineTo(0);
     }
 
     /**
@@ -327,47 +329,50 @@ public class JNodeViewBase extends ChildView {
      */
     protected void resizeBGBlock(PathView aPath, double aW, double aH, boolean doOuter)
     {
-        Path2D p = aPath.getPath();
-        p.clear();
-        double r = 5, h1 = PieceHeight, h2 = aH - BlockTailHeight;
-        p.moveTo(r, 0);
+        Path2D path = aPath.getPath();
+        path.clear();
+        double RADIUS = 5;
+        double h1 = PieceHeight;
+        double h2 = aH - BlockTailHeight;
+
+        path.moveTo(RADIUS, 0);
         if (doOuter) {
-            p.hlineTo(12);
-            p.lineTo(15, 3);
-            p.hlineTo(25);
-            p.lineTo(28, 0);
+            path.hlineTo(12);
+            path.lineTo(15, 3);
+            path.hlineTo(25);
+            path.lineTo(28, 0);
         }
-        p.hlineTo(aW - r);
-        p.arcTo(aW, 0, aW, r);
-        p.vlineTo(h1 - r);
-        p.arcTo(aW, h1, aW - r, h1);
-        p.hlineTo(40);
-        p.lineTo(37, h1 + 3);
-        p.hlineTo(27);
-        p.lineTo(24, h1); // Divit
-        p.hlineTo(10 + r);
-        p.arcTo(10, h1, 10, h1 + r);
-        p.vlineTo(h2 - r);
-        p.arcTo(10, h2, 10 + r, h2);
-        p.hlineTo(24);
-        p.lineTo(27, h2 + 3);
-        p.hlineTo(37);
-        p.lineTo(40, h2); // Divit
-        p.hlineTo(aW - r);
-        p.arcTo(aW, h2, aW, h2 + r);
-        p.vlineTo(aH - r);
-        p.arcTo(aW, aH, aW - r, aH);
+        path.hlineTo(aW - RADIUS);
+        path.arcTo(aW, 0, aW, RADIUS);
+        path.vlineTo(h1 - RADIUS);
+        path.arcTo(aW, h1, aW - RADIUS, h1);
+        path.hlineTo(40);
+        path.lineTo(37, h1 + 3);
+        path.hlineTo(27);
+        path.lineTo(24, h1); // Divit
+        path.hlineTo(10 + RADIUS);
+        path.arcTo(10, h1, 10, h1 + RADIUS);
+        path.vlineTo(h2 - RADIUS);
+        path.arcTo(10, h2, 10 + RADIUS, h2);
+        path.hlineTo(24);
+        path.lineTo(27, h2 + 3);
+        path.hlineTo(37);
+        path.lineTo(40, h2); // Divit
+        path.hlineTo(aW - RADIUS);
+        path.arcTo(aW, h2, aW, h2 + RADIUS);
+        path.vlineTo(aH - RADIUS);
+        path.arcTo(aW, aH, aW - RADIUS, aH);
         if (doOuter) {
-            p.hlineTo(28);
-            p.lineTo(25, aH + 3);
-            p.hlineTo(15);
-            p.lineTo(12, aH);
+            path.hlineTo(28);
+            path.lineTo(25, aH + 3);
+            path.hlineTo(15);
+            path.lineTo(12, aH);
         }
-        p.hlineTo(r);
-        p.arcTo(0, aH, 0, aH - r);
-        p.vlineTo(r);
-        p.arcTo(0, 0, r, 0);
-        p.close();
+        path.hlineTo(RADIUS);
+        path.arcTo(0, aH, 0, aH - RADIUS);
+        path.vlineTo(RADIUS);
+        path.arcTo(0, 0, RADIUS, 0);
+        path.close();
     }
 
     /**
@@ -375,8 +380,8 @@ public class JNodeViewBase extends ChildView {
      */
     protected void resizeBGPlain(PathView aPath, double aW, double aH)
     {
-        Path2D p = aPath.getPath();
-        p.clear();
-        p.appendShape(new RoundRect(1, 1, aW - 2, aH - 2, 5));
+        Path2D path = aPath.getPath();
+        path.clear();
+        path.appendShape(new RoundRect(1, 1, aW - 2, aH - 2, 5));
     }
 }

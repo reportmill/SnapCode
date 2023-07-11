@@ -9,6 +9,14 @@ import snap.view.RowView;
 public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
 
     /**
+     * Constructor.
+     */
+    public JStmtView()
+    {
+        super();
+    }
+
+    /**
      * Override to configure.
      */
     protected void updateUI()
@@ -20,9 +28,9 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
         setColor(isBlock() ? BlockStmtColor : PieceColor);
 
         // Configure HBox
-        RowView hbox = getHBox();
-        hbox.setPadding(0, 2, 0, 8);
-        hbox.setMinSize(120, PieceHeight);
+        RowView rowView = getRowView();
+        rowView.setPadding(0, 2, 0, 8);
+        rowView.setMinSize(120, PieceHeight);
     }
 
     /**
@@ -65,12 +73,16 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
     /**
      * Creates a JStmtView for a JStmt.
      */
-    public static JNodeView createView(JNode aNode)
+    public static JNodeView<?> createView(JNode aNode)
     {
-        if (aNode instanceof JStmtExpr) return new JStmtExprView();
-        if (aNode instanceof JStmtWhile) return new JStmtWhileView();
-        if (aNode instanceof JStmtIf) return new JStmtIfView();
-        if (aNode instanceof JStmtFor) return new JStmtForView();
+        if (aNode instanceof JStmtExpr)
+            return new JStmtExprView<>();
+        if (aNode instanceof JStmtWhile)
+            return new JStmtWhileView<>();
+        if (aNode instanceof JStmtIf)
+            return new JStmtIfView<>();
+        if (aNode instanceof JStmtFor)
+            return new JStmtForView<>();
         return new JStmtOtherView();
     }
 
@@ -78,6 +90,14 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
      * A subclass of JStmtView for statements not yet implemented.
      */
     protected static class JStmtOtherView extends JStmtView<JStmt> {
+
+        /**
+         * Constructor.
+         */
+        public JStmtOtherView()
+        {
+            super();
+        }
 
         /**
          * Override to configure.
@@ -90,7 +110,7 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
             // Create label for statement and add to HBox
             JStmt stmt = getJNode();
             Label label = createLabel(stmt.getString());
-            getHBox().addChild(label);
+            getRowView().addChild(label);
         }
     }
 }

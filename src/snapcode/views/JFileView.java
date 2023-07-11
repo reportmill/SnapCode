@@ -21,25 +21,31 @@ public class JFileView extends JNodeView<JFile> {
     static final Paint BACK_FILL = ViewUtils.getBackFill();
 
     /**
+     * Constructor.
+     */
+    public JFileView()
+    {
+        super();
+    }
+
+    /**
      * Returns the SnapCodeArea.
      */
-    public SnapEditor getEditor()
-    {
-        return _editor;
-    }
+    public SnapEditor getEditor()  { return _editor; }
 
     /**
      * Sets the JNode.
      */
+    @Override
     public void setJNode(JFile aJNode)
     {
         super.setJNode(aJNode);
 
         // Reset children and their UI
         _jnodeViews = null;
-        getVBox().removeChildren();
+        getColView().removeChildren();
         for (JNodeView<?> child : getJNodeViews())
-            getVBox().addChild(child);
+            getColView().addChild(child);
     }
 
     /**
@@ -55,28 +61,33 @@ public class JFileView extends JNodeView<JFile> {
         setBorder(Color.LIGHTGRAY, 1); //Bevel
 
         // Get/configure HBox
-        RowView hbox = getHBox();
-        hbox.setMinHeight(-1);
+        RowView rowView = getRowView();
+        rowView.setMinHeight(-1);
 
         // Get/configure VBox
-        ColView vbox = getVBox();
-        vbox.setPadding(25, 10, 10, 10);
-        vbox.setSpacing(25);
-        vbox.setFillWidth(false);
+        ColView colView = getColView();
+        colView.setPadding(25, 10, 10, 10);
+        colView.setSpacing(25);
+        colView.setFillWidth(false);
     }
 
     /**
      * Override to return JFile child node owners.
      */
-    protected List<JNodeView> createJNodeViews()
+    @Override
+    protected List<JNodeView<?>> createJNodeViews()
     {
         JFile jfile = getJNode();
-        List<JNodeView> children = new ArrayList<>();
-        JClassDecl cdecl = jfile.getClassDecl();
-        if (cdecl == null) return children;
-        JClassDeclView<?> classDeclView = new JClassDeclView<>(cdecl);
-        children.add(classDeclView);
-        return children;
+        List<JNodeView<?>> childViews = new ArrayList<>();
+        JClassDecl classDecl = jfile.getClassDecl();
+        if (classDecl == null)
+            return childViews;
+
+        JClassDeclView<?> classDeclView = new JClassDeclView<>(classDecl);
+        childViews.add(classDeclView);
+
+        // Return
+        return childViews;
     }
 
     /**

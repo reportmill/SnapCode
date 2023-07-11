@@ -14,13 +14,13 @@ import java.util.List;
 public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
 
     // The JNode
-    JNODE _jnode;
+    private JNODE _jnode;
 
     // The children node owners
-    List<JNodeView> _jnodeViews;
+    protected List<JNodeView<?>> _jnodeViews;
 
     // The current drag over node
-    static JNodeViewBase _dragOver;
+    private static JNodeViewBase _dragOver;
 
     // Constants for colors
     public static Color PieceColor = Color.get("#4C67d6");
@@ -37,10 +37,11 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
     }
 
     /**
-     * Creates a new JNodeView for given JNode.
+     * Constructor for given JNode.
      */
     public JNodeView(JNODE aJN)
     {
+        super();
         setJNode(aJN);
     }
 
@@ -65,13 +66,14 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
     {
         // Add child UI
         if (isBlock()) {
-            ColView vbox = getVBox();
+            ColView colView = getColView();
             for (JNodeView<?> child : getJNodeViews())
-                vbox.addChild(child);
-            vbox.setMinHeight(vbox.getChildCount() == 0 ? 30 : -1);
+                colView.addChild(child);
+            colView.setMinHeight(colView.getChildCount() == 0 ? 30 : -1);
         }
 
-        if (_jnode.getFile() == null) return;
+        if (_jnode.getFile() == null)
+            return;
         enableEvents(DragEvents);
     }
 
@@ -127,15 +129,17 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
     /**
      * Returns the children.
      */
-    public List<JNodeView> getJNodeViews()
+    public List<JNodeView<?>> getJNodeViews()
     {
-        return _jnodeViews != null ? _jnodeViews : (_jnodeViews = createJNodeViews());
+        if (_jnodeViews != null) return _jnodeViews;
+        List<JNodeView<?>> nodeViews = createJNodeViews();
+        return _jnodeViews = nodeViews;
     }
 
     /**
      * Creates the children.
      */
-    protected List<JNodeView> createJNodeViews()
+    protected List<JNodeView<?>> createJNodeViews()
     {
         JNode jnode = getJNode();
         JStmtBlock blockStmt = jnode instanceof WithBlockStmt ? ((WithBlockStmt) jnode).getBlock() : null;
@@ -144,11 +148,11 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
 
         // Get statements
         List<JStmt> statements = blockStmt.getStatements();
-        List<JNodeView> children = new ArrayList<>();
+        List<JNodeView<?>> children = new ArrayList<>();
 
         // Iterate over statements and create views
         for (JStmt stmt : statements) {
-            JNodeView stmtView = createView(stmt);
+            JNodeView<?> stmtView = createView(stmt);
             if (stmtView == null)
                 continue;
             children.add(stmtView);
@@ -183,15 +187,15 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
      */
     protected TextField createTextField(String aString)
     {
-        TextField tfield = new TextField();
-        tfield.setText(aString);
-        tfield.setFont(new Font("Arial", 11));
-        tfield.setAlign(Pos.CENTER);
-        tfield.setColCount(0);
-        tfield.setMinWidth(36);
-        tfield.setPrefHeight(18);
-        tfield.setPadding(2, 6, 2, 6);
-        return tfield;
+        TextField textField = new TextField();
+        textField.setText(aString);
+        textField.setFont(new Font("Arial", 11));
+        textField.setAlign(Pos.CENTER);
+        textField.setColCount(0);
+        textField.setMinWidth(36);
+        textField.setPrefHeight(18);
+        textField.setPadding(2, 6, 2, 6);
+        return textField;
     }
 
     /**
@@ -260,25 +264,35 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
     /**
      * Returns the SnapPart of a node.
      */
-    public static JNodeView getJNodeView(View aView)
+    public static JNodeView<?> getJNodeView(View aView)
     {
-        if (aView instanceof JNodeView) return (JNodeView) aView;
+        if (aView instanceof JNodeView)
+            return (JNodeView<?>) aView;
         return aView.getParent(JNodeView.class);
     }
 
     /**
      * Creates a SnapPart for a JNode.
      */
-    public static JNodeView createView(JNode aNode)
+    public static JNodeView<?> createView(JNode aNode)
     {
-        JNodeView np = null;
-        if (aNode instanceof JFile) np = new JFileView();
-        else if (aNode instanceof JMemberDecl) np = JMemberDeclView.createView(aNode);
-        else if (aNode instanceof JStmt) np = JStmtView.createView(aNode);
-        else if (aNode instanceof JExpr) np = JExprView.createView(aNode);
-        else if (aNode instanceof JType) np = new JTypeView();
-        if (np == null) return null;
-        np.setJNode(aNode);
-        return np;
+        JNodeView<?> nodeView = null;
+        if (aNode instanceof JFile)
+            nodeView = new JFileView();
+        else if (aNode instanceof JMemberDecl)
+            nodeView = JMemberDeclView.createView(aNode);
+        else if (aNode instanceof JStmt)
+            nodeView = JStmtView.createView(aNode);
+        else if (aNode instanceof JExpr)
+            nodeView = JExprView.createView((JExpr) aNode);
+        else if (aNode instanceof JType)
+            nodeView = new JTypeView<>();
+        if (nodeView == null)
+            return null;
+
+        ((JNodeView<JNode>) nodeView).setJNode(aNode);
+
+        // Return
+        return nodeView;
     }
 }

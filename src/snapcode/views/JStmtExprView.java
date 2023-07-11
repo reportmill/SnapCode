@@ -10,22 +10,31 @@ import snap.view.RowView;
 public class JStmtExprView<JNODE extends JStmtExpr> extends JStmtView<JNODE> {
 
     /**
+     * Constructor.
+     */
+    public JStmtExprView()
+    {
+        super();
+    }
+
+    /**
      * Updates UI for HBox.
      */
+    @Override
     protected void updateUI()
     {
         // Do normal version
         super.updateUI();
 
         // Configure HBox
-        RowView hbox = getHBox();
-        hbox.setPadding(0, 0, 0, 0);
+        RowView rowView = getRowView();
+        rowView.setPadding(0, 0, 0, 0);
 
         // Create/Add expr view
         JStmtExpr stmt = getJNode();
         JExpr expr = stmt.getExpr();
-        JExprView eview = JExprView.createView(expr);
-        eview.setGrowWidth(true);
-        hbox.addChild(eview);
+        JExprView exprView = JExprView.createView(expr);
+        exprView.setGrowWidth(true);
+        rowView.addChild(exprView);
     }
 }

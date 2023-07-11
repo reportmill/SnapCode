@@ -13,10 +13,10 @@ import snap.view.ViewUtils;
 public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
 
     // The text field
-    TextField _tfield;
+    private TextField _textField;
 
     // The text field name
-    static final String TextFieldName = "ExprText";
+    private static final String TextFieldName = "ExprText";
 
     /**
      * Updates UI.
@@ -29,18 +29,18 @@ public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
         setColor(null);
 
         // Get/configure HBox
-        RowView hbox = getHBox();
+        RowView rowView = getRowView();
 
         // Get expression
         JExpr expr = getJNode();
         String str = expr.getString();
 
         // Create text field, configure and return
-        _tfield = createTextField(str);
-        _tfield.setName(TextFieldName);
-        _tfield.addEventHandler(e -> handleTextEvent(e), KeyRelease); //enableEvents(_tfield, DragEvents);
-        _tfield.addEventHandler(e -> handleTextEvent(e), Action);
-        hbox.addChild(_tfield);
+        _textField = createTextField(str);
+        _textField.setName(TextFieldName);
+        _textField.addEventHandler(e -> handleTextEvent(e), KeyRelease); //enableEvents(_tfield, DragEvents);
+        _textField.addEventHandler(e -> handleTextEvent(e), Action);
+        rowView.addChild(_textField);
     }
 
     /**
@@ -48,7 +48,7 @@ public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
      */
     void fireTextFieldAction()
     {
-        ViewUtils.fireActionEvent(_tfield, null);
+        ViewUtils.fireActionEvent(_textField, null);
     }
 
     /**
@@ -59,12 +59,12 @@ public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
         // Handle KeyEvents: Update PopupList
         if (anEvent.isKeyRelease())
             getEnv().runLater(() ->
-                    SnapEditorPopup.getShared().activatePopupList(this, _tfield.getText(), _tfield.getSelStart()));
+                    SnapEditorPopup.getShared().activatePopupList(this, _textField.getText(), _textField.getSelStart()));
 
             // Handle ExprText Action
         else {
             SnapEditorPopup hpop = SnapEditorPopup.getShared();
-            String str = _tfield.getText();
+            String str = _textField.getText();
             if (hpop.isShowing()) str = hpop.getFixedText();
             SnapEditor sed = getEditor();
             sed.replaceJNode(getJNode(), str);

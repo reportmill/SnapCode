@@ -11,6 +11,14 @@ import snap.view.RowView;
 public abstract class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
 
     /**
+     * Constructor.
+     */
+    public JExprView()
+    {
+        super();
+    }
+
+    /**
      * Updates UI.
      */
     protected void updateUI()
@@ -18,32 +26,38 @@ public abstract class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
         // Do normal version
         super.updateUI();
 
-        // Configure HBox
-        RowView hbox = getHBox();
-        hbox.setPadding(0, 2, 2, 8);
+        // Configure RowView
+        RowView rowView = getRowView();
+        rowView.setPadding(0, 2, 2, 8);
         setMinHeight(PieceHeight);
     }
 
     /**
      * Override to forward to parent.
      */
+    @Override
     protected void dropNode(JNode aJNode, double anX, double aY)
     {
-        getJNodeViewParent().dropNode(aJNode, anX, aY);
+        JNodeView<?> parentView = getJNodeViewParent();
+        parentView.dropNode(aJNode, anX, aY);
     }
 
     /**
      * Creates a JNodeView for a JNode.
      */
-    public static JExprView createView(JNode aNode)
+    public static JExprView<?> createView(JExpr anExpr)
     {
-        JExprView exprView;
-        if (aNode instanceof JExprMethodCall)
-            exprView = new JExprMethodCallView();
-        else if (aNode instanceof JExprDot)
-            exprView = new JExprChainView();
-        else exprView = new JExprEditor();
-        exprView.setJNode(aNode);
+        JExprView<? extends JExpr> exprView;
+        if (anExpr instanceof JExprMethodCall)
+            exprView = new JExprMethodCallView<>();
+        else if (anExpr instanceof JExprDot)
+            exprView = new JExprDotView<>();
+        else exprView = new JExprEditor<>();
+
+        // Set node
+        ((JExprView<JExpr>) exprView).setJNode(anExpr);
+
+        // Return
         return exprView;
     }
 }

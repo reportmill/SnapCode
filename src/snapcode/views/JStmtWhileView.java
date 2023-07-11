@@ -1,5 +1,4 @@
 package snapcode.views;
-
 import javakit.parse.JExpr;
 import javakit.parse.JStmtWhile;
 import snap.view.Label;
@@ -11,6 +10,14 @@ import snap.view.RowView;
 public class JStmtWhileView<JNODE extends JStmtWhile> extends JStmtView<JNODE> {
 
     /**
+     * Constructor.
+     */
+    public JStmtWhileView()
+    {
+        super();
+    }
+
+    /**
      * Updates UI.
      */
     protected void updateUI()
@@ -19,14 +26,14 @@ public class JStmtWhileView<JNODE extends JStmtWhile> extends JStmtView<JNODE> {
         super.updateUI();
 
         // Configure HBox
-        RowView hbox = getHBox();
+        RowView rowView = getRowView();
 
         // Creeate label and expr parts and add to HBox
         Label label = createLabel("while");
-        JStmtWhile wstmt = getJNode();
-        JExpr cond = wstmt.getConditional();
-        JExprView spart = new JExprEditor();
-        spart.setJNode(cond);
-        hbox.setChildren(label, spart);
+        JStmtWhile whileStmt = getJNode();
+        JExpr condExpr = whileStmt.getConditional();
+        JExprView<JExpr> exprView = new JExprEditor<>();
+        exprView.setJNode(condExpr);
+        rowView.setChildren(label, exprView);
     }
 }

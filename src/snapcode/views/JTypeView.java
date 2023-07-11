@@ -10,10 +10,11 @@ import snap.view.RowView;
 public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
 
     /**
-     * Creates a new JTypeView.
+     * Constructor.
      */
     public JTypeView()
     {
+        super();
     }
 
     /**
@@ -27,6 +28,7 @@ public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
     /**
      * Override.
      */
+    @Override
     protected void updateUI()
     {
         // Do normal version and set type, color
@@ -36,21 +38,18 @@ public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
         setColor(PieceColor);
 
         // Configure HBox
-        RowView hbox = getHBox();
-        hbox.setPadding(0, 0, 0, 8);
+        RowView rowView = getRowView();
+        rowView.setPadding(0, 0, 0, 8);
 
         // Create label for type and add
         JType typ = getJNode();
         Label label = createLabel(typ.getName());
         label.setFont(label.getFont().deriveFont(14));
-        hbox.addChild(label);
+        rowView.addChild(label);
     }
 
     /**
      * Returns a string describing the part.
      */
-    public String getPartString()
-    {
-        return "Type";
-    }
+    public String getPartString()  { return "Type"; }
 }
