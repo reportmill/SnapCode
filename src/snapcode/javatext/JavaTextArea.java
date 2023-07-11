@@ -323,6 +323,7 @@ public class JavaTextArea extends TextArea {
         JavaDecl[] completions = javaCompleter.getCompletionsForId(idExpr);
         return completions;
     }
+
     /**
      * Returns the id expression at cursor, if available.
      */
@@ -332,26 +333,31 @@ public class JavaTextArea extends TextArea {
         if (!isSelEmpty())
             return null;
 
-        // If dot at cursor, get dot expression
-        JExprId phantomIdExprForDot = getPhantomIdExprForDot();
-        if (phantomIdExprForDot != null)
-            return phantomIdExprForDot;
+        // If dot at cursor, get virtual id expression for empty string after dot
+        JExprId virtualIdExprForDot = getVirtualIdExprForDot();
+        if (virtualIdExprForDot != null)
+            return virtualIdExprForDot;
 
-        // If selection not at end of SelNode, just return
+        // Get selected id expression (just return if SelNode not id)
         int selStart = getSelStart();
         JNode selNode = getSelNode();
-        int nodeEnd = selNode.getEndCharIndex();
-        if (selStart != nodeEnd)
-                return null;
+        JExprId selId = selNode instanceof JExprId ? (JExprId) selNode : null;
+        if (selId == null)
+            return null;
 
-        // Return selNode if id
-        return selNode instanceof JExprId ? (JExprId) selNode : null;
+        // If cursor not at end of expression, get virtual id expression for prefix
+        int idEnd = selId.getEndCharIndex();
+        if (selStart != idEnd)
+            selId = getVirtualIdExprForPrefix(selId);
+
+        // Return
+        return selId;
     }
 
     /**
      * If previous character is a dot proceeded by id, creates and returns an empty id expression (with parent dot).
      */
-    private JExprId getPhantomIdExprForDot()
+    private JExprId getVirtualIdExprForDot()
     {
         // If previous char not dot, just return
         TextDoc textDoc = getTextDoc();
@@ -366,24 +372,43 @@ public class JavaTextArea extends TextArea {
         if (prevId == null)
             return null;
 
-        // Get scope expression from previous id (either the previous id or its dot parent)
-        JNode prevIdParent = prevId.getParent();
-        JExpr scopeExpr = prevIdParent instanceof JExprDot ? (JExpr) prevIdParent : prevId;
-        JNode scopeExprParent = scopeExpr.getParent();
-
         // Create new id expression with empty string
         ParseToken prevToken = prevId.getStartToken();
-        JExprId phantomIdExpr = new JExprId("");
-        phantomIdExpr.setStartToken(prevToken);
-        phantomIdExpr.setEndToken(prevToken);
+        JExprId virtualIdExpr = new JExprId("");
+        virtualIdExpr.setStartToken(prevToken);
+        virtualIdExpr.setEndToken(prevToken);
 
-        // Create new dot expression for scope expr and new id and set parent
-        JExprDot newDotExpr = new JExprDot(scopeExpr, phantomIdExpr);
+        // Create new dot expression for previous id and new id, set parent to prev id and reset prev id parent
+        JNode prevIdParent = prevId.getParent();
+        JExprDot newDotExpr = new JExprDot(prevId, virtualIdExpr);
         newDotExpr.setParent(prevId);
-        scopeExpr.setParent(scopeExprParent); // Reset ScopeExpr parent
+        prevId.setParent(prevIdParent);
 
         // Return
-        return phantomIdExpr;
+        return virtualIdExpr;
+    }
+
+    /**
+     * Returns a new id expression that is a prefix of given id to given char count.
+     */
+    private JExprId getVirtualIdExprForPrefix(JExprId idExpr)
+    {
+        // Get prefix string for new id expression
+        ParseToken startToken = idExpr.getStartToken();
+        String fullIdString = idExpr.getString();
+        int selStart = getSelStart();
+        int idStart = idExpr.getStartCharIndex();
+        int charCount = selStart - idStart;
+        String prefixString = fullIdString.substring(0, charCount);
+
+        // Create new id expression with empty string
+        JExprId virtualIdExpr = new JExprId(prefixString);
+        virtualIdExpr.setStartToken(startToken);
+        virtualIdExpr.setEndToken(startToken);
+        virtualIdExpr.setParent(idExpr.getParent());
+
+        // Return
+        return virtualIdExpr;
     }
 
     /**
