@@ -64,9 +64,6 @@ public class NodeCompleter {
         if (prefixMatcher == null)
             return NO_MATCHES;
 
-        // Add reserved word completions (public, private, for, white, etc.)
-        addWordCompletions(prefixMatcher);
-
         // Add completions for id
         addCompletionsForId(anId, prefixMatcher);
 
@@ -114,6 +111,9 @@ public class NodeCompleter {
                 return;
             }
         }
+
+        // Add reserved word completions (public, private, for, white, etc.)
+        addWordCompletions(prefixMatcher);
 
         // Get variables with prefix of name and add to completions
         List<JVarDecl> varDecls = prefixMatcher.getVarDeclsForJNode(anId, new ArrayList<>());
@@ -220,9 +220,6 @@ public class NodeCompleter {
      */
     private void addCompletionsForNewVarDecl(JVarDecl varDecl)
     {
-        // Remove other completions
-        _list.clear();
-
         // Get type from var decl
         JType varDeclType = varDecl.getType();
         if (varDeclType == null)

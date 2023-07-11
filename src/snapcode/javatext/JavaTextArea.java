@@ -5,6 +5,7 @@ package snapcode.javatext;
 import java.util.*;
 import javakit.parse.*;
 import javakit.resolver.JavaDecl;
+import snap.parse.ParseToken;
 import snapcode.project.JavaTextDoc;
 import snap.geom.Rect;
 import snap.gfx.*;
@@ -71,47 +72,6 @@ public class JavaTextArea extends TextArea {
     protected TextAreaKeys createTextAreaKeys()  { return new JavaTextAreaKeys(this); }
 
     /**
-     * Returns the code completion popup.
-     */
-    public JavaPopupList getPopup()
-    {
-        // If already set, just return
-        if (_popup != null) return _popup;
-
-        // Create, set, return
-        JavaPopupList popupList = new JavaPopupList(this);
-        return _popup = popupList;
-    }
-
-    /**
-     * Returns completions for current text selection and selected node.
-     */
-    public JavaDecl[] getCompletionsAtCursor()
-    {
-        // If selection not empty, just return
-        if (!isSelEmpty())
-            return null;
-
-        // If selection not at end of SelNode, just return
-        int selStart = getSelStart();
-        JNode selNode = getSelNode();
-        int startCharIndex = getTextDoc().getStartCharIndex();
-        int nodeEnd = selNode.getEndCharIndex() - startCharIndex;
-        if (selStart != nodeEnd)
-            return null;
-
-        // If not id expression, just return
-        JExprId idExpr = selNode instanceof JExprId ? (JExprId) selNode : null;
-        if (idExpr == null)
-            return null;
-
-        // Get completions and return
-        NodeCompleter javaCompleter = new NodeCompleter();
-        JavaDecl[] completions = javaCompleter.getCompletionsForId(idExpr);
-        return completions;
-    }
-
-    /**
      * Returns whether to draw line for print margin column.
      */
     public boolean getShowPrintMargin()  { return _showPrintMargin; }
@@ -149,15 +109,6 @@ public class JavaTextArea extends TextArea {
      */
     public JNode getNodeAtCharIndex(int startCharIndex, int endCharIndex)
     {
-        // If TextDoc is SubText, adjust start/end
-        TextDoc textDoc = getTextDoc();
-        int subTextStart = textDoc.getStartCharIndex();
-        if (subTextStart > 0) {
-            startCharIndex += subTextStart;
-            endCharIndex += subTextStart;
-        }
-
-        // Forward to JFile
         JFile jfile = getJFile();
         return jfile.getNodeAtCharIndex(startCharIndex, endCharIndex);
     }
@@ -165,6 +116,7 @@ public class JavaTextArea extends TextArea {
     /**
      * Override to update selected node and tokens.
      */
+    @Override
     public void setSel(int aStart, int anEnd)
     {
         // Do normal version
@@ -341,6 +293,89 @@ public class JavaTextArea extends TextArea {
     {
         _hoverNode = aNode;
         repaint();
+    }
+
+    /**
+     * Returns the code completion popup.
+     */
+    public JavaPopupList getPopup()
+    {
+        // If already set, just return
+        if (_popup != null) return _popup;
+
+        // Create, set, return
+        JavaPopupList popupList = new JavaPopupList(this);
+        return _popup = popupList;
+    }
+
+    /**
+     * Returns completions for current text selection and selected node.
+     */
+    public JavaDecl[] getCompletionsAtCursor()
+    {
+        // If selection not empty, just return
+        if (!isSelEmpty())
+            return null;
+
+        // If selection not at end of SelNode, just return
+        int selStart = getSelStart();
+        JNode selNode = getSelNode();
+        int nodeEnd = selNode.getEndCharIndex();
+        if (selStart != nodeEnd) {
+
+            // If previous char is dot, create empty id expression (inside dot expr) to get all scope expression completions
+            selNode = getPhantomIdExprForDot();
+            if (selNode == null)
+                return null;
+        }
+
+        // If not id expression, just return
+        JExprId idExpr = selNode instanceof JExprId ? (JExprId) selNode : null;
+        if (idExpr == null)
+            return null;
+
+        // Get completions and return
+        NodeCompleter javaCompleter = new NodeCompleter();
+        JavaDecl[] completions = javaCompleter.getCompletionsForId(idExpr);
+        return completions;
+    }
+
+    /**
+     * If previous character is a dot proceeded by id, creates and returns an empty id expression (with parent dot).
+     */
+    private JNode getPhantomIdExprForDot()
+    {
+        // If previous char not dot, just return
+        TextDoc textDoc = getTextDoc();
+        int prevCharIndex = getSelStart() - 1;
+        char prevChar = prevCharIndex > 0 ? textDoc.charAt(prevCharIndex) : 0;
+        if (prevChar != '.')
+            return null;
+
+        // Get previous id expression - if null, just return
+        JNode prevNode = getNodeAtCharIndex(prevCharIndex, prevCharIndex);
+        JExprId prevId = prevNode instanceof JExprId ? (JExprId) prevNode : null;
+        if (prevId == null)
+            return null;
+
+        // Get scope expression from previous id (either the previous id or its dot parent)
+        JNode prevIdParent = prevId.getParent();
+        JExpr scopeExpr = prevIdParent instanceof JExprDot ? (JExpr) prevIdParent : prevId;
+        JNode scopeExprParent = scopeExpr.getParent();
+
+        // Create new id expression with empty string
+        ParseToken prevToken = prevId.getStartToken();
+        JExprId phantomIdExpr = new JExprId("");
+        phantomIdExpr.setStartToken(prevToken);
+        phantomIdExpr.setEndToken(prevToken);
+
+        // Create new dot expression for scope expr and new id and set parent
+        JExprDot newDotExpr = new JExprDot(scopeExpr, phantomIdExpr);
+        newDotExpr.setParent(prevId);
+        scopeExpr.setParent(scopeExprParent); // Reset ScopeExpr parent
+
+        // Return
+        return phantomIdExpr;
     }
 
     /**

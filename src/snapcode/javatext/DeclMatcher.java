@@ -417,7 +417,7 @@ public class DeclMatcher {
      */
     private static Matcher getSkipCharsMatcherForLiteralString(String aStr)
     {
-        String regexStr = getSkipCharsRegexForLiteralString(aStr);
+        String regexStr = aStr.length() > 0 ? getSkipCharsRegexForLiteralString(aStr) : "";
         int flags = regexStr.length() > aStr.length() ? 0 : Pattern.CASE_INSENSITIVE;
         Pattern pattern = Pattern.compile(regexStr, flags);
         Matcher matcher = pattern.matcher("");
