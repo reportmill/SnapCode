@@ -4,6 +4,7 @@ import snap.view.ViewEvent;
 import snapcode.apptools.EvalTool;
 import snapcode.apptools.ProcPane;
 import snapcode.apptools.SearchTool;
+import snapcode.javatext.DeclMatcher;
 import snapcode.project.JavaAgent;
 import snapcode.project.Project;
 import javakit.resolver.JavaDecl;
@@ -99,6 +100,9 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     {
         WebURL url = getURL();
         setTextSelectionForUrlParams(url);
+
+        // Prime completions
+        runLater(() -> DeclMatcher.primeCompletions(getTextArea().getJFile()));
     }
 
     /**

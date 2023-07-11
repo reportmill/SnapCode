@@ -451,4 +451,16 @@ public class DeclMatcher {
         // Return string
         return regexSB.toString();
     }
+
+    /**
+     * Prime completions for given resolver.
+     */
+    public static void primeCompletions(JFile jFile)
+    {
+        Resolver resolver = jFile.getResolver();
+        DeclMatcher declMatcher = new DeclMatcher("x");
+        JavaClass[] classes = declMatcher.getClassesForResolver(resolver);
+        for (JavaClass cls : classes)
+            cls.getDeclaredMethods();
+    }
 }
