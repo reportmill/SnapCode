@@ -90,6 +90,10 @@ public class JavaPage extends WebPage implements WebFile.Updater {
 
         // Register for enter action
         addKeyActionFilter("EnterAction", "Shortcut+ENTER");
+
+        // If not java file, hide SnapCodeButton (jepl file)
+        if (!javaFile.getType().equals("java"))
+            _javaTextPane.setViewVisible("SnapCodeButton", false);
     }
 
     /**
