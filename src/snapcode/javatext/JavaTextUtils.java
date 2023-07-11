@@ -38,6 +38,7 @@ public class JavaTextUtils {
     public static Image MethodImage = Image.getImageForClassResource(JavaTextUtils.class, "PublicMethod.png");
     public static Image ClassImage = Image.getImageForClassResource(JavaTextUtils.class, "PublicClass.png");
     public static Image PackageImage = Image.getImageForClassResource(JavaTextUtils.class, "Package.png");
+    public static Image WordImage = Image.getImageForClassResource(JavaTextUtils.class, "Breakpoint.png");
     public static Image CodeImage = Image.getImageForClassResource(JavaTextUtils.class, "Code.png");
     public static Image DefaultImage;
 
@@ -52,6 +53,7 @@ public class JavaTextUtils {
             case Method: return MethodImage;
             case Class: return ClassImage;
             case Package: return PackageImage;
+            case Word: return WordImage;
             default:
                 if (DefaultImage == null)
                     DefaultImage = Image.getImageForSize(16, 16, true);
