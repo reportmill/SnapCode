@@ -63,7 +63,7 @@ class DeclCompare implements Comparator<JavaDecl> {
 
         // If literal prefix match (case sensitive), add bonus
         if (_literal && declName.startsWith(_prefix))
-            rating += 2;
+            rating += 5;
 
         // Handle Vars, Fields, Methods and Constructors: Add bonus
         if (aDecl instanceof JavaMember || aDecl instanceof JavaLocalVar) {
