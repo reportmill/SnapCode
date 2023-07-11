@@ -5,6 +5,8 @@ package javakit.resolver;
 import javakit.parse.JClassDecl;
 import javakit.parse.JFile;
 import snap.util.ListUtils;
+import snap.util.SnapUtils;
+
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -94,6 +96,10 @@ public class JavaClass extends JavaType {
         _enum = aClass.isEnum();
         _interface = aClass.isInterface();
         _primitive = aClass.isPrimitive();
+
+        // Work around WebVM issue
+        if (_primitive && SnapUtils.isWebVM)
+            _mods = 1041;
 
         // Set EvalType to this
         _evalType = this;
