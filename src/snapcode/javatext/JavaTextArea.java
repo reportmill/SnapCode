@@ -309,28 +309,12 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
-     * Returns completions for current text selection and selected node.
+     * Returns completions for current text selection.
      */
     public JavaDecl[] getCompletionsAtCursor()
     {
-        // If selection not empty, just return
-        if (!isSelEmpty())
-            return null;
-
-        // If selection not at end of SelNode, just return
-        int selStart = getSelStart();
-        JNode selNode = getSelNode();
-        int nodeEnd = selNode.getEndCharIndex();
-        if (selStart != nodeEnd) {
-
-            // If previous char is dot, create empty id expression (inside dot expr) to get all scope expression completions
-            selNode = getPhantomIdExprForDot();
-            if (selNode == null)
-                return null;
-        }
-
-        // If not id expression, just return
-        JExprId idExpr = selNode instanceof JExprId ? (JExprId) selNode : null;
+        // Get id expression at cursor (just return if none)
+        JExprId idExpr = getIdExprAtCursor();
         if (idExpr == null)
             return null;
 
@@ -339,11 +323,35 @@ public class JavaTextArea extends TextArea {
         JavaDecl[] completions = javaCompleter.getCompletionsForId(idExpr);
         return completions;
     }
+    /**
+     * Returns the id expression at cursor, if available.
+     */
+    private JExprId getIdExprAtCursor()
+    {
+        // If selection not empty, just return
+        if (!isSelEmpty())
+            return null;
+
+        // If dot at cursor, get dot expression
+        JExprId phantomIdExprForDot = getPhantomIdExprForDot();
+        if (phantomIdExprForDot != null)
+            return phantomIdExprForDot;
+
+        // If selection not at end of SelNode, just return
+        int selStart = getSelStart();
+        JNode selNode = getSelNode();
+        int nodeEnd = selNode.getEndCharIndex();
+        if (selStart != nodeEnd)
+                return null;
+
+        // Return selNode if id
+        return selNode instanceof JExprId ? (JExprId) selNode : null;
+    }
 
     /**
      * If previous character is a dot proceeded by id, creates and returns an empty id expression (with parent dot).
      */
-    private JNode getPhantomIdExprForDot()
+    private JExprId getPhantomIdExprForDot()
     {
         // If previous char not dot, just return
         TextDoc textDoc = getTextDoc();
