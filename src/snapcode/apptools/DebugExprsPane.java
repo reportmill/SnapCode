@@ -95,13 +95,13 @@ public class DebugExprsPane extends WorkspaceTool {
         }
 
         // Update ExprText
-        DebugVarsPane.VarTreeItem vitem = _varTree.getSelItem();
-        setViewText("ExprText", vitem instanceof ExprTreeItem ? vitem.getName() : null);
-        setViewEnabled("ExprText", vitem instanceof ExprTreeItem);
+        DebugVarsPane.VarTreeItem varTreeItem = _varTree.getSelItem();
+        setViewText("ExprText", varTreeItem instanceof ExprTreeItem ? varTreeItem.getName() : null);
+        setViewEnabled("ExprText", varTreeItem instanceof ExprTreeItem);
 
         // Update VarText
-        if (vitem != null && getDebugApp() != null && getDebugApp().isPaused()) {
-            String pvalue = vitem.getValueToString();
+        if (varTreeItem != null && getDebugApp() != null && getDebugApp().isPaused()) {
+            String pvalue = varTreeItem.getValueToString();
             _varText.setText(pvalue != null ? pvalue : "(null)");
         } else _varText.setText("");
     }

@@ -249,7 +249,7 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
         }
 
         // Update proc items and reset UI
-        _procTree.updateItems(aProc);
+        _procTree.updateItem(aProc);
         resetLater();
         _workspacePane.resetLater();
 
