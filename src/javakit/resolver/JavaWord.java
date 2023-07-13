@@ -29,6 +29,7 @@ public class JavaWord extends JavaDecl {
     public static final JavaWord Implements = new JavaWord("implements", WordType.Declaration);
     public static final JavaWord Import = new JavaWord("import", WordType.Declaration);
     public static final JavaWord Package = new JavaWord("package", WordType.Declaration);
+    public static final JavaWord Var = new JavaWord("var", WordType.Declaration);
 
     // Statement words
     public static final JavaWord Assert = new JavaWord("assert", WordType.Statement);
@@ -54,7 +55,7 @@ public class JavaWord extends JavaDecl {
     // All
     public static final JavaWord[] ALL = {
             Public, Private, Protected, Abstract, Default, Final, Static,
-            Class, Interface, Enum, Extends, Implements, Import, Package,
+            Class, Interface, Enum, Extends, Implements, Import, Package, Var,
             Assert, Break, Case, Catch, Continue, Do, Else, Finally, For, If, Instanceof, New, Return,
             Switch, Synchronized, Throw, Throws, Try, While
     };
@@ -99,6 +100,8 @@ public class JavaWord extends JavaDecl {
         String superStr = super.getReplaceString();
         if (wantsParens())
             superStr += " ()";
+        else if (wantsTrailingSpaceChar())
+            superStr += ' ';
         return superStr;
     }
 
@@ -110,6 +113,18 @@ public class JavaWord extends JavaDecl {
         return _wordType == WordType.Statement && ArrayUtils.containsId(WANTS_PARENS, this);
     }
 
+    /**
+     * Returns whether word wants a trailing space char.
+     */
+    private boolean wantsTrailingSpaceChar()
+    {
+        if (_wordType == WordType.Modifier || _wordType == WordType.Declaration)
+            return true;
+        return ArrayUtils.containsId(WANTS_TRAILING_SPACE, this);
+    }
+
     // Array of JavaWords that want parens
-    private static final JavaWord[] WANTS_PARENS = { If, For, While, Assert, Switch };
+    private static final JavaWord[] WANTS_PARENS = { If, For, While, Assert, Switch, Catch };
+    private static final JavaWord[] WANTS_TRAILING_SPACE = { Do, Assert, Case, Else, Finally, Instanceof, New, Return,
+            Synchronized, Throw, Throws, Try  };
 }
