@@ -157,8 +157,12 @@ public class JType extends JNode {
         // If already set, just return
         if (_baseDecl != null) return _baseDecl;
 
-        // Handle primitive type
+        // Handle 'var'
         String baseName = getName();
+        if (baseName.equals("var"))
+            return _baseDecl = getDeclForVar();
+
+        // Handle primitive type
         Class<?> primitiveClass = ClassUtils.getPrimitiveClassForName(baseName);
         if (primitiveClass != null)
             return _baseDecl = getJavaClassForClass(primitiveClass);
@@ -205,6 +209,47 @@ public class JType extends JNode {
     }
 
     /**
+     * Override to handle 'var' types.
+     */
+    @Override
+    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
+    {
+        // Handle 'var'
+        String name = anExprId.getName();
+        if (name.equals("var") && anExprId == _baseExpr)
+            return getDeclForVar();
+
+        // Do normal version
+        return super.getDeclForChildExprIdNode(anExprId);
+    }
+
+    /**
+     * Special code for getting 'var' type.
+     */
+    private JavaType getDeclForVar()
+    {
+        // Get parent StmtVarDecl: 'var' is only allowed as statement (can't be field or formal param)
+        JNode parent = getParent();
+        JStmtVarDecl varDeclStmt = parent instanceof JStmtVarDecl ? (JStmtVarDecl) parent : null;
+        if (varDeclStmt == null)
+            return null;
+
+        // Get StmtVarDecl.VarDecl
+        List<JVarDecl> varDecls = varDeclStmt.getVarDecls();
+        JVarDecl varDecl = varDecls.size() > 0 ? varDecls.get(0) : null;
+        if (varDecl == null)
+            return null;
+
+        // Get initializer expression
+        JExpr initializerExpr = varDecl.getInitializer();
+        if (initializerExpr == null)
+            return null;
+
+        // Return InitializerExpr.EvalType
+        return initializerExpr.getEvalType();
+    }
+
+    /**
      * Override to provide errors for this class.
      */
     @Override
@@ -217,6 +262,8 @@ public class JType extends JNode {
         if (typeClass == null) {
             String className = getName();
             String errorString = "Can't resolve type: " + className;
+            if ("var".equals(className))
+                errorString = "Cannot infer type: 'var' on variable without initializer";
             errors = new NodeError[] { new NodeError(this, errorString) };
         }
 
