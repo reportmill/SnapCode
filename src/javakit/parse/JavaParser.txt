@@ -55,7 +55,7 @@ EnumDecl
 
 EnumConstant { Modifiers Identifier Arguments? ClassBody? }
 
-FieldDecl { Type VarDecl ("," | VarDecl)* ";" }
+FieldDecl { Type VarDecl ("," VarDecl)* ";" }
 
 ConstrDecl
 {
