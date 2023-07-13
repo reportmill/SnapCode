@@ -4,6 +4,7 @@
   <RowView Name="RowView" MinHeight="32">
     <Label Margin="0,8,0,8" text="Debug:" />
     <Button Name="DebugButton" PrefWidth="24" PrefHeight="24" Image="Debug.gif" ShowBorder="false" />
+    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Text="–" ShowBorder="false" />
   </RowView>
   <SplitView Name="SplitView" GrowHeight="true" />
 </ColView>

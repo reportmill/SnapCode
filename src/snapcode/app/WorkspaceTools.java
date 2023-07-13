@@ -219,12 +219,23 @@ public class WorkspaceTools {
      */
     public void showTool(WorkspaceTool workspaceTool)
     {
+        ToolTray toolTray = getToolTrayForTool(workspaceTool);
+        if (toolTray != null)
+            toolTray.setSelTool(workspaceTool);
+    }
+
+    /**
+     * Returns the ToolTray for given tool.
+     */
+    public ToolTray getToolTrayForTool(WorkspaceTool workspaceTool)
+    {
         if (ArrayUtils.containsId(_leftTray._trayTools, workspaceTool))
-            _leftTray.setSelTool(workspaceTool);
-        else if (ArrayUtils.containsId(_rightTray._trayTools, workspaceTool))
-            _rightTray.setSelTool(workspaceTool);
-        else if (ArrayUtils.containsId(_bottomTray._trayTools, workspaceTool))
-            _bottomTray.setSelTool(workspaceTool);
+            return _leftTray;
+        if (ArrayUtils.containsId(_rightTray._trayTools, workspaceTool))
+            return _rightTray;
+        if (ArrayUtils.containsId(_bottomTray._trayTools, workspaceTool))
+            return _bottomTray;
+        return null;
     }
 
     /**

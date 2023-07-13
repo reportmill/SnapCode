@@ -107,6 +107,9 @@ public class ProblemsTool extends WorkspaceTool {
                 getBrowser().setURLString(urls);
             }
         }
+
+        // Do normal version
+        else super.respondUI(anEvent);
     }
 
     /**

@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.view.ViewEvent;
 import snapcode.project.Project;
 import snapcode.project.Workspace;
 import snap.view.ViewOwner;
@@ -111,4 +112,17 @@ public class WorkspaceTool extends ViewOwner {
      * Returns the title.
      */
     public String getTitle()  { return "Unknown"; }
+
+    /**
+     * Respond UI.
+     */
+    @Override
+    protected void respondUI(ViewEvent anEvent)
+    {
+        if (anEvent.equals("HideButton")) {
+            ToolTray toolTray = _workspaceTools.getToolTrayForTool(this);
+            if (toolTray != null)
+                toolTray.setSelTool(null);
+        }
+    }
 }

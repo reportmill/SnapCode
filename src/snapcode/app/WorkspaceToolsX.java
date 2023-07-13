@@ -52,7 +52,8 @@ public class WorkspaceToolsX extends WorkspaceTools {
                 filesTool, fileTreeTool,
                 problemsTool, breakpointsTool,
                 searchTool, evalTool, completerTool,
-                debugTool, runConsole, runConfigsTool,
+                debugTool, debugTool.getProcPane(),
+                runConsole, runConfigsTool,
                 httpServerTool
         };
 

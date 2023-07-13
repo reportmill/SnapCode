@@ -231,6 +231,9 @@ public class DebugTool extends WorkspaceTool {
         // Handle DebugButton
         if (anEvent.equals("DebugButton"))
             runDefaultConfig(true);
+
+        // Do normal version
+        else super.respondUI(anEvent);
     }
 
     /**
