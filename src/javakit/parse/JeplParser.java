@@ -2,8 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import javakit.resolver.JavaType;
-import javakit.resolver.Resolver;
 import snap.parse.*;
 
 /**
@@ -237,25 +235,15 @@ public class JeplParser extends JavaParser {
         JExpr initializer = assignExpr.getValueExpr();
         varDecl.setInitializer(initializer);
 
-        // Create VarDeclStatement and add VarDecl
+        // Create VarDecl statement with 'var' type and add VarDecl
         JStmtVarDecl varDeclStmt = new JStmtVarDecl();
+        JType varType = JType.createTypeForNameAndToken("var", exprStmt.getStartToken());
+        varDeclStmt.setType(varType);
         varDeclStmt.addVarDecl(varDecl);
 
         // Swap VarDecl statement in for expr statement
         JStmtBlock blockStmt = exprStmt.getParent(JStmtBlock.class);
         int index = blockStmt.removeStatement(exprStmt);
         blockStmt.addStatement(varDeclStmt, index);
-
-        // Get initializer type
-        JavaType initType = initializer.getEvalType();
-        if (initType == null) {
-            System.out.println("JeplTextDocUtils.fixIncompleteVarDecl: Failed to get init type for " + initializer.getString());
-            Resolver resolver = exprStmt.getResolver();
-            initType = resolver.getJavaClassForClass(Object.class);
-        }
-
-        // Create bogus type from initializer
-        JType type = JType.createTypeForTypeAndToken(initType, assignTo.getStartToken());
-        varDecl.setType(type);
     }
 }
