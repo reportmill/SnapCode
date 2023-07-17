@@ -3,7 +3,6 @@ import java.util.*;
 import javakit.resolver.JavaClassUtils;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
-import javakit.resolver.JavaType;
 import snap.util.ListUtils;
 
 /**
@@ -54,16 +53,16 @@ public class JStmtConstrCall extends JStmt {
     }
 
     /**
-     * Returns the arg eval types.
+     * Returns the arg eval classes.
      */
-    public JavaType[] getArgEvalTypes()
+    public JavaClass[] getArgClasses()
     {
         List<JExpr> args = getArgs();
-        JavaType[] argTypes = new JavaType[args.size()];
+        JavaClass[] argTypes = new JavaClass[args.size()];
 
         for (int i = 0, iMax = args.size(); i < iMax; i++) {
             JExpr arg = args.get(i);
-            argTypes[i] = arg != null ? arg.getEvalType() : null;
+            argTypes[i] = arg != null ? arg.getEvalClass() : null;
         }
 
         return argTypes;
@@ -79,7 +78,7 @@ public class JStmtConstrCall extends JStmt {
         JavaClass enclosingClass = enclosingClassDecl.getDecl();
         if (enclosingClass == null)
             return null;
-        JavaType[] argTypes = getArgEvalTypes();
+        JavaClass[] argClasses = getArgClasses();
 
         // If Super, switch to super class
         List<JExprId> exprIds = getIds();
@@ -88,7 +87,7 @@ public class JStmtConstrCall extends JStmt {
             enclosingClass = enclosingClass.getSuperClass();
 
         // Get compatible constructor for arg types and return
-        JavaDecl constr = JavaClassUtils.getCompatibleConstructor(enclosingClass, argTypes);
+        JavaDecl constr = JavaClassUtils.getCompatibleConstructor(enclosingClass, argClasses);
         if (constr != null)
             return constr;
 

@@ -11,9 +11,9 @@ import java.util.*;
 public class JavaClassUtils {
 
     /**
-     * Returns a compatible constructor for given name and param types.
+     * Returns a compatible constructor for given param types.
      */
-    public static JavaConstructor getCompatibleConstructor(JavaClass aClass, JavaType[] theTypes)
+    public static JavaConstructor getCompatibleConstructor(JavaClass aClass, JavaClass[] paramTypes)
     {
         List<JavaConstructor> declaredConstructors = aClass.getDeclaredConstructors();
         JavaConstructor compatibleConstructor = null;
@@ -21,7 +21,7 @@ public class JavaClassUtils {
 
         // Iterate over constructors to find highest rating
         for (JavaConstructor constr : declaredConstructors) {
-            int rtg = JavaExecutable.getMatchRatingForTypes(constr, theTypes);
+            int rtg = JavaExecutable.getMatchRatingForArgClasses(constr, paramTypes);
             if (rtg > rating) {
                 compatibleConstructor = constr;
                 rating = rtg;
@@ -35,7 +35,7 @@ public class JavaClassUtils {
     /**
      * Returns a compatible method for given name and param types.
      */
-    public static JavaMethod getCompatibleMethod(JavaClass aClass, String aName, JavaType[] theTypes)
+    public static JavaMethod getCompatibleMethod(JavaClass aClass, String aName, JavaClass[] paramTypes)
     {
         List<JavaMethod> declaredMethods = aClass.getDeclaredMethods();
         JavaMethod compatibleMethod = null;
@@ -44,7 +44,7 @@ public class JavaClassUtils {
         // Iterate over methods to find highest rating
         for (JavaMethod method : declaredMethods) {
             if (method.getName().equals(aName)) {
-                int rtg = JavaExecutable.getMatchRatingForTypes(method, theTypes);
+                int rtg = JavaExecutable.getMatchRatingForArgClasses(method, paramTypes);
                 if (rtg > rating) {
                     compatibleMethod = method;
                     rating = rtg;
@@ -59,11 +59,11 @@ public class JavaClassUtils {
     /**
      * Returns a compatible method for given name and param types.
      */
-    public static JavaMethod getCompatibleMethodAll(JavaClass aClass, String aName, JavaType[] theTypes)
+    public static JavaMethod getCompatibleMethodAll(JavaClass aClass, String aName, JavaClass[] paramTypes)
     {
         // Search this class and superclasses for compatible method
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
-            JavaMethod compatibleMethod = getCompatibleMethod(cls, aName, theTypes);
+            JavaMethod compatibleMethod = getCompatibleMethod(cls, aName, paramTypes);
             if (compatibleMethod != null)
                 return compatibleMethod;
         }
@@ -72,7 +72,7 @@ public class JavaClassUtils {
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
             JavaClass[] interfaces = cls.getInterfaces();
             for (JavaClass infc : interfaces) {
-                JavaMethod compatibleMethod = getCompatibleMethodAll(infc, aName, theTypes);
+                JavaMethod compatibleMethod = getCompatibleMethodAll(infc, aName, paramTypes);
                 if (compatibleMethod != null)
                     return compatibleMethod;
             }
@@ -81,7 +81,7 @@ public class JavaClassUtils {
         // If this class is Interface, check Object
         if (aClass.isInterface()) {
             JavaClass objClass = aClass.getJavaClassForClass(Object.class);
-            return getCompatibleMethod(objClass, aName, theTypes);
+            return getCompatibleMethod(objClass, aName, paramTypes);
         }
 
         // Return not found
@@ -91,11 +91,11 @@ public class JavaClassUtils {
     /**
      * Returns a compatible method for given name and param types.
      */
-    public static List<JavaMethod> getCompatibleMethodsAll(JavaClass aClass, String aName, JavaType[] theTypes)
+    public static List<JavaMethod> getCompatibleMethodsAll(JavaClass aClass, String aName, JavaClass[] paramTypes)
     {
         // Find compatible methods
         List<JavaMethod> compatibleMethods = new ArrayList<>();
-        findCompatibleMethodsAll(aClass, aName, theTypes, compatibleMethods);
+        findCompatibleMethodsAll(aClass, aName, paramTypes, compatibleMethods);
 
         // Remove supers
         for (int i = 0; i < compatibleMethods.size(); i++) {
@@ -111,38 +111,38 @@ public class JavaClassUtils {
     /**
      * Returns a compatible method for given name and param types.
      */
-    private static void findCompatibleMethodsAll(JavaClass aClass, String aName, JavaType[] theTypes, List<JavaMethod> compatibleMethods)
+    private static void findCompatibleMethodsAll(JavaClass aClass, String aName, JavaClass[] paramTypes, List<JavaMethod> compatibleMethods)
     {
         // Search this class and superclasses for compatible methods
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
-            findCompatibleMethods(cls, aName, theTypes, compatibleMethods);
+            findCompatibleMethods(cls, aName, paramTypes, compatibleMethods);
         }
 
         // Search this class and superclasses for compatible interface
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
             JavaClass[] interfaces = cls.getInterfaces();
             for (JavaClass infc : interfaces) {
-                findCompatibleMethodsAll(infc, aName, theTypes, compatibleMethods);
+                findCompatibleMethodsAll(infc, aName, paramTypes, compatibleMethods);
             }
         }
 
         // If this class is Interface, check Object
         if (aClass.isInterface()) {
             JavaClass objDecl = aClass.getJavaClassForClass(Object.class);
-            findCompatibleMethods(objDecl, aName, theTypes, compatibleMethods);
+            findCompatibleMethods(objDecl, aName, paramTypes, compatibleMethods);
         }
     }
 
     /**
      * Find the compatible methods for given class, name and param types.
      */
-    private static void findCompatibleMethods(JavaClass aClass, String aName, JavaType[] theTypes, List<JavaMethod> compatibleMethods)
+    private static void findCompatibleMethods(JavaClass aClass, String aName, JavaClass[] paramTypes, List<JavaMethod> compatibleMethods)
     {
         // Iterate over declared methods to find compatible methods (matching name and args)
         List<JavaMethod> declaredMethods = aClass.getDeclaredMethods();
         for (JavaMethod method : declaredMethods) {
             if (method.getName().equals(aName)) {
-                int rating = JavaExecutable.getMatchRatingForTypes(method, theTypes);
+                int rating = JavaExecutable.getMatchRatingForArgClasses(method, paramTypes);
                 if (rating > 0)
                     ListUtils.addUniqueId(compatibleMethods, method);
             }

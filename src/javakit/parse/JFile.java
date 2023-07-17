@@ -219,7 +219,7 @@ public class JFile extends JNode {
             return javaClass;
 
         // See if it's a known static import class member
-        JavaDecl field = getStaticImportMemberForNameAndParams(name, null);
+        JavaDecl field = getStaticImportMemberForNameAndParamTypes(name, null);
         if (field != null)
             return field;
 
@@ -247,7 +247,7 @@ public class JFile extends JNode {
             return javaClass;
 
         // See if it's a known static import class member
-        JavaDecl field = getStaticImportMemberForNameAndParams(name, null);
+        JavaDecl field = getStaticImportMemberForNameAndParamTypes(name, null);
         if (field != null)
             return field;
 
@@ -333,12 +333,12 @@ public class JFile extends JNode {
     /**
      * Returns a Class name for given name referenced in file.
      */
-    public JavaMember getStaticImportMemberForNameAndParams(String aName, JavaType[] theParams)
+    public JavaMember getStaticImportMemberForNameAndParamTypes(String aName, JavaClass[] paramTypes)
     {
         // If static import for name, look for member there
-        JImportDecl importDecl = getStaticImportForNameAndParams(aName, theParams);
+        JImportDecl importDecl = getStaticImportForNameAndParamTypes(aName, paramTypes);
         if (importDecl != null)
-            return importDecl.getImportMemberForNameAndParams(aName, theParams);
+            return importDecl.getImportMemberForNameAndParamTypes(aName, paramTypes);
 
         // Return not found
         return null;
@@ -347,7 +347,7 @@ public class JFile extends JNode {
     /**
      * Returns an import that can be used to resolve the given field/method/class name (optional params for method).
      */
-    private JImportDecl getStaticImportForNameAndParams(String aName, JavaType[] theParams)
+    private JImportDecl getStaticImportForNameAndParamTypes(String aName, JavaClass[] paramTypes)
     {
         // Get static imports (e.g.: "import static xxx.*")
         JImportDecl[] staticImportDecls = getStaticImportDecls();
@@ -355,7 +355,7 @@ public class JFile extends JNode {
         // Iterate over static imports to see if any can resolve name from static field/method/class
         for (int i = staticImportDecls.length - 1; i >= 0; i--) {
             JImportDecl importDecl = staticImportDecls[i];
-            JavaMember member = importDecl.getImportMemberForNameAndParams(aName, theParams);
+            JavaMember member = importDecl.getImportMemberForNameAndParamTypes(aName, paramTypes);
             if (member != null) {
                 if (importDecl.isInclusive())
                     importDecl.addFoundClassName(aName);

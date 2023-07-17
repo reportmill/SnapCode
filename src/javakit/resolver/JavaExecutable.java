@@ -219,16 +219,16 @@ public class JavaExecutable extends JavaMember {
     /**
      * Returns a rating of a method for given possible arg classes.
      */
-    public static int getMatchRatingForTypes(JavaExecutable aMethod, JavaType[] theTypes)
+    public static int getMatchRatingForArgClasses(JavaExecutable aMethod, JavaClass[] argClasses)
     {
         // Handle VarArg methods special
         if (aMethod.isVarArgs())
-            return getMatchRatingForTypesWidthVarArgs(aMethod, theTypes);
+            return getMatchRatingForArgClassesWithVarArgs(aMethod, argClasses);
 
         // Get method param types and length (just return if given arg count doesn't match)
         JavaType[] paramTypes = aMethod.getParamTypes();
         int paramCount = paramTypes.length, rating = 0;
-        if (theTypes.length != paramCount)
+        if (argClasses.length != paramCount)
             return 0;
         if (paramCount == 0)
             return 1000;
@@ -237,8 +237,7 @@ public class JavaExecutable extends JavaMember {
         // This is a punt - need to groc the docs on this: https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html
         for (int i = 0, iMax = paramCount; i < iMax; i++) {
             JavaClass paramClass = paramTypes[i].getEvalClass();
-            JavaType argType = theTypes[i];
-            JavaClass argClass = argType != null ? argType.getEvalClass() : null;
+            JavaClass argClass = argClasses[i];
             if (!paramClass.isAssignableFrom(argClass))
                 return 0;
             rating += paramClass == argClass ? 1000 : argClass != null ? 100 : 10;
@@ -251,24 +250,23 @@ public class JavaExecutable extends JavaMember {
     /**
      * Returns a rating of a method for given possible arg classes.
      */
-    private static int getMatchRatingForTypesWidthVarArgs(JavaExecutable aMethod, JavaType[] theTypes)
+    private static int getMatchRatingForArgClassesWithVarArgs(JavaExecutable aMethod, JavaClass[] argClasses)
     {
         // Get method param types and length (just return if given arg count is insufficient)
         JavaType[] paramTypes = aMethod.getParamTypes();
         int argsLen = paramTypes.length;
         int varArgIndex = argsLen - 1;
         int rating = 0;
-        if (theTypes.length < varArgIndex)
+        if (argClasses.length < varArgIndex)
             return 0;
-        if (argsLen == 1 && theTypes.length == 0)
+        if (argsLen == 1 && argClasses.length == 0)
             return 10;
 
         // Iterate over classes and add score based on matching classes
         // This is a punt - need to groc the docs on this: https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html
         for (int i = 0, iMax = varArgIndex; i < iMax; i++) {
             JavaClass paramClass = paramTypes[i].getEvalClass();
-            JavaType argType = theTypes[i];
-            JavaClass argClass = argType != null? argType.getEvalClass() : null;
+            JavaClass argClass = argClasses[i];
             if (!paramClass.isAssignableFrom(argClass))
                 return 0;
             rating += paramClass == argClass ? 1000 : argClass != null ? 100 : 10;
@@ -280,15 +278,13 @@ public class JavaExecutable extends JavaMember {
         JavaClass varArgClass = varArgArrayClass.getComponentType();
 
         // If only one arg and it is of array type, add 1000
-        JavaType argType = theTypes.length == argsLen ? theTypes[varArgIndex] : null;
-        JavaClass argClass = argType != null ? argType.getEvalClass() : null;
+        JavaClass argClass = argClasses.length == argsLen ? argClasses[varArgIndex] : null;
         if (argClass != null && argClass.isArray() && varArgArrayClass.isAssignableFrom(argClass))
             rating += 1000;
 
         // If any var args match, add 1000
-        else for (int i = varArgIndex; i < theTypes.length; i++) {
-            argType = theTypes[i];
-            argClass = argType != null ? argType.getEvalClass() : null;
+        else for (int i = varArgIndex; i < argClasses.length; i++) {
+            argClass = argClasses[i];
             if (varArgClass.isAssignableFrom(argClass))
                 rating += 1000;
         }

@@ -64,23 +64,23 @@ public class JExprAlloc extends JExpr {
     }
 
     /**
-     * Returns the arg eval types.
+     * Returns the arg eval classes.
      */
-    public JavaType[] getArgEvalTypes()
+    public JavaClass[] getArgClasses()
     {
         List<JExpr> args = getArgs();
-        JavaType[] argTypes = new JavaType[args.size()];
+        JavaClass[] argClasses = new JavaClass[args.size()];
 
         // Iterate over args and map to eval types
         for (int i = 0, iMax = args.size(); i < iMax; i++) {
             JExpr arg = args.get(i);
             if (arg instanceof JExprLambda && arg._decl == null)
                 arg = null;
-            argTypes[i] = arg != null ? arg.getEvalType() : null;
+            argClasses[i] = arg != null ? arg.getEvalClass() : null;
         }
 
         // Return
-        return argTypes;
+        return argClasses;
     }
 
     /**
@@ -141,16 +141,16 @@ public class JExprAlloc extends JExpr {
 
         // Get class decl and constructor arg types
         JavaClass javaClass = javaType.getEvalClass();
-        JavaType[] argTypes = getArgEvalTypes();
+        JavaClass[] argClasses = getArgClasses();
 
         // If inner class and not static, add implied class type to arg types array
         if (javaClass.isMemberClass() && !javaClass.isStatic()) {
             JavaClass parentClass = javaClass.getDeclaringClass();
-            argTypes = ArrayUtils.add(argTypes, parentClass, 0);
+            argClasses = ArrayUtils.add(argClasses, parentClass, 0);
         }
 
         // Get scope node class type and search for compatible method for name and arg types
-        JavaConstructor constructor = JavaClassUtils.getCompatibleConstructor(javaClass, argTypes);
+        JavaConstructor constructor = JavaClassUtils.getCompatibleConstructor(javaClass, argClasses);
         if (constructor != null)
             return constructor;
 
@@ -212,13 +212,13 @@ public class JExprAlloc extends JExpr {
      */
     private String getArgTypesString()
     {
-        // Get arg types
-        JavaType[] argTypes = getArgEvalTypes();
-        if (argTypes.length == 0)
+        // Get arg classes
+        JavaClass[] argClasses = getArgClasses();
+        if (argClasses.length == 0)
             return "()";
 
         // Get arg type string and join by comma
-        String[] argTypeStrings = ArrayUtils.map(argTypes, type -> type != null ? type.getSimpleName() : "null", String.class);
+        String[] argTypeStrings = ArrayUtils.map(argClasses, type -> type != null ? type.getSimpleName() : "null", String.class);
         String argTypeString = StringUtils.join(argTypeStrings, ",");
 
         // Return in parens

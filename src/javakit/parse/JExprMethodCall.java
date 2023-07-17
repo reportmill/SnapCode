@@ -131,17 +131,17 @@ public class JExprMethodCall extends JExpr implements WithId {
         String name = getName();
         List<JExpr> args = getArgs();
         int argCount = args.size();
-        JavaType[] argTypes = new JavaType[argCount];
+        JavaClass[] argClasses = new JavaClass[argCount];
         for (int i = 0; i < argCount; i++) {
             JExpr arg = args.get(i);
             if (arg instanceof JExprLambda)
                 return getMethodForLambdaArgs();
-            JavaType argType = arg != null ? arg.getEvalType() : null;
-            argTypes[i] = argType;
+            JavaClass argClass = arg != null ? arg.getEvalClass() : null;
+            argClasses[i] = argClass;
         }
 
         // Search for compatible method for name and arg types
-        JavaMethod method = JavaClassUtils.getCompatibleMethodAll(scopeClass, name, argTypes);
+        JavaMethod method = JavaClassUtils.getCompatibleMethodAll(scopeClass, name, argClasses);
         if (method != null)
             return method;
 
@@ -162,14 +162,14 @@ public class JExprMethodCall extends JExpr implements WithId {
                 break;
 
             // If method found, return it
-            method = JavaClassUtils.getCompatibleMethodAll(scopeClass, name, argTypes);
+            method = JavaClassUtils.getCompatibleMethodAll(scopeClass, name, argClasses);
             if (method != null)
                 return method;
         }
 
         // See if method is from static import
         JFile jfile = getFile();
-        JavaMember importClassMember = jfile.getStaticImportMemberForNameAndParams(name, argTypes);
+        JavaMember importClassMember = jfile.getStaticImportMemberForNameAndParamTypes(name, argClasses);
         if (importClassMember instanceof JavaMethod)
             return (JavaMethod) importClassMember;
 
@@ -225,29 +225,29 @@ public class JExprMethodCall extends JExpr implements WithId {
         String name = getName();
         List<JExpr> args = getArgs();
         int argCount = args.size();
-        JavaType[] argTypes = new JavaType[argCount];
+        JavaClass[] argClasses = new JavaClass[argCount];
         for (int i = 0; i < argCount; i++) {
             JExpr arg = args.get(i);
-            JavaType argType = arg instanceof JExprLambda ? null : arg.getEvalType();
-            argTypes[i] = argType;
+            JavaClass argType = arg instanceof JExprLambda ? null : arg.getEvalClass();
+            argClasses[i] = argType;
         }
 
         // Get scope node class type and search for compatible method for name and arg types
-        List<JavaMethod> compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argTypes);
+        List<JavaMethod> compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argClasses);
         if (compatibleMethods.size() > 0)
             return compatibleMethods;
 
         // If scope node class type is member class and not static, go up parent classes
         while (scopeClass.isMemberClass() && !scopeClass.isStatic()) {
             scopeClass = scopeClass.getDeclaringClass();
-            compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argTypes);
+            compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argClasses);
             if (compatibleMethods.size() > 0)
                 return compatibleMethods;
         }
 
         // See if method is from static import -
         JFile jfile = getFile();
-        JavaMember importClassMember = jfile.getStaticImportMemberForNameAndParams(name, argTypes);
+        JavaMember importClassMember = jfile.getStaticImportMemberForNameAndParamTypes(name, argClasses);
         if (importClassMember instanceof JavaMethod)
             return Collections.singletonList((JavaMethod) importClassMember);
 

@@ -223,18 +223,18 @@ public class JImportDecl extends JNode {
     /**
      * Returns the member for given name and parameter types (if method) for static import.
      */
-    public JavaMember getImportMemberForNameAndParams(String aName, JavaType[] theParams)
+    public JavaMember getImportMemberForNameAndParamTypes(String aName, JavaClass[] paramTypes)
     {
         JavaClass cls = (JavaClass) getEvalType();
         if (cls == null)
             return null;
 
         // If no params, try for field
-        if (theParams == null)
+        if (paramTypes == null)
             return cls.getFieldForName(aName);
 
         // Otherwise, look for method
-        return JavaClassUtils.getCompatibleMethodAll(cls, aName, theParams);
+        return JavaClassUtils.getCompatibleMethodAll(cls, aName, paramTypes);
     }
 
     /**
