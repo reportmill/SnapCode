@@ -74,9 +74,12 @@ public abstract class JExpr extends JNode {
             WithId methodCallOrRef = (WithId) expr2;
             if (expr1 instanceof JExprDot) {
                 JExprDot dotExpr = (JExprDot) expr1;
-                JExprId idExpr = (JExprId) dotExpr.getExpr();
-                dotExpr.setExpr(expr2);
-                methodCallOrRef.setId(idExpr);
+                JExpr dotExprExpr = dotExpr.getExpr();
+                if (dotExprExpr instanceof JExprId) {
+                    JExprId idExpr = (JExprId) dotExprExpr;
+                    dotExpr.setExpr(expr2);
+                    methodCallOrRef.setId(idExpr);
+                }
                 return expr1;
             }
 

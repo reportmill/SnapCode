@@ -6,10 +6,9 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleUnaryOperator;
+import java.util.function.Function;
 import javakit.parse.*;
-
 import static javakit.runner.JSExprEvalUtils.*;
-
 import javakit.resolver.*;
 import snap.props.PropObject;
 import snap.util.*;
@@ -779,7 +778,18 @@ public class JSExprEval {
             return (Runnable) () -> {
                 _varStack.pushStackFrame();
                 try { evalExpr(anOR, contentExpr); }
-                catch (Exception e2) { throw new RuntimeException(e2); }
+                catch (Exception e) { throw new RuntimeException(e); }
+                finally { _varStack.popStackFrame(); }
+            };
+        }
+
+        // Handle Function
+        if (realClass == Function.class) {
+            return (Function) a -> {
+                _varStack.pushStackFrame();
+                _varStack.setStackValueForNode(param0, a);
+                try { return evalExpr(anOR, contentExpr); }
+                catch (Exception e) { throw new RuntimeException(e); }
                 finally { _varStack.popStackFrame(); }
             };
         }
