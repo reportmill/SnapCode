@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.resolver;
+import snap.util.ArrayUtils;
 import snap.util.StringUtils;
 import java.lang.reflect.*;
 
@@ -22,17 +23,17 @@ public class JavaExecutable extends JavaMember {
     /**
      * Constructor.
      */
-    public JavaExecutable(Resolver aResolver, DeclType aType, JavaClass aDeclaringClass, Member aMember)
+    public JavaExecutable(Resolver aResolver, DeclType aType, JavaClass aDeclaringClass, Executable anExecutable)
     {
-        super(aResolver, aType, aDeclaringClass, aMember);
-        if (aMember == null) return;
+        super(aResolver, aType, aDeclaringClass, anExecutable);
+        if (anExecutable == null)
+            return;
 
         // Get VarArgs
-        _varArgs = isVarArgs(aMember);
+        _varArgs = anExecutable.isVarArgs();
 
         // Get TypeVariables
-        Executable executable = (Executable) aMember;
-        TypeVariable<?>[] typeVars = executable.getTypeParameters();
+        TypeVariable<?>[] typeVars = anExecutable.getTypeParameters();
         _typeVars = new JavaTypeVariable[typeVars.length];
         for (int i = 0, iMax = typeVars.length; i < iMax; i++)
             _typeVars[i] = new JavaTypeVariable(_resolver, this, typeVars[i]);
@@ -101,30 +102,7 @@ public class JavaExecutable extends JavaMember {
     /**
      * Returns whether Method/Constructor is VarArgs type.
      */
-    public boolean isVarArgs()
-    {
-        return _varArgs;
-    }
-
-    /**
-     * Returns the parameter type names.
-     */
-    public String[] getParamTypeNames()
-    {
-        String[] names = new String[_paramTypes.length];
-        for (int i = 0; i < names.length; i++) names[i] = _paramTypes[i].getName();
-        return names;
-    }
-
-    /**
-     * Returns the parameter type simple names.
-     */
-    public String[] getParamTypeSimpleNames()
-    {
-        String[] names = new String[_paramTypes.length];
-        for (int i = 0; i < names.length; i++) names[i] = _paramTypes[i].getSimpleName();
-        return names;
-    }
+    public boolean isVarArgs()  { return _varArgs; }
 
     /**
      * Returns whether given declaration collides with this declaration.
@@ -209,11 +187,19 @@ public class JavaExecutable extends JavaMember {
             memberName = className + '.' + getName();
 
         // Get parameter names
-        String[] paramTypeNames = getParamTypeNames();
+        String[] paramTypeNames = ArrayUtils.map(_paramTypes, paramType -> paramType.getName(), String.class);
         String paramTypeNamesStr = StringUtils.join(paramTypeNames, ",");
 
         // Return ClassName(param1, ...) or ClassName.MethodName(param1, ...)
         return memberName + '(' + paramTypeNamesStr + ')';
+    }
+
+    /**
+     * Returns the parameter type simple names.
+     */
+    private String[] getParamTypeSimpleNames()
+    {
+        return ArrayUtils.map(_paramTypes, paramType -> paramType.getSimpleName(), String.class);
     }
 
     /**
@@ -225,17 +211,28 @@ public class JavaExecutable extends JavaMember {
         if (aMethod.isVarArgs())
             return getMatchRatingForArgClassesWithVarArgs(aMethod, argClasses);
 
-        // Get method param types and length (just return if given arg count doesn't match)
+        // Get method param types and count (just return if given arg count doesn't match)
         JavaType[] paramTypes = aMethod.getParamTypes();
-        int paramCount = paramTypes.length, rating = 0;
+        int paramCount = paramTypes.length;
         if (argClasses.length != paramCount)
             return 0;
         if (paramCount == 0)
             return 1000;
 
+        // Get and return rating for args
+        return getMatchRatingForParamTypesAndArgClasses(paramTypes, argClasses, paramCount);
+    }
+
+    /**
+     * Returns a rating of a method for given possible arg classes.
+     */
+    private static int getMatchRatingForParamTypesAndArgClasses(JavaType[] paramTypes, JavaClass[] argClasses, int aCount)
+    {
+        int rating = 0;
+
         // Iterate over classes and add score based on matching classes
         // This is a punt - need to groc the docs on this: https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html
-        for (int i = 0, iMax = paramCount; i < iMax; i++) {
+        for (int i = 0; i < aCount; i++) {
             JavaClass paramClass = paramTypes[i].getEvalClass();
             JavaClass argClass = argClasses[i];
             if (!paramClass.isAssignableFrom(argClass))
@@ -252,54 +249,38 @@ public class JavaExecutable extends JavaMember {
      */
     private static int getMatchRatingForArgClassesWithVarArgs(JavaExecutable aMethod, JavaClass[] argClasses)
     {
-        // Get method param types and length (just return if given arg count is insufficient)
+        // Get method param types and count (just return if given arg count is insufficient)
         JavaType[] paramTypes = aMethod.getParamTypes();
-        int argsLen = paramTypes.length;
-        int varArgIndex = argsLen - 1;
-        int rating = 0;
+        int paramCount = paramTypes.length;
+        int varArgIndex = paramCount - 1;
         if (argClasses.length < varArgIndex)
             return 0;
-        if (argsLen == 1 && argClasses.length == 0)
+        if (paramCount == 1 && argClasses.length == 0)
             return 10;
 
-        // Iterate over classes and add score based on matching classes
-        // This is a punt - need to groc the docs on this: https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html
-        for (int i = 0, iMax = varArgIndex; i < iMax; i++) {
-            JavaClass paramClass = paramTypes[i].getEvalClass();
-            JavaClass argClass = argClasses[i];
-            if (!paramClass.isAssignableFrom(argClass))
-                return 0;
-            rating += paramClass == argClass ? 1000 : argClass != null ? 100 : 10;
-        }
+        // Get rating for args prior to var arg index
+        int rating = getMatchRatingForParamTypesAndArgClasses(paramTypes, argClasses, varArgIndex);
 
         // Get VarArg type
         JavaType varArgArrayType = paramTypes[varArgIndex];
         JavaClass varArgArrayClass = varArgArrayType.getEvalClass();
         JavaClass varArgClass = varArgArrayClass.getComponentType();
 
-        // If only one arg and it is of array type, add 1000
-        JavaClass argClass = argClasses.length == argsLen ? argClasses[varArgIndex] : null;
-        if (argClass != null && argClass.isArray() && varArgArrayClass.isAssignableFrom(argClass))
-            rating += 1000;
-
-        // If any var args match, add 1000
-        else for (int i = varArgIndex; i < argClasses.length; i++) {
-            argClass = argClasses[i];
-            if (varArgClass.isAssignableFrom(argClass))
-                rating += 1000;
+        // If only one arg and it is of array type, return rating plus 1000
+        if (argClasses.length == paramCount) {
+            JavaClass argClass = argClasses[varArgIndex];
+            if (argClass != null && argClass.isArray() && varArgArrayClass.isAssignableFrom(argClass))
+                return rating + 1000;
         }
 
-        // Return rating
-        return rating;
-    }
+        // If any var args doesn't match, return 0
+        for (int i = varArgIndex; i < argClasses.length; i++) {
+            JavaClass argClass = argClasses[i];
+            if (!varArgClass.isAssignableFrom(argClass))
+                return 0;
+        }
 
-    /**
-     * Returns whether is VarArgs.
-     */
-    private static boolean isVarArgs(Member aMember)
-    {
-        if (aMember instanceof Method)
-            return ((Method) aMember).isVarArgs();
-        return ((Constructor<?>) aMember).isVarArgs();
+        // Return rating plus 1000
+        return rating + 1000;
     }
 }
