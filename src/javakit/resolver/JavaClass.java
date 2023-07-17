@@ -531,27 +531,31 @@ public class JavaClass extends JavaType {
     /**
      * Returns whether given type is assignable to this JavaDecl.
      */
-    @Override
-    public boolean isAssignable(JavaType aType)
+    public boolean isAssignableFrom(JavaClass otherClass)
     {
-        // If this decl is primitive, forward to primitive version
-        if (isPrimitive() && aType instanceof JavaClass)
-            return isAssignablePrimitive(aType);
+        // If this class is primitive, forward to primitive version
+        if (isPrimitive())
+            return isAssignablePrimitive(otherClass);
 
-        // If given val is null or this decl is Object return true
-        if (aType == null)
+        // If given class is null or this class is Object return true
+        if (otherClass == null)
             return true;
         if (getName().equals("java.lang.Object"))
             return true;
-        JavaClass otherClass = aType.getEvalClass();
+
+        // If other class is primitive, promote to boxed class
         if (otherClass.isPrimitive())
             otherClass = otherClass.getPrimitiveAlt();
 
-        // If either are array type, check ArrayItemTypes if both are (otherwise return false)
-        if (isArray() || otherClass.isArray()) {
-            if (isArray() && otherClass.isArray())
-                return getComponentType().isAssignable(otherClass.getComponentType());
+        // If one is array and other isn't, return false
+        if (isArray() != otherClass.isArray())
             return false;
+
+        // If both classes are array, check component types instead
+        if (isArray()) {
+            JavaClass compType = getComponentType();
+            JavaClass otherCompType = otherClass.getComponentType();
+            return compType.isAssignableFrom(otherCompType);
         }
 
         // Iterate up given class superclasses and check class and interfaces
@@ -563,9 +567,10 @@ public class JavaClass extends JavaType {
 
             // If any interface of this decl match, return true
             if (isInterface()) {
-                for (JavaClass infc : cls.getInterfaces())
-                    if (isAssignable(infc))
+                for (JavaClass infc : cls.getInterfaces()) {
+                    if (isAssignableFrom(infc))
                         return true;
+                }
             }
         }
 
@@ -574,13 +579,12 @@ public class JavaClass extends JavaType {
     }
 
     /**
-     * Returns whether given type is assignable to this JavaDecl.
+     * Returns whether given class is assignable to this class.
      */
-    private boolean isAssignablePrimitive(JavaType otherType)
+    private boolean isAssignablePrimitive(JavaClass otherClass)
     {
-        if (otherType == null)
+        if (otherClass == null)
             return false;
-        JavaClass otherClass = otherType.getEvalClass();
         JavaClass otherPrimitive = otherClass.getPrimitive();
         if (otherPrimitive == null)
             return false;

@@ -73,8 +73,8 @@ class DeclCompare implements Comparator<JavaDecl> {
 
             // If matching receiving class, add bonus
             if (_receivingClass != null) {
-                JavaType evalType = aDecl.getEvalType();
-                if (_receivingClass.isAssignable(evalType))
+                JavaClass evalClass = aDecl.getEvalClass();
+                if (_receivingClass.isAssignableFrom(evalClass))
                     rating += 5;
             }
 

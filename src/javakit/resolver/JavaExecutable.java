@@ -227,22 +227,21 @@ public class JavaExecutable extends JavaMember {
 
         // Get method param types and length (just return if given arg count doesn't match)
         JavaType[] paramTypes = aMethod.getParamTypes();
-        int plen = paramTypes.length, rating = 0;
-        if (theTypes.length != plen)
+        int paramCount = paramTypes.length, rating = 0;
+        if (theTypes.length != paramCount)
             return 0;
-        if (plen == 0)
+        if (paramCount == 0)
             return 1000;
 
         // Iterate over classes and add score based on matching classes
         // This is a punt - need to groc the docs on this: https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html
-        for (int i = 0, iMax = plen; i < iMax; i++) {
-            JavaType cls1 = paramTypes[i].getEvalClass();
-            JavaType cls2 = theTypes[i];
-            if (cls2 != null)
-                cls2 = cls2.getEvalClass();
-            if (!cls1.isAssignable(cls2))
+        for (int i = 0, iMax = paramCount; i < iMax; i++) {
+            JavaClass paramClass = paramTypes[i].getEvalClass();
+            JavaType argType = theTypes[i];
+            JavaClass argClass = argType != null ? argType.getEvalClass() : null;
+            if (!paramClass.isAssignableFrom(argClass))
                 return 0;
-            rating += cls1 == cls2 ? 1000 : cls2 != null ? 100 : 10;
+            rating += paramClass == argClass ? 1000 : argClass != null ? 100 : 10;
         }
 
         // Return rating
@@ -267,27 +266,30 @@ public class JavaExecutable extends JavaMember {
         // Iterate over classes and add score based on matching classes
         // This is a punt - need to groc the docs on this: https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html
         for (int i = 0, iMax = varArgIndex; i < iMax; i++) {
-            JavaType cls1 = paramTypes[i].getEvalClass();
-            JavaType cls2 = theTypes[i];
-            if (cls2 != null) cls2 = cls2.getEvalClass();
-            if (!cls1.isAssignable(cls2))
+            JavaClass paramClass = paramTypes[i].getEvalClass();
+            JavaType argType = theTypes[i];
+            JavaClass argClass = argType != null? argType.getEvalClass() : null;
+            if (!paramClass.isAssignableFrom(argClass))
                 return 0;
-            rating += cls1 == cls2 ? 1000 : cls2 != null ? 100 : 10;
+            rating += paramClass == argClass ? 1000 : argClass != null ? 100 : 10;
         }
 
         // Get VarArg type
         JavaType varArgArrayType = paramTypes[varArgIndex];
-        JavaType varArgType = varArgArrayType.getComponentType();
+        JavaClass varArgArrayClass = varArgArrayType.getEvalClass();
+        JavaClass varArgClass = varArgArrayClass.getComponentType();
 
         // If only one arg and it is of array type, add 1000
         JavaType argType = theTypes.length == argsLen ? theTypes[varArgIndex] : null;
-        if (argType != null && argType.isArray() && varArgArrayType.isAssignable(argType))
+        JavaClass argClass = argType != null ? argType.getEvalClass() : null;
+        if (argClass != null && argClass.isArray() && varArgArrayClass.isAssignableFrom(argClass))
             rating += 1000;
 
-            // If any var args match, add 1000
+        // If any var args match, add 1000
         else for (int i = varArgIndex; i < theTypes.length; i++) {
-            JavaType type = theTypes[i];
-            if (varArgType.isAssignable(type))
+            argType = theTypes[i];
+            argClass = argType != null ? argType.getEvalClass() : null;
+            if (varArgClass.isAssignableFrom(argClass))
                 rating += 1000;
         }
 

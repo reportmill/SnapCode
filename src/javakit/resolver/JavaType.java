@@ -56,11 +56,6 @@ public class JavaType extends JavaDecl {
     public JavaClass getPrimitiveAlt()  { return null; }
 
     /**
-     * Returns whether given type is assignable to this JavaDecl.
-     */
-    public boolean isAssignable(JavaType aType)  { return false; }
-
-    /**
      * Returns common ancestor of this type and given type.
      */
     public JavaType getCommonAncestor(JavaType aType)
@@ -80,10 +75,12 @@ public class JavaType extends JavaDecl {
         // Iterate up each super chain to check
         JavaClass thisClass = getEvalClass();
         JavaClass otherClass = aType.getEvalClass();
-        for (JavaClass cls1 = thisClass; cls1 != null; cls1 = cls1.getSuperClass())
-            for (JavaClass cls2 = otherClass; cls2 != null; cls2 = cls2.getSuperClass())
+        for (JavaClass cls1 = thisClass; cls1 != null; cls1 = cls1.getSuperClass()) {
+            for (JavaClass cls2 = otherClass; cls2 != null; cls2 = cls2.getSuperClass()) {
                 if (cls1 == cls2)
                     return cls1;
+            }
+        }
 
         // Return Object (case where at least one was interface or ParamType of interface)
         return getJavaClassForClass(Object.class);
