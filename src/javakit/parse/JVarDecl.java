@@ -73,25 +73,25 @@ public class JVarDecl extends JNode implements WithId {
     private JType getParentType()
     {
         // Handle FieldDecl.VarDecl: return type from parent
-        JNode par = getParent();
-        if (par instanceof JFieldDecl)
-            return ((JFieldDecl) par).getType();
+        JNode parentNode = getParent();
+        if (parentNode instanceof JFieldDecl)
+            return ((JFieldDecl) parentNode).getType();
 
         // Handle StatementVarDecl VarDecl: Return type from parent
-        if (par instanceof JStmtVarDecl)
-            return ((JStmtVarDecl) par).getType();
+        if (parentNode instanceof JStmtVarDecl)
+            return ((JStmtVarDecl) parentNode).getType();
 
         // Handle JExprLambda VarDecl: Get decl for this param and create new type
-        if (par instanceof JExprLambda) {
+        if (parentNode instanceof JExprLambda) {
 
             // Get decl for this param (resolve if needed)
-            JExprLambda lambda = (JExprLambda) par;
-            JavaMethod lambdaMethod = lambda.getLambdaMethod();
+            JExprLambda lambdaExpr = (JExprLambda) parentNode;
+            JavaMethod lambdaMethod = lambdaExpr.getLambdaMethod();
             if (lambdaMethod == null)
                 return null;
 
             // Get arg index
-            List<JVarDecl> lambdaArgs = lambda.getParams();
+            List<JVarDecl> lambdaArgs = lambdaExpr.getParams();
             int argIndex = ListUtils.indexOfId(lambdaArgs, this);
             if (argIndex < 0)
                 return null;
@@ -99,8 +99,8 @@ public class JVarDecl extends JNode implements WithId {
             // Get arg type for lambda arg index
             JavaType argType = lambdaMethod.getParamType(argIndex);
             if (!argType.isResolvedType()) {
-                JavaClass lambdaClass = lambda.getLambdaClass();
-                argType = lambdaClass.getResolvedType(argType);
+                JavaType lambdaType = lambdaExpr.getLambdaType();
+                argType = lambdaType.getResolvedType(argType);
             }
 
             // Create type for type decl and return

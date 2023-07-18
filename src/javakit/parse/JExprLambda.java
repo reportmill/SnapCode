@@ -4,6 +4,7 @@
 package javakit.parse;
 import java.util.*;
 import javakit.resolver.*;
+import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 
 /**
@@ -20,8 +21,8 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     // The statement Block, if lambda has block
     protected JStmtBlock  _block;
 
-    // The class this lambda
-    private JavaClass _lambdaClass;
+    // The type for this lambda
+    private JavaType _lambdaType;
 
     // The actual interface method this lambda represents
     private JavaMethod _lambdaMethod;
@@ -148,26 +149,35 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
      */
     public JavaClass getLambdaClass()
     {
-        if (_lambdaClass != null) return _lambdaClass;
-        JavaClass lambdaClass = getLambdaClassImpl();
-        return _lambdaClass = lambdaClass;
+        JavaType lambdaType = getLambdaType();
+        return lambdaType != null ? lambdaType.getEvalClass() : null;
     }
 
     /**
-     * Returns the lambda class.
+     * Returns the lambda type.
      */
-    private JavaClass getLambdaClassImpl()
+    public JavaType getLambdaType()
+    {
+        if (_lambdaType != null) return _lambdaType;
+        JavaType lambdaType = getLambdaClassImpl();
+        return _lambdaType = lambdaType;
+    }
+
+    /**
+     * Returns the lambda type.
+     */
+    private JavaType getLambdaClassImpl()
     {
         // Get Parent (just return if null)
-        JNode par = getParent();
-        if (par == null)
+        JNode parentNode = getParent();
+        if (parentNode == null)
             return null;
 
         // Handle parent is method call: Get lambda interface from method call decl param
-        if (par instanceof JExprMethodCall) {
+        if (parentNode instanceof JExprMethodCall) {
 
             // Get methodCall method
-            JExprMethodCall methodCall = (JExprMethodCall) par;
+            JExprMethodCall methodCall = (JExprMethodCall) parentNode;
             JavaMethod method = methodCall.getDecl();
             if (method == null)
                 return null;
@@ -179,16 +189,14 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
                 return null;
 
             // Get arg type at arg index
-            JavaType lambdaType = method.getParamType(argIndex);
-            JavaClass lambdaClass = lambdaType.getEvalClass();
-            return lambdaClass;
+            return method.getParamType(argIndex);
         }
 
         // Handle parent is alloc expression: Get lambda interface from alloc expression param
-        if (par instanceof JExprAlloc) {
+        if (parentNode instanceof JExprAlloc) {
 
             // Get alloc expr contructor
-            JExprAlloc allocExpr = (JExprAlloc) par;
+            JExprAlloc allocExpr = (JExprAlloc) parentNode;
             JavaConstructor constructor = (JavaConstructor) allocExpr.getDecl();
             if (constructor == null)
                 return null;
@@ -200,15 +208,13 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
                 return null;
 
             // Get arg type at arg index
-            JavaType lambdaType = constructor.getParamType(argIndex);
-            JavaClass lambdaClass = lambdaType.getEvalClass();
-            return lambdaClass;
+            return constructor.getParamType(argIndex);
         }
 
-        // Handle parent anything else (JVarDecl, JStmtExpr): Return parent eval class
-        JavaClass lambdaClass = par.getEvalClass();
-        if (lambdaClass != null)
-            return lambdaClass;
+        // Handle parent anything else (JVarDecl, JStmtExpr): Return parent eval type
+        JavaType lambdaType = parentNode.getEvalType();
+        if (lambdaType != null)
+            return lambdaType;
 
         // Return not found
         return null;
@@ -233,4 +239,23 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
      * Returns the node name.
      */
     public String getNodeString()  { return "LambdaExpr"; }
+
+    /**
+     * Returns the node errors.
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()
+    {
+        NodeError[] errors = super.getErrorsImpl();
+
+        // Handle missing class
+        JavaMethod lambdaMethod = getLambdaMethod();
+        if (lambdaMethod == null) {
+            NodeError error = new NodeError(this, "Can't resolve lambda method");
+            errors = ArrayUtils.add(errors, error);
+        }
+
+        // Return
+        return errors;
+    }
 }
