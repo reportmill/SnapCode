@@ -111,16 +111,18 @@ public class JExprId extends JExpr {
 
         // Handle decl types
         switch (decl.getType()) {
-            case Class: return "ClassId";
-            case Constructor: return "ConstrId";
 
-            case Field: {
+            // Handle Class, ParamType
+            case Class:
+            case ParamType: return "ClassId";
+
+            // Handle Field (or enum)
+            case Field:
                 JavaField field = (JavaField) decl;
-                if (field.isEnumConstant())
-                    return "EnumId";
-                return "FieldId";
-            }
+                return field.isEnumConstant() ? "EnumId" : "FieldId";
 
+            // Handle Constructor, Method, Package, TypeVar
+            case Constructor: return "ConstrId";
             case Method: return "MethodId";
             case Package: return "PackageId";
             case TypeVar: return "TypeVarId";
@@ -130,7 +132,9 @@ public class JExprId extends JExpr {
                 JNode parentNode = getParent();
                 if (parentNode instanceof JStmtBreak || parentNode instanceof JStmtLabeled)
                     return "LabelId";
-                return "VariableId";
+                return "VarId";
+
+            // Handle unknown
             default: return "UnknownId";
         }
     }

@@ -37,8 +37,8 @@ public class JavaParameterizedType extends JavaType {
             _simpleName = _simpleName + '<' + typeArgsStr + '>';
         }
 
-        // Set EvalType to RawType
-        _evalType = aRawType;
+        // Set EvalType to this
+        _evalType = this;
     }
 
     /**
@@ -75,6 +75,12 @@ public class JavaParameterizedType extends JavaType {
         // Return
         return true;
     }
+
+    /**
+     * Override to return RawType.
+     */
+    @Override
+    public JavaClass getEvalClass()  { return _rawType; }
 
     /**
      * Returns a resolved type for given unresolved type (TypeVar or ParamType<TypeVar>), if this decl can resolve it.
