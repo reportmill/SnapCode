@@ -159,14 +159,14 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     public JavaType getLambdaType()
     {
         if (_lambdaType != null) return _lambdaType;
-        JavaType lambdaType = getLambdaClassImpl();
+        JavaType lambdaType = getLambdaTypeImpl();
         return _lambdaType = lambdaType;
     }
 
     /**
      * Returns the lambda type.
      */
-    private JavaType getLambdaClassImpl()
+    private JavaType getLambdaTypeImpl()
     {
         // Get Parent (just return if null)
         JNode parentNode = getParent();

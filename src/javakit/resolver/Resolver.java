@@ -261,6 +261,14 @@ public class Resolver {
         if (aType instanceof GenericArrayType)
             return getGenericArrayTypeDecl((GenericArrayType) aType);
 
+        // Handle WildcardType: Punt for now, focus on lower bound
+        if (aType instanceof WildcardType) {
+            WildcardType wc = (WildcardType) aType;
+            Type[] boundsTypes = wc.getLowerBounds().length > 0 ? wc.getLowerBounds() : wc.getUpperBounds();
+            Type boundsType = boundsTypes.length > 0 ? boundsTypes[0] : Object.class;
+            return getJavaTypeForType(boundsType);
+        }
+
         // Handle WildCard
         Class<?> cls = ResolverUtils.getClassForType(aType);
         return getJavaClassForClass(cls);
