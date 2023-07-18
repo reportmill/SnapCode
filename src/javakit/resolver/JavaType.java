@@ -153,14 +153,6 @@ public class JavaType extends JavaDecl {
     }
 
     /**
-     * Returns a ParamType decl for this base class and given types ( This<typ,type>).
-     */
-    public JavaType getParamTypeDecl(JavaType ... theTypes)
-    {
-        return _resolver.getJavaParameterizedTypeForTypes(this, theTypes);
-    }
-
-    /**
      * Returns whether given declaration collides with this declaration.
      */
     public boolean matches(JavaDecl aDecl)

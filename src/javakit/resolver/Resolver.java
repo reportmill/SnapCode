@@ -319,23 +319,22 @@ public class Resolver {
             return decl;
 
         // Get RawType and ArgTypes as JavaType
-        Type rawType = aPT.getRawType();
+        Class<?> rawType = (Class<?>) aPT.getRawType(); // Java implementation always returns Class
         Type[] typArgs = aPT.getActualTypeArguments();
-        JavaType rawTypeDecl = getJavaTypeForType(rawType);
+        JavaClass rawTypeDecl = getJavaClassForClass(rawType);
         JavaType[] typeArgDecls = getJavaTypesForTypes(typArgs);
 
-        // Create and add to cache
-        decl = new JavaParameterizedType(this, rawTypeDecl, typeArgDecls);
-        _paramTypes.put(id, decl);
-
-        // Return
+        // Create and return JavaParameterizedType
+        decl = getJavaParameterizedTypeForTypes(rawTypeDecl, typeArgDecls);
+        if (!decl.getId().equals(id))
+            _paramTypes.put(id, decl); // Shouldn't need this
         return decl;
     }
 
     /**
      * Returns a JavaParameterizedType for given types.
      */
-    protected JavaParameterizedType getJavaParameterizedTypeForTypes(JavaType aRawType, JavaType[] theTypeArgs)
+    protected JavaParameterizedType getJavaParameterizedTypeForTypes(JavaClass aRawType, JavaType[] theTypeArgs)
     {
         // Get id and decl for id (just return if found)
         String id = ResolverUtils.getIdForParameterizedTypeParts(aRawType, theTypeArgs);

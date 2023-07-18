@@ -3,6 +3,7 @@
  */
 package javakit.parse;
 import java.util.*;
+import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaType;
 import snap.parse.ParseToken;
@@ -194,10 +195,11 @@ public class JType extends JNode {
         // If type args, build array and get decl for ParamType
         int typeArgCount = getTypeArgCount();
         if (typeArgCount > 0) {
+            JavaClass javaClass = (JavaClass) javaType;
             JavaType[] typeArgTypes = new JavaType[typeArgCount];
             for (int i = 0; i < typeArgCount; i++)
                 typeArgTypes[i] = getTypeArgType(i);
-            javaType = javaType.getParamTypeDecl(typeArgTypes);
+            javaType = javaClass.getParamTypeDecl(typeArgTypes);
         }
 
         // If ArrayCount, get decl for array

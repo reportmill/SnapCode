@@ -10,7 +10,7 @@ import snap.util.StringUtils;
 public class JavaParameterizedType extends JavaType {
 
     // The RawType
-    private JavaType  _rawType;
+    private JavaClass _rawType;
 
     // The JavaDecls for parameter types for Constructor, Method
     protected JavaType[]  _paramTypes;
@@ -18,7 +18,7 @@ public class JavaParameterizedType extends JavaType {
     /**
      * Constructor.
      */
-    public JavaParameterizedType(Resolver aResolver, JavaType aRawType, JavaType[] theTypeArgs)
+    public JavaParameterizedType(Resolver aResolver, JavaClass aRawType, JavaType[] theTypeArgs)
     {
         // Do normal version
         super(aResolver, DeclType.ParamType);
@@ -44,7 +44,7 @@ public class JavaParameterizedType extends JavaType {
     /**
      * Returns the RawType.
      */
-    public JavaType getRawType()  { return _rawType; }
+    public JavaClass getRawType()  { return _rawType; }
 
     /**
      * Returns the parameter types.
@@ -66,12 +66,7 @@ public class JavaParameterizedType extends JavaType {
      */
     public boolean isResolvedType()
     {
-        // ParamType might subclass TypeVars
-        JavaType rawType = getRawType();
-        if (!rawType.isResolvedType())
-            return false;
-
-        // Or types might include TypeVars
+        // Types might include TypeVars
         JavaType[] paramTypes = getParamTypes();
         for (JavaType paramType : paramTypes)
             if (!paramType.isResolvedType())
