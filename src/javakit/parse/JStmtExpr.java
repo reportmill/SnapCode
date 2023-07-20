@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import javakit.resolver.JavaDecl;
 import snap.util.ArrayUtils;
 
 /**
@@ -32,16 +31,6 @@ public class JStmtExpr extends JStmt {
     public void setExpr(JExpr anExpr)
     {
         replaceChild(_expr, _expr = anExpr);
-    }
-
-    /**
-     * Tries to resolve the class name for this node.
-     */
-    protected JavaDecl getDeclImpl()
-    {
-        if (_expr == null)
-            return null;
-        return _expr.getDecl();
     }
 
     /**

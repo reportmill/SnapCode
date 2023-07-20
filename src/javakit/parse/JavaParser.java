@@ -3,7 +3,6 @@
  */
 package javakit.parse;
 import java.util.*;
-import java.util.stream.Stream;
 import snap.parse.*;
 
 /**
@@ -83,6 +82,7 @@ public class JavaParser extends JavaParserStmt {
     {
         // Create rule
         ParseRule rule = ParseUtils.loadRule(JavaParser.class, null);
+        assert (rule != null);
 
         // Install handlers from list
         for (Class<? extends ParseHandler<?>> handlerClass : _handlerClasses)
@@ -527,10 +527,7 @@ public class JavaParser extends JavaParserStmt {
         }
 
         @Override
-        protected Class getPartClass()
-        {
-            return ArrayList.class;
-        }
+        protected Class getPartClass()  { return ArrayList.class; }
     }
 
     /**
@@ -696,7 +693,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * ConstrCall Handler.
+     * ConstrCall Handler: (Identifier ".")* (LookAhead(2) "this" ".")? TypeArgs? ("this" | "super") Arguments ";"
      */
     public static class ConstrCallHandler extends JNodeParseHandler<JStmtConstrCall> {
 
@@ -708,21 +705,25 @@ public class JavaParser extends JavaParserStmt {
             // Get constructor call statement
             JStmtConstrCall constrCallStmt = getPart();
 
-            // Handle Identifier
-            if (anId == "Identifier")
-                constrCallStmt.addId(aNode.getCustomNode(JExprId.class));
+            switch (anId) {
 
-            // Handle "this"/"super"
-            else if (anId == "this" || anId == "super") {
-                JExprId id = new JExprId(aNode.getString());
-                id.setStartToken(aNode.getStartToken());
-                id.setEndToken(aNode.getEndToken());
-                constrCallStmt.addId(id);
+                // Handle Identifier
+                case "Identifier":
+                    constrCallStmt.addId(aNode.getCustomNode(JExprId.class));
+                    break;
+
+                // Handle "this", "super"
+                case "this":
+                case "super":
+                    JExprId id = new JExprId(aNode);
+                    constrCallStmt.addId(id);
+                    break;
+
+                // Handle Arguments
+                case "Arguments":
+                    constrCallStmt.setArgs(aNode.getCustomNode(List.class));
+                    break;
             }
-
-            // Handle Arguments
-            else if (anId == "Arguments")
-                constrCallStmt.setArgs(aNode.getCustomNode(List.class));
         }
 
         protected Class<JStmtConstrCall> getPartClass()  { return JStmtConstrCall.class; }
@@ -757,29 +758,4 @@ public class JavaParser extends JavaParserStmt {
         ClassDeclHandler.class, TypeDeclHandler.class, ImportDeclHandler.class,
         PackageDeclHandler.class, JavaFileImportsHandler.class, JavaFileHandler.class
     };
-
-    // TeaVM needs this to exist, otherwise RuleNames.intern() != RuleName (and id == RuleName doesn't work)
-    private static String[] _allRuleNames = { "JavaFile", "PackageDecl", "Annotation", "Name", "Identifier", "NormalAnnotation",
-            "MemberValuePairs", "MemberValuePair", "MemberValue", "MemberValueArrayInit", "ConditionalExpr", "ConditionalOrExpr",
-            "ConditionalAndExpr", "InclusiveOrExpr", "ExclusiveOrExpr", "AndExpr", "EqualityExpr", "InstanceOfExpr", "RelationalExpr",
-            "ShiftExpr", "AdditiveExpr", "MultiplicativeExpr", "UnaryExpr", "PreIncrementExpr", "PrimaryExpr", "PrimaryPrefix", "Literal",
-            "IntegerLiteral", "IntLiteral", "HexLiteral", "OctalLiteral", "FloatLiteral", "CharacterLiteral", "StringLiteral",
-            "BooleanLiteral", "NullLiteral", "ClassType", "TypeArgs", "TypeArg", "ReferenceType", "PrimitiveType", "WildcardBounds",
-            "LambdaExpr", "Expression", "AssignOp", "Block", "BlockStatement", "Modifiers", "Modifier", "Type", "VarDeclStmt",
-            "VarDecl", "VarInit", "ArrayInit", "Statement", "LabeledStatement", "AssertStatement", "EmptyStatement", "ExprStatement",
-            "PreDecrementExpr", "SwitchStatement", "SwitchLabel", "IfStatement", "WhileStatement", "DoStatement", "ForStatement",
-            "ForInit", "BreakStatement", "ContinueStatement", "ReturnStatement", "ThrowStatement", "SynchronizedStatement",
-            "TryStatement", "FormalParam", "ClassDecl", "TypeParams", "TypeParam", "TypeBound", "ExtendsList", "ImplementsList",
-            "ClassBody", "ClassBodyDecl", "Initializer", "MemberDecl", "EnumDecl", "EnumConstant", "Arguments", "ConstrDecl",
-            "FormalParams", "ThrowsList", "ConstrCall", "FieldDecl", "MethodDecl", "ResultType", "AnnotationDecl", "AllocExpr",
-            "ArrayDimsAndInits", "PrimarySuffix", "MemberSelector", "UnaryExprNotPlusMinus", "CastLook", "CastExpr", "PostfixExpr",
-            "ShiftRightUnsigned", "ShiftRight", "SingleMemberAnnotation", "MarkerAnnotation", "ImportDecl", "TypeDecl",
-            "JavaFileImports",
-            "boolean", "char", "byte", "short", "int", "long", "float", "double",
-            "public", "private", "protected", "static", "default", "abstract",
-            "this", "super", "extends", "implements", "interface", "...",
-            "+", "-", "*", "/", "++", "--", "==", "+=", "-=", "{", "[", "->",
-    };
-
-    public static String[] _allRuleNamesIntern = Stream.of(_allRuleNames).map(s -> s.intern()).toArray(size -> new String[size]);
 }

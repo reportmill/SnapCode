@@ -4,19 +4,25 @@
 package javakit.parse;
 
 /**
- * A Java statement for ReturnStatement.
+ * A Java statement for return statement.
  */
 public class JStmtReturn extends JStmt {
+
     // The return expression
-    JExpr _expr;
+    private JExpr _expr;
+
+    /**
+     * Constructor.
+     */
+    public JStmtReturn()
+    {
+        super();
+    }
 
     /**
      * Returns the expression.
      */
-    public JExpr getExpr()
-    {
-        return _expr;
-    }
+    public JExpr getExpr()  { return _expr; }
 
     /**
      * Sets the expression.
