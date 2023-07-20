@@ -3,6 +3,7 @@
  */
 package javakit.resolver;
 import snap.util.StringUtils;
+import java.lang.reflect.Modifier;
 
 /**
  * A class to represent a declaration of a Java Class, Method, Field or Constructor.
@@ -71,32 +72,30 @@ public class JavaDecl implements Comparable<JavaDecl> {
         // If already set, just return
         if (_fullName != null) return _fullName;
 
-        // Get, set, return
-        String fullName = getFullNameImpl();
-        return _fullName = fullName;
-    }
+        String fullName = getMatchName();
 
-    /**
-     * Returns the full name.
-     */
-    protected String getFullNameImpl()
-    {
-        return getMatchName();
+        // If method or field, add return type name
+        if (this instanceof JavaMethod || this instanceof JavaField) {
+            JavaType returnType = getEvalType();
+            String returnTypeName = returnType.getName();
+            fullName = returnTypeName + " " + fullName;
+        }
+
+        // If Class or Member, Add mod string
+        if (this instanceof JavaClass || this instanceof JavaMember) {
+            int mods = this instanceof JavaClass ? ((JavaClass) this).getModifiers() : ((JavaMember) this).getModifiers();
+            String modifierStr = Modifier.toString(mods);
+            if (modifierStr.length() > 0)
+                fullName = modifierStr + " " + fullName;
+        }
+        // Set and return
+        return _fullName = fullName;
     }
 
     /**
      * Returns the JavaType this decl evaluates to when referenced.
      */
     public JavaType getEvalType()  { return _evalType; }
-
-    /**
-     * Returns the type name for class this decl evaluates to when referenced.
-     */
-    public String getEvalTypeName()
-    {
-        JavaType evalType = getEvalType();
-        return evalType != null ? evalType.getName() : null;
-    }
 
     /**
      * Returns the type of the most basic class associated with this type:

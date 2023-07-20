@@ -76,9 +76,8 @@ public class JavaWord extends JavaDecl {
     @Override
     public String getSuggestionString()
     {
-        // Get full name
-        String fullNameStr = getFullName();
-        String suggestionStr = fullNameStr;
+        // Get name
+        String suggestionStr = getName();
 
         // Get descriptor string
         switch (_wordType) {

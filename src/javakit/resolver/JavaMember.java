@@ -58,24 +58,4 @@ public class JavaMember extends JavaDecl {
      * Returns whether member is static.
      */
     public boolean isStatic()  { return Modifier.isStatic(_mods); }
-
-    /**
-     * Returns the full name.
-     */
-    @Override
-    protected String getFullNameImpl()
-    {
-        // Get Match name
-        String name = getMatchName();
-        if (this instanceof JavaMethod || this instanceof JavaField)
-            name = getEvalTypeName() + " " + name;
-
-        // Add mod string
-        String modifierStr = Modifier.toString(_mods);
-        if (modifierStr.length() > 0)
-            name = modifierStr + " " + name;
-
-        // Return
-        return name;
-    }
 }

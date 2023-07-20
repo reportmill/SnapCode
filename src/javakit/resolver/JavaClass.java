@@ -684,24 +684,6 @@ public class JavaClass extends JavaType {
     }
 
     /**
-     * Returns the full name.
-     */
-    @Override
-    protected String getFullNameImpl()
-    {
-        // Get Match name
-        String name = getMatchName();
-
-        // Add mod string
-        String modifierStr = Modifier.toString(_mods);
-        if (modifierStr.length() > 0)
-            name = modifierStr + " " + name;
-
-        // Return
-        return name;
-    }
-
-    /**
      * Returns a string representation of suggestion.
      */
     @Override
