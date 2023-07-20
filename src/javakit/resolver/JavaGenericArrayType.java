@@ -13,6 +13,9 @@ public class JavaGenericArrayType extends JavaType {
     // The Array component type
     private JavaType  _componentType;
 
+    // The eval class
+    private JavaClass _evalClass;
+
     /**
      * Constructor.
      */
@@ -27,8 +30,8 @@ public class JavaGenericArrayType extends JavaType {
         // Set Name, SimpleName
         _name = _simpleName = aGenArrayType.getTypeName();
 
-        // Set EvalType: Probably need to do better than this
-        _evalType = getJavaClassForClass(Object[].class);
+        // Set EvalClass: Probably need to do better than this
+        _evalClass = getJavaClassForClass(Object[].class);
 
         // Set ComponentType
         Type compType = aGenArrayType.getGenericComponentType();
@@ -39,6 +42,12 @@ public class JavaGenericArrayType extends JavaType {
      * Returns the Array component type.
      */
     public JavaType getComponentType()  { return _componentType; }
+
+    /**
+     * Override to return bounding class.
+     */
+    @Override
+    public JavaClass getEvalClass()  { return _evalClass; }
 
     /**
      * Override to return false.

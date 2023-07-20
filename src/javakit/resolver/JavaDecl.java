@@ -90,15 +90,10 @@ public class JavaDecl implements Comparable<JavaDecl> {
     public JavaType getEvalType()  { return _evalType; }
 
     /**
-     * Returns the type of the most basic class associated with this type:
+     * Returns the type of the most basic class associated with this type.
      */
     public JavaClass getEvalClass()
     {
-        // Handle JavaClass
-        if (this instanceof JavaClass)
-            return (JavaClass) this;
-
-        // Anything else: Try EvalType.ClassType?
         JavaType evalType = getEvalType();
         return evalType != null ? evalType.getEvalClass() : null;
     }
@@ -108,8 +103,8 @@ public class JavaDecl implements Comparable<JavaDecl> {
      */
     public String getEvalClassName()
     {
-        JavaType evalType = getEvalType();
-        return evalType != null ? evalType.getClassName() : null;
+        JavaClass evalClass = getEvalClass();
+        return evalClass != null ? evalClass.getName() : null;
     }
 
     /**

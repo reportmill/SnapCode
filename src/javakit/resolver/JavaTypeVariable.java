@@ -12,6 +12,9 @@ public class JavaTypeVariable extends JavaType {
     // The Class or Executable that owns this TypeVariable
     private JavaDecl  _owner;
 
+    // The bounding class
+    private JavaClass _boundingClass;
+
     /**
      * Constructor.
      */
@@ -29,15 +32,21 @@ public class JavaTypeVariable extends JavaType {
         // Set Name, SimpleName
         _name = _simpleName = typeVar.getName();
 
-        // Set EvalType
+        // Set BoundingClass
         Class<?> typeVarClass = ResolverUtils.getClassForType(typeVar);
-        _evalType = getJavaClassForClass(typeVarClass);
+        _boundingClass = getJavaClassForClass(typeVarClass);
     }
 
     /**
      * Returns the Class or Executable that owns this TypeVariable.
      */
     public JavaDecl getOwner()  { return _owner; }
+
+    /**
+     * Override to return RawType.
+     */
+    @Override
+    public JavaClass getEvalClass()  { return _boundingClass; }
 
     /**
      * Override to return false.

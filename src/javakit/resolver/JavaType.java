@@ -14,6 +14,9 @@ public class JavaType extends JavaDecl {
     protected JavaType(Resolver aResolver, DeclType aType)
     {
         super(aResolver, aType);
+
+        // JavaTypes are their own eval type
+        _evalType = this;
     }
 
     /**
@@ -118,18 +121,8 @@ public class JavaType extends JavaDecl {
      */
     public JavaType getResolvedType(JavaType aType)
     {
-        // Handle ParamType and anything not a TypeVar
-        if (aType instanceof JavaParameterizedType) {
-            System.err.println("JavaDecl.getResolvedType: ParamType not yet supported");
-            return aType;
-        }
-
-        // Should always be a TypeVar I think
-        if (!(aType instanceof JavaTypeVariable))
-            return aType;
-
-        // If not resolve, just return bounds type
-        return aType.getEvalType();
+        // If not resolved, just return bounds type
+        return aType.getEvalClass();
     }
 
     /**

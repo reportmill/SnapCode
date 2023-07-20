@@ -36,9 +36,6 @@ public class JavaParameterizedType extends JavaType {
             String typeArgsStr = StringUtils.join(getParamTypeSimpleNames(), ",");
             _simpleName = _simpleName + '<' + typeArgsStr + '>';
         }
-
-        // Set EvalType to this
-        _evalType = this;
     }
 
     /**

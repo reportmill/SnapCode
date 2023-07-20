@@ -95,9 +95,6 @@ public class JavaClass extends JavaType {
         _interface = aClass.isInterface();
         _primitive = aClass.isPrimitive();
 
-        // Set EvalType to this
-        _evalType = this;
-
         // Create/set updater
         _updater = new JavaClassUpdater(this);
 
@@ -146,9 +143,6 @@ public class JavaClass extends JavaType {
         _enum = aClassDecl.isEnum();
         _interface = aClassDecl.isInterface();
 
-        // Set EvalType to this
-        _evalType = this;
-
         // Create/set updater
         _updater = new JavaClassUpdaterDecl(this, aClassDecl);
 
@@ -167,6 +161,12 @@ public class JavaClass extends JavaType {
      * Returns the class that contains this class (if inner class).
      */
     public JavaClass getDeclaringClass()  { return _declaringClass; }
+
+    /**
+     * Override to return bounding class.
+     */
+    @Override
+    public JavaClass getEvalClass()  { return this; }
 
     /**
      * Returns the class name.
@@ -678,9 +678,8 @@ public class JavaClass extends JavaType {
         if (superType instanceof JavaParameterizedType)
             return superType.getResolvedType(aType);
 
-        // Otherwise just return EvalType
-        JavaType evalType = aType.getEvalType();
-        return evalType;
+        // Otherwise just return EvalClass
+        return aType.getEvalClass();
     }
 
     /**
