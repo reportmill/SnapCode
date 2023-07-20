@@ -47,7 +47,7 @@ public class JStmtBlock extends JStmt implements WithStmts {
      * Override to check inner variable declaration statements.
      */
     @Override
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // Get VarDecl for name from statements
         List<JStmt> statements = getStatements();
@@ -56,7 +56,7 @@ public class JStmtBlock extends JStmt implements WithStmts {
             return varDecl.getDecl();
 
         // Do normal version
-        return super.getDeclForChildExprIdNode(anExprId);
+        return super.getDeclForChildId(anExprId);
     }
 
     /**

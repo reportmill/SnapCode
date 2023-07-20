@@ -418,7 +418,7 @@ public class SearchTool extends WorkspaceTool {
          */
         public String getDescriptor()
         {
-            JavaDecl decl = _node != null ? _node.isNodeIdNode() ? _node.getDecl() : _node.getEnclosingDecl() : null;
+            JavaDecl decl = _node != null ? _node.isDeclIdNode() ? _node.getDecl() : _node.getEnclosingDecl() : null;
             if (decl != null) return decl.getFullNameWithSimpleParameterTypes();
             String s = _file.getName() + " - " + _file.getParent().getPath();
             s += " (" + _count + " match" + (_count == 1 ? "" : "es") + ")";
@@ -430,7 +430,7 @@ public class SearchTool extends WorkspaceTool {
          */
         public Image getImage()
         {
-            JavaDecl decl = _node != null ? _node.isNodeIdNode() ? _node.getDecl() : _node.getEnclosingDecl() : null;
+            JavaDecl decl = _node != null ? _node.isDeclIdNode() ? _node.getDecl() : _node.getEnclosingDecl() : null;
             if (decl == null)
                 return ViewUtils.getFileIconImage(_file);
             return JavaTextUtils.getImageForJavaDecl(decl);

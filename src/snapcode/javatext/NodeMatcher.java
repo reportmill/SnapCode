@@ -56,7 +56,7 @@ public class NodeMatcher {
      */
     private static boolean isReferenceNode(JNode aNode)
     {
-        return !aNode.isNodeIdNode() && aNode.getParent(JImportDecl.class) == null;
+        return !aNode.isDeclIdNode() && aNode.getParent(JImportDecl.class) == null;
     }
 
     /**
@@ -74,7 +74,7 @@ public class NodeMatcher {
     public static JNode[] getDeclarationNodesForDecl(JNode aNode, JavaDecl aDecl)
     {
         JNode[] matchingNodex = getMatchingNodesForDecl(aNode, aDecl);
-        return ArrayUtils.filter(matchingNodex, node -> node.isNodeIdNode());
+        return ArrayUtils.filter(matchingNodex, node -> node.isDeclIdNode());
     }
 
     /**

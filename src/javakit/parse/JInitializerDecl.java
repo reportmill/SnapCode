@@ -43,10 +43,10 @@ public class JInitializerDecl extends JMemberDecl implements WithBlockStmt {
      * REPL hack - Override to check prior JInitDecls for VarDecl matching node name.
      */
     @Override
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // Do normal version - just return if successful
-        JavaDecl decl = super.getDeclForChildExprIdNode(anExprId);
+        JavaDecl decl = super.getDeclForChildId(anExprId);
         if (decl != null)
             return decl;
 

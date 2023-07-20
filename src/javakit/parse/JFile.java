@@ -203,7 +203,7 @@ public class JFile extends JNode {
      * Override to check for package name, import class name, static import class member.
      */
     @Override
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // Get node info
         String name = anExprId.getName();
@@ -224,14 +224,14 @@ public class JFile extends JNode {
             return field;
 
         // Do normal version
-        return super.getDeclForChildExprIdNode(anExprId);
+        return super.getDeclForChildId(anExprId);
     }
 
     /**
      * Override - from old getDeclForChildNode(). Is it really needed ???
      */
     @Override
-    protected JavaDecl getDeclForChildTypeNode(JType aJType)
+    protected JavaDecl getDeclForChildType(JType aJType)
     {
         // Get node info
         String name = aJType.getName();
@@ -252,7 +252,7 @@ public class JFile extends JNode {
             return field;
 
         // Do normal version
-        return super.getDeclForChildTypeNode(aJType);
+        return super.getDeclForChildType(aJType);
     }
 
     /**

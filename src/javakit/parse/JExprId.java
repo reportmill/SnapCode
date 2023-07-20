@@ -97,7 +97,7 @@ public class JExprId extends JExpr {
         }
 
         // Forward to parents
-        return getDeclForChildExprIdNode(this);
+        return getDeclForChildId(this);
     }
 
     /**

@@ -413,7 +413,7 @@ public class JClassDecl extends JMemberDecl {
      * Override to check field declarations for id.
      */
     @Override
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // If it's "this", set class and return ClassField
         String name = anExprId.getName();
@@ -473,14 +473,14 @@ public class JClassDecl extends JMemberDecl {
         }
 
         // Do normal version
-        return super.getDeclForChildExprIdNode(anExprId);
+        return super.getDeclForChildId(anExprId);
     }
 
     /**
      * Returns the JavaDecl most closely associated with given child JType node.
      */
     @Override
-    protected JavaDecl getDeclForChildTypeNode(JType type)
+    protected JavaDecl getDeclForChildType(JType type)
     {
         // Get parent of nested type
         JType parentType = type;
@@ -504,7 +504,7 @@ public class JClassDecl extends JMemberDecl {
             }
 
             // Forward to file
-            return super.getDeclForChildTypeNode(type);
+            return super.getDeclForChildType(type);
         }
 
         // If it's "this", set class and return ClassField - from old getDeclForChildNode() is this really needed ???
@@ -538,7 +538,7 @@ public class JClassDecl extends JMemberDecl {
         }
 
         // Do normal version
-        return super.getDeclForChildTypeNode(type);
+        return super.getDeclForChildType(type);
     }
 
     /**

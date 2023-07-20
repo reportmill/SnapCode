@@ -76,20 +76,6 @@ public class JNode {
     protected String getNameImpl()  { return null; }
 
     /**
-     * Returns whether node is a declaration name (JClassDecl JMethodDecl, JFieldDecl, JVarDecl).
-     */
-    public boolean isNodeIdNode()
-    {
-        JExprId id = this instanceof JExprId ? (JExprId) this : null;
-        if (id == null)
-            return false;
-
-        //
-        JNode par = id.getParent();
-        return par instanceof JMemberDecl || par instanceof JVarDecl;
-    }
-
-    /**
      * Returns the JavaDecl most closely associated with this JNode.
      */
     public JavaDecl getDecl()
@@ -110,22 +96,22 @@ public class JNode {
     /**
      * Returns the JavaDecl most closely associated with given child JExprId node.
      */
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // Forward to parent
         if (_parent != null)
-            return _parent.getDeclForChildExprIdNode(anExprId);
+            return _parent.getDeclForChildId(anExprId);
         return null;
     }
 
     /**
      * Returns the JavaDecl most closely associated with given child JType node.
      */
-    protected JavaDecl getDeclForChildTypeNode(JType aJType)
+    protected JavaDecl getDeclForChildType(JType aJType)
     {
         // Forward to parent
         if (_parent != null)
-            return _parent.getDeclForChildTypeNode(aJType);
+            return _parent.getDeclForChildType(aJType);
         return null;
     }
 
@@ -172,7 +158,6 @@ public class JNode {
     {
         if (_parent != null)
             return _parent.getEvalTypeImpl(aNode);
-
         return null;
     }
 
@@ -224,8 +209,8 @@ public class JNode {
      */
     public JavaDecl getEnclosingDecl()
     {
-        JNode n = getEnclosingDeclNode();
-        return n != null ? n.getDecl() : null;
+        JNode enclosingDeclNode = getEnclosingDeclNode();
+        return enclosingDeclNode != null ? enclosingDeclNode.getDecl() : null;
     }
 
     /**
@@ -233,9 +218,24 @@ public class JNode {
      */
     public JNode getEnclosingDeclNode()
     {
-        JNode node = getParent(JMemberDecl.class);
-        if (node instanceof JFieldDecl && getParent(JVarDecl.class) != null) node = getParent(JVarDecl.class);
-        return node;
+        JNode enclosingDeclNode = getParent(JMemberDecl.class);
+        if (enclosingDeclNode instanceof JFieldDecl && getParent(JVarDecl.class) != null)
+            enclosingDeclNode = getParent(JVarDecl.class);
+        return enclosingDeclNode;
+    }
+
+    /**
+     * Returns whether node is a declaration id node (JClassDecl JMethodDecl, JFieldDecl, JVarDecl).
+     */
+    public boolean isDeclIdNode()
+    {
+        // If node not JExprId, return false
+        if (!(this instanceof JExprId))
+            return false;
+
+        // Return whether parent is declaration node
+        JNode parentNode = getParent();
+        return parentNode instanceof JMemberDecl || parentNode instanceof JVarDecl;
     }
 
     /**

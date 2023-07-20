@@ -174,7 +174,7 @@ public class JType extends JNode {
             return _baseDecl = javaClass;
 
         // If not primitive, try to resolve class (type might be package name or unresolvable)
-        JavaDecl packageOrClassDecl = getDeclForChildTypeNode(this);
+        JavaDecl packageOrClassDecl = getDeclForChildType(this);
         if (packageOrClassDecl instanceof JavaType)
             javaClass = (JavaType) packageOrClassDecl;
 
@@ -214,7 +214,7 @@ public class JType extends JNode {
      * Override to handle 'var' types.
      */
     @Override
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // Handle 'var'
         String name = anExprId.getName();
@@ -222,7 +222,7 @@ public class JType extends JNode {
             return getDeclForVar();
 
         // Do normal version
-        return super.getDeclForChildExprIdNode(anExprId);
+        return super.getDeclForChildId(anExprId);
     }
 
     /**

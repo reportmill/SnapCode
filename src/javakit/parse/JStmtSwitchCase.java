@@ -70,7 +70,7 @@ public class JStmtSwitchCase extends JNode implements WithStmts {
      * Override to check inner variable declaration statements.
      */
     @Override
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // If node is case label id, try to evaluate against Switch expression enum type
         if (anExprId == _expr)
@@ -83,7 +83,7 @@ public class JStmtSwitchCase extends JNode implements WithStmts {
             return varDecl.getDecl();
 
         // Do normal version
-        return super.getDeclForChildExprIdNode(anExprId);
+        return super.getDeclForChildId(anExprId);
     }
 
     /**

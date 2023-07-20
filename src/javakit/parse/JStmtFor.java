@@ -89,7 +89,7 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
      * Override to check init declaration.
      */
     @Override
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // If any ForStmt.varDecls matches id expr name, return decl
         String name = anExprId.getName();
@@ -98,6 +98,6 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
             return varDecl.getDecl();
 
         // Do normal version
-        return super.getDeclForChildExprIdNode(anExprId);
+        return super.getDeclForChildId(anExprId);
     }
 }

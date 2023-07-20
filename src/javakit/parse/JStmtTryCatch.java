@@ -52,7 +52,7 @@ public class JStmtTryCatch extends JNode implements WithBlockStmt {
      * Override to check param.
      */
     @Override
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // Check params
         String name = anExprId.getName();
@@ -60,6 +60,6 @@ public class JStmtTryCatch extends JNode implements WithBlockStmt {
             return _param.getDecl();
 
         // Do normal version
-        return super.getDeclForChildExprIdNode(anExprId);
+        return super.getDeclForChildId(anExprId);
     }
 }

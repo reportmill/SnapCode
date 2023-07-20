@@ -134,7 +134,7 @@ public class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithV
      * Override to check formal parameters.
      */
     @Override
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // Handle parameter name id: return param decl
         String name = anExprId.getName();
@@ -148,7 +148,7 @@ public class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithV
             return typeVar.getDecl();
 
         // Do normal version (search class)
-        JavaDecl superValue = super.getDeclForChildExprIdNode(anExprId);
+        JavaDecl superValue = super.getDeclForChildId(anExprId);
         if (superValue != null)
             return superValue;
 
@@ -169,7 +169,7 @@ public class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithV
         for (JInitializerDecl initDecl : initDecls) {
             if (initDecl.getStartCharIndex() < getStartCharIndex()) {
                 JStmtBlock blockStmt = initDecl.getBlock();
-                JavaDecl nodeDecl = blockStmt.getDeclForChildExprIdNode(anExprId);
+                JavaDecl nodeDecl = blockStmt.getDeclForChildId(anExprId);
                 if (nodeDecl != null)
                     return nodeDecl;
             }
@@ -184,7 +184,7 @@ public class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithV
      * Override - from old getDeclForChildNode(). Is it really needed ???
      */
     @Override
-    protected JavaDecl getDeclForChildTypeNode(JType aJType)
+    protected JavaDecl getDeclForChildType(JType aJType)
     {
         // Handle TypeVar name: return typevar decl
         String name = aJType.getName();
@@ -193,7 +193,7 @@ public class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithV
             return typeVar.getDecl();
 
         // Do normal version
-        return super.getDeclForChildTypeNode(aJType);
+        return super.getDeclForChildType(aJType);
     }
 
     /**

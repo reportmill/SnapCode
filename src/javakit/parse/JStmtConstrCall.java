@@ -99,13 +99,13 @@ public class JStmtConstrCall extends JStmt {
      * Tries to resolve the method declaration for this node.
      */
     @Override
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // Check IdList
         if (anExprId.getParent() == this && ListUtils.containsId(_idList, anExprId))
             return getDecl();
 
         // Do normal version
-        return super.getDeclForChildExprIdNode(anExprId);
+        return super.getDeclForChildId(anExprId);
     }
 }

@@ -223,7 +223,7 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     /**
      * Override to check lambda parameters.
      */
-    protected JavaDecl getDeclForChildExprIdNode(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // If node is parameter name, return param decl
         String name = anExprId.getName();
@@ -232,7 +232,7 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
             return param.getDecl();
 
         // Do normal version
-        return super.getDeclForChildExprIdNode(anExprId);
+        return super.getDeclForChildId(anExprId);
     }
 
     /**
