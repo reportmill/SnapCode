@@ -237,7 +237,7 @@ public class SearchTool extends WorkspaceTool {
 
         // Configure search
         _search = new Search();
-        _search._string = decl.getMatchName();
+        _search._string = decl.getFullNameWithParameterTypes();
         _search._kind = Search.Kind.Reference;
 
         // Iterate over all project sites
@@ -311,7 +311,7 @@ public class SearchTool extends WorkspaceTool {
 
         // Configure search
         _search = new Search();
-        _search._string = decl.getMatchName();
+        _search._string = decl.getFullNameWithParameterTypes();
         _search._kind = Search.Kind.Declaration;
 
         // Iterate over all project sites
@@ -419,7 +419,7 @@ public class SearchTool extends WorkspaceTool {
         public String getDescriptor()
         {
             JavaDecl decl = _node != null ? _node.isNodeIdNode() ? _node.getDecl() : _node.getEnclosingDecl() : null;
-            if (decl != null) return decl.getPrettyName();
+            if (decl != null) return decl.getFullNameWithSimpleParameterTypes();
             String s = _file.getName() + " - " + _file.getParent().getPath();
             s += " (" + _count + " match" + (_count == 1 ? "" : "es") + ")";
             return s;

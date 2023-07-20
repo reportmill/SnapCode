@@ -40,7 +40,7 @@ public class ClassInfoPage extends TextPage {
 
             // Print class
             if (decl instanceof JavaClass) {
-                sb.append("Class ").append(decl.getFullName()).append('\n');
+                sb.append("Class ").append(decl.getDeclarationString()).append('\n');
 
                 // Iterate over decls
                 for (JavaDecl d2 : declArray) {
@@ -49,7 +49,7 @@ public class ClassInfoPage extends TextPage {
                     if (d2 instanceof JavaMember) {
                         JavaMember member = (JavaMember) d2;
                         if (member.getDeclaringClass() == decl)
-                            sb.append("    ").append(d2.getType()).append(' ').append(d2.getFullName()).append('\n');
+                            sb.append("    ").append(d2.getType()).append(' ').append(d2.getDeclarationString()).append('\n');
                     }
                 }
                 sb.append('\n');
@@ -63,7 +63,7 @@ public class ClassInfoPage extends TextPage {
 
         // Iterate over refs
         for (JavaDecl ref : refArray)
-            sb.append(ref.getType()).append(' ').append(ref.getFullName()).append('\n');
+            sb.append(ref.getType()).append(' ').append(ref.getDeclarationString()).append('\n');
 
         // Set Text
         return sb.toString();

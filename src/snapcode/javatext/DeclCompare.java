@@ -47,8 +47,8 @@ class DeclCompare implements Comparator<JavaDecl> {
             return simpleNameComp;
 
         // Otherwise use full name
-        String fullName1 = decl1.getFullName();
-        String fullName2 = decl2.getFullName();
+        String fullName1 = decl1.getFullNameWithParameterTypes();
+        String fullName2 = decl2.getFullNameWithParameterTypes();
         return fullName1.compareToIgnoreCase(fullName2);
     }
 

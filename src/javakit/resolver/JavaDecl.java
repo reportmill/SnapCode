@@ -72,22 +72,14 @@ public class JavaDecl implements Comparable<JavaDecl> {
         // If already set, just return
         if (_fullName != null) return _fullName;
 
-        String fullName = getMatchName();
-
-        // If method or field, add return type name
+        // Get full name
+        String fullName = _name;
         if (this instanceof JavaMethod || this instanceof JavaField) {
-            JavaType returnType = getEvalType();
-            String returnTypeName = returnType.getName();
-            fullName = returnTypeName + " " + fullName;
+            JavaMember member = (JavaMember) this;
+            String className = member.getDeclaringClassName();
+            fullName = className + '.' + fullName;
         }
 
-        // If Class or Member, Add mod string
-        if (this instanceof JavaClass || this instanceof JavaMember) {
-            int mods = this instanceof JavaClass ? ((JavaClass) this).getModifiers() : ((JavaMember) this).getModifiers();
-            String modifierStr = Modifier.toString(mods);
-            if (modifierStr.length() > 0)
-                fullName = modifierStr + " " + fullName;
-        }
         // Set and return
         return _fullName = fullName;
     }
@@ -121,19 +113,74 @@ public class JavaDecl implements Comparable<JavaDecl> {
     }
 
     /**
-     * Returns a name suitable to describe declaration.
+     * Returns the full name, with parameter type names appended if executable.
      */
-    public String getPrettyName()
+    public String getSimpleNameWithParameterTypes()
     {
-        return getName();
+        String simpleName = getSimpleName();
+
+        // If Executable, add parameter types string
+        if (this instanceof JavaExecutable)
+            simpleName += ((JavaExecutable) this).getParametersString(true);
+
+        // Return
+        return simpleName;
     }
 
     /**
-     * Returns a name unique for matching declarations.
+     * Returns the full name, with parameter type names appended if executable.
      */
-    public String getMatchName()
+    public String getFullNameWithParameterTypes()
     {
-        return getName();
+        String fullName = getFullName();
+
+        // If Executable, add parameter types string
+        if (this instanceof JavaExecutable)
+            fullName += ((JavaExecutable) this).getParametersString(false);
+
+        // Return
+        return fullName;
+    }
+
+    /**
+     * Returns the full name, with parameter type simple-names appended if executable.
+     */
+    public String getFullNameWithSimpleParameterTypes()
+    {
+        String fullName = getFullName();
+
+        // If Executable, add parameter types string
+        if (this instanceof JavaExecutable)
+            fullName += ((JavaExecutable) this).getParametersString(true);
+
+        // Return
+        return fullName;
+    }
+
+    /**
+     * Returns the full declaration string, including modifiers and return type (method/field).
+     */
+    public String getDeclarationString()
+    {
+        String declString = getFullNameWithParameterTypes();
+
+        // If method or field, prefix return type
+        if (this instanceof JavaMethod || this instanceof JavaField) {
+            JavaType returnType = getEvalType();
+            String returnTypeName = returnType.getName();
+            declString = returnTypeName + " " + declString;
+        }
+
+        // If Class or Member, prefix mod string
+        if (this instanceof JavaClass || this instanceof JavaMember) {
+            int mods = this instanceof JavaClass ? ((JavaClass) this).getModifiers() : ((JavaMember) this).getModifiers();
+            String modifierStr = Modifier.toString(mods);
+            if (modifierStr.length() > 0)
+                declString = modifierStr + " " + declString;
+        }
+
+        // Return
+        return declString;
     }
 
     /**
@@ -141,8 +188,7 @@ public class JavaDecl implements Comparable<JavaDecl> {
      */
     public String getSuggestionString()
     {
-        String simpleName = getSimpleName();
-        return simpleName;
+        return getSimpleNameWithParameterTypes();
     }
 
     /**
@@ -150,8 +196,7 @@ public class JavaDecl implements Comparable<JavaDecl> {
      */
     public String getReplaceString()
     {
-        String simpleName = getSimpleName();
-        return simpleName;
+        return getSimpleNameWithParameterTypes();
     }
 
     /**
@@ -181,10 +226,10 @@ public class JavaDecl implements Comparable<JavaDecl> {
         if (typeOrder1 != typeOrder2)
             return typeOrder1 - typeOrder2;
 
-        // Compare match names
-        String matchName1 = getMatchName();
-        String matchName2 = aDecl.getMatchName();
-        return matchName1.compareTo(matchName2);
+        // Compare full names
+        String fullName1 = getFullNameWithParameterTypes();
+        String fullName2 = aDecl.getFullNameWithParameterTypes();
+        return fullName1.compareTo(fullName2);
     }
 
     /**

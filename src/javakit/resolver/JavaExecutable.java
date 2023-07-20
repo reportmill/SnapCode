@@ -5,6 +5,7 @@ package javakit.resolver;
 import snap.util.ArrayUtils;
 import snap.util.StringUtils;
 import java.lang.reflect.*;
+import java.util.function.Function;
 
 /**
  * This class represents a Java Method or Constructor.
@@ -128,78 +129,14 @@ public class JavaExecutable extends JavaMember {
     }
 
     /**
-     * Returns a string representation of suggestion.
+     * Returns the parameter types string.
      */
-    @Override
-    public String getSuggestionString()
+    protected String getParametersString(boolean simpleNames)
     {
-        // Get SimpleName,
-        String simpleName = getSimpleName();
-        String[] paramTypeNames = getParamTypeSimpleNames();
-        String paramTypeNamesStr = StringUtils.join(paramTypeNames, ",");
-
-        // Construct string SimpleName(ParamType.SimpleName, ...)
-        return simpleName + '(' + paramTypeNamesStr + ')';
-    }
-
-    /**
-     * Returns the string to use when inserting this suggestion into code.
-     */
-    @Override
-    public String getReplaceString()
-    {
-        String name = getSimpleName();
-        String[] paramTypeNames = getParamTypeSimpleNames();
-        String paramTypeNamesStr = StringUtils.join(paramTypeNames, ",");
-        return name + '(' + paramTypeNamesStr + ')';
-    }
-
-    /**
-     * Returns a name suitable to describe declaration.
-     */
-    @Override
-    public String getPrettyName()
-    {
-        // Get full MemberName for Constructor or Method
-        String className = getDeclaringClassName();
-        String memberName = className;
-        if (this instanceof JavaMethod)
-            memberName = className + '.' + getName();
-
-        // Get simple parameter names
-        String[] paramTypeNames = getParamTypeSimpleNames();
-        String paramTypeNamesStr = StringUtils.join(paramTypeNames, ",");
-
-        // Return ClassName(param1, ...) or ClassName.MethodName(param1, ...)
-        return memberName + '(' + paramTypeNamesStr + ')';
-    }
-
-    /**
-     * Returns a name unique for matching declarations.
-     */
-    @Override
-    public String getMatchName()
-    {
-        // Get full MemberName for Constructor or Method
-        String className = getDeclaringClassName();
-        String memberName = className;
-        if (this instanceof JavaMethod)
-            memberName = className + '.' + getName();
-
-        // Get parameter names
-        String[] paramTypeNames = ArrayUtils.map(_paramTypes, paramType -> paramType.getName(), String.class);
-        String paramTypeNamesStr = StringUtils.join(paramTypeNames, ",");
-
-        // Return ClassName(param1, ...) or ClassName.MethodName(param1, ...)
-        return memberName + '(' + paramTypeNamesStr + ')';
-    }
-
-    /**
-     * Returns the parameter type simple names.
-     */
-    private String[] getParamTypeSimpleNames()
-    {
-        return ArrayUtils.map(_paramTypes, paramType -> paramType.getSimpleName(), String.class);
+        Function<JavaDecl,String> namesFunction = simpleNames ? JavaDecl::getSimpleName : JavaDecl::getName;
+        String[] paramTypeNames = ArrayUtils.map(_paramTypes, namesFunction, String.class);
+        String paramTypesString = StringUtils.join(paramTypeNames, ",");
+        return '(' + paramTypesString + ')';
     }
 
     /**

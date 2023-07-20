@@ -38,8 +38,9 @@ public class JavaField extends JavaMember {
     @Override
     public String getSuggestionString()
     {
+        String simpleName = super.getSuggestionString();
+
         // Get SimpleName, EvalType.SimpleName and DeclaringClass.SimpleName
-        String simpleName = getSimpleName();
         JavaType evalType = getEvalType();
         String evalTypeName = evalType != null ? evalType.getSimpleName() : null;
         JavaClass declaringClass = getDeclaringClass();
@@ -53,28 +54,6 @@ public class JavaField extends JavaMember {
 
         // Return
         return sb.toString();
-    }
-
-    /**
-     * Returns a name suitable to describe declaration.
-     */
-    @Override
-    public String getPrettyName()
-    {
-        String className = getDeclaringClassName();
-        String fieldName = getName();
-        return className + '.' + fieldName;
-    }
-
-    /**
-     * Returns a name unique for matching declarations.
-     */
-    @Override
-    public String getMatchName()
-    {
-        String className = getDeclaringClassName();
-        String fieldName = getName();
-        return className + '.' + fieldName;
     }
 
     /**

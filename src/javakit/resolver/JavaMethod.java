@@ -123,14 +123,15 @@ public class JavaMethod extends JavaExecutable {
     /**
      * Returns a signature.
      */
-    public static String getSigForParts(JavaClass aClass, String aName, JavaType[] paramTypes, boolean varArgs)
+    public static String getSigForParts(JavaClass aClass, String aName, JavaType[] paramTypes)
     {
         // Basic "pkg.pkg.ClassName.MethodName()"
         String prefix = aClass.getId() + '.' + aName;
-        if (paramTypes.length == 0) return prefix + "()";
+        if (paramTypes.length == 0)
+            return prefix + "()";
 
         // Add ParamTypes: "(pkg.pkg.ClassName,pkg.pkg.ClassName,...)"
-        StringBuffer sb = new StringBuffer(prefix).append('(');
+        StringBuilder sb = new StringBuilder(prefix).append('(');
         for (JavaType type : paramTypes)
             sb.append(type.getId()).append(',');
         sb.setLength(sb.length() - 1);
@@ -153,7 +154,6 @@ public class JavaMethod extends JavaExecutable {
         JavaType  _returnType;
         JavaTypeVariable[]  _typeVars = new JavaTypeVariable[0];
         boolean  _default;
-        boolean  _varArgs;
         JMethodDecl  _methodDecl;
 
         // For build all
@@ -180,10 +180,8 @@ public class JavaMethod extends JavaExecutable {
         public MethodBuilder paramTypes(JavaType ...  paramTypes)  { _paramTypes = paramTypes; return this; }
         public MethodBuilder paramTypes(Type ...  paramTypes)  { _paramTypes = _resolver.getJavaTypesForTypes(paramTypes); return this; }
         public MethodBuilder returnType(JavaType returnType)  { _returnType = returnType; return this; }
-        public MethodBuilder returnType(Type returnType)  { _returnType = _resolver.getJavaTypeForType(returnType); return this; }
         public MethodBuilder typeVars(String aName)  { return this; }
         public MethodBuilder isDefault(boolean isDefault)  { _default = isDefault; return this; }
-        public MethodBuilder varArgs()  { _varArgs = true; return this; }
         public MethodBuilder methodDecl(JMethodDecl methodDecl)  { _methodDecl = methodDecl; return this; }
 
         /**
@@ -193,20 +191,19 @@ public class JavaMethod extends JavaExecutable {
         {
             JavaMethod m = new JavaMethod(_resolver, _declaringClass, null);
             m._mods = _mods;
-            m._id = getSigForParts(_declaringClass, _name, _paramTypes, _varArgs);
+            m._id = getSigForParts(_declaringClass, _name, _paramTypes);
             m._name = m._simpleName = _name;
             m._declaringClass = _declaringClass;
             m._paramTypes = _paramTypes;
             m._evalType = _returnType;
             m._typeVars = _typeVars;
             m._default = _default;
-            m._varArgs = _varArgs;
             m._methodDecl = _methodDecl;
             _mods = Modifier.PUBLIC;
             _name = null;
             _paramTypes = new JavaType[0];
             _typeVars = new JavaTypeVariable[0];
-            _default = _varArgs = false;
+            _default = false;
             _methodDecl = null;
             return m;
         }

@@ -72,13 +72,17 @@ public class JavaConstructor extends JavaExecutable {
     @Override
     public String getSuggestionString()
     {
-        String nameAndParamsStr = super.getSuggestionString();
+        String suggestionString = super.getSuggestionString();
+
+        // Get context string
         JavaClass declClass = getDeclaringClass();
         JavaClass enclClass = declClass.getDeclaringClass();
         JavaPackage pkg = declClass.getPackage();
         String parentName = enclClass != null ? enclClass.getName() : pkg != null ? pkg.getName() : "";
-        String infoStr = parentName != null ? " - " + parentName : "";
-        return nameAndParamsStr + infoStr;
+        String contextStr = parentName != null ? " - " + parentName : "";
+
+        // Return
+        return suggestionString + contextStr;
     }
 
     /**
