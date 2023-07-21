@@ -72,7 +72,7 @@ public class JExprDot extends JExpr {
         }
 
         // Get id string
-        String name = _expr != null ? _expr.getName() : null;
+        String name = _expr.getName();
         if (name == null)
             return null;
 
@@ -84,42 +84,36 @@ public class JExprDot extends JExpr {
             return null;
         }
 
-        // Handle ParameterizedType
-        if (prefixDecl instanceof JavaParameterizedType)
-            prefixDecl = ((JavaParameterizedType) prefixDecl).getRawType();
-
         // Handle prefix is Package: Return child class or package for name
         if (prefixDecl instanceof JavaPackage) {
             JavaPackage javaPkg = (JavaPackage) prefixDecl;
             return javaPkg.getChildForName(name);
         }
 
-        // Handle prefix is Class: Look for ".this", ".class", static field or inner class
-        else if (prefixDecl instanceof JavaClass) {
+        // Get eval class
+        JavaClass parentClass = prefixExpr.getEvalClass();
+        if (parentClass == null)
+            return null;
 
-            // Get parent class
-            JavaClass parentClass = (JavaClass) prefixDecl;
+        // Handle Class.this: Return parent declaration
+        if (name.equals("this"))
+            return parentClass; // was FieldName
 
-            // Handle Class.this: Return parent declaration
-            if (name.equals("this"))
-                return parentClass; // was FieldName
-
-            // Handle Class.class: Return ParamType for Class<T>
-            if (name.equals("class")) {
-                JavaClass classClass = getJavaClassForClass(Class.class);
-                return classClass.getParamTypeDecl(parentClass);
-            }
-
-            // Handle inner class
-            JavaClass innerClass = parentClass.getInnerClassDeepForName(name);
-            if (innerClass != null)
-                return innerClass;
-
-            // Handle Field
-            JavaField field = parentClass.getFieldDeepForName(name);
-            if (field != null) // && Modifier.isStatic(field.getModifiers()))
-                return field;
+        // Handle Class.class: Return ParamType for Class<T>
+        if (name.equals("class")) {
+            JavaClass classClass = getJavaClassForClass(Class.class);
+            return classClass.getParamTypeDecl(parentClass);
         }
+
+        // Handle inner class
+        JavaClass innerClass = parentClass.getInnerClassDeepForName(name);
+        if (innerClass != null)
+            return innerClass;
+
+        // Handle Field
+        JavaField field = parentClass.getFieldDeepForName(name);
+        if (field != null) // && Modifier.isStatic(field.getModifiers()))
+            return field;
 
         // Return not found
         return null;
