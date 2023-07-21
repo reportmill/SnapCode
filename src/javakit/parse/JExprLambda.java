@@ -129,6 +129,20 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     }
 
     /**
+     * Override to get eval type from expression if possible.
+     */
+    @Override
+    protected JavaType getEvalTypeImpl()
+    {
+        // If expression is set, return it's eval type
+        if (_expr != null)
+            return _expr.getEvalType();
+
+        // Do normal version
+        return super.getEvalTypeImpl();
+    }
+
+    /**
      * Returns the specific method in the lambda class interface that is to be called.
      */
     public JavaMethod getLambdaMethod()

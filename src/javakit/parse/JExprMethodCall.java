@@ -282,6 +282,34 @@ public class JExprMethodCall extends JExpr implements WithId {
             //    return resolvedDecl;
         }
 
+        // If type is ParameterizedType, try to resolve
+        else if (resolvedType instanceof JavaParameterizedType) {
+
+            // Get parameterized type and parameter types
+            JavaParameterizedType parameterizedType = (JavaParameterizedType) resolvedType;
+            JavaType[] paramTypes = parameterizedType.getParamTypes();
+            JavaType[] paramTypesResolved = paramTypes.clone();
+            boolean didResolve = false;
+
+            // Iterate over each and resolve if needed
+            for (int i = 0; i < paramTypes.length; i++) {
+                JavaType paramType = paramTypes[i];
+                if (!paramType.isResolvedType()) {
+                    JavaType paramTypeResolved = getResolvedTypeForType(paramType);
+                    if (paramTypeResolved != paramType) {
+                        paramTypesResolved[i] = paramTypeResolved;
+                        didResolve = true;
+                    }
+                }
+            }
+
+            // If something was resolved, create new type with resolved parameter types
+            if (didResolve) {
+                JavaClass rawType = parameterizedType.getRawType();
+                resolvedType = rawType.getParamTypeDecl(paramTypesResolved);
+            }
+        }
+
         // Do normal version
         if (!resolvedType.isResolvedType())
             resolvedType = super.getResolvedTypeForType(resolvedType);
@@ -301,43 +329,58 @@ public class JExprMethodCall extends JExpr implements WithId {
         if (typeVar == null)
             return null;
 
+        // Get parameter types
+        JavaType[] methodParameterTypes = aMethod.getParamTypes();
+
         // Iterate over method arg types to see if any can resolve the type var
-        JavaDecl[] argTypes = aMethod.getParamTypes();
-        for (int i = 0, iMax = argTypes.length; i < iMax; i++) {
-            JavaDecl arg = argTypes[i];
+        for (int i = 0, iMax = methodParameterTypes.length; i < iMax; i++) {
+            JavaDecl methodParameterType = methodParameterTypes[i];
 
             // If method arg is TypeVar with same name, return arg expr eval type (if not null)
-            if (arg instanceof JavaTypeVariable && arg.getName().equals(name)) {
-                JExpr argExpr = getArg(i);
-                if (argExpr == null)
-                    continue;
-                JavaType argEvalType = argExpr.getDecl().getEvalType();
-                return argEvalType;
+            if (methodParameterType instanceof JavaTypeVariable) {
+
+                // If name matches, return arg expression eval type
+                 if (methodParameterType.getName().equals(name)) {
+                     JExpr argExpr = getArg(i);
+                     JavaType argEvalType = argExpr != null ? argExpr.getEvalType() : null;
+                     if (argEvalType != null)
+                         return argEvalType;
+                 }
             }
 
             // If method arg is ParamType with matching param TypeVar,
-            if (arg instanceof JavaParameterizedType) {
+            else if (methodParameterType instanceof JavaParameterizedType) {
+
+                // Get parameterized type parameter types
+                JavaParameterizedType argPT = (JavaParameterizedType) methodParameterType;
+                JavaType[] paramTypes = argPT.getParamTypes();
 
                 // Iterate over ParamType params
-                JavaParameterizedType argPT = (JavaParameterizedType) arg;
-                JavaType[] paramTypes = argPT.getParamTypes();
                 for (JavaType paramType : paramTypes) {
 
-                    // If TypeVar with matching name, see if arg eval type can resolve
+                    // If name matches, return arg expression eval type
                     if (paramType instanceof JavaTypeVariable && paramType.getName().equals(name)) {
-
-                        // Get arg expr and eval type
                         JExpr argExpr = getArg(i);
-                        JavaDecl argEvalType = argExpr.getDecl().getEvalType();
-                        if (argEvalType == null)
-                            continue;
-
-                        if (argEvalType instanceof JavaParameterizedType) {
-                            JavaParameterizedType argEvalPT = (JavaParameterizedType) argEvalType;
-                            JavaType[] argParamTypes = argEvalPT.getParamTypes();
-                            return argParamTypes[0];
-                        }
+                        JavaType argEvalType = argExpr != null ? argExpr.getEvalType() : null;
+                        if (argEvalType != null)
+                            return argEvalType;
                     }
+                }
+            }
+
+            // Handle GenericArrayType
+            else if (methodParameterType instanceof JavaGenericArrayType) {
+
+                // Get array component type
+                JavaGenericArrayType genericArrayType = (JavaGenericArrayType) methodParameterType;
+                JavaType componentType = genericArrayType.getComponentType();
+
+                // If name matches
+                if (componentType.getName().equals(name)) {
+                    JExpr argExpr = getArg(i);
+                    JavaType argEvalType = argExpr != null ? argExpr.getEvalType() : null;
+                    if (argEvalType != null)
+                        return argEvalType;
                 }
             }
         }

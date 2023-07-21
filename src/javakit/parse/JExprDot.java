@@ -120,6 +120,20 @@ public class JExprDot extends JExpr {
     }
 
     /**
+     * Override to support MethodCall.
+     */
+    @Override
+    protected JavaType getEvalTypeImpl()
+    {
+        // If expression is MethodCall, return its EvalType
+        if (!(_expr instanceof JExprId) && _expr != null)
+            return _expr.getEvalType();
+
+        // Do normal version
+        return super.getEvalTypeImpl();
+    }
+
+    /**
      * Returns the part name.
      */
     public String getNodeString()  { return "DotExpr"; }
