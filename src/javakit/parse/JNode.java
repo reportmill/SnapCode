@@ -143,8 +143,8 @@ public class JNode {
 
         // Handle TypeVariables: Try to resolve from Class/Method TypeVars
         if (evalType != null && !evalType.isResolvedType()) {
-            JavaType resolvedType = getEvalTypeImpl(this);
-            evalType = resolvedType != null ? resolvedType : evalType.getEvalType();
+            JavaType resolvedType = getResolvedTypeForType(evalType);
+            evalType = resolvedType != null ? resolvedType : evalType.getEvalClass();
         }
 
         // Return
@@ -152,13 +152,14 @@ public class JNode {
     }
 
     /**
-     * Returns the resolved eval type for child node, if this ancestor can.
+     * Returns a resolved type for given type.
      */
-    protected JavaType getEvalTypeImpl(JNode aNode)
+    protected JavaType getResolvedTypeForType(JavaType aType)
     {
+        JavaType resolvedType = aType;
         if (_parent != null)
-            return _parent.getEvalTypeImpl(aNode);
-        return null;
+            resolvedType = _parent.getResolvedTypeForType(aType);
+        return resolvedType;
     }
 
     /**

@@ -542,29 +542,24 @@ public class JClassDecl extends JMemberDecl {
     }
 
     /**
-     * Override to resolve Decl.EvalType from ParentExpr.EvalType.
+     * Returns a resolved type for given type.
      */
-    protected JavaType getEvalTypeImpl(JNode aNode)
+    protected JavaType getResolvedTypeForType(JavaType aType)
     {
-        // Handle JType: See if class decl can resolve
-        if (aNode instanceof JType) {
+        JavaType resolvedType = aType;
 
-            // Get type
-            JType type = (JType) aNode;
-            JavaType typeType = type.getDecl();
-            JavaType evalType = typeType.getEvalType();
-
-            // If eval type is TypeVar, see if it corresponds to this class
-            if (evalType instanceof JavaTypeVariable) {
-                JavaClass javaClass = getDecl();
-                JavaType evalType2 = javaClass.getResolvedType(evalType);
-                if (evalType2 != evalType.getEvalType())
-                    return evalType2;
-            }
+        // If eval type is TypeVar, see if it corresponds to this class
+        if (resolvedType instanceof JavaTypeVariable) {
+            JavaClass javaClass = getDecl();
+            resolvedType = javaClass.getResolvedType(resolvedType);
         }
 
         // Do normal version
-        return super.getEvalTypeImpl(aNode);
+        if (!resolvedType.isResolvedType())
+            return super.getResolvedTypeForType(resolvedType);
+
+        // Return
+        return resolvedType;
     }
 
     /**

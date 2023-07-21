@@ -256,56 +256,48 @@ public class JExprMethodCall extends JExpr implements WithId {
     }
 
     /**
-     * Override to resolve Decl.EvalType from ParentExpr.EvalType.
+     * Returns a resolved type for given type.
      */
-    @Override
-    protected JavaType getEvalTypeImpl(JNode aNode)
+    protected JavaType getResolvedTypeForType(JavaType aType)
     {
-        // Handle MethodCall id
-        if (aNode == _id)
-            return getEvalType();
+        // Get type
+        JavaType resolvedType = aType;
 
-        // Handle this node
-        else if (aNode == this) {
+        // If type is TypeVar, try to resolve
+        if (resolvedType instanceof JavaTypeVariable) {
 
-            // Get method, eval type and scope type
+            // Get name and method
+            JavaTypeVariable typeVar = (JavaTypeVariable) resolvedType;
             JavaMethod method = getDecl();
-            if (method == null)
-                return null;
-            JavaType evalType = method.getEvalType();
 
-            // If eval type is TypeVar, try to resolve
-            if (evalType instanceof JavaTypeVariable) {
-                String name = evalType.getName();
+            // See if TypeVar can be resolved by method
+            if (method != null)
+                resolvedType = getResolvedTypeVarForMethod(typeVar, method);
 
-                // See if TypeVar can be resolved by method
-                JavaType resolvedDecl = getResolvedTypeVarForMethod(name, method);
-                if (resolvedDecl != null)
-                    return resolvedDecl;
-
-                // See if TypeVar can be resolved by ScopeNode.Type
-                JavaDecl scopeDecl = getScopeDecl();
-                JavaType scopeType = scopeDecl != null ? scopeDecl.getEvalType() : null;
-                resolvedDecl = scopeType != null ? scopeType.getResolvedType(evalType) : null;
-                if (resolvedDecl != null)
-                    return resolvedDecl;
-
-                // Otherwise, just return TypeVar default
-                return evalType.getEvalType();
-            }
+            // See if TypeVar can be resolved by ScopeNode.Type
+            //JavaDecl scopeDecl = getScopeDecl();
+            //JavaType scopeType = scopeDecl != null ? scopeDecl.getEvalType() : null;
+            //resolvedDecl = scopeType != null ? scopeType.getResolvedType(resolvedType) : null;
+            //if (resolvedDecl != null)
+            //    return resolvedDecl;
         }
 
         // Do normal version
-        return super.getEvalTypeImpl(aNode);
+        if (!resolvedType.isResolvedType())
+            resolvedType = super.getResolvedTypeForType(resolvedType);
+
+        // Return
+        return resolvedType;
     }
 
     /**
      * Resolves a TypeVar for given method decl and arg types.
      */
-    public JavaType getResolvedTypeVarForMethod(String aName, JavaMethod aMethod)
+    public JavaType getResolvedTypeVarForMethod(JavaTypeVariable aTypeVar, JavaMethod aMethod)
     {
         // If no type var for given name, just return
-        JavaTypeVariable typeVar = aMethod.getTypeVarForName(aName);
+        String name = aTypeVar.getName();
+        JavaTypeVariable typeVar = aMethod.getTypeVarForName(name);
         if (typeVar == null)
             return null;
 
@@ -315,11 +307,11 @@ public class JExprMethodCall extends JExpr implements WithId {
             JavaDecl arg = argTypes[i];
 
             // If method arg is TypeVar with same name, return arg expr eval type (if not null)
-            if (arg instanceof JavaTypeVariable && arg.getName().equals(aName)) {
+            if (arg instanceof JavaTypeVariable && arg.getName().equals(name)) {
                 JExpr argExpr = getArg(i);
                 if (argExpr == null)
                     continue;
-                JavaType argEvalType = argExpr.getEvalType();
+                JavaType argEvalType = argExpr.getDecl().getEvalType();
                 return argEvalType;
             }
 
@@ -332,14 +324,14 @@ public class JExprMethodCall extends JExpr implements WithId {
                 for (JavaType paramType : paramTypes) {
 
                     // If TypeVar with matching name, see if arg eval type can resolve
-                    if (paramType instanceof JavaTypeVariable && paramType.getName().equals(aName)) {
+                    if (paramType instanceof JavaTypeVariable && paramType.getName().equals(name)) {
 
                         // Get arg expr and eval type
                         JExpr argExpr = getArg(i);
-                        if (argExpr == null) continue;
-                        JavaDecl argEvalType = argExpr.getEvalType();
+                        JavaDecl argEvalType = argExpr.getDecl().getEvalType();
                         if (argEvalType == null)
                             continue;
+
                         if (argEvalType instanceof JavaParameterizedType) {
                             JavaParameterizedType argEvalPT = (JavaParameterizedType) argEvalType;
                             JavaType[] argParamTypes = argEvalPT.getParamTypes();
@@ -351,7 +343,7 @@ public class JExprMethodCall extends JExpr implements WithId {
         }
 
         // Return null since TypeVar name couldn't be resolved by method args
-        return null;
+        return aTypeVar;
     }
 
     /**

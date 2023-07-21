@@ -200,7 +200,7 @@ public class JavaClass extends JavaType {
         // Get GenericSuperClass as JavaType
         Class<?> realClass = getRealClass();
         Type superType = realClass.getGenericSuperclass();
-        JavaType javaType = _resolver.getJavaTypeForType(superType);
+        JavaType javaType = superType != null ? _resolver.getJavaTypeForType(superType) : null;
 
         // Set, return
         return _superType = javaType;
@@ -667,11 +667,6 @@ public class JavaClass extends JavaType {
         JavaDecl typeVar = getTypeVarForName(name);
         if (typeVar != null)
             return typeVar.getEvalType();
-
-        // If super has type var, return mapped type //JavaDecl sdecl = getSuper();
-        /*if(sdecl!=null && sdecl.getTypeVar(name)!=null) {
-            int ind = sdecl.getHpr().getTypeVarDeclIndex(name);
-            if(ind>=0 && ind<_paramTypes.length) return _paramTypes[ind]; }*/
 
         // If SuerType is ParameterizedType, let it try to resolve
         JavaType superType = getSuperType();
