@@ -3,6 +3,8 @@
  */
 package javakit.resolver;
 import java.lang.reflect.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Utility methods for JavaParse package.
@@ -72,9 +74,9 @@ public class ResolverUtils {
         if (typeArgs.length == 0)
             return rawTypeId;
 
-        // Return RawType<TypeArgs>
-        String typeArgsId = getIdForTypeArray(typeArgs);
-        return rawTypeId + '<' + typeArgsId + '>';
+        // Return RawType<TypeArgs>          // Was map(typeArg -> getIdForType(typeArg))
+        String typeArgsNameStr = Stream.of(typeArgs).map(Type::getTypeName).collect(Collectors.joining(","));
+        return rawTypeId + '<' + typeArgsNameStr + '>';
     }
 
     /**
@@ -87,9 +89,9 @@ public class ResolverUtils {
         if (theTypes.length == 0)
             return rawTypeId;
 
-        // Return RawType<TypeArgs>
-        String typeArgsId = getIdForJavaTypes(theTypes);
-        return rawTypeId + '<' + typeArgsId + '>';
+        // Return RawType<TypeArgs>         // Was map(JavaType::getId)
+        String typeArgsNameStr = Stream.of(theTypes).map(JavaType::getName).collect(Collectors.joining(","));
+        return rawTypeId + '<' + typeArgsNameStr + '>';
     }
 
     /**
@@ -113,47 +115,7 @@ public class ResolverUtils {
      */
     private static String getIdForTypeArray(Type[] theTypes)
     {
-        // If empty, just return empty
-        if (theTypes.length == 0) return "";
-
-        // Create StringBuffer
-        StringBuffer sb = new StringBuffer();
-
-        // Iterate over types, get id and append for each
-        for (int i = 0, iMax = theTypes.length, last = iMax - 1; i < iMax; i++) {
-            Type type = theTypes[i];
-            String typeStr = getIdForType(type);
-            sb.append(typeStr);
-            if (i != last)
-                sb.append(',');
-        }
-
-        // Return
-        return sb.toString();
-    }
-
-    /**
-     * Returns an Id string for a Type array.
-     */
-    private static String getIdForJavaTypes(JavaType[] theTypes)
-    {
-        // If empty, just return empty
-        if (theTypes.length == 0) return "";
-
-        // Create StringBuffer
-        StringBuffer sb = new StringBuffer();
-
-        // Iterate over types, get id and append for each
-        for (int i = 0, iMax = theTypes.length, last = iMax - 1; i < iMax; i++) {
-            JavaType type = theTypes[i];
-            String typeStr = type.getId();
-            sb.append(typeStr);
-            if (i != last)
-                sb.append(',');
-        }
-
-        // Return
-        return sb.toString();
+        return Stream.of(theTypes).map(type -> getIdForType(type)).collect(Collectors.joining(","));
     }
 
     /**
@@ -166,7 +128,7 @@ public class ResolverUtils {
         String classId = getIdForClass(declaringClass);
 
         // Start StringBuffer
-        StringBuffer sb = new StringBuffer(classId);
+        StringBuilder sb = new StringBuilder(classId);
 
         // Handle Field: DeclClassName.<Name>
         if (aMember instanceof Field)
@@ -177,10 +139,8 @@ public class ResolverUtils {
             Method meth = (Method) aMember;
             sb.append('.').append(meth.getName()).append('(');
             Class<?>[] paramTypes = meth.getParameterTypes();
-            if (paramTypes.length > 0) {
-                String paramTypesId = getIdForTypeArray(paramTypes);
-                sb.append(paramTypesId);
-            }
+            if (paramTypes.length > 0)
+                sb.append(getIdForTypeArray(paramTypes));
             sb.append(')');
         }
 
@@ -189,10 +149,8 @@ public class ResolverUtils {
             Constructor<?> constr = (Constructor<?>) aMember;
             Class<?>[] paramTypes = constr.getParameterTypes();
             sb.append('(');
-            if (paramTypes.length > 0) {
-                String paramTypesId = getIdForTypeArray(paramTypes);
-                sb.append(paramTypesId);
-            }
+            if (paramTypes.length > 0)
+                sb.append(getIdForTypeArray(paramTypes));
             sb.append(')');
         }
 
