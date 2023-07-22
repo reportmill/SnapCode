@@ -159,7 +159,7 @@ public class NodeCompleter {
         // Get parent expression - if none, forward to basic getCompletionsForNodeString()
         JavaDecl scopeDecl = scopeExpr.getDecl();
         if (scopeDecl instanceof JavaLocalVar || scopeDecl instanceof JavaMember)
-            scopeDecl = scopeDecl.getEvalClass();
+            scopeDecl = scopeExpr.getEvalType();
 
         // If no scope decl, get completions for string
         if (scopeDecl == null)

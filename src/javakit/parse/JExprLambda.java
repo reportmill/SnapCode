@@ -141,13 +141,10 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     public List<JVarDecl> getVarDecls()  { return _params; }
 
     /**
-     * Override to return as type.
+     * Override to return as method.
      */
     @Override
-    public JavaMethod getDecl()
-    {
-        return (JavaMethod) super.getDecl();
-    }
+    public JavaMethod getDecl()  { return (JavaMethod) super.getDecl(); }
 
     /**
      * Override to try to resolve decl from parent.
@@ -164,6 +161,11 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     @Override
     protected JavaType getEvalTypeImpl()
     {
+        // If parent is variable declaration, return its type
+        JNode parentNode = getParent();
+        if (parentNode instanceof JVarDecl)
+            return parentNode.getEvalType();
+
         // If expression is set, return it's eval type
         if (_expr != null)
             return _expr.getEvalType();

@@ -264,33 +264,31 @@ public class JExprMethodCall extends JExpr implements WithId {
         JavaType resolvedType = aType;
 
         // Handle TypeVar
-        if (resolvedType instanceof JavaTypeVariable) {
+        if (aType instanceof JavaTypeVariable) {
 
             // Get name and method
             JavaTypeVariable typeVar = (JavaTypeVariable) resolvedType;
             JavaMethod method = getDecl();
 
             // See if TypeVar can be resolved by method
-            if (method != null) {
-                String typeVarName = typeVar.getName();
-                boolean hasTypeVar = method.getTypeVarForName(typeVarName) != null;
-                if (hasTypeVar) {
-                    JavaType resType = getResolvedTypeVarForMethod(typeVar, method);
-                    if (resType != null)
-                        resolvedType = resType;
-                }
+            if (method != null && typeVar.getOwner() == method) {
+                JavaType resType = getResolvedTypeVarForMethod(typeVar, method);
+                if (resType != null)
+                    resolvedType = resType;
             }
 
             // See if TypeVar can be resolved by ScopeNode.Type
-            //JavaDecl scopeDecl = getScopeDecl();
-            //JavaType scopeType = scopeDecl != null ? scopeDecl.getEvalType() : null;
-            //resolvedDecl = scopeType != null ? scopeType.getResolvedType(resolvedType) : null;
-            //if (resolvedDecl != null)
-            //    return resolvedDecl;
+            else {
+                JavaDecl scopeDecl = getScopeDecl();
+                JavaType scopeType = scopeDecl != null ? scopeDecl.getEvalType() : null;
+                JavaType resolvedDecl = scopeType != null ? scopeType.getResolvedType(resolvedType) : null;
+                if (resolvedDecl != null)
+                    resolvedType = resolvedDecl;
+            }
         }
 
         // Handle ParameterizedType
-        else if (resolvedType instanceof JavaParameterizedType) {
+        else if (aType instanceof JavaParameterizedType) {
 
             // Get parameterized type and parameter types
             JavaParameterizedType parameterizedType = (JavaParameterizedType) resolvedType;
@@ -318,7 +316,7 @@ public class JExprMethodCall extends JExpr implements WithId {
         }
 
         // Handle Generic array type
-        else if (resolvedType instanceof JavaGenericArrayType)
+        else if (aType instanceof JavaGenericArrayType)
             System.err.println("JExprMethodCall.getResolvedTypeForType: No support for GenericArrayType");
 
         // Do normal version (skip parent dot expression)
@@ -387,6 +385,8 @@ public class JExprMethodCall extends JExpr implements WithId {
 
                 // If name matches, return arg expression eval type
                 if (paramType instanceof JavaTypeVariable && paramType.getName().equals(name)) {
+
+                    // If arg type is parameterized type, get type
                     JExpr argExpr = getArg(parameterIndex);
                     JavaType argEvalType = argExpr != null ? argExpr.getEvalType() : null;
                     if (argEvalType instanceof JavaParameterizedType) {
@@ -394,7 +394,11 @@ public class JExprMethodCall extends JExpr implements WithId {
                         JavaType[] argEvalTypePTParams = argEvalTypePT.getParamTypes();
                         if (i < argEvalTypePTParams.length)
                             return argEvalTypePTParams[i];
+                        return null;
                     }
+
+                    // Otherwise, return type
+                    return argEvalType;
                 }
             }
         }
