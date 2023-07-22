@@ -4,7 +4,6 @@
 package javakit.parse;
 import java.util.*;
 import javakit.resolver.*;
-import snap.util.ListUtils;
 
 /**
  * A JNode to represent a defined variable.
@@ -82,32 +81,8 @@ public class JVarDecl extends JNode implements WithId {
             return ((JStmtVarDecl) parentNode).getType();
 
         // Handle JExprLambda VarDecl: Get decl for this param and create new type
-        if (parentNode instanceof JExprLambda) {
-
-            // Get decl for this param (resolve if needed)
-            JExprLambda lambdaExpr = (JExprLambda) parentNode;
-            JavaMethod lambdaMethod = lambdaExpr.getLambdaMethod();
-            if (lambdaMethod == null)
-                return null;
-
-            // Get arg index
-            List<JVarDecl> lambdaArgs = lambdaExpr.getParams();
-            int argIndex = ListUtils.indexOfId(lambdaArgs, this);
-            if (argIndex < 0)
-                return null;
-
-            // Get arg type for lambda arg index
-            JavaType argType = lambdaMethod.getParamType(argIndex);
-            if (!argType.isResolvedType()) {
-                JavaType lambdaType = lambdaExpr.getLambdaType();
-                argType = lambdaType.getResolvedType(argType);
-            }
-
-            // Create type for type decl and return
-            JType type = JType.createTypeForTypeAndToken(argType, _startToken);
-            type._parent = this;
-            return type;
-        }
+        if (parentNode instanceof JExprLambda)
+            return ((JExprLambda) parentNode).createTypeNodeForVarDecl(this);
 
         // Return unknown
         return null;

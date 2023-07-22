@@ -2,10 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.resolver;
-import snap.util.ArrayUtils;
-import snap.util.StringUtils;
 import java.lang.reflect.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class represents a Java Method or Constructor.
@@ -16,7 +16,7 @@ public class JavaExecutable extends JavaMember {
     protected JavaTypeVariable[]  _typeVars;
 
     // The JavaDecls for parameter types for Constructor, Method
-    protected JavaType[]  _paramTypes;
+    protected JavaType[] _parameterTypes;
 
     // Whether method has VarArgs
     protected boolean  _varArgs;
@@ -51,7 +51,7 @@ public class JavaExecutable extends JavaMember {
         if (paramTypes.length < exec.getParameterCount())
             paramTypes = exec.getParameterTypes();
 
-        _paramTypes = _resolver.getJavaTypesForTypes(paramTypes);
+        _parameterTypes = _resolver.getJavaTypesForTypes(paramTypes);
     }
 
     /**
@@ -82,23 +82,23 @@ public class JavaExecutable extends JavaMember {
     /**
      * Returns the number of Method/ParamType parameters.
      */
-    public int getParamCount()
+    public int getParameterCount()
     {
-        return _paramTypes.length;
+        return _parameterTypes.length;
     }
 
     /**
      * Returns the individual Method parameter type at index.
      */
-    public JavaType getParamType(int anIndex)
+    public JavaType getParameterType(int anIndex)
     {
-        return _paramTypes[anIndex];
+        return _parameterTypes[anIndex];
     }
 
     /**
      * Returns the parameter types.
      */
-    public JavaType[] getParamTypes()  { return _paramTypes; }
+    public JavaType[] getParameterTypes()  { return _parameterTypes; }
 
     /**
      * Returns whether Method/Constructor is VarArgs type.
@@ -134,8 +134,7 @@ public class JavaExecutable extends JavaMember {
     protected String getParametersString(boolean simpleNames)
     {
         Function<JavaDecl,String> namesFunction = simpleNames ? JavaDecl::getSimpleName : JavaDecl::getName;
-        String[] paramTypeNames = ArrayUtils.map(_paramTypes, namesFunction, String.class);
-        String paramTypesString = StringUtils.join(paramTypeNames, ",");
+        String paramTypesString = Stream.of(_parameterTypes).map(namesFunction).collect(Collectors.joining(","));
         return '(' + paramTypesString + ')';
     }
 
@@ -149,7 +148,7 @@ public class JavaExecutable extends JavaMember {
             return getMatchRatingForArgClassesWithVarArgs(aMethod, argClasses);
 
         // Get method param types and count (just return if given arg count doesn't match)
-        JavaType[] paramTypes = aMethod.getParamTypes();
+        JavaType[] paramTypes = aMethod.getParameterTypes();
         int paramCount = paramTypes.length;
         if (argClasses.length != paramCount)
             return 0;
@@ -187,7 +186,7 @@ public class JavaExecutable extends JavaMember {
     private static int getMatchRatingForArgClassesWithVarArgs(JavaExecutable aMethod, JavaClass[] argClasses)
     {
         // Get method param types and count (just return if given arg count is insufficient)
-        JavaType[] paramTypes = aMethod.getParamTypes();
+        JavaType[] paramTypes = aMethod.getParameterTypes();
         int paramCount = paramTypes.length;
         int varArgIndex = paramCount - 1;
         if (argClasses.length < varArgIndex)

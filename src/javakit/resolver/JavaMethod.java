@@ -84,7 +84,7 @@ public class JavaMethod extends JavaExecutable {
 
         // Get super method
         String name = getName();
-        JavaType[] paramTypes = getParamTypes();
+        JavaType[] paramTypes = getParameterTypes();
         JavaMethod superMethod = superClass.getMethodDeepForNameAndTypes(name, paramTypes);
 
         // If not found, check interfaces
@@ -194,7 +194,7 @@ public class JavaMethod extends JavaExecutable {
             m._id = getSigForParts(_declaringClass, _name, _paramTypes);
             m._name = m._simpleName = _name;
             m._declaringClass = _declaringClass;
-            m._paramTypes = _paramTypes;
+            m._parameterTypes = _paramTypes;
             m._evalType = _returnType;
             m._typeVars = _typeVars;
             m._default = _default;

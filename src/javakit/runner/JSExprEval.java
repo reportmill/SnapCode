@@ -767,7 +767,7 @@ public class JSExprEval {
     private Object getWrappedLambdaExpression(Object anOR, JExprLambda lambdaExpr, JavaClass lambdaClass)
     {
         // Get params and content expression
-        List<JVarDecl> varDecls = lambdaExpr.getParams();
+        List<JVarDecl> varDecls = lambdaExpr.getParameters();
         JVarDecl param0 = varDecls.size() > 0 ? varDecls.get(0) : null;
         JVarDecl param1 = varDecls.size() > 1 ? varDecls.get(1) : null;
         JExpr contentExpr = lambdaExpr.getExpr();

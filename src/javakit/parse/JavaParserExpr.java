@@ -760,12 +760,12 @@ public class JavaParserExpr extends Parser {
                 case "Identifier":
                     JVarDecl vd = new JVarDecl();
                     vd.setId(aNode.getCustomNode(JExprId.class));
-                    getPart().addParam(vd);
+                    getPart().addParameter(vd);
                     break;
 
                 // Handle FormalParam
                 case "FormalParam":
-                    getPart().addParam(aNode.getCustomNode(JVarDecl.class));
+                    getPart().addParameter(aNode.getCustomNode(JVarDecl.class));
                     break;
 
                 // Handle Expression

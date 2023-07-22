@@ -160,7 +160,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // If method/constructor with non-zero params, return paren index
         JavaExecutable exec = (JavaExecutable) javaDecl;
-        if (exec.getParamCount() > 0)
+        if (exec.getParameterCount() > 0)
             return argStart;
 
         // If constructor

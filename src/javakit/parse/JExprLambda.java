@@ -27,20 +27,31 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     // The actual interface method this lambda represents
     private JavaMethod _lambdaMethod;
 
+    // The parameter types
+    private JavaType[] _parameterTypes;
+
     /**
-     * Returns the list of formal parameters.
+     * Constructor.
      */
-    public List<JVarDecl> getParams()  { return _params; }
+    public JExprLambda()
+    {
+        super();
+    }
 
     /**
      * Returns the number of parameters.
      */
-    public int getParamCount()  { return _params.size(); }
+    public int getParameterCount()  { return _params.size(); }
+
+    /**
+     * Returns the list of formal parameters.
+     */
+    public List<JVarDecl> getParameters()  { return _params; }
 
     /**
      * Adds a formal parameter.
      */
-    public void addParam(JVarDecl aVD)
+    public void addParameter(JVarDecl aVD)
     {
         _params.add(aVD);
         addChild(aVD, -1);
@@ -49,33 +60,52 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     /**
      * Returns the list of parameter classes.
      */
-    public String[] getParamNames()
+    public JavaType[] getParameterTypes()
     {
-        // Iterate over params and get EvalClass for each
-        String[] paramNames = new String[_params.size()];
-        for (int i = 0, iMax = _params.size(); i < iMax; i++) {
-            JVarDecl varDecl = _params.get(i);
-            paramNames[i] = varDecl.getName();
+        // If already set, just return
+        if (_parameterTypes != null) return _parameterTypes;
+
+        // Create array
+        int parameterCount = getParameterCount();
+        JavaType[] paramTypes = new JavaType[parameterCount];
+
+        // Get arg type for lambda arg index
+        JavaMethod lambdaMethod = getLambdaMethod();
+        if (lambdaMethod == null)
+            return paramTypes;
+
+        // Iterate over parameters and get EvalClass for each
+        for (int i = 0; i < parameterCount; i++) {
+
+            // Get arg type for lambda arg index
+            JavaType argType = lambdaMethod.getParameterType(i);
+            //if (!argType.isResolvedType())
+            //    argType = getResolvedTypeForType(argType);
+            paramTypes[i] = argType;
         }
 
-        // Return
-        return paramNames;
+        // Set and return
+        return _parameterTypes = paramTypes;
     }
 
     /**
-     * Returns the list of parameter classes.
+     * Creates and returns a JType node for given VarDecl.
      */
-    public JavaClass[] getParamTypes()
+    protected JType createTypeNodeForVarDecl(JVarDecl varDecl)
     {
-        // Iterate over params and get EvalClass for each
-        JavaClass[] paramTypes = new JavaClass[_params.size()];
-        for (int i = 0, iMax = _params.size(); i < iMax; i++) {
-            JVarDecl varDecl = _params.get(i);
-            paramTypes[i] = varDecl.getEvalClass();
-        }
+        // Get parameter index for var decl
+        int parameterIndex = _params.indexOf(varDecl);
+        if (parameterIndex < 0)
+            return null;
 
-        // Return
-        return paramTypes;
+        // Get parameter type for var decl
+        JavaType[] parameterTypes = getParameterTypes();
+        JavaType parameterType = parameterTypes[parameterIndex];
+
+        // Create type for type decl and return
+        JType type = JType.createTypeForTypeAndToken(parameterType, varDecl.getStartToken());
+        type._parent = varDecl;
+        return type;
     }
 
     /**
@@ -159,15 +189,6 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     }
 
     /**
-     * Returns the lambda class.
-     */
-    public JavaClass getLambdaClass()
-    {
-        JavaType lambdaType = getLambdaType();
-        return lambdaType != null ? lambdaType.getEvalClass() : null;
-    }
-
-    /**
      * Returns the lambda type.
      */
     public JavaType getLambdaType()
@@ -203,7 +224,7 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
                 return null;
 
             // Get arg type at arg index
-            return method.getParamType(argIndex);
+            return method.getParameterType(argIndex);
         }
 
         // Handle parent is alloc expression: Get lambda interface from alloc expression param
@@ -222,7 +243,7 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
                 return null;
 
             // Get arg type at arg index
-            return constructor.getParamType(argIndex);
+            return constructor.getParameterType(argIndex);
         }
 
         // Handle parent anything else (JVarDecl, JStmtExpr): Return parent eval type
@@ -232,6 +253,15 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
 
         // Return not found
         return null;
+    }
+
+    /**
+     * Returns the lambda class.
+     */
+    public JavaClass getLambdaClass()
+    {
+        JavaType lambdaType = getLambdaType();
+        return lambdaType != null ? lambdaType.getEvalClass() : null;
     }
 
     /**

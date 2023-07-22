@@ -386,7 +386,7 @@ public class JavaClass extends JavaType {
     {
         List<JavaConstructor> constructors = getDeclaredConstructors();
         for (JavaConstructor constructor : constructors) {
-            JavaType[] constrParamTypes = constructor.getParamTypes();
+            JavaType[] constrParamTypes = constructor.getParameterTypes();
             if (isTypesEqual(constrParamTypes, theTypes))
                 return constructor;
         }
@@ -419,7 +419,7 @@ public class JavaClass extends JavaType {
         List<JavaMethod> methods = getDeclaredMethods();
         for (JavaMethod method : methods) {
             if (method.getName().equals(aName)) {
-                JavaType[] methodParamTypes = method.getParamTypes();
+                JavaType[] methodParamTypes = method.getParameterTypes();
                 if (isTypesEqual(methodParamTypes, theTypes))
                     return method;
             }

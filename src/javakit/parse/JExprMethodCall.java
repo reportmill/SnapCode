@@ -195,7 +195,7 @@ public class JExprMethodCall extends JExpr implements WithId {
 
         // Iterate over methods and return first that matches arg count
         for (JavaMethod method : methods) {
-            JavaType paramType = method.getParamType(argIndex);
+            JavaType paramType = method.getParameterType(argIndex);
             JavaClass paramClass = paramType.getEvalClass();
             JavaMethod lambdaMethod = paramClass.getLambdaMethod();
             if (lambdaMethod != null)
@@ -338,7 +338,7 @@ public class JExprMethodCall extends JExpr implements WithId {
             return null;
 
         // Get parameter types
-        JavaType[] methodParameterTypes = aMethod.getParamTypes();
+        JavaType[] methodParameterTypes = aMethod.getParameterTypes();
 
         // Iterate over method arg types to see if any can resolve the type var
         for (int i = 0, iMax = methodParameterTypes.length; i < iMax; i++) {
