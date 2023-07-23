@@ -122,8 +122,8 @@ public class JExprMethodCall extends JExpr implements WithId {
     protected JavaMethod getDeclImpl()
     {
         // Get scope node class
-        JavaDecl scopeDecl = getScopeDecl();
-        JavaClass scopeClass = scopeDecl != null ? scopeDecl.getEvalClass() : null;
+        JavaType scopeEvalType = getScopeEvalType();
+        JavaClass scopeClass = scopeEvalType != null ? scopeEvalType.getEvalClass() : null;
         if (scopeClass == null)
             return null;
 
@@ -216,8 +216,8 @@ public class JExprMethodCall extends JExpr implements WithId {
     protected List<JavaMethod> getCompatibleMethods()
     {
         // Get scope class and search for compatible method for name and arg types
-        JavaDecl scopeDecl = getScopeDecl();
-        JavaClass scopeClass = scopeDecl != null ? scopeDecl.getEvalClass() : null;
+        JavaType scopeEvalType = getScopeEvalType();
+        JavaClass scopeClass = scopeEvalType != null ? scopeEvalType.getEvalClass() : null;
         if (scopeClass == null)
             return null;
 
@@ -279,8 +279,7 @@ public class JExprMethodCall extends JExpr implements WithId {
 
             // See if TypeVar can be resolved by ScopeNode.Type
             else {
-                JavaDecl scopeDecl = getScopeDecl();
-                JavaType scopeType = scopeDecl != null ? scopeDecl.getEvalType() : null;
+                JavaType scopeType = getScopeEvalType();
                 JavaType resolvedDecl = scopeType != null ? scopeType.getResolvedType(resolvedType) : null;
                 if (resolvedDecl != null)
                     resolvedType = resolvedDecl;
@@ -461,8 +460,8 @@ public class JExprMethodCall extends JExpr implements WithId {
         String methodString = methodName + argTypesString;
 
         // Get scope node class name
-        JavaDecl scopeDecl = getScopeDecl();
-        String scopeClassName = scopeDecl != null ? scopeDecl.getEvalClassName() : null;
+        JavaDecl scopeEvalType = getScopeEvalType();
+        String scopeClassName = scopeEvalType != null ? scopeEvalType.getEvalClassName() : null;
         if (scopeClassName != null)
             methodString = scopeClassName + '.' + methodName;
 

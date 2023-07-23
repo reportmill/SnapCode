@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import javakit.resolver.JavaDecl;
+import javakit.resolver.JavaType;
 import snap.util.ArrayUtils;
 import java.util.Collections;
 
@@ -44,19 +44,19 @@ public abstract class JExpr extends JNode {
     }
 
     /**
-     * Returns the JavaDecl for the scope expression (if present) or enclosing class.
+     * Returns the JavaType for the scope expression (if present) or enclosing class.
      */
-    public JavaDecl getScopeDecl()
+    public JavaType getScopeEvalType()
     {
         // If scope expression exists, return its decl
         JExpr scopeExpr = getScopeExpr();
         if (scopeExpr != null)
-            return scopeExpr.getDecl();
+            return scopeExpr.getEvalType();
 
         // Otherwise, return enclosing class
         JClassDecl classDecl = getEnclosingClassDecl();
         if (classDecl != null)
-            return classDecl.getDecl();
+            return classDecl.getEvalType();
 
         // Return not found
         return null;
