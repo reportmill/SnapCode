@@ -271,7 +271,7 @@ public class JExprMethodCall extends JExpr implements WithId {
             JavaMethod method = getDecl();
 
             // See if TypeVar can be resolved by method
-            if (method != null && typeVar.getOwner() == method) {
+            if (method != null && (typeVar.getOwner() == method || method.isStatic())) {
                 JavaType resType = getResolvedTypeVarForMethod(typeVar, method);
                 if (resType != null)
                     resolvedType = resType;
