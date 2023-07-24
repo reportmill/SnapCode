@@ -535,7 +535,24 @@ public class JNode {
     /**
      * Returns the node errors.
      */
-    protected NodeError[] getErrorsImpl()  { return NodeError.NO_ERRORS; }
+    protected NodeError[] getErrorsImpl()
+    {
+        // If no children, return no errors
+        if (_children == Collections.EMPTY_LIST)
+            return NodeError.NO_ERRORS;
+
+        NodeError[] errors = NodeError.NO_ERRORS;
+
+        // Iterate over children and add any errors for each
+        for (JNode child : _children) {
+            NodeError[] childErrors = child.getErrors();
+            if (childErrors.length > 0)
+                errors = ArrayUtils.addAll(errors, childErrors);
+        }
+
+        // Return
+        return errors;
+    }
 
     /**
      * Standard toString implementation.

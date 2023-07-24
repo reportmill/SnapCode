@@ -123,8 +123,8 @@ public class WorkspacePane extends ViewOwner {
 
         // Configure single source file project: Add dependencies for SnapKit and SnapCharts
         BuildFile buildFile = project.getBuildFile();
-        buildFile.addMavenDependencyForGroupAndPackageAndVersion("com.reportmill", "snapkit", "2023.06");
-        buildFile.addMavenDependencyForGroupAndPackageAndVersion("com.reportmill", "snapcharts", "2023.06");
+        buildFile.addMavenDependencyForGroupAndPackageAndVersion("com.reportmill", "snapkit", "2023.07");
+        buildFile.addMavenDependencyForGroupAndPackageAndVersion("com.reportmill", "snapcharts", "2023.07");
 
         // Get/set Workspace
         Workspace workspace = project.getWorkspace();

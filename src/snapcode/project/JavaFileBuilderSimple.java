@@ -23,6 +23,16 @@ public class JavaFileBuilderSimple extends JavaFileBuilder {
     }
 
     /**
+     * Returns whether file is build file.
+     */
+    @Override
+    public boolean isBuildFile(WebFile aFile)
+    {
+        String type = aFile.getType();
+        return type.equals("java") || type.equals("jepl");
+    }
+
+    /**
      * Compiles files.
      */
     @Override

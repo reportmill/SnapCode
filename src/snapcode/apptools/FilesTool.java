@@ -48,8 +48,12 @@ public class FilesTool extends WorkspaceTool {
         if (selFile.getSite() != selSite)
             selFile = selSite.getRootDir();
         WebFile selDir = selFile.isDir() ? selFile : selFile.getParent();
-        if (extension.equals(".java") && selDir == selSite.getRootDir())
-            selDir = Project.getProjectForSite(selSite).getSourceDir();
+        if (extension.equals(".java") || extension.equals(".jepl")) {
+            if (selDir == selSite.getRootDir()) {
+                Project proj = Project.getProjectForSite(selSite);
+                selDir = proj.getSourceDir();
+            }
+        }
 
         // Get suggested "Untitled.xxx" path for SelDir and extension
         String path = selDir.getDirPath() + "Untitled" + extension;
@@ -383,6 +387,7 @@ public class FilesTool extends WorkspaceTool {
         // Define options
         String[][] options = {
                 {"Java Programming File", ".java"},
+                {"Java REPL File", ".jepl"},
                 {"SnapKit UI File", ".snp"},
                 {"Directory", ".dir"},
                 {"Sound File", ".wav"},

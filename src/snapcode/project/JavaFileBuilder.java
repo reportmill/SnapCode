@@ -40,7 +40,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     public boolean isBuildFile(WebFile aFile)
     {
         String type = aFile.getType();
-        return type.equals("java") || type.equals("jepl");
+        return type.equals("java");
     }
 
     /**

@@ -17,6 +17,9 @@ public class ProjectBuilder {
     // The JavaFileBuilder
     private JavaFileBuilder  _javaFileBuilder;
 
+    // The JeplFileBuilder
+    private JavaFileBuilder  _jeplFileBuilder;
+
     // The default file builder
     private ProjectFileBuilder  _defaultFileBuilder;
 
@@ -31,6 +34,7 @@ public class ProjectBuilder {
         super();
         _proj = aProject;
         _javaFileBuilder = new JavaFileBuilderSimple(aProject);
+        _jeplFileBuilder = _javaFileBuilder;
         _defaultFileBuilder = new ProjectFileBuilder.DefaultBuilder(aProject);
     }
 
@@ -46,6 +50,7 @@ public class ProjectBuilder {
     {
         // Build files
         boolean buildSuccess = _javaFileBuilder.buildFiles(aTM);
+        buildSuccess &= _jeplFileBuilder.buildFiles(aTM);
         buildSuccess &= _defaultFileBuilder.buildFiles(aTM);
         _buildDate = new Date();
 
@@ -144,6 +149,8 @@ public class ProjectBuilder {
         // Return JavaFileBuilder, DefaultFileBuilder or null
         if (_javaFileBuilder.isBuildFile(aFile))
             return _javaFileBuilder;
+        if (_jeplFileBuilder.isBuildFile(aFile))
+            return _jeplFileBuilder;
         if (_defaultFileBuilder.isBuildFile(aFile))
             return _defaultFileBuilder;
 

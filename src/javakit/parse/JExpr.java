@@ -3,8 +3,6 @@
  */
 package javakit.parse;
 import javakit.resolver.JavaType;
-import snap.util.ArrayUtils;
-import java.util.Collections;
 
 /**
  * The JNode base class for Java expressions.
@@ -100,28 +98,5 @@ public abstract class JExpr extends JNode {
 
         // Handle two arbitrary expressions
         return new JExprDot(expr1, expr2);
-    }
-
-    /**
-     * Returns the node errors.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        // If no children, return no errors
-        if (_children == Collections.EMPTY_LIST)
-            return NodeError.NO_ERRORS;
-
-        NodeError[] errors = NodeError.NO_ERRORS;
-
-        // Iterate over children and add any errors for each
-        for (JNode child : _children) {
-            NodeError[] childErrors = child.getErrors();
-            if (childErrors.length > 0)
-                errors = ArrayUtils.addAll(errors, childErrors);
-        }
-
-        // Return
-        return errors;
     }
 }
