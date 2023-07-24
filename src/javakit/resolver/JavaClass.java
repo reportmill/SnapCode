@@ -641,7 +641,7 @@ public class JavaClass extends JavaType {
     /**
      * Returns a ParamType decl for this base class and given types ( This<typ,type>).
      */
-    public JavaType getParamTypeDecl(JavaType ... theTypes)
+    public JavaType getParameterizedTypeForTypes(JavaType ... theTypes)
     {
         return _resolver.getJavaParameterizedTypeForTypes(this, theTypes);
     }

@@ -199,7 +199,7 @@ public class JType extends JNode {
             JavaType[] typeArgTypes = new JavaType[typeArgCount];
             for (int i = 0; i < typeArgCount; i++)
                 typeArgTypes[i] = getTypeArgType(i);
-            javaType = javaClass.getParamTypeDecl(typeArgTypes);
+            javaType = javaClass.getParameterizedTypeForTypes(typeArgTypes);
         }
 
         // If ArrayCount, get decl for array

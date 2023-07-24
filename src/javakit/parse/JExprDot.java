@@ -102,7 +102,7 @@ public class JExprDot extends JExpr {
         // Handle Class.class: Return ParamType for Class<T>
         if (name.equals("class")) {
             JavaClass classClass = getJavaClassForClass(Class.class);
-            return classClass.getParamTypeDecl(parentClass);
+            return classClass.getParameterizedTypeForTypes(parentClass);
         }
 
         // Handle inner class

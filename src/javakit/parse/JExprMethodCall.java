@@ -310,7 +310,7 @@ public class JExprMethodCall extends JExpr implements WithId {
             // If something was resolved, create new type with resolved parameter types
             if (didResolve) {
                 JavaClass rawType = parameterizedType.getRawType();
-                resolvedType = rawType.getParamTypeDecl(paramTypesResolved);
+                resolvedType = rawType.getParameterizedTypeForTypes(paramTypesResolved);
             }
         }
 
