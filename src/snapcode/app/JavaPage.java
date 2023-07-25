@@ -244,9 +244,11 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         String packageName = proj != null ? proj.getClassNameForFile(fileDir) : newFile.getSimpleName();
         String className = newFile.getSimpleName();
 
-        // Set text
-        String javaText = getJavaContentStringForPackageAndClassName(packageName, className);
-        newFile.setText(javaText);
+        // If Java file, set default java text
+        if (newFile.getType().equals("java")) {
+            String javaText = getJavaContentStringForPackageAndClassName(packageName, className);
+            newFile.setText(javaText);
+        }
 
         // Return
         return newFile;
