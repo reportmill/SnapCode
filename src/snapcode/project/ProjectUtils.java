@@ -169,22 +169,26 @@ public class ProjectUtils {
         // Get project - if given null project, use TempProject
         Project proj = aProj != null ? aProj : getTempProject();
 
-        // Return project source file for "Untitled.ext", if not present
+        // If file already exists, delete it (shouldn't happen, but WebVM?)
         String fileName = '/' + aName + '.' + anExt;
         WebFile tempFile = proj.getSourceFile(fileName, false, false);
-        if (tempFile == null)
-            return proj.getSourceFile(fileName, true, false);
+        if (tempFile != null)
+            tempFile.delete();
 
+        // Create and return new file
+        return proj.getSourceFile(fileName, true, false);
+
+        // Return project source file for "Untitled.ext", if not present
+        //String fileName = '/' + aName + '.' + anExt;
+        //WebFile tempFile = proj.getSourceFile(fileName, false, false);
+        //if (tempFile == null) return proj.getSourceFile(fileName, true, false);
         // Report project source file for "Untitled-X.ext" where X is first unused file name
-        for (int i = 1; i < 1000; i++) {
-            String fileName2 = '/' + aName + '-' + i + '.' + anExt;
-            tempFile = proj.getSourceFile(fileName2, false, false);
-            if (tempFile == null)
-                return proj.getSourceFile(fileName2, true, false);
-        }
-
+        //for (int i = 1; i < 1000; i++) {
+        //    String fileName2 = '/' + aName + '-' + i + '.' + anExt;
+        //    tempFile = proj.getSourceFile(fileName2, false, false);
+        //    if (tempFile == null) return proj.getSourceFile(fileName2, true, false); }
         // Should never get here
-        throw new RuntimeException("ProjectUtils.getTempSourceFile: What is your deal with temp files?");
+        //throw new RuntimeException("ProjectUtils.getTempSourceFile: What is your deal with temp files?");
     }
 
     /**
