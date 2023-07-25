@@ -6,7 +6,6 @@ import javakit.resolver.Resolver;
 import snap.props.PropObject;
 import snap.util.ArrayUtils;
 import snap.web.WebSite;
-import java.io.Closeable;
 
 /**
  * This class manages working with a set of one or more projects.
@@ -226,12 +225,6 @@ public class Workspace extends PropObject {
      */
     public void clearClassLoader()
     {
-        // If ClassLoader closeable, close it
-        if (_classLoader instanceof Closeable)
-            try {  ((Closeable) _classLoader).close(); }
-            catch (Exception e) { throw new RuntimeException(e); }
-
-        // Clear
         _classLoader = null;
         _resolver = null;
     }

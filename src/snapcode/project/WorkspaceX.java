@@ -6,6 +6,7 @@ import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
 import snap.util.SnapUtils;
 import snap.web.WebSite;
+import java.io.Closeable;
 import java.net.URL;
 import java.net.URLClassLoader;
 
@@ -60,6 +61,22 @@ public class WorkspaceX extends Workspace {
 
         // Return
         return urlClassLoader;
+    }
+
+    /**
+     * Clears the class loader.
+     */
+    @Override
+    public void clearClassLoader()
+    {
+        // If ClassLoader closeable, close it
+        if (_classLoader instanceof ProjectClassLoaderX && _classLoader instanceof Closeable) {
+            try {  ((Closeable) _classLoader).close(); }
+            catch (Exception e) { throw new RuntimeException(e); }
+        }
+
+        // Do normal version
+        super.clearClassLoader();
     }
 
     /**
