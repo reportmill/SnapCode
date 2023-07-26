@@ -195,10 +195,17 @@ public class JType extends JNode {
         // If type args, build array and get decl for ParamType
         int typeArgCount = getTypeArgCount();
         if (typeArgCount > 0) {
-            JavaClass javaClass = (JavaClass) javaType;
+
+            // Get type arg types
             JavaType[] typeArgTypes = new JavaType[typeArgCount];
-            for (int i = 0; i < typeArgCount; i++)
-                typeArgTypes[i] = getTypeArgType(i);
+            for (int i = 0; i < typeArgCount; i++) {
+                JavaType typeArgType = typeArgTypes[i] = getTypeArgType(i);
+                if (typeArgType == null)
+                    return getJavaClassForClass(Object.class); // Do something better here!
+            }
+
+            // Get parameterized type
+            JavaClass javaClass = (JavaClass) javaType;
             javaType = javaClass.getParameterizedTypeForTypes(typeArgTypes);
         }
 
