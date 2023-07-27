@@ -1,5 +1,7 @@
 package snapcode.app;
 import javakit.parse.*;
+import snap.text.TextDoc;
+import snap.view.TextArea;
 import snap.view.ViewEvent;
 import snapcode.apptools.EvalTool;
 import snapcode.apptools.ProcPane;
@@ -28,7 +30,7 @@ import java.util.Objects;
 /**
  * A JavaPage subclass to view/edit Java files.
  */
-public class JavaPage extends WebPage implements WebFile.Updater {
+public class JavaPage extends WebPage {
 
     // The JavaTextPane
     private JavaTextPane<?> _javaTextPane;
@@ -94,6 +96,9 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         // If not java file, hide SnapCodeButton (jepl file)
         if (!javaFile.getType().equals("java"))
             _javaTextPane.setViewVisible("SnapCodeButton", false);
+
+        // Bind TextDoc.TextModified to JavaPage.TextModified
+        javaTextDoc.addPropChangeListener(pc -> setTextModified(javaTextDoc.isTextModified()), TextDoc.TextModified_Prop);
     }
 
     /**
@@ -402,20 +407,24 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     }
 
     /**
-     * Override to update Page.Modified.
+     * Called to set File.Updater (or clear it).
      */
-    protected void setTextModified(boolean aFlag)
+    private void setTextModified(boolean aFlag)
     {
         WebFile javaFile = getFile();
-        javaFile.setUpdater(aFlag ? this : null);
+        WebFile.Updater updater = f -> updateFile();
+        javaFile.setUpdater(aFlag ? updater : null);
     }
 
     /**
-     * WebFile.Updater method.
+     * Called to update File.Text before save.
      */
-    public void updateFile(WebFile aFile)
+    private void updateFile()
     {
-        getFile().setText(getTextArea().getText());
+        WebFile file = getFile();
+        TextArea textArea = getTextArea();
+        String textAreaText = textArea.getText();
+        file.setText(textAreaText);
     }
 
     /**
@@ -486,15 +495,6 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         public void showDeclarations(JNode aNode)
         {
             JavaPage.this.showDeclarations(aNode);
-        }
-
-        /**
-         * Override to update Page.Modified.
-         */
-        public void setTextModified(boolean aFlag)
-        {
-            super.setTextModified(aFlag);
-            JavaPage.this.setTextModified(aFlag);
         }
 
         /**

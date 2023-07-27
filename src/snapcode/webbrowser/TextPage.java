@@ -17,7 +17,7 @@ import snap.web.WebFile;
 public class TextPage extends WebPage {
 
     // The text pane
-    private TFTextPane<?>  _textPane = new TFTextPane<>();
+    private TextPane<?>  _textPane = new TFTextPane<>();
 
     // The text
     private String  _text;
@@ -50,15 +50,6 @@ public class TextPage extends WebPage {
     }
 
     /**
-     * Returns the TextPane.
-     */
-    public TextPane<?> getTextPane()
-    {
-        getUI();
-        return _textPane;
-    }
-
-    /**
      * Returns the TextArea.
      */
     public TextArea getTextArea()
@@ -81,8 +72,9 @@ public class TextPage extends WebPage {
     protected void initUI()
     {
         // Configure TextPane
-        _textPane.getTextArea().setFont(getDefaultFont());
-        _textPane.getTextArea().setText(getText());
+        TextArea textArea = getTextArea();
+        textArea.setFont(getDefaultFont());
+        textArea.setText(getText());
 
         Button btn = new Button("Reload");
         btn.setName("ReloadButton");
@@ -91,6 +83,10 @@ public class TextPage extends WebPage {
         btn.addEventHandler(e -> getBrowser().reloadPage(), Action);
         _textPane.getToolBarPane().addChild(btn);
         setFirstFocus(getTextArea());
+
+        // Bind TextDoc.TextModified to JavaPage.TextModified
+        TextDoc textDoc = textArea.getTextDoc();
+        textDoc.addPropChangeListener(pc -> setTextModified(textDoc.isTextModified()), TextDoc.TextModified_Prop);
     }
 
     /**
@@ -118,9 +114,32 @@ public class TextPage extends WebPage {
     }
 
     /**
+     * Called to register page file for update before save
+     */
+    private void setTextModified(boolean aFlag)
+    {
+        WebFile file = getFile();
+        if (file != null) {
+            WebFile.Updater updater = f -> updateFile();
+            file.setUpdater(aFlag ? updater : null);
+        }
+    }
+
+    /**
+     * Called to update page file before save.
+     */
+    private void updateFile()
+    {
+        WebFile file = getFile();
+        TextArea textArea = getTextArea();
+        String textAreaText = textArea.getText();
+        file.setText(textAreaText);
+    }
+
+    /**
      * A TextPane subclass.
      */
-    private class TFTextPane<T extends TextDoc> extends TextPane<T> implements WebFile.Updater {
+    private class TFTextPane<T extends TextDoc> extends TextPane<T> {
 
         /**
          * Save file.
@@ -129,26 +148,6 @@ public class TextPage extends WebPage {
         {
             try { getFile().save(); }
             catch (Exception e) { throw new RuntimeException(e); }
-        }
-
-        /**
-         * Override to update Page.Modified.
-         */
-        public void setTextModified(boolean aFlag)
-        {
-            super.setTextModified(aFlag);
-            WebFile file = getFile();
-            if (file != null)
-                file.setUpdater(aFlag ? this : null);
-        }
-
-        /**
-         * WebFile.Updater method.
-         */
-        public void updateFile(WebFile aFile)
-        {
-            WebFile file = getFile();
-            file.setText(getTextArea().getText());
         }
     }
 }

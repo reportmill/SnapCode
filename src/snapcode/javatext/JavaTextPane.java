@@ -7,13 +7,11 @@ import snapcode.project.JavaTextDoc;
 import javakit.resolver.JavaDecl;
 import snap.gfx.*;
 import snap.props.PropChange;
-import snap.props.Undoer;
 import snap.text.TextDoc;
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.TextPane;
 import snapcode.project.JeplTextDoc;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -110,16 +108,6 @@ public class JavaTextPane<T extends JavaTextDoc> extends TextPane<T> {
     {
         // Do normal version
         super.resetUI();
-
-        // Reset FontSizeText
-        JavaTextArea textArea = getTextArea();
-        setViewValue("FontSizeText", textArea.getFont().getSize());
-
-        // Update UndoButton, RedoButton
-        Undoer undoer = textArea.getUndoer();
-        boolean hasUndos = undoer.hasUndos();
-        setViewEnabled("UndoButton", hasUndos);
-        setViewEnabled("RedoButton", hasUndos);
 
         // Reset JavaDocButton
         JavaDoc javaDoc = getJavaDoc();
@@ -369,13 +357,9 @@ public class JavaTextPane<T extends JavaTextDoc> extends TextPane<T> {
     protected void textDocDidPropChange(PropChange aPC)
     {
         String propName = aPC.getPropName();
+
+        // Handle TextDoc.CharsChange: If added/removed newline, reset LineNumView, LineFootView
         if (propName == TextDoc.Chars_Prop) {
-
-            // Update TextModified
-            boolean hasUndos = getTextArea().getUndoer().hasUndos();
-            setTextModified(hasUndos);
-
-            // If added/removed newline, reset
             CharSequence chars = (CharSequence) (aPC.getNewValue() != null ? aPC.getNewValue() : aPC.getOldValue());
             if (CharSequenceUtils.indexOfNewline(chars, 0) >= 0)
                 _lineNumView.resetAll();
