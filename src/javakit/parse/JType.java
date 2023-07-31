@@ -278,7 +278,7 @@ public class JType extends JNode {
             String errorString = "Can't resolve type: " + className;
             if ("var".equals(className))
                 errorString = "Cannot infer type: 'var' on variable without initializer";
-            errors = new NodeError[] { new NodeError(this, errorString) };
+            errors = NodeError.addError(errors,this, errorString, 0);
         }
 
         // Return

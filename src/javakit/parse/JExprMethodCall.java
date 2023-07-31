@@ -433,14 +433,14 @@ public class JExprMethodCall extends JExpr implements WithId {
     @Override
     protected NodeError[] getErrorsImpl()
     {
-        NodeError[] errors = NodeError.NO_ERRORS;
+        NodeError[] errors = super.getErrorsImpl();
 
         // Handle can't resolve method
         JavaMethod method = getDecl();
         if (method == null) {
             String methodString = getMethodString();
             NodeError error = new NodeError(this, "Can't resolve method: " + methodString);
-            errors = ArrayUtils.add(errors, error);
+            errors = ArrayUtils.add(errors, error, 0);
         }
 
         // Return

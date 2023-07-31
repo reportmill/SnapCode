@@ -3,7 +3,6 @@
  */
 package snapcode.project;
 import javakit.parse.JNode;
-import javakit.parse.JStmt;
 import javakit.parse.NodeError;
 import snap.web.WebFile;
 
@@ -119,26 +118,35 @@ public class BuildIssue implements Comparable<BuildIssue> {
      */
     public int compareTo(BuildIssue aBI)
     {
+        // Sort by Kind (Errors first)
         Kind k1 = getKind();
         Kind k2 = aBI.getKind();
         if (k1 != k2)
             return k1.ordinal() - k2.ordinal();
 
-        int comp = getFile().compareTo(aBI.getFile());
+        // Sort by file name
+        WebFile file1 = getFile();
+        WebFile file2 = aBI.getFile();
+        int comp = file1.compareTo(file2);
         if (comp != 0)
             return comp;
 
-        int l1 = getLine();
-        int l2 = aBI.getLine();
-        if (l1 != l2)
-            return l2 - l1;
+        // Sort by line number
+        int line1 = getLine();
+        int line2 = aBI.getLine();
+        if (line1 != line2)
+            return line1 - line2;
 
-        int s1 = getStart();
-        int s2 = aBI.getStart();
-        if (s1 != s2)
-            return s2 - s1;
+        // Sort by start char index
+        int startCharIndex1 = getStart();
+        int startCharIndex2 = aBI.getStart();
+        if (startCharIndex1 != startCharIndex2)
+            return startCharIndex1 - startCharIndex2;
 
-        return getText().compareTo(aBI.getText());
+        // Sort by text (really shouldn't get here)
+        String text1 = getText();
+        String text2 = aBI.getText();;
+        return text1.compareTo(text2);
     }
 
     /**
@@ -155,19 +163,14 @@ public class BuildIssue implements Comparable<BuildIssue> {
      */
     public static BuildIssue createIssueForNodeError(NodeError aNodeError, WebFile aSourceFile)
     {
+        // Get info
         JNode node = aNodeError.getNode();
         String errorStr = aNodeError.getString();
+        int lineIndex = node.getLineIndex();
+        int startCharIndex = node.getStartCharIndex();
+        int endCharIndex = node.getEndCharIndex();
 
-        JStmt stmt = node instanceof JStmt ? (JStmt) node : node.getParent(JStmt.class);
-        if (stmt == null) {
-            System.out.println("BuildIssue.createIssueForNodeError: Can't find statement");
-            return null;
-        }
-
-        int lineIndex = stmt.getLineIndex();
-        int startCharIndex = stmt.getStartCharIndex();
-        int endCharIndex = stmt.getEndCharIndex();
-
+        // Create and return BuildIssue
         BuildIssue buildIssue = new BuildIssue();
         buildIssue.init(aSourceFile, BuildIssue.Kind.Error, errorStr, lineIndex,0, startCharIndex, endCharIndex);
         return buildIssue;

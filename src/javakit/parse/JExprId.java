@@ -4,7 +4,6 @@
 package javakit.parse;
 import javakit.resolver.*;
 import snap.parse.ParseNode;
-import snap.util.ArrayUtils;
 
 /**
  * A JExpr subclass for identifiers.
@@ -147,12 +146,16 @@ public class JExprId extends JExpr {
     {
         NodeError[] errors = NodeError.NO_ERRORS;
 
+        // If Parent is WithId, just return
+        JNode parentNode = getParent();
+        if (parentNode instanceof WithId && ((WithId) parentNode).getId() == this)
+            return errors;
+
         // Handle can't resolve id
         JavaDecl decl = getDecl();
         if (decl == null) {
             String name = getName();
-            NodeError error = new NodeError(this, "Can't resolve id: " + name);
-            errors = ArrayUtils.add(errors, error);
+            errors = NodeError.addError(errors, this, "Can't resolve id: " + name);
         }
 
         // Return

@@ -3,6 +3,7 @@
  */
 package javakit.parse;
 
+import snap.util.ArrayUtils;
 import snap.util.StringUtils;
 
 /**
@@ -66,5 +67,22 @@ public class NodeError {
     public static NodeError[] newErrorArray(JNode aNode, String errorMessage)
     {
         return new NodeError[] { new NodeError(aNode, errorMessage) };
+    }
+
+    /**
+     * Creates and returns an error in array.
+     */
+    public static NodeError[] addError(NodeError[] theErrors, JNode aNode, String errorMessage)
+    {
+        return addError(theErrors, aNode, errorMessage, theErrors.length);
+    }
+
+    /**
+     * Creates and returns an error in array.
+     */
+    public static NodeError[] addError(NodeError[] theErrors, JNode aNode, String errorMessage, int index)
+    {
+        NodeError error = new NodeError(aNode, errorMessage);
+        return ArrayUtils.add(theErrors, error, index);
     }
 }

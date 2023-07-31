@@ -4,7 +4,6 @@
 package javakit.parse;
 import java.util.*;
 import javakit.resolver.*;
-import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 
 /**
@@ -296,10 +295,8 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
 
         // Handle missing class
         JavaMethod lambdaMethod = getLambdaMethod();
-        if (lambdaMethod == null) {
-            NodeError error = new NodeError(this, "Can't resolve lambda method");
-            errors = ArrayUtils.add(errors, error);
-        }
+        if (lambdaMethod == null)
+            errors = NodeError.addError(errors, this, "Can't resolve lambda method", 0);
 
         // Return
         return errors;

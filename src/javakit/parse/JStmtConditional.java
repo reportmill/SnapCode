@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import snap.util.ArrayUtils;
 
 /**
  * A Java statement for conditional/nested statements (while, do, if, for).
@@ -73,19 +72,15 @@ public class JStmtConditional extends JStmt implements WithBodyStmt, WithBlockSt
     @Override
     protected NodeError[] getErrorsImpl()
     {
-        NodeError[] errors = NodeError.NO_ERRORS;
-
-        // Handle missing conditional
-        if (_cond == null && !(this instanceof JStmtFor && ((JStmtFor) this).isForEach())) {
-            NodeError error = new NodeError(this, "Missing conditional");
-            errors = ArrayUtils.add(errors, error);
-        }
+        NodeError[] errors = super.getErrorsImpl();
 
         // Handle missing statement
-        if (_stmt == null) {
-            NodeError error = new NodeError(this, "Missing statement block");
-            errors = ArrayUtils.add(errors, error);
-        }
+        if (_stmt == null)
+            errors = NodeError.addError(errors, this, "Missing statement block", 0);
+
+        // Handle missing conditional
+        if (_cond == null && !(this instanceof JStmtFor && ((JStmtFor) this).isForEach()))
+            errors = NodeError.addError(errors, this, "Missing conditional", 0);
 
         // Return
         return errors;

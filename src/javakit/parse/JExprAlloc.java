@@ -169,25 +169,22 @@ public class JExprAlloc extends JExpr {
     @Override
     protected NodeError[] getErrorsImpl()
     {
+        NodeError[] errors = super.getErrorsImpl();
+
         // If decl resolved, just return
         JavaDecl classOrConstructor = getDecl();
         if (classOrConstructor != null)
-            return NodeError.NO_ERRORS;
+            return errors;
 
         // Handle unresolved type
         JType type = getType();
         if (type == null)
-            return NodeError.newErrorArray(this, "Identifier expected");
-
-        // Handle unresolved type
-        JavaType typeClass = type.getDecl();
-        if (typeClass == null)
-            return type.getErrors();
+            return NodeError.addError(errors, this, "Identifier expected", 0);
 
         // Handle can't find constructor
         String constrString = getConstructorString();
         String errorString = "Can't resolve constructor: " + constrString;
-        return NodeError.newErrorArray(this, errorString);
+        return NodeError.addError(errors, this, errorString);
     }
 
     /**

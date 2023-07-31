@@ -63,7 +63,7 @@ public class JExprCast extends JExpr {
     @Override
     protected NodeError[] getErrorsImpl()
     {
-        NodeError[] errors = NodeError.NO_ERRORS;
+        NodeError[] errors = super.getErrorsImpl();
 
         // Handle missing type
         if (_type == null) {
@@ -75,13 +75,6 @@ public class JExprCast extends JExpr {
         if (_expr == null) {
             NodeError error = new NodeError(this, "Missing or incomplete expression");
             errors = ArrayUtils.add(errors, error);
-        }
-
-        // Otherwise init to expression errors
-        else {
-            NodeError[] exprErrors = _expr.getErrors();
-            if (exprErrors.length > 0)
-                errors = ArrayUtils.addAll(errors, exprErrors);
         }
 
         // Return

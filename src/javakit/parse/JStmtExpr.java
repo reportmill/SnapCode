@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import snap.util.ArrayUtils;
 
 /**
  * A Java statement for statements that are just expressions (increment, decrement, assignment).
@@ -39,16 +38,11 @@ public class JStmtExpr extends JStmt {
     @Override
     protected NodeError[] getErrorsImpl()
     {
-        NodeError[] errors = NodeError.NO_ERRORS;
+        NodeError[] errors = super.getErrorsImpl();
 
         // Handle missing statement
-        if (_expr == null) {
-            NodeError error = new NodeError(this, "Missing or incomplete expression");
-            errors = ArrayUtils.add(errors, error);
-        }
-
-        // Otherwise init to expression errors
-        else errors = _expr.getErrors();
+        if (_expr == null)
+            errors = NodeError.addError(errors, this, "Missing or incomplete expression", 0);
 
         // Return
         return errors;
