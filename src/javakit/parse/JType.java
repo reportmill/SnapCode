@@ -238,8 +238,8 @@ public class JType extends JNode {
     private JavaType getDeclForVar()
     {
         // Get parent StmtVarDecl: 'var' is only allowed as statement (can't be field or formal param)
-        JNode parent = getParent();
-        JStmtVarDecl varDeclStmt = parent instanceof JStmtVarDecl ? (JStmtVarDecl) parent : null;
+        JNode parentNode = getParent();
+        JStmtVarDecl varDeclStmt = parentNode instanceof JStmtVarDecl ? (JStmtVarDecl) parentNode : null;
         if (varDeclStmt == null)
             return null;
 
@@ -249,13 +249,18 @@ public class JType extends JNode {
         if (varDecl == null)
             return null;
 
-        // Get initializer expression
+        // If initializer expression set, return its EvalType
         JExpr initializerExpr = varDecl.getInitializer();
-        if (initializerExpr == null)
-            return null;
+        if (initializerExpr != null)
+            return initializerExpr.getEvalType();
 
-        // Return InitializerExpr.EvalType
-        return initializerExpr.getEvalType();
+        // If parentNode.parent is ForEachStmt, get iterable type
+        JNode grandparentNode = parentNode.getParent();
+        if (grandparentNode instanceof JStmtFor)
+            return ((JStmtFor) grandparentNode).getForEachIterationType();
+
+        // Return not found
+        return null;
     }
 
     /**

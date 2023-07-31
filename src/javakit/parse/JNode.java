@@ -394,6 +394,21 @@ public class JNode {
     }
 
     /**
+     * Returns whether given node is ancestor of this node.
+     */
+    public boolean isAncestor(JNode aNode)
+    {
+        // Iterate up parents and return true if node is found
+        for (JNode parent = _parent; parent != null; parent = parent.getParent()) {
+            if (aNode == parent)
+                return true;
+        }
+
+        // Return not ancestor
+        return false;
+    }
+
+    /**
      * Returns the node at given char index.
      */
     public JNode getNodeForCharIndex(int anIndex)
