@@ -602,12 +602,12 @@ public class JavaTextArea extends TextArea {
                     selStart -= Math.min(endCharIndex - startCharIndex, selStart - startCharIndex);
                 if (startCharIndex < selEnd)
                     selEnd -= Math.min(endCharIndex - startCharIndex, selEnd - startCharIndex);
-
-                // If at end line, break, otherwise get next line
-                if (startLine == endLine)
-                    break;
-                startLine = startLine.getNext();
             }
+
+            // If at end line, break, otherwise get next line
+            if (startLine == endLine)
+                break;
+            startLine = startLine.getNext();
         }
 
         // Reset selection
