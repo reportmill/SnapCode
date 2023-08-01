@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.runner;
+import java.lang.reflect.Array;
 import java.util.*;
 import javakit.parse.*;
 import snap.util.Convert;
@@ -298,12 +299,34 @@ public class JSStmtEval {
         JExpr listExpr = aForStmt.getConditional();
         Object listValue = evalExpr(listExpr);
 
+        // Handle null
+        if (listValue == null)
+            throw new NullPointerException("JSStmtEval.evalForEachStmt: Iteration value is null");
+
         // If Object[], convert to list
-        if (listValue instanceof Object[])
-            listValue = Arrays.asList((Object[]) listValue);
+        if (listValue.getClass().isArray()) {
+
+            // Get array length
+            int length = Array.getLength(listValue);
+
+            // Iterate over objects
+            for (int i = 0; i < length; i++) {
+
+                // Get/set loop var
+                Object obj = Array.get(listValue, i);
+                _exprEval.setExprIdValue(varId, obj);
+
+                // Eval statement
+                evalStmt(anOR, blockStmt);
+
+                // If LoopLimit hit, throw exception
+                if (handleBreakCheck())
+                    return _returnValueHit;
+            }
+        }
 
         // Handle Iterable
-        if (listValue instanceof Iterable) {
+        else if (listValue instanceof Iterable) {
 
             // Get iterable
             Iterable<?> iterable = (Iterable<?>) listValue;

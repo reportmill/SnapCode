@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
+import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 
 /**
@@ -91,6 +92,33 @@ public class JExprAssign extends JExpr {
         if (op == Op.Assign)
             return "AssignExpr";
         return "Assign" + op + "Expr";
+    }
+
+    /**
+     * Override to check valid assignment type.
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()
+    {
+        // Do normal version
+        NodeError[] errors = super.getErrorsImpl();
+
+        // Get assign to expression and value
+        JExpr assignToExpr = getIdExpr();
+        JavaClass assignToClass = assignToExpr.getEvalClass();
+
+        // Get value expression and type
+        JExpr valueExpr = getValueExpr();
+        JavaClass valueClass = valueExpr != null ? valueExpr.getEvalClass() : null;
+
+        // Check types
+        if (assignToClass == null)
+            errors = NodeError.addError(errors,this, "Can't resolve assign to type", 0);
+        else if (!assignToClass.isAssignableFrom(valueClass))
+            errors = NodeError.addError(errors, this, "Invalid assignment type", 0);
+
+        // Return
+        return errors;
     }
 
     /**

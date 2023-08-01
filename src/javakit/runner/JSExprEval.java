@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 import javakit.parse.*;
 import static javakit.runner.JSExprEvalUtils.*;
 import javakit.resolver.*;
@@ -789,6 +790,20 @@ public class JSExprEval {
                 _varStack.pushStackFrame();
                 _varStack.setStackValueForNode(param0, a);
                 try { return evalExpr(anOR, contentExpr); }
+                catch (Exception e) { throw new RuntimeException(e); }
+                finally { _varStack.popStackFrame(); }
+            };
+        }
+
+        // Handle Function
+        if (realClass == ToIntFunction.class) {
+            return (ToIntFunction) a -> {
+                _varStack.pushStackFrame();
+                _varStack.setStackValueForNode(param0, a);
+                try {
+                    Object value = evalExpr(anOR, contentExpr);
+                    return Convert.intValue(value);
+                }
                 catch (Exception e) { throw new RuntimeException(e); }
                 finally { _varStack.popStackFrame(); }
             };

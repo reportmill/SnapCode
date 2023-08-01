@@ -93,16 +93,18 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
     @Override
     protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
-        // If given id is inside for statement block, see if id is for statement var decl
-        JStmt stmt = getStatement();
-        if (anExprId.isAncestor(stmt)) {
-
-            // If any ForStmt.varDecls matches id expr name, return decl
-            String name = anExprId.getName();
-            JVarDecl varDecl = getVarDeclForName(name);
-            if (varDecl != null)
-                return varDecl.getDecl();
+        // If given id is in ForEach initializer (Conditional), don't check for parameter
+        if (isForEach()) {
+            JExpr initializer = getConditional();
+            if (anExprId == initializer || anExprId.isAncestor(initializer))
+                return super.getDeclForChildId(anExprId);
         }
+
+        // If any ForStmt.varDecls matches id expr name, return decl
+        String name = anExprId.getName();
+        JVarDecl varDecl = getVarDeclForName(name);
+        if (varDecl != null)
+            return varDecl.getDecl();
 
         // Do normal version
         return super.getDeclForChildId(anExprId);
