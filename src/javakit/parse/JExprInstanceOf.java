@@ -10,10 +10,18 @@ import javakit.resolver.JavaDecl;
 public class JExprInstanceOf extends JExpr {
 
     // The real expression for cast
-    JExpr _expr;
+    private JExpr _expr;
 
     // The target type
-    JType _type;
+    private JType _type;
+
+    /**
+     * Constructor.
+     */
+    public JExprInstanceOf()
+    {
+        super();
+    }
 
     /**
      * Returns the expression to be checked.

@@ -99,7 +99,7 @@ public class JSExprEval {
 
         // Handle Instanceof expression
         if (anExpr instanceof JExprInstanceOf)
-            throw new RuntimeException("JSExprEval.evalTypeExpr() not implemented");
+            return evalInstanceOfExpr(anOR, ((JExprInstanceOf) anExpr));
 
         // Handle lambda expression
         if (anExpr instanceof JExprLambda)
@@ -423,6 +423,24 @@ public class JSExprEval {
         // Cast value and return
         Object castValue = castOrConvertValueToPrimitiveClass(value, castClass);
         return castValue;
+    }
+
+    /**
+     * Evaluate JExprInstanceOf.
+     */
+    protected Object evalInstanceOfExpr(Object anOR, JExprInstanceOf anInstanceOfExpr) throws Exception
+    {
+        // Get expression and evaluate
+        JExpr expr = anInstanceOfExpr.getExpr();
+        Object value = evalExpr(anOR, expr);
+
+        // Get type and class
+        JType type = anInstanceOfExpr.getType();
+        JavaClass typeClass = type.getEvalClass();
+        Class<?> typeRealClass = typeClass.getRealClass();
+
+        // Return whether value is instance of
+        return typeRealClass.isInstance(value);
     }
 
     /**
