@@ -92,7 +92,8 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * Type Handler.
+     * Type Handler: LookAhead(2) ReferenceType | PrimitiveType
+     *   - ReferenceType: PrimitiveType (LookAhead(2) "[" "]")+ | ClassType (LookAhead(2) "[" "]")*
      */
     public static class TypeHandler extends JNodeParseHandler<JType> {
 
@@ -103,19 +104,16 @@ public class JavaParserExpr extends Parser {
         {
             switch (anId) {
 
-                // Handle PrimitiveType
+                // Handle ClassType, PrimitiveType
+                case "ClassType":
                 case "PrimitiveType":
                     _part = aNode.getCustomNode(JType.class);
                     break;
 
                 // Handle ReferenceType."["
                 case "[":
-                    getPart().setArrayCount(getPart().getArrayCount() + 1);
-                    break;
-
-                // Handle ClassType
-                case "ClassType":
-                    _part = aNode.getCustomNode(JType.class);
+                    JType part = getPart();
+                    part.setArrayCount(part.getArrayCount() + 1);
                     break;
             }
         }
@@ -472,7 +470,7 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * PrimaryExpr Handler.
+     * PrimaryExpr Handler: PrimaryPrefix (LookAhead(2) PrimarySuffix)*
      */
     public static class PrimaryExprHandler extends JNodeParseHandler<JExpr> {
 
@@ -491,7 +489,7 @@ public class JavaParserExpr extends Parser {
                 // Handle PrimarySuffix: Join prefix and suffix
                 case "PrimarySuffix":
                     JExpr expr = aNode.getCustomNode(JExpr.class);
-                    _part = JExpr.joinExpressions(_part, expr);
+                    _part = JExpr.joinPrimaryPrefixAndSuffixExpressions(_part, expr);
                     break;
             }
         }
@@ -501,6 +499,15 @@ public class JavaParserExpr extends Parser {
 
     /**
      * PrimaryPrefix Handler.
+     *     Literal |
+     *     LookAhead ((Identifier | ".")* "this") (Identifier ".")* "this" |
+     *     "super" "." Identifier |
+     *     LookAhead (ClassType "." "super" "." Identifier) ClassType "." "super" "." Identifier |
+     *     LambdaExpr |
+     *     "(" Expression ")" |
+     *     AllocExpr |
+     *     LookAhead (ResultType "." "class") ResultType "." "class" |
+     *     Name
      */
     public static class PrimaryPrefixHandler extends JNodeParseHandler<JExpr> {
 
@@ -535,8 +542,9 @@ public class JavaParserExpr extends Parser {
                     break;
                 }
 
-                // Handle ClassType (using above to handle the rest: "." "super" "." Identifier
+                // Handle ClassType.super and ResultType.class
                 case "ClassType":
+                case "ResultType":
                     JType classType = aNode.getCustomNode(JType.class);
                     _part = new JExprType(classType);
                     break;
@@ -558,10 +566,6 @@ public class JavaParserExpr extends Parser {
                     break;
 
                 // Handle ResultType "." "class"
-                case "ResultType":
-                    JType resultType = aNode.getCustomNode(JType.class);
-                    _part = new JExprType(resultType);
-                    break;
                 case "class": {
                     JExprId idExpr = new JExprId(aNode);
                     _part = new JExprDot(_part, idExpr);
@@ -582,6 +586,13 @@ public class JavaParserExpr extends Parser {
 
     /**
      * PrimarySuffix Handler.
+     *     LookAhead ("." "super" ".") "." "super" |
+     *     LookAhead(2) "." "this" |
+     *     LookAhead(2) "." AllocExpr |
+     *     LookAhead(3) MemberSelector |
+     *     "[" Expression "]" |
+     *     ("." | "::") Identifier |
+     *     Arguments
      */
     public static class PrimarySuffixHandler extends JNodeParseHandler<JExpr> {
 
@@ -596,14 +607,10 @@ public class JavaParserExpr extends Parser {
 
                 // Handle [ "." "super" ] and [ "." "this" ]
                 case "super":
-                case "this":
-                    _part = new JExprId(aNode.getString());
-                    break;
+                case "this": _part = new JExprId(aNode.getString()); break;
 
                 // Handle AllocExpr
-                case "AllocExpr":
-                    _part = aNode.getCustomNode(JExpr.class);
-                    break;
+                case "AllocExpr": _part = aNode.getCustomNode(JExpr.class); break;
 
                 // Handle MemberSelector: TypeArgs Identifier (currently handed below without TypeArgs)
                 //else if(anId=="TypeArgs") _part = aNode.getCustomNode(JavaExpression.class);
@@ -616,17 +623,13 @@ public class JavaParserExpr extends Parser {
                 // Handle ("." | "::") Identifier
                 case "Identifier":
                     JExprId id = aNode.getCustomNode(JExprId.class);
-                    if (_methodRef) {
+                    if (_methodRef)
                         _part = new JExprMethodRef(null, id);
-                        _methodRef = false;
-                    }
                     else _part = id;
                     break;
 
                 // Handle "::" Identifier
-                case "::":
-                    _methodRef = true;
-                    break;
+                case "::": _methodRef = true; break;
 
                 // Handle Arguments
                 case "Arguments":
@@ -634,6 +637,16 @@ public class JavaParserExpr extends Parser {
                     _part = new JExprMethodCall(null, argsList);
                     break;
             }
+        }
+
+        /**
+         * Override to clear MethodRef.
+         */
+        @Override
+        public void reset()
+        {
+            super.reset();
+            _methodRef = false;
         }
 
         protected Class<JExpr> getPartClass()  { return JExpr.class; }
@@ -676,25 +689,25 @@ public class JavaParserExpr extends Parser {
 
             switch (anId) {
 
-                // Handle PrimitiveType
+                // Handle PrimitiveType, ClassType
                 case "PrimitiveType":
-                    allocExpr.setType(aNode.getCustomNode(JType.class));
+                case "ClassType":
+                    JType type = aNode.getCustomNode(JType.class);
+                    allocExpr.setType(type);
                     break;
 
                 // Handle ArrayDimsAndInits
                 case "Expression":
-                    if (allocType != null && allocType.isArrayType())
-                        allocExpr.setArrayDims(aNode.getCustomNode(JExpr.class));
+                    if (allocType != null && allocType.isArrayType()) {
+                        JExpr dimsOrInitsExpr = aNode.getCustomNode(JExpr.class);
+                        allocExpr.setArrayDims(dimsOrInitsExpr);
+                    }
                     break;
 
                 // Handle ArrayDimsAndInits ArrayInit
                 case "ArrayInit":
-                    allocExpr.setArrayInits(aNode.getCustomNode(List.class));
-                    break;
-
-                // Handle ClassType
-                case "ClassType":
-                    allocExpr.setType(aNode.getCustomNode(JType.class));
+                    List<JExpr> arrayInits = aNode.getCustomNode(List.class);
+                    allocExpr.setArrayInits(arrayInits);
                     break;
 
                 // Handle TypeArgs, ArrayDimsAndInits
@@ -705,7 +718,8 @@ public class JavaParserExpr extends Parser {
 
                 // Handle Arguments
                 case "Arguments":
-                    allocExpr.setArgs(aNode.getCustomNode(List.class));
+                    List<JExpr> argExprs = aNode.getCustomNode(List.class);
+                    allocExpr.setArgs(argExprs);
                     break;
 
                 // Handle ClassBody

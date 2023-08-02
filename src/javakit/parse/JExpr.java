@@ -61,42 +61,53 @@ public abstract class JExpr extends JNode {
     }
 
     /**
-     * Joins two expressions together and returns the result.
+     * Joins two expressions together and returns the result (for PrimaryExprHandler).
      */
-    public static JExpr joinExpressions(JExpr expr1, JExpr expr2)
+    protected static JExpr joinPrimaryPrefixAndSuffixExpressions(JExpr prefixExpr, JExpr suffixExpr)
     {
-        // Handle MethodCall or MethodRef with missing prefix expression: Set prefix expression and return
-        if (expr2 instanceof WithId && ((WithId) expr2).getId() == null) {
+        // Handle MethodCall: Set prefix expression
+        if (suffixExpr instanceof JExprMethodCall) {
+
+            // Get method call and check that id is null (should not be possible)
+            JExprMethodCall methodCall = (JExprMethodCall) suffixExpr;
+            if (methodCall.getId() != null)
+                System.err.println("JExpr.joinExpression: Unexpected method call with id: " + methodCall.getId().getName());
 
             // If prefix is dot expression, replace dotExpr.Expr with method call
-            WithId methodCallOrRef = (WithId) expr2;
-            if (expr1 instanceof JExprDot) {
-                JExprDot dotExpr = (JExprDot) expr1;
+            if (prefixExpr instanceof JExprDot) {
+                JExprDot dotExpr = (JExprDot) prefixExpr;
                 JExpr dotExprExpr = dotExpr.getExpr();
                 if (dotExprExpr instanceof JExprId) {
                     JExprId idExpr = (JExprId) dotExprExpr;
-                    dotExpr.setExpr(expr2);
-                    methodCallOrRef.setId(idExpr);
+                    dotExpr.setExpr(methodCall);
+                    methodCall.setId(idExpr);
                 }
-                return expr1;
+                return prefixExpr;
             }
 
             // Otherwise set id and return method call
-            JExprId idExpr = (JExprId) expr1;
-            methodCallOrRef.setId(idExpr);
-            return expr2;
+            JExprId idExpr = (JExprId) prefixExpr;
+            methodCall.setId(idExpr);
+            return suffixExpr;
+        }
+
+        // Handle MethodRef: Set prefix expression
+        if (suffixExpr instanceof JExprMethodRef) {
+            JExprMethodRef methodRef = (JExprMethodRef) suffixExpr;
+            methodRef.setExpr(prefixExpr);
+            return methodRef;
         }
 
         // If ArrayIndex with missing ArrayExpr, set and return
-        if (expr2 instanceof JExprArrayIndex) {
-            JExprArrayIndex arrayIndexExpr = (JExprArrayIndex) expr2;
+        if (suffixExpr instanceof JExprArrayIndex) {
+            JExprArrayIndex arrayIndexExpr = (JExprArrayIndex) suffixExpr;
             if (arrayIndexExpr.getArrayExpr() != null)
                 System.err.println("JExpr.join: ArrayIndex.ArrayExpr not null");
-            arrayIndexExpr.setArrayExpr(expr1);
+            arrayIndexExpr.setArrayExpr(prefixExpr);
             return arrayIndexExpr;
         }
 
         // Handle two arbitrary expressions
-        return new JExprDot(expr1, expr2);
+        return new JExprDot(prefixExpr, suffixExpr);
     }
 }
