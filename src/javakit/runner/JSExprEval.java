@@ -4,16 +4,11 @@
 package javakit.runner;
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.DoubleBinaryOperator;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
-import java.util.function.ToIntFunction;
 import javakit.parse.*;
 import static javakit.runner.JSExprEvalUtils.*;
 import javakit.resolver.*;
 import snap.props.PropObject;
 import snap.util.*;
-import snap.view.EventListener;
 
 /**
  * A class to evaluate expressions.
@@ -647,7 +642,12 @@ public class JSExprEval {
             throw new RuntimeException("JSExprEval.evalLambdaExpr: Can't determine lambda class for expr: " + aLambdaExpr);
 
         // Get/return lambda of lambda class that wraps given expression
-        Object wrappedLambda = getWrappedLambdaExpression(anOR, aLambdaExpr, lambdaClass);
+        Object wrappedLambda = LambdaWrapper.getWrappedLambdaExpression(this, anOR, aLambdaExpr, lambdaClass);
+        if (wrappedLambda != null)
+            return wrappedLambda;
+
+        // Legacy code
+        wrappedLambda = LambdaWrapper2.getWrappedLambdaExpression(this, anOR, aLambdaExpr, lambdaClass);
         return wrappedLambda;
     }
 
@@ -778,96 +778,5 @@ public class JSExprEval {
 
         // Return not found
         return null;
-    }
-
-    /**
-     * Returns a wrapped lambda expression for given class.
-     */
-    private Object getWrappedLambdaExpression(Object anOR, JExprLambda lambdaExpr, JavaClass lambdaClass)
-    {
-        // Get params and content expression
-        List<JVarDecl> varDecls = lambdaExpr.getParameters();
-        JVarDecl param0 = varDecls.size() > 0 ? varDecls.get(0) : null;
-        JVarDecl param1 = varDecls.size() > 1 ? varDecls.get(1) : null;
-        JExpr contentExpr = lambdaExpr.getExpr();
-        Class<?> realClass = lambdaClass.getRealClass();
-
-        // Handle Runnable
-        if (realClass == Runnable.class) {
-            return (Runnable) () -> {
-                _varStack.pushStackFrame();
-                try { evalExpr(anOR, contentExpr); }
-                catch (Exception e) { throw new RuntimeException(e); }
-                finally { _varStack.popStackFrame(); }
-            };
-        }
-
-        // Handle Function
-        if (realClass == Function.class) {
-            return (Function) a -> {
-                _varStack.pushStackFrame();
-                _varStack.setStackValueForNode(param0, a);
-                try { return evalExpr(anOR, contentExpr); }
-                catch (Exception e) { throw new RuntimeException(e); }
-                finally { _varStack.popStackFrame(); }
-            };
-        }
-
-        // Handle Function
-        if (realClass == ToIntFunction.class) {
-            return (ToIntFunction) a -> {
-                _varStack.pushStackFrame();
-                _varStack.setStackValueForNode(param0, a);
-                try {
-                    Object value = evalExpr(anOR, contentExpr);
-                    return Convert.intValue(value);
-                }
-                catch (Exception e) { throw new RuntimeException(e); }
-                finally { _varStack.popStackFrame(); }
-            };
-        }
-
-        // Handle DoubleUnaryOperator
-        if (realClass == DoubleUnaryOperator.class) {
-            return (DoubleUnaryOperator) d -> {
-                _varStack.pushStackFrame();
-                _varStack.setStackValueForNode(param0, d);
-                try {
-                    Object value = evalExpr(anOR, contentExpr);
-                    return Convert.doubleValue(value);
-                }
-                catch (Exception e) { throw new RuntimeException(e); }
-                finally { _varStack.popStackFrame(); }
-            };
-        }
-
-        // Handle DoubleBinaryOperator
-        if (realClass == DoubleBinaryOperator.class) {
-            return (DoubleBinaryOperator) (x,y) -> {
-                _varStack.pushStackFrame();
-                _varStack.setStackValueForNode(param0, x);
-                _varStack.setStackValueForNode(param1, y);
-                try {
-                    Object value = evalExpr(anOR, contentExpr);
-                    return Convert.doubleValue(value);
-                }
-                catch (Exception e) { throw new RuntimeException(e); }
-                finally { _varStack.popStackFrame(); }
-            };
-        }
-
-        // Handle EventListener
-        if (realClass == EventListener.class) {
-            return (EventListener) (e) -> {
-                _varStack.pushStackFrame();
-                _varStack.setStackValueForNode(param0, e);
-                try { evalExpr(anOR, contentExpr); }
-                catch (Exception e2) { throw new RuntimeException(e2); }
-                finally { _varStack.popStackFrame(); }
-            };
-        }
-
-        // Complain
-        throw new RuntimeException("JSExprEval.getWrappedLambdaExpr: Unknown lambda class: " + lambdaClass.getName());
     }
 }

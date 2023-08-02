@@ -2,7 +2,7 @@ package javakit.runner;
 import javakit.parse.JExprMath;
 import javakit.resolver.JavaMethod;
 import snap.util.Convert;
-
+import snap.util.SnapUtils;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -311,15 +311,22 @@ public class JSExprEvalUtils {
      */
     protected static Object invokeMethod(Object anObj, JavaMethod javaMethod, Object[] theArgs) throws Exception
     {
-        // Get method
-        Method meth = javaMethod.getMethod();
+        // Get method - check object class to get top method if overridden
+        Method method = javaMethod.getMethod();
+        if (anObj != null && !javaMethod.isStatic()) {
+            Class<?> objClass = anObj.getClass();
+            if (objClass != method.getDeclaringClass())
+                method = objClass.getMethod(method.getName(), method.getParameterTypes());
+        }
 
         // If VarArgs, need to repackage args
-        if (meth.isVarArgs())
-            theArgs = repackageArgsForVarArgsMethod(meth, theArgs);
+        if (method.isVarArgs())
+            theArgs = repackageArgsForVarArgsMethod(method, theArgs);
 
         // Invoke
-        return meth.invoke(anObj, theArgs);
+        if (SnapUtils.isWebVM)
+            method.setAccessible(true);
+        return method.invoke(anObj, theArgs);
     }
 
     /**
