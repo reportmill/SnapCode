@@ -35,6 +35,8 @@ public class JavaPopupList extends PopupList<JavaDecl> {
      */
     public JavaPopupList(JavaTextArea aJavaTextArea)
     {
+        super();
+
         // Create ListArea and configure style
         ListArea<JavaDecl> listArea = getListArea();
         listArea.setFill(BACKGROUND_COLOR);
@@ -259,6 +261,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Override to register for textArea property change.
      */
+    @Override
     public void show(View aView, double aX, double aY)
     {
         // Shift X by image width
@@ -275,6 +278,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Override to unregister property change.
      */
+    @Override
     public void hide()
     {
         super.hide();
@@ -282,9 +286,24 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     }
 
     /**
+     * Override to fire action on tab key.
+     */
+    @Override
+    protected void processPopupListKeyPressEvent(ViewEvent anEvent)
+    {
+        if (anEvent.isTabKey()) {
+            fireActionEvent(anEvent);
+            return;
+        }
+
+        // Do normal version
+        super.processPopupListKeyPressEvent(anEvent);
+    }
+
+    /**
      * Catch TextArea Selection changes that should cause Popup to close.
      */
-    public void textAreaPropChange(PropChange aPC)
+    private void textAreaPropChange(PropChange aPC)
     {
         // If not showing, unregister (in case we were PopupList was dismissed without hide)
         if (!isShowing()) {
@@ -306,6 +325,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Configure cells for this PopupList.
      */
+    @Override
     protected void configureCell(ListCell<JavaDecl> aCell)
     {
         // Get cell item
@@ -325,6 +345,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Override to apply suggestion.
      */
+    @Override
     protected void fireActionEvent(ViewEvent anEvent)
     {
         applySuggestion();
