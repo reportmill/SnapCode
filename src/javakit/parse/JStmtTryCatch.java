@@ -1,12 +1,13 @@
 package javakit.parse;
 import javakit.resolver.JavaDecl;
-
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * A JNode for a catch block
  */
-public class JStmtTryCatch extends JNode implements WithBlockStmt {
+public class JStmtTryCatch extends JNode implements WithVarDecls, WithBlockStmt {
 
     // The formal parameter
     protected JVarDecl  _param;
@@ -33,6 +34,15 @@ public class JStmtTryCatch extends JNode implements WithBlockStmt {
     public void setParameter(JVarDecl aVD)
     {
         replaceChild(_param, _param = aVD);
+    }
+
+    /**
+     * WithVarDecls method.
+     */
+    @Override
+    public List<JVarDecl> getVarDecls()
+    {
+        return Collections.singletonList(_param);
     }
 
     /**

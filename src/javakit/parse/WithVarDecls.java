@@ -28,4 +28,23 @@ public interface WithVarDecls {
         Predicate<JVarDecl> nameEquals = vd -> Objects.equals(aName, vd.getName());
         return ListUtils.findMatch(varDecls, nameEquals);
     }
+
+    /**
+     * Returns the matching var decl for given name, if found and in scope (appears before id expression).
+     */
+    default JVarDecl getVarDeclForId(JExprId anId)
+    {
+        // Get var decl for name (just return null if not found)
+        String name = anId.getName();
+        JVarDecl varDecl = getVarDeclForName(name);
+        if (varDecl == null)
+            return null;
+
+        // If id appears before var decl, return null
+        if (anId.getStartCharIndex() < varDecl.getEndCharIndex())
+            return null;
+
+        // Return
+        return varDecl;
+    }
 }

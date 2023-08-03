@@ -3,12 +3,24 @@
  */
 package javakit.parse;
 import java.util.*;
+
 import javakit.resolver.JavaDecl;
 
 /**
  * A Java statement for a block of statements.
  */
-public class JStmtBlock extends JStmt implements WithStmts {
+public class JStmtBlock extends JStmt implements WithStmts, WithVarDeclsX {
+
+    // An array of VarDecls held by JStmtVarDecls
+    private List<JVarDecl> _varDecls;
+
+    /**
+     * Constructor.
+     */
+    public JStmtBlock()
+    {
+        super();
+    }
 
     /**
      * Returns the list of statements.
@@ -41,6 +53,17 @@ public class JStmtBlock extends JStmt implements WithStmts {
     public int removeStatement(JStmt aStmt)
     {
         return removeChild(aStmt);
+    }
+
+    /**
+     * Returns VarDecls encapsulated by class (JFieldDecl VarDecls).
+     */
+    @Override
+    public List<JVarDecl> getVarDecls()
+    {
+        if (_varDecls != null) return _varDecls;
+        List<JVarDecl> varDecls = WithStmts.getWithStmtsVarDecls(this);
+        return _varDecls = varDecls;
     }
 
     /**

@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * A class to represent individual cases in a switch statement.
  */
-public class JStmtSwitchCase extends JNode implements WithStmts {
+public class JStmtSwitchCase extends JNode implements WithStmts, WithVarDeclsX {
 
     // The case expression
     private JExpr  _expr;
@@ -20,6 +20,9 @@ public class JStmtSwitchCase extends JNode implements WithStmts {
 
     // The body statements
     private List<JStmt>  _stmts = new ArrayList<>();
+
+    // An array of VarDecls held by JStmtVarDecls
+    private List<JVarDecl> _varDecls;
 
     /**
      * Constructor.
@@ -64,6 +67,17 @@ public class JStmtSwitchCase extends JNode implements WithStmts {
     {
         _stmts.add(aStmt);
         addChild(aStmt, -1);
+    }
+
+    /**
+     * Returns VarDecls encapsulated by class (JFieldDecl VarDecls).
+     */
+    @Override
+    public List<JVarDecl> getVarDecls()
+    {
+        if (_varDecls != null) return _varDecls;
+        List<JVarDecl> varDecls = WithStmts.getWithStmtsVarDecls(this);
+        return _varDecls = varDecls;
     }
 
     /**

@@ -100,6 +100,24 @@ public class JExprId extends JExpr {
     }
 
     /**
+     * Looks for VarDecl in parent nodes (i.e., in scope) for this id.
+     */
+    private JVarDecl getVarDeclForId()
+    {
+        // Iterate up parents to look for a JVarDecl that defines this id name (Local vars, method params, class fields, etc.)
+        for (JNode parentNode = getParent(); parentNode != null; parentNode = parentNode.getParent()) {
+            if (parentNode instanceof WithVarDeclsX) {
+                JVarDecl varDecl = ((WithVarDeclsX) parentNode).getVarDeclForId(this);
+                if (varDecl != null)
+                    return varDecl;
+            }
+        }
+
+        // Return not found
+        return null;
+    }
+
+    /**
      * Returns the part name.
      */
     public String getNodeString()

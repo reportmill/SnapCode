@@ -3,13 +3,16 @@
  */
 package javakit.parse;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import javakit.resolver.*;
 import snap.util.ListUtils;
 
 /**
  * A Java member for ClassDecl.
  */
-public class JClassDecl extends JMemberDecl {
+public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
 
     // The type of class (Class, Interface, Enum, Annotation)
     protected ClassType  _classType = ClassType.Class;
@@ -43,6 +46,9 @@ public class JClassDecl extends JMemberDecl {
 
     // An array of class declarations that are members of this class
     protected JClassDecl[]  _classDecls;
+
+    // An array of VarDecls held by JFieldDecls
+    private List<JVarDecl> _varDecls;
 
     // The class type
     public enum ClassType { Class, Interface, Enum, Annotation }
@@ -539,6 +545,24 @@ public class JClassDecl extends JMemberDecl {
 
         // Do normal version
         return super.getDeclForChildType(type);
+    }
+
+    /**
+     * Returns VarDecls encapsulated by class (JFieldDecl VarDecls).
+     */
+    @Override
+    public List<JVarDecl> getVarDecls()
+    {
+        // If already set, just return
+        if (_varDecls != null) return _varDecls;
+
+        // Get FieldDecls.VarDecls
+        JFieldDecl[] fieldDecls = getFieldDecls();
+        Stream<JVarDecl> varDeclsStream = Stream.of(fieldDecls).flatMap(fieldDecl -> fieldDecl.getVarDecls().stream());
+        List<JVarDecl> varDecls = varDeclsStream.collect(Collectors.toList());
+
+        // Set and return
+        return _varDecls = varDecls;
     }
 
     /**

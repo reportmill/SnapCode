@@ -8,7 +8,7 @@ import java.util.*;
 /**
  * A JMember for Field declarations.
  */
-public class JFieldDecl extends JMemberDecl {
+public class JFieldDecl extends JMemberDecl implements WithVarDecls {
 
     // The type/return-type
     protected JType  _type;
