@@ -603,18 +603,13 @@ public class JSExprEval {
      */
     private Object evalLambdaExpr(Object anOR, JExprLambda aLambdaExpr)
     {
-        // Get lambda class
-        JavaClass lambdaClass = aLambdaExpr.getLambdaClass();
-        if (lambdaClass == null)
-            throw new RuntimeException("JSExprEval.evalLambdaExpr: Can't determine lambda class for expr: " + aLambdaExpr);
-
         // Get/return lambda of lambda class that wraps given expression
-        Object wrappedLambda = LambdaWrapper.getWrappedLambdaExpression(this, anOR, aLambdaExpr, lambdaClass);
+        Object wrappedLambda = LambdaWrapper.getWrappedLambdaExpression(this, anOR, aLambdaExpr);
         if (wrappedLambda != null)
             return wrappedLambda;
 
         // Legacy code
-        wrappedLambda = LambdaWrapper2.getWrappedLambdaExpression(this, anOR, aLambdaExpr, lambdaClass);
+        wrappedLambda = LambdaWrapper2.getWrappedLambdaExpression(this, anOR, aLambdaExpr);
         return wrappedLambda;
     }
 

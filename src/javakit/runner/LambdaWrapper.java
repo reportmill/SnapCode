@@ -4,9 +4,9 @@ import javakit.parse.JExprLambda;
 import javakit.parse.JVarDecl;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaMethod;
-
 import java.lang.invoke.*;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Wraps Lambda expression.
@@ -25,21 +25,28 @@ public class LambdaWrapper {
     // The Content expression
     private JExpr _contentExpr;
 
+    // The params
+    private JVarDecl _param0, _param1;
+
     /**
      * Constructor.
      */
-    public LambdaWrapper(JSExprEval exprEval, Object anOR, JExpr contentExpr)
+    public LambdaWrapper(JSExprEval exprEval, Object anOR, JExprLambda lambdaExpr)
     {
         _exprEval = exprEval;
         _varStack = exprEval._varStack;
         _OR = anOR;
-        _contentExpr = contentExpr;
+        _contentExpr = lambdaExpr.getExpr();
+
+        List<JVarDecl> varDecls = lambdaExpr.getParameters();
+        _param0 = varDecls.size() > 0 ? varDecls.get(0) : null;
+        _param1 = varDecls.size() > 1 ? varDecls.get(1) : null;
     }
 
     /**
      * Invokes void.
      */
-    public Object invokeVoid()
+    public Object invokeVoidMethod()
     {
         _varStack.pushStackFrame();
         try { _exprEval.evalExpr(_OR, _contentExpr); }
@@ -48,27 +55,19 @@ public class LambdaWrapper {
         return null;
     }
 
-    public void invokeLambdaVoidMethod0(Object anOR, JExpr contentExpr)
+    public Object invokeObjectMethod()
     {
         _varStack.pushStackFrame();
-        try { _exprEval.evalExpr(anOR, contentExpr); }
+        try { return _exprEval.evalExpr(_OR, _contentExpr); }
         catch (Exception e) { throw new RuntimeException(e); }
         finally { _varStack.popStackFrame(); }
     }
 
-    public Object invokeLambdaObjectMethod(Object anOR, JExpr contentExpr)
+    public Object invokeObjectMethodWithObject(Object arg1)
     {
         _varStack.pushStackFrame();
-        try { return _exprEval.evalExpr(anOR, contentExpr); }
-        catch (Exception e) { throw new RuntimeException(e); }
-        finally { _varStack.popStackFrame(); }
-    }
-
-    public Object invokeLambdaObjectMethodWithArg(Object anOR, JExpr contentExpr, JVarDecl param0, Object a)
-    {
-        _varStack.pushStackFrame();
-        _varStack.setStackValueForNode(param0, a);
-        try { return _exprEval.evalExpr(anOR, contentExpr); }
+        _varStack.setStackValueForNode(_param0, arg1);
+        try { return _exprEval.evalExpr(_OR, _contentExpr); }
         catch (Exception e) { throw new RuntimeException(e); }
         finally { _varStack.popStackFrame(); }
     }
@@ -76,8 +75,13 @@ public class LambdaWrapper {
     /**
      * Returns a wrapped lambda expression for given class.
      */
-    public static Object getWrappedLambdaExpression(JSExprEval exprEval, Object anOR, JExprLambda lambdaExpr, JavaClass lambdaClass)
+    public static Object getWrappedLambdaExpression(JSExprEval exprEval, Object anOR, JExprLambda lambdaExpr)
     {
+        // Get lambda class
+        JavaClass lambdaClass = lambdaExpr.getLambdaClass();
+        if (lambdaClass == null)
+            throw new RuntimeException("JSExprEval.evalLambdaExpr: Can't determine lambda class for expr: " + lambdaExpr);
+
         try { return getWrappedLambdaExpressionImpl(exprEval, anOR, lambdaExpr, lambdaClass); }
         catch (Throwable t) { throw new RuntimeException(t); }
     }
@@ -88,27 +92,39 @@ public class LambdaWrapper {
     public static Object getWrappedLambdaExpressionImpl(JSExprEval exprEval, Object anOR, JExprLambda lambdaExpr, JavaClass lambdaClass) throws Throwable
     {
         // Get params and content expression
-        List<JVarDecl> varDecls = lambdaExpr.getParameters();
-        JVarDecl param0 = varDecls.size() > 0 ? varDecls.get(0) : null;
-        JVarDecl param1 = varDecls.size() > 1 ? varDecls.get(1) : null;
-        JExpr contentExpr = lambdaExpr.getExpr();
         Class<?> realClass = lambdaClass.getRealClass();
+
+        // Get lambda method name
+        JavaMethod lambdaMethod = lambdaExpr.getLambdaMethod();
+        String lambdaMethodName = lambdaMethod.getName();
+        MethodType lambdaMethodType = MethodType.methodType(realClass, LambdaWrapper.class);
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        LambdaWrapper lambdaWrapper = new LambdaWrapper(exprEval, anOR, lambdaExpr);
 
         // Handle Runnable
         if (realClass == Runnable.class) {
 
-            // Get lambda method name
-            JavaMethod lambdaMethod = lambdaExpr.getLambdaMethod();
-            String lambdaMethodName = lambdaMethod.getName();
-
             // Create LambdaWrapper for expression
-            LambdaWrapper lambdaWrapper = new LambdaWrapper(exprEval, anOR, contentExpr);
             MethodType methodType = MethodType.methodType(Object.class);
-            MethodHandles.Lookup lookup = MethodHandles.lookup();
-            MethodHandle methodHandle = lookup.findVirtual(LambdaWrapper.class, "invokeVoid", methodType);
+            MethodHandle methodHandle = lookup.findVirtual(LambdaWrapper.class, "invokeVoidMethod", methodType);
 
             // Get CallSite
-            MethodType lambdaMethodType = MethodType.methodType(realClass, LambdaWrapper.class);
+            CallSite callSite = LambdaMetafactory.metafactory(lookup, lambdaMethodName, lambdaMethodType, methodType, methodHandle, methodType);
+
+            // Bind call to LambdaWrapper and get a real lambda instance
+            MethodHandle lambdaWrapped2 = callSite.getTarget();
+            MethodHandle lambdaWrapped3 = lambdaWrapped2.bindTo(lambdaWrapper);
+            return lambdaWrapped3.invoke();
+        }
+
+        // Handle Function
+        if (realClass == Function.class) {
+
+            // Create LambdaWrapper for expression
+            MethodType methodType = MethodType.methodType(Object.class, Object.class);
+            MethodHandle methodHandle = lookup.findVirtual(LambdaWrapper.class, "invokeObjectMethodWithObject", methodType);
+
+            // Get CallSite
             CallSite callSite = LambdaMetafactory.metafactory(lookup, lambdaMethodName, lambdaMethodType, methodType, methodHandle, methodType);
 
             // Bind call to LambdaWrapper and get a real lambda instance

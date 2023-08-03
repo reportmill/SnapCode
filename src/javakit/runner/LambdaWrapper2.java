@@ -19,8 +19,13 @@ public class LambdaWrapper2 {
     /**
      * Returns a wrapped lambda expression for given class.
      */
-    public static Object getWrappedLambdaExpression(JSExprEval exprEval, Object anOR, JExprLambda lambdaExpr, JavaClass lambdaClass)
+    public static Object getWrappedLambdaExpression(JSExprEval exprEval, Object anOR, JExprLambda lambdaExpr)
     {
+        // Get lambda class
+        JavaClass lambdaClass = lambdaExpr.getLambdaClass();
+        if (lambdaClass == null)
+            throw new RuntimeException("JSExprEval.evalLambdaExpr: Can't determine lambda class for expr: " + lambdaExpr);
+
         // Get params and content expression
         List<JVarDecl> varDecls = lambdaExpr.getParameters();
         JVarDecl param0 = varDecls.size() > 0 ? varDecls.get(0) : null;
