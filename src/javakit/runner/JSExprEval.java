@@ -7,7 +7,6 @@ import java.util.*;
 import javakit.parse.*;
 import static javakit.runner.JSExprEvalUtils.*;
 import javakit.resolver.*;
-import snap.props.PropObject;
 import snap.util.*;
 
 /**
@@ -211,17 +210,10 @@ public class JSExprEval {
             argValues[i] = evalExpr(thisObj, argExpr);
         }
 
-        // Get method
+        // Get method (if null, throw exception)
         JavaMethod method = methodCallExpr.getDecl();
-        if (method == null) {
-
-            // Check for PropObject
-            if (anOR instanceof PropObject)
-                return evalMethodCallExprForPropObject((PropObject) anOR, methodCallExpr.getName(), argValues);
-
-            // Alright, now we can give up
+        if (method == null)
             throw new NoSuchMethodException("JSExprEval: Method not found for " + methodCallExpr.getName());
-        }
 
         // If object null, throw NullPointerException
         if (anOR == null && !method.isStatic())
@@ -262,31 +254,6 @@ public class JSExprEval {
 
         // Return
         return returnVal;
-    }
-
-    /**
-     * Evaluate JExprMethodCall for PropObject.
-     */
-    private Object evalMethodCallExprForPropObject(PropObject propObject, String methName, Object[] argValues) throws Exception
-    {
-        if ((methName.startsWith("is") || methName.startsWith("get") || methName.startsWith("set"))) {
-
-            // Get PropName
-            String propName = methName.substring(methName.startsWith("is") ? 2 : 3);
-
-            // Handle set
-            if (methName.startsWith("set")) {
-                if (argValues.length > 0) {
-                    propObject.setPropValue(propName, argValues[0]);
-                    return null;
-                }
-            }
-
-            // Handle is/get
-            return propObject.getPropValue(propName);
-        }
-
-        throw new NoSuchMethodException("JSExprEval: Method not found for " + methName);
     }
 
     /**

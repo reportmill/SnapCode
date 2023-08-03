@@ -313,10 +313,13 @@ public class JSExprEvalUtils {
     {
         // Get method - check object class to get top method if overridden
         Method method = javaMethod.getMethod();
-        if (anObj != null && !javaMethod.isStatic()) {
+        if (!javaMethod.isStatic()) {
             Class<?> objClass = anObj.getClass();
-            if (objClass != method.getDeclaringClass())
+            if (objClass != method.getDeclaringClass()) {
                 method = objClass.getMethod(method.getName(), method.getParameterTypes());
+                if (SnapUtils.isWebVM) // Bug
+                    method.setAccessible(true);
+            }
         }
 
         // If VarArgs, need to repackage args
@@ -324,8 +327,6 @@ public class JSExprEvalUtils {
             theArgs = repackageArgsForVarArgsMethod(method, theArgs);
 
         // Invoke
-        if (SnapUtils.isWebVM)
-            method.setAccessible(true);
         return method.invoke(anObj, theArgs);
     }
 
