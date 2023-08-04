@@ -71,7 +71,9 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
         // Get arg type for lambda arg index
         JavaMethod lambdaMethod = getLambdaMethod();
         if (lambdaMethod == null)
-            return paramTypes;
+            return null;
+        if (lambdaMethod.getParameterCount() != parameterCount)
+            return null;
 
         // Iterate over parameters and get EvalClass for each
         for (int i = 0; i < parameterCount; i++) {
@@ -99,7 +101,9 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
 
         // Get parameter type for var decl
         JavaType[] parameterTypes = getParameterTypes();
-        JavaType parameterType = parameterTypes[parameterIndex];
+        JavaType parameterType = parameterTypes != null && parameterTypes.length > parameterIndex ? parameterTypes[parameterIndex] : null;
+        if (parameterType == null)
+            return null;
 
         // Create type for type decl and return
         JType type = JType.createTypeForTypeAndToken(parameterType, varDecl.getStartToken());
