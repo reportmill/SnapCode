@@ -1,8 +1,6 @@
 package javakit.parse;
-import javakit.resolver.JavaDecl;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * A JNode for a catch block
@@ -56,20 +54,5 @@ public class JStmtTryCatch extends JNode implements WithVarDecls, WithBlockStmt 
     public void setBlock(JStmtBlock aStmtBlock)
     {
         replaceChild(_block, _block = aStmtBlock);
-    }
-
-    /**
-     * Override to check param.
-     */
-    @Override
-    protected JavaDecl getDeclForChildId(JExprId anExprId)
-    {
-        // Check params
-        String name = anExprId.getName();
-        if (_param != null && Objects.equals(_param.getName(), name))
-            return _param.getDecl();
-
-        // Do normal version
-        return super.getDeclForChildId(anExprId);
     }
 }

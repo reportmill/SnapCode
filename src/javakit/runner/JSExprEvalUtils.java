@@ -2,7 +2,6 @@ package javakit.runner;
 import javakit.parse.JExprMath;
 import javakit.resolver.JavaMethod;
 import snap.util.Convert;
-import snap.util.SnapUtils;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -317,8 +316,7 @@ public class JSExprEvalUtils {
             Class<?> objClass = anObj.getClass();
             if (objClass != method.getDeclaringClass()) {
                 method = objClass.getMethod(method.getName(), method.getParameterTypes());
-                if (SnapUtils.isWebVM) // Bug
-                    method.setAccessible(true);
+                method.setAccessible(true); // Not sure why we need this sometimes
             }
         }
 

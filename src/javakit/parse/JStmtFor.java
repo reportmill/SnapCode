@@ -3,7 +3,6 @@
  */
 package javakit.parse;
 import java.util.*;
-import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaParameterizedType;
 import javakit.resolver.JavaType;
 
@@ -85,29 +84,6 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
     {
         List<JVarDecl> varDecls = _initDecl != null ? _initDecl.getVarDecls() : Collections.EMPTY_LIST;
         return varDecls;
-    }
-
-    /**
-     * Override to check init declaration.
-     */
-    @Override
-    protected JavaDecl getDeclForChildId(JExprId anExprId)
-    {
-        // If given id is in ForEach initializer (Conditional), don't check for parameter
-        if (isForEach()) {
-            JExpr initializer = getConditional();
-            if (anExprId == initializer || anExprId.isAncestor(initializer))
-                return super.getDeclForChildId(anExprId);
-        }
-
-        // If any ForStmt.varDecls matches id expr name, return decl
-        String name = anExprId.getName();
-        JVarDecl varDecl = getVarDeclForName(name);
-        if (varDecl != null)
-            return varDecl.getDecl();
-
-        // Do normal version
-        return super.getDeclForChildId(anExprId);
     }
 
     /**

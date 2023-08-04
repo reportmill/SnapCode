@@ -90,12 +90,6 @@ public class JStmtSwitchCase extends JNode implements WithStmts, WithVarDeclsX {
         if (anExprId == _expr)
             return getDeclForCaseExpr();
 
-        // If statements (as block) can resolve node, return decl
-        List<JStmt> statements = getStatements();
-        JVarDecl varDecl = JStmtBlock.getVarDeclForNameFromStatements(anExprId, statements);
-        if (varDecl != null)
-            return varDecl.getDecl();
-
         // Do normal version
         return super.getDeclForChildId(anExprId);
     }

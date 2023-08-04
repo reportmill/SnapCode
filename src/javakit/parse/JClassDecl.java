@@ -430,15 +430,6 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
         if (name.equals("super"))
             return getSuperClass();
 
-        // Iterate over fields and return declaration if found
-        JFieldDecl[] fieldDecls = getFieldDecls();
-        for (JFieldDecl fieldDecl : fieldDecls) {
-            List<JVarDecl> fieldVarDecls = fieldDecl.getVarDecls();
-            for (JVarDecl fieldVarDecl : fieldVarDecls)
-                if (Objects.equals(fieldVarDecl.getName(), name))
-                    return fieldVarDecl.getDecl();
-        }
-
         // Iterate over enum constants
         if (isEnum()) {
             List<JEnumConst> enumConstants = getEnumConstants();
@@ -563,6 +554,44 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
 
         // Set and return
         return _varDecls = varDecls;
+    }
+
+    /**
+     * Override to provide hack to look for VarDecls in previous initializers.
+     */
+    @Override
+    public JVarDecl getVarDeclForId(JExprId anId)
+    {
+        // Do normal version
+        JVarDecl varDecl = WithVarDeclsX.super.getVarDeclForId(anId);
+        if (varDecl != null)
+            return varDecl;
+
+        // Try ReplHack
+        return getVarDeclForIdReplHack(anId);
+    }
+
+    /**
+     * REPL hack - Get/search initializers before this method for unresolved ids.
+     */
+    protected JVarDecl getVarDeclForIdReplHack(JExprId anExprId)
+    {
+        // Get class initializers
+        JInitializerDecl[] initDecls = getInitDecls();
+
+        // Search initializers before this method and return node decl if found
+        for (JInitializerDecl initDecl : initDecls) {
+            if (initDecl.getStartCharIndex() < getStartCharIndex()) {
+                JStmtBlock blockStmt = initDecl.getBlock();
+                JVarDecl varDecl = blockStmt.getVarDeclForId(anExprId);
+                if (varDecl != null)
+                    return varDecl;
+            }
+            else break;
+        }
+
+        // Return not found
+        return null;
     }
 
     /**

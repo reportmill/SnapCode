@@ -266,21 +266,6 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     }
 
     /**
-     * Override to check lambda parameters.
-     */
-    protected JavaDecl getDeclForChildId(JExprId anExprId)
-    {
-        // If node is parameter name, return param decl
-        String name = anExprId.getName();
-        JVarDecl param = getVarDeclForName(name);
-        if (param != null)
-            return param.getDecl();
-
-        // Do normal version
-        return super.getDeclForChildId(anExprId);
-    }
-
-    /**
      * Returns the node name.
      */
     public String getNodeString()  { return "LambdaExpr"; }

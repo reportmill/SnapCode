@@ -136,48 +136,14 @@ public class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithV
     @Override
     protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
-        // Handle parameter name id: return param decl
-        String name = anExprId.getName();
-        JVarDecl param = getVarDeclForName(name);
-        if (param != null)
-            return param.getDecl();
-
         // Handle TypeVar name: return typevar decl
+        String name = anExprId.getName();
         JTypeVar typeVar = getTypeVar(name);
         if (typeVar != null)
             return typeVar.getDecl();
 
-        // Do normal version (search class)
-        JavaDecl superValue = super.getDeclForChildId(anExprId);
-        if (superValue != null)
-            return superValue;
-
-        // REPL hack - Get/search initializers before this method
-        return getDeclForChildExprIdNodeReplHack(anExprId);
-    }
-
-    /**
-     * REPL hack - Get/search initializers before this method for unresolved ids.
-     */
-    protected JavaDecl getDeclForChildExprIdNodeReplHack(JExprId anExprId)
-    {
-        // Get class initializers
-        JClassDecl classDecl = getEnclosingClassDecl();
-        JInitializerDecl[] initDecls = classDecl.getInitDecls();
-
-        // Search initializers before this method and return node decl if found
-        for (JInitializerDecl initDecl : initDecls) {
-            if (initDecl.getStartCharIndex() < getStartCharIndex()) {
-                JStmtBlock blockStmt = initDecl.getBlock();
-                JavaDecl nodeDecl = blockStmt.getDeclForChildId(anExprId);
-                if (nodeDecl != null)
-                    return nodeDecl;
-            }
-            else break;
-        }
-
-        // Return not found
-        return null;
+        // Do normal version
+        return super.getDeclForChildId(anExprId);
     }
 
     /**
