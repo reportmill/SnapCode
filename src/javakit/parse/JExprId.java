@@ -80,28 +80,57 @@ public class JExprId extends JExpr {
     @Override
     protected JavaDecl getDeclImpl()
     {
+        // Look for a master node, if this id is just part of another node or a var reference
+        JNode declNode = getDeclNodeForId();
+        if (declNode != null)
+            return declNode.getDecl();
+
+        // Forward to parents
+        return getDeclForChildId(this);
+    }
+
+    /**
+     * Override to resolve from DeclNode, if available.
+     */
+    @Override
+    protected JavaType getEvalTypeImpl()
+    {
+        // Look for a master node, if this id is just part of another node or a var reference
+        JNode declNode = getDeclNodeForId();
+        if (declNode != null)
+            return declNode.getEvalType();
+
+        // Do normal version
+        return super.getEvalTypeImpl();
+    }
+
+    /**
+     * Returns the master node that declares this id, if this id is just a part of another node or a variable reference.
+     */
+    private JNode getDeclNodeForId()
+    {
         // Handle parent WithId (method/class/field decl id, method call/ref id, local var decl id, etc.)
         JNode parent = getParent();
         if (parent instanceof WithId) {
             JExprId parentId = ((WithId) parent).getId();
             if (this == parentId)
-                return parent.getDecl();
+                return parent;
         }
 
-        // Handle parent is dot expression: Return dot expression decl
+        // Handle parent is dot expression: Return dot expression
         if (parent instanceof JExprDot) {
             JExprDot dotExpr = (JExprDot) parent;
             if (dotExpr.getExpr() == this)
-                return parent.getDecl();
+                return dotExpr;
         }
 
         // Look for VarDecl that defines this id (if this id is var reference)
         JVarDecl varDecl = getVarDeclForId();
         if (varDecl != null)
-            return varDecl.getDecl();
+            return varDecl;
 
-        // Forward to parents
-        return getDeclForChildId(this);
+        // Return not found
+        return null;
     }
 
     /**
