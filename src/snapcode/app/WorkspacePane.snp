@@ -1,40 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <SplitView Name="MainSplit" PrefWidth="958" PrefHeight="684" GrowHeight="true" Vertical="true">
-  <ColView Name="MainColView" GrowHeight="true" FillWidth="true">
-    <MenuBar Name="MenuBar" MinHeight="30">
-      <Menu Name="FileMenu" Text="File">
-        <MenuItem Name="NewMenuItem" Text="New" key="Shortcut+N" />
-        <MenuItem />
-        <MenuItem Name="OpenMenuItem" Text="Open" key="Shortcut+O" />
-        <MenuItem Name="CloseMenuItem" Text="Close" key="Shortcut+W" />
-        <MenuItem Name="SaveMenuItem" Text="Save" key="Shortcut+S" />
-        <MenuItem Name="SaveAsMenuItem" Text="Save As..." key="Shortcut+Shift+S" />
-        <MenuItem Name="RevertMenuItem" Text="Revert to Saved" key="Shortcut+U" />
-        <MenuItem Name="QuitMenuItem" Text="Quit" key="Shortcut+Q" />
-      </Menu>
-      <Menu Name="EditMenu" Text="Edit">
-        <MenuItem Name="UndoMenuItem" Text="Undo" key="Shortcut+Z" />
-        <MenuItem Name="RedoMenuItem" Text="Redo" key="Shortcut+Shift+Z" />
-        <MenuItem />
-        <MenuItem Name="CutMenuItem" Text="Cut" key="Shortcut+X" />
-        <MenuItem Name="CopyMenuItem" Text="Copy" key="Shortcut+C" />
-        <MenuItem Name="PasteMenuItem" Text="Paste" key="Shortcut+V" />
-        <MenuItem Name="SelectAllMenuItem" Text="Select All" key="Shortcut+A" />
-      </Menu>
-      <Menu Name="ToolsMenu" Text="Tools">
-        <MenuItem Name="ShowLeftTrayMenuItem" Text="Hide Left Tray" />
-        <MenuItem Name="ShowRightTrayMenuItem" Text="Hide Right Tray" />
-        <MenuItem Name="ShowBottomTrayMenuItem" Text="Hide Bottom Tray" />
-      </Menu>
-      <Menu Name="HelpMenu" Text="Help">
-        <MenuItem Name="SupportPageMenuItem" Text="Support Page" />
-        <MenuItem Name="JavaDocMenuItem" Text="Tutorial" />
-        <MenuItem Name="ShowJavaHomeMenuItem" Text="Show Java Home" />
-      </Menu>
-    </MenuBar>
-    <RectView PrefHeight="1">
-      <Fill Color="#B2" />
-    </RectView>
-    <SplitView Name="PagePaneSplitView" GrowHeight="true" />
-  </ColView>
+    <ColView Name="MainColView" GrowHeight="true" FillWidth="true">
+        <MenuBar Name="MenuBar" MinHeight="30">
+            <Menu Name="FileMenu" Text="File">
+                <MenuItem Name="NewMenuItem" Text="New" key="Shortcut+N"/>
+                <MenuItem/>
+                <MenuItem Name="OpenMenuItem" Text="Open" key="Shortcut+O"/>
+                <MenuItem Name="CloseMenuItem" Text="Close" key="Shortcut+W"/>
+                <MenuItem Name="SaveMenuItem" Text="Save" key="Shortcut+S"/>
+                <MenuItem Name="SaveAsMenuItem" Text="Save As..." key="Shortcut+Shift+S"/>
+                <MenuItem Name="RevertMenuItem" Text="Revert to Saved" key="Shortcut+U"/>
+                <MenuItem Name="QuitMenuItem" Text="Quit" key="Shortcut+Q"/>
+            </Menu>
+            <Menu Name="EditMenu" Text="Edit">
+                <MenuItem Name="UndoMenuItem" Text="Undo" key="Shortcut+Z"/>
+                <MenuItem Name="RedoMenuItem" Text="Redo" key="Shortcut+Shift+Z"/>
+                <MenuItem/>
+                <MenuItem Name="CutMenuItem" Text="Cut" key="Shortcut+X"/>
+                <MenuItem Name="CopyMenuItem" Text="Copy" key="Shortcut+C"/>
+                <MenuItem Name="PasteMenuItem" Text="Paste" key="Shortcut+V"/>
+                <MenuItem Name="SelectAllMenuItem" Text="Select All" key="Shortcut+A"/>
+                <MenuItem/>
+                <MenuItem Name="DuplicateLineMenuItem" Text="Duplicate Line" key="Shortcut+D"/>
+                <MenuItem Name="DeleteLineMenuItem" Text="Delete Line" key="Shortcut+Shift+D"/>
+            </Menu>
+            <Menu Name="ToolsMenu" Text="Tools">
+                <MenuItem Name="ShowLeftTrayMenuItem" Text="Hide Left Tray"/>
+                <MenuItem Name="ShowRightTrayMenuItem" Text="Hide Right Tray"/>
+                <MenuItem Name="ShowBottomTrayMenuItem" Text="Hide Bottom Tray"/>
+            </Menu>
+            <Menu Name="HelpMenu" Text="Help">
+                <MenuItem Name="SupportPageMenuItem" Text="Support Page"/>
+                <MenuItem Name="JavaDocMenuItem" Text="Tutorial"/>
+                <MenuItem Name="ShowJavaHomeMenuItem" Text="Show Java Home"/>
+            </Menu>
+        </MenuBar>
+        <RectView PrefHeight="1">
+            <Fill Color="#B2"/>
+        </RectView>
+        <SplitView Name="PagePaneSplitView" GrowHeight="true"/>
+    </ColView>
 </SplitView>

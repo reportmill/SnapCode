@@ -1,12 +1,5 @@
 <!-- title: "SnapCode - a Java workbench for Data Science and Education" -->
 
-<div style="position:relative;left:-25px;top:-40px;height:60px;">
-  <script src="https://reportmill.com/shared/navbar.js"></script>
-  <font size="1" face="Verdana, Helvetica, Arial" color="#CB0017">
-    <a href="http://www.reportmill.com">HOME</a> &gt; SnapCode
-  </font>
-</div>
-
 # <a name="title">SnapCode - a Java workbench for Data Science and Education</a>
 
 <div align="center">
