@@ -604,7 +604,7 @@ public class JSExprEval {
     private Object evalLambdaExpr(Object anOR, JExprLambda aLambdaExpr)
     {
         // Get/return lambda of lambda class that wraps given expression
-        Object wrappedLambda = LambdaWrapper.getWrappedLambdaExpression(this, anOR, aLambdaExpr);
+        Object wrappedLambda = LambdaWrapper3.getWrappedLambdaExpression(this, anOR, aLambdaExpr);
         if (wrappedLambda != null)
             return wrappedLambda;
 
