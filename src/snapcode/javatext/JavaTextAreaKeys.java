@@ -2,10 +2,11 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.javatext;
-import javakit.parse.*;
 
-import static snapcode.javatext.JavaTextArea.INDENT_STRING;
-
+import javakit.parse.JExprLiteral;
+import javakit.parse.JNode;
+import javakit.parse.JStmtBlock;
+import javakit.parse.JStmtConditional;
 import snap.parse.CodeTokenizer;
 import snap.text.TextBoxLine;
 import snap.text.TextBoxToken;
@@ -13,6 +14,12 @@ import snap.view.KeyCode;
 import snap.view.TextAreaKeys;
 import snap.view.ViewEvent;
 import snap.view.ViewUtils;
+import snapcode.app.App;
+import snapcode.app.WorkspacePane;
+import snapcode.apptools.FilesTool;
+import snapcode.project.Project;
+
+import static snapcode.javatext.JavaTextArea.INDENT_STRING;
 
 /**
  * This class is a helper for JavaTextArea to handle key processing.
@@ -20,13 +27,12 @@ import snap.view.ViewUtils;
 public class JavaTextAreaKeys extends TextAreaKeys {
 
     // The JavaTextArea
-    private JavaTextArea  _javaTextArea;
+    private JavaTextArea _javaTextArea;
 
     /**
      * Constructor.
      */
-    public JavaTextAreaKeys(JavaTextArea aJTA)
-    {
+    public JavaTextAreaKeys(JavaTextArea aJTA) {
         super(aJTA);
         _javaTextArea = aJTA;
     }
@@ -35,8 +41,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
      * Called when a key is pressed.
      */
     @Override
-    protected void keyPressed(ViewEvent anEvent)
-    {
+    protected void keyPressed(ViewEvent anEvent) {
         // Get event info
         int keyCode = anEvent.getKeyCode();
         boolean shortcutDown = anEvent.isShortcutDown();
@@ -78,10 +83,55 @@ public class JavaTextAreaKeys extends TextAreaKeys {
 
         // Handle command Slash
         if (shortcutDown) {
-            if (keyCode == KeyCode.SLASH) {
-                _javaTextArea.commentLinesWithLineComment();
-                anEvent.consume();
-                return;
+            TextBoxLine current = _javaTextArea.getLine(_javaTextArea.getSel().getStartLine().getIndex());
+            Project project = Project.getProjectForFile(this._javaTextArea.getSourceFile());
+
+            switch (keyCode) {
+                case KeyCode.SLASH:
+                    this._javaTextArea.commentLinesWithLineComment();
+                    anEvent.consume();
+                    return;
+                case KeyCode.D:
+                    //TODO: This ruins undo/redo
+                    this._javaTextArea.addChars(String.format("\n%s", current.getString()), null,
+                            current.getEndCharIndex());
+                    anEvent.consume();
+                    return;
+                case KeyCode.L:
+                    if (shiftDown) {
+                        this._javaTextArea.replaceChars("", null,
+                                current.getStartCharIndex(), current.getEndCharIndex(), true);
+                        anEvent.consume();
+                        return;
+                    }
+                    break;
+                case KeyCode.N:
+                    if (project != null) {
+                        FilesTool filesTool = project.getWorkspace().getWorkspaceTools().getFilesTool();
+                        if (filesTool != null) {
+                            filesTool.showNewFilePanel();
+                            anEvent.consume();
+                            return;
+                        }
+                    }
+                    break;
+                case KeyCode.Q:
+                    App.getShared().quitApp();
+                    anEvent.consume();
+                    return;
+                case KeyCode.W:
+                    if (project != null) {
+                        WorkspacePane workspacePane = project.getWorkspace().getWorkspaceTools().getWorkspacePane();
+                        if (workspacePane != null) {
+                            workspacePane.getPagePane().removeOpenFile(workspacePane.getSelFile());
+                            anEvent.consume();
+                            return;
+                        }
+                    }
+                case KeyCode.Y:
+                    this._javaTextArea.redo();
+                    anEvent.consume();
+                    return;
             }
         }
 
@@ -93,8 +143,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
      * Called when a key is typed.
      */
     @Override
-    protected void keyTyped(ViewEvent anEvent)
-    {
+    protected void keyTyped(ViewEvent anEvent) {
         // Get event info
         char keyChar = anEvent.getKeyChar();
         if (keyChar == KeyCode.CHAR_UNDEFINED) return;
@@ -166,8 +215,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     /**
      * Process newline key event.
      */
-    protected void processNewline()
-    {
+    protected void processNewline() {
         // Get line and its indent
         TextBoxLine textLine = getSel().getStartLine();
 
@@ -190,7 +238,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         // If leaving conditional (if, for, do, while) without brackets, remove level of indent
         JNode selNode = _javaTextArea.getSelNode();
         JStmtConditional selNodeParent = selNode != null ? selNode.getParent(JStmtConditional.class) : null;
-        if (selNodeParent != null &&  !(selNodeParent.getStatement() instanceof JStmtBlock)) {
+        if (selNodeParent != null && !(selNodeParent.getStatement() instanceof JStmtBlock)) {
             if (sb.length() > INDENT_STRING.length())
                 sb.delete(sb.length() - INDENT_STRING.length(), sb.length());
         }
@@ -202,8 +250,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     /**
      * Returns whether this line is processing a multi line comment.
      */
-    private boolean isEnteringMultilineComment(TextBoxLine aTextLine)
-    {
+    private boolean isEnteringMultilineComment(TextBoxLine aTextLine) {
         TextBoxToken lastToken = aTextLine.getTokenLast();
         return lastToken != null && lastToken.getName() == CodeTokenizer.MULTI_LINE_COMMENT;
     }
@@ -211,8 +258,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     /**
      * Process newline key event.
      */
-    protected void processNewlineForMultilineComment(TextBoxLine aTextLine)
-    {
+    protected void processNewlineForMultilineComment(TextBoxLine aTextLine) {
         String lineString = aTextLine.getString().trim();
         boolean isStartOfMultiLineComment = lineString.startsWith("/*") && !lineString.endsWith("*/");
         boolean isInMultiLineComment = lineString.startsWith("*") && !lineString.endsWith("*/");
@@ -226,11 +272,11 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         if (isStartOfMultiLineComment)
             sb.append(" * ");
 
-        // If in multi-line comment, add "* "
+            // If in multi-line comment, add "* "
         else if (isInMultiLineComment)
             sb.append("* ");
 
-        // If after multi-line comment, remove space from indent
+            // If after multi-line comment, remove space from indent
         else if (isEndMultiLineComment) {
             if (sb.length() > 0)
                 sb.delete(sb.length() - 1, sb.length());
@@ -251,8 +297,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     /**
      * Returns whether this line is in process of entering a block statement (if, for, do, while).
      */
-    private boolean isEnteringBlockStatement(TextBoxLine aTextLine)
-    {
+    private boolean isEnteringBlockStatement(TextBoxLine aTextLine) {
         // If last token is open bracket, return true
         TextBoxToken textToken = aTextLine.getTokenLast();
         String textTokenString = textToken != null ? textToken.getString() : "";
@@ -271,8 +316,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     /**
      * Process newline key event.
      */
-    protected void processNewlineForBlockStatement(TextBoxLine aTextLine)
-    {
+    protected void processNewlineForBlockStatement(TextBoxLine aTextLine) {
         // Create string for new line plus indent
         String indentStr = aTextLine.getIndentString();
         StringBuffer sb = new StringBuffer().append('\n').append(indentStr);
@@ -300,51 +344,57 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     /**
      * Returns whether given char is paired char opener.
      */
-    public boolean isPairedCharOpener(char aChar)
-    {
+    public boolean isPairedCharOpener(char aChar) {
         return aChar == '\'' || aChar == '"' || aChar == '(' || aChar == '[';
     }
 
     /**
      * Returns whether given char is paired char closer.
      */
-    public boolean isPairedCharCloser(char aChar)
-    {
+    public boolean isPairedCharCloser(char aChar) {
         return aChar == '\'' || aChar == '"' || aChar == ')' || aChar == ']';
     }
 
     /**
      * Returns the paired closer char for given opener char.
      */
-    public char getPairedCharForOpener(char openerChar)
-    {
+    public char getPairedCharForOpener(char openerChar) {
         switch (openerChar) {
-            case '\'': return openerChar;
-            case '"': return openerChar;
-            case '(': return ')';
-            case '[': return ']';
-            default: throw new IllegalArgumentException("JavaTextAreaKey.getPairedCharCloser: Illegal char: " + openerChar);
+            case '\'':
+                return openerChar;
+            case '"':
+                return openerChar;
+            case '(':
+                return ')';
+            case '[':
+                return ']';
+            default:
+                throw new IllegalArgumentException("JavaTextAreaKey.getPairedCharCloser: Illegal char: " + openerChar);
         }
     }
+
     /**
      * Returns the paired opener char for given closer char.
      */
-    public char getPairedCharForCloser(char closerChar)
-    {
+    public char getPairedCharForCloser(char closerChar) {
         switch (closerChar) {
-            case '\'': return closerChar;
-            case '"': return closerChar;
-            case ')': return '(';
-            case ']': return '[';
-            default: throw new IllegalArgumentException("JavaTextAreaKey.getPairedCharOpener: Illegal char: " + closerChar);
+            case '\'':
+                return closerChar;
+            case '"':
+                return closerChar;
+            case ')':
+                return '(';
+            case ']':
+                return '[';
+            default:
+                throw new IllegalArgumentException("JavaTextAreaKey.getPairedCharOpener: Illegal char: " + closerChar);
         }
     }
 
     /**
      * Handles paired char opener: Insert close char as convenience.
      */
-    public void handlePairedCharOpener(char aChar)
-    {
+    public void handlePairedCharOpener(char aChar) {
         String closer = String.valueOf(getPairedCharForOpener(aChar));
 
         // Add closer char
@@ -356,8 +406,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     /**
      * Handles paired char closer: Avoid redundancy of user closing already closed pair.
      */
-    public boolean isPairedCharCloserRedundant(char keyChar)
-    {
+    public boolean isPairedCharCloserRedundant(char keyChar) {
         // If not paired char closer, return false
         if (!isPairedCharCloser(keyChar))
             return false;

@@ -22,7 +22,7 @@
                 <MenuItem Name="SelectAllMenuItem" Text="Select All" key="Shortcut+A"/>
                 <MenuItem/>
                 <MenuItem Name="DuplicateLineMenuItem" Text="Duplicate Line" key="Shortcut+D"/>
-                <MenuItem Name="DeleteLineMenuItem" Text="Delete Line" key="Shortcut+Shift+D"/>
+                <MenuItem Name="DeleteLineMenuItem" Text="Delete Line" key="Shortcut+Shift+L"/>
             </Menu>
             <Menu Name="ToolsMenu" Text="Tools">
                 <MenuItem Name="ShowLeftTrayMenuItem" Text="Hide Left Tray"/>
