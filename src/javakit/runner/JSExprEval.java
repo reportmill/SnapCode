@@ -101,7 +101,7 @@ public class JSExprEval {
 
         // Handle method ref expression
         if (anExpr instanceof JExprMethodRef)
-            throw new RuntimeException("JSExprEval.evalMethodRef() not implemented");
+            return evalMethodRefExpr(anOR, (JExprMethodRef) anExpr);
 
         // Handle Type expression
         if (anExpr instanceof JExprType)
@@ -603,14 +603,15 @@ public class JSExprEval {
      */
     private Object evalLambdaExpr(Object anOR, JExprLambda aLambdaExpr)
     {
-        // Get/return lambda of lambda class that wraps given expression
-        Object wrappedLambda = LambdaWrapper3.getWrappedLambdaExpression(this, anOR, aLambdaExpr);
-        if (wrappedLambda != null)
-            return wrappedLambda;
+        return LambdaWrapper3.getWrappedLambdaExpression(this, anOR, aLambdaExpr);
+    }
 
-        // Legacy code
-        wrappedLambda = LambdaWrapper2.getWrappedLambdaExpression(this, anOR, aLambdaExpr);
-        return wrappedLambda;
+    /**
+     * Handle JExprMethodRef.
+     */
+    private Object evalMethodRefExpr(Object anOR, JExprMethodRef methodRefExpr)
+    {
+        return MethodRefWrapper.getWrappedLambdaExpression(this, anOR, methodRefExpr);
     }
 
     /**

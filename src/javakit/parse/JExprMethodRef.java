@@ -3,6 +3,9 @@
  */
 package javakit.parse;
 
+import javakit.resolver.JavaClass;
+import javakit.resolver.JavaMethod;
+
 /**
  * This JExpr subclass represents a method reference: obj::method.
  */
@@ -13,6 +16,10 @@ public class JExprMethodRef extends JExpr implements WithId {
 
     // The identifier
     JExprId _id;
+
+    // A constant to define the types of method refs.
+    // See https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html
+    public enum Type { StaticMethod, InstanceMethod, HelperInstanceMethod, Constructor };
 
     /**
      * Creates a new Method Reference expression for expression and id.
@@ -53,6 +60,22 @@ public class JExprMethodRef extends JExpr implements WithId {
     public void setId(JExprId anId)
     {
         replaceChild(_id, _id = anId);
+    }
+
+    /**
+     * Returns the specific method in the lambda class interface that is to be called.
+     */
+    public JavaMethod getLambdaMethod()
+    {
+        return null;
+    }
+
+    /**
+     * Returns the lambda class.
+     */
+    public JavaClass getLambdaClass()
+    {
+        return null;
     }
 
     /**
