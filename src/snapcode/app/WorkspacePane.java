@@ -1,26 +1,18 @@
 package snapcode.app;
-
+import snapcode.project.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
-import snap.text.TextBoxLine;
 import snap.util.ArrayUtils;
 import snap.util.FileUtils;
 import snap.util.SnapUtils;
-import snap.view.MenuBar;
-import snap.view.TextArea;
 import snap.view.*;
+import snapcode.webbrowser.WebBrowser;
+import snapcode.webbrowser.WebPage;
 import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.apptools.*;
-import snapcode.project.*;
-import snapcode.webbrowser.WebBrowser;
-import snapcode.webbrowser.WebPage;
-
-import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
 
 /**
  * This class is the top level controller for an open project.
@@ -51,14 +43,16 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Constructor.
      */
-    public WorkspacePane() {
+    public WorkspacePane()
+    {
         this(new Workspace());
     }
 
     /**
      * Constructor.
      */
-    public WorkspacePane(Workspace workspace) {
+    public WorkspacePane(Workspace workspace)
+    {
         super();
 
         // Create workspace
@@ -84,14 +78,13 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Returns the workspace.
      */
-    public Workspace getWorkspace() {
-        return _workspace;
-    }
+    public Workspace getWorkspace()  { return _workspace; }
 
     /**
      * Sets the workspace.
      */
-    public void setWorkspace(Workspace aWorkspace) {
+    public void setWorkspace(Workspace aWorkspace)
+    {
         if (aWorkspace == _workspace) return;
 
         // Uninstall
@@ -114,7 +107,8 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Opens a Workspace for Java/Jepl file source.
      */
-    public void openWorkspaceForSource(Object aSource) {
+    public void openWorkspaceForSource(Object aSource)
+    {
         // Get JavaTextDoc and source file for source
         JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForSource(aSource);
         WebFile sourceFile = javaTextDoc.getSourceFile();
@@ -160,84 +154,66 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Returns the PagePane.
      */
-    public PagePane getPagePane() {
-        return _pagePane;
-    }
+    public PagePane getPagePane()  { return _pagePane; }
 
     /**
      * Returns the PagePane.Browser.
      */
-    public WebBrowser getBrowser() {
-        return _pagePane.getBrowser();
-    }
+    public WebBrowser getBrowser()  { return _pagePane.getBrowser(); }
 
     /**
      * Returns the WorkspaceTools helper.
      */
-    public WorkspaceTools getWorkspaceTools() {
-        return _workspaceTools;
-    }
+    public WorkspaceTools getWorkspaceTools()  { return _workspaceTools; }
 
     /**
      * Creates the PagePane.
      */
-    protected PagePane createPagePane() {
-        return new PagePane(this);
-    }
+    protected PagePane createPagePane()  { return new PagePane(this); }
 
     /**
      * Creates the WorkspaceTools.
      */
-    protected WorkspaceTools createWorkspaceTools() {
-        return new WorkspaceTools(this);
-    }
+    protected WorkspaceTools createWorkspaceTools()  { return new WorkspaceTools(this); }
 
     /**
      * Returns the toolbar.
      */
-    public MainToolBar getToolBar() {
-        return _toolBar;
-    }
+    public MainToolBar getToolBar()  { return _toolBar; }
 
     /**
      * Returns the projects.
      */
-    public Project[] getProjects() {
-        return _workspace.getProjects();
-    }
+    public Project[] getProjects()  { return _workspace.getProjects(); }
 
     /**
      * Returns the project panes.
      */
-    public ProjectPane[] getProjectPanes() {
-        return _projectPanes;
-    }
+    public ProjectPane[] getProjectPanes()  { return _projectPanes; }
 
     /**
      * Returns the ProjectPanes.
      */
-    public ProjectPane getProjectPaneForProject(Project aProject) {
+    public ProjectPane getProjectPaneForProject(Project aProject)
+    {
         return ArrayUtils.findMatch(_projectPanes, prjPane -> prjPane.getProject() == aProject);
     }
 
     /**
      * Returns the array of sites.
      */
-    public WebSite[] getSites() {
-        return _workspace.getSites();
-    }
+    public WebSite[] getSites()  { return _workspace.getSites(); }
 
     /**
      * Returns the selected project.
      */
-    public Project getRootProject() {
-        return _workspace.getRootProject();
-    }
+    public Project getRootProject()  { return _workspace.getRootProject(); }
 
     /**
      * Returns the top level site.
      */
-    public WebSite getRootSite() {
+    public WebSite getRootSite()
+    {
         Project rootProj = _workspace.getRootProject();
         return rootProj.getSite();
     }
@@ -245,28 +221,26 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Returns the home page URL.
      */
-    public WebURL getHomePageURL() {
-        return null;
-    }
+    public WebURL getHomePageURL()  { return null; }
 
     /**
      * Returns the selected file.
      */
-    public WebFile getSelFile() {
-        return _pagePane.getSelFile();
-    }
+    public WebFile getSelFile()  { return _pagePane.getSelFile(); }
 
     /**
      * Sets the selected site file.
      */
-    public void setSelFile(WebFile aFile) {
+    public void setSelFile(WebFile aFile)
+    {
         _pagePane.setSelFile(aFile);
     }
 
     /**
      * Returns the selected site.
      */
-    public WebSite getSelSite() {
+    public WebSite getSelSite()
+    {
         // Get site for selected file
         WebFile selFile = getSelFile();
         WebSite selSite = selFile != null ? selFile.getSite() : null;
@@ -283,7 +257,8 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Shows the WorkspacePane window.
      */
-    public void show() {
+    public void show()
+    {
         // Show window
         getUI();
         getWindow().setSaveName("AppPane");
@@ -304,7 +279,8 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Close this WorkspacePane.
      */
-    public void hide() {
+    public void hide()
+    {
         ProjectPane[] projectPanes = getProjectPanes();
 
         // Flush and refresh sites
@@ -315,11 +291,8 @@ public class WorkspacePane extends ViewOwner {
 
             // Close project site
             WebSite projectSite = projectPane.getProjectSite();
-            try {
-                projectSite.flush();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            try { projectSite.flush(); }
+            catch (Exception e) { throw new RuntimeException(e); }
             projectSite.resetFiles();
         }
 
@@ -329,22 +302,17 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Returns the build directory.
      */
-    public WebFile getBuildDir() {
+    public WebFile getBuildDir()
+    {
         Project proj = getRootProject();
         return proj != null ? proj.getBuildDir() : null;
-    }
-
-    private TextArea getTextArea() {
-        //This totally sucks. Need better way to get textarea
-        return ((JavaPage) getBrowser()
-                .getPageForURL(getPagePane().getSelFile().getURL()))
-                .getTextPane().getTextArea();
     }
 
     /**
      * Initializes UI panel.
      */
-    protected void initUI() {
+    protected void initUI()
+    {
         // Get MainSplit
         SplitView mainSplit = getUI(SplitView.class);
         mainSplit.setBorder(null);
@@ -352,9 +320,7 @@ public class WorkspacePane extends ViewOwner {
 
         // Get MenuBar and register to process events
         MenuBar menuBar = getView("MenuBar", MenuBar.class);
-        menuBar.addEventHandler(e -> {
-            if (e.isShortcutDown()) ViewUtils.processEvent(menuBar, e);
-        }, KeyPress);
+        menuBar.addEventHandler(e -> { if (e.isShortcutDown()) ViewUtils.processEvent(menuBar, e); }, KeyPress);
 
         // Install ToolBar
         ColView mainColView = getView("MainColView", ColView.class);
@@ -420,7 +386,8 @@ public class WorkspacePane extends ViewOwner {
      * Resets UI panel.
      */
     @Override
-    public void resetUI() {
+    public void resetUI()
+    {
         // Reset window title
         WebPage page = _pagePane.getSelPage();
         getWindow().setTitle(page != null ? page.getTitle() : "SnapCode");
@@ -433,64 +400,11 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Responds to UI panel controls.
      */
-    public void respondUI(ViewEvent anEvent) {
-        TextBoxLine current = this.getTextArea().getLine(this.getTextArea().getSel().getStartLine().getIndex());
-
-        // TODO: Handle OpenMenuItem
+    public void respondUI(ViewEvent anEvent)
+    {
+        // Handle OpenMenuItem
         if (anEvent.equals("OpenMenuItem")) {
             getToolBar().selectSearchText();
-            anEvent.consume();
-        }
-
-        if (anEvent.equals("SaveMenuItem")) {
-            this.getSelFile().save();
-            anEvent.consume();
-        }
-
-        //TODO: Handle SaveAsMenuItem
-        //TODO: Handle RevertMenuItem
-
-        if (anEvent.equals("UndoMenuItem")) {
-            if (this.getTextArea().getUndoer().hasUndos())
-                this.getTextArea().undo();
-            anEvent.consume();
-        }
-
-        if (anEvent.equals("RedoMenuItem")) {
-            if (this.getTextArea().getUndoer().hasRedos())
-                this.getTextArea().redo();
-            anEvent.consume();
-        }
-
-        if (anEvent.equals("CopyMenuItem")) {
-            this.getTextArea().copy();
-            anEvent.consume();
-        }
-
-        if (anEvent.equals("CutMenuItem")) {
-            this.getTextArea().cut();
-            anEvent.consume();
-        }
-
-        if (anEvent.equals("PasteMenuItem")) {
-            this.getTextArea().paste();
-            anEvent.consume();
-        }
-
-        if (anEvent.equals("SelectAllMenuItem")) {
-            this.getTextArea().selectAll();
-            anEvent.consume();
-        }
-
-        if (anEvent.equals("DuplicateLineMenuItem")) {
-            //TODO: This ruins undo/redo
-            this.getTextArea().addChars(String.format("\n%s", current.getString()), null, current.getEndCharIndex());
-            anEvent.consume();
-        }
-
-        if (anEvent.equals("DeleteLineMenuItem")) {
-            this.getTextArea().replaceChars("", null,
-                    current.getStartCharIndex(), current.getEndCharIndex(), true);
             anEvent.consume();
         }
 
@@ -501,7 +415,7 @@ public class WorkspacePane extends ViewOwner {
         }
 
         // Handle NewFileMenuItem, NewFileButton
-        if (anEvent.equals("NewFileMenuItem") || anEvent.equals("NewFileButton") || anEvent.equals("NewMenuItem")) {
+        if (anEvent.equals("NewFileMenuItem") || anEvent.equals("NewFileButton")) {
             FilesTool filesTool = _workspaceTools.getFilesTool();
             filesTool.showNewFilePanel();
             anEvent.consume();
@@ -516,26 +430,10 @@ public class WorkspacePane extends ViewOwner {
         // Handle ShowLeftTrayMenuItem, ShowRightTrayMenuItem, ShowBottomTrayMenuItem
         if (anEvent.equals("ShowLeftTrayMenuItem"))
             _workspaceTools.setShowLeftTray(!_workspaceTools.isShowLeftTray());
-
         if (anEvent.equals("ShowRightTrayMenuItem"))
             _workspaceTools.setShowRightTray(!_workspaceTools.isShowRightTray());
-
         if (anEvent.equals("ShowBottomTrayMenuItem"))
             _workspaceTools.setShowBottomTray(!_workspaceTools.isShowBottomTray());
-
-        if (anEvent.equals("SupportPageMenuItem")) {
-            try {
-                Desktop.getDesktop().browse(URI.create("https://www.reportmill.com/support"));
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            anEvent.consume();
-        }
-
-        if (anEvent.equals("JavaDocMenuItem")) {
-            this.getWorkspaceTools().showToolForClass(HelpTool.class);
-            anEvent.consume();
-        }
 
         // Handle ShowJavaHomeMenuItem
         if (anEvent.equals("ShowJavaHomeMenuItem")) {
@@ -553,7 +451,8 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Called when Workspace does a property change.
      */
-    private void workspaceDidPropChange(PropChange aPC) {
+    private void workspaceDidPropChange(PropChange aPC)
+    {
         String propName = aPC.getPropName();
 
         // Handle Status, Activity
@@ -562,7 +461,7 @@ public class WorkspacePane extends ViewOwner {
         else if (propName == Workspace.Activity_Prop)
             getBrowser().setActivity(_workspace.getActivity());
 
-            // Handle Building
+        // Handle Building
         else if (propName == Workspace.Building_Prop) {
             if (!_workspace.isBuilding())
                 handleBuildCompleted();
@@ -587,7 +486,8 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Called when Workspace adds a project.
      */
-    private void workspaceDidAddProject(Project aProject) {
+    private void workspaceDidAddProject(Project aProject)
+    {
         // Start listening to file changes
         WebSite projSite = aProject.getSite();
         projSite.addFileChangeListener(_siteFileLsnr);
@@ -607,7 +507,8 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Called when Workspace removes a project.
      */
-    private void workspaceDidRemoveProject(Project aProject) {
+    private void workspaceDidRemoveProject(Project aProject)
+    {
         // Remove ProjectPane
         ProjectPane projPane = getProjectPaneForProject(aProject);
         _projectPanes = ArrayUtils.remove(_projectPanes, projPane);
@@ -627,7 +528,8 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Called when site file changes with File PropChange.
      */
-    protected void siteFileChanged(PropChange aPC) {
+    protected void siteFileChanged(PropChange aPC)
+    {
         // Get file/prop
         WebFile file = (WebFile) aPC.getSource();
         String propName = aPC.getPropName();
@@ -642,7 +544,8 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Called when PagePane does prop change.
      */
-    protected void pagePaneDidPropChange(PropChange aPC) {
+    protected void pagePaneDidPropChange(PropChange aPC)
+    {
         // Handle SelFile
         String propName = aPC.getPropName();
         if (propName == PagePane.SelFile_Prop) {
@@ -654,7 +557,8 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Called when a build is completed.
      */
-    private void handleBuildCompleted() {
+    private void handleBuildCompleted()
+    {
         // If final error count non-zero, show problems pane
         int errorCount = _workspace.getBuildIssues().getErrorCount();
         if (errorCount > 0) {
