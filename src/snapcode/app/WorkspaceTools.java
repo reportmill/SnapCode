@@ -95,10 +95,6 @@ public class WorkspaceTools {
         addSamplesButton();
     }
 
-    public WorkspacePane getWorkspacePane() {
-        return this._workspacePane;
-    }
-
     /**
      * Sets the workspace.
      */
@@ -131,7 +127,6 @@ public class WorkspaceTools {
             // Update tools
             for (WorkspaceTool tool : _tools)
                 tool._workspace = _workspace;
-            _workspace.setWorkspaceTools(this);
         }
     }
 
