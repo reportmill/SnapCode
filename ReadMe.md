@@ -10,14 +10,14 @@
 # <a name="title">SnapCode - a Java workbench for Data Science and Education</a>
 
 <div align="center">
-  <a href="https://reportmill.com/SnapCode/app">
+  <a href="https://reportmill.com/SnapCode/cj">
     <img src="https://reportmill.com/SnapCode/SnapCode.png">
   </a>
   <br>
-  <a href="https://reportmill.com/SnapCode/app">( Run SnapCode )</a>
+  <a href="https://reportmill.com/SnapCode/cj">( Run SnapCode )</a>
 </div>
 
-<!-- [ ![SnapCode](https://reportmill.com/SnapCode/SnapCode.png)](http://www.reportmill.com/SnapCode/app/) -->
+<!-- [ ![SnapCode](https://reportmill.com/SnapCode/SnapCode.png)](http://www.reportmill.com/SnapCode/cj/) -->
 
 ## <a name="Overview">Overview</a>
 
@@ -27,7 +27,7 @@ All of this makes SnapCode effective for a broad range of uses from data science
 
 SnapCode gets things started quickly with these features:
 
-- Tiny and instant [in-browser download](https://reportmill.com/SnapCode)
+- No install - runs in browser [in-browser download](https://reportmill.com/SnapCode/cj)
 - "No Compile" run using Java interpreter
 - Incremental REPL style output (shows values for each line as interactive views)
 
