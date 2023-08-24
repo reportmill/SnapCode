@@ -302,10 +302,22 @@ public class JSExprEval {
 
                 // Iterate over arg expressions and get evaluated values
                 for (int i = 0; i < arrayLen; i++) {
+
+                    // Get array value at index
                     JExpr initExpr = initsExpr.get(i);
                     Object initValue = evalExpr(thisObj, initExpr);
-                    initValue = castOrConvertValueToPrimitiveClass(initValue, compClass);
-                    Array.set(array, i, initValue);
+
+                    // Set value - these can go when WebVM is fixed
+                    if (array instanceof double[])
+                        ((double[]) array)[i] = Convert.doubleValue(initValue);
+                    else if (array instanceof float[])
+                        ((float[]) array)[i] = Convert.floatValue(initValue);
+                    else if (array instanceof int[])
+                        ((int[]) array)[i] = Convert.intValue(initValue);
+                    else {
+                        initValue = castOrConvertValueToPrimitiveClass(initValue, compClass);
+                        Array.set(array, i, initValue);
+                    }
                 }
 
                 // Return
