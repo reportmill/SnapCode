@@ -5,25 +5,25 @@
 ## Simple
 
 ```
-    x = new double[] { 1, 2, 3, 4 }
+    var x = new double[] { 1, 2, 3, 4 }
 ```
 
 ## From Range
 
 ```
-    x = DoubleArray.fromMinMax(-3, 3)
+    var x = DoubleArray.fromMinMax(-3, 3)
 ```
 
 ## From Range with count
 
 ```
-    x = DoubleArray.fromMinMaxCount(-3, 3, 100)
+    var x = DoubleArray.fromMinMaxCount(-3, 3, 100)
 ```
 
 ## From other array via function
 
 ```
-    y = DoubleArray.of(x).map(d -> Math.sin(d))
+    var y = DoubleArray.of(x).map(d -> Math.sin(d))
 ```
 
 # Define dataset
@@ -31,19 +31,19 @@
 ## From data arrays
 
 ```
-    x = new double[] { 1, 2, 3, 4 }
-    y = new double[] { 1, 4, 9, 16 }
-    dataSet = dataSet(x, y)
+    var x = new double[] { 1, 2, 3, 4 }
+    var y = new double[] { 1, 4, 9, 16 }
+    var dataSet = dataSet(x, y)
     show(dataSet)
 ```
 
 ## From 3D data
 
 ```
-    x = DoubleArray.fromMinMax(-3, 3)
-    y = DoubleArray.fromMinMax(-4, 4)
-    z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
-    dataSet = dataSet(x, y, z)
+    var x = DoubleArray.fromMinMax(-3, 3)
+    var y = DoubleArray.fromMinMax(-4, 4)
+    var z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
+    var dataSet = dataSet(x, y, z)
     show(dataSet)
 ```
 
@@ -52,19 +52,19 @@
 ## From data arrays
 
 ```
-    x = new double[] { 1, 2, 3, 4 }
-    y = new double[] { 1, 4, 9, 16 }
-    chart = chart(x,y)
+    var x = new double[] { 1, 2, 3, 4 }
+    var y = new double[] { 1, 4, 9, 16 }
+    var chart = chart(x,y)
     show(chart)
 ```
 
 ## From data set
 
 ```
-    x = new double[] { 1, 2, 3, 4 }
-    y = new double[] { 1, 4, 9, 16 }
-    dataSet = dataSet(x, y)
-    chart = chart(dataSet)
+    var x = new double[] { 1, 2, 3, 4 }
+    var y = new double[] { 1, 4, 9, 16 }
+    var dataSet = dataSet(x, y)
+    var chart = chart(dataSet)
     show(dataSet)
     show(chart)
 ```
@@ -72,10 +72,10 @@
 ## From 3D data
 
 ```
-    x = DoubleArray.fromMinMax(-3, 3)
-    y = DoubleArray.fromMinMax(-4, 4)
-    z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
-    chart = chart(x, y, z)
+    var x = DoubleArray.fromMinMax(-3, 3)
+    var y = DoubleArray.fromMinMax(-4, 4)
+    var z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
+    var chart = chart(x, y, z)
     show(chart)
 ```
 
@@ -84,21 +84,21 @@
 ## From data arrays
 
 ```
-    x = DoubleArray.fromMinMax(-3, 3)
-    y = DoubleArray.fromMinMax(-4, 4)
-    z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
-    chart = chart3D(x, y, z)
+    var x = DoubleArray.fromMinMax(-3, 3)
+    var y = DoubleArray.fromMinMax(-4, 4)
+    var z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
+    var chart = chart3D(x, y, z)
     show(chart)
 ```
 
 ## From data set
 
 ```
-    x = DoubleArray.fromMinMax(-3, 3)
-    y = DoubleArray.fromMinMax(-4, 4)
-    z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
-    dataSet = dataSet(x, y, z)
-    chart = chart3D(dataSet)
+    var x = DoubleArray.fromMinMax(-3, 3)
+    var y = DoubleArray.fromMinMax(-4, 4)
+    var z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
+    var dataSet = dataSet(x, y, z)
+    var chart = chart3D(dataSet)
     show(chart)
 ```
 
@@ -107,7 +107,7 @@
 ## Draw box
 
 ```
-    drawView = QuickDraw.createDrawView()
+    var drawView = QuickDraw.createDrawView()
     drawView.moveTo(100, 100)
     for (int i = 0; i < 4; i++) {
         drawView.forward(200)
@@ -119,8 +119,8 @@
 ## Draw Spiral
 
 ```
-    drawView = QuickDraw.createDrawView()
-    drawView.moveTo(200, 200)
+    var drawView = QuickDraw.createDrawView()
+    var drawView.moveTo(200, 200)
     for (int i = 0; i < 1080; i++) {
         drawView.forward(i / 360d)
         drawView.turn(1)
@@ -133,14 +133,14 @@
 ## Text
 
 ```
-    text = getTextForSource("https://reportmill.com/examples/AAPL.csv")
+    var text = getTextForSource("https://reportmill.com/examples/AAPL.csv")
     show(text)
 ```
 
 ## Image
 
 ```
-    image = getImageForSource("https://reportmill.com/examples/Weird.jpg")
+    var image = getImageForSource("https://reportmill.com/examples/Weird.jpg")
     show(image)
 ```
 
@@ -149,7 +149,7 @@
 ## Create Button
 
 ```
-    button = new Button("Hello World")
+    var button = new Button("Hello World")
     button.setPrefSize(100, 25)
     button.setMargin(20,20,20,20)
     show(button)
@@ -158,7 +158,7 @@
 ## Create Slider
 
 ```
-    slider = new Slider()
+    var slider = new Slider()
     slider.setPrefSize(300, 25)
     slider.setMargin(20,20,20,20)
     show(slider)
@@ -169,9 +169,9 @@
 ## Animate Button
 
 ```
-    button = new Button("Hello World")
+    var button = new Button("Hello World")
     button.setMargin(50,50,50,50)
-    anim = button.getAnim(0)
+    var anim = button.getAnim(0)
     anim.getAnim(1000).setScale(3).getAnim(2000).setScale(1)
     anim.getAnim(2000).setRotate(360)
     anim.setLoopCount(4)
@@ -184,14 +184,14 @@
 ## 3D cube
 
 ```
-    cube = Quick3D.createCube()
+    var cube = Quick3D.createCube()
     show(cube)
 ```
 
 ## 3D image
 
 ```
-    image3D = Quick3D.createImage3D(image)
+    var image3D = Quick3D.createImage3D(image)
     show(image3D)
 ```
 
