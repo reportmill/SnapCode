@@ -127,6 +127,8 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         JNode selNode = textArea.getIdExprAtCursor(); //textArea.getSelNode();
         int nodeStart = selNode.getStartCharIndex();
         int nodeEnd = textArea.getSelEnd();
+        if (textArea.charAt(nodeEnd - 1) == '.')
+            nodeStart = nodeEnd;
 
         // Replace selection with completeString
         textArea.replaceChars(completionStr, null, nodeStart, nodeEnd, true);

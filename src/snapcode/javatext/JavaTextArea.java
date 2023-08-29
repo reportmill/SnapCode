@@ -401,17 +401,15 @@ public class JavaTextArea extends TextArea {
      */
     private JExprId getVirtualIdExprForTextTokenAtCursor()
     {
-        // Get text token at cursor
-        int selStart = getSelStart();
-        JNode selNode = getSelNode();
+        // Get token for SelStart - just return if none
         TextDoc textDoc = getTextDoc();
-        TextLine textLine = textDoc.getLineForCharIndex(selStart);
-        int lineStart = textLine.getStartCharIndex();
-        int selStartInLine = selStart - lineStart;
-        TextToken textToken = textLine.getTokenForCharIndex(selStartInLine);
+        int selStart = getSelStart();
+        TextToken textToken = textDoc.getTokenForCharIndex(selStart);
+        if (textToken == null)
+            return null;
 
         // Get token string - just return if not valid java identifier
-        String tokenStr = textToken != null ? textToken.getString() : null;
+        String tokenStr = textToken.getString();
         if (!isJavaIdentifier(tokenStr))
             return null;
 
@@ -421,6 +419,7 @@ public class JavaTextArea extends TextArea {
         JExprId virtualIdExpr = new JExprId(tokenStr);
         virtualIdExpr.setStartToken(startToken);
         virtualIdExpr.setEndToken(startToken);
+        JNode selNode = getSelNode();
         virtualIdExpr.setParent(selNode);
 
         // Return
