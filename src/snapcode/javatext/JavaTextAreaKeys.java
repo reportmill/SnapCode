@@ -204,7 +204,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
      */
     private boolean isEnteringMultilineComment(TextBoxLine aTextLine)
     {
-        TextBoxToken lastToken = aTextLine.getTokenLast();
+        TextBoxToken lastToken = aTextLine.getLastToken();
         return lastToken != null && lastToken.getName() == CodeTokenizer.MULTI_LINE_COMMENT;
     }
 
@@ -254,7 +254,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     private boolean isEnteringBlockStatement(TextBoxLine aTextLine)
     {
         // If last token is open bracket, return true
-        TextBoxToken textToken = aTextLine.getTokenLast();
+        TextBoxToken textToken = aTextLine.getLastToken();
         String textTokenString = textToken != null ? textToken.getString() : "";
         if (textTokenString.equals("{"))
             return true;
@@ -284,7 +284,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         _textArea.replaceChars(sb.toString());
 
         // If start of code block, proactively append close bracket
-        TextBoxToken textToken = aTextLine.getTokenLast();
+        TextBoxToken textToken = aTextLine.getLastToken();
         String textTokenString = textToken != null ? textToken.getString() : "";
         boolean addCloseBracket = textTokenString.equals("{");
         if (addCloseBracket) {
