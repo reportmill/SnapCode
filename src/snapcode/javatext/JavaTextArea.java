@@ -34,7 +34,7 @@ public class JavaTextArea extends TextArea {
     protected JNode  _hoverNode;
 
     // The list of selected tokens
-    protected TextBoxToken[]  _selTokens = new TextBoxToken[0];
+    protected TextToken[] _selTokens = new TextToken[0];
 
     // A PopupList to show code completion stuff
     protected JavaPopupList  _popup;
@@ -86,7 +86,7 @@ public class JavaTextArea extends TextArea {
      */
     public void selectLine(int anIndex)
     {
-        TextBoxLine textLine = anIndex >= 0 && anIndex < getLineCount() ? getLine(anIndex) : null;
+        TextLine textLine = anIndex >= 0 && anIndex < getLineCount() ? getLine(anIndex) : null;
         if (textLine != null)
             setSel(textLine.getStartCharIndex(), textLine.getEndCharIndex());
     }
@@ -156,7 +156,7 @@ public class JavaTextArea extends TextArea {
         _selNode = _deepNode = aNode;
 
         // Reset SelTokens
-        TextBoxToken[] selTokens = getTokensForNode(aNode);
+        TextToken[] selTokens = getTokensForNode(aNode);
         setSelTokens(selTokens);
 
         // Reset PopupList
@@ -170,12 +170,12 @@ public class JavaTextArea extends TextArea {
     /**
      * Returns the array of selected tokens.
      */
-    public TextBoxToken[] getSelTokens()  { return _selTokens; }
+    public TextToken[] getSelTokens()  { return _selTokens; }
 
     /**
      * Sets the array of selected tokens.
      */
-    private void setSelTokens(TextBoxToken[] theTokens)
+    private void setSelTokens(TextToken[] theTokens)
     {
         // If new & old both empty, just return
         if (_selTokens.length == 0 && theTokens.length == 0) return;
@@ -189,50 +189,50 @@ public class JavaTextArea extends TextArea {
     /**
      * Returns reference tokens for given node.
      */
-    protected TextBoxToken[] getTokensForNode(JNode aNode)
+    protected TextToken[] getTokensForNode(JNode aNode)
     {
         // If not var name or type name, just return
         if (!(aNode instanceof JExprId || aNode instanceof JType))
-            return new TextBoxToken[0];
+            return new TextToken[0];
 
         // Handle null
         JavaDecl nodeDecl = aNode.getDecl();
         if (nodeDecl == null)
-            return new TextBoxToken[0];
+            return new TextToken[0];
 
         // Get other matching nodes
         JNode[] matchingNodes = NodeMatcher.getMatchingNodesForDecl(aNode.getFile(), nodeDecl);
         if (matchingNodes.length == 0)
-            return new TextBoxToken[0];
+            return new TextToken[0];
 
         // Return TextBoxTokens
         return getTokensForNodes(matchingNodes);
     }
 
     /**
-     * Returns a TextBoxToken array for given JNodes.
+     * Returns a TextToken array for given JNodes.
      */
-    protected TextBoxToken[] getTokensForNodes(JNode[] theNodes)
+    protected TextToken[] getTokensForNodes(JNode[] theNodes)
     {
         // Convert matching JNodes to TextBoxTokens
-        List<TextBoxToken> tokensList = new ArrayList<>(theNodes.length);
+        List<TextToken> tokensList = new ArrayList<>(theNodes.length);
         TextBox textBox = getTextBox();
-        int textBoxLineStart = 0;
+        int textLineStart = 0;
 
         // Iterate over nodes and convert to TextBoxTokens
         for (JNode jnode : theNodes) {
 
             // Get line index (skip if negative - assume Repl import statement or something)
-            int lineIndex = jnode.getLineIndex() - textBoxLineStart;
+            int lineIndex = jnode.getLineIndex() - textLineStart;
             if (lineIndex < 0)
                 continue;
 
             // Get line and token
-            TextBoxLine textBoxLine = textBox.getLine(lineIndex);
+            TextLine textLine = textBox.getLine(lineIndex);
             int startCharIndex = jnode.getLineCharIndex();
             if (jnode instanceof JType && jnode.getStartToken() != jnode.getEndToken())
                 startCharIndex = jnode.getEndToken().getColumnIndex();
-            TextBoxToken token = textBoxLine.getTokenForCharIndex(startCharIndex);
+            TextToken token = textLine.getTokenForCharIndex(startCharIndex);
 
             // Add to tokens list
             if (token != null)
@@ -241,13 +241,13 @@ public class JavaTextArea extends TextArea {
         }
 
         // Return
-        return tokensList.toArray(new TextBoxToken[0]);
+        return tokensList.toArray(new TextToken[0]);
     }
 
     /**
      * Repaints token bounds.
      */
-    private void repaintTokensBounds(TextBoxToken[] theTokens)
+    private void repaintTokensBounds(TextToken[] theTokens)
     {
         if (theTokens.length == 0) return;
         Rect tokensBounds = getBoundsForTokens(theTokens);
@@ -257,10 +257,10 @@ public class JavaTextArea extends TextArea {
     /**
      * Returns the bounds rect for tokens.
      */
-    private Rect getBoundsForTokens(TextBoxToken[] theTokens)
+    private Rect getBoundsForTokens(TextToken[] theTokens)
     {
         // Get first token and bounds
-        TextBoxToken token0 = theTokens[0];
+        TextToken token0 = theTokens[0];
         double tokenX = Math.round(token0.getTextBoxX()) - 1;
         double tokenY = Math.round(token0.getTextBoxY()) - 1;
         double tokenMaxX = Math.ceil(token0.getTextBoxMaxX()) + 1;
@@ -268,7 +268,7 @@ public class JavaTextArea extends TextArea {
 
         // Iterate over remaining tokens and union bounds
         for (int i = 1; i < theTokens.length; i++) {
-            TextBoxToken token = theTokens[i];
+            TextToken token = theTokens[i];
             tokenX = Math.min(tokenX, Math.round(token.getTextBoxX()) - 1);
             tokenY = Math.min(tokenY, Math.round(token.getTextBoxY()) - 1);
             tokenMaxX = Math.max(tokenMaxX, Math.ceil(token.getTextBoxMaxX()) + 1);
@@ -474,11 +474,11 @@ public class JavaTextArea extends TextArea {
             if (issueEnd < issueStart || issueEnd > length())
                 continue;
 
-            TextBoxLine textBoxLine = getLineForCharIndex(issueEnd);
-            int lineStartCharIndex = textBoxLine.getStartCharIndex();
+            TextLine textLine = getLineForCharIndex(issueEnd);
+            int lineStartCharIndex = textLine.getStartCharIndex();
             if (issueStart < lineStartCharIndex)
                 issueStart = lineStartCharIndex;
-            TextBoxToken token = getTokenForCharIndex(issueStart);
+            TextToken token = getTokenForCharIndex(issueStart);
             if (token != null) {
                 int tend = token.getTextLine().getStartCharIndex() + token.getEndCharIndex();
                 if (issueEnd < tend)
@@ -486,10 +486,10 @@ public class JavaTextArea extends TextArea {
             }
 
             // If possible, make sure we underline at least one char
-            if (issueStart == issueEnd && issueEnd < textBoxLine.getEndCharIndex()) issueEnd++;
-            int yb = (int) Math.round(textBoxLine.getBaseline()) + 2;
-            double x1 = textBoxLine.getXForCharIndex(issueStart - lineStartCharIndex);
-            double x2 = textBoxLine.getXForCharIndex(issueEnd - lineStartCharIndex);
+            if (issueStart == issueEnd && issueEnd < textLine.getEndCharIndex()) issueEnd++;
+            int yb = (int) Math.round(textLine.getBaseline()) + 2;
+            double x1 = textLine.getXForCharIndex(issueStart - lineStartCharIndex);
+            double x2 = textLine.getXForCharIndex(issueEnd - lineStartCharIndex);
             aPntr.setPaint(issue.isError() ? Color.RED : new Color(244, 198, 60));
             aPntr.setStroke(Stroke.StrokeDash1);
             aPntr.drawLine(x1, yb, x2, yb);
@@ -499,16 +499,16 @@ public class JavaTextArea extends TextArea {
         // Paint program counter
         int progCounterLine = getProgramCounterLine();
         if (progCounterLine >= 0 && progCounterLine < getLineCount()) {
-            TextBoxLine line = getLine(progCounterLine);
+            TextLine line = getLine(progCounterLine);
             aPntr.setPaint(new Color(199, 218, 175, 200));
             aPntr.fillRect(line.getX(), line.getY() + .5, line.getWidth(), line.getHeight());
         }
 
         // Paint selected tokens highlight rects
-        TextBoxToken[] selTokens = getSelTokens();
+        TextToken[] selTokens = getSelTokens();
         if (selTokens.length > 0) {
             aPntr.setColor(new Color("#FFF3AA"));
-            for (TextBoxToken token : selTokens) {
+            for (TextToken token : selTokens) {
                 double tokenX = Math.round(token.getTextBoxX()) - 1;
                 double tokenY = Math.round(token.getTextBoxY()) - 1;
                 double tokenW = Math.ceil(token.getTextBoxMaxX()) - tokenX + 1;
@@ -520,7 +520,7 @@ public class JavaTextArea extends TextArea {
         // If HoverNode, underline
         if (_hoverNode != null) {
             //TextBoxToken hoverToken = (TextBoxToken) _hoverNode.getStartToken();
-            TextBoxToken hoverToken = getTokenForCharIndex(_hoverNode.getStartCharIndex());
+            TextToken hoverToken = getTokenForCharIndex(_hoverNode.getStartCharIndex());
             double tokenX = hoverToken.getTextBoxX();
             double tokenY = hoverToken.getTextBoxStringY() + 1;
             double tokenMaxX = tokenX + hoverToken.getWidth();
@@ -536,8 +536,8 @@ public class JavaTextArea extends TextArea {
     {
         // Get start/end lines for selection
         TextSel textSel = getSel();
-        TextBoxLine startLine = textSel.getStartLine();
-        TextBoxLine endLine = textSel.getEndLine();
+        TextLine startLine = textSel.getStartLine();
+        TextLine endLine = textSel.getEndLine();
         int selStart = textSel.getStart();
         int selEnd = textSel.getEnd();
 
@@ -571,8 +571,8 @@ public class JavaTextArea extends TextArea {
     {
         // Get start/end lines for selection
         TextSel textSel = getSel();
-        TextBoxLine startLine = textSel.getStartLine();
-        TextBoxLine endLine = textSel.getEndLine();
+        TextLine startLine = textSel.getStartLine();
+        TextLine endLine = textSel.getEndLine();
         int selStart = textSel.getStart();
         int selEnd = textSel.getEnd();
 
@@ -620,14 +620,14 @@ public class JavaTextArea extends TextArea {
     {
         // Get start/end lines for selection
         TextSel textSel = getSel();
-        TextBoxLine startLine = textSel.getStartLine();
-        TextBoxLine endLine = textSel.getEndLine();
+        TextLine startLine = textSel.getStartLine();
+        TextLine endLine = textSel.getEndLine();
         int selStart = textSel.getStart();
         int selEnd = textSel.getEnd();
 
         // Assume adding comments if any line doesn't start with comment
         boolean addComments = false;
-        for (TextBoxLine line = startLine; line != endLine.getNext(); line = line.getNext()) {
+        for (TextLine line = startLine; line != endLine.getNext(); line = line.getNext()) {
             String lineStr = line.getString().trim();
             if (!lineStr.startsWith("//")) {
                 addComments = true;
@@ -718,8 +718,8 @@ public class JavaTextArea extends TextArea {
         if (newlineCount > 0) {
 
             // Get start/end line index
-            TextBoxLine startLine = getLineForCharIndex(charIndex);
-            TextBoxLine endLine = getLineForCharIndex(charIndex + charsLength);
+            TextLine startLine = getLineForCharIndex(charIndex);
+            TextLine endLine = getLineForCharIndex(charIndex + charsLength);
             int startLineIndex = startLine.getIndex();
             int endLineIndex = endLine.getIndex();
             int lineIndexDelta = endLineIndex - startLineIndex;
@@ -764,7 +764,7 @@ public class JavaTextArea extends TextArea {
         if (newlineCount > 0) {
 
             // Get start/end lines
-            TextBoxLine startLine = getLineForCharIndex(charIndex);
+            TextLine startLine = getLineForCharIndex(charIndex);
             int startLineIndex = startLine.getIndex();
             int endLineIndex = startLineIndex + newlineCount;
             int lineIndexDelta = endLineIndex - startLineIndex;

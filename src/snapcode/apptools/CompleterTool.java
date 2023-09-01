@@ -252,14 +252,14 @@ public class CompleterTool extends WorkspaceTool {
         }
 
         // Make sure Y is below DragBlock first line
-        TextBoxToken dragBlockToken = (TextBoxToken) _dragBlock.getStartToken();
-        TextBoxLine dragBlockLine = dragBlockToken.getTextLine();
-        if (aY < dragBlockLine.getY() + dragBlockLine.getLineAdvance())
-            _dragPoint = new Point(anX, dragBlockLine.getY() + dragBlockLine.getLineAdvance() + 1);
+        TextToken dragBlockToken = (TextToken) _dragBlock.getStartToken();
+        TextLine dragBlockLine = dragBlockToken.getTextLine();
+        if (aY < dragBlockLine.getY() + dragBlockLine.getMetrics().getLineAdvance())
+            _dragPoint = new Point(anX, dragBlockLine.getY() + dragBlockLine.getMetrics().getLineAdvance() + 1);
 
         // Get DragBlock.String with indent
-        TextBoxToken dragToken = (TextBoxToken) _dragNode.getStartToken();
-        TextBoxLine line = dragToken.getTextLine();
+        TextToken dragToken = (TextToken) _dragNode.getStartToken();
+        TextLine line = dragToken.getTextLine();
         String indent = getIndentString(line.getIndex());
         String dragString = indent + _dragCodeBlock.getString();
 
@@ -286,7 +286,7 @@ public class CompleterTool extends WorkspaceTool {
     public void drop(double anX, double aY)
     {
         JavaTextArea textArea = getTextArea();
-        TextBoxLine line = textArea.getTextBox().getLineForY(_dragPoint.getY());
+        TextLine line = textArea.getTextBox().getLineForY(_dragPoint.getY());
         CharSequence indent = getIndentString(line.getIndex());
         String string = _dragCodeBlock.getReplaceString(), fullString = indent + string + "\n";
         int selStart = line.getStartCharIndex();
@@ -363,7 +363,7 @@ public class CompleterTool extends WorkspaceTool {
 
         JavaTextArea textArea = getTextArea();
         TextBox textBox = textArea.getTextBox();
-        TextBoxLine line = textBox.getLine(anIndex - 1);
+        TextLine line = textBox.getLine(anIndex - 1);
 
         int indentCount = 0;
         while (indentCount < line.length() && Character.isWhitespace(line.charAt(indentCount)))

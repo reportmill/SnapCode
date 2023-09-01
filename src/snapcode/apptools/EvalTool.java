@@ -5,7 +5,7 @@ import javakit.parse.JMethodDecl;
 import javakit.parse.JNode;
 import snap.gfx.Color;
 import snap.gfx.Image;
-import snap.text.TextBoxLine;
+import snap.text.TextLine;
 import snap.view.*;
 import snap.viewx.TextPane;
 import snapcode.app.WorkspacePane;
@@ -126,8 +126,8 @@ public class EvalTool extends WorkspaceTool {
             return;
 
         // If previous line is empty whitespace, just return
-        TextBoxLine textLine = textArea.getSel().getStartLine();
-        TextBoxLine prevLine = textLine.getPrevious();
+        TextLine textLine = textArea.getSel().getStartLine();
+        TextLine prevLine = textLine.getPrevious();
         if (prevLine.isWhiteSpace())
             return;
 

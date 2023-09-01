@@ -5,7 +5,7 @@ import snapcode.project.BuildIssue;
 import javakit.resolver.JavaExecutable;
 import snap.geom.Rect;
 import snap.gfx.Image;
-import snap.text.TextBoxLine;
+import snap.text.TextLine;
 import snap.view.ViewEvent;
 
 /**
@@ -73,7 +73,7 @@ public abstract class LineMarker<T> extends Rect {
 
             // Get/set Y from line
             int lineIndex = aTarget.getLineIndex();
-            TextBoxLine textLine = _textArea.getLine(lineIndex);
+            TextLine textLine = _textArea.getLine(lineIndex);
             setY(Math.round(textLine.getY()));
 
             // Set image
@@ -121,7 +121,7 @@ public abstract class LineMarker<T> extends Rect {
 
             // Get/set Y from line
             int charIndex = aTarget.getEnd();
-            TextBoxLine textLine = _textArea.getLineForCharIndex(charIndex);
+            TextLine textLine = _textArea.getLineForCharIndex(charIndex);
             setY(Math.round(textLine.getY()));
 
             // Set image
@@ -153,7 +153,7 @@ public abstract class LineMarker<T> extends Rect {
         public BreakpointMarker(JavaTextPane<?> aJTP, Breakpoint aBP)
         {
             super(aJTP, aBP);
-            TextBoxLine line = _textArea.getLine(aBP.getLine());
+            TextLine line = _textArea.getLine(aBP.getLine());
             setY(Math.round(line.getY()));
             _image = BREAKPOINT_IMAGE;
         }

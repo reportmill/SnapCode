@@ -88,8 +88,8 @@ public class LineFootView extends View {
             markers.add(new BuildIssueMarker(issue));
 
         // Add markers for TextArea.SelectedTokens
-        TextBoxToken[] selTokens = _textArea.getSelTokens();
-        for (TextBoxToken token : selTokens)
+        TextToken[] selTokens = _textArea.getSelTokens();
+        for (TextToken token : selTokens)
             markers.add(new TokenMarker(token));
 
         // Return markers
@@ -120,7 +120,7 @@ public class LineFootView extends View {
             }
 
             TextBox textBox = _textArea.getTextBox();
-            TextBoxLine line = textBox.getLineForY(anEvent.getY() / getHeight() * _textArea.getHeight());
+            TextLine line = textBox.getLineForY(anEvent.getY() / getHeight() * _textArea.getHeight());
             setTextSel(line.getStartCharIndex(), line.getEndCharIndex());
         }
 
@@ -168,7 +168,7 @@ public class LineFootView extends View {
         }
 
         TextBox textBox = _textArea.getTextBox();
-        TextBoxLine line = textBox.getLineForY(_my / getHeight() * _textArea.getHeight());
+        TextLine line = textBox.getLineForY(_my / getHeight() * _textArea.getHeight());
         return "Line: " + (line.getIndex() + 1);
     }
 
@@ -229,7 +229,7 @@ public class LineFootView extends View {
         public BuildIssueMarker(BuildIssue anIssue)
         {
             super(anIssue);
-            TextBoxLine line = _textArea.getLineForCharIndex(Math.min(anIssue.getEnd(), _textArea.length()));
+            TextLine line = _textArea.getLineForCharIndex(Math.min(anIssue.getEnd(), _textArea.length()));
             _y = line.getY() + line.getHeight() / 2;
         }
 
@@ -277,15 +277,15 @@ public class LineFootView extends View {
     /**
      * The class that describes a overview marker.
      */
-    public static class TokenMarker extends Marker<TextBoxToken> {
+    public static class TokenMarker extends Marker<TextToken> {
 
         /**
          * Creates a new TokenMarker.
          */
-        public TokenMarker(TextBoxToken aToken)
+        public TokenMarker(TextToken aToken)
         {
             super(aToken);
-            TextBoxLine line = aToken.getTextLine();
+            TextLine line = aToken.getTextLine();
             _y = line.getY() + line.getHeight() / 2;
         }
 

@@ -81,7 +81,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // Get location for text start
         TextSel textSel = _textArea.getSel();
-        TextBoxLine selLine = textSel.getStartLine();
+        TextLine selLine = textSel.getStartLine();
         int selLineStart = selLine.getStartCharIndex();
         JNode selNode = _textArea.getSelNode();
         int selNodeStart = selNode.getStartCharIndex() - _textArea.getTextDoc().getStartCharIndex() - selLineStart;

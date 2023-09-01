@@ -2,7 +2,7 @@ package snapcode.views;
 import javakit.parse.*;
 import javakit.resolver.JavaClass;
 import snapcode.javatext.JavaTextArea;
-import snap.text.TextBoxLine;
+import snap.text.TextLine;
 import snap.view.StackView;
 import snap.view.View;
 import snap.view.ViewEvent;
@@ -263,7 +263,7 @@ public class SnapEditor extends StackView {
             return scopeExpr.getEndCharIndex();
 
         JavaTextArea javaTextArea = getJavaTextArea();
-        TextBoxLine textLine = javaTextArea.getLineForCharIndex(nodeStartCharIndex);
+        TextLine textLine = javaTextArea.getLineForCharIndex(nodeStartCharIndex);
         return textLine.getStartCharIndex();
     }
 
@@ -279,7 +279,7 @@ public class SnapEditor extends StackView {
             return dotExpr.getExpr().getEndCharIndex();
 
         JavaTextArea javaTextArea = getJavaTextArea();
-        TextBoxLine tline = javaTextArea.getLineForCharIndex(index);
+        TextLine tline = javaTextArea.getLineForCharIndex(index);
         return tline.getEndCharIndex();
     }
 
@@ -291,7 +291,7 @@ public class SnapEditor extends StackView {
         JavaTextArea tview = getJavaTextArea();
         int index = aNode.getStartCharIndex();
         while (index < tview.length() && tview.charAt(index) != '{') index++;
-        TextBoxLine tline = tview.getLineForCharIndex(index);
+        TextLine tline = tview.getLineForCharIndex(index);
         return tline.getEndCharIndex();
     }
 
@@ -301,7 +301,7 @@ public class SnapEditor extends StackView {
     String getIndent(JNode aNode, int aPos)
     {
         int index = aNode.getStartCharIndex();
-        TextBoxLine textLine = getJavaTextArea().getLineForCharIndex(index);
+        TextLine textLine = getJavaTextArea().getLineForCharIndex(index);
         String indentStr = textLine.getIndentString();
         if (aPos == 0)
             indentStr += "    ";

@@ -14,7 +14,7 @@ import javakit.resolver.JavaMember;
 import snapcode.project.JavaTextDoc;
 import snap.util.Convert;
 import snap.util.ListUtils;
-import snap.text.TextBoxLine;
+import snap.text.TextLine;
 import snap.view.View;
 import snapcode.javatext.JavaTextArea;
 import snapcode.javatext.JavaTextPane;
@@ -188,7 +188,7 @@ public class JavaPage extends WebPage {
         String selLine = aURL.getRefValue("SelLine");
         if (selLine != null) {
             int lineNum = Convert.intValue(selLine) - 1;
-            TextBoxLine textLine = lineNum >= 0 && lineNum < textArea.getLineCount() ? textArea.getLine(lineNum) : null;
+            TextLine textLine = lineNum >= 0 && lineNum < textArea.getLineCount() ? textArea.getLine(lineNum) : null;
             if (textLine != null)
                 textArea.setSel(textLine.getStartCharIndex());
         }

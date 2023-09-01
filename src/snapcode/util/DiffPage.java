@@ -8,7 +8,7 @@ import snap.gfx.Font;
 import snap.gfx.Painter;
 import snap.gfx.Stroke;
 import snapcode.project.VersionControl;
-import snap.text.TextBoxLine;
+import snap.text.TextLine;
 import snap.text.TextSel;
 import snap.view.*;
 import snapcode.webbrowser.WebPage;
@@ -302,7 +302,7 @@ public class DiffPage extends WebPage {
                         return;
                     }
                 }
-                TextBoxLine line = _ltext.getTextBox().getLineForY(anEvent.getY() / getHeight() * _ltext.getHeight());
+                TextLine line = _ltext.getTextBox().getLineForY(anEvent.getY() / getHeight() * _ltext.getHeight());
                 setTextSel(line.getStartCharIndex(), line.getEndCharIndex());
             }
 
@@ -351,7 +351,7 @@ public class DiffPage extends WebPage {
             }
 
             // Otherwise, just return line
-            TextBoxLine line = _ltext.getTextBox().getLineForY(_my / getHeight() * _ltext.getHeight());
+            TextLine line = _ltext.getTextBox().getLineForY(_my / getHeight() * _ltext.getHeight());
             return "Line: " + (line.getIndex() + 1);
         }
     }
@@ -374,7 +374,7 @@ public class DiffPage extends WebPage {
         {
             _sel = aSel;
             setRect(3, 0, 10, 5);
-            TextBoxLine line = aSel.getStartLine();
+            TextLine line = aSel.getStartLine();
             _y = line.getY() + line.getHeight() / 2;
         }
 

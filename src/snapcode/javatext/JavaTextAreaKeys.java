@@ -3,12 +3,10 @@
  */
 package snapcode.javatext;
 import javakit.parse.*;
-
 import static snapcode.javatext.JavaTextArea.INDENT_STRING;
-
 import snap.parse.CodeTokenizer;
-import snap.text.TextBoxLine;
-import snap.text.TextBoxToken;
+import snap.text.TextLine;
+import snap.text.TextToken;
 import snap.view.KeyCode;
 import snap.view.TextAreaKeys;
 import snap.view.ViewEvent;
@@ -115,9 +113,9 @@ public class JavaTextAreaKeys extends TextAreaKeys {
 
             // Handle open bracket: If empty line and indented more than previous line, remove level of indent
             if (keyChar == '{') {
-                TextBoxLine thisLine = getSel().getStartLine();
+                TextLine thisLine = getSel().getStartLine();
                 if (thisLine.isWhiteSpace() && thisLine.length() >= INDENT_STRING.length()) {
-                    TextBoxLine prevLine = thisLine.getPrevious();
+                    TextLine prevLine = thisLine.getPrevious();
                     if (prevLine != null && thisLine.getIndentLength() >= prevLine.getIndentLength() + INDENT_STRING.length()) {
                         int start = getSelStart();
                         _javaTextArea.delete(thisLine.getStartCharIndex(), thisLine.getStartCharIndex() + 4, false);
@@ -142,8 +140,8 @@ public class JavaTextAreaKeys extends TextAreaKeys {
             if (keyChar == '}') {
 
                 // Get indent for this line and next
-                TextBoxLine thisLine = getSel().getStartLine();
-                TextBoxLine prevLine = thisLine.getPrevious();
+                TextLine thisLine = getSel().getStartLine();
+                TextLine prevLine = thisLine.getPrevious();
                 int thisIndent = thisLine.getIndentLength();
                 int prevIndent = prevLine != null ? prevLine.getIndentLength() : 0;
 
@@ -169,7 +167,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     protected void processNewline()
     {
         // Get line and its indent
-        TextBoxLine textLine = getSel().getStartLine();
+        TextLine textLine = getSel().getStartLine();
 
         // If entering a multi-line comment, handle special
         if (isEnteringMultilineComment(textLine)) {
@@ -202,16 +200,16 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     /**
      * Returns whether this line is processing a multi line comment.
      */
-    private boolean isEnteringMultilineComment(TextBoxLine aTextLine)
+    private boolean isEnteringMultilineComment(TextLine aTextLine)
     {
-        TextBoxToken lastToken = aTextLine.getLastToken();
+        TextToken lastToken = aTextLine.getLastToken();
         return lastToken != null && lastToken.getName() == CodeTokenizer.MULTI_LINE_COMMENT;
     }
 
     /**
      * Process newline key event.
      */
-    protected void processNewlineForMultilineComment(TextBoxLine aTextLine)
+    protected void processNewlineForMultilineComment(TextLine aTextLine)
     {
         String lineString = aTextLine.getString().trim();
         boolean isStartOfMultiLineComment = lineString.startsWith("/*") && !lineString.endsWith("*/");
@@ -251,10 +249,10 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     /**
      * Returns whether this line is in process of entering a block statement (if, for, do, while).
      */
-    private boolean isEnteringBlockStatement(TextBoxLine aTextLine)
+    private boolean isEnteringBlockStatement(TextLine aTextLine)
     {
         // If last token is open bracket, return true
-        TextBoxToken textToken = aTextLine.getLastToken();
+        TextToken textToken = aTextLine.getLastToken();
         String textTokenString = textToken != null ? textToken.getString() : "";
         if (textTokenString.equals("{"))
             return true;
@@ -271,7 +269,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     /**
      * Process newline key event.
      */
-    protected void processNewlineForBlockStatement(TextBoxLine aTextLine)
+    protected void processNewlineForBlockStatement(TextLine aTextLine)
     {
         // Create string for new line plus indent
         String indentStr = aTextLine.getIndentString();
@@ -284,7 +282,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         _textArea.replaceChars(sb.toString());
 
         // If start of code block, proactively append close bracket
-        TextBoxToken textToken = aTextLine.getLastToken();
+        TextToken textToken = aTextLine.getLastToken();
         String textTokenString = textToken != null ? textToken.getString() : "";
         boolean addCloseBracket = textTokenString.equals("{");
         if (addCloseBracket) {
