@@ -84,11 +84,13 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         TextLine selLine = textSel.getStartLine();
         int selLineStart = selLine.getStartCharIndex();
         JNode selNode = _textArea.getSelNode();
-        int selNodeStart = selNode.getStartCharIndex() - _textArea.getTextDoc().getStartCharIndex() - selLineStart;
+        int selNodeStart = selNode.getStartCharIndex() - selLineStart;
+        if (selNodeStart < 0) // This seems a little bogus
+            selNodeStart = selLine.length();
 
         // Get location for popup and show
-        double textX = selLine.getXForCharIndex(selNodeStart);
-        double textY = selLine.getMaxY() + 4;
+        double textX = selLine.getTextXForCharIndex(selNodeStart);
+        double textY = selLine.getTextMaxY() + 4;
         show(_textArea, textX, textY);
     }
 

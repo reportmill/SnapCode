@@ -261,18 +261,18 @@ public class JavaTextArea extends TextArea {
     {
         // Get first token and bounds
         TextToken token0 = theTokens[0];
-        double tokenX = Math.round(token0.getTextBoxX()) - 1;
-        double tokenY = Math.round(token0.getTextBoxY()) - 1;
-        double tokenMaxX = Math.ceil(token0.getTextBoxMaxX()) + 1;
-        double tokenMaxY = Math.ceil(token0.getTextBoxMaxY()) + 1;
+        double tokenX = Math.round(token0.getTextX()) - 1;
+        double tokenY = Math.round(token0.getTextY()) - 1;
+        double tokenMaxX = Math.ceil(token0.getTextMaxX()) + 1;
+        double tokenMaxY = Math.ceil(token0.getTextMaxY()) + 1;
 
         // Iterate over remaining tokens and union bounds
         for (int i = 1; i < theTokens.length; i++) {
             TextToken token = theTokens[i];
-            tokenX = Math.min(tokenX, Math.round(token.getTextBoxX()) - 1);
-            tokenY = Math.min(tokenY, Math.round(token.getTextBoxY()) - 1);
-            tokenMaxX = Math.max(tokenMaxX, Math.ceil(token.getTextBoxMaxX()) + 1);
-            tokenMaxY = Math.max(tokenMaxY, Math.ceil(token.getTextBoxMaxY()) + 1);
+            tokenX = Math.min(tokenX, Math.round(token.getTextX()) - 1);
+            tokenY = Math.min(tokenY, Math.round(token.getTextY()) - 1);
+            tokenMaxX = Math.max(tokenMaxX, Math.ceil(token.getTextMaxX()) + 1);
+            tokenMaxY = Math.max(tokenMaxY, Math.ceil(token.getTextMaxY()) + 1);
         }
 
         // Return bounds
@@ -509,10 +509,10 @@ public class JavaTextArea extends TextArea {
         if (selTokens.length > 0) {
             aPntr.setColor(new Color("#FFF3AA"));
             for (TextToken token : selTokens) {
-                double tokenX = Math.round(token.getTextBoxX()) - 1;
-                double tokenY = Math.round(token.getTextBoxY()) - 1;
-                double tokenW = Math.ceil(token.getTextBoxMaxX()) - tokenX + 1;
-                double tokenH = Math.ceil(token.getTextBoxMaxY()) - tokenY + 1;
+                double tokenX = Math.round(token.getTextX()) - 1;
+                double tokenY = Math.round(token.getTextY()) - 1;
+                double tokenW = Math.ceil(token.getTextMaxX()) - tokenX + 1;
+                double tokenH = Math.ceil(token.getTextMaxY()) - tokenY + 1;
                 aPntr.fillRect(tokenX, tokenY, tokenW, tokenH);
             }
         }
@@ -521,8 +521,8 @@ public class JavaTextArea extends TextArea {
         if (_hoverNode != null) {
             //TextBoxToken hoverToken = (TextBoxToken) _hoverNode.getStartToken();
             TextToken hoverToken = getTokenForCharIndex(_hoverNode.getStartCharIndex());
-            double tokenX = hoverToken.getTextBoxX();
-            double tokenY = hoverToken.getTextBoxStringY() + 1;
+            double tokenX = hoverToken.getTextX();
+            double tokenY = hoverToken.getTextStringY() + 1;
             double tokenMaxX = tokenX + hoverToken.getWidth();
             aPntr.setColor(Color.BLACK);
             aPntr.drawLine(tokenX, tokenY, tokenMaxX, tokenY);

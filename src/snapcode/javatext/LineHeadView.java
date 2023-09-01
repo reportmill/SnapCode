@@ -297,7 +297,7 @@ public class LineHeadView extends View {
 
             // Get lineY (baseline)
             TextLine textLine = _textArea.getLine(i);
-            double lineY = textLine.getY() + textLine.getMetrics().getAscent();
+            double lineY = textLine.getTextY() + textLine.getMetrics().getAscent();
 
             // Get String, Width and X
             String str = String.valueOf(i + 1);
