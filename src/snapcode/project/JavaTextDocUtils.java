@@ -6,7 +6,7 @@ import javakit.parse.*;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.parse.*;
-import snap.text.TextDocUtils;
+import snap.text.TextBlockUtils;
 import snap.text.TextLine;
 import snap.text.TextToken;
 import snap.util.CharSequenceUtils;
@@ -138,7 +138,7 @@ public class JavaTextDocUtils {
     /**
      * Updates JFile for given range change.
      */
-    public static boolean updateJFileForChange(JavaTextDoc javaTextDoc, JFile aJFile, TextDocUtils.CharsChange aCharsChange)
+    public static boolean updateJFileForChange(JavaTextDoc javaTextDoc, JFile aJFile, TextBlockUtils.CharsChange aCharsChange)
     {
         // If no JFile, just bail
         if (aJFile == null) return true;

@@ -684,7 +684,7 @@ public class JavaTextArea extends TextArea {
         if (propName == TextDoc.Chars_Prop) {
 
             // Get CharsChange info
-            TextDocUtils.CharsChange charsChange = (TextDocUtils.CharsChange) anEvent;
+            TextBlockUtils.CharsChange charsChange = (TextBlockUtils.CharsChange) anEvent;
             int charIndex = anEvent.getIndex();
             CharSequence addChars = charsChange.getNewValue();
             CharSequence removeChars = charsChange.getOldValue();

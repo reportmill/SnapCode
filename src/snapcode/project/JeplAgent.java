@@ -3,7 +3,7 @@
  */
 package snapcode.project;
 import javakit.parse.*;
-import snap.text.TextDocUtils;
+import snap.text.TextBlockUtils;
 import snap.util.ArrayUtils;
 import snap.web.WebFile;
 
@@ -90,7 +90,7 @@ public class JeplAgent extends JavaAgent {
      * Override to just do full re-parse.
      */
     @Override
-    protected void updateJFileForChange(TextDocUtils.CharsChange charsChange)
+    protected void updateJFileForChange(TextBlockUtils.CharsChange charsChange)
     {
         _jfile = null;
     }

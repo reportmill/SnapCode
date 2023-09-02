@@ -5,7 +5,7 @@ package snapcode.project;
 import javakit.parse.*;
 import snap.props.PropChange;
 import snap.text.TextDoc;
-import snap.text.TextDocUtils;
+import snap.text.TextBlockUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
 
@@ -199,7 +199,7 @@ public class JavaAgent {
 
         // Handle CharsChange: Try to update JFile with partial parse
         if (propName == TextDoc.Chars_Prop && _jfile != null) {
-            TextDocUtils.CharsChange charsChange = (TextDocUtils.CharsChange) aPC;
+            TextBlockUtils.CharsChange charsChange = (TextBlockUtils.CharsChange) aPC;
             updateJFileForChange(charsChange);
         }
     }
@@ -207,7 +207,7 @@ public class JavaAgent {
     /**
      * Updates JFile incrementally if possible.
      */
-    protected void updateJFileForChange(TextDocUtils.CharsChange charsChange)
+    protected void updateJFileForChange(TextBlockUtils.CharsChange charsChange)
     {
         // If partial parse fails, clear JFile for full reparse
         boolean jfileUpdated = JavaTextDocUtils.updateJFileForChange(_javaTextDoc, _jfile, charsChange);
