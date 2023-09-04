@@ -246,8 +246,8 @@ public class CompleterTool extends WorkspaceTool {
         }
 
         ParseToken dragNodeToken = _dragBlock.getStartToken();
-        if (!(dragNodeToken instanceof TextBoxToken)) {
-            System.out.println("CompleterTool: Node token no longer TextBoxToken - update this code");
+        if (!(dragNodeToken instanceof TextToken)) {
+            System.out.println("CompleterTool: Node token no longer TextToken - update this code");
             return;
         }
 
