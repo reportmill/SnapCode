@@ -10,14 +10,14 @@
 # <a name="title">SnapCode - a Java workbench for Data Science and Education</a>
 
 <div align="center">
-  <a href="https://reportmill.com/SnapCode/cj">
+  <a href="https://reportmill.com/SnapCode/app">
     <img src="https://reportmill.com/SnapCode/SnapCode.png">
   </a>
   <br>
-  <a href="https://reportmill.com/SnapCode/cj">( Run SnapCode )</a>
+  <a href="https://reportmill.com/SnapCode/app">( Run SnapCode )</a>
 </div>
 
-<!-- [ ![SnapCode](https://reportmill.com/SnapCode/SnapCode.png)](http://www.reportmill.com/SnapCode/cj/) -->
+<!-- [ ![SnapCode](https://reportmill.com/SnapCode/SnapCode.png)](http://www.reportmill.com/SnapCode/app/) -->
 
 ## <a name="Overview">Overview</a>
 
@@ -27,9 +27,10 @@ All of this makes SnapCode effective for a broad range of uses from data science
 
 SnapCode gets things started quickly with these features:
 
-- No install - runs in browser [in-browser download](https://reportmill.com/SnapCode/cj)
+- No install - runs in browser [in-browser download](https://reportmill.com/SnapCode/app)
 - "No Compile" run using Java interpreter
 - Incremental REPL style output (shows values for each line as interactive views)
+- Desktop app: [Download Page](https://reportmill.com/SnapCode/download.html)
 
 ## <a name="ModernFeatures">Modern IDE Features</a>
 
@@ -97,4 +98,4 @@ This project is built with the following tools:
 - [SnapKit](https://github.com/reportmill/SnapKit) - Java UI Kit (Github)
 - [JavaKit](https://github.com/reportmill/JavaKit) - Java Parsing library (Github)
 - [SnapCharts](https://github.com/reportmill/SnapCharts) - Java charting library (Github)
-- [TeaVM](https://teavm.org/) - A Java to JavaScript transpiler (Github)
+- [CheerpJ](https://leaningtech.com/cheerpj/) - A Java JVM in the browser
