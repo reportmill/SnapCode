@@ -2,11 +2,11 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.apptools;
+import snap.text.TextBlock;
 import snapcode.javatext.JavaTextArea;
 import snap.geom.Insets;
 import snap.gfx.Color;
 import snap.gfx.Image;
-import snap.text.TextDoc;
 import snap.view.*;
 import snap.viewx.TextPane;
 import snapcode.webbrowser.WebPage;
@@ -16,7 +16,7 @@ import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.util.HelpFile;
 import snapcode.util.HelpSection;
-import snapcode.util.MarkDownDoc;
+import snapcode.util.MarkDownText;
 
 /**
  * This class shows a help file for the app.
@@ -87,7 +87,7 @@ public class HelpTool extends WorkspaceTool {
         _selSection = aSection;
 
         // Update SectionTextArea
-        TextDoc sectionText = aSection.getMarkDownDoc();
+        TextBlock sectionText = aSection.getMarkDownText();
         _helpTextArea.setTextDoc(sectionText);
     }
 
@@ -246,7 +246,7 @@ public class HelpTool extends WorkspaceTool {
     {
         // Get current section and MarkDown doc
         HelpSection selSection = getSelSection();
-        MarkDownDoc markDown = selSection.getMarkDownDoc();
+        MarkDownText markDown = selSection.getMarkDownText();
 
         // Get selection char index from SectionTextArea
         int selStart = _helpTextArea.getSelStart();
@@ -254,7 +254,7 @@ public class HelpTool extends WorkspaceTool {
         int selCharIndex = (selStart + selEnd) / 2;
 
         // Get the code for selection char index
-        MarkDownDoc.MarkDownRun codeRun = markDown.getCodeRunForCharIndex(selCharIndex);
+        MarkDownText.MarkDownRun codeRun = markDown.getCodeRunForCharIndex(selCharIndex);
         if (codeRun == null)
             return null;
 

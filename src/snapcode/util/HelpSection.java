@@ -20,8 +20,8 @@ public class HelpSection {
     // The content
     private String  _content;
 
-    // The MarkDownDoc
-    private MarkDownDoc _markDownDoc;
+    // The MarkDownText
+    private MarkDownText _markDownText;
 
     /**
      * Constructor.
@@ -78,25 +78,18 @@ public class HelpSection {
     }
 
     /**
-     * Returns the MarkDownDoc.
+     * Returns the MarkDownText.
      */
-    public MarkDownDoc getMarkDownDoc()
+    public MarkDownText getMarkDownText()
     {
         // If already set, just return
-        if (_markDownDoc != null) return _markDownDoc;
+        if (_markDownText != null) return _markDownText;
 
-        // Create, set, return
-        MarkDownDoc textDoc = createMarkDownDoc();
-        return _markDownDoc = textDoc;
-    }
+        // Create and configure
+        MarkDownText markDownText = new MarkDownText();
+        markDownText.setMarkDown("# " + _sectionText);
 
-    /**
-     * Creates the MarkDownDoc.
-     */
-    protected MarkDownDoc createMarkDownDoc()
-    {
-        MarkDownDoc markDownDoc = new MarkDownDoc();
-        markDownDoc.setMarkDown("# " + _sectionText);
-        return markDownDoc;
+        // Set and return
+        return _markDownText = markDownText;
     }
 }

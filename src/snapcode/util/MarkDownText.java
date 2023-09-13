@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * This RichText subclass can be created with MarkDown.
+ * This TextBlock subclass can be created with MarkDown.
  */
-public class MarkDownDoc extends TextDoc {
+public class MarkDownText extends TextBlock {
 
     // The header 1 style
     private TextStyle  _header1Style;
@@ -41,7 +41,7 @@ public class MarkDownDoc extends TextDoc {
     /**
      * Constructor.
      */
-    public MarkDownDoc()
+    public MarkDownText()
     {
         super(true);
     }
