@@ -4,11 +4,7 @@
 package snapcode.util;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.text.RichText;
-import snap.text.TextLine;
-import snap.text.TextRun;
-import snap.text.TextStyle;
-
+import snap.text.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -16,7 +12,7 @@ import java.util.stream.Stream;
 /**
  * This RichText subclass can be created with MarkDown.
  */
-public class MarkDownDoc extends RichText {
+public class MarkDownDoc extends TextDoc {
 
     // The header 1 style
     private TextStyle  _header1Style;
@@ -47,7 +43,7 @@ public class MarkDownDoc extends RichText {
      */
     public MarkDownDoc()
     {
-        super();
+        super(true);
     }
 
     /**

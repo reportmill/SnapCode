@@ -97,7 +97,7 @@ public class JavaTextArea extends TextArea {
     public JFile getJFile()
     {
         //JavaTextBox textBox = getTextBox();
-        TextDoc textDoc = getTextDoc();
+        TextBlock textDoc = getTextDoc();
 
         // Get JavaTextDoc and forward
         JavaTextDoc javaTextDoc = (JavaTextDoc) textDoc;
@@ -368,7 +368,7 @@ public class JavaTextArea extends TextArea {
     private JExprId getVirtualIdExprForDot()
     {
         // If previous char not dot, just return
-        TextDoc textDoc = getTextDoc();
+        TextBlock textDoc = getTextDoc();
         int prevCharIndex = getSelStart() - 1;
         char prevChar = prevCharIndex > 0 ? textDoc.charAt(prevCharIndex) : 0;
         if (prevChar != '.')
@@ -402,7 +402,7 @@ public class JavaTextArea extends TextArea {
     private JExprId getVirtualIdExprForTextTokenAtCursor()
     {
         // Get token for SelStart - just return if none
-        TextDoc textDoc = getTextDoc();
+        TextBlock textDoc = getTextDoc();
         int selStart = getSelStart();
         TextToken textToken = textDoc.getTokenForCharIndex(selStart);
         if (textToken == null)
@@ -791,8 +791,10 @@ public class JavaTextArea extends TextArea {
      */
     public WebFile getSourceFile()
     {
-        TextDoc textDoc = getTextDoc();
-        return textDoc.getSourceFile();
+        TextBlock textBlock = getTextDoc();
+        if (textBlock instanceof TextDoc)
+            return ((TextDoc) textBlock).getSourceFile();
+        return null;
     }
 
     /**

@@ -52,7 +52,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         setPrefRowCount(12);
 
         // Set font
-        TextDoc textDoc = aJavaTextArea.getTextDoc();
+        TextBlock textDoc = aJavaTextArea.getTextDoc();
         Font font = textDoc.getDefaultStyle().getFont();
         listArea.setFont(font);
     }
@@ -250,7 +250,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // Get Java text
         TextArea textArea = getTextArea();
-        TextDoc textDoc = textArea.getTextDoc();
+        TextBlock textDoc = textArea.getTextDoc();
 
         // Add import to Java text
         TextLine line = textDoc.getLine(importLineIndex);
