@@ -1,4 +1,5 @@
 package snapcode.util;
+import snap.text.TextBlock;
 import snapcode.project.JavaTextDoc;
 import snapcode.javatext.JavaTextArea;
 import snap.geom.Rect;
@@ -28,7 +29,7 @@ public class DiffPage extends WebPage {
     SplitView _splitView;
 
     // The two texts
-    TextArea _ltext, _rtext;
+    TextArea _leftTextArea, _rightTextArea;
 
     // The default font
     static Font _defaultFont;
@@ -69,22 +70,22 @@ public class DiffPage extends WebPage {
         // Get texts, initialize and install
         WebFile localFile = getLocalFile();
         WebFile remoteFile = getRemoteFile();
-        _ltext = getText(localFile);
-        _ltext.setGrowWidth(true);
-        _rtext = getText(remoteFile);
-        _rtext.setGrowWidth(true);
+        _leftTextArea = getText(localFile);
+        _leftTextArea.setGrowWidth(true);
+        _rightTextArea = getText(remoteFile);
+        _rightTextArea.setGrowWidth(true);
 
         // Get DiffPane and install texts
-        _splitView.setItems(_ltext, _rtext);
+        _splitView.setItems(_leftTextArea, _rightTextArea);
 
         // Get ranges lists
         List<TextSel> lranges, rranges;
-        lranges = _ltext instanceof DiffTextArea ? ((DiffTextArea) _ltext).ranges : ((DiffJavaTextArea) _ltext).ranges;
-        rranges = _rtext instanceof DiffTextArea ? ((DiffTextArea) _rtext).ranges : ((DiffJavaTextArea) _rtext).ranges;
+        lranges = _leftTextArea instanceof DiffTextArea ? ((DiffTextArea) _leftTextArea).ranges : ((DiffJavaTextArea) _leftTextArea).ranges;
+        rranges = _rightTextArea instanceof DiffTextArea ? ((DiffTextArea) _rightTextArea).ranges : ((DiffJavaTextArea) _rightTextArea).ranges;
 
         // Print diffs
         DiffUtil diffUtil = new DiffUtil();
-        List<DiffUtil.Diff> diffs = diffUtil.diff_main(_rtext.getText(), _ltext.getText());
+        List<DiffUtil.Diff> diffs = diffUtil.diff_main(_rightTextArea.getText(), _leftTextArea.getText());
         int localIndex = 0;
         int remoteIndex = 0;
         for (DiffUtil.Diff diff : diffs) {
@@ -95,13 +96,15 @@ public class DiffPage extends WebPage {
 
             // Handle insert
             if (insert) {
-                lranges.add(new TextSel(_ltext.getTextBox(), localIndex, localIndex + length));
+                TextBlock textBlock = _leftTextArea.getTextBlock();
+                lranges.add(new TextSel(textBlock, localIndex, localIndex + length));
                 localIndex += length;
             }
 
             // Handle delete
             else if (delete) {
-                rranges.add(new TextSel(_rtext.getTextBox(), remoteIndex, remoteIndex + length));
+                TextBlock textBlock = _rightTextArea.getTextBlock();
+                rranges.add(new TextSel(textBlock, remoteIndex, remoteIndex + length));
                 remoteIndex += length;
             }
 
@@ -265,7 +268,7 @@ public class DiffPage extends WebPage {
          */
         public void setTextSel(int aStart, int anEnd)
         {
-            _ltext.setSel(aStart, anEnd);
+            _leftTextArea.setSel(aStart, anEnd);
         }
 
         /**
@@ -280,8 +283,8 @@ public class DiffPage extends WebPage {
             List<Marker> markers = new ArrayList<>();
 
             // Add markers for TextArea.JavaSource.BuildIssues
-            List<TextSel> ranges = _ltext instanceof DiffTextArea ? ((DiffTextArea) _ltext).ranges :
-                    ((DiffJavaTextArea) _ltext).ranges;
+            List<TextSel> ranges = _leftTextArea instanceof DiffTextArea ? ((DiffTextArea) _leftTextArea).ranges :
+                    ((DiffJavaTextArea) _leftTextArea).ranges;
             for (TextSel ts : ranges)
                 markers.add(new Marker(ts));
 
@@ -302,7 +305,9 @@ public class DiffPage extends WebPage {
                         return;
                     }
                 }
-                TextLine line = _ltext.getTextBox().getLineForY(anEvent.getY() / getHeight() * _ltext.getHeight());
+
+                TextBlock textBlock = _leftTextArea.getTextBlock();
+                TextLine line = textBlock.getLineForY(anEvent.getY() / getHeight() * _leftTextArea.getHeight());
                 setTextSel(line.getStartCharIndex(), line.getEndCharIndex());
             }
 
@@ -325,7 +330,7 @@ public class DiffPage extends WebPage {
          */
         protected void paintFront(Painter aPntr)
         {
-            double th = _ltext.getHeight();
+            double th = _leftTextArea.getHeight();
             double h = Math.min(getHeight(), th);
             aPntr.setStroke(Stroke.Stroke1);
             for (Marker marker : getMarkers()) {
@@ -351,7 +356,8 @@ public class DiffPage extends WebPage {
             }
 
             // Otherwise, just return line
-            TextLine line = _ltext.getTextBox().getLineForY(_my / getHeight() * _ltext.getHeight());
+            TextBlock textBlock = _leftTextArea.getTextBlock();
+            TextLine line = textBlock.getLineForY(_my / getHeight() * _leftTextArea.getHeight());
             return "Line: " + (line.getIndex() + 1);
         }
     }

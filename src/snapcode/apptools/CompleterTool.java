@@ -265,9 +265,9 @@ public class CompleterTool extends WorkspaceTool {
 
         // If DragText needs to be reset, create and reset
         if (_dragText == null || !_dragText.getString().equals(dragString)) {
-            TextBox textBox = textArea.getTextBox();
+            TextBlock textBlock = textArea.getTextBlock();
             _dragText = new TextBox();
-            _dragText.setX(textBox.getX());
+            _dragText.setX(textBlock.getX());
             _dragText.setString(dragString);
         }
     }
@@ -286,7 +286,8 @@ public class CompleterTool extends WorkspaceTool {
     public void drop(double anX, double aY)
     {
         JavaTextArea textArea = getTextArea();
-        TextLine line = textArea.getTextBox().getLineForY(_dragPoint.getY());
+        TextBlock textBlock = textArea.getTextBlock();
+        TextLine line = textBlock.getLineForY(_dragPoint.getY());
         CharSequence indent = getIndentString(line.getIndex());
         String string = _dragCodeBlock.getReplaceString(), fullString = indent + string + "\n";
         int selStart = line.getStartCharIndex();
@@ -362,7 +363,7 @@ public class CompleterTool extends WorkspaceTool {
         if (anIndex == 0) return 0;
 
         JavaTextArea textArea = getTextArea();
-        TextBox textBox = textArea.getTextBox();
+        TextBlock textBox = textArea.getTextBlock();
         TextLine line = textBox.getLine(anIndex - 1);
 
         int indentCount = 0;

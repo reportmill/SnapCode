@@ -119,8 +119,8 @@ public class LineFootView extends View {
                 }
             }
 
-            TextBox textBox = _textArea.getTextBox();
-            TextLine line = textBox.getLineForY(anEvent.getY() / getHeight() * _textArea.getHeight());
+            TextBlock textBlock = _textArea.getTextBlock();
+            TextLine line = textBlock.getLineForY(anEvent.getY() / getHeight() * _textArea.getHeight());
             setTextSel(line.getStartCharIndex(), line.getEndCharIndex());
         }
 
@@ -167,8 +167,8 @@ public class LineFootView extends View {
                 return marker.getToolTip();
         }
 
-        TextBox textBox = _textArea.getTextBox();
-        TextLine line = textBox.getLineForY(_my / getHeight() * _textArea.getHeight());
+        TextBlock textBlock = _textArea.getTextBlock();
+        TextLine line = textBlock.getLineForY(_my / getHeight() * _textArea.getHeight());
         return "Line: " + (line.getIndex() + 1);
     }
 

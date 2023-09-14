@@ -5,7 +5,6 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.text.RichText;
 import snap.text.TextBlock;
 import snap.text.TextLineStyle;
 import snap.text.TextStyle;
@@ -107,7 +106,7 @@ public class HttpServerTool extends WorkspaceTool {
         _textView.setWrapLines(true);
 
         // Make font bigger and increase space between lines
-        TextBlock richText = _textView.getTextBox();
+        TextBlock richText = _textView.getTextBlock();
         richText.setDefaultStyle(richText.getDefaultStyle().copyFor(Font.Arial12));
         TextLineStyle lstyle = richText.getDefaultLineStyle();
         TextLineStyle lstyle2 = lstyle.copyFor(TextLineStyle.SPACING_KEY, 2);

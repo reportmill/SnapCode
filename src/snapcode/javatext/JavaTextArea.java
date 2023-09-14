@@ -216,7 +216,7 @@ public class JavaTextArea extends TextArea {
     {
         // Convert matching JNodes to TextBoxTokens
         List<TextToken> tokensList = new ArrayList<>(theNodes.length);
-        TextBox textBox = getTextBox();
+        TextBlock textBlock = getTextBlock();
         int textLineStart = 0;
 
         // Iterate over nodes and convert to TextBoxTokens
@@ -228,7 +228,7 @@ public class JavaTextArea extends TextArea {
                 continue;
 
             // Get line and token
-            TextLine textLine = textBox.getLine(lineIndex);
+            TextLine textLine = textBlock.getLine(lineIndex);
             int startCharIndex = jnode.getLineCharIndex();
             if (jnode instanceof JType && jnode.getStartToken() != jnode.getEndToken())
                 startCharIndex = jnode.getEndToken().getColumnIndex();

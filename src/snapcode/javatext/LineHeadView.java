@@ -227,7 +227,9 @@ public class LineHeadView extends View {
                         return;
                     }
                 }
-                TextLine line = _textArea.getTextBox().getLineForY(anEvent.getY());
+
+                TextBlock textBlock = _textArea.getTextBlock();
+                TextLine line = textBlock.getLineForY(anEvent.getY());
                 int lineIndex = line.getIndex();
                 _textArea.addBreakpoint(lineIndex);
                 resetAll();
@@ -287,7 +289,8 @@ public class LineHeadView extends View {
         double clipMaxY = clipRect.getMaxY();
 
         // Get start line index for ClipY
-        TextLine startLine = _textArea.getTextBox().getLineForY(clipY);
+        TextBlock textBlock = _textArea.getTextBlock();
+        TextLine startLine = textBlock.getLineForY(clipY);
         int startLineIndex = startLine.getIndex();
         int lineCount = _textArea.getLineCount();
         double maxX = getWidth() - getPadding().right;
