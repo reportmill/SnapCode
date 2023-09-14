@@ -62,7 +62,7 @@ public class JavaTextArea extends TextArea {
         }
 
         // Set default TextDoc to JavaTextDoc
-        setTextDoc(DUMMY_TEXT_DOC);
+        setSourceText(DUMMY_TEXT_DOC);
     }
 
     /**
@@ -669,10 +669,10 @@ public class JavaTextArea extends TextArea {
     /**
      * Override to setTextModified.
      */
-    protected void textDocDidPropChange(PropChange anEvent)
+    protected void sourceTextDidPropChange(PropChange anEvent)
     {
         // Do normal version and update TextPane.TextModified
-        super.textDocDidPropChange(anEvent);
+        super.sourceTextDidPropChange(anEvent);
 
         // Get PropName
         String propName = anEvent.getPropName();

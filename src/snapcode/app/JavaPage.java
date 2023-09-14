@@ -87,7 +87,7 @@ public class JavaPage extends WebPage {
 
         // Set TextArea.TextDoc and FirstFocus
         JavaTextArea javaTextArea = getTextArea();
-        javaTextArea.setTextDoc(javaTextDoc);
+        javaTextArea.setSourceText(javaTextDoc);
         setFirstFocus(javaTextArea);
 
         // Register for enter action
@@ -143,7 +143,7 @@ public class JavaPage extends WebPage {
 
         // Set TextArea.TextDoc
         JavaTextArea javaTextArea = getTextArea();
-        javaTextArea.setTextDoc(javaTextDoc);
+        javaTextArea.setSourceText(javaTextDoc);
     }
 
     /**

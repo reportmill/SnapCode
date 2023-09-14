@@ -346,7 +346,7 @@ public class JavaTextPane extends TextPane {
             resetLater();
 
         // Handle TextDoc
-        if (propName == TextArea.TextDoc_Prop) {
+        if (propName == TextArea.SourceText_Prop) {
             _lineNumView.resetAll();
             _lineFootView.resetAll();
         }
@@ -474,7 +474,7 @@ public class JavaTextPane extends TextPane {
 
         // Create JavaTextPane and show
         JavaTextPane javaTextPane = new JavaTextPane();
-        javaTextPane.getTextArea().setTextDoc(javaTextDoc);
+        javaTextPane.getTextArea().setSourceText(javaTextDoc);
         javaTextPane.getUI().setPrefHeight(800);
         javaTextPane.setWindowVisible(true);
     }

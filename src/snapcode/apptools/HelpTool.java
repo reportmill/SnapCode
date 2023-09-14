@@ -88,7 +88,7 @@ public class HelpTool extends WorkspaceTool {
 
         // Update SectionTextArea
         TextBlock sectionText = aSection.getMarkDownText();
-        _helpTextArea.setTextDoc(sectionText);
+        _helpTextArea.setSourceText(sectionText);
     }
 
     /**

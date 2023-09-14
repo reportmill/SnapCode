@@ -148,7 +148,7 @@ public class DiffPage extends WebPage {
 
             // Create DiffJavaTextArea and set JavaTextDoc
             DiffJavaTextArea diffJavaTextArea = new DiffJavaTextArea();
-            diffJavaTextArea.setTextDoc(javaTextDoc);
+            diffJavaTextArea.setSourceText(javaTextDoc);
             return diffJavaTextArea;
         }
 
