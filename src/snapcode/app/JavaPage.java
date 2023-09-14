@@ -33,7 +33,7 @@ import java.util.Objects;
 public class JavaPage extends WebPage {
 
     // The JavaTextPane
-    private JavaTextPane<?> _javaTextPane;
+    private JavaTextPane _javaTextPane;
 
     /**
      * Constructor.
@@ -56,12 +56,12 @@ public class JavaPage extends WebPage {
     /**
      * Returns the JavaTextArea.
      */
-    public JavaTextPane<?> getTextPane()  { return _javaTextPane; }
+    public JavaTextPane getTextPane()  { return _javaTextPane; }
 
     /**
      * Creates the JavaTextPane.
      */
-    protected JavaTextPane<?> createJavaTextPane()  { return new JavaPageJavaTextPane(); }
+    protected JavaTextPane createJavaTextPane()  { return new JavaPageJavaTextPane(); }
 
     /**
      * Returns the JavaTextArea.
@@ -196,7 +196,7 @@ public class JavaPage extends WebPage {
         // Look for Find
         String findString = aURL.getRefValue("Find");
         if (findString != null) {
-            JavaTextPane<?> textPane = getTextPane();
+            JavaTextPane textPane = getTextPane();
             textPane.find(findString, true, true);
         }
 
@@ -455,7 +455,7 @@ public class JavaPage extends WebPage {
     /**
      * A JavaTextPane for a JavaPage to implement symbol features and such.
      */
-    public class JavaPageJavaTextPane extends JavaTextPane<JavaTextDoc> {
+    public class JavaPageJavaTextPane extends JavaTextPane {
 
         /**
          * Override to set selection using browser.

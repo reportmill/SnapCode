@@ -47,7 +47,7 @@ public class EvalToolRunner {
     /**
      * Returns the current JavaTextPane.
      */
-    public JavaTextPane<?> getJavaTextPane()
+    public JavaTextPane getJavaTextPane()
     {
         WorkspacePane workspacePane = _evalTool.getWorkspacePane();
         PagePane pagePane = workspacePane.getPagePane();
@@ -88,8 +88,8 @@ public class EvalToolRunner {
     protected void runAppImpl()
     {
         // Get JavaTextDoc, JavaAgent
-        JavaTextPane<?> javaTextPane = getJavaTextPane();
-        JavaTextDoc javaTextDoc = javaTextPane.getTextDoc();
+        JavaTextPane javaTextPane = getJavaTextPane();
+        JavaTextDoc javaTextDoc = javaTextPane.getJavaTextDoc();
         JavaAgent javaAgent = javaTextDoc.getAgent();
 
         // Build file

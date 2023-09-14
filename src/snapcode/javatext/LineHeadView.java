@@ -19,7 +19,7 @@ import snap.view.*;
 public class LineHeadView extends View {
 
     // The JavaTextPane that contains this view
-    private JavaTextPane<?>  _textPane;
+    private JavaTextPane _textPane;
 
     // The JavaTextArea
     private JavaTextArea  _textArea;
@@ -46,7 +46,7 @@ public class LineHeadView extends View {
     /**
      * Creates a new RowHeader.
      */
-    public LineHeadView(JavaTextPane<?> aJTP)
+    public LineHeadView(JavaTextPane aJTP)
     {
         // Set ivars
         _textPane = aJTP;

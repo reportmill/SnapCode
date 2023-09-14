@@ -18,10 +18,10 @@ import snap.web.WebFile;
 public class TextPage extends WebPage {
 
     // The text pane
-    private TextPane<?>  _textPane = new TFTextPane<>();
+    private TextPane _textPane = new TFTextPane();
 
     // The text
-    private String  _text;
+    private String _text;
 
     /**
      * Returns the text.
@@ -86,7 +86,7 @@ public class TextPage extends WebPage {
         setFirstFocus(getTextArea());
 
         // Bind TextDoc.TextModified to JavaPage.TextModified
-        TextBlock textDoc = textArea.getTextDoc();
+        TextBlock textDoc = textArea.getSourceText();
         textDoc.addPropChangeListener(pc -> setTextModified(textDoc.isTextModified()), TextDoc.TextModified_Prop);
     }
 
@@ -140,11 +140,12 @@ public class TextPage extends WebPage {
     /**
      * A TextPane subclass.
      */
-    private class TFTextPane<T extends TextDoc> extends TextPane<T> {
+    private class TFTextPane extends TextPane {
 
         /**
          * Save file.
          */
+        @Override
         protected void saveChangesImpl()
         {
             try { getFile().save(); }

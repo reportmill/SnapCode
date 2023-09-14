@@ -52,8 +52,8 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         setPrefRowCount(12);
 
         // Set font
-        TextBlock textDoc = aJavaTextArea.getTextDoc();
-        Font font = textDoc.getDefaultStyle().getFont();
+        TextBlock textBlock = aJavaTextArea.getTextBlock();
+        Font font = textBlock.getDefaultStyle().getFont();
         listArea.setFont(font);
     }
 
@@ -250,11 +250,11 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // Get Java text
         TextArea textArea = getTextArea();
-        TextBlock textDoc = textArea.getTextDoc();
+        TextBlock textBlock = textArea.getTextBlock();
 
         // Add import to Java text
-        TextLine line = textDoc.getLine(importLineIndex);
-        textDoc.addChars(importStr, null, line.getStartCharIndex());
+        TextLine textLine = textBlock.getLine(importLineIndex);
+        textBlock.addChars(importStr, null, textLine.getStartCharIndex());
 
         // Update selection
         int selStart = textArea.getSelStart();

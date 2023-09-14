@@ -96,11 +96,8 @@ public class JavaTextArea extends TextArea {
      */
     public JFile getJFile()
     {
-        //JavaTextBox textBox = getTextBox();
-        TextBlock textDoc = getTextDoc();
-
         // Get JavaTextDoc and forward
-        JavaTextDoc javaTextDoc = (JavaTextDoc) textDoc;
+        JavaTextDoc javaTextDoc = (JavaTextDoc) getSourceText();
         return javaTextDoc.getJFile();
     }
 
@@ -368,9 +365,9 @@ public class JavaTextArea extends TextArea {
     private JExprId getVirtualIdExprForDot()
     {
         // If previous char not dot, just return
-        TextBlock textDoc = getTextDoc();
+        TextBlock textBlock = getTextBlock();
         int prevCharIndex = getSelStart() - 1;
-        char prevChar = prevCharIndex > 0 ? textDoc.charAt(prevCharIndex) : 0;
+        char prevChar = prevCharIndex > 0 ? textBlock.charAt(prevCharIndex) : 0;
         if (prevChar != '.')
             return null;
 
@@ -402,9 +399,9 @@ public class JavaTextArea extends TextArea {
     private JExprId getVirtualIdExprForTextTokenAtCursor()
     {
         // Get token for SelStart - just return if none
-        TextBlock textDoc = getTextDoc();
+        TextBlock textBlock = getTextBlock();
         int selStart = getSelStart();
-        TextToken textToken = textDoc.getTokenForCharIndex(selStart);
+        TextToken textToken = textBlock.getTokenForCharIndex(selStart);
         if (textToken == null)
             return null;
 
@@ -791,10 +788,8 @@ public class JavaTextArea extends TextArea {
      */
     public WebFile getSourceFile()
     {
-        TextBlock textBlock = getTextDoc();
-        if (textBlock instanceof TextDoc)
-            return ((TextDoc) textBlock).getSourceFile();
-        return null;
+        TextDoc textDoc = (TextDoc) getSourceText();
+        return textDoc.getSourceFile();
     }
 
     /**
@@ -873,7 +868,7 @@ public class JavaTextArea extends TextArea {
      */
     public int getProgramCounterLine()
     {
-        JavaTextPane<?> javaTextPane = getOwner(JavaTextPane.class);
+        JavaTextPane javaTextPane = getOwner(JavaTextPane.class);
         if (javaTextPane == null)
             return -1;
         return javaTextPane.getProgramCounterLine();
@@ -903,7 +898,7 @@ public class JavaTextArea extends TextArea {
     public void replaceCharsWithContent(Object theContent)
     {
         // If String, trim extra indent
-        if (theContent instanceof String && getTextDoc() instanceof JeplTextDoc)
+        if (theContent instanceof String && getSourceText() instanceof JeplTextDoc)
             theContent = JavaTextUtils.removeExtraIndentFromString((String) theContent);
 
         // Do normal version

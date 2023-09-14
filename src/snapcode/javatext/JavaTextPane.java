@@ -19,7 +19,7 @@ import java.util.Objects;
 /**
  * A panel for editing Java files.
  */
-public class JavaTextPane<T extends JavaTextDoc> extends TextPane<T> {
+public class JavaTextPane extends TextPane {
 
     // The JavaTextArea
     protected JavaTextArea  _textArea;
@@ -42,10 +42,12 @@ public class JavaTextPane<T extends JavaTextDoc> extends TextPane<T> {
      * Returns the JavaTextArea.
      */
     @Override
-    public JavaTextArea getTextArea()
-    {
-        return (JavaTextArea) super.getTextArea();
-    }
+    public JavaTextArea getTextArea()  { return (JavaTextArea) super.getTextArea(); }
+
+    /**
+     * Returns the JavaTextDoc.
+     */
+    public JavaTextDoc getJavaTextDoc()  { return (JavaTextDoc) _textArea.getSourceText(); }
 
     /**
      * Creates the JavaTextArea.
@@ -383,7 +385,7 @@ public class JavaTextPane<T extends JavaTextDoc> extends TextPane<T> {
     protected Label[] getLabelsForSelNodePath()
     {
         // If Jepl, labels root should be JClassDecl
-        JavaTextDoc textDoc = getTextDoc();
+        JavaTextDoc textDoc = getJavaTextDoc();
         if (textDoc instanceof JeplTextDoc)
             return getLabelsForSelNodePathForJepl();
 
@@ -471,8 +473,8 @@ public class JavaTextPane<T extends JavaTextDoc> extends TextPane<T> {
         JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForSource("/tmp/Test.java");
 
         // Create JavaTextPane and show
-        JavaTextPane<JavaTextDoc> javaTextPane = new JavaTextPane<>();
-        javaTextPane.setTextDoc(javaTextDoc);
+        JavaTextPane javaTextPane = new JavaTextPane();
+        javaTextPane.getTextArea().setTextDoc(javaTextDoc);
         javaTextPane.getUI().setPrefHeight(800);
         javaTextPane.setWindowVisible(true);
     }

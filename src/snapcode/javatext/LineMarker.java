@@ -14,10 +14,10 @@ import snap.view.ViewEvent;
 public abstract class LineMarker<T> extends Rect {
 
     // The JavaTextPane
-    protected JavaTextPane<?>  _textPane;
+    protected JavaTextPane _textPane;
 
     // The JavaTextArea
-    protected JavaTextArea  _textArea;
+    protected JavaTextArea _textArea;
 
     // The object that is being marked.
     protected T  _target;
@@ -35,7 +35,7 @@ public abstract class LineMarker<T> extends Rect {
     /**
      * Creates a new marker for target.
      */
-    public LineMarker(JavaTextPane<?> aJavaTextPane, T aTarget)
+    public LineMarker(JavaTextPane aJavaTextPane, T aTarget)
     {
         _textPane = aJavaTextPane;
         _textArea = aJavaTextPane.getTextArea();
@@ -65,7 +65,7 @@ public abstract class LineMarker<T> extends Rect {
         /**
          * Creates a new marker for target.
          */
-        public SuperMemberMarker(JavaTextPane<?> aJTP, JMemberDecl aTarget)
+        public SuperMemberMarker(JavaTextPane aJTP, JMemberDecl aTarget)
         {
             super(aJTP, aTarget);
             _superDecl = aTarget.getSuperDecl();
@@ -114,7 +114,7 @@ public abstract class LineMarker<T> extends Rect {
         /**
          * Creates a new marker for target.
          */
-        public BuildIssueMarker(JavaTextPane<?> aJTP, BuildIssue aTarget)
+        public BuildIssueMarker(JavaTextPane aJTP, BuildIssue aTarget)
         {
             super(aJTP, aTarget);
             _isError = aTarget.isError();
@@ -150,7 +150,7 @@ public abstract class LineMarker<T> extends Rect {
         /**
          * Creates a BreakpointMarker.
          */
-        public BreakpointMarker(JavaTextPane<?> aJTP, Breakpoint aBP)
+        public BreakpointMarker(JavaTextPane aJTP, Breakpoint aBP)
         {
             super(aJTP, aBP);
             TextLine line = _textArea.getLine(aBP.getLine());

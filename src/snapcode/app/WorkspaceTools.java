@@ -279,7 +279,7 @@ public class WorkspaceTools {
         WebFile issueFile = issue.getFile();
         WebPage page = _workspacePane.getBrowser().getPageForURL(issueFile.getURL());
         if (page instanceof JavaPage) {
-            JavaTextPane<?> javaTextPane = ((JavaPage) page).getTextPane();
+            JavaTextPane javaTextPane = ((JavaPage) page).getTextPane();
             javaTextPane.buildIssueOrBreakPointMarkerChanged();
         }
 
