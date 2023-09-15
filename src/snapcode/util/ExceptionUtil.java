@@ -1,9 +1,6 @@
 package snapcode.util;
 import snap.gfx.Color;
-import snap.text.RichText;
-import snap.text.TextDoc;
-import snap.text.TextLink;
-import snap.text.TextStyle;
+import snap.text.*;
 import snap.util.Convert;
 import snap.util.StringUtils;
 
@@ -18,7 +15,7 @@ public class ExceptionUtil {
     /**
      * Returns a TextDoc for given exception.
      */
-    public static TextDoc getTextDocForException(Exception anException)
+    public static TextBlock getTextBlockForException(Exception anException)
     {
         String str = StringUtils.getStackTraceString(anException);
 
@@ -29,7 +26,7 @@ public class ExceptionUtil {
             return textDoc;
         }
 
-        TextDoc textDoc = new RichText();
+        TextBlock textDoc = new RichText();
         appendString(textDoc, str, ERROR_COLOR);
         return textDoc;
     }
@@ -37,7 +34,7 @@ public class ExceptionUtil {
     /**
      * Appends text with given color.
      */
-    private static void appendString(TextDoc aTextDoc, String aStr, Color aColor)
+    private static void appendString(TextBlock aTextDoc, String aStr, Color aColor)
     {
         // Get default style modified for color
         TextStyle style = aTextDoc.getStyleForCharIndex(aTextDoc.length());
@@ -115,5 +112,4 @@ public class ExceptionUtil {
         //WebFile file = proj.getProjectSet().getSourceFile(aPath);
         //return file != null ? file.getURL().getString() : aPath;
     }
-
 }
