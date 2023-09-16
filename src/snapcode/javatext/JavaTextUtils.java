@@ -66,11 +66,6 @@ public class JavaTextUtils {
      */
     public static String removeExtraIndentFromString(String str)
     {
-        // If starts with newline, strip it
-        if (str.startsWith("\n"))
-            str = str.substring(1);
-        boolean endsWithNewline = str.endsWith("\n");
-
         // Get string as lines
         String[] lines = str.split("\n");
         int minIndent = 99;
@@ -100,6 +95,7 @@ public class JavaTextUtils {
                 lines[i] = lines[i].replaceFirst(indentStr, "");
 
             // Rebuild string
+            boolean endsWithNewline = str.endsWith("\n");
             str = String.join("\n", lines);
             if (endsWithNewline)
                 str += "\n";
