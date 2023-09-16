@@ -24,6 +24,9 @@ public class MethodRefWrapper {
     // The OR
     private Object _OR;
 
+    // The MethodRef expr
+    private JExprMethodRef _methodRefExpr;
+
     // The Content expression
     private JExpr _contentExpr;
 
@@ -38,6 +41,7 @@ public class MethodRefWrapper {
         _exprEval = exprEval;
         _varStack = exprEval._varStack;
         _OR = anOR;
+        _methodRefExpr = methodRefExpr;
         //_contentExpr = lambdaExpr.getExpr();
 
         //List<JVarDecl> varDecls = lambdaExpr.getParameters();
@@ -47,15 +51,22 @@ public class MethodRefWrapper {
 
     public Object invokeWithArgs(Object[] args)
     {
-        _varStack.pushStackFrame();
-        if (_param0 != null) {
-            _varStack.setStackValueForNode(_param0, args[0]);
-            if (_param1 != null)
-                _varStack.setStackValueForNode(_param1, args[1]);
+        JavaMethod method = _methodRefExpr.getLambdaMethod();
+        Method method1 = method.getMethod();
+        try { return method1.invoke(_OR, args); }
+        catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        try { return _exprEval.evalExpr(_OR, _contentExpr); }
-        catch (Exception e) { throw new RuntimeException(e); }
-        finally { _varStack.popStackFrame(); }
+
+//        _varStack.pushStackFrame();
+//        if (_param0 != null) {
+//            _varStack.setStackValueForNode(_param0, args[0]);
+//            if (_param1 != null)
+//                _varStack.setStackValueForNode(_param1, args[1]);
+//        }
+//        try { return _exprEval.evalExpr(_OR, _contentExpr); }
+//        catch (Exception e) { throw new RuntimeException(e); }
+//        finally { _varStack.popStackFrame(); }
     }
 
     /**
