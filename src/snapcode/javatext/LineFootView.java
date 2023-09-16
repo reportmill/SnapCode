@@ -58,7 +58,7 @@ public class LineFootView extends View {
      */
     public void setTextSel(int aStart, int anEnd)
     {
-        _textPane.setTextSel(aStart, anEnd);
+        _textArea.setSel(aStart, anEnd);
     }
 
     /**

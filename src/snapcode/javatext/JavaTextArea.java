@@ -30,6 +30,9 @@ public class JavaTextArea extends TextArea {
     // The deepest child of SelNode recently selected
     protected JNode  _deepNode;
 
+    // Whether mouse move looks to highlight node under mouse
+    private boolean _hoverEnabled;
+
     // The node that the mouse is hovering over (if command down)
     protected JNode  _hoverNode;
 
@@ -116,6 +119,19 @@ public class JavaTextArea extends TextArea {
     {
         JFile jfile = getJFile();
         return jfile.getNodeForCharRange(startCharIndex, endCharIndex);
+    }
+
+    /**
+     * Returns the node at given XY.
+     */
+    public JNode getNodeAtXY(double aX, double aY)
+    {
+        int charIndexForXY = getCharIndexForXY(aX, aY);
+        JFile jfile = getJFile();
+        JNode node = jfile.getNodeForCharIndex(charIndexForXY);
+        if (node instanceof JExprId || node instanceof JType)
+            return node;
+        return null;
     }
 
     /**
@@ -285,6 +301,21 @@ public class JavaTextArea extends TextArea {
      * Sets the deep node.
      */
     public void setDeepNode(JNode aNode)  { _deepNode = aNode; }
+
+    /**
+     * Returns whether hover is enabled.
+     */
+    public boolean isHoverEnabled()  { return _hoverEnabled; }
+
+    /**
+     * Sets whether hover is enabled.
+     */
+    public void setHoverEnabled(boolean aValue)
+    {
+        if (aValue == _hoverEnabled) return;
+        _hoverEnabled = aValue;
+        setHoverNode(null);
+    }
 
     /**
      * Returns the node under the mouse (if command is down).
@@ -872,6 +903,62 @@ public class JavaTextArea extends TextArea {
         if (javaTextPane == null)
             return -1;
         return javaTextPane.getProgramCounterLine();
+    }
+
+    /**
+     * Override to enable hover node.
+     */
+    @Override
+    protected void keyPressed(ViewEvent anEvent)
+    {
+        // If Shortcut, set HoverEnabled
+        int keyCode = anEvent.getKeyCode();
+        setHoverEnabled(keyCode == KeyCode.COMMAND || keyCode == KeyCode.CONTROL);
+
+        // Do normal version
+        super.keyPressed(anEvent);
+    }
+
+    /**
+     * Override for hover node.
+     */
+    @Override
+    protected void keyReleased(ViewEvent anEvent)
+    {
+        setHoverEnabled(false);
+        super.keyReleased(anEvent);
+    }
+
+    /**
+     * Override to set hover node.
+     */
+    @Override
+    protected void mouseMoved(ViewEvent anEvent)
+    {
+        // Handle HoverEnabled + HoverNode
+        if (isHoverEnabled()) {
+            if (!anEvent.isShortcutDown())
+                setHoverEnabled(false);
+            else {
+                JNode hoverNode = getNodeAtXY(anEvent.getX(), anEvent.getY());
+                setHoverNode(hoverNode);
+            }
+        }
+
+        // Do normal version
+        super.mouseMoved(anEvent);
+    }
+
+    /**
+     * Override to reset hover enabled.
+     */
+    @Override
+    protected void setFocused(boolean aValue)
+    {
+        if (aValue == isFocused()) return;
+        super.setFocused(aValue);
+        if (!aValue)
+            setHoverEnabled(false);
     }
 
     /**

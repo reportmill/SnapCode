@@ -151,15 +151,8 @@ public class JavaTextPane extends TextPane {
         // Handle TextArea key events
         if (anEvent.equals("TextArea")) {
 
-            // Handle KeyPressed/KeyReleased to watch for CONTROL/COMMAND press/release
-            if (anEvent.isKeyPress() || anEvent.isKeyRelease()) {
-                int keyCode = anEvent.getKeyCode();
-                if (keyCode == KeyCode.COMMAND || keyCode == KeyCode.CONTROL)
-                    setTextAreaHoverEnabled(anEvent.isKeyPress());
-            }
-
             // Handle PopupTrigger
-            else if (anEvent.isPopupTrigger()) { //anEvent.consume();
+            if (anEvent.isPopupTrigger()) { //anEvent.consume();
                 Menu contextMenu = createContextMenu();
                 contextMenu.show(_textArea, anEvent.getX(), anEvent.getY());
             }
@@ -176,24 +169,11 @@ public class JavaTextPane extends TextPane {
                     }
                 }
 
-                // If there is a hover node, open it (and clear Hover)
+                // If there is a hover node, open it
                 JavaTextArea textArea = getTextArea();
                 JNode hoverNode = textArea.getHoverNode();
-                if (hoverNode != null) {
+                if (hoverNode != null)
                     openDeclaration(hoverNode);
-                    setTextAreaHoverEnabled(false);
-                }
-            }
-
-            // Handle MouseMoved
-            else if (anEvent.isMouseMove()) {
-                if (!anEvent.isShortcutDown()) {
-                    setTextAreaHoverEnabled(false);
-                    return;
-                }
-                int index = _textArea.getCharIndexForXY(anEvent.getX(), anEvent.getY());
-                JNode node = _textArea.getJFile().getNodeForCharIndex(index);
-                _textArea.setHoverNode(node instanceof JExprId || node instanceof JType ? node : null);
             }
         }
 
@@ -255,25 +235,6 @@ public class JavaTextPane extends TextPane {
     }
 
     /**
-     * Sets whether MouseMoved over JavaTextArea should set hover node.
-     */
-    protected void setTextAreaHoverEnabled(boolean isEnabled)
-    {
-        if (isEnabled) enableEvents(_textArea, MouseMove);
-        else disableEvents(_textArea, MouseMove);
-        _textArea.setHoverNode(null);
-    }
-
-    /**
-     * Override to turn off TextAreaHoverEnabled.
-     */
-    public void showLineNumberPanel()
-    {
-        super.showLineNumberPanel();
-        setTextAreaHoverEnabled(false);
-    }
-
-    /**
      * Creates the ContextMenu.
      */
     protected Menu createContextMenu()
@@ -290,14 +251,6 @@ public class JavaTextPane extends TextPane {
 
         // Return
         return contextMenu;
-    }
-
-    /**
-     * Sets the TextSelection.
-     */
-    public void setTextSel(int aStart, int anEnd)
-    {
-        _textArea.setSel(aStart, anEnd);
     }
 
     /**
