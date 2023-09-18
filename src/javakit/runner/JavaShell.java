@@ -4,6 +4,7 @@
 package javakit.runner;
 import javakit.parse.*;
 import snap.util.CharSequenceUtils;
+import snap.util.StringUtils;
 import snapcharts.repl.ReplObject;
 import java.io.PrintStream;
 
@@ -124,7 +125,7 @@ public class JavaShell {
 
         // Handle statement eval exception: Try expression
         catch (Exception e) {
-            e.printStackTrace(_stdErr);
+            e.printStackTrace();
             _errorWasHit = true;
         }
     }
@@ -158,7 +159,7 @@ public class JavaShell {
 
         // If newline, process and clear
         if (CharSequenceUtils.isLastCharNewline(_consoleErr.getString())) {
-            ReplObject.show(_consoleErr);
+            ReplObject.show(StringUtils.trimEnd(_consoleErr.getString()));
             _consoleErr = null;
         }
     }
