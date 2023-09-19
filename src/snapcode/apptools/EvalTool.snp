@@ -25,4 +25,7 @@
     <Fill Color="#CC" />
   </RectView>
   <ScrollView Name="ScrollView" FillWidth="true" GrowHeight="true" />
+  <TextField Name="InputTextField" Margin="8" Padding="0,10,0,8" PrefHeight="28" PromptText="Program Input" BorderRadius="10">
+    <Font Name="Arial" Size="14" />
+  </TextField>
 </ColView>

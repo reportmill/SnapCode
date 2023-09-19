@@ -1,5 +1,6 @@
 package snapcode.apptools;
 import snapcharts.repl.Console;
+import snapcharts.repl.ReplObject;
 import snapcode.javatext.JavaTextArea;
 import javakit.parse.JMethodDecl;
 import javakit.parse.JNode;
@@ -203,6 +204,13 @@ public class EvalTool extends WorkspaceTool {
         // Handle CancelExtendedRunButton
         else if (anEvent.equals("CancelExtendedRunButton"))
             cancelRun();
+
+        // Handle InputTextField
+        else if (anEvent.equals("InputTextField")) {
+            String inputString = anEvent.getStringValue();
+            ReplObject.show(inputString);
+            setViewValue("InputTextField", null);
+        }
     }
 
     /**
