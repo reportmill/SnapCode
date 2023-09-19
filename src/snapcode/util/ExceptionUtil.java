@@ -1,5 +1,6 @@
 package snapcode.util;
 import snap.gfx.Color;
+import snap.gfx.Font;
 import snap.text.*;
 import snap.util.Convert;
 import snap.util.StringUtils;
@@ -13,31 +14,25 @@ public class ExceptionUtil {
     private static Color ERROR_COLOR = Color.get("#CC0000");
 
     /**
-     * Returns a TextDoc for given exception.
+     * Returns a TextBlock for given exception.
      */
     public static TextBlock getTextBlockForException(Exception anException)
     {
         String str = StringUtils.getStackTraceString(anException);
 
-        if (true) {
-            TextDoc textDoc = new TextDoc();
-            textDoc.setDefaultStyle(textDoc.getDefaultStyle().copyFor(ERROR_COLOR));
-            textDoc.addChars(str);
-            return textDoc;
-        }
-
-        TextBlock textDoc = new RichText();
-        appendString(textDoc, str, ERROR_COLOR);
-        return textDoc;
+        TextBlock textBlock = new RichText();
+        textBlock.setDefaultStyle(textBlock.getDefaultStyle().copyFor(Font.Arial14));
+        appendString(textBlock, str, ERROR_COLOR);
+        return textBlock;
     }
 
     /**
      * Appends text with given color.
      */
-    private static void appendString(TextBlock aTextDoc, String aStr, Color aColor)
+    private static void appendString(TextBlock textBlock, String aStr, Color aColor)
     {
         // Get default style modified for color
-        TextStyle style = aTextDoc.getStyleForCharIndex(aTextDoc.length());
+        TextStyle style = textBlock.getStyleForCharIndex(textBlock.length());
         style = style.copyFor(aColor);
 
         // Look for a StackFrame reference: " at java.pkg.Class(Class.java:55)" and add as link if found
@@ -49,13 +44,13 @@ public class ExceptionUtil {
             int e = aStr.indexOf(")", i);
             if (s < start || e < 0) {
                 String str = aStr.substring(start, start = i + 6);
-                aTextDoc.addChars(str, style, aTextDoc.length());
+                textBlock.addChars(str, style, textBlock.length());
                 continue;
             }
 
             // Get chars before parens and add
             String prefix = aStr.substring(start, s + 1);
-            aTextDoc.addChars(prefix, style, aTextDoc.length());
+            textBlock.addChars(prefix, style, textBlock.length());
 
             // Get link text, link address, TextLink
             String linkText = aStr.substring(s + 1, e);
@@ -64,7 +59,7 @@ public class ExceptionUtil {
 
             // Get TextStyle for link and add link chars
             TextStyle lstyle = style.copyFor(textLink);
-            aTextDoc.addChars(linkText, lstyle, aTextDoc.length());
+            textBlock.addChars(linkText, lstyle, textBlock.length());
 
             // Update start to end of link text and continue
             start = e;
@@ -72,7 +67,7 @@ public class ExceptionUtil {
 
         // Add remainder normally
         String remainderStr = aStr.substring(start);
-        aTextDoc.addChars(remainderStr, style, aTextDoc.length());
+        textBlock.addChars(remainderStr, style, textBlock.length());
     }
 
     /**

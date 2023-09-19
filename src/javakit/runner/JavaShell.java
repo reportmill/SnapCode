@@ -3,9 +3,12 @@
  */
 package javakit.runner;
 import javakit.parse.*;
+import snap.text.TextBlock;
 import snap.util.CharSequenceUtils;
 import snap.util.StringUtils;
 import snapcharts.repl.ReplObject;
+import snapcode.util.ExceptionUtil;
+
 import java.io.PrintStream;
 
 /**
@@ -125,7 +128,7 @@ public class JavaShell {
 
         // Handle statement eval exception: Try expression
         catch (Exception e) {
-            e.printStackTrace();
+            ReplObject.show(e);
             _errorWasHit = true;
         }
     }

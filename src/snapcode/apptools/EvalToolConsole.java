@@ -2,10 +2,11 @@ package snapcode.apptools;
 import javakit.parse.NodeError;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.text.TextDoc;
+import snap.text.TextBlock;
 import snap.text.TextStyle;
 import snapcharts.repl.DefaultConsole;
 import snapcode.project.BuildIssue;
+import snapcode.util.ExceptionUtil;
 
 /**
  * This REPL Console subclass allows customization.
@@ -42,22 +43,26 @@ public class EvalToolConsole extends DefaultConsole {
             return;
         }
 
-        // Handle NodeError, BuildIssue: Map to error TextDoc
+        // Handle NodeError, BuildIssue: Map to error TextBlock
         if (aValue instanceof NodeError)
-            aValue = createTextDocForNodeErrors(new NodeError[] { (NodeError) aValue });
+            aValue = createTextBlockForNodeErrors(new NodeError[] { (NodeError) aValue });
         else if (aValue instanceof NodeError[])
-            aValue = createTextDocForNodeErrors((NodeError[]) aValue);
+            aValue = createTextBlockForNodeErrors((NodeError[]) aValue);
         else if (aValue instanceof BuildIssue[])
-            aValue = createTextDocForBuildIssues((BuildIssue[]) aValue);
+            aValue = createTextBlockForBuildIssues((BuildIssue[]) aValue);
+
+        // Handle Exception
+        else if (aValue instanceof Exception)
+            aValue = ExceptionUtil.getTextBlockForException((Exception) aValue);
 
         // Do normal version
         super.show(aValue);
     }
 
     /**
-     * Creates content view for ViewOwner.
+     * Creates TextBlock for NodeErrors.
      */
-    private static TextDoc createTextDocForNodeErrors(NodeError[] nodeErrors)
+    private static TextBlock createTextBlockForNodeErrors(NodeError[] nodeErrors)
     {
         // Get exception string
         String errorString = "";
@@ -68,13 +73,13 @@ public class EvalToolConsole extends DefaultConsole {
         }
 
         // Return view for error string
-        return createTextDocForErrorString(errorString);
+        return createTextBlockForErrorString(errorString);
     }
 
     /**
-     * Creates content view for BuildIssues.
+     * Creates TextBlock for BuildIssues.
      */
-    private static TextDoc createTextDocForBuildIssues(BuildIssue[] buildIssues)
+    private static TextBlock createTextBlockForBuildIssues(BuildIssue[] buildIssues)
     {
         // Get error string
         String errorString = "";
@@ -85,27 +90,27 @@ public class EvalToolConsole extends DefaultConsole {
         }
 
         // Return view for error string
-        return createTextDocForErrorString(errorString);
+        return createTextBlockForErrorString(errorString);
     }
 
     /**
-     * Creates content view for BuildIssues.
+     * Creates TextBlock for BuildIssues.
      */
-    private static TextDoc createTextDocForErrorString(String errorString)
+    private static TextBlock createTextBlockForErrorString(String errorString)
     {
         // Create TextArea
-        TextDoc textDoc = new TextDoc();
+        TextBlock textBlock = new TextBlock();
         Color ERROR_COLOR = Color.get("#CC0000");
-        TextStyle textStyle = textDoc.getStyleForCharIndex(0);
+        TextStyle textStyle = textBlock.getStyleForCharIndex(0);
         TextStyle textStyle2 = textStyle.copyFor(ERROR_COLOR).copyFor(Font.Arial12);
-        textDoc.setDefaultStyle(textStyle2);
-        if (textDoc.isRichText())
-            textDoc.setStyle(textStyle2, 0, textDoc.length());
+        textBlock.setDefaultStyle(textStyle2);
+        if (textBlock.isRichText())
+            textBlock.setStyle(textStyle2, 0, textBlock.length());
 
         // Add chars
-        textDoc.addChars(errorString);
+        textBlock.addChars(errorString);
 
         // Return
-        return textDoc;
+        return textBlock;
     }
 }
