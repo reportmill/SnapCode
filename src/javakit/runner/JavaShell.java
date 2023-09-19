@@ -3,12 +3,13 @@
  */
 package javakit.runner;
 import javakit.parse.*;
+import snap.gfx.Color;
+import snap.gfx.Font;
 import snap.text.TextBlock;
+import snap.text.TextStyle;
 import snap.util.CharSequenceUtils;
 import snap.util.StringUtils;
 import snapcharts.repl.ReplObject;
-import snapcode.util.ExceptionUtil;
-
 import java.io.PrintStream;
 
 /**
@@ -145,7 +146,7 @@ public class JavaShell {
 
         // If newline, process and clear
         if (CharSequenceUtils.isLastCharNewline(_consoleOut.getString())) {
-            ReplObject.show(_consoleOut);
+            ReplObject.show(_consoleOut.getTextBlock());
             _consoleOut = null;
         }
     }
@@ -162,7 +163,7 @@ public class JavaShell {
 
         // If newline, process and clear
         if (CharSequenceUtils.isLastCharNewline(_consoleErr.getString())) {
-            ReplObject.show(StringUtils.trimEnd(_consoleErr.getString()));
+            ReplObject.show(_consoleErr.getTextBlock());
             _consoleErr = null;
         }
     }
@@ -175,6 +176,8 @@ public class JavaShell {
         // Ivars
         private String  _name;
         protected String  _string;
+
+        private static Color ERROR_COLOR = Color.get("#CC0000");
 
         /**
          * Constructor.
@@ -194,6 +197,27 @@ public class JavaShell {
          * Returns the string.
          */
         public String getString()  { return _string; }
+
+        /**
+         * Returns a text block.
+         */
+        public TextBlock getTextBlock()
+        {
+            // Create TextBlock and configure Style
+            TextBlock textBlock = new TextBlock();
+            TextStyle textStyle = textBlock.getDefaultStyle();
+            TextStyle textStyle2 = textStyle.copyFor(Font.Arial12);
+            if (_name.equals(STANDARD_ERR))
+                textStyle2 = textStyle2.copyFor(ERROR_COLOR);
+            textBlock.setDefaultStyle(textStyle2);
+
+            // Set string
+            String str = StringUtils.trimEnd(_string);
+            textBlock.setString(str);
+
+            // Return
+            return textBlock;
+        }
 
         /**
          * Returns whether is error.
