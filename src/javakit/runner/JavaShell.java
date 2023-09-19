@@ -206,7 +206,7 @@ public class JavaShell {
             // Create TextBlock and configure Style
             TextBlock textBlock = new TextBlock();
             TextStyle textStyle = textBlock.getDefaultStyle();
-            TextStyle textStyle2 = textStyle.copyFor(Font.Arial12);
+            TextStyle textStyle2 = textStyle.copyFor(Font.Arial14);
             if (_name.equals(STANDARD_ERR))
                 textStyle2 = textStyle2.copyFor(ERROR_COLOR);
             textBlock.setDefaultStyle(textStyle2);

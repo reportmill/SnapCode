@@ -19,6 +19,7 @@ public class ExceptionUtil {
     public static TextBlock getTextBlockForException(Exception anException)
     {
         String str = StringUtils.getStackTraceString(anException);
+        str = StringUtils.trimEnd(str);
 
         TextBlock textBlock = new RichText();
         textBlock.setDefaultStyle(textBlock.getDefaultStyle().copyFor(Font.Arial14));
