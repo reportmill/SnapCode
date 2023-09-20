@@ -122,7 +122,7 @@ public abstract class LineMarker<T> extends Rect {
             // Get/set Y from line
             int charIndex = aTarget.getEnd();
             TextLine textLine = _textArea.getLineForCharIndex(charIndex);
-            setY(Math.round(textLine.getY()));
+            setY(Math.round(textLine.getTextY()));
 
             // Set image
             _image = _isError ? ERROR_IMAGE : WARNING_IMAGE;

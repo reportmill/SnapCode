@@ -514,13 +514,14 @@ public class JavaTextArea extends TextArea {
             }
 
             // If possible, make sure we underline at least one char
-            if (issueStart == issueEnd && issueEnd < textLine.getEndCharIndex()) issueEnd++;
-            int yb = (int) Math.round(textLine.getBaseline()) + 2;
-            double x1 = textLine.getXForCharIndex(issueStart - lineStartCharIndex);
-            double x2 = textLine.getXForCharIndex(issueEnd - lineStartCharIndex);
+            if (issueStart == issueEnd && issueEnd < textLine.getEndCharIndex())
+                issueEnd++;
+            int issueY = (int) Math.round(textLine.getTextBaseline()) + 2;
+            double issueX = textLine.getTextXForCharIndex(issueStart - lineStartCharIndex);
+            double issueMaxX = textLine.getTextXForCharIndex(issueEnd - lineStartCharIndex);
             aPntr.setPaint(issue.isError() ? Color.RED : new Color(244, 198, 60));
             aPntr.setStroke(Stroke.StrokeDash1);
-            aPntr.drawLine(x1, yb, x2, yb);
+            aPntr.drawLine(issueX, issueY, issueMaxX, issueY);
             aPntr.setStroke(Stroke.Stroke1);
         }
 

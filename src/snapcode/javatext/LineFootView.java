@@ -10,7 +10,7 @@ import snap.text.*;
 import snap.view.*;
 
 /**
- * A component to show locations of Errors, warnings, selected symbols, etc.
+ * A view to show locations of Errors, warnings, selected symbols, etc.
  */
 public class LineFootView extends View {
 
@@ -219,7 +219,7 @@ public class LineFootView extends View {
     }
 
     /**
-     * The class that describes a overview marker.
+     * The class that describes an overview marker.
      */
     public class BuildIssueMarker extends Marker<BuildIssue> {
 
@@ -229,49 +229,35 @@ public class LineFootView extends View {
         public BuildIssueMarker(BuildIssue anIssue)
         {
             super(anIssue);
-            TextLine line = _textArea.getLineForCharIndex(Math.min(anIssue.getEnd(), _textArea.length()));
-            _y = line.getY() + line.getHeight() / 2;
+            int charIndex = Math.min(anIssue.getEnd(), _textArea.length());
+            TextLine line = _textArea.getLineForCharIndex(charIndex);
+            _y = line.getTextY() + line.getHeight() / 2;
         }
 
         /**
          * Returns the color.
          */
-        public Color getColor()
-        {
-            return _target.isError() ? _error : _warning;
-        }
+        public Color getColor()  { return _target.isError() ? _error : _warning; }
 
         /**
          * Returns the stroke color.
          */
-        public Color getStrokeColor()
-        {
-            return _target.isError() ? _errorBorder : _warningBorder;
-        }
+        public Color getStrokeColor()  { return _target.isError() ? _errorBorder : _warningBorder; }
 
         /**
          * Returns the selection start.
          */
-        public int getSelStart()
-        {
-            return _target.getStart();
-        }
+        public int getSelStart()  { return _target.getStart(); }
 
         /**
          * Returns the selection start.
          */
-        public int getSelEnd()
-        {
-            return _target.getEnd();
-        }
+        public int getSelEnd()  { return _target.getEnd(); }
 
         /**
          * Returns a tooltip.
          */
-        public String getToolTip()
-        {
-            return _target.getText();
-        }
+        public String getToolTip()  { return _target.getText(); }
     }
 
     /**
@@ -286,24 +272,18 @@ public class LineFootView extends View {
         {
             super(aToken);
             TextLine line = aToken.getTextLine();
-            _y = line.getY() + line.getHeight() / 2;
+            _y = line.getTextY() + line.getHeight() / 2;
         }
 
         /**
          * Returns the color.
          */
-        public Color getColor()
-        {
-            return _warning;
-        }
+        public Color getColor()  { return _warning; }
 
         /**
          * Returns the stroke color.
          */
-        public Color getStrokeColor()
-        {
-            return _warningBorder;
-        }
+        public Color getStrokeColor()  { return _warningBorder; }
 
         /**
          * Returns the selection start.
@@ -324,9 +304,6 @@ public class LineFootView extends View {
         /**
          * Returns a tooltip.
          */
-        public String getToolTip()
-        {
-            return "Occurrence of '" + _target.getString() + "'";
-        }
+        public String getToolTip()  { return "Occurrence of '" + _target.getString() + "'"; }
     }
 }

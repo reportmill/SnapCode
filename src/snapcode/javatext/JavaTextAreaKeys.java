@@ -53,8 +53,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         if (keyCode == KeyCode.ENTER && isSelEmpty()) {
             if (shiftDown || shortcutDown)
                 _textArea.selectLineEnd();
-            if (!shortcutDown)
-                processNewline();
+            //if (!shortcutDown) processNewline();
             anEvent.consume();
             return;
         }
