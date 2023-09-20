@@ -53,7 +53,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         if (keyCode == KeyCode.ENTER && isSelEmpty()) {
             if (shiftDown || shortcutDown)
                 _textArea.selectLineEnd();
-            //if (!shortcutDown) processNewline();
+            else processNewline();
             anEvent.consume();
             return;
         }
@@ -73,12 +73,20 @@ public class JavaTextAreaKeys extends TextAreaKeys {
             }
         }
 
-        // Handle command Slash
+        // Handle Shortcut keys
         if (shortcutDown) {
-            if (keyCode == KeyCode.SLASH) {
-                _javaTextArea.commentLinesWithLineComment();
-                anEvent.consume();
-                return;
+
+            switch (keyCode) {
+
+                // Shortcut + Slash
+                case KeyCode.SLASH: {
+                    _javaTextArea.commentLinesWithLineComment();
+                    anEvent.consume();
+                    return;
+                }
+
+                // Shortcut + D
+                case KeyCode.D: duplicate(); anEvent.consume(); return;
             }
         }
 
@@ -375,5 +383,40 @@ public class JavaTextAreaKeys extends TextAreaKeys {
 
         // Return true
         return true;
+    }
+
+    /**
+     * Duplicates the current selection - or line if selection is empty.
+     */
+    public void duplicate()
+    {
+        int selStart = _textArea.getSelStart();
+        int selEnd = _textArea.getSelEnd();
+
+        // If selection, duplicate selected string
+        if (selStart != selEnd) {
+            String selString = _textArea.getSel().getString();
+            _textArea.addChars(selString, null, selEnd);
+            _textArea.setSel(selEnd, selEnd + selString.length());
+        }
+
+        // If empty selection, duplicate line
+        else {
+
+            // Get selected line as string (with newline)
+            TextLine selLine = _textArea.getSel().getStartLine();
+            String lineString = selLine.getString();
+            if (!selLine.isLastCharNewline())
+                lineString = '\n' + lineString;
+
+            // Add line string to end of selLine
+            int endCharIndex = selLine.getEndCharIndex();
+            _textArea.addChars(lineString, null, endCharIndex);
+
+            // Select start char of new line
+            TextLine newLine = selLine.getNext();
+            int selStart2 = newLine.getStartCharIndex() + newLine.getIndentLength();
+            _textArea.setSel(selStart2);
+        }
     }
 }
