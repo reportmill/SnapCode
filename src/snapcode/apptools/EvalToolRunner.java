@@ -5,6 +5,7 @@ package snapcode.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JStmt;
 import snapcharts.repl.Console;
+import snapcharts.repl.ScanPane;
 import snapcode.javatext.JavaTextPane;
 import snapcode.project.JavaTextDoc;
 import snapcode.project.BuildIssue;
@@ -15,6 +16,7 @@ import snapcode.webbrowser.WebPage;
 import snapcode.app.JavaPage;
 import snapcode.app.PagePane;
 import snapcode.app.WorkspacePane;
+import java.io.InputStream;
 
 /**
  * A TextArea subclass to show code evaluation.
@@ -32,6 +34,9 @@ public class EvalToolRunner {
 
     // Whether last run was pre-empted
     private boolean _preemptedForNewRun;
+
+    // An input stream for standard in
+    protected ScanPane.BytesInputStream _inputStream;
 
     /**
      * Constructor.
@@ -109,7 +114,16 @@ public class EvalToolRunner {
             Console.setShared(_evalTool._console);
             JFile jfile = javaAgent.getJFile();
             JStmt[] javaStmts = javaAgent.getJFileStatements();
+
+            // Replace System.in with our own input stream to allow input
+            InputStream stdIn = System.in;
+            System.setIn(_inputStream = new ScanPane.BytesInputStream(null));
+
+            // Run code
             _javaShell.runJavaCode(jfile, javaStmts);
+
+            // Restore System.in
+            System.setIn(stdIn);
         }
 
         // Remove extended run ui
@@ -166,5 +180,13 @@ public class EvalToolRunner {
         // Interrupt and clear
         _javaShell.interrupt();
         _runAppThread = null;
+    }
+
+    /**
+     * Adds an input string.
+     */
+    public void addSystemInputString(String aString)
+    {
+        _inputStream.add(aString);
     }
 }

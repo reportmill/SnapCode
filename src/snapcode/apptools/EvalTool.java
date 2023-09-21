@@ -205,10 +205,11 @@ public class EvalTool extends WorkspaceTool {
         else if (anEvent.equals("CancelExtendedRunButton"))
             cancelRun();
 
-        // Handle InputTextField
+        // Handle InputTextField: Show input string, add to runner input and clear text
         else if (anEvent.equals("InputTextField")) {
             String inputString = anEvent.getStringValue();
             ReplObject.show(inputString);
+            _evalRunner.addSystemInputString(inputString + '\n');
             setViewValue("InputTextField", null);
         }
     }
