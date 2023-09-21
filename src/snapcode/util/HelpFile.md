@@ -1,34 +1,111 @@
 
 
-# Define data array
+# Basic Java
 
-## Simple
+## Variable Definitions
+
+```
+    int x = 1
+    float y = 2.5f
+    double pi = 3.14d
+    String str = "Hello World"
+    show(str)
+```
+
+## System logging
+
+```
+    System.out.println("Hello World");
+```
+
+## System Input
+
+```
+    // Print prompt message
+    System.out.println("Enter a number to be squared: ");
+    
+    // Create scanner from System.in and read int value
+    Scanner scanner = new Scanner(System.in);
+    int value = scanner.nextInt();
+    
+    // Print result of value squared
+    System.out.println(value + " * " + value + " = " + (value * value));
+```
+
+## Conditionals
+
+```
+    if (2 + 2 == 4)
+        System.out.println("All is right with the world");
+```
+
+## For/while loops
+
+```
+    for (int i = 0; i < 10; i++)
+        System.out.println("Looping: " + i);
+```
+
+## Method definition
+
+```
+    public int factorial(int aValue)
+    {
+        int factorial = 1;
+        for (int i = aValue; i > 0; i--)
+            factorial *= i;
+        return factorial;
+    }
+```
+
+# Advanced Java
+
+## Streams
+
+```
+    var names = Stream.of("John", "Paul", "George", "Ringo");
+    var names2 = names.map(str -> str.toUpperCase());
+    var namesStr = names2.collect(Collectors.joining(", "));
+    show(namesStr);
+```
+
+## Lambda
+
+```
+    // Create button that prints any mouse events it receives
+    Button button = new Button("Hello World");
+    button.setPrefSize(120, 30);
+    button.addEventFilter(e -> show(e), View.MouseEvents);
+    show(button);
+```
+
+# Define datasets
+
+## Simple array
 
 ```
     var x = new double[] { 1, 2, 3, 4 }
 ```
 
-## From Range
+## Array from Range
 
 ```
     var x = DoubleArray.fromMinMax(-3, 3)
 ```
 
-## From Range with count
+## Array from Range with count
 
 ```
     var x = DoubleArray.fromMinMaxCount(-3, 3, 100)
 ```
 
-## From other array via function
+## Array from other array via function
 
 ```
     var y = DoubleArray.of(x).map(d -> Math.sin(d))
 ```
 
-# Define dataset
-
-## From data arrays
+## DataSet from data arrays
 
 ```
     var x = new double[] { 1, 2, 3, 4 }
@@ -37,7 +114,7 @@
     show(dataSet)
 ```
 
-## From 3D data
+## DataSet from 3D data
 
 ```
     var x = DoubleArray.fromMinMax(-3, 3)
@@ -164,6 +241,24 @@
     show(slider)
 ```
 
+## Create TextField
+
+```
+    var textField = new TextField()
+    textField.setPrefSize(300, 25)
+    textField.setMargin(20,20,20,20)
+    show(textField)
+```
+
+## Create Window
+
+```
+    var button = new Button("Hello World");
+    button.setPrefSize(400, 400);
+    ViewOwner viewOwner = new ViewOwner(button);
+    viewOwner.setWindowVisible(true);
+```
+
 # Animate UI
 
 ## Animate Button
@@ -193,48 +288,4 @@
 ```
     var image3D = Quick3D.createImage3D(image)
     show(image3D)
-```
-
-# Basic Java code
-
-## Variable Definitions
-
-```
-    int x = 1
-    float y = 2.5f
-    double pi = 3.14d
-    String str = "Hello World"
-    show(str)
-```
-
-## System logging
-
-```
-    System.out.println("Hello World");
-```
-
-## Conditionals
-
-```
-    if (2 + 2 == 4)
-        System.out.println("All is right with the world");
-```
-
-## For/while loops
-
-```
-    for (int i = 0; i < 10; i++)
-        System.out.println("Looping: " + i);
-```
-
-## Method definition
-
-```
-    public int factorial(int aValue)
-    {
-        int factorial = 1;
-        for (int i = aValue; i > 0; i--)
-            factorial *= i;
-        return factorial;
-    }
 ```
