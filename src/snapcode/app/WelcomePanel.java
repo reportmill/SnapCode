@@ -182,7 +182,7 @@ public class WelcomePanel extends ViewOwner {
     /**
      * Opens a Java string file.
      */
-    protected void openJavaString(String javaString)
+    protected void openJavaString(String javaString, boolean isJepl)
     {
         // Create temp file dir
         File tempDir = FileUtils.getTempFile("JavaFiddleProj");
@@ -193,6 +193,8 @@ public class WelcomePanel extends ViewOwner {
 
         // Write to JavaFiddle file
         String javaFiddlePath = javaFiddleProjDir.getPath() + "/JavaFiddle.java";
+        if (isJepl)
+            javaFiddlePath = javaFiddlePath.replace(".java", ".jepl");
         WebURL javaFiddleURL = WebURL.getURL(javaFiddlePath);
         WebFile javaFiddleFile = javaFiddleURL.createFile(false);
         javaFiddleFile.setText(javaString);

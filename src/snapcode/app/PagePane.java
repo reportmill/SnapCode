@@ -3,6 +3,8 @@
  */
 package snapcode.app;
 import snapcode.apptools.BuildFileTool;
+import snapcode.javatext.JavaTextArea;
+import snapcode.project.JeplTextDoc;
 import snapcode.project.Workspace;
 import snap.gfx.Color;
 import snap.gfx.Font;
@@ -11,6 +13,7 @@ import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.*;
 import snapcode.util.ClassInfoPage;
+import snapcode.util.LZString;
 import snapcode.webbrowser.BuildDirPage;
 import snapcode.webbrowser.SnapBuilderPage;
 import snapcode.webbrowser.WebBrowser;
@@ -231,6 +234,27 @@ public class PagePane extends ViewOwner {
         }
 
         // Return
+        return null;
+    }
+
+    /**
+     * Returns the Window.location.hash for current Workspace selected page.
+     */
+    public String getWindowLocationHash()
+    {
+        WebPage selPage = getSelPage();
+
+        // Handle JavaPage: Return 'Java:...' or 'Jepl:...'
+        if (selPage instanceof JavaPage) {
+            JavaPage javaPage = (JavaPage) selPage;
+            JavaTextArea javaTextArea = javaPage.getTextArea();
+            String prefix = javaTextArea.getSourceText() instanceof JeplTextDoc ? "Jepl:" : "Java:";
+            String javaText = javaTextArea.getTextBlock().getString();
+            String javaTextLZ = LZString.compressToEncodedURIComponent(javaText);
+            return prefix + javaTextLZ;
+        }
+
+        // Return null
         return null;
     }
 

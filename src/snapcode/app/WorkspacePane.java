@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.gfx.GFXEnv;
 import snapcode.project.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
@@ -383,6 +384,16 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
+     * Called when WorkspacePane is first shown.
+     */
+    @Override
+    protected void initShowing()
+    {
+        if (SnapUtils.isWebVM)
+            getWindow().addPropChangeListener(pc -> windowFocusedChanged(), View.Focused_Prop);
+    }
+
+    /**
      * Resets UI panel.
      */
     @Override
@@ -572,6 +583,20 @@ public class WorkspacePane extends ViewOwner {
             ToolTray bottomTray = _workspaceTools.getBottomTray();
             if (bottomTray.getSelTool() instanceof ProblemsTool)
                 bottomTray.hideTools();
+        }
+    }
+
+    /**
+     * Called when Window.Focused changes (WebVM uses this to set '#Java:...' in browser address bar).
+     */
+    private void windowFocusedChanged()
+    {
+        WindowView window = getWindow();
+
+        // Handle Focused: Set browser window.location.hash for page pane Java string
+        if (!window.isFocused()) {
+            String string = _pagePane.getWindowLocationHash();
+            GFXEnv.getEnv().setBrowserWindowLocationHash(string);
         }
     }
 }

@@ -4,6 +4,7 @@ import snap.util.Prefs;
 import snap.view.ViewTheme;
 import snap.view.ViewUtils;
 import snap.view.WindowView;
+import snapcode.util.LZString;
 
 /**
  * Main App class for SnapCode.
@@ -40,6 +41,10 @@ public class App {
         // Set UI Theme
         ViewTheme.setThemeForName("Light");
 
+        // If Java string set, open Java string
+        if (handleAppArgs())
+            return;
+
         // Show WelcomePanel
         showWelcomePanel();
     }
@@ -50,7 +55,6 @@ public class App {
     public void showWelcomePanel()
     {
         WelcomePanel.getShared().showPanel();
-        ViewUtils.runLater(() -> handleAppArgs());
     }
 
     /**
@@ -69,29 +73,49 @@ public class App {
     }
 
     /**
-     * Called to process app args
+     * Called to handle args - returns true if args started the app.
      */
-    private void handleAppArgs()
+    private boolean handleAppArgs()
     {
-//        String testJavaStr = "Java:  public class JavaFiddle\n" + "  {\n" +
-//                "    public static void main(String[] args)\n" + "    {\n" +
-//                "      System.out.println(\"HelloWorld!\");\n" + "    }\n" + "  }";
-//        APP_ARGS = new String[] { testJavaStr };
+        if (APP_ARGS.length == 0)
+            return false;
 
-        // Get AppArgs - just return if none
-        String[] appArgs = App.APP_ARGS;
-        if (appArgs == null)
-            return;
+        String arg0 = APP_ARGS[0];
 
-        // Handle args
-        for (String appArg : appArgs) {
-
-            // Handle Base64
-            if (appArg.startsWith("Java:")) {
-                String javaStr = appArg.substring("Java:".length());
-                WelcomePanel.getShared().openJavaString(javaStr);
-            }
+        // Handle 'Java:...' or "Jepl:...': Open Java String
+        if (arg0.startsWith("Java:") || arg0.startsWith("Jepl:")) {
+            openJavaString(APP_ARGS[0]);
+            return true;
         }
+
+        // Handle 'New'
+        if (arg0.equalsIgnoreCase("new")) {
+            WelcomePanel.getShared().newFile(false);
+            return true;
+        }
+
+        // Handle 'Samples'
+        if (arg0.equalsIgnoreCase("samples")) {
+            WelcomePanel.getShared().newFile(true);
+            return true;
+        }
+
+        // Return not handled
+        return false;
+    }
+
+    /**
+     * Called to open Java or Jepl string.
+     */
+    private void openJavaString(String aString)
+    {
+        // Decompress string
+        boolean isJepl = aString.startsWith("Jepl:");
+        String javaStrLZ = aString.substring("Java:".length());
+        String javaStr = LZString.decompressFromEncodedURIComponent(javaStrLZ);
+
+        // Open Java/Jepl string
+        WelcomePanel.getShared().openJavaString(javaStr, isJepl);
     }
 
     /**
