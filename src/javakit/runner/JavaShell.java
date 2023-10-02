@@ -93,6 +93,7 @@ public class JavaShell {
         }
 
         // Restore System out/err
+        flushConsole();
         System.setOut(_stdOut);
         System.setErr(_stdErr);
     }
@@ -166,6 +167,19 @@ public class JavaShell {
             ReplObject.show(_consoleErr.getTextBlock());
             _consoleErr = null;
         }
+    }
+
+    /**
+     * Flushes output.
+     */
+    protected void flushConsole()
+    {
+        if (_consoleOut != null)
+            ReplObject.show(_consoleOut.getTextBlock());
+        _consoleOut = null;
+        if (_consoleErr != null)
+            ReplObject.show(_consoleErr.getTextBlock());
+        _consoleErr = null;
     }
 
     /**

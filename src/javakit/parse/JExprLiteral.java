@@ -20,7 +20,7 @@ public class JExprLiteral extends JExpr {
     LiteralType _literalType = LiteralType.Null;
 
     // Constants for Literal type
-    public enum LiteralType {Boolean, Integer, Long, Float, Double, Character, String, Null}
+    public enum LiteralType { Boolean, Integer, Long, Float, Double, Character, String, Null }
 
     ;
 
@@ -80,42 +80,54 @@ public class JExprLiteral extends JExpr {
         if (_value != null || isNull()) return _value;
 
         // Get literal type and string info
-        String s = getValueString();
-        int len = s.length();
-        char c = s.charAt(len - 1);
+        String valueStr = getValueString();
+        int len = valueStr.length();
+        char lastChar = valueStr.charAt(len - 1);
 
         // Decode type from string
         switch (getLiteralType()) {
-            case Boolean:
-                _value = Boolean.valueOf(s);
-                break;
+
+            // Boolean
+            case Boolean: _value = Boolean.valueOf(valueStr); break;
+
+            // Integer
             case Integer:
-                try {
-                    _value = Integer.decode(s);
-                } catch (Exception e) {
-                }
+                try { _value = Integer.decode(valueStr); }
+                catch (Exception ignore) { }
                 break;
+
+            // Long
             case Long:
-                try {
-                    _value = Long.decode(s.substring(0, len - 1));
-                } catch (Exception e) {
-                }
+                try { _value = Long.decode(valueStr.substring(0, len - 1)); }
+                catch (Exception ignore) { }
                 break;
-            case Float:
-                _value = Float.valueOf(s.substring(0, len - 1));
-                break;
+
+            // Float
+            case Float: _value = Float.valueOf(valueStr.substring(0, len - 1)); break;
+
+            // Double
             case Double:
-                _value = c == 'd' || c == 'D' ? Double.valueOf(s.substring(0, len - 1)) : Double.valueOf(s);
+                _value = lastChar == 'd' || lastChar == 'D' ? Double.valueOf(valueStr.substring(0, len - 1)) : Double.valueOf(valueStr);
                 break;
-            case Character:
-                _value = s.charAt(1);
+
+            // Char
+            case Character: {
+                String str = getStringForStringLiteral(valueStr);
+                if (str.length() > 0)
+                    _value = str.charAt(0);
                 break;
+            }
+
+            // String
             case String:
-                _value = s.substring(1, s.length() - 1);
+                _value = getStringForStringLiteral(valueStr);
                 break;
-            default:
-                return null;
+
+            // Dunno
+            default: return null;
         }
+
+        // Return
         return _value;
     }
 
@@ -129,18 +141,26 @@ public class JExprLiteral extends JExpr {
 
         // Create value string from value
         if (_value == null) _valueStr = "null";
-        else if (_value instanceof Boolean) _valueStr = _value.toString();
-        else if (_value instanceof Character || _value instanceof String) _valueStr = _value.toString();
-        else if (_value instanceof Byte || _value instanceof Short) _valueStr = _value.toString();
-        else if (_value instanceof Integer) _valueStr = _value.toString();
-        else if (_value instanceof Long) _valueStr = _value.toString() + 'L';
+        else if (_value instanceof Boolean)
+            _valueStr = _value.toString();
+        else if (_value instanceof Character || _value instanceof String)
+            _valueStr = _value.toString();
+        else if (_value instanceof Byte || _value instanceof Short)
+            _valueStr = _value.toString();
+        else if (_value instanceof Integer)
+            _valueStr = _value.toString();
+        else if (_value instanceof Long)
+            _valueStr = _value.toString() + 'L';
         else if (_value instanceof Float) {
             float val = (Float) _value;
-            if (val == (int) val) _valueStr = Integer.toString((int) val) + 'f';
+            if (val == (int) val)
+                _valueStr = Integer.toString((int) val) + 'f';
             else _valueStr = _value.toString() + 'f';
-        } else if (_value instanceof Double) {
+        }
+        else if (_value instanceof Double) {
             double val = (Double) _value;
-            if (val == (long) val) _valueStr = Long.toString((int) val) + 'd';
+            if (val == (long) val)
+                _valueStr = Long.toString((int) val) + 'd';
             else _valueStr = _value.toString() + 'd';
         }
 
@@ -210,4 +230,16 @@ public class JExprLiteral extends JExpr {
         }
     }
 
+    /**
+     * Returns a string from a string literal string.
+     */
+    private static String getStringForStringLiteral(String stringLiteral)
+    {
+        String str = stringLiteral.substring(1, stringLiteral.length() - 1);
+        str = str.replace("\\n", "\n");
+        str = str.replace("\\t", "\t");
+        str = str.replace("\\r", "\r");
+        str = str.replace("\\\\", "\\");
+        return str;
+    }
 }
