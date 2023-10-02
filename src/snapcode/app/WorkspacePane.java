@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.geom.Rect;
 import snap.gfx.GFXEnv;
 import snapcode.project.*;
 import snap.props.PropChange;
@@ -389,8 +390,11 @@ public class WorkspacePane extends ViewOwner {
     @Override
     protected void initShowing()
     {
-        if (SnapUtils.isWebVM)
+        if (SnapUtils.isWebVM) {
             getWindow().addPropChangeListener(pc -> windowFocusedChanged(), View.Focused_Prop);
+            if (getEnv().getClass().getSimpleName().startsWith("Swing"))
+                new ViewTimer(1000, e -> checkScreenSize()).start();
+        }
     }
 
     /**
@@ -597,6 +601,19 @@ public class WorkspacePane extends ViewOwner {
         if (!window.isFocused()) {
             String string = _pagePane.getWindowLocationHash();
             GFXEnv.getEnv().setBrowserWindowLocationHash(string);
+        }
+    }
+
+    /**
+     * Called every second to check screen size.
+     */
+    private void checkScreenSize()
+    {
+        Rect screenBounds = getEnv().getScreenBoundsInset();
+        WindowView window = getWindow();
+        if (window.getWidth() != screenBounds.width || window.getHeight() != screenBounds.height) {
+            window.setBounds(screenBounds);
+            System.out.println("Changed window size");
         }
     }
 }
