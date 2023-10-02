@@ -615,7 +615,7 @@ public class JSExprEval {
      */
     private Object evalLambdaExpr(Object anOR, JExprLambda aLambdaExpr)
     {
-        return LambdaWrapper3.getWrappedLambdaExpression(this, anOR, aLambdaExpr);
+        return LambdaWrapper.getWrappedLambdaExpression(this, anOR, aLambdaExpr);
     }
 
     /**
