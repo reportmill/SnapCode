@@ -156,7 +156,7 @@ public class NodeCompleter {
      */
     private void addCompletionsForScopedId(JExpr scopeExpr, DeclMatcher prefixMatcher)
     {
-        // Get parent expression - if none, forward to basic getCompletionsForNodeString()
+        // Get scope expression decl
         JavaDecl scopeDecl = scopeExpr.getDecl();
         if (scopeDecl instanceof JavaLocalVar || scopeDecl instanceof JavaMember)
             scopeDecl = scopeExpr.getEvalType();
@@ -189,11 +189,19 @@ public class NodeCompleter {
         // Handle anything else with a parent class
         else if (scopeDecl instanceof JavaType) {
 
-            // Get ParentExpr.EvalClass
-            JavaClass parExprEvalClass = scopeDecl.getEvalClass();
+            // Get ScopeExpr.EvalClass
+            JavaClass scopeExprEvalClass = scopeDecl.getEvalClass();
+
+            // Get whether expression is class name
+            String className = scopeExprEvalClass.getSimpleName();
+            boolean staticMembersOnly = isExprClassName(scopeExpr, className);
+            if (staticMembersOnly && prefixMatcher.matchesString("class")) {
+                JavaField classField = getClassField(scopeExprEvalClass);
+                addCompletionDecl(classField);
+            }
 
             // Get matching members (fields, methods) for class and add
-            JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(parExprEvalClass, false);
+            JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(scopeExprEvalClass, staticMembersOnly);
             addCompletionDecls(matchingMembers);
         }
     }
@@ -300,5 +308,30 @@ public class NodeCompleter {
                 return true;
         }
         return false;
+    }
+
+    /**
+     * Returns whether given expression is given class name.
+     */
+    private static boolean isExprClassName(JExpr anExpr, String className)
+    {
+        JExpr expr = anExpr instanceof JExprDot ? ((JExprDot) anExpr).getExpr() : anExpr;
+        JExprId exprId = expr instanceof JExprId ? (JExprId) expr : null;
+        if (exprId == null)
+            return false;
+
+        String exprStr = exprId.getName();
+        return exprStr.equals(className);
+    }
+
+    /**
+     * Returns the class field for a given Class (for Class.class).
+     */
+    private JavaField getClassField(JavaClass classClass)
+    {
+        JavaField.FieldBuilder fb = new JavaField.FieldBuilder();
+        fb.init(_resolver, classClass.getClassName());
+        JavaField javaField = fb.name("class").type(Class.class).build();
+        return javaField;
     }
 }
