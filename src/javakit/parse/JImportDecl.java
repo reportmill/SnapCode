@@ -234,7 +234,7 @@ public class JImportDecl extends JNode {
             return cls.getFieldForName(aName);
 
         // Otherwise, look for method
-        return JavaClassUtils.getCompatibleMethodAll(cls, aName, paramTypes);
+        return JavaClassUtils.getCompatibleMethodAll(cls, aName, paramTypes, true);
     }
 
     /**

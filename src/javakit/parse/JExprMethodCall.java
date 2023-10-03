@@ -140,13 +140,17 @@ public class JExprMethodCall extends JExpr implements WithId {
             argClasses[i] = argClass;
         }
 
+        // Get whether to only search static methods (scope expression is Class)
+        JExpr scopeExpr = getScopeExpr();
+        boolean staticOnly = scopeExpr != null && scopeExpr.isClassNameLiteral();
+
         // Search for compatible method for name and arg types
-        JavaMethod method = JavaClassUtils.getCompatibleMethodAll(scopeClass, name, argClasses);
+        JavaMethod method = JavaClassUtils.getCompatibleMethodAll(scopeClass, name, argClasses, staticOnly);
         if (method != null)
             return method;
 
         // If scope expression is present, just return
-        if (getScopeExpr() != null)
+        if (scopeExpr != null)
             return null;
 
         // Get enclosing class
@@ -162,7 +166,7 @@ public class JExprMethodCall extends JExpr implements WithId {
                 break;
 
             // If method found, return it
-            method = JavaClassUtils.getCompatibleMethodAll(scopeClass, name, argClasses);
+            method = JavaClassUtils.getCompatibleMethodAll(scopeClass, name, argClasses, false);
             if (method != null)
                 return method;
         }

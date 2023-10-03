@@ -35,7 +35,7 @@ public class JavaClassUtils {
     /**
      * Returns a compatible method for given name and param types.
      */
-    public static JavaMethod getCompatibleMethod(JavaClass aClass, String aName, JavaClass[] paramTypes)
+    public static JavaMethod getCompatibleMethod(JavaClass aClass, String aName, JavaClass[] paramTypes, boolean staticOnly)
     {
         List<JavaMethod> declaredMethods = aClass.getDeclaredMethods();
         JavaMethod compatibleMethod = null;
@@ -43,6 +43,8 @@ public class JavaClassUtils {
 
         // Iterate over methods to find highest rating
         for (JavaMethod method : declaredMethods) {
+            if (staticOnly && !method.isStatic())
+                continue;
             if (method.getName().equals(aName)) {
                 int rtg = JavaExecutable.getMatchRatingForArgClasses(method, paramTypes);
                 if (rtg > rating) {
@@ -59,11 +61,11 @@ public class JavaClassUtils {
     /**
      * Returns a compatible method for given name and param types.
      */
-    public static JavaMethod getCompatibleMethodAll(JavaClass aClass, String aName, JavaClass[] paramTypes)
+    public static JavaMethod getCompatibleMethodAll(JavaClass aClass, String aName, JavaClass[] paramTypes, boolean staticOnly)
     {
         // Search this class and superclasses for compatible method
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
-            JavaMethod compatibleMethod = getCompatibleMethod(cls, aName, paramTypes);
+            JavaMethod compatibleMethod = getCompatibleMethod(cls, aName, paramTypes, staticOnly);
             if (compatibleMethod != null)
                 return compatibleMethod;
         }
@@ -72,7 +74,7 @@ public class JavaClassUtils {
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
             JavaClass[] interfaces = cls.getInterfaces();
             for (JavaClass infc : interfaces) {
-                JavaMethod compatibleMethod = getCompatibleMethodAll(infc, aName, paramTypes);
+                JavaMethod compatibleMethod = getCompatibleMethodAll(infc, aName, paramTypes, staticOnly);
                 if (compatibleMethod != null)
                     return compatibleMethod;
             }
@@ -81,7 +83,7 @@ public class JavaClassUtils {
         // If this class is Interface, check Object
         if (aClass.isInterface()) {
             JavaClass objClass = aClass.getJavaClassForClass(Object.class);
-            return getCompatibleMethod(objClass, aName, paramTypes);
+            return getCompatibleMethod(objClass, aName, paramTypes, staticOnly);
         }
 
         // Return not found

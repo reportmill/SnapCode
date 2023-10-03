@@ -193,8 +193,7 @@ public class NodeCompleter {
             JavaClass scopeExprEvalClass = scopeDecl.getEvalClass();
 
             // Get whether expression is class name
-            String className = scopeExprEvalClass.getSimpleName();
-            boolean staticMembersOnly = isExprClassName(scopeExpr, className);
+            boolean staticMembersOnly = scopeExpr.isClassNameLiteral();
             if (staticMembersOnly && prefixMatcher.matchesString("class")) {
                 JavaField classField = getClassField(scopeExprEvalClass);
                 addCompletionDecl(classField);
@@ -308,20 +307,6 @@ public class NodeCompleter {
                 return true;
         }
         return false;
-    }
-
-    /**
-     * Returns whether given expression is given class name.
-     */
-    private static boolean isExprClassName(JExpr anExpr, String className)
-    {
-        JExpr expr = anExpr instanceof JExprDot ? ((JExprDot) anExpr).getExpr() : anExpr;
-        JExprId exprId = expr instanceof JExprId ? (JExprId) expr : null;
-        if (exprId == null)
-            return false;
-
-        String exprStr = exprId.getName();
-        return exprStr.equals(className);
     }
 
     /**

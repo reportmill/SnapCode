@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import javakit.resolver.JavaType;
+import javakit.resolver.*;
 
 /**
  * The JNode base class for Java expressions.
@@ -58,6 +58,31 @@ public abstract class JExpr extends JNode {
 
         // Return not found
         return null;
+    }
+
+    /**
+     * Returns whether expression is a class name literal.
+     */
+    public boolean isClassNameLiteral()
+    {
+        // Get id for expression if simple id or dot expression
+        JExpr expr = this instanceof JExprDot ? ((JExprDot) this).getExpr() : this;
+        JExprId exprId = expr instanceof JExprId ? (JExprId) expr : null;
+        if (exprId == null)
+            return false;
+
+        // Get expression decl (just return if not type)
+        JavaDecl decl = getDecl();
+        JavaType javaType = decl instanceof JavaType ? (JavaType) decl : null;
+        if (javaType == null)
+            return false;
+
+        // Get class name for expression EvalClass
+        JavaClass exprEvalClass = javaType.getEvalClass();
+        String className = exprEvalClass.getSimpleName();
+
+        String exprStr = exprId.getName();
+        return exprStr.equals(className);
     }
 
     /**
