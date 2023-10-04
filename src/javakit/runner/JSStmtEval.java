@@ -6,7 +6,6 @@ import java.lang.reflect.Array;
 import java.util.*;
 import javakit.parse.*;
 import snap.util.Convert;
-import snap.util.ListUtils;
 
 /**
  * A class to evaluate Java statements.
@@ -245,14 +244,14 @@ public class JSStmtEval {
         JStmtBlock blockStmt = aForStmt.getBlock();
 
         // Get main var name statement
-        JStmtVarDecl initDeclStmt = aForStmt.getInitDecl();
-        evalStmt(anOR, initDeclStmt);
+        JExprVarDecl initDeclExpr = aForStmt.getInitDecl();
+        evalExpr(initDeclExpr);
 
         // Get conditional
         JExpr condExpr = aForStmt.getConditional();
 
-        // Get update statements
-        List<JStmtExpr> updateStmts = aForStmt.getUpdateStmts();
+        // Get update expressions
+        List<JExpr> updateExpressions = aForStmt.getUpdateExpressions();
 
         // Iterate while conditional is true
         while (true) {
@@ -265,11 +264,11 @@ public class JSStmtEval {
             // Evaluate block statements
             evalStmt(anOR, blockStmt);
 
-            // Execute update statements
-            for (JStmtExpr updateStmt : updateStmts) {
+            // Execute update expressions
+            for (JExpr updateStmt : updateExpressions) {
 
                 // Eval statements
-                evalStmt(anOR, updateStmt);
+                evalExpr(updateStmt);
 
                 // If break was hit, break
                 if (handleBreakCheck())
@@ -290,8 +289,8 @@ public class JSStmtEval {
         JStmtBlock blockStmt = aForStmt.getBlock();
 
         // Get main variable name
-        JStmtVarDecl initDeclStmt = aForStmt.getInitDecl();
-        List<JVarDecl> varDecls = initDeclStmt.getVarDecls();
+        JExprVarDecl initDeclExpr = aForStmt.getInitDecl();
+        List<JVarDecl> varDecls = initDeclExpr.getVarDecls();
         JVarDecl varDecl = varDecls.get(0);
         JExprId varId = varDecl.getId();
 
@@ -413,29 +412,8 @@ public class JSStmtEval {
      */
     public Object evalVarDeclStmt(JStmtVarDecl aStmt) throws Exception
     {
-        // Get list
-        List<JVarDecl> varDecls = aStmt.getVarDecls();
-        List<Object> vals = new ArrayList<>();
-
-        // Iterate over VarDecls
-        for (JVarDecl varDecl : varDecls) {
-
-            // If initializer expression, evaluate and set local var
-            JExpr initExpr = varDecl.getInitializer();
-            if (initExpr != null) {
-                JExprId varId = varDecl.getId();
-                Object val = evalExpr(initExpr);
-                _exprEval.setExprIdValue(varId, val);
-                vals.add(val);
-            }
-        }
-
-        // If one value, just return it
-        if (vals.size() == 1)
-            return vals.get(0);
-
-        // Otherwise, return joined string
-        return ListUtils.joinStrings(vals, ", ");
+        JExprVarDecl expr = aStmt.getVarDeclExpr();
+        return evalExpr(expr);
     }
 
     /**
@@ -443,11 +421,7 @@ public class JSStmtEval {
      */
     public Object evalExpr(JExpr anExpr) throws Exception
     {
-        // Evaluate expr
-        Object val = _exprEval.evalExpr(anExpr);
-
-        // Return
-        return val;
+        return _exprEval.evalExpr(anExpr);
     }
 
     /**

@@ -15,13 +15,13 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
     protected boolean  _forEach = true;
 
     // The for-init declaration (if declaration)
-    protected JStmtVarDecl  _initDecl;
+    protected JExprVarDecl  _initDecl;
 
-    // The update
-    protected List<JStmtExpr>  _updateStmts = new ArrayList<>();
+    // The init expressions
+    private List<JExpr> _initExpressions = new ArrayList<>();
 
-    // The for-init List of StatementExpressions (if statement expressions)
-    protected List<JStmtExpr>  _initStmts = new ArrayList<>();
+    // The update expressions
+    private List<JExpr> _updateExpressions = new ArrayList<>();
 
     /**
      * Constructor.
@@ -39,47 +39,48 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
     /**
      * Returns the init declaration.
      */
-    public JStmtVarDecl getInitDecl()  { return _initDecl; }
+    public JExprVarDecl getInitDecl()  { return _initDecl; }
 
     /**
      * Sets the init declaration.
      */
-    public void setInitDecl(JStmtVarDecl aVD)
+    public void setInitDecl(JExprVarDecl aVD)
     {
         replaceChild(_initDecl, _initDecl = aVD);
     }
 
     /**
-     * Returns the update statements.
+     * Returns the init expression.
      */
-    public List<JStmtExpr> getUpdateStmts()  { return _updateStmts; }
+    public List<JExpr> getInitExpressions()  { return _initExpressions; }
 
     /**
-     * Add an update statements.
+     * Adds an init expression.
      */
-    public void addUpdateStmt(JStmtExpr aStmtExpr)
+    public void addInitExpression(JExpr anExpr)
     {
-        _updateStmts.add(aStmtExpr);
-        addChild(aStmtExpr, -1);
+        _initExpressions.add(anExpr);
+        addChild(anExpr, -1);
     }
 
     /**
-     * Returns the init statements.
+     * Returns the update expressions.
      */
-    public List<JStmtExpr> getInitStmts()  { return _initStmts; }
+    public List<JExpr> getUpdateExpressions()  { return _updateExpressions; }
 
     /**
-     * Adds an init statements.
+     * Add an update expressions.
      */
-    public void addInitStmt(JStmtExpr aStmtExpr)
+    public void addUpdateExpression(JExpr anExpr)
     {
-        _initStmts.add(aStmtExpr);
-        addChild(aStmtExpr, -1);
+        _updateExpressions.add(anExpr);
+        addChild(anExpr, -1);
     }
 
     /**
-     * Returns the for statement InitDecl.VarDecls.
+     * WithVarDecls method.
      */
+    @Override
     public List<JVarDecl> getVarDecls()
     {
         List<JVarDecl> varDecls = _initDecl != null ? _initDecl.getVarDecls() : Collections.EMPTY_LIST;

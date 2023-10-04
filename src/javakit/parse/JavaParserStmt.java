@@ -580,43 +580,32 @@ public class JavaParserStmt extends JavaParserExpr {
 
             switch (anId) {
 
-                // Handle Type
-                case "Type": {
-                    JType type = aNode.getCustomNode(JType.class);
-                    JExprVarDecl varDeclExpr = new JExprVarDecl();
-                    varDeclExpr.setType(type);
-                    JStmtVarDecl varDeclStmt = new JStmtVarDecl();
-                    varDeclStmt.setVarDeclExpr(varDeclExpr);
-                    forStmt.setInitDecl(varDeclStmt);
-                } break;
+                // Handle VarDeclExpr
+                case "VarDeclExpr": {
+                    JExprVarDecl varDeclExpr = aNode.getCustomNode(JExprVarDecl.class);
+                    forStmt.setInitDecl(varDeclExpr);
+                    break;
+                }
 
-                // Handle Identifier
-                case "Identifier": {
-                    JExprId idExpr = aNode.getCustomNode(JExprId.class);
-                    JVarDecl varDecl = new JVarDecl();
-                    varDecl.setId(idExpr);
-                    forStmt.getInitDecl().getVarDeclExpr().addVarDecl(varDecl);
-                } break;
-
-                // Handle ForInit VarDeclStmt
-                case "VarDeclStmt": {
-                    JStmtVarDecl varDeclStmt = aNode.getCustomNode(JStmtVarDecl.class);
-                    forStmt.setInitDecl(varDeclStmt);
-                } break;
-
-                // Handle ForInit ExprStatement(s) or ForUpdate ExprStatement(s)
-                case "ExprStatement": {
-                    JStmtExpr se = aNode.getCustomNode(JStmtExpr.class);
-                    if (_partIndex == 0)
-                        forStmt.addInitStmt(se);
-                    else forStmt.addUpdateStmt(se);
-                } break;
-
-                // Handle init or conditional Expression
+                // Handle Expression
                 case "Expression": {
-                    JExpr condExpr = aNode.getCustomNode(JExpr.class);
-                    forStmt.setConditional(condExpr);
-                } break;
+                    JExpr expr = aNode.getCustomNode(JExpr.class);
+
+                    // Handle ForEach expression or basic for conditional
+                    if (forStmt.getInitDecl() != null && _partIndex == 0)
+                        forStmt.setConditional(expr);
+
+                    // Handle basic for statement
+                    else {
+                        switch (_partIndex) {
+                            case 0: forStmt.addInitExpression(expr); break;
+                            case 1: forStmt.setConditional(expr); break;
+                            case 2: forStmt.addUpdateExpression(expr); break;
+                        }
+                    }
+
+                    break;
+                }
 
                 // Handle separator
                 case ";": {

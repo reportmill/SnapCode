@@ -69,6 +69,10 @@ public class JSExprEval {
         if (anExpr instanceof JExprMethodCall)
             return evalMethodCallExpr(anOR, (JExprMethodCall) anExpr);
 
+        // Handle VarDecl expression
+        if (anExpr instanceof JExprVarDecl)
+            return evalVarDeclExpr(anOR, (JExprVarDecl) anExpr);
+
         // Handle assign expression
         if (anExpr instanceof JExprAssign)
             return evalAssignExpr(anOR, (JExprAssign) anExpr);
@@ -576,7 +580,37 @@ public class JSExprEval {
     }
 
     /**
-     * Handle JExprMath Assign.
+     * Handle JExprVarDecl.
+     */
+    private Object evalVarDeclExpr(Object anOR, JExprVarDecl anExpr) throws Exception
+    {
+        // Get list
+        List<JVarDecl> varDecls = anExpr.getVarDecls();
+        List<Object> vals = new ArrayList<>();
+
+        // Iterate over VarDecls
+        for (JVarDecl varDecl : varDecls) {
+
+            // If initializer expression, evaluate and set local var
+            JExpr initExpr = varDecl.getInitializer();
+            if (initExpr != null) {
+                JExprId varId = varDecl.getId();
+                Object val = evalExpr(initExpr);
+                setExprIdValue(varId, val);
+                vals.add(val);
+            }
+        }
+
+        // If one value, just return it
+        if (vals.size() == 1)
+            return vals.get(0);
+
+        // Otherwise, return joined string
+        return ListUtils.joinStrings(vals, ", ");
+    }
+
+    /**
+     * Handle JExprAssign.
      */
     private Object evalAssignExpr(Object anOR, JExprAssign anExpr) throws Exception
     {

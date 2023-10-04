@@ -120,17 +120,17 @@ ForStatement { "for" "(" ForIteration ")" Statement }
 
 ForIteration
 {
-    LookAhead ( Modifiers Type Identifier ":" ) Modifiers Type Identifier ":" Expression |
-    ForInit? ";" Expression? ";" ForExprStmtList?
+    LookAhead ( VarDeclExpr ":" ) VarDeclExpr ":" Expression |
+    ForInit? ";" Expression? ";" ForExprList?
 }
 
 ForInit
 {
-    LookAhead (Modifiers Type Identifier) VarDeclStmt |
-    ForExprStmtList
+    LookAhead (Modifiers Type Identifier) VarDeclExpr |
+    ForExprList
 }
 
-ForExprStmtList { ExprStatement ("," ExprStatement)* }
+ForExprList { Expression ("," Expression)* }
 
 WhileStatement { "while" "(" Expression ")" Statement }
 

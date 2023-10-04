@@ -36,11 +36,11 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
 
         // Add init declaration text
         if (forStmt.getInitDecl() != null) {
-            JStmtVarDecl ivd = forStmt.getInitDecl();
-            String str = ivd.getString();
+            JExpr initExpr = forStmt.getInitDecl();
+            String str = initExpr.getString();
             TextField tfield = createTextField(str);
             tfield.setName("ExprText");
-            tfield.setProp("Expr", ivd);
+            tfield.setProp("Expr", initExpr);
             tfield.addEventHandler(e -> handleTextEvent(e));
             rowView.addChild(tfield);
         }
@@ -57,12 +57,12 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
         }
 
         // Add update statement text
-        if (forStmt.getUpdateStmts() != null && forStmt.getUpdateStmts().size() > 0) {
-            JStmtExpr se = forStmt.getUpdateStmts().get(0);
-            String str = se.getString();
+        if (forStmt.getUpdateExpressions() != null && forStmt.getUpdateExpressions().size() > 0) {
+            JExpr updateExpr = forStmt.getUpdateExpressions().get(0);
+            String str = updateExpr.getString();
             TextField tfield = createTextField(str);
             tfield.setName("ExprText");
-            tfield.setProp("Expr", se);
+            tfield.setProp("Expr", updateExpr);
             tfield.addEventHandler(e -> handleTextEvent(e));
             rowView.addChild(tfield);
         }
