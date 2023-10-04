@@ -239,12 +239,12 @@ public class JType extends JNode {
     {
         // Get parent StmtVarDecl: 'var' is only allowed as statement (can't be field or formal param)
         JNode parentNode = getParent();
-        JStmtVarDecl varDeclStmt = parentNode instanceof JStmtVarDecl ? (JStmtVarDecl) parentNode : null;
-        if (varDeclStmt == null)
+        JExprVarDecl varDeclExpr = parentNode instanceof JExprVarDecl ? (JExprVarDecl) parentNode : null;
+        if (varDeclExpr == null)
             return null;
 
         // Get StmtVarDecl.VarDecl
-        List<JVarDecl> varDecls = varDeclStmt.getVarDecls();
+        List<JVarDecl> varDecls = varDeclExpr.getVarDecls();
         JVarDecl varDecl = varDecls.size() > 0 ? varDecls.get(0) : null;
         if (varDecl == null)
             return null;

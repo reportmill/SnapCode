@@ -236,10 +236,12 @@ public class JeplParser extends JavaParser {
         varDecl.setInitializer(initializer);
 
         // Create VarDecl statement with 'var' type and add VarDecl
-        JStmtVarDecl varDeclStmt = new JStmtVarDecl();
+        JExprVarDecl varDeclExpr = new JExprVarDecl();
         JType varType = JType.createTypeForNameAndToken("var", exprStmt.getStartToken());
-        varDeclStmt.setType(varType);
-        varDeclStmt.addVarDecl(varDecl);
+        varDeclExpr.setType(varType);
+        varDeclExpr.addVarDecl(varDecl);
+        JStmtVarDecl varDeclStmt = new JStmtVarDecl();
+        varDeclStmt.setVarDeclExpr(varDeclExpr);
 
         // Swap VarDecl statement in for expr statement
         JStmtBlock blockStmt = exprStmt.getParent(JStmtBlock.class);

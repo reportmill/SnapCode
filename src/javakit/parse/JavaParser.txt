@@ -93,7 +93,9 @@ BlockStatement
     ClassDecl
 }
 
-VarDeclStmt { Modifiers Type VarDecl ("," VarDecl)* }
+VarDeclStmt { VarDeclExpr | "b_o_g_u_s" }
+
+VarDeclExpr { Modifiers Type VarDecl ("," VarDecl)* }
 
 VarDecl { Identifier ("[" "]")* ("=" VarInit)? }
 
@@ -122,7 +124,11 @@ ForIteration
     ForInit? ";" Expression? ";" ForExprStmtList?
 }
 
-ForInit { LookAhead (Modifiers Type Identifier) VarDeclStmt | ForExprStmtList }
+ForInit
+{
+    LookAhead (Modifiers Type Identifier) VarDeclStmt |
+    ForExprStmtList
+}
 
 ForExprStmtList { ExprStatement ("," ExprStatement)* }
 
@@ -148,7 +154,20 @@ ThrowStatement { "throw" Expression ";" }
 
 SynchronizedStatement { "synchronized" "(" Expression | ")" Block }
 
-TryStatement { "try" Block ("catch" "(" FormalParam ")" Block)* ("finally" Block)? }
+TryStatement
+{
+    "try" ResourceSpec? Block
+    ("catch" "(" FormalParam ")" Block)*
+    ("finally" Block)?
+}
+
+ResourceSpec { "(" Resource (LookAhead(2) ";" Resource)* ";"? ")" }
+
+Resource
+{
+    LookAhead (Modifiers Type VarDecl) VarDeclExpr |
+    PrimaryExpr
+}
 
 LabeledStatement { Identifier ":" Statement }
 

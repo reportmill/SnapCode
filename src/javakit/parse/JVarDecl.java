@@ -76,9 +76,9 @@ public class JVarDecl extends JNode implements WithId {
         if (parentNode instanceof JFieldDecl)
             return ((JFieldDecl) parentNode).getType();
 
-        // Handle StatementVarDecl VarDecl: Return type from parent
-        if (parentNode instanceof JStmtVarDecl)
-            return ((JStmtVarDecl) parentNode).getType();
+        // Handle ExprVarDecl VarDecl: Return type from parent
+        if (parentNode instanceof JExprVarDecl)
+            return ((JExprVarDecl) parentNode).getType();
 
         // Handle JExprLambda VarDecl: Get decl for this param and create new type
         if (parentNode instanceof JExprLambda)

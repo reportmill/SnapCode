@@ -220,7 +220,7 @@ public class JavaParserStmt extends JavaParserExpr {
     }
 
     /**
-     * VarDecl Handler.
+     * VarDecl Handler: Identifier ("[" "]")* ("=" VarInit)?
      */
     public static class VarDeclHandler extends JNodeParseHandler<JVarDecl> {
 
@@ -260,7 +260,43 @@ public class JavaParserStmt extends JavaParserExpr {
     }
 
     /**
-     * VarDeclStmt Handler.
+     * VarDeclExpr Handler: Modifiers Type VarDecl ("," VarDecl)*
+     */
+    public static class VarDeclExprHandler extends JNodeParseHandler<JExprVarDecl> {
+
+        /**
+         * ParseHandler method.
+         */
+        protected void parsedOne(ParseNode aNode, String anId)
+        {
+            // Get variable declaration expression
+            JExprVarDecl varDeclExpr = getPart();
+
+            switch (anId) {
+
+                // Handle Modifiers
+                case "Modifiers":
+                    varDeclExpr.setMods(aNode.getCustomNode(JModifiers.class));
+                    break;
+
+                // Handle Type
+                case "Type":
+                    varDeclExpr.setType(aNode.getCustomNode(JType.class));
+                    break;
+
+                // Handle VarDecl(s)
+                case "VarDecl":
+                    JVarDecl varDecl = aNode.getCustomNode(JVarDecl.class);
+                    varDeclExpr.addVarDecl(varDecl);
+                    break;
+            }
+        }
+
+        protected Class<JExprVarDecl> getPartClass()  { return JExprVarDecl.class; }
+    }
+
+    /**
+     * VarDeclStmt Handler: VarDeclExpr
      */
     public static class VarDeclStmtHandler extends JNodeParseHandler<JStmtVarDecl> {
 
@@ -272,24 +308,14 @@ public class JavaParserStmt extends JavaParserExpr {
             // Get variable declaration statement
             JStmtVarDecl varDeclStmt = getPart();
 
-            switch (anId) {
-
-                // Handle Modifiers
-                case "Modifiers":
-                    varDeclStmt.setMods(aNode.getCustomNode(JModifiers.class));
-                    break;
-
-                // Handle Type
-                case "Type":
-                    varDeclStmt.setType(aNode.getCustomNode(JType.class));
-                    break;
-
-                // Handle VarDecl(s)
-                case "VarDecl":
-                    JVarDecl varDecl = aNode.getCustomNode(JVarDecl.class);
-                    varDeclStmt.addVarDecl(varDecl);
-                    break;
+            // Handle VarDeclExpr
+            if (anId == "VarDeclExpr") {
+                JExprVarDecl varDeclExpr = aNode.getCustomNode(JExprVarDecl.class);
+                varDeclStmt.setVarDeclExpr(varDeclExpr);
             }
+
+            // Complain
+            else System.err.println("JavaParserStmt.VarDeclStmtHandler: Unexpected node: " + anId);
         }
 
         protected Class<JStmtVarDecl> getPartClass()  { return JStmtVarDecl.class; }
@@ -557,9 +583,11 @@ public class JavaParserStmt extends JavaParserExpr {
                 // Handle Type
                 case "Type": {
                     JType type = aNode.getCustomNode(JType.class);
-                    JStmtVarDecl svd = new JStmtVarDecl();
-                    svd.setType(type);
-                    forStmt.setInitDecl(svd);
+                    JExprVarDecl varDeclExpr = new JExprVarDecl();
+                    varDeclExpr.setType(type);
+                    JStmtVarDecl varDeclStmt = new JStmtVarDecl();
+                    varDeclStmt.setVarDeclExpr(varDeclExpr);
+                    forStmt.setInitDecl(varDeclStmt);
                 } break;
 
                 // Handle Identifier
@@ -567,7 +595,7 @@ public class JavaParserStmt extends JavaParserExpr {
                     JExprId idExpr = aNode.getCustomNode(JExprId.class);
                     JVarDecl varDecl = new JVarDecl();
                     varDecl.setId(idExpr);
-                    forStmt.getInitDecl().addVarDecl(varDecl);
+                    forStmt.getInitDecl().getVarDeclExpr().addVarDecl(varDecl);
                 } break;
 
                 // Handle ForInit VarDeclStmt

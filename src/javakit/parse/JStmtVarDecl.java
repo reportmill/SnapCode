@@ -9,14 +9,8 @@ import java.util.*;
  */
 public class JStmtVarDecl extends JStmt implements WithVarDecls {
 
-    // The modifiers
-    protected JModifiers  _mods;
-
-    // The type/return-type
-    protected JType  _type;
-
-    // List of variable declarations
-    protected List<JVarDecl>  _varDecls = new ArrayList<>();
+    // The var decl expression
+    protected JExprVarDecl  _varDeclExpr;
 
     /**
      * Constructor.
@@ -27,44 +21,30 @@ public class JStmtVarDecl extends JStmt implements WithVarDecls {
     }
 
     /**
-     * Returns the modifiers.
+     * Returns the VarDecl expression.
      */
-    public JModifiers getMods()  { return _mods; }
+    public JExprVarDecl getVarDeclExpr()  { return _varDeclExpr; }
 
     /**
-     * Sets the modifiers.
+     * Sets the VarDecl expression.
      */
-    public void setMods(JModifiers theMods)
+    public void setVarDeclExpr(JExprVarDecl varDeclExpr)
     {
-        if (_mods == null)
-            addChild(_mods = theMods);
-        else replaceChild(_mods, _mods = theMods);
+        replaceChild(_varDeclExpr, _varDeclExpr = varDeclExpr);
     }
+
+    /**
+     * Returns the modifiers.
+     */
+    public JModifiers getMods()  { return _varDeclExpr.getMods(); }
 
     /**
      * Returns the type.
      */
-    public JType getType()  { return _type; }
-
-    /**
-     * Sets the type.
-     */
-    public void setType(JType aType)
-    {
-        replaceChild(_type, _type = aType);
-    }
+    public JType getType()  { return _varDeclExpr.getType(); }
 
     /**
      * Returns the variable declarations.
      */
-    public List<JVarDecl> getVarDecls()  { return _varDecls; }
-
-    /**
-     * Adds a variable declaration.
-     */
-    public void addVarDecl(JVarDecl aVD)
-    {
-        _varDecls.add(aVD);
-        addChild(aVD, -1);
-    }
+    public List<JVarDecl> getVarDecls()  { return _varDeclExpr.getVarDecls(); }
 }
