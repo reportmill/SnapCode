@@ -146,7 +146,7 @@ public class JavaParserStmt extends JavaParserExpr {
     }
 
     /**
-     * BlockStatement Handler - translates VarDeclStmt and ClassDecl to JavaStatements.
+     * BlockStatement Handler - translates VarDeclExpr and ClassDecl to JavaStatements.
      */
     public static class BlockStatementHandler extends JNodeParseHandler<JStmt> {
 
@@ -157,8 +157,12 @@ public class JavaParserStmt extends JavaParserExpr {
         {
             switch (anId) {
 
-                // Handle VarDeclStmt
-                case "VarDeclStmt": _part = aNode.getCustomNode(JStmtVarDecl.class); break;
+                // Handle VarDeclExpr
+                case "VarDeclExpr": {
+                    JExprVarDecl varDeclExpr = aNode.getCustomNode(JExprVarDecl.class);
+                    _part = new JStmtVarDecl(varDeclExpr);
+                    break;
+                }
 
                 // Handle Statement
                 case "Statement": _part = aNode.getCustomNode(JStmt.class); break;
@@ -293,32 +297,6 @@ public class JavaParserStmt extends JavaParserExpr {
         }
 
         protected Class<JExprVarDecl> getPartClass()  { return JExprVarDecl.class; }
-    }
-
-    /**
-     * VarDeclStmt Handler: VarDeclExpr
-     */
-    public static class VarDeclStmtHandler extends JNodeParseHandler<JStmtVarDecl> {
-
-        /**
-         * ParseHandler method.
-         */
-        protected void parsedOne(ParseNode aNode, String anId)
-        {
-            // Get variable declaration statement
-            JStmtVarDecl varDeclStmt = getPart();
-
-            // Handle VarDeclExpr
-            if (anId == "VarDeclExpr") {
-                JExprVarDecl varDeclExpr = aNode.getCustomNode(JExprVarDecl.class);
-                varDeclStmt.setVarDeclExpr(varDeclExpr);
-            }
-
-            // Complain
-            else System.err.println("JavaParserStmt.VarDeclStmtHandler: Unexpected node: " + anId);
-        }
-
-        protected Class<JStmtVarDecl> getPartClass()  { return JStmtVarDecl.class; }
     }
 
     /**

@@ -88,12 +88,10 @@ Block { "{" BlockStatement* "}" }
 
 BlockStatement
 {
-    LookAhead (VarDeclStmt) VarDeclStmt ";" |
+    LookAhead (VarDeclExpr) VarDeclExpr ";" |
     Statement |
     ClassDecl
 }
-
-VarDeclStmt { VarDeclExpr | "b_o_g_u_s" }
 
 VarDeclExpr { Modifiers Type VarDecl ("," VarDecl)* }
 

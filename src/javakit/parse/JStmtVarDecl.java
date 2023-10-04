@@ -2,49 +2,29 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import java.util.*;
+import java.util.List;
 
 /**
  * A Java statement for local variable declarations.
  */
-public class JStmtVarDecl extends JStmt implements WithVarDecls {
-
-    // The var decl expression
-    protected JExprVarDecl  _varDeclExpr;
+public class JStmtVarDecl extends JStmtExpr implements WithVarDecls {
 
     /**
      * Constructor.
      */
-    public JStmtVarDecl()
+    public JStmtVarDecl(JExprVarDecl varDeclExpr)
     {
         super();
+        setExpr(varDeclExpr);
     }
 
     /**
-     * Returns the VarDecl expression.
+     * WithVarDecls method.
      */
-    public JExprVarDecl getVarDeclExpr()  { return _varDeclExpr; }
-
-    /**
-     * Sets the VarDecl expression.
-     */
-    public void setVarDeclExpr(JExprVarDecl varDeclExpr)
+    @Override
+    public List<JVarDecl> getVarDecls()
     {
-        replaceChild(_varDeclExpr, _varDeclExpr = varDeclExpr);
+        JExprVarDecl varDeclExpr = (JExprVarDecl) _expr;
+        return varDeclExpr.getVarDecls();
     }
-
-    /**
-     * Returns the modifiers.
-     */
-    public JModifiers getMods()  { return _varDeclExpr.getMods(); }
-
-    /**
-     * Returns the type.
-     */
-    public JType getType()  { return _varDeclExpr.getType(); }
-
-    /**
-     * Returns the variable declarations.
-     */
-    public List<JVarDecl> getVarDecls()  { return _varDeclExpr.getVarDecls(); }
 }

@@ -143,10 +143,6 @@ public class JSStmtEval {
         if (aStmt instanceof JStmtTry)
             throw new RuntimeException("JSStmtEval: try Statement not implemented");
 
-        // Handle variable declaration statement
-        if (aStmt instanceof JStmtVarDecl)
-            return evalVarDeclStmt((JStmtVarDecl) aStmt);
-
         // Handle while statement
         if (aStmt instanceof JStmtWhile)
             return evalWhileStmt(anOR, (JStmtWhile) aStmt);
@@ -405,15 +401,6 @@ public class JSStmtEval {
 
         // Return
         return null;
-    }
-
-    /**
-     * Evaluate JStmtVarDecl.
-     */
-    public Object evalVarDeclStmt(JStmtVarDecl aStmt) throws Exception
-    {
-        JExprVarDecl expr = aStmt.getVarDeclExpr();
-        return evalExpr(expr);
     }
 
     /**

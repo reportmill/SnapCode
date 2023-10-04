@@ -748,7 +748,7 @@ public class JavaParser extends JavaParserStmt {
         ContinueStatementHandler.class, BreakStatementHandler.class, ForStatementHandler.class,
         DoStatementHandler.class, WhileStatementHandler.class, IfStatementHandler.class,
         SwitchLabelHandler.class, SwitchStatementHandler.class, ExprStatementHandler.class,
-        EmptyStatementHandler.class, VarDeclStmtHandler.class, VarDeclExprHandler.class, VarDeclHandler.class,
+        EmptyStatementHandler.class, VarDeclExprHandler.class, VarDeclHandler.class,
         FormalParamHandler.class, BlockStatementHandler.class, BlockHandler.class,
         LabeledStatementHandler.class, AssertStatementHandler.class, ModifiersHandler.class,
         StatementHandler.class, ConstrCallHandler.class, ThrowsListHandler.class,
