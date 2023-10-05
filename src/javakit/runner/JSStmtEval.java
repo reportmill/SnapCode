@@ -141,7 +141,7 @@ public class JSStmtEval {
 
         // Handle try statement
         if (aStmt instanceof JStmtTry)
-            throw new RuntimeException("JSStmtEval: try Statement not implemented");
+            return evalTryStmt(anOR, (JStmtTry) aStmt);
 
         // Handle while statement
         if (aStmt instanceof JStmtWhile)
@@ -398,6 +398,28 @@ public class JSStmtEval {
             if (!Convert.booleanValue(condValue))
                 break;
         }
+
+        // Return
+        return null;
+    }
+
+    /**
+     * Evaluate JStmtTry.
+     */
+    public Object evalTryStmt(Object anOR, JStmtTry aTryStmt) throws Exception
+    {
+        JExpr[] resourceExprs = aTryStmt.getResources();
+        for (JExpr resourceExpr : resourceExprs)
+            evalExpr(resourceExpr);
+
+        // Run try block
+        JStmtBlock blockStmt = aTryStmt.getBlock();
+        evalStmt(anOR, blockStmt);
+
+        // If finally statement availabe, run it
+        JStmtBlock finallyStmt = aTryStmt.getFinallyBlock();
+        if (finallyStmt != null)
+            evalStmt(anOR, finallyStmt);
 
         // Return
         return null;

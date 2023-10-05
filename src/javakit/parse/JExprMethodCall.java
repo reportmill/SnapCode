@@ -136,7 +136,8 @@ public class JExprMethodCall extends JExpr implements WithId {
             JExpr arg = args.get(i);
             if (arg instanceof JExprLambda)
                 return getMethodForLambdaArgs();
-            JavaClass argClass = arg != null ? arg.getEvalClass() : null;
+            JavaDecl argDecl = arg != null ? arg.getDecl() : null;
+            JavaClass argClass = argDecl != null ? argDecl.getEvalClass() : null;
             argClasses[i] = argClass;
         }
 
