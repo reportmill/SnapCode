@@ -735,19 +735,32 @@ public class JavaParserStmt extends JavaParserExpr {
             // Get try statement
             JStmtTry tryStmt = getPart();
 
-            // Handle Block
-            if (anId == "Block") {
-                JStmtBlock blockStmt = aNode.getCustomNode(JStmtBlock.class);
-                if (tryStmt.getBlock() == null)
-                    tryStmt.setBlock(blockStmt);
-                else tryStmt.addStatementBlock(blockStmt);
-            }
+            switch (anId) {
 
-            // Handle FormalParam
-            else if (anId == "FormalParam") {
-                JStmtTryCatch catchNode = new JStmtTryCatch();
-                catchNode.setParameter(aNode.getCustomNode(JVarDecl.class));
-                tryStmt.addCatchBlock(catchNode);
+                // Handle Resource: VarDeclExpr | PrimaryExpr
+                case "VarDeclExpr":
+                case "PrimaryExpr": {
+                    JExpr resourceExpr = aNode.getCustomNode(JExpr.class);
+                    tryStmt.addResource(resourceExpr);
+                    break;
+                }
+
+                // Handle Block
+                case "Block": {
+                    JStmtBlock blockStmt = aNode.getCustomNode(JStmtBlock.class);
+                    if (tryStmt.getBlock() == null)
+                        tryStmt.setBlock(blockStmt);
+                    else tryStmt.addStatementBlock(blockStmt);
+                    break;
+                }
+
+                // Handle FormalParam
+                case "FormalParam": {
+                    JStmtTryCatch catchNode = new JStmtTryCatch();
+                    catchNode.setParameter(aNode.getCustomNode(JVarDecl.class));
+                    tryStmt.addCatchBlock(catchNode);
+                    break;
+                }
             }
         }
 

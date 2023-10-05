@@ -35,15 +35,6 @@ public class JStmtTryCatch extends JNode implements WithVarDecls, WithBlockStmt 
     }
 
     /**
-     * WithVarDecls method.
-     */
-    @Override
-    public List<JVarDecl> getVarDecls()
-    {
-        return Collections.singletonList(_param);
-    }
-
-    /**
      * Returns the statement block.
      */
     public JStmtBlock getBlock()  { return _block; }
@@ -54,5 +45,14 @@ public class JStmtTryCatch extends JNode implements WithVarDecls, WithBlockStmt 
     public void setBlock(JStmtBlock aStmtBlock)
     {
         replaceChild(_block, _block = aStmtBlock);
+    }
+
+    /**
+     * WithVarDecls method.
+     */
+    @Override
+    public List<JVarDecl> getVarDecls()
+    {
+        return Collections.singletonList(_param);
     }
 }
