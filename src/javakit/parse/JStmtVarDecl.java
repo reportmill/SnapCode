@@ -19,6 +19,11 @@ public class JStmtVarDecl extends JStmtExpr {
     }
 
     /**
+     * Returns the Expr as JExprVarDecl.
+     */
+    public JExprVarDecl getVarDeclExpr()  { return (JExprVarDecl) getExpr(); }
+
+    /**
      * WithVarDecls method.
      */
     public List<JVarDecl> getVarDecls()

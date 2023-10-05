@@ -108,8 +108,11 @@ public class Simpiler {
         for (JStmt stmt : stmts) {
 
             // Handle varDecl statement: Bump varIndex for VarDecl statement VarDecls
-            if (stmt instanceof JStmtVarDecl)
-                varIndex = setVarStackIndexForNodeWithVarDecls(stmt, varIndex);
+            if (stmt instanceof JStmtVarDecl) {
+                JStmtVarDecl varDeclStmt = (JStmtVarDecl) stmt;
+                JExprVarDecl varDeclExpr = varDeclStmt.getVarDeclExpr();
+                varIndex = setVarStackIndexForNodeWithVarDecls(varDeclExpr, varIndex);
+            }
 
             // Handle any other statement normally
             else setVarStackIndexForNode(stmt, varIndex);
