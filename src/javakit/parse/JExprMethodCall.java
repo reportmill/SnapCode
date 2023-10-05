@@ -136,8 +136,7 @@ public class JExprMethodCall extends JExpr implements WithId {
             JExpr arg = args.get(i);
             if (arg instanceof JExprLambda)
                 return getMethodForLambdaArgs();
-            JavaDecl argDecl = arg != null ? arg.getDecl() : null;
-            JavaClass argClass = argDecl != null ? argDecl.getEvalClass() : null;
+            JavaClass argClass = arg != null ? arg.getEvalClass() : null;
             argClasses[i] = argClass;
         }
 
@@ -276,7 +275,7 @@ public class JExprMethodCall extends JExpr implements WithId {
             JavaMethod method = getDecl();
 
             // See if TypeVar can be resolved by method
-            if (method != null && (typeVar.getOwner() == method || method.isStatic())) {
+            if (method != null && typeVar.getOwner() == method) {
                 JavaType resType = getResolvedTypeVarForMethod(typeVar, method);
                 if (resType != null)
                     resolvedType = resType;
@@ -323,12 +322,11 @@ public class JExprMethodCall extends JExpr implements WithId {
         else if (aType instanceof JavaGenericArrayType)
             System.err.println("JExprMethodCall.getResolvedTypeForType: No support for GenericArrayType");
 
-        // Do normal version (skip parent dot expression)
+        // If still not resolved, forward to parent WithTypeVars
         if (!resolvedType.isResolvedType()) {
-            JNode parentNode = getParent();
-            if (parentNode instanceof JExprDot)
-                parentNode = parentNode.getParent();
-            resolvedType = parentNode.getResolvedTypeForType(resolvedType);
+            JNode parentNode = getParent(JClassDecl.class); // Should also be JExecutableDecl
+            if (parentNode != null)
+                resolvedType = parentNode.getResolvedTypeForType(resolvedType);
         }
 
         // Return
