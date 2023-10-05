@@ -248,6 +248,13 @@ public class DeclMatcher {
         else if (aNode instanceof JStmtBlock)
             getVarDeclsForJStmtBlock((JStmtBlock) aNode, theVariables);
 
+        // Handle WithVarDecls
+        else if (aNode instanceof WithVarDecls) {
+            WithVarDecls withVarDecls = (WithVarDecls) aNode;
+            List<JVarDecl> varDecls = withVarDecls.getVarDecls();
+            getVarDeclsForJVarDecls(varDecls, theVariables);
+        }
+
         // If Parent, forward on
         JNode parent = aNode.getParent();
         if (parent != null)

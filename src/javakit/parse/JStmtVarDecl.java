@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * A Java statement for local variable declarations.
  */
-public class JStmtVarDecl extends JStmtExpr implements WithVarDecls {
+public class JStmtVarDecl extends JStmtExpr {
 
     /**
      * Constructor.
@@ -21,7 +21,6 @@ public class JStmtVarDecl extends JStmtExpr implements WithVarDecls {
     /**
      * WithVarDecls method.
      */
-    @Override
     public List<JVarDecl> getVarDecls()
     {
         JExprVarDecl varDeclExpr = (JExprVarDecl) _expr;
