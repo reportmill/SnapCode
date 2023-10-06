@@ -3,6 +3,7 @@
  */
 package snapcode.project;
 import javakit.parse.*;
+import snap.util.ArrayUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
 import java.util.ArrayList;
@@ -66,12 +67,14 @@ public class JavaFileBuilderSimple extends JavaFileBuilder {
 
         // Find errors in JFile
         findNodeErrors(jFile, errorsList);
+        NodeError[] errors = errorsList.toArray(NodeError.NO_ERRORS);
 
-        // Set project errors
-        boolean success = errorsList.size() == 0;
-        setErrorsForJavaAgent(javaAgent, errorsList);
+        // Convert to BuildIssues and set in agent
+        BuildIssue[] buildIssues = ArrayUtils.map(errors, error -> BuildIssue.createIssueForNodeError(error, javaFile), BuildIssue.class);
+        javaAgent.setBuildIssues(buildIssues);
 
         // Return
+        boolean success = errorsList.size() == 0;
         return success;
     }
 
@@ -90,28 +93,5 @@ public class JavaFileBuilderSimple extends JavaFileBuilder {
         List<JNode> children = aNode.getChildren();
         for (JNode child : children)
             findNodeErrors(child, theErrors);
-    }
-
-    /**
-     * Sets the errors for given JavaAgent and NodeError list.
-     */
-    private void setErrorsForJavaAgent(JavaAgent javaAgent, List<NodeError> theNodeErrors)
-    {
-        // Get Workspace.BuildIssues and clear
-        Workspace workspace = javaAgent.getWorkspace();
-        BuildIssues buildIssues = workspace.getBuildIssues();
-
-        // Remove old issues
-        WebFile javaFile = javaAgent.getFile();
-        BuildIssue[] oldIssues = buildIssues.getIssuesForFile(javaFile);
-        for (BuildIssue buildIssue : oldIssues)
-            buildIssues.remove(buildIssue);
-
-        // Add new issues
-        for (NodeError nodeError : theNodeErrors) {
-            BuildIssue buildIssue = BuildIssue.createIssueForNodeError(nodeError, javaFile);
-            if (buildIssue != null)
-                buildIssues.add(buildIssue);
-        }
     }
 }

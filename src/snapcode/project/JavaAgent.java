@@ -180,6 +180,26 @@ public class JavaAgent {
     }
 
     /**
+     * Sets the build issues.
+     */
+    public void setBuildIssues(BuildIssue[] buildIssues)
+    {
+        // Get Workspace.BuildIssues and clear
+        Workspace workspace = getWorkspace();
+        BuildIssues buildIssuesMgr = workspace.getBuildIssues();
+
+        // Remove old issues
+        WebFile javaFile = getFile();
+        BuildIssue[] oldIssues = buildIssuesMgr.getIssuesForFile(javaFile);
+        for (BuildIssue buildIssue : oldIssues)
+            buildIssuesMgr.remove(buildIssue);
+
+        // Add new issues
+        for (BuildIssue buildIssue : buildIssues)
+            buildIssuesMgr.add(buildIssue);
+    }
+
+    /**
      * Returns the string from Java file.
      */
     public String getJavaText()
