@@ -81,7 +81,7 @@ public class EvalToolRunner {
         _runAppThread.start();
 
         // Check back in half a second to see if we need to show progress bar
-        ViewUtils.runDelayed(() -> handleExtendedRun(), 500, true);
+        ViewUtils.runDelayed(() -> handleExtendedRun(), 500);
 
         // Reset EvalPane
         _evalTool.resetLater();

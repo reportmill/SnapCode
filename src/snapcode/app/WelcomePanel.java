@@ -139,7 +139,7 @@ public class WelcomePanel extends ViewOwner {
         WorkspacePane workspacePane = openWorkspaceForFile(javaReplFile);
 
         if (showSamples)
-            runLaterDelayed(300, () -> workspacePane.getWorkspaceTools().showSamples());
+            runDelayed(300, () -> workspacePane.getWorkspaceTools().showSamples());
         else runLater(() -> workspacePane.getWorkspaceTools().startSamplesButtonAnim());
     }
 

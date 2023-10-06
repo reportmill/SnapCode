@@ -558,7 +558,7 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     synchronized void updateProcTreeLater()
     {
         if (_procTreeUpdater != null) return; // If already set, just return
-        runLaterDelayed(250, _procTreeUpdater = _procTreeUpdaterImpl);
+        runDelayed(250, _procTreeUpdater = _procTreeUpdaterImpl);
     }
 
     Runnable _procTreeUpdater, _procTreeUpdaterImpl = () -> {
