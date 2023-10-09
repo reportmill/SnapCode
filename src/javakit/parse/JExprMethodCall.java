@@ -274,8 +274,12 @@ public class JExprMethodCall extends JExpr implements WithId {
             JavaTypeVariable typeVar = (JavaTypeVariable) resolvedType;
             JavaMethod method = getDecl();
 
+            // Get whether method has this type var
+            String typeVarName = typeVar.getName();
+            boolean methodHasTypeVar = method != null && method.getTypeVarForName(typeVarName) != null;
+
             // See if TypeVar can be resolved by method
-            if (method != null && typeVar.getOwner() == method) {
+            if (methodHasTypeVar) {
                 JavaType resType = getResolvedTypeVarForMethod(typeVar, method);
                 if (resType != null)
                     resolvedType = resType;

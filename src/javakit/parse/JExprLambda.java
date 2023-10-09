@@ -170,11 +170,15 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
             return parentNode.getEvalType();
 
         // If expression is set, return it's eval type
-        if (_expr != null)
-            return _expr.getEvalType();
+        if (_expr != null) {
+            JavaDecl exprDecl = _expr.getDecl();
+            return exprDecl != null ? exprDecl.getEvalType() : null;
+        }
 
-        // Do normal version
-        return super.getEvalTypeImpl();
+        // Do normal version - without resolution
+        JavaDecl decl = getDecl();
+        JavaType evalType = decl != null ? decl.getEvalType() : null;
+        return evalType;
     }
 
     /**
