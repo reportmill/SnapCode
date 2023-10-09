@@ -156,9 +156,70 @@ public class JNode {
      */
     protected JavaType getResolvedTypeForType(JavaType aType)
     {
+        // Get type
         JavaType resolvedType = aType;
-        if (_parent != null)
-            resolvedType = _parent.getResolvedTypeForType(aType);
+
+        // Handle TypeVar
+        if (aType instanceof JavaTypeVariable) {
+            JavaTypeVariable typeVar = (JavaTypeVariable) resolvedType;
+            resolvedType = getResolvedTypeForTypeVar(typeVar);
+        }
+
+        // Handle ParameterizedType
+        else if (aType instanceof JavaParameterizedType) {
+
+            // Get parameterized type and parameter types
+            JavaParameterizedType parameterizedType = (JavaParameterizedType) resolvedType;
+            JavaType[] paramTypes = parameterizedType.getParamTypes();
+            JavaType[] paramTypesResolved = paramTypes.clone();
+            boolean didResolve = false;
+
+            // Iterate over each and resolve if needed
+            for (int i = 0; i < paramTypes.length; i++) {
+                JavaType paramType = paramTypes[i];
+                if (!paramType.isResolvedType()) {
+                    JavaType paramTypeResolved = getResolvedTypeForType(paramType);
+                    if (paramTypeResolved != paramType) {
+                        paramTypesResolved[i] = paramTypeResolved;
+                        didResolve = true;
+                    }
+                }
+            }
+
+            // If something was resolved, create new type with resolved parameter types
+            if (didResolve) {
+                JavaClass rawType = parameterizedType.getRawType();
+                resolvedType = rawType.getParameterizedTypeForTypes(paramTypesResolved);
+            }
+        }
+
+        // Handle Generic array type
+        else if (aType instanceof JavaGenericArrayType)
+            System.err.println("JExprMethodCall.getResolvedTypeForType: No support for GenericArrayType");
+
+        // If still not resolved, forward to parent WithTypeVars
+        if (!resolvedType.isResolvedType()) {
+            JNode parentNode = getParent(JClassDecl.class); // Should also be JExecutableDecl
+            if (parentNode != null)
+                resolvedType = parentNode.getResolvedTypeForType(resolvedType);
+        }
+
+        // Return
+        return resolvedType;
+    }
+
+    /**
+     * Returns a resolved type for given type.
+     */
+    protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
+    {
+        JavaType resolvedType = aTypeVar;
+
+        // Forward to upper resolvables (parent class or method definition)
+        JNode parent = getParent(JClassDecl.class);
+        if (parent != null)
+            resolvedType = parent.getResolvedTypeForTypeVar(aTypeVar);
+
         return resolvedType;
     }
 

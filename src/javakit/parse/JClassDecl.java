@@ -597,19 +597,15 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
     /**
      * Returns a resolved type for given type.
      */
-    protected JavaType getResolvedTypeForType(JavaType aType)
+    protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
     {
-        JavaType resolvedType = aType;
-
-        // If eval type is TypeVar, see if it corresponds to this class
-        if (resolvedType instanceof JavaTypeVariable) {
-            JavaClass javaClass = getDecl();
-            resolvedType = javaClass.getResolvedType(resolvedType);
-        }
+        // Just resolve typeVar to bounds
+        JavaClass javaClass = getDecl();
+        JavaType resolvedType = javaClass.getResolvedType(aTypeVar);
 
         // Do normal version
-        if (!resolvedType.isResolvedType())
-            return super.getResolvedTypeForType(resolvedType);
+        if (!resolvedType.isResolvedType() && resolvedType instanceof JavaTypeVariable)
+            resolvedType = super.getResolvedTypeForTypeVar((JavaTypeVariable) resolvedType);
 
         // Return
         return resolvedType;
