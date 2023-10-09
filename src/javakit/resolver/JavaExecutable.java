@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.resolver;
+import snap.util.ArrayUtils;
 import java.lang.reflect.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -69,14 +70,7 @@ public class JavaExecutable extends JavaMember {
      */
     public JavaTypeVariable getTypeVarForName(String aName)
     {
-        // Check Method, Constructor TypeVars
-        for (JavaTypeVariable typeVar : _typeVars)
-            if (typeVar.getName().equals(aName))
-                return typeVar;
-
-        // Forward to class
-        JavaClass declaringClass = getDeclaringClass();
-        return declaringClass.getTypeVarForName(aName);
+        return ArrayUtils.findMatch(_typeVars, tvar -> tvar.getName().equals(aName));
     }
 
     /**

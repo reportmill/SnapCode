@@ -82,7 +82,7 @@ public class JVarDecl extends JNode implements WithId {
 
         // Handle JExprLambda VarDecl: Get decl for this param and create new type
         if (parentNode instanceof JExprLambda)
-            return ((JExprLambda) parentNode).createTypeNodeForVarDecl(this);
+            return ((JExprLambda) parentNode).createTypeNodeForLambdaParameterVarDecl(this);
 
         // Return unknown
         return null;

@@ -92,7 +92,7 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
     /**
      * Creates and returns a JType node for given VarDecl.
      */
-    protected JType createTypeNodeForVarDecl(JVarDecl varDecl)
+    protected JType createTypeNodeForLambdaParameterVarDecl(JVarDecl varDecl)
     {
         // Get parameter index for var decl
         int parameterIndex = _params.indexOf(varDecl);
@@ -104,6 +104,12 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
         JavaType parameterType = parameterTypes != null && parameterTypes.length > parameterIndex ? parameterTypes[parameterIndex] : null;
         if (parameterType == null)
             return null;
+
+        // If not resolved, try to resolve
+        if (!parameterType.isResolvedType()) {
+            JNode parentNode = getParent(); // Should be method call
+            parameterType = parentNode.getResolvedTypeForType(parameterType);
+        }
 
         // Create type for type decl and return
         JType type = JType.createTypeForTypeAndToken(parameterType, varDecl.getStartToken());
@@ -253,10 +259,12 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
             return constructor.getParameterType(argIndex);
         }
 
-        // Handle parent anything else (JVarDecl, JStmtExpr): Return parent eval type
-        JavaType lambdaType = parentNode.getEvalType();
-        if (lambdaType != null)
-            return lambdaType;
+        // Handle parent is JVarDecl, JExprCast, JExprAssign: Return parent eval type
+        if (parentNode instanceof JVarDecl || parentNode instanceof JExprCast || parentNode instanceof JExprAssign) {
+            JavaType lambdaType = parentNode.getEvalType();
+            if (lambdaType != null)
+                return lambdaType;
+        }
 
         // Return not found
         return null;

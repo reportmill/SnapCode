@@ -485,14 +485,8 @@ public class JavaClass extends JavaType {
      */
     public JavaTypeVariable getTypeVarForName(String aName)
     {
-        // Iterate to find TypeVar for name
         List<JavaTypeVariable> typeVars = getTypeVars();
-        for (JavaTypeVariable typeVar : typeVars)
-            if (typeVar.getName().equals(aName))
-                return typeVar;
-
-        // Return not found
-        return null;
+        return ListUtils.findMatch(typeVars, tvar -> tvar.getName().equals(aName));
     }
 
     /**
