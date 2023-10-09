@@ -48,6 +48,7 @@ public class JavaTextArea extends TextArea {
     // Constants
     protected static String INDENT_STRING = "    ";
     private static JavaTextDoc DUMMY_TEXT_DOC;
+    private Color ERROR_TEXT_COLOR = Color.RED.brighter().brighter();
 
     /**
      * Creates a new JavaTextArea.
@@ -495,35 +496,9 @@ public class JavaTextArea extends TextArea {
 
         // Underline build issues
         BuildIssue[] issues = getBuildIssues();
-        for (BuildIssue issue : issues) {
-
-            int issueStart = issue.getStart();
-            int issueEnd = issue.getEnd();
-            if (issueEnd < issueStart || issueEnd > length())
-                continue;
-
-            TextLine textLine = getLineForCharIndex(issueEnd);
-            int lineStartCharIndex = textLine.getStartCharIndex();
-            if (issueStart < lineStartCharIndex)
-                issueStart = lineStartCharIndex;
-            TextToken token = getTokenForCharIndex(issueStart);
-            if (token != null) {
-                int tend = token.getTextLine().getStartCharIndex() + token.getEndCharIndex();
-                if (issueEnd < tend)
-                    issueEnd = tend;
-            }
-
-            // If possible, make sure we underline at least one char
-            if (issueStart == issueEnd && issueEnd < textLine.getEndCharIndex())
-                issueEnd++;
-            int issueY = (int) Math.round(textLine.getTextBaseline()) + 2;
-            double issueX = textLine.getTextXForCharIndex(issueStart - lineStartCharIndex);
-            double issueMaxX = textLine.getTextXForCharIndex(issueEnd - lineStartCharIndex);
-            aPntr.setPaint(issue.isError() ? Color.RED : new Color(244, 198, 60));
-            aPntr.setStroke(Stroke.StrokeDash1);
-            aPntr.drawLine(issueX, issueY, issueMaxX, issueY);
-            aPntr.setStroke(Stroke.Stroke1);
-        }
+        Set<TextLine> paintedLines = new HashSet<>();
+        for (BuildIssue issue : issues)
+            paintError(aPntr, issue, paintedLines);
 
         // Paint program counter
         int progCounterLine = getProgramCounterLine();
@@ -556,6 +531,70 @@ public class JavaTextArea extends TextArea {
             aPntr.setColor(Color.BLACK);
             aPntr.drawLine(tokenX, tokenY, tokenMaxX, tokenY);
         }
+    }
+
+    /**
+     * Paints an error.
+     */
+    private void paintError(Painter aPntr, BuildIssue issue, Set<TextLine> paintedLines)
+    {
+        int issueStart = issue.getStart();
+        int issueEnd = issue.getEnd();
+        if (issueEnd < issueStart || issueEnd > length())
+            return;
+
+        TextLine textLine = getLineForCharIndex(issueEnd);
+        if (paintedLines.contains(textLine))
+            return;
+        paintedLines.add(textLine);
+
+        int lineStartCharIndex = textLine.getStartCharIndex();
+        if (issueStart < lineStartCharIndex)
+            issueStart = lineStartCharIndex;
+        TextToken token = getTokenForCharIndex(issueStart);
+        if (token != null) {
+            int tend = token.getTextLine().getStartCharIndex() + token.getEndCharIndex();
+            if (issueEnd < tend)
+                issueEnd = tend;
+        }
+
+        // If possible, make sure we underline at least one char
+        if (issueStart == issueEnd && issueEnd < textLine.getEndCharIndex())
+            issueEnd++;
+        int issueY = (int) Math.round(textLine.getTextBaseline()) + 2;
+        double issueX = textLine.getTextXForCharIndex(issueStart - lineStartCharIndex);
+        double issueMaxX = textLine.getTextXForCharIndex(issueEnd - lineStartCharIndex);
+        aPntr.setPaint(issue.isError() ? Color.RED : new Color(244, 198, 60));
+        aPntr.setStroke(Stroke.StrokeDash1);
+        aPntr.drawLine(issueX, issueY, issueMaxX, issueY);
+        aPntr.setStroke(Stroke.Stroke1);
+
+        // Paint the error message
+        paintErrorMessage(aPntr, issue, textLine, getFont());
+    }
+
+    /**
+     * Paints an error message.
+     */
+    private void paintErrorMessage(Painter aPntr, BuildIssue issue, TextLine textLine, Font errorFont)
+    {
+        // Get error string and X, Y, W, H, MidX, MidY
+        String errorStr = issue.getText();
+        double errorX = textLine.getMaxX() + 80;
+        double errorY = textLine.getTextBaseline() + 1;
+        double errorW = errorFont.getStringAdvance(errorStr);
+        double errorH = errorFont.getAscent();
+        double errorMidX = errorX + errorW / 2;
+        double errorMidY = errorY + errorH / 2;
+
+        // Paint string skewed a bit (italics)
+        aPntr.save();
+        aPntr.translate(errorMidX, errorMidY);
+        aPntr.transform(1, 0, -.15, 1, 0, 0);
+        aPntr.translate(-errorMidX, -errorMidY);
+        aPntr.setColor(ERROR_TEXT_COLOR);
+        aPntr.drawString(errorStr, errorX, errorY);
+        aPntr.restore();
     }
 
     /**
