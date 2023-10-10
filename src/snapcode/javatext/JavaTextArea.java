@@ -495,10 +495,7 @@ public class JavaTextArea extends TextArea {
         }
 
         // Underline build issues
-        BuildIssue[] issues = getBuildIssues();
-        Set<TextLine> paintedLines = new HashSet<>();
-        for (BuildIssue issue : issues)
-            paintError(aPntr, issue, paintedLines);
+        paintErrors(aPntr);
 
         // Paint program counter
         int progCounterLine = getProgramCounterLine();
@@ -531,6 +528,21 @@ public class JavaTextArea extends TextArea {
             aPntr.setColor(Color.BLACK);
             aPntr.drawLine(tokenX, tokenY, tokenMaxX, tokenY);
         }
+    }
+
+    /**
+     * Paints errors.
+     */
+    private void paintErrors(Painter aPntr)
+    {
+        // Set font for error messages
+        aPntr.setFont(getFont());
+
+        // Underline build issues
+        BuildIssue[] issues = getBuildIssues();
+        Set<TextLine> paintedLines = new HashSet<>();
+        for (BuildIssue issue : issues)
+            paintError(aPntr, issue, paintedLines);
     }
 
     /**
