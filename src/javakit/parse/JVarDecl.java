@@ -208,22 +208,42 @@ public class JVarDecl extends JNode implements WithId {
     @Override
     protected NodeError[] getErrorsImpl()
     {
-        // Do normal version
-        NodeError[] errors = super.getErrorsImpl();
-
         // If initializer expression set, check type
         JExpr initExpr = getInitializer();
         if (initExpr != null) {
+
+            // If initializer has errors, just return them
+            NodeError[] initializerErrors = initExpr.getErrors();
+            if (initializerErrors.length > 0)
+                return initializerErrors;
+
+            // If invalid assign type, return error
             JavaClass varClass = getEvalClass();
             if (varClass != null) {
                 JavaClass initClass = initExpr.getEvalClass();
                 if (!varClass.isAssignableFrom(initClass))
-                    errors = NodeError.addError(errors, this, "Invalid assignment type");
+                    return NodeError.newErrorArray(this, "Invalid assignment type");
             }
         }
 
-        // Return
-        return errors;
+        // If any array inits have error, return that
+        List<JExpr> arrayInitExprs = getArrayInits();
+        for (JExpr arrayInitExpr : arrayInitExprs) {
+            NodeError[] arrayInitExprErrors = arrayInitExpr.getErrors();
+            if (arrayInitExprErrors.length > 0)
+                return arrayInitExprErrors;
+        }
+
+        // If type has errors, just return it
+        JType type = getType();
+        if (type != null) {
+            NodeError[] typeErrors = type.getErrors();
+            if (typeErrors.length > 0)
+                return typeErrors;
+        }
+
+        // Return normal version
+        return super.getErrorsImpl();
     }
 
     /**

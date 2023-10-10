@@ -62,6 +62,15 @@ public class JType extends JNode {
     }
 
     /**
+     * Returns whether type is 'var'.
+     */
+    public boolean isVarType()
+    {
+        String name = getName();
+        return name.equals("var");
+    }
+
+    /**
      * Returns whether type is primitive type.
      */
     public boolean isPrimitive()  { return _primitive; }
@@ -159,11 +168,11 @@ public class JType extends JNode {
         if (_baseDecl != null) return _baseDecl;
 
         // Handle 'var'
-        String baseName = getName();
-        if (baseName.equals("var"))
+        if (isVarType())
             return _baseDecl = getDeclForVar();
 
         // Handle primitive type
+        String baseName = getName();
         Class<?> primitiveClass = ClassUtils.getPrimitiveClassForName(baseName);
         if (primitiveClass != null)
             return _baseDecl = getJavaClassForClass(primitiveClass);
@@ -224,8 +233,7 @@ public class JType extends JNode {
     protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // Handle 'var'
-        String name = anExprId.getName();
-        if (name.equals("var") && anExprId == _baseExpr)
+        if (isVarType() && anExprId == _baseExpr)
             return getDeclForVar();
 
         // Do normal version

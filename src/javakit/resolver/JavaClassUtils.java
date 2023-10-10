@@ -46,6 +46,8 @@ public class JavaClassUtils {
             if (staticOnly && !method.isStatic())
                 continue;
             if (method.getName().equals(aName)) {
+                if (paramTypes == null)
+                    return method;
                 int rtg = JavaExecutable.getMatchRatingForArgClasses(method, paramTypes);
                 if (rtg > rating) {
                     compatibleMethod = method;

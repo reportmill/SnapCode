@@ -23,6 +23,9 @@ public class JExprMethodCall extends JExpr implements WithId {
     // The param types
     private JavaType[] _paramTypes;
 
+    // The method
+    private JavaMethod _method;
+
     /**
      * Constructor.
      */
@@ -116,10 +119,24 @@ public class JExprMethodCall extends JExpr implements WithId {
     public JavaMethod getDecl()  { return (JavaMethod) super.getDecl(); }
 
     /**
-     * Tries to resolve the method declaration for this node.
+     * Override to return method.
      */
     @Override
-    protected JavaMethod getDeclImpl()
+    protected JavaMethod getDeclImpl()  { return getMethod(); }
+
+    /**
+     * Tries to resolve the method declaration for this node.
+     */
+    public JavaMethod getMethod()
+    {
+        if (_method != null) return _method;
+        return _method = getMethodImpl();
+    }
+
+    /**
+     * Tries to resolve the method declaration for this node.
+     */
+    protected JavaMethod getMethodImpl()
     {
         // Get scope node class
         JavaType scopeEvalType = getScopeEvalType();
@@ -400,29 +417,58 @@ public class JExprMethodCall extends JExpr implements WithId {
     @Override
     protected NodeError[] getErrorsImpl()
     {
-        NodeError[] errors = super.getErrorsImpl();
+        // If any arg errors, return them
+        for (JExpr arg : _args) {
+            NodeError[] argErrors = arg.getErrors();
+            if (argErrors.length > 0)
+                return argErrors;
+        }
 
         // Handle can't resolve method
         JavaMethod method = getDecl();
         if (method == null) {
-            String methodString = getMethodString();
-            NodeError error = new NodeError(this, "Can't resolve method: " + methodString);
-            errors = ArrayUtils.add(errors, error, 0);
+
+            // If no method exists for name, return can't resolve method name
+            boolean hasAnyMethodForName = getMethodAny() != null;
+            String methodString = getMethodString(hasAnyMethodForName);
+            return NodeError.newErrorArray(this, "Can't find method: " + methodString);
         }
 
         // Return
-        return errors;
+        return NodeError.NO_ERRORS;
+    }
+
+    /**
+     * Looks to see if there is any method for given name.
+     */
+    protected JavaMethod getMethodAny()
+    {
+        // Get scope node class
+        String name = getName();
+        JavaType scopeEvalType = getScopeEvalType();
+        JavaClass scopeClass = scopeEvalType != null ? scopeEvalType.getEvalClass() : null;
+        if (scopeClass == null)
+            return null;
+
+        // Get whether to only search static methods (scope expression is Class)
+        JExpr scopeExpr = getScopeExpr();
+        boolean staticOnly = scopeExpr != null && scopeExpr.isClassNameLiteral();
+
+        // Search for compatible method for name and arg types
+        return JavaClassUtils.getCompatibleMethodAll(scopeClass, name, null, staticOnly);
     }
 
     /**
      * Returns a string for method.
      */
-    private String getMethodString()
+    private String getMethodString(boolean withArgs)
     {
         // Get method name and arg types
         String methodName = getName();
         if (methodName == null)
             return "No name found";
+        if (!withArgs)
+            return methodName + "()";
         String argTypesString = getArgTypesString();
         String methodString = methodName + argTypesString;
 
@@ -430,7 +476,7 @@ public class JExprMethodCall extends JExpr implements WithId {
         JavaDecl scopeEvalType = getScopeEvalType();
         String scopeClassName = scopeEvalType != null ? scopeEvalType.getEvalClassName() : null;
         if (scopeClassName != null)
-            methodString = scopeClassName + '.' + methodName;
+            methodString = scopeClassName + '.' + methodString;
 
         // Return
         return methodString;

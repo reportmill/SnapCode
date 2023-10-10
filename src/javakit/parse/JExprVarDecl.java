@@ -68,4 +68,25 @@ public class JExprVarDecl extends JExpr implements WithVarDecls {
         _varDecls.add(aVD);
         addChild(aVD, -1);
     }
+
+    /**
+     * Override to just return first VarDecl error, if present.
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()
+    {
+        // Handle compound var
+        if (_type.isVarType() && _varDecls.size() > 1)
+            return NodeError.newErrorArray(_type, "'var' is not allowed in a compound declaration");
+
+        // If any child VarDecls has errors, just return that
+        for (JVarDecl varDecl : _varDecls) {
+            NodeError[] varDeclErrors = varDecl.getErrors();
+            if (varDeclErrors.length > 0)
+                return varDeclErrors;
+        }
+
+        // Do normal version
+        return super.getErrorsImpl();
+    }
 }
