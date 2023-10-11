@@ -151,7 +151,7 @@ public class JExprMethodCall extends JExpr implements WithId {
         JavaClass[] argClasses = new JavaClass[argCount];
         for (int i = 0; i < argCount; i++) {
             JExpr arg = args.get(i);
-            if (arg instanceof JExprLambda)
+            if (arg instanceof JExprLambda || arg instanceof JExprMethodRef)
                 return getMethodForLambdaArgs();
             JavaClass argClass = arg != null ? arg.getEvalClass() : null;
             argClasses[i] = argClass;
@@ -210,7 +210,7 @@ public class JExprMethodCall extends JExpr implements WithId {
 
         // Get arg index of lambda expression
         List<JExpr> args = getArgs();
-        int argIndex = ListUtils.findMatchIndex(args, arg -> arg instanceof JExprLambda);
+        int argIndex = ListUtils.findMatchIndex(args, arg -> arg instanceof JExprLambda || arg instanceof JExprMethodRef);
         if (argIndex < 0)
             return null;
 
@@ -249,19 +249,23 @@ public class JExprMethodCall extends JExpr implements WithId {
         JavaClass[] argClasses = new JavaClass[argCount];
         for (int i = 0; i < argCount; i++) {
             JExpr arg = args.get(i);
-            JavaClass argType = arg instanceof JExprLambda ? null : arg.getEvalClass();
+            JavaClass argType = arg instanceof JExprLambda || arg instanceof JExprMethodRef ? null : arg.getEvalClass();
             argClasses[i] = argType;
         }
 
+        // Get whether to only search static methods (scope expression is Class)
+        JExpr scopeExpr = getScopeExpr();
+        boolean staticOnly = scopeExpr != null && scopeExpr.isClassNameLiteral();
+
         // Get scope node class type and search for compatible method for name and arg types
-        List<JavaMethod> compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argClasses);
+        List<JavaMethod> compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argClasses, staticOnly);
         if (compatibleMethods.size() > 0)
             return compatibleMethods;
 
         // If scope node class type is member class and not static, go up parent classes
         while (scopeClass.isMemberClass() && !scopeClass.isStatic()) {
             scopeClass = scopeClass.getDeclaringClass();
-            compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argClasses);
+            compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argClasses, staticOnly);
             if (compatibleMethods.size() > 0)
                 return compatibleMethods;
         }

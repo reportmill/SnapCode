@@ -2,10 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import javakit.resolver.JavaClass;
-import javakit.resolver.JavaConstructor;
-import javakit.resolver.JavaMethod;
-import javakit.resolver.JavaType;
+import javakit.resolver.*;
 import snap.util.ListUtils;
 
 import java.util.List;
@@ -20,6 +17,9 @@ public class JExprMethodRef extends JExpr {
 
     // The identifier
     JExprId _id;
+
+    // The method
+    private JavaMethod _method;
 
     // The type for this lambda
     private JavaType _lambdaType;
@@ -69,6 +69,46 @@ public class JExprMethodRef extends JExpr {
     public void setId(JExprId anId)
     {
         replaceChild(_id, _id = anId);
+    }
+
+    /**
+     * Returns the method name.
+     */
+    public String getMethodName()  { return _id != null ? _id.getName() : null; }
+
+    /**
+     * Tries to resolve the method declaration for this node.
+     */
+    public JavaMethod getMethod()
+    {
+        if (_method != null) return _method;
+        return _method = getMethodImpl();
+    }
+
+    /**
+     * Tries to resolve the method declaration for this node.
+     */
+    protected JavaMethod getMethodImpl()
+    {
+        // Get method name
+        String methodName = getMethodName();
+        if (methodName == null)
+            return null;
+
+        // Get scope node class
+        JExpr scopeExpr = _expr;
+        JavaType scopeEvalType = scopeExpr != null ? scopeExpr.getEvalType() : null;
+        JavaClass scopeClass = scopeEvalType != null ? scopeEvalType.getEvalClass() : null;
+        if (scopeClass == null)
+            return null;
+
+        // Search for compatible method for name and arg types
+        List<JavaMethod> methods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, methodName, null, false);
+        if (methods.size() > 0)
+            return methods.get(0);
+
+        // Return not found
+        return null;
     }
 
     /**
@@ -145,10 +185,12 @@ public class JExprMethodRef extends JExpr {
             return constructor.getParameterType(argIndex);
         }
 
-        // Handle parent anything else (JVarDecl, JStmtExpr): Return parent eval type
-        JavaType lambdaType = parentNode.getEvalType();
-        if (lambdaType != null)
-            return lambdaType;
+        // Handle parent is JVarDecl, JExprCast, JExprAssign: Return parent eval type
+        if (parentNode instanceof JVarDecl || parentNode instanceof JExprCast || parentNode instanceof JExprAssign) {
+            JavaType lambdaType = parentNode.getEvalType();
+            if (lambdaType != null)
+                return lambdaType;
+        }
 
         // Return not found
         return null;
@@ -161,6 +203,15 @@ public class JExprMethodRef extends JExpr {
     {
         JavaType lambdaType = getLambdaType();
         return lambdaType != null ? lambdaType.getEvalClass() : null;
+    }
+
+    /**
+     * Override to return Method.
+     */
+    @Override
+    protected JavaDecl getDeclImpl()
+    {
+        return getLambdaMethod();
     }
 
     /**

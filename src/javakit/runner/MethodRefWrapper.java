@@ -4,6 +4,7 @@ import javakit.parse.JExprMethodRef;
 import javakit.parse.JVarDecl;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaMethod;
+import snap.util.ArrayUtils;
 import snap.util.Convert;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -49,24 +50,20 @@ public class MethodRefWrapper {
         //_param1 = varDecls.size() > 1 ? varDecls.get(1) : null;
     }
 
-    public Object invokeWithArgs(Object[] args)
+    public Object invokeWithArgs(Object proxy, Object[] args)
     {
-        JavaMethod method = _methodRefExpr.getLambdaMethod();
+        JavaMethod method = _methodRefExpr.getMethod();
         Method method1 = method.getMethod();
-        try { return method1.invoke(_OR, args); }
+        Object thisObj = args[0];
+        if (method.isStatic()) {
+            thisObj = null;
+            args = ArrayUtils.add(args, proxy, 0);
+        }
+        else args = new Object[0];
+        try { return method1.invoke(thisObj, args); }
         catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-//        _varStack.pushStackFrame();
-//        if (_param0 != null) {
-//            _varStack.setStackValueForNode(_param0, args[0]);
-//            if (_param1 != null)
-//                _varStack.setStackValueForNode(_param1, args[1]);
-//        }
-//        try { return _exprEval.evalExpr(_OR, _contentExpr); }
-//        catch (Exception e) { throw new RuntimeException(e); }
-//        finally { _varStack.popStackFrame(); }
     }
 
     /**
@@ -112,7 +109,7 @@ public class MethodRefWrapper {
 
                 // If functional interface method, do that version
                 if (method.getName().equals(lambdaMethodName)) {
-                    Object result = lambdaWrapper.invokeWithArgs(args);
+                    Object result = lambdaWrapper.invokeWithArgs(proxy, args);
                     if (converter != null)
                         result = converter.apply(result);
                     else result = returnType.cast(result);

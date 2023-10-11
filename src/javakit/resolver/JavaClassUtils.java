@@ -35,7 +35,7 @@ public class JavaClassUtils {
     /**
      * Returns a compatible method for given name and param types.
      */
-    public static JavaMethod getCompatibleMethod(JavaClass aClass, String aName, JavaClass[] paramTypes, boolean staticOnly)
+    private static JavaMethod getCompatibleMethod(JavaClass aClass, String aName, JavaClass[] paramTypes, boolean staticOnly)
     {
         List<JavaMethod> declaredMethods = aClass.getDeclaredMethods();
         JavaMethod compatibleMethod = null;
@@ -95,11 +95,17 @@ public class JavaClassUtils {
     /**
      * Returns a compatible method for given name and param types.
      */
-    public static List<JavaMethod> getCompatibleMethodsAll(JavaClass aClass, String aName, JavaClass[] paramTypes)
+    public static List<JavaMethod> getCompatibleMethodsAll(JavaClass aClass, String aName, JavaClass[] paramTypes, boolean staticOnly)
     {
         // Find compatible methods
         List<JavaMethod> compatibleMethods = new ArrayList<>();
-        findCompatibleMethodsAll(aClass, aName, paramTypes, compatibleMethods);
+        findCompatibleMethodsAll(aClass, aName, paramTypes, compatibleMethods, staticOnly);
+
+        // If given class is Interface, check Object
+        if (aClass.isInterface()) {
+            JavaClass objDecl = aClass.getJavaClassForClass(Object.class);
+            findCompatibleMethods(objDecl, aName, paramTypes, compatibleMethods, staticOnly);
+        }
 
         // Remove supers
         for (int i = 0; i < compatibleMethods.size(); i++) {
@@ -115,38 +121,34 @@ public class JavaClassUtils {
     /**
      * Returns a compatible method for given name and param types.
      */
-    private static void findCompatibleMethodsAll(JavaClass aClass, String aName, JavaClass[] paramTypes, List<JavaMethod> compatibleMethods)
+    private static void findCompatibleMethodsAll(JavaClass aClass, String aName, JavaClass[] paramTypes, List<JavaMethod> compatibleMethods, boolean staticOnly)
     {
         // Search this class and superclasses for compatible methods
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
-            findCompatibleMethods(cls, aName, paramTypes, compatibleMethods);
+            findCompatibleMethods(cls, aName, paramTypes, compatibleMethods, staticOnly);
         }
 
         // Search this class and superclasses for compatible interface
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
             JavaClass[] interfaces = cls.getInterfaces();
             for (JavaClass infc : interfaces) {
-                findCompatibleMethodsAll(infc, aName, paramTypes, compatibleMethods);
+                findCompatibleMethodsAll(infc, aName, paramTypes, compatibleMethods, staticOnly);
             }
-        }
-
-        // If this class is Interface, check Object
-        if (aClass.isInterface()) {
-            JavaClass objDecl = aClass.getJavaClassForClass(Object.class);
-            findCompatibleMethods(objDecl, aName, paramTypes, compatibleMethods);
         }
     }
 
     /**
      * Find the compatible methods for given class, name and param types.
      */
-    private static void findCompatibleMethods(JavaClass aClass, String aName, JavaClass[] paramTypes, List<JavaMethod> compatibleMethods)
+    private static void findCompatibleMethods(JavaClass aClass, String aName, JavaClass[] paramTypes, List<JavaMethod> compatibleMethods, boolean staticOnly)
     {
         // Iterate over declared methods to find compatible methods (matching name and args)
         List<JavaMethod> declaredMethods = aClass.getDeclaredMethods();
         for (JavaMethod method : declaredMethods) {
+            if (staticOnly && !method.isStatic())
+                continue;
             if (method.getName().equals(aName)) {
-                int rating = JavaExecutable.getMatchRatingForArgClasses(method, paramTypes);
+                int rating = paramTypes != null ? JavaExecutable.getMatchRatingForArgClasses(method, paramTypes) : 1;
                 if (rating > 0)
                     ListUtils.addUniqueId(compatibleMethods, method);
             }

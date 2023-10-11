@@ -124,6 +124,13 @@ public class JExprId extends JExpr {
                 return dotExpr;
         }
 
+        // Handle parent is MethodRef
+        if (parent instanceof JExprMethodRef) {
+            JExprMethodRef methodRef = (JExprMethodRef) parent;
+            if (methodRef.getId() == this)
+                return methodRef;
+        }
+
         // Look for VarDecl that defines this id (if this id is var reference)
         JVarDecl varDecl = getVarDeclForId();
         if (varDecl != null)
