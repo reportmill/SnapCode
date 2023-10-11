@@ -557,11 +557,13 @@ public class JavaTextArea extends TextArea {
         if (issueEnd < issueStart || issueEnd > length())
             return;
 
+        // Get text line for error - just return if already painted
         TextLine textLine = getLineForCharIndex(issueEnd);
         if (paintedLines.contains(textLine))
             return;
         paintedLines.add(textLine);
 
+        // Constrain issueStart and issueEnd to textLine
         int lineStartCharIndex = textLine.getStartCharIndex();
         if (issueStart < lineStartCharIndex)
             issueStart = lineStartCharIndex;
@@ -594,7 +596,7 @@ public class JavaTextArea extends TextArea {
     {
         // Get error string and X, Y, W, H, MidX, MidY
         String errorStr = issue.getText();
-        double errorX = textLine.getMaxX() + 80;
+        double errorX = textLine.getMaxX() + 60;
         double errorY = textLine.getTextBaseline() + 1;
         double errorW = errorFont.getStringAdvance(errorStr);
         double errorH = errorFont.getAscent();

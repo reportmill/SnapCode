@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaConstructor;
 import javakit.resolver.JavaMethod;
@@ -14,7 +13,7 @@ import java.util.List;
 /**
  * This JExpr subclass represents a method reference: obj::method.
  */
-public class JExprMethodRef extends JExpr implements WithId {
+public class JExprMethodRef extends JExpr {
 
     // The expression
     JExpr _expr;
@@ -62,7 +61,6 @@ public class JExprMethodRef extends JExpr implements WithId {
     /**
      * Returns the identifier.
      */
-    @Override
     public JExprId getId()  { return _id; }
 
     /**
