@@ -24,7 +24,7 @@ public class DeclMatcher {
     private Matcher  _matcher;
 
     // Constant for preferred packages
-    public static final String[] COMMON_PACKAGES = { "java.util", "java.lang", "java.io", "snap.view", "snap.gfx", "snap.util" };
+    public static final String[] COMMON_PACKAGES = { "java.util", "java.lang", "java.io", "snap.view", "snap.gfx", "snap.geom", "snap.util" };
 
     // Constant for empty members
     private static final JavaField[] EMPTY_FIELDS_ARRAY = new JavaField[0];
