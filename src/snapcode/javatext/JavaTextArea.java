@@ -541,8 +541,10 @@ public class JavaTextArea extends TextArea {
         // Underline build issues
         BuildIssue[] issues = getBuildIssues();
         Set<TextLine> paintedLines = new HashSet<>();
-        for (BuildIssue issue : issues)
-            paintError(aPntr, issue, paintedLines);
+        for (BuildIssue issue : issues) {
+            if (issue.isError())
+                paintError(aPntr, issue, paintedLines);
+        }
     }
 
     /**

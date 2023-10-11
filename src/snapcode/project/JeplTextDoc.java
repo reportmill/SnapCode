@@ -25,6 +25,7 @@ public class JeplTextDoc extends JavaTextDoc {
         imports.add("java.util.*");
         imports.add("java.util.stream.*");
         imports.add("snap.view.*");
+        imports.add("snap.gfx.*");
         imports.add("snapcharts.data.*");
         imports.add("snapcharts.repl.*");
         imports.add("static snapcharts.repl.ReplObject.*");
