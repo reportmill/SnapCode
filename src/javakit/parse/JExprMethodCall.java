@@ -20,9 +20,6 @@ public class JExprMethodCall extends JExpr implements WithId {
     // The args
     private List<JExpr> _args;
 
-    // The param types
-    private JavaType[] _paramTypes;
-
     // The method
     private JavaMethod _method;
 
@@ -91,25 +88,29 @@ public class JExprMethodCall extends JExpr implements WithId {
     }
 
     /**
+     * Returns the arg eval type at given index.
+     */
+    public JavaType getArgEvalType(int anIndex)
+    {
+        JExpr argExpr = anIndex < getArgCount() ? getArg(anIndex) : null;
+        return argExpr != null ? argExpr.getEvalType() : null;
+    }
+
+    /**
+     * Returns the arg eval type at given index.
+     */
+    public JavaClass getArgEvalClass(int anIndex)
+    {
+        JExpr argExpr = anIndex < getArgCount() ? getArg(anIndex) : null;
+        return argExpr != null ? argExpr.getEvalClass() : null;
+    }
+
+    /**
      * Returns the arg eval types.
      */
     public JavaType[] getArgEvalTypes()
     {
-        // If already set, just return
-        if (_paramTypes != null) return _paramTypes;
-
-        // Get param expressions and create array for types
-        List<JExpr> paramExprs = getArgs();
-        JavaType[] paramTypes = new JavaType[paramExprs.size()];
-
-        // Iterate over expressions and evaluate to type
-        for (int i = 0, iMax = paramExprs.size(); i < iMax; i++) {
-            JExpr arg = paramExprs.get(i);
-            paramTypes[i] = arg != null ? arg.getEvalType() : null;
-        }
-
-        // Set/Return
-        return _paramTypes = paramTypes;
+        return ListUtils.mapToArray(_args, expr -> expr != null ? expr.getEvalType() : null, JavaType.class);
     }
 
     /**
@@ -297,7 +298,7 @@ public class JExprMethodCall extends JExpr implements WithId {
 
         // See if TypeVar can be resolved by method
         if (methodHasTypeVar) {
-            JavaType resType = getResolvedTypeVarForMethod(aTypeVar, method);
+            JavaType resType = getResolvedTypeVarForMethodAndName(method, typeVarName);
             if (resType != null)
                 resolvedType = resType;
         }
@@ -319,17 +320,13 @@ public class JExprMethodCall extends JExpr implements WithId {
     }
 
     /**
-     * Resolves a TypeVar for given method decl and arg types.
+     * Resolves a TypeVar for given method and type var name.
      */
-    private JavaType getResolvedTypeVarForMethod(JavaTypeVariable aTypeVar, JavaMethod aMethod)
+    private JavaType getResolvedTypeVarForMethodAndName(JavaMethod aMethod, String typeVarName)
     {
-        // Get parameter types
-        JavaType[] methodParameterTypes = aMethod.getParameterTypes();
-
-        // Iterate over method arg types to see if any can resolve the type var
-        for (int i = 0, iMax = methodParameterTypes.length; i < iMax; i++) {
-            JavaType methodParameterType = methodParameterTypes[i];
-            JavaType resolvedType = getResolvedTypeVarForMethodParameterType(aTypeVar, methodParameterType, i);
+        // Iterate over method parameter types to see if any can resolve the type var name
+        for (int i = 0, iMax = aMethod.getParameterCount(); i < iMax; i++) {
+            JavaType resolvedType = getResolvedTypeVarForMethodAndParamIndexAndName(aMethod, i, typeVarName);
             if (resolvedType != null)
                 return resolvedType;
         }
@@ -339,20 +336,19 @@ public class JExprMethodCall extends JExpr implements WithId {
     }
 
     /**
-     * Resolves a TypeVar for given method decl and arg types.
+     * Resolves a TypeVar for given method, parameter index and type var name.
      */
-    private JavaType getResolvedTypeVarForMethodParameterType(JavaTypeVariable aTypeVar, JavaType methodParameterType, int parameterIndex)
+    private JavaType getResolvedTypeVarForMethodAndParamIndexAndName(JavaMethod aMethod, int paramIndex, String typeVarName)
     {
-        // If no type var for given name, just return
-        String typeVarName = aTypeVar.getName();
+        // Get typeVar name
+        JavaType methodParameterType = aMethod.getParameterType(paramIndex);
 
         // If method arg is TypeVar with same name, return arg expr eval type (if not null)
         if (methodParameterType instanceof JavaTypeVariable) {
 
             // If name matches, return arg expression eval type
              if (methodParameterType.getName().equals(typeVarName)) {
-                 JExpr argExpr = getArg(parameterIndex);
-                 JavaType argEvalType = argExpr != null ? argExpr.getEvalType() : null;
+                 JavaType argEvalType = getArgEvalType(paramIndex);
                  if (argEvalType != null)
                      return argEvalType;
              }
@@ -374,8 +370,7 @@ public class JExprMethodCall extends JExpr implements WithId {
                 if (paramType instanceof JavaTypeVariable && paramType.getName().equals(typeVarName)) {
 
                     // If arg type is parameterized type, get type
-                    JExpr argExpr = getArg(parameterIndex);
-                    JavaType argEvalType = argExpr != null ? argExpr.getEvalType() : null;
+                    JavaType argEvalType = getArgEvalType(paramIndex);
                     if (argEvalType instanceof JavaParameterizedType) {
                         JavaParameterizedType argEvalTypePT = (JavaParameterizedType) argEvalType;
                         JavaType[] argEvalTypePTParams = argEvalTypePT.getParamTypes();
@@ -399,8 +394,7 @@ public class JExprMethodCall extends JExpr implements WithId {
 
             // If name matches
             if (componentType.getName().equals(typeVarName)) {
-                JExpr argExpr = getArg(parameterIndex);
-                JavaClass argEvalClass = argExpr != null ? argExpr.getEvalClass() : null;
+                JavaClass argEvalClass = getArgEvalClass(paramIndex);
                 if (argEvalClass != null) {
                     if (argEvalClass.isArray())
                         return argEvalClass.getComponentType();
