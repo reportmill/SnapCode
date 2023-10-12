@@ -3,8 +3,8 @@
  */
 package javakit.parse;
 import javakit.resolver.*;
+import snap.util.ArrayUtils;
 import snap.util.ListUtils;
-
 import java.util.List;
 
 /**
@@ -29,7 +29,7 @@ public class JExprMethodRef extends JExpr {
 
     // A constant to define the types of method refs.
     // See https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html
-    public enum Type { StaticMethod, InstanceMethod, HelperInstanceMethod, Constructor };
+    public enum Type { InstanceMethod, StaticMethod, HelperMethod, Constructor };
 
     /**
      * Creates a new Method Reference expression for expression and id.
@@ -102,10 +102,27 @@ public class JExprMethodRef extends JExpr {
         if (scopeClass == null)
             return null;
 
-        // Search for compatible method for name and arg types
-        List<JavaMethod> methods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, methodName, null, false);
-        if (methods.size() > 0)
-            return methods.get(0);
+        // Search for instance method with no args
+        JavaMethod instanceMethod = JavaClassUtils.getCompatibleMethodAll(scopeClass, methodName, new JavaClass[0], false);
+        if (instanceMethod != null && !instanceMethod.isStatic())
+            return instanceMethod;
+
+        // Get lambda method - just return if null
+        JavaMethod lambdaMethod = getLambdaMethod();
+        if (lambdaMethod == null)
+            return null;
+
+        // Get parameter types from lambda method and look for method
+        JavaType[] lambdaMethodParamTypes = lambdaMethod.getParameterTypes();
+        JavaClass[] paramTypes = ArrayUtils.map(lambdaMethodParamTypes, type -> type.getEvalClass(), JavaClass.class);
+
+        // Get whether scope expression is class name literal
+        boolean staticOnly = scopeExpr.isClassNameLiteral();
+
+        // Search for static or helper method for name and arg types
+        JavaMethod helperMethod = JavaClassUtils.getCompatibleMethodAll(scopeClass, methodName, paramTypes, staticOnly);
+        if (helperMethod != null)
+            return helperMethod;
 
         // Return not found
         return null;
@@ -212,6 +229,32 @@ public class JExprMethodRef extends JExpr {
     protected JavaDecl getDeclImpl()
     {
         return getLambdaMethod();
+    }
+
+    /**
+     * Override to get eval type from expression if possible.
+     */
+    @Override
+    protected JavaType getEvalTypeImpl()
+    {
+        // If parent is variable declaration, return its type
+        JNode parentNode = getParent();
+        if (parentNode instanceof JVarDecl)
+            return parentNode.getEvalType();
+
+        // If method is found, return its eval type
+        JavaMethod method = getMethod();
+        if (method != null) {
+            JavaType evalType = method.getEvalType();
+            if (evalType != null && !evalType.isResolvedType()) {
+                JavaType resolvedType = getResolvedTypeForType(evalType);
+                evalType = resolvedType != null ? resolvedType : evalType.getEvalClass();
+            }
+            return evalType;
+        }
+
+        // Do normal version
+        return super.getEvalTypeImpl();
     }
 
     /**

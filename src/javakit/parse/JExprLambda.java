@@ -181,7 +181,7 @@ public class JExprLambda extends JExpr implements WithVarDecls, WithBlockStmt {
             return exprDecl != null ? exprDecl.getEvalType() : null;
         }
 
-        // Do normal version - without resolution
+        // Do normal version
         return super.getEvalTypeImpl();
     }
 

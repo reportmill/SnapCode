@@ -284,6 +284,7 @@ public class JExprMethodCall extends JExpr implements WithId {
     /**
      * Returns a resolved type for given type.
      */
+    @Override
     protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
     {
         // Get type
