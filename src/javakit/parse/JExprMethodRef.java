@@ -311,6 +311,19 @@ public class JExprMethodRef extends JExpr {
     }
 
     /**
+     * Returns the JavaDecl most closely associated with given child JExprId node.
+     */
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
+    {
+        // If given id is MethodRef.Id, return method
+        if (anExprId == _id)
+            return getMethod();
+
+        // Do normal version
+        return super.getDeclForChildId(anExprId);
+    }
+
+    /**
      * Override to customize for MethodRef.
      */
     @Override

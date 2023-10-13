@@ -80,13 +80,10 @@ public class JExprId extends JExpr {
     @Override
     protected JavaDecl getDeclImpl()
     {
-        // Handle this id is MethodRef.Id: Return method
+        // If parent is MethodRef, forward on - I don't like this, but don't want to confuse id with vars of same name
         JNode parent = getParent();
-        if (parent instanceof JExprMethodRef) {
-            JExprMethodRef methodRef = (JExprMethodRef) parent;
-            if (methodRef.getId() == this)
-                return methodRef.getMethod();
-        }
+        if (parent instanceof JExprMethodRef && ((JExprMethodRef) parent).getId() == this)
+            return getDeclForChildId(this);
 
         // Look for a master node, if this id is just part of another node or a var reference
         JNode declNode = getDeclNodeForId();
