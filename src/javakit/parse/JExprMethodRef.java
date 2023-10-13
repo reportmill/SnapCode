@@ -3,7 +3,6 @@
  */
 package javakit.parse;
 import javakit.resolver.*;
-import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import java.util.List;
 
@@ -13,10 +12,13 @@ import java.util.List;
 public class JExprMethodRef extends JExpr {
 
     // The expression
-    JExpr _expr;
+    private JExpr _expr;
 
     // The identifier
-    JExprId _id;
+    private JExprId _id;
+
+    // The type of method ref
+    private Type _type;
 
     // The method
     private JavaMethod _method;
@@ -29,7 +31,7 @@ public class JExprMethodRef extends JExpr {
 
     // A constant to define the types of method refs.
     // See https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html
-    public enum Type { InstanceMethod, StaticMethod, HelperMethod, Constructor };
+    public enum Type { InstanceMethod, StaticMethod, HelperMethod, Constructor, Unknown };
 
     /**
      * Creates a new Method Reference expression for expression and id.
@@ -69,6 +71,30 @@ public class JExprMethodRef extends JExpr {
     public void setId(JExprId anId)
     {
         replaceChild(_id, _id = anId);
+    }
+
+    /**
+     * Returns the type.
+     */
+    public Type getType()
+    {
+        if (_type != null) return _type;
+        return _type = getTypeImpl();
+    }
+
+    /**
+     * Returns the type.
+     */
+    private Type getTypeImpl()
+    {
+        JavaMethod method = getMethod();
+        if (method == null)
+            return Type.Unknown;
+        if (method.getParameterCount() == 0)
+            return Type.InstanceMethod;
+        if (_expr.isClassNameLiteral())
+            return Type.StaticMethod;
+        return Type.HelperMethod;
     }
 
     /**
@@ -113,8 +139,7 @@ public class JExprMethodRef extends JExpr {
             return null;
 
         // Get parameter types from lambda method and look for method
-        JavaType[] lambdaMethodParamTypes = lambdaMethod.getParameterTypes();
-        JavaClass[] paramTypes = ArrayUtils.map(lambdaMethodParamTypes, type -> type.getEvalClass(), JavaClass.class);
+        JavaClass[] paramTypes = getLambdaMethodParameterTypesResolved();
 
         // Get whether scope expression is class name literal
         boolean staticOnly = scopeExpr.isClassNameLiteral();
@@ -142,6 +167,34 @@ public class JExprMethodRef extends JExpr {
 
         // Set/return
         return _lambdaMethod = lambdaMethod;
+    }
+
+    /**
+     * Returns the resolved lambda method parameter types.
+     */
+    public JavaClass[] getLambdaMethodParameterTypesResolved()
+    {
+        JavaMethod lambdaMethod = getLambdaMethod();
+        if (lambdaMethod == null)
+            return null;
+        JavaType[] paramTypes = lambdaMethod.getParameterTypes();
+        JavaClass[] paramClasses = new JavaClass[paramTypes.length];
+
+        // Get node to resolve any unresolved types
+        JNode resolveNode = getParent(JExprMethodCall.class);
+        if (resolveNode == null)
+            resolveNode = this;
+
+        // Iterate over parameter types
+        for (int i = 0; i < paramTypes.length; i++) {
+            JavaType paramType = paramTypes[i];
+            if (!paramType.isResolvedType())
+                paramType = resolveNode.getResolvedTypeForType(paramType);
+            paramClasses[i] = paramType != null ? paramType.getEvalClass() : null;
+        }
+
+        // Return
+        return paramClasses;
     }
 
     /**
@@ -255,6 +308,30 @@ public class JExprMethodRef extends JExpr {
 
         // Do normal version
         return super.getEvalTypeImpl();
+    }
+
+    /**
+     * Override to customize for MethodRef.
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()
+    {
+        // If Scope expression has errors, return them
+        NodeError[] scopeExprErrors = _expr.getErrors();
+        if (scopeExprErrors.length > 0)
+            return scopeExprErrors;
+
+        // If no Id expression has errors, return them
+        if (_id == null)
+            return  NodeError.newErrorArray(this, "Method reference method name not specified");
+
+        // If id has errors, return them
+        NodeError[] idErrors = _id.getErrors();
+        if (idErrors.length > 0)
+            return idErrors;
+
+        // Return no errors
+        return super.getErrorsImpl();
     }
 
     /**

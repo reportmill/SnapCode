@@ -80,6 +80,14 @@ public class JExprId extends JExpr {
     @Override
     protected JavaDecl getDeclImpl()
     {
+        // Handle this id is MethodRef.Id: Return method
+        JNode parent = getParent();
+        if (parent instanceof JExprMethodRef) {
+            JExprMethodRef methodRef = (JExprMethodRef) parent;
+            if (methodRef.getId() == this)
+                return methodRef.getMethod();
+        }
+
         // Look for a master node, if this id is just part of another node or a var reference
         JNode declNode = getDeclNodeForId();
         if (declNode != null)
@@ -122,13 +130,6 @@ public class JExprId extends JExpr {
             JExprDot dotExpr = (JExprDot) parent;
             if (dotExpr.getExpr() == this)
                 return dotExpr;
-        }
-
-        // Handle parent is MethodRef
-        if (parent instanceof JExprMethodRef) {
-            JExprMethodRef methodRef = (JExprMethodRef) parent;
-            if (methodRef.getId() == this)
-                return methodRef;
         }
 
         // Look for VarDecl that defines this id (if this id is var reference)

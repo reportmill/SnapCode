@@ -655,9 +655,20 @@ public class JSExprEval {
     /**
      * Handle JExprMethodRef.
      */
-    private Object evalMethodRefExpr(Object anOR, JExprMethodRef methodRefExpr)
+    private Object evalMethodRefExpr(Object anOR, JExprMethodRef methodRefExpr) throws Exception
     {
-        return MethodRefWrapper.getWrappedLambdaExpression(this, anOR, methodRefExpr);
+        // If MethodRef is HelperMethod and instance method on specified scope instance, evaluate to get target object
+        Object target = null;
+        if (methodRefExpr.getType() == JExprMethodRef.Type.HelperMethod) {
+            JavaMethod method = methodRefExpr.getMethod();
+            if (!method.isStatic()) {
+                JExpr scopeExpr = methodRefExpr.getExpr();
+                target = evalExpr(anOR, scopeExpr);
+            }
+        }
+
+        // Return a proxy object which is a dynamically generated implementation of lambda functional interface class
+        return MethodRefWrapper.getWrappedMethodRefExpression(methodRefExpr, target);
     }
 
     /**

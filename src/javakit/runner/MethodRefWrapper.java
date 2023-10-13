@@ -1,10 +1,7 @@
 package javakit.runner;
-import javakit.parse.JExpr;
 import javakit.parse.JExprMethodRef;
-import javakit.parse.JVarDecl;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaMethod;
-import snap.util.ArrayUtils;
 import snap.util.Convert;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -12,54 +9,46 @@ import java.lang.reflect.Proxy;
 import java.util.function.Function;
 
 /**
- * Wraps Lambda expression.
+ * Wraps MethodRef expression.
  */
 public class MethodRefWrapper {
-
-    // The ExprEval
-    private JSExprEval _exprEval;
-
-    // The VarStack
-    private JSVarStack _varStack;
-
-    // The OR
-    private Object _OR;
 
     // The MethodRef expr
     private JExprMethodRef _methodRefExpr;
 
-    // The Content expression
-    private JExpr _contentExpr;
+    // The MethodRef type
+    private JExprMethodRef.Type _type;
 
-    // The params
-    private JVarDecl _param0, _param1;
+    // The target, if type is HelperMethod and method is instance method
+    private Object _target;
 
     /**
      * Constructor.
      */
-    public MethodRefWrapper(JSExprEval exprEval, Object anOR, JExprMethodRef methodRefExpr)
+    public MethodRefWrapper(JExprMethodRef methodRefExpr, Object target)
     {
-        _exprEval = exprEval;
-        _varStack = exprEval._varStack;
-        _OR = anOR;
         _methodRefExpr = methodRefExpr;
-        //_contentExpr = lambdaExpr.getExpr();
-
-        //List<JVarDecl> varDecls = lambdaExpr.getParameters();
-        //_param0 = varDecls.size() > 0 ? varDecls.get(0) : null;
-        //_param1 = varDecls.size() > 1 ? varDecls.get(1) : null;
+        _type = methodRefExpr.getType();
+        _target = target;
     }
 
-    public Object invokeWithArgs(Object proxy, Object[] args)
+    /**
+     * Invoke MethodRef.
+     */
+    public Object invokeWithArgs(Object[] args)
     {
         JavaMethod method = _methodRefExpr.getMethod();
         Method method1 = method.getMethod();
         Object thisObj = args[0];
-        if (method.isStatic()) {
-            thisObj = null;
-            args = ArrayUtils.add(args, proxy, 0);
-        }
-        else args = new Object[0];
+
+        // Handle InstanceMethod: Invoke MethodRef.Method on first arg, with empty args array
+        if (_type == JExprMethodRef.Type.InstanceMethod)
+            args = new Object[0];
+
+        // Handle StaticMethod or HelperMethod:
+        else thisObj = _target;
+
+        // Invoke method
         try { return method1.invoke(thisObj, args); }
         catch (Exception e) {
             throw new RuntimeException(e);
@@ -67,59 +56,48 @@ public class MethodRefWrapper {
     }
 
     /**
-     * Returns a wrapped lambda expression for given class.
+     * Returns a wrapped MethodRef expression for given class.
      */
-    public static Object getWrappedLambdaExpression(JSExprEval exprEval, Object anOR, JExprMethodRef methodRefExpr)
+    public static Object getWrappedMethodRefExpression(JExprMethodRef methodRefExpr, Object target)
     {
         // Get lambda class
         JavaClass lambdaClass = methodRefExpr.getLambdaClass();
         if (lambdaClass == null)
             throw new RuntimeException("MethodRefWrapper.getWrappedLambdaExpression: Can't determine lambda class for expr: " + methodRefExpr);
 
-        try { return getWrappedLambdaExpressionImpl(exprEval, anOR, methodRefExpr, lambdaClass); }
-        catch (Throwable t) { throw new RuntimeException(t); }
-    }
-
-    /**
-     * Returns a wrapped lambda expression for given class.
-     */
-    public static Object getWrappedLambdaExpressionImpl(JSExprEval exprEval, Object anOR, JExprMethodRef methodRefExpr, JavaClass lambdaClass) throws Throwable
-    {
         // Get params and content expression
         Class<?> realClass = lambdaClass.getRealClass();
 
         // Get lambda method name
         JavaMethod lambdaJavaMethod = methodRefExpr.getLambdaMethod();
         Method lambdaMethod = lambdaJavaMethod.getMethod();
-        MethodRefWrapper lambdaWrapper = new MethodRefWrapper(exprEval, anOR, methodRefExpr);
+        MethodRefWrapper lambdaWrapper = new MethodRefWrapper(methodRefExpr, target);
 
         // Get MethodType and LambdaWrapper method name
         Class<?> returnType = lambdaMethod.getReturnType();
 
-        ClassLoader classLoader = lambdaWrapper.getClass().getClassLoader();
+        ClassLoader classLoader = MethodRefWrapper.class.getClassLoader();
         Class<?>[] interfaces = { realClass };
 
         // Get converter for return type
         Function<Object,Object> converter = getConverterForClass(returnType);
         String lambdaMethodName = lambdaMethod.getName();
 
-        InvocationHandler handler = new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        // Create invocation handler
+        InvocationHandler handler =  (Object proxy, Method method, Object[] args) -> {
 
-                // If functional interface method, do that version
-                if (method.getName().equals(lambdaMethodName)) {
-                    Object result = lambdaWrapper.invokeWithArgs(proxy, args);
-                    if (converter != null)
-                        result = converter.apply(result);
-                    else result = returnType.cast(result);
-                    return result;
-                }
-
-                return method.invoke(lambdaWrapper, args);
+            // If functional interface method, do that version
+            if (method.getName().equals(lambdaMethodName)) {
+                Object result = lambdaWrapper.invokeWithArgs(args);
+                if (converter != null)
+                    result = converter.apply(result);
+                return result;
             }
+
+            return method.invoke(lambdaWrapper, args);
         };
 
+        // Create and return proxy class for lambda class
         Object lambda = Proxy.newProxyInstance(classLoader, interfaces, handler);
         return lambda;
     }
