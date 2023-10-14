@@ -11,11 +11,11 @@ import java.util.List;
  */
 public class JExprMethodRef extends JExpr {
 
-    // The expression
-    private JExpr _expr;
+    // The prefix expression
+    private JExpr _prefixExpr;
 
-    // The identifier
-    private JExprId _id;
+    // The method name identifier
+    private JExprId _methodId;
 
     // The type of method ref
     private Type _type;
@@ -36,41 +36,38 @@ public class JExprMethodRef extends JExpr {
     /**
      * Creates a new Method Reference expression for expression and id.
      */
-    public JExprMethodRef(JExpr anExpr, JExprId anId)
+    public JExprMethodRef(JExpr prefixExpr, JExprId anId)
     {
-        setExpr(anExpr);
-        setId(anId);
+        setPrefixExpr(prefixExpr);
+        setMethodId(anId);
     }
 
     /**
-     * Returns the expression.
+     * Returns the prefix expression.
      */
-    public JExpr getExpr()
+    public JExpr getPrefixExpr()  { return _prefixExpr; }
+
+    /**
+     * Sets the prefix expression.
+     */
+    public void setPrefixExpr(JExpr anExpr)
     {
-        return _expr;
+        if (_prefixExpr == null)
+            addChild(_prefixExpr = anExpr, 0);
+        else replaceChild(_prefixExpr, _prefixExpr = anExpr);
     }
 
     /**
-     * Sets the expression.
+     * Returns the method name identifier.
      */
-    public void setExpr(JExpr anExpr)
-    {
-        if (_expr == null)
-            addChild(_expr = anExpr, 0);
-        else replaceChild(_expr, _expr = anExpr);
-    }
+    public JExprId getMethodId()  { return _methodId; }
 
     /**
-     * Returns the identifier.
+     * Sets the method name identifier.
      */
-    public JExprId getId()  { return _id; }
-
-    /**
-     * Sets the identifier.
-     */
-    public void setId(JExprId anId)
+    public void setMethodId(JExprId anId)
     {
-        replaceChild(_id, _id = anId);
+        replaceChild(_methodId, _methodId = anId);
     }
 
     /**
@@ -92,7 +89,7 @@ public class JExprMethodRef extends JExpr {
             return Type.Unknown;
         if (method.getParameterCount() == 0)
             return Type.InstanceMethod;
-        if (_expr.isClassNameLiteral())
+        if (_prefixExpr.isClassNameLiteral())
             return Type.StaticMethod;
         return Type.HelperMethod;
     }
@@ -100,7 +97,7 @@ public class JExprMethodRef extends JExpr {
     /**
      * Returns the method name.
      */
-    public String getMethodName()  { return _id != null ? _id.getName() : null; }
+    public String getMethodName()  { return _methodId != null ? _methodId.getName() : null; }
 
     /**
      * Tries to resolve the method declaration for this node.
@@ -121,15 +118,15 @@ public class JExprMethodRef extends JExpr {
         if (methodName == null)
             return null;
 
-        // Get scope node class
-        JExpr scopeExpr = _expr;
-        JavaType scopeEvalType = scopeExpr != null ? scopeExpr.getEvalType() : null;
-        JavaClass scopeClass = scopeEvalType != null ? scopeEvalType.getEvalClass() : null;
-        if (scopeClass == null)
+        // Get prefix expr eval class
+        JExpr prefixExpr = _prefixExpr;
+        JavaType prefixEvalType = prefixExpr != null ? prefixExpr.getEvalType() : null;
+        JavaClass prefixClass = prefixEvalType != null ? prefixEvalType.getEvalClass() : null;
+        if (prefixClass == null)
             return null;
 
         // Search for instance method with no args
-        JavaMethod instanceMethod = JavaClassUtils.getCompatibleMethodAll(scopeClass, methodName, new JavaClass[0], false);
+        JavaMethod instanceMethod = JavaClassUtils.getCompatibleMethodAll(prefixClass, methodName, new JavaClass[0], false);
         if (instanceMethod != null && !instanceMethod.isStatic())
             return instanceMethod;
 
@@ -142,10 +139,10 @@ public class JExprMethodRef extends JExpr {
         JavaClass[] paramTypes = getLambdaMethodParameterTypesResolved();
 
         // Get whether scope expression is class name literal
-        boolean staticOnly = scopeExpr.isClassNameLiteral();
+        boolean staticOnly = prefixExpr.isClassNameLiteral();
 
         // Search for static or helper method for name and arg types
-        JavaMethod helperMethod = JavaClassUtils.getCompatibleMethodAll(scopeClass, methodName, paramTypes, staticOnly);
+        JavaMethod helperMethod = JavaClassUtils.getCompatibleMethodAll(prefixClass, methodName, paramTypes, staticOnly);
         if (helperMethod != null)
             return helperMethod;
 
@@ -315,8 +312,8 @@ public class JExprMethodRef extends JExpr {
      */
     protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
-        // If given id is MethodRef.Id, return method
-        if (anExprId == _id)
+        // If given id is MethodId, return method
+        if (anExprId == _methodId)
             return getMethod();
 
         // Do normal version
@@ -329,19 +326,19 @@ public class JExprMethodRef extends JExpr {
     @Override
     protected NodeError[] getErrorsImpl()
     {
-        // If Scope expression has errors, return them
-        NodeError[] scopeExprErrors = _expr.getErrors();
-        if (scopeExprErrors.length > 0)
-            return scopeExprErrors;
+        // If prefix expression has errors, return them
+        NodeError[] prefixExprErrors = _prefixExpr.getErrors();
+        if (prefixExprErrors.length > 0)
+            return prefixExprErrors;
 
-        // If no Id expression has errors, return them
-        if (_id == null)
+        // If no MethodId expression has errors, return them
+        if (_methodId == null)
             return  NodeError.newErrorArray(this, "Method reference method name not specified");
 
-        // If id has errors, return them
-        NodeError[] idErrors = _id.getErrors();
-        if (idErrors.length > 0)
-            return idErrors;
+        // If MethodId has errors, return them
+        NodeError[] methodIdErrors = _methodId.getErrors();
+        if (methodIdErrors.length > 0)
+            return methodIdErrors;
 
         // Return no errors
         return super.getErrorsImpl();

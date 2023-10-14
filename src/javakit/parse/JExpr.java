@@ -37,6 +37,13 @@ public abstract class JExpr extends JNode {
                 return methodCallExpr.getScopeExpr();
         }
 
+        // If parent is method ref and this is MethodRef.Id, return MethodRef.PrefixExpr
+        if (parent instanceof JExprMethodRef) {
+            JExprMethodRef methodRef = (JExprMethodRef) parent;
+            if (methodRef.getMethodId() == this)
+                return methodRef.getPrefixExpr();
+        }
+
         // Return not found
         return null;
     }
@@ -119,7 +126,7 @@ public abstract class JExpr extends JNode {
         // Handle MethodRef: Set prefix expression
         if (suffixExpr instanceof JExprMethodRef) {
             JExprMethodRef methodRef = (JExprMethodRef) suffixExpr;
-            methodRef.setExpr(prefixExpr);
+            methodRef.setPrefixExpr(prefixExpr);
             return methodRef;
         }
 

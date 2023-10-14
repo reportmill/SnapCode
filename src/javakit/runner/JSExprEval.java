@@ -662,8 +662,8 @@ public class JSExprEval {
         if (methodRefExpr.getType() == JExprMethodRef.Type.HelperMethod) {
             JavaMethod method = methodRefExpr.getMethod();
             if (!method.isStatic()) {
-                JExpr scopeExpr = methodRefExpr.getExpr();
-                target = evalExpr(anOR, scopeExpr);
+                JExpr prefixExpr = methodRefExpr.getPrefixExpr();
+                target = evalExpr(anOR, prefixExpr);
             }
         }
 
