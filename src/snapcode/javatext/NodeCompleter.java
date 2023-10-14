@@ -194,14 +194,18 @@ public class NodeCompleter {
 
             // Get whether expression is class name
             boolean staticMembersOnly = scopeExpr.isClassNameLiteral();
-            if (staticMembersOnly && prefixMatcher.matchesString("class")) {
-                JavaField classField = getClassField(scopeExprEvalClass);
-                addCompletionDecl(classField);
-            }
+            if (staticMembersOnly) {
 
-            // If id parent is MethodRef, don't limit to static
-            if (staticMembersOnly && scopeExpr.getParent() instanceof JExprMethodRef)
-                staticMembersOnly = false;
+                // If parent is MethodRef, reset value so we get all methods
+                if (scopeExpr.getParent() instanceof JExprMethodRef)
+                    staticMembersOnly = false;
+
+                // Add completion for "ClassName.class"
+                else if (prefixMatcher.matchesString("class")) {
+                    JavaField classField = getClassField(scopeExprEvalClass);
+                    addCompletionDecl(classField);
+                }
+            }
 
             // Get matching members (fields, methods) for class and add
             JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(scopeExprEvalClass, staticMembersOnly);

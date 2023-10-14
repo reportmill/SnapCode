@@ -215,12 +215,12 @@ UnaryExprNotPlusMinus { ("~" | "!") UnaryExpr | LookAhead (CastLook) CastExpr | 
 
 PostfixExpr { PrimaryExpr ("++" | "--")? }
 
-PrimaryExpr { PrimaryPrefix (LookAhead(2) PrimarySuffix)* }
+PrimaryExpr { PrimaryPrefix PrimarySuffix* }
 
 PrimaryPrefix
 {
     Literal |
-    LookAhead ((Identifier | ".")* "this") (Identifier ".")* "this" |
+    LookAhead ((Identifier ".")* "this") (Identifier ".")* "this" |
     "super" "." Identifier |
     LookAhead (ClassType "." "super" "." Identifier) ClassType "." "super" "." Identifier |
     LambdaExpr |
@@ -232,16 +232,14 @@ PrimaryPrefix
 
 PrimarySuffix
 {
-    LookAhead ("." "super" ".") "." "super" |
+    LookAhead(2) "." "super" |
     LookAhead(2) "." "this" |
     LookAhead(2) "." AllocExpr |
-    LookAhead(3) MemberSelector |
+    LookAhead(2) "." TypeArgs? Identifier |
     "[" Expression "]" |
-    ("." | "::") Identifier |
+    "::" Identifier |
     Arguments
 }
-
-MemberSelector { "." TypeArgs Identifier }
 
 AssignOp { "=" | "*=" | "/=" | "%=" | "+=" | "-=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|=" }
 

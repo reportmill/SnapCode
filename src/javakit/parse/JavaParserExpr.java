@@ -470,7 +470,7 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * PrimaryExpr Handler: PrimaryPrefix (LookAhead(2) PrimarySuffix)*
+     * PrimaryExpr Handler: PrimaryPrefix PrimarySuffix*
      */
     public static class PrimaryExprHandler extends JNodeParseHandler<JExpr> {
 
@@ -500,7 +500,7 @@ public class JavaParserExpr extends Parser {
     /**
      * PrimaryPrefix Handler.
      *     Literal |
-     *     LookAhead ((Identifier | ".")* "this") (Identifier ".")* "this" |
+     *     LookAhead ((Identifier ".")* "this") (Identifier ".")* "this" |
      *     "super" "." Identifier |
      *     LookAhead (ClassType "." "super" "." Identifier) ClassType "." "super" "." Identifier |
      *     LambdaExpr |
@@ -586,12 +586,12 @@ public class JavaParserExpr extends Parser {
 
     /**
      * PrimarySuffix Handler.
-     *     LookAhead ("." "super" ".") "." "super" |
+     *     LookAhead(2) "." "super" |
      *     LookAhead(2) "." "this" |
      *     LookAhead(2) "." AllocExpr |
-     *     LookAhead(3) MemberSelector |
+     *     LookAhead(2) "." TypeArgs? Identifier |
      *     "[" Expression "]" |
-     *     ("." | "::") Identifier |
+     *     "::" Identifier |
      *     Arguments
      */
     public static class PrimarySuffixHandler extends JNodeParseHandler<JExpr> {
