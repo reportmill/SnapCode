@@ -596,8 +596,6 @@ public class JavaParserExpr extends Parser {
      */
     public static class PrimarySuffixHandler extends JNodeParseHandler<JExpr> {
 
-        boolean _methodRef;
-
         /**
          * ParseHandler method.
          */
@@ -623,13 +621,15 @@ public class JavaParserExpr extends Parser {
                 // Handle ("." | "::") Identifier
                 case "Identifier":
                     JExprId id = aNode.getCustomNode(JExprId.class);
-                    if (_methodRef)
-                        _part = new JExprMethodRef(null, id);
+                    if (_part instanceof JExprMethodRef)
+                        ((JExprMethodRef) _part).setMethodId(id);
                     else _part = id;
                     break;
 
-                // Handle "::" Identifier
-                case "::": _methodRef = true; break;
+                // Handle "::" Identifier: Set part to JExprMethodRef
+                case "::":
+                    _part = new JExprMethodRef(null, null);
+                    break;
 
                 // Handle Arguments
                 case "Arguments":
@@ -637,16 +637,6 @@ public class JavaParserExpr extends Parser {
                     _part = new JExprMethodCall(null, argsList);
                     break;
             }
-        }
-
-        /**
-         * Override to clear MethodRef.
-         */
-        @Override
-        public void reset()
-        {
-            super.reset();
-            _methodRef = false;
         }
 
         protected Class<JExpr> getPartClass()  { return JExpr.class; }

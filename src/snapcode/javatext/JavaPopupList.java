@@ -126,11 +126,16 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // Get start/stop char index for completion
         JavaTextArea textArea = getTextArea();
-        JNode selNode = textArea.getIdExprAtCursor(); //textArea.getSelNode();
+        JExprId selNode = textArea.getIdExprAtCursor(); //textArea.getSelNode();
         int nodeStart = selNode.getStartCharIndex();
         int nodeEnd = textArea.getSelEnd();
-        if (textArea.charAt(nodeEnd - 1) == '.')
+        char selChar = textArea.charAt(nodeEnd - 1);
+        if (selChar == '.' || selChar == ':')
             nodeStart = nodeEnd;
+
+        // If method ref, just use name
+        if (selNode.getParent() instanceof JExprMethodRef)
+            completionStr = completionDecl.getSimpleName();
 
         // Replace selection with completeString
         textArea.replaceChars(completionStr, null, nodeStart, nodeEnd, true);

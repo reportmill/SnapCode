@@ -396,11 +396,13 @@ public class JavaTextArea extends TextArea {
      */
     private JExprId getVirtualIdExprForDot()
     {
-        // If previous char not dot, just return
+        // If previous char not dot or ::, just return
         TextBlock textBlock = getTextBlock();
         int prevCharIndex = getSelStart() - 1;
-        char prevChar = prevCharIndex > 0 ? textBlock.charAt(prevCharIndex) : 0;
-        if (prevChar != '.')
+        char prevChar = prevCharIndex > 1 ? textBlock.charAt(prevCharIndex) : 0;
+        if (prevChar == ':')
+            prevChar = textBlock.charAt(--prevCharIndex);
+        if (prevChar != '.' && prevChar != ':')
             return null;
 
         // Get previous id expression - if null, just return
@@ -417,7 +419,7 @@ public class JavaTextArea extends TextArea {
 
         // Create new dot expression for previous id and new id, set parent to prev id and reset prev id parent
         JNode prevIdParent = prevId.getParent();
-        JExprDot newDotExpr = new JExprDot(prevId, virtualIdExpr);
+        JExpr newDotExpr = prevChar == '.' ? new JExprDot(prevId, virtualIdExpr) : new JExprMethodRef(prevId, virtualIdExpr);
         newDotExpr.setParent(prevId);
         prevId.setParent(prevIdParent);
 

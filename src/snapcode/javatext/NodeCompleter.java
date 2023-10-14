@@ -199,6 +199,10 @@ public class NodeCompleter {
                 addCompletionDecl(classField);
             }
 
+            // If id parent is MethodRef, don't limit to static
+            if (staticMembersOnly && scopeExpr.getParent() instanceof JExprMethodRef)
+                staticMembersOnly = false;
+
             // Get matching members (fields, methods) for class and add
             JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(scopeExprEvalClass, staticMembersOnly);
             addCompletionDecls(matchingMembers);
