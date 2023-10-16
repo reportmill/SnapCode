@@ -619,7 +619,7 @@ public class JSExprEval {
         Object value = evalExpr(anOR, valExpr);
 
         // Get name expression/name
-        JExpr assignToExpr = anExpr.getIdExpr();
+        JExpr assignToExpr = anExpr.getLeftSideExpr();
 
         // If op not simple, perform math
         JExprAssign.Op assignOp = anExpr.getOp();

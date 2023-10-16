@@ -10,8 +10,14 @@ import javakit.resolver.JavaDecl;
  */
 public class JExprAssign extends JExpr {
 
+    // The left side expression
+    private JExpr _leftSideExpr;
+
     // The operator
-    public Op op;
+    private Op _op;
+
+    // The assigned expression
+    private JExpr _valueExpr;
 
     // Constants for op
     public enum Op {
@@ -36,8 +42,8 @@ public class JExprAssign extends JExpr {
      */
     public JExprAssign(String aString, JExpr aFirst, JExpr aSecond)
     {
-        op = getOpForString(aString);
-        addChild(aFirst);
+        _op = getOpForString(aString);
+        setLeftSideExpr(aFirst);
         if (aSecond != null)
             addChild(aSecond);
     }
@@ -45,34 +51,32 @@ public class JExprAssign extends JExpr {
     /**
      * Returns the op.
      */
-    public Op getOp()  { return op; }
+    public Op getOp()  { return _op; }
 
     /**
-     * Returns the id expression.
+     * Returns the assignee expression.
      */
-    public JExpr getIdExpr()  { return (JExpr) getChild(0); }
+    public JExpr getLeftSideExpr()  { return _leftSideExpr; }
+
+    /**
+     * Returns the assignee expression.
+     */
+    public void setLeftSideExpr(JExpr anExpr)
+    {
+        replaceChild(_leftSideExpr, _leftSideExpr = anExpr);
+    }
 
     /**
      * Returns the value expression.
      */
-    public JExpr getValueExpr()
-    {
-        if (getChildCount() < 2)
-            return null;
-        return (JExpr) getChild(1);
-    }
+    public JExpr getValueExpr()  { return _valueExpr; }
 
     /**
      * Sets the value expression.
      */
     public void setValueExpr(JExpr anExpr)
     {
-        if (getChildCount() == 1)
-            addChild(anExpr);
-        else {
-            JExpr valueExpr = getValueExpr();
-            replaceChild(valueExpr, anExpr);
-        }
+        replaceChild(_valueExpr, _valueExpr = anExpr);
     }
 
     /**
@@ -80,7 +84,7 @@ public class JExprAssign extends JExpr {
      */
     protected JavaDecl getDeclImpl()
     {
-        JExpr target = getIdExpr();
+        JExpr target = getLeftSideExpr();
         return target.getEvalType();
     }
 
@@ -89,9 +93,9 @@ public class JExprAssign extends JExpr {
      */
     public String getNodeString()
     {
-        if (op == Op.Assign)
+        if (_op == Op.Assign)
             return "AssignExpr";
-        return "Assign" + op + "Expr";
+        return "Assign" + _op + "Expr";
     }
 
     /**
@@ -100,25 +104,28 @@ public class JExprAssign extends JExpr {
     @Override
     protected NodeError[] getErrorsImpl()
     {
-        // Do normal version
-        NodeError[] errors = super.getErrorsImpl();
+        // Get left side expression and errors - just return if errors found
+        JExpr leftSideExpr = getLeftSideExpr();
+        NodeError[] leftSideErrors = leftSideExpr.getErrors();
+        if (leftSideErrors.length > 0)
+            return leftSideErrors;
 
-        // Get assign to expression and value
-        JExpr assignToExpr = getIdExpr();
-        JavaClass assignToClass = assignToExpr.getEvalClass();
-
-        // Get value expression and type
+        // Get value expression and errors - just return if errors found
         JExpr valueExpr = getValueExpr();
-        JavaClass valueClass = valueExpr != null ? valueExpr.getEvalClass() : null;
+        if (valueExpr == null)
+            return NodeError.newErrorArray(this, "Missing assignment value");
+        NodeError[] valueExprErrors = valueExpr.getErrors();
+        if (valueExprErrors.length > 0)
+            return valueExprErrors;
 
-        // Check types
-        if (assignToClass == null)
-            errors = NodeError.addError(errors,this, "Can't resolve assign to type", 0);
-        else if (!assignToClass.isAssignableFrom(valueClass))
-            errors = NodeError.addError(errors, this, "Invalid assignment type", 0);
+        // Get assign to class and value class - return error if no match
+        JavaClass assignToClass = leftSideExpr.getEvalClass();
+        JavaClass valueClass = valueExpr.getEvalClass();
+        if (assignToClass == null || valueClass == null || !assignToClass.isAssignableFrom(valueClass))
+            return NodeError.newErrorArray(this, "Invalid assignment type");
 
         // Return
-        return errors;
+        return super.getErrorsImpl();
     }
 
     /**
