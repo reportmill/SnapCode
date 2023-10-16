@@ -1,0 +1,33 @@
+{
+    "bin": {"snapcode": "jdeploy-bundle/jdeploy.js"},
+    "author": "ReportMill Software, Inc.",
+    "description": "A Java workbench for education",
+    "main": "index.js",
+    "preferGlobal": true,
+    "repository": "",
+    "version": "2023.10.16",
+    "jdeploy": {
+        "jdk": false,
+        "javaVersion": "8",
+        "documentTypes": [{
+            "editor": true,
+            "extension": "java",
+            "mimetype": "text/java"
+        }],
+        "jar": "build/libs/SnapCodeAll-2023.10.jar",
+        "javafx": false,
+        "title": "SnapCode"
+    },
+    "dependencies": {
+        "command-exists-promise": "^2.0.2",
+        "node-fetch": "2.6.7",
+        "tar": "^4.4.8",
+        "yauzl": "^2.10.0",
+        "shelljs": "^0.8.4"
+    },
+    "license": "",
+    "name": "snapcodejava",
+    "files": ["jdeploy-bundle"],
+    "scripts": {"test": "echo \"Error: no test specified\" && exit 1"},
+    "homepage": "https://reportmill.com/SnapCode"
+}
