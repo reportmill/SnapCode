@@ -4,6 +4,7 @@ import snap.util.Prefs;
 import snap.view.ViewTheme;
 import snap.view.ViewUtils;
 import snap.view.WindowView;
+import snap.viewx.ExceptionReporter;
 import snapcode.util.LZString;
 
 /**
@@ -37,6 +38,13 @@ public class App {
         // Set Prefs Root
         Prefs prefs = Prefs.getPrefsForName("SnapCode");
         Prefs.setDefaultPrefs(prefs);
+
+        // Install Exception reporter
+        ExceptionReporter er = new ExceptionReporter("SnapCode");
+        er.setToAddress("support@reportmill.com");
+        String version = "2023.10", buildDate = "Oct 16, 2023";
+        er.setInfo("SnapCode Version " + version + ", Build Date: " + buildDate);
+        Thread.setDefaultUncaughtExceptionHandler(er);
 
         // Set UI Theme
         ViewTheme.setThemeForName("Light");
