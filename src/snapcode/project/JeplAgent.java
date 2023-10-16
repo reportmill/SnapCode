@@ -50,17 +50,6 @@ public class JeplAgent extends JavaAgent {
     }
 
     /**
-     * Override to fix incomplete var decls.
-     */
-    @Override
-    protected JFile createJFile()
-    {
-        JFile jfile = super.createJFile();
-        JeplParser.findAndFixIncompleteVarDecls(jfile);
-        return jfile;
-    }
-
-    /**
      * Override to get statements from initializers.
      */
     @Override
