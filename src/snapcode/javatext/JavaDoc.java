@@ -4,7 +4,10 @@
 package snapcode.javatext;
 import javakit.parse.JNode;
 import javakit.resolver.JavaClass;
+import javakit.resolver.JavaDecl;
+import javakit.resolver.JavaMethod;
 import snap.util.URLUtils;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +18,9 @@ public class JavaDoc {
 
     // The class that JavaDoc represents
     private Class<?>  _javaDocClass;
+
+    // The method to point to
+    private Method _method;
 
     // The URL that is pointed to
     private String  _urlString;
@@ -51,9 +57,11 @@ public class JavaDoc {
         // If already set, just return
         if (_urlString != null) return _urlString;
 
-        // Get, set, return
-        String className = _javaDocClass.getName();
-        return _urlString = getJavaDocUrlForJavaDocClassName(className);
+        // Get url for class
+        String urlString = getJavaDocUrlForJavaDocClassName(_javaDocClass, _method);
+
+        // Set and return
+        return _urlString = urlString;
     }
 
     /**
@@ -66,13 +74,38 @@ public class JavaDoc {
     }
 
     /**
+     * Returns a copy for given method.
+     */
+    public JavaDoc copyForMethod(Method aMethod)
+    {
+        JavaDoc copy = new JavaDoc(_javaDocClass);
+        copy._method = aMethod;
+        return copy;
+    }
+
+    /**
      * Returns the JavaDoc url for given JNode.
      */
     public static JavaDoc getJavaDocForNode(JNode aNode)
     {
+        // Get class for node
+        JavaDecl decl = aNode != null ? aNode.getDecl() : null;
+        JavaMethod javaMethod = decl instanceof JavaMethod ? (JavaMethod) decl : null;
         JavaClass javaClass = aNode != null ? aNode.getEvalClass() : null;
+        if (javaMethod != null)
+            javaClass = javaMethod.getDeclaringClass();
+
         Class<?> nodeClass = javaClass != null ? javaClass.getRealClass() : null;
-        return getJavaDocForClass(nodeClass);
+        JavaDoc javaDoc = getJavaDocForClass(nodeClass);
+        if (javaDoc == null)
+            return null;
+
+        // If method, get copy for method
+        if (javaMethod != null)
+            javaDoc = javaDoc.copyForMethod(javaMethod.getMethod());
+
+        // Return
+        return javaDoc;
     }
 
     /**
@@ -135,19 +168,50 @@ public class JavaDoc {
     /**
      * Returns the JavaDoc url for given JavaDoc class.
      */
-    private static String getJavaDocUrlForJavaDocClassName(String className)
+    private static String getJavaDocUrlForJavaDocClassName(Class<?> aClass, Method aMethod)
+    {
+        // Get base url for class - just return if not found
+        String className = aClass.getName();
+        String baseURL = getJavaDocBaseUrlForJavaDocClassName(className);
+        if (baseURL == null)
+            return null;
+
+        // Add suffix
+        String classPath = className.replace('.', '/');
+        String suffix = "index.html?" + classPath + ".html";
+
+        // If method set, add hash
+        if (aMethod != null) {
+            String methodString = aMethod.toString();
+            int index = methodString.indexOf(aMethod.getName() + '(');
+            if (index > 0) {
+                methodString = methodString.substring(index);
+                methodString = methodString.replace("[]", "");
+                methodString = methodString.replace('(', '-').replace(')', '-');
+                suffix = classPath + ".html#" + methodString;
+            }
+        }
+
+        // Return combined
+        return baseURL + suffix;
+    }
+
+    /**
+     * Returns the JavaDoc url for given JavaDoc class.
+     */
+    private static String getJavaDocBaseUrlForJavaDocClassName(String className)
     {
         // Handle snap classes
         if (className.startsWith("snap."))
-            return "http://reportmill.com/snap1/javadoc/index.html?" + className.replace('.', '/') + ".html";
+            return "http://reportmill.com/snap1/javadoc/";
 
-            // Handle ReportMill classes
-        else if (className.startsWith("com.reportmill."))
-            return "http://reportmill.com/rm14/javadoc/index.html?" + className.replace('.', '/') + ".html";
+        // Handle ReportMill classes
+        if (className.startsWith("com.reportmill."))
+            return "http://reportmill.com/rm14/javadoc/";
 
-            // Handle standard java classes
-        else if (className.startsWith("java.") || className.startsWith("javax."))
-            return "http://docs.oracle.com/javase/8/docs/api/index.html?" + className.replace('.', '/') + ".html";
+        // Handle standard java classes
+        if (className.startsWith("java.") || className.startsWith("javax."))
+            return "http://docs.oracle.com/javase/8/docs/api/";
 
         // Return not found
         return null;
