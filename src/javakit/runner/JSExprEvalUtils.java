@@ -21,7 +21,7 @@ public class JSExprEvalUtils {
             double val1 = doubleValue(aVal1);
             double val2 = doubleValue(aVal2);
             double result = val1 + val2;
-            return value(result, aVal1, aVal2);
+            return castToNumberForMathOpValues(result, aVal1, aVal2);
         }
 
         // Handle strings
@@ -42,7 +42,7 @@ public class JSExprEvalUtils {
             double val1 = doubleValue(aVal1);
             double val2 = doubleValue(aVal2);
             double result = val1 - val2;
-            return value(result, aVal1, aVal2);
+            return castToNumberForMathOpValues(result, aVal1, aVal2);
         }
 
         // Complain
@@ -59,7 +59,7 @@ public class JSExprEvalUtils {
             double val1 = doubleValue(aVal1);
             double val2 = doubleValue(aVal2);
             double result = val1 * val2;
-            return value(result, aVal1, aVal2);
+            return castToNumberForMathOpValues(result, aVal1, aVal2);
         }
 
         // Complain
@@ -76,7 +76,7 @@ public class JSExprEvalUtils {
             double val1 = doubleValue(aVal1);
             double val2 = doubleValue(aVal2);
             double result = val1 / val2;
-            return value(result, aVal1, aVal2);
+            return castToNumberForMathOpValues(result, aVal1, aVal2);
         }
 
         // Complain
@@ -93,7 +93,7 @@ public class JSExprEvalUtils {
             long val1 = longValue(aVal1);
             long val2 = longValue(aVal2);
             double result = val1 % val2;
-            return value(result, aVal1, aVal2);
+            return castToNumberForMathOpValues(result, aVal1, aVal2);
         }
 
         // Complain
@@ -185,9 +185,32 @@ public class JSExprEvalUtils {
     }
 
     /**
+     * Evaluates values for bitwise operator.
+     */
+    protected static Object evalBitwise(Object aVal1, Object aVal2, JExprMath.Op anOp)
+    {
+        if (isFixedPointOrChar(aVal1) && isFixedPointOrChar(aVal2)) {
+            long val1 = longValue(aVal1);
+            long val2 = longValue(aVal2);
+
+            switch (anOp) {
+                case BitAnd: return castToLongOrInt(val1 & val2, val1, val2);
+                case BitOr: return castToLongOrInt(val1 | val2, val1, val2);
+                case BitXOr: return castToLongOrInt(val1 ^ val2, val1, val2);
+                case ShiftLeft: return castToLongOrInt(val1 << val2, val1, val2);
+                case ShiftRight: return castToLongOrInt(val1 >> val2, val1, val2);
+                case ShiftRightUnsigned: return castToLongOrInt(val1 >>> val2, val1, val2);
+            }
+        }
+
+        // Handle unsupported value types
+        throw new RuntimeException("Can't logical compare types " + aVal1 + " + " + aVal2);
+    }
+
+    /**
      * Return value of appropriate type for given number and original two values.
      */
-    protected static Object value(double aValue, Object aVal1, Object aVal2)
+    protected static Object castToNumberForMathOpValues(double aValue, Object aVal1, Object aVal2)
     {
         if (isDouble(aVal1) || isDouble(aVal2))
             return aValue;
@@ -201,6 +224,16 @@ public class JSExprEvalUtils {
     }
 
     /**
+     * Return value of appropriate type for given number and original two values.
+     */
+    protected static Object castToLongOrInt(long aValue, Object aVal1, Object aVal2)
+    {
+        if (isLong(aVal1) || isLong(aVal2))
+            return aValue;
+        return (int) aValue;
+    }
+
+    /**
      * Return whether object is boolean.
      */
     protected static boolean isBoolean(Object anObj)  { return anObj instanceof Boolean; }
@@ -209,6 +242,15 @@ public class JSExprEvalUtils {
      * Returns whether object is Number or Character.
      */
     protected static boolean isNumberOrChar(Object anObj)  { return anObj instanceof Number || anObj instanceof Character; }
+
+    /**
+     * Returns whether object is fixed point number (long, int, short, bye) or Character.
+     */
+    protected static boolean isFixedPointOrChar(Object anObj)
+    {
+        return anObj instanceof Long || anObj instanceof Integer || anObj instanceof Short ||
+                anObj instanceof Byte || anObj instanceof Character;
+    }
 
     /**
      * Return whether object is long.

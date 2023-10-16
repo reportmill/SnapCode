@@ -538,6 +538,15 @@ public class JSExprEval {
                 throw new RuntimeException("Numeric PostDecrement Expr not numeric: " + anExpr);
             }
 
+            // Handle Bitwise compliment
+            case BitComp: {
+                if (isLong(val1))
+                    return ~longValue(val1);
+                if (isFixedPointOrChar(val1))
+                    return ~intValue(val1);
+                throw new RuntimeException("Bitwise compliment Expr not fixed point value: " + anExpr);
+            }
+
             // Handle unknown (BitComp?)
             default: throw new RuntimeException("Operator not supported " + anExpr.getOp());
         }
@@ -573,6 +582,14 @@ public class JSExprEval {
             // Handle compare logical
             case Or:
             case And: return compareLogical(val1, val2, op);
+
+            // Handle bitwise
+            case BitAnd:
+            case BitOr:
+            case BitXOr:
+            case ShiftLeft:
+            case ShiftRight:
+            case ShiftRightUnsigned: return evalBitwise(val1, val2, op);
 
             // Handle unsupported: BitOr, BitXOr, BitAnd, InstanceOf, ShiftLeft, ShiftRight, ShiftRightUnsigned
             default: throw new RuntimeException("Operator not supported " + anExpr.getOp());
@@ -635,6 +652,12 @@ public class JSExprEval {
                 case Multiply: value = multiply(assignToValue, value); break;
                 case Divide: value = divide(assignToValue, value); break;
                 case Mod: value = mod(assignToValue, value); break;
+                case And: value = evalBitwise(assignToValue, value, JExprMath.Op.BitAnd); break;
+                case Or: value = evalBitwise(assignToValue, value, JExprMath.Op.BitOr); break;
+                case Xor: value = evalBitwise(assignToValue, value, JExprMath.Op.BitXOr); break;
+                case ShiftLeft: value = evalBitwise(assignToValue, value, JExprMath.Op.ShiftLeft); break;
+                case ShiftRight: value = evalBitwise(assignToValue, value, JExprMath.Op.ShiftRight); break;
+                case ShiftRightUnsigned: value = evalBitwise(assignToValue, value, JExprMath.Op.ShiftRightUnsigned); break;
                 default: throw new RuntimeException("JSExprEval.evalAssignExpr: Op not yet supported: " + assignOp);
             }
         }
