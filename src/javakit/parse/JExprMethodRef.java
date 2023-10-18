@@ -125,18 +125,23 @@ public class JExprMethodRef extends JExpr {
         if (prefixClass == null)
             return null;
 
-        // Search for instance method with no args
-        JavaMethod instanceMethod = JavaClassUtils.getCompatibleMethodAll(prefixClass, methodName, new JavaClass[0], false);
-        if (instanceMethod != null && !instanceMethod.isStatic())
-            return instanceMethod;
+        // Get parameter types from lambda method and look for method
+        JavaClass[] paramTypes = getLambdaMethodParameterTypesResolved();
+
+        // If one parameter with same class as prefix expression class, search for instance method with no args
+        if (paramTypes.length == 1) {
+            JavaClass paramClass = paramTypes[0];
+            if (prefixClass.isAssignableFrom(paramClass)) {
+                JavaMethod instanceMethod = JavaClassUtils.getCompatibleMethodAll(prefixClass, methodName, new JavaClass[0], false);
+                if (instanceMethod != null && !instanceMethod.isStatic())
+                    return instanceMethod;
+            }
+        }
 
         // Get lambda method - just return if null
         JavaMethod lambdaMethod = getLambdaMethod();
         if (lambdaMethod == null)
             return null;
-
-        // Get parameter types from lambda method and look for method
-        JavaClass[] paramTypes = getLambdaMethodParameterTypesResolved();
 
         // Get whether scope expression is class name literal
         boolean staticOnly = prefixExpr.isClassNameLiteral();
