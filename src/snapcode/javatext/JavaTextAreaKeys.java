@@ -164,7 +164,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
             // Activate PopupList
             JavaPopupList javaPopup = _javaTextArea.getPopup();
             if (!javaPopup.isShowing() && !anEvent.isSpaceKey())
-                ViewUtils.runLater(() -> javaPopup.activatePopupList());
+                ViewUtils.runLater(() -> javaPopup.showPopupList());
         }
     }
 
@@ -190,7 +190,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
 
         // Create string for new line plus indent
         String indentStr = textLine.getIndentString();
-        StringBuffer sb = new StringBuffer().append('\n').append(indentStr);
+        StringBuilder sb = new StringBuilder().append('\n').append(indentStr);
 
         // If leaving conditional (if, for, do, while) without brackets, remove level of indent
         JNode selNode = _javaTextArea.getSelNode();
@@ -225,7 +225,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
 
         // Create indent string
         String indentStr = aTextLine.getIndentString();
-        StringBuffer sb = new StringBuffer().append('\n').append(indentStr);
+        StringBuilder sb = new StringBuilder().append('\n').append(indentStr);
 
         // If start of multi-line comment, add " * "
         if (isStartOfMultiLineComment)
@@ -280,7 +280,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     {
         // Create string for new line plus indent
         String indentStr = aTextLine.getIndentString();
-        StringBuffer sb = new StringBuffer().append('\n').append(indentStr);
+        StringBuilder sb = new StringBuilder().append('\n').append(indentStr);
 
         // Add additional level of indent
         sb.append(INDENT_STRING);
@@ -324,24 +324,11 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     public char getPairedCharForOpener(char openerChar)
     {
         switch (openerChar) {
-            case '\'': return openerChar;
+            case '\'':
             case '"': return openerChar;
             case '(': return ')';
             case '[': return ']';
             default: throw new IllegalArgumentException("JavaTextAreaKey.getPairedCharCloser: Illegal char: " + openerChar);
-        }
-    }
-    /**
-     * Returns the paired opener char for given closer char.
-     */
-    public char getPairedCharForCloser(char closerChar)
-    {
-        switch (closerChar) {
-            case '\'': return closerChar;
-            case '"': return closerChar;
-            case ')': return '(';
-            case ']': return '[';
-            default: throw new IllegalArgumentException("JavaTextAreaKey.getPairedCharOpener: Illegal char: " + closerChar);
         }
     }
 

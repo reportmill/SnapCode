@@ -127,6 +127,8 @@ public class JExprMethodRef extends JExpr {
 
         // Get parameter types from lambda method and look for method
         JavaClass[] paramTypes = getLambdaMethodParameterTypesResolved();
+        if (paramTypes == null)
+            return null;
 
         // If one parameter with same class as prefix expression class, search for instance method with no args
         if (paramTypes.length == 1) {
