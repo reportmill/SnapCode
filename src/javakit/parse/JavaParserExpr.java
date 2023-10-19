@@ -655,8 +655,11 @@ public class JavaParserExpr extends Parser {
             ArrayList<JExpr> argsExpr = getPart();
 
             // Handle Expression
-            if (anId == "Expression")
-                argsExpr.add(aNode.getCustomNode(JExpr.class));
+            if (anId == "Expression") {
+                JExpr argExpr = aNode.getCustomNode(JExpr.class);
+                if (argExpr != null)
+                    argsExpr.add(argExpr);
+            }
         }
 
         @Override
