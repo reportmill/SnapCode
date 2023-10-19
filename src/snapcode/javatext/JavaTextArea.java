@@ -405,23 +405,23 @@ public class JavaTextArea extends TextArea {
         if (prevChar != '.' && prevChar != ':')
             return null;
 
-        // Get previous id expression - if null, just return
+        // Get previous expression - if null, just return
         JNode prevNode = getNodeForCharIndex(prevCharIndex);
-        JExprId prevId = prevNode instanceof JExprId ? (JExprId) prevNode : null;
-        if (prevId == null)
+        JExpr prefixExpr = prevNode instanceof JExpr ? (JExpr) prevNode : null;
+        if (prefixExpr == null)
             return null;
 
         // Create new id expression with empty string
-        ParseToken prevToken = prevId.getStartToken();
+        ParseToken prevToken = prefixExpr.getEndToken();
         JExprId virtualIdExpr = new JExprId("");
         virtualIdExpr.setStartToken(prevToken);
         virtualIdExpr.setEndToken(prevToken);
 
-        // Create new dot expression for previous id and new id, set parent to prev id and reset prev id parent
-        JNode prevIdParent = prevId.getParent();
-        JExpr newDotExpr = prevChar == '.' ? new JExprDot(prevId, virtualIdExpr) : new JExprMethodRef(prevId, virtualIdExpr);
-        newDotExpr.setParent(prevId);
-        prevId.setParent(prevIdParent);
+        // Create new dot expression for prefix expression and new id, set parent to prefixExpr and reset prefixExpr parent
+        JNode prefixExprParent = prefixExpr.getParent();
+        JExpr newDotExpr = prevChar == '.' ? new JExprDot(prefixExpr, virtualIdExpr) : new JExprMethodRef(prefixExpr, virtualIdExpr);
+        newDotExpr.setParent(prefixExpr);
+        prefixExpr.setParent(prefixExprParent);
 
         // Return
         return virtualIdExpr;
