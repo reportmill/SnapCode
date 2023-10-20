@@ -114,12 +114,6 @@ public class JExprMethodCall extends JExpr implements WithId {
     }
 
     /**
-     * Override to return as JavaMethod.
-     */
-    @Override
-    public JavaMethod getDecl()  { return (JavaMethod) super.getDecl(); }
-
-    /**
      * Override to return method.
      */
     @Override
@@ -291,7 +285,7 @@ public class JExprMethodCall extends JExpr implements WithId {
         JavaType resolvedType = aTypeVar;
 
         // Get name and method
-        JavaMethod method = getDecl();
+        JavaMethod method = getMethod();
 
         // Get whether method has this type var
         String typeVarName = aTypeVar.getName();
@@ -424,7 +418,7 @@ public class JExprMethodCall extends JExpr implements WithId {
         }
 
         // Handle can't resolve method
-        JavaMethod method = getDecl();
+        JavaMethod method = getMethod();
         if (method == null) {
 
             // If no method exists for name, return can't resolve method name

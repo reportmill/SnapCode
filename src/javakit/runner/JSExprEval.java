@@ -215,7 +215,7 @@ public class JSExprEval {
         }
 
         // Get method (if null, throw exception)
-        JavaMethod method = methodCallExpr.getDecl();
+        JavaMethod method = methodCallExpr.getMethod();
         if (method == null)
             throw new NoSuchMethodException("JSExprEval: Method not found for " + methodCallExpr.getName());
 

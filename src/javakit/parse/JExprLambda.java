@@ -139,17 +139,15 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
         if (parameterIndex < 0)
             return null;
 
-        // Get parameter type for var decl
-        JavaType[] parameterTypes = getParameterTypes();
-        JavaType parameterType = parameterTypes != null && parameterTypes.length > parameterIndex ? parameterTypes[parameterIndex] : null;
-        if (parameterType == null)
+        // Get resolved parameter types - just return if missing
+        JavaClass[] parameterTypes = getLambdaMethodParameterTypesResolved();
+        if (parameterTypes == null || parameterIndex >= parameterTypes.length)
             return null;
 
-        // If not resolved, try to resolve
-        if (!parameterType.isResolvedType()) {
-            JNode parentNode = getParent(); // Should be method call
-            parameterType = parentNode.getResolvedTypeForType(parameterType);
-        }
+        // Get parameter type
+        JavaType parameterType = parameterTypes[parameterIndex];
+        if (parameterType == null)
+            return null;
 
         // Create type for type decl and return
         JType type = JType.createTypeForTypeAndToken(parameterType, varDecl.getStartToken());

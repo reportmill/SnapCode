@@ -77,13 +77,13 @@ public class JExprLambdaBase extends JExpr {
         if (parentNode instanceof JExprMethodCall) {
 
             // Get methodCall method
-            JExprMethodCall methodCall = (JExprMethodCall) parentNode;
-            JavaMethod method = methodCall.getDecl();
+            JExprMethodCall methodCallExpr = (JExprMethodCall) parentNode;
+            JavaMethod method = methodCallExpr.getMethod();
             if (method == null)
                 return null;
 
             // Get arg index of this lambda expr
-            List<JExpr> args = methodCall.getArgs();
+            List<JExpr> args = methodCallExpr.getArgs();
             int argIndex = ListUtils.indexOfId(args, this);
             if (argIndex < 0)
                 return null;

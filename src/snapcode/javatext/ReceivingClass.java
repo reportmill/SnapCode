@@ -79,17 +79,17 @@ public class ReceivingClass {
     private static JavaType getMethodCallArgType(JNode aNode)
     {
         // Get methodc all
-        JExprMethodCall methodCall = getMethodCall(aNode);
-        if (methodCall == null)
+        JExprMethodCall methodCallExpr = getMethodCall(aNode);
+        if (methodCallExpr == null)
             return null;
 
         // Get Arg index for node
-        int argIndex = getMethodCallArgIndex(methodCall, aNode);
+        int argIndex = getMethodCallArgIndex(methodCallExpr, aNode);
         if (argIndex < 0)
             return null;
 
         // Get method
-        JavaMethod method = methodCall.getDecl();
+        JavaMethod method = methodCallExpr.getMethod();
         if (method == null)
             return null;
 
