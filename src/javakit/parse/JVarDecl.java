@@ -208,6 +208,16 @@ public class JVarDecl extends JNode implements WithId {
     @Override
     protected NodeError[] getErrorsImpl()
     {
+        // If not var and type has errors, return them
+        JType type = getType();
+        if (type == null)
+            return NodeError.newErrorArray(this, "Missing type");
+        if (!type.isVarType()) {
+            NodeError[] typeErrors = type.getErrors();
+            if (typeErrors.length > 0)
+                return typeErrors;
+        }
+
         // If initializer expression set, check type
         JExpr initExpr = getInitializer();
         if (initExpr != null) {
@@ -235,12 +245,9 @@ public class JVarDecl extends JNode implements WithId {
         }
 
         // If type has errors, just return it
-        JType type = getType();
-        if (type != null) {
-            NodeError[] typeErrors = type.getErrors();
-            if (typeErrors.length > 0)
-                return typeErrors;
-        }
+        NodeError[] typeErrors = type.getErrors();
+        if (typeErrors.length > 0)
+            return typeErrors;
 
         // Return normal version
         return super.getErrorsImpl();
