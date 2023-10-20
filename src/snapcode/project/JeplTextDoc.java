@@ -23,6 +23,7 @@ public class JeplTextDoc extends JavaTextDoc {
         // Initialize imports
         List<String> imports = new ArrayList<>();
         imports.add("java.util.*");
+        imports.add("java.util.function.*");
         imports.add("java.util.stream.*");
         imports.add("snap.view.*");
         imports.add("snap.gfx.*");
