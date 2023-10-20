@@ -156,20 +156,17 @@ public class JNode {
      */
     protected JavaType getResolvedTypeForType(JavaType aType)
     {
-        // Get type
-        JavaType resolvedType = aType;
-
         // Handle TypeVar
         if (aType instanceof JavaTypeVariable) {
-            JavaTypeVariable typeVar = (JavaTypeVariable) resolvedType;
-            resolvedType = getResolvedTypeForTypeVar(typeVar);
+            JavaTypeVariable typeVar = (JavaTypeVariable) aType;
+            return getResolvedTypeForTypeVar(typeVar);
         }
 
         // Handle ParameterizedType
         else if (aType instanceof JavaParameterizedType) {
 
             // Get parameterized type and parameter types
-            JavaParameterizedType parameterizedType = (JavaParameterizedType) resolvedType;
+            JavaParameterizedType parameterizedType = (JavaParameterizedType) aType;
             JavaType[] paramTypes = parameterizedType.getParamTypes();
             JavaType[] paramTypesResolved = paramTypes.clone();
             boolean didResolve = false;
@@ -189,23 +186,16 @@ public class JNode {
             // If something was resolved, create new type with resolved parameter types
             if (didResolve) {
                 JavaClass rawType = parameterizedType.getRawType();
-                resolvedType = rawType.getParameterizedTypeForTypes(paramTypesResolved);
+                return rawType.getParameterizedTypeForTypes(paramTypesResolved);
             }
         }
 
         // Handle Generic array type
         else if (aType instanceof JavaGenericArrayType)
-            System.err.println("JExprMethodCall.getResolvedTypeForType: No support for GenericArrayType");
-
-        // If still not resolved, forward to parent WithTypeVars
-        if (!resolvedType.isResolvedType()) {
-            JNode parentNode = getParent(JClassDecl.class); // Should also be JExecutableDecl
-            if (parentNode != null)
-                resolvedType = parentNode.getResolvedTypeForType(resolvedType);
-        }
+            System.err.println("JNode.getResolvedTypeForType: No support for GenericArrayType");
 
         // Return
-        return resolvedType;
+        return aType;
     }
 
     /**
@@ -213,14 +203,12 @@ public class JNode {
      */
     protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
     {
-        JavaType resolvedType = aTypeVar;
-
         // Forward to upper resolvables (parent class or method definition)
         JNode parent = getParent(JClassDecl.class);
         if (parent != null)
-            resolvedType = parent.getResolvedTypeForTypeVar(aTypeVar);
+            return parent.getResolvedTypeForTypeVar(aTypeVar);
 
-        return resolvedType;
+        return aTypeVar;
     }
 
     /**

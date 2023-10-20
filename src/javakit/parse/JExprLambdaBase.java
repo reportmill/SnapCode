@@ -17,9 +17,6 @@ public class JExprLambdaBase extends JExpr {
     // The actual interface method this lambda represents
     private JavaMethod _lambdaMethod;
 
-    // The parameter types
-    private JavaType[] _parameterTypes;
-
     /**
      * Constructor.
      */
@@ -157,6 +154,26 @@ public class JExprLambdaBase extends JExpr {
 
         // Return
         return paramClasses;
+    }
+
+    /**
+     * Override to try to resolve with lambda type.
+     */
+    @Override
+    protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
+    {
+        JavaType lambdaType = getLambdaType();
+
+        // If lambda type is parameterized type, try to resolve
+        if (lambdaType instanceof JavaParameterizedType) {
+            JavaParameterizedType paramType = (JavaParameterizedType) lambdaType;
+            JavaType resolvedType = paramType.getResolvedTypeForTypeVar(aTypeVar);
+            if (resolvedType != null)
+                return resolvedType;
+        }
+
+        // Do normal version
+        return super.getResolvedTypeForTypeVar(aTypeVar);
     }
 
     /**
