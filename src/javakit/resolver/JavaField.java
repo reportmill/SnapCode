@@ -43,14 +43,11 @@ public class JavaField extends JavaMember {
         // Get SimpleName, EvalType.SimpleName and DeclaringClass.SimpleName
         JavaType evalType = getEvalType();
         String evalTypeName = evalType != null ? evalType.getSimpleName() : null;
-        JavaClass declaringClass = getDeclaringClass();
-        String declaringClassSimpleName = declaringClass.getSimpleName();
 
-        // Construct string: SimpleName : EvalType.SimpleName - DeclaringCLass.SimpleName
+        // Construct string: SimpleName : EvalType.SimpleName
         StringBuffer sb = new StringBuffer(simpleName);
         if (evalTypeName != null)
-            sb.append(" : ").append(evalTypeName);
-        sb.append(" - ").append(declaringClassSimpleName);
+            sb.append(" - ").append(evalTypeName);
 
         // Return
         return sb.toString();

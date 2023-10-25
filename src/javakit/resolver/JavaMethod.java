@@ -63,6 +63,11 @@ public class JavaMethod extends JavaExecutable {
     public Method getMethod()  { return _method; }
 
     /**
+     * Returns the return type.
+     */
+    public JavaClass getReturnType()  { return getEvalClass(); }
+
+    /**
      * Returns the JMethodDecl.
      */
     public JMethodDecl getMethodDecl()  { return _methodDecl; }
@@ -114,10 +119,10 @@ public class JavaMethod extends JavaExecutable {
     {
         // Get normal version and ClassName
         String superName = super.getSuggestionString();
-        String classStr = getDeclaringClassName();
+        String returnTypeStr = getReturnType().getSimpleName();
 
         // Construct string SimpleName(ParamType.SimpleName, ...) - ClassName
-        return superName + " - " + classStr;
+        return superName + " - " + returnTypeStr;
     }
 
     /**

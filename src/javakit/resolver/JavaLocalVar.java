@@ -45,12 +45,7 @@ public class JavaLocalVar extends JavaDecl {
         JavaType evalType = getEvalType();
         String evalTypeName = evalType != null ? evalType.getSimpleName() : null;
 
-        // Construct string: SimpleName : EvalType.SimpleName
-        StringBuffer sb = new StringBuffer(simpleName);
-        if (evalTypeName != null)
-            sb.append(" : ").append(evalTypeName);
-
         // Return
-        return sb.toString();
+        return simpleName + " - " + evalTypeName;
     }
 }
