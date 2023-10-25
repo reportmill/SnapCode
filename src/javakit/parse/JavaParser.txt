@@ -8,6 +8,7 @@ JeplFile { ImportDecl* JeplNode* }
 JeplNode
 {
     LookAhead (Modifiers ResultType Identifier FormalParams) Modifiers MethodDecl |
+    LookAhead (Modifiers EnumDecl) Modifiers EnumDecl |
     BlockStatement
 }
 

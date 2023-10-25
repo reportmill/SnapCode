@@ -5,7 +5,6 @@ package snapcode.javatext;
 import javakit.parse.*;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
-import snap.util.SnapUtils;
 import snap.util.StringUtils;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -80,20 +79,8 @@ public class DeclMatcher {
                 return matchingClasses.toArray(new JavaClass[0]);
         }
 
-        // If WebVM, limit to common packages for now
-        if (SnapUtils.isWebVM) {
-            for (String commonPackageName : COMMON_PACKAGES) {
-                JavaPackage commonPackage = aResolver.getJavaPackageForName(commonPackageName);
-                if (commonPackage == null) // WebVM
-                    continue;
-                findClassesForPackageDeep(commonPackage, matchingClasses, limit);
-                if (matchingClasses.size() >= limit)
-                    return matchingClasses.toArray(new JavaClass[0]);
-            }
-        }
-
         // Search all packages
-        else findClassesForPackageDeep(rootPackage, matchingClasses, limit);
+        findClassesForPackageDeep(rootPackage, matchingClasses, limit);
 
         // Return
         return matchingClasses.toArray(new JavaClass[0]);

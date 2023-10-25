@@ -102,12 +102,22 @@ public class JeplParser extends JavaParser {
                 case "Modifiers": break;
 
                 // Handle MethodDecl
-                case "MethodDecl":
+                case "MethodDecl": {
                     JMethodDecl methodDecl = aNode.getCustomNode(JMethodDecl.class);
                     classDecl.addMemberDecl(methodDecl);
                     jfile.setEndToken(endToken);
                     _initDecl = null;
                     break;
+                }
+
+                // Handle EnumDecl
+                case "EnumDecl": {
+                    JClassDecl enumDecl = aNode.getCustomNode(JClassDecl.class);
+                    classDecl.addMemberDecl(enumDecl);
+                    jfile.setEndToken(endToken);
+                    _initDecl = null;
+                    break;
+                }
             }
         }
 
