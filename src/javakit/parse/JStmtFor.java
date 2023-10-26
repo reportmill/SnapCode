@@ -3,8 +3,10 @@
  */
 package javakit.parse;
 import java.util.*;
+import javakit.resolver.JavaClass;
 import javakit.resolver.JavaParameterizedType;
 import javakit.resolver.JavaType;
+import snap.util.ArrayUtils;
 
 /**
  * A JStatement for for() statements.
@@ -12,16 +14,22 @@ import javakit.resolver.JavaType;
 public class JStmtFor extends JStmtConditional implements WithVarDecls {
 
     // Whether this for statement is really ForEach
-    protected boolean  _forEach = true;
+    protected boolean _forEach;
 
-    // The for-init declaration (if declaration)
-    protected JExprVarDecl  _initDecl;
+    // The var decl expression
+    protected JExprVarDecl _varDeclExpr;
 
-    // The init expressions
-    private List<JExpr> _initExpressions = new ArrayList<>();
+    // The init expressions (if basic for and no VarDecl)
+    private JExpr[] _initExprs = EMPTY_EXPR_ARRAY;
 
     // The update expressions
-    private List<JExpr> _updateExpressions = new ArrayList<>();
+    private JExpr[] _updateExprs = EMPTY_EXPR_ARRAY;
+
+    // The iterable expression (ForEach)
+    private JExpr _iterableExpr;
+
+    // Constant for empty expressions
+    private static JExpr[] EMPTY_EXPR_ARRAY = new JExpr[0];
 
     /**
      * Constructor.
@@ -37,44 +45,57 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
     public boolean isForEach()  { return _forEach; }
 
     /**
-     * Returns the init declaration.
+     * Returns the var decl expression.
      */
-    public JExprVarDecl getInitDecl()  { return _initDecl; }
+    public JExprVarDecl getVarDeclExpr()  { return _varDeclExpr; }
 
     /**
-     * Sets the init declaration.
+     * Sets the var decl expression.
      */
-    public void setInitDecl(JExprVarDecl aVD)
+    public void setVarDeclExpr(JExprVarDecl varDeclExpr)
     {
-        replaceChild(_initDecl, _initDecl = aVD);
+        replaceChild(_varDeclExpr, _varDeclExpr = varDeclExpr);
     }
 
     /**
      * Returns the init expression.
      */
-    public List<JExpr> getInitExpressions()  { return _initExpressions; }
+    public JExpr[] getInitExprs()  { return _initExprs; }
 
     /**
      * Adds an init expression.
      */
-    public void addInitExpression(JExpr anExpr)
+    public void addInitExpr(JExpr anExpr)
     {
-        _initExpressions.add(anExpr);
-        addChild(anExpr, -1);
+        _initExprs = ArrayUtils.add(_initExprs, anExpr);
+        addChild(anExpr);
     }
 
     /**
      * Returns the update expressions.
      */
-    public List<JExpr> getUpdateExpressions()  { return _updateExpressions; }
+    public JExpr[] getUpdateExprs()  { return _updateExprs; }
 
     /**
      * Add an update expressions.
      */
-    public void addUpdateExpression(JExpr anExpr)
+    public void addUpdateExpr(JExpr anExpr)
     {
-        _updateExpressions.add(anExpr);
-        addChild(anExpr, -1);
+        _updateExprs = ArrayUtils.add(_updateExprs, anExpr);
+        addChild(anExpr);
+    }
+
+    /**
+     * Returns the iterable expression (ForEach only).
+     */
+    public JExpr getIterableExpr()  { return _iterableExpr; }
+
+    /**
+     * Sets the iterable expression (ForEach only).
+     */
+    public void setIterableExpr(JExpr anExpr)
+    {
+        replaceChild(_iterableExpr, _iterableExpr = anExpr);
     }
 
     /**
@@ -83,8 +104,52 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
     @Override
     public List<JVarDecl> getVarDecls()
     {
-        List<JVarDecl> varDecls = _initDecl != null ? _initDecl.getVarDecls() : Collections.EMPTY_LIST;
+        List<JVarDecl> varDecls = _varDeclExpr != null ? _varDeclExpr.getVarDecls() : Collections.EMPTY_LIST;
         return varDecls;
+    }
+
+    /**
+     * Override to do checks for for() statement.
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()
+    {
+        // Handle var decl errors
+        JExprVarDecl varDeclExpr = getVarDeclExpr();
+        if (varDeclExpr != null) {
+            NodeError[] varDeclErrors = varDeclExpr.getErrors();
+            if (varDeclErrors.length > 0)
+                return varDeclErrors;
+        }
+
+        // Handle for each
+        if (isForEach()) {
+
+            // Handle missing or invalid iterable expression
+            JExpr iterableExpr = getIterableExpr();
+            if (iterableExpr == null)
+                return NodeError.newErrorArray(this, "Missing iterable or array");
+            NodeError[] iterableErrors = iterableExpr.getErrors();
+            if (iterableErrors.length > 0)
+                return iterableErrors;
+
+            // Handle iterable expression not iterable
+            JavaClass iterableClass = iterableExpr.getEvalClass();
+            boolean isArrayOrIterable = iterableClass.isArray() || getJavaClassForClass(Iterable.class).isAssignableFrom(iterableClass);
+            if (!isArrayOrIterable)
+                return NodeError.newErrorArray(iterableExpr, "Expression must be array or iterable");
+
+            // Handle iterable type not assignable to var decl
+            assert (varDeclExpr != null);
+            JavaClass varDeclClass = varDeclExpr.getEvalClass();
+            JavaClass iterationClass = getForEachIterationTypeResolved();
+            if (iterationClass != null && !varDeclClass.isAssignableFrom(iterationClass))
+                return NodeError.newErrorArray(iterableExpr, "Incompatible types: " +
+                    iterationClass.getSimpleName() + " cannot be assigned to " + varDeclClass.getSimpleName());
+        }
+
+        // Handle basic
+        return super.getErrorsImpl();
     }
 
     /**
@@ -92,13 +157,13 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
      */
     public JavaType getForEachIterationType()
     {
-        // Get ForEach initializer
-        JExpr initExpr = getConditional();
-        if (initExpr == null)
+        // Get ForEach iterable expression
+        JExpr iterableExpr = getIterableExpr();
+        if (iterableExpr == null)
             return null;
 
         // Get iterable type (just return if null)
-        JavaType iterableType = initExpr.getEvalType();
+        JavaType iterableType = iterableExpr.getEvalType();
         if (iterableType == null)
             return null;
 
@@ -117,5 +182,23 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
         // Show some surprise
         System.err.println("JStmtFor.getForEachIterationType: Can't determine type for iterable: " + iterableType);
         return null;
+    }
+
+    /**
+     * Returns the ForEach iteration type.
+     */
+    public JavaClass getForEachIterationTypeResolved()
+    {
+        // Get iteration type - just return if null
+        JavaType iterationType = getForEachIterationType();
+        if (iterationType == null)
+            return null;
+
+        // If not resolved, resolve it
+        if (!iterationType.isResolvedType())
+            iterationType = getResolvedTypeForType(iterationType);
+
+        // Return
+        return iterationType.getEvalClass();
     }
 }

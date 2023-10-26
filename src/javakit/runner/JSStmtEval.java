@@ -239,15 +239,23 @@ public class JSStmtEval {
         // Get block statement
         JStmtBlock blockStmt = aForStmt.getBlock();
 
-        // Get main var name statement
-        JExprVarDecl initDeclExpr = aForStmt.getInitDecl();
-        evalExpr(initDeclExpr);
+        // Get var decl and evaluate
+        JExprVarDecl varDeclExpr = aForStmt.getVarDeclExpr();
+        if (varDeclExpr != null)
+            evalExpr(varDeclExpr);
+
+        // If init expressions instead, get and evaluate those
+        else {
+            JExpr[] initExprs = aForStmt.getInitExprs();
+            for (JExpr initExpr : initExprs)
+                evalExpr(initExpr);
+        }
 
         // Get conditional
         JExpr condExpr = aForStmt.getConditional();
 
         // Get update expressions
-        List<JExpr> updateExpressions = aForStmt.getUpdateExpressions();
+        JExpr[] updateExpressions = aForStmt.getUpdateExprs();
 
         // Iterate while conditional is true
         while (true) {
@@ -261,10 +269,10 @@ public class JSStmtEval {
             evalStmt(anOR, blockStmt);
 
             // Execute update expressions
-            for (JExpr updateStmt : updateExpressions) {
+            for (JExpr updateExpr : updateExpressions) {
 
                 // Eval statements
-                evalExpr(updateStmt);
+                evalExpr(updateExpr);
 
                 // If break was hit, break
                 if (handleBreakCheck())
@@ -284,31 +292,31 @@ public class JSStmtEval {
         // Get block statement
         JStmtBlock blockStmt = aForStmt.getBlock();
 
-        // Get main variable name
-        JExprVarDecl initDeclExpr = aForStmt.getInitDecl();
-        List<JVarDecl> varDecls = initDeclExpr.getVarDecls();
+        // Get variable name
+        JExprVarDecl varDeclExpr = aForStmt.getVarDeclExpr();
+        List<JVarDecl> varDecls = varDeclExpr.getVarDecls();
         JVarDecl varDecl = varDecls.get(0);
         JExprId varId = varDecl.getId();
 
         // Get list value
-        JExpr listExpr = aForStmt.getConditional();
-        Object listValue = evalExpr(listExpr);
+        JExpr iterableExpr = aForStmt.getIterableExpr();
+        Object iterableObj = evalExpr(iterableExpr);
 
         // Handle null
-        if (listValue == null)
+        if (iterableObj == null)
             throw new NullPointerException("JSStmtEval.evalForEachStmt: Iteration value is null");
 
         // If Object[], convert to list
-        if (listValue.getClass().isArray()) {
+        if (iterableObj.getClass().isArray()) {
 
             // Get array length
-            int length = Array.getLength(listValue);
+            int length = Array.getLength(iterableObj);
 
             // Iterate over objects
             for (int i = 0; i < length; i++) {
 
                 // Get/set loop var
-                Object obj = Array.get(listValue, i);
+                Object obj = Array.get(iterableObj, i);
                 _exprEval.setExprIdValue(varId, obj);
 
                 // Eval statement
@@ -321,10 +329,10 @@ public class JSStmtEval {
         }
 
         // Handle Iterable
-        else if (listValue instanceof Iterable) {
+        else if (iterableObj instanceof Iterable) {
 
             // Get iterable
-            Iterable<?> iterable = (Iterable<?>) listValue;
+            Iterable<?> iterable = (Iterable<?>) iterableObj;
 
             // Iterate over objects
             for (Object obj : iterable) {

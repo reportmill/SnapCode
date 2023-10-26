@@ -79,7 +79,7 @@ public class JStmtConditional extends JStmt implements WithBodyStmt, WithBlockSt
             errors = NodeError.addError(errors, this, "Missing statement block", 0);
 
         // Handle missing conditional
-        if (_cond == null && !(this instanceof JStmtFor && ((JStmtFor) this).isForEach()))
+        if (_cond == null && !(this instanceof JStmtFor))
             errors = NodeError.addError(errors, this, "Missing conditional", 0);
 
         // Return

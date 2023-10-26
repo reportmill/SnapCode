@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
+import javakit.resolver.JavaDecl;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,8 +58,14 @@ public class JExprVarDecl extends JExpr implements WithVarDecls {
     }
 
     /**
+     * Returns the first var decl.
+     */
+    public JVarDecl getVarDecl()  { return _varDecls.size() > 0 ? _varDecls.get(0) : null; }
+
+    /**
      * Returns the variable declarations.
      */
+    @Override
     public List<JVarDecl> getVarDecls()  { return _varDecls; }
 
     /**
@@ -67,6 +75,16 @@ public class JExprVarDecl extends JExpr implements WithVarDecls {
     {
         _varDecls.add(aVD);
         addChild(aVD, -1);
+    }
+
+    /**
+     * Override to return var decl.
+     */
+    @Override
+    protected JavaDecl getDeclImpl()
+    {
+        JVarDecl varDecl = getVarDecl();
+        return varDecl != null ? varDecl.getDecl() : null;
     }
 
     /**

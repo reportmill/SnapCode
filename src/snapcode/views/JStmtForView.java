@@ -34,31 +34,34 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
         Label label = createLabel("for");
         rowView.addChild(label);
 
+        // Get for statement parts
+        JExpr varDeclExpr = forStmt.getVarDeclExpr();
+        JExpr condExpr = forStmt.isForEach() ? forStmt.getIterableExpr() : forStmt.getConditional();
+        JExpr[] updateExprs = forStmt.getUpdateExprs();
+        JExpr updateExpr = updateExprs.length > 0 ? updateExprs[0] : null;
+
         // Add init declaration text
-        if (forStmt.getInitDecl() != null) {
-            JExpr initExpr = forStmt.getInitDecl();
-            String str = initExpr.getString();
+        if (varDeclExpr != null) {
+            String str = varDeclExpr.getString();
             TextField tfield = createTextField(str);
             tfield.setName("ExprText");
-            tfield.setProp("Expr", initExpr);
+            tfield.setProp("Expr", varDeclExpr);
             tfield.addEventHandler(e -> handleTextEvent(e));
             rowView.addChild(tfield);
         }
 
-        // Add conditional text
-        if (forStmt.getConditional() != null) {
-            JExpr cond = forStmt.getConditional();
-            String str = cond.getString();
+        // Add conditional / iterable text
+        if (condExpr != null) {
+            String str = condExpr.getString();
             TextField tfield = createTextField(str);
             tfield.setName("ExprText");
-            tfield.setProp("Expr", cond);
+            tfield.setProp("Expr", condExpr);
             tfield.addEventHandler(e -> handleTextEvent(e));
             rowView.addChild(tfield);
         }
 
         // Add update statement text
-        if (forStmt.getUpdateExpressions() != null && forStmt.getUpdateExpressions().size() > 0) {
-            JExpr updateExpr = forStmt.getUpdateExpressions().get(0);
+        if (updateExpr != null) {
             String str = updateExpr.getString();
             TextField tfield = createTextField(str);
             tfield.setName("ExprText");

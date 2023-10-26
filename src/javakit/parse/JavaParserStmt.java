@@ -561,41 +561,48 @@ public class JavaParserStmt extends JavaParserExpr {
                 // Handle VarDeclExpr
                 case "VarDeclExpr": {
                     JExprVarDecl varDeclExpr = aNode.getCustomNode(JExprVarDecl.class);
-                    forStmt.setInitDecl(varDeclExpr);
+                    forStmt.setVarDeclExpr(varDeclExpr);
                     break;
                 }
 
                 // Handle Expression
                 case "Expression": {
                     JExpr expr = aNode.getCustomNode(JExpr.class);
+                    if (expr == null)
+                        return;
 
                     // Handle ForEach expression or basic for conditional
-                    if (forStmt.getInitDecl() != null && _partIndex == 0)
-                        forStmt.setConditional(expr);
+                    if (forStmt.isForEach())
+                        forStmt.setIterableExpr(expr);
 
                     // Handle basic for statement
                     else {
                         switch (_partIndex) {
-                            case 0: forStmt.addInitExpression(expr); break;
+                            case 0: forStmt.addInitExpr(expr); break;
                             case 1: forStmt.setConditional(expr); break;
-                            case 2: forStmt.addUpdateExpression(expr); break;
+                            case 2: forStmt.addUpdateExpr(expr); break;
                         }
                     }
 
                     break;
                 }
 
-                // Handle separator
-                case ";": {
+                // Handle basic for separator
+                case ";":
                     _partIndex++;
-                    forStmt._forEach = false;
-                } break;
+                    break;
+
+                // Handle ForEach separator
+                case ":":
+                    forStmt._forEach = true;
+                    break;
 
                 // Handle Statement
                 case "Statement": {
                     JStmt stmt = aNode.getCustomNode(JStmt.class);
                     forStmt.setStatement(stmt);
-                } break;
+                    break;
+                }
             }
         }
 
