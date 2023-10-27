@@ -214,43 +214,45 @@ public class JavaTextArea extends TextArea {
             return new TextToken[0];
 
         // Get other matching nodes
-        JNode[] matchingNodes = NodeMatcher.getMatchingNodesForDecl(aNode.getFile(), nodeDecl);
-        if (matchingNodes.length == 0)
+        JExprId[] matchingIdNodes = NodeMatcher.getMatchingIdNodesForDecl(aNode.getFile(), nodeDecl);
+        if (matchingIdNodes.length == 0)
             return new TextToken[0];
 
         // Return TextBoxTokens
-        return getTokensForNodes(matchingNodes);
+        return getTokensForIdNodes(matchingIdNodes);
     }
 
     /**
-     * Returns a TextToken array for given JNodes.
+     * Returns array of respective TextTokens for given id expression nodes.
      */
-    protected TextToken[] getTokensForNodes(JNode[] theNodes)
+    protected TextToken[] getTokensForIdNodes(JExprId[] idNodes)
     {
         // Convert matching JNodes to TextBoxTokens
-        List<TextToken> tokensList = new ArrayList<>(theNodes.length);
+        List<TextToken> tokensList = new ArrayList<>(idNodes.length);
         TextBlock textBlock = getTextBlock();
         int textLineStart = 0;
 
         // Iterate over nodes and convert to TextBoxTokens
-        for (JNode jnode : theNodes) {
+        for (JExprId idExpr : idNodes) {
+
+            // If node is zero length, skip
+            if (idExpr.getCharLength() == 0)
+                continue;
 
             // Get line index (skip if negative - assume Repl import statement or something)
-            int lineIndex = jnode.getLineIndex() - textLineStart;
+            int lineIndex = idExpr.getLineIndex() - textLineStart;
             if (lineIndex < 0)
                 continue;
 
             // Get line and token
             TextLine textLine = textBlock.getLine(lineIndex);
-            int startCharIndex = jnode.getLineCharIndex();
-            if (jnode instanceof JType && jnode.getStartToken() != jnode.getEndToken())
-                startCharIndex = jnode.getEndToken().getColumnIndex();
+            int startCharIndex = idExpr.getLineCharIndex();
             TextToken token = textLine.getTokenForCharIndex(startCharIndex);
 
             // Add to tokens list
             if (token != null)
                 tokensList.add(token);
-            else System.out.println("JavaTextArea.getTokensForNode: Can't find token for matching node: " + jnode);
+            else System.out.println("JavaTextArea.getTokensForNode: Can't find token for matching node: " + idExpr);
         }
 
         // Return

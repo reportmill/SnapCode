@@ -143,14 +143,18 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         if (!_textArea.isSelEmpty())
             return null;
 
+        // Get SelNode - just return if bogus
+        int selStart = _textArea.getSelStart();
+        JNode selNode = _textArea.getSelNode();
+        if (selNode == null || selNode instanceof JFile)
+            return null;
+
         // If dot at cursor, get virtual id expression for empty string after dot
         JExprId virtualIdExprForDot = getVirtualIdExprForDot();
         if (virtualIdExprForDot != null)
             return virtualIdExprForDot;
 
         // Get selected id expression (just return if SelNode not id)
-        int selStart = _textArea.getSelStart();
-        JNode selNode = _textArea.getSelNode();
         JExprId selId = selNode instanceof JExprId ? (JExprId) selNode : null;
         if (selId == null)
             return getVirtualIdExprForTextTokenAtCursor();

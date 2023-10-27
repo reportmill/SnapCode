@@ -296,18 +296,12 @@ public class JNode {
     /**
      * Sets the start token of this node.
      */
-    public void setStartToken(ParseToken aToken)
-    {
-        _startToken = aToken;
-    }
+    public void setStartToken(ParseToken aToken)  { _startToken = aToken; }
 
     /**
      * Returns the start char index of this node.
      */
-    public int getStartCharIndex()
-    {
-        return _startToken != null ? _startToken.getStartCharIndex() : 0;
-    }
+    public int getStartCharIndex()  { return _startToken != null ? _startToken.getStartCharIndex() : 0; }
 
     /**
      * Returns the end token of this node.
@@ -317,34 +311,27 @@ public class JNode {
     /**
      * Sets the end token of this node.
      */
-    public void setEndToken(ParseToken aToken)
-    {
-        _endToken = aToken;
-    }
+    public void setEndToken(ParseToken aToken)  { _endToken = aToken; }
 
     /**
      * Returns the end char index of this node.
      */
-    public int getEndCharIndex()
-    {
-        return _endToken != null ? _endToken.getEndCharIndex() : 0;
-    }
+    public int getEndCharIndex()  { return _endToken != null ? _endToken.getEndCharIndex() : 0; }
+
+    /**
+     * Returns the char length.
+     */
+    public int getCharLength() { return getEndCharIndex() - getStartCharIndex(); }
 
     /**
      * Returns the line index of this node.
      */
-    public int getLineIndex()
-    {
-        return _startToken.getLineIndex();
-    }
+    public int getLineIndex()  { return _startToken.getLineIndex(); }
 
     /**
      * Returns the char index of this node in line.
      */
-    public int getLineCharIndex()
-    {
-        return _startToken.getColumnIndex();
-    }
+    public int getLineCharIndex()  { return _startToken.getColumnIndex(); }
 
     /**
      * Returns the parent node.
@@ -354,10 +341,7 @@ public class JNode {
     /**
      * Sets the parent node.
      */
-    public void setParent(JNode aParent)
-    {
-        _parent = aParent;
-    }
+    public void setParent(JNode aParent)  { _parent = aParent; }
 
     /**
      * Returns the parent node of given class.

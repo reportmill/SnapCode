@@ -14,41 +14,41 @@ import java.util.List;
 public class NodeMatcher {
 
     /**
-     * Returns matching nodes for given decl.
+     * Returns matching id expression nodes for given decl.
      */
-    public static JNode[] getMatchingNodesForDecl(JNode aNode, JavaDecl aDecl)
+    public static JExprId[] getMatchingIdNodesForDecl(JNode aNode, JavaDecl aDecl)
     {
-        List<JNode> matchingNodes = new ArrayList<>();
-        findMatchingNodesForDecl(aNode, aDecl, matchingNodes);
-        return matchingNodes.toArray(new JNode[0]);
+        List<JExprId> matchingNodes = new ArrayList<>();
+        findMatchingIdNodesForDecl(aNode, aDecl, matchingNodes);
+        return matchingNodes.toArray(new JExprId[0]);
     }
 
     /**
-     * Finds matching nodes in given JNode that match given JavaDecl.
+     * Finds matching id expression nodes in given JNode that match given JavaDecl.
      */
-    private static void findMatchingNodesForDecl(JNode aNode, JavaDecl aDecl, List<JNode> theMatches)
+    private static void findMatchingIdNodesForDecl(JNode aNode, JavaDecl aDecl, List<JExprId> matchingIdNodes)
     {
         // If JExprId, check for match
         if (aNode instanceof JExprId) {
             if (isPossibleMatch(aNode, aDecl)) {
                 JavaDecl decl = aNode.getDecl();
                 if (decl != null && aDecl.matches(decl))
-                    theMatches.add(aNode);
+                    matchingIdNodes.add((JExprId) aNode);
             }
         }
 
         // Recurse
         for (JNode child : aNode.getChildren())
-            findMatchingNodesForDecl(child, aDecl, theMatches);
+            findMatchingIdNodesForDecl(child, aDecl, matchingIdNodes);
     }
 
     /**
      * Returns nodes that reference given decl.
      */
-    public static JNode[] getReferenceNodesForDecl(JNode aNode, JavaDecl aDecl)
+    public static JExprId[] getReferenceNodesForDecl(JNode aNode, JavaDecl aDecl)
     {
-        JNode[] matchingNodex = getMatchingNodesForDecl(aNode, aDecl);
-        return ArrayUtils.filter(matchingNodex, node -> isReferenceNode(aNode));
+        JExprId[] matchingIdNodes = getMatchingIdNodesForDecl(aNode, aDecl);
+        return ArrayUtils.filter(matchingIdNodes, node -> isReferenceNode(aNode));
     }
 
     /**
@@ -71,10 +71,10 @@ public class NodeMatcher {
     /**
      * Returns nodes that are declarations or subclass declarations of given decl.
      */
-    public static JNode[] getDeclarationNodesForDecl(JNode aNode, JavaDecl aDecl)
+    public static JExprId[] getDeclarationNodesForDecl(JNode aNode, JavaDecl aDecl)
     {
-        JNode[] matchingNodex = getMatchingNodesForDecl(aNode, aDecl);
-        return ArrayUtils.filter(matchingNodex, node -> node.isDeclIdNode());
+        JExprId[] matchingIdNodes = getMatchingIdNodesForDecl(aNode, aDecl);
+        return ArrayUtils.filter(matchingIdNodes, node -> node.isDeclIdNode());
     }
 
     /**
