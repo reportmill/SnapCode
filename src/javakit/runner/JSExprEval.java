@@ -609,7 +609,7 @@ public class JSExprEval {
         for (JVarDecl varDecl : varDecls) {
 
             // If initializer expression, evaluate and set local var
-            JExpr initExpr = varDecl.getInitializer();
+            JExpr initExpr = varDecl.getInitExpr();
             if (initExpr != null) {
                 JExprId varId = varDecl.getId();
                 Object val = evalExpr(initExpr);

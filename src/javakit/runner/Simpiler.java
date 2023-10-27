@@ -73,7 +73,7 @@ public class Simpiler {
             JVarDecl varDecl = varDecls.get(i);
 
             // If varDecl.InitExpr is lambda, recurse in
-            JExpr initExpr = varDecl.getInitializer();
+            JExpr initExpr = varDecl.getInitExpr();
             if (initExpr != null)
                 setVarStackIndexForNode(initExpr, 0);
 

@@ -239,24 +239,32 @@ public class JavaParserStmt extends JavaParserExpr {
             switch (anId) {
 
                 // Handle Identifier
-                case "Identifier":
-                    varDecl.setId(aNode.getCustomNode(JExprId.class));
+                case "Identifier": {
+                    JExprId idExpr = aNode.getCustomNode(JExprId.class);
+                    varDecl.setId(idExpr);
                     break;
+                }
 
                 // Handle ("[" "]")*
-                case "[":
-                    varDecl.setArrayCount(varDecl.getArrayCount() + 1);
+                case "[": {
+                    int arrayCount = varDecl.getArrayCount() + 1;
+                    varDecl.setArrayCount(arrayCount);
                     break;
+                }
 
                 // Handle VarInit ArrayInit
-                case "ArrayInit":
-                    varDecl.setArrayInits(aNode.getCustomNode(List.class));
+                case "ArrayInit": {
+                    List<JExpr> arrayInitExprs = aNode.getCustomNode(List.class);
+                    varDecl.setArrayInitExprs(arrayInitExprs);
                     break;
+                }
 
                 // Handle VarInit Expression
-                case "Expression":
-                    varDecl.setInitializer(aNode.getCustomNode(JExpr.class));
+                case "Expression": {
+                    JExpr initExpr = aNode.getCustomNode(JExpr.class);
+                    varDecl.setInitExpr(initExpr);
                     break;
+                }
             }
         }
 

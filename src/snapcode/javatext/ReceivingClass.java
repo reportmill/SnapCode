@@ -133,9 +133,9 @@ public class ReceivingClass {
             if (node instanceof JExpr) {
                 JExpr expr = (JExpr) node;
                 if (expr.getParent() instanceof JVarDecl) {
-                    JVarDecl vd = (JVarDecl) expr.getParent();
-                    if (vd.getInitializer() == expr)
-                        return vd;
+                    JVarDecl varDecl = (JVarDecl) expr.getParent();
+                    if (varDecl.getInitExpr() == expr)
+                        return varDecl;
                 }
             }
             node = node.getParent();

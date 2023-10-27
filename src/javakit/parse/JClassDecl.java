@@ -580,14 +580,13 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
      */
     protected JVarDecl getVarDeclForIdReplHack(JExprId idExpr)
     {
-        // Get class initializers
         JInitializerDecl[] initializerDecls = getInitDecls();
 
-        // Search initializers before this method and return node decl if found
+        // Iterate over initializers to find matching var decl (break at one holding given id)
         for (JInitializerDecl initializerDecl : initializerDecls) {
 
             // If id expression is before initializer start, just break
-            if (idExpr.getStartCharIndex() < initializerDecl.getStartCharIndex())
+            if (idExpr.getStartCharIndex() < initializerDecl.getEndCharIndex())
                 break;
 
             // If initializer block has var decl for id, return it

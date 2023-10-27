@@ -316,7 +316,7 @@ public class DeclMatcher {
     {
         JInitializerDecl[] initializerDecls = classDecl.getInitDecls();
 
-        // Iterate over class initializers
+        // Iterate over initializers to find matching var decls (break at one holding given id)
         for (JInitializerDecl initializerDecl : initializerDecls) {
 
             // If id expression is before initializer end, just break

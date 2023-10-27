@@ -18,13 +18,13 @@ public class JVarDecl extends JNode implements WithId {
     protected JExprId  _id;
 
     // The variable dimension (if defined with variable instead of type)
-    protected int  _arrayCount;
+    private int _arrayCount;
 
-    // The initializer
-    protected JExpr  _initializer;
+    // The initializer expression
+    private JExpr _initExpr;
 
-    // The array initializer (if array)
-    protected List<JExpr>  _arrayInits = Collections.EMPTY_LIST;
+    // The array initializer expressions (if array)
+    protected List<JExpr> _arrayInitExprs = Collections.EMPTY_LIST;
 
     /**
      * Constructor.
@@ -118,31 +118,38 @@ public class JVarDecl extends JNode implements WithId {
     }
 
     /**
-     * Returns the initializer.
+     * Returns the initializer expression.
      */
-    public JExpr getInitializer()  { return _initializer; }
+    public JExpr getInitExpr()  { return _initExpr; }
 
     /**
-     * Sets the initializer.
+     * Sets the initializer expression.
      */
-    public void setInitializer(JExpr anExpr)
+    public void setInitExpr(JExpr anExpr)
     {
-        replaceChild(_initializer, _initializer = anExpr);
+        replaceChild(_initExpr, _initExpr = anExpr);
     }
 
     /**
-     * Returns the array init expressions, if array.
+     * Returns the array init expressions (if array).
      */
-    public List<JExpr> getArrayInits()  { return _arrayInits; }
+    public List<JExpr> getArrayInitExprs()  { return _arrayInitExprs; }
 
     /**
-     * Sets the array init expressions, if array.
+     * Sets the array init expressions (if array).
      */
-    public void setArrayInits(List<JExpr> theArrayInits)
+    public void setArrayInitExprs(List<JExpr> theArrayInits)
     {
-        if (_arrayInits != null) for (JExpr expr : _arrayInits) removeChild(expr);
-        _arrayInits = theArrayInits;
-        if (_arrayInits != null) for (JExpr expr : _arrayInits) addChild(expr, -1);
+        // Remove old expressions if set
+        if (_arrayInitExprs != null && _arrayInitExprs.size() > 0)
+            _arrayInitExprs.forEach(expr -> removeChild(expr));
+
+        // Set new
+        _arrayInitExprs = theArrayInits;
+
+        // Add new expressions
+        if (_arrayInitExprs != null)
+            _arrayInitExprs.forEach(expr -> addChild(expr));
     }
 
     /**
@@ -219,7 +226,7 @@ public class JVarDecl extends JNode implements WithId {
         }
 
         // If initializer expression set, check type
-        JExpr initExpr = getInitializer();
+        JExpr initExpr = getInitExpr();
         if (initExpr != null) {
 
             // If initializer has errors, just return them
@@ -237,7 +244,7 @@ public class JVarDecl extends JNode implements WithId {
         }
 
         // If any array inits have error, return that
-        List<JExpr> arrayInitExprs = getArrayInits();
+        List<JExpr> arrayInitExprs = getArrayInitExprs();
         for (JExpr arrayInitExpr : arrayInitExprs) {
             NodeError[] arrayInitExprErrors = arrayInitExpr.getErrors();
             if (arrayInitExprErrors.length > 0)
