@@ -284,12 +284,9 @@ public class JavaParserExpr extends Parser {
     public static class MultiplicativeExprHandler extends BinaryExprHandler { }
 
     /**
-     * OpExpr Handler.
+     * BinaryExpr Handler.
      */
     public static abstract class BinaryExprHandler extends ParseHandler<JExpr> {
-
-        // The Op
-        JExprMath.Op _op;
 
         /**
          * ParseHandler method.
@@ -299,16 +296,17 @@ public class JavaParserExpr extends Parser {
             // Handle KeyChain
             if (aNode.getCustomNode() instanceof JExpr) {
                 JExpr part = aNode.getCustomNode(JExpr.class);
-                if (_part == null)
-                    _part = part;
-                else {
-                    _part = new JExprMath(_op, _part, part);
-                    _op = null;
-                }
+                if (_part instanceof JExprMath)
+                    ((JExprMath) _part).addOperand(part);
+                else _part = part;
             }
 
             // Handle Ops
-            else _op = getOpForString(anId);
+            else {
+                JExprMath.Op op = getOpForString(anId);
+                if (op != null)
+                    _part = new JExprMath(op, _part);
+            }
         }
 
         @Override
