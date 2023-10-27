@@ -316,7 +316,7 @@ public class JavaParserStmt extends JavaParserExpr {
     }
 
     /**
-     * ExprStatement Handler: PreIncrementExpr | PreDecrementExpr | PrimaryExpr ("++" | "--" | AssignOp Expression)?
+     * ExprStatement Handler: PreIncrementExpr | PrimaryExpr ("++" | "--" | AssignOp Expression)?
      */
     public static class ExprStatementHandler extends JNodeParseHandler<JStmtExpr> {
 
@@ -330,9 +330,8 @@ public class JavaParserStmt extends JavaParserExpr {
 
             switch (anId) {
 
-                // Handle PreIncrementExpr, PreDecrementExpr, PrimaryExpr: Set expression statement expression
+                // Handle PreIncrementExpr, PrimaryExpr: Set expression statement expression
                 case "PreIncrementExpr":
-                case "PreDecrementExpr":
                 case "PrimaryExpr": {
                     JExpr expr = (JExpr) aNode.getCustomNode();
                     exprStmt.setExpr(expr);

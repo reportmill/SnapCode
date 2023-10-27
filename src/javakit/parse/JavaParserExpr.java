@@ -345,7 +345,7 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * UnaryExpr Handler: ("+" | "-") UnaryExpr | PreIncrementExpr | PreDecrementExpr | UnaryExprNotPlusMinus
+     * UnaryExpr Handler: ("+" | "-") UnaryExpr | PreIncrementExpr | UnaryExprNotPlusMinus
      */
     public static class UnaryExprHandler extends JNodeParseHandler<JExpr> {
 
@@ -354,7 +354,7 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle any expression rule: UnaryExpr, PreIncrementExpr, PreDecrementExpr, UnaryExprNotPlusMinus
+            // Handle any expression rule: UnaryExpr, PreIncrementExpr, UnaryExprNotPlusMinus
             if (aNode.getCustomNode() instanceof JExpr) {
                 JExpr part = aNode.getCustomNode(JExpr.class);
                 if (_part instanceof JExprMath)
@@ -390,38 +390,19 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle "++"
-            if (anId == "++")
-                _part = new JExprMath(JExprMath.Op.PreIncrement);
+            switch (anId) {
 
-            // Handle PrimaryExpr
-            if (anId == "PrimaryExpr") {
-                JExpr expr = aNode.getCustomNode(JExpr.class);
-                _part.addOperand(expr);
-            }
-        }
+                // Handle "++"
+                case "++": _part = new JExprMath(JExprMath.Op.PreIncrement); break;
 
-        protected Class<JExprMath> getPartClass()  { return JExprMath.class; }
-    }
+                // Handle "--"
+                case "--": _part = new JExprMath(JExprMath.Op.PreDecrement); break;
 
-    /**
-     * PreDecrementExpr Handler: "--" PrimaryExpr
-     */
-    public static class PreDecrementExprHandler extends JNodeParseHandler<JExprMath> {
-
-        /**
-         * ParseHandler method.
-         */
-        protected void parsedOne(ParseNode aNode, String anId)
-        {
-            // Handle "--"
-            if (anId == "--")
-                _part = new JExprMath(JExprMath.Op.PreDecrement);
-
-            // Handle PrimaryExpr
-            if (anId == "PrimaryExpr") {
-                JExpr expr = aNode.getCustomNode(JExpr.class);
-                _part.addOperand(expr);
+                // Handle PrimaryExpr
+                case "PrimaryExpr":
+                    JExpr expr = aNode.getCustomNode(JExpr.class);
+                    _part.addOperand(expr);
+                    break;
             }
         }
 

@@ -736,7 +736,7 @@ public class JavaParser extends JavaParserStmt {
         AnnotationDeclHandler.class, LiteralHandler.class, LambdaExprHandler.class,
         ArrayInitHandler.class, AllocExprHandler.class, ArgumentsHandler.class,
         PrimarySuffixHandler.class, PrimaryPrefixHandler.class, PrimaryExprHandler.class,
-        InstanceOfExprHandler.class, CastExprHandler.class, PreDecrementExprHandler.class,
+        InstanceOfExprHandler.class, CastExprHandler.class,
         PreIncrementExprHandler.class, UnaryExprHandler.class, MultiplicativeExprHandler.class,
         AdditiveExprHandler.class, ShiftExprHandler.class, RelationalExprHandler.class,
         EqualityExprHandler.class, AndExprHandler.class, ExclusiveOrExprHandler.class,

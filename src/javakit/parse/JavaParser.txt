@@ -172,7 +172,7 @@ LabeledStatement { Identifier ":" Statement }
 
 ExprStatement
 {
-    PreIncrementExpr | PreDecrementExpr |
+    PreIncrementExpr |
     PrimaryExpr ("++" | "--" | AssignOp Expression)?
 }
 
@@ -206,11 +206,9 @@ AdditiveExpr { MultiplicativeExpr (("+" | "-") MultiplicativeExpr)* }
 
 MultiplicativeExpr { UnaryExpr (("*" | "/" | "%") UnaryExpr)* }
 
-UnaryExpr { ("+" | "-") UnaryExpr | PreIncrementExpr | PreDecrementExpr | UnaryExprNotPlusMinus }
+UnaryExpr { ("+" | "-") UnaryExpr | PreIncrementExpr | UnaryExprNotPlusMinus }
 
-PreIncrementExpr { "++" PrimaryExpr }
-
-PreDecrementExpr { "--" PrimaryExpr }
+PreIncrementExpr { ("++" | "--") PrimaryExpr }
 
 UnaryExprNotPlusMinus { ("~" | "!") UnaryExpr | LookAhead (CastLook) CastExpr | PostfixExpr }
 
