@@ -77,14 +77,12 @@ public class JExprMethodCall extends JExpr implements WithId {
     public void setArgs(List<JExpr> theArgs)
     {
         if (_args != null)
-            for (JExpr arg : _args)
-                removeChild(arg);
+            _args.forEach(arg -> removeChild(arg));
 
         _args = theArgs;
 
         if (_args != null)
-            for (JExpr arg : _args)
-                addChild(arg, -1);
+            _args.forEach(arg -> addChild(arg));
     }
 
     /**

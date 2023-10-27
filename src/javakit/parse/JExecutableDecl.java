@@ -59,14 +59,12 @@ public class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithV
     public void setTypeVars(List<JTypeVar> theTVs)
     {
         if (_typeVars != null)
-            for (JTypeVar tvar : _typeVars)
-                removeChild(tvar);
+            _typeVars.forEach(tvar -> removeChild(tvar));
 
         _typeVars = theTVs;
 
         if (_typeVars != null)
-            for (JTypeVar tvar : _typeVars)
-                addChild(tvar, -1);
+            _typeVars.forEach(tvar -> addChild(tvar));
     }
 
     /**
@@ -84,7 +82,7 @@ public class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithV
             return;
         }
         _params.add(aVarDecl);
-        addChild(aVarDecl, -1);
+        addChild(aVarDecl);
     }
 
     /**
@@ -98,14 +96,12 @@ public class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithV
     public void setThrowsList(List<JExpr> theThrows)
     {
         if (_throwsNameList != null)
-            for (JExpr t : _throwsNameList)
-                removeChild(t);
+            _throwsNameList.forEach(expr -> removeChild(expr));
 
         _throwsNameList = theThrows;
 
         if (_throwsNameList != null)
-            for (JExpr t : _throwsNameList)
-                addChild(t, -1);
+            _throwsNameList.forEach(expr -> addChild(expr));
     }
 
     /**

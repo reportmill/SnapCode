@@ -43,10 +43,10 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
     /**
      * Adds a formal parameter.
      */
-    public void addParameter(JVarDecl aVD)
+    public void addParameter(JVarDecl aVarDecl)
     {
-        _params.add(aVD);
-        addChild(aVD, -1);
+        _params.add(aVarDecl);
+        addChild(aVarDecl);
     }
 
     /**

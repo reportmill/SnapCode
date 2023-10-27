@@ -66,7 +66,7 @@ public class JStmtSwitchCase extends JNode implements WithStmts, WithVarDeclsX {
     public void addStatement(JStmt aStmt)
     {
         _stmts.add(aStmt);
-        addChild(aStmt, -1);
+        addChild(aStmt);
     }
 
     /**

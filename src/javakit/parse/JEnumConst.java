@@ -28,18 +28,22 @@ public class JEnumConst extends JMemberDecl {
      */
     public void setArgs(List<JExpr> theArgs)
     {
-        if (_args != null) for (JExpr arg : _args) removeChild(arg);
+        // Remove old
+        if (_args != null)
+            _args.forEach(arg -> removeChild(arg));
+
+        // Set new
         _args = theArgs;
-        if (_args != null) for (JExpr arg : _args) addChild(arg, -1);
+
+        // Add new args
+        if (_args != null)
+            _args.forEach(arg -> addChild(arg));
     }
 
     /**
      * Returns the class decl.
      */
-    public String getClassBody()
-    {
-        return _classBody;
-    }
+    public String getClassBody()  { return _classBody; }
 
     /**
      * Sets the class decl.

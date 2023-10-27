@@ -79,18 +79,22 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
      */
     public void setTypeVars(List<JTypeVar> theTVs)
     {
-        if (_typeVars != null) for (JNode n : _typeVars) removeChild(n);
+        // Remove old type vars
+        if (_typeVars != null)
+            _typeVars.forEach(tvar -> removeChild(tvar));
+
+        // Set new
         _typeVars = theTVs;
-        if (_typeVars != null) for (JNode n : _typeVars) addChild(n, -1);
+
+        // Add new type vars
+        if (_typeVars != null)
+            _typeVars.forEach(tvar -> addChild(tvar));
     }
 
     /**
      * Returns the extends list.
      */
-    public List<JType> getExtendsTypes()
-    {
-        return _extendsTypes;
-    }
+    public List<JType> getExtendsTypes()  { return _extendsTypes; }
 
     /**
      * Returns the extends list.
@@ -98,7 +102,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
     public void addExtendsType(JType aType)
     {
         _extendsTypes.add(aType);
-        addChild(aType, -1);
+        addChild(aType);
     }
 
     /**
@@ -112,7 +116,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
     public void addImplementsType(JType aType)
     {
         _implementsTypes.add(aType);
-        addChild(aType, -1);
+        addChild(aType);
     }
 
     /**
@@ -126,7 +130,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
     public void addEnumConstant(JEnumConst anEC)
     {
         _enumConstants.add(anEC);
-        addChild(anEC, -1);
+        addChild(anEC);
     }
 
     /**
@@ -213,7 +217,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
     public void addMemberDecl(JMemberDecl aDecl)
     {
         _members.add(aDecl);
-        addChild(aDecl, -1);
+        addChild(aDecl);
     }
 
     /**

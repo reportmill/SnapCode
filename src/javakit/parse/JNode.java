@@ -381,7 +381,6 @@ public class JNode {
     {
         // Checks
         if (aNode == null) return;
-        if (anIndex < 0) anIndex = _children.size();
 
         // Make sure Children array is real
         if (_children == Collections.EMPTY_LIST)
@@ -423,6 +422,8 @@ public class JNode {
     protected void replaceChild(JNode oNode, JNode nNode)
     {
         int index = oNode != null ? removeChild(oNode) : -1;
+        if (index < 0)
+            index = _children.size();
         addChild(nNode, index);
     }
 

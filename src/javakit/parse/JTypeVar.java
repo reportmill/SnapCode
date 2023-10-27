@@ -39,7 +39,8 @@ public class JTypeVar extends JNode implements WithId {
     public void setId(JExprId anId)
     {
         replaceChild(_id, _id = anId);
-        if (_id != null) setName(_id.getName());
+        if (_id != null)
+            setName(_id.getName());
     }
 
     /**
@@ -53,7 +54,7 @@ public class JTypeVar extends JNode implements WithId {
     public void addType(JType aType)
     {
         _types.add(aType);
-        addChild(aType, -1);
+        addChild(aType);
     }
 
     /**

@@ -48,7 +48,7 @@ public class JFieldDecl extends JMemberDecl implements WithVarDecls {
     public void addVarDecl(JVarDecl aVD)
     {
         _vars.add(aVD);
-        addChild(aVD, -1);
+        addChild(aVD);
     }
 
     /**

@@ -71,10 +71,10 @@ public class JExprVarDecl extends JExpr implements WithVarDecls {
     /**
      * Adds a variable declaration.
      */
-    public void addVarDecl(JVarDecl aVD)
+    public void addVarDecl(JVarDecl aVarDecl)
     {
-        _varDecls.add(aVD);
-        addChild(aVD, -1);
+        _varDecls.add(aVarDecl);
+        addChild(aVarDecl);
     }
 
     /**

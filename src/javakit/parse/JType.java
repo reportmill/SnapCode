@@ -107,7 +107,7 @@ public class JType extends JNode {
     {
         if (_typeArgs == null) _typeArgs = new ArrayList<>();
         _typeArgs.add(aType);
-        addChild(aType, -1);
+        addChild(aType);
     }
 
     /**

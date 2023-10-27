@@ -34,24 +34,7 @@ public class JStmtBlock extends JStmt implements WithStmts, WithVarDeclsX {
      */
     public void addStatement(JStmt aStmt)
     {
-        addChild(aStmt, -1);
-    }
-
-    /**
-     * Adds a statement.
-     */
-    public void addStatement(JStmt aStmt, int anIndex)
-    {
-        addChild(aStmt, anIndex);
-        _varDecls = null;
-    }
-
-    /**
-     * Removes a statement.
-     */
-    public int removeStatement(JStmt aStmt)
-    {
-        return removeChild(aStmt);
+        addChild(aStmt);
     }
 
     /**

@@ -58,9 +58,13 @@ public class JExprAlloc extends JExpr {
      */
     public void setArgs(List<JExpr> theArgs)
     {
-        if (_args != null) for (JExpr arg : _args) removeChild(arg);
+        if (_args != null)
+            _args.forEach(arg -> removeChild(arg));
+
         _args = theArgs;
-        if (_args != null) for (JExpr arg : _args) addChild(arg, -1);
+
+        if (_args != null)
+            _args.forEach(arg -> addChild(arg));
     }
 
     /**
@@ -106,9 +110,13 @@ public class JExprAlloc extends JExpr {
      */
     public void setArrayInits(List<JExpr> theArrayInits)
     {
-        if (_arrayInits != null) for (JExpr expr : _arrayInits) removeChild(expr);
+        if (_arrayInits != null)
+            _arrayInits.forEach(expr -> removeChild(expr));
+
         _arrayInits = theArrayInits;
-        if (_arrayInits != null) for (JExpr expr : _arrayInits) addChild(expr, -1);
+
+        if (_arrayInits != null)
+            _arrayInits.forEach(expr -> addChild(expr));
     }
 
     /**

@@ -47,9 +47,13 @@ public class JStmtConstrCall extends JStmt {
      */
     public void setArgs(List<JExpr> theArgs)
     {
-        if (_args != null) for (JExpr arg : _args) removeChild(arg);
+        if (_args != null)
+            _args.forEach(arg -> removeChild(arg));
+
         _args = theArgs;
-        if (_args != null) for (JExpr arg : _args) addChild(arg, -1);
+
+        if (_args != null)
+            _args.forEach(arg -> addChild(arg));
     }
 
     /**
