@@ -567,27 +567,34 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
         if (varDecl != null)
             return varDecl;
 
-        // Try ReplHack
+        // If this class is inner class, just return not found
+        if (getParent(JClassDecl.class) != null)
+            return null;
+
+        // Try ReplHack for top level class
         return getVarDeclForIdReplHack(anId);
     }
 
     /**
      * REPL hack - Get/search initializers before this method for unresolved ids.
      */
-    protected JVarDecl getVarDeclForIdReplHack(JExprId anExprId)
+    protected JVarDecl getVarDeclForIdReplHack(JExprId idExpr)
     {
         // Get class initializers
-        JInitializerDecl[] initDecls = getInitDecls();
+        JInitializerDecl[] initializerDecls = getInitDecls();
 
         // Search initializers before this method and return node decl if found
-        for (JInitializerDecl initDecl : initDecls) {
-            if (initDecl.getStartCharIndex() < getStartCharIndex()) {
-                JStmtBlock blockStmt = initDecl.getBlock();
-                JVarDecl varDecl = blockStmt.getVarDeclForId(anExprId);
-                if (varDecl != null)
-                    return varDecl;
-            }
-            else break;
+        for (JInitializerDecl initializerDecl : initializerDecls) {
+
+            // If id expression is before initializer start, just break
+            if (idExpr.getStartCharIndex() < initializerDecl.getStartCharIndex())
+                break;
+
+            // If initializer block has var decl for id, return it
+            JStmtBlock blockStmt = initializerDecl.getBlock();
+            JVarDecl varDecl = blockStmt.getVarDeclForId(idExpr);
+            if (varDecl != null)
+                return varDecl;
         }
 
         // Return not found
