@@ -223,7 +223,7 @@ public class JavaParserExpr extends Parser {
                 case "Expression":
                     JExpr part = aNode.getCustomNode(JExpr.class);
                     JExprMath opExpr = _part instanceof JExprMath ? (JExprMath) _part : null;
-                    if (opExpr == null || opExpr.op != JExprMath.Op.Conditional)
+                    if (opExpr == null || opExpr.getOp() != JExprMath.Op.Conditional)
                         _part = new JExprMath(JExprMath.Op.Conditional, _part, part);
                     else opExpr.setOperand(part, 2);
                     break;
@@ -349,43 +349,32 @@ public class JavaParserExpr extends Parser {
      */
     public static class UnaryExprHandler extends JNodeParseHandler<JExpr> {
 
-        // The current op
-        JExprMath.Op _op;
-
         /**
          * ParseHandler method.
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle JavaExpression rules: PreIncrementExpr, PreDecrementExpr, UnaryExprNotPlusMinus
+            // Handle any expression rule: UnaryExpr, PreIncrementExpr, PreDecrementExpr, UnaryExprNotPlusMinus
             if (aNode.getCustomNode() instanceof JExpr) {
                 JExpr part = aNode.getCustomNode(JExpr.class);
-                _part = _op == null ? part : new JExprMath(_op, part);
+                if (_part instanceof JExprMath)
+                    ((JExprMath) _part).addOperand(part);
+                else _part = part;
             }
 
             // Handle unary ops (ignore '+')
             else if (anId == "-")
-                _op = JExprMath.Op.Negate;
-            else if (anId == "~")
-                _op = JExprMath.Op.BitComp;
+                _part = new JExprMath(JExprMath.Op.Negate);
             else if (anId == "!")
-                _op = JExprMath.Op.Not;
+                _part = new JExprMath(JExprMath.Op.Not);
+            else if (anId == "~")
+                _part = new JExprMath(JExprMath.Op.BitComp);
 
             // Handle post Increment/Decrement
-            else if (anId == "++" || anId == "--") {
-                _op = anId == "++" ? JExprMath.Op.PostIncrement : JExprMath.Op.PostDecrement;
-                if (_part != null)
-                    _part = new JExprMath(_op, _part);
-            }
-        }
-
-        /**
-         * Override to clear op.
-         */
-        public JExpr parsedAll()
-        {
-            _op = null;
-            return super.parsedAll();
+            else if (anId == "++")
+                _part = new JExprMath(JExprMath.Op.PostIncrement, _part);
+            else if (anId == "--")
+                _part = new JExprMath(JExprMath.Op.PostDecrement, _part);
         }
 
         protected Class<JExpr> getPartClass()  { return JExpr.class; }

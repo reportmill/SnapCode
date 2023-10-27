@@ -11,7 +11,7 @@ import javakit.resolver.JavaType;
 public class JExprMath extends JExpr {
 
     // The operator
-    public Op op;
+    private Op _op;
 
     // Constants for op
     public enum Op {
@@ -66,7 +66,7 @@ public class JExprMath extends JExpr {
      */
     public JExprMath(Op anOp)
     {
-        op = anOp;
+        _op = anOp;
     }
 
     /**
@@ -74,8 +74,9 @@ public class JExprMath extends JExpr {
      */
     public JExprMath(Op anOp, JExpr aFirst)
     {
-        op = anOp;
-        addOperand(aFirst);
+        _op = anOp;
+        if (aFirst != null)
+            addOperand(aFirst);
     }
 
     /**
@@ -83,7 +84,7 @@ public class JExprMath extends JExpr {
      */
     public JExprMath(Op anOp, JExpr aFirst, JExpr aSecond)
     {
-        op = anOp;
+        _op = anOp;
         addOperand(aFirst);
         addOperand(aSecond);
     }
@@ -91,7 +92,7 @@ public class JExprMath extends JExpr {
     /**
      * Returns the op.
      */
-    public Op getOp()  { return op; }
+    public Op getOp()  { return _op; }
 
     /**
      * Returns the operand count.
@@ -134,11 +135,11 @@ public class JExprMath extends JExpr {
     {
         // If missing operands, return error
         int opCountActual = getOperandCount();
-        int opCountExpected = op.getOperandCount();
+        int opCountExpected = _op.getOperandCount();
         if (opCountActual < opCountExpected)
             return null;
 
-        switch (op) {
+        switch (_op) {
 
             // Handle binary numeric math ops
             case Add:
@@ -275,7 +276,7 @@ public class JExprMath extends JExpr {
     {
         // If missing operands, return error
         int opCountActual = getOperandCount();
-        int opCountExpected = op.getOperandCount();
+        int opCountExpected = _op.getOperandCount();
         if (opCountActual < opCountExpected)
             return NodeError.newErrorArray(this, "Missing operand");
 
@@ -286,7 +287,7 @@ public class JExprMath extends JExpr {
     /**
      * Returns the part name.
      */
-    public String getNodeString()  { return op + "Expr"; }
+    public String getNodeString()  { return _op + "Expr"; }
 
     /**
      * Returns the Op string for op.
