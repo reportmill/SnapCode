@@ -73,14 +73,16 @@ public class JStmtConditional extends JStmt implements WithBodyStmt, WithBlockSt
     protected NodeError[] getErrorsImpl()
     {
         NodeError[] errors = super.getErrorsImpl();
-
-        // Handle missing statement
-        if (_stmt == null)
-            errors = NodeError.addError(errors, this, "Missing statement block", 0);
+        if (errors.length > 0)
+            return errors;
 
         // Handle missing conditional
         if (_cond == null && !(this instanceof JStmtFor))
-            errors = NodeError.addError(errors, this, "Missing conditional", 0);
+            return NodeError.newErrorArray(this, "Missing conditional");
+
+        // Handle missing statement
+        if (_stmt == null)
+            return NodeError.newErrorArray(this, "Missing statement block");
 
         // Return
         return errors;

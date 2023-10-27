@@ -149,6 +149,34 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
         }
 
         // Handle basic
+        else {
+
+            // If errors in init expressions, return
+            JExpr[] initExprs = getInitExprs();
+            for (JExpr initExpr : initExprs) {
+                NodeError[] initErrors = initExpr.getErrors();
+                if (initErrors.length > 0)
+                    return initErrors;
+            }
+
+            // If errors in conditional expression, return
+            JExpr condExpr = getConditional();
+            if (condExpr != null) {
+                NodeError[] condErrors = condExpr.getErrors();
+                if (condErrors.length > 0)
+                    return condErrors;
+            }
+
+            // If errors in update expressions, return
+            JExpr[] updateExprs = getUpdateExprs();
+            for (JExpr updateExpr : updateExprs) {
+                NodeError[] updateErrors = updateExpr.getErrors();
+                if (updateErrors.length > 0)
+                    return updateErrors;
+            }
+        }
+
+        // Do normal version
         return super.getErrorsImpl();
     }
 

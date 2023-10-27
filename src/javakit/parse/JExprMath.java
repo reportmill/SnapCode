@@ -15,11 +15,43 @@ public class JExprMath extends JExpr {
 
     // Constants for op
     public enum Op {
-        Add, Subtract, Multiply, Divide, Mod,
-        Equal, NotEqual, LessThan, GreaterThan, LessThanOrEqual, GreaterThanOrEqual,
-        Or, And, Not, BitOr, BitXOr, BitAnd, Conditional, Assign,
-        ShiftLeft, ShiftRight, ShiftRightUnsigned,
-        PreIncrement, PreDecrement, Negate, BitComp, PostIncrement, PostDecrement
+
+        // Binary numeric math
+        Add(2), Subtract(2),
+        Multiply(2), Divide(2), Mod(2),
+
+        // Binary numeric compare
+        Equal(2), NotEqual(2),
+        LessThan(2), GreaterThan(2),
+        LessThanOrEqual(2), GreaterThanOrEqual(2),
+
+        // Binary logical
+        Or(2), And(2), Not(1),
+
+        // Bitwise binary math
+        BitOr(2), BitXOr(2), BitAnd(2),
+
+        // Conditional
+        Conditional(3),
+
+        // Bitwise shift
+        ShiftLeft(2), ShiftRight(2), ShiftRightUnsigned(2),
+
+        // Unary
+        PreIncrement(1), PreDecrement(1),
+        PostIncrement(1), PostDecrement(1),
+
+        // Unary
+        Negate(1), BitComp(1);
+
+        // Operand count
+        private int _operandCount;
+
+        // Constructor
+        Op(int operandCount)  { _operandCount = operandCount; }
+
+        // Returns the number of operands
+        public int getOperandCount() { return _operandCount; }
     }
 
     /**
@@ -27,6 +59,14 @@ public class JExprMath extends JExpr {
      */
     public JExprMath()
     {
+    }
+
+    /**
+     * Creates a new expression for given op and LeftHand expression.
+     */
+    public JExprMath(Op anOp)
+    {
+        op = anOp;
     }
 
     /**
@@ -51,10 +91,7 @@ public class JExprMath extends JExpr {
     /**
      * Returns the op.
      */
-    public Op getOp()
-    {
-        return op;
-    }
+    public Op getOp()  { return op; }
 
     /**
      * Returns the operand count.
@@ -77,7 +114,7 @@ public class JExprMath extends JExpr {
      */
     public void addOperand(JExpr anExpr)
     {
-        addChild(anExpr, -1);
+        addChild(anExpr);
     }
 
     /**
@@ -85,8 +122,9 @@ public class JExprMath extends JExpr {
      */
     public void setOperand(JExpr anExpr, int anIndex)
     {
-        if (anIndex < getChildCount()) replaceChild(getChild(anIndex), anExpr);
-        else addChild(anExpr, -1);
+        if (anIndex < getChildCount())
+            replaceChild(getChild(anIndex), anExpr);
+        else addChild(anExpr);
     }
 
     /**
@@ -94,43 +132,55 @@ public class JExprMath extends JExpr {
      */
     protected JavaDecl getDeclImpl()
     {
+        // If missing operands, return error
+        int opCountActual = getOperandCount();
+        int opCountExpected = op.getOperandCount();
+        if (opCountActual < opCountExpected)
+            return null;
+
         switch (op) {
+
+            // Handle binary numeric math ops
             case Add:
             case Subtract:
             case Multiply:
             case Divide:
-            case Mod:
-                return getEvalTypeMath();
+            case Mod: return getEvalTypeMath();
+
+            // Handle binary numeric compare ops
             case Equal:
             case NotEqual:
             case LessThan:
             case GreaterThan:
             case LessThanOrEqual:
             case GreaterThanOrEqual:
+
+            // Handle binary/unary logic
             case Or:
             case And:
-            case Not:
-                return getJavaClassForClass(boolean.class);
-            case Conditional:
-                return getEvalTypeConditional();
+            case Not: return getJavaClassForClass(boolean.class);
+
+            // Handle conditional
+            case Conditional: return getEvalTypeConditional();
+
+            // Handle binary bitwise ops
             case BitOr:
             case BitXOr:
             case BitAnd:
-                return getOperand(0).getEvalType();
             case ShiftLeft:
             case ShiftRight:
-            case ShiftRightUnsigned:
-                return getOperand(0).getEvalType();
+            case ShiftRightUnsigned: return getOperand(0).getEvalType();
+
+            // Handle unary ops
             case PreIncrement:
             case PreDecrement:
-            case Negate:
-            case BitComp:
-                return getOperand(0).getEvalType();
             case PostIncrement:
             case PostDecrement:
-                return getOperand(0).getEvalType();
-            default:
-                return getJavaClassForClass(boolean.class);
+            case Negate:
+            case BitComp: return getOperand(0).getEvalType();
+
+            // Handle bogus
+            default: return getJavaClassForClass(boolean.class);
         }
     }
 
@@ -218,12 +268,25 @@ public class JExprMath extends JExpr {
     }
 
     /**
+     * Override to customize for math expression.
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()
+    {
+        // If missing operands, return error
+        int opCountActual = getOperandCount();
+        int opCountExpected = op.getOperandCount();
+        if (opCountActual < opCountExpected)
+            return NodeError.newErrorArray(this, "Missing operand");
+
+        // Do normal version
+        return super.getErrorsImpl();
+    }
+
+    /**
      * Returns the part name.
      */
-    public String getNodeString()
-    {
-        return op + "Expr";
-    }
+    public String getNodeString()  { return op + "Expr"; }
 
     /**
      * Returns the Op string for op.

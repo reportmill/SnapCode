@@ -387,7 +387,7 @@ public class JNode {
      */
     protected void addChild(JNode aNode)
     {
-        addChild(aNode, -1);
+        addChild(aNode, _children.size());
     }
 
     /**

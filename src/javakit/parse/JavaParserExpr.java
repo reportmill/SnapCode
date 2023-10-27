@@ -16,7 +16,7 @@ import java.util.List;
 public class JavaParserExpr extends Parser {
 
     /**
-     * Expression Handler.
+     * Expression Handler: ConditionalExpr (AssignOp Expression)?
      */
     public static class ExpressionHandler extends JNodeParseHandler<JExpr> {
 
@@ -345,7 +345,7 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * UnaryExpr Handler.
+     * UnaryExpr Handler: ("+" | "-") UnaryExpr | PreIncrementExpr | PreDecrementExpr | UnaryExprNotPlusMinus
      */
     public static class UnaryExprHandler extends JNodeParseHandler<JExpr> {
 
@@ -364,14 +364,18 @@ public class JavaParserExpr extends Parser {
             }
 
             // Handle unary ops (ignore '+')
-            else if (anId == "-") _op = JExprMath.Op.Negate;
-            else if (anId == "~") _op = JExprMath.Op.BitComp;
-            else if (anId == "!") _op = JExprMath.Op.Not;
+            else if (anId == "-")
+                _op = JExprMath.Op.Negate;
+            else if (anId == "~")
+                _op = JExprMath.Op.BitComp;
+            else if (anId == "!")
+                _op = JExprMath.Op.Not;
 
             // Handle post Increment/Decrement
             else if (anId == "++" || anId == "--") {
                 _op = anId == "++" ? JExprMath.Op.PostIncrement : JExprMath.Op.PostDecrement;
-                if (_part != null) _part = new JExprMath(_op, _part);
+                if (_part != null)
+                    _part = new JExprMath(_op, _part);
             }
         }
 
@@ -388,37 +392,51 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * PreIncrementExpr Handler.
+     * PreIncrementExpr Handler: "++" PrimaryExpr
      */
-    public static class PreIncrementExprHandler extends JNodeParseHandler<JExpr> {
+    public static class PreIncrementExprHandler extends JNodeParseHandler<JExprMath> {
 
         /**
          * ParseHandler method.
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            if (anId == "PrimaryExpr")
-                _part = new JExprMath(JExprMath.Op.PreIncrement, aNode.getCustomNode(JExpr.class));
+            // Handle "++"
+            if (anId == "++")
+                _part = new JExprMath(JExprMath.Op.PreIncrement);
+
+            // Handle PrimaryExpr
+            if (anId == "PrimaryExpr") {
+                JExpr expr = aNode.getCustomNode(JExpr.class);
+                _part.addOperand(expr);
+            }
         }
 
-        protected Class<JExpr> getPartClass()  { return JExpr.class; }
+        protected Class<JExprMath> getPartClass()  { return JExprMath.class; }
     }
 
     /**
-     * PreDecrementExpr Handler.
+     * PreDecrementExpr Handler: "--" PrimaryExpr
      */
-    public static class PreDecrementExprHandler extends JNodeParseHandler<JExpr> {
+    public static class PreDecrementExprHandler extends JNodeParseHandler<JExprMath> {
 
         /**
          * ParseHandler method.
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            if (anId == "PrimaryExpr")
-                _part = new JExprMath(JExprMath.Op.PreDecrement, aNode.getCustomNode(JExpr.class));
+            // Handle "--"
+            if (anId == "--")
+                _part = new JExprMath(JExprMath.Op.PreDecrement);
+
+            // Handle PrimaryExpr
+            if (anId == "PrimaryExpr") {
+                JExpr expr = aNode.getCustomNode(JExpr.class);
+                _part.addOperand(expr);
+            }
         }
 
-        protected Class<JExpr> getPartClass()  { return JExpr.class; }
+        protected Class<JExprMath> getPartClass()  { return JExprMath.class; }
     }
 
     /**

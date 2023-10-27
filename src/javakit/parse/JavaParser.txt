@@ -176,7 +176,7 @@ ExprStatement
     PrimaryExpr ("++" | "--" | AssignOp Expression)?
 }
 
-Expression { ConditionalExpr (LookAhead(2) AssignOp Expression)? }
+Expression { ConditionalExpr (AssignOp Expression)? }  // Was LookAhead(2)
 
 ConditionalExpr { ConditionalOrExpr ("?" Expression ":" Expression)? }
 
