@@ -215,43 +215,6 @@ public class DeclMatcher {
     }
 
     /**
-     * Finds JVarDecls for given prefix matcher and adds them to given list.
-     */
-    public List<JVarDecl> getVarDeclsForJNode(JNode aNode, List<JVarDecl> theVariables)
-    {
-        // Handle JClassDecl
-        if (aNode instanceof JClassDecl)
-            getVarDeclsForJClassDecl((JClassDecl) aNode, theVariables);
-
-        // Handle JExecutableDecl
-        else if (aNode instanceof JExecutableDecl)
-            getVarDeclsForJExecutableDecl((JExecutableDecl) aNode, theVariables);
-
-        // Handle JInitializerDecl
-        else if (aNode instanceof JInitializerDecl)
-            getVarDeclsForJInitializerDecl((JInitializerDecl) aNode, theVariables);
-
-        // Handle JStmtBlock
-        else if (aNode instanceof JStmtBlock)
-            getVarDeclsForJStmtBlock((JStmtBlock) aNode, theVariables);
-
-        // Handle WithVarDecls
-        else if (aNode instanceof WithVarDecls) {
-            WithVarDecls withVarDecls = (WithVarDecls) aNode;
-            List<JVarDecl> varDecls = withVarDecls.getVarDecls();
-            getVarDeclsForJVarDecls(varDecls, theVariables);
-        }
-
-        // If Parent, forward on
-        JNode parent = aNode.getParent();
-        if (parent != null)
-            getVarDeclsForJNode(parent, theVariables);
-
-        // Return
-        return theVariables;
-    }
-
-    /**
      * Returns whether method matches with option for looking for statics.
      */
     private boolean matchesMethod(JavaMethod method, boolean staticOnly)
@@ -294,93 +257,76 @@ public class DeclMatcher {
     }
 
     /**
-     * Get VarDecls for JClassDecl - search Class fields.
+     * Returns matching VarDecls in parent nodes (i.e., in scope) for given id expression.
      */
-    private void getVarDeclsForJClassDecl(JClassDecl classDecl, List<JVarDecl> varDeclList)
+    public List<JVarDecl> getVarDeclsForId(JExprId idExpr)
     {
-        // Iterate over FieldDecls and see if any contains matching varDecls
-        JFieldDecl[] fieldDecls = classDecl.getFieldDecls();
-        for (JFieldDecl fieldDecl : fieldDecls) {
-            List<JVarDecl> varDecls = fieldDecl.getVarDecls();
-            getVarDeclsForJVarDecls(varDecls, varDeclList);
+        List<JVarDecl> matchingVarDecls = new ArrayList<>();
+
+        // Iterate up parents to look for VarDecls prior to id expression that match prefix
+        for (JNode parentNode = idExpr.getParent(); parentNode != null; parentNode = parentNode.getParent()) {
+            if (parentNode instanceof WithVarDecls) // Local vars, method params, class fields, statement params, etc.
+                findVarDeclsForIdInWithVarDecls(idExpr, (WithVarDecls) parentNode, matchingVarDecls);
         }
+
+        // ReplHack: If Repl file, add matching var decls from previous initializers
+        JFile jFile = idExpr.getFile();
+        if (jFile.isRepl()) {
+            JClassDecl classDecl = jFile.getClassDecl();
+            findVarDeclsForIdReplHack(idExpr, classDecl, matchingVarDecls);
+        }
+
+        // Return
+        return matchingVarDecls;
     }
 
     /**
-     * Get VarDecls for JExecutableDecl - search method/constructor params.
+     * Finds VarDecls for given id expression that match prefix and adds them to given list.
      */
-    private void getVarDeclsForJExecutableDecl(JExecutableDecl executableDecl, List<JVarDecl> varDeclList)
+    private void findVarDeclsForIdInWithVarDecls(JExprId idExpr, WithVarDecls withVarDecls, List<JVarDecl> matchingVarDecls)
     {
-        // Get Executable.Parameters and search
-        List<JVarDecl> params = executableDecl.getParameters();
-        getVarDeclsForJVarDecls(params, varDeclList);
+        List<JVarDecl> varDecls = withVarDecls.getVarDecls();
 
-        // REPL hack - find initializer before this method and run for its block
-        JClassDecl classDecl = executableDecl.getEnclosingClassDecl();
-        JInitializerDecl[] initDecls = classDecl.getInitDecls();
+        // Iterate over var decls and add those that match prefix and are declared before id expression
+        for (JVarDecl varDecl : varDecls) {
 
-        // REPL hack - find initializer before this method and run for its block
-        for (JInitializerDecl initDecl : initDecls) {
-            if (initDecl.getStartCharIndex() < executableDecl.getStartCharIndex()) {
-                JStmtBlock blockStmt = initDecl.getBlock();
-                getVarDeclsForJStmtBlock(blockStmt, varDeclList);
-            }
-            else break;
-        }
-    }
-
-    /**
-     * Get VarDecls for JInitializerDecl - REPL hack to check prior JInitDecls for VarDecl matching node name.
-     */
-    private void getVarDeclsForJInitializerDecl(JInitializerDecl anInitDecl, List<JVarDecl> varDeclList)
-    {
-        // Get enclosing class initDecls
-        JClassDecl classDecl = anInitDecl.getEnclosingClassDecl();
-        JInitializerDecl[] initDecls = classDecl.getInitDecls();
-
-        // Iterate over initDecls
-        for (JInitializerDecl initDecl : initDecls) {
-
-            // Stop when we hit given InitDecl
-            if (initDecl == anInitDecl)
-                break;
-
-            // Get InitDecl.Block and search
-            JStmtBlock initDeclBlock = initDecl.getBlock();
-            getVarDeclsForJStmtBlock(initDeclBlock, varDeclList);
-        }
-    }
-
-    /**
-     * Get VarDecls for JStmtBlock.
-     */
-    private void getVarDeclsForJStmtBlock(JStmtBlock blockStmt, List<JVarDecl> varDeclList)
-    {
-        // Get statements and search
-        List<JStmt> statements = blockStmt.getStatements();
-
-        // Iterate over statements and see if any JStmtVarDecl contains variable with that name
-        for (JStmt stmt : statements) {
-
-            // Skip non-VarDecl statements
-            if (!(stmt instanceof JStmtVarDecl))
+            // If name doesn't match or id expression is before end of var decl, skip
+            if (!matchesString(varDecl.getName()))
+                continue;
+            if (idExpr.getStartCharIndex() < varDecl.getEndCharIndex())
                 continue;
 
-            // Get varDeclStmt.VarDecls
-            JStmtVarDecl varDeclStmt = (JStmtVarDecl) stmt;
-            List<JVarDecl> varDecls = varDeclStmt.getVarDecls();
-            getVarDeclsForJVarDecls(varDecls, varDeclList);
+            // If WithVarDecls node is ForEach statement and id expression is before iterable expression end, skip
+            if (withVarDecls instanceof JStmtFor) {
+                JStmtFor forStmt = (JStmtFor) withVarDecls;
+                JExpr iterableExpr = forStmt.getIterableExpr();
+                if (iterableExpr != null && idExpr.getStartCharIndex() < iterableExpr.getEndCharIndex())
+                    continue;
+            }
+
+            // Add to list
+            matchingVarDecls.add(varDecl);
         }
     }
 
     /**
-     * Get VarDecls for JVarDecl list.
+     * REPL hack - Find matching var decls from previous initializers and add to given list.
      */
-    private void getVarDeclsForJVarDecls(List<JVarDecl> varDecls, List<JVarDecl> varDeclList)
+    private void findVarDeclsForIdReplHack(JExprId idExpr, JClassDecl classDecl, List<JVarDecl> matchingVarDecls)
     {
-        for (JVarDecl varDecl : varDecls)
-            if (matchesString(varDecl.getName()))
-                varDeclList.add(varDecl);
+        JInitializerDecl[] initializerDecls = classDecl.getInitDecls();
+
+        // Iterate over class initializers
+        for (JInitializerDecl initializerDecl : initializerDecls) {
+
+            // If id expression is before initializer end, just break
+            if (idExpr.getStartCharIndex() < initializerDecl.getEndCharIndex())
+                break;
+
+            // Find matching var decls in initializer
+            JStmtBlock blockStmt = initializerDecl.getBlock();
+            findVarDeclsForIdInWithVarDecls(idExpr, blockStmt, matchingVarDecls);
+        }
     }
 
     /**

@@ -116,7 +116,7 @@ public class NodeCompleter {
         addWordCompletions(prefixMatcher);
 
         // Get variables with prefix of name and add to completions
-        List<JVarDecl> varDecls = prefixMatcher.getVarDeclsForJNode(anId, new ArrayList<>());
+        List<JVarDecl> varDecls = prefixMatcher.getVarDeclsForId(anId);
         for (JVarDecl varDecl : varDecls)
             addCompletionDecl(varDecl.getDecl());
 

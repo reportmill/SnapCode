@@ -65,6 +65,11 @@ public class JFile extends JNode {
     }
 
     /**
+     * Returns whether file is Repl Java instead of just java.
+     */
+    public boolean isRepl()  { return  _sourceFile != null && _sourceFile.getType().equals("jepl"); }
+
+    /**
      * Returns the Resolver.
      */
     public Resolver getResolver()
