@@ -40,7 +40,7 @@ public interface WithVarDecls {
         if (varDecl == null)
             return null;
 
-        // If id appears before var decl, return null
+        // If id appears before var decl end, return null
         if (anId.getStartCharIndex() < varDecl.getEndCharIndex())
             return null;
 

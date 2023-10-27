@@ -109,6 +109,26 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
     }
 
     /**
+     * Override to make sure we don't return ForEach var decl for anything in iterable expression.
+     */
+    @Override
+    public JVarDecl getVarDeclForId(JExprId anId)
+    {
+        // Do normal version - just return if null
+        JVarDecl varDecl = WithVarDecls.super.getVarDeclForId(anId);
+        if (varDecl == null)
+            return null;
+
+        // If Id before end of iterable expression, return null
+        JExpr iterableExpr = getIterableExpr();
+        if (iterableExpr != null && anId.getStartCharIndex() < iterableExpr.getEndCharIndex())
+            return null;
+
+        // Return
+        return varDecl;
+    }
+
+    /**
      * Override to do checks for for() statement.
      */
     @Override

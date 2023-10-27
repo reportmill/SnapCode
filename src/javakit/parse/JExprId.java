@@ -145,6 +145,8 @@ public class JExprId extends JExpr {
     {
         // Iterate up parents to look for a JVarDecl that defines this id name (Local vars, method params, class fields, etc.)
         for (JNode parentNode = getParent(); parentNode != null; parentNode = parentNode.getParent()) {
+
+            // If parent has var decls, and has one that defines this id name, return it
             if (parentNode instanceof WithVarDecls) {
                 JVarDecl varDecl = ((WithVarDecls) parentNode).getVarDeclForId(this);
                 if (varDecl != null)
