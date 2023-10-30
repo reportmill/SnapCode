@@ -148,13 +148,9 @@ public class DeclMatcher {
             // Get Class fields
             List<JavaField> fields = cls.getDeclaredFields();
             for (JavaField field : fields) {
-                if (matchesString(field.getName())) {
-                    if (!staticOnly || field.isStatic())
-                        matchingFields = ArrayUtils.add(matchingFields, field);
-                }
+                if (matchesField(field, staticOnly))
+                    matchingFields = ArrayUtils.add(matchingFields, field);
             }
-
-            // Should iterate over class interfaces, too
         }
 
         // Return
@@ -215,10 +211,35 @@ public class DeclMatcher {
     }
 
     /**
+     * Returns whether field matches with option for looking for statics.
+     */
+    private boolean matchesField(JavaField field, boolean staticOnly)
+    {
+        // If not public, just return - need to eventually handle protected/private
+        if (!field.isPublic())
+            return false;
+
+        // If name doesn't match, return false
+        if (!matchesString(field.getName()))
+            return false;
+
+        // If StaticOnly, return if static
+        if (staticOnly)
+            return field.isStatic();
+
+        // Return matches
+        return true;
+    }
+
+    /**
      * Returns whether method matches with option for looking for statics.
      */
     private boolean matchesMethod(JavaMethod method, boolean staticOnly)
     {
+        // If not public, just return - need to eventually handle protected/private
+        if (!method.isPublic())
+            return false;
+
         // If name doesn't match, return false
         if (!matchesString(method.getName()))
             return false;
