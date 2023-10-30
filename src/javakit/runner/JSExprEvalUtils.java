@@ -386,7 +386,7 @@ public class JSExprEvalUtils {
         // If only one varArg and it is already packaged as VarArgArrayClass, just return
         if (theArgs.length == argCount) {
             Object firstVarArg = theArgs[varArgIndex];
-            if (firstVarArg.getClass() == varArgArrayClass)
+            if (varArgArrayClass.isAssignableFrom(firstVarArg.getClass()))
                 return theArgs;
         }
 
