@@ -146,7 +146,12 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         // Get SelNode - just return if bogus
         int selStart = _textArea.getSelStart();
         JNode selNode = _textArea.getSelNode();
-        if (selNode == null || selNode instanceof JFile)
+        if (selNode == null)
+            return null;
+
+        // If no class decl, just bail
+        JFile jfile = selNode.getFile();
+        if (jfile.getClassDecl() == null)
             return null;
 
         // If dot at cursor, get virtual id expression for empty string after dot
