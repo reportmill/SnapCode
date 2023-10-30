@@ -191,8 +191,13 @@ public class JNode {
         }
 
         // Handle Generic array type
-        else if (aType instanceof JavaGenericArrayType)
-            System.err.println("JNode.getResolvedTypeForType: No support for GenericArrayType");
+        else if (aType instanceof JavaGenericArrayType) {
+            JavaGenericArrayType arrayType = (JavaGenericArrayType) aType;
+            JavaType compType = arrayType.getComponentType();
+            JavaType compTypeResolved = getResolvedTypeForType(compType);
+            if (compTypeResolved != compType)
+                return compTypeResolved.getArrayType();
+        }
 
         // Return
         return aType;
