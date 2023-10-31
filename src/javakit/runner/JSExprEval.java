@@ -691,7 +691,7 @@ public class JSExprEval {
         }
 
         // Return a proxy object which is a dynamically generated implementation of lambda functional interface class
-        return MethodRefWrapper.getWrappedMethodRefExpression(methodRefExpr, target);
+        return LambdaWrapper.getWrappedMethodRefExpression(methodRefExpr, target);
     }
 
     /**
