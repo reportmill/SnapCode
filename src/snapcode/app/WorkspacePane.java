@@ -390,11 +390,8 @@ public class WorkspacePane extends ViewOwner {
     @Override
     protected void initShowing()
     {
-        if (SnapUtils.isWebVM) {
-            getWindow().addPropChangeListener(pc -> windowFocusedChanged(), View.Focused_Prop);
-            if (getEnv().getClass().getSimpleName().startsWith("Swing"))
-                new ViewTimer(1000, e -> checkScreenSize()).start();
-        }
+        if (SnapUtils.isWebVM && getEnv().getClass().getSimpleName().startsWith("Swing"))
+            new ViewTimer(1000, e -> checkScreenSize()).start();
     }
 
     /**
@@ -449,6 +446,12 @@ public class WorkspacePane extends ViewOwner {
             _workspaceTools.setShowRightTray(!_workspaceTools.isShowRightTray());
         if (anEvent.equals("ShowBottomTrayMenuItem"))
             _workspaceTools.setShowBottomTray(!_workspaceTools.isShowBottomTray());
+
+        // Handle CopyWebLinkMenuItem, OpenWebLinkMenuItem
+        if (anEvent.equals("CopyWebLinkMenuItem"))
+            copyWebLink();
+        if (anEvent.equals("OpenWebLinkMenuItem"))
+            openWebLink();
 
         // Handle ShowJavaHomeMenuItem
         if (anEvent.equals("ShowJavaHomeMenuItem")) {
@@ -591,17 +594,22 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
-     * Called when Window.Focused changes (WebVM uses this to set '#Java:...' in browser address bar).
+     * Copies web link to clipboard.
      */
-    private void windowFocusedChanged()
+    private void copyWebLink()
     {
-        WindowView window = getWindow();
+        String string = "https://reportmill.com/SnapCode/app/#" + _pagePane.getWindowLocationHash();
+        Clipboard clipboard = Clipboard.get();
+        clipboard.addData(string);
+    }
 
-        // Handle Focused: Set browser window.location.hash for page pane Java string
-        if (!window.isFocused()) {
-            String string = _pagePane.getWindowLocationHash();
-            GFXEnv.getEnv().setBrowserWindowLocationHash(string);
-        }
+    /**
+     * Opens web link.
+     */
+    private void openWebLink()
+    {
+        String string = "https://reportmill.com/SnapCode/app/#" + _pagePane.getWindowLocationHash();
+        GFXEnv.getEnv().openURL(string);
     }
 
     /**

@@ -25,6 +25,9 @@
         <MenuItem Name="ShowLeftTrayMenuItem" Text="Hide Left Tray" />
         <MenuItem Name="ShowRightTrayMenuItem" Text="Hide Right Tray" />
         <MenuItem Name="ShowBottomTrayMenuItem" Text="Hide Bottom Tray" />
+        <MenuItem />
+        <MenuItem Name="CopyWebLinkMenuItem" Text="Copy Web Link" />
+        <MenuItem Name="OpenWebLinkMenuItem" Text="Open Web Link" />
       </Menu>
       <Menu Name="HelpMenu" Text="Help">
         <MenuItem Name="SupportPageMenuItem" Text="Support Page" />
