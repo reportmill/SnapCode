@@ -3,6 +3,9 @@ import javakit.parse.JExprMethodRef;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaMethod;
 import snap.util.Convert;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -94,6 +97,16 @@ public class MethodRefWrapper {
                 return result;
             }
 
+            // Handle default methods
+            if (method.isDefault()) {
+                Constructor<MethodHandles.Lookup> constr = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+                constr.setAccessible(true);
+                MethodHandles.Lookup instance = constr.newInstance(realClass, MethodHandles.Lookup.PRIVATE);
+                MethodHandle instanceProxy = instance.unreflectSpecial(method, realClass).bindTo(proxy);
+                return instanceProxy.invokeWithArguments(args);
+            }
+
+            // Probably bogus
             return method.invoke(lambdaWrapper, args);
         };
 
