@@ -24,7 +24,7 @@ public abstract class LambdaWrapper implements InvocationHandler {
     protected String _lambdaMethodName;
 
     // The result type converter
-    protected Function<Object,Object> converter;
+    protected Function<Object,Object> _converter;
 
     // The proxy object
     protected Object _proxy;
@@ -37,7 +37,7 @@ public abstract class LambdaWrapper implements InvocationHandler {
         // Get lambda class
         JavaClass lambdaClass = lambdaExpr.getLambdaClass();
         if (lambdaClass == null)
-            throw new RuntimeException("LambdaWrapper.getWrappedLambdaExpression: Can't determine lambda class for expr: " + lambdaExpr);
+            throw new RuntimeException("LambdaWrapper.init: Can't determine lambda class for expr: " + lambdaExpr);
 
         // Get lambda method name
         JavaMethod lambdaJavaMethod = lambdaExpr.getLambdaMethod();
@@ -49,7 +49,7 @@ public abstract class LambdaWrapper implements InvocationHandler {
 
         // Get converter for return type
         Class<?> returnType = lambdaMethod.getReturnType();
-        converter = getConverterForClass(returnType);
+        _converter = getConverterForClass(returnType);
 
         // Create proxy class for lambda class
         ClassLoader classLoader = getClass().getClassLoader();
@@ -66,8 +66,8 @@ public abstract class LambdaWrapper implements InvocationHandler {
         // If functional interface method, do that version
         if (method.getName().equals(_lambdaMethodName)) {
             Object result = invokeLambdaMethodWithArgs(args);
-            if (converter != null)
-                result = converter.apply(result);
+            if (_converter != null)
+                result = _converter.apply(result);
             return result;
         }
 
@@ -81,7 +81,7 @@ public abstract class LambdaWrapper implements InvocationHandler {
         }
 
         // Can't happen?
-        throw new IllegalArgumentException("LambdaWrapper: can't invoke method: " + method);
+        throw new IllegalArgumentException("LambdaWrapper.invoke: can't invoke method: " + method);
     }
 
     /**
