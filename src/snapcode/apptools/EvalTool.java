@@ -201,10 +201,6 @@ public class EvalTool extends WorkspaceTool {
         else if (anEvent.equals("DeleteButton"))
             resetDisplay();
 
-        // Handle CancelExtendedRunButton
-        else if (anEvent.equals("CancelExtendedRunButton"))
-            cancelRun();
-
         // Handle InputTextField: Show input string, add to runner input and clear text
         else if (anEvent.equals("InputTextField")) {
             String inputString = anEvent.getStringValue();

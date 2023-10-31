@@ -130,6 +130,12 @@ public class JavaShell {
 
         // Handle statement eval exception: Try expression
         catch (Exception e) {
+
+            // Ignore InterruptedExceptions - assume this is from controlling thread
+            if (isInterruptedException(e))
+                return;
+
+            // Show exception and mark ErrorWasHit
             ReplObject.show(e);
             _errorWasHit = true;
         }
@@ -180,6 +186,17 @@ public class JavaShell {
         if (_consoleErr != null)
             ReplObject.show(_consoleErr.getTextBlock());
         _consoleErr = null;
+    }
+
+    /**
+     * Returns whether given exception is InterruptedException.
+     */
+    private static boolean isInterruptedException(Exception anException)
+    {
+        for (Throwable e = anException; e != null; e = e.getCause())
+            if (e instanceof InterruptedException)
+                return true;
+        return false;
     }
 
     /**

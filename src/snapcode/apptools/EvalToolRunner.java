@@ -179,7 +179,18 @@ public class EvalToolRunner {
 
         // Interrupt and clear
         _javaShell.interrupt();
-        _runAppThread = null;
+        ViewUtils.runDelayed(() -> cancelRunExtreme(), 600);
+    }
+
+    /**
+     * Called to really cancel run with thread interrupt, if in system code.
+     */
+    private void cancelRunExtreme()
+    {
+        if (_runAppThread != null) {
+            _runAppThread.interrupt();
+            _runAppThread = null;
+        }
     }
 
     /**
