@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.resolver;
+import snap.util.ArrayUtils;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -19,8 +20,8 @@ public class JavaClassUpdater {
     // A cached list of all decls
     private List<JavaDecl>  _allDecls;
 
-    // A count of decls added in last update
-    private int  _addedDecls;
+    // Whether class has changed
+    private boolean _changed;
 
     /**
      * Constructor.
@@ -70,14 +71,15 @@ public class JavaClassUpdater {
 
         // Create set for added/removed decls
         Set<JavaDecl> removedDecls = new HashSet<>(getAllDecls());
-        _addedDecls = 0;
+        _changed = false;
 
         // Update modifiers
         if (_javaClass.getModifiers() != realClass.getModifiers())
             _javaClass._mods = realClass.getModifiers();
 
         // Update interfaces
-        updateInterfaces(realClass);
+        JavaClass[] interfaces = getInterfaces(realClass);
+        _javaClass._interfaces = interfaces;
 
         // Update type variables
         updateTypeVariables(realClass, removedDecls);
@@ -98,7 +100,7 @@ public class JavaClassUpdater {
         if (_javaClass.isArray() && _javaClass.getFieldForName("length") == null) {
             JavaField javaField = getLengthField();
             _javaClass._fieldDecls = Arrays.asList(javaField);
-            _addedDecls++;
+            _changed = true;
         }
 
         // Remove unused decls
@@ -106,28 +108,22 @@ public class JavaClassUpdater {
             removeDecl(jd);
 
         // Return whether decls were changed
-        boolean changed = _addedDecls > 0 || removedDecls.size() > 0;
-        if (changed)
+        if (removedDecls.size() > 0)
+            _changed = true;
+        if (_changed)
             _allDecls = null;
 
         // Return
-        return changed;
+        return _changed;
     }
 
     /**
-     * Updates inner classes.
+     * Returns interfaces.
      */
-    private void updateInterfaces(Class<?> realClass) throws SecurityException
+    private JavaClass[] getInterfaces(Class<?> realClass)
     {
-        // Get interfaces
         Class<?>[] interfaces = realClass.getInterfaces();
-
-        // Iterate over interfaces and add
-        _javaClass._interfaces = new JavaClass[interfaces.length];
-        for (int i = 0, iMax = interfaces.length; i < iMax; i++) {
-            Class<?> intrface = interfaces[i];
-            _javaClass._interfaces[i] = _javaClass.getJavaClassForClass(intrface);
-        }
+        return ArrayUtils.map(interfaces, cls -> _javaClass.getJavaClassForClass(cls), JavaClass.class);
     }
 
     /**
@@ -145,7 +141,7 @@ public class JavaClassUpdater {
             if (decl == null) {
                 decl = new JavaTypeVariable(_resolver, _javaClass, typeVariable);
                 addDecl(decl);
-                _addedDecls++;
+                _changed = true;
             }
             else removedDecls.remove(decl);
         }
@@ -170,7 +166,7 @@ public class JavaClassUpdater {
             if (decl == null) {
                 decl = _resolver.getJavaClassForClass(innerClass);
                 addDecl(decl);
-                _addedDecls++;
+                _changed = true;
             }
             else removedDecls.remove(decl);
         }
@@ -190,7 +186,7 @@ public class JavaClassUpdater {
             if (decl == null) {
                 decl = new JavaField(_resolver, _javaClass, field);
                 addDecl(decl);
-                _addedDecls++;
+                _changed = true;
             }
             else removedDecls.remove(decl);
         }
@@ -212,7 +208,7 @@ public class JavaClassUpdater {
                 decl = new JavaMethod(_resolver, _javaClass, meth);
                 addDecl(decl);
                 decl.initTypes(meth);
-                _addedDecls++;
+                _changed = true;
             }
             else removedDecls.remove(decl);
         }
@@ -234,7 +230,7 @@ public class JavaClassUpdater {
                 decl = new JavaConstructor(_resolver, _javaClass, constr);
                 addDecl(decl);
                 decl.initTypes(constr);
-                _addedDecls++;
+                _changed = true;
             }
             else removedDecls.remove(decl);
         }
