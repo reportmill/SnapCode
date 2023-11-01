@@ -5,6 +5,7 @@ package javakit.resolver;
 import snap.util.ArrayUtils;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * This class updates a JavaClass from resolver.
@@ -213,7 +214,7 @@ public class JavaClassUpdater {
     private JavaMethod[] getDeclaredMethods(Class<?> realClass)
     {
         Method[] methods = realClass.getDeclaredMethods();
-        return ArrayUtils.map(methods, method -> getJavaMethodForMethod(method), JavaMethod.class);
+        return Stream.of(methods).filter(m -> !m.isSynthetic()).map(m -> getJavaMethodForMethod(m)).toArray(size -> new JavaMethod[size]);
     }
 
     /**
@@ -233,7 +234,7 @@ public class JavaClassUpdater {
     private JavaConstructor[] getDeclaredConstructors(Class<?> realClass)
     {
         Constructor<?>[] constrs = realClass.getDeclaredConstructors();
-        return ArrayUtils.map(constrs, constr -> getJavaConstructorForConstructor(constr), JavaConstructor.class);
+        return Stream.of(constrs).filter(c -> !c.isSynthetic()).map(c -> getJavaConstructorForConstructor(c)).toArray(size -> new JavaConstructor[size]);
     }
 
     /**
