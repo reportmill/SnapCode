@@ -191,4 +191,20 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         // Return Methods
         return mb.buildAll();
     }
+
+    /**
+     * Returns a field value.
+     */
+    public Object getFieldValue(JavaField aField, Object anObj)
+    {
+        // Handle Enum constants
+        if (_javaClass.isEnum() && aField.isStatic()) {
+            String fieldName = aField.getName();
+            Object[] enumConsts = _javaClass.getEnumConstants();
+            return ArrayUtils.findMatch(enumConsts, obj -> obj.toString().equals(fieldName));
+        }
+
+        // Complain
+        throw new RuntimeException("JavaClassUpdaterDecl.getFieldValue: Can't resolve field: " + aField.getName());
+    }
 }

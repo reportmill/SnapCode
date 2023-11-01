@@ -10,6 +10,9 @@ import java.util.Arrays;
  */
 public class JavaField extends JavaMember {
 
+    // The Java Field
+    private Field _field;
+
     /**
      * Constructor.
      */
@@ -17,6 +20,9 @@ public class JavaField extends JavaMember {
     {
         super(aResolver, DeclType.Field, aDeclaringClass, aField);
         if (aField == null) return;
+
+        // Set field
+        _field = aField;
 
         // Set EvalType
         Type fieldType = aField.getGenericType();
@@ -30,6 +36,19 @@ public class JavaField extends JavaMember {
     {
         JavaClass fieldClass = getDeclaringClass();
         return fieldClass != null && fieldClass.isEnum();
+    }
+
+    /**
+     * Evaluates field for given object.
+     */
+    public Object get(Object anObj) throws IllegalArgumentException, IllegalAccessException
+    {
+        // Handle JavaClass for JClassDecl for Enum constant
+        if (_field == null && _declaringClass.getUpdater() instanceof JavaClassUpdaterDecl)
+            return ((JavaClassUpdaterDecl) _declaringClass.getUpdater()).getFieldValue(this, anObj);
+
+        // Do normal version
+        return _field.get(anObj);
     }
 
     /**

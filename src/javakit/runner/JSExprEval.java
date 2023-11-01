@@ -141,6 +141,14 @@ public class JSExprEval {
         // Get identifier name
         String name = anId.getName();
 
+        // Handle common "this", "class" and array.length (not sure about this)
+        if (name.equals("this"))
+            return thisObject();
+        if (name.equals("class"))
+            return anOR;
+        if (name.equals("length") && isArray(anOR))
+            return Array.getLength(anOR);
+
         // If LocalVar, get from stack
         JavaDecl idDecl = anId.getDecl();
         if (idDecl instanceof JavaLocalVar) {
@@ -151,53 +159,22 @@ public class JSExprEval {
             }
         }
 
-        // Evaluate to see if it has value
-        Object value = evalName(anOR, name);
+        // Handle Field
+        if (idDecl instanceof JavaField) {
+            JavaField field = (JavaField) idDecl;
+            return field.get(anOR);
+        }
 
-        // If not found, but ExprId evaluates to class, return class
-        if (value == null) {
-            JavaDecl decl = anId.getDecl();
-            if (decl instanceof JavaClass)
-                return ((JavaClass) decl).getRealClass();
+        // Handle class literal
+        if (idDecl instanceof JavaClass) {
+             if (anId.isClassNameLiteral())
+                return idDecl;
+             else System.out.println("JSExprEval.evalIdExpr: id is class but not literal: " + name);
         }
 
         // Return
-        return value;
-    }
-
-    /**
-     * Evaluate JIdentifier.
-     */
-    private Object evalName(Object anOR, String aName) throws Exception
-    {
-        // If name is "this", return ThisObject
-        if (aName == null)
-            return null;
-        if (aName.equals("this"))
-            return thisObject();
-        if (aName.equals("class"))
-            return anOR;
-
-        // Handle array length
-        if (aName.equals("length") && isArray(anOR))
-            return Array.getLength(anOR);
-
-        // Look for field
-        if (anOR != null) {
-            Class<?> cls = anOR instanceof Class ? (Class<?>) anOR : anOR.getClass();
-            Field field = ClassUtils.getFieldForName(cls, aName);
-            if (field != null)
-                return field.get(anOR);
-        }
-
-        // Check for class name
-        Class<?> cls = getClassForName(anOR, aName);
-        if (cls != null)
-            return cls;
-
-        // Complain
+        System.out.println("JSExprEval.evalIdExpr: Can't evaluate id: " + name);
         return null;
-        //throw new RuntimeException("Identifier not found: " + aName);
     }
 
     /**

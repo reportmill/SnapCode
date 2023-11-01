@@ -58,6 +58,9 @@ public class JavaClass extends JavaType {
     // The Array component type (if Array)
     private JavaClass  _componentType;
 
+    // The array of enum constants (enum only)
+    private Object[] _enumConstants;
+
     // The updater
     private JavaClassUpdater  _updater;
 
@@ -605,6 +608,28 @@ public class JavaClass extends JavaType {
             case "void": return getJavaClassForClass(Void.class);
             default: return null;
         }
+    }
+
+    /**
+     * Returns the enum constants.
+     */
+    public Object[] getEnumConstants()
+    {
+        if (_enumConstants != null || !isEnum()) return _enumConstants;
+
+        // Please don't look at this
+        if (_updater instanceof JavaClassUpdaterDecl) {
+            JavaField[] fields = getDeclaredFields();
+            fields = ArrayUtils.filter(fields, field -> field.isStatic());
+            Object[] enumConsts = new Object[fields.length];
+            for (int i = 0; i < fields.length; i++)
+                enumConsts[i] = new JavaEnum(this, fields[i].getName());
+            return _enumConstants = enumConsts;
+        }
+
+        // Get from real class
+        Class<?> realClass = getRealClass();
+        return _enumConstants = realClass.getEnumConstants();
     }
 
     /**
