@@ -1,6 +1,7 @@
 package javakit.parse;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
+import javakit.resolver.JavaField;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,12 +17,17 @@ public class JEnumConst extends JMemberDecl {
     protected String  _classBody;
 
     /**
+     * Constructor.
+     */
+    public JEnumConst()
+    {
+        super();
+    }
+
+    /**
      * Returns the arguments.
      */
-    public List<JExpr> getArgs()
-    {
-        return _args;
-    }
+    public List<JExpr> getArgs()  { return _args; }
 
     /**
      * Sets the arguments.
@@ -56,17 +62,18 @@ public class JEnumConst extends JMemberDecl {
     /**
      * Get class name from parent enum declaration.
      */
+    @Override
     protected JavaDecl getDeclImpl()
     {
         // Get enum name, enclosing JClassDecl and its JavaClass (can be null if enum hasn't been compiled yet)
-        String name = getName();
-        JClassDecl cdecl = (JClassDecl) getParent();
-        JavaClass jdecl = cdecl.getDecl();
-        if (jdecl == null)
+        String enumName = getName();
+        JClassDecl classDecl = (JClassDecl) getParent();
+        JavaClass javaClass = classDecl.getDecl();
+        if (javaClass == null)
             return null;
 
-        // Get JavaDecl for enum constant, which is just a field of enum class
-        JavaDecl edecl = jdecl.getFieldForName(name);
-        return edecl;
+        // Get JavaField for enum constant
+        JavaField field = javaClass.getFieldForName(enumName);
+        return field;
     }
 }
