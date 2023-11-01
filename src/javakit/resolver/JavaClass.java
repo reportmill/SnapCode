@@ -5,7 +5,6 @@ package javakit.resolver;
 import javakit.parse.JClassDecl;
 import javakit.parse.JFile;
 import snap.util.ArrayUtils;
-import snap.util.ListUtils;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -36,19 +35,19 @@ public class JavaClass extends JavaType {
     private boolean  _enum, _interface, _primitive;
 
     // The array of interfaces
-    protected JavaClass[]  _interfaces;
+    protected JavaClass[] _interfaces;
 
     // The field decls
-    protected List<JavaField>  _fieldDecls;
+    protected JavaField[] _fields;
 
     // The method decls
-    protected List<JavaMethod>  _methDecls = new ArrayList<>();
+    protected JavaMethod[] _methods = new JavaMethod[0];
 
     // The constructor decls
-    protected List<JavaConstructor>  _constrDecls = new ArrayList<>();
+    protected JavaConstructor[] _constructors = new JavaConstructor[0];
 
     // The inner class decls
-    protected List<JavaClass>  _innerClasses = new ArrayList<>();
+    protected JavaClass[] _innerClasses = new JavaClass[0];
 
     // The type var decls
     protected JavaTypeVariable[] _typeVars = new JavaTypeVariable[0];
@@ -308,34 +307,34 @@ public class JavaClass extends JavaType {
     /**
      * Returns the fields.
      */
-    public List<JavaField> getDeclaredFields()
+    public JavaField[] getDeclaredFields()
     {
-        if (_fieldDecls == null) updateDecls();
-        return _fieldDecls;
+        if (_fields == null) updateDecls();
+        return _fields;
     }
 
     /**
      * Returns the methods.
      */
-    public List<JavaMethod> getDeclaredMethods()
+    public JavaMethod[] getDeclaredMethods()
     {
         getDeclaredFields();
-        return _methDecls;
+        return _methods;
     }
 
     /**
      * Returns the Constructors.
      */
-    public List<JavaConstructor> getDeclaredConstructors()
+    public JavaConstructor[] getDeclaredConstructors()
     {
         getDeclaredFields();
-        return _constrDecls;
+        return _constructors;
     }
 
     /**
      * Returns the inner classes.
      */
-    public List<JavaClass> getDeclaredClasses()
+    public JavaClass[] getDeclaredClasses()
     {
         getDeclaredFields();
         return _innerClasses;
@@ -355,13 +354,8 @@ public class JavaClass extends JavaType {
      */
     public JavaField getFieldForName(String aName)
     {
-        List<JavaField> fields = getDeclaredFields();
-        for (JavaField field : fields)
-            if (field.getName().equals(aName))
-                return field;
-
-        // Return
-        return null;
+        JavaField[] fields = getDeclaredFields();
+        return ArrayUtils.findMatch(fields, field -> field.getName().equals(aName));
     }
 
     /**
@@ -385,15 +379,8 @@ public class JavaClass extends JavaType {
      */
     public JavaConstructor getConstructorForTypes(JavaType[] theTypes)
     {
-        List<JavaConstructor> constructors = getDeclaredConstructors();
-        for (JavaConstructor constructor : constructors) {
-            JavaType[] constrParamTypes = constructor.getParameterTypes();
-            if (isTypesEqual(constrParamTypes, theTypes))
-                return constructor;
-        }
-
-        // Return
-        return null;
+        JavaConstructor[] constructors = getDeclaredConstructors();
+        return ArrayUtils.findMatch(constructors, constr -> isTypesEqual(constr.getParameterTypes(), theTypes));
     }
 
     /**
@@ -417,7 +404,7 @@ public class JavaClass extends JavaType {
      */
     public JavaMethod getMethodForNameAndTypes(String aName, JavaType[] theTypes)
     {
-        List<JavaMethod> methods = getDeclaredMethods();
+        JavaMethod[] methods = getDeclaredMethods();
         for (JavaMethod method : methods) {
             if (method.getName().equals(aName)) {
                 JavaType[] methodParamTypes = method.getParameterTypes();
@@ -451,13 +438,8 @@ public class JavaClass extends JavaType {
      */
     public JavaClass getInnerClassForName(String aName)
     {
-        List<JavaClass> innerClasses = getDeclaredClasses();
-        for (JavaClass innerClass : innerClasses)
-            if (innerClass.getSimpleName().equals(aName))
-                return innerClass;
-
-        // Return not found
-        return null;
+        JavaClass[] innerClasses = getDeclaredClasses();
+        return ArrayUtils.findMatch(innerClasses, cls -> cls.getSimpleName().equals(aName));
     }
 
     /**
@@ -511,8 +493,8 @@ public class JavaClass extends JavaType {
         }
 
         // Find lambda method
-        List<JavaMethod> methods = getDeclaredMethods();
-        return ListUtils.findMatch(methods, method -> !(method.isStatic() || method.isDefault()));
+        JavaMethod[] methods = getDeclaredMethods();
+        return ArrayUtils.findMatch(methods, method -> !(method.isStatic() || method.isDefault()));
     }
 
     /**
@@ -662,6 +644,100 @@ public class JavaClass extends JavaType {
 
         // Otherwise just return EvalClass
         return aType.getEvalClass();
+    }
+
+    /**
+     * Returns the JavaField for java.lang.reflect.Field.
+     */
+    public JavaField getJavaFieldForField(Field aField)
+    {
+        String name = aField.getName();
+        JavaField field = getFieldForName(name);
+        if (field == null)
+            return null;
+
+        int mods = aField.getModifiers();
+        if (mods != field.getModifiers())
+            return null;
+
+        // Return
+        return field;
+    }
+
+    /**
+     * Returns the JavaMethod for given java.lang.reflect.method.
+     */
+    public JavaMethod getJavaMethodForMethod(Method aMeth)
+    {
+        String id = ResolverUtils.getIdForMember(aMeth);
+        JavaMethod method = getMethodForId(id);
+        if (method == null)
+            return null;
+
+        int mods = aMeth.getModifiers();
+        if (mods != method.getModifiers())
+            return null;
+
+        // Check return type?
+        return method;
+    }
+
+    /**
+     * Returns the JavaMethod for id string.
+     */
+    private JavaMethod getMethodForId(String anId)
+    {
+        JavaMethod[] methods = getDeclaredMethods();
+        return ArrayUtils.findMatch(methods, method -> method.getId().equals(anId));
+    }
+
+    /**
+     * Returns the JavaConstructor for java.lang.reflect.Constructor.
+     */
+    public JavaConstructor getJavaConstructorForConstructor(Constructor<?> aConstr)
+    {
+        String id = ResolverUtils.getIdForMember(aConstr);
+        JavaConstructor constructor = getConstructorForId(id);
+        if (constructor == null)
+            return null;
+
+        // Check mods
+        int mods = aConstr.getModifiers();
+        if (mods != constructor.getModifiers())
+            return null;
+
+        // Return
+        return constructor;
+    }
+
+    /**
+     * Returns the Constructor decl for id string.
+     */
+    public JavaConstructor getConstructorForId(String anId)
+    {
+        JavaConstructor[] constructors = getDeclaredConstructors();
+        return ArrayUtils.findMatch(constructors, constr -> constr.getId().equals(anId));
+    }
+
+    /**
+     * Returns a JavaMember for given java.lang.reflect.Member.
+     */
+    public JavaMember getJavaMemberForMember(Member aMember)
+    {
+        // Handle Field
+        if (aMember instanceof Field)
+            return getJavaFieldForField((Field) aMember);
+
+        // Handle Method
+        if (aMember instanceof Method)
+            return getJavaMethodForMethod((Method) aMember);
+
+        // Handle Constructor
+        if (aMember instanceof Constructor)
+            return getJavaConstructorForConstructor((Constructor<?>) aMember);
+
+        // Handle MemberName
+        throw new RuntimeException("JavaClass.getJavaMemberForMember: " + aMember);
     }
 
     /**

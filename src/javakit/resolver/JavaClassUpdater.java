@@ -20,9 +20,6 @@ public class JavaClassUpdater {
     // A cached list of all decls
     private List<JavaDecl>  _allDecls;
 
-    // Whether class has changed
-    private boolean _changed;
-
     /**
      * Constructor.
      */
@@ -50,8 +47,8 @@ public class JavaClassUpdater {
     public boolean updateDeclsImpl() throws SecurityException
     {
         // If first time, set decls
-        if (_javaClass._fieldDecls == null)
-            _javaClass._fieldDecls = new ArrayList<>();
+        if (_javaClass._fields == null)
+            _javaClass._fields = new JavaField[0];
 
         // Get ClassName
         String className = _javaClass.getClassName();
@@ -69,9 +66,8 @@ public class JavaClassUpdater {
             return true;
         }
 
-        // Create set for added/removed decls
-        Set<JavaDecl> removedDecls = new HashSet<>(getAllDecls());
-        _changed = false;
+        // Whether class changed
+        boolean classChanged = false;
 
         // Update modifiers
         if (_javaClass.getModifiers() != realClass.getModifiers())
@@ -84,40 +80,52 @@ public class JavaClassUpdater {
         // Update type variables
         JavaTypeVariable[] typeVars = getTypeVariables(realClass);
         if (!ArrayUtils.equalsId(typeVars, _javaClass._typeVars))
-            _changed = true;
+            classChanged = true;
         _javaClass._typeVars = typeVars;
 
         // Update inner classes
-        updateInnerClasses(realClass, removedDecls);
+        JavaClass[] innerClasses = getInnerClasses(realClass);
+        if (!ArrayUtils.equalsId(innerClasses, _javaClass._innerClasses))
+            classChanged = true;
+        _javaClass._innerClasses = innerClasses;
 
         // Update fields
-        updateFields(realClass, removedDecls);
+        JavaField[] fields = getDeclaredFields(realClass);
+        if (!ArrayUtils.equalsId(fields, _javaClass._fields))
+            classChanged = true;
+        _javaClass._fields = fields;
 
         // Update methods
-        updateMethods(realClass, removedDecls);
+        JavaMethod[] oldMethods = _javaClass._methods;
+        JavaMethod[] newMethods = _javaClass._methods = getDeclaredMethods(realClass);
+        if (!ArrayUtils.equalsId(oldMethods, newMethods)) {
+            for (JavaMethod method : newMethods)
+                method.initTypes();
+            classChanged = true;
+        }
 
         // Update constructors
-        updateConstructors(realClass, removedDecls);
+        JavaConstructor[] oldConstrs = _javaClass._constructors;
+        JavaConstructor[] newConstrs = _javaClass._constructors = getDeclaredConstructors(realClass);
+        if (!ArrayUtils.equalsId(oldConstrs, newConstrs)) {
+            for (JavaConstructor constr : newConstrs)
+                constr.initTypes();
+            classChanged = true;
+        }
 
         // Array.length: Handle this special for Object[]
         if (_javaClass.isArray() && _javaClass.getFieldForName("length") == null) {
             JavaField javaField = getLengthField();
-            _javaClass._fieldDecls = Arrays.asList(javaField);
-            _changed = true;
+            _javaClass._fields = new JavaField[] { javaField };
+            classChanged = true;
         }
 
-        // Remove unused decls
-        for (JavaDecl jd : removedDecls)
-            removeDecl(jd);
-
         // Return whether decls were changed
-        if (removedDecls.size() > 0)
-            _changed = true;
-        if (_changed)
+        if (classChanged)
             _allDecls = null;
 
         // Return
-        return _changed;
+        return classChanged;
     }
 
     /**
@@ -130,7 +138,7 @@ public class JavaClassUpdater {
     }
 
     /**
-     * Updates inner classes.
+     * Returns JavaTypeVariable array for given class TypeVariables.
      */
     private JavaTypeVariable[] getTypeVariables(Class<?> realClass)
     {
@@ -153,90 +161,90 @@ public class JavaClassUpdater {
     /**
      * Updates inner classes.
      */
-    private void updateInnerClasses(Class<?> realClass, Set<JavaDecl> removedDecls) throws SecurityException
+    private JavaClass[] getInnerClasses(Class<?> realClass)
     {
         // Get Inner Classes
         Class<?>[] innerClasses;
         try { innerClasses = realClass.getDeclaredClasses(); }
         catch (Throwable e) {
-            System.err.println("JavaClassUpdater.updateInnerClasses: Can't get declared classes: " + e);
+            System.err.println("JavaClassUpdater.getInnerClasses: Can't get declared classes: " + e);
             innerClasses = new Class[0];
         }
 
         // Add JavaDecl for each inner class
-        for (Class<?> innerClass : innerClasses) {   //if(icls.isSynthetic()) continue;
-            JavaDecl decl = _javaClass.getInnerClassForName(innerClass.getSimpleName());
-            if (decl == null) {
-                decl = _resolver.getJavaClassForClass(innerClass);
-                addDecl(decl);
-                _changed = true;
-            }
-            else removedDecls.remove(decl);
-        }
+        return ArrayUtils.map(innerClasses, cls -> getJavaClassForClass(cls), JavaClass.class);
     }
 
     /**
-     * Updates fields.
+     * Returns a JavaClass for given inner Class from JavaClass, creating if missing.
      */
-    private void updateFields(Class<?> realClass, Set<JavaDecl> removedDecls) throws SecurityException
+    private JavaClass getJavaClassForClass(Class<?> anInnerClass)
     {
-        // Get Fields
+        String innerClassName = anInnerClass.getSimpleName();
+        JavaClass innerClass = _javaClass.getInnerClassForName(innerClassName);
+        if (innerClass == null)
+            innerClass = _resolver.getJavaClassForClass(anInnerClass);
+        return innerClass;
+    }
+
+    /**
+     * Returns JavaField array for given class.
+     */
+    private JavaField[] getDeclaredFields(Class<?> realClass)
+    {
         Field[] fields = realClass.getDeclaredFields();
-
-        // Add JavaDecl for each declared field - also make sure field type is in refs
-        for (Field field : fields) {
-            JavaDecl decl = getJavaFieldForField(field);
-            if (decl == null) {
-                decl = new JavaField(_resolver, _javaClass, field);
-                addDecl(decl);
-                _changed = true;
-            }
-            else removedDecls.remove(decl);
-        }
+        return ArrayUtils.map(fields, field -> getJavaFieldForField(field), JavaField.class);
     }
 
     /**
-     * Updates methods.
+     * Returns a JavaField for given Field from JavaClass, creating if missing.
      */
-    private void updateMethods(Class<?> realClass, Set<JavaDecl> removedDecls) throws SecurityException
+    private JavaField getJavaFieldForField(Field aField)
     {
-        // Get Methods
+        JavaField javaField = _javaClass.getJavaFieldForField(aField);
+        if (javaField == null)
+            javaField = new JavaField(_resolver, _javaClass, aField);
+        return javaField;
+    }
+
+    /**
+     * Returns JavaMethod array for given class.
+     */
+    private JavaMethod[] getDeclaredMethods(Class<?> realClass)
+    {
         Method[] methods = realClass.getDeclaredMethods();
-
-        // Add JavaDecl for each declared method - also make sure return/parameter types are in refs
-        for (Method meth : methods) {
-            if (meth.isSynthetic()) continue;
-            JavaMethod decl = getJavaMethodForMethod(meth);
-            if (decl == null) {
-                decl = new JavaMethod(_resolver, _javaClass, meth);
-                addDecl(decl);
-                decl.initTypes(meth);
-                _changed = true;
-            }
-            else removedDecls.remove(decl);
-        }
+        return ArrayUtils.map(methods, method -> getJavaMethodForMethod(method), JavaMethod.class);
     }
 
     /**
-     * Updates constructors.
+     * Returns a JavaMethod for given Method from JavaClass, creating if missing.
      */
-    private void updateConstructors(Class<?> realClass, Set<JavaDecl> removedDecls) throws SecurityException
+    private JavaMethod getJavaMethodForMethod(Method aMethod)
     {
-        // Get Constructors
-        Constructor<?>[] constructors = realClass.getDeclaredConstructors();
+        JavaMethod javaMethod = _javaClass.getJavaMethodForMethod(aMethod);
+        if (javaMethod == null)
+            javaMethod = new JavaMethod(_resolver, _javaClass, aMethod);
+        return javaMethod;
+    }
 
-        // Add JavaDecl for each constructor - also make sure parameter types are in refs
-        for (Constructor<?> constr : constructors) {
-            if (constr.isSynthetic()) continue;
-            JavaConstructor decl = getJavaConstructorForConstructor(constr);
-            if (decl == null) {
-                decl = new JavaConstructor(_resolver, _javaClass, constr);
-                addDecl(decl);
-                decl.initTypes(constr);
-                _changed = true;
-            }
-            else removedDecls.remove(decl);
-        }
+    /**
+     * Returns JavaConstructor array for given class.
+     */
+    private JavaConstructor[] getDeclaredConstructors(Class<?> realClass)
+    {
+        Constructor<?>[] constrs = realClass.getDeclaredConstructors();
+        return ArrayUtils.map(constrs, constr -> getJavaConstructorForConstructor(constr), JavaConstructor.class);
+    }
+
+    /**
+     * Returns a JavaConstructor for given Method from JavaClass, creating if missing.
+     */
+    private JavaConstructor getJavaConstructorForConstructor(Constructor<?> aConstr)
+    {
+        JavaConstructor javaConstr = _javaClass.getJavaConstructorForConstructor(aConstr);
+        if (javaConstr == null)
+            javaConstr = new JavaConstructor(_resolver, _javaClass, aConstr);
+        return javaConstr;
     }
 
     /**
@@ -245,10 +253,10 @@ public class JavaClassUpdater {
     private void updateArrayClass()
     {
         JavaClass aryDecl = _resolver.getJavaClassForClass(Object[].class);
-        _javaClass._fieldDecls = aryDecl.getDeclaredFields();
+        _javaClass._fields = aryDecl.getDeclaredFields();
         _javaClass._interfaces = aryDecl._interfaces;
-        _javaClass._methDecls = aryDecl._methDecls;
-        _javaClass._constrDecls = aryDecl._constrDecls;
+        _javaClass._methods = aryDecl._methods;
+        _javaClass._constructors = aryDecl._constructors;
         _javaClass._innerClasses = aryDecl._innerClasses;
         _javaClass._typeVars = aryDecl._typeVars;
     }
@@ -262,152 +270,18 @@ public class JavaClassUpdater {
         if (_allDecls != null) return _allDecls;
 
         // Create new AllDecls cached list with decls for fields, methods, constructors, inner classes and this class
-        List<JavaField> fdecls = _javaClass.getDeclaredFields();
-        int memberCount = fdecls.size() + _javaClass._methDecls.size() + _javaClass._constrDecls.size();
-        int declCount = memberCount + _javaClass._innerClasses.size() + 1;
+        JavaField[] fields = _javaClass.getDeclaredFields();
+        int memberCount = fields.length + _javaClass._methods.length + _javaClass._constructors.length;
+        int declCount = memberCount + _javaClass._innerClasses.length + 1;
         List<JavaDecl> decls = new ArrayList<>(declCount);
         decls.add(_javaClass);
-        decls.addAll(_javaClass._fieldDecls);
-        decls.addAll(_javaClass._methDecls);
-        decls.addAll(_javaClass._constrDecls);
-        decls.addAll(_javaClass._innerClasses);
+        Collections.addAll(decls, _javaClass._fields);
+        Collections.addAll(decls, _javaClass._methods);
+        Collections.addAll(decls, _javaClass._constructors);
+        Collections.addAll(decls, _javaClass._innerClasses);
 
         // Set/return
         return _allDecls = decls;
-    }
-
-    /**
-     * Returns the JavaField for java.lang.reflect.Field.
-     */
-    public JavaField getJavaFieldForField(Field aField)
-    {
-        String name = aField.getName();
-        JavaField field = _javaClass.getFieldForName(name);
-        if (field == null)
-            return null;
-
-        int mods = aField.getModifiers();
-        if (mods != field.getModifiers())
-            return null;
-
-        // Return
-        return field;
-    }
-
-    /**
-     * Returns the JavaMethod for given java.lang.reflect.method.
-     */
-    public JavaMethod getJavaMethodForMethod(Method aMeth)
-    {
-        String id = ResolverUtils.getIdForMember(aMeth);
-        JavaMethod method = getMethodForId(id);
-        if (method == null)
-            return null;
-
-        int mods = aMeth.getModifiers();
-        if (mods != method.getModifiers())
-            return null;
-
-        // Check return type?
-        return method;
-    }
-
-    /**
-     * Returns the JavaMethod for id string.
-     */
-    private JavaMethod getMethodForId(String anId)
-    {
-        List<JavaMethod> methods = _javaClass.getDeclaredMethods();
-        for (JavaMethod method : methods)
-            if (method.getId().equals(anId))
-                return method;
-
-        // Return
-        return null;
-    }
-
-    /**
-     * Returns the JavaConstructor for java.lang.reflect.Constructor.
-     */
-    public JavaConstructor getJavaConstructorForConstructor(Constructor<?> aConstr)
-    {
-        String id = ResolverUtils.getIdForMember(aConstr);
-        JavaConstructor constructor = getConstructorForId(id);
-        if (constructor == null)
-            return null;
-
-        // Check mods
-        int mods = aConstr.getModifiers();
-        if (mods != constructor.getModifiers())
-            return null;
-
-        // Return
-        return constructor;
-    }
-
-    /**
-     * Returns the Constructor decl for id string.
-     */
-    public JavaConstructor getConstructorForId(String anId)
-    {
-        List<JavaConstructor> constructors = _javaClass.getDeclaredConstructors();
-        for (JavaConstructor constructor : constructors)
-            if (constructor.getId().equals(anId))
-                return constructor;
-
-        // Return
-        return null;
-    }
-
-    /**
-     * Returns a JavaMember for given java.lang.reflect.Member.
-     */
-    public JavaMember getJavaMemberForMember(Member aMember)
-    {
-        // Handle Field
-        if (aMember instanceof Field)
-            return getJavaFieldForField((Field) aMember);
-
-        // Handle Method
-        if (aMember instanceof Method)
-            return getJavaMethodForMethod((Method) aMember);
-
-        // Handle Constructor
-        if (aMember instanceof Constructor)
-            return getJavaConstructorForConstructor((Constructor<?>) aMember);
-
-        // Handle MemberName
-        throw new RuntimeException("JavaClassUpdater.getJavaMemberForMember: " + aMember);
-    }
-
-    /**
-     * Adds a decl.
-     */
-    public void addDecl(JavaDecl aDecl)
-    {
-        JavaDecl.DeclType type = aDecl.getType();
-        switch (type) {
-            case Field: _javaClass._fieldDecls.add((JavaField) aDecl); break;
-            case Method: _javaClass._methDecls.add((JavaMethod) aDecl); break;
-            case Constructor: _javaClass._constrDecls.add((JavaConstructor) aDecl); break;
-            case Class: _javaClass._innerClasses.add((JavaClass) aDecl); break;
-            default: throw new RuntimeException("JavaDeclHpr.addDecl: Invalid type " + type);
-        }
-    }
-
-    /**
-     * Removes a decl.
-     */
-    public void removeDecl(JavaDecl aDecl)
-    {
-        JavaDecl.DeclType type = aDecl.getType();
-        switch (type) {
-            case Field: _javaClass._fieldDecls.remove(aDecl); break;
-            case Method: _javaClass._methDecls.remove(aDecl); break;
-            case Constructor: _javaClass._constrDecls.remove(aDecl); break;
-            case Class: _javaClass._innerClasses.remove(aDecl); break;
-            default: throw new RuntimeException("JavaDeclHpr.removeDecl: Invalid type " + type);
-        }
     }
 
     /**

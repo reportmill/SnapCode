@@ -280,15 +280,6 @@ public class NodeCompleter {
     }
 
     /**
-     * Adds completion.
-     */
-    private void addCompletionDecls(Collection<? extends JavaDecl> theDecls)
-    {
-        for (JavaDecl decl : theDecls)
-            addCompletionDecl(decl);
-    }
-
-    /**
      * Replaces classes with constructors.
      */
     private void replaceClassesWithConstructors()
@@ -299,7 +290,7 @@ public class NodeCompleter {
                 JavaClass javaClass = (JavaClass) decl;
                 if (!javaClass.isPrimitive()) {
                     _list.remove(i);
-                    List<JavaConstructor> constructors = javaClass.getDeclaredConstructors();
+                    JavaConstructor[] constructors = javaClass.getDeclaredConstructors();
                     addCompletionDecls(constructors);
                 }
             }

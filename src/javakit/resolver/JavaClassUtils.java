@@ -15,7 +15,7 @@ public class JavaClassUtils {
      */
     public static JavaConstructor getCompatibleConstructor(JavaClass aClass, JavaClass[] paramTypes)
     {
-        List<JavaConstructor> declaredConstructors = aClass.getDeclaredConstructors();
+        JavaConstructor[] declaredConstructors = aClass.getDeclaredConstructors();
         JavaConstructor compatibleConstructor = null;
         int rating = 0;
 
@@ -37,7 +37,7 @@ public class JavaClassUtils {
      */
     private static JavaMethod getCompatibleMethod(JavaClass aClass, String aName, JavaClass[] paramTypes, boolean staticOnly)
     {
-        List<JavaMethod> declaredMethods = aClass.getDeclaredMethods();
+        JavaMethod[] declaredMethods = aClass.getDeclaredMethods();
         JavaMethod compatibleMethod = null;
         int rating = 0;
 
@@ -143,7 +143,7 @@ public class JavaClassUtils {
     private static void findCompatibleMethods(JavaClass aClass, String aName, JavaClass[] paramTypes, List<JavaMethod> compatibleMethods, boolean staticOnly)
     {
         // Iterate over declared methods to find compatible methods (matching name and args)
-        List<JavaMethod> declaredMethods = aClass.getDeclaredMethods();
+        JavaMethod[] declaredMethods = aClass.getDeclaredMethods();
         for (JavaMethod method : declaredMethods) {
             if (staticOnly && !method.isStatic())
                 continue;

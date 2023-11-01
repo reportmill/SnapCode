@@ -44,10 +44,13 @@ public class JavaExecutable extends JavaMember {
     /**
      * Resolves types.
      */
-    protected void initTypes(Member aMember)
+    protected void initTypes()
     {
+        // If already initialized, just return
+        if (_parameterTypes != null) return;
+
         // Get GenericParameterTypes (this can fail https://bugs.openjdk.java.net/browse/JDK-8075483))
-        Executable exec = (Executable) aMember;
+        Executable exec = this instanceof JavaMethod ? ((JavaMethod) this).getMethod() : ((JavaConstructor) this).getConstructor();
         Type[] paramTypes = exec.getGenericParameterTypes();
         if (paramTypes.length < exec.getParameterCount())
             paramTypes = exec.getParameterTypes();

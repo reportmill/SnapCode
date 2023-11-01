@@ -146,7 +146,7 @@ public class DeclMatcher {
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
 
             // Get Class fields
-            List<JavaField> fields = cls.getDeclaredFields();
+            JavaField[] fields = cls.getDeclaredFields();
             for (JavaField field : fields) {
                 if (matchesField(field, staticOnly))
                     matchingFields = ArrayUtils.add(matchingFields, field);
@@ -176,7 +176,7 @@ public class DeclMatcher {
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
 
             // Get Class methods
-            List<JavaMethod> methods = cls.getDeclaredMethods();
+            JavaMethod[] methods = cls.getDeclaredMethods();
             for (JavaMethod method : methods) {
                 if (matchesMethod(method, staticOnly))
                     matchingMethods.add(method);

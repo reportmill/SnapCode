@@ -29,7 +29,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     public void setClassDecl(JClassDecl aClassDecl)
     {
         _classDecl = aClassDecl;
-        _javaClass._fieldDecls = null;
+        _javaClass._fields = null;
     }
 
     /**
@@ -39,8 +39,8 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     public boolean updateDeclsImpl() throws SecurityException
     {
         // If first time, set decls
-        if (_javaClass._fieldDecls == null)
-            _javaClass._fieldDecls = Collections.EMPTY_LIST;
+        if (_javaClass._fields == null)
+            _javaClass._fields = new JavaField[0];
 
         // Update SuperClass
         JavaClass superClass = _classDecl.getSuperClass();
@@ -48,25 +48,22 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         _javaClass._superClassName = superClass.getName();
 
         // Update interfaces
-        //updateInterfaces();
-        _javaClass._interfaces = new JavaClass[0];
+        //_javaClass._interfaces = getInterfaces();
 
         // Update type variables
-        //updateTypeVariables(realClass, removedDecls);
+        //_javaClass._typeVars = getTypeVariables();
 
         // Update inner classes
-        //updateInnerClasses();
-        _javaClass._innerClasses = Collections.EMPTY_LIST;
+        //_javaClass._innerClasses = getDeclaredClasses();
 
         // Update fields
-        updateFields();
+        _javaClass._fields = getDeclaredFields();
 
         // Update methods
-        updateMethods();
+        _javaClass._methods = getDeclaredMethods();
 
         // Update constructors
-        //updateConstructors();
-        _javaClass._constrDecls = Collections.EMPTY_LIST;
+        //_javaClass._constructors = getDeclaredConstructors();
 
         // Return
         return true;
@@ -75,7 +72,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     /**
      * Updates methods.
      */
-    private void updateFields() throws SecurityException
+    private JavaField[] getDeclaredFields()
     {
         // Get Methods
         JFieldDecl[] fieldDecls = _classDecl.getFieldDecls();
@@ -106,15 +103,14 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
             }
         }
 
-        // Set fields
-        JavaField[] fields = fb.buildAll();
-        _javaClass._fieldDecls = Arrays.asList(fields);
+        // Return fields
+        return fb.buildAll();
     }
 
     /**
      * Updates methods.
      */
-    private void updateMethods() throws SecurityException
+    private JavaMethod[] getDeclaredMethods() throws SecurityException
     {
         // Get Methods
         JMethodDecl[] methodDecls = _classDecl.getMethodDecls();
@@ -153,8 +149,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
             mb.save();
         }
 
-        // Set Methods
-        JavaMethod[] methods = mb.buildAll();
-        _javaClass._methDecls = Arrays.asList(methods);
+        // Return Methods
+        return mb.buildAll();
     }
 }

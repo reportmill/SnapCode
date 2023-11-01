@@ -42,14 +42,18 @@ public class JavaMethod extends JavaExecutable {
     /**
      * Resolves types.
      */
-    protected void initTypes(Method aMethod)
+    @Override
+    protected void initTypes()
     {
+        // If already initialized, just return
+        if (_evalType != null) return;
+
         // Get/set EvalType to method return Type
-        Type returnType = aMethod.getGenericReturnType();
+        Type returnType = _method.getGenericReturnType();
         _evalType = _resolver.getJavaTypeForType(returnType);
 
         // Do normal version
-        super.initTypes(aMethod);
+        super.initTypes();
     }
 
     /**

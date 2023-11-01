@@ -393,8 +393,7 @@ public class Resolver {
     {
         Class<?> declaringClass = aMember.getDeclaringClass();
         JavaClass javaClass = getJavaClassForClass(declaringClass);
-        JavaClassUpdater updater = javaClass.getUpdater();
-        return updater.getJavaMemberForMember(aMember);
+        return javaClass.getJavaMemberForMember(aMember);
     }
 
     /**
