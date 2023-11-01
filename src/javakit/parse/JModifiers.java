@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-
 import java.lang.reflect.Modifier;
 
 /**
@@ -11,102 +10,73 @@ import java.lang.reflect.Modifier;
 public class JModifiers extends JNode {
 
     // The modifiers value
-    int _mods;
+    private int _mods;
+
+    /**
+     * Constructor.
+     */
+    public JModifiers()
+    {
+        super();
+    }
 
     /**
      * Returns the value.
      */
-    public int getValue()
-    {
-        return _mods;
-    }
+    public int getValue()  { return _mods; }
 
     /**
      * Adds a modifier value.
      */
-    public void addValue(int aValue)
-    {
-        _mods |= aValue;
-    }
+    public void addValue(int aValue) { _mods |= aValue; }
 
     /**
      * Returns whether modifiers includes abstract.
      */
-    public boolean isAbstract()
-    {
-        return Modifier.isAbstract(_mods);
-    }
+    public boolean isAbstract()  { return Modifier.isAbstract(_mods); }
 
     /**
      * Returns whether modifiers includes final.
      */
-    public boolean isFinal()
-    {
-        return Modifier.isFinal(_mods);
-    }
+    public boolean isFinal()  { return Modifier.isFinal(_mods); }
 
     /**
      * Returns whether modifiers includes interface.
      */
-    public boolean isInterface()
-    {
-        return Modifier.isInterface(_mods);
-    }
+    public boolean isInterface()  { return Modifier.isInterface(_mods); }
 
     /**
      * Returns whether modifiers includes native.
      */
-    public boolean isNative()
-    {
-        return Modifier.isNative(_mods);
-    }
+    public boolean isNative()  { return Modifier.isNative(_mods); }
 
     /**
      * Returns whether modifiers includes private.
      */
-    public boolean isPrivate()
-    {
-        return Modifier.isPrivate(_mods);
-    }
+    public boolean isPrivate()  { return Modifier.isPrivate(_mods); }
 
     /**
      * Returns whether modifiers includes protected.
      */
-    public boolean isProtected()
-    {
-        return Modifier.isProtected(_mods);
-    }
+    public boolean isProtected()  { return Modifier.isProtected(_mods); }
 
     /**
      * Returns whether modifiers includes public.
      */
-    public boolean isPublic()
-    {
-        return Modifier.isPublic(_mods);
-    }
+    public boolean isPublic()  { return Modifier.isPublic(_mods); }
 
     /**
      * Returns whether modifiers includes static.
      */
-    public boolean isStatic()
-    {
-        return Modifier.isStatic(_mods);
-    }
+    public boolean isStatic()  { return Modifier.isStatic(_mods); }
 
     /**
      * Returns whether modifiers includes strict.
      */
-    public boolean isStrict()
-    {
-        return Modifier.isStrict(_mods);
-    }
+    public boolean isStrict()  { return Modifier.isStrict(_mods); }
 
     /**
      * Returns whether modifiers includes synchronized.
      */
-    public boolean isSynchronized()
-    {
-        return Modifier.isSynchronized(_mods);
-    }
-
+    public boolean isSynchronized()  { return Modifier.isSynchronized(_mods); }
 }

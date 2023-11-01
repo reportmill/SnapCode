@@ -84,7 +84,7 @@ public class JavaClassUpdater {
         _javaClass._typeVars = typeVars;
 
         // Update inner classes
-        JavaClass[] innerClasses = getInnerClasses(realClass);
+        JavaClass[] innerClasses = getDeclaredClasses(realClass);
         if (!ArrayUtils.equalsId(innerClasses, _javaClass._innerClasses))
             classChanged = true;
         _javaClass._innerClasses = innerClasses;
@@ -159,15 +159,15 @@ public class JavaClassUpdater {
     }
 
     /**
-     * Updates inner classes.
+     * Returns JavaClass array of declared inner classes for given class.
      */
-    private JavaClass[] getInnerClasses(Class<?> realClass)
+    private JavaClass[] getDeclaredClasses(Class<?> realClass)
     {
         // Get Inner Classes
         Class<?>[] innerClasses;
         try { innerClasses = realClass.getDeclaredClasses(); }
         catch (Throwable e) {
-            System.err.println("JavaClassUpdater.getInnerClasses: Can't get declared classes: " + e);
+            System.err.println("JavaClassUpdater.getDeclaredClasses: Can't get declared classes: " + e);
             innerClasses = new Class[0];
         }
 
@@ -294,16 +294,4 @@ public class JavaClassUpdater {
         JavaField javaField = fb.name("length").type(int.class).build();
         return javaField;
     }
-
-    /**
-     * Returns a bogus field for Array.length.
-     */
-    private static Field getLenField()
-    {
-        try { return Array.class.getField("length"); }
-        catch (Exception e) { return null; }
-    }
-
-    // Bogus class to get length
-    private static class Array { public int length; }
 }

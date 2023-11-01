@@ -35,7 +35,7 @@ public class JavaClass extends JavaType {
     private boolean  _enum, _interface, _primitive;
 
     // The array of interfaces
-    protected JavaClass[] _interfaces;
+    protected JavaClass[] _interfaces = new JavaClass[0];
 
     // The field decls
     protected JavaField[] _fields;

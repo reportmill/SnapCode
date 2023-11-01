@@ -3,7 +3,8 @@
  */
 package javakit.resolver;
 import javakit.parse.*;
-
+import snap.util.ArrayUtils;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
@@ -54,7 +55,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         //_javaClass._typeVars = getTypeVariables();
 
         // Update inner classes
-        //_javaClass._innerClasses = getDeclaredClasses();
+        _javaClass._innerClasses = getDeclaredClasses();
 
         // Update fields
         _javaClass._fields = getDeclaredFields();
@@ -67,6 +68,34 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
 
         // Return
         return true;
+    }
+
+    /**
+     * Updates inner classes.
+     */
+    private JavaClass[] getDeclaredClasses()
+    {
+        JClassDecl[] innerClassDecls = _classDecl.getClassDecls();
+        return ArrayUtils.map(innerClassDecls, cdecl -> getJavaClassForClassDecl(cdecl), JavaClass.class);
+    }
+
+    /**
+     * Returns a JavaClass for given inner Class from JavaClass, creating if missing.
+     */
+    private JavaClass getJavaClassForClassDecl(JClassDecl anInnerClassDecl)
+    {
+        // Get or create class for class name
+        String innerClassName = anInnerClassDecl.getSimpleName();
+        JavaClass innerClass = _javaClass.getInnerClassForName(innerClassName);
+        if (innerClass == null)
+            innerClass = new JavaClass(_resolver, anInnerClassDecl, innerClassName);
+
+        // Reset decl
+        JavaClassUpdaterDecl classUpdater = (JavaClassUpdaterDecl) innerClass.getUpdater();
+        classUpdater.setClassDecl(anInnerClassDecl);
+
+        // Return
+        return innerClass;
     }
 
     /**
@@ -88,9 +117,10 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
             // Iterate over varDecls
             for (JVarDecl varDecl : varDecls) {
 
-                // Get/set name
+                // Get/set name and mods
                 String fieldName = varDecl.getName();
                 fb.name(fieldName);
+                fb.mods(fieldDecl.getMods().getValue());
 
                 // Get/set type
                 JType varTypeDecl = varDecl.getType();
@@ -100,6 +130,15 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
 
                 // Add to builder list
                 fb.save();
+            }
+        }
+
+        // Handle enum: Add constant fields
+        if (_classDecl.isEnum()) {
+            JEnumConst[] enumConsts = _classDecl.getEnumConstants();
+            for (JEnumConst enumConst : enumConsts) {
+                String constName = enumConst.getName();
+                fb.name(constName).type(_javaClass).mods(Modifier.PUBLIC | Modifier.STATIC).save();
             }
         }
 

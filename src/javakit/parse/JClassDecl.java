@@ -5,8 +5,8 @@ package javakit.parse;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javakit.resolver.*;
+import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 
 /**
@@ -30,7 +30,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
     protected List<JMemberDecl>  _members = new ArrayList<>();
 
     // The enum constants (if ClassType Enum)
-    protected List<JEnumConst>  _enumConstants = new ArrayList<>();
+    protected JEnumConst[] _enumConstants = new JEnumConst[0];
 
     // The field declarations
     protected JFieldDecl[]  _fieldDecls;
@@ -122,14 +122,14 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
     /**
      * Returns the list of enum constants.
      */
-    public List<JEnumConst> getEnumConstants()  { return _enumConstants; }
+    public JEnumConst[] getEnumConstants()  { return _enumConstants; }
 
     /**
      * Adds an enum constant.
      */
     public void addEnumConstant(JEnumConst anEC)
     {
-        _enumConstants.add(anEC);
+        _enumConstants = ArrayUtils.add(_enumConstants, anEC);
         addChild(anEC);
     }
 
@@ -436,7 +436,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
 
         // Iterate over enum constants
         if (isEnum()) {
-            List<JEnumConst> enumConstants = getEnumConstants();
+            JEnumConst[] enumConstants = getEnumConstants();
             for (JEnumConst enumConst : enumConstants) {
                 if (name.equals(enumConst.getName()))
                     return enumConst.getDecl();
