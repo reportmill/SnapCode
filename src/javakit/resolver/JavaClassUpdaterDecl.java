@@ -53,7 +53,6 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
 
         // Update type variables
         //updateTypeVariables(realClass, removedDecls);
-        _javaClass._typeVarDecls = Collections.EMPTY_LIST;
 
         // Update inner classes
         //updateInnerClasses();

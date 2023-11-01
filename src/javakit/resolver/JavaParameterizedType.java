@@ -3,7 +3,6 @@
  */
 package javakit.resolver;
 import snap.util.StringUtils;
-import java.util.List;
 
 /**
  * This class represents a Java ParameterizedType.
@@ -88,11 +87,11 @@ public class JavaParameterizedType extends JavaType {
         // Get type var name and this parameter type base class and type vars
         String typeVarName = aTypeVar.getName();
         JavaClass baseClass = getRawType();
-        List<JavaTypeVariable> typeVars = baseClass.getTypeVars();
+        JavaTypeVariable[] typeVars = baseClass.getTypeVars();
 
         // Iterate over type vars - if type var name found, return respective parameter type
-        for (int i = 0, iMax = typeVars.size(); i < iMax; i++) {
-            JavaTypeVariable typeVar = typeVars.get(i);
+        for (int i = 0, iMax = typeVars.length; i < iMax; i++) {
+            JavaTypeVariable typeVar = typeVars[i];
             if (typeVar.getName().equals(typeVarName)) {
                 JavaType[] paramTypes = getParamTypes();
                 if (i < paramTypes.length)

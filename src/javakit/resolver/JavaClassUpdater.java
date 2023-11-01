@@ -82,7 +82,10 @@ public class JavaClassUpdater {
         _javaClass._interfaces = interfaces;
 
         // Update type variables
-        updateTypeVariables(realClass, removedDecls);
+        JavaTypeVariable[] typeVars = getTypeVariables(realClass);
+        if (!ArrayUtils.equalsId(typeVars, _javaClass._typeVars))
+            _changed = true;
+        _javaClass._typeVars = typeVars;
 
         // Update inner classes
         updateInnerClasses(realClass, removedDecls);
@@ -129,22 +132,22 @@ public class JavaClassUpdater {
     /**
      * Updates inner classes.
      */
-    private void updateTypeVariables(Class<?> realClass, Set<JavaDecl> removedDecls) throws SecurityException
+    private JavaTypeVariable[] getTypeVariables(Class<?> realClass)
     {
-        // Get TypeVariables
         TypeVariable<?>[] typeVariables = realClass.getTypeParameters();
+        return ArrayUtils.map(typeVariables, tvar -> getJavaTypeVarForTypeVar(tvar), JavaTypeVariable.class);
+    }
 
-        // Add JavaDecl for each Type parameter
-        for (TypeVariable<?> typeVariable : typeVariables) {
-            String name = typeVariable.getName();
-            JavaDecl decl = _javaClass.getTypeVarForName(name);
-            if (decl == null) {
-                decl = new JavaTypeVariable(_resolver, _javaClass, typeVariable);
-                addDecl(decl);
-                _changed = true;
-            }
-            else removedDecls.remove(decl);
-        }
+    /**
+     * Returns a JavaTypeVariable for given TypeVariable from JavaClass, creating if missing.
+     */
+    private JavaTypeVariable getJavaTypeVarForTypeVar(TypeVariable<?> aTypeVar)
+    {
+        String typeVarName = aTypeVar.getName();
+        JavaTypeVariable javaTypeVar = _javaClass.getTypeVarForName(typeVarName);
+        if (javaTypeVar == null)
+            javaTypeVar = new JavaTypeVariable(_resolver, _javaClass, aTypeVar);
+        return javaTypeVar;
     }
 
     /**
@@ -247,7 +250,7 @@ public class JavaClassUpdater {
         _javaClass._methDecls = aryDecl._methDecls;
         _javaClass._constrDecls = aryDecl._constrDecls;
         _javaClass._innerClasses = aryDecl._innerClasses;
-        _javaClass._typeVarDecls = aryDecl._typeVarDecls;
+        _javaClass._typeVars = aryDecl._typeVars;
     }
 
     /**
@@ -388,7 +391,6 @@ public class JavaClassUpdater {
             case Method: _javaClass._methDecls.add((JavaMethod) aDecl); break;
             case Constructor: _javaClass._constrDecls.add((JavaConstructor) aDecl); break;
             case Class: _javaClass._innerClasses.add((JavaClass) aDecl); break;
-            case TypeVar: _javaClass._typeVarDecls.add((JavaTypeVariable) aDecl); break;
             default: throw new RuntimeException("JavaDeclHpr.addDecl: Invalid type " + type);
         }
     }
@@ -404,7 +406,6 @@ public class JavaClassUpdater {
             case Method: _javaClass._methDecls.remove(aDecl); break;
             case Constructor: _javaClass._constrDecls.remove(aDecl); break;
             case Class: _javaClass._innerClasses.remove(aDecl); break;
-            case TypeVar: _javaClass._typeVarDecls.remove(aDecl); break;
             default: throw new RuntimeException("JavaDeclHpr.removeDecl: Invalid type " + type);
         }
     }

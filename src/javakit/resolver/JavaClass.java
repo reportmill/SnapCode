@@ -4,6 +4,7 @@
 package javakit.resolver;
 import javakit.parse.JClassDecl;
 import javakit.parse.JFile;
+import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import java.lang.reflect.*;
 import java.util.*;
@@ -50,7 +51,7 @@ public class JavaClass extends JavaType {
     protected List<JavaClass>  _innerClasses = new ArrayList<>();
 
     // The type var decls
-    protected List<JavaTypeVariable>  _typeVarDecls = new ArrayList<>();
+    protected JavaTypeVariable[] _typeVars = new JavaTypeVariable[0];
 
     // The Array component type name (if Array)
     private String _componentTypeName;
@@ -343,10 +344,10 @@ public class JavaClass extends JavaType {
     /**
      * Returns the inner classes.
      */
-    public List<JavaTypeVariable> getTypeVars()
+    public JavaTypeVariable[] getTypeVars()
     {
         getDeclaredFields();
-        return _typeVarDecls;
+        return _typeVars;
     }
 
     /**
@@ -485,8 +486,8 @@ public class JavaClass extends JavaType {
      */
     public JavaTypeVariable getTypeVarForName(String aName)
     {
-        List<JavaTypeVariable> typeVars = getTypeVars();
-        return ListUtils.findMatch(typeVars, tvar -> tvar.getName().equals(aName));
+        JavaTypeVariable[] typeVars = getTypeVars();
+        return ArrayUtils.findMatch(typeVars, tvar -> tvar.getName().equals(aName));
     }
 
     /**
@@ -494,16 +495,8 @@ public class JavaClass extends JavaType {
      */
     public int getTypeVarIndexForName(String aName)
     {
-        // Iterate to find TypeVar index for name
-        List<JavaTypeVariable> typeVars = getTypeVars();
-        for (int i = 0, iMax = typeVars.size(); i < iMax; i++) {
-            JavaTypeVariable typeVar = typeVars.get(i);
-            if (typeVar.getName().equals(aName))
-                return i;
-        }
-
-        // Return not found
-        return -1;
+        JavaTypeVariable[] typeVars = getTypeVars();
+        return ArrayUtils.findMatchIndex(typeVars, tvar -> tvar.getName().equals(aName));
     }
 
     /**
