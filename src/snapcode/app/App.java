@@ -5,6 +5,7 @@ import snap.view.ViewTheme;
 import snap.view.ViewUtils;
 import snap.view.WindowView;
 import snap.viewx.ExceptionReporter;
+import snapcode.apptools.EvalTool;
 import snapcode.util.LZString;
 
 /**
@@ -85,14 +86,26 @@ public class App {
      */
     private boolean handleAppArgs()
     {
-        if (APP_ARGS.length == 0)
-            return false;
+        boolean handled = false;
 
-        String arg0 = APP_ARGS[0];
+        // Iterate over app args
+        for (String arg : APP_ARGS)
+            if (handleAppArg(arg))
+                handled = true;
 
+        // Return
+        return handled;
+    }
+
+    /**
+     * Called to handle args - returns true if args started the app.
+     */
+    private boolean handleAppArg(String arg0)
+    {
         // Handle 'Java:...' or "Jepl:...': Open Java String
         if (arg0.startsWith("Java:") || arg0.startsWith("Jepl:")) {
-            openJavaString(APP_ARGS[0]);
+            openJavaString(arg0);
+            ViewUtils.runDelayed(() -> autoRunOpenFile(), 2000);
             return true;
         }
 
@@ -106,6 +119,12 @@ public class App {
         if (arg0.equalsIgnoreCase("samples")) {
             WelcomePanel.getShared().newFile(true);
             return true;
+        }
+
+        // Handle 'Play'
+        if (arg0.equals("autorun")) {
+            ViewUtils.runDelayed(() -> autoRunOpenFile(), 800);
+            return false;
         }
 
         // Return not handled
@@ -124,6 +143,18 @@ public class App {
 
         // Open Java/Jepl string
         WelcomePanel.getShared().openJavaString(javaStr, isJepl);
+    }
+
+    /**
+     * Called to auto run open workspace file.
+     */
+    private void autoRunOpenFile()
+    {
+        WorkspacePane workspacePane = WindowView.getOpenWindowOwner(WorkspacePane.class);
+        if (workspacePane != null) {
+            EvalTool evalTool = workspacePane.getWorkspaceTools().getToolForClass(EvalTool.class);
+            evalTool.runApp(true);
+        }
     }
 
     /**

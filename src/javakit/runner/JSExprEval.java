@@ -405,9 +405,11 @@ public class JSExprEval {
     {
         Object val = anOR;
 
-        // Eval prefix expression
+        // Eval prefix expression (if not package name)
         JExpr prefixExpr = anExpr.getPrefixExpr();
-        Object prefixVal = evalExpr(val, prefixExpr);
+        Object prefixVal = null;
+        if (!(prefixExpr.getDecl() instanceof JavaPackage))
+            prefixVal = evalExpr(val, prefixExpr);
 
         // Eval expression
         JExpr expr = anExpr.getExpr();
