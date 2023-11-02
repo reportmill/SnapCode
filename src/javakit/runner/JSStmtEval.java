@@ -70,8 +70,9 @@ public class JSStmtEval {
         _exprEval._thisObj = anOR;
 
         // Handle Assert statement
-        if (aStmt instanceof JStmtAssert)
-            throw new RuntimeException("JSStmtEval: Assert Statement not implemented");
+        if (aStmt instanceof JStmtAssert) {
+            System.out.println("JSStmtEval: Assert Statement not implemented");
+        }
 
         // Handle block statement
         if (aStmt instanceof JStmtBlock)
@@ -118,8 +119,10 @@ public class JSStmtEval {
             return evalIfStmt(anOR, (JStmtIf) aStmt);
 
         // Handle labeled statement
-        if (aStmt instanceof JStmtLabeled)
-            throw new RuntimeException("JSStmtEval: labeled Statement not implemented");
+        if (aStmt instanceof JStmtLabeled) {
+            JStmt stmt = ((JStmtLabeled) aStmt).getStatement();
+            return evalStmt(anOR, stmt);
+        }
 
         // Handle return statement
         if (aStmt instanceof JStmtReturn)
@@ -127,7 +130,7 @@ public class JSStmtEval {
 
         // Handle switch statement
         if (aStmt instanceof JStmtSwitch)
-            throw new RuntimeException("JSStmtEval: switch Statement not implemented");
+            return evalSwitchStmt(anOR, (JStmtSwitch) aStmt);
 
         // Handle sync statement
         if (aStmt instanceof JStmtSynchronized) {
@@ -156,8 +159,16 @@ public class JSStmtEval {
      */
     public Object evalBlockStmt(Object anOR, JStmtBlock aBlockStmt) throws Exception
     {
-        // Get statements
         List<JStmt> statements = aBlockStmt.getStatements();
+        return evalStatements(anOR, statements);
+    }
+
+    /**
+     * Evaluate List of JStmts.
+     */
+    public Object evalStatements(Object anOR, List<JStmt> statements) throws Exception
+    {
+        // Get statements
         Object returnVal = null;
 
         // Iterate over statements and evaluate each
@@ -201,6 +212,55 @@ public class JSStmtEval {
 
         // Set and return value
         return _returnValueHit = returnVal;
+    }
+
+    /**
+     * Evaluate JStmtSwitch.
+     */
+    public Object evalSwitchStmt(Object anOR, JStmtSwitch aSwitchStmt) throws Exception
+    {
+        // Get switch expression and eval
+        JExpr switchExpr = aSwitchStmt.getExpr();
+        Object switchValue = evalExpr(switchExpr);
+
+        // Iterate over cases
+        List<JStmtSwitchCase> switchCases = aSwitchStmt.getSwitchCases();
+        boolean hitTrueCase = false;
+
+        // Iterate over switch cases
+        for (JStmtSwitchCase switchCase : switchCases) {
+
+            // Skip default
+            if (switchCase.isDefault())
+                continue;
+
+            // If haven't found true case, eval case expr and check if this is it
+            if (!hitTrueCase) {
+                JExpr caseExpr = switchCase.getExpr();
+                Object caseValue = evalExpr(caseExpr);
+                hitTrueCase = Objects.equals(switchValue, caseValue);
+            }
+
+            // If hit true case, execute statements and check for break/return
+            if (hitTrueCase) {
+                List<JStmt> statements = switchCase.getStatements();
+                evalStatements(anOR, statements);
+                if (handleBreakCheck())
+                    return _returnValueHit;
+            }
+        }
+
+        // Get default and run that
+        JStmtSwitchCase defaultCase = aSwitchStmt.getDefaultCase();
+        if (defaultCase != null) {
+            List<JStmt> statements = defaultCase.getStatements();
+            evalStatements(anOR, statements);
+            if (handleBreakCheck())
+                return _returnValueHit;
+        }
+
+        // Return null
+        return null;
     }
 
     /**

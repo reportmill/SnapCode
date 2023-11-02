@@ -15,6 +15,9 @@ public class JStmtSwitch extends JStmt {
     // The list of SwitchLabels
     protected List<JStmtSwitchCase>  _switchCases = new ArrayList<>();
 
+    // The default case
+    private JStmtSwitchCase _defaultCase;
+
     /**
      * Constructor.
      */
@@ -48,5 +51,14 @@ public class JStmtSwitch extends JStmt {
     {
         _switchCases.add(aSwitchCase);
         addChild(aSwitchCase);
+
+        // If given case is default case, set it
+        if (aSwitchCase.isDefault())
+            _defaultCase = aSwitchCase;
     }
+
+    /**
+     * Returns the default case.
+     */
+    public JStmtSwitchCase getDefaultCase()  { return _defaultCase; }
 }
