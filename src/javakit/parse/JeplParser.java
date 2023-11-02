@@ -40,6 +40,9 @@ public class JeplParser extends JavaParser {
         // A running ivar for batches of statements
         JInitializerDecl  _initDecl;
 
+        // The TypeDecl Modifiers
+        JModifiers _mods;
+
         /**
          * Constructor.
          */
@@ -99,11 +102,14 @@ public class JeplParser extends JavaParser {
                     break;
 
                 // Handle Modifiers: Ignore for now
-                case "Modifiers": break;
+                case "Modifiers":
+                    _mods = aNode.getCustomNode(JModifiers.class);
+                    break;
 
                 // Handle MethodDecl
                 case "MethodDecl": {
                     JMethodDecl methodDecl = aNode.getCustomNode(JMethodDecl.class);
+                    methodDecl.setMods(_mods); _mods = null;
                     classDecl.addMemberDecl(methodDecl);
                     jfile.setEndToken(endToken);
                     _initDecl = null;
@@ -113,6 +119,7 @@ public class JeplParser extends JavaParser {
                 // Handle EnumDecl
                 case "EnumDecl": {
                     JClassDecl enumDecl = aNode.getCustomNode(JClassDecl.class);
+                    enumDecl.setMods(_mods); _mods = null;
                     classDecl.addMemberDecl(enumDecl);
                     jfile.setEndToken(endToken);
                     _initDecl = null;

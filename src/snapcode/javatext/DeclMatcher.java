@@ -17,13 +17,13 @@ import java.util.regex.Pattern;
 public class DeclMatcher {
 
     // The prefix
-    private String  _prefix;
+    private String _prefix;
 
     // The Matcher
-    private Matcher  _matcher;
+    private Matcher _matcher;
 
     // Constant for preferred packages
-    public static final String[] COMMON_PACKAGES = { "java.util", "java.lang", "java.io", "snap.view", "snap.gfx", "snap.geom", "snap.util" };
+    public static final String[] COMMON_PACKAGES = {"java.util", "java.lang", "java.io", "snap.view", "snap.gfx", "snap.geom", "snap.util"};
 
     // Constant for empty members
     private static final JavaField[] EMPTY_FIELDS_ARRAY = new JavaField[0];
@@ -47,14 +47,6 @@ public class DeclMatcher {
      * Returns the matcher.
      */
     public Matcher getMatcher()  { return _matcher; }
-
-    /**
-     * Returns whether this matcher matches given string.
-     */
-    public boolean matchesString(String aString)
-    {
-        return _matcher.reset(aString).lookingAt();
-    }
 
     /**
      * Returns all matching classes.
@@ -92,18 +84,16 @@ public class DeclMatcher {
     private void findClassesForPackage(JavaPackage packageNode, List<JavaClass> matchingClasses, int limit)
     {
         // Get all package classes
-        JavaClass[] classNodes = packageNode.getClasses();
+        JavaClass[] classes = packageNode.getClasses();
 
         // Iterate over classes and add matching public classes to list
-        for (JavaClass classNode : classNodes) {
+        for (JavaClass cls : classes) {
 
-            // If class name matches and is public add to list
-            if (matchesString(classNode.getSimpleName())) {
-                if (Modifier.isPublic(classNode.getModifiers())) {
-                    matchingClasses.add(classNode);
-                    if (matchingClasses.size() >= limit)
-                        return;
-                }
+            // If class matches, add to list
+            if (matchesClass(cls)) {
+                matchingClasses.add(cls);
+                if (matchingClasses.size() >= limit)
+                    return;
             }
         }
     }
@@ -132,6 +122,43 @@ public class DeclMatcher {
             if (matchingClasses.size() >= limit)
                 return;
         }
+    }
+
+    /**
+     * Returns matching members (fields, methods) for given class.
+     */
+    public JavaMember[] getMembersForClass(JavaClass aClass, boolean staticOnly)
+    {
+        JavaMember[] matchingMembers = EMPTY_MEMBERS_ARRAY;
+
+        // Look for matching fields
+        JavaField[] matchingFields = getFieldsForClass(aClass, staticOnly);
+        if (matchingFields.length > 0)
+            matchingMembers = ArrayUtils.addAll(matchingMembers, matchingFields);
+
+        // Add matching methods
+        JavaMember[] matchingMethods = getMethodsForClass(aClass, staticOnly);
+        if (matchingMethods.length > 0)
+            matchingMembers = ArrayUtils.addAll(matchingMembers, matchingMethods);
+
+        // Return
+        return matchingMembers;
+    }
+
+    /**
+     * Returns matching members (fields, methods, classes) for given class.
+     */
+    public JavaDecl[] getMembersAndClassesForClass(JavaClass aClass, boolean staticOnly)
+    {
+        JavaDecl[] matchingMembers = getMembersForClass(aClass, staticOnly);
+
+        // Add matching inner classes
+        JavaClass[] matchingClasses = getInnerClassesForClass(aClass, staticOnly);
+        if (matchingClasses.length > 0)
+            matchingMembers = ArrayUtils.addAll(matchingClasses, matchingMembers);
+
+        // Return
+        return matchingMembers;
     }
 
     /**
@@ -190,70 +217,25 @@ public class DeclMatcher {
     }
 
     /**
-     * Returns matching members (fields, methods) for given class.
+     * Returns inner classes that match given matcher.
      */
-    public JavaMember[] getMembersForClass(JavaClass aClass, boolean staticOnly)
+    public JavaClass[] getInnerClassesForClass(JavaClass aClass, boolean staticOnly)
     {
-        JavaMember[] matchingMembers = EMPTY_MEMBERS_ARRAY;
+        Set<JavaClass> matchingClasses = new HashSet<>();
 
-        // Look for matching fields
-        JavaField[] matchingFields = getFieldsForClass(aClass, staticOnly);
-        if (matchingFields.length > 0)
-            matchingMembers = ArrayUtils.addAll(matchingMembers, matchingFields);
+        // Iterate over super classes
+        for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
 
-        // Add matching methods
-        JavaMember[] matchingMethods = getMethodsForClass(aClass, staticOnly);
-        if (matchingMethods.length > 0)
-            matchingMembers = ArrayUtils.addAll(matchingMembers, matchingMethods);
+            // Get inner classes
+            JavaClass[] innerClasses = cls.getDeclaredClasses();
+            for (JavaClass innerClass : innerClasses) {
+                if (matchesClass(innerClass))
+                    matchingClasses.add(innerClass);
+            }
+        }
 
-        // Return
-        return matchingMembers;
-    }
-
-    /**
-     * Returns whether field matches with option for looking for statics.
-     */
-    private boolean matchesField(JavaField field, boolean staticOnly)
-    {
-        // If not public, just return - need to eventually handle protected/private
-        if (!field.isPublic())
-            return false;
-
-        // If name doesn't match, return false
-        if (!matchesString(field.getName()))
-            return false;
-
-        // If StaticOnly, return if static
-        if (staticOnly)
-            return field.isStatic();
-
-        // Return matches
-        return true;
-    }
-
-    /**
-     * Returns whether method matches with option for looking for statics.
-     */
-    private boolean matchesMethod(JavaMethod method, boolean staticOnly)
-    {
-        // If not public, just return - need to eventually handle protected/private
-        if (!method.isPublic())
-            return false;
-
-        // If name doesn't match, return false
-        if (!matchesString(method.getName()))
-            return false;
-
-        // If StaticOnly, return if static
-        if (staticOnly)
-            return method.isStatic();
-
-        // If super exists, return false (will find super version when searching super class)
-        if (method.getSuper() != null)
-            return false;
-
-        // Return matches
-        return true;
+        // Return array
+        return matchingClasses.toArray(new JavaClass[0]);
     }
 
     /**
@@ -348,6 +330,77 @@ public class DeclMatcher {
             JStmtBlock blockStmt = initializerDecl.getBlock();
             findVarDeclsForIdInWithVarDecls(idExpr, blockStmt, matchingVarDecls);
         }
+    }
+
+    /**
+     * Returns whether this matcher matches given string.
+     */
+    public boolean matchesString(String aString)
+    {
+        return _matcher.reset(aString).lookingAt();
+    }
+
+    /**
+     * Returns whether this matcher matches given class.
+     */
+    private boolean matchesClass(JavaClass aClass)
+    {
+        // If not public class, return false
+        if (!Modifier.isPublic(aClass.getModifiers()))
+            return false;
+
+        // If name doesn't match, return false
+        if (!matchesString(aClass.getSimpleName()))
+            return false;
+
+        // Return matches
+        return true;
+    }
+
+    /**
+     * Returns whether field matches with option for looking for statics.
+     */
+    private boolean matchesField(JavaField field, boolean staticOnly)
+    {
+        // If not public, just return - need to eventually handle protected/private
+        if (!field.isPublic())
+            return false;
+
+        // If name doesn't match, return false
+        if (!matchesString(field.getName()))
+            return false;
+
+        // If StaticOnly, return if static
+        if (staticOnly)
+            return field.isStatic();
+
+        // Return matches
+        return true;
+    }
+
+    /**
+     * Returns whether method matches with option for looking for statics.
+     */
+    private boolean matchesMethod(JavaMethod method, boolean staticOnly)
+    {
+        // If not public, just return - need to eventually handle protected/private
+        if (!method.isPublic())
+            return false;
+
+        // If name doesn't match, return false
+        if (!matchesString(method.getName()))
+            return false;
+
+        // If StaticOnly, return if static
+        if (staticOnly)
+            return method.isStatic();
+
+        // If super exists, return false (will find super version when searching super class)
+        if (method.getSuper() != null)
+            return false;
+
+        // Return matches
+        return true;
     }
 
     /**

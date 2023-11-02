@@ -143,6 +143,7 @@ public class JavaClass extends JavaType {
 
         // Set Mods, Enum, Interface, Primitive
         _mods = aClassDecl.getMods().getValue();
+        _mods |= Modifier.PUBLIC; // Lame - but used for NodeCompleter until it handles current class properly
         _enum = aClassDecl.isEnum();
         _interface = aClassDecl.isInterface();
 
@@ -809,4 +810,9 @@ public class JavaClass extends JavaType {
     {
         return _updater.getAllDecls();
     }
+
+    /**
+     * Returns whether this class was loaded from source. Lame.
+     */
+    public boolean isFromSource()  { return _updater instanceof JavaClassUpdaterDecl; }
 }
