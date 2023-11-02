@@ -4,6 +4,7 @@
 package javakit.resolver;
 import javakit.parse.*;
 import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
@@ -88,7 +89,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         String innerClassName = anInnerClassDecl.getSimpleName();
         JavaClass innerClass = _javaClass.getInnerClassForName(innerClassName);
         if (innerClass == null)
-            innerClass = new JavaClass(_resolver, anInnerClassDecl, innerClassName);
+            innerClass = anInnerClassDecl.getDecl();
 
         // Reset decl
         JavaClassUpdaterDecl classUpdater = (JavaClassUpdaterDecl) innerClass.getUpdater();
@@ -103,47 +104,59 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
      */
     private JavaField[] getDeclaredFields()
     {
-        // Get Methods
-        JFieldDecl[] fieldDecls = _classDecl.getFieldDecls();
+        // Get FieldDecls
+        List<JVarDecl> fieldDecls = _classDecl.getVarDecls();
+
+        // Get fields
         JavaField.FieldBuilder fb = new JavaField.FieldBuilder();
         fb.init(_resolver, _javaClass.getClassName());
-
-        // Add JavaDecl for each declared field
-        for (JFieldDecl fieldDecl : fieldDecls) {
-
-            // Get VarDecls
-            List<JVarDecl> varDecls = fieldDecl.getVarDecls();
-
-            // Iterate over varDecls
-            for (JVarDecl varDecl : varDecls) {
-
-                // Get/set name and mods
-                String fieldName = varDecl.getName();
-                fb.name(fieldName);
-                fb.mods(fieldDecl.getMods().getValue());
-
-                // Get/set type
-                JType varTypeDecl = varDecl.getType();
-                JavaType varType = varTypeDecl != null ? varTypeDecl.getDecl() : null;
-                if (varType != null)
-                    fb.type(varType);
-
-                // Add to builder list
-                fb.save();
-            }
-        }
+        JavaField[] fields = ListUtils.mapToArray(fieldDecls, vd -> getJavaFieldForVarDecl(vd, fb), JavaField.class);
 
         // Handle enum: Add constant fields
         if (_classDecl.isEnum()) {
             JEnumConst[] enumConsts = _classDecl.getEnumConstants();
-            for (JEnumConst enumConst : enumConsts) {
-                String constName = enumConst.getName();
-                fb.name(constName).type(_javaClass).mods(Modifier.PUBLIC | Modifier.STATIC).save();
-            }
+            JavaField[] enumFields = ArrayUtils.map(enumConsts, ec -> getJavaFieldForEnumConst(ec, fb), JavaField.class);
+            fields = ArrayUtils.addAll(fields, enumFields);
         }
 
-        // Return fields
-        return fb.buildAll();
+        // Return
+        return fields;
+    }
+
+    /**
+     * Returns a JavaField for given field var decl from class decl, creating if missing.
+     */
+    private JavaField getJavaFieldForVarDecl(JVarDecl varDecl, JavaField.FieldBuilder fb)
+    {
+        JFieldDecl fieldDecl = (JFieldDecl) varDecl.getParent();
+        String fieldName = varDecl.getName();
+        JavaField javaField = _javaClass.getFieldForName(fieldName);
+        if (javaField == null) {
+            fb.name(fieldName);
+            fb.mods(fieldDecl.getMods().getValue());
+
+            // Get/set type
+            JType varTypeDecl = varDecl.getType();
+            JavaType varType = varTypeDecl != null ? varTypeDecl.getDecl() : null;
+            if (varType != null)
+                fb.type(varType);
+
+            // Add to builder list
+            javaField = fb.build();
+        }
+        return javaField;
+    }
+
+    /**
+     * Returns a JavaField for given enum constant from class decl, creating if missing.
+     */
+    private JavaField getJavaFieldForEnumConst(JEnumConst enumConst, JavaField.FieldBuilder fb)
+    {
+        String enumConstName = enumConst.getName();
+        JavaField enumField = _javaClass.getFieldForName(enumConstName);
+        if (enumField == null) // Need to make sure type and mods match too
+            enumField = fb.name(enumConstName).type(_javaClass).mods(Modifier.PUBLIC | Modifier.STATIC).build();
+        return enumField;
     }
 
     /**
