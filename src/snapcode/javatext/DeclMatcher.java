@@ -146,22 +146,6 @@ public class DeclMatcher {
     }
 
     /**
-     * Returns matching members (fields, methods, classes) for given class.
-     */
-    public JavaDecl[] getMembersAndClassesForClass(JavaClass aClass, boolean staticOnly)
-    {
-        JavaDecl[] matchingMembers = getMembersForClass(aClass, staticOnly);
-
-        // Add matching inner classes
-        JavaClass[] matchingClasses = getInnerClassesForClass(aClass, staticOnly);
-        if (matchingClasses.length > 0)
-            matchingMembers = ArrayUtils.addAll(matchingClasses, matchingMembers);
-
-        // Return
-        return matchingMembers;
-    }
-
-    /**
      * Returns matching fields for given class (with option for static only).
      */
     public JavaField[] getFieldsForClass(JavaClass aClass, boolean staticOnly)
@@ -219,7 +203,7 @@ public class DeclMatcher {
     /**
      * Returns inner classes that match given matcher.
      */
-    public JavaClass[] getInnerClassesForClass(JavaClass aClass, boolean staticOnly)
+    public JavaClass[] getInnerClassesForClass(JavaClass aClass)
     {
         Set<JavaClass> matchingClasses = new HashSet<>();
 

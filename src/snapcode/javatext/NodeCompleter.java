@@ -126,8 +126,14 @@ public class NodeCompleter {
 
         // Add methods of enclosing class
         while (enclosingClass != null) {
-            JavaDecl[] matchingMembers = prefixMatcher.getMembersAndClassesForClass(enclosingClass, false);
+
+            // Add matching members and inner classes for enclosing class
+            JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(enclosingClass, false);
             addCompletionDecls(matchingMembers);
+            JavaClass[] matchingInnerClasses = prefixMatcher.getInnerClassesForClass(enclosingClass);
+            addCompletionDecls(matchingInnerClasses);
+
+            // Get next enclosing class
             enclosingClassDecl = enclosingClassDecl.getEnclosingClassDecl();
             enclosingClass = enclosingClassDecl != null ? enclosingClassDecl.getEvalClass() : null;
         }
@@ -208,8 +214,14 @@ public class NodeCompleter {
             }
 
             // Get matching members (fields, methods) for class and add
-            JavaDecl[] matchingMembers = prefixMatcher.getMembersAndClassesForClass(scopeExprEvalClass, staticMembersOnly);
+            JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(scopeExprEvalClass, staticMembersOnly);
             addCompletionDecls(matchingMembers);
+
+            // If class name literal, get matching inner classes
+            if (staticMembersOnly) {
+                JavaClass[] matchingInnerClasses = prefixMatcher.getInnerClassesForClass(scopeExprEvalClass);
+                addCompletionDecls(matchingInnerClasses);
+            }
         }
     }
 
