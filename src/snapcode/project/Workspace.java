@@ -5,7 +5,11 @@ package snapcode.project;
 import javakit.resolver.Resolver;
 import snap.props.PropObject;
 import snap.util.ArrayUtils;
+import snap.util.FilePathUtils;
 import snap.web.WebSite;
+import java.io.Closeable;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 /**
  * This class manages working with a set of one or more projects.
@@ -200,6 +204,24 @@ public class Workspace extends PropObject {
     }
 
     /**
+     * Returns all project class paths.
+     */
+    public String[] getClassPaths()
+    {
+        Project[] projects = getProjects();
+        String[] classPaths = new String[0];
+
+        // Iterate over projects and add Project.ClassPaths for each
+        for (Project proj : projects) {
+            String[] projClassPaths = proj.getRuntimeClassPaths();
+            classPaths = ArrayUtils.addAllUnique(classPaths, projClassPaths);
+        }
+
+        // Return
+        return classPaths;
+    }
+
+    /**
      * Returns the ClassLoader.
      */
     public ClassLoader getClassLoader()
@@ -217,7 +239,26 @@ public class Workspace extends PropObject {
      */
     protected ClassLoader createClassLoader()
     {
-        return ClassLoader.getSystemClassLoader();
+        // Get all project class paths
+        String[] classPaths = getClassPaths();
+
+        // Get all project ClassPath URLs
+        URL[] urls = FilePathUtils.getUrlsForPaths(classPaths);
+
+        // Get root ClassLoader
+        ClassLoader workspaceClassLoader = ClassLoader.getSystemClassLoader();
+
+        // If IncludeSnapKitRuntime is set, use platform class loader instead
+        Project rootProject = getRootProject();
+        BuildFile buildFile = rootProject.getBuildFile();
+        if (!buildFile.isIncludeSnapKitRuntime())
+            workspaceClassLoader = workspaceClassLoader.getParent();
+
+        // Create special URLClassLoader subclass so when debugging SnapCode, we can ignore classes loaded by Project
+        ClassLoader urlClassLoader = new SnapCodeDebugClassLoader(urls, workspaceClassLoader);
+
+        // Return
+        return urlClassLoader;
     }
 
     /**
@@ -225,6 +266,12 @@ public class Workspace extends PropObject {
      */
     public void clearClassLoader()
     {
+        // If ClassLoader closeable, close it
+        if (_classLoader instanceof SnapCodeDebugClassLoader) {
+            try {  ((Closeable) _classLoader).close(); }
+            catch (Exception e) { throw new RuntimeException(e); }
+        }
+
         _classLoader = null;
         _resolver = null;
     }
@@ -275,5 +322,16 @@ public class Workspace extends PropObject {
     protected Project createProjectForSite(WebSite aSite)
     {
         return new Project(this, aSite);
+    }
+
+    /**
+     * Needs unique name so that when debugging SnapCode, we can ignore classes loaded by Project.
+     */
+    public static class SnapCodeDebugClassLoader extends URLClassLoader {
+
+        public SnapCodeDebugClassLoader(URL[] urls, ClassLoader aPar)
+        {
+            super(urls, aPar);
+        }
     }
 }

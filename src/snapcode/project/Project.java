@@ -6,7 +6,6 @@ import javakit.resolver.Resolver;
 import snap.props.PropObject;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
-import snap.util.SnapUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -148,9 +147,6 @@ public class Project extends PropObject {
      */
     public String[] getRuntimeClassPaths()
     {
-        if (SnapUtils.isWebVM)
-            return getCompileClassPaths();
-
         // Get build path
         String buildPath = _buildFile.getBuildPathAbsolute();
         String[] runtimeClassPaths = { buildPath };
@@ -168,13 +164,16 @@ public class Project extends PropObject {
      */
     public String[] getCompileClassPaths()
     {
-        if (SnapUtils.isWebVM)
-            return ProjectUtils.getSnapKitAndSnapChartsClassPaths();
-
         // Get build file dependencies
         BuildFile buildFile = getBuildFile();
         BuildDependency[] dependencies = buildFile.getDependencies();
         String[] compileClassPaths = new String[0];
+
+        // If BuildFile.IncludeSnapKitRuntime, add SnapKit jar path
+        if (buildFile.isIncludeSnapKitRuntime()) {
+            String[] snapKitPaths = ProjectUtils.getSnapKitAndSnapChartsClassPaths();
+            compileClassPaths = ArrayUtils.addAllUnique(snapKitPaths);
+        }
 
         // Iterate over compile dependencies and add runtime class paths for each
         for (BuildDependency dependency : dependencies) {
