@@ -299,7 +299,7 @@ public class JExprMethodCall extends JExpr implements WithId {
         // See if TypeVar can be resolved by ScopeNode.Type
         else {
             JavaType scopeType = getScopeEvalType();
-            JavaType resolvedDecl = scopeType != null ? scopeType.getResolvedType(resolvedType) : null;
+            JavaType resolvedDecl = scopeType != null ? scopeType.getResolvedTypeForTypeVariable(aTypeVar) : null;
             if (resolvedDecl != null)
                 resolvedType = resolvedDecl;
         }

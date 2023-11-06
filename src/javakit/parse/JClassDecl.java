@@ -611,7 +611,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
     {
         // Just resolve typeVar to bounds
         JavaClass javaClass = getDecl();
-        JavaType resolvedType = javaClass.getResolvedType(aTypeVar);
+        JavaType resolvedType = javaClass.getResolvedTypeForTypeVariable(aTypeVar);
 
         // Do normal version
         if (!resolvedType.isResolvedType() && resolvedType instanceof JavaTypeVariable)

@@ -117,12 +117,11 @@ public class JavaType extends JavaDecl {
     public boolean isResolvedType()  { return true; }
 
     /**
-     * Returns a resolved type for given unresolved type (TypeVar or ParamType<TypeVar>), if this decl can resolve it.
+     * Returns a resolved type for given TypeVar.
      */
-    public JavaType getResolvedType(JavaType aType)
+    public JavaType getResolvedTypeForTypeVariable(JavaTypeVariable aTypeVar)
     {
-        // If not resolved, just return bounds type
-        return aType.getEvalClass();
+        return aTypeVar.getEvalType();
     }
 
     /**

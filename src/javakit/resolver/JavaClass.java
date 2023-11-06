@@ -642,34 +642,24 @@ public class JavaClass extends JavaType {
     }
 
     /**
-     * Returns a resolved type for given unresolved type (TypeVar or ParamType<TypeVar>), if this decl can resolve it.
+     * Returns a resolved type for given TypeVar.
      */
     @Override
-    public JavaType getResolvedType(JavaType aType)
+    public JavaType getResolvedTypeForTypeVariable(JavaTypeVariable aTypeVar)
     {
-        // Handle ParamType and anything not a TypeVar
-        if (aType instanceof JavaParameterizedType) {
-            System.err.println("JavaDecl.getResolvedType: ParamType not yet supported");
-            return aType;
-        }
-
-        // If not TypeVariable, we shouldn't be here
-        if (!(aType instanceof JavaTypeVariable))
-            return aType;
-
         // If has type var, return bounds type
-        String name = aType.getName();
-        JavaDecl typeVar = getTypeVarForName(name);
+        String typeVarName = aTypeVar.getName();
+        JavaDecl typeVar = getTypeVarForName(typeVarName);
         if (typeVar != null)
             return typeVar.getEvalType();
 
         // If SuerType is ParameterizedType, let it try to resolve
         JavaType superType = getSuperType();
         if (superType instanceof JavaParameterizedType)
-            return superType.getResolvedType(aType);
+            return superType.getResolvedTypeForTypeVariable(aTypeVar);
 
         // Otherwise just return EvalClass
-        return aType.getEvalClass();
+        return aTypeVar.getEvalClass();
     }
 
     /**
