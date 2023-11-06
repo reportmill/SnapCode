@@ -10,13 +10,13 @@ import java.util.Comparator;
 class DeclCompare implements Comparator<JavaDecl> {
 
     // The DeclMatcher match string
-    private String  _prefix;
+    private String _prefix;
 
     // Whether DeclMatcher prefix is literal pattern
-    private boolean  _literal;
+    private boolean _literal;
 
     // The receiving class for completions
-    private JavaClass  _receivingClass;
+    private JavaClass _receivingClass;
 
     /**
      * Creates a DeclCompare.
@@ -82,32 +82,15 @@ class DeclCompare implements Comparator<JavaDecl> {
             if (aDecl instanceof JavaConstructor) {
                 JavaConstructor constructor = (JavaConstructor) aDecl;
                 JavaClass evalClass = constructor.getEvalClass();
-                if (evalClass.isMemberClass())
-                    rating -= 2;
+                int classRating = getMatchRatingForClass(evalClass);
+                rating += classRating;
             }
         }
 
         // Handle Class: Add bonus for preferred packages or receiving class match
         else if (aDecl instanceof JavaClass) {
-
-            // Get package
-            JavaClass javaClass = (JavaClass) aDecl;
-            JavaPackage pkg = javaClass.getPackage();
-            String packageName = pkg.getName();
-
-            // If root or common package, add bonus
-            if (packageName.length() == 0 || ArrayUtils.contains(DeclMatcher.COMMON_PACKAGES, packageName))
-                rating += 5;
-            else if (packageName.startsWith("java.util.") || packageName.startsWith("java.lang."))
-                rating += 2;
-
-            // If class is ReceivingClass, user might want cast
-            if (javaClass == _receivingClass)
-                rating += 5;
-
-            // Inner class makes us less happy
-            if (javaClass.isMemberClass())
-                rating -= 2;
+            int classRating = getMatchRatingForClass((JavaClass) aDecl);
+            rating += classRating;
         }
 
         // Handle word: Add bonus
@@ -118,6 +101,35 @@ class DeclCompare implements Comparator<JavaDecl> {
         // Additional chars make us less happy
         int additionalCharsCount = declName.length() - _prefix.length();
         rating -= additionalCharsCount;
+
+        // Return
+        return rating;
+    }
+
+    /**
+     * Returns the match rating for a class.
+     */
+    private int getMatchRatingForClass(JavaClass javaClass)
+    {
+        int rating = 0;
+
+        // Get package
+        JavaPackage pkg = javaClass.getPackage();
+        String packageName = pkg.getName();
+
+        // If root or common package, add bonus
+        if (packageName.length() == 0 || ArrayUtils.contains(DeclMatcher.COMMON_PACKAGES, packageName))
+            rating += 5;
+        else if (packageName.startsWith("java.util.") || packageName.startsWith("java.lang."))
+            rating += 2;
+
+        // If class is ReceivingClass, user might want cast
+        if (javaClass == _receivingClass)
+            rating += 5;
+
+        // Inner class makes us less happy
+        if (javaClass.isMemberClass())
+            rating -= 2;
 
         // Return
         return rating;
