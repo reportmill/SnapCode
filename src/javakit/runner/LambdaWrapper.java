@@ -80,8 +80,8 @@ public abstract class LambdaWrapper implements InvocationHandler {
             return instanceProxy.invokeWithArguments(args);
         }
 
-        // Can't happen?
-        throw new IllegalArgumentException("LambdaWrapper.invoke: can't invoke method: " + method);
+        // Evaluate any other (assumed Object?) method using this LambdaWrapper as generic object?
+        return method.invoke(this, args);
     }
 
     /**
