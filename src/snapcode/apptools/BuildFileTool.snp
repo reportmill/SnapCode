@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="500" PrefHeight="500" Padding="16" Spacing="10">
-  <Font Name="Arial" Size="14" />
-  <RowView Padding="10,10,10,10" MinWidth="400" BorderRadius="8">
-    <Fill Color="#F8" />
-    <Font Name="Arial" Size="18" />
-    <Label Text="Build File" />
+<ColView PrefWidth="500" Padding="16" Spacing="10">
+  <font name="Arial" size="14" />
+  <RowView MinWidth="400" BorderRadius="8" Padding="10">
+    <color value="#f8f8f8" />
+    <font name="Arial" size="18" />
+    <Label text="Build File" />
   </RowView>
   <RowView Spacing="5">
     <Label text="Source Directory:" />
@@ -14,6 +14,40 @@
     <Label text="Build Directory:" />
     <TextField Name="BuildPathText" PrefWidth="255" />
   </RowView>
-  <Label text="Build Dependencies:" />
-  <ListView Name="DependenciesListView" PrefWidth="360" PrefHeight="120" />
+  <RowView>
+    <Label text="Build Dependencies:" />
+    <Button Name="AddDependencyButton" PrefWidth="22" PrefHeight="22" Margin="0,4,0,40" text="+" />
+    <Button Name="RemoveDependencyButton" PrefWidth="22" PrefHeight="22" text="-" />
+  </RowView>
+  <ListView Name="DependenciesListView" PrefWidth="360" PrefHeight="120">
+    <LineBorder Color="#c0c0c0" />
+  </ListView>
+  <ColView Name="MavenDependencyBox" BorderRadius="8" Margin="0,0,0,26" Padding="10,10,10,20">
+    <color value="#f4f4f4" />
+    <font name="Arial" size="12" />
+    <RowView Padding="4" Spacing="4">
+      <Label PrefWidth="100" text="Repository URL:" />
+      <TextField Name="RepositoryURLText" PrefWidth="200" />
+    </RowView>
+    <RowView Padding="4" Spacing="4">
+      <Label PrefWidth="100" text="Group id:" />
+      <TextField Name="GroupText" PrefWidth="200" />
+    </RowView>
+    <RowView Padding="4" Spacing="4">
+      <Label PrefWidth="100" text="Package Name:" />
+      <TextField Name="PackageNameText" PrefWidth="120" />
+    </RowView>
+    <RowView Padding="4" Spacing="4">
+      <Label PrefWidth="100" text="Version:" />
+      <TextField Name="VersionText" PrefWidth="120" />
+    </RowView>
+  </ColView>
+  <ColView Name="GeneralDependencyBox" BorderRadius="8" Margin="0,0,0,26" Padding="10,10,10,20">
+    <color value="#f4f4f4" />
+    <font name="Arial" size="12" />
+    <RowView Padding="4" Spacing="4">
+      <Label PrefWidth="80" text="Dependency:" />
+      <TextField Name="DependencyText" PrefWidth="220" />
+    </RowView>
+  </ColView>
 </ColView>

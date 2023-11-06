@@ -15,6 +15,9 @@ import java.util.List;
  */
 public class BuildFileTool extends ProjectTool {
 
+    // Dependencies ListArea
+    private ListArea<BuildDependency> _dependenciesListArea;
+
     /**
      * Constructor.
      */
@@ -136,9 +139,13 @@ public class BuildFileTool extends ProjectTool {
         ListView<BuildDependency> dependenciesListView = getView("DependenciesListView", ListView.class);
         dependenciesListView.setItemTextFunction(dep -> dep.getType() + " " + dep.getId());
         enableEvents(dependenciesListView, DragEvents);
-        dependenciesListView.addEventFilter(e -> { if (e.getClickCount() == 2) showAddDependencyPanel(); }, MousePress);
-        ListArea<BuildDependency> dependencyListArea = dependenciesListView.getListArea();
-        dependencyListArea.setRowHeight(26);
+
+        // Configure  DependenciesListArea
+        _dependenciesListArea = dependenciesListView.getListArea();
+        _dependenciesListArea.setRowHeight(26);
+        BuildFile buildFile = getBuildFile();
+        BuildDependency[] dependencies = buildFile.getDependencies();
+        _dependenciesListArea.setItems(dependencies);
     }
 
     /**
@@ -153,8 +160,28 @@ public class BuildFileTool extends ProjectTool {
         setViewValue("SourcePathText", buildFile.getSourcePath());
         setViewValue("BuildPathText", buildFile.getBuildPath());
 
-        // Update DependenciesList
-        setViewItems("DependenciesListView", buildFile.getDependencies());
+        // Update RemoveDependencyButton
+        setViewDisabled("RemoveDependencyButton", _dependenciesListArea.getSelItem() == null);
+
+        // Get selected dependency
+        BuildDependency selDependency = _dependenciesListArea.getSelItem();
+
+        // Update MavenDependencyBox
+        setViewVisible("MavenDependencyBox", selDependency instanceof BuildDependency.MavenDependency);
+        if (selDependency instanceof BuildDependency.MavenDependency) {
+            BuildDependency.MavenDependency mavenDependency = (BuildDependency.MavenDependency) selDependency;
+            setViewValue("RepositoryURLText", mavenDependency.getRepositoryURL());
+            setViewValue("GroupText", mavenDependency.getGroup());
+            setViewValue("PackageNameText", mavenDependency.getName());
+            setViewValue("VersionText", mavenDependency.getVersion());
+        }
+
+        // Update GeneralDependencyBox
+        boolean isGeneralDependency = selDependency != null && !(selDependency instanceof BuildDependency.MavenDependency);
+        setViewVisible("GeneralDependencyBox", isGeneralDependency);
+        if (isGeneralDependency) {
+            setViewValue("DependencyText", selDependency.getId());
+        }
     }
 
     /**
@@ -170,16 +197,30 @@ public class BuildFileTool extends ProjectTool {
         if (anEvent.equals("BuildPathText"))
             buildFile.setBuildPath(anEvent.getStringValue());
 
+        // Handle AddDependencyButton, RemoveDependencyButton
+        if (anEvent.equals("AddDependencyButton"))
+            showAddDependencyPanel();
+        if (anEvent.equals("RemoveDependencyButton")) {
+
+            // Ask user to confirm (just return if cancelled)
+            String msg = "Are you sure you want to remove selected dependency?";
+            if (!DialogBox.showConfirmDialog(getUI(), "Remove Dependency", msg))
+                return;
+
+            // Remove selected
+            int selIndex = _dependenciesListArea.getSelIndex();
+            if (selIndex >= 0)
+                buildFile.removeDependency(selIndex);
+            int newSelIndex = Math.max(selIndex, _dependenciesListArea.getItemCount() - 1);
+            _dependenciesListArea.setSelIndex(newSelIndex);
+        }
+
         // Handle DependenciesList
         if (anEvent.equals("DependenciesListView")) {
 
             // Handle DragEvent
-             if (anEvent.isDragEvent())
-                 handleDependenciesListDragEvent(anEvent);
-
-            // Handle double click: Show add dependency panel
-            if (anEvent.getClickCount() > 1)
-                showAddDependencyPanel();
+            if (anEvent.isDragEvent())
+                handleDependenciesListDragEvent(anEvent);
         }
 
         // Handle DeleteAction

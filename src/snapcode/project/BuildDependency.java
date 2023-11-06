@@ -228,6 +228,11 @@ public abstract class BuildDependency extends PropObject {
         }
 
         /**
+         * Returns the repository name.
+         */
+        public String getRepositoryURL()  { return "https://reportmill.com/maven"; }
+
+        /**
          * Returns the group name.
          */
         public String getGroup()  { return _group; }
