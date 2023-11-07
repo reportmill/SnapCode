@@ -14,40 +14,42 @@
     <Label text="Build Directory:" />
     <TextField Name="BuildPathText" PrefWidth="255" />
   </RowView>
-  <RowView>
-    <Label text="Build Dependencies:" />
-    <Button Name="AddDependencyButton" PrefWidth="22" PrefHeight="22" Margin="0,4,0,40" text="+" />
-    <Button Name="RemoveDependencyButton" PrefWidth="22" PrefHeight="22" text="-" />
-  </RowView>
-  <ListView Name="DependenciesListView" PrefWidth="360" PrefHeight="120">
-    <LineBorder Color="#c0c0c0" />
-  </ListView>
-  <ColView Name="MavenDependencyBox" BorderRadius="8" Margin="0,0,0,26" Padding="10,10,10,20">
-    <color value="#f4f4f4" />
-    <font name="Arial" size="12" />
-    <RowView Padding="4" Spacing="4">
-      <Label PrefWidth="100" text="Repository URL:" />
-      <TextField Name="RepositoryURLText" PrefWidth="200" />
+  <ColView Name="BuildDependenciesBox" >
+    <RowView PrefWidth="400" Margin="0,0,4,0" >
+      <Label text="Build Dependencies:" />
+      <Button Name="AddDependencyButton" PrefWidth="22" PrefHeight="22" Margin="0,4,0,40" LeanX="RIGHT" Text="+" />
+      <Button Name="RemoveDependencyButton" PrefWidth="22" PrefHeight="22" Margin="0,8,0,0" Text="-" />
     </RowView>
-    <RowView Padding="4" Spacing="4">
-      <Label PrefWidth="100" text="Group id:" />
-      <TextField Name="GroupText" PrefWidth="200" />
-    </RowView>
-    <RowView Padding="4" Spacing="4">
-      <Label PrefWidth="100" text="Package Name:" />
-      <TextField Name="PackageNameText" PrefWidth="120" />
-    </RowView>
-    <RowView Padding="4" Spacing="4">
-      <Label PrefWidth="100" text="Version:" />
-      <TextField Name="VersionText" PrefWidth="120" />
-    </RowView>
-  </ColView>
-  <ColView Name="GeneralDependencyBox" BorderRadius="8" Margin="0,0,0,26" Padding="10,10,10,20">
-    <color value="#f4f4f4" />
-    <font name="Arial" size="12" />
-    <RowView Padding="4" Spacing="4">
-      <Label PrefWidth="80" text="Dependency:" />
-      <TextField Name="DependencyText" PrefWidth="220" />
-    </RowView>
+    <ListView Name="DependenciesListView" PrefWidth="400" PrefHeight="150" Margin="0,0,8,0">
+      <LineBorder Color="#c0c0c0" />
+    </ListView>
+    <ColView Name="MavenDependencyBox" BorderRadius="8" Margin="0,0,0,10" Padding="10,10,10,20">
+      <color value="#f4f4f4" />
+      <font name="Arial" size="12" />
+      <RowView Padding="4" Spacing="4">
+        <Label PrefWidth="100" text="Repository URL:" />
+        <TextField Name="RepositoryURLText" PrefWidth="240" />
+      </RowView>
+      <RowView Padding="4" Spacing="4">
+        <Label PrefWidth="100" text="Group id:" />
+        <TextField Name="GroupText" PrefWidth="240" />
+      </RowView>
+      <RowView Padding="4" Spacing="4">
+        <Label PrefWidth="100" text="Package Name:" />
+        <TextField Name="PackageNameText" PrefWidth="150" />
+      </RowView>
+      <RowView Padding="4" Spacing="4">
+        <Label PrefWidth="100" text="Version:" />
+        <TextField Name="VersionText" PrefWidth="120" />
+      </RowView>
+    </ColView>
+    <ColView Name="GeneralDependencyBox" BorderRadius="8" Margin="0,0,0,10" Padding="10,10,10,20">
+      <color value="#f4f4f4" />
+      <font name="Arial" size="12" />
+      <RowView Padding="4" Spacing="4">
+        <Label PrefWidth="80" text="Dependency:" />
+        <TextField Name="DependencyText" PrefWidth="220" />
+      </RowView>
+    </ColView>
   </ColView>
 </ColView>

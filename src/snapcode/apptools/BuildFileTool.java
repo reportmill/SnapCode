@@ -1,4 +1,6 @@
 package snapcode.apptools;
+import snap.gfx.Color;
+import snap.gfx.Font;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.app.*;
@@ -137,12 +139,14 @@ public class BuildFileTool extends ProjectTool {
 
         // Configure DependenciesListView
         ListView<BuildDependency> dependenciesListView = getView("DependenciesListView", ListView.class);
-        dependenciesListView.setItemTextFunction(dep -> dep.getType() + " " + dep.getId());
         enableEvents(dependenciesListView, DragEvents);
 
         // Configure  DependenciesListArea
         _dependenciesListArea = dependenciesListView.getListArea();
         _dependenciesListArea.setRowHeight(26);
+        _dependenciesListArea.setCellConfigure(this::configureDependenciesListCell);
+
+        // Set DependenciesListArea items
         BuildFile buildFile = getBuildFile();
         BuildDependency[] dependencies = buildFile.getDependencies();
         _dependenciesListArea.setItems(dependencies);
@@ -293,6 +297,27 @@ public class BuildFileTool extends ProjectTool {
 
         // Add Project for name
         addProjectForName(projectName, null);
+    }
+
+    /**
+     * Configure
+     */
+    private void configureDependenciesListCell(ListCell<BuildDependency> aCell)
+    {
+        BuildDependency buildDependency = aCell.getItem();
+        if (buildDependency == null)
+            return;
+
+        // Set text
+        aCell.setText(buildDependency.getId());
+
+        // Set type as label on left
+        Label label = new Label(buildDependency.getType().toString());
+        label.setFont(Font.Arial10);
+        label.setBorder(Color.DARKGRAY, 1);
+        label.setMargin(0, 8, 0, 4);
+        label.setPadding(1, 1, 1, 1);
+        aCell.setGraphic(label);
     }
 
     /**
