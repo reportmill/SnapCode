@@ -316,7 +316,7 @@ public class BuildFileTool extends ProjectTool {
         label.setFont(Font.Arial10);
         label.setBorder(Color.DARKGRAY, 1);
         label.setMargin(0, 8, 0, 4);
-        label.setPadding(1, 1, 1, 1);
+        label.setPadding(1, 1, 1, 2);
         aCell.setGraphic(label);
     }
 

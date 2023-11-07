@@ -3,13 +3,11 @@ import snapcode.project.WorkspaceBuilder;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
-import snap.util.FileUtils;
 import snap.util.ListUtils;
 import snap.view.*;
 import snap.viewx.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import snap.web.WebURL;
 import snapcode.app.*;
 import snapcode.util.DiffPage;
 import snapcode.webbrowser.*;
@@ -133,18 +131,21 @@ public class FileTreeTool extends WorkspaceTool {
      */
     protected void initUI()
     {
-        // Get the FilesTree
+        // Get and configure FilesTree
         _filesTree = getView("FilesTree", TreeView.class);
         _filesTree.setResolver(new FileTreeFile.AppFileTreeResolver());
         _filesTree.setRowHeight(20);
+        _filesTree.addEventFilter(this::handleTreeViewMouseEvent, MousePress, MouseRelease);
+        _filesTree.addEventFilter(this::handleTreeViewDragEvent, DragEvents);
+        _filesTree.addEventFilter(this::handleDragGestureEvent, DragGesture);
 
         // Get FilesList
         _filesList = getView("FilesList", ListView.class);
         _filesList.setRowHeight(24);
         _filesList.setAltPaint(Color.WHITE);
         _filesList.setCellConfigure(this::configureFilesListCell);
-        enableEvents(_filesList, MousePress, MouseRelease);
-        enableEvents(_filesList, DragEvents);
+        _filesList.addEventFilter(this::handleTreeViewMouseEvent, MousePress, MouseRelease);
+        _filesList.addEventFilter(this::handleTreeViewDragEvent, DragEvents);
 
         // Create RootFiles for TreeView (one for each open project)
         List<FileTreeFile> rootFiles = getRootFiles();
@@ -152,10 +153,6 @@ public class FileTreeTool extends WorkspaceTool {
         _filesTree.expandItem(rootFiles.get(0));
         if (_filesTree.getItemsList().size() > 1)
             _filesTree.expandItem(_filesTree.getItemsList().get(1));
-
-        // Enable events to get MouseUp on TreeView
-        enableEvents(_filesTree, MousePress, MouseRelease, DragGesture);
-        enableEvents(_filesTree, DragEvents);
 
         // Register for copy/paste
         addKeyActionHandler("CopyAction", "Shortcut+C");
@@ -193,57 +190,9 @@ public class FileTreeTool extends WorkspaceTool {
 
         // Handle FilesTree
         if (eventView == _filesTree || eventView == _filesList) {
-
-            // Handle PopupTrigger
-            if (anEvent.isPopupTrigger()) {
-                MenuButton menuButton = getView("MenuButton", MenuButton.class);
-                List<MenuItem> menuItems = menuButton.getItems();
-                ViewArchiver viewArchiver = new ViewArchiver();
-                Menu menu = new Menu();
-                for (MenuItem mi : menuItems) {
-                    MenuItem menuItemCopy = viewArchiver.copy(mi);
-                    menu.addItem(menuItemCopy);
-                }
-                menu.setOwner(this);
-                menu.show(eventView, anEvent.getX(), anEvent.getY());
-            }
-
-            // Handle MouseClick (double-click): RunSelectedFile
-            if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
-                if (getSelFile().isFile())
-                    runFile(getSelFile(), false);
-            }
-
-            // Handle DragEvent
-            else if (anEvent.isDragEvent()) {
-
-                // If from this app, just return
-                Clipboard clipboard = anEvent.getClipboard();
-                if (clipboard.getDragSourceView() != null)
-                    return;
-
-                // Accept drag and add files
-                anEvent.acceptDrag();
-                if (anEvent.isDragDropEvent() && clipboard.hasFiles()) {
-                    List<File> files = clipboard.getJavaFiles();
-                    if (files == null || files.size() == 0)
-                        return;
-                    FilesTool filesTool = _workspaceTools.getFilesTool();
-                    filesTool.addFiles(files);
-                    anEvent.dropComplete();
-                }
-            }
-
-            // Handle DragGesture
-            else if (anEvent.isDragGesture())
-                handleDragGestureEvent(anEvent);
-
-            // Handle Selection event: Select file for tree selection
-            else if (anEvent.isActionEvent()) { //if(anEvent.isSelectionEvent()) {
-                FileTreeFile item = (FileTreeFile) anEvent.getSelItem();
-                WebFile file = item != null ? item.getFile() : null;
-                setSelFile(file);
-            }
+            FileTreeFile item = (FileTreeFile) anEvent.getSelItem();
+            WebFile file = item != null ? item.getFile() : null;
+            setSelFile(file);
         }
 
         // Handle AllFilesButton
@@ -287,11 +236,7 @@ public class FileTreeTool extends WorkspaceTool {
         // Handle OpenInTextEditorMenuItem
         if (anEvent.equals("OpenInTextEditorMenuItem")) {
             WebFile file = getSelFile();
-            WebURL url = file.getURL();
-            WebPage page = new TextPage();
-            page.setURL(url);
-            _pagePane.setPageForURL(page.getURL(), page);
-            _pagePane.setBrowserURL(url);
+            _pagePane.showFileInTextEditor(file);
         }
 
         // Handle OpenInBrowserMenuItem
@@ -305,10 +250,7 @@ public class FileTreeTool extends WorkspaceTool {
         // Handle ShowFileMenuItem
         if (anEvent.equals("ShowFileMenuItem")) {
             WebFile file = getSelFile();
-            if (!file.isDir())
-                file = file.getParent();
-            File file2 = file.getJavaFile();
-            FileUtils.openFile(file2);
+            _pagePane.showFileInFinder(file);
         }
 
         // Handle RunFileMenuItem, DebugFileMenuItem
@@ -370,6 +312,54 @@ public class FileTreeTool extends WorkspaceTool {
         // Handle CopyAction, PasteAction
         if (anEvent.equals("CopyAction")) copy();
         if (anEvent.equals("PasteAction")) paste();
+    }
+
+    /**
+     * Called when TreeView or ListView gets mouse press or release.
+     */
+    private void handleTreeViewMouseEvent(ViewEvent anEvent)
+    {
+        // Handle PopupTrigger
+        if (anEvent.isPopupTrigger()) {
+            MenuButton menuButton = getView("MenuButton", MenuButton.class);
+            List<MenuItem> menuItems = menuButton.getItems();
+            ViewArchiver viewArchiver = new ViewArchiver();
+            Menu menu = new Menu();
+            for (MenuItem mi : menuItems) {
+                MenuItem menuItemCopy = viewArchiver.copy(mi);
+                menu.addItem(menuItemCopy);
+            }
+            menu.setOwner(this);
+            menu.show(anEvent.getView(), anEvent.getX(), anEvent.getY());
+        }
+
+        // Handle MouseClick (double-click): RunSelectedFile
+        if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
+            if (getSelFile().isFile())
+                runFile(getSelFile(), false);
+        }
+    }
+
+    /**
+     * Called when TreeView or ListView gets drag event.
+     */
+    private void handleTreeViewDragEvent(ViewEvent anEvent)
+    {
+        // If from this app, just return
+        Clipboard clipboard = anEvent.getClipboard();
+        if (clipboard.getDragSourceView() != null)
+            return;
+
+        // Accept drag and add files
+        anEvent.acceptDrag();
+        if (anEvent.isDragDropEvent() && clipboard.hasFiles()) {
+            List<File> files = clipboard.getJavaFiles();
+            if (files == null || files.size() == 0)
+                return;
+            FilesTool filesTool = _workspaceTools.getFilesTool();
+            filesTool.addFiles(files);
+            anEvent.dropComplete();
+        }
     }
 
     /**

@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.app;
+import snap.gfx.GFXEnv;
 import snapcode.apptools.BuildFileTool;
 import snapcode.javatext.JavaTextArea;
 import snapcode.project.JeplTextDoc;
@@ -14,10 +15,7 @@ import snap.util.ListUtils;
 import snap.view.*;
 import snapcode.util.ClassInfoPage;
 import snapcode.util.LZString;
-import snapcode.webbrowser.BuildDirPage;
-import snapcode.webbrowser.SnapBuilderPage;
-import snapcode.webbrowser.WebBrowser;
-import snapcode.webbrowser.WebPage;
+import snapcode.webbrowser.*;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebSite;
@@ -364,6 +362,7 @@ public class PagePane extends ViewOwner {
             // Configure Tab.Button
             ToggleButton tabButton = fileTab.getButton();
             tabButton.setTextFill(TAB_TEXT_COLOR);
+            tabButton.addEventFilter(e -> tabButtonMousePress(e, file), MousePress);
         }
 
         // Reset UI
@@ -424,6 +423,62 @@ public class PagePane extends ViewOwner {
             WebFile tabFile = getOpenFiles()[index];
             removeOpenFile(tabFile);
         }
+    }
+
+    /**
+     * Called when tab button gets mouse press.
+     */
+    private void tabButtonMousePress(ViewEvent anEvent, WebFile aFile)
+    {
+        if (anEvent.isPopupTrigger()) {
+            Menu contextMenu = createFileContextMenu(aFile);
+            contextMenu.show(anEvent.getView(), anEvent.getX(), anEvent.getY());
+            anEvent.consume();
+        }
+    }
+
+    /**
+     * Creates popup menu for tab button.
+     */
+    private Menu createFileContextMenu(WebFile aFile)
+    {
+        ViewBuilder<MenuItem> mb = new ViewBuilder<>(MenuItem.class);
+        mb.text("Revert File").save().addEventHandler(e -> revertFile(aFile), Action);
+        mb.text("Show file in Finder/Explorer").save().addEventHandler(e -> showFileInFinder(aFile), Action);
+        mb.text("Show file in Text Editor").save().addEventHandler(e -> showFileInTextEditor(aFile), Action);
+        return mb.buildMenu("ContextMenu", null);
+    }
+
+    /**
+     * Reverts a file.
+     */
+    public void revertFile(WebFile aFile)
+    {
+        removeOpenFile(aFile);
+        aFile.reload();
+        setPageForURL(aFile.getURL(), null);
+        setSelFile(aFile);
+    }
+
+    /**
+     * Shows a file in finder.
+     */
+    public void showFileInFinder(WebFile aFile)
+    {
+        WebFile dirFile = aFile.isDir() ? aFile : aFile.getParent();
+        GFXEnv.getEnv().openFile(dirFile);
+    }
+
+    /**
+     * Shows a file in text editor.
+     */
+    public void showFileInTextEditor(WebFile aFile)
+    {
+        WebURL url = aFile.getURL();
+        WebPage page = new TextPage();
+        page.setURL(url);
+        setPageForURL(page.getURL(), page);
+        setBrowserURL(url);
     }
 
     /**
