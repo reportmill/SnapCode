@@ -75,6 +75,11 @@ public class BuildFile extends PropObject {
     }
 
     /**
+     * Returns the project that owns this build file.
+     */
+    public Project getProject()  { return _proj; }
+
+    /**
      * Returns the source path.
      */
     public String getSourcePath()  { return _srcPath; }
@@ -121,6 +126,7 @@ public class BuildFile extends PropObject {
     public void setDependencies(BuildDependency[] theDependencies)
     {
         if (Arrays.equals(theDependencies, _dependencies)) return;
+        for (BuildDependency buildDependency : theDependencies) buildDependency._buildFile = this;
         firePropChange(Dependencies_Prop, _dependencies, _dependencies = theDependencies);
     }
 

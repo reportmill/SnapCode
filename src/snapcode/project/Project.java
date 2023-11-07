@@ -177,7 +177,7 @@ public class Project extends PropObject {
 
         // Iterate over compile dependencies and add runtime class paths for each
         for (BuildDependency dependency : dependencies) {
-            String[] classPaths = BuildFileUtils.getClassPathsForProjectDependency(this, dependency);
+            String[] classPaths = dependency.getClassPaths();
             if (classPaths != null)
                 compileClassPaths = ArrayUtils.addAllUnique(compileClassPaths, classPaths);
             else System.err.println("Project.getCompileClassPaths: Can't get class path for: " + dependency);

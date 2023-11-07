@@ -39,15 +39,10 @@ public class BuildFileTool extends ProjectTool {
     public BuildFile getBuildFile()  { return _proj.getBuildFile(); }
 
     /**
-     * Adds a dependency for given string.
+     * Adds a dependency to build file.
      */
-    public void addDependencyForIdString(String idString)
+    public void addDependency(BuildDependency dependency)
     {
-        // Get dependency for id string (just return if not found)
-        BuildDependency dependency = BuildDependency.getDependencyForPath(_proj, idString);
-        if (dependency == null)
-            return;
-
         // Add dependency
         BuildFile buildFile = getBuildFile();
         buildFile.addDependency(dependency);
@@ -150,6 +145,10 @@ public class BuildFileTool extends ProjectTool {
         BuildFile buildFile = getBuildFile();
         BuildDependency[] dependencies = buildFile.getDependencies();
         _dependenciesListArea.setItems(dependencies);
+
+        //
+        ComboBox<BuildDependency.Type> dependencyTypeComboBox = getView("DependencyTypeComboBox", ComboBox.class);
+        dependencyTypeComboBox.setItems(BuildDependency.Type.values());
     }
 
     /**
@@ -169,6 +168,9 @@ public class BuildFileTool extends ProjectTool {
 
         // Get selected dependency
         BuildDependency selDependency = _dependenciesListArea.getSelItem();
+        setViewVisible("DependencyTypeBox", selDependency != null);
+        if (selDependency != null)
+            setViewSelItem("DependencyTypeComboBox", selDependency.getType());
 
         // Update MavenDependencyBox
         setViewVisible("MavenDependencyBox", selDependency instanceof BuildDependency.MavenDependency);
@@ -234,6 +236,17 @@ public class BuildFileTool extends ProjectTool {
                 removeDependency(dependency);
             }
         }
+
+        // Handle GroupText, PackageNameText, VersionText, RepositoryURLText
+        BuildDependency selDependency = _dependenciesListArea.getSelItem();
+        if (anEvent.equals("GroupText"))
+            ((BuildDependency.MavenDependency) selDependency).setGroup(anEvent.getStringValue());
+        if (anEvent.equals("PackageNameText"))
+            ((BuildDependency.MavenDependency) selDependency).setName(anEvent.getStringValue());
+        if (anEvent.equals("VersionText"))
+            ((BuildDependency.MavenDependency) selDependency).setVersion(anEvent.getStringValue());
+        if (anEvent.equals("RepositoryURLText"))
+            ((BuildDependency.MavenDependency) selDependency).setRepositoryURL(anEvent.getStringValue());
     }
 
     /**
@@ -272,15 +285,23 @@ public class BuildFileTool extends ProjectTool {
      */
     private void showAddDependencyPanel()
     {
-        // Show dialog box to get dependency name/path/string (just return if cancelled/empty)
-        DialogBox dialogBox = new DialogBox("Add Build Dependency");
-        dialogBox.setQuestionMessage("Enter dependency string:");
-        String dependencyStr = dialogBox.showInputDialog(getUI(), null);
-        if (dependencyStr == null || dependencyStr.length() == 0)
-            return;
+//        // Show dialog box to get dependency name/path/string (just return if cancelled/empty)
+//        DialogBox dialogBox = new DialogBox("Add Build Dependency");
+//        dialogBox.setQuestionMessage("Enter dependency string:");
+//        String dependencyStr = dialogBox.showInputDialog(getUI(), null);
+//        if (dependencyStr == null || dependencyStr.length() == 0)
+//            return;
+//
+//        // Get dependency for id string (just return if not found)
+//        BuildDependency newDependency = BuildDependency.getDependencyForPath(_proj, dependencyStr);
+//        if (newDependency == null)
+//            return;
 
-        // Add Project for name
-        addDependencyForIdString(dependencyStr);
+        // Create new dependency
+        BuildDependency newDependency = new BuildDependency.MavenDependency();
+
+        // Add dependency
+        addDependency(newDependency);
     }
 
     /**

@@ -24,14 +24,19 @@
     <ListView Name="DependenciesListView" PrefWidth="400" PrefHeight="150" Margin="0,0,8,0">
       <LineBorder Color="#c0c0c0" />
     </ListView>
-    <ColView Name="MavenDependencyBox" BorderRadius="8" Margin="0,0,0,10" Padding="10,10,10,20">
+    <ColView Name="DependencyTypeBox" BorderRadius="8" Margin="0,0,0,10" Padding="5,10,5,20">
       <color value="#f4f4f4" />
       <LineBorder Color="#E8E8E8" />
       <font name="Arial" size="12" />
       <RowView Padding="4" Spacing="4">
-        <Label PrefWidth="100" text="Repository URL:" />
-        <TextField Name="RepositoryURLText" PrefWidth="240" />
+        <Label PrefWidth="100" text="Dependency Type:" />
+        <ComboBox Name="DependencyTypeComboBox" PrefWidth="240" PrefHeight="24"/>
       </RowView>
+    </ColView>
+    <ColView Name="MavenDependencyBox" BorderRadius="8" Margin="5,0,0,10" Padding="10,10,10,20">
+      <color value="#f4f4f4" />
+      <LineBorder Color="#E8E8E8" />
+      <font name="Arial" size="12" />
       <RowView Padding="4" Spacing="4">
         <Label PrefWidth="100" text="Group id:" />
         <TextField Name="GroupText" PrefWidth="240" />
@@ -43,6 +48,10 @@
       <RowView Padding="4" Spacing="4">
         <Label PrefWidth="100" text="Version:" />
         <TextField Name="VersionText" PrefWidth="120" />
+      </RowView>
+      <RowView Padding="4" Spacing="4">
+        <Label PrefWidth="100" text="Repository URL:" />
+        <TextField Name="RepositoryURLText" PrefWidth="240" />
       </RowView>
     </ColView>
     <ColView Name="GeneralDependencyBox" BorderRadius="8" Margin="0,0,0,10" Padding="10,10,10,20">
