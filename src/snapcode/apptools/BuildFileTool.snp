@@ -15,6 +15,10 @@
     <Label text="Build Directory:" />
     <TextField Name="BuildPathText" PrefWidth="255" />
   </RowView>
+  <RowView Spacing="5">
+    <Label text="Include SnapKit Runtime" />
+    <CheckBox Name="IncludeSnapKitRuntimeCheckBox" />
+  </RowView>
   <ColView Name="BuildDependenciesBox" >
     <RowView PrefWidth="400" Margin="0,0,4,0" >
       <Label text="Build Dependencies:" />
@@ -30,7 +34,7 @@
       <font name="Arial" size="12" />
       <RowView Padding="4" Spacing="4">
         <Label PrefWidth="100" text="Dependency Type:" />
-        <ComboBox Name="DependencyTypeComboBox" PrefWidth="240" PrefHeight="24"/>
+        <ComboBox Name="DependencyTypeComboBox" PrefWidth="250" PrefHeight="24"/>
       </RowView>
     </ColView>
     <ColView Name="MavenDependencyBox" BorderRadius="8" Margin="5,0,0,10" Padding="10">

@@ -159,9 +159,10 @@ public class BuildFileTool extends ProjectTool {
     {
         BuildFile buildFile = getBuildFile();
 
-        // Update SourcePathText, BuildPathText
+        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox
         setViewValue("SourcePathText", buildFile.getSourcePath());
         setViewValue("BuildPathText", buildFile.getBuildPath());
+        setViewValue("IncludeSnapKitRuntimeCheckBox", buildFile.isIncludeSnapKitRuntime());
 
         // Update RemoveDependencyButton
         setViewDisabled("RemoveDependencyButton", _dependenciesListArea.getSelItem() == null);
@@ -213,11 +214,13 @@ public class BuildFileTool extends ProjectTool {
     {
         BuildFile buildFile = getBuildFile();
 
-        // Update SourcePathText, BuildPathText
+        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox
         if (anEvent.equals("SourcePathText"))
             buildFile.setSourcePath(anEvent.getStringValue());
         if (anEvent.equals("BuildPathText"))
             buildFile.setBuildPath(anEvent.getStringValue());
+        if (anEvent.equals("IncludeSnapKitRuntimeCheckBox"))
+            buildFile.setIncludeSnapKitRuntime(anEvent.getBoolValue());
 
         // Handle AddDependencyButton, RemoveDependencyButton
         if (anEvent.equals("AddDependencyButton"))

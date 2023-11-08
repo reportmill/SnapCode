@@ -313,7 +313,7 @@ public abstract class BuildDependency extends PropObject {
         public static final String RepositoryURL_Prop = "RepositoryURL";
 
         // Constants
-        public static final String MAVEN_CENTRAL_URL = "https://maven.org/maven2";
+        public static final String MAVEN_CENTRAL_URL = "https://repo1.maven.org/maven2";
 
         /**
          * Constructor.
