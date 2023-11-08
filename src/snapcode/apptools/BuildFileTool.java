@@ -41,15 +41,15 @@ public class BuildFileTool extends ProjectTool {
     /**
      * Adds a dependency to build file.
      */
-    public void addDependency(BuildDependency dependency)
+    public void addDependency(BuildDependency dependency, int anIndex)
     {
         // Add dependency
         BuildFile buildFile = getBuildFile();
-        buildFile.addDependency(dependency);
+        buildFile.addDependency(dependency, anIndex);
 
         // Select dependency and reset
-        setViewItems("DependenciesListView", buildFile.getDependencies());
-        setViewSelItem("DependenciesListView", dependency);
+        _dependenciesListArea.setItems(buildFile.getDependencies());
+        _dependenciesListArea.setSelItem(dependency);
         resetLater();
     }
 
@@ -136,7 +136,7 @@ public class BuildFileTool extends ProjectTool {
         ListView<BuildDependency> dependenciesListView = getView("DependenciesListView", ListView.class);
         enableEvents(dependenciesListView, DragEvents);
 
-        // Configure  DependenciesListArea
+        // Configure DependenciesListArea
         _dependenciesListArea = dependenciesListView.getListArea();
         _dependenciesListArea.setRowHeight(26);
         _dependenciesListArea.setCellConfigure(this::configureDependenciesListCell);
@@ -146,7 +146,7 @@ public class BuildFileTool extends ProjectTool {
         BuildDependency[] dependencies = buildFile.getDependencies();
         _dependenciesListArea.setItems(dependencies);
 
-        //
+        // Configure DependencyTypeComboBox
         ComboBox<BuildDependency.Type> dependencyTypeComboBox = getView("DependencyTypeComboBox", ComboBox.class);
         dependencyTypeComboBox.setItems(BuildDependency.Type.values());
     }
@@ -169,24 +169,40 @@ public class BuildFileTool extends ProjectTool {
         // Get selected dependency
         BuildDependency selDependency = _dependenciesListArea.getSelItem();
         setViewVisible("DependencyTypeBox", selDependency != null);
-        if (selDependency != null)
+        if (selDependency != null) {
             setViewSelItem("DependencyTypeComboBox", selDependency.getType());
+            _dependenciesListArea.updateItem(selDependency);
+        }
 
-        // Update MavenDependencyBox
-        setViewVisible("MavenDependencyBox", selDependency instanceof BuildDependency.MavenDependency);
-        if (selDependency instanceof BuildDependency.MavenDependency) {
+        // Update MavenDependencyBox, MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText
+        boolean isMavenDependency = selDependency instanceof BuildDependency.MavenDependency;
+        setViewVisible("MavenDependencyBox", isMavenDependency);
+        if (isMavenDependency) {
             BuildDependency.MavenDependency mavenDependency = (BuildDependency.MavenDependency) selDependency;
-            setViewValue("RepositoryURLText", mavenDependency.getRepositoryURL());
+            setViewValue("MavenIdText", mavenDependency.getId());
             setViewValue("GroupText", mavenDependency.getGroup());
             setViewValue("PackageNameText", mavenDependency.getName());
             setViewValue("VersionText", mavenDependency.getVersion());
+            String repoURL = mavenDependency.getRepositoryURL();
+            setViewValue("RepositoryURLText", repoURL);
+            if (repoURL == null)
+                getView("RepositoryURLText", TextField.class).setPromptText(mavenDependency.getRepositoryDefaultName());
         }
 
-        // Update GeneralDependencyBox
-        boolean isGeneralDependency = selDependency != null && !(selDependency instanceof BuildDependency.MavenDependency);
-        setViewVisible("GeneralDependencyBox", isGeneralDependency);
-        if (isGeneralDependency) {
-            setViewValue("DependencyText", selDependency.getId());
+        // Update JarFileDependencyBox, JarPathText
+        boolean isJarFileDependency = selDependency instanceof BuildDependency.JarFileDependency;
+        setViewVisible("JarFileDependencyBox", isJarFileDependency);
+        if (isJarFileDependency) {
+            BuildDependency.JarFileDependency jarFileDependency = (BuildDependency.JarFileDependency) selDependency;
+            setViewValue("JarPathText", jarFileDependency.getJarPath());
+        }
+
+        // Update ProjectDependencyBox, ProjectNameText
+        boolean isProjectDependency = selDependency instanceof BuildDependency.ProjectDependency;
+        setViewVisible("ProjectDependencyBox", isProjectDependency);
+        if (isProjectDependency) {
+            BuildDependency.ProjectDependency projectDependency = (BuildDependency.ProjectDependency) selDependency;
+            setViewValue("ProjectNameText", projectDependency.getProjectName());
         }
     }
 
@@ -237,8 +253,10 @@ public class BuildFileTool extends ProjectTool {
             }
         }
 
-        // Handle GroupText, PackageNameText, VersionText, RepositoryURLText
+        // Handle MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText
         BuildDependency selDependency = _dependenciesListArea.getSelItem();
+        if (anEvent.equals("MavenIdText"))
+            ((BuildDependency.MavenDependency) selDependency).setId(anEvent.getStringValue());
         if (anEvent.equals("GroupText"))
             ((BuildDependency.MavenDependency) selDependency).setGroup(anEvent.getStringValue());
         if (anEvent.equals("PackageNameText"))
@@ -247,6 +265,16 @@ public class BuildFileTool extends ProjectTool {
             ((BuildDependency.MavenDependency) selDependency).setVersion(anEvent.getStringValue());
         if (anEvent.equals("RepositoryURLText"))
             ((BuildDependency.MavenDependency) selDependency).setRepositoryURL(anEvent.getStringValue());
+
+        // Handle JarPathText, ProjectNameText
+        if (anEvent.equals("JarPathText"))
+            ((BuildDependency.JarFileDependency) selDependency).setJarPath(anEvent.getStringValue());
+        if (anEvent.equals("ProjectNameText"))
+            ((BuildDependency.ProjectDependency) selDependency).setProjectName(anEvent.getStringValue());
+
+        // Handle DependencyTypeComboBox
+        if (anEvent.equals("DependencyTypeComboBox"))
+            changeSelectedDependencyType();
     }
 
     /**
@@ -301,7 +329,29 @@ public class BuildFileTool extends ProjectTool {
         BuildDependency newDependency = new BuildDependency.MavenDependency();
 
         // Add dependency
-        addDependency(newDependency);
+        addDependency(newDependency, _dependenciesListArea.getItemCount());
+
+        // Focus MavenIdText
+        runLater(() -> getView("MavenIdText").requestFocus());
+    }
+
+    /**
+     * Changes selected dependency type.
+     */
+    private void changeSelectedDependencyType()
+    {
+        // Remove selected dependency
+        BuildFile buildFile = getBuildFile();
+        int index = _dependenciesListArea.getSelIndex();
+        buildFile.removeDependency(index);
+
+        // Create new dependency for type and add
+        ComboBox<BuildDependency.Type> dependencyTypeComboBox = getView("DependencyTypeComboBox", ComboBox.class);
+        BuildDependency.Type newType = dependencyTypeComboBox.getSelItem();
+        BuildDependency newDependency = newType == BuildDependency.Type.Maven ? new BuildDependency.MavenDependency() :
+                newType == BuildDependency.Type.JarFile ? new BuildDependency.JarFileDependency() :
+                new BuildDependency.ProjectDependency();
+        addDependency(newDependency, index);
     }
 
     /**

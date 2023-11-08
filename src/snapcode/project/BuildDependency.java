@@ -16,17 +16,11 @@ public abstract class BuildDependency extends PropObject {
     // The build file that declares this dependency
     protected BuildFile _buildFile;
 
-    // An identifier string
-    private String _id;
-
     // The class paths for this dependency
     protected String[] _classPaths;
 
     // Constants for type
     public enum Type { JarFile, Project, Maven };
-
-    // Constants for properties
-    public static final String Id_Prop = "Id";
 
     /**
      * Constructor.
@@ -44,19 +38,7 @@ public abstract class BuildDependency extends PropObject {
     /**
      * Returns the identifier string.
      */
-    public String getId()  { return _id; }
-
-    /**
-     * Sets the identifier string.
-     */
-    public void setId(String aValue)
-    {
-        if (Objects.equals(aValue, _id)) return;
-        firePropChange(Id_Prop, _id, _id = aValue);
-
-        // Clear ClassPaths
-        _classPaths = null;
-    }
+    public abstract String getId();
 
     /**
      * Returns whether this dependency is resolved.
@@ -78,75 +60,18 @@ public abstract class BuildDependency extends PropObject {
     protected abstract String[] getClassPathsImpl();
 
     /**
-     * Override to support props for this class.
-     */
-    @Override
-    protected void initProps(PropSet aPropSet)
-    {
-        aPropSet.addPropNamed(Id_Prop, String.class);
-    }
-
-    /**
-     * Override to support props for this class.
-     */
-    @Override
-    public Object getPropValue(String aPropName)
-    {
-        if (aPropName.equals(Id_Prop))
-            return getId();
-        return super.getPropValue(aPropName);
-    }
-
-    /**
-     * Override to support props for this class.
-     */
-    @Override
-    public void setPropValue(String aPropName, Object aValue)
-    {
-        if (aPropName.equals(Id_Prop))
-            setId(Convert.stringValue(aValue));
-        else super.setPropValue(aPropName, aValue);
-    }
-
-    /**
      * Returns a dependency for given path.
      */
     public static BuildDependency getDependencyForPath(Project aProject, String aPath)
     {
-        // Get dependency for given path - just return null if not found
-        Class<? extends BuildDependency> dependencyClass = getDependencyClassForPath(aProject, aPath);
-        BuildDependency dependency = dependencyClass != null ? ClassUtils.newInstance(dependencyClass) : null;
-        if (dependency == null)
-            return null;
-
-        // Get Id string
-        String idStr = aPath;
-
-        // If JarFile, reset Id string to relative path to jar file
-        if (dependency instanceof JarFileDependency)
-            idStr = ProjectUtils.getRelativePath(aProject, aPath);
-
-        // If Project,  reset Id string to project name
-        else if (dependency instanceof ProjectDependency)
-            idStr = FilePathUtils.getFilename(aPath);
-
-        // Set Id string
-        dependency.setId(idStr);
-
-        // Return
-        return dependency;
-    }
-
-    /**
-     * Returns a dependency for given path.
-     */
-    private static Class<? extends BuildDependency> getDependencyClassForPath(Project aProject, String aPath)
-    {
         // If Maven dependency string, return MavenDependency
         if (aPath.contains(":")) {
             String[] names = aPath.split(":");
-            if (names.length == 3)
-                return MavenDependency.class;
+            if (names.length == 3) {
+                MavenDependency mavenDependency = new MavenDependency();
+                mavenDependency.setId(aPath);
+                return mavenDependency;
+            }
         }
 
         // Get WebFile for path
@@ -158,12 +83,18 @@ public abstract class BuildDependency extends PropObject {
 
         // If Jar, return JarFileDependency
         String snapFileType = snapFile.getType();
-        if (snapFileType.equals("jar"))
-            return JarFileDependency.class;
+        if (snapFileType.equals("jar")) {
+            JarFileDependency jarFileDependency = new JarFileDependency();
+            jarFileDependency.setJarPath(snapFile.getPath());
+            return jarFileDependency;
+        }
 
         // If Project dir, return Project
-        if (snapFile.isDir())
-            return ProjectDependency.class;
+        if (snapFile.isDir()) {
+            ProjectDependency projectDependency = new ProjectDependency();
+            projectDependency.setProjectName(snapFile.getName());
+            return projectDependency;
+        }
 
         // Return not found
         return null;
@@ -173,6 +104,12 @@ public abstract class BuildDependency extends PropObject {
      * This class represents a JarFile dependency.
      */
     public static class JarFileDependency extends BuildDependency {
+
+        // The path to jar
+        private String _jarPath;
+
+        // Constants for properties
+        public static final String JarPath_Prop = "JarPath";
 
         /**
          * Constructor.
@@ -185,12 +122,29 @@ public abstract class BuildDependency extends PropObject {
         /**
          * Returns the type.
          */
+        @Override
         public Type getType()  { return Type.JarFile; }
+
+        /**
+         * Override to return JarPath.
+         */
+        @Override
+        public String getId()  { return getJarPath(); }
 
         /**
          * Returns the path to the JarFile.
          */
-        public String getJarFilePath()  { return getId(); }
+        public String getJarPath()  { return _jarPath; }
+
+        /**
+         * Sets the path to the JarFile.
+         */
+        public void setJarPath(String aValue)
+        {
+            if (Objects.equals(aValue, _jarPath)) return;
+            _classPaths = null;
+            firePropChange(JarPath_Prop, _jarPath, _jarPath = aValue);
+        }
 
         /**
          * Override to get class paths from jar file path.
@@ -200,9 +154,41 @@ public abstract class BuildDependency extends PropObject {
         {
             if (_buildFile == null) return null;
             Project project = _buildFile.getProject();
-            String jarFilePathRelative = getJarFilePath();
+            String jarFilePathRelative = getJarPath();
             String jarFilePathAbsolute = ProjectUtils.getAbsolutePath(project, jarFilePathRelative, true);
             return new String[] { jarFilePathAbsolute };
+        }
+
+        /**
+         * Override to support props for this class.
+         */
+        @Override
+        protected void initProps(PropSet aPropSet)
+        {
+            super.initProps(aPropSet);
+            aPropSet.addPropNamed(JarPath_Prop, String.class);
+        }
+
+        /**
+         * Override to support props for this class.
+         */
+        @Override
+        public Object getPropValue(String aPropName)
+        {
+            if (aPropName.equals(JarPath_Prop))
+                return getJarPath();
+            return super.getPropValue(aPropName);
+        }
+
+        /**
+         * Override to support props for this class.
+         */
+        @Override
+        public void setPropValue(String aPropName, Object aValue)
+        {
+            if (aPropName.equals(JarPath_Prop))
+                setJarPath(Convert.stringValue(aValue));
+            else super.setPropValue(aPropName, aValue);
         }
     }
 
@@ -210,6 +196,12 @@ public abstract class BuildDependency extends PropObject {
      * This class represents a Project dependency.
      */
     public static class ProjectDependency extends BuildDependency {
+
+        // The project name
+        private String _projectName;
+
+        // Constants for properties
+        public static final String ProjectName_Prop = "ProjectName";
 
         /**
          * Constructor.
@@ -222,12 +214,29 @@ public abstract class BuildDependency extends PropObject {
         /**
          * Returns the type.
          */
-        public Type getType()  { return Type.JarFile; }
+        @Override
+        public Type getType()  { return Type.Project; }
+
+        /**
+         * Override to return project name.
+         */
+        @Override
+        public String getId()  { return getProjectName(); }
 
         /**
          * Returns the Project name.
          */
-        public String getProjectName()  { return getId(); }
+        public String getProjectName()  { return _projectName; }
+
+        /**
+         * Sets the Project name.
+         */
+        public void setProjectName(String aValue)
+        {
+            if (!Objects.equals(aValue, _projectName)) return;
+            _classPaths = null;
+            firePropChange(ProjectName_Prop, _projectName, _projectName = aValue);
+        }
 
         /**
          * Override to get class paths for project.
@@ -242,6 +251,38 @@ public abstract class BuildDependency extends PropObject {
             if (otherProject == null)
                 return null;
             return otherProject.getRuntimeClassPaths();
+        }
+
+        /**
+         * Override to support props for this class.
+         */
+        @Override
+        protected void initProps(PropSet aPropSet)
+        {
+            super.initProps(aPropSet);
+            aPropSet.addPropNamed(ProjectName_Prop, String.class);
+        }
+
+        /**
+         * Override to support props for this class.
+         */
+        @Override
+        public Object getPropValue(String aPropName)
+        {
+            if (aPropName.equals(ProjectName_Prop))
+                return getProjectName();
+            return super.getPropValue(aPropName);
+        }
+
+        /**
+         * Override to support props for this class.
+         */
+        @Override
+        public void setPropValue(String aPropName, Object aValue)
+        {
+            if (aPropName.equals(ProjectName_Prop))
+                setProjectName(Convert.stringValue(aValue));
+            else super.setPropValue(aPropName, aValue);
         }
     }
 
@@ -260,13 +301,19 @@ public abstract class BuildDependency extends PropObject {
         private String _version;
 
         // The repository url
-        private String _repositoryURL = MAVEN_CENTRAL_REPOSITORY_URL;
+        private String _repositoryURL;
+
+        // The id string
+        private String _id;
 
         // Constants for properties
+        public static final String Group_Prop = "Group";
+        public static final String Name_Prop = "Name";
+        public static final String Version_Prop = "Version";
         public static final String RepositoryURL_Prop = "RepositoryURL";
 
         // Constants
-        public static final String MAVEN_CENTRAL_REPOSITORY_URL = "https://maven.org/maven2";
+        public static final String MAVEN_CENTRAL_URL = "https://maven.org/maven2";
 
         /**
          * Constructor.
@@ -281,43 +328,37 @@ public abstract class BuildDependency extends PropObject {
          */
         public Type getType()  { return Type.Maven; }
 
+        /**
+         * Returns id string.
+         */
         @Override
+        public String getId()
+        {
+            if (_id != null) return _id;
+
+            // If any part is invalid, just return
+            if (_group == null || _name == null || _version == null)
+                return null;
+            if (_group.length() == 0 || _name.length() == 0 || _version.length() == 0)
+                return null;
+
+            // Create id string and return
+            return _id = _group + ":" + _name + ":" + _version;
+        }
+
+        /**
+         * Sets properties for given id string.
+         */
         public void setId(String aValue)
         {
-            if (Objects.equals(aValue, getId())) return;
-            super.setId(aValue);
+            if (Objects.equals(aValue, _id)) return;
+            _id = aValue;
 
             // Set Group, Name, Version
             String[] names = aValue.split(":");
-            _group = names.length > 0 ? names[0] : null;
-            _name = names.length > 1 ? names[1] : null;
-            _version = names.length > 2 ? names[2] : null;
-        }
-
-        /**
-         * Sets the id.
-         */
-        private void updateId()
-        {
-            String group = _group != null ? _group : "";
-            String name = _name != null ? _name : "";
-            String version = _version != null ? _version : "";
-            String id = group + ":" + name + ":" + version;
-            setId(id);
-        }
-
-        /**
-         * Returns the repository name.
-         */
-        public String getRepositoryURL()  { return _repositoryURL; }
-
-        /**
-         * Sets the repository name.
-         */
-        public void setRepositoryURL(String aValue)
-        {
-            if (Objects.equals(aValue, _repositoryURL)) return;
-            firePropChange(RepositoryURL_Prop, _repositoryURL, _repositoryURL = aValue);
+            setGroup(names.length > 0 ? names[0] : null);
+            setName(names.length > 1 ? names[1] : null);
+            setVersion(names.length > 2 ? names[2] : null);
         }
 
         /**
@@ -331,8 +372,8 @@ public abstract class BuildDependency extends PropObject {
         public void setGroup(String aValue)
         {
             if (Objects.equals(aValue, _group)) return;
-            _group = aValue;
-            updateId();
+            _id = null; _classPaths = null;
+            firePropChange(Group_Prop, _group, _group = aValue);
         }
 
         /**
@@ -346,8 +387,8 @@ public abstract class BuildDependency extends PropObject {
         public void setName(String aValue)
         {
             if (Objects.equals(aValue, _name)) return;
-            _name = aValue;
-            updateId();
+            _id = null; _classPaths = null;
+            firePropChange(Name_Prop, _name, _name = aValue);
         }
 
         /**
@@ -361,8 +402,45 @@ public abstract class BuildDependency extends PropObject {
         public void setVersion(String aValue)
         {
             if (Objects.equals(aValue, _version)) return;
-            _version = aValue;
-            updateId();
+            _id = null; _classPaths = null;
+            firePropChange(Version_Prop, _version, _version = aValue);
+        }
+
+        /**
+         * Returns the repository name.
+         */
+        public String getRepositoryURL()  { return _repositoryURL; }
+
+        /**
+         * Sets the repository name.
+         */
+        public void setRepositoryURL(String aValue)
+        {
+            if (Objects.equals(aValue, _repositoryURL)) return;
+            _classPaths = null;
+            firePropChange(RepositoryURL_Prop, _repositoryURL, _repositoryURL = aValue);
+        }
+
+        /**
+         * Returns the repository URL or default.
+         */
+        public String getRepositoryUrlOrDefault()
+        {
+            if (_repositoryURL != null)
+                return _repositoryURL;
+            if (_name != null && _name.toLowerCase().contains("reportmill"))
+                return "https://reportmill.com/maven";
+            return MAVEN_CENTRAL_URL;
+        }
+
+        /**
+         *
+         */
+        public String getRepositoryDefaultName()
+        {
+            if (_name != null && _name.toLowerCase().contains("reportmill"))
+                return "ReportMill";
+            return "Maven Central";
         }
 
         /**
@@ -371,19 +449,8 @@ public abstract class BuildDependency extends PropObject {
         @Override
         protected String[] getClassPathsImpl()
         {
-            // If local jar file doesn't exist, just return null
-            WebURL localJarURL = getLocalJarURL();
-            if (localJarURL == null)
-                return null;
-            WebFile localJarFile = localJarURL.getFile();
-
-            // Copy maven package to local cache dir
-            if (localJarFile == null) {
-                copyPackageFromRepositoryToLocal();
-                localJarFile = localJarURL.getFile();
-            }
-
-            // If still null, just return
+            // Get local jar file (just return if it doesn't exist)
+            WebFile localJarFile = getLocalJarFile();
             if (localJarFile == null)
                 return null;
 
@@ -411,11 +478,33 @@ public abstract class BuildDependency extends PropObject {
         }
 
         /**
+         * Returns the local Jar file, fetching it if missing.
+         */
+        protected WebFile getLocalJarFile()
+        {
+            // Get local Jar URL (just return if that can't be created)
+            WebURL localJarURL = getLocalJarURL();
+            if (localJarURL == null)
+                return null;
+
+            // Get local Jar file (just return if local file already exists)
+            WebFile localJarFile = localJarURL.getFile();
+            if (localJarFile != null)
+                return localJarFile;
+
+            // Copy maven package to local cache dir
+            copyPackageFromRepositoryToLocal();
+
+            // Return
+            return localJarURL.getFile();
+        }
+
+        /**
          * Returns the remote Jar URL string.
          */
         public String getRemoteJarUrlString()
         {
-            String repositoryURL = getRepositoryURL();
+            String repositoryURL = getRepositoryUrlOrDefault();
             String relativeJarPath = getRelativeJarPath();
             if (repositoryURL == null || relativeJarPath == null)
                 return null;
@@ -463,19 +552,10 @@ public abstract class BuildDependency extends PropObject {
          */
         private void copyPackageFromRepositoryToLocal()
         {
-            // Get local jar file url
-            WebURL localJarURL = getLocalJarURL();
-            if (localJarURL == null)
-                return;
-
-            // If file exists, just return
-            WebFile localJarFile = localJarURL.getFile();
-            if (localJarFile != null)
-                return;
-
-            // Get remote jar file url
+            // Get remote and local jar file urls - if either is null, just return
             WebURL remoteJarURL = getRemoteJarURL();
-            if (remoteJarURL == null)
+            WebURL localJarURL = getLocalJarURL();
+            if (remoteJarURL == null || localJarURL == null)
                 return;
 
             // Fetch file
@@ -492,6 +572,9 @@ public abstract class BuildDependency extends PropObject {
         protected void initProps(PropSet aPropSet)
         {
             super.initProps(aPropSet);
+            aPropSet.addPropNamed(Group_Prop, String.class);
+            aPropSet.addPropNamed(Name_Prop, String.class);
+            aPropSet.addPropNamed(Version_Prop, String.class);
             aPropSet.addPropNamed(RepositoryURL_Prop, String.class);
         }
 
@@ -501,9 +584,17 @@ public abstract class BuildDependency extends PropObject {
         @Override
         public Object getPropValue(String aPropName)
         {
-            if (aPropName.equals(RepositoryURL_Prop))
-                return getRepositoryURL();
-            return super.getPropValue(aPropName);
+            switch (aPropName) {
+
+                // Group, Name, Version, RepositoryURL
+                case Group_Prop: return getGroup();
+                case Name_Prop: return getName();
+                case Version_Prop: return getVersion();
+                case RepositoryURL_Prop: return getRepositoryURL();
+
+                // Do normal version
+                default: return super.getPropValue(aPropName);
+            }
         }
 
         /**
@@ -512,9 +603,17 @@ public abstract class BuildDependency extends PropObject {
         @Override
         public void setPropValue(String aPropName, Object aValue)
         {
-            if (aPropName.equals(RepositoryURL_Prop))
-                setRepositoryURL(Convert.stringValue(aValue));
-            else super.setPropValue(aPropName, aValue);
+            switch (aPropName) {
+
+                // Group, Name, Version, RepositoryURL
+                case Group_Prop: setGroup(Convert.stringValue(aValue)); break;
+                case Name_Prop: setName(Convert.stringValue(aValue)); break;
+                case Version_Prop: setVersion(Convert.stringValue(aValue)); break;
+                case RepositoryURL_Prop: setRepositoryURL(Convert.stringValue(aValue)); break;
+
+                // Do normal version
+                default: super.setPropValue(aPropName, aValue);
+            }
         }
     }
 

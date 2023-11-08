@@ -1,7 +1,5 @@
 package snapcode.project;
-import snap.props.PropArchiverJS;
-import snap.props.PropObject;
-import snap.props.PropSet;
+import snap.props.*;
 import snap.util.ArrayUtils;
 import snap.util.Convert;
 import snap.util.FilePathUtils;
@@ -33,6 +31,9 @@ public class BuildFile extends PropObject {
 
     // The actual build file
     private WebFile _buildFile;
+
+    // A listener to propagate dependency changes to build file listeners
+    private PropChangeListener _dependencyDidChangeLsnr = this::dependencyDidChange;
 
     // Constants
     public static final String BUILD_FILE_PATH = "/build.snapcode";
@@ -126,8 +127,21 @@ public class BuildFile extends PropObject {
     public void setDependencies(BuildDependency[] theDependencies)
     {
         if (Arrays.equals(theDependencies, _dependencies)) return;
-        for (BuildDependency buildDependency : theDependencies) buildDependency._buildFile = this;
-        firePropChange(Dependencies_Prop, _dependencies, _dependencies = theDependencies);
+
+        // Reset old
+        BuildDependency[] oldDependencies = _dependencies;
+        for (BuildDependency dependency : oldDependencies )
+            dependency.removePropChangeListener(_dependencyDidChangeLsnr);
+
+        // Set new
+        _dependencies = theDependencies;
+        for (BuildDependency dependency : theDependencies) {
+            dependency._buildFile = this;
+            dependency.addPropChangeListener(_dependencyDidChangeLsnr);
+        }
+
+        // Fire prop change
+        firePropChange(Dependencies_Prop, oldDependencies, _dependencies);
     }
 
     /**
@@ -188,7 +202,7 @@ public class BuildFile extends PropObject {
     {
         String libPath = ProjectUtils.getRelativePath(_proj, aPath);
         BuildDependency.JarFileDependency jarFileDependency = new BuildDependency.JarFileDependency();
-        jarFileDependency.setId(libPath);
+        jarFileDependency.setJarPath(libPath);
         addDependency(jarFileDependency);
     }
 
@@ -210,7 +224,7 @@ public class BuildFile extends PropObject {
     {
         String projectName = FilePathUtils.getFilename(aPath);
         BuildDependency.ProjectDependency projectDependency = new BuildDependency.ProjectDependency();
-        projectDependency.setId(projectName);
+        projectDependency.setProjectName(projectName);
         addDependency(projectDependency);
     }
 
@@ -266,6 +280,14 @@ public class BuildFile extends PropObject {
         // Set bytes and save
         configFile.setBytes(jsonBytes);
         configFile.save();
+    }
+
+    /**
+     * Called when a dependency changes to forward to build file listeners.
+     */
+    private void dependencyDidChange(PropChange aPC)
+    {
+        firePropChange(aPC);
     }
 
     /**
