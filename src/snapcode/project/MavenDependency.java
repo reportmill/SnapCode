@@ -2,11 +2,12 @@ package snapcode.project;
 import snap.props.PropSet;
 import snap.util.Convert;
 import snap.util.FilePathUtils;
+import snap.util.SnapUtils;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebSite;
 import snap.web.WebURL;
-
+import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -42,8 +43,11 @@ public class MavenDependency extends BuildDependency {
     public static final String RepositoryURL_Prop = "RepositoryURL";
     public static final String Loading_Prop = "Loading";
 
-    // Constants
+    // Constant for Maven central URL
     public static final String MAVEN_CENTRAL_URL = "https://repo1.maven.org/maven2";
+
+    // Constant for proxy server for CORS access found by googling for 'free cors proxy server'
+    private static final String CORS_PROXY_SERVER = "https://corsproxy.io/?";
 
     /**
      * Constructor.
@@ -203,6 +207,8 @@ public class MavenDependency extends BuildDependency {
             return _repositoryURL;
         if (_name != null && _name.toLowerCase().contains("reportmill"))
             return "https://reportmill.com/maven";
+        if (SnapUtils.isWebVM)
+            return CORS_PROXY_SERVER + MAVEN_CENTRAL_URL;
         return MAVEN_CENTRAL_URL;
     }
 
@@ -419,10 +425,10 @@ public class MavenDependency extends BuildDependency {
     /**
      * Copies a given source URL to given destination url.
      */
-    private static void copyFileForURLs(WebURL sourceURL, WebURL destURL)
+    private static void copyFileForURLs(WebURL sourceURL, WebURL destURL) throws IOException
     {
         // Get bytes from source url
-        byte[] sourceBytes = sourceURL.getBytes();
+        byte[] sourceBytes = sourceURL.getBytesOrThrow();
         if (sourceBytes == null || sourceBytes.length == 0)
             throw new RuntimeException("Couldn't download remote jar file: " + sourceURL.getString());
 
