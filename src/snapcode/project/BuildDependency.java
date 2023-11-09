@@ -318,6 +318,9 @@ public abstract class BuildDependency extends PropObject {
         // The id string
         private String _id;
 
+        // Whether dependency is loading
+        private boolean _loading;
+
         // The error string
         private String _error;
 
@@ -326,6 +329,7 @@ public abstract class BuildDependency extends PropObject {
         public static final String Name_Prop = "Name";
         public static final String Version_Prop = "Version";
         public static final String RepositoryURL_Prop = "RepositoryURL";
+        public static final String Loading_Prop = "Loading";
 
         // Constants
         public static final String MAVEN_CENTRAL_URL = "https://repo1.maven.org/maven2";
@@ -444,6 +448,8 @@ public abstract class BuildDependency extends PropObject {
             WebFile localJarFile = getLocalJarFile();
             if (localJarFile != null)
                 return "Loaded";
+            if (isLoading())
+                return "Loading";
             return "Error";
         }
 
@@ -531,6 +537,10 @@ public abstract class BuildDependency extends PropObject {
          */
         protected WebFile getLocalJarFile()
         {
+            // If loading, return null
+            if (isLoading())
+                return null;
+
             // Get local Jar URL (just return if that can't be created)
             WebURL localJarURL = getLocalJarURL();
             if (localJarURL == null)
@@ -542,7 +552,7 @@ public abstract class BuildDependency extends PropObject {
                 return localJarFile;
 
             // Copy maven package to local cache dir
-            copyPackageFromRepositoryToLocal();
+            loadPackageFiles();
 
             // Return
             return localJarURL.getFile();
@@ -594,6 +604,33 @@ public abstract class BuildDependency extends PropObject {
             String versionPath = FilePathUtils.getChild(packagePath, version);
             String jarName = packageName + '-' + version + ".jar";
             return FilePathUtils.getChild(versionPath, jarName);
+        }
+
+        /**
+         * Returns whether maven package is loading.
+         */
+        public boolean isLoading()  { return  _loading; }
+
+        /**
+         * Loads file.
+         */
+        public void loadPackageFiles()
+        {
+            if (_loading)
+                return;
+
+            _loading = true;
+            new Thread(() -> loadPackageFilesImpl()).start();
+        }
+
+        /**
+         * Loads package files.
+         */
+        private void loadPackageFilesImpl()
+        {
+            copyPackageFromRepositoryToLocal();
+            _loading = false;
+            firePropChange(Loading_Prop, true, false);
         }
 
         /**

@@ -1,6 +1,8 @@
 package snapcode.apptools;
 import snap.gfx.Color;
 import snap.gfx.Font;
+import snap.gfx.GFXEnv;
+import snap.props.PropChangeListener;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.app.*;
@@ -149,6 +151,9 @@ public class BuildFileTool extends ProjectTool {
         // Configure DependencyTypeComboBox
         ComboBox<BuildDependency.Type> dependencyTypeComboBox = getView("DependencyTypeComboBox", ComboBox.class);
         dependencyTypeComboBox.setItems(BuildDependency.Type.values());
+
+        // Configure ClassPathsText
+        getView("ClassPathsText").addEventFilter(e -> classPathsTextDidMousePress(e), MousePress);
     }
 
     /**
@@ -195,8 +200,8 @@ public class BuildFileTool extends ProjectTool {
             String status = mavenDependency.getStatus();
             String error = mavenDependency.getError();
             setViewValue("StatusText", status);
-            getView("StatusText", TextField.class).setTextFill(error != null ? Color.RED : Color.BLACK);
-            setViewVisible("StatusProgressBar", status.equals("Loading"));
+            getView("StatusText", Label.class).setTextFill(error != null ? Color.RED : Color.BLACK);
+            setViewVisible("StatusProgressBar", mavenDependency.isLoading());
             setViewVisible("ReloadButton", status.equals("Loaded"));
             setViewValue("ClassPathsLabel", error == null ? "Class path:" : "Error:");
             String classPathsText = error != null ? error : mavenDependency.getClassPathsJoined("\n");
@@ -269,18 +274,28 @@ public class BuildFileTool extends ProjectTool {
             }
         }
 
-        // Handle MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText
+        // Handle MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText, ReloadButton
         BuildDependency selDependency = _dependenciesListArea.getSelItem();
-        if (anEvent.equals("MavenIdText"))
-            ((BuildDependency.MavenDependency) selDependency).setId(anEvent.getStringValue());
-        if (anEvent.equals("GroupText"))
-            ((BuildDependency.MavenDependency) selDependency).setGroup(anEvent.getStringValue());
-        if (anEvent.equals("PackageNameText"))
-            ((BuildDependency.MavenDependency) selDependency).setName(anEvent.getStringValue());
-        if (anEvent.equals("VersionText"))
-            ((BuildDependency.MavenDependency) selDependency).setVersion(anEvent.getStringValue());
-        if (anEvent.equals("RepositoryURLText"))
-            ((BuildDependency.MavenDependency) selDependency).setRepositoryURL(anEvent.getStringValue());
+        if (selDependency instanceof BuildDependency.MavenDependency) {
+            BuildDependency.MavenDependency mavenDependency = (BuildDependency.MavenDependency) selDependency;
+            if (anEvent.equals("MavenIdText"))
+                mavenDependency.setId(anEvent.getStringValue());
+            if (anEvent.equals("GroupText"))
+                mavenDependency.setGroup(anEvent.getStringValue());
+            if (anEvent.equals("PackageNameText"))
+                mavenDependency.setName(anEvent.getStringValue());
+            if (anEvent.equals("VersionText"))
+                mavenDependency.setVersion(anEvent.getStringValue());
+            if (anEvent.equals("RepositoryURLText"))
+                mavenDependency.setRepositoryURL(anEvent.getStringValue());
+            if (anEvent.equals("ReloadButton"))
+                mavenDependency.loadPackageFiles();
+
+            // If any of the above caused loading, make sure we resetUI after loading - I don't love this
+            mavenDependency.getClassPaths();
+            if (mavenDependency.isLoading())
+                mavenDependency.addPropChangeListener(PropChangeListener.getOneShot(pc -> resetLater()), BuildDependency.MavenDependency.Loading_Prop);
+        }
 
         // Handle JarPathText, ProjectNameText
         if (anEvent.equals("JarPathText"))
@@ -405,6 +420,24 @@ public class BuildFileTool extends ProjectTool {
         label.setMargin(0, 8, 0, 4);
         label.setPadding(1, 1, 1, 2);
         aCell.setGraphic(label);
+    }
+
+    /**
+     * Called when ClassPathsText gets mouse press.
+     */
+    private void classPathsTextDidMousePress(ViewEvent anEvent)
+    {
+        if (anEvent.getClickCount() == 2) {
+            String classPath = getViewText("ClassPathsText");
+            if (classPath.startsWith("/")) {
+                WebURL url = WebURL.getURL(classPath);
+                WebFile file = url != null ? url.getFile() : null;
+                if (file != null) {
+                    WebFile dirFile = file.isDir() ? file : file.getParent();
+                    GFXEnv.getEnv().openFile(dirFile);
+                }
+            }
+        }
     }
 
     /**

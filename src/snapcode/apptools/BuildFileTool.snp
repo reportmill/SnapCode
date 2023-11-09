@@ -67,7 +67,7 @@
           <color value="#fafafa" />
           <LineBorder Color="#E8E8E8" />
         </Label>
-        <ProgressBar Name="StatusProgressBar" PrefWidth="40" PrefHeight="16" />
+        <ProgressBar Name="StatusProgressBar" PrefWidth="40" PrefHeight="16" Indeterminate="true" />
         <Button Name="ReloadButton" Margin="0,8,0,0" Text="Reload" />
       </RowView>
       <ColView Padding="2,4,4,4" Spacing="2">
