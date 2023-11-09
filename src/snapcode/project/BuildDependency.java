@@ -3,10 +3,13 @@ import snap.props.PropObject;
 import snap.props.PropSet;
 import snap.util.*;
 import snap.web.WebFile;
+import snap.web.WebResponse;
 import snap.web.WebSite;
 import snap.web.WebURL;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class represents a build dependency (e.g. JarFile, Project, Maven Package).
@@ -58,6 +61,15 @@ public abstract class BuildDependency extends PropObject {
      * Returns the class paths for this dependency.
      */
     protected abstract String[] getClassPathsImpl();
+
+    /**
+     * Returns the class paths joined by given delimeter.
+     */
+    public String getClassPathsJoined(String aDelimeter)
+    {
+        String[] classPaths = getClassPaths();
+        return classPaths != null ? Stream.of(classPaths).collect(Collectors.joining(aDelimeter)) : null;
+    }
 
     /**
      * Returns a dependency for given path.
@@ -306,6 +318,9 @@ public abstract class BuildDependency extends PropObject {
         // The id string
         private String _id;
 
+        // The error string
+        private String _error;
+
         // Constants for properties
         public static final String Group_Prop = "Group";
         public static final String Name_Prop = "Name";
@@ -372,7 +387,7 @@ public abstract class BuildDependency extends PropObject {
         public void setGroup(String aValue)
         {
             if (Objects.equals(aValue, _group)) return;
-            _id = null; _classPaths = null;
+            _classPaths = null; _id = null; _error = null;
             firePropChange(Group_Prop, _group, _group = aValue);
         }
 
@@ -387,7 +402,7 @@ public abstract class BuildDependency extends PropObject {
         public void setName(String aValue)
         {
             if (Objects.equals(aValue, _name)) return;
-            _id = null; _classPaths = null;
+            _classPaths = null; _id = null; _error = null;
             firePropChange(Name_Prop, _name, _name = aValue);
         }
 
@@ -402,7 +417,7 @@ public abstract class BuildDependency extends PropObject {
         public void setVersion(String aValue)
         {
             if (Objects.equals(aValue, _version)) return;
-            _id = null; _classPaths = null;
+            _classPaths = null; _id = null; _error = null;
             firePropChange(Version_Prop, _version, _version = aValue);
         }
 
@@ -417,8 +432,42 @@ public abstract class BuildDependency extends PropObject {
         public void setRepositoryURL(String aValue)
         {
             if (Objects.equals(aValue, _repositoryURL)) return;
-            _classPaths = null;
+            _classPaths = null; _error = null;
             firePropChange(RepositoryURL_Prop, _repositoryURL, _repositoryURL = aValue);
+        }
+
+        /**
+         * Returns the status.
+         */
+        public String getStatus()
+        {
+            WebFile localJarFile = getLocalJarFile();
+            if (localJarFile != null)
+                return "Loaded";
+            return "Error";
+        }
+
+        /**
+         * Returns the error.
+         */
+        public String getError()
+        {
+            if (_error != null) return _error;
+            return _error = getErrorImpl();
+        }
+
+        /**
+         * Returns the error.
+         */
+        private String getErrorImpl()
+        {
+            if (_group == null || _group.length() == 0)
+                return "Invalid group";
+            if (_name == null || _name.length() == 0)
+                return "Invalid package name";
+            if (_version == null || _version.length() == 0)
+                return "Invalid version";
+            return null;
         }
 
         /**
@@ -434,7 +483,7 @@ public abstract class BuildDependency extends PropObject {
         }
 
         /**
-         *
+         * Returns the name of the default repository.
          */
         public String getRepositoryDefaultName()
         {
@@ -561,7 +610,7 @@ public abstract class BuildDependency extends PropObject {
             // Fetch file
             try { copyFileForURLs(remoteJarURL, localJarURL); }
             catch (Exception e) {
-                e.printStackTrace();
+                _error = e.getMessage();
             }
         }
 
@@ -634,6 +683,8 @@ public abstract class BuildDependency extends PropObject {
 
         // Set source bytes in destination file and save
         destFile.setBytes(sourceBytes);
-        destFile.save();
+        WebResponse resp = destFile.save();
+        if (resp.getException() != null)
+            throw new RuntimeException(resp.getException());
     }
 }

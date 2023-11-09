@@ -61,6 +61,22 @@
         <Label PrefWidth="100" text="Repository URL:" />
         <TextField Name="RepositoryURLText" PrefWidth="250" />
       </RowView>
+      <RowView Padding="4" Spacing="4">
+        <Label PrefWidth="100" text="Status:" />
+        <Label Name="StatusText" PrefWidth="80" Padding="4" BorderRadius="3">
+          <color value="#fafafa" />
+          <LineBorder Color="#E8E8E8" />
+        </Label>
+        <ProgressBar Name="StatusProgressBar" PrefWidth="40" PrefHeight="16" />
+        <Button Name="ReloadButton" Margin="0,8,0,0" Text="Reload" />
+      </RowView>
+      <ColView Padding="2,4,4,4" Spacing="2">
+        <Label Name="ClassPathsLabel" PrefWidth="100" text="Class path:" />
+        <TextArea Name="ClassPathsText" PrefWidth="354" Padding="4" BorderRadius="3" Editable="false" WrapLines="true">
+          <color value="#fafafa" />
+          <LineBorder Color="#E0E0E0" />
+        </TextArea>
+      </ColView>
     </ColView>
     <ColView Name="JarFileDependencyBox" BorderRadius="8" Margin="0,0,0,10" Padding="10">
       <color value="#f4f4f4" />

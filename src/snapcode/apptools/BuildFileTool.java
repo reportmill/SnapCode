@@ -175,10 +175,12 @@ public class BuildFileTool extends ProjectTool {
             _dependenciesListArea.updateItem(selDependency);
         }
 
-        // Update MavenDependencyBox, MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText
+        // Update MavenDependencyBox
         boolean isMavenDependency = selDependency instanceof BuildDependency.MavenDependency;
         setViewVisible("MavenDependencyBox", isMavenDependency);
         if (isMavenDependency) {
+
+            // Update MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText
             BuildDependency.MavenDependency mavenDependency = (BuildDependency.MavenDependency) selDependency;
             setViewValue("MavenIdText", mavenDependency.getId());
             setViewValue("GroupText", mavenDependency.getGroup());
@@ -188,6 +190,17 @@ public class BuildFileTool extends ProjectTool {
             setViewValue("RepositoryURLText", repoURL);
             if (repoURL == null)
                 getView("RepositoryURLText", TextField.class).setPromptText(mavenDependency.getRepositoryDefaultName());
+
+            // Update StatusText, StatusProgressBar, ReloadButton, ClassPathsText
+            String status = mavenDependency.getStatus();
+            String error = mavenDependency.getError();
+            setViewValue("StatusText", status);
+            getView("StatusText", TextField.class).setTextFill(error != null ? Color.RED : Color.BLACK);
+            setViewVisible("StatusProgressBar", status.equals("Loading"));
+            setViewVisible("ReloadButton", status.equals("Loaded"));
+            setViewValue("ClassPathsLabel", error == null ? "Class path:" : "Error:");
+            String classPathsText = error != null ? error : mavenDependency.getClassPathsJoined("\n");
+            setViewValue("ClassPathsText", classPathsText);
         }
 
         // Update JarFileDependencyBox, JarPathText
