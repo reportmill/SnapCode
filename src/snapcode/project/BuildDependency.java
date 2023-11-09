@@ -535,10 +535,10 @@ public abstract class BuildDependency extends PropObject {
         /**
          * Returns the local Jar file, fetching it if missing.
          */
-        protected WebFile getLocalJarFile()
+        public WebFile getLocalJarFile()
         {
             // If loading, return null
-            if (isLoading())
+            if (isLoading() || getError() != null)
                 return null;
 
             // Get local Jar URL (just return if that can't be created)

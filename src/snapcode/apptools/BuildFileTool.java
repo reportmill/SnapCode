@@ -151,9 +151,6 @@ public class BuildFileTool extends ProjectTool {
         // Configure DependencyTypeComboBox
         ComboBox<BuildDependency.Type> dependencyTypeComboBox = getView("DependencyTypeComboBox", ComboBox.class);
         dependencyTypeComboBox.setItems(BuildDependency.Type.values());
-
-        // Configure ClassPathsText
-        getView("ClassPathsText").addEventFilter(e -> classPathsTextDidMousePress(e), MousePress);
     }
 
     /**
@@ -196,12 +193,13 @@ public class BuildFileTool extends ProjectTool {
             if (repoURL == null)
                 getView("RepositoryURLText", TextField.class).setPromptText(mavenDependency.getRepositoryDefaultName());
 
-            // Update StatusText, StatusProgressBar, ReloadButton, ClassPathsText
+            // Update StatusText, StatusProgressBar, ShowButton, ReloadButton, ClassPathsText
             String status = mavenDependency.getStatus();
             String error = mavenDependency.getError();
             setViewValue("StatusText", status);
             getView("StatusText", Label.class).setTextFill(error != null ? Color.RED : Color.BLACK);
             setViewVisible("StatusProgressBar", mavenDependency.isLoading());
+            setViewVisible("ShowButton", status.equals("Loaded"));
             setViewVisible("ReloadButton", status.equals("Loaded"));
             setViewValue("ClassPathsLabel", error == null ? "Class path:" : "Error:");
             String classPathsText = error != null ? error : mavenDependency.getClassPathsJoined("\n");
@@ -274,7 +272,7 @@ public class BuildFileTool extends ProjectTool {
             }
         }
 
-        // Handle MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText, ReloadButton
+        // Handle MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText, ShowButton, ReloadButton
         BuildDependency selDependency = _dependenciesListArea.getSelItem();
         if (selDependency instanceof BuildDependency.MavenDependency) {
             BuildDependency.MavenDependency mavenDependency = (BuildDependency.MavenDependency) selDependency;
@@ -288,6 +286,8 @@ public class BuildFileTool extends ProjectTool {
                 mavenDependency.setVersion(anEvent.getStringValue());
             if (anEvent.equals("RepositoryURLText"))
                 mavenDependency.setRepositoryURL(anEvent.getStringValue());
+            if (anEvent.equals("ShowButton"))
+                showMavenDependencyInFinder(mavenDependency);
             if (anEvent.equals("ReloadButton"))
                 mavenDependency.loadPackageFiles();
 
@@ -423,20 +423,14 @@ public class BuildFileTool extends ProjectTool {
     }
 
     /**
-     * Called when ClassPathsText gets mouse press.
+     * Shows the given maven dependency in finder/explorer.
      */
-    private void classPathsTextDidMousePress(ViewEvent anEvent)
+    private void showMavenDependencyInFinder(BuildDependency.MavenDependency mavenDependency)
     {
-        if (anEvent.getClickCount() == 2) {
-            String classPath = getViewText("ClassPathsText");
-            if (classPath.startsWith("/")) {
-                WebURL url = WebURL.getURL(classPath);
-                WebFile file = url != null ? url.getFile() : null;
-                if (file != null) {
-                    WebFile dirFile = file.isDir() ? file : file.getParent();
-                    GFXEnv.getEnv().openFile(dirFile);
-                }
-            }
+        WebFile file = mavenDependency.getLocalJarFile();
+        if (file != null) {
+            WebFile dirFile = file.isDir() ? file : file.getParent();
+            GFXEnv.getEnv().openFile(dirFile);
         }
     }
 
