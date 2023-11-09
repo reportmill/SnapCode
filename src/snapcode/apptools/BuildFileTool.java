@@ -178,12 +178,12 @@ public class BuildFileTool extends ProjectTool {
         }
 
         // Update MavenDependencyBox
-        boolean isMavenDependency = selDependency instanceof BuildDependency.MavenDependency;
+        boolean isMavenDependency = selDependency instanceof MavenDependency;
         setViewVisible("MavenDependencyBox", isMavenDependency);
         if (isMavenDependency) {
 
             // Update MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText
-            BuildDependency.MavenDependency mavenDependency = (BuildDependency.MavenDependency) selDependency;
+            MavenDependency mavenDependency = (MavenDependency) selDependency;
             setViewValue("MavenIdText", mavenDependency.getId());
             setViewValue("GroupText", mavenDependency.getGroup());
             setViewValue("PackageNameText", mavenDependency.getName());
@@ -274,8 +274,8 @@ public class BuildFileTool extends ProjectTool {
 
         // Handle MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText, ShowButton, ReloadButton
         BuildDependency selDependency = _dependenciesListArea.getSelItem();
-        if (selDependency instanceof BuildDependency.MavenDependency) {
-            BuildDependency.MavenDependency mavenDependency = (BuildDependency.MavenDependency) selDependency;
+        if (selDependency instanceof MavenDependency) {
+            MavenDependency mavenDependency = (MavenDependency) selDependency;
             if (anEvent.equals("MavenIdText"))
                 mavenDependency.setId(anEvent.getStringValue());
             if (anEvent.equals("GroupText"))
@@ -294,7 +294,7 @@ public class BuildFileTool extends ProjectTool {
             // If any of the above caused loading, make sure we resetUI after loading - I don't love this
             mavenDependency.getClassPaths();
             if (mavenDependency.isLoading())
-                mavenDependency.addPropChangeListener(PropChangeListener.getOneShot(pc -> resetLater()), BuildDependency.MavenDependency.Loading_Prop);
+                mavenDependency.addPropChangeListener(PropChangeListener.getOneShot(pc -> resetLater()), MavenDependency.Loading_Prop);
         }
 
         // Handle JarPathText, ProjectNameText
@@ -325,7 +325,7 @@ public class BuildFileTool extends ProjectTool {
             // Iterate over dependency files and add dependency for each
             for (File dependencyFile : dependencyFiles) {
                 String dependencyFilePath = dependencyFile.getAbsolutePath();
-                BuildDependency dependency = BuildDependency.getDependencyForPath(_proj, dependencyFilePath);
+                BuildDependency dependency = BuildDependency.getJarFileDependencyForPath(_proj, dependencyFilePath);
                 if (dependency != null) {
                     BuildFile buildFile = getBuildFile();
                     buildFile.addDependency(dependency);
@@ -344,20 +344,8 @@ public class BuildFileTool extends ProjectTool {
      */
     private void showAddDependencyPanel()
     {
-//        // Show dialog box to get dependency name/path/string (just return if cancelled/empty)
-//        DialogBox dialogBox = new DialogBox("Add Build Dependency");
-//        dialogBox.setQuestionMessage("Enter dependency string:");
-//        String dependencyStr = dialogBox.showInputDialog(getUI(), null);
-//        if (dependencyStr == null || dependencyStr.length() == 0)
-//            return;
-//
-//        // Get dependency for id string (just return if not found)
-//        BuildDependency newDependency = BuildDependency.getDependencyForPath(_proj, dependencyStr);
-//        if (newDependency == null)
-//            return;
-
         // Create new dependency
-        BuildDependency newDependency = new BuildDependency.MavenDependency();
+        BuildDependency newDependency = new MavenDependency();
 
         // Add dependency
         addDependency(newDependency, _dependenciesListArea.getItemCount());
@@ -379,26 +367,10 @@ public class BuildFileTool extends ProjectTool {
         // Create new dependency for type and add
         ComboBox<BuildDependency.Type> dependencyTypeComboBox = getView("DependencyTypeComboBox", ComboBox.class);
         BuildDependency.Type newType = dependencyTypeComboBox.getSelItem();
-        BuildDependency newDependency = newType == BuildDependency.Type.Maven ? new BuildDependency.MavenDependency() :
+        BuildDependency newDependency = newType == BuildDependency.Type.Maven ? new MavenDependency() :
                 newType == BuildDependency.Type.JarFile ? new BuildDependency.JarFileDependency() :
                 new BuildDependency.ProjectDependency();
         addDependency(newDependency, index);
-    }
-
-    /**
-     * Shows an add project dialog box to add project dependency to this project.
-     */
-    private void showAddProjectPanel()
-    {
-        // Show dialog box to get project name (just return if cancelled/empty)
-        DialogBox dialogBox = new DialogBox("Add Project Dependency");
-        dialogBox.setQuestionMessage("Enter Project Name:");
-        String projectName = dialogBox.showInputDialog(getUI(), null);
-        if (projectName == null || projectName.length() == 0)
-            return;
-
-        // Add Project for name
-        addProjectForName(projectName, null);
     }
 
     /**
@@ -425,7 +397,7 @@ public class BuildFileTool extends ProjectTool {
     /**
      * Shows the given maven dependency in finder/explorer.
      */
-    private void showMavenDependencyInFinder(BuildDependency.MavenDependency mavenDependency)
+    private void showMavenDependencyInFinder(MavenDependency mavenDependency)
     {
         WebFile file = mavenDependency.getLocalJarFile();
         if (file != null) {

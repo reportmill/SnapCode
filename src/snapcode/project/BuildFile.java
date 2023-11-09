@@ -196,17 +196,6 @@ public class BuildFile extends PropObject {
     }
 
     /**
-     * Adds a build dependency for given Jar file class or class dir.
-     */
-    public void addJarFileDependencyForPath(String aPath)
-    {
-        String libPath = ProjectUtils.getRelativePath(_proj, aPath);
-        BuildDependency.JarFileDependency jarFileDependency = new BuildDependency.JarFileDependency();
-        jarFileDependency.setJarPath(libPath);
-        addDependency(jarFileDependency);
-    }
-
-    /**
      * Returns the dependent project names.
      */
     public String[] getProjectDependenciesNames()
@@ -226,17 +215,6 @@ public class BuildFile extends PropObject {
         BuildDependency.ProjectDependency projectDependency = new BuildDependency.ProjectDependency();
         projectDependency.setProjectName(projectName);
         addDependency(projectDependency);
-    }
-
-    /**
-     * Adds a maven build dependency.
-     */
-    public void addMavenDependencyForGroupAndPackageAndVersion(String groupName, String packageName, String version)
-    {
-        BuildDependency.MavenDependency mavenDependency = new BuildDependency.MavenDependency();
-        String idStr = groupName + ':' + packageName + ':' + version;
-        mavenDependency.setId(idStr);
-        addDependency(mavenDependency);
     }
 
     /**
@@ -372,7 +350,7 @@ public class BuildFile extends PropObject {
         PropArchiverJS archiver = new PropArchiverJS();
         archiver.addClassMapClass(BuildDependency.JarFileDependency.class);
         archiver.addClassMapClass(BuildDependency.ProjectDependency.class);
-        archiver.addClassMapClass(BuildDependency.MavenDependency.class);
+        archiver.addClassMapClass(MavenDependency.class);
         return archiver;
     }
 }
