@@ -193,7 +193,9 @@ public class JavaClassUpdater {
      */
     private JavaField[] getDeclaredFields(Class<?> realClass)
     {
-        Field[] fields = realClass.getDeclaredFields();
+        Field[] fields;
+        try { fields = realClass.getDeclaredFields(); }
+        catch (Throwable e) { return new JavaField[0]; }
         return ArrayUtils.map(fields, field -> getJavaFieldForField(field), JavaField.class);
     }
 
@@ -213,7 +215,9 @@ public class JavaClassUpdater {
      */
     private JavaMethod[] getDeclaredMethods(Class<?> realClass)
     {
-        Method[] methods = realClass.getDeclaredMethods();
+        Method[] methods;
+        try { methods = realClass.getDeclaredMethods(); }
+        catch (Throwable e) { return new JavaMethod[0]; }
         return Stream.of(methods).filter(m -> !m.isSynthetic()).map(m -> getJavaMethodForMethod(m)).toArray(size -> new JavaMethod[size]);
     }
 
@@ -233,7 +237,9 @@ public class JavaClassUpdater {
      */
     private JavaConstructor[] getDeclaredConstructors(Class<?> realClass)
     {
-        Constructor<?>[] constrs = realClass.getDeclaredConstructors();
+        Constructor<?>[] constrs;
+        try { constrs = realClass.getDeclaredConstructors(); }
+        catch (Throwable e) { return new JavaConstructor[0]; }
         return Stream.of(constrs).filter(c -> !c.isSynthetic()).map(c -> getJavaConstructorForConstructor(c)).toArray(size -> new JavaConstructor[size]);
     }
 
