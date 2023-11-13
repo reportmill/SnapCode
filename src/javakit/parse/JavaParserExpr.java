@@ -685,7 +685,7 @@ public class JavaParserExpr extends Parser {
 
                 // Handle ArrayDimsAndInits ArrayInit
                 case "ArrayInit":
-                    List<JExpr> arrayInits = aNode.getCustomNode(List.class);
+                    List<?> arrayInits = aNode.getCustomNode(List.class);
                     allocExpr.setArrayInits(arrayInits);
                     break;
 
@@ -717,20 +717,33 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * ArrayInit Handler
+     * ArrayInit Handler: "{" (VarInit (LookAhead(2) "," VarInit)*)? ","? "}"
+     * VarInit: ArrayInit | Expression
      */
-    public static class ArrayInitHandler extends ParseHandler<ArrayList<JExpr>> {
+    public static class ArrayInitHandler extends ParseHandler<ArrayList<Object>> {
 
         /**
          * ParseHandler method.
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            ArrayList<JExpr> arrayInitExpr = getPart();
+            // Usually an array of JExpr - but array of list if multidimensional array
+            ArrayList<Object> arrayInitExpr = getPart();
 
-            // Handle Expression
-            if (anId == "Expression")
-                arrayInitExpr.add(aNode.getCustomNode(JExpr.class));
+            switch (anId) {
+
+                // Handle Expression
+                case "Expression":
+                    JExpr expr = aNode.getCustomNode(JExpr.class);
+                    arrayInitExpr.add(expr);
+                    break;
+
+                // Handle ArrayInit
+                case "ArrayInit":
+                    List<JExpr> exprList = aNode.getCustomNode(List.class);
+                    arrayInitExpr.add(exprList);
+                    break;
+            }
         }
 
         @Override

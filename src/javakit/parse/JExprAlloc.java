@@ -21,8 +21,8 @@ public class JExprAlloc extends JExpr {
     // The dimensions expression, if array
     protected JExpr  _arrayDims;
 
-    // The array init expressions, if array
-    protected List<JExpr>  _arrayInits = Collections.EMPTY_LIST;
+    // The array init expressions, if array (or array of arrays if multidimensional)
+    protected List<?>  _arrayInits = Collections.EMPTY_LIST;
 
     // The allocation JClassDecl
     protected JClassDecl  _classDecl;
@@ -103,20 +103,26 @@ public class JExprAlloc extends JExpr {
     /**
      * Returns the array init expressions, if array.
      */
-    public List<JExpr> getArrayInits()  { return _arrayInits; }
+    public List<?> getArrayInits()  { return _arrayInits; }
 
     /**
      * Sets the array init expressions, if array.
      */
-    public void setArrayInits(List<JExpr> theArrayInits)
+    public void setArrayInits(List<?> theArrayInits)
     {
-        if (_arrayInits != null)
-            _arrayInits.forEach(expr -> removeChild(expr));
+        //if (_arrayInits != null)
+        //    _arrayInits.forEach(expr -> removeChild(expr));
 
         _arrayInits = theArrayInits;
 
-        if (_arrayInits != null)
-            _arrayInits.forEach(expr -> addChild(expr));
+        if (_arrayInits != null) {
+            for (Object item : _arrayInits) {
+                if (item instanceof JExpr)
+                    addChild((JExpr) item);
+                else if (item instanceof List)
+                    ((List) item).forEach(itm -> addChild((JExpr) itm));
+            }
+        }
     }
 
     /**
