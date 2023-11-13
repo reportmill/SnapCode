@@ -685,8 +685,8 @@ public class JavaParserExpr extends Parser {
 
                 // Handle ArrayDimsAndInits ArrayInit
                 case "ArrayInit":
-                    List<?> arrayInits = aNode.getCustomNode(List.class);
-                    allocExpr.setArrayInits(arrayInits);
+                    JExprArrayInit arrayInits = aNode.getCustomNode(JExprArrayInit.class);
+                    allocExpr.setArrayInit(arrayInits);
                     break;
 
                 // Handle TypeArgs, ArrayDimsAndInits
@@ -720,7 +720,7 @@ public class JavaParserExpr extends Parser {
      * ArrayInit Handler: "{" (VarInit (LookAhead(2) "," VarInit)*)? ","? "}"
      * VarInit: ArrayInit | Expression
      */
-    public static class ArrayInitHandler extends ParseHandler<ArrayList<Object>> {
+    public static class ArrayInitHandler extends ParseHandler<JExprArrayInit> {
 
         /**
          * ParseHandler method.
@@ -728,26 +728,21 @@ public class JavaParserExpr extends Parser {
         protected void parsedOne(ParseNode aNode, String anId)
         {
             // Usually an array of JExpr - but array of list if multidimensional array
-            ArrayList<Object> arrayInitExpr = getPart();
+            JExprArrayInit arrayInitExpr = getPart();
 
             switch (anId) {
 
-                // Handle Expression
+                // Handle Expression, ArrayInit (nested)
+                case "ArrayInit":
                 case "Expression":
                     JExpr expr = aNode.getCustomNode(JExpr.class);
-                    arrayInitExpr.add(expr);
-                    break;
-
-                // Handle ArrayInit
-                case "ArrayInit":
-                    List<JExpr> exprList = aNode.getCustomNode(List.class);
-                    arrayInitExpr.add(exprList);
+                    arrayInitExpr.addExpr(expr);
                     break;
             }
         }
 
         @Override
-        protected Class getPartClass()  { return ArrayList.class; }
+        protected Class getPartClass()  { return JExprArrayInit.class; }
     }
 
     /**

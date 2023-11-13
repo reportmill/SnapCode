@@ -81,6 +81,10 @@ public class JSExprEval {
         if (anExpr instanceof JExprArrayIndex)
             return evalArrayIndexExpr(anOR, (JExprArrayIndex) anExpr);
 
+        // Handle array initializer
+        if (anExpr instanceof JExprArrayInit)
+            return evalArrayInitExpr(anOR, (JExprArrayInit) anExpr);
+
         // Handle alloc expression
         if (anExpr instanceof JExprAlloc)
             return evalAllocExpr(anOR, (JExprAlloc) anExpr);
@@ -259,6 +263,36 @@ public class JSExprEval {
     }
 
     /**
+     * Evaluate JExprArrayInit.
+     */
+    private Object evalArrayInitExpr(Object anOR, JExprArrayInit arrayInitExpr) throws Exception
+    {
+        JavaClass javaClass = arrayInitExpr.getArrayClass();
+        Class<?> realClass = javaClass.getRealClass();
+
+        // Create array
+        int arrayLen = arrayInitExpr.getExprCount();
+        Class<?> compClass = realClass.getComponentType();
+        Object array = Array.newInstance(compClass, arrayLen);
+        Object thisObj = thisObject();
+
+        // Iterate over arg expressions and get evaluated values
+        for (int i = 0; i < arrayLen; i++) {
+
+            // Get array value at index
+            JExpr initExpr = arrayInitExpr.getExpr(i);
+            Object initValue = evalExpr(thisObj, initExpr);
+
+            // Set value
+            initValue = castOrConvertValueToPrimitiveClass(initValue, compClass);
+            Array.set(array, i, initValue);
+        }
+
+        // Return
+        return array;
+    }
+
+    /**
      * Evaluate JExprAlloc.
      */
     protected Object evalAllocExpr(Object anOR, JExprAlloc anExpr) throws Exception
@@ -318,44 +352,8 @@ public class JSExprEval {
         }
 
         // Handle inits
-        List<?> initsExpr = anExpr.getArrayInits();
-        return evalAllocArrayExprInits(anOR, anExpr, javaClass, initsExpr);
-    }
-
-    /**
-     * Evaluate JExprAlloc for array inits.
-     */
-    protected Object evalAllocArrayExprInits(Object anOR, JExprAlloc anExpr, JavaClass javaClass, List<?> initsExprs) throws Exception
-    {
-        Class<?> realClass = javaClass.getRealClass();
-
-        // Create array
-        int arrayLen = initsExprs.size();
-        Class<?> compClass = realClass.getComponentType();
-        Object array = Array.newInstance(compClass, arrayLen);
-        Object thisObj = thisObject();
-
-        // Iterate over arg expressions and get evaluated values
-        for (int i = 0; i < arrayLen; i++) {
-
-            // Get init expression (it will be another list, if multidimensional array)
-            Object initExpr = initsExprs.get(i);
-
-            // Get array value at index
-            Object initValue;
-           if (initExpr instanceof JExpr)
-               initValue = evalExpr(thisObj, (JExpr) initExpr);
-           else if (initExpr instanceof List)
-               initValue = evalAllocArrayExprInits(anOR, anExpr, javaClass.getComponentType(), (List<?>) initExpr);
-           else throw new RuntimeException("JSExprEval.evalAllocArrayExprInits: Invalid init type - can't happen");
-
-            // Set value
-            initValue = castOrConvertValueToPrimitiveClass(initValue, compClass);
-            Array.set(array, i, initValue);
-        }
-
-        // Return
-        return array;
+        JExprArrayInit arrayInitExpr = anExpr.getArrayInit();
+        return evalArrayInitExpr(anOR, arrayInitExpr);
     }
 
     /**

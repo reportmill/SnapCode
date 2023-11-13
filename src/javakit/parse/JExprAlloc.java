@@ -21,8 +21,8 @@ public class JExprAlloc extends JExpr {
     // The dimensions expression, if array
     protected JExpr  _arrayDims;
 
-    // The array init expressions, if array (or array of arrays if multidimensional)
-    protected List<?>  _arrayInits = Collections.EMPTY_LIST;
+    // The array initializer, if array (or array of arrays if multidimensional)
+    protected JExprArrayInit _arrayInit;
 
     // The allocation JClassDecl
     protected JClassDecl  _classDecl;
@@ -88,12 +88,12 @@ public class JExprAlloc extends JExpr {
     }
 
     /**
-     * Returns the array dimensions.
+     * Returns the array dimensions (array only).
      */
     public JExpr getArrayDims()  { return _arrayDims; }
 
     /**
-     * Sets the array dimension.
+     * Sets the array dimension (array only).
      */
     public void setArrayDims(JExpr theDims)
     {
@@ -101,28 +101,16 @@ public class JExprAlloc extends JExpr {
     }
 
     /**
-     * Returns the array init expressions, if array.
+     * Returns the array initializer expression (array only).
      */
-    public List<?> getArrayInits()  { return _arrayInits; }
+    public JExprArrayInit getArrayInit()  { return _arrayInit; }
 
     /**
-     * Sets the array init expressions, if array.
+     * Sets the array initializer expression (array only).
      */
-    public void setArrayInits(List<?> theArrayInits)
+    public void setArrayInit(JExprArrayInit theArrayInits)
     {
-        //if (_arrayInits != null)
-        //    _arrayInits.forEach(expr -> removeChild(expr));
-
-        _arrayInits = theArrayInits;
-
-        if (_arrayInits != null) {
-            for (Object item : _arrayInits) {
-                if (item instanceof JExpr)
-                    addChild((JExpr) item);
-                else if (item instanceof List)
-                    ((List) item).forEach(itm -> addChild((JExpr) itm));
-            }
-        }
+        replaceChild(_arrayInit, _arrayInit = theArrayInits);
     }
 
     /**
@@ -150,7 +138,7 @@ public class JExprAlloc extends JExpr {
             return null;
 
         // If array alloc, just return Type decl
-        if (_arrayDims != null || _arrayInits.size() > 0)
+        if (_arrayDims != null || _arrayInit != null)
             return javaType;
 
         // Get class decl and constructor arg types
