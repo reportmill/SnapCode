@@ -259,8 +259,15 @@ public class JType extends JNode {
 
         // If initializer expression set, return its EvalType
         JExpr initExpr = varDecl.getInitExpr();
-        if (initExpr != null)
+        if (initExpr != null) {
+
+            // If expression is just array init, return null - no type info there (will stack overflow)!
+            if (initExpr instanceof JExprArrayInit)
+                return null;
+
+            // Return
             return initExpr.getEvalType();
+        }
 
         // If parentNode.parent is ForEachStmt, get iterable type
         JNode grandparentNode = parentNode.getParent();
