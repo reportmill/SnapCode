@@ -148,26 +148,26 @@ public class WelcomePanel extends ViewOwner {
      */
     protected WorkspacePane openWorkspaceForFile(WebFile aFile)
     {
+        // Get whether file is just a source file
+        boolean isSourceFile = ArrayUtils.contains(FILE_TYPES, aFile.getType());
+
+        // Create Workspace
+        Workspace workspace = new Workspace();
+        if (!isSourceFile)
+            workspace.setUseRealCompiler(true);
+
         // Create WorkspacePane, set source, show
-        WorkspacePane workspacePane;
+        WorkspacePane workspacePane = new WorkspacePane(workspace);
 
         // Handle source file
-        boolean isSourceFile = ArrayUtils.contains(FILE_TYPES, aFile.getType());
         if (isSourceFile) {
-            workspacePane = new WorkspacePane();
             workspacePane.openWorkspaceForSource(aFile);
         }
 
-        // Handle Project file
+        // Handle Project file: Get project site and add to workspace
         else {
-
-            // If desktop, swap in real WorkspacePaneX
-            workspacePane = new WorkspacePaneX();
-
-            // Get project site and add to workspace
             WebFile projectDir = aFile.isDir() ? aFile : aFile.getParent();
             WebSite projectSite = projectDir.getURL().getAsSite();
-            Workspace workspace = workspacePane.getWorkspace();
             workspace.addProjectForSite(projectSite);
         }
 

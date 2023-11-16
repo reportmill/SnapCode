@@ -115,7 +115,7 @@ class DeclCompare implements Comparator<JavaDecl> {
 
         // Get package
         JavaPackage pkg = javaClass.getPackage();
-        String packageName = pkg.getName();
+        String packageName = pkg != null ? pkg.getName() : "";
 
         // If root or common package, add bonus
         if (packageName.length() == 0 || ArrayUtils.contains(DeclMatcher.COMMON_PACKAGES, packageName))

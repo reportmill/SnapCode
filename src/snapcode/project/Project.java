@@ -4,12 +4,13 @@
 package snapcode.project;
 import javakit.resolver.Resolver;
 import snap.props.PropObject;
-import snap.util.ArrayUtils;
-import snap.util.ListUtils;
-import snap.util.TaskMonitor;
+import snap.util.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
+
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,6 +73,12 @@ public class Project extends PropObject {
 
         // Get child projects
         _projects = getProjectsFromBuildFile();
+
+        // Create/set ProjectBuilder.JavaFileBuilderImpl
+        if (aWorkspace.isUseRealCompiler()) {
+            JavaFileBuilder javaFileBuilder = new JavaFileBuilderImpl(this);
+            _projBuilder.setJavaFileBuilder(javaFileBuilder);
+        }
     }
 
     /**
@@ -447,8 +454,15 @@ public class Project extends PropObject {
      */
     public ClassLoader createCompilerClassLoader()
     {
-        // Should be new URLClassLoader(getClassPathURLs())
-        return ClassLoader.getSystemClassLoader();
+        // Get CompilerClassPaths and ClassPathUrls
+        String[] classPaths = getCompileClassPaths();
+        URL[] classPathUrls = FilePathUtils.getUrlsForPaths(classPaths);
+
+        // Get System ClassLoader
+        ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader().getParent();
+
+        // Create/Return URLClassLoader for classPath
+        return new URLClassLoader(classPathUrls, systemClassLoader);
     }
 
     /**

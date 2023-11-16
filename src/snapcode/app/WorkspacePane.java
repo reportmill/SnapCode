@@ -42,6 +42,9 @@ public class WorkspacePane extends ViewOwner {
     // A PropChangeListener to watch for site file changes
     private PropChangeListener _siteFileLsnr = pc -> siteFileChanged(pc);
 
+    // The default HomePage
+    private HomePage  _homePage;
+
     /**
      * Constructor.
      */
@@ -175,7 +178,12 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Creates the WorkspaceTools.
      */
-    protected WorkspaceTools createWorkspaceTools()  { return new WorkspaceTools(this); }
+    protected WorkspaceTools createWorkspaceTools()
+    {
+        if (_workspace.isUseRealCompiler())
+            return new WorkspaceToolsX(this);
+        return new WorkspaceTools(this);
+    }
 
     /**
      * Returns the toolbar.
@@ -222,7 +230,23 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Returns the home page URL.
      */
-    public WebURL getHomePageURL()  { return null; }
+    public WebURL getHomePageURL()
+    {
+        if (_workspace.isUseRealCompiler())
+            return getHomePage().getURL();
+        return null;
+    }
+
+    /**
+     * Returns the HomePage.
+     */
+    private HomePage getHomePage()
+    {
+        if (_homePage != null) return _homePage;
+        _homePage = new HomePage();
+        _pagePane.setPageForURL(_homePage.getURL(), _homePage);
+        return _homePage;
+    }
 
     /**
      * Returns the selected file.

@@ -205,8 +205,11 @@ public class MavenDependency extends BuildDependency {
     {
         if (_repositoryURL != null)
             return _repositoryURL;
-        if (_name != null && _name.toLowerCase().contains("reportmill"))
-            return "https://reportmill.com/maven";
+        if (_name != null) {
+            String name = _name.toLowerCase();
+            if (name.contains("reportmill") || name.contains("snapkit") || name.contains("snapcharts"))
+                return "https://reportmill.com/maven";
+        }
         if (SnapUtils.isWebVM)
             return CORS_PROXY_SERVER + MAVEN_CENTRAL_URL;
         return MAVEN_CENTRAL_URL;
@@ -217,7 +220,7 @@ public class MavenDependency extends BuildDependency {
      */
     public String getRepositoryDefaultName()
     {
-        if (_name != null && _name.toLowerCase().contains("reportmill"))
+        if (getRepositoryUrlOrDefault().contains("reportmill"))
             return "ReportMill";
         return "Maven Central";
     }
