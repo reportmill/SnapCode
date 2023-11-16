@@ -39,15 +39,13 @@ public class ProjectFiles {
 
         // Get SourcePath
         BuildFile buildFile = _proj.getBuildFile();
-        String path = buildFile.getSourcePath();
-        if (path != null && !path.startsWith("/"))
-            path = '/' + path;
+        String sourcePath = buildFile.getSourcePath();
+        if (!sourcePath.startsWith("/"))
+            sourcePath = '/' + sourcePath;
 
         // Get dir file from Project.Site
         WebSite projSite = _proj.getSite();
-        WebFile srcDir = path != null ? projSite.getFileForPath(path) : projSite.getRootDir();
-        if (srcDir == null)
-            srcDir = projSite.createFileForPath(path, true);
+        WebFile srcDir = projSite.createFileForPath(sourcePath, true);
 
         // Set/return
         return _srcDir = srcDir;
@@ -63,15 +61,13 @@ public class ProjectFiles {
 
         // Get from BuildPath and site
         BuildFile buildFile = _proj.getBuildFile();
-        String path = buildFile.getBuildPath();
-        if (path != null && !path.startsWith("/"))
-            path = '/' + path;
+        String buildPath = buildFile.getBuildPath();
+        if (!buildPath.startsWith("/"))
+            buildPath = '/' + buildPath;
 
         // Get dir file from Project.Site
         WebSite projSite = _proj.getSite();
-        WebFile bldDir = path != null ? projSite.getFileForPath(path) : projSite.getRootDir();
-        if (bldDir == null)
-            bldDir = projSite.createFileForPath(path, true);
+        WebFile bldDir = projSite.createFileForPath(buildPath, true);
 
         // Set/return
         return _buildDir = bldDir;

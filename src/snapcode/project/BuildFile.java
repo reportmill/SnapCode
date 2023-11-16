@@ -91,10 +91,11 @@ public class BuildFile extends PropObject {
     public void setSourcePath(String aPath)
     {
         // If already set, just return
-        if (Objects.equals(aPath, _srcPath)) return;
+        String path = aPath != null ? aPath : "";
+        if (Objects.equals(path, _srcPath)) return;
 
         // Set, firePropChange
-        String newPath = aPath != null ? ProjectUtils.getRelativePath(_proj, aPath) : null;
+        String newPath = ProjectUtils.getRelativePath(_proj, aPath);
         firePropChange(SourcePath_Prop, _srcPath, _srcPath = newPath);
     }
 
@@ -109,10 +110,11 @@ public class BuildFile extends PropObject {
     public void setBuildPath(String aPath)
     {
         // If already set, just return
-        if (Objects.equals(aPath, _buildPath)) return;
+        String path = aPath != null ? aPath : "";
+        if (Objects.equals(path, _buildPath)) return;
 
         // Set, firePropChange
-        String newPath = aPath != null ? ProjectUtils.getRelativePath(_proj, aPath) : null;
+        String newPath = ProjectUtils.getRelativePath(_proj, path);
         firePropChange(BuildPath_Prop, _buildPath, _buildPath = newPath);
     }
 
