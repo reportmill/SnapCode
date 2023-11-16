@@ -225,6 +225,7 @@ public class JavaParserStmt extends JavaParserExpr {
 
     /**
      * VarDecl Handler: Identifier ("[" "]")* ("=" VarInit)?
+     * VarInit: ArrayInit | Expression
      */
     public static class VarDeclHandler extends JNodeParseHandler<JVarDecl> {
 
@@ -239,32 +240,23 @@ public class JavaParserStmt extends JavaParserExpr {
             switch (anId) {
 
                 // Handle Identifier
-                case "Identifier": {
+                case "Identifier":
                     JExprId idExpr = aNode.getCustomNode(JExprId.class);
                     varDecl.setId(idExpr);
                     break;
-                }
 
                 // Handle ("[" "]")*
-                case "[": {
+                case "[":
                     int arrayCount = varDecl.getArrayCount() + 1;
                     varDecl.setArrayCount(arrayCount);
                     break;
-                }
 
-                // Handle VarInit ArrayInit
-                case "ArrayInit": {
-                    List<JExpr> arrayInitExprs = aNode.getCustomNode(List.class);
-                    varDecl.setArrayInitExprs(arrayInitExprs);
-                    break;
-                }
-
-                // Handle VarInit Expression
-                case "Expression": {
+                // Handle ArrayInit, VarInit Expression
+                case "ArrayInit":
+                case "Expression":
                     JExpr initExpr = aNode.getCustomNode(JExpr.class);
                     varDecl.setInitExpr(initExpr);
                     break;
-                }
             }
         }
 

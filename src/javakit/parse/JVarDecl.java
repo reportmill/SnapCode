@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import java.util.*;
 import javakit.resolver.*;
 
 /**
@@ -22,9 +21,6 @@ public class JVarDecl extends JNode implements WithId {
 
     // The initializer expression
     private JExpr _initExpr;
-
-    // The array initializer expressions (if array)
-    protected List<JExpr> _arrayInitExprs = Collections.EMPTY_LIST;
 
     /**
      * Constructor.
@@ -49,7 +45,11 @@ public class JVarDecl extends JNode implements WithId {
         // If array count is set, replace with type to account for it
         if (_arrayCount > 0) {
             JType type2 = JType.createTypeForTypeAndToken(_type.getEvalType(), _startToken);
-            type2._arrayCount = _type._arrayCount + _arrayCount;
+            if (_arrayCount > 0) {
+                type2._arrayCount = _type._arrayCount + _arrayCount;
+                for (int i = 0; i < _arrayCount && type2._decl != null; i++)
+                    type2._decl = type2.getDecl().getArrayType();
+            }
             _type = type2;
             _type._parent = this;
         }
@@ -128,28 +128,6 @@ public class JVarDecl extends JNode implements WithId {
     public void setInitExpr(JExpr anExpr)
     {
         replaceChild(_initExpr, _initExpr = anExpr);
-    }
-
-    /**
-     * Returns the array init expressions (if array).
-     */
-    public List<JExpr> getArrayInitExprs()  { return _arrayInitExprs; }
-
-    /**
-     * Sets the array init expressions (if array).
-     */
-    public void setArrayInitExprs(List<JExpr> theArrayInits)
-    {
-        // Remove old expressions if set
-        if (_arrayInitExprs != null && _arrayInitExprs.size() > 0)
-            _arrayInitExprs.forEach(expr -> removeChild(expr));
-
-        // Set new
-        _arrayInitExprs = theArrayInits;
-
-        // Add new expressions
-        if (_arrayInitExprs != null)
-            _arrayInitExprs.forEach(expr -> addChild(expr));
     }
 
     /**
@@ -241,14 +219,6 @@ public class JVarDecl extends JNode implements WithId {
                 if (!varClass.isAssignableFrom(initClass))
                     return NodeError.newErrorArray(this, "Invalid assignment type");
             }
-        }
-
-        // If any array inits have error, return that
-        List<JExpr> arrayInitExprs = getArrayInitExprs();
-        for (JExpr arrayInitExpr : arrayInitExprs) {
-            NodeError[] arrayInitExprErrors = arrayInitExpr.getErrors();
-            if (arrayInitExprErrors.length > 0)
-                return arrayInitExprErrors;
         }
 
         // If type has errors, just return it
