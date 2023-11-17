@@ -1,12 +1,10 @@
 package snapcode.apptools;
 import snap.gfx.Image;
-import snap.util.ListUtils;
 import snap.view.*;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.app.*;
 import snapcode.debug.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,14 +15,8 @@ public class DebugFramesPane extends WorkspaceTool implements RunApp.AppListener
     // The DebugTool
     private DebugTool _debugTool;
 
-    // The list of recently run apps
-    private List<RunApp>  _apps = new ArrayList<>();
-
     // The Process TreeView
     private TreeView<Object>  _procTree;
-
-    // The limit to the number of running processes
-    private int  _procLimit = 1;
 
     // Runnable to defer/coalesce ProcTree update
     private Runnable _procTreeUpdater, _procTreeUpdaterImpl = () -> { resetLater(); _procTreeUpdater = null; };
@@ -57,61 +49,6 @@ public class DebugFramesPane extends WorkspaceTool implements RunApp.AppListener
      * Returns the DebugExprsPane.
      */
     public DebugExprsPane getDebugExprsPane()  { return _debugTool.getDebugExprsPane(); }
-
-    /**
-     * Returns the list of processes.
-     */
-    public List<RunApp> getProcs()  { return _apps; }
-
-    /**
-     * Returns the number of processes.
-     */
-    public int getProcCount()  { return _apps.size(); }
-
-    /**
-     * Returns the process at given index.
-     */
-    public RunApp getProc(int anIndex)  { return _apps.get(anIndex); }
-
-    /**
-     * Adds a new process.
-     */
-    public void addProc(RunApp aProc)
-    {
-        // Remove procs that are terminated and procs beyond limit
-        for (RunApp p : _apps.toArray(new RunApp[0]))
-            if (p.isTerminated())
-                removeProc(p);
-
-        if (getProcCount() + 1 > _procLimit) {
-            RunApp proc = getProc(0);
-            proc.terminate();
-            removeProc(proc);
-        }
-
-        // Add new proc
-        _apps.add(aProc);
-        aProc.setListener(this);
-        resetLater();
-    }
-
-    /**
-     * Removes a process.
-     */
-    public void removeProc(int anIndex)
-    {
-        _apps.remove(anIndex);
-    }
-
-    /**
-     * Removes a process.
-     */
-    public void removeProc(RunApp aProcess)
-    {
-        int index = ListUtils.indexOfId(_apps, aProcess);
-        if (index >= 0)
-            removeProc(index);
-    }
 
     /**
      * Sets the selected stack frame.
@@ -277,7 +214,7 @@ public class DebugFramesPane extends WorkspaceTool implements RunApp.AppListener
     protected void resetUI()
     {
         // Reset items, auto expand threads
-        List<RunApp> apps = getProcs();
+        List<RunApp> apps = _debugTool.getProcs();
         _procTree.setItemsList((List<Object>) (List<?>) apps);
         for (RunApp app : apps)
             _procTree.expandItem(app);

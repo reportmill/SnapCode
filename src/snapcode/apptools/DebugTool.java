@@ -2,6 +2,7 @@ package snapcode.apptools;
 import snap.gfx.Color;
 import snap.props.PropChange;
 import snap.util.FilePathUtils;
+import snap.util.ListUtils;
 import snap.view.*;
 import snapcode.javatext.JavaTextArea;
 import snapcode.project.*;
@@ -21,6 +22,9 @@ import java.util.List;
  * This project tool class handles running/debugging a process.
  */
 public class DebugTool extends WorkspaceTool {
+
+    // The list of recently run apps
+    private List<RunApp>  _apps = new ArrayList<>();
 
     // The selected app
     private RunApp _selApp;
@@ -43,6 +47,9 @@ public class DebugTool extends WorkspaceTool {
     // The current ProgramCounter line
     private int  _progCounterLine;
 
+    // The limit to the number of running processes
+    private int  _procLimit = 1;
+
     // The last executed file
     private static WebFile  _lastRunFile;
 
@@ -57,6 +64,61 @@ public class DebugTool extends WorkspaceTool {
         _debugFramesPane = new DebugFramesPane(this);
         _debugVarsPane = new DebugVarsPane(this);
         _debugExprsPane = new DebugExprsPane(this);
+    }
+
+    /**
+     * Returns the list of processes.
+     */
+    public List<RunApp> getProcs()  { return _apps; }
+
+    /**
+     * Returns the number of processes.
+     */
+    public int getProcCount()  { return _apps.size(); }
+
+    /**
+     * Returns the process at given index.
+     */
+    public RunApp getProc(int anIndex)  { return _apps.get(anIndex); }
+
+    /**
+     * Adds a new process.
+     */
+    public void addProc(RunApp aProc)
+    {
+        // Remove procs that are terminated and procs beyond limit
+        for (RunApp p : _apps.toArray(new RunApp[0]))
+            if (p.isTerminated())
+                removeProc(p);
+
+        if (getProcCount() + 1 > _procLimit) {
+            RunApp proc = getProc(0);
+            proc.terminate();
+            removeProc(proc);
+        }
+
+        // Add new proc
+        _apps.add(aProc);
+        aProc.setListener(_debugFramesPane);
+        resetLater();
+    }
+
+    /**
+     * Removes a process.
+     */
+    public void removeProc(int anIndex)
+    {
+        _apps.remove(anIndex);
+    }
+
+    /**
+     * Removes a process.
+     */
+    public void removeProc(RunApp aProcess)
+    {
+        int index = ListUtils.indexOfId(_apps, aProcess);
+        if (index >= 0)
+            removeProc(index);
     }
 
     /**
@@ -265,7 +327,7 @@ public class DebugTool extends WorkspaceTool {
     public void execProc(RunApp aProc)
     {
         setSelApp(null);
-        _debugFramesPane.addProc(aProc);
+        addProc(aProc);
         setSelApp(aProc);
         ToolTray bottomTray = _workspaceTools.getBottomTray();
         bottomTray.setSelToolForClass(RunConsole.class);
@@ -395,8 +457,7 @@ public class DebugTool extends WorkspaceTool {
         if (pc.getPropName() != Breakpoints.ITEMS_PROP) return;
 
         // Get processes
-        DebugFramesPane procPane = getProcPane();
-        List<RunApp> processes = procPane.getProcs();
+        List<RunApp> processes = getProcs();
 
         // Handle Breakpoint added
         Breakpoint addedBreakpoint = (Breakpoint) pc.getNewValue();
