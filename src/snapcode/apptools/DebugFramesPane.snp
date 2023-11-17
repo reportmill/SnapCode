@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView PrefWidth="220" PrefHeight="300" Padding="0,5,5,5" FillWidth="true">
-  <TreeView Name="ProcTree" GrowHeight="true" />
+  <ListView Name="FramesListView" GrowHeight="true" />
 </ColView>

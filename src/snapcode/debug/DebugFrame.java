@@ -88,17 +88,25 @@ public class DebugFrame {
     public String getDescription()
     {
         if (_desc != null) return _desc;
+
         try {
             Location loc = _frame.location();
             Method method = loc.method();
-            StringBuffer sb = new StringBuffer(loc.sourceName()).append('.').append(method.name()).append('(');
-            for (String type : method.argumentTypeNames()) sb.append(type).append(',');
-            if (method.argumentTypeNames().size() > 0) sb.delete(sb.length() - 1, sb.length());
-            sb.append(") line:").append(loc.lineNumber());
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(method.name()).append(", ");
+            sb.append(loc.sourceName());
+            sb.append(":").append(loc.lineNumber());
+            //StringBuffer sb = new StringBuffer(loc.sourceName()).append('.').append(method.name()).append('(');
+            //for (String type : method.argumentTypeNames()) sb.append(type).append(',');
+            //if (method.argumentTypeNames().size() > 0) sb.delete(sb.length() - 1, sb.length());
+            //sb.append(") line:").append(loc.lineNumber());
+
             return _desc = sb.toString();
-        } catch (Exception e) {
-            return "StackFrame read error: " + e;
         }
+
+        // Handle exceptions
+        catch (Exception e) { return "StackFrame read error: " + e; }
     }
 
     /**

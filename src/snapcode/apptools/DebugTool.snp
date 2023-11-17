@@ -15,4 +15,12 @@
     <Button Name="RunToLineButton" PrefWidth="24" PrefHeight="24" image="RunToLine.png" ShowBorder="false" />
     <Button Name="HideButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" Text="–" ShowBorder="false" />
   </RowView>
+  <RowView Name="AppsBox" Margin="10" Spacing="5">
+    <Label Text="Selected App:" />
+    <ComboBox Name="AppsComboBox" PrefWidth="200" PrefHeight="25" />
+  </RowView>
+  <RowView Name="ThreadsBox" Margin="10,20,10,10" Spacing="5">
+    <Label Text="Selected Thread:" />
+    <ComboBox Name="ThreadsComboBox" GrowWidth="true" PrefHeight="25" />
+  </RowView>
 </ColView>

@@ -346,6 +346,12 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
         RowView rowView = getView("RowView", RowView.class);
         rowView.setBorder(Color.GRAY8, 1);
 
+        // Config AppsComboBox, ThreadsComboBox
+        ComboBox<RunApp> appsComboBox = getView("AppsComboBox", ComboBox.class);
+        appsComboBox.setItemTextFunction(RunApp::getName);
+        ComboBox<DebugThread> threadsComboBox = getView("ThreadsComboBox", ComboBox.class);
+        threadsComboBox.setItemTextFunction(DebugThread::getName);
+
         // Add ProcPane
         View procPaneUI = _debugFramesPane.getUI();
         CollapseView processToolUI = new CollapseView("Frames", procPaneUI);
@@ -370,16 +376,37 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
     @Override
     protected void resetUI()
     {
+        RunApp selApp = getSelApp();
+        DebugApp debugApp = getSelDebugApp();
+
+        // Update ResumeButton, SuspendButton, TerminateButton
         boolean paused = isPaused();
         boolean pausable = isPausable();
         setViewEnabled("ResumeButton", paused);
         setViewEnabled("SuspendButton", pausable);
         setViewEnabled("TerminateButton", !isTerminated());
+
+        // Update StepIntoButton, StepOverButton, StepReturnButton, RunToLineButton
         setViewEnabled("StepIntoButton", paused);
         setViewEnabled("StepOverButton", paused);
         setViewEnabled("StepReturnButton", paused);
         setViewEnabled("RunToLineButton", paused);
 
+        // Update AppsBox, AppsComboBox
+        setViewVisible("AppsBox", getProcCount() > 0);
+        setViewItems("AppsComboBox", getProcs());
+        setViewSelItem("AppsComboBox", selApp);
+
+        // Update ThreadsBox, ThreadsComboBox
+        setViewVisible("ThreadsBox", paused);
+        if (paused) {
+            DebugFrame debugFrame = debugApp.getFrame();
+            setViewItems("ThreadsComboBox", debugApp.getThreads());
+            if (debugFrame != null)
+                setViewSelItem("ThreadsComboBox", debugFrame.getThread());
+        }
+
+        // Update frames, vars, expressions
         _debugFramesPane.resetLater();
         _debugVarsPane.resetLater();
         _debugExprsPane.resetLater();
@@ -388,12 +415,11 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
         if (_resetConsole) {
             _resetConsole = false;
             getRunConsole().clear();
-            RunApp proc = getSelApp();
-            if (proc != null) {
-                for (RunApp.Output out : proc.getOutput()) {
+            if (selApp != null) {
+                for (RunApp.Output out : selApp.getOutput()) {
                     if (out.isErr())
-                        appendErr(proc, out.getString());
-                    else appendOut(proc, out.getString());
+                        appendErr(selApp, out.getString());
+                    else appendOut(selApp, out.getString());
                 }
             }
         }
@@ -437,6 +463,12 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
             int line = tarea.getSel().getStartLine().getIndex();
             debugApp.runToLine(file, line);
         }
+
+        // Handle ThreadsComboBox
+//        else if (anEvent.equals("ThreadsComboBox")) {
+//            DebugThread debugThread = (DebugThread) getViewSelItem("ThreadsComboBox");
+//            debugThread.select();
+//        }
 
         // Do normal version
         else super.respondUI(anEvent);
