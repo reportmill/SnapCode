@@ -184,31 +184,29 @@ public class DebugTool extends WorkspaceTool {
     @Override
     protected void initUI()
     {
+        // Get main col view
+        ColView mainColView = getUI(ColView.class);
+
         // Config RowView
         RowView rowView = getView("RowView", RowView.class);
         rowView.setBorder(Color.GRAY8, 1);
 
-        // Get/config SplitView
-        _splitView = getView("SplitView", SplitView.class);
-        _splitView.setBorder(null);
-        int DIVIDER_SPAN = 2;
-        Color DIVIDER_FILL = new Color(.87);
-        _splitView.setDividerSpan(DIVIDER_SPAN);
-        Divider divider = _splitView.getDivider();
-        divider.setFill(DIVIDER_FILL);
-        divider.setBorder(null);
-
         // Add ProcPane
         View procPaneUI = _procPane.getUI();
-        _splitView.addItem(procPaneUI);
+        CollapseView processToolUI = new CollapseView("Frames", procPaneUI);
+        mainColView.addChild(processToolUI);
 
         // Add DebugVars
         View debugVarsUI = _debugVarsPane.getUI();
-        _splitView.addItem(debugVarsUI);
+        CollapseView debugVarsUIBox = new CollapseView("Variables", debugVarsUI);
+        debugVarsUIBox.setCollapsed(true);
+        mainColView.addChild(debugVarsUIBox);
 
         // Add DebugExprs
         View debugExprsUI = _debugExprsPane.getUI();
-        _splitView.addItem(debugExprsUI);
+        CollapseView debugExprsUIBox = new CollapseView("Expressions", debugExprsUI);
+        debugExprsUIBox.setCollapsed(true);
+        mainColView.addChild(debugExprsUIBox);
     }
 
     /**
@@ -240,7 +238,7 @@ public class DebugTool extends WorkspaceTool {
      * Override for title.
      */
     @Override
-    public String getTitle()  { return "Debug"; }
+    public String getTitle()  { return "Run / Debug"; }
 
     /**
      * Called when Workspace.BreakPoints change.

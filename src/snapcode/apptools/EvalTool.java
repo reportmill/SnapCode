@@ -240,5 +240,5 @@ public class EvalTool extends WorkspaceTool {
      * Title.
      */
     @Override
-    public String getTitle()  { return "Run / Debug"; }
+    public String getTitle()  { return _workspace.isUseRealCompiler() ? "Run" : "Run / Debug"; }
 }

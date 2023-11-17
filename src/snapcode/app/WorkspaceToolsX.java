@@ -62,11 +62,11 @@ public class WorkspaceToolsX extends WorkspaceTools {
         _leftTray = new ToolTray(Side.LEFT, leftTools);
 
         // Create RightTray
-        WorkspaceTool[] rightTools = { searchTool, evalTool, completerTool };
+        WorkspaceTool[] rightTools = { evalTool, debugTool, searchTool, completerTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray
-        WorkspaceTool[] bottomTools = { problemsTool, debugTool, runConsole, breakpointsTool, runConfigsTool, httpServerTool };
+        WorkspaceTool[] bottomTools = { problemsTool, runConsole, breakpointsTool, runConfigsTool, httpServerTool };
         _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
     }
 

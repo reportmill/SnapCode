@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefHeight="220" FillWidth="true">
+<ColView PrefWidth="400" FillWidth="true">
   <font name="Arial" size="12" />
   <RowView Name="RowView" MinHeight="32">
     <Label Margin="0,8,0,8" text="Debug:" />
     <Button Name="DebugButton" PrefWidth="24" PrefHeight="24" Image="Debug.gif" ShowBorder="false" />
-    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Text="–" ShowBorder="false" />
+    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" Text="–" ShowBorder="false" />
   </RowView>
-  <SplitView Name="SplitView" GrowHeight="true" />
 </ColView>
