@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView PrefWidth="400" FillWidth="true">
   <font name="Arial" size="12" />
-  <RowView Name="RowView" MinHeight="32">
+  <RowView Name="RowView" MinHeight="32" Spacing="4">
     <Label Margin="0,8,0,8" text="Debug:" />
     <Button Name="DebugButton" PrefWidth="24" PrefHeight="24" Image="Debug.gif" ShowBorder="false" />
+    <Separator PrefWidth="8" PrefHeight="24" Vertical="true" />
+    <Button Name="ResumeButton" PrefWidth="24" PrefHeight="24" image="Resume.gif" ShowBorder="false" />
+    <Button Name="SuspendButton" PrefWidth="24" PrefHeight="24" image="Suspend.gif" ShowBorder="false" />
+    <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" image="Terminate.gif" ShowBorder="false" />
+    <Separator PrefWidth="8" PrefHeight="24" Vertical="true" />
+    <Button Name="StepIntoButton" PrefWidth="24" PrefHeight="24" image="StepInto.gif" ShowBorder="false" />
+    <Button Name="StepOverButton" PrefWidth="24" PrefHeight="24" image="StepOver.gif" ShowBorder="false" />
+    <Button Name="StepReturnButton" PrefWidth="24" PrefHeight="24" image="StepReturn.gif" ShowBorder="false" />
+    <Button Name="RunToLineButton" PrefWidth="24" PrefHeight="24" image="RunToLine.png" ShowBorder="false" />
     <Button Name="HideButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" Text="–" ShowBorder="false" />
   </RowView>
 </ColView>

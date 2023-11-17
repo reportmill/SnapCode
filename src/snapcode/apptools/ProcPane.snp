@@ -1,14 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView PrefWidth="220" PrefHeight="300" Padding="0,5,5,5" FillWidth="true">
-  <RowView PrefHeight="32" Spacing="4">
-    <Button Name="ResumeButton" PrefWidth="24" PrefHeight="24" image="Resume.gif" ShowBorder="false" />
-    <Button Name="SuspendButton" PrefWidth="24" PrefHeight="24" image="Suspend.gif" ShowBorder="false" />
-    <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" image="Terminate.gif" ShowBorder="false" />
-    <Separator PrefWidth="8" PrefHeight="24" Vertical="true" />
-    <Button Name="StepIntoButton" PrefWidth="24" PrefHeight="24" image="StepInto.gif" ShowBorder="false" />
-    <Button Name="StepOverButton" PrefWidth="24" PrefHeight="24" image="StepOver.gif" ShowBorder="false" />
-    <Button Name="StepReturnButton" PrefWidth="24" PrefHeight="24" image="StepReturn.gif" ShowBorder="false" />
-    <Button Name="RunToLineButton" PrefWidth="24" PrefHeight="24" image="RunToLine.png" ShowBorder="false" />
-  </RowView>
   <TreeView Name="ProcTree" GrowHeight="true" />
 </ColView>

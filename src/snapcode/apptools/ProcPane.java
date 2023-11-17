@@ -1,5 +1,4 @@
 package snapcode.apptools;
-import snapcode.javatext.JavaTextArea;
 import snap.gfx.Image;
 import snap.util.ListUtils;
 import snap.view.*;
@@ -22,14 +21,8 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     // The list of recently run apps
     private List<RunApp>  _apps = new ArrayList<>();
 
-    // The selected app
-    private RunApp  _selApp;
-
     // The Process TreeView
     private TreeView<Object>  _procTree;
-
-    // Whether Console needs to be reset
-    private boolean  _resetConsole;
 
     // The file that currently has the ProgramCounter
     private WebFile  _progCounterFile;
@@ -39,6 +32,9 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
 
     // The limit to the number of running processes
     private int  _procLimit = 1;
+
+    // Runnable to defer/coalesce ProcTree update
+    private Runnable _procTreeUpdater, _procTreeUpdaterImpl = () -> { resetLater(); _procTreeUpdater = null; };
 
     // Images
     public static Image ProcImage = Image.getImageForClassResource(ProcPane.class, "Process.png");
@@ -57,7 +53,7 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     /**
      * Returns the RunConsole.
      */
-    public RunConsole getRunConsole()  { return _workspaceTools.getToolForClass(RunConsole.class); }
+    public RunConsole getRunConsole()  { return _debugTool.getRunConsole(); }
 
     /**
      * Returns the DebugVarsPane.
@@ -140,29 +136,17 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     /**
      * Returns the selected app.
      */
-    public RunApp getSelApp()
-    {
-        return _selApp;
-    }
+    public RunApp getSelApp()  { return _debugTool.getSelApp(); }
 
     /**
      * Sets the selected app.
      */
-    public void setSelApp(RunApp aProc)
-    {
-        if (aProc == _selApp) return;
-        _selApp = aProc;
-        resetLater();
-        _resetConsole = true;
-    }
+    public void setSelApp(RunApp aProc)  { _debugTool.setSelApp(aProc); }
 
     /**
      * Returns the debug process.
      */
-    public DebugApp getSelDebugApp()
-    {
-        return _selApp instanceof DebugApp ? (DebugApp) _selApp : null;
-    }
+    public DebugApp getSelDebugApp()  { return _debugTool.getSelDebugApp(); }
 
     /**
      * Sets the selected stack frame.
@@ -180,33 +164,6 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     {
         RunApp app = getSelApp();
         return app != null && app.isRunning();
-    }
-
-    /**
-     * Returns whether selected process is terminated.
-     */
-    public boolean isTerminated()
-    {
-        RunApp app = getSelApp();
-        return app == null || app.isTerminated();
-    }
-
-    /**
-     * Returns whether selected process can be paused.
-     */
-    public boolean isPausable()
-    {
-        DebugApp app = getSelDebugApp();
-        return app != null && app.isRunning();
-    }
-
-    /**
-     * Returns whether selected process is paused.
-     */
-    public boolean isPaused()
-    {
-        DebugApp app = getSelDebugApp();
-        return app != null && app.isPaused();
     }
 
     /**
@@ -269,14 +226,10 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
         switch (anEvent.getType()) {
 
             // Handle ThreadStart
-            case ThreadStart:
-                updateProcTreeLater();
-                break;
+            case ThreadStart: updateProcTreeLater(); break;
 
             // Handle ThreadDeatch
-            case ThreadDeath:
-                updateProcTreeLater();
-                break;
+            case ThreadDeath: updateProcTreeLater(); break;
 
             // Handle LocationTrigger
             case LocationTrigger: {
@@ -339,20 +292,12 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     /**
      * RunProc.Listener method - called when output is available.
      */
-    public void appendOut(final RunApp aProc, final String aStr)
-    {
-        if (getSelApp() == aProc)
-            getRunConsole().appendOut(aStr);
-    }
+    public void appendOut(RunApp aProc, final String aStr)  { _debugTool.appendOut(aProc, aStr); }
 
     /**
      * RunProc.Listener method - called when error output is available.
      */
-    public void appendErr(final RunApp aProc, final String aStr)
-    {
-        if (getSelApp() == aProc)
-            getRunConsole().appendErr(aStr);
-    }
+    public void appendErr(RunApp aProc, final String aStr)  { _debugTool.appendErr(aProc, aStr); }
 
     /**
      * Returns the program counter for given file.
@@ -397,16 +342,6 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
      */
     protected void resetUI()
     {
-        boolean paused = isPaused();
-        boolean pausable = isPausable();
-        setViewEnabled("ResumeButton", paused);
-        setViewEnabled("SuspendButton", pausable);
-        setViewEnabled("TerminateButton", !isTerminated());
-        setViewEnabled("StepIntoButton", paused);
-        setViewEnabled("StepOverButton", paused);
-        setViewEnabled("StepReturnButton", paused);
-        setViewEnabled("RunToLineButton", paused);
-
         // Reset items, auto expand threads
         List<RunApp> apps = getProcs();
         _procTree.setItemsList((List<Object>) (List<?>) apps);
@@ -416,20 +351,10 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
             _procTree.updateItems();
 
         // If current proc is Debug with suspended thread, select current frame
-        RunApp proc = getSelApp();
         DebugFrame frame = getSelFrame();
         if (frame != null) {
             _procTree.expandItem(frame.getThread());
             _procTree.setSelItem(frame);
-        }
-
-        // Reset Console
-        if (_resetConsole) {
-            _resetConsole = false;
-            getRunConsole().clear();
-            if (proc != null) for (RunApp.Output out : proc.getOutput())
-                if (out.isErr()) appendErr(proc, out.getString());
-                else appendOut(proc, out.getString());
         }
     }
 
@@ -438,47 +363,8 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
      */
     protected void respondUI(ViewEvent anEvent)
     {
-        // The Selected App, DebugApp
-        RunApp selApp = getSelApp();
-        DebugApp debugApp = getSelDebugApp();
-
-        // Handle ResumeButton
-        if (anEvent.equals("ResumeButton"))
-            debugApp.resume();
-
-        // Handle SuspendButton
-        else if (anEvent.equals("SuspendButton"))
-            debugApp.pause();
-
-        // Handle TerminateButton
-        else if (anEvent.equals("TerminateButton"))
-            selApp.terminate();
-
-        // Handle StepIntoButton
-        else if (anEvent.equals("StepIntoButton"))
-            debugApp.stepIntoLine();
-
-        // Handle StepOverButton
-        else if (anEvent.equals("StepOverButton"))
-            debugApp.stepOverLine();
-
-        // Handle StepReturnButton
-        else if (anEvent.equals("StepReturnButton"))
-            debugApp.stepOut();
-
-        // Handle RunToLineButton
-        else if (anEvent.equals("RunToLineButton")) {
-            WebPage page = getBrowser().getPage();
-            JavaPage jpage = page instanceof JavaPage ? (JavaPage) page : null;
-            if (jpage == null) return;
-            JavaTextArea tarea = jpage.getTextArea();
-            WebFile file = jpage.getFile();
-            int line = tarea.getSel().getStartLine().getIndex();
-            debugApp.runToLine(file, line);
-        }
-
         // Handle ProcTree
-        else if (anEvent.equals("ProcTree")) {
+        if (anEvent.equals("ProcTree")) {
             Object item = anEvent.getSelItem();
             if (item instanceof RunApp)
                 setSelApp((RunApp) item);
@@ -557,13 +443,7 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
      */
     synchronized void updateProcTreeLater()
     {
-        if (_procTreeUpdater != null) return; // If already set, just return
-        runDelayed(250, _procTreeUpdater = _procTreeUpdaterImpl);
+        if (_procTreeUpdater == null)
+            runDelayed(250, _procTreeUpdater = _procTreeUpdaterImpl);
     }
-
-    Runnable _procTreeUpdater, _procTreeUpdaterImpl = () -> {
-        resetLater();
-        _procTreeUpdater = null;
-    };
-
 }

@@ -3,6 +3,7 @@ import snap.gfx.Color;
 import snap.props.PropChange;
 import snap.util.FilePathUtils;
 import snap.view.*;
+import snapcode.javatext.JavaTextArea;
 import snapcode.project.*;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
@@ -21,11 +22,14 @@ import java.util.List;
  */
 public class DebugTool extends WorkspaceTool {
 
+    // The selected app
+    private RunApp _selApp;
+
+    // Whether Console needs to be reset
+    private boolean _resetConsole;
+
     // The ProcPane manages run/debug processes
     private ProcPane  _procPane;
-
-    // The SplitView
-    private SplitView  _splitView;
 
     // The DebugVarsPane
     private DebugVarsPane _debugVarsPane;
@@ -50,6 +54,54 @@ public class DebugTool extends WorkspaceTool {
     }
 
     /**
+     * Returns the selected app.
+     */
+    public RunApp getSelApp()  { return _selApp; }
+
+    /**
+     * Sets the selected app.
+     */
+    public void setSelApp(RunApp aProc)
+    {
+        if (aProc == _selApp) return;
+        _selApp = aProc;
+        resetLater();
+        _resetConsole = true;
+    }
+
+    /**
+     * Returns the debug app.
+     */
+    public DebugApp getSelDebugApp()  { return _selApp instanceof DebugApp ? (DebugApp) _selApp : null; }
+
+    /**
+     * Returns whether selected process is terminated.
+     */
+    public boolean isTerminated()
+    {
+        RunApp app = getSelApp();
+        return app == null || app.isTerminated();
+    }
+
+    /**
+     * Returns whether selected process can be paused.
+     */
+    public boolean isPausable()
+    {
+        DebugApp app = getSelDebugApp();
+        return app != null && app.isRunning();
+    }
+
+    /**
+     * Returns whether selected process is paused.
+     */
+    public boolean isPaused()
+    {
+        DebugApp app = getSelDebugApp();
+        return app != null && app.isPaused();
+    }
+
+    /**
      * Returns the processes pane.
      */
     public ProcPane getProcPane()  { return _procPane; }
@@ -65,12 +117,9 @@ public class DebugTool extends WorkspaceTool {
     public DebugExprsPane getDebugExprsPane()  { return _debugExprsPane; }
 
     /**
-     * Returns the debug app.
+     * Returns the RunConsole.
      */
-    public DebugApp getSelDebugApp()
-    {
-        return _procPane.getSelDebugApp();
-    }
+    public RunConsole getRunConsole()  { return _workspaceTools.getToolForClass(RunConsole.class); }
 
     /**
      * Run application.
@@ -215,9 +264,33 @@ public class DebugTool extends WorkspaceTool {
     @Override
     protected void resetUI()
     {
+        boolean paused = isPaused();
+        boolean pausable = isPausable();
+        setViewEnabled("ResumeButton", paused);
+        setViewEnabled("SuspendButton", pausable);
+        setViewEnabled("TerminateButton", !isTerminated());
+        setViewEnabled("StepIntoButton", paused);
+        setViewEnabled("StepOverButton", paused);
+        setViewEnabled("StepReturnButton", paused);
+        setViewEnabled("RunToLineButton", paused);
+
         _procPane.resetLater();
         _debugVarsPane.resetLater();
         _debugExprsPane.resetLater();
+
+        // Reset Console
+        if (_resetConsole) {
+            _resetConsole = false;
+            getRunConsole().clear();
+            RunApp proc = getSelApp();
+            if (proc != null) {
+                for (RunApp.Output out : proc.getOutput()) {
+                    if (out.isErr())
+                        appendErr(proc, out.getString());
+                    else appendOut(proc, out.getString());
+                }
+            }
+        }
     }
 
     /**
@@ -226,9 +299,38 @@ public class DebugTool extends WorkspaceTool {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
+        // The Selected App, DebugApp
+        RunApp selApp = getSelApp();
+        DebugApp debugApp = getSelDebugApp();
+
         // Handle DebugButton
         if (anEvent.equals("DebugButton"))
             runDefaultConfig(true);
+
+        // Handle ResumeButton, SuspendButton, TerminateButton
+        else if (anEvent.equals("ResumeButton"))
+            debugApp.resume();
+        else if (anEvent.equals("SuspendButton"))
+            debugApp.pause();
+        else if (anEvent.equals("TerminateButton"))
+            selApp.terminate();
+
+        // Handle StepIntoButton, StepOverButton, StepReturnButton, RunToLineButton
+        else if (anEvent.equals("StepIntoButton"))
+            debugApp.stepIntoLine();
+        else if (anEvent.equals("StepOverButton"))
+            debugApp.stepOverLine();
+        else if (anEvent.equals("StepReturnButton"))
+            debugApp.stepOut();
+        else if (anEvent.equals("RunToLineButton")) {
+            WebPage page = getBrowser().getPage();
+            JavaPage jpage = page instanceof JavaPage ? (JavaPage) page : null;
+            if (jpage == null) return;
+            JavaTextArea tarea = jpage.getTextArea();
+            WebFile file = jpage.getFile();
+            int line = tarea.getSel().getStartLine().getIndex();
+            debugApp.runToLine(file, line);
+        }
 
         // Do normal version
         else super.respondUI(anEvent);
@@ -274,6 +376,24 @@ public class DebugTool extends WorkspaceTool {
             for (RunApp rp : processes)
                 rp.removeBreakpoint(removedBreakpoint);
         }
+    }
+
+    /**
+     * RunProc.Listener method - called when output is available.
+     */
+    public void appendOut(final RunApp aProc, final String aStr)
+    {
+        if (getSelApp() == aProc)
+            getRunConsole().appendOut(aStr);
+    }
+
+    /**
+     * RunProc.Listener method - called when error output is available.
+     */
+    public void appendErr(final RunApp aProc, final String aStr)
+    {
+        if (getSelApp() == aProc)
+            getRunConsole().appendErr(aStr);
     }
 
     /**
