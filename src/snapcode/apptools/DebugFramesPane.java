@@ -1,8 +1,6 @@
 package snapcode.apptools;
 import snap.gfx.Image;
 import snap.view.*;
-import snap.web.WebFile;
-import snap.web.WebURL;
 import snapcode.app.*;
 import snapcode.debug.*;
 import java.util.List;
@@ -10,7 +8,7 @@ import java.util.List;
 /**
  * This class displays stack frame for DebugTool.SelApp thread.
  */
-public class DebugFramesPane extends WorkspaceTool implements RunApp.AppListener {
+public class DebugFramesPane extends WorkspaceTool {
 
     // The DebugTool
     private DebugTool _debugTool;
@@ -36,21 +34,6 @@ public class DebugFramesPane extends WorkspaceTool implements RunApp.AppListener
     }
 
     /**
-     * Returns the RunConsole.
-     */
-    public RunConsole getRunConsole()  { return _debugTool.getRunConsole(); }
-
-    /**
-     * Returns the DebugVarsPane.
-     */
-    public DebugVarsPane getDebugVarsPane()  { return _debugTool.getDebugVarsPane(); }
-
-    /**
-     * Returns the DebugExprsPane.
-     */
-    public DebugExprsPane getDebugExprsPane()  { return _debugTool.getDebugExprsPane(); }
-
-    /**
      * Sets the selected stack frame.
      */
     public DebugFrame getSelFrame()
@@ -58,144 +41,6 @@ public class DebugFramesPane extends WorkspaceTool implements RunApp.AppListener
         DebugApp dp = _debugTool.getSelDebugApp();
         return dp != null ? dp.getFrame() : null;
     }
-
-    /**
-     * RunProc.Listener method - called when process starts.
-     */
-    public void appStarted(RunApp aProc)
-    {
-        resetLater();
-        updateProcTreeLater();
-    }
-
-    /**
-     * RunProc.Listener method - called when process is paused.
-     */
-    public void appPaused(DebugApp aProc)
-    {
-        resetLater();
-        updateProcTreeLater();
-    }
-
-    /**
-     * RunProc.Listener method - called when process is continued.
-     */
-    public void appResumed(DebugApp aProc)
-    {
-        resetLater();
-        updateProcTreeLater();
-        setProgramCounter(null, -1);
-    }
-
-    /**
-     * RunProc.Listener method - called when process ends.
-     */
-    public void appExited(RunApp aProc)
-    {
-        // Only run on event thread
-        if (!isEventThread()) {
-            runLater(() -> appExited(aProc));
-            return;
-        }
-
-        // Update proc items and reset UI
-        _procTree.updateItem(aProc);
-        resetLater();
-        _workspacePane.resetLater();
-
-        // If debug app, reset Debug vars, expressions and current line counter
-        if (aProc instanceof DebugApp) {
-            getDebugVarsPane().resetVarTable();
-            getDebugExprsPane().resetVarTable();
-            setProgramCounter(null, 1);
-        }
-    }
-
-    /**
-     * Called when DebugApp gets notice of things like VM start/death, thread start/death, breakpoints, etc.
-     */
-    public void processDebugEvent(DebugApp aProc, DebugEvent anEvent)
-    {
-        switch (anEvent.getType()) {
-
-            // Handle ThreadStart
-            case ThreadStart: updateProcTreeLater(); break;
-
-            // Handle ThreadDeatch
-            case ThreadDeath: updateProcTreeLater(); break;
-
-            // Handle LocationTrigger
-            case LocationTrigger: {
-                runLater(() -> handleLocationTrigger());
-                break;
-            }
-        }
-    }
-
-    /**
-     * Called when Debug LocationTrigger is encountered.
-     */
-    protected void handleLocationTrigger()
-    {
-        getEnv().activateApp(getUI());
-        getDebugVarsPane().resetVarTable();
-        getDebugExprsPane().resetVarTable();
-    }
-
-    /**
-     * RunProc.Listener method - called when stack frame changes.
-     */
-    public void frameChanged(DebugApp aProc)
-    {
-        // Only run on event thread
-        if (!isEventThread()) {
-            runLater(() -> frameChanged(aProc));
-            return;
-        }
-
-        // Make DebugVarsPane visible and updateVarTable
-        _workspaceTools.showToolForClass(DebugTool.class);
-
-        DebugFrame frame = aProc.getFrame();
-        if (frame == null) return;
-        getDebugVarsPane().resetVarTable(); // This used to be before short-circuit to clear trees
-        getDebugExprsPane().resetVarTable();
-        String path = frame.getSourcePath();
-        if (path == null) return;
-        int lineNum = frame.getLineNumber();
-        if (lineNum < 0) lineNum = 0;
-        path = getRunConsole().getSourceURL(path);
-        path += "#SelLine=" + lineNum;
-
-        // Set ProgramCounter file and line
-        WebURL url = WebURL.getURL(path);
-        WebFile file = url.getFile();
-        _debugTool.setProgramCounter(file, lineNum - 1);
-        getBrowser().setURL(url);
-    }
-
-    /**
-     * DebugListener breakpoint methods.
-     */
-    public void requestSet(BreakpointReq e)  { }
-    public void requestDeferred(BreakpointReq e)  { }
-    public void requestDeleted(BreakpointReq e)  { }
-    public void requestError(BreakpointReq e)  { }
-
-    /**
-     * RunProc.Listener method - called when output is available.
-     */
-    public void appendOut(RunApp aProc, final String aStr)  { _debugTool.appendOut(aProc, aStr); }
-
-    /**
-     * RunProc.Listener method - called when error output is available.
-     */
-    public void appendErr(RunApp aProc, final String aStr)  { _debugTool.appendErr(aProc, aStr); }
-
-    /**
-     * Sets the program counter file, line.
-     */
-    public void setProgramCounter(WebFile aFile, int aLine)  { _debugTool.setProgramCounter(aFile, aLine); }
 
     /**
      * Initialize UI.
