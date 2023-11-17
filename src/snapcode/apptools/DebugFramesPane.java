@@ -2,7 +2,6 @@ package snapcode.apptools;
 import snap.gfx.Image;
 import snap.util.ListUtils;
 import snap.view.*;
-import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.app.*;
@@ -11,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The ProcPane manages run/debug processes.
+ * This class displays stack frame for DebugTool.SelApp thread.
  */
-public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
+public class DebugFramesPane extends WorkspaceTool implements RunApp.AppListener {
 
     // The DebugTool
     private DebugTool _debugTool;
@@ -24,12 +23,6 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     // The Process TreeView
     private TreeView<Object>  _procTree;
 
-    // The file that currently has the ProgramCounter
-    private WebFile  _progCounterFile;
-
-    // The current ProgramCounter line
-    private int  _progCounterLine;
-
     // The limit to the number of running processes
     private int  _procLimit = 1;
 
@@ -37,14 +30,14 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     private Runnable _procTreeUpdater, _procTreeUpdaterImpl = () -> { resetLater(); _procTreeUpdater = null; };
 
     // Images
-    public static Image ProcImage = Image.getImageForClassResource(ProcPane.class, "Process.png");
-    public static Image ThreadImage = Image.getImageForClassResource(ProcPane.class, "Thread.png");
-    public static Image StackFrameImage = Image.getImageForClassResource(ProcPane.class, "StackFrame.png");
+    public static Image ProcImage = Image.getImageForClassResource(DebugFramesPane.class, "Process.png");
+    public static Image ThreadImage = Image.getImageForClassResource(DebugFramesPane.class, "Thread.png");
+    public static Image StackFrameImage = Image.getImageForClassResource(DebugFramesPane.class, "StackFrame.png");
 
     /**
-     * Creates a new ProcPane.
+     * Constructor.
      */
-    public ProcPane(DebugTool aDebugTool)
+    public DebugFramesPane(DebugTool aDebugTool)
     {
         super(aDebugTool.getWorkspacePane());
         _debugTool = aDebugTool;
@@ -121,49 +114,12 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     }
 
     /**
-     * Executes a proc and adds it to list.
-     */
-    public void execProc(RunApp aProc)
-    {
-        setSelApp(null);
-        addProc(aProc);
-        setSelApp(aProc);
-        ToolTray bottomTray = _workspaceTools.getBottomTray();
-        bottomTray.setSelToolForClass(RunConsole.class);
-        aProc.exec();
-    }
-
-    /**
-     * Returns the selected app.
-     */
-    public RunApp getSelApp()  { return _debugTool.getSelApp(); }
-
-    /**
-     * Sets the selected app.
-     */
-    public void setSelApp(RunApp aProc)  { _debugTool.setSelApp(aProc); }
-
-    /**
-     * Returns the debug process.
-     */
-    public DebugApp getSelDebugApp()  { return _debugTool.getSelDebugApp(); }
-
-    /**
      * Sets the selected stack frame.
      */
     public DebugFrame getSelFrame()
     {
-        DebugApp dp = getSelDebugApp();
+        DebugApp dp = _debugTool.getSelDebugApp();
         return dp != null ? dp.getFrame() : null;
-    }
-
-    /**
-     * Returns whether selected process is running.
-     */
-    public boolean isRunning()
-    {
-        RunApp app = getSelApp();
-        return app != null && app.isRunning();
     }
 
     /**
@@ -277,7 +233,7 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
         // Set ProgramCounter file and line
         WebURL url = WebURL.getURL(path);
         WebFile file = url.getFile();
-        setProgramCounter(file, lineNum - 1);
+        _debugTool.setProgramCounter(file, lineNum - 1);
         getBrowser().setURL(url);
     }
 
@@ -300,31 +256,9 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
     public void appendErr(RunApp aProc, final String aStr)  { _debugTool.appendErr(aProc, aStr); }
 
     /**
-     * Returns the program counter for given file.
-     */
-    public int getProgramCounter(WebFile aFile)
-    {
-        return aFile == _progCounterFile ? _progCounterLine : -1;
-    }
-
-    /**
      * Sets the program counter file, line.
      */
-    public void setProgramCounter(WebFile aFile, int aLine)
-    {
-        // Store old value, set new value
-        WebFile oldPCF = _progCounterFile;
-        _progCounterFile = aFile;
-        _progCounterLine = aLine;
-
-        // Reset JavaPage.TextArea for old/new files
-        WebPage page = oldPCF != null ? getBrowser().getPageForURL(oldPCF.getURL()) : null;
-        if (page instanceof JavaPage)
-            ((JavaPage) page).getTextArea().repaint();
-        page = _progCounterFile != null ? getBrowser().getPageForURL(_progCounterFile.getURL()) : null;
-        if (page instanceof JavaPage)
-            ((JavaPage) page).getTextArea().repaint();
-    }
+    public void setProgramCounter(WebFile aFile, int aLine)  { _debugTool.setProgramCounter(aFile, aLine); }
 
     /**
      * Initialize UI.
@@ -367,7 +301,7 @@ public class ProcPane extends WorkspaceTool implements RunApp.AppListener {
         if (anEvent.equals("ProcTree")) {
             Object item = anEvent.getSelItem();
             if (item instanceof RunApp)
-                setSelApp((RunApp) item);
+                _debugTool.setSelApp((RunApp) item);
             else if (item instanceof DebugFrame) {
                 DebugFrame frame = (DebugFrame) item;
                 frame.select();

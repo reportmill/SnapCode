@@ -28,14 +28,20 @@ public class DebugTool extends WorkspaceTool {
     // Whether Console needs to be reset
     private boolean _resetConsole;
 
-    // The ProcPane manages run/debug processes
-    private ProcPane  _procPane;
+    // The DebugFramesPane
+    private DebugFramesPane _debugFramesPane;
 
     // The DebugVarsPane
     private DebugVarsPane _debugVarsPane;
 
     // The DebugExprsPane
     private DebugExprsPane _debugExprsPane;
+
+    // The file that currently has the ProgramCounter
+    private WebFile  _progCounterFile;
+
+    // The current ProgramCounter line
+    private int  _progCounterLine;
 
     // The last executed file
     private static WebFile  _lastRunFile;
@@ -48,7 +54,7 @@ public class DebugTool extends WorkspaceTool {
         super(workspacePane);
 
         // Create parts
-        _procPane = new ProcPane(this);
+        _debugFramesPane = new DebugFramesPane(this);
         _debugVarsPane = new DebugVarsPane(this);
         _debugExprsPane = new DebugExprsPane(this);
     }
@@ -73,6 +79,33 @@ public class DebugTool extends WorkspaceTool {
      * Returns the debug app.
      */
     public DebugApp getSelDebugApp()  { return _selApp instanceof DebugApp ? (DebugApp) _selApp : null; }
+
+    /**
+     * Returns the program counter for given file.
+     */
+    public int getProgramCounter(WebFile aFile)
+    {
+        return aFile == _progCounterFile ? _progCounterLine : -1;
+    }
+
+    /**
+     * Sets the program counter file, line.
+     */
+    public void setProgramCounter(WebFile aFile, int aLine)
+    {
+        // Store old value, set new value
+        WebFile oldPCF = _progCounterFile;
+        _progCounterFile = aFile;
+        _progCounterLine = aLine;
+
+        // Reset JavaPage.TextArea for old/new files
+        WebPage page = oldPCF != null ? getBrowser().getPageForURL(oldPCF.getURL()) : null;
+        if (page instanceof JavaPage)
+            ((JavaPage) page).getTextArea().repaint();
+        page = _progCounterFile != null ? getBrowser().getPageForURL(_progCounterFile.getURL()) : null;
+        if (page instanceof JavaPage)
+            ((JavaPage) page).getTextArea().repaint();
+    }
 
     /**
      * Returns whether selected process is terminated.
@@ -104,7 +137,7 @@ public class DebugTool extends WorkspaceTool {
     /**
      * Returns the processes pane.
      */
-    public ProcPane getProcPane()  { return _procPane; }
+    public DebugFramesPane getProcPane()  { return _debugFramesPane; }
 
     /**
      * Returns the DebugVarsPane.
@@ -223,8 +256,20 @@ public class DebugTool extends WorkspaceTool {
         }
 
         // Create RunApp and exec
-        ProcPane procPane = getProcPane();
-        procPane.execProc(proc);
+        execProc(proc);
+    }
+
+    /**
+     * Executes a proc and adds it to list.
+     */
+    public void execProc(RunApp aProc)
+    {
+        setSelApp(null);
+        _debugFramesPane.addProc(aProc);
+        setSelApp(aProc);
+        ToolTray bottomTray = _workspaceTools.getBottomTray();
+        bottomTray.setSelToolForClass(RunConsole.class);
+        aProc.exec();
     }
 
     /**
@@ -241,7 +286,7 @@ public class DebugTool extends WorkspaceTool {
         rowView.setBorder(Color.GRAY8, 1);
 
         // Add ProcPane
-        View procPaneUI = _procPane.getUI();
+        View procPaneUI = _debugFramesPane.getUI();
         CollapseView processToolUI = new CollapseView("Frames", procPaneUI);
         mainColView.addChild(processToolUI);
 
@@ -274,7 +319,7 @@ public class DebugTool extends WorkspaceTool {
         setViewEnabled("StepReturnButton", paused);
         setViewEnabled("RunToLineButton", paused);
 
-        _procPane.resetLater();
+        _debugFramesPane.resetLater();
         _debugVarsPane.resetLater();
         _debugExprsPane.resetLater();
 
@@ -350,7 +395,7 @@ public class DebugTool extends WorkspaceTool {
         if (pc.getPropName() != Breakpoints.ITEMS_PROP) return;
 
         // Get processes
-        ProcPane procPane = getProcPane();
+        DebugFramesPane procPane = getProcPane();
         List<RunApp> processes = procPane.getProcs();
 
         // Handle Breakpoint added

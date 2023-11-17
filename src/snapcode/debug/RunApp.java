@@ -12,50 +12,50 @@ import java.util.List;
 public class RunApp {
 
     // The URL
-    WebURL _url;
+    private WebURL _url;
 
     // The args
-    String[] _args;
+    private String[] _args;
 
     // Main class name
-    String _mainClassName;
+    private String _mainClassName;
 
     // Class path (also in vmArguments)
-    String _classPath;
+    private String _classPath;
 
     // VM args
-    String _vmArgs;
+    private String _vmArgs;
 
     // Command args
-    String _appArgs;
+    private String _appArgs;
 
     // The working directory
-    File _workDir;
+    private File _workDir;
 
     // The process
-    Process _process;
+    protected Process _process;
 
     // The writer to process stdin
-    BufferedWriter _stdInWriter;
+    private BufferedWriter _stdInWriter;
 
     // The readers
-    StreamReader _outReader, _errReader;
+    private StreamReader _outReader, _errReader;
 
     // String buffer for output text
-    List<Output> _output = new ArrayList();
+    private List<Output> _output = new ArrayList<>();
 
     // Whether app is running
-    boolean _running;
+    protected boolean _running;
 
     // Whether app has finished running
-    boolean _terminated;
+    protected boolean _terminated;
 
     // Whether error was printed
-    boolean _hadError;
+    private boolean _hadError;
 
     // The listener
-    AppListener _listener;
-    List<AppListener> _lsnrs = new ArrayList();
+    protected AppListener _listener;
+    private List<AppListener> _lsnrs = new ArrayList<>();
 
     /**
      * Creates a new RunApp for URL and args.
@@ -159,66 +159,42 @@ public class RunApp {
     /**
      * Returns VM arguments.
      */
-    public String getVmArgs()
-    {
-        return _vmArgs;
-    }
+    public String getVmArgs()  { return _vmArgs; }
 
     /**
      * Sets VM arguments.
      */
-    public void setVmArgs(String theArgs)
-    {
-        _vmArgs = theArgs;
-    }
+    public void setVmArgs(String theArgs)  { _vmArgs = theArgs; }
 
     /**
      * Returns program arguments.
      */
-    public String getAppArgs()
-    {
-        return _appArgs;
-    }
+    public String getAppArgs()  { return _appArgs; }
 
     /**
      * Sets program arguments.
      */
-    public void setAppArgs(String theArgs)
-    {
-        _appArgs = theArgs;
-    }
+    public void setAppArgs(String theArgs)  { _appArgs = theArgs; }
 
     /**
      * Returns the app Main class name.
      */
-    public String getMainClassName()
-    {
-        return _mainClassName;
-    }
+    public String getMainClassName()  { return _mainClassName; }
 
     /**
      * Sets the app Main class name.
      */
-    public void setMainClassName(String mainClassName)
-    {
-        this._mainClassName = mainClassName;
-    }
+    public void setMainClassName(String mainClassName)  { _mainClassName = mainClassName; }
 
     /**
      * Returns the app class path.
      */
-    public String getClassPath()
-    {
-        return _classPath;
-    }
+    public String getClassPath()  { return _classPath; }
 
     /**
      * Sets the app class path.
      */
-    public void setClassPath(String aPath)
-    {
-        _classPath = aPath;
-    }
+    public void setClassPath(String aPath)  { _classPath = aPath; }
 
     /**
      * Executes the given command + args.
@@ -244,10 +220,7 @@ public class RunApp {
     /**
      * Returns the main class url.
      */
-    public WebURL getURL()
-    {
-        return _url;
-    }
+    public WebURL getURL()  { return _url; }
 
     /**
      * Returns the name.
@@ -283,84 +256,52 @@ public class RunApp {
     /**
      * Returns the output text.
      */
-    public List<Output> getOutput()
-    {
-        return _output;
-    }
+    public List<Output> getOutput()  { return _output; }
 
     /**
      * Clears the output text.
      */
-    public void clearOutput()
-    {
-        _output.clear();
-    }
+    public void clearOutput()  { _output.clear(); }
 
     /**
      * Terminates the process.
      */
-    public void terminate()
-    {
-        _process.destroy();
-    }
+    public void terminate()  { _process.destroy(); }
 
     /**
      * Returns whether process is running.
      */
-    public boolean isRunning()
-    {
-        return _running;
-    }
+    public boolean isRunning()  { return _running; }
 
     /**
      * Returns whether process is terminated.
      */
-    public boolean isTerminated()
-    {
-        return _terminated;
-    }
+    public boolean isTerminated()  { return _terminated; }
 
     /**
      * Returns whether process is paused.
      */
-    public boolean isPaused()
-    {
-        return false;
-    }
+    public boolean isPaused()  { return false; }
 
     /**
      * Post an error message to the PrintWriter.
      */
-    public void error(String message)
-    {
-        _diagnostics.putString(message);
-    }
+    public void error(String message)  { _diagnostics.putString(message);  }
 
     /**
      * Post an error message to the PrintWriter.
      */
-    public void failure(String message)
-    {
-        _diagnostics.putString(message);
-    }
+    public void failure(String message)  { _diagnostics.putString(message); }
 
     /**
      * Post an error message to the PrintWriter.
      */
-    public void notice(String message)
-    {
-        _diagnostics.putString(message);
-    }
+    public void notice(String message)  { _diagnostics.putString(message); }
 
     /**
      * Proxies for AppOutput, AppError and Diagnostics.
      */
-    OutputListener _diagnostics = new OutputListener() {
-        public void putString(String aStr)
-        {
-            System.out.println(aStr);
-        }
-    };
+    protected OutputListener _diagnostics = str -> System.out.println(str);
 
     /**
      * Called to append to output buffer.
@@ -417,24 +358,17 @@ public class RunApp {
     /**
      * Returns whether process had error.
      */
-    public boolean hadError()
-    {
-        return _hadError;
-    }
+    public boolean hadError()  { return _hadError; }
 
     /**
      * Adds a breakpoint.
      */
-    public void addBreakpoint(Breakpoint aBP)
-    {
-    }
+    public void addBreakpoint(Breakpoint aBP)  { }
 
     /**
      * Removes a breakpoint.
      */
-    public void removeBreakpoint(Breakpoint aBP)
-    {
-    }
+    public void removeBreakpoint(Breakpoint aBP)  { }
 
     /**
      * Sets listener.
@@ -474,11 +408,8 @@ public class RunApp {
 
         // App started, paused, resumed, exited
         void appStarted(RunApp em);
-
         void appPaused(DebugApp em);
-
         void appResumed(DebugApp em);
-
         void appExited(RunApp em);
 
         // FrameChanged
@@ -489,76 +420,13 @@ public class RunApp {
 
         // Notifications for Breakpoints, Watchpoints and Exception points.
         void requestSet(BreakpointReq e);
-
         void requestDeferred(BreakpointReq e);
-
         void requestDeleted(BreakpointReq e);
-
         void requestError(BreakpointReq e);
 
         // Notification for debugger output
         void appendOut(RunApp aProc, String aStr);
-
         void appendErr(RunApp aProc, String aStr);
-    }
-
-    /**
-     * A listener for JDI events (with embedded adapter).
-     */
-    public static class AppAdapter implements AppListener {
-
-        // App started, paused, resumed, exited
-        public void appStarted(RunApp em)
-        {
-        }
-
-        public void appPaused(DebugApp em)
-        {
-        }
-
-        public void appResumed(DebugApp em)
-        {
-        }
-
-        public void appExited(RunApp em)
-        {
-        }
-
-        // FrameChanged
-        public void frameChanged(DebugApp anApp)
-        {
-        }
-
-        // DebugEvent
-        public void processDebugEvent(DebugApp anApp, DebugEvent e)
-        {
-        }
-
-        // Notifications for Breakpoints, Watchpoints and Exception points.
-        public void requestSet(BreakpointReq e)
-        {
-        }
-
-        public void requestDeferred(BreakpointReq e)
-        {
-        }
-
-        public void requestDeleted(BreakpointReq e)
-        {
-        }
-
-        public void requestError(BreakpointReq e)
-        {
-        }
-
-        // Notification for debugger output
-        public void appendOut(RunApp aProc, String aStr)
-        {
-        }
-
-        public void appendErr(RunApp aProc, String aStr)
-        {
-        }
     }
 
     /**

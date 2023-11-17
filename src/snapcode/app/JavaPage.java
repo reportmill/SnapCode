@@ -3,8 +3,8 @@ import javakit.parse.*;
 import snap.text.TextDoc;
 import snap.view.TextArea;
 import snap.view.ViewEvent;
+import snapcode.apptools.DebugTool;
 import snapcode.apptools.EvalTool;
-import snapcode.apptools.ProcPane;
 import snapcode.apptools.SearchTool;
 import snapcode.javatext.DeclMatcher;
 import snapcode.project.JavaAgent;
@@ -434,8 +434,8 @@ public class JavaPage extends WebPage {
     {
         WorkspacePane workspacePane = getWorkspacePane();
         WorkspaceTools workspaceTools = workspacePane.getWorkspaceTools();
-        ProcPane procPane = workspaceTools.getToolForClass(ProcPane.class);
-        return procPane != null ? procPane.getProgramCounter(getFile()) : -1;
+        DebugTool debugTool = workspaceTools.getToolForClass(DebugTool.class);
+        return debugTool != null ? debugTool.getProgramCounter(getFile()) : -1;
     }
 
     /**
