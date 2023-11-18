@@ -1,5 +1,4 @@
 package snapcode.apptools;
-import snap.gfx.Color;
 import snap.props.PropChange;
 import snap.util.FilePathUtils;
 import snap.util.ListUtils;
@@ -12,7 +11,6 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.app.*;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -328,8 +326,6 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
         setSelApp(null);
         addProc(aProc);
         setSelApp(aProc);
-        ToolTray bottomTray = _workspaceTools.getBottomTray();
-        bottomTray.setSelToolForClass(RunConsole.class);
         aProc.exec();
     }
 
@@ -342,10 +338,6 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
         // Get main col view
         ColView mainColView = getUI(ColView.class);
 
-        // Config RowView
-        RowView rowView = getView("RowView", RowView.class);
-        rowView.setBorder(Color.GRAY8, 1);
-
         // Config AppsComboBox, ThreadsComboBox
         ComboBox<RunApp> appsComboBox = getView("AppsComboBox", ComboBox.class);
         appsComboBox.setItemTextFunction(RunApp::getName);
@@ -353,9 +345,9 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
         threadsComboBox.setItemTextFunction(DebugThread::getName);
 
         // Add ProcPane
-        View procPaneUI = _debugFramesPane.getUI();
-        CollapseView processToolUI = new CollapseView("Frames", procPaneUI);
-        mainColView.addChild(processToolUI);
+        View debugFramesUI = _debugFramesPane.getUI();
+        CollapseView debugFramesUIBox = new CollapseView("Frames", debugFramesUI);
+        mainColView.addChild(debugFramesUIBox);
 
         // Add DebugVars
         View debugVarsUI = _debugVarsPane.getUI();

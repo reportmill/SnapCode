@@ -212,38 +212,8 @@ public class LineHeadView extends View {
     protected void processEvent(ViewEvent anEvent)
     {
         // Handle MouseClick
-        if (anEvent.isMouseClick()) {
-
-            // Get reversed markers (so click effects top marker)
-            LineMarker<?>[] markers = getMarkers().clone();
-            ArrayUtils.reverse(markers);
-            double x = anEvent.getX(), y = anEvent.getY();
-
-            // Handle double click
-            if (anEvent.getClickCount() == 2) {
-                for (LineMarker<?> marker : markers) {
-                    if (marker.contains(x, y) && marker instanceof LineMarker.BreakpointMarker) {
-                        marker.mouseClicked(anEvent);
-                        return;
-                    }
-                }
-
-                TextBlock textBlock = _textArea.getTextBlock();
-                TextLine line = textBlock.getLineForY(anEvent.getY());
-                int lineIndex = line.getIndex();
-                _textArea.addBreakpoint(lineIndex);
-                resetAll();
-                return;
-            }
-
-            // Handle normal click
-            for (LineMarker<?> marker : markers) {
-                if (marker.contains(x, y)) {
-                    marker.mouseClicked(anEvent);
-                    return;
-                }
-            }
-        }
+        if (anEvent.isMouseClick())
+            handleMouseClick(anEvent);
 
         // Handle MouseMoved
         else if (anEvent.isMouseMove()) {
@@ -257,6 +227,33 @@ public class LineHeadView extends View {
             }
             setCursor(Cursor.DEFAULT);
         }
+    }
+
+    /**
+     * Handle mouse click.
+     */
+    private void handleMouseClick(ViewEvent anEvent)
+    {
+        // Get reversed markers (so click effects top marker)
+        LineMarker<?>[] markers = getMarkers().clone();
+        ArrayUtils.reverse(markers);
+        double eventX = anEvent.getX();
+        double eventY = anEvent.getY();
+
+        // If mouse hits marker, forward to marker
+        for (LineMarker<?> marker : markers) {
+            if (marker.contains(eventX, eventY)) {
+                marker.mouseClicked(anEvent);
+                return;
+            }
+        }
+
+        // Add breakpoint
+        TextBlock textBlock = _textArea.getTextBlock();
+        TextLine textLine = textBlock.getLineForY(anEvent.getY());
+        int lineIndex = textLine.getIndex();
+        _textArea.addBreakpoint(lineIndex);
+        resetAll();
     }
 
     /**

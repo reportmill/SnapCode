@@ -32,8 +32,8 @@ public class DebugFramesPane extends WorkspaceTool {
      */
     public DebugFrame getSelFrame()
     {
-        DebugApp dp = _debugTool.getSelDebugApp();
-        return dp != null ? dp.getFrame() : null;
+        DebugApp debugApp = _debugTool.getSelDebugApp();
+        return debugApp != null ? debugApp.getFrame() : null;
     }
 
     /**

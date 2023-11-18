@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView PrefWidth="400" FillWidth="true">
   <font name="Arial" size="12" />
-  <RowView Name="RowView" MinHeight="32" Spacing="4">
+  <RowView MinHeight="32" Spacing="4">
     <Label Margin="0,8,0,8" text="Debug:" />
     <Button Name="DebugButton" PrefWidth="24" PrefHeight="24" Image="Debug.gif" ShowBorder="false" />
     <Separator PrefWidth="8" PrefHeight="24" Vertical="true" />
@@ -15,6 +15,9 @@
     <Button Name="RunToLineButton" PrefWidth="24" PrefHeight="24" image="RunToLine.png" ShowBorder="false" />
     <Button Name="HideButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" Text="–" ShowBorder="false" />
   </RowView>
+  <RectView PrefHeight="1">
+    <Fill Color="#CD" />
+  </RectView>
   <RowView Name="AppsBox" Margin="10" Spacing="5">
     <Label Text="Selected App:" />
     <ComboBox Name="AppsComboBox" PrefWidth="200" PrefHeight="25" />

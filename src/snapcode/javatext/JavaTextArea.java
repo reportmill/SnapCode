@@ -47,13 +47,15 @@ public class JavaTextArea extends TextArea {
     // Constants
     protected static String INDENT_STRING = "    ";
     private static JavaTextDoc DUMMY_TEXT_DOC;
-    private Color ERROR_TEXT_COLOR = Color.RED.brighter().brighter();
+    private static final Color ERROR_TEXT_COLOR = Color.RED.brighter().brighter();
+    private static final Color PROGRAM_COUNTER_LINE_HIGHLITE_COLOR = new Color(199, 218, 175, 200);
 
     /**
      * Creates a new JavaTextArea.
      */
     public JavaTextArea()
     {
+        super();
         setFill(Color.WHITE);
         setPadding(5, 5, 5,5);
         setEditable(true);
@@ -368,9 +370,9 @@ public class JavaTextArea extends TextArea {
         // Paint program counter
         int progCounterLine = getProgramCounterLine();
         if (progCounterLine >= 0 && progCounterLine < getLineCount()) {
-            TextLine line = getLine(progCounterLine);
-            aPntr.setPaint(new Color(199, 218, 175, 200));
-            aPntr.fillRect(line.getX(), line.getY() + .5, line.getWidth(), line.getHeight());
+            TextLine textLine = getLine(progCounterLine);
+            aPntr.setPaint(PROGRAM_COUNTER_LINE_HIGHLITE_COLOR);
+            aPntr.fillRect(0, textLine.getTextY() - 1, getWidth(), textLine.getHeight() + 3);
         }
 
         // Paint selected tokens highlight rects

@@ -70,14 +70,12 @@ public abstract class LineMarker<T> extends Rect {
             super(aJTP, aTarget);
             _superDecl = aTarget.getSuperDecl();
             _interface = aTarget.isSuperDeclInterface();
+            _image = isInterface() ? IMPLEMENTS_IMAGE : OVERRIDE_IMAGE;
 
-            // Get/set Y from line
+            // Set Y to center image in line
             int lineIndex = aTarget.getLineIndex();
             TextLine textLine = _textArea.getLine(lineIndex);
-            setY(Math.round(textLine.getY()));
-
-            // Set image
-            _image = isInterface() ? IMPLEMENTS_IMAGE : OVERRIDE_IMAGE;
+            y = getYForTextLineAndImage(textLine, _image);
         }
 
         /**
@@ -118,14 +116,12 @@ public abstract class LineMarker<T> extends Rect {
         {
             super(aJTP, aTarget);
             _isError = aTarget.isError();
+            _image = _isError ? ERROR_IMAGE : WARNING_IMAGE;
 
-            // Get/set Y from line
+            // Set Y to center image in line
             int charIndex = aTarget.getEnd();
             TextLine textLine = _textArea.getLineForCharIndex(charIndex);
-            setY(Math.round(textLine.getTextY()));
-
-            // Set image
-            _image = _isError ? ERROR_IMAGE : WARNING_IMAGE;
+            y = getYForTextLineAndImage(textLine, _image);
         }
 
         /**
@@ -153,9 +149,11 @@ public abstract class LineMarker<T> extends Rect {
         public BreakpointMarker(JavaTextPane aJTP, Breakpoint aBP)
         {
             super(aJTP, aBP);
-            TextLine line = _textArea.getLine(aBP.getLine());
-            setY(Math.round(line.getY()));
             _image = BREAKPOINT_IMAGE;
+
+            // Set Y to center image in line
+            TextLine textLine = _textArea.getLine(aBP.getLine());
+            y = getYForTextLineAndImage(textLine, _image);
         }
 
         /**
@@ -168,9 +166,19 @@ public abstract class LineMarker<T> extends Rect {
          */
         public void mouseClicked(ViewEvent anEvent)
         {
-            if (anEvent.getClickCount() == 2)
-                _textArea.removeBreakpoint(_target);
+            _textArea.removeBreakpoint(_target);
             _textPane._lineNumView.resetAll();
         }
+    }
+
+    /**
+     * Returns the Y value to center given image in given line.
+     */
+    private static double getYForTextLineAndImage(TextLine textLine, Image image)
+    {
+        double lineY = textLine.getTextY();
+        double lineH = textLine.getHeight();
+        double imageH = image.getHeight();
+        return Math.round(lineY + (lineH - imageH) / 2);
     }
 }

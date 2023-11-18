@@ -278,7 +278,7 @@ public class PagePane extends ViewOwner {
         Tab sampleTab = new Tab();
         sampleTab.setTitle("XXX");
         _tabBar.addTab(sampleTab);
-        _tabBar.setPrefHeight(_tabBar.getPrefHeight());
+        _tabBar.setPrefHeight(_tabBar.getPrefHeight() + 2);
         _tabBar.removeTab(0);
 
         // Create browser
