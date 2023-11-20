@@ -151,11 +151,6 @@ public class EvalTool extends WorkspaceTool {
         scrollView.setBorder(null);
         scrollView.setContent(consoleView);
 
-        // Set RunButton, DeleteButton image
-        getView("RunButton", ButtonBase.class).setImageAfter(getImage("pkg.images/Run.png"));
-        getView("RunButton", ButtonBase.class).getLabel().setTextFill(Color.GRAY);
-        getView("DeleteButton", ButtonBase.class).setImage(Image.getImageForClassResource(TextPane.class, "pkg.images/Edit_Delete.png"));
-
         // Get ExtendedRunView
         _extendedRunView = getView("ExtendedRunView");
         _extendedRunView.setVisible(false);
@@ -173,7 +168,8 @@ public class EvalTool extends WorkspaceTool {
     protected void resetUI()
     {
         // Update RunButton, AutoRunCheckBox
-        setViewText("RunButton", !_evalRunner.isRunning() ? "Run" : "Cancel");
+        setViewEnabled("RunButton", !isRunning());
+        setViewEnabled("TerminateButton", isRunning());
         setViewValue("AutoRunCheckBox", isAutoRun());
     }
 
@@ -183,12 +179,11 @@ public class EvalTool extends WorkspaceTool {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle RunButton
-        if (anEvent.equals("RunButton")) {
-            if (!isRunning())
-                runApp(false);
-            else cancelRun();
-        }
+        // Handle RunButton, TerminateButton
+        if (anEvent.equals("RunButton"))
+            runApp(false);
+        else if (anEvent.equals("TerminateButton"))
+            cancelRun();
 
         // Handle AutoRunCheckBox
         else if (anEvent.equals("AutoRunCheckBox")) {
@@ -197,8 +192,8 @@ public class EvalTool extends WorkspaceTool {
                 runApp(true);
         }
 
-        // Handle DeleteButton
-        else if (anEvent.equals("DeleteButton"))
+        // Handle ClearButton
+        else if (anEvent.equals("ClearButton"))
             resetDisplay();
 
         // Handle InputTextField: Show input string, add to runner input and clear text
