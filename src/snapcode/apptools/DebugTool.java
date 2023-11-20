@@ -470,7 +470,7 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
      * Override for title.
      */
     @Override
-    public String getTitle()  { return "Run / Debug"; }
+    public String getTitle()  { return "Debug"; }
 
     /**
      * Called when Workspace.BreakPoints change.

@@ -200,22 +200,13 @@ public class HelpTool extends WorkspaceTool {
         if (javaPage == null)
             return;
 
-        // If current line not empty, select end
+        // Set help code in text area
         JavaTextArea javaTextArea = javaPage.getTextArea();
-        if (!javaTextArea.getSel().isEmpty() || javaTextArea.getSel().getStartLine().length() > 1)
-            javaTextArea.setSel(javaTextArea.length(), javaTextArea.length());
-
-        // Add help
+        javaTextArea.setSel(0, javaTextArea.length());
         javaTextArea.replaceCharsWithContent(helpCode);
 
-        // Run app
-        EvalTool evalTool = _workspaceTools.getToolForClass(EvalTool.class);
-        if (evalTool != null) {
-
-            _workspaceTools.showToolForClass(EvalTool.class);
-            if (evalTool.isAutoRun())
-                evalTool.runApp(false);
-        }
+        // Show run console
+        _workspaceTools.showToolForClass(EvalTool.class);
 
         // Focus on text area
         javaTextArea.requestFocus();

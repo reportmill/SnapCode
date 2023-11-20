@@ -153,7 +153,7 @@ public class App {
         WorkspacePane workspacePane = WindowView.getOpenWindowOwner(WorkspacePane.class);
         if (workspacePane != null) {
             EvalTool evalTool = workspacePane.getWorkspaceTools().getToolForClass(EvalTool.class);
-            evalTool.runApp(true);
+            evalTool.runApp();
         }
     }
 

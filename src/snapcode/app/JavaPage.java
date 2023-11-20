@@ -126,7 +126,7 @@ public class JavaPage extends WebPage {
             WorkspaceTools workspaceTools = workspacePane.getWorkspaceTools();
             EvalTool evalTool = workspaceTools.getToolForClass(EvalTool.class);
             if (evalTool != null)
-                evalTool.runApp(true);
+                evalTool.runApp();
         }
     }
 

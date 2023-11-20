@@ -311,8 +311,8 @@ public class WorkspaceTools {
 
         // Kick off run
         EvalTool evalTool = getToolForClass(EvalTool.class);
-        if (evalTool != null && !evalTool.isAutoRun())
-            evalTool.runApp(false);
+        if (evalTool != null)
+            evalTool.runApp();
     }
 
     /**

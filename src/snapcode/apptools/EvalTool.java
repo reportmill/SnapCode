@@ -1,14 +1,7 @@
 package snapcode.apptools;
 import snapcharts.repl.Console;
 import snapcharts.repl.ReplObject;
-import snapcode.javatext.JavaTextArea;
-import javakit.parse.JMethodDecl;
-import javakit.parse.JNode;
-import snap.gfx.Color;
-import snap.gfx.Image;
-import snap.text.TextLine;
 import snap.view.*;
-import snap.viewx.TextPane;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 
@@ -16,12 +9,6 @@ import snapcode.app.WorkspaceTool;
  * This class manages the run/eval UI.
  */
 public class EvalTool extends WorkspaceTool {
-
-    // Whether to auto run code
-    private boolean  _autoRun;
-
-    // Whether auto run was requested
-    protected boolean  _autoRunRequested;
 
     // EvalRunner
     protected EvalToolRunner  _evalRunner;
@@ -56,21 +43,10 @@ public class EvalTool extends WorkspaceTool {
     }
 
     /**
-     * Returns whether to automatically run when enter key is pressed in edit pane.
-     */
-    public boolean isAutoRun()  { return _autoRun; }
-
-    /**
-     * Sets whether to automatically run when enter key is pressed in edit pane.
-     */
-    public void setAutoRun(boolean aValue)  { _autoRun = aValue; }
-
-    /**
      * Runs Java code.
      */
-    public void runApp(boolean autoRunRequested)
+    public void runApp()
     {
-        _autoRunRequested = autoRunRequested;
         if (_resetEvalValuesRun == null)
             runLater(_resetEvalValuesRun = _resetEvalValuesRunReal);
         resetLater();
@@ -84,7 +60,6 @@ public class EvalTool extends WorkspaceTool {
         try { _evalRunner.runApp(); }
         finally {
             _resetEvalValuesRun = null;
-            _autoRunRequested = false;
         }
     }
 
@@ -110,30 +85,6 @@ public class EvalTool extends WorkspaceTool {
         setShowExtendedRunUI(false);
         setShowCancelledRunUI(false);
         _console.resetConsole();
-    }
-
-    /**
-     * Triggers auto run if it makes sense. Called when newline is entered.
-     */
-    public void autoRunIfDesirable(JavaTextArea textArea)
-    {
-        // If AutoRun not set, just return
-        if (!isAutoRun())
-            return;
-
-        // If inside method decl, just return
-        JNode selNode = textArea.getSelNode();
-        if (selNode != null && selNode.getParent(JMethodDecl.class) != null)
-            return;
-
-        // If previous line is empty whitespace, just return
-        TextLine textLine = textArea.getSel().getStartLine();
-        TextLine prevLine = textLine.getPrevious();
-        if (prevLine.isWhiteSpace())
-            return;
-
-        // Trigger auto run
-        runApp(true);
     }
 
     /**
@@ -167,10 +118,9 @@ public class EvalTool extends WorkspaceTool {
     @Override
     protected void resetUI()
     {
-        // Update RunButton, AutoRunCheckBox
+        // Update RunButton, TerminateButton
         setViewEnabled("RunButton", !isRunning());
         setViewEnabled("TerminateButton", isRunning());
-        setViewValue("AutoRunCheckBox", isAutoRun());
     }
 
     /**
@@ -181,16 +131,9 @@ public class EvalTool extends WorkspaceTool {
     {
         // Handle RunButton, TerminateButton
         if (anEvent.equals("RunButton"))
-            runApp(false);
+            runApp();
         else if (anEvent.equals("TerminateButton"))
             cancelRun();
-
-        // Handle AutoRunCheckBox
-        else if (anEvent.equals("AutoRunCheckBox")) {
-            setAutoRun(!isAutoRun());
-            if (isAutoRun())
-                runApp(true);
-        }
 
         // Handle ClearButton
         else if (anEvent.equals("ClearButton"))
@@ -203,6 +146,9 @@ public class EvalTool extends WorkspaceTool {
             _evalRunner.addSystemInputString(inputString + '\n');
             setViewValue("InputTextField", null);
         }
+
+        // Do normal version
+        else super.respondUI(anEvent);
     }
 
     /**
@@ -223,8 +169,6 @@ public class EvalTool extends WorkspaceTool {
             _cancelledRunView.setVisible(aValue);
         if (aValue) {
             String text = "Last run cancelled";
-            if (_autoRunRequested)
-                text += " - exceeded AutoRun timeout";
             if (_console.getItemCount() > EvalToolConsole.MAX_OUTPUT_COUNT)
                 text += " - Too much output";
             setViewText("CancelledRunLabel", text);
@@ -235,5 +179,5 @@ public class EvalTool extends WorkspaceTool {
      * Title.
      */
     @Override
-    public String getTitle()  { return _workspace.isUseRealCompiler() ? "Run" : "Run / Debug"; }
+    public String getTitle()  { return "Run / Console"; }
 }

@@ -159,12 +159,6 @@ public class EvalToolRunner {
         if (_runAppThread == null)
             return;
 
-        // If AutoRunRequested, just cancel run
-        if (_evalTool._autoRunRequested) {
-            cancelRun();
-            return;
-        }
-
         // Show extended run UI
         _evalTool.setShowExtendedRunUI(true);
     }

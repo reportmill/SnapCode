@@ -3,17 +3,17 @@
   <font name="Arial" size="12" />
   <RowView MinHeight="32" Spacing="4">
     <Label Margin="0,8,0,8" text="Debug:" />
-    <Button Name="DebugButton" PrefWidth="24" PrefHeight="24" Image="Debug.gif" ShowBorder="false" />
+    <Button Name="DebugButton" PrefWidth="24" PrefHeight="24" Image="Debug.gif" ShowArea="false" />
     <Separator PrefWidth="8" PrefHeight="24" Vertical="true" />
-    <Button Name="ResumeButton" PrefWidth="24" PrefHeight="24" image="Resume.gif" ShowBorder="false" />
-    <Button Name="SuspendButton" PrefWidth="24" PrefHeight="24" image="Suspend.gif" ShowBorder="false" />
-    <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" image="Terminate.gif" ShowBorder="false" />
+    <Button Name="ResumeButton" PrefWidth="24" PrefHeight="24" image="Resume.gif" ShowArea="false" />
+    <Button Name="SuspendButton" PrefWidth="24" PrefHeight="24" image="Suspend.gif" ShowArea="false" />
+    <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" image="Terminate.gif" ShowArea="false" />
     <Separator PrefWidth="8" PrefHeight="24" Vertical="true" />
-    <Button Name="StepIntoButton" PrefWidth="24" PrefHeight="24" image="StepInto.gif" ShowBorder="false" />
-    <Button Name="StepOverButton" PrefWidth="24" PrefHeight="24" image="StepOver.gif" ShowBorder="false" />
-    <Button Name="StepReturnButton" PrefWidth="24" PrefHeight="24" image="StepReturn.gif" ShowBorder="false" />
-    <Button Name="RunToLineButton" PrefWidth="24" PrefHeight="24" image="RunToLine.png" ShowBorder="false" />
-    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" Text="–" ShowBorder="false" />
+    <Button Name="StepIntoButton" PrefWidth="24" PrefHeight="24" image="StepInto.gif" ShowArea="false" />
+    <Button Name="StepOverButton" PrefWidth="24" PrefHeight="24" image="StepOver.gif" ShowArea="false" />
+    <Button Name="StepReturnButton" PrefWidth="24" PrefHeight="24" image="StepReturn.gif" ShowArea="false" />
+    <Button Name="RunToLineButton" PrefWidth="24" PrefHeight="24" image="RunToLine.png" ShowArea="false" />
+    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Text="–" ShowArea="false" />
   </RowView>
   <RectView PrefHeight="1">
     <Fill Color="#CD" />
