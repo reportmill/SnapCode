@@ -1,6 +1,5 @@
 package snapcode.debug;
 import snapcode.project.Breakpoint;
-import snap.util.StringUtils;
 import snap.web.WebURL;
 import java.io.*;
 import java.util.ArrayList;
@@ -9,7 +8,7 @@ import java.util.List;
 /**
  * A class to run an external process.
  */
-public class RunApp {
+public abstract class RunApp {
 
     // The URL
     private WebURL _url;
@@ -32,30 +31,27 @@ public class RunApp {
     // The working directory
     private File _workDir;
 
-    // The process
-    protected Process _process;
-
-    // The writer to process stdin
-    private BufferedWriter _stdInWriter;
-
-    // The readers
-    private StreamReader _outReader, _errReader;
-
     // String buffer for output text
-    private List<Output> _output = new ArrayList<>();
+    protected List<Output> _output = new ArrayList<>();
 
     // Whether app is running
     protected boolean _running;
+
+    // Whether app has been paused
+    protected boolean _paused;
 
     // Whether app has finished running
     protected boolean _terminated;
 
     // Whether error was printed
-    private boolean _hadError;
+    protected boolean _hadError;
 
     // The listener
     protected AppListener _listener;
-    private List<AppListener> _lsnrs = new ArrayList<>();
+    protected List<AppListener> _lsnrs = new ArrayList<>();
+
+    // Proxies for AppOutput, AppError and Diagnostics.
+    protected OutputListener _diagnostics = str -> System.out.println(str);
 
     /**
      * Creates a new RunApp for URL and args.
@@ -67,6 +63,11 @@ public class RunApp {
     }
 
     /**
+     * Returns the args.
+     */
+    public String[] getArgs()  { return _args; }
+
+    /**
      * Sets DebugApp launch args.
      */
     public boolean setArgs(String[] argv)
@@ -75,7 +76,10 @@ public class RunApp {
         _args = argv;
 
         // Declare/initialize some variables
-        String clsName = "", classPath = "", javaArgs = "", progArgs = "";
+        String className = "";
+        String classPath = "";
+        String javaArgs = "";
+        String progArgs = "";
 
         // Iterate over args
         for (int i = 0; i < argv.length; i++) {
@@ -127,7 +131,7 @@ public class RunApp {
 
             // Everything from here is part of the command line
             else {
-                clsName = token;
+                className = token;
                 for (i++; i < argv.length; i++) progArgs += argv[i] + " ";
                 break;
             }
@@ -136,12 +140,17 @@ public class RunApp {
         // Configure context
         setVmArgs(javaArgs);
         setAppArgs(progArgs);
-        setMainClassName(clsName);
+        setMainClassName(className);
         setClassPath(classPath);
 
         // Return true since configure was fine
         return true;
     }
+
+    /**
+     * Returns the working directory.
+     */
+    public File getWorkingDirectory()  { return _workDir; }
 
     /**
      * Sets the working directory.
@@ -197,27 +206,6 @@ public class RunApp {
     public void setClassPath(String aPath)  { _classPath = aPath; }
 
     /**
-     * Executes the given command + args.
-     */
-    public void exec()
-    {
-        // Print exec args
-        appendOut(StringUtils.join(_args, " ") + '\n');
-
-        // Run process
-        try {
-            _process = Runtime.getRuntime().exec(_args, null, _workDir);
-            _running = true;
-            startProcessReaders();
-        }
-
-        // Catch exceptions
-        catch (Throwable t) {
-            t.printStackTrace();
-        }
-    }
-
-    /**
      * Returns the main class url.
      */
     public WebURL getURL()  { return _url; }
@@ -233,27 +221,6 @@ public class RunApp {
     }
 
     /**
-     * Returns the running process.
-     */
-    public Process getProcess()
-    {
-        return _process;
-    }
-
-    /**
-     * Starts the process readers.
-     */
-    protected void startProcessReaders()
-    {
-        _outReader = new StreamReader(_process.getInputStream(), false); // Start standard out
-        _outReader.setPriority(Thread.MAX_PRIORITY - 1);
-        _outReader.start();
-        _errReader = new StreamReader(_process.getErrorStream(), true);  // Start standard err
-        _errReader.setPriority(Thread.MAX_PRIORITY - 1);
-        _errReader.start();
-    }
-
-    /**
      * Returns the output text.
      */
     public List<Output> getOutput()  { return _output; }
@@ -264,9 +231,14 @@ public class RunApp {
     public void clearOutput()  { _output.clear(); }
 
     /**
+     * Executes the given command + args.
+     */
+    public abstract void exec();
+
+    /**
      * Terminates the process.
      */
-    public void terminate()  { _process.destroy(); }
+    public abstract void terminate();
 
     /**
      * Returns whether process is running.
@@ -281,7 +253,18 @@ public class RunApp {
     /**
      * Returns whether process is paused.
      */
-    public boolean isPaused()  { return false; }
+    public boolean isPaused()
+    {
+        return _paused;
+    }
+
+    /**
+     * Sets whether process is paused.
+     */
+    protected void setPaused(boolean aVal)
+    {
+        _paused = aVal;
+    }
 
     /**
      * Post an error message to the PrintWriter.
@@ -297,11 +280,6 @@ public class RunApp {
      * Post an error message to the PrintWriter.
      */
     public void notice(String message)  { _diagnostics.putString(message); }
-
-    /**
-     * Proxies for AppOutput, AppError and Diagnostics.
-     */
-    protected OutputListener _diagnostics = str -> System.out.println(str);
 
     /**
      * Called to append to output buffer.
@@ -326,25 +304,7 @@ public class RunApp {
     /**
      * Sends input to process.
      */
-    public void sendInput(String aStr)
-    {
-        // If writer not yet set, create and set
-        if (_stdInWriter == null) {
-            OutputStream stdin = _process.getOutputStream();
-            _stdInWriter = new BufferedWriter(new OutputStreamWriter(stdin));
-        }
-
-        // Append to output
-        _output.add(new Output(aStr, false));
-
-        // Write and flush
-        try {
-            _stdInWriter.write(aStr);
-            _stdInWriter.flush();
-        } catch (Exception e) {
-            appendErr("RunApp.sendInput: Failed to write to process: " + e);
-        }
-    }
+    public abstract void sendInput(String aStr);
 
     /**
      * Called when process exited.
@@ -430,45 +390,9 @@ public class RunApp {
     }
 
     /**
-     * An inner class to read from an input stream in a separate thread to a string buffer.
-     */
-    private class StreamReader extends Thread {
-        InputStream _is;
-        boolean _isErr;
-
-        StreamReader(InputStream anIS, boolean isErr)
-        {
-            _is = anIS;
-            _isErr = isErr;
-        }
-
-        public void run()
-        {
-            try {
-                InputStreamReader isr = new InputStreamReader(_is);
-                BufferedReader br = new BufferedReader(isr);
-                char[] chars = new char[1024];
-                for (int len = br.read(chars, 0, 1024); len >= 0; len = br.read(chars, 0, 1024)) {
-                    String line = new String(chars, 0, len);
-                    if (line.length() > 0 && _isErr) _hadError = true;
-                    if (_isErr) appendErr(line);
-                    else appendOut(line);
-                }
-                if (!_terminated) {
-                    _running = false;
-                    _terminated = true;
-                    notifyAppExited();
-                }
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
-            }
-        }
-    }
-
-    /**
      * Output from app.
      */
-    public class Output {
+    public static class Output {
         String _str;
         boolean _isErr;
 
@@ -478,15 +402,8 @@ public class RunApp {
             _isErr = isErr;
         }
 
-        public String getString()
-        {
-            return _str;
-        }
+        public String getString()  { return _str; }
 
-        public boolean isErr()
-        {
-            return _isErr;
-        }
+        public boolean isErr()  { return _isErr; }
     }
-
 }

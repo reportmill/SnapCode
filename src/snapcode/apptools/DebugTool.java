@@ -303,7 +303,7 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
         // Get process
         RunApp proc;
         if (!isDebug)
-            proc = new RunApp(aURL, args);
+            proc = new RunAppBin(aURL, args);
 
         // Handle isDebug: Create DebugApp with Workspace.Breakpoints
         else {

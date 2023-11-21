@@ -16,7 +16,7 @@ import snapcode.debug.Exceptions.*;
  * This class manages a DebugApp.
  * Originated from pieces of debug.gui.ContentManager/Environment/CommandInterpreter and debug.bdi.ExecutionManager.
  */
-public class DebugApp extends RunApp {
+public class DebugApp extends RunAppBin {
 
     // The virtual machine
     VirtualMachine _vm;
@@ -26,9 +26,6 @@ public class DebugApp extends RunApp {
 
     // Current frame index
     int _frameIndex;
-
-    // Whether app has been paused
-    boolean _paused;
 
     // all specs
     //List <BreakpointReq>          _eventRequestSpecs = Collections.synchronizedList(new ArrayList());
@@ -64,24 +61,9 @@ public class DebugApp extends RunApp {
     }
 
     /**
-     * Returns whether process is paused.
-     */
-    public boolean isPaused()
-    {
-        return _paused;
-    }
-
-    /**
-     * Sets whether process is paused.
-     */
-    protected void setPaused(boolean aVal)
-    {
-        _paused = aVal;
-    }
-
-    /**
      * Start a new VM.
      */
+    @Override
     public void exec()
     {
         // Get class name (if no class name, complain and return)
@@ -96,7 +78,9 @@ public class DebugApp extends RunApp {
             endSession();
 
             // Get command line, create session and start it
-            String vmArgs = getVmArgs(), appArgs = getAppArgs(), cmdLine = cname + " " + appArgs;
+            String vmArgs = getVmArgs();
+            String appArgs = getAppArgs();
+            String cmdLine = cname + " " + appArgs;
             _vm = Utils.getVM(vmArgs, cmdLine, _diagnostics);
             _running = true;
             startSession();
@@ -112,6 +96,7 @@ public class DebugApp extends RunApp {
     /**
      * Detach.
      */
+    @Override
     public void terminate()
     {
         try {
