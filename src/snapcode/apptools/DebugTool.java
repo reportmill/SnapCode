@@ -48,12 +48,12 @@ public class DebugTool extends WorkspaceTool {
     /**
      * Returns the list of processes.
      */
-    public List<RunApp> getProcs()  { return _runTool.getProcs(); }
+    public List<RunApp> getProcs()  { return _runTool.getApps(); }
 
     /**
      * Returns the number of processes.
      */
-    public int getProcCount()  { return _runTool.getProcCount(); }
+    public int getProcCount()  { return _runTool.getAppCount(); }
 
     /**
      * Returns the selected app.

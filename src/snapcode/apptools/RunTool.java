@@ -45,12 +45,6 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     // The Console
     protected Console _console;
 
-    // For resetEntriesLater
-    private Runnable  _resetEvalValuesRun;
-
-    // For resetEntriesLater
-    private Runnable  _resetEvalValuesRunReal = () -> runAppNow();
-
     // The view that shows when there is an extended run
     private View  _extendedRunView;
 
@@ -75,34 +69,34 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     }
 
     /**
-     * Returns the list of processes.
+     * Returns the list of apps.
      */
-    public List<RunApp> getProcs()  { return _apps; }
+    public List<RunApp> getApps()  { return _apps; }
 
     /**
-     * Returns the number of processes.
+     * Returns the number of apps.
      */
-    public int getProcCount()  { return _apps.size(); }
+    public int getAppCount()  { return _apps.size(); }
 
     /**
-     * Returns the process at given index.
+     * Returns the app at given index.
      */
-    public RunApp getProc(int anIndex)  { return _apps.get(anIndex); }
+    public RunApp getApp(int anIndex)  { return _apps.get(anIndex); }
 
     /**
-     * Adds a new process.
+     * Adds a new app.
      */
-    public void addProc(RunApp aProc)
+    public void addApp(RunApp aProc)
     {
         // Remove procs that are terminated and procs beyond limit
         for (RunApp p : _apps.toArray(new RunApp[0]))
             if (p.isTerminated())
-                removeProc(p);
+                removeApp(p);
 
-        if (getProcCount() + 1 > _procLimit) {
-            RunApp proc = getProc(0);
+        if (getAppCount() + 1 > _procLimit) {
+            RunApp proc = getApp(0);
             proc.terminate();
-            removeProc(proc);
+            removeApp(proc);
         }
 
         // Add new proc
@@ -112,21 +106,21 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     }
 
     /**
-     * Removes a process.
+     * Removes the app at given index.
      */
-    public void removeProc(int anIndex)
+    public void removeApp(int anIndex)
     {
         _apps.remove(anIndex);
     }
 
     /**
-     * Removes a process.
+     * Removes the given app.
      */
-    public void removeProc(RunApp aProcess)
+    public void removeApp(RunApp aProcess)
     {
         int index = ListUtils.indexOfId(_apps, aProcess);
         if (index >= 0)
-            removeProc(index);
+            removeApp(index);
     }
 
     /**
@@ -269,7 +263,7 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     public void execProc(RunApp aProc)
     {
         setSelApp(null);
-        addProc(aProc);
+        addApp(aProc);
         setSelApp(aProc);
         aProc.exec();
     }
@@ -301,7 +295,7 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
         if (pc.getPropName() != Breakpoints.ITEMS_PROP) return;
 
         // Get processes
-        List<RunApp> processes = getProcs();
+        List<RunApp> processes = getApps();
 
         // Handle Breakpoint added
         Breakpoint addedBreakpoint = (Breakpoint) pc.getNewValue();
@@ -578,20 +572,8 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
      */
     public void runApp()
     {
-        if (_resetEvalValuesRun == null)
-            runLater(_resetEvalValuesRun = _resetEvalValuesRunReal);
+        _evalRunner.runApp();
         resetLater();
-    }
-
-    /**
-     * Reset Repl values.
-     */
-    protected void runAppNow()
-    {
-        try { _evalRunner.runApp(); }
-        finally {
-            _resetEvalValuesRun = null;
-        }
     }
 
     /**
