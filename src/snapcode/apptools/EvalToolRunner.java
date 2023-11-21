@@ -23,8 +23,8 @@ import java.io.InputStream;
  */
 public class EvalToolRunner {
 
-    // The EvalTool
-    private EvalTool _evalTool;
+    // The RunTool
+    private RunTool _runTool;
 
     // The JavaShell
     protected JavaShell _javaShell;
@@ -41,9 +41,9 @@ public class EvalToolRunner {
     /**
      * Constructor.
      */
-    public EvalToolRunner(EvalTool evalTool)
+    public EvalToolRunner(RunTool runTool)
     {
-        _evalTool = evalTool;
+        _runTool = runTool;
 
         // Create JavaShell
         _javaShell = new JavaShell();
@@ -54,7 +54,7 @@ public class EvalToolRunner {
      */
     public JavaTextPane getJavaTextPane()
     {
-        WorkspacePane workspacePane = _evalTool.getWorkspacePane();
+        WorkspacePane workspacePane = _runTool.getWorkspacePane();
         PagePane pagePane = workspacePane.getPagePane();
         WebPage selPage = pagePane.getSelPage();
         JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
@@ -67,7 +67,7 @@ public class EvalToolRunner {
     public void runApp()
     {
         // Reset display
-        _evalTool.resetDisplay();
+        _runTool.resetDisplay();
 
         // If previous thread is running, kill it
         if (_runAppThread != null) {
@@ -84,7 +84,7 @@ public class EvalToolRunner {
         ViewUtils.runDelayed(() -> handleExtendedRun(), 500);
 
         // Reset EvalPane
-        _evalTool.resetLater();
+        _runTool.resetLater();
     }
 
     /**
@@ -106,12 +106,12 @@ public class EvalToolRunner {
         // If build failed, report errors
         if (!success) {
             BuildIssue[] buildIssues = javaAgent.getBuildIssues();
-            _evalTool._console.show(buildIssues);
+            _runTool._console.show(buildIssues);
         }
 
         // If no errors, run
         else {
-            Console.setShared(_evalTool._console);
+            Console.setShared(_runTool._console);
             JFile jfile = javaAgent.getJFile();
             JStmt[] javaStmts = javaAgent.getJFileStatements();
 
@@ -127,7 +127,7 @@ public class EvalToolRunner {
         }
 
         // Remove extended run ui
-        ViewUtils.runLater(() -> _evalTool.setShowExtendedRunUI(false));
+        ViewUtils.runLater(() -> _runTool.setShowExtendedRunUI(false));
 
         // If Preempted, kick off another run
         if (_preemptedForNewRun) {
@@ -137,13 +137,13 @@ public class EvalToolRunner {
 
         // If otherwise interrupted, add last run cancelled UI
         else if (_javaShell.isInterrupted())
-            ViewUtils.runLater(() -> _evalTool.setShowCancelledRunUI(true));
+            ViewUtils.runLater(() -> _runTool.setShowCancelledRunUI(true));
 
         // Reset thread
         _runAppThread = null;
 
         // Reset EvalPane
-        _evalTool.resetLater();
+        _runTool.resetLater();
     }
 
     /**
@@ -160,7 +160,7 @@ public class EvalToolRunner {
             return;
 
         // Show extended run UI
-        _evalTool.setShowExtendedRunUI(true);
+        _runTool.setShowExtendedRunUI(true);
     }
 
     /**

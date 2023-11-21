@@ -206,7 +206,7 @@ public class HelpTool extends WorkspaceTool {
         javaTextArea.replaceCharsWithContent(helpCode);
 
         // Show run console
-        _workspaceTools.showToolForClass(EvalTool.class);
+        _workspaceTools.showToolForClass(RunTool.class);
 
         // Focus on text area
         javaTextArea.requestFocus();

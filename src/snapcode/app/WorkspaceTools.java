@@ -68,23 +68,26 @@ public class WorkspaceTools {
      */
     protected void createTools()
     {
-        // Create tools
+        // Main tools
         FilesTool filesTool = new FilesTool(_workspacePane);
         FileTreeTool fileTreeTool = new FileTreeTool(_workspacePane);
-        EvalTool evalTool = new EvalTool(_workspacePane);
+        RunTool runTool = new RunTool(_workspacePane);
+        DebugTool debugTool = new DebugTool(_workspacePane, runTool);
+
+        // Support tools
         HelpTool helpTool = new HelpTool(_workspacePane);
         CompleterTool completerTool = new CompleterTool(_workspacePane);
         ProblemsTool problemsTool = new ProblemsTool(_workspacePane);
 
         // Create tools array
-        _tools = new WorkspaceTool[] { filesTool, fileTreeTool, evalTool, helpTool, completerTool, problemsTool };
+        _tools = new WorkspaceTool[] { filesTool, fileTreeTool, runTool, debugTool, helpTool, completerTool, problemsTool };
 
         // Create LeftTray
         WorkspaceTool[] leftTools = { fileTreeTool };
         _leftTray = new ToolTray(Side.LEFT, leftTools);
 
         // Create RightTray
-        WorkspaceTool[] rightTools = { evalTool, helpTool, completerTool };
+        WorkspaceTool[] rightTools = { runTool, helpTool, completerTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray
@@ -310,9 +313,9 @@ public class WorkspaceTools {
         _workspacePane.openWorkspaceForSource(aURL);
 
         // Kick off run
-        EvalTool evalTool = getToolForClass(EvalTool.class);
-        if (evalTool != null)
-            evalTool.runApp();
+        RunTool runTool = getToolForClass(RunTool.class);
+        if (runTool != null)
+            runTool.runApp();
     }
 
     /**

@@ -23,9 +23,10 @@ public class WorkspaceToolsX extends WorkspaceTools {
     @Override
     public void runFile(WebFile aFile, boolean isDebug)
     {
-        DebugTool debugTool = getToolForClass(DebugTool.class);
-        showTool(debugTool);
+        RunTool debugTool = getToolForClass(RunTool.class);
         debugTool.runConfigOrFile(null, aFile, false);
+
+        showToolForClass(isDebug ? DebugTool.class : RunTool.class);
     }
 
     /**
@@ -34,27 +35,27 @@ public class WorkspaceToolsX extends WorkspaceTools {
     @Override
     protected void createTools()
     {
-        // Create tools
+        // Main tools
         FilesTool filesTool = new FilesTool(_workspacePane);
         FileTreeTool fileTreeTool = new FileTreeTool(_workspacePane);
+        RunTool runTool = new RunTool(_workspacePane);
+        DebugTool debugTool = new DebugTool(_workspacePane, runTool);
+
+        // Support tools
         ProblemsTool problemsTool = new ProblemsTool(_workspacePane);
         BreakpointsTool breakpointsTool = new BreakpointsTool(_workspacePane);
         SearchTool searchTool = new SearchTool(_workspacePane);
-        EvalTool evalTool = new EvalTool(_workspacePane);
         CompleterTool completerTool = new CompleterTool(_workspacePane);
-        DebugTool debugTool = new DebugTool(_workspacePane);
-        RunConsole runConsole = new RunConsole(_workspacePane);
         RunConfigsTool runConfigsTool = new RunConfigsTool(_workspacePane);
         HttpServerTool httpServerTool = new HttpServerTool(_workspacePane);
 
         // Create tools array
         _tools = new WorkspaceTool[] {
                 filesTool, fileTreeTool,
+                runTool, debugTool,
                 problemsTool, breakpointsTool,
-                searchTool, evalTool, completerTool,
-                debugTool, debugTool.getProcPane(),
-                runConsole, runConfigsTool,
-                httpServerTool
+                searchTool, completerTool,
+                runConfigsTool, httpServerTool
         };
 
         // Create LeftTray
@@ -62,11 +63,11 @@ public class WorkspaceToolsX extends WorkspaceTools {
         _leftTray = new ToolTray(Side.LEFT, leftTools);
 
         // Create RightTray
-        WorkspaceTool[] rightTools = { evalTool, debugTool, searchTool, completerTool };
+        WorkspaceTool[] rightTools = { runTool, debugTool, searchTool, completerTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray
-        WorkspaceTool[] bottomTools = { problemsTool, runConsole, breakpointsTool, runConfigsTool, httpServerTool };
+        WorkspaceTool[] bottomTools = { problemsTool, breakpointsTool, runConfigsTool, httpServerTool };
         _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
     }
 
@@ -76,8 +77,8 @@ public class WorkspaceToolsX extends WorkspaceTools {
     @Override
     protected void breakpointsDidChange(PropChange pc)
     {
-        DebugTool debugTool = getToolForClass(DebugTool.class);
-        debugTool.breakpointsDidChange(pc);
+        RunTool runTool = getToolForClass(RunTool.class);
+        runTool.breakpointsDidChange(pc);
     }
 
     /**

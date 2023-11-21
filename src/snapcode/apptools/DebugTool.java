@@ -1,33 +1,20 @@
 package snapcode.apptools;
-import snap.props.PropChange;
-import snap.util.FilePathUtils;
-import snap.util.ListUtils;
 import snap.view.*;
 import snapcode.debug.*;
 import snapcode.javatext.JavaTextArea;
-import snapcode.project.*;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
-import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.app.*;
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * This project tool class handles running/debugging a process.
  */
-public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
+public class DebugTool extends WorkspaceTool {
 
-    // The list of recently run apps
-    private List<RunApp>  _apps = new ArrayList<>();
-
-    // The selected app
-    private RunApp _selApp;
-
-    // Whether Console needs to be reset
-    private boolean _resetConsole;
+    // The RunTool
+    private RunTool _runTool;
 
     // The DebugFramesPane
     private DebugFramesPane _debugFramesPane;
@@ -44,18 +31,13 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
     // The current ProgramCounter line
     private int  _progCounterLine;
 
-    // The limit to the number of running processes
-    private int  _procLimit = 1;
-
-    // The last executed file
-    private static WebFile  _lastRunFile;
-
     /**
      * Constructor.
      */
-    public DebugTool(WorkspacePane workspacePane)
+    public DebugTool(WorkspacePane workspacePane, RunTool aRunTool)
     {
         super(workspacePane);
+        _runTool = aRunTool;
 
         // Create parts
         _debugFramesPane = new DebugFramesPane(this);
@@ -66,78 +48,22 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
     /**
      * Returns the list of processes.
      */
-    public List<RunApp> getProcs()  { return _apps; }
+    public List<RunApp> getProcs()  { return _runTool.getProcs(); }
 
     /**
      * Returns the number of processes.
      */
-    public int getProcCount()  { return _apps.size(); }
-
-    /**
-     * Returns the process at given index.
-     */
-    public RunApp getProc(int anIndex)  { return _apps.get(anIndex); }
-
-    /**
-     * Adds a new process.
-     */
-    public void addProc(RunApp aProc)
-    {
-        // Remove procs that are terminated and procs beyond limit
-        for (RunApp p : _apps.toArray(new RunApp[0]))
-            if (p.isTerminated())
-                removeProc(p);
-
-        if (getProcCount() + 1 > _procLimit) {
-            RunApp proc = getProc(0);
-            proc.terminate();
-            removeProc(proc);
-        }
-
-        // Add new proc
-        _apps.add(aProc);
-        aProc.setListener(this);
-        resetLater();
-    }
-
-    /**
-     * Removes a process.
-     */
-    public void removeProc(int anIndex)
-    {
-        _apps.remove(anIndex);
-    }
-
-    /**
-     * Removes a process.
-     */
-    public void removeProc(RunApp aProcess)
-    {
-        int index = ListUtils.indexOfId(_apps, aProcess);
-        if (index >= 0)
-            removeProc(index);
-    }
+    public int getProcCount()  { return _runTool.getProcCount(); }
 
     /**
      * Returns the selected app.
      */
-    public RunApp getSelApp()  { return _selApp; }
-
-    /**
-     * Sets the selected app.
-     */
-    public void setSelApp(RunApp aProc)
-    {
-        if (aProc == _selApp) return;
-        _selApp = aProc;
-        resetLater();
-        _resetConsole = true;
-    }
+    public RunApp getSelApp()  { return _runTool.getSelApp(); }
 
     /**
      * Returns the debug app.
      */
-    public DebugApp getSelDebugApp()  { return _selApp instanceof DebugApp ? (DebugApp) _selApp : null; }
+    public DebugApp getSelDebugApp()  { return _runTool.getSelDebugApp(); }
 
     /**
      * Returns the program counter for given file.
@@ -207,127 +133,6 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
      * Returns the DebugExprsPane.
      */
     public DebugExprsPane getDebugExprsPane()  { return _debugExprsPane; }
-
-    /**
-     * Returns the RunConsole.
-     */
-    public RunConsole getRunConsole()  { return _workspaceTools.getToolForClass(RunConsole.class); }
-
-    /**
-     * Run application.
-     */
-    public void runDefaultConfig(boolean withDebug)
-    {
-        WebSite site = getRootSite();
-        RunConfig config = RunConfigs.get(site).getRunConfig();
-        runConfigOrFile(config, null, withDebug);
-    }
-
-    /**
-     * Run application.
-     */
-    public void runConfigForName(String configName, boolean withDebug)
-    {
-        RunConfigs runConfigs = RunConfigs.get(getRootSite());
-        RunConfig runConfig = runConfigs.getRunConfig(configName);
-        if (runConfig != null) {
-            runConfigs.getRunConfigs().remove(runConfig);
-            runConfigs.getRunConfigs().add(0, runConfig);
-            runConfigs.writeFile();
-            runConfigOrFile(runConfig, null, withDebug);
-        }
-    }
-
-    /**
-     * Runs a given RunConfig or file as a separate process.
-     */
-    public void runConfigOrFile(RunConfig aConfig, WebFile aFile, boolean isDebug)
-    {
-        // Automatically save all files
-        FilesTool filesTool = _workspaceTools.getFilesTool();
-        filesTool.saveAllFiles();
-
-        // Get site and RunConfig (if available)
-        WebSite site = getRootSite();
-        RunConfig config = aConfig != null || aFile != null ? aConfig : RunConfigs.get(site).getRunConfig();
-
-        // Get file
-        WebFile runFile = aFile;
-        if (runFile == null && config != null)
-            runFile = site.createFileForPath(config.getMainFilePath(), false);
-        if (runFile == null)
-            runFile = _lastRunFile;
-        if (runFile == null)
-            runFile = getSelFile();
-
-        // Try to replace file with project file
-        Project proj = Project.getProjectForFile(runFile);
-        if (proj == null) {
-            System.err.println("DebugTool: not project file: " + runFile);
-            return;
-        }
-
-        // Get class file for given file (should be JavaFile)
-        ProjectFiles projectFiles = proj.getProjectFiles();
-        WebFile classFile;
-        if (runFile.getType().equals("java"))
-            classFile = projectFiles.getClassFileForJavaFile(runFile);
-
-            // Try generic way to get class file
-        else classFile = projectFiles.getBuildFile(runFile.getPath(), false, runFile.isDir());
-
-        // If ClassFile found, set run file
-        if (classFile != null)
-            runFile = classFile;
-
-        // Set last run file
-        _lastRunFile = runFile;
-
-        // Run/debug file
-        String[] runArgs = getRunArgs(proj, config, runFile, isDebug);
-        WebURL url = runFile.getURL();
-        runAppForArgs(runArgs, url, isDebug);
-    }
-
-    /**
-     * Runs the provided file as straight app.
-     */
-    public void runAppForArgs(String[] args, WebURL aURL, boolean isDebug)
-    {
-        // Print run command to console
-        String commandLineStr = String.join(" ", args);
-        if (isDebug)
-            commandLineStr = "debug " + commandLineStr;
-        System.err.println(commandLineStr);
-
-        // Get process
-        RunApp proc;
-        if (!isDebug)
-            proc = new RunAppBin(aURL, args);
-
-        // Handle isDebug: Create DebugApp with Workspace.Breakpoints
-        else {
-            proc = new DebugApp(aURL, args);
-            Breakpoints breakpointsHpr = _workspace.getBreakpoints();
-            Breakpoint[] breakpoints = breakpointsHpr.getArray();
-            for (Breakpoint breakpoint : breakpoints)
-                proc.addBreakpoint(breakpoint);
-        }
-
-        // Create RunApp and exec
-        execProc(proc);
-    }
-
-    /**
-     * Executes a proc and adds it to list.
-     */
-    public void execProc(RunApp aProc)
-    {
-        setSelApp(null);
-        addProc(aProc);
-        setSelApp(aProc);
-        aProc.exec();
-    }
 
     /**
      * Initialize UI.
@@ -402,19 +207,6 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
         _debugFramesPane.resetLater();
         _debugVarsPane.resetLater();
         _debugExprsPane.resetLater();
-
-        // Reset Console
-        if (_resetConsole) {
-            _resetConsole = false;
-            getRunConsole().clear();
-            if (selApp != null) {
-                for (RunApp.Output out : selApp.getOutput()) {
-                    if (out.isErr())
-                        appendErr(selApp, out.getString());
-                    else appendOut(selApp, out.getString());
-                }
-            }
-        }
     }
 
     /**
@@ -429,7 +221,7 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
 
         // Handle DebugButton
         if (anEvent.equals("DebugButton"))
-            runDefaultConfig(true);
+            _runTool.runDefaultConfig(true);
 
         // Handle ResumeButton, SuspendButton, TerminateButton
         else if (anEvent.equals("ResumeButton"))
@@ -471,41 +263,6 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
      */
     @Override
     public String getTitle()  { return "Debug"; }
-
-    /**
-     * Called when Workspace.BreakPoints change.
-     */
-    public void breakpointsDidChange(PropChange pc)
-    {
-        if (pc.getPropName() != Breakpoints.ITEMS_PROP) return;
-
-        // Get processes
-        List<RunApp> processes = getProcs();
-
-        // Handle Breakpoint added
-        Breakpoint addedBreakpoint = (Breakpoint) pc.getNewValue();
-        if (addedBreakpoint != null) {
-
-            // Tell active processes about breakpoint change
-            for (RunApp rp : processes)
-                rp.addBreakpoint(addedBreakpoint);
-        }
-
-        // Handle Breakpoint removed
-        else {
-
-            Breakpoint removedBreakpoint = (Breakpoint) pc.getOldValue();
-
-            // Make current JavaPage.TextArea resetLater
-            WebPage page = getBrowser().getPageForURL(removedBreakpoint.getFile().getURL());
-            if (page instanceof JavaPage)
-                ((JavaPage) page).getTextPane().buildIssueOrBreakPointMarkerChanged();
-
-            // Tell active processes about breakpoint change
-            for (RunApp rp : processes)
-                rp.removeBreakpoint(removedBreakpoint);
-        }
-    }
 
     /**
      * RunProc.Listener method - called when process starts.
@@ -609,7 +366,7 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
         if (path == null) return;
         int lineNum = frame.getLineNumber();
         if (lineNum < 0) lineNum = 0;
-        path = getRunConsole().getSourceURL(path);
+        path = _runTool.getSourceURL(path);
         path += "#SelLine=" + lineNum;
 
         // Set ProgramCounter file and line
@@ -617,65 +374,5 @@ public class DebugTool extends WorkspaceTool implements RunApp.AppListener {
         WebFile file = url.getFile();
         setProgramCounter(file, lineNum - 1);
         getBrowser().setURL(url);
-    }
-
-    /**
-     * DebugListener breakpoint methods.
-     */
-    public void requestSet(BreakpointReq e)  { }
-    public void requestDeferred(BreakpointReq e)  { }
-    public void requestDeleted(BreakpointReq e)  { }
-    public void requestError(BreakpointReq e)  { }
-
-    /**
-     * RunProc.Listener method - called when output is available.
-     */
-    public void appendOut(final RunApp aProc, final String aStr)
-    {
-        if (getSelApp() == aProc)
-            getRunConsole().appendOut(aStr);
-    }
-
-    /**
-     * RunProc.Listener method - called when error output is available.
-     */
-    public void appendErr(final RunApp aProc, final String aStr)
-    {
-        if (getSelApp() == aProc)
-            getRunConsole().appendErr(aStr);
-    }
-
-    /**
-     * Returns an array of args for given config and file.
-     */
-    private static String[] getRunArgs(Project aProj, RunConfig aConfig, WebFile aFile, boolean isDebug)
-    {
-        // Get basic run command and add to list
-        List<String> commands = new ArrayList<>();
-
-        // If not debug, add Java command path
-        if (!isDebug) {
-            String javaCmdPath = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-            commands.add(javaCmdPath);
-        }
-
-        // Get Class path and add to list
-        String[] classPaths = aProj.getRuntimeClassPaths();
-        String[] classPathsNtv = FilePathUtils.getNativePaths(classPaths);
-        String classPath = FilePathUtils.getJoinedPath(classPathsNtv);
-        commands.add("-cp");
-        commands.add(classPath);
-
-        // Add class name
-        String className = aProj.getClassNameForFile(aFile);
-        commands.add(className);
-
-        // Add App Args
-        String appArgs = aConfig != null ? aConfig.getAppArgs() : null;
-        if (appArgs != null && appArgs.length() > 0)
-            commands.add(appArgs);
-
-        // Return commands
-        return commands.toArray(new String[0]);
     }
 }

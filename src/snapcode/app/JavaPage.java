@@ -4,7 +4,7 @@ import snap.text.TextDoc;
 import snap.view.TextArea;
 import snap.view.ViewEvent;
 import snapcode.apptools.DebugTool;
-import snapcode.apptools.EvalTool;
+import snapcode.apptools.RunTool;
 import snapcode.apptools.SearchTool;
 import snapcode.javatext.DeclMatcher;
 import snapcode.project.JavaAgent;
@@ -124,9 +124,9 @@ public class JavaPage extends WebPage {
         if (anEvent.equals("EnterAction")) {
             WorkspacePane workspacePane = getWorkspacePane();
             WorkspaceTools workspaceTools = workspacePane.getWorkspaceTools();
-            EvalTool evalTool = workspaceTools.getToolForClass(EvalTool.class);
-            if (evalTool != null)
-                evalTool.runApp();
+            RunTool runTool = workspaceTools.getToolForClass(RunTool.class);
+            if (runTool != null)
+                runTool.runApp();
         }
     }
 

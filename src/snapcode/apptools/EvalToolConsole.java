@@ -13,8 +13,8 @@ import snapcode.util.ExceptionUtil;
  */
 public class EvalToolConsole extends DefaultConsole {
 
-    // The EvalTool that owns this console
-    private EvalTool _evalTool;
+    // The RunTool that owns this console
+    private RunTool _runTool;
 
     // Constants
     public static final int MAX_OUTPUT_COUNT = 1000;
@@ -22,10 +22,10 @@ public class EvalToolConsole extends DefaultConsole {
     /**
      * Constructor.
      */
-    public EvalToolConsole(EvalTool evalTool)
+    public EvalToolConsole(RunTool runTool)
     {
         super();
-        _evalTool = evalTool;
+        _runTool = runTool;
     }
 
     /**
@@ -36,10 +36,10 @@ public class EvalToolConsole extends DefaultConsole {
     {
         // If too much output, bail
         if (getItemCount() > MAX_OUTPUT_COUNT) {
-            boolean isRunning = _evalTool.isRunning();
+            boolean isRunning = _runTool.isRunning();
             if (!isRunning)
                 return;
-            _evalTool.cancelRun();
+            _runTool.cancelRun();
             return;
         }
 

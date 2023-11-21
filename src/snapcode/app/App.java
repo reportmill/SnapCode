@@ -5,7 +5,7 @@ import snap.view.ViewTheme;
 import snap.view.ViewUtils;
 import snap.view.WindowView;
 import snap.viewx.ExceptionReporter;
-import snapcode.apptools.EvalTool;
+import snapcode.apptools.RunTool;
 import snapcode.util.LZString;
 
 /**
@@ -152,8 +152,8 @@ public class App {
     {
         WorkspacePane workspacePane = WindowView.getOpenWindowOwner(WorkspacePane.class);
         if (workspacePane != null) {
-            EvalTool evalTool = workspacePane.getWorkspaceTools().getToolForClass(EvalTool.class);
-            evalTool.runApp();
+            RunTool runTool = workspacePane.getWorkspaceTools().getToolForClass(RunTool.class);
+            runTool.runApp();
         }
     }
 
