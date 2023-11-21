@@ -1,4 +1,5 @@
 package snapcode.debug;
+import snap.util.ArrayUtils;
 import snapcode.project.Breakpoint;
 import snap.web.WebURL;
 import java.io.*;
@@ -46,9 +47,8 @@ public abstract class RunApp {
     // Whether error was printed
     protected boolean _hadError;
 
-    // The listener
-    protected AppListener _listener;
-    protected List<AppListener> _lsnrs = new ArrayList<>();
+    // App listeners
+    protected AppListener[] _appLsnrs = new AppListener[0];
 
     // Proxies for AppOutput, AppError and Diagnostics.
     protected OutputListener _diagnostics = str -> System.out.println(str);
@@ -287,7 +287,7 @@ public abstract class RunApp {
     protected void appendOut(String aStr)
     {
         _output.add(new Output(aStr, false));
-        for (AppListener lsnr : _lsnrs)
+        for (AppListener lsnr : _appLsnrs)
             lsnr.appendOut(this, aStr);
     }
 
@@ -297,7 +297,7 @@ public abstract class RunApp {
     protected void appendErr(String aStr)
     {
         _output.add(new Output(aStr, true));
-        for (AppListener lsnr : _lsnrs)
+        for (AppListener lsnr : _appLsnrs)
             lsnr.appendErr(this, aStr);
     }
 
@@ -311,7 +311,7 @@ public abstract class RunApp {
      */
     protected void notifyAppExited()
     {
-        for (AppListener lsnr : _lsnrs)
+        for (AppListener lsnr : _appLsnrs)
             lsnr.appExited(this);
     }
 
@@ -335,16 +335,7 @@ public abstract class RunApp {
      */
     public void addListener(AppListener aListener)
     {
-        _lsnrs.add(aListener);
-    }
-
-    /**
-     * Sets listener.
-     */
-    public void setListener(AppListener aListener)
-    {
-        _listener = aListener;
-        _lsnrs.add(aListener);
+        _appLsnrs = ArrayUtils.add(_appLsnrs, aListener);
     }
 
     /**

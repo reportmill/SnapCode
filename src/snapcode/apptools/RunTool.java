@@ -86,7 +86,7 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     /**
      * Adds a new app.
      */
-    public void addApp(RunApp aProc)
+    public void addApp(RunApp runApp)
     {
         // Remove procs that are terminated and procs beyond limit
         for (RunApp p : _apps.toArray(new RunApp[0]))
@@ -100,8 +100,8 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
         }
 
         // Add new proc
-        _apps.add(aProc);
-        aProc.setListener(this);
+        _apps.add(runApp);
+        runApp.addListener(this);
         resetLater();
     }
 

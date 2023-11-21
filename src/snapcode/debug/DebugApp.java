@@ -3,6 +3,7 @@ import com.sun.jdi.*;
 import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
 import com.sun.jdi.request.*;
+import snap.util.ListUtils;
 import snapcode.project.Breakpoint;
 import snap.util.ArrayUtils;
 import snap.web.WebFile;
@@ -164,8 +165,8 @@ public class DebugApp extends RunAppBin {
             //### detach due to an error condition, e.g., connection failure.
             try {
                 _vm.dispose();
-            } catch (VMDisconnectedException ee) {
             }
+            catch (VMDisconnectedException ignore) { }
             notice("Disconnected from VM");
         }
 
@@ -285,11 +286,9 @@ public class DebugApp extends RunAppBin {
             failure("No current thread.");
             return;
         }
-        try {
-            generalStep(thread, size, depth);
-        } catch (Exception e) {
-            failure("Failure to step: " + e.getMessage());
-        }
+
+        try { generalStep(thread, size, depth); }
+        catch (Exception e) { failure("Failure to step: " + e.getMessage()); }
     }
 
     /**
@@ -328,7 +327,8 @@ public class DebugApp extends RunAppBin {
      */
     void ensureActiveSession() throws NoSessionException
     {
-        if (!_running) throw new NoSessionException();
+        if (!_running)
+            throw new NoSessionException();
     }
 
     /*
@@ -339,11 +339,12 @@ public class DebugApp extends RunAppBin {
         // A previous step may not have completed on this thread; if so, it gets removed here.
         EventRequestManager mgr = _vm.eventRequestManager();
         List<StepRequest> requests = mgr.stepRequests();
-        for (StepRequest request : requests)
+        for (StepRequest request : requests) {
             if (request.thread().equals(thread)) {
                 mgr.deleteEventRequest(request);
                 break;
             }
+        }
     }
 
     /**
@@ -367,12 +368,10 @@ public class DebugApp extends RunAppBin {
 
         // Handle ArrayReference: Concatenate values
         if (aVal instanceof ArrayReference) {
-            ArrayReference aref = (ArrayReference) aVal;
-            List<Value> values = aref.getValues();
-            StringBuffer sb = new StringBuffer("[");
-            for (Value chld : values) sb.append(toString(chld)).append(", ");
-            if (values.size() > 0) sb.delete(sb.length() - 2, sb.length());
-            return sb.append(']').toString();
+            ArrayReference arrayRef = (ArrayReference) aVal;
+            List<Value> values = arrayRef.getValues();
+            String valuesStr = ListUtils.mapAndJoinStrings(values, this::toString, ", ");
+            return '[' + valuesStr + ']';
         }
 
         // Handle ObjectReference: Invoke toString() method
@@ -535,10 +534,7 @@ public class DebugApp extends RunAppBin {
     /**
      * Returns the current thread.
      */
-    public ThreadReference getCurrentThread()
-    {
-        return _currentThread;
-    }
+    public ThreadReference getCurrentThread()  { return _currentThread; }
 
     /**
      * Sets the current thread.
@@ -558,7 +554,8 @@ public class DebugApp extends RunAppBin {
     {
         try {
             return _running && _currentThread != null && _frameIndex >= 0 ? _currentThread.frame(_frameIndex) : null;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             System.err.println("DebugApp.getCurrentThread: " + e);
             return null;
         }
@@ -598,8 +595,8 @@ public class DebugApp extends RunAppBin {
                     try {
                         while (inputBuffer.size() < 1) inputLock.wait();
                         line = (String) inputBuffer.removeLast();
-                    } catch (InterruptedException e) {
                     }
+                    catch (InterruptedException ignore) { }
                 }
             }
 
@@ -612,9 +609,7 @@ public class DebugApp extends RunAppBin {
     /**
      * Called to echo input.
      */
-    private void echoInputLine(String line)
-    {
-    }
+    private void echoInputLine(String line)  { }
 
     /**
      * Adds a breakpoint.
@@ -622,11 +617,12 @@ public class DebugApp extends RunAppBin {
     public void addBreakpoint(Breakpoint aBP)
     {
         // If Breakpoint already set, just return
-        for (BreakpointReq bpr : _eventRequestSpecs)
+        for (BreakpointReq bpr : _eventRequestSpecs) {
             if (bpr._bpoint.equals(aBP)) {
                 System.err.println("Breakpoint already added " + aBP);
                 return;
             }
+        }
 
         // Create new BreakpointReq and add
         BreakpointReq bpr = new BreakpointReq(this, aBP);
@@ -642,12 +638,14 @@ public class DebugApp extends RunAppBin {
     {
         // Find BreakpointReq
         BreakpointReq bpr = null;
-        for (BreakpointReq br : _eventRequestSpecs)
+        for (BreakpointReq br : _eventRequestSpecs) {
             if (br._bpoint == aBP) {
                 bpr = br;
                 break;
             }
-        if (bpr == null) return;
+        }
+        if (bpr == null)
+            return;
 
         // Remove BreakpointReq
         _eventRequestSpecs = ArrayUtils.remove(_eventRequestSpecs, bpr); // Add request to array
@@ -697,9 +695,10 @@ public class DebugApp extends RunAppBin {
             String pattern = aPattern.substring(1);
             List result = new ArrayList();  //### Is default size OK?
             List<ReferenceType> classes = _vm.allClasses();
-            for (ReferenceType type : classes)
+            for (ReferenceType type : classes) {
                 if (type.name().endsWith(pattern))
                     result.add(type);
+            }
             return result;
         }
 
@@ -712,22 +711,26 @@ public class DebugApp extends RunAppBin {
      */
     protected void notifyAppStarted()
     {
-        _listener.appStarted(this);
+        for (AppListener appLsnr : _appLsnrs)
+            appLsnr.appStarted(this);
     }
 
     protected void notifyAppPaused()
     {
-        _listener.appPaused(this);
+        for (AppListener appLsnr : _appLsnrs)
+            appLsnr.appPaused(this);
     }
 
     protected void notifyAppResumed()
     {
-        _listener.appResumed(this);
+        for (AppListener appLsnr : _appLsnrs)
+            appLsnr.appResumed(this);
     }
 
     protected void notifyAppExited()
     {
-        _listener.appExited(this);
+        for (AppListener appLsnr : _appLsnrs)
+            appLsnr.appExited(this);
     }
 
     /**
@@ -741,7 +744,8 @@ public class DebugApp extends RunAppBin {
      */
     protected void notifyFrameChanged()
     {
-        _listener.frameChanged(this);
+        for (AppListener appLsnr : _appLsnrs)
+            appLsnr.frameChanged(this);
     }
 
     /**
@@ -749,23 +753,27 @@ public class DebugApp extends RunAppBin {
      */
     protected void notifySet(BreakpointReq aBP)
     {
-        _listener.requestSet(aBP);
+        for (AppListener appLsnr : _appLsnrs)
+            appLsnr.requestSet(aBP);
     }
 
     protected void notifyDeferred(BreakpointReq aBP)
     {
-        _listener.requestDeferred(aBP);
+        for (AppListener appLsnr : _appLsnrs)
+            appLsnr.requestDeferred(aBP);
     }
 
     protected void notifyDeleted(BreakpointReq aBP)
     {
-        _listener.requestDeleted(aBP);
+        for (AppListener appLsnr : _appLsnrs)
+            appLsnr.requestDeleted(aBP);
     }
 
     protected void notifyError(BreakpointReq aBP)
     {
         error("Failed to set BP: " + aBP);
-        _listener.requestError(aBP);
+        for (AppListener appLsnr : _appLsnrs)
+            appLsnr.requestError(aBP);
     }
 
     /**
@@ -796,14 +804,10 @@ public class DebugApp extends RunAppBin {
         switch (type) {
 
             // Handle Class prepare
-            case ClassPrepare:
-                resolve(anEvent.getReferenceType());
-                break;
+            case ClassPrepare: resolve(anEvent.getReferenceType()); break;
 
             // Handle VMDisconnect
-            case VMDisconnect:
-                endSession();
-                break;
+            case VMDisconnect: endSession(); break;
 
             // Handle LocationTrigger
             case LocationTrigger:
@@ -822,14 +826,10 @@ public class DebugApp extends RunAppBin {
                 break;
 
             // Handle AccessWatchpoint
-            case AccessWatchpoint:
-                wantsPause = true;
-                break;
+            case AccessWatchpoint: wantsPause = true; break;
 
             // Handle ModificationWatchpoint
-            case ModificationWatchpoint:
-                wantsPause = true;
-                break;
+            case ModificationWatchpoint: wantsPause = true; break;
         }
 
         // If event paused VM either resume or make it official
@@ -847,8 +847,8 @@ public class DebugApp extends RunAppBin {
         }
 
         // Dispatch event to listener
-        if (_listener != null)
-            _listener.processDebugEvent(this, anEvent);
+        for (AppListener appLsnr : _appLsnrs)
+            appLsnr.processDebugEvent(this, anEvent);
     }
 
     /**
@@ -882,9 +882,7 @@ public class DebugApp extends RunAppBin {
             }
 
             // Handle Exceptions
-            catch (InterruptedException e) {
-            } catch (Exception e) {
-            }
+            catch (Exception ignore) { }
 
             // Set everything stopped
             _running = false;
@@ -1082,5 +1080,4 @@ public class DebugApp extends RunAppBin {
      */
     private static String[] ptnames = {"boolean", "byte", "char", "short", "int", "long", "float", "double"};
     private static List<String> primitiveTypeNames = Arrays.asList(ptnames);
-
 }
