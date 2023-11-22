@@ -39,9 +39,6 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     // The last executed file
     private static WebFile _lastRunFile;
 
-    // EvalRunner
-    protected EvalToolRunner  _evalRunner;
-
     // The Console
     protected Console _console;
 
@@ -63,9 +60,6 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
 
         // Create console
         _console = new EvalToolConsole(this);
-
-        // Create runner
-        _evalRunner = new EvalToolRunner(this);
     }
 
     /**
@@ -260,12 +254,12 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     /**
      * Executes a proc and adds it to list.
      */
-    public void execProc(RunApp aProc)
+    public void execProc(RunApp runApp)
     {
         setSelApp(null);
-        addApp(aProc);
-        setSelApp(aProc);
-        aProc.exec();
+        addApp(runApp);
+        setSelApp(runApp);
+        runApp.exec();
     }
 
     /**
@@ -602,22 +596,56 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
         if (!success)
             return;
 
+        // Set console
+        Console.setShared(_console);
+
         // Run app
-        _evalRunner.runApp();
+        WebFile selFile = getSelFile();
+        if (selFile == null)
+            return;
+
+        // Create app and run
+        RunApp runApp = new RunAppSrc(selFile.getURL());
+        execProc(runApp);
+
+        // Check back in half a second to see if we need to show progress bar
+        ViewUtils.runDelayed(() -> handleExtendedRun(), 500);
+
+        // Reset UI
         resetLater();
+    }
+
+    /**
+     * Called when a run is taking a long time.
+     */
+    protected void handleExtendedRun()
+    {
+        RunApp selApp = getSelApp();
+        if (selApp == null || !selApp.isRunning())
+            return;
+
+        // Show extended run UI
+        setShowExtendedRunUI(true);
     }
 
     /**
      * Whether run is running.
      */
-    public boolean isRunning()  { return _evalRunner.isRunning(); }
+    public boolean isRunning()
+    {
+        RunApp selApp = getSelApp();
+        return selApp != null && selApp.isRunning();
+    }
 
     /**
      * Cancels run.
      */
     public void cancelRun()
     {
-        _evalRunner.cancelRun();
+        RunApp selApp = getSelApp();
+        if (selApp != null)
+            selApp.terminate();
+
         resetLater();
     }
 
@@ -685,9 +713,17 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
 
         // Handle InputTextField: Show input string, add to runner input and clear text
         else if (anEvent.equals("InputTextField")) {
+
+            // Get InputTextField string
             String inputString = anEvent.getStringValue();
             ReplObject.show(inputString);
-            _evalRunner.addSystemInputString(inputString + '\n');
+
+            // Send to current process
+            RunApp selApp = getSelApp();
+            if (selApp != null)
+                selApp.sendInput(inputString + '\n');
+
+            // Clear InputTextField
             setViewValue("InputTextField", null);
         }
 

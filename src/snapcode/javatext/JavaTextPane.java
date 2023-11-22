@@ -347,15 +347,9 @@ public class JavaTextPane extends TextPane {
      */
     private void buildFile()
     {
-        // Get JavaTextDoc, JavaAgent
         JavaTextDoc javaTextDoc = getJavaTextDoc();
         JavaAgent javaAgent = javaTextDoc.getAgent();
-
-        // Build file
         javaAgent.buildFile();
-
-        // Notify EditPane of possible BuildIssue changes
-        _lineFootView.resetAll();
     }
 
     /**
