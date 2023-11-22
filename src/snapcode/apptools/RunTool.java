@@ -568,10 +568,41 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     }
 
     /**
+     * Builds the app.
+     */
+    public boolean buildApp()
+    {
+        // Get JavaAgent
+        WebFile selFile = getSelFile();
+        JavaAgent javaAgent = selFile != null ? JavaAgent.getAgentForFile(selFile) : null;
+        if (javaAgent == null)
+            return false;
+
+        // Build file - if failed, show errors
+        boolean success = javaAgent.buildFile();
+        if (!success) {
+            BuildIssue[] buildIssues = javaAgent.getBuildIssues();
+            _console.show(buildIssues);
+        }
+
+        // Return
+        return success;
+    }
+
+    /**
      * Runs Java code.
      */
     public void runApp()
     {
+        // Clear display
+        resetDisplay();
+
+        // Build app
+        boolean success = buildApp();
+        if (!success)
+            return;
+
+        // Run app
         _evalRunner.runApp();
         resetLater();
     }

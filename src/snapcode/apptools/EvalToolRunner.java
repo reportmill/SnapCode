@@ -4,18 +4,12 @@
 package snapcode.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JStmt;
+import snap.web.WebFile;
 import snapcharts.repl.Console;
 import snapcharts.repl.ScanPane;
-import snapcode.javatext.JavaTextPane;
-import snapcode.project.JavaTextDoc;
-import snapcode.project.BuildIssue;
 import snapcode.project.JavaAgent;
 import javakit.runner.JavaShell;
 import snap.view.*;
-import snapcode.webbrowser.WebPage;
-import snapcode.app.JavaPage;
-import snapcode.app.PagePane;
-import snapcode.app.WorkspacePane;
 import java.io.InputStream;
 
 /**
@@ -32,9 +26,6 @@ public class EvalToolRunner {
     // The thread to reset views
     private Thread _runAppThread;
 
-    // Whether last run was pre-empted
-    private boolean _preemptedForNewRun;
-
     // An input stream for standard in
     protected ScanPane.BytesInputStream _inputStream;
 
@@ -50,31 +41,13 @@ public class EvalToolRunner {
     }
 
     /**
-     * Returns the current JavaTextPane.
-     */
-    public JavaTextPane getJavaTextPane()
-    {
-        WorkspacePane workspacePane = _runTool.getWorkspacePane();
-        PagePane pagePane = workspacePane.getPagePane();
-        WebPage selPage = pagePane.getSelPage();
-        JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
-        return javaPage != null ? javaPage.getTextPane() : null;
-    }
-
-    /**
      * Called to update when textView changes.
      */
     public void runApp()
     {
-        // Reset display
-        _runTool.resetDisplay();
-
         // If previous thread is running, kill it
-        if (_runAppThread != null) {
-            _preemptedForNewRun = true;
-            _javaShell.interrupt();
-            return;
-        }
+        if (_runAppThread != null)
+            cancelRun();
 
         // Run
         _runAppThread = new Thread(() -> runAppImpl());
@@ -82,9 +55,6 @@ public class EvalToolRunner {
 
         // Check back in half a second to see if we need to show progress bar
         ViewUtils.runDelayed(() -> handleExtendedRun(), 500);
-
-        // Reset EvalPane
-        _runTool.resetLater();
     }
 
     /**
@@ -92,51 +62,32 @@ public class EvalToolRunner {
      */
     protected void runAppImpl()
     {
-        // Get JavaTextDoc, JavaAgent
-        JavaTextPane javaTextPane = getJavaTextPane();
-        JavaTextDoc javaTextDoc = javaTextPane.getJavaTextDoc();
-        JavaAgent javaAgent = javaTextDoc.getAgent();
+        // Get JavaAgent
+        WebFile selFile = _runTool.getSelFile();
+        JavaAgent javaAgent = selFile != null ? JavaAgent.getAgentForFile(selFile) : null;
+        if (javaAgent == null)
+            return;
 
-        // Build file
-        boolean success = javaAgent.buildFile();
+        // Get statements
+        Console.setShared(_runTool._console);
+        JFile jfile = javaAgent.getJFile();
+        JStmt[] javaStmts = javaAgent.getJFileStatements();
 
-        // Notify EditPane of possible BuildIssue changes
-        javaTextPane.buildIssueOrBreakPointMarkerChanged();
+        // Replace System.in with our own input stream to allow input
+        InputStream stdIn = System.in;
+        System.setIn(_inputStream = new ScanPane.BytesInputStream(null));
 
-        // If build failed, report errors
-        if (!success) {
-            BuildIssue[] buildIssues = javaAgent.getBuildIssues();
-            _runTool._console.show(buildIssues);
-        }
+        // Run code
+        _javaShell.runJavaCode(jfile, javaStmts);
 
-        // If no errors, run
-        else {
-            Console.setShared(_runTool._console);
-            JFile jfile = javaAgent.getJFile();
-            JStmt[] javaStmts = javaAgent.getJFileStatements();
-
-            // Replace System.in with our own input stream to allow input
-            InputStream stdIn = System.in;
-            System.setIn(_inputStream = new ScanPane.BytesInputStream(null));
-
-            // Run code
-            _javaShell.runJavaCode(jfile, javaStmts);
-
-            // Restore System.in
-            System.setIn(stdIn);
-        }
+        // Restore System.in
+        System.setIn(stdIn);
 
         // Remove extended run ui
         ViewUtils.runLater(() -> _runTool.setShowExtendedRunUI(false));
 
-        // If Preempted, kick off another run
-        if (_preemptedForNewRun) {
-            _preemptedForNewRun = false;
-            ViewUtils.runLater(() -> runApp());
-        }
-
-        // If otherwise interrupted, add last run cancelled UI
-        else if (_javaShell.isInterrupted())
+        // If thread was interrupted, add last run cancelled UI
+        if (_javaShell.isInterrupted())
             ViewUtils.runLater(() -> _runTool.setShowCancelledRunUI(true));
 
         // Reset thread
@@ -173,18 +124,16 @@ public class EvalToolRunner {
 
         // Interrupt and clear
         _javaShell.interrupt();
-        ViewUtils.runDelayed(() -> cancelRunExtreme(), 600);
+        ViewUtils.runDelayed(() -> cancelRunExtreme(_runAppThread), 600);
     }
 
     /**
      * Called to really cancel run with thread interrupt, if in system code.
      */
-    private void cancelRunExtreme()
+    private void cancelRunExtreme(Thread runAppThread)
     {
-        if (_runAppThread != null) {
-            _runAppThread.interrupt();
-            _runAppThread = null;
-        }
+        if (runAppThread != null)
+            runAppThread.interrupt();
     }
 
     /**
