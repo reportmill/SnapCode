@@ -5,6 +5,7 @@ import snap.geom.Rect;
 import snap.geom.RoundRect;
 import snap.gfx.Border;
 import snap.gfx.Color;
+import snap.gfx.EmbossEffect;
 import snap.view.ChildView;
 import snap.view.ColView;
 import snap.view.PathView;
@@ -58,7 +59,8 @@ public class JNodeViewBase extends ChildView {
 
         // Set background
         _bg = new PathView();
-        _bg.setManaged(false); //_bg.setEffect(new EmbossEffect(68,112,4));
+        _bg.setManaged(false);
+        _bg.setEffect(new EmbossEffect(68,112,4));
 
         // Create HBox
         _hbox = new RowView();
