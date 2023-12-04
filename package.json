@@ -5,7 +5,7 @@
     "main": "index.js",
     "preferGlobal": true,
     "repository": "",
-    "version": "2023.11.10",
+    "version": "2023.12.1",
     "jdeploy": {
         "jdk": false,
         "javaVersion": "8",
@@ -14,8 +14,8 @@
             "extension": "java",
             "mimetype": "text/java"
         }],
-        "jar": "build/libs/SnapCodeAll-2023.11.jar",
-        "javafx": false,
+        "jar": "build/libs/SnapCodeAll-2023.12.jar",
+        "javafx": true,
         "title": "SnapCode"
     },
     "dependencies": {
