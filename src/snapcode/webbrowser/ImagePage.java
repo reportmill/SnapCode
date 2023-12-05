@@ -33,7 +33,7 @@ public class ImagePage extends WebPage {
         Label fileNameLabel = new Label("File name: " + fileName);
         Label fileSizeLabel = new Label("File size: " + fileSize);
         Label imageSizeLabel = new Label("Image size: " + imageSize);
-        Label imageDpiLabel = new Label("Image DPI: " + image.getDPIX());
+        Label imageDpiLabel = new Label("Image DPI: " + image.getDpiX());
         topColView.setChildren(fileNameLabel, fileSizeLabel, imageSizeLabel, imageDpiLabel);
 
         // Create/add ImageView
