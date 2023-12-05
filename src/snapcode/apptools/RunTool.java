@@ -350,6 +350,9 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     {
         DebugTool debugTool = getDebugTool();
         debugTool.appExited(aProc);
+
+        // Clear extended run UI if needed
+        ViewUtils.runLater(() -> setShowExtendedRunUI(false));
     }
 
     /**

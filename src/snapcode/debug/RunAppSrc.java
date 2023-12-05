@@ -39,6 +39,7 @@ public class RunAppSrc extends RunApp {
     {
         _runAppThread = new Thread(() -> runAppImpl());
         _runAppThread.start();
+        _running = true;
     }
 
     /**
@@ -69,6 +70,7 @@ public class RunAppSrc extends RunApp {
 
         // Reset thread
         _runAppThread = null;
+        _running = false;
 
         // Notify exited
         for (AppListener appLsnr : _appLsnrs)
