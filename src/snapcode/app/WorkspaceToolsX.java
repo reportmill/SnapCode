@@ -40,9 +40,9 @@ public class WorkspaceToolsX extends WorkspaceTools {
         FileTreeTool fileTreeTool = new FileTreeTool(_workspacePane);
         RunTool runTool = new RunTool(_workspacePane);
         DebugTool debugTool = new DebugTool(_workspacePane, runTool);
+        BuildTool buildTool = new BuildTool(_workspacePane);
 
         // Support tools
-        ProblemsTool problemsTool = new ProblemsTool(_workspacePane);
         BreakpointsTool breakpointsTool = new BreakpointsTool(_workspacePane);
         SearchTool searchTool = new SearchTool(_workspacePane);
         CompleterTool completerTool = new CompleterTool(_workspacePane);
@@ -51,9 +51,7 @@ public class WorkspaceToolsX extends WorkspaceTools {
 
         // Create tools array
         _tools = new WorkspaceTool[] {
-                filesTool, fileTreeTool,
-                runTool, debugTool,
-                problemsTool, breakpointsTool,
+                filesTool, fileTreeTool, runTool, debugTool, buildTool, breakpointsTool,
                 searchTool, completerTool,
                 runConfigsTool, httpServerTool
         };
@@ -63,11 +61,11 @@ public class WorkspaceToolsX extends WorkspaceTools {
         _leftTray = new ToolTray(Side.LEFT, leftTools);
 
         // Create RightTray
-        WorkspaceTool[] rightTools = { runTool, debugTool, searchTool, completerTool };
+        WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, completerTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray
-        WorkspaceTool[] bottomTools = { problemsTool, breakpointsTool, runConfigsTool, httpServerTool };
+        WorkspaceTool[] bottomTools = { breakpointsTool, runConfigsTool, httpServerTool };
         _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
     }
 

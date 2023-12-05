@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView PrefWidth="500" GrowHeight="true" FillWidth="true">
+  <Font name="Arial" size="12" />
   <RowView Name="ToolBar" PrefHeight="32" Spacing="4">
     <Label Margin="0,10,0,8" text="Run:" />
     <Button Name="RunButton" PrefWidth="24" PrefHeight="24" Image="pkg.images/Run.png" ShowArea="false" />

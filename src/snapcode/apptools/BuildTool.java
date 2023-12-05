@@ -8,11 +8,12 @@ import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
+import snapcode.project.JavaAgent;
 
 /**
  * A pane/panel to show current build issues.
  */
-public class ProblemsTool extends WorkspaceTool {
+public class BuildTool extends WorkspaceTool {
 
     // The selected issue
     private BuildIssue  _selIssue;
@@ -24,9 +25,29 @@ public class ProblemsTool extends WorkspaceTool {
     /**
      * Constructor.
      */
-    public ProblemsTool(WorkspacePane workspacePane)
+    public BuildTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
+    }
+
+    /**
+     * Builds the app.
+     */
+    public boolean buildApp()
+    {
+        // Get JavaAgent
+        WebFile selFile = getSelFile();
+        JavaAgent javaAgent = selFile != null ? JavaAgent.getAgentForFile(selFile) : null;
+        if (javaAgent == null)
+            return false;
+
+        // Build file - if failed, show errors
+        boolean success = javaAgent.buildFile();
+        if (!success)
+            _workspaceTools.showTool(this);
+
+        // Return
+        return success;
     }
 
     /**
@@ -138,5 +159,5 @@ public class ProblemsTool extends WorkspaceTool {
      * Override for title.
      */
     @Override
-    public String getTitle()  { return "Problems"; }
+    public String getTitle()  { return "Build"; }
 }

@@ -138,6 +138,7 @@ public class WorkspacePane extends ViewOwner {
         getUI(); //_workspaceTools.setShowLeftTray(false);
         _workspaceTools.getLeftTray().setSelTool(null);
         _workspaceTools.getRightTray().setSelToolForClass(RunTool.class);
+        _workspaceTools.setShowBottomTray(false);
         _toolBar.getUI().setVisible(false);
         getView("MainColView", ColView.class).getChild(2).setVisible(false);
 
@@ -604,14 +605,14 @@ public class WorkspacePane extends ViewOwner {
         int errorCount = _workspace.getBuildIssues().getErrorCount();
         if (errorCount > 0) {
             ToolTray bottomTray = _workspaceTools.getBottomTray();
-            if (!(bottomTray.getSelTool() instanceof ProblemsTool))
+            if (!(bottomTray.getSelTool() instanceof BuildTool))
                 bottomTray.showProblemsTool();
         }
 
         // If error count zero and SupportTray showing problems, close
         else if (errorCount == 0) {
             ToolTray bottomTray = _workspaceTools.getBottomTray();
-            if (bottomTray.getSelTool() instanceof ProblemsTool)
+            if (bottomTray.getSelTool() instanceof BuildTool)
                 bottomTray.hideTools();
         }
     }

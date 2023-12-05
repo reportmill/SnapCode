@@ -3,7 +3,7 @@ import snap.geom.Side;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.view.*;
-import snapcode.apptools.ProblemsTool;
+import snapcode.apptools.BuildTool;
 import java.util.List;
 
 /**
@@ -81,7 +81,7 @@ public class ToolTray extends ViewOwner {
     /**
      * Shows the problems tool.
      */
-    public void showProblemsTool()  { setSelToolForClass(ProblemsTool.class); }
+    public void showProblemsTool()  { setSelToolForClass(BuildTool.class); }
 
     /**
      * Hides selected tool.

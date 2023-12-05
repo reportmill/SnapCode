@@ -73,25 +73,25 @@ public class WorkspaceTools {
         FileTreeTool fileTreeTool = new FileTreeTool(_workspacePane);
         RunTool runTool = new RunTool(_workspacePane);
         DebugTool debugTool = new DebugTool(_workspacePane, runTool);
+        BuildTool buildTool = new BuildTool(_workspacePane);
 
         // Support tools
         HelpTool helpTool = new HelpTool(_workspacePane);
         CompleterTool completerTool = new CompleterTool(_workspacePane);
-        ProblemsTool problemsTool = new ProblemsTool(_workspacePane);
 
         // Create tools array
-        _tools = new WorkspaceTool[] { filesTool, fileTreeTool, runTool, debugTool, helpTool, completerTool, problemsTool };
+        _tools = new WorkspaceTool[] { filesTool, fileTreeTool, runTool, debugTool, buildTool, helpTool, completerTool };
 
         // Create LeftTray
         WorkspaceTool[] leftTools = { fileTreeTool };
         _leftTray = new ToolTray(Side.LEFT, leftTools);
 
         // Create RightTray
-        WorkspaceTool[] rightTools = { runTool, helpTool, completerTool };
+        WorkspaceTool[] rightTools = { runTool, buildTool, helpTool, completerTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray
-        WorkspaceTool[] bottomTools = { problemsTool };
+        WorkspaceTool[] bottomTools = { };
         _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
 
         // Add SamplesButton to RightTray
@@ -251,9 +251,9 @@ public class WorkspaceTools {
      */
     public void resetLater()
     {
-        _bottomTray.resetLater();
         _leftTray.resetLater();
         _rightTray.resetLater();
+        _bottomTray.resetLater();
     }
 
     /**
@@ -291,9 +291,9 @@ public class WorkspaceTools {
         fileTreeTool.updateChangedFile(issueFile);
 
         // Update ProblemsTool
-        ProblemsTool problemsTool = getToolForClass(ProblemsTool.class);
-        if (problemsTool != null && problemsTool.isShowing())
-            problemsTool.resetLater();
+        BuildTool buildTool = getToolForClass(BuildTool.class);
+        if (buildTool != null && buildTool.isShowing())
+            buildTool.resetLater();
     }
 
     /**
