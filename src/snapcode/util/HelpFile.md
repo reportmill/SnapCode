@@ -286,6 +286,7 @@
 ## 3D image
 
 ```
+    var image = getImageForSource("https://reportmill.com/examples/Weird.jpg")
     var image3D = Quick3D.createImage3D(image)
     show(image3D)
 ```
