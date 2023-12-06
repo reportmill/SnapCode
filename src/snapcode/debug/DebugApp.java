@@ -4,11 +4,11 @@ import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
 import com.sun.jdi.request.*;
 import snap.util.ListUtils;
+import snapcode.apptools.RunTool;
 import snapcode.project.Breakpoint;
 import snap.util.ArrayUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;
-
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -55,11 +55,11 @@ public class DebugApp extends RunAppBin {
     static final int DIFFERENT = 2;
 
     /**
-     * Creates a new DebugApp.
+     * Constructor.
      */
-    public DebugApp(WebURL aURL, String[] args)
+    public DebugApp(RunTool runTool, WebURL aURL, String[] args)
     {
-        super(aURL, args);
+        super(runTool, aURL, args);
     }
 
     /**

@@ -8,6 +8,7 @@ import snap.web.WebURL;
 import snapcharts.repl.Console;
 import snapcharts.repl.DefaultConsole;
 import snapcharts.repl.ScanPane;
+import snapcode.apptools.RunTool;
 import snapcode.project.JavaAgent;
 import java.io.InputStream;
 
@@ -31,9 +32,9 @@ public class RunAppSrc extends RunApp {
     /**
      * Constructor.
      */
-    public RunAppSrc(WebURL mainClassFileURL)
+    public RunAppSrc(RunTool runTool, WebURL mainClassFileURL)
     {
-        super(mainClassFileURL, new String[0]);
+        super(runTool, mainClassFileURL, new String[0]);
 
         // Create JavaShell
         _javaShell = new JavaShell(this);
@@ -42,12 +43,17 @@ public class RunAppSrc extends RunApp {
         _console = new DefaultConsole();
     }
 
+    /**
+     * Override to run source app.
+     */
     @Override
     public void exec()
     {
         // Set console
-        Console.setShared(_console);
+        Console.setShared(null);
+        Console.setConsoleCreatedHandler(() -> setAltConsoleView(Console.getShared().getConsoleView()));
 
+        // Create and start new thread to run
         _runAppThread = new Thread(() -> runAppImpl());
         _runAppThread.start();
         _running = true;

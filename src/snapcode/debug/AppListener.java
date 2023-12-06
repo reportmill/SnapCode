@@ -8,30 +8,30 @@ public interface AppListener {
     /**
      * App started.
      */
-    void appStarted(RunApp em);
+    void appStarted(RunApp runApp);
 
     /**
      * App paused.
      */
-    void appPaused(DebugApp em);
+    void appPaused(DebugApp runApp);
 
     /**
      * App resumed.
      */
-    void appResumed(DebugApp em);
+    void appResumed(DebugApp runApp);
 
     /**
      * App exited.
      */
-    void appExited(RunApp em);
+    void appExited(RunApp runApp);
 
     /**
      * FrameChanged.
      */
-    void frameChanged(DebugApp anApp);
+    void frameChanged(DebugApp runApp);
 
     /**
      * DebugEvent.
      */
-    void processDebugEvent(DebugApp anApp, DebugEvent e);
+    void processDebugEvent(DebugApp runApp, DebugEvent e);
 }

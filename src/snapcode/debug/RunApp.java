@@ -1,7 +1,11 @@
 package snapcode.debug;
+import snap.gfx.Color;
 import snap.util.ArrayUtils;
+import snap.view.TextArea;
+import snap.view.View;
 import snap.view.ViewEnv;
 import snap.view.ViewUtils;
+import snapcode.apptools.RunTool;
 import snapcode.project.Breakpoint;
 import snap.web.WebURL;
 import java.io.*;
@@ -10,6 +14,9 @@ import java.io.*;
  * A class to run an external process.
  */
 public abstract class RunApp {
+
+    // The RunTook
+    protected RunTool _runTool;
 
     // The URL
     private WebURL _url;
@@ -33,7 +40,16 @@ public abstract class RunApp {
     private File _workDir;
 
     // Text to hold system console output
-    protected ConsoleText _outputText;
+    protected ConsoleText _consoleText;
+
+    // TextView to hold console text
+    protected TextArea _consoleTextView;
+
+    // The console view
+    private View _consoleView;
+
+    // The alternate console view
+    private View _altConsoleView;
 
     // Whether app is running
     protected boolean _running;
@@ -50,22 +66,34 @@ public abstract class RunApp {
     /**
      * Creates a new RunApp for URL and args.
      */
-    public RunApp(WebURL aURL, String[] theArgs)
+    public RunApp(RunTool runTool, WebURL aURL, String[] theArgs)
     {
+        super();
+        _runTool = runTool;
         _url = aURL;
         setArgs(theArgs);
 
         // Create TextBlock to hold system console output
-        _outputText = new ConsoleText();
+        _consoleText = new ConsoleText();
+        _consoleText.setRunTool(_runTool);
+
+        // Create ConsoleTextView
+        _consoleTextView = new TextArea();
+        _consoleTextView.setEditable(true);
+        _consoleTextView.setFill(Color.WHITE);
+        _consoleTextView.setPadding(8, 8, 8, 8);
+        _consoleTextView.setGrowHeight(true);
+        _consoleTextView.setSourceText(_consoleText);
+        _consoleView = _consoleTextView;
     }
 
     /**
-     * Returns the args.
+     * Returns the app launch args.
      */
     public String[] getArgs()  { return _args; }
 
     /**
-     * Sets DebugApp launch args.
+     * Sets the app launch args.
      */
     public boolean setArgs(String[] argv)
     {
@@ -118,10 +146,12 @@ public abstract class RunApp {
             else if (token.equals("-help")) {
                 error("");
                 return false;
-            } else if (token.equals("-version")) {
+            }
+            else if (token.equals("-version")) {
                 error("Version 1");
                 return false;
-            } else if (token.startsWith("-")) {
+            }
+            else if (token.startsWith("-")) {
                 error("invalid option: " + token);
                 return false;
             }
@@ -213,19 +243,55 @@ public abstract class RunApp {
     public String getName()
     {
         String name = getURL().getFilenameSimple();
-        if (isTerminated()) name += " <terminated>";
+        if (isTerminated())
+            name += " <terminated>";
         return name;
     }
 
     /**
-     * Returns the output text.
+     * Returns the console view.
      */
-    public ConsoleText getOutputText()  { return _outputText; }
+    public View getConsoleView()  { return _consoleView; }
 
     /**
-     * Clears the output text.
+     * Sets the console view.
      */
-    public void clearOutputText()  { _outputText.clear(); }
+    public void setConsoleView(View aView)
+    {
+        if (aView == _consoleView) return;
+        _consoleView = aView;
+        _runTool.consoleViewDidChange(this);
+    }
+
+    /**
+     * Returns the alternate console view.
+     */
+    public View getAltConsoleView()  { return _altConsoleView; }
+
+    /**
+     * Sets the console view.
+     */
+    public void setAltConsoleView(View aView)
+    {
+        if (aView == _altConsoleView) return;
+        _altConsoleView = aView;
+        setConsoleView(aView);
+    }
+
+    /**
+     * Returns the console text view.
+     */
+    public TextArea getConsoleTextView()  { return _consoleTextView; }
+
+    /**
+     * Returns the console text.
+     */
+    public ConsoleText getConsoleText()  { return _consoleText; }
+
+    /**
+     * Clears the console text.
+     */
+    public void clearConsole()  { _consoleText.clear(); }
 
     /**
      * Executes the given command + args.
@@ -298,7 +364,7 @@ public abstract class RunApp {
     {
         if (!ViewEnv.getEnv().isEventThread())
             ViewUtils.runLater(() -> appendConsoleOutput(aString, isError));
-        else _outputText.appendString(aString, isError);
+        else _consoleText.appendString(aString, isError);
     }
 
     /**

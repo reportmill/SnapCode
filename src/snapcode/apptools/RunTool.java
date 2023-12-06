@@ -1,5 +1,4 @@
 package snapcode.apptools;
-import snap.gfx.Color;
 import snap.props.PropChange;
 import snap.util.FilePathUtils;
 import snap.util.ListUtils;
@@ -31,9 +30,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
     // The limit to the number of running processes
     private int  _procLimit = 1;
 
-    // The ConsoleTextView
-    private TextArea _consoleTextView;
-
     // The view that shows when there is an extended run
     private View  _extendedRunView;
 
@@ -49,13 +45,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
     public RunTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
-
-        // Create ConsoleTextView
-        _consoleTextView = new TextArea();
-        _consoleTextView.setEditable(true);
-        _consoleTextView.setFill(Color.WHITE);
-        _consoleTextView.setPadding(8, 8, 8, 8);
-        _consoleTextView.setGrowHeight(true);
     }
 
     /**
@@ -127,7 +116,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         _selApp = aProc;
 
         resetLater();
-        runLater(() -> resetConsole());
+        runLater(() -> resetConsoleView());
         DebugTool debugTool = getDebugTool();
         debugTool.resetLater();
     }
@@ -232,11 +221,11 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // Get process
         RunApp proc;
         if (!isDebug)
-            proc = new RunAppBin(aURL, args);
+            proc = new RunAppBin(this, aURL, args);
 
             // Handle isDebug: Create DebugApp with Workspace.Breakpoints
         else {
-            proc = new DebugApp(aURL, args);
+            proc = new DebugApp(this, aURL, args);
             Breakpoints breakpointsHpr = _workspace.getBreakpoints();
             Breakpoint[] breakpoints = breakpointsHpr.getArray();
             for (Breakpoint breakpoint : breakpoints)
@@ -259,20 +248,19 @@ public class RunTool extends WorkspaceTool implements AppListener {
     }
 
     /**
-     * Reset console.
+     * Reset console view.
      */
-    protected void resetConsole()
+    protected void resetConsoleView()
     {
         RunApp selApp = getSelApp();
         if (selApp == null)
             return;
 
         // Set selApp.OutputText in ConsoleText
-        ConsoleText consoleText = selApp.getOutputText();
-        if (_consoleTextView.getTextBlock() != consoleText) {
-            _consoleTextView.setSourceText(consoleText);
-            consoleText.setRunTool(this);
-        }
+        View consoleView = selApp.getConsoleView();
+        ScrollView scrollView = getView("ScrollView", ScrollView.class);
+        if (scrollView.getContent() != consoleView)
+            scrollView.setContent(consoleView);
     }
 
     /**
@@ -347,6 +335,14 @@ public class RunTool extends WorkspaceTool implements AppListener {
 
         // Clear extended run UI if needed
         ViewUtils.runLater(() -> setShowExtendedRunUI(false));
+    }
+
+    /**
+     * Called when run app console view changes.
+     */
+    public void consoleViewDidChange(RunApp runApp)
+    {
+        resetConsoleView();
     }
 
     /**
@@ -440,7 +436,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
     public void runApp()
     {
         // Clear display
-        resetDisplay();
+        clearConsole();
 
         // Build app
         BuildTool buildTool = _workspaceTools.getToolForClass(BuildTool.class);
@@ -454,7 +450,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
             return;
 
         // Create app and run
-        RunApp runApp = new RunAppSrc(selFile.getURL());
+        RunApp runApp = new RunAppSrc(this, selFile.getURL());
         execProc(runApp);
 
         // Check back in half a second to see if we need to show progress bar
@@ -501,11 +497,16 @@ public class RunTool extends WorkspaceTool implements AppListener {
     /**
      * Clear eval values.
      */
-    public void resetDisplay()
+    public void clearConsole()
     {
+        // Remove extended run or cancelled run UI if set
         setShowExtendedRunUI(false);
         setShowCancelledRunUI(false);
-        _consoleTextView.clear();
+
+        // Tell selected app to clear console
+        RunApp selApp = getSelApp();
+        if (selApp != null)
+            selApp.clearConsole();
     }
 
     /**
@@ -517,7 +518,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // Get ScrollView and config
         ScrollView scrollView = getView("ScrollView", ScrollView.class);
         scrollView.setBorder(null);
-        scrollView.setContent(_consoleTextView);
 
         // Get ExtendedRunView
         _extendedRunView = getView("ExtendedRunView");
@@ -538,6 +538,16 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // Update RunButton, TerminateButton
         setViewEnabled("RunButton", !isRunning());
         setViewEnabled("TerminateButton", isRunning());
+
+        // Update SwapConsoleButton
+        RunApp selApp = getSelApp();
+        boolean hasAltConsole = selApp != null && selApp.getAltConsoleView() != null;
+        setViewVisible("SwapConsoleButton", hasAltConsole);
+        if (hasAltConsole) {
+            boolean isAltConsole = selApp.getConsoleView() == selApp.getAltConsoleView();
+            String swapConsoleButtonTitle = isAltConsole ? "Show System Console" : "Show App Console";
+            setViewText("SwapConsoleButton", swapConsoleButtonTitle);
+        }
     }
 
     /**
@@ -552,9 +562,17 @@ public class RunTool extends WorkspaceTool implements AppListener {
         else if (anEvent.equals("TerminateButton"))
             cancelRun();
 
+        // Handle SwapConsoleButton
+        else if (anEvent.equals("SwapConsoleButton")) {
+            RunApp selApp = getSelApp();
+            boolean isAltConsole = selApp.getConsoleView() == selApp.getAltConsoleView();
+            View swapConsoleView = isAltConsole ? selApp.getConsoleTextView() : selApp.getAltConsoleView();
+            selApp.setConsoleView(swapConsoleView);
+        }
+
         // Handle ClearButton
         else if (anEvent.equals("ClearButton"))
-            resetDisplay();
+            clearConsole();
 
         // Handle InputTextField: Show input string, add to runner input and clear text
         else if (anEvent.equals("InputTextField")) {

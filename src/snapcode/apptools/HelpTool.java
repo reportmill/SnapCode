@@ -207,7 +207,7 @@ public class HelpTool extends WorkspaceTool {
 
         // Show run console
         RunTool runTool = _workspaceTools.getToolForClass(RunTool.class);
-        runTool.resetDisplay();
+        runTool.clearConsole();
         _workspaceTools.showToolForClass(RunTool.class);
 
         // Focus on text area
