@@ -6,7 +6,6 @@ import snap.util.ListUtils;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcharts.repl.ReplObject;
 import snap.view.*;
 import snapcode.app.JavaPage;
 import snapcode.app.WorkspacePane;
@@ -560,11 +559,8 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // Handle InputTextField: Show input string, add to runner input and clear text
         else if (anEvent.equals("InputTextField")) {
 
-            // Get InputTextField string
+            // Get InputTextField string and send to current process
             String inputString = anEvent.getStringValue();
-            ReplObject.show(inputString);
-
-            // Send to current process
             RunApp selApp = getSelApp();
             if (selApp != null)
                 selApp.sendInput(inputString + '\n');

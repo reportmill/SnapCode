@@ -307,7 +307,7 @@ public class BreakpointReq {
      */
     public static boolean isValidMethodName(String aName)
     {
-        return Utils.isJavaIdentifier(aName) || aName.equals("<init>") || aName.equals("<clinit>");
+        return DebugUtils.isJavaIdentifier(aName) || aName.equals("<init>") || aName.equals("<clinit>");
     }
 
     /**

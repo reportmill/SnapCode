@@ -47,9 +47,6 @@ public abstract class RunApp {
     // App listeners
     protected AppListener[] _appLsnrs = new AppListener[0];
 
-    // Proxies for AppOutput, AppError and Diagnostics.
-    protected OutputListener _diagnostics = str -> System.out.println(str);
-
     /**
      * Creates a new RunApp for URL and args.
      */
@@ -266,17 +263,17 @@ public abstract class RunApp {
     /**
      * Post an error message to the PrintWriter.
      */
-    public void error(String message)  { _diagnostics.putString(message);  }
+    public void error(String message)  { printDiagnostic(message);  }
 
     /**
      * Post an error message to the PrintWriter.
      */
-    public void failure(String message)  { _diagnostics.putString(message); }
+    public void failure(String message)  { printDiagnostic(message); }
 
     /**
      * Post an error message to the PrintWriter.
      */
-    public void notice(String message)  { _diagnostics.putString(message); }
+    public void notice(String message)  { printDiagnostic(message); }
 
     /**
      * Called to append to output buffer.
@@ -337,16 +334,10 @@ public abstract class RunApp {
     }
 
     /**
-     * An interface for objects providing input.
+     * Prints a diagnostic.
      */
-    public interface InputListener {
-        String getLine();
-    }
-
-    /**
-     * An interface for objects providing input.
-     */
-    public interface OutputListener {
-        void putString(String str);
+    public void printDiagnostic(String aString)
+    {
+        System.out.println(aString);
     }
 }

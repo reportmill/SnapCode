@@ -10,89 +10,88 @@ import java.util.Map;
 /**
  * Debug Utils.
  */
-public class Utils {
+public class DebugUtils {
 
     /**
      * Creates a VM for VM args and a command line.
      */
-    public static VirtualMachine getVM(String theVMArgs, String cmdLine, RunApp.OutputListener diagnostics)
+    public static VirtualMachine getVM(String theVMArgs, String cmdLine, RunApp runApp)
     {
         VirtualMachineManager manager = Bootstrap.virtualMachineManager();
         LaunchingConnector connector = manager.defaultConnector();
         Map<String, Connector.Argument> args = connector.defaultArguments();
         args.get("options").setValue(theVMArgs);
         args.get("main").setValue(cmdLine);  // Should probably figure out how to specify 'localhost'
-        return generalGetVM(connector, args, diagnostics);
+
+        // Return general version
+        return generalGetVM(connector, args, runApp);
     }
 
-    static private VirtualMachine generalGetVM(LaunchingConnector connector, Map args, RunApp.OutputListener diagnostics)
+    private static VirtualMachine generalGetVM(LaunchingConnector connector, Map<String, Connector.Argument> args, RunApp runApp)
     {
         VirtualMachine vm = null;
         try {
-            diagnostics.putString("Starting child.");
+            runApp.printDiagnostic("Starting child.");
             vm = connector.launch(args);
-        } catch (IOException ioe) {
-            diagnostics.putString("Unable to start child: " + ioe.getMessage());
-        } catch (IllegalConnectorArgumentsException icae) {
-            diagnostics.putString("Unable to start child: " + icae.getMessage());
-        } catch (VMStartException vmse) {
-            diagnostics.putString("Unable to start child: " + vmse.getMessage() + '\n');
-            dumpFailedLaunchInfo(diagnostics, vmse.process());
         }
+        catch (IOException | IllegalConnectorArgumentsException ioe) {
+            runApp.printDiagnostic("Unable to start child: " + ioe.getMessage());
+        }
+        catch (VMStartException vmse) {
+            runApp.printDiagnostic("Unable to start child: " + vmse.getMessage() + '\n');
+            dumpFailedLaunchInfo(runApp, vmse.process());
+        }
+
+        // Return
         return vm;
     }
 
     /**
-     * Launch child java interpreter, return host:port
+     * dumpFailedLaunchInfo.
      */
-    static private void dumpStream(RunApp.OutputListener diagnostics, InputStream stream) throws IOException
+    private static void dumpFailedLaunchInfo(RunApp runApp, Process process)
+    {
+        try {
+            dumpStream(runApp, process.getErrorStream());
+            dumpStream(runApp, process.getInputStream());
+        }
+        catch (IOException e) {
+            runApp.printDiagnostic("Unable to display process output: " + e.getMessage());
+        }
+    }
+
+    /**
+     * dumpStream.
+     */
+    private static void dumpStream(RunApp runApp, InputStream stream) throws IOException
     {
         BufferedReader in = new BufferedReader(new InputStreamReader(stream));
         for (String line = in.readLine(); line != null; line = in.readLine())
-            diagnostics.putString(line);
-    }
-
-    static private void dumpFailedLaunchInfo(RunApp.OutputListener diagnostics, Process process)
-    {
-        try {
-            dumpStream(diagnostics, process.getErrorStream());
-            dumpStream(diagnostics, process.getInputStream());
-        } catch (IOException e) {
-            diagnostics.putString("Unable to display process output: " + e.getMessage());
-        }
+            runApp.printDiagnostic(line);
     }
 
     /**
      * Return the thread status description.
      */
-    public static String getStatus(ThreadReference thr)
+    public static String getStatus(ThreadReference threadReference)
     {
-        int status = thr.status();
+        int status = threadReference.status();
         String result;
         switch (status) {
-            case ThreadReference.THREAD_STATUS_UNKNOWN:
-                result = "unknown status";
-                break;
-            case ThreadReference.THREAD_STATUS_ZOMBIE:
-                result = "zombie";
-                break;
-            case ThreadReference.THREAD_STATUS_RUNNING:
-                result = "running";
-                break;
-            case ThreadReference.THREAD_STATUS_SLEEPING:
-                result = "sleeping";
-                break;
-            case ThreadReference.THREAD_STATUS_MONITOR:
-                result = "waiting to acquire a monitor lock";
-                break;
-            case ThreadReference.THREAD_STATUS_WAIT:
-                result = "waiting on a condition";
-                break;
-            default:
-                result = "<invalid thread status>";
+            case ThreadReference.THREAD_STATUS_UNKNOWN: result = "unknown status"; break;
+            case ThreadReference.THREAD_STATUS_ZOMBIE: result = "zombie"; break;
+            case ThreadReference.THREAD_STATUS_RUNNING: result = "running"; break;
+            case ThreadReference.THREAD_STATUS_SLEEPING: result = "sleeping"; break;
+            case ThreadReference.THREAD_STATUS_MONITOR: result = "waiting to acquire a monitor lock"; break;
+            case ThreadReference.THREAD_STATUS_WAIT: result = "waiting on a condition"; break;
+            default: result = "<invalid thread status>";
         }
-        if (thr.isSuspended())
+
+        // If suspended, add text
+        if (threadReference.isSuspended())
             result += " (suspended)";
+
+        // Return
         return result;
     }
 
@@ -177,28 +176,38 @@ public class Utils {
     }
 
     /**
-     * A class to forward text from InputListener to given PrintWriter.
+     * A thread subclass to forward text from InputListener to given PrintWriter.
      */
-    public static class InputWriter extends Thread {
+    public static class InputWriterThread extends Thread {
 
-        PrintWriter _stream;
-        RunApp.InputListener _input;
+        // PrintWriter
+        private PrintWriter _printWriter;
 
-        InputWriter(String aName, PrintWriter aPW, RunApp.InputListener anIL)
+        // InputListener
+        private InputListener _inputLsnr;
+
+        InputWriterThread(String aName, PrintWriter printWriter, InputListener inputListener)
         {
             super(aName);
-            _stream = aPW;
-            _input = anIL;
+            _printWriter = printWriter;
+            _inputLsnr = inputListener;
+            setPriority(Thread.MAX_PRIORITY - 1);
         }
 
         public void run()
         {
             while (true) {
-                String line = _input.getLine();
-                _stream.println(line);
-                _stream.flush(); // Should not be needed for println above!
+                String line = _inputLsnr.getLine();
+                _printWriter.println(line);
+                _printWriter.flush(); // Should not be needed for println above!
             }
         }
     }
 
+    /**
+     * An interface for objects providing input.
+     */
+    public interface InputListener {
+        String getLine();
+    }
 }

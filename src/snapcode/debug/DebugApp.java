@@ -8,6 +8,8 @@ import snapcode.project.Breakpoint;
 import snap.util.ArrayUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;
+
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.*;
@@ -29,7 +31,6 @@ public class DebugApp extends RunAppBin {
     int _frameIndex;
 
     // all specs
-    //List <BreakpointReq>          _eventRequestSpecs = Collections.synchronizedList(new ArrayList());
     BreakpointReq[] _eventRequestSpecs = new BreakpointReq[0];
 
     // Event source thread
@@ -82,7 +83,7 @@ public class DebugApp extends RunAppBin {
             String vmArgs = getVmArgs();
             String appArgs = getAppArgs();
             String cmdLine = cname + " " + appArgs;
-            _vm = Utils.getVM(vmArgs, cmdLine, _diagnostics);
+            _vm = DebugUtils.getVM(vmArgs, cmdLine, this);
             _running = true;
             startSession();
             startSystemConsoleReaders();
@@ -116,11 +117,12 @@ public class DebugApp extends RunAppBin {
         // Get process
         _process = _vm.process();
 
-        // Start InputWriter
-        PrintWriter in = new PrintWriter(new OutputStreamWriter(_process.getOutputStream()));
-        Utils.InputWriter inputWriter = new Utils.InputWriter("input writer", in, _appInput);
-        inputWriter.setPriority(Thread.MAX_PRIORITY - 1);
-        inputWriter.start();
+        // Start InputWriterThread
+        OutputStream stdInOutputStream = _process.getOutputStream();
+        OutputStreamWriter stdInOutputStreamWriter = new OutputStreamWriter(stdInOutputStream);
+        PrintWriter stdIn = new PrintWriter(stdInOutputStreamWriter);
+        DebugUtils.InputWriterThread inputWriterThread = new DebugUtils.InputWriterThread("input writer", stdIn, _appInput);
+        inputWriterThread.start();
 
         _vm.setDebugTraceMode(VirtualMachine.TRACE_NONE);
         notice("Connected to VM");
@@ -526,9 +528,9 @@ public class DebugApp extends RunAppBin {
      */
     public void setFrame(DebugFrame aFrame)
     {
-        ThreadReference tref = aFrame != null ? aFrame._thread._tref : null;
-        int ind = aFrame != null ? aFrame.getIndex() : -1;
-        setCurrentThread(tref, ind);
+        ThreadReference threadRef = aFrame != null ? aFrame._thread._tref : null;
+        int frameIndex = aFrame != null ? aFrame.getIndex() : -1;
+        setCurrentThread(threadRef, frameIndex);
     }
 
     /**
@@ -574,37 +576,41 @@ public class DebugApp extends RunAppBin {
      */
     public void sendLineToApp(String line)
     {
-        synchronized (inputLock) {
-            inputBuffer.addFirst(line);
-            inputLock.notifyAll();
+        synchronized (_inputLock) {
+            _inputBuffer.addFirst(line);
+            _inputLock.notifyAll();
         }
     }
 
     /**
      * SendLineToApp support.
      */
-    private LinkedList inputBuffer = new LinkedList();
-    private Object inputLock = new Object();
-    private InputListener _appInput = new InputListener() {
-        public String getLine()
-        {
-            // Don't allow reader to be interrupted -- catch and retry.
-            String line = null;
-            while (line == null) {
-                synchronized (inputLock) {
-                    try {
-                        while (inputBuffer.size() < 1) inputLock.wait();
-                        line = (String) inputBuffer.removeLast();
-                    }
-                    catch (InterruptedException ignore) { }
-                }
-            }
+    private LinkedList<String> _inputBuffer = new LinkedList<>();
+    private Object _inputLock = new Object();
+    private DebugUtils.InputListener _appInput = () -> getInputBufferLine();
 
-            // Must not be holding inputLock here, as listener that we call to echo line might call us re-entrantly
-            echoInputLine(line);
-            return line;
+    /**
+     * SendLineToApp support.
+     */
+    private String getInputBufferLine()
+    {
+        // Don't allow reader to be interrupted -- catch and retry.
+        String line = null;
+        while (line == null) {
+            synchronized (_inputLock) {
+                try {
+                    while (_inputBuffer.size() < 1)
+                        _inputLock.wait();
+                    line = _inputBuffer.removeLast();
+                }
+                catch (InterruptedException ignore) { }
+            }
         }
-    };
+
+        // Must not be holding inputLock here, as listener that we call to echo line might call us re-entrantly
+        echoInputLine(line);
+        return line;
+    }
 
     /**
      * Called to echo input.
