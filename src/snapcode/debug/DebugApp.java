@@ -751,29 +751,15 @@ public class DebugApp extends RunAppBin {
     /**
      * Notifications for breakpoints.
      */
-    protected void notifySet(BreakpointReq aBP)
-    {
-        for (AppListener appLsnr : _appLsnrs)
-            appLsnr.requestSet(aBP);
-    }
+    protected void breakpointReqWasSet(BreakpointReq aBP)  { }
 
-    protected void notifyDeferred(BreakpointReq aBP)
-    {
-        for (AppListener appLsnr : _appLsnrs)
-            appLsnr.requestDeferred(aBP);
-    }
+    protected void breakpointReqWasDeferred(BreakpointReq aBP)  { }
 
-    protected void notifyDeleted(BreakpointReq aBP)
-    {
-        for (AppListener appLsnr : _appLsnrs)
-            appLsnr.requestDeleted(aBP);
-    }
+    protected void breakpointReqWasDeleted(BreakpointReq aBP)  { }
 
-    protected void notifyError(BreakpointReq aBP)
+    protected void breakpointReqSetFailed(BreakpointReq aBP)
     {
         error("Failed to set BP: " + aBP);
-        for (AppListener appLsnr : _appLsnrs)
-            appLsnr.requestError(aBP);
     }
 
     /**
@@ -783,20 +769,23 @@ public class DebugApp extends RunAppBin {
     {
         // Notify listeners
         DebugEvent.Type type = anEvent._type;
-        boolean eventPaused = anEvent.suspendedAll(), wantsPause = isPaused();
-        if (_printEVs) System.out.println("JDIEvent: " + anEvent);
+        boolean eventPaused = anEvent.suspendedAll();
+        boolean wantsPause = isPaused();
+        if (_printEVs)
+            System.out.println("JDIEvent: " + anEvent);
 
         // If invoking a method, we just want to get back to business
         if (_invoking) {
+
+            // Handle ClassPrepare
             if (type == DebugEvent.Type.ClassPrepare)
                 resolve(anEvent.getReferenceType());
-            if (eventPaused)
-                try {
-                    _vm.resume();
-                    return;
-                } catch (Exception e) {
-                    failure("Failed to resume: " + e.getMessage());
-                }
+
+            // Handle event pause
+            if (eventPaused) {
+                try { _vm.resume(); return; }
+                catch (Exception e) { failure("Failed to resume: " + e.getMessage()); }
+            }
             return;
         }
 
@@ -929,11 +918,8 @@ public class DebugApp extends RunAppBin {
 
             // This probably won't happen for the method that we are really supposed to call.
             List<Type> argTypes;
-            try {
-                argTypes = mm.argumentTypes();
-            } catch (ClassNotLoadedException ee) {
-                continue;
-            }
+            try { argTypes = mm.argumentTypes(); }
+            catch (ClassNotLoadedException ee) { continue; }
 
             //
             int compare = argumentsMatch(argTypes, args);
@@ -973,9 +959,8 @@ public class DebugApp extends RunAppBin {
         Iterator<Value> valIter = args.iterator();
         int result = SAME;
 
-        // If any pair aren't the same, change the
-        // result to ASSIGNABLE.  If any pair aren't
-        // assignable, return DIFFERENT
+        // If any pair aren't the same, change result to ASSIGNABLE
+        // If any pair aren't assignable, return DIFFERENT
         while (typeIter.hasNext()) {
             Type argType = typeIter.next();
             Value value = valIter.next();
@@ -1078,6 +1063,6 @@ public class DebugApp extends RunAppBin {
     /**
      * PrimitiveTypeNames.
      */
-    private static String[] ptnames = {"boolean", "byte", "char", "short", "int", "long", "float", "double"};
+    private static String[] ptnames = { "boolean", "byte", "char", "short", "int", "long", "float", "double" };
     private static List<String> primitiveTypeNames = Arrays.asList(ptnames);
 }

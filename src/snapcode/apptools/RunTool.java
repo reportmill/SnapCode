@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * This class manages the run/eval UI.
  */
-public class RunTool extends WorkspaceTool implements RunApp.AppListener {
+public class RunTool extends WorkspaceTool implements AppListener {
 
     // The list of recently run apps
     private List<RunApp> _apps = new ArrayList<>();
@@ -369,14 +369,6 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     }
 
     /**
-     * DebugListener breakpoint methods.
-     */
-    public void requestSet(BreakpointReq e)  { }
-    public void requestDeferred(BreakpointReq e)  { }
-    public void requestDeleted(BreakpointReq e)  { }
-    public void requestError(BreakpointReq e)  { }
-
-    /**
      * Returns a source URL for path.
      */
     public String getSourceURL(String aPath)
@@ -386,7 +378,9 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
         if (aPath.startsWith("/javafx/"))
             return "https://reportmill.com/jars/8u05/javafx-src.zip!" + aPath;
 
-        Project project = Project.getProjectForSite(getRootSite());
+        // Get root project
+        WebSite rootSite = getRootSite();
+        Project project = Project.getProjectForSite(rootSite);
         if (project == null)
             return aPath;
 

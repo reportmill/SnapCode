@@ -5,8 +5,6 @@ import snap.view.ViewUtils;
 import snapcode.project.Breakpoint;
 import snap.web.WebURL;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A class to run an external process.
@@ -350,47 +348,5 @@ public abstract class RunApp {
      */
     public interface OutputListener {
         void putString(String str);
-    }
-
-    /**
-     * An interface for objects wanting notification of change of Session status.
-     */
-    public interface AppListener {
-
-        // App started, paused, resumed, exited
-        void appStarted(RunApp em);
-        void appPaused(DebugApp em);
-        void appResumed(DebugApp em);
-        void appExited(RunApp em);
-
-        // FrameChanged
-        void frameChanged(DebugApp anApp);
-
-        // DebugEvent
-        void processDebugEvent(DebugApp anApp, DebugEvent e);
-
-        // Notifications for Breakpoints, Watchpoints and Exception points.
-        void requestSet(BreakpointReq e);
-        void requestDeferred(BreakpointReq e);
-        void requestDeleted(BreakpointReq e);
-        void requestError(BreakpointReq e);
-    }
-
-    /**
-     * Output from app.
-     */
-    public static class Output {
-        String _str;
-        boolean _isErr;
-
-        Output(String aStr, boolean isErr)
-        {
-            _str = aStr;
-            _isErr = isErr;
-        }
-
-        public String getString()  { return _str; }
-
-        public boolean isErr()  { return _isErr; }
     }
 }

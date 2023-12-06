@@ -76,7 +76,7 @@ public class BreakpointReq {
             }
 
         // If ref-type not found, notify deferred
-        _app.notifyDeferred(this);
+        _app.breakpointReqWasDeferred(this);
     }
 
     /**
@@ -89,14 +89,14 @@ public class BreakpointReq {
             _request = createEventRequest(aRefType);
             _request.putProperty("spec", this); // Don't think we need this
             _request.enable();
-            _app.notifySet(this);  // Notify successful set
+            _app.breakpointReqWasSet(this);  // Notify successful set
             System.out.println("Installed BP " + getName() + " :" + _bpoint.getLineNum());
         }
 
         // If create event request fails, set error and notify
         catch (Exception exc) {
             _error = exc;
-            _app.notifyError(this);
+            _app.breakpointReqSetFailed(this);
         }
     }
 
@@ -109,7 +109,7 @@ public class BreakpointReq {
         EventRequest request = getEventRequest();
         if (request != null && _app.isRunning())
             request.virtualMachine().eventRequestManager().deleteEventRequest(request);
-        _app.notifyDeleted(this);
+        _app.breakpointReqWasDeleted(this);
     }
 
     /**
