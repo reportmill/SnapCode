@@ -1,16 +1,11 @@
 package snapcode.apptools;
 import snap.gfx.Color;
 import snap.props.PropChange;
-import snap.text.TextLink;
-import snap.text.TextStyle;
-import snap.util.Convert;
 import snap.util.FilePathUtils;
 import snap.util.ListUtils;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcharts.repl.Console;
-import snapcharts.repl.DefaultConsole;
 import snapcharts.repl.ReplObject;
 import snap.view.*;
 import snapcode.app.JavaPage;
@@ -37,11 +32,8 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     // The limit to the number of running processes
     private int  _procLimit = 1;
 
-    // The last executed file
-    private static WebFile _lastRunFile;
-
-    // The Console
-    protected Console _console;
+    // The ConsoleTextView
+    private TextArea _consoleTextView;
 
     // The view that shows when there is an extended run
     private View  _extendedRunView;
@@ -49,8 +41,8 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     // The view that shows when there is cancelled run
     private View  _cancelledRunView;
 
-    // Constants
-    private static Color ERROR_COLOR = new Color("CC0000");
+    // The last executed file
+    private static WebFile _lastRunFile;
 
     /**
      * Constructor.
@@ -59,8 +51,12 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     {
         super(workspacePane);
 
-        // Create console
-        _console = new DefaultConsole();
+        // Create ConsoleTextView
+        _consoleTextView = new TextArea();
+        _consoleTextView.setEditable(true);
+        _consoleTextView.setFill(Color.WHITE);
+        _consoleTextView.setPadding(8, 8, 8, 8);
+        _consoleTextView.setGrowHeight(true);
     }
 
     /**
@@ -268,17 +264,15 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
      */
     protected void resetConsole()
     {
-        resetDisplay();
-
         RunApp selApp = getSelApp();
         if (selApp == null)
             return;
 
-        // Reset Console
-        for (RunApp.Output out : selApp.getOutput()) {
-            if (out.isErr())
-                appendErr(selApp, out.getString());
-            else appendOut(selApp, out.getString());
+        // Set selApp.OutputText in ConsoleText
+        ConsoleText consoleText = selApp.getOutputText();
+        if (_consoleTextView.getTextBlock() != consoleText) {
+            _consoleTextView.setSourceText(consoleText);
+            consoleText.setRunTool(this);
         }
     }
 
@@ -383,127 +377,9 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     public void requestError(BreakpointReq e)  { }
 
     /**
-     * RunProc.Listener method - called when output is available.
-     */
-    public void appendOut(RunApp aProc, String aStr)
-    {
-        if (getSelApp() == aProc)
-            appendOut(aStr);
-    }
-
-    /**
-     * RunProc.Listener method - called when error output is available.
-     */
-    public void appendErr(RunApp aProc, String aStr)
-    {
-        if (getSelApp() == aProc)
-            appendErr(aStr);
-    }
-
-    /**
-     * Appends to out.
-     */
-    public void appendOut(String aStr)
-    {
-        // Make sure we're in app event thread
-        if (!isEventThread()) {
-            runLater(() -> appendOut(aStr)); return; }
-
-        // Append string in black
-        appendString(aStr, Color.BLACK);
-    }
-
-    /**
-     * Appends to err.
-     */
-    public void appendErr(String aStr)
-    {
-        // Make sure we're in app event thread
-        if (!isEventThread()) {
-            runLater(() -> appendErr(aStr)); return; }
-
-        // Append string in red
-        appendString(aStr, ERROR_COLOR);
-    }
-
-    /**
-     * Appends text with given color.
-     */
-    void appendString(String aStr, Color aColor)
-    {
-        TextArea _textView = new TextArea();
-
-        // Get default style modified for color
-        TextStyle style = _textView.getStyleForCharIndex(_textView.length());
-        if (_textView.length() > 100000) return;
-        style = style.copyFor(aColor);
-
-        // Look for a StackFrame reference: " at java.pkg.Class(Class.java:55)" and add as link if found
-        int start = 0;
-        for (int i = aStr.indexOf(".java:"); i > 0; i = aStr.indexOf(".java:", start)) {
-
-            // Get start/end of Java file name inside parens (if parens not found, just add chars and continue)
-            int parenStartIndex = aStr.lastIndexOf("(", i);
-            int parenEndIndex = aStr.indexOf(")", i);
-            if (parenStartIndex < start || parenEndIndex < 0) {
-                _textView.addChars(aStr.substring(start, start = i + 6), style);
-                continue;
-            }
-
-            // Get chars before parens and add
-            String prefix = aStr.substring(start, parenStartIndex + 1);
-            _textView.addChars(prefix, style);
-
-            // Get link text, link address, TextLink
-            String linkText = aStr.substring(parenStartIndex + 1, parenEndIndex);
-            String linkAddr = getLink(prefix, linkText);
-            TextLink textLink = new TextLink(linkAddr);
-
-            // Get TextStyle for link and add link chars
-            TextStyle lstyle = style.copyFor(textLink);
-            _textView.addChars(linkText, lstyle);
-
-            // Update start to end of link text and continue
-            start = parenEndIndex;
-        }
-
-        // Add remainder normally
-        _textView.addChars(aStr.substring(start), style);
-
-        _console.show(_textView);
-    }
-
-    /**
-     * Returns a link for a StackString.
-     */
-    protected String getLink(String aPrefix, String linkedText)
-    {
-        // Get start/end of full class path for .java
-        int start = aPrefix.indexOf("at ");
-        if (start < 0)
-            return "/Unknown";
-        start += 3;
-        int end = aPrefix.indexOf('$');
-        if (end < start)
-            end = aPrefix.lastIndexOf('.');
-        if (end < start)
-            end = aPrefix.length() - 1;
-
-        // Create link from path and return
-        String path = aPrefix.substring(start, end);
-        path = '/' + path.replace('.', '/') + ".java";
-        path = getSourceURL(path);
-        String lineStr = linkedText.substring(linkedText.indexOf(":") + 1);
-        int line = Convert.intValue(lineStr);
-        if (line > 0)
-            path += "#LineNumber=" + line;
-        return path;
-    }
-
-    /**
      * Returns a source URL for path.
      */
-    protected String getSourceURL(String aPath)
+    public String getSourceURL(String aPath)
     {
         if (aPath.startsWith("/java/") || aPath.startsWith("/javax/"))
             return "https://reportmill.com/jars/8u05/src.zip!" + aPath;
@@ -579,9 +455,6 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
         if (!success)
             return;
 
-        // Set console
-        Console.setShared(_console);
-
         // Run app
         WebFile selFile = getSelFile();
         if (selFile == null)
@@ -639,7 +512,7 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     {
         setShowExtendedRunUI(false);
         setShowCancelledRunUI(false);
-        _console.resetConsole();
+        _consoleTextView.clear();
     }
 
     /**
@@ -648,14 +521,10 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
     @Override
     protected void initUI()
     {
-        // Create Repl Console
-        View consoleView = _console.getConsoleView();
-        consoleView.setGrowHeight(true);
-
         // Get ScrollView and config
         ScrollView scrollView = getView("ScrollView", ScrollView.class);
         scrollView.setBorder(null);
-        scrollView.setContent(consoleView);
+        scrollView.setContent(_consoleTextView);
 
         // Get ExtendedRunView
         _extendedRunView = getView("ExtendedRunView");

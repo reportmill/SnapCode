@@ -5,6 +5,8 @@ import javakit.runner.JavaShell;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;
+import snapcharts.repl.Console;
+import snapcharts.repl.DefaultConsole;
 import snapcharts.repl.ScanPane;
 import snapcode.project.JavaAgent;
 import java.io.InputStream;
@@ -20,6 +22,9 @@ public class RunAppSrc extends RunApp {
     // The thread to reset views
     private Thread _runAppThread;
 
+    // The Console
+    protected Console _console;
+
     // An input stream for standard in
     protected ScanPane.BytesInputStream _inputStream;
 
@@ -31,12 +36,18 @@ public class RunAppSrc extends RunApp {
         super(mainClassFileURL, new String[0]);
 
         // Create JavaShell
-        _javaShell = new JavaShell();
+        _javaShell = new JavaShell(this);
+
+        // Create console
+        _console = new DefaultConsole();
     }
 
     @Override
     public void exec()
     {
+        // Set console
+        Console.setShared(_console);
+
         _runAppThread = new Thread(() -> runAppImpl());
         _runAppThread.start();
         _running = true;

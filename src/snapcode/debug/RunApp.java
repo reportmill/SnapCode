@@ -1,5 +1,7 @@
 package snapcode.debug;
 import snap.util.ArrayUtils;
+import snap.view.ViewEnv;
+import snap.view.ViewUtils;
 import snapcode.project.Breakpoint;
 import snap.web.WebURL;
 import java.io.*;
@@ -35,6 +37,9 @@ public abstract class RunApp {
     // String buffer for output text
     protected List<Output> _output = new ArrayList<>();
 
+    // Text to hold system console output
+    protected ConsoleText _outputText;
+
     // Whether app is running
     protected boolean _running;
 
@@ -43,9 +48,6 @@ public abstract class RunApp {
 
     // Whether app has finished running
     protected boolean _terminated;
-
-    // Whether error was printed
-    protected boolean _hadError;
 
     // App listeners
     protected AppListener[] _appLsnrs = new AppListener[0];
@@ -60,6 +62,9 @@ public abstract class RunApp {
     {
         _url = aURL;
         setArgs(theArgs);
+
+        // Create TextBlock to hold system console output
+        _outputText = new ConsoleText();
     }
 
     /**
@@ -223,12 +228,12 @@ public abstract class RunApp {
     /**
      * Returns the output text.
      */
-    public List<Output> getOutput()  { return _output; }
+    public ConsoleText getOutputText()  { return _outputText; }
 
     /**
      * Clears the output text.
      */
-    public void clearOutput()  { _output.clear(); }
+    public void clearOutputText()  { _outputText.clear(); }
 
     /**
      * Executes the given command + args.
@@ -253,10 +258,7 @@ public abstract class RunApp {
     /**
      * Returns whether process is paused.
      */
-    public boolean isPaused()
-    {
-        return _paused;
-    }
+    public boolean isPaused()  { return _paused; }
 
     /**
      * Sets whether process is paused.
@@ -286,9 +288,7 @@ public abstract class RunApp {
      */
     protected void appendOut(String aStr)
     {
-        _output.add(new Output(aStr, false));
-        for (AppListener lsnr : _appLsnrs)
-            lsnr.appendOut(this, aStr);
+        appendConsoleOutput(aStr, false);
     }
 
     /**
@@ -296,9 +296,17 @@ public abstract class RunApp {
      */
     protected void appendErr(String aStr)
     {
-        _output.add(new Output(aStr, true));
-        for (AppListener lsnr : _appLsnrs)
-            lsnr.appendErr(this, aStr);
+        appendConsoleOutput(aStr, true);
+    }
+
+    /**
+     * Called to append console output.
+     */
+    public void appendConsoleOutput(String aString, boolean isError)
+    {
+        if (!ViewEnv.getEnv().isEventThread())
+            ViewUtils.runLater(() -> appendConsoleOutput(aString, isError));
+        else _outputText.appendString(aString, isError);
     }
 
     /**
@@ -314,11 +322,6 @@ public abstract class RunApp {
         for (AppListener lsnr : _appLsnrs)
             lsnr.appExited(this);
     }
-
-    /**
-     * Returns whether process had error.
-     */
-    public boolean hadError()  { return _hadError; }
 
     /**
      * Adds a breakpoint.
@@ -374,10 +377,6 @@ public abstract class RunApp {
         void requestDeferred(BreakpointReq e);
         void requestDeleted(BreakpointReq e);
         void requestError(BreakpointReq e);
-
-        // Notification for debugger output
-        void appendOut(RunApp aProc, String aStr);
-        void appendErr(RunApp aProc, String aStr);
     }
 
     /**

@@ -44,7 +44,7 @@ public class RunAppBin extends RunApp {
             startProcessReaders();
         }
 
-        // Catch exceptions
+        // Handle exceptions
         catch (Throwable t) {
             t.printStackTrace();
         }
@@ -93,7 +93,10 @@ public class RunAppBin extends RunApp {
         try {
             _stdInWriter.write(aStr);
             _stdInWriter.flush();
-        } catch (Exception e) {
+        }
+
+        // Handle exceptions
+        catch (Exception e) {
             appendErr("RunApp.sendInput: Failed to write to process: " + e);
         }
     }
@@ -102,35 +105,47 @@ public class RunAppBin extends RunApp {
      * An inner class to read from an input stream in a separate thread to a string buffer.
      */
     private class StreamReader extends Thread {
-        InputStream _is;
-        boolean _isErr;
 
+        // The input stream
+        private InputStream _inputStream;
+
+        // Whether this is error stream
+        private boolean _isErr;
+
+        /**
+         * Constructor.
+         */
         StreamReader(InputStream anIS, boolean isErr)
         {
-            _is = anIS;
+            _inputStream = anIS;
             _isErr = isErr;
         }
 
         public void run()
         {
             try {
-                InputStreamReader isr = new InputStreamReader(_is);
-                BufferedReader br = new BufferedReader(isr);
+
+                // Get input stream reader
+                InputStreamReader inputStreamReader = new InputStreamReader(_inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
                 char[] chars = new char[1024];
-                for (int len = br.read(chars, 0, 1024); len >= 0; len = br.read(chars, 0, 1024)) {
+
+                // Read until end
+                for (int len = bufferedReader.read(chars, 0, 1024); len >= 0; len = bufferedReader.read(chars, 0, 1024)) {
                     String line = new String(chars, 0, len);
-                    if (line.length() > 0 && _isErr) _hadError = true;
-                    if (_isErr) appendErr(line);
-                    else appendOut(line);
+                    appendConsoleOutput(line, _isErr);
                 }
+
+                // Terminate app
                 if (!_terminated) {
                     _running = false;
                     _terminated = true;
                     notifyAppExited();
                 }
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
             }
+
+            // Handle exception
+            catch (IOException ioe) { ioe.printStackTrace(); }
         }
     }
 }

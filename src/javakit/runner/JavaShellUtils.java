@@ -40,9 +40,7 @@ public class JavaShellUtils {
 
             // Write char to console
             String str = String.valueOf(Character.valueOf((char) b));
-            if (_stdErr)
-                _javaShell.appendErr(str);
-            else _javaShell.appendOut(str);
+            _javaShell.appendConsoleOutput(str, _stdErr);
         }
 
         /**
@@ -55,9 +53,7 @@ public class JavaShellUtils {
 
             // Write buff to console
             String str = new String(buf, off, len);
-            if (_stdErr)
-                _javaShell.appendErr(str);
-            else _javaShell.appendOut(str);
+            _javaShell.appendConsoleOutput(str, _stdErr);
         }
     }
 }

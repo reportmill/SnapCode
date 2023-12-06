@@ -3,13 +3,9 @@
  */
 package javakit.runner;
 import javakit.parse.*;
-import snap.gfx.Color;
-import snap.gfx.Font;
-import snap.text.TextBlock;
-import snap.text.TextStyle;
-import snap.util.CharSequenceUtils;
 import snap.util.StringUtils;
 import snapcharts.repl.ReplObject;
+import snapcode.debug.RunApp;
 import snapcode.util.ExceptionUtil;
 import java.io.PrintStream;
 
@@ -27,11 +23,8 @@ public class JavaShell {
     // Whether error was hit
     private boolean  _errorWasHit;
 
-    // Current console out object
-    private ConsoleOutput  _consoleOut;
-
-    // Current console err object
-    private ConsoleOutput  _consoleErr;
+    // The RunApp
+    protected RunApp _runApp;
 
     // The public out and err PrintStreams
     private PrintStream  _stdOut = System.out;
@@ -41,15 +34,13 @@ public class JavaShell {
     private PrintStream  _shellOut = new JavaShellUtils.ProxyPrintStream(this, _stdOut);
     private PrintStream  _shellErr = new JavaShellUtils.ProxyPrintStream(this,_stdErr);
 
-    // Constants
-    public static final String STANDARD_OUT = "Standard Out";
-    public static final String STANDARD_ERR = "Standard Err";
-
     /**
-     * Creates a new PGEvaluator.
+     * Constructor.
      */
-    public JavaShell()
+    public JavaShell(RunApp runApp)
     {
+        _runApp = runApp;
+
         // Create Statement eval
         _stmtEval = new JSStmtEval();
     }
@@ -94,7 +85,6 @@ public class JavaShell {
         }
 
         // Restore System out/err
-        flushConsole();
         System.setOut(_stdOut);
         System.setErr(_stdErr);
     }
@@ -108,11 +98,11 @@ public class JavaShell {
     }
 
     /**
-     * Returns whether shell was interrupted.
+     * Appends console output string with option for whether is error.
      */
-    public boolean isInterrupted()
+    protected void appendConsoleOutput(String aString, boolean isError)
     {
-        return _stmtEval._stopRun;
+        _runApp.appendConsoleOutput(aString, isError);
     }
 
     /**
@@ -136,58 +126,17 @@ public class JavaShell {
             if (isInterruptedException(e))
                 return;
 
-            // Show exception and mark ErrorWasHit
+            // Mark ErrorWasHit
+            _errorWasHit = true;
+
+            // Show exception
+            String str = StringUtils.getStackTraceString(e);
+            appendConsoleOutput(str, true);
+
+            // Show exception
             Object exceptionText = ExceptionUtil.getTextBlockForException(e);
             ReplObject.show(exceptionText);
-            _errorWasHit = true;
         }
-    }
-
-    /**
-     * Appends output.
-     */
-    protected void appendOut(String aString)
-    {
-        // Get/update ConsoleOut with string
-        if (_consoleOut == null)
-            _consoleOut = new ConsoleOutput(STANDARD_OUT, aString);
-        else _consoleOut._string += aString;
-
-        // If newline, process and clear
-        if (CharSequenceUtils.isLastCharNewline(_consoleOut.getString())) {
-            ReplObject.show(_consoleOut.getTextBlock());
-            _consoleOut = null;
-        }
-    }
-
-    /**
-     * Appends error.
-     */
-    protected void appendErr(String aString)
-    {
-        // Get/update ConsoleOut with string
-        if (_consoleErr == null)
-            _consoleErr = new ConsoleOutput(STANDARD_ERR, aString);
-        else _consoleErr._string += aString;
-
-        // If newline, process and clear
-        if (CharSequenceUtils.isLastCharNewline(_consoleErr.getString())) {
-            ReplObject.show(_consoleErr.getTextBlock());
-            _consoleErr = null;
-        }
-    }
-
-    /**
-     * Flushes output.
-     */
-    protected void flushConsole()
-    {
-        if (_consoleOut != null)
-            ReplObject.show(_consoleOut.getTextBlock());
-        _consoleOut = null;
-        if (_consoleErr != null)
-            ReplObject.show(_consoleErr.getTextBlock());
-        _consoleErr = null;
     }
 
     /**
@@ -199,67 +148,5 @@ public class JavaShell {
             if (e instanceof InterruptedException)
                 return true;
         return false;
-    }
-
-    /**
-     * A class to hold standard out/err output strings.
-     */
-    public static class ConsoleOutput {
-
-        // Ivars
-        private String  _name;
-        protected String  _string;
-
-        private static Color ERROR_COLOR = Color.get("#CC0000");
-
-        /**
-         * Constructor.
-         */
-        public ConsoleOutput(String aName, String aString)
-        {
-            _name = aName;
-            _string = aString;
-        }
-
-        /**
-         * Returns the name.
-         */
-        public String getName()  { return _name; }
-
-        /**
-         * Returns the string.
-         */
-        public String getString()  { return _string; }
-
-        /**
-         * Returns a text block.
-         */
-        public TextBlock getTextBlock()
-        {
-            // Create TextBlock and configure Style
-            TextBlock textBlock = new TextBlock();
-            TextStyle textStyle = textBlock.getDefaultStyle();
-            TextStyle textStyle2 = textStyle.copyFor(Font.Arial14);
-            if (_name.equals(STANDARD_ERR))
-                textStyle2 = textStyle2.copyFor(ERROR_COLOR);
-            textBlock.setDefaultStyle(textStyle2);
-
-            // Set string
-            String str = StringUtils.trimEnd(_string);
-            textBlock.setString(str);
-
-            // Return
-            return textBlock;
-        }
-
-        /**
-         * Returns whether is error.
-         */
-        public boolean isError()  { return _name == STANDARD_ERR; }
-
-        /**
-         * Standard toString.
-         */
-        public String toString()  { return _string.trim(); }
     }
 }
