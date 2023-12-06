@@ -10,6 +10,7 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcharts.repl.Console;
+import snapcharts.repl.DefaultConsole;
 import snapcharts.repl.ReplObject;
 import snap.view.*;
 import snapcode.app.JavaPage;
@@ -59,7 +60,7 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
         super(workspacePane);
 
         // Create console
-        _console = new EvalToolConsole(this);
+        _console = new DefaultConsole();
     }
 
     /**
@@ -731,8 +732,6 @@ public class RunTool extends WorkspaceTool implements RunApp.AppListener {
             _cancelledRunView.setVisible(aValue);
         if (aValue) {
             String text = "Last run cancelled";
-            if (_console.getItemCount() > EvalToolConsole.MAX_OUTPUT_COUNT)
-                text += " - Too much output";
             setViewText("CancelledRunLabel", text);
         }
     }

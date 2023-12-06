@@ -10,6 +10,7 @@ import snap.text.TextStyle;
 import snap.util.CharSequenceUtils;
 import snap.util.StringUtils;
 import snapcharts.repl.ReplObject;
+import snapcode.util.ExceptionUtil;
 import java.io.PrintStream;
 
 /**
@@ -136,7 +137,8 @@ public class JavaShell {
                 return;
 
             // Show exception and mark ErrorWasHit
-            ReplObject.show(e);
+            Object exceptionText = ExceptionUtil.getTextBlockForException(e);
+            ReplObject.show(exceptionText);
             _errorWasHit = true;
         }
     }
