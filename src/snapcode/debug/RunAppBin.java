@@ -11,11 +11,14 @@ public class RunAppBin extends RunApp {
     // The process
     protected Process _process;
 
+    // The system out reader thread
+    private StreamReaderThread _outReaderThread;
+
+    // The system err reader thread
+    private StreamReaderThread _errReaderThread;
+
     // The writer to process stdin
     private BufferedWriter _stdInWriter;
-
-    // The readers
-    private StreamReader _outReader, _errReader;
 
     /**
      * Constructor for URL and args.
@@ -24,6 +27,11 @@ public class RunAppBin extends RunApp {
     {
         super(aURL, theArgs);
     }
+
+    /**
+     * Returns the running process.
+     */
+    public Process getProcess()  { return _process; }
 
     /**
      * Executes the given command + args.
@@ -41,7 +49,7 @@ public class RunAppBin extends RunApp {
             File workingDir = getWorkingDirectory();
             _process = Runtime.getRuntime().exec(args, null, workingDir);
             _running = true;
-            startProcessReaders();
+            startSystemConsoleReaders();
         }
 
         // Handle exceptions
@@ -51,28 +59,29 @@ public class RunAppBin extends RunApp {
     }
 
     /**
-     * Returns the running process.
-     */
-    public Process getProcess()  { return _process; }
-
-    /**
-     * Starts the process readers.
-     */
-    protected void startProcessReaders()
-    {
-        _outReader = new StreamReader(_process.getInputStream(), false); // Start standard out
-        _outReader.setPriority(Thread.MAX_PRIORITY - 1);
-        _outReader.start();
-        _errReader = new StreamReader(_process.getErrorStream(), true);  // Start standard err
-        _errReader.setPriority(Thread.MAX_PRIORITY - 1);
-        _errReader.start();
-    }
-
-    /**
      * Terminates the process.
      */
     @Override
-    public void terminate()  { _process.destroy(); }
+    public void terminate()
+    {
+        _process.destroy();
+    }
+
+    /**
+     * Starts threads to read system console (out/err).
+     */
+    protected void startSystemConsoleReaders()
+    {
+        // Start standard out reader
+        InputStream standardOutInputStream = _process.getInputStream();
+        _outReaderThread = new StreamReaderThread(standardOutInputStream, false);
+        _outReaderThread.start();
+
+        // Start standard err reader
+        InputStream standardErrInputStream = _process.getErrorStream();
+        _errReaderThread = new StreamReaderThread(standardErrInputStream, true);
+        _errReaderThread.start();
+    }
 
     /**
      * Sends input to process.
@@ -82,12 +91,13 @@ public class RunAppBin extends RunApp {
     {
         // If writer not yet set, create and set
         if (_stdInWriter == null) {
-            OutputStream stdin = _process.getOutputStream();
-            _stdInWriter = new BufferedWriter(new OutputStreamWriter(stdin));
+            OutputStream standardInOutputStream = _process.getOutputStream();
+            OutputStreamWriter standardInOutputStreamWriter = new OutputStreamWriter(standardInOutputStream);
+            _stdInWriter = new BufferedWriter(standardInOutputStreamWriter);
         }
 
         // Append to output
-        _output.add(new Output(aStr, false));
+        appendConsoleOutput(aStr, false);
 
         // Write and flush
         try {
@@ -104,7 +114,7 @@ public class RunAppBin extends RunApp {
     /**
      * An inner class to read from an input stream in a separate thread to a string buffer.
      */
-    private class StreamReader extends Thread {
+    private class StreamReaderThread extends Thread {
 
         // The input stream
         private InputStream _inputStream;
@@ -115,12 +125,17 @@ public class RunAppBin extends RunApp {
         /**
          * Constructor.
          */
-        StreamReader(InputStream anIS, boolean isErr)
+        StreamReaderThread(InputStream anIS, boolean isErr)
         {
             _inputStream = anIS;
             _isErr = isErr;
+            setPriority(Thread.MAX_PRIORITY - 1);
         }
 
+        /**
+         * Thread: run().
+         */
+        @Override
         public void run()
         {
             try {

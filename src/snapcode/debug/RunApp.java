@@ -34,9 +34,6 @@ public abstract class RunApp {
     // The working directory
     private File _workDir;
 
-    // String buffer for output text
-    protected List<Output> _output = new ArrayList<>();
-
     // Text to hold system console output
     protected ConsoleText _outputText;
 

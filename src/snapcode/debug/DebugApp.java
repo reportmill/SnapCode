@@ -85,7 +85,7 @@ public class DebugApp extends RunAppBin {
             _vm = Utils.getVM(vmArgs, cmdLine, _diagnostics);
             _running = true;
             startSession();
-            startProcessReaders();
+            startSystemConsoleReaders();
         }
 
         // Complain on VMLaunchFailureException and return false
