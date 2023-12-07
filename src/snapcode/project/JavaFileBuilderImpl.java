@@ -101,7 +101,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
         boolean compileSuccess = true;
 
         // Reset Interrupt flag
-        _interrupt = false;
+        _interrupted = false;
 
         // Iterate over build files and compile
         for (int i = 0; i < sourceFiles.size(); i++) {
@@ -112,7 +112,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
                 continue;
 
             // If interrupted, add remaining build files and return
-            if (_interrupt) {
+            if (_interrupted) {
                 List<WebFile> remainingSourceFiles = sourceFiles.subList(i, sourceFiles.size());
                 remainingSourceFiles.forEach(this::addBuildFile);
                 return false;
@@ -154,7 +154,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
             _errorFiles.add(sourceFile);
             addBuildFile(sourceFile);
             if (_compiler._errorCount >= 1000)
-                _interrupt = true;
+                _interrupted = true;
             return false;
         }
 
@@ -222,7 +222,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
     public void findUnusedImports()
     {
         // Sanity check
-        if (_interrupt) return;
+        if (_interrupted) return;
 
         // Iterate over compiled files
         for (WebFile javaFile : _compiledFiles) {

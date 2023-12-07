@@ -23,8 +23,8 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     // A list of files to be compiled
     protected Set<WebFile>  _buildFiles = Collections.synchronizedSet(new HashSet<>());
 
-    // Whether to interrupt current build
-    protected boolean  _interrupt;
+    // Whether current build has been interrputed
+    protected boolean _interrupted;
 
     /**
      * Constructor for given Project.
@@ -74,7 +74,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
      */
     public void interruptBuild()
     {
-        _interrupt = true;
+        _interrupted = true;
     }
 
     /**
