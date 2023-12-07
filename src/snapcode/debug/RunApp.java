@@ -5,6 +5,7 @@ import snap.view.TextArea;
 import snap.view.View;
 import snap.view.ViewEnv;
 import snap.view.ViewUtils;
+import snapcharts.repl.Console;
 import snapcode.apptools.RunTool;
 import snapcode.project.Breakpoint;
 import snap.web.WebURL;
@@ -275,7 +276,7 @@ public abstract class RunApp {
     {
         if (aView == _altConsoleView) return;
         _altConsoleView = aView;
-        setConsoleView(aView);
+        setConsoleView(aView != null ? aView : _consoleTextView);
     }
 
     /**
@@ -291,7 +292,14 @@ public abstract class RunApp {
     /**
      * Clears the console text.
      */
-    public void clearConsole()  { _consoleText.clear(); }
+    public void clearConsole()
+    {
+        _consoleText.clear();
+        if (_altConsoleView != null) {
+            Console.setShared(null);
+            setAltConsoleView(null);
+        }
+    }
 
     /**
      * Executes the given command + args.
