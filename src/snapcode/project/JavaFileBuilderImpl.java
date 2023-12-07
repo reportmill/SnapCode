@@ -91,115 +91,131 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
     @Override
     public boolean buildFiles(TaskMonitor aTaskMonitor)
     {
-        // Empty case
+        // Get source files
         if (_buildFiles.size() == 0) return true;
-
-        // Get files
         List<WebFile> sourceFiles = new ArrayList<>(_buildFiles);
         _buildFiles.clear();
 
-        // Get Compiler and sets for compiled/error files
-        SnapCompiler compiler = new SnapCompiler(_proj);
-        Set<WebFile> compiledFiles = new HashSet<>();
-        Set<WebFile> errorFiles = new HashSet<>();
+        // Create compiler and sets for compiled/error files
+        _compiler = new SnapCompiler(_proj);
+        _compiledFiles = new HashSet<>();
+        _errorFiles = new HashSet<>();
+        boolean compileSuccess = true;
 
         // Reset Interrupt flag
         _interrupt = false;
 
         // Iterate over build files and compile
-        boolean compileSuccess = true; //long time = System.currentTimeMillis();
         for (int i = 0; i < sourceFiles.size(); i++) {
+
+            // Get next source file - if already built, just skip
             WebFile sourceFile = sourceFiles.get(i);
+            if (_compiledFiles.contains(sourceFile))
+                continue;
 
             // If interrupted, add remaining build files and return
             if (_interrupt) {
-                for (int j = i, jMax = sourceFiles.size(); j < jMax; j++)
-                    addBuildFile(sourceFiles.get(j));
+                List<WebFile> remainingSourceFiles = sourceFiles.subList(i, sourceFiles.size());
+                remainingSourceFiles.forEach(this::addBuildFile);
                 return false;
             }
 
-            // Update progress
-            if (compiledFiles.contains(sourceFile))
-                continue; //System.err.println("Skipping " + finfo);
-
-            //
-            ProjectFiles projectFiles = _proj.getProjectFiles();
-            String className = projectFiles.getClassNameForFile(sourceFile);
-
-            //
-            int count = compiledFiles.size() + 1;
-            String msg = String.format("Compiling %s (%d of %d)", className, count, sourceFiles.size());
+            // Add task manager task with message: "Compiling MyClass (X of MaxX)"
+            String className = _proj.getProjectFiles().getClassNameForFile(sourceFile);
+            String msg = String.format("Compiling %s (%d of %d)", className, i, sourceFiles.size());
             aTaskMonitor.beginTask(msg, -1);
 
-            // Get compile file
-            boolean result = compiler.compile(sourceFile);
-            aTaskMonitor.endTask();
-
-            // If compile failed, re-add file to BuildFiles and continue
-            if (!result) {
-                compiledFiles.add(sourceFile);
-                errorFiles.add(sourceFile);
-                addBuildFile(sourceFile);
-                if (compiler._errorCount >= 1000) _interrupt = true;
+            // Build file
+            boolean fileCompileSuccess = buildFile(sourceFile, sourceFiles);
+            if (fileCompileSuccess)
                 compileSuccess = false;
-                continue;
-            }
 
-            // Add Compiler.CompiledFiles to CompiledFiles
-            compiledFiles.addAll(compiler.getCompiledJavaFiles());
-
-            // If there were modified files, clear Project.ClassLoader
-            if (compiler.getModifiedJavaFiles().size() > 0) {
-                Workspace workspace = _proj.getWorkspace();
-                workspace.clearClassLoader();
-            }
-
-            // Iterate over JavaFiles for modified ClassFiles and update
-            for (WebFile jfile : compiler.getModifiedJavaFiles()) {
-
-                // Delete class files for removed inner classes
-                deleteZombieClassFiles(jfile);
-
-                // Update dependencies and get files that need to be updated
-                JavaData javaData = JavaData.getJavaDataForFile(jfile);
-                boolean dependsChanged = javaData.updateDependencies();
-                if (!dependsChanged)
-                    continue;
-
-                // Iterate over Java files dependent on loop JavaFile and mark for update
-                Set<WebFile> updateFiles = javaData.getDependents();
-                for (WebFile updateFile : updateFiles) {
-
-                    //
-                    Project proj = Project.getProjectForFile(updateFile);
-                    if (proj == _proj) {
-                        if (!compiledFiles.contains(updateFile)) {
-                            if (!ListUtils.containsId(sourceFiles, updateFile))
-                                sourceFiles.add(updateFile);
-                        }
-                    }
-
-                    // Otherwise, add build file
-                    else {
-                        ProjectBuilder projectBuilder = proj.getBuilder();
-                        projectBuilder.addBuildFileForce(updateFile);
-                    }
-                }
-            }
+            // Stop task manager task
+            aTaskMonitor.endTask();
         }
 
         // Finalize TaskMonitor
         aTaskMonitor.beginTask("Build Completed", -1);
         aTaskMonitor.endTask();
 
-        // Set compiler/files for findUnusedImports
-        _compiler = compiler;
-        _compiledFiles = compiledFiles;
-        _errorFiles = errorFiles;
-
-        // Finalize ActivityText and return
-        //System.out.println("Build time: " + (System.currentTimeMillis()-time)/1000f + " seconds");
+        // Return
         return compileSuccess;
+    }
+
+    /**
+     * Compiles file.
+     */
+    public boolean buildFile(WebFile sourceFile, List<WebFile> sourceFiles)
+    {
+        // Compile file
+        boolean compileSuccess = _compiler.compile(sourceFile);
+
+        // If compile failed, re-add file to BuildFiles and continue
+        if (!compileSuccess) {
+            _compiledFiles.add(sourceFile);
+            _errorFiles.add(sourceFile);
+            addBuildFile(sourceFile);
+            if (_compiler._errorCount >= 1000)
+                _interrupt = true;
+            return false;
+        }
+
+        // Add Compiler.CompiledFiles to CompiledFiles
+        Set<WebFile> compiledJavaFiles = _compiler.getCompiledJavaFiles();
+        _compiledFiles.addAll(compiledJavaFiles);
+
+        // Process modified Java files
+        processModifiedJavaFiles(sourceFiles);
+
+        // Return success
+        return true;
+    }
+
+    /**
+     * Processes recompiled java files (delete zombie class files and add child dependents to source files).
+     */
+    private void processModifiedJavaFiles(List<WebFile> sourceFiles)
+    {
+        Set<WebFile> modifiedJavaFiles = _compiler.getModifiedJavaFiles();
+
+        // If there were modified files, clear Project.ClassLoader
+        if (modifiedJavaFiles.size() > 0) {
+            Workspace workspace = _proj.getWorkspace();
+            workspace.clearClassLoader();
+        }
+
+        // Iterate over JavaFiles for modified ClassFiles and update
+        for (WebFile modifiedJavaFile : modifiedJavaFiles) {
+
+            // Delete class files for removed inner classes
+            deleteZombieClassFiles(modifiedJavaFile);
+
+            // Update dependencies and get files that need to be updated
+            JavaData javaData = JavaData.getJavaDataForFile(modifiedJavaFile);
+            boolean dependsChanged = javaData.updateDependencies();
+            if (!dependsChanged)
+                continue;
+
+            // Iterate over Java files dependent on loop JavaFile and mark for update
+            Set<WebFile> updateFiles = javaData.getDependents();
+            for (WebFile updateFile : updateFiles) {
+
+                // Make sure updated file is in sourceFiles list
+                Project proj = Project.getProjectForFile(updateFile);
+                if (proj == _proj) {
+                    if (!_compiledFiles.contains(updateFile)) {
+                        if (!ListUtils.containsId(sourceFiles, updateFile))
+                            sourceFiles.add(updateFile);
+                    }
+                }
+
+                // Otherwise, add build file
+                else {
+                    ProjectBuilder projectBuilder = proj.getBuilder();
+                    projectBuilder.addBuildFileForce(updateFile);
+                }
+            }
+        }
     }
 
     /**
@@ -208,7 +224,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
     public void findUnusedImports()
     {
         // Sanity check
-        if (_compiler == null) return;
+        if (_interrupt) return;
 
         // Iterate over compiled files
         for (WebFile javaFile : _compiledFiles) {
