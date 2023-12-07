@@ -59,8 +59,7 @@ public class JavaData {
     {
         Project proj = getProject();
         ProjectFiles projectFiles = proj.getProjectFiles();
-        WebFile[] classFiles = projectFiles.getClassFilesForJavaFile(_javaFile);
-        return classFiles;
+        return projectFiles.getClassFilesForJavaFile(_javaFile);
     }
 
     /**

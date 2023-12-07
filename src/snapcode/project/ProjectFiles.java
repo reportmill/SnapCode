@@ -2,10 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
+import snap.util.ArrayUtils;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class manages files for a project.
@@ -197,33 +196,41 @@ public class ProjectFiles {
     }
 
     /**
-     * Returns the class files for a given Java file.
+     * Returns all class files for a given Java file.
      */
     public WebFile[] getClassFilesForJavaFile(WebFile aFile)
+    {
+        // Get Class file - if bogus, return empty list
+        WebFile classFile = getClassFileForJavaFile(aFile);
+        if (classFile.getBytes() == null)
+            return new WebFile[0];
+
+        // Get inner class file - if empty, return class file as array
+        WebFile[] innerClassFiles = getInnerClassFilesForJavaFile(aFile);
+        if (innerClassFiles.length == 0)
+            return new WebFile[] { classFile };
+
+        // Return classFile + innerClassFiles array
+        return ArrayUtils.add(innerClassFiles, classFile, 0);
+    }
+
+    /**
+     * Returns the inner class files for a given Java file.
+     */
+    public WebFile[] getInnerClassFilesForJavaFile(WebFile aFile)
     {
         // Get Class file
         WebFile classFile = getClassFileForJavaFile(aFile);
         if (classFile.getBytes() == null)
-            return null;
+            return new WebFile[0];
 
-        // Create list to hold files with at least Class file
-        List<WebFile> classFiles = new ArrayList<>();
-        classFiles.add(classFile);
-
-        // Get Package dir files
+        // Get Package files
         WebFile pkgDir = classFile.getParent();
-        WebFile[] pkgDirFiles = pkgDir.getFiles();
+        WebFile[] pkgFiles = pkgDir.getFiles();
 
-        // Get prefix that inner class files should have
+        // Return inner class files (start with 'class_name$' and end with '.class')
         String classNamePrefix = classFile.getSimpleName() + '$';
-
-        // Iterate over package dir files and add .class files that match <ClassName$...>
-        for (WebFile file : pkgDirFiles)
-            if (file.getType().equals("class") && file.getName().startsWith(classNamePrefix))
-                classFiles.add(file);
-
-        // Return
-        return classFiles.toArray(new WebFile[0]);
+        return ArrayUtils.filter(pkgFiles, file -> file.getName().startsWith(classNamePrefix) && file.getType().equals("class"));
     }
 
     /**

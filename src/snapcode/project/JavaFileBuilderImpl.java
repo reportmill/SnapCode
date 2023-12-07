@@ -75,8 +75,6 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
         // Get JavaFile.ClassFiles and remove them
         ProjectFiles projectFiles = _proj.getProjectFiles();
         WebFile[] classFiles = projectFiles.getClassFilesForJavaFile(aFile);
-        if (classFiles == null)
-            return;
 
         // Iterate over class files and delete
         for (WebFile classFile : classFiles) {
@@ -249,14 +247,12 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
      */
     private void deleteZombieClassFiles(WebFile aJavaFile)
     {
-        // Get all ClassFiles for JavaFile
+        // Get inner ClassFiles for JavaFile
         ProjectFiles projFiles = _proj.getProjectFiles();
-        WebFile[] classFiles = projFiles.getClassFilesForJavaFile(aJavaFile);
-        if (classFiles == null)
-            return;
+        WebFile[] innerClassFiles = projFiles.getInnerClassFilesForJavaFile(aJavaFile);
 
         // Iterate over class files and delete if older than source file
-        for (WebFile classFile : classFiles) {
+        for (WebFile classFile : innerClassFiles) {
             boolean classFileOlderThanSource = classFile.getLastModTime() < aJavaFile.getLastModTime();
             if (classFileOlderThanSource) {
                 try { classFile.delete(); }
