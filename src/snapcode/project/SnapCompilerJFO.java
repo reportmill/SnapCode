@@ -44,12 +44,6 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
         _file = aFile;
         _proj = aProject;
         _compiler = aCompiler;
-
-        // If Class file, Get SourceFile
-        if (_file.getType().equals("class")) {
-            ProjectFiles projectFiles = _proj.getProjectFiles();
-            _sourceFile = projectFiles.getJavaFileForClassFile(_file);
-        }
     }
 
     /**
@@ -131,6 +125,10 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
      */
     private void compileFinished(byte[] classFileBytes)
     {
+        // If SourceFile not set, get it
+        if (_sourceFile == null)
+            _sourceFile = _proj.getProjectFiles().getJavaFileForClassFile(_file);
+
         // Add SourceFile to Compiler.CompiledJFs
         _compiler._compiledJavaFiles.add(_sourceFile);
 
