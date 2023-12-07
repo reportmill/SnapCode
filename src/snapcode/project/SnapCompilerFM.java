@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * A Java File Manager class for Snap.
+ * A JavaFileManager subclass for SnapCompiler which forwards to standard fileManager for source and to classLoader for classes.
  */
 public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
 
@@ -20,109 +20,47 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     private Project  _proj;
 
     // A map of previously accessed SnapFileObjects for paths
-    private Map<String, SnapCompilerJFO>  _jfos = new HashMap<>();
+    private Map<String, SnapCompilerJFO> _javaFileObjects = new HashMap<>();
 
     // The class loader to find project lib classes
     private ClassLoader  _classLoader;
 
-    // Whether compile includes SnapKit
-    protected boolean  _excludeSnapKit;
-
     /**
-     * Construct a new FileManager which forwards to the <var>fileManager</var>
-     * for source and to the <var>classLoader</var> for classes
+     * Constructor.
      */
     public SnapCompilerFM(SnapCompiler aCompiler, JavaFileManager aFileManager)
     {
-        // Do normal version and set vars
         super(aFileManager);
         _compiler = aCompiler;
         _proj = _compiler._proj;
-
-        // Determine whether we're compiling something with SnapKit, so we can exclude it from standard ClassPath if not
-        //_excludeSnapKit = _proj.getProjectSet().getProject("SnapKit")==null && !_proj.getName().equals("SnapKit");
     }
 
     /**
-     * Override to return class loader.
+     * Returns a JavaFleObject for given path (with option to provide file for efficiency).
      */
-    public ClassLoader getClassLoader(Location aLoc)
+    public synchronized SnapCompilerJFO getJavaFileObject(WebFile aFile)
     {
-        // If already set, just return
-        if (_classLoader != null) return _classLoader;
+        // Get cached file for file path (just return if found)
+        String filePath = aFile.getPath();
+        SnapCompilerJFO javaFileObject = _javaFileObjects.get(filePath);
+        if (javaFileObject != null)
+            return javaFileObject;
 
-        // Get Project.CompilerClassLoader
-        ClassLoader classLoader = _proj.createCompilerClassLoader();
+        // Get file for path
+        WebFile file = _proj.getFile(filePath);
+        if (file != null) {
+            javaFileObject = new SnapCompilerJFO(_proj, file, _compiler);
+            _javaFileObjects.put(filePath, javaFileObject);
+        }
 
-        // Set/return
-        return _classLoader = classLoader;
-    }
-
-    /**
-     * Return a FileObject for a given location from which compiler can obtain source or byte code.
-     */
-    public FileObject getFileForInput(Location aLoc, String aPkgName, String aRelName) throws IOException
-    {
-        System.err.println("SnapCompilerFM:getFileForInput: " + aPkgName + "." + aRelName + ", loc: " + aLoc.getName());
-        //FileObject o = _fileObjects.get(getURI(location, packageName, relativeName)); if(o!=null) return o;
-        return super.getFileForInput(aLoc, aPkgName, aRelName);
-    }
-
-    /**
-     * Return a FileObject for a given location from which compiler can obtain source or byte code.
-     */
-    public JavaFileObject getJavaFileForInput(Location aLoc, String aClassName, Kind aKind) throws IOException
-    {
-        System.err.println("getJavaFileForInput: " + aClassName + ", kind: " + aKind);
-        String cpath = _proj.getSourceDir().getDirPath() + aClassName.replace('.', '/') + ".java";
-        return getJFO(cpath, null);
-    }
-
-    /**
-     * Create a JavaFileObject for an output class file and store it in the classloader.
-     */
-    public JavaFileObject getJavaFileForOutput(Location aLoc, String aClassName, Kind kind, FileObject aSblg)
-    {
-        WebFile javaFile = ((SnapCompilerJFO) aSblg).getFile();
-        String classPath = "/" + aClassName.replace('.', '/') + ".class";
-        ProjectFiles projectFiles = _proj.getProjectFiles();
-        WebFile classFile = projectFiles.getBuildFile(classPath, true, false);
-        SnapCompilerJFO jfo = getJFO(classFile.getPath(), classFile);
-        jfo._sourceFile = javaFile;
-        return jfo;
-    }
-
-    /**
-     * Returns whether we have location.
-     */
-    public boolean hasLocation(Location aLoc)
-    {
-        if (aLoc == StandardLocation.SOURCE_PATH) return true;
-        return super.hasLocation(aLoc);
-    }
-
-    /**
-     * Override to handle JavaFileObjects (return the file's name).
-     */
-    public String inferBinaryName(Location aLoc, JavaFileObject aFile)
-    {
-        if (aFile instanceof SnapCompilerJFO) return ((SnapCompilerJFO) aFile).getBinaryName();
-        return super.inferBinaryName(aLoc, aFile);
-    }
-
-    /**
-     * Compare files.
-     */
-    public boolean isSameFile(FileObject a, FileObject b)
-    {
-        if (a == b) return true;
-        if (a instanceof SnapCompilerJFO || b instanceof SnapCompilerJFO) return false;
-        return super.isSameFile(a, b);
+        // Return
+        return javaFileObject;
     }
 
     /**
      * Override to return project src/bin files.
      */
+    @Override
     public Iterable<JavaFileObject> list(Location aLoc, String aPkgName, Set<Kind> kinds, boolean doRcrs) throws IOException
     {
         // Do normal version
@@ -132,9 +70,8 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         if (aLoc != StandardLocation.CLASS_PATH && aLoc != StandardLocation.SOURCE_PATH)
             return iterable;
 
-        // If we need to explicitly exclude SnapKit (because it's in the standard CLASS_PATH), return emtpy list
-        if (_excludeSnapKit && aLoc == StandardLocation.CLASS_PATH && aPkgName.startsWith("snap."))
-            return Collections.EMPTY_LIST;
+        // If we need to explicitly exclude SnapKit (because it's in the standard CLASS_PATH), return empty list
+        //if (_excludeSnapKit && aLoc == StandardLocation.CLASS_PATH && aPkgName.startsWith("snap.")) return Collections.EMPTY_LIST;
 
         // If system path (package files were found), just return
         if (aPkgName.length() > 0 && iterable.iterator().hasNext())
@@ -145,37 +82,118 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
                 aPkgName.startsWith("com.sun") || aPkgName.startsWith("sun.") || aPkgName.startsWith("org.xml"))
             return iterable;
 
-        // Add Class files
-        List<JavaFileObject> files = new ArrayList<>();
-        if (kinds.contains(Kind.CLASS)) {
-            WebFile pkgDir = getBuildDir(aPkgName);
-            if (pkgDir != null)
-                for (WebFile file : pkgDir.getFiles()) {
-                    if (file.getType().equals("class"))
-                        files.add(getJFO(file.getPath(), file));
-                }
-        }
+        // Find source and class files
+        List<JavaFileObject> filesList = new ArrayList<>();
+        if (kinds.contains(Kind.SOURCE))
+            findSourceFilesForPackageName(aPkgName, filesList);
+        if (kinds.contains(Kind.CLASS))
+            findClassFilesForPackageName(aPkgName, filesList);
 
-        // Add Source files
-        if (kinds.contains(Kind.SOURCE)) {
-            WebFile pkgDir = getSourceDir(aPkgName);
-            if (pkgDir != null)
-                for (WebFile file : pkgDir.getFiles()) {
-                    if (isJavaFile(file))
-                        files.add(getJFO(file.getPath(), file));
-                }
-        }
-
-        // Return files
-        return files;
+        // Return
+        return filesList;
     }
 
     /**
-     * Returns whether file is java file.
+     * Finds source files for package name.
      */
-    boolean isJavaFile(WebFile aFile)
+    private void findSourceFilesForPackageName(String aPkgName, List<JavaFileObject> filesList)
     {
-        return aFile.getType().equals("java");
+        WebFile pkgDir = getSourceDir(aPkgName);
+        findFilesForDirFileAndType(pkgDir, "java", filesList);
+    }
+
+    /**
+     * Finds class files for package name.
+     */
+    private void findClassFilesForPackageName(String aPkgName, List<JavaFileObject> filesList)
+    {
+        WebFile pkgDir = getBuildDir(aPkgName);
+        findFilesForDirFileAndType(pkgDir, "class", filesList);
+    }
+
+    /**
+     * Override to return Project.CompilerClassLoader.
+     */
+    @Override
+    public ClassLoader getClassLoader(Location aLoc)
+    {
+        if (_classLoader != null) return _classLoader;
+        ClassLoader classLoader = _proj.createCompilerClassLoader();
+        return _classLoader = classLoader;
+    }
+
+    /**
+     * Return a FileObject for a given location from which compiler can obtain source or byte code.
+     */
+    @Override
+    public FileObject getFileForInput(Location aLoc, String aPkgName, String aRelName) throws IOException
+    {
+        System.err.println("SnapCompilerFM:getFileForInput: " + aPkgName + "." + aRelName + ", loc: " + aLoc.getName());
+        //FileObject o = _fileObjects.get(getURI(location, packageName, relativeName)); if(o!=null) return o;
+        return super.getFileForInput(aLoc, aPkgName, aRelName);
+    }
+
+    /**
+     * Return a FileObject for a given location from which compiler can obtain source or byte code.
+     */
+    @Override
+    public JavaFileObject getJavaFileForInput(Location aLoc, String aClassName, Kind aKind)
+    {
+        System.err.println("getJavaFileForInput: " + aClassName + ", kind: " + aKind);
+        String sourceDirPath = _proj.getSourceDir().getDirPath();
+        String javaFilePath = sourceDirPath + aClassName.replace('.', '/') + ".java";
+        WebFile javaFile = _proj.getFile(javaFilePath);
+        return javaFile != null ? getJavaFileObject(javaFile) : null;
+    }
+
+    /**
+     * Create a JavaFileObject for an output class file and store it in the classloader.
+     */
+    @Override
+    public JavaFileObject getJavaFileForOutput(Location aLoc, String aClassName, Kind kind, FileObject aSblg)
+    {
+        WebFile javaFile = ((SnapCompilerJFO) aSblg).getFile();
+        String classPath = "/" + aClassName.replace('.', '/') + ".class";
+        ProjectFiles projectFiles = _proj.getProjectFiles();
+        WebFile classFile = projectFiles.getBuildFile(classPath, true, false);
+        SnapCompilerJFO jfo = getJavaFileObject(classFile);
+        jfo._sourceFile = javaFile;
+        return jfo;
+    }
+
+    /**
+     * Returns whether we have location.
+     */
+    @Override
+    public boolean hasLocation(Location aLoc)
+    {
+        if (aLoc == StandardLocation.SOURCE_PATH)
+            return true;
+        return super.hasLocation(aLoc);
+    }
+
+    /**
+     * Override to handle JavaFileObjects (return the file's name).
+     */
+    @Override
+    public String inferBinaryName(Location aLoc, JavaFileObject aFile)
+    {
+        if (aFile instanceof SnapCompilerJFO)
+            return ((SnapCompilerJFO) aFile).getBinaryName();
+        return super.inferBinaryName(aLoc, aFile);
+    }
+
+    /**
+     * Compare files.
+     */
+    @Override
+    public boolean isSameFile(FileObject file1, FileObject file2)
+    {
+        if (file1 == file2)
+            return true;
+        if (file1 instanceof SnapCompilerJFO || file2 instanceof SnapCompilerJFO)
+            return false;
+        return super.isSameFile(file1, file2);
     }
 
     /**
@@ -187,12 +205,8 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         if (aPackageName.length() == 0)
             return buildDir;
 
-        String dirname = aPackageName.replace('.', '/');
-        ProjectFiles projectFiles = _proj.getProjectFiles();
-        WebFile file = projectFiles.getBuildFile('/' + dirname, false, true); //buildDir.getFile(dirname);
-
-        // Return
-        return file;
+        String pkgPath = '/' + aPackageName.replace('.', '/');
+        return _proj.getProjectFiles().getBuildFile(pkgPath, false, true); //buildDir.getFile(dirname);
     }
 
     /**
@@ -204,23 +218,24 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         if (aPackageName.length() == 0)
             return sourceDir;
 
-        String dirname = aPackageName.replace('.', '/');
-        return _proj.getSourceFile('/' + dirname, false, true); //sourceDir.getFile(dirname);
+        String pkgPath = '/' + aPackageName.replace('.', '/');
+        return _proj.getSourceFile(pkgPath, false, true);
     }
 
     /**
-     * Returns a JavaFleObject for given path (with option to provide file for efficiency).
+     * Finds files in given dir file of given type and adds to given list.
      */
-    public synchronized SnapCompilerJFO getJFO(String aPath, WebFile aFile)
+    private void findFilesForDirFileAndType(WebFile dirFile, String fileType, List<JavaFileObject> filesList)
     {
-        SnapCompilerJFO jfo = _jfos.get(aPath);
-        if (jfo == null) {
-            WebFile dfile = aFile != null ? aFile : _proj.getFile(aPath);
-            if (dfile != null)
-                _jfos.put(aPath, jfo = new SnapCompilerJFO(_proj, dfile, _compiler));
-        }
+        if (dirFile == null)
+            return;
 
-        // Return
-        return jfo;
+        WebFile[] dirFiles = dirFile.getFiles();
+        for (WebFile file : dirFiles) {
+            if (file.getType().equals(fileType)) {
+                JavaFileObject javaFileObject = getJavaFileObject(file);
+                filesList.add(javaFileObject);
+            }
+        }
     }
 }

@@ -146,7 +146,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
     public boolean buildFile(WebFile sourceFile, List<WebFile> sourceFiles)
     {
         // Compile file
-        boolean compileSuccess = _compiler.compile(sourceFile);
+        boolean compileSuccess = _compiler.compileFile(sourceFile);
 
         // If compile failed, re-add file to BuildFiles and continue
         if (!compileSuccess) {
@@ -162,31 +162,22 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
         Set<WebFile> compiledJavaFiles = _compiler.getCompiledJavaFiles();
         _compiledFiles.addAll(compiledJavaFiles);
 
-        // Process modified Java files
-        processModifiedJavaFiles(sourceFiles);
+        // Find dependencies for modified Java files and add to source files
+        findDependenciesForModifiedJavaFiles(sourceFiles);
 
         // Return success
         return true;
     }
 
     /**
-     * Processes recompiled java files (delete zombie class files and add child dependents to source files).
+     * Find dependencies for modified Java files and add to source files.
      */
-    private void processModifiedJavaFiles(List<WebFile> sourceFiles)
+    private void findDependenciesForModifiedJavaFiles(List<WebFile> sourceFiles)
     {
         Set<WebFile> modifiedJavaFiles = _compiler.getModifiedJavaFiles();
 
-        // If there were modified files, clear Project.ClassLoader
-        if (modifiedJavaFiles.size() > 0) {
-            Workspace workspace = _proj.getWorkspace();
-            workspace.clearClassLoader();
-        }
-
         // Iterate over JavaFiles for modified ClassFiles and update
         for (WebFile modifiedJavaFile : modifiedJavaFiles) {
-
-            // Delete class files for removed inner classes
-            deleteZombieClassFiles(modifiedJavaFile);
 
             // Update dependencies and get files that need to be updated
             JavaData javaData = JavaData.getJavaDataForFile(modifiedJavaFile);
@@ -234,30 +225,11 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
             // Iterate over build issues
             BuildIssue[] unusedImportIssues = getUnusedImportBuildIssuesForFile(javaFile);
             for (BuildIssue buildIssue : unusedImportIssues)
-                _compiler.report(buildIssue);
+                _compiler.reportBuildIssue(buildIssue);
         }
 
         // Clear vars
         _compiler = null;
         _compiledFiles = _errorFiles = null;
-    }
-
-    /**
-     * Delete inner-class class files that were generated in older version of class.
-     */
-    private void deleteZombieClassFiles(WebFile aJavaFile)
-    {
-        // Get inner ClassFiles for JavaFile
-        ProjectFiles projFiles = _proj.getProjectFiles();
-        WebFile[] innerClassFiles = projFiles.getInnerClassFilesForJavaFile(aJavaFile);
-
-        // Iterate over class files and delete if older than source file
-        for (WebFile classFile : innerClassFiles) {
-            boolean classFileOlderThanSource = classFile.getLastModTime() < aJavaFile.getLastModTime();
-            if (classFileOlderThanSource) {
-                try { classFile.delete(); }
-                catch (Exception e) { throw new RuntimeException(e); }
-            }
-        }
     }
 }

@@ -13,7 +13,7 @@ import java.net.URI;
 import java.util.Arrays;
 
 /**
- * A Java File Object for a WebFile.
+ * A JavaFileObject subclass for a WebFile.
  */
 class SnapCompilerJFO extends SimpleJavaFileObject {
 
@@ -36,7 +36,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     private String  _javaTextStr;
 
     /**
-     * Creates a new SnapFileJFO with WebFile, SnapCompiler and (optional) source file.
+     * Constructor for project, file (source or class) and SnapCompiler.
      */
     protected SnapCompilerJFO(Project aProject, WebFile aFile, SnapCompiler aCompiler)
     {
@@ -60,10 +60,8 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     /**
      * Returns ModifiedTime of WebFile.
      */
-    public long getLastModified()
-    {
-        return _file.getLastModTime();
-    }
+    @Override
+    public long getLastModified()  { return _file.getLastModTime(); }
 
     /**
      * Returns the "binary name" for the CompilerFileManager inferBinaryName method.
@@ -85,6 +83,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     /**
      * Returns the char content of file (for source file).
      */
+    @Override
     public CharSequence getCharContent(boolean ignoreEncodingErrors)
     {
         // If already set, just return
@@ -105,6 +104,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     /**
      * Returns input stream for source/class bytes.
      */
+    @Override
     public InputStream openInputStream()
     {
         return _file.getInputStream();
@@ -113,6 +113,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     /**
      * Returns output stream for byte code.
      */
+    @Override
     public OutputStream openOutputStream()
     {
         return new ByteArrayOutputStream() {
@@ -131,7 +132,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     private void compileFinished(byte[] classFileBytes)
     {
         // Add SourceFile to Compiler.CompiledJFs
-        _compiler._compJFs.add(_sourceFile);
+        _compiler._compiledJavaFiles.add(_sourceFile);
 
         // Get bytes and whether class file is modified
         boolean modified = !Arrays.equals(classFileBytes, _file.getBytes());
@@ -139,7 +140,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
         // If modified, set File.Bytes and add ClassFile to ModifiedFiles and SourceFile to ModifiedSources
         if (modified) {
             _file.setBytes(classFileBytes);
-            _compiler._modJFs.add(_sourceFile);
+            _compiler._modifiedJavaFiles.add(_sourceFile);
         }
 
         // If file was modified or a real compile file, save

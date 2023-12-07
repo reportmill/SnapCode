@@ -23,7 +23,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     // A list of files to be compiled
     protected Set<WebFile>  _buildFiles = Collections.synchronizedSet(new HashSet<>());
 
-    // Whether current build has been interrputed
+    // Whether current build has been interrupted
     protected boolean _interrupted;
 
     /**

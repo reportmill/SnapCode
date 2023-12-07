@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * A class to compile a Java file.
  */
-public class SnapCompiler implements DiagnosticListener {
+public class SnapCompiler {
 
     // The Project
     protected Project  _proj;
@@ -24,16 +24,16 @@ public class SnapCompiler implements DiagnosticListener {
     private List<String>  _options;
 
     // The shared file manager for any project compile
-    private SnapCompilerFM  _fm;
+    private SnapCompilerFM _fileManager;
 
     // Whether compile succeeded (no errors encountered)
     private boolean  _succeeded;
 
     // The Set of source files compiled by last compile
-    protected Set<WebFile>  _compJFs = new HashSet<>();
+    protected Set<WebFile> _compiledJavaFiles = new HashSet<>();
 
     // The Set of source files that had class files modified by last compile
-    protected Set<WebFile>  _modJFs = new HashSet<>();
+    protected Set<WebFile> _modifiedJavaFiles = new HashSet<>();
 
     // The number of errors currently encountered
     protected int  _errorCount;
@@ -66,8 +66,9 @@ public class SnapCompiler implements DiagnosticListener {
 
         // Get compiler class and instance and return
         try {
-            Class<?> cls = Class.forName("com.sun.tools.javac.api.JavacTool", true, getClass().getClassLoader());
-            return _compiler = (JavaCompiler) cls.newInstance();
+            ClassLoader classLoader = getClass().getClassLoader();
+            Class<?> compilerClass = Class.forName("com.sun.tools.javac.api.JavacTool", true, classLoader);
+            return _compiler = (JavaCompiler) compilerClass.newInstance();
         }
 
         catch (Exception e) { throw new RuntimeException(e); }
@@ -107,55 +108,94 @@ public class SnapCompiler implements DiagnosticListener {
     /**
      * Returns the compiler file manager.
      */
-    public SnapCompilerFM getFileManaer()
+    public SnapCompilerFM getFileManager()
     {
-        if (_fm != null) return _fm;
-        StandardJavaFileManager sfm = getCompiler().getStandardFileManager(null, null, null);
-        return _fm = new SnapCompilerFM(this, sfm);
+        if (_fileManager != null) return _fileManager;
+
+        // Create file manager
+        JavaCompiler javaCompiler = getCompiler();
+        StandardJavaFileManager standardFileManager = javaCompiler.getStandardFileManager(null, null, null);
+        return _fileManager = new SnapCompilerFM(this, standardFileManager);
     }
 
     /**
-     * Executes the compile task.
+     * Compiles the given file.
      */
-    public boolean compile(WebFile aFile)
+    public boolean compileFile(WebFile aFile)
     {
         // Clear files from previous compile
-        _compJFs.clear();
-        _modJFs.clear();
+        _compiledJavaFiles.clear();
+        _modifiedJavaFiles.clear();
 
         // Get compiler and file manager
         JavaCompiler compiler = getCompiler();
-        SnapCompilerFM fman = getFileManaer();
+        StringWriter additionalOutputWriter = new StringWriter();
+        SnapCompilerFM fileManager = getFileManager();
+        DiagnosticListener<JavaFileObject> diagnosticListener = diag -> reportDiagnostic(diag);
 
         // Get JFOs
-        JavaFileObject jfo = fman.getJFO(aFile.getPath(), aFile);
+        JavaFileObject jfo = fileManager.getJavaFileObject(aFile);
         List<JavaFileObject> jfos = Collections.singletonList(jfo);
 
         // Get task, call and return _succeeded
-        CompilationTask task = compiler.getTask(new StringWriter(), fman, this, getOptions(), null, jfos);
+        List<String> options = getOptions();
+        CompilationTask task = compiler.getTask(additionalOutputWriter, fileManager, diagnosticListener, options, null, jfos);
+
+        // Call task
         _succeeded = true;
         task.call();
+
+        // If success - delete any zombie inner class files for compiled Java files
+        if (_succeeded)
+            deleteZombieInnerClassFiles();
+
+        // Return
         return _succeeded;
     }
 
     /**
-     * Report Diagnostic.
+     * Returns the Set of source files that had class files over-written by last compile.
      */
-    public void report(Diagnostic aDiagnostic)
-    {
-        if (_succeeded && aDiagnostic.getKind() == Diagnostic.Kind.ERROR)
-            _succeeded = false;
+    public Set<WebFile> getCompiledJavaFiles()  { return _compiledJavaFiles; }
 
-        // Create issue and report
-        BuildIssue issue = createBuildIssue(aDiagnostic);
-        if (issue != null)
-            report(issue);
+    /**
+     * Returns the Set of source files that had class files actually modified by last compile.
+     */
+    public Set<WebFile> getModifiedJavaFiles()  { return _modifiedJavaFiles; }
+
+    /**
+     * Delete zombie inner class files for recompiled Java files.
+     */
+    private void deleteZombieInnerClassFiles()
+    {
+        // Iterate over recompiled JavaFiles to delete zombie inner classes
+        for (WebFile modifiedJavaFile : _modifiedJavaFiles) {
+
+            // Get inner ClassFiles for JavaFile
+            ProjectFiles projFiles = _proj.getProjectFiles();
+            WebFile[] innerClassFiles = projFiles.getInnerClassFilesForJavaFile(modifiedJavaFile);
+
+            // Iterate over class files and delete if older than source file
+            for (WebFile classFile : innerClassFiles) {
+                boolean classFileOlderThanSource = classFile.getLastModTime() < modifiedJavaFile.getLastModTime();
+                if (classFileOlderThanSource) {
+                    try { classFile.delete(); }
+                    catch (Exception e) { throw new RuntimeException(e); }
+                }
+            }
+        }
+
+        // If there were modified files, clear Project.ClassLoader
+        if (_modifiedJavaFiles.size() > 0) {
+            Workspace workspace = _proj.getWorkspace();
+            workspace.clearClassLoader();
+        }
     }
 
     /**
      * Report BuildIssue.
      */
-    protected void report(BuildIssue anIssue)
+    protected void reportBuildIssue(BuildIssue anIssue)
     {
         Workspace workspace = _proj.getWorkspace();
         BuildIssues buildIssues = workspace.getBuildIssues();
@@ -213,12 +253,16 @@ public class SnapCompiler implements DiagnosticListener {
     }
 
     /**
-     * Returns the Set of source files that had class files modified by the compile.
+     * Report Diagnostic.
      */
-    public Set<WebFile> getCompiledJavaFiles()  { return _compJFs; }
+    private void reportDiagnostic(Diagnostic<?> aDiagnostic)
+    {
+        if (_succeeded && aDiagnostic.getKind() == Diagnostic.Kind.ERROR)
+            _succeeded = false;
 
-    /**
-     * Returns the Set of source files that had class files modified by the compile.
-     */
-    public Set<WebFile> getModifiedJavaFiles()  { return _modJFs; }
+        // Create issue and report
+        BuildIssue issue = createBuildIssue(aDiagnostic);
+        if (issue != null)
+            reportBuildIssue(issue);
+    }
 }
