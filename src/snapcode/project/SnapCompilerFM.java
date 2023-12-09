@@ -46,12 +46,9 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         if (javaFileObject != null)
             return javaFileObject;
 
-        // Get file for path
-        WebFile file = _proj.getFile(filePath);
-        if (file != null) {
-            javaFileObject = new SnapCompilerJFO(_proj, file, _compiler);
-            _javaFileObjects.put(filePath, javaFileObject);
-        }
+        // Create java file object and add to cache
+        javaFileObject = new SnapCompilerJFO(_proj, aFile, _compiler);
+        _javaFileObjects.put(filePath, javaFileObject);
 
         // Return
         return javaFileObject;

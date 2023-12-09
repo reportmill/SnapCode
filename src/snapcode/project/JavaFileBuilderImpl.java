@@ -27,6 +27,8 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
     public JavaFileBuilderImpl(Project aProject)
     {
         super(aProject);
+        _compiledFiles = new HashSet<>();
+        _errorFiles = new HashSet<>();
     }
 
     /**
@@ -94,10 +96,10 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
         List<WebFile> sourceFiles = new ArrayList<>(_buildFiles);
         _buildFiles.clear();
 
-        // Create compiler and sets for compiled/error files
+        // Create compiler and clear sets for compiled/error files
         _compiler = new SnapCompiler(_proj);
-        _compiledFiles = new HashSet<>();
-        _errorFiles = new HashSet<>();
+        _compiledFiles.clear();
+        _errorFiles.clear();
         boolean compileSuccess = true;
 
         // Reset Interrupt flag
@@ -143,7 +145,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
     /**
      * Compiles file.
      */
-    public boolean buildFile(WebFile sourceFile, List<WebFile> sourceFiles)
+    private boolean buildFile(WebFile sourceFile, List<WebFile> sourceFiles)
     {
         // Compile file
         boolean compileSuccess = _compiler.compileFile(sourceFile);
@@ -213,7 +215,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
     public void findUnusedImports()
     {
         // Sanity check
-        if (_interrupted) return;
+        if (_interrupted || _compiler == null) return;
 
         // Iterate over compiled files
         for (WebFile javaFile : _compiledFiles) {
@@ -230,6 +232,5 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
 
         // Clear vars
         _compiler = null;
-        _compiledFiles = _errorFiles = null;
     }
 }
