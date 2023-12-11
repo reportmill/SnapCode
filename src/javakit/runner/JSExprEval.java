@@ -209,8 +209,12 @@ public class JSExprEval {
         if (methodDecl != null)
             return evalMethodCallExprForMethodDecl(anOR, methodDecl, argValues);
 
+        // Handle var args packaging
+        if (method.isVarArgs())
+            argValues = method.repackageArgsForVarArgsMethod(argValues);
+
         // Invoke method
-        Object value = JSExprEvalUtils.invokeMethod(anOR, method, argValues);
+        Object value = method.invoke(anOR, argValues);
         return value;
     }
 

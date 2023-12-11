@@ -125,9 +125,7 @@ public class JavaShell {
         JavaMethod mainMethod = mainClass.getMethodForNameAndTypes("main", new JavaClass[] { stringArrayClass });
 
         // Invoke main method
-        try {
-            JSExprEvalUtils.invokeMethod(null, mainMethod, new Object[] { new String[0] });
-        }
+        try { mainMethod.invoke(null, (Object) new String[0]); }
         catch (Exception e) { throw new RuntimeException(e); }
 
         // Restore System out/err

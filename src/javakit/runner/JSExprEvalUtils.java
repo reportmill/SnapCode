@@ -1,10 +1,6 @@
 package javakit.runner;
 import javakit.parse.JExprMath;
-import javakit.resolver.JavaMethod;
 import snap.util.Convert;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.util.Arrays;
 
 /**
  * Utility methods for JSExprEval.
@@ -346,64 +342,4 @@ public class JSExprEvalUtils {
      * Return the current this object.
      */
     protected static String toString(Object anObj)  { return anObj != null ? anObj.toString() : null;  }
-
-    /**
-     * Invokes a method on given object for name and args.
-     */
-    protected static Object invokeMethod(Object anObj, JavaMethod javaMethod, Object[] theArgs) throws Exception
-    {
-        // Get method - check object class to get top method if overridden
-        Method method = javaMethod.getMethod();
-        if (!javaMethod.isStatic()) {
-            Class<?> objClass = anObj.getClass();
-            if (objClass != method.getDeclaringClass()) {
-                method = objClass.getMethod(method.getName(), method.getParameterTypes());
-                method.setAccessible(true); // Not sure why we need this sometimes
-            }
-        }
-
-        // If VarArgs, need to repackage args
-        if (method.isVarArgs())
-            theArgs = repackageArgsForVarArgsMethod(method, theArgs);
-
-        // Invoke
-        return method.invoke(anObj, theArgs);
-    }
-
-    /**
-     * This method takes an array of args from a method call and repackages them for VarArgs call.
-     * It basically moves collates the var args into an array.
-     */
-    private static Object[] repackageArgsForVarArgsMethod(Method aMethod, Object[] theArgs)
-    {
-        // Get VarArg class
-        int argCount = aMethod.getParameterCount();
-        int varArgIndex = argCount - 1;
-        Class<?>[] paramClasses = aMethod.getParameterTypes();
-        Class<?> varArgArrayClass = paramClasses[varArgIndex];
-        Class<?> varArgClass = varArgArrayClass.getComponentType();
-
-        // If only one varArg and it is already packaged as VarArgArrayClass, just return
-        if (theArgs.length == argCount) {
-            Object firstVarArg = theArgs[varArgIndex];
-            if (varArgArrayClass.isAssignableFrom(firstVarArg.getClass()))
-                return theArgs;
-        }
-
-        // Create new args array of proper length
-        Object[] args = Arrays.copyOf(theArgs, argCount);
-
-        // Create VarArgs array of proper class and set in new args array
-        int varArgsCount = theArgs.length - varArgIndex;
-        Object varArgArray = args[varArgIndex] = Array.newInstance(varArgClass, varArgsCount);
-
-        // Copy var args over from given args array to new VarArgsArray
-        for (int i = 0; i < varArgsCount; i++) {
-            Object varArg = theArgs[i + varArgIndex];
-            Array.set(varArgArray, i, varArg);
-        }
-
-        // Return
-        return args;
-    }
 }

@@ -150,6 +150,64 @@ public class JavaMethod extends JavaExecutable {
     }
 
     /**
+     * Invokes this method on given object and args.
+     */
+    public Object invoke(Object anObj, Object ... theArgs) throws Exception
+    {
+        // Get method - check object class to get top method if overridden
+        Method method = getMethod();
+
+        // If not static receiver object class has override method, make sure we use override method
+        if (!isStatic()) {
+            Class<?> objClass = anObj.getClass();
+            if (objClass != method.getDeclaringClass()) {
+                method = objClass.getMethod(method.getName(), method.getParameterTypes());
+                method.setAccessible(true); // Not sure why we need this sometimes
+            }
+        }
+
+        // Invoke
+        return method.invoke(anObj, theArgs);
+    }
+
+    /**
+     * This method repackages a given array of individual method args into an args array for VarArgs method.
+     */
+    public Object[] repackageArgsForVarArgsMethod(Object[] theArgs)
+    {
+        // Get VarArg class
+        Method aMethod = getMethod();
+        int argCount = aMethod.getParameterCount();
+        int varArgIndex = argCount - 1;
+        Class<?>[] paramClasses = aMethod.getParameterTypes();
+        Class<?> varArgArrayClass = paramClasses[varArgIndex];
+        Class<?> varArgClass = varArgArrayClass.getComponentType();
+
+        // If only one varArg and it is already packaged as VarArgArrayClass, just return
+        if (theArgs.length == argCount) {
+            Object firstVarArg = theArgs[varArgIndex];
+            if (varArgArrayClass.isAssignableFrom(firstVarArg.getClass()))
+                return theArgs;
+        }
+
+        // Create new args array of proper length
+        Object[] args = Arrays.copyOf(theArgs, argCount);
+
+        // Create VarArgs array of proper class and set in new args array
+        int varArgsCount = theArgs.length - varArgIndex;
+        Object varArgArray = args[varArgIndex] = Array.newInstance(varArgClass, varArgsCount);
+
+        // Copy var args over from given args array to new VarArgsArray
+        for (int i = 0; i < varArgsCount; i++) {
+            Object varArg = theArgs[i + varArgIndex];
+            Array.set(varArgArray, i, varArg);
+        }
+
+        // Return
+        return args;
+    }
+
+    /**
      * A Builder class for JavaMethod.
      */
     public static class MethodBuilder {
