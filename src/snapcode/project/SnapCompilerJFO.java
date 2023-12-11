@@ -2,8 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
+import javakit.parse.JFile;
+import snap.util.SnapUtils;
 import snap.web.WebFile;
-
 import javax.tools.SimpleJavaFileObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -83,16 +84,33 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
         // If already set, just return
         if (_javaTextStr != null) return _javaTextStr;
 
-        // Get string
-        _javaTextStr = _file.getText();
+        // Get java text string
+        String javaTextStr = getJavaTextString();
 
         // Since compiler just read new file contents, clear buildIssues for file
-        Workspace workspace = _proj.getWorkspace();
-        BuildIssues buildIssues = workspace.getBuildIssues();
-        buildIssues.removeIssuesForFile(_file);
+        JavaAgent javaAgent = JavaAgent.getAgentForFile(_file);
+        javaAgent.clearBuildIssues();
 
-        // Return
-        return _javaTextStr;
+        // Set and return
+        return _javaTextStr = javaTextStr;
+    }
+
+    /**
+     * Returns the Java string of file.
+     */
+    private String getJavaTextString()
+    {
+        // Handle RunWithInterpreter
+        if (_proj.getBuildFile().isRunWithInterpreter()) {
+            JavaAgent javaAgent = JavaAgent.getAgentForFile(_file);
+            JFile jFile = javaAgent.getJFile();
+            String javaText = new JavaWriter(jFile).getJava();
+            //SnapUtils.writeBytes(javaText.getBytes(), "/tmp/" + _file.getName());
+            return javaText;
+        }
+
+        // Get string
+        return _file.getText();
     }
 
     /**

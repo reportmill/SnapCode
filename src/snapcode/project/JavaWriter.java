@@ -145,7 +145,7 @@ public class JavaWriter {
     /**
      * Appends the method body:
      *    Object[] __args = { param1, param2, ... };
-     *    JavaShell.call("classpath_methodName", args);
+     *    snapcharts.repl.CallHandler.Call("className", "methodName", args);
      */
     private void appendMethodBody(JMethodDecl methodDecl, JModifiers mods, String methodName, List<JVarDecl> varDecls)
     {
@@ -162,10 +162,19 @@ public class JavaWriter {
 
         // Append call to JavaShell
         _sb.append(_indent);
-        _sb.append("JavaShell.call(\"");
-        String javaShellMethodName = methodName;
-        _sb.append(javaShellMethodName);
+        _sb.append("snapcharts.repl.CallHandler.Call(");
+
+        // Append class name arg
+        JClassDecl classDecl = methodDecl.getEnclosingClassDecl();
+        String className = classDecl.getName();
+        _sb.append("\"").append(className);
         _sb.append("\", ");
+
+        // Append method name arg
+        _sb.append("\"").append(methodName);
+        _sb.append("\", ");
+
+        // Append 'this' and '__args' args
         _sb.append(mods.isStatic() ? "null, " : "this, ");
         _sb.append("__args);\n");
 

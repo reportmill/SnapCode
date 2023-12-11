@@ -3,9 +3,16 @@
  */
 package javakit.runner;
 import javakit.parse.*;
+import javakit.resolver.JavaClass;
+import javakit.resolver.JavaMethod;
+import javakit.resolver.Resolver;
 import snap.util.StringUtils;
+import snap.web.WebFile;
+import snapcharts.repl.CallHandler;
 import snapcharts.repl.ReplObject;
-import snapcode.debug.RunApp;
+import snapcode.debug.RunAppSrc;
+import snapcode.project.JavaAgent;
+import snapcode.project.Project;
 import snapcode.util.ExceptionUtil;
 import java.io.PrintStream;
 
@@ -24,7 +31,7 @@ public class JavaShell {
     private boolean  _errorWasHit;
 
     // The RunApp
-    protected RunApp _runApp;
+    protected RunAppSrc _runApp;
 
     // The public out and err PrintStreams
     private PrintStream  _stdOut = System.out;
@@ -37,7 +44,7 @@ public class JavaShell {
     /**
      * Constructor.
      */
-    public JavaShell(RunApp runApp)
+    public JavaShell(RunAppSrc runApp)
     {
         _runApp = runApp;
 
@@ -48,15 +55,20 @@ public class JavaShell {
     /**
      * Evaluate string.
      */
-    public void runJavaCode(JFile jfile, JStmt[] javaStmts)
+    public void runJavaCode(JavaAgent javaAgent)
     {
-        // Reset VarStack
-        _stmtEval._exprEval._varStack.reset();
-
         // Set var stack indexes in AST
+        JFile jfile = javaAgent.getJFile();
         Simpiler.setVarStackIndexForJFile(jfile);
 
+        // Handle new hybrid source feature
+        if (_runApp.isSrcHybrid()) {
+            runJavaCode2(javaAgent);
+            return;
+        }
+
         // Get parsed statements
+        JStmt[] javaStmts = javaAgent.getJFileStatements();
         if (javaStmts == null) {
             System.err.println("JavaShell.runJavaCode: No main method");
             return;
@@ -65,9 +77,6 @@ public class JavaShell {
         // Set System out/err to catch console output
         System.setOut(_shellOut);
         System.setErr(_shellErr);
-
-        // Clear StopRun
-        _stmtEval._stopRun = _errorWasHit = false;
 
         // Iterate over lines and eval each
         for (JStmt stmt : javaStmts) {
@@ -83,6 +92,43 @@ public class JavaShell {
             if (_stmtEval._stopRun || _errorWasHit)
                 break;
         }
+
+        // Restore System out/err
+        System.setOut(_stdOut);
+        System.setErr(_stdErr);
+    }
+
+    /**
+     * Evaluate string.
+     */
+    public void runJavaCode2(JavaAgent javaAgent)
+    {
+        // Set System out/err to catch console output
+        System.setOut(_shellOut);
+        System.setErr(_shellErr);
+
+        // Create/set CallHandler
+        new CallHandler() {
+            @Override
+            public Object call(String className, String methodName, Object thisObject, Object[] args)
+            {
+                return JavaShell.this.call(className, methodName, thisObject, args);
+            }
+        };
+
+        // Get main method
+        Project project = javaAgent.getProject();
+        Resolver resolver = project.getResolver();
+        String mainClassName = _runApp.getMainClassName();
+        JavaClass mainClass = resolver.getJavaClassForName(mainClassName);
+        JavaClass stringArrayClass = resolver.getJavaClassForClass(String[].class);
+        JavaMethod mainMethod = mainClass.getMethodForNameAndTypes("main", new JavaClass[] { stringArrayClass });
+
+        // Invoke main method
+        try {
+            JSExprEvalUtils.invokeMethod(null, mainMethod, new Object[] { new String[0] });
+        }
+        catch (Exception e) { throw new RuntimeException(e); }
 
         // Restore System out/err
         System.setOut(_stdOut);
@@ -137,6 +183,27 @@ public class JavaShell {
             Object exceptionText = ExceptionUtil.getTextBlockForException(e);
             ReplObject.show(exceptionText);
         }
+    }
+
+    /**
+     * This method is a dispatcher for Java source classes.
+     */
+    public Object call(String className, String methodName, Object thisObject, Object[] args)
+    {
+        // Get source file for class name
+        WebFile sourceFile = _runApp.getSourceFileForClassName(className);
+
+        // Get ClassDecl for full class name
+        JavaAgent javaAgent = JavaAgent.getAgentForFile(sourceFile);
+        JFile jFile = javaAgent.getJFile();
+        JClassDecl classDecl = jFile.getClassDecl();
+
+        // Get MethodDecl for method name and invoke
+        JMethodDecl methodDecl = classDecl.getMethodDeclForNameAndTypes(methodName, null);
+        try {
+            return _stmtEval._exprEval.evalMethodCallExprForMethodDecl(thisObject, methodDecl, args);
+        }
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**

@@ -217,7 +217,7 @@ public class JSExprEval {
     /**
      * Evaluate JExprMethodCall for local JMethodDecl.
      */
-    private Object evalMethodCallExprForMethodDecl(Object anOR, JMethodDecl aMethodDecl, Object[] argValues) throws Exception
+    public Object evalMethodCallExprForMethodDecl(Object anOR, JMethodDecl aMethodDecl, Object[] argValues) throws Exception
     {
         // Create stack frame
         _varStack.pushStackFrame();

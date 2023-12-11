@@ -449,8 +449,13 @@ public class RunTool extends WorkspaceTool implements AppListener {
         if (selFile == null)
             return;
 
+        // Get args
+        Project proj = getProject();
+        String className = proj.getClassNameForFile(selFile);
+        String[] args = { className };
+
         // Create app and run
-        RunApp runApp = new RunAppSrc(this, selFile.getURL());
+        RunApp runApp = new RunAppSrc(this, selFile.getURL(), args);
         execProc(runApp);
 
         // Check back in half a second to see if we need to show progress bar

@@ -1,6 +1,4 @@
 package snapcode.debug;
-import javakit.parse.JFile;
-import javakit.parse.JStmt;
 import javakit.runner.JavaShell;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
@@ -10,6 +8,7 @@ import snapcharts.repl.DefaultConsole;
 import snapcharts.repl.ScanPane;
 import snapcode.apptools.RunTool;
 import snapcode.project.JavaAgent;
+import snapcode.project.Project;
 import java.io.InputStream;
 
 /**
@@ -32,9 +31,9 @@ public class RunAppSrc extends RunApp {
     /**
      * Constructor.
      */
-    public RunAppSrc(RunTool runTool, WebURL mainClassFileURL)
+    public RunAppSrc(RunTool runTool, WebURL mainClassFileURL, String[] args)
     {
-        super(runTool, mainClassFileURL, new String[0]);
+        super(runTool, mainClassFileURL, args);
 
         // Create JavaShell
         _javaShell = new JavaShell(this);
@@ -71,16 +70,12 @@ public class RunAppSrc extends RunApp {
         if (javaAgent == null)
             return;
 
-        // Get statements
-        JFile jfile = javaAgent.getJFile();
-        JStmt[] javaStmts = javaAgent.getJFileStatements();
-
         // Replace System.in with our own input stream to allow input
         InputStream stdIn = System.in;
         System.setIn(_inputStream = new ScanPane.BytesInputStream(null));
 
         // Run code
-        _javaShell.runJavaCode(jfile, javaStmts);
+        _javaShell.runJavaCode(javaAgent);
 
         // Restore System.in
         System.setIn(stdIn);
@@ -126,5 +121,23 @@ public class RunAppSrc extends RunApp {
     public void sendInput(String aString)
     {
         _inputStream.add(aString);
+    }
+
+    /**
+     * Returns whether run app is source hybrid.
+     */
+    public boolean isSrcHybrid()
+    {
+        Project project = _runTool.getProject();
+        return project.getBuildFile().isRunWithInterpreter();
+    }
+
+    /**
+     * Returns the source file for class name.
+     */
+    public WebFile getSourceFileForClassName(String className)
+    {
+        Project project = _runTool.getProject();
+        return project.getProjectFiles().getJavaFileForClassName(className);
     }
 }
