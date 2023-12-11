@@ -200,6 +200,14 @@ public class JavaAgent {
     }
 
     /**
+     * Clears build issues for java file.
+     */
+    public void clearBuildIssues()
+    {
+        setBuildIssues(new BuildIssue[0]);
+    }
+
+    /**
      * Returns the string from Java file.
      */
     public String getJavaText()
@@ -245,10 +253,16 @@ public class JavaAgent {
 
         // If missing, create/set
         if (javaAgent == null) {
-            if (aFile.getType().equals("jepl"))
+
+            // Create JavaAgent for java/jepl file
+            if (aFile.getType().equals("java"))
+                javaAgent = new JavaAgent(aFile);
+            else if (aFile.getType().equals("jepl"))
                 javaAgent = new JeplAgent(aFile);
-            else javaAgent = new JavaAgent(aFile);
-            aFile.setProp(JavaAgent.class.getName(), javaAgent);
+
+            // Set agent as file property
+            if (javaAgent != null)
+                aFile.setProp(JavaAgent.class.getName(), javaAgent);
         }
 
         // Return

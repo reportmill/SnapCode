@@ -127,7 +127,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
 
             // Build file
             boolean fileCompileSuccess = buildFile(sourceFile, sourceFiles);
-            if (fileCompileSuccess)
+            if (!fileCompileSuccess)
                 compileSuccess = false;
 
             // Stop task manager task

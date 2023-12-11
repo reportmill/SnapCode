@@ -411,9 +411,9 @@ public class Project extends PropObject {
         _projBuilder.removeBuildFile(aFile);
 
         // Remove BuildIssues for file
-        Workspace workspace = getWorkspace();
-        BuildIssues buildIssues = workspace.getBuildIssues();
-        buildIssues.removeIssuesForFile(aFile);
+        JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
+        if (javaAgent != null)
+            javaAgent.clearBuildIssues();
     }
 
     /**

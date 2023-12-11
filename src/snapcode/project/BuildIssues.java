@@ -161,15 +161,6 @@ public class BuildIssues extends PropObject {
     }
 
     /**
-     * Removes the build issues for a file.
-     */
-    public void removeIssuesForFile(WebFile aFile)
-    {
-        BuildIssue[] issues = getIssuesForFile(aFile);
-        for (BuildIssue i : issues) remove(i);
-    }
-
-    /**
      * Returns the build status for a file.
      */
     public BuildIssue.Kind getBuildStatusForFile(WebFile aFile)
