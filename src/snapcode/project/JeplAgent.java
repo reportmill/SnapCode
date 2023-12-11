@@ -4,7 +4,6 @@
 package snapcode.project;
 import javakit.parse.*;
 import snap.text.TextBlockUtils;
-import snap.util.ArrayUtils;
 import snap.web.WebFile;
 
 /**
@@ -47,32 +46,6 @@ public class JeplAgent extends JavaAgent {
         String[] importNames = jeplTextDoc.getImports();
         String superClassName = jeplTextDoc.getSuperClassName();
         return new JeplParser(importNames, superClassName);
-    }
-
-    /**
-     * Override to get statements from initializers.
-     */
-    @Override
-    public JStmt[] getJFileStatements()
-    {
-        // Get JFile, ClassDecl (just return if not found)
-        JFile jfile = getJFile();
-        JClassDecl classDecl = jfile.getClassDecl();
-        if (classDecl == null)
-            return new JStmt[0];
-
-        // Get initializers
-        JInitializerDecl[] initDecls = classDecl.getInitDecls();
-        JStmt[] stmtsAll = new JStmt[0];
-
-        // Iterate over initializers and add statements
-        for (JInitializerDecl initDecl : initDecls) {
-            JStmt[] stmts = JavaTextDocUtils.getStatementsForJavaNode(initDecl);
-            stmtsAll = ArrayUtils.addAll(stmtsAll, stmts);
-        }
-
-        // Return
-        return stmtsAll;
     }
 
     /**

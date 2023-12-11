@@ -10,8 +10,6 @@ import snap.text.TextBlockUtils;
 import snap.text.TextLine;
 import snap.text.TextToken;
 import snap.util.CharSequenceUtils;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Utility methods and support for JavaTextDoc.
@@ -106,33 +104,6 @@ public class JavaTextDocUtils {
 
         // Return none
         return null;
-    }
-
-    /**
-     * Returns an array of statements in given node.
-     */
-    public static JStmt[] getStatementsForJavaNode(JNode aJNode)
-    {
-        List<JStmt> stmtsList = new ArrayList<>();
-        findStatementsForJavaNode(aJNode, stmtsList);
-        return stmtsList.toArray(new JStmt[0]);
-    }
-
-    /**
-     * Recursively finds all statements in node and adds to given list.
-     */
-    private static void findStatementsForJavaNode(JNode aJNode, List<JStmt> theStmtsList)
-    {
-        // Handle statement node (but not block), get line index and set in array
-        if (aJNode instanceof JStmt && !(aJNode instanceof JStmtBlock)) {
-            theStmtsList.add((JStmt) aJNode);
-            return;
-        }
-
-        // Handle any node: Iterate over children and recurse
-        List<JNode> children = aJNode.getChildren();
-        for (JNode child : children)
-            findStatementsForJavaNode(child, theStmtsList);
     }
 
     /**

@@ -53,7 +53,7 @@ public class JavaShell {
     }
 
     /**
-     * Evaluate string.
+     * Run code in JavaFile for given JavaAgent.
      */
     public void runJavaCode(JavaAgent javaAgent)
     {
@@ -61,37 +61,14 @@ public class JavaShell {
         JFile jfile = javaAgent.getJFile();
         Simpiler.setVarStackIndexForJFile(jfile);
 
-        // Handle new hybrid source feature
-        if (_runApp.isSrcHybrid()) {
-            runJavaCode2(javaAgent);
-            return;
-        }
-
-        // Get parsed statements
-        JStmt[] javaStmts = javaAgent.getJFileStatements();
-        if (javaStmts == null) {
-            System.err.println("JavaShell.runJavaCode: No main method");
-            return;
-        }
-
         // Set System out/err to catch console output
         System.setOut(_shellOut);
         System.setErr(_shellErr);
 
-        // Iterate over lines and eval each
-        for (JStmt stmt : javaStmts) {
-
-            // Get Statement (if null, just set empty string value and continue)
-            if (stmt == null)
-                continue;
-
-            // Evaluate statement
-            evalStatement(stmt);
-
-            // If StopRun hit, break
-            if (_stmtEval._stopRun || _errorWasHit)
-                break;
-        }
+        // Run as main method (RunApp.SrcHybrid) or main statements (legacy)
+        if (_runApp.isSrcHybrid())
+            runMainMethod(javaAgent);
+        else runMainStatements(jfile);
 
         // Restore System out/err
         System.setOut(_stdOut);
@@ -99,14 +76,10 @@ public class JavaShell {
     }
 
     /**
-     * Evaluate string.
+     * Runs the main method for given JavaAgent.
      */
-    public void runJavaCode2(JavaAgent javaAgent)
+    public void runMainMethod(JavaAgent javaAgent)
     {
-        // Set System out/err to catch console output
-        System.setOut(_shellOut);
-        System.setErr(_shellErr);
-
         // Create/set CallHandler
         new CallHandler() {
             @Override
@@ -126,11 +99,12 @@ public class JavaShell {
 
         // Invoke main method
         try { mainMethod.invoke(null, (Object) new String[0]); }
-        catch (Exception e) { throw new RuntimeException(e); }
 
-        // Restore System out/err
-        System.setOut(_stdOut);
-        System.setErr(_stdErr);
+        // Catch exceptions and show in console
+        catch (Exception e) {
+            String str = StringUtils.getStackTraceString(e);
+            appendConsoleOutput(str, true);
+        }
     }
 
     /**
@@ -147,6 +121,30 @@ public class JavaShell {
     protected void appendConsoleOutput(String aString, boolean isError)
     {
         _runApp.appendConsoleOutput(aString, isError);
+    }
+
+    /**
+     * Runs main statements in given JFile.
+     */
+    private void runMainStatements(JFile jfile)
+    {
+        // Get main statements
+        JStmt[] mainStmts = JavaShellUtils.getMainStatements(jfile);
+
+        // Iterate over main statements and eval each
+        for (JStmt stmt : mainStmts) {
+
+            // Get Statement (if null, just set empty string value and continue)
+            if (stmt == null)
+                continue;
+
+            // Evaluate statement
+            evalStatement(stmt);
+
+            // If StopRun hit, break
+            if (_stmtEval._stopRun || _errorWasHit)
+                break;
+        }
     }
 
     /**

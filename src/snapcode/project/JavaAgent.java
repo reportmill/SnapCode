@@ -138,22 +138,6 @@ public class JavaAgent {
     }
 
     /**
-     * Returns the parsed statements.
-     */
-    public JStmt[] getJFileStatements()
-    {
-        // Get main method
-        JFile jfile = getJFile();
-        JClassDecl classDecl = jfile.getClassDecl();
-        JMethodDecl mainMethod = classDecl.getMethodDeclForNameAndTypes("main", null);
-        if (mainMethod == null)
-            return null;
-
-        // Get statements from main method
-        return JavaTextDocUtils.getStatementsForJavaNode(mainMethod);
-    }
-
-    /**
      * Builds this file.
      */
     public boolean buildFile()
