@@ -49,7 +49,7 @@ public class BuildFileTool extends ProjectTool {
         BuildFile buildFile = getBuildFile();
         buildFile.addDependency(dependency, anIndex);
 
-        // Select dependency and reset
+        // Reset items and select new dependency
         _dependenciesListArea.setItems(buildFile.getDependencies());
         _dependenciesListArea.setSelItem(dependency);
         resetLater();
@@ -64,9 +64,9 @@ public class BuildFileTool extends ProjectTool {
         BuildFile buildFile = getBuildFile();
         buildFile.removeDependency(buildDependency);
 
-        // Select dependency and reset
-        setViewItems("DependenciesListView", buildFile.getDependencies());
-        setViewSelItem("DependenciesListView", null);
+        // Reset items and selection
+        _dependenciesListArea.setItems(buildFile.getDependencies());
+        _dependenciesListArea.setSelItem(null);
         resetLater();
     }
 
@@ -161,10 +161,11 @@ public class BuildFileTool extends ProjectTool {
     {
         BuildFile buildFile = getBuildFile();
 
-        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox
+        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, RunWithInterpreterCheckBox
         setViewValue("SourcePathText", buildFile.getSourcePath());
         setViewValue("BuildPathText", buildFile.getBuildPath());
         setViewValue("IncludeSnapKitRuntimeCheckBox", buildFile.isIncludeSnapKitRuntime());
+        setViewValue("RunWithInterpreterCheckBox", buildFile.isRunWithInterpreter());
 
         // Update RemoveDependencyButton
         setViewDisabled("RemoveDependencyButton", _dependenciesListArea.getSelItem() == null);
@@ -230,13 +231,15 @@ public class BuildFileTool extends ProjectTool {
     {
         BuildFile buildFile = getBuildFile();
 
-        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox
+        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, RunWithInterpreterCheckBox
         if (anEvent.equals("SourcePathText"))
             buildFile.setSourcePath(anEvent.getStringValue());
         if (anEvent.equals("BuildPathText"))
             buildFile.setBuildPath(anEvent.getStringValue());
         if (anEvent.equals("IncludeSnapKitRuntimeCheckBox"))
             buildFile.setIncludeSnapKitRuntime(anEvent.getBoolValue());
+        if (anEvent.equals("RunWithInterpreterCheckBox"))
+            buildFile.setRunWithInterpreter(anEvent.getBoolValue());
 
         // Handle AddDependencyButton, RemoveDependencyButton
         if (anEvent.equals("AddDependencyButton"))
