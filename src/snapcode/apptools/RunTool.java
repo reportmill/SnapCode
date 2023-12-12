@@ -261,6 +261,8 @@ public class RunTool extends WorkspaceTool implements AppListener {
         ScrollView scrollView = getView("ScrollView", ScrollView.class);
         if (scrollView.getContent() != consoleView)
             scrollView.setContent(consoleView);
+
+        resetLater();
     }
 
     /**
@@ -342,7 +344,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
      */
     public void consoleViewDidChange(RunApp runApp)
     {
-        resetConsoleView();
+        runLater(() -> resetConsoleView());
     }
 
     /**

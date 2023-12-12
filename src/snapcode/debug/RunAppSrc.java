@@ -1,10 +1,10 @@
 package snapcode.debug;
 import javakit.runner.JavaShell;
+import snap.view.View;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcharts.repl.Console;
-import snapcharts.repl.DefaultConsole;
 import snapcharts.repl.ScanPane;
 import snapcode.apptools.RunTool;
 import snapcode.project.JavaAgent;
@@ -23,11 +23,11 @@ public class RunAppSrc extends RunApp {
     // The thread to reset views
     private Thread _runAppThread;
 
-    // The Console
-    protected Console _console;
+    // Whether runAppThread is waiting for console app
+    private boolean _runAppThreadWaiting;
 
     // An input stream for standard in
-    protected ScanPane.BytesInputStream _inputStream;
+    protected ScanPane.BytesInputStream _standardInInputStream;
 
     // The real system in/out/err
     private static final InputStream REAL_SYSTEM_IN = System.in;
@@ -43,9 +43,6 @@ public class RunAppSrc extends RunApp {
 
         // Create JavaShell
         _javaShell = new JavaShell(this);
-
-        // Create console
-        _console = new DefaultConsole();
     }
 
     /**
@@ -56,12 +53,12 @@ public class RunAppSrc extends RunApp {
     {
         // Set console
         Console.setShared(null);
-        Console.setConsoleCreatedHandler(() -> setAltConsoleView(Console.getShared().getConsoleView()));
+        Console.setConsoleCreatedHandler(this::consoleWasCreated);
 
         // Create and start new thread to run
         _runAppThread = new Thread(() -> runAppImpl());
-        _runAppThread.start();
         _running = true;
+        _runAppThread.start();
     }
 
     /**
@@ -77,12 +74,23 @@ public class RunAppSrc extends RunApp {
             return;
 
         // Replace System.in with proxy versions to allow input/output
-        System.setIn(_inputStream = new ScanPane.BytesInputStream(null));
+        System.setIn(_standardInInputStream = new ScanPane.BytesInputStream(null));
         System.setOut(new ProxyPrintStream(REAL_SYSTEM_OUT));
         System.setErr(new ProxyPrintStream(REAL_SYSTEM_ERR));
 
         // Run code
         _javaShell.runJavaCode(javaAgent);
+
+        // If console app, wait for explicit termination
+        if (getAltConsoleView() != null) {
+            synchronized (this) {
+                try {
+                    _runAppThreadWaiting = true;
+                    wait();
+                }
+                catch (Exception e) { throw new RuntimeException(e); }
+            }
+        }
 
         // Process terminate
         finalizeTermination();
@@ -97,8 +105,16 @@ public class RunAppSrc extends RunApp {
         // If already cancelled, just return
         if (_runAppThread == null) return;
 
-        // Send interrupt to shell (soft interrupt)
-        _javaShell.interrupt();
+        // If RunAppThreadWaiting (console app), just activate thread
+        if (_runAppThreadWaiting) {
+            synchronized (this) {
+                try { notifyAll(); }
+                catch (Exception e) { throw new RuntimeException(e); }
+            }
+        }
+
+        // Otherwise, send interrupt to shell (soft interrupt)
+        else _javaShell.interrupt();
 
         // Register timeout to check if hard thread interrupt is needed
         ViewUtils.runDelayed(() -> hardTerminate(), 600);
@@ -138,6 +154,13 @@ public class RunAppSrc extends RunApp {
         _runAppThread = null;
         _running = false;
 
+        // If console app, clear console
+        if (_runAppThreadWaiting) {
+            Console.setShared(null);
+            Console.setConsoleCreatedHandler(null);
+            setAltConsoleView(null);
+        }
+
         // Notify exited
         for (AppListener appLsnr : _appLsnrs)
             appLsnr.appExited(this);
@@ -149,7 +172,7 @@ public class RunAppSrc extends RunApp {
     @Override
     public void sendInput(String aString)
     {
-        _inputStream.add(aString);
+        _standardInInputStream.add(aString);
     }
 
     /**
@@ -168,6 +191,15 @@ public class RunAppSrc extends RunApp {
     {
         Project project = _runTool.getProject();
         return project.getProjectFiles().getJavaFileForClassName(className);
+    }
+
+    /**
+     * Called when Console is created.
+     */
+    private void consoleWasCreated()
+    {
+        View consoleView = Console.getShared().getConsoleView();
+        setAltConsoleView(consoleView);
     }
 
     /**
