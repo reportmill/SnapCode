@@ -33,6 +33,9 @@ public class JNode {
     // The errors in this node
     private NodeError[]  _errors;
 
+    // The string for this node
+    private String _string;
+
     /**
      * Constructor.
      */
@@ -554,28 +557,42 @@ public class JNode {
      */
     public String getString()
     {
+        if (_string != null) return _string;
+        return _string = getStringImpl();
+    }
+
+    /**
+     * Returns the string for this node (from Token.Tokenizer.getInput(Start,End)).
+     */
+    protected String getStringImpl()
+    {
         // Get start/end token - if same, just return token string
         ParseToken startToken = getStartToken();
         ParseToken endToken = getEndToken();
-        if (startToken == endToken && startToken != null)
+        if (startToken == endToken && startToken != null && startToken.getString().length() > 0)
             return startToken.getString();
 
         // Java string, and start/end tokens
         JFile jfile = getFile();
         String javaString = jfile != null ? jfile.getJavaFileString() : null;
         if (javaString == null || startToken == null || endToken == null)
-            return "(No string available - JFile, Java string or tokens not found)";
+            return createString(); // "(No string available - JFile, Java string or tokens not found)";
 
         // Get JavaString
         int startIndex = startToken.getStartCharIndex();
         int endIndex = endToken.getEndCharIndex();
         if (endIndex > javaString.length())
-            return "(No string available - token start/end out of range/synch)";
+            return createString(); // "(No string available - token start/end out of range/synch)";
 
         // Return string
         String str = javaString.substring(startIndex, endIndex);
         return str;
     }
+
+    /**
+     * Creates a string for this part.
+     */
+    protected String createString()  { return ""; }
 
     /**
      * Returns the node errors.

@@ -301,6 +301,15 @@ public class JType extends JNode {
     }
 
     /**
+     * Override to customize for this class.
+     */
+    @Override
+    protected String createString()
+    {
+        return getName();
+    }
+
+    /**
      * Creates a type for type and token.
      */
     public static JType createTypeForTypeAndToken(JavaType aType, ParseToken aToken)

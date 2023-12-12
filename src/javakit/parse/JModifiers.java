@@ -79,4 +79,13 @@ public class JModifiers extends JNode {
      * Returns whether modifiers includes synchronized.
      */
     public boolean isSynchronized()  { return Modifier.isSynchronized(_mods); }
+
+    /**
+     * Override to customize for this class.
+     */
+    @Override
+    protected String createString()
+    {
+        return Modifier.toString(_mods);
+    }
 }

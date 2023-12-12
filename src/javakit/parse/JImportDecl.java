@@ -251,4 +251,20 @@ public class JImportDecl extends JNode {
             _found = new HashSet<>();
         _found.add(aName);
     }
+
+    /**
+     * Override to customize for this class.
+     */
+    @Override
+    protected String createString()
+    {
+        StringBuilder sb = new StringBuilder("import ");
+        if (isStatic())
+            sb.append("static ");
+        sb.append(getName());
+        if (isInclusive())
+            sb.append(".*");
+        sb.append(';');
+        return sb.toString();
+    }
 }

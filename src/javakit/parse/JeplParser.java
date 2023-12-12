@@ -4,6 +4,8 @@
 package javakit.parse;
 import snap.parse.*;
 
+import java.lang.reflect.Modifier;
+
 /**
  * This class.
  */
@@ -15,13 +17,13 @@ public class JeplParser extends JavaParser {
     /**
      * Constructor.
      */
-    public JeplParser(String[] importNames, String superClassName)
+    public JeplParser(String className, String[] importNames, String superClassName)
     {
         super();
 
         // Get/set rule for JeplFile
         ParseRule jeplRule = getRule("JeplFile");
-        JeplFileHandler jeplFileHandler = new JeplFileHandler(importNames, superClassName);
+        JeplFileHandler jeplFileHandler = new JeplFileHandler(className, importNames, superClassName);
         jeplRule.setHandler(jeplFileHandler);
         setRule(jeplRule);
     }
@@ -30,6 +32,9 @@ public class JeplParser extends JavaParser {
      * JeplFile Handler.
      */
     public static class JeplFileHandler extends JNodeParseHandler<JFile> {
+
+        // The class name
+        private String _className;
 
         // The import names
         private String[] _importNames;
@@ -46,9 +51,10 @@ public class JeplParser extends JavaParser {
         /**
          * Constructor.
          */
-        public JeplFileHandler(String[] importNames, String superClassName)
+        public JeplFileHandler(String className, String[] importNames, String superClassName)
         {
             super();
+            _className = className;
             _importNames = importNames;
             _superClassName = superClassName;
         }
@@ -145,12 +151,17 @@ public class JeplParser extends JavaParser {
 
             // Create/add ClassDecl
             JClassDecl classDecl = new JClassDecl();
-            classDecl.setName("JavaShellREPL");
+            JModifiers modifiers = new JModifiers();
+            modifiers.addValue(Modifier.PUBLIC);
+            modifiers.getString();
+            classDecl.setMods(modifiers);
+            classDecl.setName(_className);
             classDecl.setStartToken(startToken);
             jfile.addClassDecl(classDecl);
 
             // Add Superclass
             JType extendsType = JType.createTypeForNameAndToken(_superClassName, startToken);
+            extendsType.getString(); // Cache string
             classDecl.addExtendsType(extendsType);
 
             _initDecl = null;
@@ -168,7 +179,7 @@ public class JeplParser extends JavaParser {
         protected ParseHandler<JFile> createBackupHandler()
         {
             System.err.println("JeplParser.createBackupHandler: This should never get called");
-            return new JeplFileHandler(_importNames, _superClassName);
+            return new JeplFileHandler(_className, _importNames, _superClassName);
         }
     }
 
@@ -193,6 +204,7 @@ public class JeplParser extends JavaParser {
         importDecl.setStatic(isStatic);
         importDecl.setStartToken(PHANTOM_TOKEN);
         importDecl.setEndToken(PHANTOM_TOKEN);
+        importDecl.getString(); // Cache string
         aFile.addImportDecl(importDecl);
     }
 }
