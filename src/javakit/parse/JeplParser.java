@@ -153,6 +153,7 @@ public class JeplParser extends JavaParser {
             JClassDecl classDecl = new JClassDecl();
             JModifiers modifiers = new JModifiers();
             modifiers.addValue(Modifier.PUBLIC);
+            modifiers.setStartToken(startToken);
             modifiers.getString();
             classDecl.setMods(modifiers);
             classDecl.setName(_className);

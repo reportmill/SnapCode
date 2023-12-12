@@ -3,7 +3,6 @@ import javakit.parse.*;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.util.SnapUtils;
-
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +16,9 @@ public class JavaWriter {
     // The JFile
     private JFile _jfile;
 
+    // Whether this is repl
+    private boolean _isJepl;
+
     // The StringBuilder
     private StringBuilder _sb;
 
@@ -29,6 +31,7 @@ public class JavaWriter {
     public JavaWriter(JFile jFile)
     {
         _jfile = jFile;
+        _isJepl = _jfile.isRepl();
         _sb = new StringBuilder();
     }
 
@@ -141,8 +144,13 @@ public class JavaWriter {
         _sb.append('\n');
         _sb.append(_indent);
 
-        // Append modifiers
+        // Append modifiers - If Jepl, make all methods 'public static'
         JModifiers mods = methodDecl.getMods();
+        if (_isJepl) {
+            mods = new JModifiers();
+            mods.addValue(Modifier.PUBLIC);
+            mods.addValue(Modifier.STATIC);
+        }
         appendModifiers(mods);
 
         // Append return type
@@ -186,10 +194,13 @@ public class JavaWriter {
             _sb.append(" };\n");
         }
 
-        // Append call to JavaShell
+        // Append call to JavaShell: return (type) snapcharts.repl.CallHandler.Call(
         _sb.append(_indent);
-        if (!returnTypeStr.equals("void"))
+        if (!returnTypeStr.equals("void")) {
             _sb.append("return ");
+            if (!returnTypeStr.equals("Object"))
+                _sb.append('(').append(returnTypeStr).append(") ");
+        }
         _sb.append("snapcharts.repl.CallHandler.Call(");
 
         // Append class name arg
@@ -220,10 +231,10 @@ public class JavaWriter {
     private void appendInitializerDecl(JInitializerDecl initializerDecl)
     {
         // Handle Jepl file
-        if (_jfile.isRepl()) {
+        if (_isJepl) {
             _sb.append('\n');
             _sb.append(_indent);
-            _sb.append("public static void main(String[] args)");
+            _sb.append("public static void main(String[] args)\n");
         }
 
         // Get initializer id
