@@ -28,6 +28,9 @@ public class RunAppSrc extends RunApp {
     // An input stream for standard in
     protected ScanPane.BytesInputStream _inputStream;
 
+    // The real system in
+    private static final InputStream REAL_SYSTEM_IN = System.in;
+
     /**
      * Constructor.
      */
@@ -71,14 +74,58 @@ public class RunAppSrc extends RunApp {
             return;
 
         // Replace System.in with our own input stream to allow input
-        InputStream stdIn = System.in;
         System.setIn(_inputStream = new ScanPane.BytesInputStream(null));
 
         // Run code
         _javaShell.runJavaCode(javaAgent);
 
+        // Process terminate
+        finalizeTermination();
+    }
+
+    /**
+     * Terminates the process.
+     */
+    @Override
+    public void terminate()
+    {
+        // If already cancelled, just return
+        if (_runAppThread == null) return;
+
+        // Send interrupt to shell (soft interrupt)
+        _javaShell.interrupt();
+
+        // Register timeout to check if hard thread interrupt is needed
+        ViewUtils.runDelayed(() -> hardTerminate(), 600);
+    }
+
+    /**
+     * Called to really terminate run with thread interrupt, if in system code.
+     */
+    private void hardTerminate()
+    {
+        // If standard terminate worked, just return
+        Thread runAppThread = _runAppThread;
+        if (runAppThread == null)
+            return;
+
+        // Interrupt thread
+        runAppThread.interrupt();
+
+        // Process termination
+        finalizeTermination();
+    }
+
+    /**
+     * Called to do cleanup when after app is terminated.
+     */
+    private void finalizeTermination()
+    {
+        // If already called, just return (possible if soft interrupt somehow finishes after hard thread interrupt has been triggered)
+        if (_runAppThread == null) return;
+
         // Restore System.in
-        System.setIn(stdIn);
+        System.setIn(REAL_SYSTEM_IN);
 
         // Reset thread
         _runAppThread = null;
@@ -87,31 +134,6 @@ public class RunAppSrc extends RunApp {
         // Notify exited
         for (AppListener appLsnr : _appLsnrs)
             appLsnr.appExited(this);
-    }
-
-    @Override
-    public void terminate()
-    {
-        // If already cancelled, just return
-        if (_runAppThread == null) return;
-
-        // Interrupt and clear
-        _javaShell.interrupt();
-        ViewUtils.runDelayed(() -> cancelRunExtreme(_runAppThread), 600);
-    }
-
-    /**
-     * Called to really cancel run with thread interrupt, if in system code.
-     */
-    private void cancelRunExtreme(Thread runAppThread)
-    {
-        if (runAppThread != null) {
-            runAppThread.interrupt();
-
-            // Notify exited
-            for (AppListener appLsnr : _appLsnrs)
-                appLsnr.appExited(this);
-        }
     }
 
     /**
