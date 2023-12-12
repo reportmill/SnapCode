@@ -10,6 +10,7 @@ import snapcode.apptools.RunTool;
 import snapcode.project.JavaAgent;
 import snapcode.project.Project;
 import java.io.InputStream;
+import java.io.PrintStream;
 
 /**
  * This RunApp subclass runs an app from source.
@@ -28,8 +29,10 @@ public class RunAppSrc extends RunApp {
     // An input stream for standard in
     protected ScanPane.BytesInputStream _inputStream;
 
-    // The real system in
+    // The real system in/out/err
     private static final InputStream REAL_SYSTEM_IN = System.in;
+    private static final PrintStream REAL_SYSTEM_OUT = System.out;
+    private static final PrintStream REAL_SYSTEM_ERR = System.err;
 
     /**
      * Constructor.
@@ -73,8 +76,10 @@ public class RunAppSrc extends RunApp {
         if (javaAgent == null)
             return;
 
-        // Replace System.in with our own input stream to allow input
+        // Replace System.in with proxy versions to allow input/output
         System.setIn(_inputStream = new ScanPane.BytesInputStream(null));
+        System.setOut(new ProxyPrintStream(REAL_SYSTEM_OUT));
+        System.setErr(new ProxyPrintStream(REAL_SYSTEM_ERR));
 
         // Run code
         _javaShell.runJavaCode(javaAgent);
@@ -124,8 +129,10 @@ public class RunAppSrc extends RunApp {
         // If already called, just return (possible if soft interrupt somehow finishes after hard thread interrupt has been triggered)
         if (_runAppThread == null) return;
 
-        // Restore System.in
+        // Restore System.in/out/err
         System.setIn(REAL_SYSTEM_IN);
+        System.setOut(REAL_SYSTEM_OUT);
+        System.setErr(REAL_SYSTEM_ERR);
 
         // Reset thread
         _runAppThread = null;
@@ -161,5 +168,45 @@ public class RunAppSrc extends RunApp {
     {
         Project project = _runTool.getProject();
         return project.getProjectFiles().getJavaFileForClassName(className);
+    }
+
+    /**
+     * A PrintStream to stand in for System.out and System.err.
+     */
+    private class ProxyPrintStream extends PrintStream {
+
+        /**
+         * Constructor.
+         */
+        public ProxyPrintStream(PrintStream printStream)
+        {
+            super(printStream);
+        }
+
+        /**
+         * Override to send to local console.
+         */
+        public void write(int b)
+        {
+            // Do normal version
+            super.write(b);
+
+            // Write char to console
+            String str = String.valueOf(Character.valueOf((char) b));
+            appendConsoleOutput(str, this == System.err);
+        }
+
+        /**
+         * Override to send to local console.
+         */
+        public void write(byte[] buf, int off, int len)
+        {
+            // Do normal version
+            super.write(buf, off, len);
+
+            // Write buff to console
+            String str = new String(buf, off, len);
+            appendConsoleOutput(str, this == System.err);
+        }
     }
 }

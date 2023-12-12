@@ -14,7 +14,6 @@ import snapcode.debug.RunAppSrc;
 import snapcode.project.JavaAgent;
 import snapcode.project.Project;
 import snapcode.util.ExceptionUtil;
-import java.io.PrintStream;
 
 /**
  * A class to evaluate JavaShell code.
@@ -32,14 +31,6 @@ public class JavaShell {
 
     // The RunApp
     protected RunAppSrc _runApp;
-
-    // The public out and err PrintStreams
-    private PrintStream  _stdOut = System.out;
-    private PrintStream  _stdErr = System.err;
-
-    // Proxy standard out/err to capture console
-    private PrintStream  _shellOut = new JavaShellUtils.ProxyPrintStream(this, _stdOut);
-    private PrintStream  _shellErr = new JavaShellUtils.ProxyPrintStream(this,_stdErr);
 
     /**
      * Constructor.
@@ -61,18 +52,10 @@ public class JavaShell {
         JFile jfile = javaAgent.getJFile();
         Simpiler.setVarStackIndexForJFile(jfile);
 
-        // Set System out/err to catch console output
-        System.setOut(_shellOut);
-        System.setErr(_shellErr);
-
         // Run as main method (RunApp.SrcHybrid) or main statements (legacy)
         if (_runApp.isSrcHybrid())
             runMainMethod(javaAgent);
         else runMainStatements(jfile);
-
-        // Restore System out/err
-        System.setOut(_stdOut);
-        System.setErr(_stdErr);
     }
 
     /**

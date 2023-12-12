@@ -4,7 +4,6 @@
 package javakit.runner;
 import javakit.parse.*;
 import snap.util.ArrayUtils;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,53 +82,5 @@ public class JavaShellUtils {
         List<JNode> children = aJNode.getChildren();
         for (JNode child : children)
             findStatementsForNode(child, stmtsList);
-    }
-
-    /**
-     * A PrintStream to stand in for System.out and System.err.
-     */
-    protected static class ProxyPrintStream extends PrintStream {
-
-        // The JavaShell
-        private JavaShell  _javaShell;
-
-        // Whether is standard err
-        private boolean  _stdErr;
-
-        /**
-         * Constructor.
-         */
-        public ProxyPrintStream(JavaShell javaShell, PrintStream printStream)
-        {
-            super(printStream);
-            _javaShell = javaShell;
-            _stdErr = printStream == System.err;
-        }
-
-        /**
-         * Override to send to ScanView.
-         */
-        public void write(int b)
-        {
-            // Do normal version
-            super.write(b);
-
-            // Write char to console
-            String str = String.valueOf(Character.valueOf((char) b));
-            _javaShell.appendConsoleOutput(str, _stdErr);
-        }
-
-        /**
-         * Override to send to ScanView.
-         */
-        public void write(byte[] buf, int off, int len)
-        {
-            // Do normal version
-            super.write(buf, off, len);
-
-            // Write buff to console
-            String str = new String(buf, off, len);
-            _javaShell.appendConsoleOutput(str, _stdErr);
-        }
     }
 }
