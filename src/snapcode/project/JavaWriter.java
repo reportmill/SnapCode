@@ -1,6 +1,11 @@
 package snapcode.project;
 import javakit.parse.*;
+import snap.util.ArrayUtils;
 import snap.util.ListUtils;
+import snap.util.SnapUtils;
+
+import java.lang.reflect.Modifier;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,10 +55,12 @@ public class JavaWriter {
 
         // Append class
         JClassDecl classDecl = _jfile.getClassDecl();
-        appendClassDecl(classDecl);
+        if (classDecl != null)
+            appendClassDecl(classDecl);
 
         // Return string
         String javaString = _sb.toString();
+        SnapUtils.writeBytes(javaString.getBytes(), "/tmp/" + _jfile.getName() + ".java");
         return javaString;
     }
 
@@ -113,6 +120,8 @@ public class JavaWriter {
             appendFieldDecl((JFieldDecl) memberDecl);
         else if (memberDecl instanceof JMethodDecl)
             appendMethodDecl((JMethodDecl) memberDecl);
+        else if (memberDecl instanceof JInitializerDecl)
+            appendInitializerDecl((JInitializerDecl) memberDecl);
     }
 
     /**
@@ -154,33 +163,37 @@ public class JavaWriter {
         _sb.append(")\n");
 
         // Append method body
-        appendMethodBody(methodDecl, mods, methodName, varDecls);
+        appendMethodBody(methodDecl, mods, returnTypeStr, methodName, varDecls);
     }
 
     /**
      * Appends the method body:
      *    Object[] __args = { param1, param2, ... };
-     *    snapcharts.repl.CallHandler.Call("className", "methodName", args);
+     *    [return] snapcharts.repl.CallHandler.Call("className", "methodName", args);
      */
-    private void appendMethodBody(JMethodDecl methodDecl, JModifiers mods, String methodName, List<JVarDecl> varDecls)
+    private void appendMethodBody(JMemberDecl memberDecl, JModifiers mods, String returnTypeStr, String methodName, List<JVarDecl> varDecls)
     {
         // Append method body open
         _sb.append(_indent).append("{\n");
         indent();
 
         // Append args array declaration: Object[] args = { param1, param2, ... };
-        _sb.append(_indent);
-        _sb.append("Object[] __args = { ");
-        String varDeclNamesStr = varDecls.stream().map(JVarDecl::getName).collect(Collectors.joining(", "));
-        _sb.append(varDeclNamesStr);
-        _sb.append(" };\n");
+        if (varDecls.size() > 0) {
+            _sb.append(_indent);
+            _sb.append("Object[] __args = { ");
+            String varDeclNamesStr = varDecls.stream().map(JVarDecl::getName).collect(Collectors.joining(", "));
+            _sb.append(varDeclNamesStr);
+            _sb.append(" };\n");
+        }
 
         // Append call to JavaShell
         _sb.append(_indent);
+        if (!returnTypeStr.equals("void"))
+            _sb.append("return ");
         _sb.append("snapcharts.repl.CallHandler.Call(");
 
         // Append class name arg
-        JClassDecl classDecl = methodDecl.getEnclosingClassDecl();
+        JClassDecl classDecl = memberDecl.getEnclosingClassDecl();
         String className = classDecl.getName();
         _sb.append("\"").append(className);
         _sb.append("\", ");
@@ -190,12 +203,39 @@ public class JavaWriter {
         _sb.append("\", ");
 
         // Append 'this' and '__args' args
-        _sb.append(mods.isStatic() ? "null, " : "this, ");
-        _sb.append("__args);\n");
+        String thisObjectString = mods.isStatic() ? "null" : "this";
+        _sb.append(thisObjectString).append(',');
+        String argsStr = varDecls.size() > 0 ? " __args" : " null";
+        _sb.append(argsStr);
+        _sb.append(");\n");
 
         // Append method body close
         outdent();
         _sb.append(_indent).append("}\n");
+    }
+
+    /**
+     * Appends an initializer decl.
+     */
+    private void appendInitializerDecl(JInitializerDecl initializerDecl)
+    {
+        // Handle Jepl file
+        if (_jfile.isRepl()) {
+            _sb.append('\n');
+            _sb.append(_indent);
+            _sb.append("public static void main(String[] args)");
+        }
+
+        // Get initializer id
+        JClassDecl classDecl = initializerDecl.getEnclosingClassDecl();
+        JInitializerDecl[] initializerDecls = classDecl.getInitDecls();
+        int initializerIndex = ArrayUtils.indexOfId(initializerDecls, initializerDecl);
+        String initializerId = "__initializer" + initializerIndex;
+        JModifiers modifiers = new JModifiers();
+        modifiers.addValue(Modifier.STATIC);
+
+        // Append body
+        appendMethodBody(initializerDecl, modifiers, "void", initializerId, Collections.EMPTY_LIST);
     }
 
     /**

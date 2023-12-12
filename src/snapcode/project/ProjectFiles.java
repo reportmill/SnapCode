@@ -148,7 +148,13 @@ public class ProjectFiles {
         String javaFilePath = '/' + className.replace('.', '/') + ".java";
 
         // Return Source file for JavaFilePath
-        return getSourceFile(javaFilePath, false, false);
+        WebFile javaFile = getSourceFile(javaFilePath, false, false);
+        if (javaFile != null)
+            return javaFile;
+
+        // Try for Jepl file
+        String jeplFilePath = '/' + className.replace('.', '/') + ".jepl";
+        return getSourceFile(jeplFilePath, false, false);
     }
 
     /**

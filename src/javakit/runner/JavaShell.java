@@ -6,9 +6,11 @@ import javakit.parse.*;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaMethod;
 import javakit.resolver.Resolver;
+import snap.util.Convert;
 import snap.util.StringUtils;
 import snap.web.WebFile;
 import snapcharts.repl.CallHandler;
+import snapcharts.repl.Console;
 import snapcharts.repl.ReplObject;
 import snapcode.debug.RunAppSrc;
 import snapcode.project.JavaAgent;
@@ -112,15 +114,17 @@ public class JavaShell {
      */
     private void runMainStatements(JFile jfile)
     {
-        // Get main statements
         JStmt[] mainStmts = JavaShellUtils.getMainStatements(jfile);
+        runStatements(mainStmts);
+    }
 
+    /**
+     * Runs given statements in given JFile.
+     */
+    private void runStatements(JStmt[] stmtsArray)
+    {
         // Iterate over main statements and eval each
-        for (JStmt stmt : mainStmts) {
-
-            // Get Statement (if null, just set empty string value and continue)
-            if (stmt == null)
-                continue;
+        for (JStmt stmt : stmtsArray) {
 
             // Evaluate statement
             evalStatement(stmt);
@@ -160,8 +164,10 @@ public class JavaShell {
             appendConsoleOutput(str, true);
 
             // Show exception
-            Object exceptionText = ExceptionUtil.getTextBlockForException(e);
-            ReplObject.show(exceptionText);
+            if (Console.getShared() != null) {
+                Object exceptionText = ExceptionUtil.getTextBlockForException(e);
+                ReplObject.show(exceptionText);
+            }
         }
     }
 
@@ -180,6 +186,16 @@ public class JavaShell {
         JavaAgent javaAgent = JavaAgent.getAgentForFile(sourceFile);
         JFile jFile = javaAgent.getJFile();
         JClassDecl classDecl = jFile.getClassDecl();
+
+        // Handle initializer
+        if (methodName.startsWith("__initializer")) {
+            int initializerIndex = Convert.intValue(methodName);
+            JInitializerDecl[] initializerDecls = classDecl.getInitDecls();
+            JInitializerDecl initializerDecl = initializerDecls[initializerIndex];
+            JStmt[] stmts = initializerDecl.getBlockStatements();
+            runStatements(stmts);
+            return null;
+        }
 
         // Get MethodDecl for method name and invoke
         JMethodDecl methodDecl = classDecl.getMethodDeclForNameAndTypes(methodName, null);

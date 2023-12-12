@@ -3,7 +3,6 @@
  */
 package snapcode.project;
 import javakit.parse.JFile;
-import snap.util.SnapUtils;
 import snap.web.WebFile;
 import javax.tools.SimpleJavaFileObject;
 import java.io.ByteArrayOutputStream;
@@ -41,7 +40,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
      */
     protected SnapCompilerJFO(Project aProject, WebFile aFile, SnapCompiler aCompiler)
     {
-        super(URI.create(aFile.getPath()), isJavaFile(aFile) ? Kind.SOURCE : Kind.CLASS);
+        super(getFileURI(aFile), isJavaFile(aFile) ? Kind.SOURCE : Kind.CLASS);
         _file = aFile;
         _proj = aProject;
         _compiler = aCompiler;
@@ -179,6 +178,18 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
      */
     private static boolean isJavaFile(WebFile aFile)
     {
-        return aFile.getType().equals("java");
+        String type = aFile.getType();
+        return type.equals("java") || type.equals("jepl");
+    }
+
+    /**
+     * Returns the URI for a file.
+     */
+    private static URI getFileURI(WebFile aFile)
+    {
+        String filePath = aFile.getPath();
+        if (aFile.getType().equals("jepl"))
+            filePath = filePath.substring(0, filePath.length() - 3) + "ava";
+        return URI.create(filePath);
     }
 }

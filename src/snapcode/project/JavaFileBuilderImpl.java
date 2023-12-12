@@ -32,6 +32,22 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
     }
 
     /**
+     * Returns whether file is build file.
+     */
+    @Override
+    public boolean isBuildFile(WebFile aFile)
+    {
+        String type = aFile.getType();
+        if (type.equals("java"))
+            return true;
+        if (type.equals("jepl")) {
+            if (_proj.getBuildFile().isRunWithInterpreter())
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * Returns whether given file needs to be built.
      */
     public boolean getNeedsBuild(WebFile aFile)

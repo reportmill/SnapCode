@@ -43,9 +43,10 @@ public class JeplAgent extends JavaAgent {
     protected JavaParser getJavaParserImpl()
     {
         JeplTextDoc jeplTextDoc = getJavaTextDoc();
+        String className = getFile().getSimpleName();
         String[] importNames = jeplTextDoc.getImports();
         String superClassName = jeplTextDoc.getSuperClassName();
-        return new JeplParser(importNames, superClassName);
+        return new JeplParser(className, importNames, superClassName);
     }
 
     /**
