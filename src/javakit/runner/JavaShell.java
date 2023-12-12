@@ -102,6 +102,7 @@ public class JavaShell {
 
         // Catch exceptions and show in console
         catch (Exception e) {
+            _errorWasHit = true;
             String str = StringUtils.getStackTraceString(e);
             appendConsoleOutput(str, true);
         }
@@ -186,6 +187,9 @@ public class JavaShell {
      */
     public Object call(String className, String methodName, Object thisObject, Object[] args)
     {
+        // If hit error, just return
+        if (_errorWasHit) return null;
+
         // Get source file for class name
         WebFile sourceFile = _runApp.getSourceFileForClassName(className);
 
@@ -199,7 +203,14 @@ public class JavaShell {
         try {
             return _stmtEval._exprEval.evalMethodCallExprForMethodDecl(thisObject, methodDecl, args);
         }
-        catch (Exception e) { throw new RuntimeException(e); }
+
+        // Handle exceptions: Add to console
+        catch (Exception e) {
+            _errorWasHit = true;
+            String str = StringUtils.getStackTraceString(e);
+            appendConsoleOutput(str, true);
+            return null;
+        }
     }
 
     /**
