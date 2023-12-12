@@ -372,7 +372,7 @@ public class DebugApp extends RunAppBin {
         if (aVal instanceof ArrayReference) {
             ArrayReference arrayRef = (ArrayReference) aVal;
             List<Value> values = arrayRef.getValues();
-            String valuesStr = ListUtils.mapAndJoinStrings(values, this::toString, ", ");
+            String valuesStr = ListUtils.mapToStringsAndJoin(values, this::toString, ", ");
             return '[' + valuesStr + ']';
         }
 

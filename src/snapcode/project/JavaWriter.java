@@ -1,5 +1,6 @@
 package snapcode.project;
 import javakit.parse.*;
+import snap.util.ListUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,18 +42,19 @@ public class JavaWriter {
 
         // Append imports
         List<JImportDecl> importDecls = _jfile.getImportDecls();
-        for (JImportDecl importDecl : importDecls) {
-            String importDeclStr = importDecl.getString();
-            _sb.append(importDeclStr);
-            _sb.append(";\n");
-        }
+        String importDeclsStr = ListUtils.mapToStringsAndJoin(importDecls, JImportDecl::getString, "\n");
+        _sb.append(importDeclsStr);
+        if (importDeclsStr.length() > 0)
+            _sb.append('\n');
+        _sb.append('\n');
 
         // Append class
         JClassDecl classDecl = _jfile.getClassDecl();
         appendClassDecl(classDecl);
 
         // Return string
-        return _sb.toString();
+        String javaString = _sb.toString();
+        return javaString;
     }
 
     /**
@@ -70,18 +72,31 @@ public class JavaWriter {
         String classTypeString = classDecl.isClass() ? "class" : classDecl.isInterface() ? "interface" : "enum";
         _sb.append(classTypeString).append(' ');
         String className = classDecl.getName();
-        _sb.append(className).append(' ');
+        _sb.append(className);
 
         // Append extends
+        List<JType> extendsTypes = classDecl.getExtendsTypes();
+        if (extendsTypes.size() > 0) {
+            _sb.append(" extends ");
+            String extendsTypesStr = extendsTypes.stream().map(JType::getName).collect(Collectors.joining(", "));
+            _sb.append(extendsTypesStr);
+        }
+
+        // Append implements
+        List<JType> implementsTypes = classDecl.getImplementsTypes();
+        if (implementsTypes.size() > 0) {
+            _sb.append(" implements ");
+            String extendsTypesStr = extendsTypes.stream().map(JType::getName).collect(Collectors.joining(", "));
+            _sb.append(extendsTypesStr);
+        }
 
         // Append class decl body
-        _sb.append("{\n");
+        _sb.append(" {\n");
         indent();
 
-        // Get class members and append
+        // Append all class members
         List<JMemberDecl> memberDecls = classDecl.getMemberDecls();
-        for (JMemberDecl memberDecl : memberDecls)
-            appendMemberDecl(memberDecl);
+        memberDecls.forEach(this::appendMemberDecl);
 
         // Outdent
         outdent();
