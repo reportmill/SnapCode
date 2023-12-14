@@ -23,12 +23,17 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     // Whether current build has been interrupted
     protected boolean _interrupted;
 
+    // The final set of compiled files
+    protected Set<WebFile> _compiledFiles;
+
     /**
      * Constructor for given Project.
      */
     public JavaFileBuilder(Project aProject)
     {
+        super();
         _proj = aProject;
+        _compiledFiles = new HashSet<>();
     }
 
     /**
@@ -66,20 +71,50 @@ public class JavaFileBuilder implements ProjectFileBuilder {
      */
     public boolean buildFiles(TaskMonitor aTaskMonitor)
     {
-        // Empty case
-        if (_buildFiles.size() == 0) return true;
+        // Clear compiled files and reset Interrupt flag
+        _compiledFiles.clear();
+        _interrupted = false;
+
+        // If no build files, just return
+        if (_buildFiles.size() == 0)
+            return true;
 
         // Get files
-        WebFile[] javaFiles = _buildFiles.toArray(new WebFile[0]);
+        List<WebFile> javaFiles = new ArrayList<>(_buildFiles);;
         _buildFiles.clear();
 
-        // Iterate over files and build
-        boolean success = true;
-        for (WebFile javaFile : javaFiles)
-            success &= buildFile(javaFile);
+        // Do real build
+        boolean buildSuccess = buildFilesImpl(aTaskMonitor, javaFiles);
+
+        // Find unused imports
+        findUnusedImports();
+        _compiledFiles.clear();
 
         // Return
-        return success;
+        return buildSuccess;
+    }
+
+    /**
+     * Compiles given java files and returns whether all were compiled successfully.
+     */
+    protected boolean buildFilesImpl(TaskMonitor aTaskMonitor, List<WebFile> javaFiles)
+    {
+        boolean buildFilesSuccess = true;
+
+        // Iterate over files and build
+        for (WebFile javaFile : javaFiles) {
+
+            // Build file
+            boolean buildFileSuccess = buildFile(javaFile);
+
+            // If successful, add to CompiledFiles
+            if (buildFileSuccess)
+                _compiledFiles.add(javaFile);
+            else buildFilesSuccess = false;
+        }
+
+        // Return
+        return buildFilesSuccess;
     }
 
     /**
@@ -109,7 +144,20 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     /**
      * Checks last set of compiled files for unused imports.
      */
-    public void findUnusedImports()  { }
+    public void findUnusedImports()
+    {
+        Workspace workspace = _proj.getWorkspace();
+        BuildIssues buildIssues = workspace.getBuildIssues();
+
+        // Iterate over compiled files
+        for (WebFile javaFile : _compiledFiles) {
+
+            // Iterate over build issues
+            BuildIssue[] unusedImportIssues = getUnusedImportBuildIssuesForFile(javaFile);
+            for (BuildIssue buildIssue : unusedImportIssues)
+                buildIssues.add(buildIssue);
+        }
+    }
 
     /**
      * Returns an array of build issues for Java file.

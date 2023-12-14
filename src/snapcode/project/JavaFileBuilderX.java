@@ -15,12 +15,6 @@ public class JavaFileBuilderX extends JavaFileBuilder {
     // The SnapCompiler used for last compiles
     private SnapCompiler  _compiler;
 
-    // The final set of compiled files
-    private Set<WebFile> _compiledFiles;
-
-    // The final set of compiled files with errors
-    private Set<WebFile>  _errorFiles;
-
     // Whether to do source-hybrid compile
     private boolean _doSourceHybridCompile;
 
@@ -30,8 +24,6 @@ public class JavaFileBuilderX extends JavaFileBuilder {
     public JavaFileBuilderX(Project aProject)
     {
         super(aProject);
-        _compiledFiles = new HashSet<>();
-        _errorFiles = new HashSet<>();
 
         _doSourceHybridCompile = aProject.getBuildFile().isRunWithInterpreter();
     }
@@ -95,21 +87,11 @@ public class JavaFileBuilderX extends JavaFileBuilder {
      * Compiles files.
      */
     @Override
-    public boolean buildFiles(TaskMonitor aTaskMonitor)
+    protected boolean buildFilesImpl(TaskMonitor aTaskMonitor, List<WebFile> sourceFiles)
     {
-        // Get source files
-        if (_buildFiles.size() == 0) return true;
-        List<WebFile> sourceFiles = new ArrayList<>(_buildFiles);
-        _buildFiles.clear();
-
-        // Create compiler and clear sets for compiled/error files
+        // Create compiler
         _compiler = new SnapCompiler(_proj);
-        _compiledFiles.clear();
-        _errorFiles.clear();
-        boolean buildSuccess = true;
-
-        // Reset Interrupt flag
-        _interrupted = false;
+        boolean buildFilesSuccess = true;
 
         // Iterate over build files and compile
         for (int i = 0; i < sourceFiles.size(); i++) {
@@ -139,7 +121,7 @@ public class JavaFileBuilderX extends JavaFileBuilder {
                 findDependenciesForModifiedJavaFiles(sourceFiles);
 
             // Otherwise, mark build failure
-            else buildSuccess = false;
+            else buildFilesSuccess = false;
 
             // Stop task manager task
             aTaskMonitor.endTask();
@@ -150,7 +132,7 @@ public class JavaFileBuilderX extends JavaFileBuilder {
         aTaskMonitor.endTask();
 
         // Return
-        return buildSuccess;
+        return buildFilesSuccess;
     }
 
     /**
@@ -165,10 +147,8 @@ public class JavaFileBuilderX extends JavaFileBuilder {
         if (compileSuccess && _doSourceHybridCompile)
             compileSuccess = super.buildFile(sourceFile);
 
-        // If compile failed, re-add file to BuildFiles and continue
+        // If compile failed, re-add to BuildFiles and return
         if (!compileSuccess) {
-            _compiledFiles.add(sourceFile);
-            _errorFiles.add(sourceFile);
             addBuildFile(sourceFile);
             if (_compiler._errorCount >= 1000)
                 _interrupted = true;
@@ -206,10 +186,8 @@ public class JavaFileBuilderX extends JavaFileBuilder {
                 // Make sure updated file is in sourceFiles list
                 Project proj = Project.getProjectForFile(updateFile);
                 if (proj == _proj) {
-                    if (!_compiledFiles.contains(updateFile)) {
-                        if (!ListUtils.containsId(sourceFiles, updateFile))
-                            sourceFiles.add(updateFile);
-                    }
+                    if (!_compiledFiles.contains(updateFile))
+                        ListUtils.addUniqueId(sourceFiles, updateFile);
                 }
 
                 // Otherwise, add build file
@@ -219,30 +197,5 @@ public class JavaFileBuilderX extends JavaFileBuilder {
                 }
             }
         }
-    }
-
-    /**
-     * Checks last set of compiled files for unused imports.
-     */
-    public void findUnusedImports()
-    {
-        // Sanity check
-        if (_interrupted || _compiler == null) return;
-
-        // Iterate over compiled files
-        for (WebFile javaFile : _compiledFiles) {
-
-            // Just continue if file contains errors
-            if (_errorFiles.contains(javaFile))
-                continue;
-
-            // Iterate over build issues
-            BuildIssue[] unusedImportIssues = getUnusedImportBuildIssuesForFile(javaFile);
-            for (BuildIssue buildIssue : unusedImportIssues)
-                _compiler.reportBuildIssue(buildIssue);
-        }
-
-        // Clear vars
-        _compiler = null;
     }
 }
