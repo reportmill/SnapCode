@@ -30,12 +30,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
     // The limit to the number of running processes
     private int  _procLimit = 1;
 
-    // The view that shows when there is an extended run
-    private View  _extendedRunView;
-
-    // The view that shows when there is cancelled run
-    private View  _cancelledRunView;
-
     // The last executed file
     private static WebFile _lastRunFile;
 
@@ -335,8 +329,8 @@ public class RunTool extends WorkspaceTool implements AppListener {
         DebugTool debugTool = getDebugTool();
         debugTool.appExited(aProc);
 
-        // Clear extended run UI if needed
-        ViewUtils.runLater(() -> setShowExtendedRunUI(false));
+        // Reset UI
+        resetLater();
     }
 
     /**
@@ -460,24 +454,8 @@ public class RunTool extends WorkspaceTool implements AppListener {
         RunApp runApp = new RunAppSrc(this, selFile.getURL(), args);
         execProc(runApp);
 
-        // Check back in half a second to see if we need to show progress bar
-        ViewUtils.runDelayed(() -> handleExtendedRun(), 500);
-
         // Reset UI
         resetLater();
-    }
-
-    /**
-     * Called when a run is taking a long time.
-     */
-    protected void handleExtendedRun()
-    {
-        RunApp selApp = getSelApp();
-        if (selApp == null || !selApp.isRunning())
-            return;
-
-        // Show extended run UI
-        setShowExtendedRunUI(true);
     }
 
     /**
@@ -497,8 +475,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
         RunApp selApp = getSelApp();
         if (selApp != null)
             selApp.terminate();
-
-        resetLater();
     }
 
     /**
@@ -506,10 +482,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
      */
     public void clearConsole()
     {
-        // Remove extended run or cancelled run UI if set
-        setShowExtendedRunUI(false);
-        setShowCancelledRunUI(false);
-
         // Tell selected app to clear console
         RunApp selApp = getSelApp();
         if (selApp != null)
@@ -525,15 +497,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // Get ScrollView and config
         ScrollView scrollView = getView("ScrollView", ScrollView.class);
         scrollView.setBorder(null);
-
-        // Get ExtendedRunView
-        _extendedRunView = getView("ExtendedRunView");
-        _extendedRunView.setVisible(false);
-        getView("ProgressBar", ProgressBar.class).setIndeterminate(true);
-
-        // Get CancelledRunView
-        _cancelledRunView = getView("CancelledRunView");
-        _cancelledRunView.setVisible(false);
     }
 
     /**
@@ -542,9 +505,11 @@ public class RunTool extends WorkspaceTool implements AppListener {
     @Override
     protected void resetUI()
     {
-        // Update RunButton, TerminateButton
-        setViewEnabled("RunButton", !isRunning());
-        setViewEnabled("TerminateButton", isRunning());
+        // Update RunButton, TerminateButton, ProgressBar
+        boolean isRunning = isRunning();
+        setViewEnabled("RunButton", !isRunning);
+        setViewEnabled("TerminateButton", isRunning);
+        setProgressBarVisible(isRunning);
 
         // Update SwapConsoleButton
         RunApp selApp = getSelApp();
@@ -599,25 +564,22 @@ public class RunTool extends WorkspaceTool implements AppListener {
     }
 
     /**
-     * Sets whether ExtendedRunView is showing.
+     * Shows or hides the 'is running' progress bar.
      */
-    protected void setShowExtendedRunUI(boolean aValue)
+    private void setProgressBarVisible(boolean aValue)
     {
-        if (_extendedRunView != null)
-            _extendedRunView.setVisible(aValue);
-    }
+        ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
 
-    /**
-     * Sets whether CancelledRunView is showing.
-     */
-    protected void setShowCancelledRunUI(boolean aValue)
-    {
-        if (_cancelledRunView != null)
-            _cancelledRunView.setVisible(aValue);
-        if (aValue) {
-            String text = "Last run cancelled";
-            setViewText("CancelledRunLabel", text);
+        // Show ProgressBar
+        if (aValue && !progressBar.isVisible()) {
+            progressBar.setVisible(true);
+            progressBar.setOpacity(0);
+            progressBar.getAnimCleared(600).setOpacity(1).play();
         }
+
+        // Hide ProgressBar
+        else if (!aValue && progressBar.isVisible())
+            progressBar.getAnimCleared(300).setOpacity(0).setOnFinish(() -> progressBar.setVisible(false)).play();
     }
 
     /**

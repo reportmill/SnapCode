@@ -5,24 +5,13 @@
     <Label Margin="0,10,0,8" text="Run:" />
     <Button Name="RunButton" PrefWidth="24" PrefHeight="24" Image="pkg.images/Run.png" ShowArea="false" />
     <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" Image="pkg.images/Terminate.gif" ShowArea="false" />
+    <ProgressBar Name="ProgressBar" PrefWidth="45" PrefHeight="12" Margin="5,5,5,16" Visible="false" Indeterminate="true" />
     <Button Name="SwapConsoleButton" Padding="1,3,1,3" LeanX="CENTER">
       <Font name="Arial" size="11" />
     </Button>
     <Button Name="ClearButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" ToolTip="Clear console" Image="pkg.images/Clear.png" ShowArea="false" />
     <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" Text="–" ShowArea="false" />
   </RowView>
-  <ColView Name="ExtendedRunView" GrowWidth="true">
-    <RectView PrefHeight="1" GrowWidth="true">
-      <Fill Color="#CC" />
-    </RectView>
-    <ProgressBar Name="ProgressBar" PrefWidth="400" PrefHeight="15" Margin="5" LeanX="CENTER" Indeterminate="true" />
-  </ColView>
-  <ColView Name="CancelledRunView" Spacing="8" GrowWidth="true">
-    <RectView PrefHeight="1" GrowWidth="true">
-      <Fill Color="#CC" />
-    </RectView>
-    <Label Name="CancelledRunLabel" Margin="8" LeanX="CENTER" Text="Last run cancelled" />
-  </ColView>
   <RectView PrefHeight="1">
     <Fill Color="#CC" />
   </RectView>
