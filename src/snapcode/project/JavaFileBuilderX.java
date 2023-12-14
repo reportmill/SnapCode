@@ -8,9 +8,9 @@ import snap.web.WebFile;
 import java.util.*;
 
 /**
- * A FileBuilder to build Java files.
+ * A FileBuilder to build Java files using JDK compiler.
  */
-public class JavaFileBuilderImpl extends JavaFileBuilder {
+public class JavaFileBuilderX extends JavaFileBuilder {
 
     // The SnapCompiler used for last compiles
     private SnapCompiler  _compiler;
@@ -21,35 +21,25 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
     // The final set of compiled files with errors
     private Set<WebFile>  _errorFiles;
 
+    // Whether to do source-hybrid compile
+    private boolean _doSourceHybridCompile;
+
     /**
      * Creates a new JavaFileBuilder for given Project.
      */
-    public JavaFileBuilderImpl(Project aProject)
+    public JavaFileBuilderX(Project aProject)
     {
         super(aProject);
         _compiledFiles = new HashSet<>();
         _errorFiles = new HashSet<>();
-    }
 
-    /**
-     * Returns whether file is build file.
-     */
-    @Override
-    public boolean isBuildFile(WebFile aFile)
-    {
-        String type = aFile.getType();
-        if (type.equals("java"))
-            return true;
-        if (type.equals("jepl")) {
-            if (_proj.getBuildFile().isRunWithInterpreter())
-                return true;
-        }
-        return false;
+        _doSourceHybridCompile = aProject.getBuildFile().isRunWithInterpreter();
     }
 
     /**
      * Returns whether given file needs to be built.
      */
+    @Override
     public boolean getNeedsBuild(WebFile aFile)
     {
         // See if Java file has out of date Class file
@@ -116,7 +106,7 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
         _compiler = new SnapCompiler(_proj);
         _compiledFiles.clear();
         _errorFiles.clear();
-        boolean compileSuccess = true;
+        boolean buildSuccess = true;
 
         // Reset Interrupt flag
         _interrupted = false;
@@ -142,9 +132,14 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
             aTaskMonitor.beginTask(msg, -1);
 
             // Build file
-            boolean fileCompileSuccess = buildFile(sourceFile, sourceFiles);
-            if (!fileCompileSuccess)
-                compileSuccess = false;
+            boolean buildFileSuccess = buildFile(sourceFile);
+
+            // If successful compile Find dependencies for modified Java files and add to source files
+            if (buildFileSuccess)
+                findDependenciesForModifiedJavaFiles(sourceFiles);
+
+            // Otherwise, mark build failure
+            else buildSuccess = false;
 
             // Stop task manager task
             aTaskMonitor.endTask();
@@ -155,16 +150,20 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
         aTaskMonitor.endTask();
 
         // Return
-        return compileSuccess;
+        return buildSuccess;
     }
 
     /**
-     * Compiles file.
+     * Compiles given java file.
      */
-    private boolean buildFile(WebFile sourceFile, List<WebFile> sourceFiles)
+    protected boolean buildFile(WebFile sourceFile)
     {
         // Compile file
         boolean compileSuccess = _compiler.compileFile(sourceFile);
+
+        // If successful but doing source-hybrid compile, do super version to check source
+        if (compileSuccess && _doSourceHybridCompile)
+            compileSuccess = super.buildFile(sourceFile);
 
         // If compile failed, re-add file to BuildFiles and continue
         if (!compileSuccess) {
@@ -179,9 +178,6 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
         // Add Compiler.CompiledFiles to CompiledFiles
         Set<WebFile> compiledJavaFiles = _compiler.getCompiledJavaFiles();
         _compiledFiles.addAll(compiledJavaFiles);
-
-        // Find dependencies for modified Java files and add to source files
-        findDependenciesForModifiedJavaFiles(sourceFiles);
 
         // Return success
         return true;

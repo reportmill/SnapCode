@@ -76,7 +76,7 @@ public class Project extends PropObject {
 
         // Create/set ProjectBuilder.JavaFileBuilderImpl
         if (aWorkspace.isUseRealCompiler()) {
-            JavaFileBuilder javaFileBuilder = new JavaFileBuilderImpl(this);
+            JavaFileBuilder javaFileBuilder = new JavaFileBuilderX(this);
             _projBuilder.setJavaFileBuilder(javaFileBuilder);
         }
     }

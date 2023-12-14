@@ -33,7 +33,7 @@ public class ProjectBuilder {
     {
         super();
         _proj = aProject;
-        _javaFileBuilder = new JavaFileBuilderSimple(aProject);
+        _javaFileBuilder = new JavaFileBuilder(aProject);
         _jeplFileBuilder = _javaFileBuilder;
         _defaultFileBuilder = new ProjectFileBuilder.DefaultBuilder(aProject);
     }

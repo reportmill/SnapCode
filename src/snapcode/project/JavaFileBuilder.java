@@ -2,15 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import javakit.parse.JFile;
-import javakit.parse.JImportDecl;
+import javakit.parse.*;
 import snap.util.ArrayUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A FileBuilder to build Java files.
@@ -40,7 +37,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     public boolean isBuildFile(WebFile aFile)
     {
         String type = aFile.getType();
-        return type.equals("java");
+        return type.equals("java") || type.equals("jepl");
     }
 
     /**
@@ -67,7 +64,39 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     /**
      * Compiles files.
      */
-    public boolean buildFiles(TaskMonitor aTaskMonitor)  { return true; }
+    public boolean buildFiles(TaskMonitor aTaskMonitor)
+    {
+        // Empty case
+        if (_buildFiles.size() == 0) return true;
+
+        // Get files
+        WebFile[] javaFiles = _buildFiles.toArray(new WebFile[0]);
+        _buildFiles.clear();
+
+        // Iterate over files and build
+        boolean success = true;
+        for (WebFile javaFile : javaFiles)
+            success &= buildFile(javaFile);
+
+        // Return
+        return success;
+    }
+
+    /**
+     * Builds a file.
+     */
+    protected boolean buildFile(WebFile javaFile)
+    {
+        // Get BuildIssues for parsed file
+        BuildIssue[] buildIssues = getBuildIssuesForFile(javaFile);
+
+        // Set build issues
+        JavaAgent javaAgent = JavaAgent.getAgentForFile(javaFile);
+        javaAgent.setBuildIssues(buildIssues);
+
+        // Return
+        return buildIssues.length == 0;
+    }
 
     /**
      * Interrupts build.
@@ -81,6 +110,24 @@ public class JavaFileBuilder implements ProjectFileBuilder {
      * Checks last set of compiled files for unused imports.
      */
     public void findUnusedImports()  { }
+
+    /**
+     * Returns an array of build issues for Java file.
+     */
+    protected BuildIssue[] getBuildIssuesForFile(WebFile javaFile)
+    {
+        // Get JavaAgent and JFile
+        JavaAgent javaAgent = JavaAgent.getAgentForFile(javaFile);
+        JFile jFile = javaAgent.getJFile();
+        List<NodeError> errorsList = new ArrayList<>();
+
+        // Find errors in JFile
+        findNodeErrors(jFile, errorsList);
+        NodeError[] errors = errorsList.toArray(NodeError.NO_ERRORS);
+
+        // Convert to BuildIssues and set in agent
+        return ArrayUtils.map(errors, error -> BuildIssue.createIssueForNodeError(error, javaFile), BuildIssue.class);
+    }
 
     /**
      * Returns an array of unused imports for Java file.
@@ -108,5 +155,22 @@ public class JavaFileBuilder implements ProjectFileBuilder {
         int startCharIndex = importDecl.getStartCharIndex();
         int endCharIndex = importDecl.getEndCharIndex();
         return new BuildIssue().init(javaFile, BuildIssue.Kind.Warning, msg, lineIndex, 0, startCharIndex, endCharIndex);
+    }
+
+    /**
+     * Recurse into nodes
+     */
+    private static void findNodeErrors(JNode aNode, List<NodeError> theErrors)
+    {
+        NodeError[] errors = aNode.getErrors();
+        if (errors.length > 0)
+            Collections.addAll(theErrors, errors);
+
+        if (aNode instanceof JStmtExpr)
+            return;
+
+        List<JNode> children = aNode.getChildren();
+        for (JNode child : children)
+            findNodeErrors(child, theErrors);
     }
 }
