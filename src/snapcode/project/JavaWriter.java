@@ -63,7 +63,7 @@ public class JavaWriter {
 
         // Return string
         String javaString = _sb.toString();
-        SnapUtils.writeBytes(javaString.getBytes(), "/tmp/" + _jfile.getName() + ".java");
+        //SnapUtils.writeBytes(javaString.getBytes(), "/tmp/" + _jfile.getName() + ".java");
         return javaString;
     }
 

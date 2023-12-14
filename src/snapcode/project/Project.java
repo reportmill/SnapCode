@@ -73,12 +73,6 @@ public class Project extends PropObject {
 
         // Get child projects
         _projects = getProjectsFromBuildFile();
-
-        // Create/set ProjectBuilder.JavaFileBuilderImpl
-        if (aWorkspace.isUseRealCompiler()) {
-            JavaFileBuilder javaFileBuilder = new JavaFileBuilderX(this);
-            _projBuilder.setJavaFileBuilder(javaFileBuilder);
-        }
     }
 
     /**

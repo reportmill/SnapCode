@@ -32,6 +32,11 @@ public class ProjectBuilder {
         _proj = aProject;
         _javaFileBuilder = new JavaFileBuilder(aProject);
         _defaultFileBuilder = new ProjectFileBuilder.DefaultBuilder(aProject);
+
+        // If Project.Workspace.UseRealCompiler, use JavaFileBuilderX
+        Workspace workspace = aProject.getWorkspace();
+        if (workspace.isUseRealCompiler())
+            _javaFileBuilder = new JavaFileBuilderX(aProject);
     }
 
     /**
@@ -201,13 +206,5 @@ public class ProjectBuilder {
         ProjectFileBuilder fileBuilder = getFileBuilder(aFile);
         if (fileBuilder != null)
             fileBuilder.removeBuildFile(aFile);
-    }
-
-    /**
-     * Sets the JavaFileBuilder.
-     */
-    public void setJavaFileBuilder(JavaFileBuilder aJFB)
-    {
-        _javaFileBuilder = aJFB;
     }
 }
