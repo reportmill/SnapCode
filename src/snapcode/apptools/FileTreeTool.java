@@ -1,9 +1,9 @@
 package snapcode.apptools;
+import snap.util.SnapUtils;
 import snapcode.project.WorkspaceBuilder;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
-import snap.util.ListUtils;
 import snap.view.*;
 import snap.viewx.*;
 import snap.web.WebFile;
@@ -27,7 +27,7 @@ public class FileTreeTool extends WorkspaceTool {
     private ListView<FileTreeFile>  _filesList;
 
     // The root AppFiles (for TreeView)
-    protected List<FileTreeFile>  _rootFiles;
+    protected FileTreeFile[] _rootFiles;
 
     // Images for files tree/list
     private static Image FILES_TREE_ICON = Image.getImageForClassResource(FileTreeTool.class, "FilesTree.png");
@@ -44,7 +44,7 @@ public class FileTreeTool extends WorkspaceTool {
     /**
      * Returns the root files.
      */
-    public List<FileTreeFile> getRootFiles()
+    public FileTreeFile[] getRootFiles()
     {
         // If already set, just return
         if (_rootFiles != null) return _rootFiles;
@@ -57,8 +57,8 @@ public class FileTreeTool extends WorkspaceTool {
             rootFiles.add(fileTreeFile);
         }
 
-        // Set, Return
-        return _rootFiles = rootFiles;
+        // Set array and Return
+        return _rootFiles = rootFiles.toArray(new FileTreeFile[0]);
     }
 
     /**
@@ -76,8 +76,8 @@ public class FileTreeTool extends WorkspaceTool {
 
         // If root, search for file in RootFiles
         if (aFile.isRoot()) {
-            List<FileTreeFile> rootFiles = getRootFiles();
-            return ListUtils.findMatch(rootFiles, treeFile -> treeFile.getFile() == aFile);
+            FileTreeFile[] rootFiles = getRootFiles();
+            return ArrayUtils.findMatch(rootFiles, treeFile -> treeFile.getFile() == aFile);
         }
 
         // Otherwise, getTreeFile for sucessive parents and search them for this file
@@ -147,12 +147,9 @@ public class FileTreeTool extends WorkspaceTool {
         _filesList.addEventFilter(this::handleTreeViewMouseEvent, MousePress, MouseRelease);
         _filesList.addEventFilter(this::handleTreeViewDragEvent, DragEvents);
 
-        // Create RootFiles for TreeView (one for each open project)
-        List<FileTreeFile> rootFiles = getRootFiles();
-        _filesTree.setItemsList(rootFiles);
-        _filesTree.expandItem(rootFiles.get(0));
-        if (_filesTree.getItemsList().size() > 1)
-            _filesTree.expandItem(_filesTree.getItemsList().get(1));
+        // Set TreeView items
+        FileTreeFile[] rootFiles = getRootFiles();
+        _filesTree.setItems(rootFiles);
 
         // Register for copy/paste
         addKeyActionHandler("CopyAction", "Shortcut+C");
@@ -163,6 +160,21 @@ public class FileTreeTool extends WorkspaceTool {
     }
 
     /**
+     * Initialize UI for showing.
+     */
+    @Override
+    protected void initShowing()
+    {
+        // Expand first project
+        runLater(() -> {
+            FileTreeFile[] rootFiles = getRootFiles();
+            _filesTree.expandItem(rootFiles[0]);
+            if (_filesTree.getItemsList().size() > 1)
+                _filesTree.expandItem(_filesTree.getItemsList().get(1));
+        });
+    }
+
+    /**
      * Resets UI panel.
      */
     public void resetUI()
@@ -170,8 +182,8 @@ public class FileTreeTool extends WorkspaceTool {
         // Repaint tree
         WebFile selFile = getSelFile();
         FileTreeFile selTreeFile = getTreeFile(selFile);
-        List<FileTreeFile> rootTreeFiles = getRootFiles();
-        _filesTree.setItemsList(rootTreeFiles);
+        FileTreeFile[] rootTreeFiles = getRootFiles();
+        _filesTree.setItems(rootTreeFiles);
         _filesTree.setSelItem(selTreeFile);
 
         // Update FilesList
@@ -440,7 +452,7 @@ public class FileTreeTool extends WorkspaceTool {
      */
     protected void windowFocusChanged()
     {
-        if (_workspacePane.getWindow().isFocused()) {
+        if (_workspacePane.getWindow().isFocused() && !SnapUtils.isWebVM) {
             for (FileTreeFile file : getRootFiles())
                 checkForExternalMods(file.getFile());
         }

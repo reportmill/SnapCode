@@ -6,6 +6,8 @@ import javakit.parse.*;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
 import snap.util.StringUtils;
+import snapcode.project.Project;
+
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -453,9 +455,17 @@ public class DeclMatcher {
     /**
      * Prime completions for given resolver.
      */
-    public static void primeCompletions(JFile jFile)
+    public static void primeCompletions(Project aProject)
     {
-        Resolver resolver = jFile.getResolver();
+        new Thread(() -> primeCompletionsImpl(aProject)).start();
+    }
+
+    /**
+     * Prime completions for given resolver.
+     */
+    private static void primeCompletionsImpl(Project aProject)
+    {
+        Resolver resolver = aProject.getResolver();
         DeclMatcher declMatcher = new DeclMatcher("x");
         JavaClass[] classes = declMatcher.getClassesForResolver(resolver);
         for (JavaClass cls : classes)

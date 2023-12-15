@@ -111,7 +111,7 @@ public class JavaPage extends WebPage {
         setTextSelectionForUrlParams(url);
 
         // Prime completions
-        runLater(() -> DeclMatcher.primeCompletions(getTextArea().getJFile()));
+        runLater(() -> DeclMatcher.primeCompletions(Project.getProjectForFile(getFile())));
     }
 
     /**
