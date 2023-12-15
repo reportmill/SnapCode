@@ -5,6 +5,7 @@ package snapcode.webbrowser;
 import snap.gfx.Image;
 import snap.view.*;
 import snap.web.WebFile;
+import snapcode.util.FileIcons;
 
 /**
  * A WebPage subclass for directories.
@@ -118,7 +119,7 @@ public class DirFilePage extends WebPage {
         // Return child file icon
         public Image getImage(WebFile aFile)
         {
-            return ViewUtils.getFileIconImage(aFile);
+            return FileIcons.getFileIconImage(aFile);
         }
     }
 

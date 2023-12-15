@@ -5,6 +5,7 @@ import snapcode.project.VersionControl.Op;
 import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.web.WebFile;
+import snapcode.util.FileIcons;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -147,7 +148,7 @@ public class VcsTransferPane extends ViewOwner {
         else badge = isCommit ? UpdatedLocalBadge : UpdatedRemoteBadge;
 
         // Composite file and return
-        Image image = ViewUtils.getFileIconImage(aFile);
+        Image image = FileIcons.getFileIconImage(aFile);
         ImageView imageView = new ImageView(image), bview = new ImageView(badge);
         StackView stackView = new StackView();
         stackView.setAlign(Pos.TOP_LEFT);

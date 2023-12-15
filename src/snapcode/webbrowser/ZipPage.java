@@ -6,7 +6,7 @@ import snap.gfx.Image;
 import snap.view.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
-
+import snapcode.util.FileIcons;
 import java.util.Arrays;
 import java.util.List;
 
@@ -118,8 +118,7 @@ public class ZipPage extends WebPage {
         // Return child file icon
         public Image getImage(WebFile aFile)
         {
-            return ViewUtils.getFileIconImage(aFile);
+            return FileIcons.getFileIconImage(aFile);
         }
     }
-
 }

@@ -9,6 +9,7 @@ import snap.gfx.Image;
 import snapcode.project.VersionControl;
 import snap.view.*;
 import snap.web.WebFile;
+import snapcode.util.FileIcons;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -193,7 +194,7 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
     public View getGraphic()
     {
         // Get image for file
-        Image fileImage = _type == FileType.PACKAGE_DIR ? Package : ViewUtils.getFileIconImage(_file);
+        Image fileImage = _type == FileType.PACKAGE_DIR ? Package : FileIcons.getFileIconImage(_file);
         View fileIconView = new ImageView(fileImage);
         fileIconView.setPrefSize(18, 18);
 

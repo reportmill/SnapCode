@@ -21,6 +21,7 @@ import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
+import snapcode.util.FileIcons;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -432,7 +433,7 @@ public class SearchTool extends WorkspaceTool {
         {
             JavaDecl decl = _node != null ? _node.isDeclIdNode() ? _node.getDecl() : _node.getEnclosingDecl() : null;
             if (decl == null)
-                return ViewUtils.getFileIconImage(_file);
+                return FileIcons.getFileIconImage(_file);
             return JavaTextUtils.getImageForJavaDecl(decl);
         }
 
