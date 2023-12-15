@@ -381,12 +381,18 @@ public class JFile extends JNode {
         // If already set, just return
         if (_unusedImports != null) return _unusedImports;
 
-        // Resolve class names
-        Set<JImportDecl> importDecls = new HashSet<>(getImportDecls());
-        resolveClassNames(this, importDecls);
+        // Get import decls
+        List<JImportDecl> importDecls = getImportDecls();
+        if (isRepl()) {
+            importDecls = ListUtils.filter(importDecls, imp -> imp.getStartToken() != imp.getEndToken());
+        }
 
-        // Set, return
-        return _unusedImports = importDecls.toArray(new JImportDecl[0]);
+        // Resolve class names
+        Set<JImportDecl> unusedImportDecls = new HashSet<>(importDecls);
+        resolveClassNames(this, unusedImportDecls);
+
+        // Set array and return
+        return _unusedImports = unusedImportDecls.toArray(new JImportDecl[0]);
     }
 
     /**

@@ -2,11 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.webbrowser;
-import snap.gfx.Image;
 import snap.view.View;
 import snap.view.ViewEvent;
 import snap.view.ViewOwner;
-import snap.view.ViewUtils;
 import snap.viewx.DialogBox;
 import snap.web.*;
 import java.util.Objects;
@@ -183,15 +181,6 @@ public class WebPage extends ViewOwner {
 
         // Return
         return title;
-    }
-
-    /**
-     * Returns the icon for the file.
-     */
-    public Image getIcon()
-    {
-        WebFile file = getFile();
-        return ViewUtils.getFileIconImage(file);
     }
 
     /**
