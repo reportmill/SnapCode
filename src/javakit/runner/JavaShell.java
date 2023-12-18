@@ -187,6 +187,12 @@ public class JavaShell {
         JFile jFile = javaAgent.getJFile();
         JClassDecl classDecl = jFile.getClassDecl();
 
+        // Handle constructor
+        if (methodName.equals("__init")) {
+            JConstrDecl constrDecl = classDecl.getConstructorDeclForTypes( null);
+            return null;
+        }
+
         // Handle initializer
         if (methodName.startsWith("__initializer")) {
             int initializerIndex = Convert.intValue(methodName);

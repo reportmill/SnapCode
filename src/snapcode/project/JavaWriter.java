@@ -2,7 +2,6 @@ package snapcode.project;
 import javakit.parse.*;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
-import snap.util.SnapUtils;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
@@ -63,7 +62,7 @@ public class JavaWriter {
 
         // Return string
         String javaString = _sb.toString();
-        //SnapUtils.writeBytes(javaString.getBytes(), "/tmp/" + _jfile.getName() + ".java");
+        snap.util.SnapUtils.writeBytes(javaString.getBytes(), "/tmp/" + _jfile.getName() + ".java");
         return javaString;
     }
 
@@ -123,6 +122,8 @@ public class JavaWriter {
             appendFieldDecl((JFieldDecl) memberDecl);
         else if (memberDecl instanceof JMethodDecl)
             appendMethodDecl((JMethodDecl) memberDecl);
+        else if (memberDecl instanceof JConstrDecl)
+            appendConstructorDecl((JConstrDecl) memberDecl);
         else if (memberDecl instanceof JInitializerDecl)
             appendInitializerDecl((JInitializerDecl) memberDecl);
     }
@@ -146,11 +147,8 @@ public class JavaWriter {
 
         // Append modifiers - If Jepl, make all methods 'public static'
         JModifiers mods = methodDecl.getMods();
-        if (_isJepl) {
-            mods = new JModifiers();
-            mods.addValue(Modifier.PUBLIC);
-            mods.addValue(Modifier.STATIC);
-        }
+        if (_isJepl)
+            mods = new JModifiers(Modifier.PUBLIC | Modifier.STATIC);
         appendModifiers(mods);
 
         // Append return type
@@ -184,6 +182,18 @@ public class JavaWriter {
         // Append method body open
         _sb.append(_indent).append("{\n");
         indent();
+
+        // Append constructor call
+        if (memberDecl instanceof JConstrDecl) {
+            JConstrDecl constrDecl = (JConstrDecl) memberDecl;
+            JStmt[] bodyStmts = constrDecl.getBlockStatements();
+            if (bodyStmts.length > 0 && bodyStmts[0] instanceof JStmtConstrCall) {
+                JStmtConstrCall constrCall = (JStmtConstrCall) bodyStmts[0];
+                String constrCallStr = constrCall.getString();
+                _sb.append(_indent);
+                _sb.append(constrCallStr).append('\n');
+            }
+        }
 
         // Append args array declaration: Object[] args = { param1, param2, ... };
         if (varDecls.size() > 0) {
@@ -226,6 +236,36 @@ public class JavaWriter {
     }
 
     /**
+     * Appends a constructor decl.
+     */
+    private void appendConstructorDecl(JConstrDecl constrDecl)
+    {
+        // Append indent
+        _sb.append('\n');
+        _sb.append(_indent);
+
+        // Append modifiers - If Jepl, make all constructors public
+        JModifiers mods = constrDecl.getMods();
+        if (_isJepl)
+            mods = new JModifiers(Modifier.PUBLIC);
+        appendModifiers(mods);
+
+        // Append class name
+        String className = constrDecl.getName();
+        _sb.append(className);
+
+        // Append parameters
+        _sb.append('(');
+        List<JVarDecl> varDecls = constrDecl.getParameters();
+        String varDeclsStr = varDecls.stream().map(JVarDecl::getString).collect(Collectors.joining(", "));
+        _sb.append(varDeclsStr);
+        _sb.append(")\n");
+
+        // Append method body
+        appendMethodBody(constrDecl, mods, "void", "__init", varDecls);
+    }
+
+    /**
      * Appends an initializer decl.
      */
     private void appendInitializerDecl(JInitializerDecl initializerDecl)
@@ -242,8 +282,7 @@ public class JavaWriter {
         JInitializerDecl[] initializerDecls = classDecl.getInitDecls();
         int initializerIndex = ArrayUtils.indexOfId(initializerDecls, initializerDecl);
         String initializerId = "__initializer" + initializerIndex;
-        JModifiers modifiers = new JModifiers();
-        modifiers.addValue(Modifier.STATIC);
+        JModifiers modifiers = new JModifiers(Modifier.STATIC);
 
         // Append body
         appendMethodBody(initializerDecl, modifiers, "void", initializerId, Collections.EMPTY_LIST);

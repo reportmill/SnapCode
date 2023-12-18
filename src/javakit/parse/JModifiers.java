@@ -21,6 +21,15 @@ public class JModifiers extends JNode {
     }
 
     /**
+     * Constructor for give mods value.
+     */
+    public JModifiers(int aValue)
+    {
+        super();
+        _mods = aValue;
+    }
+
+    /**
      * Returns the value.
      */
     public int getValue()  { return _mods; }

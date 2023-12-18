@@ -245,6 +245,20 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
     }
 
     /**
+     * Returns the JMethodDecl for given name.
+     */
+    public JConstrDecl getConstructorDeclForTypes(JavaType[] argTypes)
+    {
+        // Get compatible constructor
+        JavaClass javaClass = getDecl();
+        JavaConstructor constructor = JavaClassUtils.getCompatibleConstructor(javaClass, new JavaClass[0]);
+
+        // Get constructor decls and return the one that has matching constructor
+        JConstrDecl[] constrDecls = getConstructorDecls();
+        return ArrayUtils.findMatch(constrDecls, constrDecl -> constrDecl.getDecl() == constructor);
+    }
+
+    /**
      * Returns the class method declarations.
      */
     public JMethodDecl[] getMethodDecls()
