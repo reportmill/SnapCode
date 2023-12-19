@@ -4,7 +4,6 @@
 package javakit.runner;
 import javakit.parse.*;
 import javakit.resolver.JavaClass;
-import javakit.resolver.JavaMethod;
 import snap.util.Convert;
 import snap.util.StringUtils;
 import snap.web.WebFile;
@@ -14,6 +13,7 @@ import snapcharts.repl.ReplObject;
 import snapcode.debug.RunAppSrc;
 import snapcode.project.JavaAgent;
 import snapcode.util.ExceptionUtil;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
@@ -85,11 +85,12 @@ public class JavaShell {
             }
         };
 
-        // Get main method
-        JavaMethod mainMethod = JavaShellUtils.getMainJavaMethod(this, javaAgent);
-
         // Invoke main method
-        try { mainMethod.invoke(null, (Object) new String[0]); }
+        try {
+            Class<?> mainClass = JavaShellUtils.getMainClass(this, javaAgent);
+            Method mainMethod = mainClass.getMethod("main", String[].class);
+            mainMethod.invoke(null, (Object) new String[0]);
+        }
 
         // Catch exceptions and show in console
         catch (Exception e) {
