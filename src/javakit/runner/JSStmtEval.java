@@ -40,15 +40,14 @@ public class JSStmtEval {
     }
 
     /**
-     * Executes top level statements.
+     * Executes an array of statements.
      */
-    public Object evalStatements(Object anOR, JStmt[] stmtsArray) throws Exception
+    public Object evalStatements(JStmt[] stmtsArray, Object thisObject) throws Exception
     {
         // Eval statement and return
         try {
-            _javaShell._exprEval._thisObj = anOR;
             _returnValueHit = null;
-            Object returnVal = evalBlockStatements(anOR, Arrays.asList(stmtsArray));
+            Object returnVal = evalBlockStatements(Arrays.asList(stmtsArray), thisObject);
             if (returnVal == NULL_RETURN_VALUE)
                 returnVal = null;
             return returnVal;
@@ -63,11 +62,8 @@ public class JSStmtEval {
     /**
      * Evaluate JStmt.
      */
-    public Object evalStmt(Object anOR, JStmt aStmt) throws Exception
+    private Object evalStmt(JStmt aStmt, Object thisObject) throws Exception
     {
-        // Dunno
-        _javaShell._exprEval._thisObj = anOR;
-
         // Handle Assert statement
         if (aStmt instanceof JStmtAssert) {
             System.out.println("JSStmtEval: Assert Statement not implemented");
@@ -75,7 +71,7 @@ public class JSStmtEval {
 
         // Handle block statement
         if (aStmt instanceof JStmtBlock)
-            return evalBlockStmt(anOR, (JStmtBlock) aStmt);
+            return evalBlockStmt((JStmtBlock) aStmt, thisObject);
 
         // Handle break statement
         if (aStmt instanceof JStmtBreak) {
@@ -99,7 +95,7 @@ public class JSStmtEval {
 
         // Handle Do statement
         if (aStmt instanceof JStmtDo)
-            return evalDoStmt(anOR, (JStmtDo) aStmt);
+            return evalDoStmt((JStmtDo) aStmt, thisObject);
 
         // Empty statement
         if(aStmt instanceof JStmtEmpty)
@@ -107,34 +103,34 @@ public class JSStmtEval {
 
         // Expression statement
         if (aStmt instanceof JStmtExpr)
-            return evalExprStmt((JStmtExpr) aStmt);
+            return evalExprStmt((JStmtExpr) aStmt, thisObject);
 
         // For statement
         if (aStmt instanceof JStmtFor)
-            return evalForStmt(anOR, (JStmtFor) aStmt);
+            return evalForStmt((JStmtFor) aStmt, thisObject);
 
         // Handle if statement
         if (aStmt instanceof JStmtIf)
-            return evalIfStmt(anOR, (JStmtIf) aStmt);
+            return evalIfStmt((JStmtIf) aStmt, thisObject);
 
         // Handle labeled statement
         if (aStmt instanceof JStmtLabeled) {
             JStmt stmt = ((JStmtLabeled) aStmt).getStatement();
-            return evalStmt(anOR, stmt);
+            return evalStmt(stmt, thisObject);
         }
 
         // Handle return statement
         if (aStmt instanceof JStmtReturn)
-            return evalReturnStmt(anOR, (JStmtReturn) aStmt);
+            return evalReturnStmt((JStmtReturn) aStmt, thisObject);
 
         // Handle switch statement
         if (aStmt instanceof JStmtSwitch)
-            return evalSwitchStmt(anOR, (JStmtSwitch) aStmt);
+            return evalSwitchStmt((JStmtSwitch) aStmt, thisObject);
 
         // Handle sync statement
         if (aStmt instanceof JStmtSynchronized) {
             JStmtSynchronized syncStmt = (JStmtSynchronized) aStmt;
-            return evalStmt(anOR, syncStmt.getBlock());
+            return evalStmt(syncStmt.getBlock(), thisObject);
         }
 
         // Handle throw statement
@@ -143,11 +139,11 @@ public class JSStmtEval {
 
         // Handle try statement
         if (aStmt instanceof JStmtTry)
-            return evalTryStmt(anOR, (JStmtTry) aStmt);
+            return evalTryStmt((JStmtTry) aStmt, thisObject);
 
         // Handle while statement
         if (aStmt instanceof JStmtWhile)
-            return evalWhileStmt(anOR, (JStmtWhile) aStmt);
+            return evalWhileStmt((JStmtWhile) aStmt, thisObject);
 
         // Complain
         throw new RuntimeException("EvalStmt.evalStmt: Unsupported statement " + aStmt.getClass());
@@ -156,23 +152,23 @@ public class JSStmtEval {
     /**
      * Evaluate JStmtBlock.
      */
-    private Object evalBlockStmt(Object anOR, JStmtBlock aBlockStmt) throws Exception
+    private Object evalBlockStmt(JStmtBlock aBlockStmt, Object thisObject) throws Exception
     {
         List<JStmt> statements = aBlockStmt.getStatements();
-        return evalBlockStatements(anOR, statements);
+        return evalBlockStatements(statements, thisObject);
     }
 
     /**
      * Evaluate List of JStmts.
      */
-    private Object evalBlockStatements(Object anOR, List<JStmt> statements) throws Exception
+    private Object evalBlockStatements(List<JStmt> statements, Object thisObject) throws Exception
     {
         // Get statements
         Object returnVal = null;
 
         // Iterate over statements and evaluate each
         for (JStmt stmt : statements) {
-            Object rval = evalStmt(anOR, stmt);
+            Object rval = evalStmt(stmt, thisObject);
             if (stmt instanceof JStmtReturn)
                 returnVal = rval;
             if (_breakWasHit || _continueWasHit || _stopRun || _returnValueHit != null)
@@ -186,17 +182,17 @@ public class JSStmtEval {
     /**
      * Evaluate JStmtExpr.
      */
-    private Object evalExprStmt(JStmtExpr aStmt) throws Exception
+    private Object evalExprStmt(JStmtExpr aStmt, Object thisObject) throws Exception
     {
         JExpr expr = aStmt.getExpr();
-        Object val = evalExpr(expr);
+        Object val = evalExpr(expr, thisObject);
         return val;
     }
 
     /**
      * Evaluate JStmtReturn.
      */
-    private Object evalReturnStmt(Object anOR, JStmtReturn aReturnStmt) throws Exception
+    private Object evalReturnStmt(JStmtReturn aReturnStmt, Object thisObject) throws Exception
     {
         // Get return value
         Object returnVal = NULL_RETURN_VALUE;
@@ -204,7 +200,7 @@ public class JSStmtEval {
         // If return expression set, evaluate and set returnVal
         JExpr returnExpr = aReturnStmt.getExpr();
         if (returnExpr != null) {
-            returnVal = evalExpr(returnExpr);
+            returnVal = evalExpr(returnExpr, thisObject);
             if (returnVal == null)
                 returnVal = NULL_RETURN_VALUE;
         }
@@ -216,11 +212,11 @@ public class JSStmtEval {
     /**
      * Evaluate JStmtSwitch.
      */
-    private Object evalSwitchStmt(Object anOR, JStmtSwitch aSwitchStmt) throws Exception
+    private Object evalSwitchStmt(JStmtSwitch aSwitchStmt, Object thisObject) throws Exception
     {
         // Get switch expression and eval
         JExpr switchExpr = aSwitchStmt.getExpr();
-        Object switchValue = evalExpr(switchExpr);
+        Object switchValue = evalExpr(switchExpr, thisObject);
 
         // Iterate over cases
         List<JStmtSwitchCase> switchCases = aSwitchStmt.getSwitchCases();
@@ -236,14 +232,14 @@ public class JSStmtEval {
             // If haven't found true case, eval case expr and check if this is it
             if (!hitTrueCase) {
                 JExpr caseExpr = switchCase.getExpr();
-                Object caseValue = evalExpr(caseExpr);
+                Object caseValue = evalExpr(caseExpr, thisObject);
                 hitTrueCase = Objects.equals(switchValue, caseValue);
             }
 
             // If hit true case, execute statements and check for break/return
             if (hitTrueCase) {
                 List<JStmt> statements = switchCase.getStatements();
-                evalBlockStatements(anOR, statements);
+                evalBlockStatements(statements, thisObject);
                 if (handleBreakCheck())
                     return _returnValueHit;
             }
@@ -253,7 +249,7 @@ public class JSStmtEval {
         JStmtSwitchCase defaultCase = aSwitchStmt.getDefaultCase();
         if (defaultCase != null) {
             List<JStmt> statements = defaultCase.getStatements();
-            evalBlockStatements(anOR, statements);
+            evalBlockStatements(statements, thisObject);
             if (handleBreakCheck())
                 return _returnValueHit;
         }
@@ -265,22 +261,22 @@ public class JSStmtEval {
     /**
      * Evaluate JStmtFor.
      */
-    private Object evalIfStmt(Object anOR, JStmtIf anIfStmt) throws Exception
+    private Object evalIfStmt(JStmtIf anIfStmt, Object thisObject) throws Exception
     {
         // Get conditional
         JExpr condExpr = anIfStmt.getConditional();
-        Object condValue = evalExpr(condExpr);
+        Object condValue = evalExpr(condExpr, thisObject);
 
         // Handle true: Get true statement and return eval
         if (Convert.booleanValue(condValue)) {
             JStmt trueStmt = anIfStmt.getStatement();
-            return evalStmt(anOR, trueStmt);
+            return evalStmt(trueStmt, thisObject);
         }
 
         // If else statement set, forward to it
         JStmt elseStmt = anIfStmt.getElseStatement();
         if (elseStmt != null)
-            return evalStmt(anOR, elseStmt);
+            return evalStmt(elseStmt, thisObject);
 
         // Return
         return null;
@@ -289,11 +285,11 @@ public class JSStmtEval {
     /**
      * Evaluate JStmtFor.
      */
-    private Object evalForStmt(Object anOR, JStmtFor aForStmt) throws Exception
+    private Object evalForStmt(JStmtFor aForStmt, Object thisObject) throws Exception
     {
         // Handle ForEach
         if (aForStmt.isForEach())
-            return evalForEachStmt(anOR, aForStmt);
+            return evalForEachStmt(aForStmt, thisObject);
 
         // Get block statement
         JStmtBlock blockStmt = aForStmt.getBlock();
@@ -301,13 +297,13 @@ public class JSStmtEval {
         // Get var decl and evaluate
         JExprVarDecl varDeclExpr = aForStmt.getVarDeclExpr();
         if (varDeclExpr != null)
-            evalExpr(varDeclExpr);
+            evalExpr(varDeclExpr, thisObject);
 
         // If init expressions instead, get and evaluate those
         else {
             JExpr[] initExprs = aForStmt.getInitExprs();
             for (JExpr initExpr : initExprs)
-                evalExpr(initExpr);
+                evalExpr(initExpr, thisObject);
         }
 
         // Get conditional
@@ -320,18 +316,18 @@ public class JSStmtEval {
         while (true) {
 
             // Evaluate conditional and break if false
-            Object condValue = evalExpr(condExpr);
+            Object condValue = evalExpr(condExpr, thisObject);
             if (!Convert.booleanValue(condValue))
                 break;
 
             // Evaluate block statements
-            evalStmt(anOR, blockStmt);
+            evalStmt(blockStmt, thisObject);
 
             // Execute update expressions
             for (JExpr updateExpr : updateExpressions) {
 
                 // Eval statements
-                evalExpr(updateExpr);
+                evalExpr(updateExpr, thisObject);
 
                 // If break was hit, break
                 if (handleBreakCheck())
@@ -346,7 +342,7 @@ public class JSStmtEval {
     /**
      * Evaluate JStmtFor.
      */
-    private Object evalForEachStmt(Object anOR, JStmtFor aForStmt) throws Exception
+    private Object evalForEachStmt(JStmtFor aForStmt, Object thisObject) throws Exception
     {
         // Get block statement
         JStmtBlock blockStmt = aForStmt.getBlock();
@@ -359,7 +355,7 @@ public class JSStmtEval {
 
         // Get list value
         JExpr iterableExpr = aForStmt.getIterableExpr();
-        Object iterableObj = evalExpr(iterableExpr);
+        Object iterableObj = evalExpr(iterableExpr, thisObject);
 
         // Handle null
         if (iterableObj == null)
@@ -379,7 +375,7 @@ public class JSStmtEval {
                 _javaShell.setExprIdValue(varId, obj);
 
                 // Eval statement
-                evalStmt(anOR, blockStmt);
+                evalStmt(blockStmt, thisObject);
 
                 // If LoopLimit hit, throw exception
                 if (handleBreakCheck())
@@ -400,7 +396,7 @@ public class JSStmtEval {
                 _javaShell.setExprIdValue(varId, obj);
 
                 // Eval statement
-                evalStmt(anOR, blockStmt);
+                evalStmt(blockStmt, thisObject);
 
                 // If LoopLimit hit, throw exception
                 if (handleBreakCheck())
@@ -415,7 +411,7 @@ public class JSStmtEval {
     /**
      * Evaluate JStmtWhile.
      */
-    private Object evalWhileStmt(Object anOR, JStmtWhile aWhileStmt) throws Exception
+    private Object evalWhileStmt(JStmtWhile aWhileStmt, Object thisObject) throws Exception
     {
         // Get conditional and block statement
         JExpr condExpr = aWhileStmt.getConditional();
@@ -425,12 +421,12 @@ public class JSStmtEval {
         while (true) {
 
             // Evaluate conditional and break if false
-            Object condValue = evalExpr(condExpr);
+            Object condValue = evalExpr(condExpr, thisObject);
             if (!Convert.booleanValue(condValue))
                 break;
 
             // Evaluate block statements
-            evalStmt(anOR, blockStmt);
+            evalStmt(blockStmt, thisObject);
 
             // If break was hit, break
             if (handleBreakCheck())
@@ -444,7 +440,7 @@ public class JSStmtEval {
     /**
      * Evaluate JStmtDo.
      */
-    private Object evalDoStmt(Object anOR, JStmtDo aDoStmt) throws Exception
+    private Object evalDoStmt(JStmtDo aDoStmt, Object thisObject) throws Exception
     {
         // Get conditional and block statement
         JExpr condExpr = aDoStmt.getConditional();
@@ -454,14 +450,14 @@ public class JSStmtEval {
         while (true) {
 
             // Evaluate block statements
-            evalStmt(anOR, blockStmt);
+            evalStmt(blockStmt, thisObject);
 
             // If break was hit, break
             if (handleBreakCheck())
                 return _returnValueHit;
 
             // Evaluate conditional and break if false
-            Object condValue = evalExpr(condExpr);
+            Object condValue = evalExpr(condExpr, thisObject);
             if (!Convert.booleanValue(condValue))
                 break;
         }
@@ -473,20 +469,20 @@ public class JSStmtEval {
     /**
      * Evaluate JStmtTry.
      */
-    private Object evalTryStmt(Object anOR, JStmtTry aTryStmt) throws Exception
+    private Object evalTryStmt(JStmtTry aTryStmt, Object thisObject) throws Exception
     {
         JExpr[] resourceExprs = aTryStmt.getResources();
         for (JExpr resourceExpr : resourceExprs)
-            evalExpr(resourceExpr);
+            evalExpr(resourceExpr, thisObject);
 
         // Run try block
         JStmtBlock blockStmt = aTryStmt.getBlock();
-        evalStmt(anOR, blockStmt);
+        evalStmt(blockStmt, thisObject);
 
         // If finally statement availabe, run it
         JStmtBlock finallyStmt = aTryStmt.getFinallyBlock();
         if (finallyStmt != null)
-            evalStmt(anOR, finallyStmt);
+            evalStmt(finallyStmt, thisObject);
 
         // Return
         return null;
@@ -495,9 +491,9 @@ public class JSStmtEval {
     /**
      * Evaluate JStmtExpr.
      */
-    public Object evalExpr(JExpr anExpr) throws Exception
+    public Object evalExpr(JExpr anExpr, Object thisObject) throws Exception
     {
-        return _javaShell._exprEval.evalExpr(anExpr);
+        return _javaShell._exprEval.evalExpr(anExpr, thisObject);
     }
 
     /**

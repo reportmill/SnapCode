@@ -106,9 +106,9 @@ public abstract class LambdaWrapper implements InvocationHandler {
     /**
      * Returns a wrapped lambda expression for given class.
      */
-    public static Object getWrappedLambdaExpression(JavaShell javaShell, Object anOR, JExprLambda lambdaExpr)
+    public static Object getWrappedLambdaExpression(JavaShell javaShell, Object thisObject, JExprLambda lambdaExpr)
     {
-        LambdaWrapper lambdaWrapper = new LambdaExprWrapper(javaShell, anOR, lambdaExpr);
+        LambdaWrapper lambdaWrapper = new LambdaExprWrapper(javaShell, thisObject, lambdaExpr);
         return lambdaWrapper._proxy;
     }
 
@@ -129,8 +129,8 @@ public abstract class LambdaWrapper implements InvocationHandler {
         // The JavaShell
         private JavaShell _javaShell;
 
-        // The OR
-        private Object _OR;
+        // The 'this' object
+        private Object _thisObject;
 
         // The Content expression
         private JExpr _contentExpr;
@@ -141,13 +141,13 @@ public abstract class LambdaWrapper implements InvocationHandler {
         /**
          * Constructor.
          */
-        public LambdaExprWrapper(JavaShell javaShell, Object anOR, JExprLambda lambdaExpr)
+        public LambdaExprWrapper(JavaShell javaShell, Object thisObject, JExprLambda lambdaExpr)
         {
             super(lambdaExpr);
             _javaShell = javaShell;
 
             // Get lambda expression stuff
-            _OR = anOR;
+            _thisObject = thisObject;
             _contentExpr = lambdaExpr.getExpr();
 
             List<JVarDecl> varDecls = lambdaExpr.getParameters();
@@ -171,7 +171,7 @@ public abstract class LambdaWrapper implements InvocationHandler {
             }
 
             // Eval content expression, pop var stack and return
-            try { return _javaShell._exprEval.evalExpr(_OR, _contentExpr); }
+            try { return _javaShell._exprEval.evalExpr(_contentExpr, _thisObject); }
             catch (Exception e) { throw new RuntimeException(e); }
             finally { varStack.popStackFrame(); }
         }

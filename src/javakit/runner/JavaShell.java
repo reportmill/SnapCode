@@ -5,7 +5,6 @@ package javakit.runner;
 import javakit.parse.*;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaMethod;
-import javakit.resolver.Resolver;
 import snap.util.Convert;
 import snap.util.StringUtils;
 import snap.web.WebFile;
@@ -14,7 +13,6 @@ import snapcharts.repl.Console;
 import snapcharts.repl.ReplObject;
 import snapcode.debug.RunAppSrc;
 import snapcode.project.JavaAgent;
-import snapcode.project.Project;
 import snapcode.util.ExceptionUtil;
 import java.util.List;
 
@@ -31,9 +29,6 @@ public class JavaShell {
 
     // A map of local variables
     protected JSVarStack _varStack;
-
-    // An object to act as "this"
-    protected Object  _thisObject = new Object();
 
     // Whether error was hit
     private boolean  _errorWasHit;
@@ -70,7 +65,8 @@ public class JavaShell {
         // Otherwise just run main statements
         else {
             JStmt[] mainStmts = JavaShellUtils.getMainStatements(jfile);
-            evalStatements(_thisObject, mainStmts);
+            Class<?> mainClass = JavaShellUtils.getMainClass(this, javaAgent);
+            evalStatements(mainStmts, mainClass);
         }
     }
 
@@ -89,12 +85,7 @@ public class JavaShell {
         };
 
         // Get main method
-        Project project = javaAgent.getProject();
-        Resolver resolver = project.getResolver();
-        String mainClassName = _runApp.getMainClassName();
-        JavaClass mainClass = resolver.getJavaClassForName(mainClassName);
-        JavaClass stringArrayClass = resolver.getJavaClassForClass(String[].class);
-        JavaMethod mainMethod = mainClass.getMethodForNameAndTypes("main", new JavaClass[] { stringArrayClass });
+        JavaMethod mainMethod = JavaShellUtils.getMainJavaMethod(this, javaAgent);
 
         // Invoke main method
         try { mainMethod.invoke(null, (Object) new String[0]); }
@@ -103,7 +94,7 @@ public class JavaShell {
         catch (Exception e) {
             _errorWasHit = true;
             String str = StringUtils.getStackTraceString(e);
-            appendConsoleOutput(str, true);
+            _runApp.appendConsoleOutput(str, true);
         }
     }
 
@@ -116,26 +107,18 @@ public class JavaShell {
     }
 
     /**
-     * Appends console output string with option for whether is error.
-     */
-    protected void appendConsoleOutput(String aString, boolean isError)
-    {
-        _runApp.appendConsoleOutput(aString, isError);
-    }
-
-    /**
      * Runs given statements array.
      */
-    public Object evalStatements(Object thisObject, JStmt[] stmtsArray)
+    public Object evalStatements(JStmt[] stmtsArray, Object thisObject)
     {
         // Eval statement
-        try { return _stmtEval.evalStatements(thisObject, stmtsArray); }
+        try { return _stmtEval.evalStatements(stmtsArray, thisObject); }
 
         // Handle statement eval exception: Try expression
         catch (Exception e) {
 
             // Ignore InterruptedExceptions - assume this is from controlling thread
-            if (isInterruptedException(e))
+            if (JavaShellUtils.isInterruptedException(e))
                 return null;
 
             // Mark ErrorWasHit
@@ -143,7 +126,7 @@ public class JavaShell {
 
             // Show exception
             String str = StringUtils.getStackTraceString(e);
-            appendConsoleOutput(str, true);
+            _runApp.appendConsoleOutput(str, true);
 
             // Show exception
             if (Console.getShared() != null) {
@@ -174,7 +157,7 @@ public class JavaShell {
 
         // Get method body and run
         JStmt[] methodBody = aMethodDecl.getBlockStatements();
-        Object returnVal = evalStatements(thisObject, methodBody);
+        Object returnVal = evalStatements(methodBody, thisObject);
 
         // Pop stack frame
         _varStack.popStackFrame();
@@ -226,7 +209,7 @@ public class JavaShell {
             JInitializerDecl[] initializerDecls = classDecl.getInitDecls();
             JInitializerDecl initializerDecl = initializerDecls[initializerIndex];
             JStmt[] stmts = initializerDecl.getBlockStatements();
-            evalStatements(thisObject, stmts);
+            evalStatements(stmts, thisObject);
             return null;
         }
 
@@ -240,19 +223,8 @@ public class JavaShell {
         catch (Exception e) {
             _errorWasHit = true;
             String str = StringUtils.getStackTraceString(e);
-            appendConsoleOutput(str, true);
+            _runApp.appendConsoleOutput(str, true);
             return null;
         }
-    }
-
-    /**
-     * Returns whether given exception is InterruptedException.
-     */
-    private static boolean isInterruptedException(Exception anException)
-    {
-        for (Throwable e = anException; e != null; e = e.getCause())
-            if (e instanceof InterruptedException)
-                return true;
-        return false;
     }
 }

@@ -3,7 +3,12 @@
  */
 package javakit.runner;
 import javakit.parse.*;
+import javakit.resolver.JavaClass;
+import javakit.resolver.JavaMethod;
+import javakit.resolver.Resolver;
 import snap.util.ArrayUtils;
+import snapcode.project.JavaAgent;
+import snapcode.project.Project;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +16,38 @@ import java.util.List;
  * Utility methods and support for JavaShell.
  */
 public class JavaShellUtils {
+
+    /**
+     * Returns the Main JavaClass for JavaShell.
+     */
+    public static Class<?> getMainClass(JavaShell javaShell, JavaAgent javaAgent)
+    {
+        JavaClass javaClass = getMainJavaClass(javaShell, javaAgent);
+        return javaClass.getRealClass();
+    }
+
+    /**
+     * Returns the Main JavaClass for JavaShell.
+     */
+    public static JavaClass getMainJavaClass(JavaShell javaShell, JavaAgent javaAgent)
+    {
+        Project project = javaAgent.getProject();
+        Resolver resolver = project.getResolver();
+        String mainClassName = javaShell._runApp.getMainClassName();
+        return resolver.getJavaClassForName(mainClassName);
+    }
+
+    /**
+     * Returns the main JavaMethod for JavaShell.
+     */
+    public static JavaMethod getMainJavaMethod(JavaShell javaShell, JavaAgent javaAgent)
+    {
+        JavaClass mainClass = getMainJavaClass(javaShell, javaAgent);
+        Project project = javaAgent.getProject();
+        Resolver resolver = project.getResolver();
+        JavaClass stringArrayClass = resolver.getJavaClassForClass(String[].class);
+        return mainClass.getMethodForNameAndTypes("main", new JavaClass[] { stringArrayClass });
+    }
 
     /**
      * Returns the main statements for a JFile.
@@ -82,5 +119,16 @@ public class JavaShellUtils {
         List<JNode> children = aJNode.getChildren();
         for (JNode child : children)
             findStatementsForNode(child, stmtsList);
+    }
+
+    /**
+     * Returns whether given exception is InterruptedException.
+     */
+    public static boolean isInterruptedException(Exception anException)
+    {
+        for (Throwable e = anException; e != null; e = e.getCause())
+            if (e instanceof InterruptedException)
+                return true;
+        return false;
     }
 }
