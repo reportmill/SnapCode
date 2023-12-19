@@ -14,6 +14,7 @@ import snapcharts.repl.ReplObject;
 import snapcode.debug.RunAppSrc;
 import snapcode.project.JavaAgent;
 import snapcode.util.ExceptionUtil;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -140,33 +141,6 @@ public class JavaShell {
     }
 
     /**
-     * Calls given method decl with target object and args.
-     */
-    public Object callMethodDecl(JMethodDecl aMethodDecl, Object thisObject, Object[] argValues)
-    {
-        // Create stack frame
-        _varStack.pushStackFrame();
-
-        // Install params
-        List<JVarDecl> params = aMethodDecl.getParameters();
-        for (int i = 0, iMax = params.size(); i < iMax; i++) {
-            JVarDecl varDecl = params.get(i);
-            JExprId varId = varDecl.getId();
-            setExprIdValue(varId, argValues[i]);
-        }
-
-        // Get method body and run
-        JStmt[] methodBody = aMethodDecl.getBlockStatements();
-        Object returnVal = evalStatements(methodBody, thisObject);
-
-        // Pop stack frame
-        _varStack.popStackFrame();
-
-        // Return
-        return returnVal;
-    }
-
-    /**
      * Sets an assignment value for given identifier expression and value.
      */
     protected Object setExprIdValue(JExprId idExpr, Object aValue)
@@ -200,6 +174,7 @@ public class JavaShell {
         // Handle constructor
         if (methodName.equals("__init")) {
             JConstrDecl constrDecl = classDecl.getConstructorDeclForTypes( null);
+            callMethodDecl(constrDecl, thisObject, args);
             return null;
         }
 
@@ -226,5 +201,38 @@ public class JavaShell {
             _runApp.appendConsoleOutput(str, true);
             return null;
         }
+    }
+
+    /**
+     * Calls given method decl with target object and args (supports constructor, too).
+     */
+    protected Object callMethodDecl(JExecutableDecl aMethodDecl, Object thisObject, Object[] argValues)
+    {
+        // Create stack frame
+        _varStack.pushStackFrame();
+
+        // Install params
+        List<JVarDecl> params = aMethodDecl.getParameters();
+        for (int i = 0, iMax = params.size(); i < iMax; i++) {
+            JVarDecl varDecl = params.get(i);
+            JExprId varId = varDecl.getId();
+            setExprIdValue(varId, argValues[i]);
+        }
+
+        // Get statements
+        JStmt[] methodBody = aMethodDecl.getBlockStatements();
+
+        // If constructor and first statement is constructor call (super() or this()), skip first statement
+        if (aMethodDecl instanceof JConstrDecl && methodBody.length > 0 && methodBody[0] instanceof JStmtConstrCall)
+            methodBody = Arrays.copyOfRange(methodBody, 1, methodBody.length);
+
+        // Get method body and run
+        Object returnVal = evalStatements(methodBody, thisObject);
+
+        // Pop stack frame
+        _varStack.popStackFrame();
+
+        // Return
+        return returnVal;
     }
 }
