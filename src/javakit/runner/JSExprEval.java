@@ -14,14 +14,11 @@ import snap.util.*;
  */
 public class JSExprEval {
 
-    // The Statement Evaluator that created this instance
-    private JSStmtEval  _stmtEval;
+    // The JavaShell
+    private JavaShell _javaShell;
 
     // The current "this" object
     protected Object  _thisObj;
-
-    // A map of local variables
-    protected JSVarStack _varStack = new JSVarStack();
 
     // A Resolver
     protected Resolver _resolver;
@@ -29,9 +26,9 @@ public class JSExprEval {
     /**
      * Constructor.
      */
-    public JSExprEval(JSStmtEval aStmtEval)
+    public JSExprEval(JavaShell javaShell)
     {
-        _stmtEval = aStmtEval;
+        _javaShell = javaShell;
     }
 
     /**
@@ -155,13 +152,8 @@ public class JSExprEval {
 
         // If LocalVar, get from stack
         JavaDecl idDecl = anId.getDecl();
-        if (idDecl instanceof JavaLocalVar) {
-            int indexInStackFrame = ((JavaLocalVar) idDecl).getIndexInStackFrame();
-            if (indexInStackFrame >= 0) {
-                Object value = _varStack.getStackValue(indexInStackFrame);
-                return value;
-            }
-        }
+        if (idDecl instanceof JavaLocalVar)
+            return _javaShell._varStack.getStackValueForNode(anId);
 
         // Handle Field
         if (idDecl instanceof JavaField) {
@@ -207,7 +199,7 @@ public class JSExprEval {
         // Look for local MethodDecl
         JMethodDecl methodDecl = method.getMethodDecl();
         if (methodDecl != null)
-            return evalMethodCallExprForMethodDecl(anOR, methodDecl, argValues);
+            return _javaShell.callMethodDecl(methodDecl, anOR, argValues);
 
         // Handle var args packaging
         if (method.isVarArgs())
@@ -216,33 +208,6 @@ public class JSExprEval {
         // Invoke method
         Object value = method.invoke(anOR, argValues);
         return value;
-    }
-
-    /**
-     * Evaluate JExprMethodCall for local JMethodDecl.
-     */
-    public Object evalMethodCallExprForMethodDecl(Object anOR, JMethodDecl aMethodDecl, Object[] argValues) throws Exception
-    {
-        // Create stack frame
-        _varStack.pushStackFrame();
-
-        // Install params
-        List<JVarDecl> params = aMethodDecl.getParameters();
-        for (int i = 0, iMax = params.size(); i < iMax; i++) {
-            JVarDecl varDecl = params.get(i);
-            JExprId varId = varDecl.getId();
-            setExprIdValue(varId, argValues[i]);
-        }
-
-        // Get method body and run
-        JStmtBlock methodBody = aMethodDecl.getBlock();
-        Object returnVal = _stmtEval.evalExecutable(anOR, methodBody);
-
-        // Pop stack frame
-        _varStack.popStackFrame();
-
-        // Return
-        return returnVal;
     }
 
     /**
@@ -608,7 +573,7 @@ public class JSExprEval {
             if (initExpr != null) {
                 JExprId varId = varDecl.getId();
                 Object val = evalExpr(initExpr);
-                setExprIdValue(varId, val);
+                _javaShell.setExprIdValue(varId, val);
                 vals.add(val);
             }
         }
@@ -667,7 +632,7 @@ public class JSExprEval {
      */
     private Object evalLambdaExpr(Object anOR, JExprLambda aLambdaExpr)
     {
-        return LambdaWrapper.getWrappedLambdaExpression(this, anOR, aLambdaExpr);
+        return LambdaWrapper.getWrappedLambdaExpression(_javaShell, anOR, aLambdaExpr);
     }
 
     /**
@@ -708,7 +673,7 @@ public class JSExprEval {
     {
         // Handle ExprId
         if (assignToExpr instanceof JExprId)
-            return setExprIdValue((JExprId) assignToExpr, aValue);
+            return _javaShell.setExprIdValue((JExprId) assignToExpr, aValue);
 
         // Handle array
         if (assignToExpr instanceof JExprArrayIndex)
@@ -716,21 +681,6 @@ public class JSExprEval {
 
         // I don't think this can happen
         throw new RuntimeException("JExprEval.setAssignExprValue: Unexpected assign to class: " + assignToExpr.getClass());
-    }
-
-    /**
-     * Sets an assignment value for given identifier expression and value.
-     */
-    protected Object setExprIdValue(JExprId idExpr, Object aValue)
-    {
-        // Convert type
-        JavaClass assignClass = idExpr.getEvalClass();
-        Class<?> realClass = assignClass.getRealClass();
-        Object assignValue = castOrConvertValueToPrimitiveClass(aValue, realClass);
-
-        if (!_varStack.setStackValueForNode(idExpr, assignValue))
-            System.err.println("JSExprEval: Unknown id: " + idExpr);
-        return assignValue;
     }
 
     /**
@@ -748,7 +698,7 @@ public class JSExprEval {
         int index = intValue(indexObj);
 
         // Get array
-        Object array = _varStack.getStackValueForNode(arrayExpr);
+        Object array = _javaShell._varStack.getStackValueForNode(arrayExpr);
 
         // Set value and return
         Array.set(array, index, aValue);

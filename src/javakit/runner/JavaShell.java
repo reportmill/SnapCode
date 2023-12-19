@@ -16,17 +16,24 @@ import snapcode.debug.RunAppSrc;
 import snapcode.project.JavaAgent;
 import snapcode.project.Project;
 import snapcode.util.ExceptionUtil;
+import java.util.List;
 
 /**
  * A class to evaluate JavaShell code.
  */
 public class JavaShell {
 
+    // An expression evaluator
+    protected JSExprEval _exprEval;
+
     // A Statement evaluator
     private JSStmtEval _stmtEval;
 
+    // A map of local variables
+    protected JSVarStack _varStack;
+
     // An object to act as "this"
-    private Object  _thisObject = new Object();
+    protected Object  _thisObject = new Object();
 
     // Whether error was hit
     private boolean  _errorWasHit;
@@ -42,7 +49,9 @@ public class JavaShell {
         _runApp = runApp;
 
         // Create Statement eval
-        _stmtEval = new JSStmtEval();
+        _varStack = new JSVarStack();
+        _exprEval = new JSExprEval(this);
+        _stmtEval = new JSStmtEval(this);
     }
 
     /**
@@ -57,7 +66,12 @@ public class JavaShell {
         // Run as main method (RunApp.SrcHybrid) or main statements (legacy)
         if (_runApp.isSrcHybrid())
             runMainMethod(javaAgent);
-        else runMainStatements(jfile);
+
+        // Otherwise just run main statements
+        else {
+            JStmt[] mainStmts = JavaShellUtils.getMainStatements(jfile);
+            evalStatements(_thisObject, mainStmts);
+        }
     }
 
     /**
@@ -110,51 +124,19 @@ public class JavaShell {
     }
 
     /**
-     * Runs main statements in given JFile.
+     * Runs given statements array.
      */
-    private void runMainStatements(JFile jfile)
+    public Object evalStatements(Object thisObject, JStmt[] stmtsArray)
     {
-        JStmt[] mainStmts = JavaShellUtils.getMainStatements(jfile);
-        runStatements(mainStmts);
-    }
-
-    /**
-     * Runs given statements in given JFile.
-     */
-    private void runStatements(JStmt[] stmtsArray)
-    {
-        // Iterate over main statements and eval each
-        for (JStmt stmt : stmtsArray) {
-
-            // Evaluate statement
-            evalStatement(stmt);
-
-            // If StopRun hit, break
-            if (_stmtEval._stopRun || _errorWasHit)
-                break;
-        }
-    }
-
-    /**
-     * Evaluate JStmt.
-     */
-    protected void evalStatement(JStmt aStmt)
-    {
-        // Handle statement with errors
-        if (aStmt.getErrors() != NodeError.NO_ERRORS) {
-            _errorWasHit = true;
-            return;
-        }
-
         // Eval statement
-        try { _stmtEval.evalExecutable(_thisObject, aStmt); }
+        try { return _stmtEval.evalStatements(thisObject, stmtsArray); }
 
         // Handle statement eval exception: Try expression
         catch (Exception e) {
 
             // Ignore InterruptedExceptions - assume this is from controlling thread
             if (isInterruptedException(e))
-                return;
+                return null;
 
             // Mark ErrorWasHit
             _errorWasHit = true;
@@ -168,7 +150,52 @@ public class JavaShell {
                 Object exceptionText = ExceptionUtil.getTextBlockForException(e);
                 ReplObject.show(exceptionText);
             }
+
+            // Return null
+            return null;
         }
+    }
+
+    /**
+     * Calls given method decl with target object and args.
+     */
+    public Object callMethodDecl(JMethodDecl aMethodDecl, Object thisObject, Object[] argValues)
+    {
+        // Create stack frame
+        _varStack.pushStackFrame();
+
+        // Install params
+        List<JVarDecl> params = aMethodDecl.getParameters();
+        for (int i = 0, iMax = params.size(); i < iMax; i++) {
+            JVarDecl varDecl = params.get(i);
+            JExprId varId = varDecl.getId();
+            setExprIdValue(varId, argValues[i]);
+        }
+
+        // Get method body and run
+        JStmt[] methodBody = aMethodDecl.getBlockStatements();
+        Object returnVal = evalStatements(thisObject, methodBody);
+
+        // Pop stack frame
+        _varStack.popStackFrame();
+
+        // Return
+        return returnVal;
+    }
+
+    /**
+     * Sets an assignment value for given identifier expression and value.
+     */
+    protected Object setExprIdValue(JExprId idExpr, Object aValue)
+    {
+        // Convert type
+        JavaClass assignClass = idExpr.getEvalClass();
+        Class<?> realClass = assignClass.getRealClass();
+        Object assignValue = JSExprEvalUtils.castOrConvertValueToPrimitiveClass(aValue, realClass);
+
+        if (!_varStack.setStackValueForNode(idExpr, assignValue))
+            System.err.println("JSExprEval: Unknown id: " + idExpr);
+        return assignValue;
     }
 
     /**
@@ -199,14 +226,14 @@ public class JavaShell {
             JInitializerDecl[] initializerDecls = classDecl.getInitDecls();
             JInitializerDecl initializerDecl = initializerDecls[initializerIndex];
             JStmt[] stmts = initializerDecl.getBlockStatements();
-            runStatements(stmts);
+            evalStatements(thisObject, stmts);
             return null;
         }
 
         // Get MethodDecl for method name and invoke
         JMethodDecl methodDecl = classDecl.getMethodDeclForNameAndTypes(methodName, null);
         try {
-            return _stmtEval._exprEval.evalMethodCallExprForMethodDecl(thisObject, methodDecl, args);
+            return callMethodDecl(methodDecl, thisObject, args);
         }
 
         // Handle exceptions: Add to console

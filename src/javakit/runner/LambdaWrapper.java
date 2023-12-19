@@ -106,9 +106,9 @@ public abstract class LambdaWrapper implements InvocationHandler {
     /**
      * Returns a wrapped lambda expression for given class.
      */
-    public static Object getWrappedLambdaExpression(JSExprEval exprEval, Object anOR, JExprLambda lambdaExpr)
+    public static Object getWrappedLambdaExpression(JavaShell javaShell, Object anOR, JExprLambda lambdaExpr)
     {
-        LambdaWrapper lambdaWrapper = new LambdaExprWrapper(exprEval, anOR, lambdaExpr);
+        LambdaWrapper lambdaWrapper = new LambdaExprWrapper(javaShell, anOR, lambdaExpr);
         return lambdaWrapper._proxy;
     }
 
@@ -126,11 +126,8 @@ public abstract class LambdaWrapper implements InvocationHandler {
      */
     private static class LambdaExprWrapper extends LambdaWrapper {
 
-        // The ExprEval
-        private JSExprEval _exprEval;
-
-        // The VarStack
-        private JSVarStack _varStack;
+        // The JavaShell
+        private JavaShell _javaShell;
 
         // The OR
         private Object _OR;
@@ -144,13 +141,12 @@ public abstract class LambdaWrapper implements InvocationHandler {
         /**
          * Constructor.
          */
-        public LambdaExprWrapper(JSExprEval exprEval, Object anOR, JExprLambda lambdaExpr)
+        public LambdaExprWrapper(JavaShell javaShell, Object anOR, JExprLambda lambdaExpr)
         {
             super(lambdaExpr);
+            _javaShell = javaShell;
 
             // Get lambda expression stuff
-            _exprEval = exprEval;
-            _varStack = exprEval._varStack;
             _OR = anOR;
             _contentExpr = lambdaExpr.getExpr();
 
@@ -165,15 +161,19 @@ public abstract class LambdaWrapper implements InvocationHandler {
         @Override
         protected Object invokeLambdaMethodWithArgs(Object[] args)
         {
-            _varStack.pushStackFrame();
+            // Push var stack and params
+            JSVarStack varStack = _javaShell._varStack;
+            varStack.pushStackFrame();
             if (_param0 != null) {
-                _varStack.setStackValueForNode(_param0, args[0]);
+                varStack.setStackValueForNode(_param0, args[0]);
                 if (_param1 != null)
-                    _varStack.setStackValueForNode(_param1, args[1]);
+                    varStack.setStackValueForNode(_param1, args[1]);
             }
-            try { return _exprEval.evalExpr(_OR, _contentExpr); }
+
+            // Eval content expression, pop var stack and return
+            try { return _javaShell._exprEval.evalExpr(_OR, _contentExpr); }
             catch (Exception e) { throw new RuntimeException(e); }
-            finally { _varStack.popStackFrame(); }
+            finally { varStack.popStackFrame(); }
         }
     }
 
