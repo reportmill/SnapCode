@@ -1,14 +1,13 @@
 package snapcode.apptools;
-import snapcode.project.BuildIssue;
+import snap.util.TaskMonitor;
+import snapcode.project.*;
 import snapcode.javatext.JavaTextUtils;
-import snapcode.project.BuildIssues;
 import snap.gfx.Image;
 import snap.view.*;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
-import snapcode.project.JavaAgent;
 
 /**
  * A pane/panel to show current build issues.
@@ -41,8 +40,16 @@ public class BuildTool extends WorkspaceTool {
         if (javaAgent == null)
             return false;
 
+        // Get ProjectBuilder and add build file
+        Project proj = getProject();
+        ProjectBuilder projectBuilder = proj.getBuilder();
+        projectBuilder.addBuildFile(selFile, true);
+
+        // Build project
+        TaskMonitor taskMonitor = new TaskMonitor.Text(System.out);
+        boolean success = projectBuilder.buildProject(taskMonitor);
+
         // Build file - if failed, show errors
-        boolean success = javaAgent.buildFile();
         if (!success)
             _workspaceTools.showTool(this);
 

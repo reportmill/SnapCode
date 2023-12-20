@@ -3,7 +3,6 @@
  */
 package snapcode.javatext;
 import javakit.parse.*;
-import snapcode.project.BuildIssue;
 import snapcode.project.JavaAgent;
 import snapcode.project.JavaTextDoc;
 import javakit.resolver.JavaDecl;
@@ -31,9 +30,6 @@ public class JavaTextPane extends TextPane {
 
     // The OverView
     protected LineFootView  _lineFootView;
-
-    // A runnable to build file after delay
-    private Runnable _buildFileRun = () -> buildFile();
 
     /**
      * Constructor.
@@ -324,32 +320,18 @@ public class JavaTextPane extends TextPane {
             if (CharSequenceUtils.indexOfNewline(chars, 0) >= 0)
                 _lineNumView.resetAll();
             _lineFootView.resetAll();
-            buildFileLater();
+            buildFileAfterDelay();
         }
     }
 
     /**
      * Register to build file after slight delay.
      */
-    private void buildFileLater()
-    {
-        // Get JavaTextDoc, JavaAgent
-        JavaTextDoc javaTextDoc = getJavaTextDoc();
-        JavaAgent javaAgent = javaTextDoc.getAgent();
-        javaAgent.setBuildIssues(new BuildIssue[0]);
-
-        // Register to build
-        ViewUtils.runDelayedCancelPrevious(_buildFileRun, 1000);
-    }
-
-    /**
-     * Builds file.
-     */
-    private void buildFile()
+    private void buildFileAfterDelay()
     {
         JavaTextDoc javaTextDoc = getJavaTextDoc();
         JavaAgent javaAgent = javaTextDoc.getAgent();
-        javaAgent.buildFile();
+        javaAgent.buildFileAfterDelay(1000);
     }
 
     /**

@@ -18,11 +18,14 @@ public class WorkspaceBuilder {
     // Whether to auto build project feature is enabled
     private boolean  _autoBuildEnabled = true;
 
+    // Whether to add all files to next build
+    private boolean _addAllFilesToBuild;
+
+    // A runnable to build file after delay
+    private Runnable _buildWorkspaceRun = () -> buildWorkspace();
+
     // The runner to build files
     private BuildFilesRunner  _buildFilesRunner;
-
-    // Runnable for build later
-    private Runnable  _buildLaterRun;
 
     /**
      * Constructor.
@@ -63,9 +66,16 @@ public class WorkspaceBuilder {
      */
     public void buildWorkspaceLater(boolean doAddFiles)
     {
-        // If not already set, register for buildLater run
-        if (_buildLaterRun == null)
-            ViewUtils.runLater(_buildLaterRun = () -> buildWorkspace(doAddFiles));
+        _addAllFilesToBuild |= doAddFiles;
+        buildWorkspaceAfterDelay(0);
+    }
+
+    /**
+     * Build workspace after delay.
+     */
+    public void buildWorkspaceAfterDelay(int aDelay)
+    {
+        ViewUtils.runDelayedCancelPrevious(_buildWorkspaceRun, aDelay);
     }
 
     /**
@@ -83,20 +93,20 @@ public class WorkspaceBuilder {
     /**
      * Build workspace.
      */
-    private void buildWorkspace(boolean doAddFiles)
+    private void buildWorkspace()
     {
-        getBuildFilesRunner(doAddFiles);
-        _buildLaterRun = null;
+        getBuildFilesRunner();
+        _addAllFilesToBuild = false;
     }
 
     /**
      * Build workspace real.
      */
-    private void buildWorkspaceImpl(boolean addFiles, TaskMonitor aTM)
+    private void buildWorkspaceImpl(boolean addAllFilesToBuild, TaskMonitor aTM)
     {
         // Handle AddFiles
-        if (addFiles)
-            addBuildFilesAll();
+        if (addAllFilesToBuild)
+            addAllFilesToBuild();
 
         // Get RootProj and child projects
         Project rootProj = _workspace.getRootProject();
@@ -125,7 +135,7 @@ public class WorkspaceBuilder {
     /**
      * Adds a build file.
      */
-    private void addBuildFilesAll()
+    private void addAllFilesToBuild()
     {
         // Make RootProject addBuildFiles
         Project rootProj = _workspace.getRootProject();
@@ -143,14 +153,14 @@ public class WorkspaceBuilder {
     /**
      * Returns the build files runner.
      */
-    private synchronized void getBuildFilesRunner(boolean addBuildFiles)
+    private synchronized void getBuildFilesRunner()
     {
         // If already building: Configure new build and interrupt
         if (_buildFilesRunner != null) {
 
             // Update BuildFilesRunner.[ AddFiles, RunAgain ]
-            if (addBuildFiles)
-                _buildFilesRunner._addFiles = addBuildFiles;
+            if (_addAllFilesToBuild)
+                _buildFilesRunner._addAllFiles = true;
             _buildFilesRunner._runAgain = true;
 
             // Stop active build
@@ -161,7 +171,7 @@ public class WorkspaceBuilder {
 
         // If not building: Create BuildFilesRunner and start
         else {
-            _buildFilesRunner = new BuildFilesRunner(addBuildFiles);
+            _buildFilesRunner = new BuildFilesRunner();
             _buildFilesRunner.start();
         }
     }
@@ -171,19 +181,19 @@ public class WorkspaceBuilder {
      */
     private class BuildFilesRunner extends TaskRunner<Object> {
 
-        // Whether to add files
-        boolean  _addFiles;
+        // Whether to add all files to build
+        private boolean _addAllFiles;
 
         // Whether to run again
-        boolean  _runAgain;
+        private boolean _runAgain;
 
         /**
          * Constructor.
          */
-        public BuildFilesRunner(boolean doAddFiles)
+        public BuildFilesRunner()
         {
             super();
-            _addFiles = doAddFiles;
+            _addAllFiles = _addAllFilesToBuild;
         }
 
         /**
@@ -191,7 +201,7 @@ public class WorkspaceBuilder {
          */
         public Object run()
         {
-            buildWorkspaceImpl(_addFiles, this);
+            buildWorkspaceImpl(_addAllFiles, this);
             return true;
         }
 

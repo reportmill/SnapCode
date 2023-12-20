@@ -6,7 +6,6 @@ import javakit.parse.*;
 import snap.props.PropChange;
 import snap.text.TextDoc;
 import snap.text.TextBlockUtils;
-import snap.util.TaskMonitor;
 import snap.web.WebFile;
 
 /**
@@ -140,17 +139,20 @@ public class JavaAgent {
     /**
      * Builds this file.
      */
-    public boolean buildFile()
+    public void buildFileAfterDelay(int aDelay)
     {
         // Get ProjectBuilder and add build file
         Project proj = getProject();
         ProjectBuilder projectBuilder = proj.getBuilder();
         projectBuilder.addBuildFile(_file, true);
 
-        // Build project
-        TaskMonitor taskMonitor = new TaskMonitor.Text(System.out);
-        boolean success = projectBuilder.buildProject(taskMonitor);
-        return success;
+        // Clear build issues
+        setBuildIssues(new BuildIssue[0]);
+
+        // Build workspace after delay
+        Workspace workspace = getWorkspace();
+        WorkspaceBuilder workspaceBuilder = workspace.getBuilder();
+        workspaceBuilder.buildWorkspaceAfterDelay(aDelay);
     }
 
     /**
