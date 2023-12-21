@@ -62,6 +62,35 @@ public class WorkspaceBuilder {
     }
 
     /**
+     * Build workspace.
+     */
+    public TaskRunner<Boolean> buildWorkspace()
+    {
+        // If already building: Configure new build and interrupt
+        if (_buildFilesRunner != null) {
+
+            // Update BuildFilesRunner.[ AddFiles, RunAgain ]
+            if (_addAllFilesToBuild)
+                _buildFilesRunner._addAllFiles = true;
+            _buildFilesRunner._runAgain = true;
+
+            // Stop active build
+            Project rootProj = _workspace.getRootProject();
+            ProjectBuilder rootProjBuilder = rootProj.getBuilder();
+            rootProjBuilder.interruptBuild();
+        }
+
+        // If not building: Create BuildFilesRunner and start
+        else {
+            _buildFilesRunner = new BuildFilesRunner();
+            _buildFilesRunner.start();
+        }
+
+        _addAllFilesToBuild = false;
+        return _buildFilesRunner;
+    }
+
+    /**
      * Build workspace after delay (with option to add build files).
      */
     public void buildWorkspaceLater(boolean doAddFiles)
@@ -91,18 +120,9 @@ public class WorkspaceBuilder {
     }
 
     /**
-     * Build workspace.
-     */
-    private void buildWorkspace()
-    {
-        getBuildFilesRunner();
-        _addAllFilesToBuild = false;
-    }
-
-    /**
      * Build workspace real.
      */
-    private void buildWorkspaceImpl(boolean addAllFilesToBuild, TaskMonitor aTM)
+    private boolean buildWorkspaceImpl(boolean addAllFilesToBuild, TaskMonitor aTM)
     {
         // Handle AddFiles
         if (addAllFilesToBuild)
@@ -110,26 +130,21 @@ public class WorkspaceBuilder {
 
         // Get RootProj and child projects
         Project rootProj = _workspace.getRootProject();
-        Project[] projects = rootProj.getProjects();
-        boolean success = true;
+        Project[] childProjects = rootProj.getProjects();
 
         // Build child projects
-        for (Project proj : projects) {
+        for (Project childProject : childProjects) {
 
             // Build project
-            ProjectBuilder projectBuilder = proj.getBuilder();
+            ProjectBuilder projectBuilder = childProject.getBuilder();
             boolean projBuildSuccess = projectBuilder.buildProject(aTM);
-            if (!projBuildSuccess) {
-                success = false;
-                break;
-            }
+            if (!projBuildSuccess)
+                return false;
         }
 
-        // Build project
-        if (success) {
-            ProjectBuilder rootBuilder = rootProj.getBuilder();
-            rootBuilder.buildProject(aTM);
-        }
+        // Build root project
+        ProjectBuilder rootBuilder = rootProj.getBuilder();
+        return rootBuilder.buildProject(aTM);
     }
 
     /**
@@ -151,35 +166,9 @@ public class WorkspaceBuilder {
     }
 
     /**
-     * Returns the build files runner.
-     */
-    private synchronized void getBuildFilesRunner()
-    {
-        // If already building: Configure new build and interrupt
-        if (_buildFilesRunner != null) {
-
-            // Update BuildFilesRunner.[ AddFiles, RunAgain ]
-            if (_addAllFilesToBuild)
-                _buildFilesRunner._addAllFiles = true;
-            _buildFilesRunner._runAgain = true;
-
-            // Stop active build
-            Project rootProj = _workspace.getRootProject();
-            ProjectBuilder rootProjBuilder = rootProj.getBuilder();
-            rootProjBuilder.interruptBuild();
-        }
-
-        // If not building: Create BuildFilesRunner and start
-        else {
-            _buildFilesRunner = new BuildFilesRunner();
-            _buildFilesRunner.start();
-        }
-    }
-
-    /**
      * This TaskRunner subclass builds workspace in background thread.
      */
-    private class BuildFilesRunner extends TaskRunner<Object> {
+    private class BuildFilesRunner extends TaskRunner<Boolean> {
 
         // Whether to add all files to build
         private boolean _addAllFiles;
@@ -199,10 +188,9 @@ public class WorkspaceBuilder {
         /**
          * Called to start runner.
          */
-        public Object run()
+        public Boolean run()
         {
-            buildWorkspaceImpl(_addAllFiles, this);
-            return true;
+            return buildWorkspaceImpl(_addAllFiles, this);
         }
 
         /**
