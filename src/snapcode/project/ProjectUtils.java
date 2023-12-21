@@ -99,6 +99,33 @@ public class ProjectUtils {
     }
 
     /**
+     * Returns the URL of source code for given project and class path.
+     */
+    public static String getSourceCodeUrlForClassPath(Project aProject, String classPath)
+    {
+        if (classPath.startsWith("/java/") || classPath.startsWith("/javax/"))
+            return "https://reportmill.com/jars/8u05/src.zip!" + classPath;
+        if (classPath.startsWith("/javafx/"))
+            return "https://reportmill.com/jars/8u05/javafx-src.zip!" + classPath;
+
+        // Look in project
+        WebFile file = aProject.getSourceFile(classPath, false, false);
+        if (file != null)
+            return file.getUrlString();
+
+        // Look in child projects
+        Project[] projects = aProject.getProjects();
+        for (Project proj : projects) {
+            file = proj.getSourceFile(classPath, false, false);
+            if (file != null)
+                return file.getUrlString();
+        }
+
+        // Return not found
+        return classPath;
+    }
+
+    /**
      * Returns a temp project.
      */
     public static Project getTempProject()

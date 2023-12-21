@@ -7,6 +7,8 @@ import snap.text.TextStyle;
 import snap.util.Convert;
 import snapcode.apptools.RunTool;
 import snapcode.project.JavaTextDocUtils;
+import snapcode.project.Project;
+import snapcode.project.ProjectUtils;
 
 /**
  * A TextBlock to hold system console output.
@@ -104,16 +106,21 @@ public class ConsoleText extends TextBlock {
         if (end < start)
             end = aPrefix.length() - 1;
 
-        // Create link from path and return
-        String path = aPrefix.substring(start, end);
-        path = '/' + path.replace('.', '/') + ".java";
-        path = _runTool.getSourceURL(path);
+        // Get class file path
+        String classFilePath = aPrefix.substring(start, end);
+        classFilePath = '/' + classFilePath.replace('.', '/') + ".java";
+
+        // Get full path to source file in project (or full URL string if external source)
+        Project rootProject = _runTool.getProject();
+        String sourceCodeFilePath = ProjectUtils.getSourceCodeUrlForClassPath(rootProject, classFilePath);
         String lineStr = linkedText.substring(linkedText.indexOf(":") + 1);
+
+        // Add line number
         int line = Convert.intValue(lineStr);
         if (line > 0)
-            path += "#LineNumber=" + line;
+            sourceCodeFilePath += "#LineNumber=" + line;
 
         // Return
-        return path;
+        return sourceCodeFilePath;
     }
 }

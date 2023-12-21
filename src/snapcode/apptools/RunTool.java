@@ -410,39 +410,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
     }
 
     /**
-     * Returns a source URL for path.
-     */
-    public String getSourceURL(String aPath)
-    {
-        if (aPath.startsWith("/java/") || aPath.startsWith("/javax/"))
-            return "https://reportmill.com/jars/8u05/src.zip!" + aPath;
-        if (aPath.startsWith("/javafx/"))
-            return "https://reportmill.com/jars/8u05/javafx-src.zip!" + aPath;
-
-        // Get root project
-        WebSite rootSite = getRootSite();
-        Project project = Project.getProjectForSite(rootSite);
-        if (project == null)
-            return aPath;
-
-        // Look in project
-        WebFile file = project.getSourceFile(aPath, false, false);
-        if (file != null)
-            return file.getUrlString();
-
-        // Look in child projects
-        Project[] projects = project.getProjects();
-        for (Project proj : projects) {
-            file = proj.getSourceFile(aPath, false, false);
-            if (file != null)
-                return file.getUrlString();
-        }
-
-        // Return not found
-        return aPath;
-    }
-
-    /**
      * Whether run is running.
      */
     public boolean isRunning()

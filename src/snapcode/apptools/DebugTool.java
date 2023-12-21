@@ -2,6 +2,8 @@ package snapcode.apptools;
 import snap.view.*;
 import snapcode.debug.*;
 import snapcode.javatext.JavaTextArea;
+import snapcode.project.Project;
+import snapcode.project.ProjectUtils;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebURL;
@@ -358,19 +360,31 @@ public class DebugTool extends WorkspaceTool {
         // Make DebugVarsPane visible and updateVarTable
         _workspaceTools.showToolForClass(DebugTool.class);
 
+        // Get current frame (just return if null)
         DebugFrame frame = aProc.getFrame();
-        if (frame == null) return;
-        getDebugVarsPane().resetVarTable(); // This used to be before short-circuit to clear trees
+        if (frame == null)
+            return;
+
+        // Reset vars/exprs UI (This used to be before short-circuit to clear trees)
+        getDebugVarsPane().resetVarTable();
         getDebugExprsPane().resetVarTable();
-        String path = frame.getSourcePath();
-        if (path == null) return;
+
+        // Get frame class file path
+        String classFilePath = frame.getSourcePath();
+        if (classFilePath == null)
+            return;
+
+        // Get full path to class in project (or url to system source)
+        Project rootProject = getProject();
+        String sourceCodeFilePath = ProjectUtils.getSourceCodeUrlForClassPath(rootProject, classFilePath);
+
+        // Add line number
         int lineNum = frame.getLineNumber();
-        if (lineNum < 0) lineNum = 0;
-        path = _runTool.getSourceURL(path);
-        path += "#SelLine=" + lineNum;
+        if (lineNum >= 0)
+            sourceCodeFilePath += "#SelLine=" + lineNum;
 
         // Set ProgramCounter file and line
-        WebURL url = WebURL.getURL(path);
+        WebURL url = WebURL.getURL(sourceCodeFilePath);
         WebFile file = url.getFile();
         setProgramCounter(file, lineNum - 1);
         getBrowser().setURL(url);
