@@ -131,6 +131,16 @@ public class WorkspaceBuilder {
     }
 
     /**
+     * Stops any build in progress.
+     */
+    public void stopBuild()
+    {
+        BuildWorkspaceRunner buildRunner = _buildWorkspaceRunner;
+        if (buildRunner != null)
+            buildRunner.cancel();
+    }
+
+    /**
      * Removes build files from workspace.
      */
     public void cleanWorkspace()

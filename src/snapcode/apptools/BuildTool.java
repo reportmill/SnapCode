@@ -75,11 +75,26 @@ public class BuildTool extends WorkspaceTool {
     }
 
     /**
+     * Initialize when showing.
+     */
+    @Override
+    protected void initShowing()
+    {
+        _workspace.addPropChangeListener(pc -> resetLater(), Workspace.Building_Prop);
+    }
+
+    /**
      * Reset UI.
      */
     @Override
     protected void resetUI()
     {
+        // Update BuildButton, StopButton
+        boolean isBuilding = _workspace.isBuilding();
+        setViewEnabled("BuildButton", !isBuilding);
+        setViewEnabled("StopButton", isBuilding);
+
+        // Update BuildStatusLabel
         setViewText("BuildStatusLabel", getBuildStatusText());
 
         setViewItems("ErrorsList", getIssues());
@@ -91,8 +106,14 @@ public class BuildTool extends WorkspaceTool {
      */
     public void respondUI(ViewEvent anEvent)
     {
+        // Handle BuildButton, Handle StopButton
+        if (anEvent.equals("BuildButton"))
+            _workspace.getBuilder().buildWorkspaceLater();
+        else if (anEvent.equals("StopButton"))
+            _workspace.getBuilder().stopBuild();
+
         // Handle ErrorsList
-        if (anEvent.equals("ErrorsList")) {
+        else if (anEvent.equals("ErrorsList")) {
 
             // Set issue
             BuildIssue issue = (BuildIssue) anEvent.getSelItem();
