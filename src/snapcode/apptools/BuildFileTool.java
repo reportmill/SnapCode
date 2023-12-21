@@ -122,7 +122,8 @@ public class BuildFileTool extends ProjectTool {
 
         // Build workspace
         WorkspaceBuilder builder = _workspace.getBuilder();
-        builder.buildWorkspaceLater(true);
+        builder.addAllFilesToBuild();
+        builder.buildWorkspaceLater();
     }
 
     /**
@@ -338,7 +339,7 @@ public class BuildFileTool extends ProjectTool {
 
         // Trigger build
         WorkspaceBuilder builder = _workspace.getBuilder();
-        builder.buildWorkspaceLater(false);
+        builder.buildWorkspaceLater();
         dragEvent.dropComplete();
     }
 

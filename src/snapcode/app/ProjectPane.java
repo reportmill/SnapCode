@@ -122,8 +122,10 @@ public class ProjectPane extends ViewOwner {
         // Do AutoBuild
         Workspace workspace = getWorkspace();
         WorkspaceBuilder builder = workspace.getBuilder();
-        if (builder.isAutoBuildEnabled())
-            builder.buildWorkspaceLater(true);
+        if (builder.isAutoBuildEnabled()) {
+            builder.addAllFilesToBuild();
+            builder.buildWorkspaceLater();
+        }
 
         // Activate VersionControlPane
         if (_versionControlTool != null)
@@ -248,7 +250,7 @@ public class ProjectPane extends ViewOwner {
         Workspace workspace = _project.getWorkspace();
         WorkspaceBuilder builder = workspace.getBuilder();
         if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
-            builder.buildWorkspaceLater(false);
+            builder.buildWorkspaceLater();
     }
 
     /**

@@ -309,7 +309,7 @@ public class FileTreeTool extends WorkspaceTool {
         // Handle BuildProjectMenuItem
         if (anEvent.equals("BuildProjectMenuItem")) {
             WorkspaceBuilder builder = _workspace.getBuilder();
-            builder.buildWorkspaceLater(false);
+            builder.buildWorkspaceLater();
         }
 
         // Handle ShowClassInfoMenuItem

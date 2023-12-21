@@ -227,8 +227,10 @@ public class VersionControlTool extends ProjectTool {
         // Reset AutoBuildEnabled and trigger auto build
         WorkspaceBuilder builder = _workspace.getBuilder();
         builder.setAutoBuildEnabled(oldAutoBuildEnabled);
-        if (oldAutoBuildEnabled)
-            builder.buildWorkspaceLater(true);
+        if (oldAutoBuildEnabled) {
+            builder.addAllFilesToBuild();
+            builder.buildWorkspaceLater();
+        }
     }
 
     /**
@@ -380,7 +382,7 @@ public class VersionControlTool extends ProjectTool {
                 WorkspaceBuilder builder = _workspace.getBuilder();
                 builder.setAutoBuildEnabled(oldAutoBuild);
                 if (oldAutoBuild)
-                    builder.buildWorkspaceLater(false);
+                    builder.buildWorkspaceLater();
 
                 // Connect to remote site
                 if (isUISet())
@@ -465,7 +467,7 @@ public class VersionControlTool extends ProjectTool {
                 WorkspaceBuilder builder = _workspace.getBuilder();
                 builder.setAutoBuildEnabled(oldAutoBuild);
                 if (oldAutoBuild)
-                    builder.buildWorkspaceLater(false);
+                    builder.buildWorkspaceLater();
 
                 // Connect to remote site
                 if (isUISet())

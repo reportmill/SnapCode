@@ -115,16 +115,15 @@ public class WorkspaceBuilder {
     }
 
     /**
-     * Build workspace after delay (with option to add build files).
+     * Build workspace after delay.
      */
-    public void buildWorkspaceLater(boolean doAddFiles)
+    public void buildWorkspaceLater()
     {
-        _addAllFilesToBuild |= doAddFiles;
         buildWorkspaceAfterDelay(0);
     }
 
     /**
-     * Build workspace after delay.
+     * Build workspace after given delay.
      */
     public void buildWorkspaceAfterDelay(int aDelay)
     {
@@ -150,7 +149,7 @@ public class WorkspaceBuilder {
     {
         // Handle AddFiles
         if (addAllFilesToBuild)
-            addAllFilesToBuild();
+            addAllFilesToBuildImpl();
 
         // Get RootProj and child projects
         Project rootProj = _workspace.getRootProject();
@@ -172,9 +171,14 @@ public class WorkspaceBuilder {
     }
 
     /**
+     * Adds all workspace source files to next build.
+     */
+    public void addAllFilesToBuild()  { _addAllFilesToBuild = true; }
+
+    /**
      * Adds a build file.
      */
-    private void addAllFilesToBuild()
+    private void addAllFilesToBuildImpl()
     {
         // Make RootProject addBuildFiles
         Project rootProj = _workspace.getRootProject();

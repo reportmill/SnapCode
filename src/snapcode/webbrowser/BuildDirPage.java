@@ -95,7 +95,8 @@ public class BuildDirPage extends WebPage {
             Project proj = getProject();
             Workspace workspace = proj.getWorkspace();
             WorkspaceBuilder builder = workspace.getBuilder();
-            builder.buildWorkspaceLater(true);
+            builder.addAllFilesToBuild();
+            builder.buildWorkspaceLater();
         }
 
         // Handle CleanButton

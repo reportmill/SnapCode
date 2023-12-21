@@ -122,7 +122,7 @@ public class FilesTool extends WorkspaceTool {
 
         // Enable auto build and build
         builder.setAutoBuildEnabled(true);
-        builder.buildWorkspaceLater(false);
+        builder.buildWorkspaceLater();
 
         // Return files
         return success && theFiles.size() > 0;
@@ -232,7 +232,7 @@ public class FilesTool extends WorkspaceTool {
 
         // Enable auto build and build
         builder.setAutoBuildEnabled(true);
-        builder.buildWorkspaceLater(false);
+        builder.buildWorkspaceLater();
     }
 
     /**
