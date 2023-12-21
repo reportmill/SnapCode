@@ -315,7 +315,7 @@ public class WorkspaceTools {
         // Kick off run
         RunTool runTool = getToolForClass(RunTool.class);
         if (runTool != null)
-            ViewUtils.runLater(() -> runTool.runApp());
+            ViewUtils.runLater(() -> runTool.runAppForSelFile());
     }
 
     /**

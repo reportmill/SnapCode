@@ -1,5 +1,4 @@
 package snapcode.apptools;
-import snap.util.TaskMonitor;
 import snapcode.project.*;
 import snapcode.javatext.JavaTextUtils;
 import snap.gfx.Image;
@@ -27,34 +26,6 @@ public class BuildTool extends WorkspaceTool {
     public BuildTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
-    }
-
-    /**
-     * Builds the app.
-     */
-    public boolean buildApp()
-    {
-        // Get JavaAgent
-        WebFile selFile = getSelFile();
-        JavaAgent javaAgent = selFile != null ? JavaAgent.getAgentForFile(selFile) : null;
-        if (javaAgent == null)
-            return false;
-
-        // Get ProjectBuilder and add build file
-        Project proj = getProject();
-        ProjectBuilder projectBuilder = proj.getBuilder();
-        projectBuilder.addBuildFile(selFile, true);
-
-        // Build project
-        TaskMonitor taskMonitor = new TaskMonitor.Text(System.out);
-        boolean success = projectBuilder.buildProject(taskMonitor);
-
-        // Build file - if failed, show errors
-        if (!success)
-            _workspaceTools.showTool(this);
-
-        // Return
-        return success;
     }
 
     /**

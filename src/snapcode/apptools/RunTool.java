@@ -1,7 +1,7 @@
 package snapcode.apptools;
 import snap.props.PropChange;
-import snap.util.FilePathUtils;
 import snap.util.ListUtils;
+import snap.util.TaskRunner;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
@@ -12,7 +12,6 @@ import snapcode.app.WorkspaceTool;
 import snapcode.debug.*;
 import snapcode.project.*;
 import snapcode.webbrowser.WebPage;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,6 +125,56 @@ public class RunTool extends WorkspaceTool implements AppListener {
     public DebugTool getDebugTool()  { return _workspaceTools.getToolForClass(DebugTool.class); }
 
     /**
+     * Runs app for selected file.
+     */
+    public void runAppForSelFile()
+    {
+        // Clear display
+        clearConsole();
+
+        // Trigger build
+        WorkspaceBuilder workspaceBuilder = _workspace.getBuilder();
+        TaskRunner<Boolean> buildRunner = workspaceBuilder.buildWorkspace();
+        buildRunner.setOnSuccess(success -> buildFinished(success));
+    }
+
+    /**
+     * Called after build finished.
+     */
+    private void buildFinished(boolean noErrors)
+    {
+        // If no errors, just run app
+        if (noErrors)
+            runAppForSelFileImpl();
+
+            // Otherwise, show build tool
+        else _workspaceTools.showToolForClass(BuildTool.class);
+    }
+
+    /**
+     * Runs app for selected file.
+     */
+    private void runAppForSelFileImpl()
+    {
+        // Run app
+        WebFile selFile = getSelFile();
+        if (selFile == null)
+            return;
+
+        // Get args
+        Project proj = getProject();
+        String className = proj.getClassNameForFile(selFile);
+        String[] args = { className };
+
+        // Create app and run
+        RunApp runApp = new RunAppSrc(this, selFile.getURL(), args);
+        execProc(runApp);
+
+        // Reset UI
+        resetLater();
+    }
+
+    /**
      * Run application.
      */
     public void runDefaultConfig(boolean withDebug)
@@ -196,16 +245,17 @@ public class RunTool extends WorkspaceTool implements AppListener {
         _lastRunFile = runFile;
 
         // Run/debug file
-        String[] runArgs = getRunArgs(proj, config, runFile, isDebug);
-        WebURL url = runFile.getURL();
-        runAppForArgs(runArgs, url, isDebug);
+        String[] runArgs = RunToolUtils.getRunArgs(proj, config, runFile, isDebug);
+        runAppForFileAndArgs(runFile, runArgs, isDebug);
     }
 
     /**
      * Runs the provided file as straight app.
      */
-    public void runAppForArgs(String[] args, WebURL aURL, boolean isDebug)
+    public void runAppForFileAndArgs(WebFile aFile, String[] args, boolean isDebug)
     {
+        WebURL fileURL = aFile.getURL();
+
         // Print run command to console
         String commandLineStr = String.join(" ", args);
         if (isDebug)
@@ -215,11 +265,11 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // Get process
         RunApp proc;
         if (!isDebug)
-            proc = new RunAppBin(this, aURL, args);
+            proc = new RunAppBin(this, fileURL, args);
 
             // Handle isDebug: Create DebugApp with Workspace.Breakpoints
         else {
-            proc = new DebugApp(this, aURL, args);
+            proc = new DebugApp(this, fileURL, args);
             Breakpoints breakpointsHpr = _workspace.getBreakpoints();
             Breakpoint[] breakpoints = breakpointsHpr.getArray();
             for (Breakpoint breakpoint : breakpoints)
@@ -393,72 +443,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
     }
 
     /**
-     * Returns an array of args for given config and file.
-     */
-    private static String[] getRunArgs(Project aProj, RunConfig aConfig, WebFile aFile, boolean isDebug)
-    {
-        // Get basic run command and add to list
-        List<String> commands = new ArrayList<>();
-
-        // If not debug, add Java command path
-        if (!isDebug) {
-            String javaCmdPath = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-            commands.add(javaCmdPath);
-        }
-
-        // Get Class path and add to list
-        String[] classPaths = aProj.getRuntimeClassPaths();
-        String[] classPathsNtv = FilePathUtils.getNativePaths(classPaths);
-        String classPath = FilePathUtils.getJoinedPath(classPathsNtv);
-        commands.add("-cp");
-        commands.add(classPath);
-
-        // Add class name
-        String className = aProj.getClassNameForFile(aFile);
-        commands.add(className);
-
-        // Add App Args
-        String appArgs = aConfig != null ? aConfig.getAppArgs() : null;
-        if (appArgs != null && appArgs.length() > 0)
-            commands.add(appArgs);
-
-        // Return commands
-        return commands.toArray(new String[0]);
-    }
-
-    /**
-     * Runs Java code.
-     */
-    public void runApp()
-    {
-        // Clear display
-        clearConsole();
-
-        // Build app
-        BuildTool buildTool = _workspaceTools.getToolForClass(BuildTool.class);
-        boolean success = buildTool.buildApp();
-        if (!success)
-            return;
-
-        // Run app
-        WebFile selFile = getSelFile();
-        if (selFile == null)
-            return;
-
-        // Get args
-        Project proj = getProject();
-        String className = proj.getClassNameForFile(selFile);
-        String[] args = { className };
-
-        // Create app and run
-        RunApp runApp = new RunAppSrc(this, selFile.getURL(), args);
-        execProc(runApp);
-
-        // Reset UI
-        resetLater();
-    }
-
-    /**
      * Whether run is running.
      */
     public boolean isRunning()
@@ -530,7 +514,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
     {
         // Handle RunButton, TerminateButton
         if (anEvent.equals("RunButton"))
-            runApp();
+            runAppForSelFile();
         else if (anEvent.equals("TerminateButton"))
             cancelRun();
 
