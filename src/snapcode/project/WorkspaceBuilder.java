@@ -1,4 +1,5 @@
 package snapcode.project;
+import snap.util.ArrayUtils;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
 import snap.view.ViewUtils;
@@ -24,8 +25,8 @@ public class WorkspaceBuilder {
     // A runnable to build file after delay
     private Runnable _buildWorkspaceRun = () -> buildWorkspace();
 
-    // The runner to build files
-    private BuildFilesRunner  _buildFilesRunner;
+    // The runner to build workspace
+    private BuildWorkspaceRunner _buildWorkspaceRunner;
 
     /**
      * Constructor.
@@ -62,17 +63,40 @@ public class WorkspaceBuilder {
     }
 
     /**
+     * Returns whether workspace needs to build.
+     */
+    public boolean isNeedsBuild()
+    {
+        if (_addAllFilesToBuild)
+            return true;
+        Project rootProj = _workspace.getRootProject();
+        if (rootProj.getBuilder().isNeedsBuild())
+            return true;
+        Project[] childProjects = rootProj.getProjects();
+        return ArrayUtils.hasMatch(childProjects, proj -> proj.getBuilder().isNeedsBuild());
+    }
+
+    /**
+     * Returns whether workspace is building.
+     */
+    public boolean isBuilding()
+    {
+        BuildWorkspaceRunner buildRunner = _buildWorkspaceRunner;
+        return buildRunner != null && buildRunner.isActive();
+    }
+
+    /**
      * Build workspace.
      */
     public TaskRunner<Boolean> buildWorkspace()
     {
         // If already building: Configure new build and interrupt
-        if (_buildFilesRunner != null) {
+        if (_buildWorkspaceRunner != null) {
 
             // Update BuildFilesRunner.[ AddFiles, RunAgain ]
             if (_addAllFilesToBuild)
-                _buildFilesRunner._addAllFiles = true;
-            _buildFilesRunner._runAgain = true;
+                _buildWorkspaceRunner._addAllFiles = true;
+            _buildWorkspaceRunner._runAgain = true;
 
             // Stop active build
             Project rootProj = _workspace.getRootProject();
@@ -82,12 +106,12 @@ public class WorkspaceBuilder {
 
         // If not building: Create BuildFilesRunner and start
         else {
-            _buildFilesRunner = new BuildFilesRunner();
-            _buildFilesRunner.start();
+            _buildWorkspaceRunner = new BuildWorkspaceRunner();
+            _buildWorkspaceRunner.start();
         }
 
         _addAllFilesToBuild = false;
-        return _buildFilesRunner;
+        return _buildWorkspaceRunner;
     }
 
     /**
@@ -168,7 +192,7 @@ public class WorkspaceBuilder {
     /**
      * This TaskRunner subclass builds workspace in background thread.
      */
-    private class BuildFilesRunner extends TaskRunner<Boolean> {
+    private class BuildWorkspaceRunner extends TaskRunner<Boolean> {
 
         // Whether to add all files to build
         private boolean _addAllFiles;
@@ -179,7 +203,7 @@ public class WorkspaceBuilder {
         /**
          * Constructor.
          */
-        public BuildFilesRunner()
+        public BuildWorkspaceRunner()
         {
             super();
             _addAllFiles = _addAllFilesToBuild;
@@ -213,7 +237,7 @@ public class WorkspaceBuilder {
                 start();
             }
 
-            else _buildFilesRunner = null;
+            else _buildWorkspaceRunner = null;
 
             // Update Workspace Activity/Building
             _workspace.setActivity("Build Completed");

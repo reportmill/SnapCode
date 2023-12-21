@@ -15,6 +15,11 @@ import java.util.List;
 public interface ProjectFileBuilder {
 
     /**
+     * Returns whether this builder has files to build.
+     */
+    boolean isNeedsBuild();
+
+    /**
      * Returns whether file is build file.
      */
     boolean isBuildFile(WebFile aFile);
@@ -22,7 +27,7 @@ public interface ProjectFileBuilder {
     /**
      * Returns whether given file needs a build.
      */
-    boolean getNeedsBuild(WebFile aFile);
+    boolean isFileNeedsBuild(WebFile aFile);
 
     /**
      * Add a build file.
@@ -51,11 +56,20 @@ public interface ProjectFileBuilder {
         private List<WebFile>  _buildFiles = new ArrayList<>();
 
         /**
-         * Creates a new DefaultFileBuilder for given Project.
+         * Constructor for given Project.
          */
         public DefaultBuilder(Project aProject)
         {
             _proj = aProject;
+        }
+
+        /**
+         * Returns whether file is build file.
+         */
+        @Override
+        public boolean isNeedsBuild()
+        {
+            return _buildFiles.size() > 0;
         }
 
         /**
@@ -70,7 +84,7 @@ public interface ProjectFileBuilder {
         /**
          * Returns whether given file needs to be built.
          */
-        public boolean getNeedsBuild(WebFile aFile)
+        public boolean isFileNeedsBuild(WebFile aFile)
         {
             ProjectFiles projFiles = _proj.getProjectFiles();
             WebFile buildFile = projFiles.getBuildFile(aFile.getPath(), false, false);

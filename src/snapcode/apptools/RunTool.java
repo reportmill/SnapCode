@@ -132,10 +132,15 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // Clear display
         clearConsole();
 
-        // Trigger build
+        // If workspace needs build, trigger build
         WorkspaceBuilder workspaceBuilder = _workspace.getBuilder();
-        TaskRunner<Boolean> buildRunner = workspaceBuilder.buildWorkspace();
-        buildRunner.setOnSuccess(success -> buildFinished(success));
+        if (workspaceBuilder.isNeedsBuild() || workspaceBuilder.isBuilding()) {
+            TaskRunner<Boolean> buildRunner = workspaceBuilder.buildWorkspace();
+            buildRunner.setOnSuccess(success -> buildFinished(success));
+        }
+
+        // Otherwise, just launch
+        else runAppForSelFileImpl();
     }
 
     /**

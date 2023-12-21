@@ -37,6 +37,15 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     }
 
     /**
+     * Returns whether this builder has files to build.
+     */
+    @Override
+    public boolean isNeedsBuild()
+    {
+        return _buildFiles.size() > 0;
+    }
+
+    /**
      * Returns whether file is build file.
      */
     public boolean isBuildFile(WebFile aFile)
@@ -48,7 +57,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     /**
      * Returns whether given file needs to be built.
      */
-    public boolean getNeedsBuild(WebFile aFile)  { return true; }
+    public boolean isFileNeedsBuild(WebFile aFile)  { return true; }
 
     /**
      * Adds a compile file.

@@ -45,6 +45,14 @@ public class ProjectBuilder {
     public Date getBuildDate()  { return _buildDate; }
 
     /**
+     * Returns whether project currently needs to be built.
+     */
+    public boolean isNeedsBuild()
+    {
+        return _javaFileBuilder.isNeedsBuild() || _defaultFileBuilder.isNeedsBuild();
+    }
+
+    /**
      * Builds the project.
      */
     public boolean buildProject(TaskMonitor aTM)
@@ -182,7 +190,7 @@ public class ProjectBuilder {
             return;
 
         // If file needs build, add to fileBuilder
-        boolean needsBuild = fileBuilder.getNeedsBuild(aFile);
+        boolean needsBuild = fileBuilder.isFileNeedsBuild(aFile);
         if (doForce || needsBuild)
             fileBuilder.addBuildFile(aFile);
     }

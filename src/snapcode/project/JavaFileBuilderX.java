@@ -32,7 +32,7 @@ public class JavaFileBuilderX extends JavaFileBuilder {
      * Returns whether given file needs to be built.
      */
     @Override
-    public boolean getNeedsBuild(WebFile aFile)
+    public boolean isFileNeedsBuild(WebFile aFile)
     {
         // See if Java file has out of date Class file
         ProjectFiles projectFiles = _proj.getProjectFiles();
