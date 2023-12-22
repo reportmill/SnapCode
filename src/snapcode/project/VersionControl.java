@@ -65,8 +65,10 @@ public class VersionControl {
     {
         WebSite sandboxSite = getSite().getSandbox();
         WebFile cloneDir = sandboxSite.getFileForPath("Remote.clone");
-        if (cloneDir == null)
+        if (cloneDir == null) {
             cloneDir = sandboxSite.createFileForPath("Remote.clone", true);
+            cloneDir.save();
+        }
         return cloneDir;
     }
 
@@ -337,6 +339,8 @@ public class VersionControl {
         if (name.equals("bin"))
             return true;
         if (name.equals("CVS"))
+            return true;
+        if (name.startsWith("__"))
             return true;
         return name.equals(".git");
     }

@@ -134,6 +134,13 @@ public class WelcomePanel extends ViewOwner {
      */
     protected void newFile(boolean showSamples)
     {
+        // Handle alt down
+        if (ViewUtils.isAltDown()) {
+            WebURL repoURL = WebURL.getURL("/Users/jeff/Samples/SnapCode/VectorGraphics");
+            openWorkspaceForRepoURL(repoURL);
+            return;
+        }
+
         // Open workspace for new Java repl file
         WebFile javaReplFile = ProjectUtils.getTempJavaFile("JavaFiddle", "", true);
         WorkspacePane workspacePane = openWorkspaceForFile(javaReplFile);
@@ -177,6 +184,27 @@ public class WelcomePanel extends ViewOwner {
 
         // Return
         return workspacePane;
+    }
+
+    /**
+     * Opens a workspace for repo URL.
+     */
+    private void openWorkspaceForRepoURL(WebURL repoURL)
+    {
+        Workspace workspace = new Workspace();
+        workspace.setUseRealCompiler(true);
+        workspace.addProjectForRepoURL(repoURL);
+        openWorkspace(workspace);
+    }
+
+    /**
+     * Opens a workspace.
+     */
+    private void openWorkspace(Workspace aWorkspace)
+    {
+        WorkspacePane workspacePane = new WorkspacePane(aWorkspace);
+        workspacePane.show();
+        hide();
     }
 
     /**

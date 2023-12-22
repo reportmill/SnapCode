@@ -424,6 +424,8 @@ public class WorkspacePane extends ViewOwner {
     @Override
     public void resetUI()
     {
+        if (getProjects().length == 0) return;
+
         // Reset window title
         WebPage page = _pagePane.getSelPage();
         getWindow().setTitle(page != null ? page.getTitle() : "SnapCode");
