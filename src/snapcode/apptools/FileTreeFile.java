@@ -181,7 +181,7 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
                 _file.isRoot() ? _file.getSite().getName() : _file.getName();
 
         // Get Prefix, Suffix
-        String prefix = _vc.isModified(_file) ? ">" : "";
+        String prefix = _vc.isFileModified(_file) ? ">" : "";
         String suffix = _file.isUpdateSet() ? " *" : "";
 
         // Return all parts

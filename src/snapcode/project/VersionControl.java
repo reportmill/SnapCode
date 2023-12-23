@@ -15,18 +15,18 @@ import snap.web.WebURL;
 import java.util.*;
 
 /**
- * This is a class to handle file synchronization with a remote WebSite for a data source.
+ * This is a class to handle file synchronization for a local WebSite with a remote WebSite.
  */
 public class VersionControl {
 
     // The local site
-    private WebSite  _site;
+    private WebSite _localSite;
 
     // The remote URL
-    private WebURL  _remoteURL;
+    private WebURL _remoteURL;
 
     // A map of file to it's status
-    private Map<WebFile, Status>  _filesStatus = new HashMap<>();
+    private Map<WebFile, FileStatus> _filesStatusCache = new HashMap<>();
 
     // The PropChangeSupport
     private PropChangeSupport _pcs = PropChangeSupport.EMPTY;
@@ -35,14 +35,17 @@ public class VersionControl {
     public enum Op { Update, Replace, Commit }
 
     // Constants for the state of files relative to remote cache
-    public enum Status { Added, Removed, Modified, Identical }
+    public enum FileStatus { Added, Removed, Modified, Identical }
+
+    // Constants for properties
+    public static final String FileStatus_Prop = "FileStatus";
 
     /**
      * Creates a VersionControl for a given site.
      */
     public VersionControl(WebSite aSite)
     {
-        _site = aSite;
+        _localSite = aSite;
         String urls = getRemoteURLString(aSite);
         if (urls != null)
             _remoteURL = WebURL.getURL(urls);
@@ -63,7 +66,8 @@ public class VersionControl {
      */
     protected WebFile getCloneDir()
     {
-        WebSite sandboxSite = getSite().getSandbox();
+        WebSite localSite = getLocalSite();
+        WebSite sandboxSite = localSite.getSandbox();
         WebFile cloneDir = sandboxSite.getFileForPath("Remote.clone");
         if (cloneDir == null) {
             cloneDir = sandboxSite.createFileForPath("Remote.clone", true);
@@ -75,14 +79,15 @@ public class VersionControl {
     /**
      * Returns the local site.
      */
-    public WebSite getSite()  { return _site; }
+    public WebSite getLocalSite()  { return _localSite; }
 
     /**
      * Returns the local cache site of remote site.
      */
     public WebSite getCloneSite()
     {
-        return getCloneDir().getURL().getAsSite();
+        WebFile cloneDir = getCloneDir();
+        return cloneDir.getURL().getAsSite();
     }
 
     /**
@@ -96,45 +101,11 @@ public class VersionControl {
     /**
      * Returns the remote site.
      */
-    public WebSite getRemoteSite()  { return _remoteURL != null ? _remoteURL.getAsSite() : null; }
-
-    /**
-     * Returns the site file for path.
-     */
-    private WebFile getSiteFile(String aPath, boolean isDir)
+    public WebSite getRemoteSite()
     {
-        WebSite site = getSite();
-        return getFile(site, aPath, true, isDir);
-    }
-
-    /**
-     * Returns the local cache file of given path.
-     */
-    public WebFile getCloneFile(String aPath, boolean doCreate, boolean isDir)
-    {
-        WebSite cloneSite = getCloneSite();
-        return getFile(cloneSite, aPath, doCreate, isDir);
-    }
-
-    /**
-     * Returns the remote file for path.
-     */
-    public WebFile getRepoFile(String aPath, boolean doCreate, boolean isDir)
-    {
-        WebSite repoSite = getRepoSite();
-        return getFile(repoSite, aPath, doCreate, isDir);
-    }
-
-    /**
-     * Returns the file for site and path.
-     */
-    private WebFile getFile(WebSite aSite, String aPath, boolean doCreate, boolean isDir)
-    {
-        if (aSite == null) return null;
-        WebFile file = aSite.getFileForPath(aPath);
-        if (file == null && doCreate)
-            file = aSite.createFileForPath(aPath, isDir);
-        return file;
+        if (_remoteURL != null)
+            return _remoteURL.getAsSite();
+        return null;
     }
 
     /**
@@ -149,114 +120,22 @@ public class VersionControl {
     /**
      * Load remote files and VCS files into site directory.
      */
-    public void checkout(TaskMonitor aTM) throws Exception
+    public void checkout(TaskMonitor taskMonitor)
     {
-        List<WebFile> files = new ArrayList<>();
-        WebFile rootDir = getSite().getRootDir();
-        getUpdateFiles(rootDir, files);
-        updateFiles(files, aTM);
-    }
+        // Find all files to update
+        WebSite localSite = getLocalSite();
+        WebFile localSiteRootDir = localSite.getRootDir();
+        List<WebFile> updateFiles = new ArrayList<>();
+        findUpdateFiles(localSiteRootDir, updateFiles);
 
-    /**
-     * Delete VCS support files from site directory.
-     */
-    public void disconnect(TaskMonitor aTM) throws Exception
-    {
-        WebSite cloneSite = getCloneSite();
-        if (cloneSite != null)
-            cloneSite.deleteSite();
-    }
-
-    /**
-     * Returns whether the file has been modified from VCS.
-     */
-    public boolean isModified(WebFile aFile)
-    {
-        Status status = getStatus(aFile);
-        return status != Status.Identical;
-    }
-
-    /**
-     * Returns the file VersionControl status.
-     */
-    public synchronized Status getStatus(WebFile aFile)
-    {
-        // Get cached status
-        Status status = _filesStatus.get(aFile);
-        if (status != null)
-            return status;
-
-        // Determine status, cache and return
-        status = getStatus(aFile, true);
-        _filesStatus.put(aFile, status);
-        return status;
-    }
-
-    /**
-     * Returns the status for a given remote file info.
-     */
-    protected Status getStatus(WebFile aFile, boolean isDeep)
-    {
-        // If no clone site or is ignore file, just return
-        if (!getExists())
-            return Status.Identical;
-        if (isIgnoreFile(aFile))
-            return Status.Identical;
-
-        // If directory, iterate over child files and if any ChangedLocal, return ChangedLocal, otherwise return Identical
-        if (aFile.isDir()) {
-            if (isDeep) {
-                for (WebFile file : aFile.getFiles()) {
-                    if (isModified(file))
-                        return Status.Modified;
-                }
-            }
-            return Status.Identical;
-        }
-
-        // If file doesn't exist, return removed
-        if (!aFile.getExists())
-            return Status.Removed;
-
-        // Get CloneFile - if not found, return Status.Added
-        WebFile cloneFile = getCloneFile(aFile.getPath(), false, false);
-        if (cloneFile == null)
-            return Status.Added;
-
-        // Check modified times match, or bytes match, return identical
-        long cloneMT = cloneFile.getLastModTime(), localMT = aFile.getLastModTime();
-        if (localMT == cloneMT)
-            return Status.Identical;
-        if (aFile.isFile() && cloneFile.isFile() && ArrayUtils.equals(aFile.getBytes(), cloneFile.getBytes()))
-            return Status.Identical;
-
-        // Otherwise, return Modified
-        return Status.Modified;
-    }
-
-    /**
-     * Returns the file VersionControl status.
-     */
-    public void setStatus(WebFile aFile, Status aStatus)
-    {
-        // Set new status, get old
-        Status old;
-        synchronized (this) {
-            old = _filesStatus.put(aFile, aStatus);
-        }
-
-        // If parent, clear Parent.Status
-        if (aFile.getParent() != null)
-            setStatus(aFile.getParent(), null);
-
-        // Fire PropChange
-        firePropChange(new PropChange(aFile, "Status", old, aStatus));
+        // Update files
+        updateFiles(updateFiles, taskMonitor);
     }
 
     /**
      * Returns the local files for given file or directory that need to be updated.
      */
-    public void getUpdateFiles(WebFile aFile, List<WebFile> theFiles)
+    public void findUpdateFiles(WebFile aFile, List<WebFile> updateFiles)
     {
         // If no clone site, just return
         if (!getExists()) return;
@@ -265,69 +144,375 @@ public class VersionControl {
         WebFile remoteFile = getRepoFile(aFile.getPath(), true, aFile.isDir());
 
         // Get remote changed files (update files)
-        Set<WebFile> updateFiles = getChangedFiles(remoteFile, new HashSet<>());
+        Set<WebFile> changedFiles = new HashSet<>();
+        findChangedFiles(remoteFile, changedFiles);
 
         // Add local versions to list
-        for (WebFile file : updateFiles) {
-            WebFile lfile = getSiteFile(file.getPath(), file.isDir());
-            theFiles.add(lfile);
+        for (WebFile changedFile : changedFiles) {
+            WebFile localFile = getLocalFile(changedFile.getPath(), changedFile.isDir());
+            updateFiles.add(localFile);
+        }
+    }
+
+    /**
+     * Updates (merges) local site files from remote site.
+     */
+    public void updateFiles(List<WebFile> localFiles, TaskMonitor taskMonitor)
+    {
+        // Call TaskMonitor.startTasks
+        taskMonitor.startTasks(localFiles.size());
+
+        // Iterate over files and update each
+        for (WebFile localFile : localFiles) {
+            taskMonitor.beginTask("Updating " + localFile.getPath(), -1);
+            if (taskMonitor.isCancelled())
+                break;
+
+            // Update file
+            try { updateFile(localFile); }
+            catch (AccessException e) {
+                ClientUtils.setAccess(e.getSite());
+                updateFile(localFile);
+            }
+            taskMonitor.endTask();
+        }
+    }
+
+    /**
+     * Updates (merges) local site files from remote site.
+     */
+    protected void updateFile(WebFile localFile)
+    {
+        // Get RepoFile and CloneFile
+        String filePath = localFile.getPath();
+        boolean isDir = localFile.isDir();
+        WebFile repoFile = getRepoFile(filePath, true, isDir);
+        WebFile cloneFile = getCloneFile(filePath, true, isDir);
+
+        // Set new file bytes and save
+        if (repoFile.getExists()) {
+
+            // Update local file and save
+            if (localFile.isFile())
+                localFile.setBytes(repoFile.getBytes());
+            localFile.save();
+            localFile.setModTimeSaved(repoFile.getLastModTime());
+
+            // Update clone file and save
+            if (cloneFile.isFile())
+                cloneFile.setBytes(repoFile.getBytes());
+            cloneFile.save();
+            cloneFile.setModTimeSaved(repoFile.getLastModTime());
+
+            // Update status
+            setFileStatus(localFile, null);
+        }
+
+        // Otherwise delete LocalFile and CloneFile
+        else {
+            if (localFile.getExists())
+                localFile.delete();
+            if (cloneFile.getExists())
+                cloneFile.delete();
+            setFileStatus(localFile, null);
+        }
+    }
+
+    /**
+     * Returns the files that need to be committed to server.
+     */
+    public void findCommitFiles(WebFile aFile, List<WebFile> commitFiles)
+    {
+        // If no clone site, just return
+        if (!getExists()) return;
+
+        // Find local changed files and add to commit files list
+        Set<WebFile> changedFiles = new HashSet<>();
+        findChangedFiles(aFile, changedFiles);
+        commitFiles.addAll(changedFiles);
+    }
+
+    /**
+     * Commits (copies) local site files to remote site.
+     */
+    public void commitFiles(List<WebFile> localFiles, String aMessage, TaskMonitor taskMonitor)
+    {
+        // Call TaskMonitor.startTasks
+        taskMonitor.startTasks(localFiles.size());
+
+        // Iterate over files
+        for (WebFile file : localFiles) {
+            if (taskMonitor.isCancelled())
+                break;
+
+            try { commitFile(file, aMessage); }
+            catch (AccessException e) {
+                ClientUtils.setAccess(e.getSite());
+                commitFile(file, aMessage);
+            }
+            taskMonitor.endTask();
+        }
+    }
+
+    /**
+     * Commits (copies) local site file to remote site.
+     */
+    protected void commitFile(WebFile localFile, String aMessage)
+    {
+        // Get RepoFile and CloneFile
+        String filePath = localFile.getPath();
+        boolean isDir = localFile.isDir();
+        WebFile repoFile = getRepoFile(filePath, true, isDir);
+        WebFile cloneFile = getCloneFile(filePath, true, isDir);
+
+        // If LocalFile was deleted, delete RepoFile and CloneFile
+        if (!localFile.getExists()) {
+            if (repoFile.getExists())
+                repoFile.delete();
+            if (cloneFile.getExists())
+                cloneFile.delete();
+            setFileStatus(localFile, null);
+        }
+
+        // Otherwise save LocalFile bytes to RepoFile and CloneFile
+        else {
+            if (localFile.isFile())
+                repoFile.setBytes(localFile.getBytes());
+            repoFile.save();
+            if (localFile.isFile())
+                cloneFile.setBytes(localFile.getBytes());
+            cloneFile.save();
+            cloneFile.setModTimeSaved(repoFile.getLastModTime());
+            localFile.setModTimeSaved(repoFile.getLastModTime());
+            setFileStatus(localFile, null);
         }
     }
 
     /**
      * Returns the local files for given file or directory that need to be replaced.
      */
-    public void getReplaceFiles(WebFile aFile, List<WebFile> theFiles)
+    public void findReplaceFiles(WebFile aFile, List<WebFile> replaceFiles)
     {
         // If no clone site, just return
         if (!getExists()) return;
 
-        // Get local changed files and add to list
-        Set<WebFile> commitFiles = getChangedFiles(aFile, new HashSet<>());
-        theFiles.addAll(commitFiles);
+        // Find local changed files and add to replace files list
+        Set<WebFile> changedFiles = new HashSet<>();
+        findChangedFiles(aFile, changedFiles);
+        replaceFiles.addAll(changedFiles);
     }
 
     /**
-     * Returns the files that need to be committed to server.
+     * Replaces (overwrites) local site files from clone site.
      */
-    public void getCommitFiles(WebFile aFile, List<WebFile> theFiles)
+    public void replaceFiles(List<WebFile> localFiles, TaskMonitor taskMonitor) throws Exception
     {
-        // If no clone site, just return
-        if (!getExists()) return;
+        // Call TaskMonitor.startTasks
+        taskMonitor.startTasks(localFiles.size());
 
-        // Get local changed files and add to list
-        Set<WebFile> commitFiles = getChangedFiles(aFile, new HashSet<>());
-        theFiles.addAll(commitFiles);
+        // Iterate over files
+        for (WebFile file : localFiles) {
+
+            // Update monitor task message
+            taskMonitor.beginTask("Updating " + file.getPath(), -1);
+            if (taskMonitor.isCancelled())
+                break;
+
+            // Replace file
+            try { replaceFile(file); }
+            catch (AccessException e) {
+                ClientUtils.setAccess(e.getSite());
+                updateFile(file);
+            }
+
+            // Close task
+            taskMonitor.endTask();
+        }
+    }
+
+    /**
+     * Replaces (overwrites) local site files from clone site.
+     */
+    protected void replaceFile(WebFile localFile)
+    {
+        // Get CloneFile
+        WebFile cloneFile = getCloneFile(localFile.getPath(), true, localFile.isDir());
+
+        // Set new file bytes and save
+        if (cloneFile.getExists()) {
+            if (localFile.isFile())
+                localFile.setBytes(cloneFile.getBytes());
+            localFile.save();
+            localFile.setModTimeSaved(cloneFile.getLastModTime());
+            setFileStatus(localFile, null);
+        }
+
+        // Otherwise delete LocalFile and CloneFile
+        else {
+            if (localFile.getExists())
+                localFile.delete();
+            setFileStatus(localFile, null);
+        }
     }
 
     /**
      * Returns the files that changed from last checkout.
      */
-    protected Set<WebFile> getChangedFiles(WebFile aFile, Set<WebFile> theFiles)
+    protected void findChangedFiles(WebFile aFile, Set<WebFile> changedFiles)
     {
-        // If Added/Updated/Removed, add file
-        Status status = getStatus(aFile, false);
-        if (status != Status.Identical)
-            theFiles.add(aFile);
+        // If file status is Added/Updated/Removed, add file
+        FileStatus fileStatus = getFileStatus(aFile, false);
+        if (fileStatus != FileStatus.Identical)
+            changedFiles.add(aFile);
 
         // If file is directory, recurse for child files
         if (aFile.isDir() && !isIgnoreFile(aFile)) {
 
             // Recurse for child files
-            for (WebFile file : aFile.getFiles())
-                getChangedFiles(file, theFiles);
+            WebFile[] childFiles = aFile.getFiles();
+            for (WebFile file : childFiles)
+                findChangedFiles(file, changedFiles);
 
             // Add missing files
-            WebSite fsite = aFile.getSite();
-            WebFile cfile = getCloneFile(aFile.getPath(), false, false);
-            if (cfile != null) for (WebFile file : cfile.getFiles()) {
-                if (fsite.getFileForPath(file.getPath()) == null)
-                    getChangedFiles(fsite.createFileForPath(file.getPath(), file.isDir()), theFiles);
+            WebSite fileSite = aFile.getSite();
+            WebFile cloneFile = getCloneFile(aFile.getPath(), false, false);
+            if (cloneFile != null) {
+
+                // Iterate over child files and recurse for missing files
+                WebFile[] cloneChildFiles = cloneFile.getFiles();
+                for (WebFile cloneChildFile : cloneChildFiles) {
+                    WebFile otherChildFile = fileSite.getFileForPath(cloneChildFile.getPath());
+                    if (otherChildFile == null) {
+                        otherChildFile = fileSite.createFileForPath(cloneChildFile.getPath(), cloneChildFile.isDir());
+                        findChangedFiles(otherChildFile, changedFiles);
+                    }
+                }
             }
         }
+    }
 
-        // Return file set
-        return theFiles;
+    /**
+     * Returns the site file for path.
+     */
+    private WebFile getLocalFile(String aPath, boolean isDir)
+    {
+        WebSite localSite = getLocalSite(); if (localSite == null) return null;
+        WebFile localFile = localSite.getFileForPath(aPath);
+        if (localFile == null)
+            localFile = localSite.createFileForPath(aPath, isDir);
+        return localFile;
+    }
+
+    /**
+     * Returns the local cache file of given path.
+     */
+    public WebFile getCloneFile(String aPath, boolean doCreate, boolean isDir)
+    {
+        WebSite cloneSite = getCloneSite(); if (cloneSite == null) return null;
+        WebFile cloneFile = cloneSite.getFileForPath(aPath);
+        if (cloneFile == null && doCreate)
+            cloneFile = cloneSite.createFileForPath(aPath, isDir);
+        return cloneFile;
+    }
+
+    /**
+     * Returns the remote file for path.
+     */
+    public WebFile getRepoFile(String aPath, boolean doCreate, boolean isDir)
+    {
+        WebSite repoSite = getRepoSite(); if (repoSite == null) return null;
+        WebFile repoFile = repoSite.getFileForPath(aPath);
+        if (repoFile == null && doCreate)
+            repoFile = repoSite.createFileForPath(aPath, isDir);
+        return repoFile;
+    }
+
+    /**
+     * Returns whether the file has been modified from VCS.
+     */
+    public boolean isFileModified(WebFile aFile)
+    {
+        FileStatus fileStatus = getFileStatus(aFile);
+        return fileStatus != FileStatus.Identical;
+    }
+
+    /**
+     * Returns the file VersionControl status.
+     */
+    public synchronized FileStatus getFileStatus(WebFile aFile)
+    {
+        // Get cached status
+        FileStatus fileStatus = _filesStatusCache.get(aFile);
+        if (fileStatus != null)
+            return fileStatus;
+
+        // Determine status, cache and return
+        fileStatus = getFileStatus(aFile, true);
+        _filesStatusCache.put(aFile, fileStatus);
+        return fileStatus;
+    }
+
+    /**
+     * Returns the status for a given remote file info.
+     */
+    protected FileStatus getFileStatus(WebFile aFile, boolean isDeep)
+    {
+        // If no clone site or is ignore file, just return
+        if (!getExists())
+            return FileStatus.Identical;
+        if (isIgnoreFile(aFile))
+            return FileStatus.Identical;
+
+        // If directory, iterate over child files and if any ChangedLocal, return ChangedLocal, otherwise return Identical
+        if (aFile.isDir()) {
+            if (isDeep) {
+                WebFile[] childFiles = aFile.getFiles();
+                for (WebFile childFile : childFiles) {
+                    if (isFileModified(childFile))
+                        return FileStatus.Modified;
+                }
+            }
+            return FileStatus.Identical;
+        }
+
+        // If file doesn't exist, return removed
+        if (!aFile.getExists())
+            return FileStatus.Removed;
+
+        // Get CloneFile - if not found, return Status.Added
+        WebFile cloneFile = getCloneFile(aFile.getPath(), false, false);
+        if (cloneFile == null)
+            return FileStatus.Added;
+
+        // Check modified times match, or bytes match, return identical
+        long cloneModTime = cloneFile.getLastModTime();
+        long localModTime = aFile.getLastModTime();
+        if (localModTime == cloneModTime)
+            return FileStatus.Identical;
+        if (aFile.isFile() && cloneFile.isFile() && ArrayUtils.equals(aFile.getBytes(), cloneFile.getBytes()))
+            return FileStatus.Identical;
+
+        // Return Modified
+        return FileStatus.Modified;
+    }
+
+    /**
+     * Returns the file VersionControl status.
+     */
+    public void setFileStatus(WebFile aFile, FileStatus aFileStatus)
+    {
+        // Set new status, get old
+        FileStatus old;
+        synchronized (this) {
+            old = _filesStatusCache.put(aFile, aFileStatus);
+        }
+
+        // If parent, clear Parent.Status
+        if (aFile.getParent() != null)
+            setFileStatus(aFile.getParent(), null);
+
+        // Fire PropChange
+        firePropChange(new PropChange(aFile, FileStatus_Prop, old, aFileStatus));
     }
 
     /**
@@ -346,164 +531,13 @@ public class VersionControl {
     }
 
     /**
-     * Commits (copies) local site files to remote site.
+     * Delete VCS support files from site directory.
      */
-    public void commitFiles(List<WebFile> theLocalFiles, String aMessage, TaskMonitor aTM)
+    public void disconnect(TaskMonitor taskMonitor) throws Exception
     {
-        // Make sure we have a TaskMonitor and call TaskMonitor.startTasks
-        if (aTM == null)
-            aTM = TaskMonitor.NULL;
-        aTM.startTasks(theLocalFiles.size());
-
-        // Iterate over files
-        for (WebFile file : theLocalFiles) {
-            if (aTM.isCancelled())
-                break;
-
-            try { commitFile(file, aMessage); }
-            catch (AccessException e) {
-                ClientUtils.setAccess(e.getSite());
-                commitFile(file, aMessage);
-            }
-            aTM.endTask();
-        }
-    }
-
-    /**
-     * Commits (copies) local site file to remote site.
-     */
-    protected void commitFile(WebFile aLocalFile, String aMessage)
-    {
-        // Get RepoFile and CloneFile
-        String filePath = aLocalFile.getPath();
-        boolean isDir = aLocalFile.isDir();
-        WebFile repoFile = getRepoFile(filePath, true, isDir);
-        WebFile cloneFile = getCloneFile(filePath, true, isDir);
-
-        // If LocalFile was deleted, delete RepoFile and CloneFile
-        if (!aLocalFile.getExists()) {
-            if (repoFile.getExists()) repoFile.delete();
-            if (cloneFile.getExists()) cloneFile.delete();
-            setStatus(aLocalFile, null);
-        }
-
-        // Otherwise save LocalFile bytes to RepoFile and CloneFile
-        else {
-            if (aLocalFile.isFile())
-                repoFile.setBytes(aLocalFile.getBytes());
-            repoFile.save();
-            if (aLocalFile.isFile())
-                cloneFile.setBytes(aLocalFile.getBytes());
-            cloneFile.save();
-            cloneFile.setModTimeSaved(repoFile.getLastModTime());
-            aLocalFile.setModTimeSaved(repoFile.getLastModTime());
-            setStatus(aLocalFile, null);
-        }
-    }
-
-    /**
-     * Updates (merges) local site files from remote site.
-     */
-    public void updateFiles(List<WebFile> theLocalFiles, TaskMonitor aTM)
-    {
-        // Make sure we have a TaskMonitor and call TaskMonitor.startTasks
-        if (aTM == null) aTM = TaskMonitor.NULL;
-        aTM.startTasks(theLocalFiles.size());
-
-        // Iterate over files
-        for (WebFile file : theLocalFiles) {
-            aTM.beginTask("Updating " + file.getPath(), -1);
-            if (aTM.isCancelled()) break;
-            try {
-                updateFile(file);
-            } catch (AccessException e) {
-                ClientUtils.setAccess(e.getSite());
-                updateFile(file);
-            }
-            aTM.endTask();
-        }
-    }
-
-    /**
-     * Updates (merges) local site files from remote site.
-     */
-    protected void updateFile(WebFile aLocalFile)
-    {
-        // Get RepoFile and CloneFile
-        String filePath = aLocalFile.getPath();
-        boolean isDir = aLocalFile.isDir();
-        WebFile repoFile = getRepoFile(filePath, true, isDir);
-        WebFile cloneFile = getCloneFile(filePath, true, isDir);
-
-        // Set new file bytes and save
-        if (repoFile.getExists()) {
-            if (aLocalFile.isFile())
-                aLocalFile.setBytes(repoFile.getBytes());
-            aLocalFile.save();
-            aLocalFile.setModTimeSaved(repoFile.getLastModTime());
-            if (cloneFile.isFile())
-                cloneFile.setBytes(repoFile.getBytes());
-            cloneFile.save();
-            cloneFile.setModTimeSaved(repoFile.getLastModTime());
-            setStatus(aLocalFile, null);
-        }
-
-        // Otherwise delete LocalFile and CloneFile
-        else {
-            if (aLocalFile.getExists())
-                aLocalFile.delete();
-            if (cloneFile.getExists())
-                cloneFile.delete();
-            setStatus(aLocalFile, null);
-        }
-    }
-
-    /**
-     * Replaces (overwrites) local site files from clone site.
-     */
-    public void replaceFiles(List<WebFile> theLocalFiles, TaskMonitor aTM) throws Exception
-    {
-        // Make sure we have a TaskMonitor and call TaskMonitor.startTasks
-        if (aTM == null) aTM = TaskMonitor.NULL;
-        aTM.startTasks(theLocalFiles.size());
-
-        // Iterate over files
-        for (WebFile file : theLocalFiles) {
-            aTM.beginTask("Updating " + file.getPath(), -1);
-            if (aTM.isCancelled()) break;
-            try {
-                replaceFile(file);
-            } catch (AccessException e) {
-                ClientUtils.setAccess(e.getSite());
-                updateFile(file);
-            }
-            aTM.endTask();
-        }
-    }
-
-    /**
-     * Replaces (overwrites) local site files from clone site.
-     */
-    protected void replaceFile(WebFile aLocalFile)
-    {
-        // Get CloneFile
-        WebFile cloneFile = getCloneFile(aLocalFile.getPath(), true, aLocalFile.isDir());
-
-        // Set new file bytes and save
-        if (cloneFile.getExists()) {
-            if (aLocalFile.isFile())
-                aLocalFile.setBytes(cloneFile.getBytes());
-            aLocalFile.save();
-            aLocalFile.setModTimeSaved(cloneFile.getLastModTime());
-            setStatus(aLocalFile, null);
-        }
-
-        // Otherwise delete LocalFile and CloneFile
-        else {
-            if (aLocalFile.getExists())
-                aLocalFile.delete();
-            setStatus(aLocalFile, null);
-        }
+        WebSite cloneSite = getCloneSite();
+        if (cloneSite != null)
+            cloneSite.deleteSite();
     }
 
     /**
@@ -516,7 +550,7 @@ public class VersionControl {
      */
     public void fileRemoved(WebFile aFile)
     {
-        setStatus(aFile, null);
+        setFileStatus(aFile, null);
     }
 
     /**
@@ -524,7 +558,7 @@ public class VersionControl {
      */
     public void fileSaved(WebFile aFile)
     {
-        setStatus(aFile, null);
+        setFileStatus(aFile, null);
     }
 
     /**
@@ -551,23 +585,23 @@ public class VersionControl {
     {
         // Get remote settings file
         WebSite sandboxSite = aSite.getSandbox();
-        WebFile file = sandboxSite.getFileForPath("/settings/remote");
-        if (file == null)
+        WebFile remoteSettingsFile = sandboxSite.getFileForPath("/settings/remote");
+        if (remoteSettingsFile == null)
             return null;
 
         // Get file text and return
-        String text = file.getText();
-        String urls = text.trim();
-        return urls.length() > 0 ? urls : null;
+        String remoteSettingsText = remoteSettingsFile.getText();
+        String urlString = remoteSettingsText.trim();
+        return urlString.length() > 0 ? urlString : null;
     }
 
     /**
      * Sets the Remote URL string.
      */
-    public static void setRemoteURLString(WebSite aSite, String aURLS)
+    public static void setRemoteURLString(WebSite aSite, String aUrlString)
     {
         // If already set, just return
-        if (Objects.equals(aURLS, getRemoteURLString(aSite))) return;
+        if (Objects.equals(aUrlString, getRemoteURLString(aSite))) return;
 
         // Get remote settings file
         WebSite sandboxSite = aSite.getSandbox();
@@ -579,14 +613,14 @@ public class VersionControl {
         try {
 
             // If empty URL, delete file
-            if (aURLS == null || aURLS.length() == 0) {
+            if (aUrlString == null || aUrlString.length() == 0) {
                 if (file.getExists())
                     file.delete();
             }
 
             // Set file text and save
             else {
-                file.setText(aURLS);
+                file.setText(aUrlString);
                 file.save();
             }
         }

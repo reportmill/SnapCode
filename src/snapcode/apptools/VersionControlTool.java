@@ -265,7 +265,7 @@ public class VersionControlTool extends ProjectTool {
 
         try {
             for (WebFile file : fromFiles)
-                _versionControl.getCommitFiles(file, commitFiles);
+                _versionControl.findCommitFiles(file, commitFiles);
         }
 
         catch (AccessException e) {
@@ -330,7 +330,7 @@ public class VersionControlTool extends ProjectTool {
 
         try {
             for (WebFile file : fromFiles)
-                _versionControl.getUpdateFiles(file, xfiles);
+                _versionControl.findUpdateFiles(file, xfiles);
         }
 
         // Handle AccessException:
@@ -423,7 +423,7 @@ public class VersionControlTool extends ProjectTool {
 
         try {
             for (WebFile file : fromFiles)
-                _versionControl.getReplaceFiles(file, replaceFiles);
+                _versionControl.findReplaceFiles(file, replaceFiles);
         }
 
         catch (AccessException e) {
