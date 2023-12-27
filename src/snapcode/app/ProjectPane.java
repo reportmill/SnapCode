@@ -3,7 +3,7 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.view.*;
 import snap.viewx.DialogBox;
-import snap.viewx.TaskMonitorPanel;
+import snap.util.TaskMonitorPanel;
 import snapcode.apptools.ProjectAnalysisTool;
 import snapcode.apptools.VersionControlTool;
 import snapcode.project.Project;

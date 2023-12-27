@@ -8,7 +8,7 @@ import snap.props.PropChangeSupport;
 import snap.util.ArrayUtils;
 import snap.util.TaskRunner;
 import snap.view.View;
-import snap.viewx.TaskMonitorPanel;
+import snap.util.TaskMonitorPanel;
 import snapcode.webbrowser.ClientUtils;
 import snap.util.TaskMonitor;
 import snap.web.AccessException;

@@ -155,7 +155,7 @@ public class WorkspaceBuilder {
     /**
      * Build workspace real.
      */
-    private boolean buildWorkspaceImpl(boolean addAllFilesToBuild, TaskMonitor aTM)
+    private boolean buildWorkspaceImpl(boolean addAllFilesToBuild)
     {
         // Handle AddFiles
         if (addAllFilesToBuild)
@@ -164,20 +164,21 @@ public class WorkspaceBuilder {
         // Get RootProj and child projects
         Project rootProj = _workspace.getRootProject();
         Project[] childProjects = rootProj.getProjects();
+        TaskMonitor taskMonitor = new BuildWorkspaceMonitor();
 
         // Build child projects
         for (Project childProject : childProjects) {
 
             // Build project
             ProjectBuilder projectBuilder = childProject.getBuilder();
-            boolean projBuildSuccess = projectBuilder.buildProject(aTM);
+            boolean projBuildSuccess = projectBuilder.buildProject(taskMonitor);
             if (!projBuildSuccess)
                 return false;
         }
 
         // Build root project
         ProjectBuilder rootBuilder = rootProj.getBuilder();
-        return rootBuilder.buildProject(aTM);
+        return rootBuilder.buildProject(taskMonitor);
     }
 
     /**
@@ -200,6 +201,19 @@ public class WorkspaceBuilder {
         for (Project proj : projects) {
             ProjectBuilder projBuilder = proj.getBuilder();
             projBuilder.addBuildFilesAll();
+        }
+    }
+
+    /**
+     * A TaskMonitor implementation to update workspace Activity and Building properties.
+     */
+    private class BuildWorkspaceMonitor implements TaskMonitor {
+
+        @Override
+        public void beginTask(String aTitle, int theTotalWork)
+        {
+            _workspace.setActivity(aTitle);
+            _workspace.setBuilding(true);
         }
     }
 
@@ -228,16 +242,7 @@ public class WorkspaceBuilder {
          */
         public Boolean run()
         {
-            return buildWorkspaceImpl(_addAllFiles, this);
-        }
-
-        /**
-         * Called when runner starts a new task.
-         */
-        public void beginTask(final String aTitle, int theTotalWork)
-        {
-            _workspace.setActivity(aTitle);
-            _workspace.setBuilding(true);
+            return buildWorkspaceImpl(_addAllFiles);
         }
 
         /**

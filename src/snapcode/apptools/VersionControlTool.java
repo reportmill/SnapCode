@@ -1,5 +1,5 @@
 package snapcode.apptools;
-import snap.viewx.TaskMonitorPanel;
+import snap.util.TaskMonitorPanel;
 import snapcode.project.WorkspaceBuilder;
 import snap.props.PropChange;
 import snap.view.View;
@@ -257,10 +257,10 @@ public class VersionControlTool extends ProjectTool {
         // Create TaskRunner and start
         View view = _workspacePane.getUI();
         String title = "Commit files to remote site";
-        TaskMonitor taskMonitor = new TaskMonitorPanel(view, title);
-        Supplier<?> commitFunc = () -> { _versionControl.commitFiles(theFiles, aMessage, taskMonitor); return null; };
+        TaskMonitorPanel taskMonitorPanel = new TaskMonitorPanel(view, title);
+        Supplier<?> commitFunc = () -> { _versionControl.commitFiles(theFiles, aMessage, taskMonitorPanel); return null; };
         TaskRunner<?> commitRunner = new TaskRunner<>(commitFunc);
-        commitRunner.setMonitor(taskMonitor);
+        commitRunner.setOnFinished(() -> taskMonitorPanel.hide());
         commitRunner.start();
     }
 
@@ -327,12 +327,11 @@ public class VersionControlTool extends ProjectTool {
         // Create and configure task runner for update and start
         View view = _workspacePane.getUI();
         String title = "Update files from remote site";
-        TaskMonitor taskMonitor = new TaskMonitorPanel(view, title);
-        Supplier<?> updateFunc = () -> { _versionControl.updateFiles(theFiles, taskMonitor); return null; };
+        TaskMonitorPanel taskMonitorPanel = new TaskMonitorPanel(view, title);
+        Supplier<?> updateFunc = () -> { _versionControl.updateFiles(theFiles, taskMonitorPanel); return null; };
         TaskRunner<?> updateRunner = new TaskRunner<>(updateFunc);
         updateRunner.setOnSuccess(obj -> updateFilesSuccess(theFiles));
-        updateRunner.setOnFinished(() -> updateFilesFinished(oldAutoBuild));
-        updateRunner.setMonitor(taskMonitor);
+        updateRunner.setOnFinished(() -> updateFilesFinished(oldAutoBuild, taskMonitorPanel));
         updateRunner.start();
     }
 
@@ -351,8 +350,11 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called when update files finishes.
      */
-    private void updateFilesFinished(boolean oldAutoBuild)
+    private void updateFilesFinished(boolean oldAutoBuild, TaskMonitorPanel taskMonitorPanel)
     {
+        // Hide task monitor panel
+        taskMonitorPanel.hide();
+
         // Reset AutoBuildEnabled and build Project
         WorkspaceBuilder builder = _workspace.getBuilder();
         builder.setAutoBuildEnabled(oldAutoBuild);
@@ -420,41 +422,12 @@ public class VersionControlTool extends ProjectTool {
         // Create and configure task runner for replace and start
         View view = _workspacePane.getUI();
         String title = "Replace files from remote site";
-        TaskMonitor taskMonitor = new TaskMonitorPanel(view, title);
-        Supplier<?> replaceFunc = () -> { _versionControl.replaceFiles(theFiles, taskMonitor); return null; };
+        TaskMonitorPanel taskMonitorPanel = new TaskMonitorPanel(view, title);
+        Supplier<?> replaceFunc = () -> { _versionControl.replaceFiles(theFiles, taskMonitorPanel); return null; };
         TaskRunner<?> replaceRunner = new TaskRunner<>(replaceFunc);
-        replaceRunner.setOnSuccess(obj -> replaceFilesSuccess(theFiles));
-        replaceRunner.setOnFinished(() -> replaceFilesFinished(oldAutoBuild));
-        replaceRunner.setMonitor(taskMonitor);
+        replaceRunner.setOnSuccess(obj -> updateFilesSuccess(theFiles));
+        replaceRunner.setOnFinished(() -> updateFilesFinished(oldAutoBuild, taskMonitorPanel));
         replaceRunner.start();
-    }
-
-    /**
-     * Called when update files succeeds.
-     */
-    private void replaceFilesSuccess(List<WebFile> theFiles)
-    {
-        for (WebFile file : theFiles)
-            file.reload();
-        for (WebFile file : theFiles)
-            getBrowser().reloadFile(file);
-        _workspacePane.resetLater();
-    }
-
-    /**
-     * Called when replace files finishes.
-     */
-    private void replaceFilesFinished(boolean oldAutoBuild)
-    {
-        // Reset AutoBuildEnabled and build Project
-        WorkspaceBuilder builder = _workspace.getBuilder();
-        builder.setAutoBuildEnabled(oldAutoBuild);
-        if (oldAutoBuild)
-            builder.buildWorkspaceLater();
-
-        // Connect to remote site
-        if (isUISet())
-            connectToRemoteSite();
     }
 
     /**
