@@ -3,7 +3,7 @@
  */
 package snapcode.webbrowser;
 import snap.view.ViewEnv;
-import snap.viewx.TaskRunnerPanel;
+import snap.util.TaskRunner;
 import snap.web.WebRequest;
 import snap.web.WebResponse;
 import snap.web.WebSite;
@@ -21,7 +21,7 @@ public class WebBrowserLoader {
     private WebRequest  _req;
 
     // The current runner loading a file
-    private TaskRunnerPanel _runner;
+    private TaskRunner<WebResponse> _runner;
 
     /**
      * Creates a loader for a browser.
@@ -75,7 +75,9 @@ public class WebBrowserLoader {
 
         // Create and start URLLoader
         _req = aReq;
-        _runner = new URLLoader(aReq);
+        _runner = new TaskRunner<>(() -> loadURL(aReq));
+        _runner.setOnSuccess(resp -> loadURLSuccess(resp));
+        _runner.setOnFailure(e -> loadURLFailure(aReq, e));
         _runner.start();
     }
 
@@ -90,7 +92,7 @@ public class WebBrowserLoader {
     /**
      * Loads a URL.
      */
-    protected WebResponse loadURL(WebRequest aReq) throws Exception
+    protected WebResponse loadURL(WebRequest aReq)
     {
         WebSite site = aReq.getURL().getSite();
         return site.getResponse(aReq);
@@ -119,34 +121,5 @@ public class WebBrowserLoader {
         _browser.showException(aReq.getURL(), e);
         _req = null;
         _runner = null;
-    }
-
-    /**
-     * A JFXRunner subclass to load a URL file+bytes.
-     */
-    private class URLLoader extends TaskRunnerPanel<WebResponse> {
-
-        // Ivars
-        WebRequest  _ldrReq;
-
-        URLLoader(WebRequest aReq)
-        {
-            _ldrReq = aReq;
-        }
-
-        public WebResponse run() throws Exception
-        {
-            return loadURL(_ldrReq);
-        }
-
-        public void success(WebResponse aResponse)
-        {
-            loadURLSuccess(aResponse);
-        }
-
-        public void failure(Exception e)
-        {
-            loadURLFailure(_ldrReq, e);
-        }
     }
 }

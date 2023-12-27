@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import snap.viewx.TaskMonitorPanel;
 import snapcode.project.WorkspaceBuilder;
 import snap.props.PropChange;
 import snap.view.View;
@@ -13,8 +14,6 @@ import snap.view.ProgressBar;
 import snap.view.SpringView;
 import snap.view.ViewEvent;
 import snap.viewx.DialogBox;
-import snapcode.webbrowser.LoginPage;
-import snap.viewx.TaskRunnerPanel;
 import snapcode.webbrowser.WebBrowser;
 import snap.web.AccessException;
 import snap.web.WebFile;
@@ -22,6 +21,7 @@ import snap.web.WebSite;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * This ProjectTool subclass manages version control for project.
@@ -176,46 +176,18 @@ public class VersionControlTool extends ProjectTool {
      */
     public void checkout()
     {
-        TaskRunner<?> runner = new TaskRunnerPanel(_workspacePane.getUI(), "Checkout from " + _versionControl.getRemoteURLString()) {
-            boolean _oldAutoBuildEnabled;
+        WorkspaceBuilder builder = _workspace.getBuilder();
+        builder.setAutoBuildEnabled(false);
 
-            public Object run() throws Exception
-            {
-                WorkspaceBuilder builder = _workspace.getBuilder();
-                _oldAutoBuildEnabled = builder.setAutoBuildEnabled(false);
-
-                WebSite projectSite = getProjectSite();
-                WebFile rootDir = projectSite.getRootDir();
-                if (!rootDir.getExists())
-                    rootDir.save(); // So refresh will work later
-                _versionControl.checkout(this);
-                return null;
-            }
-
-            public void success(Object aRes)
-            {
-                checkoutSuccess(_oldAutoBuildEnabled);
-            }
-
-            public void failure(Exception e)
-            {
-                WorkspaceBuilder builder = _workspace.getBuilder();
-                builder.setAutoBuildEnabled(_oldAutoBuildEnabled);
-
-                if (ClientUtils.setAccess(getRemoteSite()))
-                    checkout();
-                else if (new LoginPage().showPanel(_workspacePane.getUI(), getRemoteSite()))
-                    checkout();
-                else super.failure(e);
-            }
-        };
-        runner.start();
+        View view = _workspacePane.getUI();
+        TaskRunner<?> checkoutRunner = _versionControl.checkout(view);
+        checkoutRunner.setOnSuccess(obj -> checkoutSuccess());
     }
 
     /**
      * Called when checkout succeeds.
      */
-    protected void checkoutSuccess(boolean oldAutoBuildEnabled)
+    private void checkoutSuccess()
     {
         // Reload files
         WebSite projectSite = getProjectSite();
@@ -226,11 +198,9 @@ public class VersionControlTool extends ProjectTool {
 
         // Reset AutoBuildEnabled and trigger auto build
         WorkspaceBuilder builder = _workspace.getBuilder();
-        builder.setAutoBuildEnabled(oldAutoBuildEnabled);
-        if (oldAutoBuildEnabled) {
-            builder.addAllFilesToBuild();
-            builder.buildWorkspaceLater();
-        }
+        builder.setAutoBuildEnabled(true);
+        builder.addAllFilesToBuild();
+        builder.buildWorkspaceLater();
     }
 
     /**
@@ -285,18 +255,13 @@ public class VersionControlTool extends ProjectTool {
     protected void commitFilesImpl(final List<WebFile> theFiles, final String aMessage)
     {
         // Create TaskRunner and start
-        TaskRunnerPanel<?> taskRunnerPanel = new TaskRunnerPanel(_workspacePane.getUI(), "Commit files to remote site") {
-            public Object run() throws Exception
-            {
-                _versionControl.commitFiles(theFiles, aMessage, this);
-                return null;
-            }
-
-            public void success(Object anObj)  { }
-            public void failure(Exception e)  { super.failure(e); }
-            public void finished() { }
-        };
-        taskRunnerPanel.start();
+        View view = _workspacePane.getUI();
+        String title = "Commit files to remote site";
+        TaskMonitor taskMonitor = new TaskMonitorPanel(view, title);
+        Supplier<?> commitFunc = () -> { _versionControl.commitFiles(theFiles, aMessage, taskMonitor); return null; };
+        TaskRunner<?> commitRunner = new TaskRunner<>(commitFunc);
+        commitRunner.setMonitor(taskMonitor);
+        commitRunner.start();
     }
 
     /**
@@ -359,37 +324,44 @@ public class VersionControlTool extends ProjectTool {
         // Get old Autobuild
         final boolean oldAutoBuild = _workspace.getBuilder().setAutoBuildEnabled(false);
 
-        // Create TaskRunner and start
-        TaskRunnerPanel<?> taskRunnerPanel = new TaskRunnerPanel(_workspacePane.getUI(), "Update files from remote site") {
-            public Object run() throws Exception
-            {
-                _versionControl.updateFiles(theFiles, this);
-                return null;
-            }
+        // Create and configure task runner for update and start
+        View view = _workspacePane.getUI();
+        String title = "Update files from remote site";
+        TaskMonitor taskMonitor = new TaskMonitorPanel(view, title);
+        Supplier<?> updateFunc = () -> { _versionControl.updateFiles(theFiles, taskMonitor); return null; };
+        TaskRunner<?> updateRunner = new TaskRunner<>(updateFunc);
+        updateRunner.setOnSuccess(obj -> updateFilesSuccess(theFiles));
+        updateRunner.setOnFinished(() -> updateFilesFinished(oldAutoBuild));
+        updateRunner.setMonitor(taskMonitor);
+        updateRunner.start();
+    }
 
-            public void success(Object anObj)
-            {
-                for (WebFile file : theFiles)
-                    file.reload();
-                for (WebFile file : theFiles)
-                    getBrowser().reloadFile(file); // Refresh replaced files
-                _workspacePane.resetLater(); // Reset UI
-            }
+    /**
+     * Called when update files succeeds.
+     */
+    private void updateFilesSuccess(List<WebFile> theFiles)
+    {
+        for (WebFile file : theFiles)
+            file.reload();
+        for (WebFile file : theFiles)
+            getBrowser().reloadFile(file); // Refresh replaced files
+        _workspacePane.resetLater(); // Reset UI
+    }
 
-            public void finished()
-            {
-                // Reset AutoBuildEnabled and build Project
-                WorkspaceBuilder builder = _workspace.getBuilder();
-                builder.setAutoBuildEnabled(oldAutoBuild);
-                if (oldAutoBuild)
-                    builder.buildWorkspaceLater();
+    /**
+     * Called when update files finishes.
+     */
+    private void updateFilesFinished(boolean oldAutoBuild)
+    {
+        // Reset AutoBuildEnabled and build Project
+        WorkspaceBuilder builder = _workspace.getBuilder();
+        builder.setAutoBuildEnabled(oldAutoBuild);
+        if (oldAutoBuild)
+            builder.buildWorkspaceLater();
 
-                // Connect to remote site
-                if (isUISet())
-                    connectToRemoteSite();
-            }
-        };
-        taskRunnerPanel.start();
+        // Connect to remote site
+        if (isUISet())
+            connectToRemoteSite();
     }
 
     /**
@@ -445,36 +417,44 @@ public class VersionControlTool extends ProjectTool {
         // Create TaskRunner and start
         final boolean oldAutoBuild = _workspace.getBuilder().setAutoBuildEnabled(false);
 
-        TaskRunnerPanel<?> taskRunnerPanel = new TaskRunnerPanel(_workspacePane.getUI(), "Replace files from remote site") {
-            public Object run() throws Exception
-            {
-                _versionControl.replaceFiles(theFiles, this);
-                return null;
-            }
+        // Create and configure task runner for replace and start
+        View view = _workspacePane.getUI();
+        String title = "Replace files from remote site";
+        TaskMonitor taskMonitor = new TaskMonitorPanel(view, title);
+        Supplier<?> replaceFunc = () -> { _versionControl.replaceFiles(theFiles, taskMonitor); return null; };
+        TaskRunner<?> replaceRunner = new TaskRunner<>(replaceFunc);
+        replaceRunner.setOnSuccess(obj -> replaceFilesSuccess(theFiles));
+        replaceRunner.setOnFinished(() -> replaceFilesFinished(oldAutoBuild));
+        replaceRunner.setMonitor(taskMonitor);
+        replaceRunner.start();
+    }
 
-            public void success(Object anObj)
-            {
-                for (WebFile file : theFiles)
-                    file.reload();
-                for (WebFile file : theFiles)
-                    getBrowser().reloadFile(file);
-                _workspacePane.resetLater();
-            }
+    /**
+     * Called when update files succeeds.
+     */
+    private void replaceFilesSuccess(List<WebFile> theFiles)
+    {
+        for (WebFile file : theFiles)
+            file.reload();
+        for (WebFile file : theFiles)
+            getBrowser().reloadFile(file);
+        _workspacePane.resetLater();
+    }
 
-            public void finished()
-            {
-                // Reset AutoBuildEnabled and build Project
-                WorkspaceBuilder builder = _workspace.getBuilder();
-                builder.setAutoBuildEnabled(oldAutoBuild);
-                if (oldAutoBuild)
-                    builder.buildWorkspaceLater();
+    /**
+     * Called when replace files finishes.
+     */
+    private void replaceFilesFinished(boolean oldAutoBuild)
+    {
+        // Reset AutoBuildEnabled and build Project
+        WorkspaceBuilder builder = _workspace.getBuilder();
+        builder.setAutoBuildEnabled(oldAutoBuild);
+        if (oldAutoBuild)
+            builder.buildWorkspaceLater();
 
-                // Connect to remote site
-                if (isUISet())
-                    connectToRemoteSite();
-            }
-        };
-        taskRunnerPanel.start();
+        // Connect to remote site
+        if (isUISet())
+            connectToRemoteSite();
     }
 
     /**
@@ -519,78 +499,5 @@ public class VersionControlTool extends ProjectTool {
     {
         WebFile rootDir = getProjectSite().getRootDir();
         return Collections.singletonList(rootDir);
-    }
-
-    /**
-     * Load all remote files into project directory.
-     */
-    public static void checkoutProject(VersionControl versionControl, View clientView, Runnable successCallback)
-    {
-        // Create checkout task runner
-        String title = "Checkout from " + versionControl.getRemoteURLString();
-        TaskRunner<Object> checkoutRunner = new CheckoutProjectTaskRunnerPanel(clientView, title, versionControl, successCallback);
-
-        // Start task
-        checkoutRunner.start();
-    }
-
-    /**
-     * This TaskRunner subclass checks out a project.
-     */
-    private static class CheckoutProjectTaskRunnerPanel extends TaskRunnerPanel<Object> {
-
-        // The View
-        private View _view;
-
-        // The VersionControl
-        private VersionControl  _versionControl;
-
-        // The callback for success
-        private Runnable _successCallback;
-
-        /**
-         * Constructor.
-         */
-        public CheckoutProjectTaskRunnerPanel(View aView, String aTitle, VersionControl aVC, Runnable successCallback)
-        {
-            super(aView, aTitle);
-            _view = aView;
-            _versionControl = aVC;
-            _successCallback = successCallback;
-        }
-
-        public Object run() throws Exception
-        {
-            _versionControl.checkout(this);
-            return null;
-        }
-
-        public void success(Object aRes)
-        {
-            _successCallback.run();
-        }
-
-        public void failure(Exception e)
-        {
-            WebSite remoteSite = _versionControl.getRemoteSite();
-
-            // If attempt to set permissions succeeds, try again
-            boolean setPermissionsSuccess = ClientUtils.setAccess(remoteSite);
-            if (setPermissionsSuccess) {
-                checkoutProject(_versionControl, _view, _successCallback);
-                return;
-            }
-
-            // If attempt to login succeeds, try again
-            LoginPage loginPage = new LoginPage();
-            boolean loginSuccess = loginPage.showPanel(_view, remoteSite);
-            if (loginSuccess) {
-                checkoutProject(_versionControl, _view, _successCallback);
-                return;
-            }
-
-            // Do normal version
-            super.failure(e);
-        }
     }
 }

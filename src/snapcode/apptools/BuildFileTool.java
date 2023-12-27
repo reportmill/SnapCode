@@ -3,6 +3,7 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.GFXEnv;
 import snap.props.PropChangeListener;
+import snap.util.TaskRunner;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.app.*;
@@ -96,8 +97,8 @@ public class BuildFileTool extends ProjectTool {
             // Checkout project for URL
             VersionControl.setRemoteURLString(projSite, aURLString);
             VersionControl versionControl = VersionControl.createVersionControlForProjectSite(projSite);
-            Runnable successCallback = () -> addProjectForNameImpl(aName);
-            VersionControlTool.checkoutProject(versionControl, _workspacePane.getUI(), successCallback);
+            TaskRunner<?> checkoutRunner = versionControl.checkout(_workspacePane.getUI());
+            checkoutRunner.setOnSuccess(obj -> addProjectForNameImpl(aName));
             return;
         }
 

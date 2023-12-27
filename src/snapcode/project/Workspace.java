@@ -6,6 +6,7 @@ import javakit.resolver.Resolver;
 import snap.props.PropObject;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
+import snap.util.TaskRunner;
 import snap.view.View;
 import snap.viewx.DialogBox;
 import snap.web.WebSite;
@@ -377,9 +378,9 @@ public class Workspace extends PropObject {
             // Checkout project for URL
             VersionControl.setRemoteURLString(projSite, repoURL.getString());
             VersionControl versionControl = VersionControl.createVersionControlForProjectSite(projSite);
-            Runnable successCallback = () -> projectCheckoutFinished(projSite);
             View view = null; //_workspacePane.getUI()
-            VersionControlTool.checkoutProject(versionControl, view, successCallback);
+            TaskRunner<?> checkoutRunner = versionControl.checkout(view);
+            checkoutRunner.setOnSuccess(obj -> projectCheckoutFinished(projSite));
             return;
         }
 

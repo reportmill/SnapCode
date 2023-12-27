@@ -6,12 +6,16 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
 import snap.util.ArrayUtils;
+import snap.util.TaskRunner;
+import snap.view.View;
+import snap.viewx.TaskMonitorPanel;
 import snapcode.webbrowser.ClientUtils;
 import snap.util.TaskMonitor;
 import snap.web.AccessException;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import snapcode.webbrowser.LoginPage;
 import java.util.*;
 
 /**
@@ -120,7 +124,50 @@ public class VersionControl {
     /**
      * Load remote files and VCS files into site directory.
      */
-    public void checkout(TaskMonitor taskMonitor)
+    public TaskRunner<Object> checkout(View aView)
+    {
+        String title = "Checkout from " + getRemoteURLString();
+        TaskMonitor checkoutMonitor = aView != null ? new TaskMonitorPanel(aView, title) : TaskMonitor.NULL;
+        TaskRunner<Object> checkoutRunner = new TaskRunner<>(() -> { checkout(aView, checkoutMonitor); return null; });
+        checkoutRunner.start();
+        return checkoutRunner;
+    }
+
+    /**
+     * Load remote files and VCS files into site directory.
+     */
+    private void checkout(View aView, TaskMonitor taskMonitor)
+    {
+        // Try basic checkout
+        try { checkoutImpl(taskMonitor); }
+
+        // If failure
+        catch (Exception e) {
+
+            // If attempt to set permissions succeeds, try again
+            WebSite remoteSite = getRemoteSite();
+            boolean setPermissionsSuccess = ClientUtils.setAccess(remoteSite);
+            if (setPermissionsSuccess) {
+                checkoutImpl(taskMonitor);
+                return;
+            }
+
+            // If attempt to login succeeds, try again
+            LoginPage loginPage = new LoginPage();
+            boolean loginSuccess = loginPage.showPanel(aView, remoteSite);
+            if (loginSuccess) {
+                checkoutImpl(taskMonitor);
+                return;
+            }
+
+            throw e;
+        }
+    }
+
+    /**
+     * Load remote files and VCS files into site directory.
+     */
+    private void checkoutImpl(TaskMonitor taskMonitor)
     {
         // Find all files to update
         WebSite localSite = getLocalSite();
@@ -305,7 +352,7 @@ public class VersionControl {
     /**
      * Replaces (overwrites) local site files from clone site.
      */
-    public void replaceFiles(List<WebFile> localFiles, TaskMonitor taskMonitor) throws Exception
+    public void replaceFiles(List<WebFile> localFiles, TaskMonitor taskMonitor)
     {
         // Call TaskMonitor.startTasks
         taskMonitor.startTasks(localFiles.size());
