@@ -7,7 +7,6 @@ import snapcode.app.ProjectPane;
 import snapcode.app.ProjectTool;
 import snapcode.app.WorkspaceTools;
 import snapcode.project.VersionControl;
-import snapcode.webbrowser.ClientUtils;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
 import snap.view.ProgressBar;
@@ -15,10 +14,8 @@ import snap.view.SpringView;
 import snap.view.ViewEvent;
 import snap.viewx.DialogBox;
 import snapcode.webbrowser.WebBrowser;
-import snap.web.AccessException;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
@@ -217,7 +214,7 @@ public class VersionControlTool extends ProjectTool {
             rootFiles = getSiteRootDirAsList();
 
         // Get update files for root files
-        List<WebFile> updateFiles = getChangedFilesForRootFiles(rootFiles, VersionControl.Op.Update);
+        List<WebFile> updateFiles = _versionControl.getChangedFilesForRootFiles(rootFiles, VersionControl.Op.Update);
 
         // Run VcsTransferPane for files and op to confirm
         if (!new VcsTransferPane().showPanel(this, updateFiles, VersionControl.Op.Update))
@@ -289,7 +286,7 @@ public class VersionControlTool extends ProjectTool {
             rootFiles = getSiteRootDirAsList();
 
         // Get replace files for root files
-        List<WebFile> replaceFiles = getChangedFilesForRootFiles(rootFiles, VersionControl.Op.Replace);
+        List<WebFile> replaceFiles = _versionControl.getChangedFilesForRootFiles(rootFiles, VersionControl.Op.Replace);
 
         // Run VcsTransferPane for files and op
         if (!new VcsTransferPane().showPanel(this, replaceFiles, VersionControl.Op.Replace))
@@ -333,7 +330,7 @@ public class VersionControlTool extends ProjectTool {
             rootFiles = getSiteRootDirAsList();
 
         // Get commit files for root files
-        List<WebFile> commitFiles = getChangedFilesForRootFiles(rootFiles, VersionControl.Op.Commit);
+        List<WebFile> commitFiles = _versionControl.getChangedFilesForRootFiles(rootFiles, VersionControl.Op.Commit);
 
         // Run VersionControlFilesPane for files and op
         VcsTransferPane transferPane = new VcsTransferPane();
@@ -357,42 +354,6 @@ public class VersionControlTool extends ProjectTool {
         TaskRunner<?> commitRunner = new TaskRunner<>(commitFunc);
         commitRunner.setMonitor(taskMonitor);
         commitRunner.start();
-    }
-
-    /**
-     * Returns the changed files for given root files and version control operation.
-     */
-    protected List<WebFile> getChangedFilesForRootFiles(List<WebFile> rootFiles, VersionControl.Op operation)
-    {
-        List<WebFile> changedFiles = new ArrayList<>();
-
-        try {
-            for (WebFile file : rootFiles) {
-                switch (operation) {
-                    case Update: _versionControl.findUpdateFiles(file, changedFiles); break;
-                    case Replace: _versionControl.findReplaceFiles(file, changedFiles); break;
-                    case Commit: _versionControl.findCommitFiles(file, changedFiles); break;
-                }
-            }
-        }
-
-        // Handle AccessException:
-        catch (AccessException e) {
-            if (ClientUtils.setAccess(e.getSite()))
-                return getChangedFilesForRootFiles(rootFiles, operation);
-            throw e;
-        }
-
-        // Handle Exception
-        catch (Exception e) {
-            DialogBox dialogBox = new DialogBox("Disconnect Error");
-            dialogBox.setErrorMessage(e.toString());
-            dialogBox.showMessageDialog(_workspacePane.getUI());
-        }
-
-        // Sort and return
-        Collections.sort(changedFiles);
-        return changedFiles;
     }
 
     /**

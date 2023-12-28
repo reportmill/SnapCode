@@ -180,28 +180,6 @@ public class VersionControl {
     }
 
     /**
-     * Returns the local files for given file or directory that need to be updated.
-     */
-    public void findUpdateFiles(WebFile aFile, List<WebFile> updateFiles)
-    {
-        // If no clone site, just return
-        if (!getExists()) return;
-
-        // Get remote file for given file
-        WebFile remoteFile = getRepoFile(aFile.getPath(), true, aFile.isDir());
-
-        // Get remote changed files (update files)
-        Set<WebFile> changedFiles = new HashSet<>();
-        findChangedFiles(remoteFile, changedFiles);
-
-        // Add local versions to list
-        for (WebFile changedFile : changedFiles) {
-            WebFile localFile = getLocalFile(changedFile.getPath(), changedFile.isDir());
-            updateFiles.add(localFile);
-        }
-    }
-
-    /**
      * Updates (merges) local site files from remote site.
      */
     public void updateFiles(List<WebFile> localFiles, TaskMonitor taskMonitor)
@@ -266,17 +244,56 @@ public class VersionControl {
     }
 
     /**
-     * Returns the files that need to be committed to server.
+     * Replaces (overwrites) local site files from clone site.
      */
-    public void findCommitFiles(WebFile aFile, List<WebFile> commitFiles)
+    public void replaceFiles(List<WebFile> localFiles, TaskMonitor taskMonitor)
     {
-        // If no clone site, just return
-        if (!getExists()) return;
+        // Call TaskMonitor.startTasks
+        taskMonitor.startTasks(localFiles.size());
 
-        // Find local changed files and add to commit files list
-        Set<WebFile> changedFiles = new HashSet<>();
-        findChangedFiles(aFile, changedFiles);
-        commitFiles.addAll(changedFiles);
+        // Iterate over files
+        for (WebFile file : localFiles) {
+
+            // Update monitor task message
+            taskMonitor.beginTask("Updating " + file.getPath(), -1);
+            if (taskMonitor.isCancelled())
+                break;
+
+            // Replace file
+            try { replaceFile(file); }
+            catch (AccessException e) {
+                ClientUtils.setAccess(e.getSite());
+                updateFile(file);
+            }
+
+            // Close task
+            taskMonitor.endTask();
+        }
+    }
+
+    /**
+     * Replaces (overwrites) local site files from clone site.
+     */
+    protected void replaceFile(WebFile localFile)
+    {
+        // Get CloneFile
+        WebFile cloneFile = getCloneFile(localFile.getPath(), true, localFile.isDir());
+
+        // Set new file bytes and save
+        if (cloneFile.getExists()) {
+            if (localFile.isFile())
+                localFile.setBytes(cloneFile.getBytes());
+            localFile.save();
+            localFile.setModTimeSaved(cloneFile.getLastModTime());
+            setFileStatus(localFile, null);
+        }
+
+        // Otherwise delete LocalFile and CloneFile
+        else {
+            if (localFile.getExists())
+                localFile.delete();
+            setFileStatus(localFile, null);
+        }
     }
 
     /**
@@ -336,9 +353,64 @@ public class VersionControl {
     }
 
     /**
+     * Returns the changed files for given root files and version control operation.
+     */
+    public List<WebFile> getChangedFilesForRootFiles(List<WebFile> rootFiles, VersionControl.Op operation)
+    {
+        List<WebFile> changedFiles = new ArrayList<>();
+
+        try {
+            for (WebFile file : rootFiles) {
+                switch (operation) {
+                    case Update: findUpdateFiles(file, changedFiles); break;
+                    case Replace: findReplaceFiles(file, changedFiles); break;
+                    case Commit: findCommitFiles(file, changedFiles); break;
+                }
+            }
+        }
+
+        // Handle AccessException:
+        catch (AccessException e) {
+            if (ClientUtils.setAccess(e.getSite()))
+                return getChangedFilesForRootFiles(rootFiles, operation);
+            throw e;
+        }
+
+        // Handle Exception
+        /*catch (Exception e) { DialogBox dialogBox = new DialogBox("Disconnect Error");
+            dialogBox.setErrorMessage(e.toString()); dialogBox.showMessageDialog(_workspacePane.getUI()); }*/
+
+        // Sort and return
+        Collections.sort(changedFiles);
+        return changedFiles;
+    }
+
+    /**
+     * Returns the local files for given file or directory that need to be updated.
+     */
+    private void findUpdateFiles(WebFile aFile, List<WebFile> updateFiles)
+    {
+        // If no clone site, just return
+        if (!getExists()) return;
+
+        // Get remote file for given file
+        WebFile remoteFile = getRepoFile(aFile.getPath(), true, aFile.isDir());
+
+        // Get remote changed files (update files)
+        Set<WebFile> changedFiles = new HashSet<>();
+        findChangedFiles(remoteFile, changedFiles);
+
+        // Add local versions to list
+        for (WebFile changedFile : changedFiles) {
+            WebFile localFile = getLocalFile(changedFile.getPath(), changedFile.isDir());
+            updateFiles.add(localFile);
+        }
+    }
+
+    /**
      * Returns the local files for given file or directory that need to be replaced.
      */
-    public void findReplaceFiles(WebFile aFile, List<WebFile> replaceFiles)
+    private void findReplaceFiles(WebFile aFile, List<WebFile> replaceFiles)
     {
         // If no clone site, just return
         if (!getExists()) return;
@@ -350,62 +422,23 @@ public class VersionControl {
     }
 
     /**
-     * Replaces (overwrites) local site files from clone site.
+     * Returns the files that need to be committed to server.
      */
-    public void replaceFiles(List<WebFile> localFiles, TaskMonitor taskMonitor)
+    private void findCommitFiles(WebFile aFile, List<WebFile> commitFiles)
     {
-        // Call TaskMonitor.startTasks
-        taskMonitor.startTasks(localFiles.size());
+        // If no clone site, just return
+        if (!getExists()) return;
 
-        // Iterate over files
-        for (WebFile file : localFiles) {
-
-            // Update monitor task message
-            taskMonitor.beginTask("Updating " + file.getPath(), -1);
-            if (taskMonitor.isCancelled())
-                break;
-
-            // Replace file
-            try { replaceFile(file); }
-            catch (AccessException e) {
-                ClientUtils.setAccess(e.getSite());
-                updateFile(file);
-            }
-
-            // Close task
-            taskMonitor.endTask();
-        }
-    }
-
-    /**
-     * Replaces (overwrites) local site files from clone site.
-     */
-    protected void replaceFile(WebFile localFile)
-    {
-        // Get CloneFile
-        WebFile cloneFile = getCloneFile(localFile.getPath(), true, localFile.isDir());
-
-        // Set new file bytes and save
-        if (cloneFile.getExists()) {
-            if (localFile.isFile())
-                localFile.setBytes(cloneFile.getBytes());
-            localFile.save();
-            localFile.setModTimeSaved(cloneFile.getLastModTime());
-            setFileStatus(localFile, null);
-        }
-
-        // Otherwise delete LocalFile and CloneFile
-        else {
-            if (localFile.getExists())
-                localFile.delete();
-            setFileStatus(localFile, null);
-        }
+        // Find local changed files and add to commit files list
+        Set<WebFile> changedFiles = new HashSet<>();
+        findChangedFiles(aFile, changedFiles);
+        commitFiles.addAll(changedFiles);
     }
 
     /**
      * Returns the files that changed from last checkout.
      */
-    protected void findChangedFiles(WebFile aFile, Set<WebFile> changedFiles)
+    private void findChangedFiles(WebFile aFile, Set<WebFile> changedFiles)
     {
         // If file status is Added/Updated/Removed, add file
         FileStatus fileStatus = getFileStatus(aFile, false);
