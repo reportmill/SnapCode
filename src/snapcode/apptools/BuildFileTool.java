@@ -85,7 +85,7 @@ public class BuildFileTool extends ProjectTool {
         }
 
         // Get project site
-        WebSite projSite = findProjectForName(aName);
+        WebSite projSite = findProjectSiteForName(aName);
 
         // If project site not found but VersionControl URL provided, try to check out project
         boolean projectNotFound = projSite == null || !projSite.getExists();
@@ -414,16 +414,26 @@ public class BuildFileTool extends ProjectTool {
     /**
      * Finds a project site for given name.
      */
-    private WebSite findProjectForName(String aName)
+    private WebSite findProjectSiteForName(String aName)
     {
         // return AppBase.getShared().getProjectSiteForName(aName);
+
+        // Get project site parent URL (just return null if null)
         WebSite thisProjSite = getProjectSite();
         WebURL thisProjSiteURL = thisProjSite.getURL();
         WebURL parentURL = thisProjSiteURL.getParent();
-        WebFile parentDir = parentURL != null ? parentURL.getFile() : null;
-        WebFile projSiteDir = parentDir != null ? parentDir.getFileForName(aName) : null;
-        WebURL projSiteURL = projSiteDir != null ? projSiteDir.getURL() : null;
-        return projSiteURL != null ? projSiteURL.getAsSite() : null;
+        WebFile parentDir = parentURL.getFile();
+        if (parentDir == null)
+            return null;
+
+        // Get project dir for name (just return null if null)
+        WebFile projDir = parentDir != null ? parentDir.getFileForName(aName) : null;
+        if (projDir == null)
+            return null;
+
+        // Get project dir as site
+        WebURL projSiteURL = projDir.getURL();
+        return projSiteURL.getAsSite();
     }
 
     /**

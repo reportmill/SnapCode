@@ -168,9 +168,11 @@ public class FileTreeTool extends WorkspaceTool {
         // Expand first project
         runLater(() -> {
             FileTreeFile[] rootFiles = getRootFiles();
-            _filesTree.expandItem(rootFiles[0]);
-            if (_filesTree.getItemsList().size() > 1)
-                _filesTree.expandItem(_filesTree.getItemsList().get(1));
+            if (rootFiles.length > 0)
+                _filesTree.expandItem(rootFiles[0]);
+            List<FileTreeFile> filesTreeFiles = _filesTree.getItemsList();
+            if (filesTreeFiles.size() > 1)
+                _filesTree.expandItem(filesTreeFiles.get(1));
         });
     }
 
