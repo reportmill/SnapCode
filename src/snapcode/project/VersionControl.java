@@ -17,6 +17,7 @@ import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.webbrowser.LoginPage;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * This is a class to handle file synchronization for a local WebSite with a remote WebSite.
@@ -124,22 +125,22 @@ public class VersionControl {
     /**
      * Load remote files and VCS files into site directory.
      */
-    public TaskRunner<Object> checkout(View aView)
+    public TaskRunner<Boolean> checkout(View aView)
     {
         String title = "Checkout from " + getRemoteURLString();
-        TaskMonitor checkoutMonitor = aView != null ? new TaskMonitorPanel(aView, title) : new TaskMonitor();
-        TaskRunner<Object> checkoutRunner = new TaskRunner<>(() -> { checkout(aView, checkoutMonitor); return null; });
-        checkoutRunner.start();
-        return checkoutRunner;
+        TaskMonitor taskMonitor = aView != null ? new TaskMonitorPanel(aView, title) : new TaskMonitor();
+        TaskRunner<Boolean> taskRunner = new TaskRunner<>(() -> checkout(aView, taskMonitor));
+        taskRunner.start();
+        return taskRunner;
     }
 
     /**
      * Load remote files and VCS files into site directory.
      */
-    private void checkout(View aView, TaskMonitor taskMonitor)
+    private boolean checkout(View aView, TaskMonitor taskMonitor)
     {
         // Try basic checkout
-        try { checkoutImpl(taskMonitor); }
+        try { return checkoutImpl(taskMonitor); }
 
         // If failure
         catch (Exception e) {
@@ -147,18 +148,14 @@ public class VersionControl {
             // If attempt to set permissions succeeds, try again
             WebSite remoteSite = getRemoteSite();
             boolean setPermissionsSuccess = ClientUtils.setAccess(remoteSite);
-            if (setPermissionsSuccess) {
-                checkoutImpl(taskMonitor);
-                return;
-            }
+            if (setPermissionsSuccess)
+                return checkoutImpl(taskMonitor);
 
             // If attempt to login succeeds, try again
             LoginPage loginPage = new LoginPage();
             boolean loginSuccess = loginPage.showPanel(aView, remoteSite);
-            if (loginSuccess) {
-                checkoutImpl(taskMonitor);
-                return;
-            }
+            if (loginSuccess)
+                return checkoutImpl(taskMonitor);
 
             throw e;
         }
@@ -167,7 +164,7 @@ public class VersionControl {
     /**
      * Load remote files and VCS files into site directory.
      */
-    private void checkoutImpl(TaskMonitor taskMonitor)
+    private boolean checkoutImpl(TaskMonitor taskMonitor)
     {
         // Find all files to update
         WebSite localSite = getLocalSite();
@@ -176,22 +173,39 @@ public class VersionControl {
         findUpdateFiles(localSiteRootDir, updateFiles);
 
         // Update files
-        updateFiles(updateFiles, taskMonitor);
+        return updateFilesImpl(updateFiles, taskMonitor);
+    }
+
+    /**
+     * Update files.
+     */
+    public TaskRunner<Boolean> updateFiles(List<WebFile> theFiles, TaskMonitor taskMonitor)
+    {
+        Supplier<Boolean> updateFunc = () -> updateFilesImpl(theFiles, taskMonitor);
+        TaskRunner<Boolean> taskRunner = new TaskRunner<>(updateFunc);
+        taskRunner.setMonitor(taskMonitor);
+        taskRunner.start();
+        return taskRunner;
     }
 
     /**
      * Updates (merges) local site files from remote site.
      */
-    public void updateFiles(List<WebFile> localFiles, TaskMonitor taskMonitor)
+    protected boolean updateFilesImpl(List<WebFile> localFiles, TaskMonitor taskMonitor)
     {
         // Call TaskMonitor.startTasks
         taskMonitor.startTasks(localFiles.size());
+        boolean completed = true;
 
         // Iterate over files and update each
         for (WebFile localFile : localFiles) {
+
+            // Update monitor task message
             taskMonitor.beginTask("Updating " + localFile.getPath(), -1);
-            if (taskMonitor.isCancelled())
+            if (taskMonitor.isCancelled()) {
+                completed = false;
                 break;
+            }
 
             // Update file
             try { updateFile(localFile); }
@@ -199,8 +213,13 @@ public class VersionControl {
                 ClientUtils.setAccess(e.getSite());
                 updateFile(localFile);
             }
+
+            // Close task
             taskMonitor.endTask();
         }
+
+        // Return
+        return completed;
     }
 
     /**
@@ -244,20 +263,35 @@ public class VersionControl {
     }
 
     /**
+     * Replace files.
+     */
+    public TaskRunner<Boolean> replaceFiles(List<WebFile> theFiles, TaskMonitor taskMonitor)
+    {
+        Supplier<Boolean> replaceFunc = () -> replaceFilesImpl(theFiles, taskMonitor);
+        TaskRunner<Boolean> taskRunner = new TaskRunner<>(replaceFunc);
+        taskRunner.setMonitor(taskMonitor);
+        taskRunner.start();
+        return taskRunner;
+    }
+
+    /**
      * Replaces (overwrites) local site files from clone site.
      */
-    public void replaceFiles(List<WebFile> localFiles, TaskMonitor taskMonitor)
+    protected boolean replaceFilesImpl(List<WebFile> localFiles, TaskMonitor taskMonitor)
     {
         // Call TaskMonitor.startTasks
         taskMonitor.startTasks(localFiles.size());
+        boolean completed = true;
 
         // Iterate over files
         for (WebFile file : localFiles) {
 
             // Update monitor task message
             taskMonitor.beginTask("Updating " + file.getPath(), -1);
-            if (taskMonitor.isCancelled())
+            if (taskMonitor.isCancelled()) {
+                completed = false;
                 break;
+            }
 
             // Replace file
             try { replaceFile(file); }
@@ -269,6 +303,9 @@ public class VersionControl {
             // Close task
             taskMonitor.endTask();
         }
+
+        // Return
+        return completed;
     }
 
     /**
@@ -297,31 +334,52 @@ public class VersionControl {
     }
 
     /**
+     * Commit files.
+     */
+    public TaskRunner<Boolean> commitFiles(List<WebFile> theFiles, TaskMonitor taskMonitor, String aMessage)
+    {
+        Supplier<Boolean> commitFunc = () -> commitFilesImpl(theFiles, aMessage, taskMonitor);
+        TaskRunner<Boolean> taskRunner = new TaskRunner<>(commitFunc);
+        taskRunner.setMonitor(taskMonitor);
+        taskRunner.start();
+        return taskRunner;
+    }
+
+    /**
      * Commits (copies) local site files to remote site.
      */
-    public void commitFiles(List<WebFile> localFiles, String aMessage, TaskMonitor taskMonitor)
+    protected boolean commitFilesImpl(List<WebFile> localFiles, String aMessage, TaskMonitor taskMonitor)
     {
         // Call TaskMonitor.startTasks
         taskMonitor.startTasks(localFiles.size());
+        boolean completed = true;
 
         // Iterate over files
         for (WebFile file : localFiles) {
+
+            // Update monitor task message
+            taskMonitor.beginTask("Committing " + file.getPath(), -1);
             if (taskMonitor.isCancelled())
                 break;
 
-            try { commitFile(file, aMessage); }
+            try { commitFile(file); }
             catch (AccessException e) {
                 ClientUtils.setAccess(e.getSite());
-                commitFile(file, aMessage);
+                commitFile(file);
             }
+
+            // Close task
             taskMonitor.endTask();
         }
+
+        // Return
+        return completed;
     }
 
     /**
      * Commits (copies) local site file to remote site.
      */
-    protected void commitFile(WebFile localFile, String aMessage)
+    protected void commitFile(WebFile localFile)
     {
         // Get RepoFile and CloneFile
         String filePath = localFile.getPath();

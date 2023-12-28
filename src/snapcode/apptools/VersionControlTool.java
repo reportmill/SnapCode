@@ -18,7 +18,6 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * This ProjectTool subclass manages version control for project.
@@ -220,28 +219,14 @@ public class VersionControlTool extends ProjectTool {
         if (!new VcsTransferPane().showPanel(this, updateFiles, VersionControl.Op.Update))
             return;
 
-        // Call real update method
-        updateFilesImpl(updateFiles);
-    }
-
-    /**
-     * Update files.
-     */
-    protected void updateFilesImpl(List<WebFile> theFiles)
-    {
-        // Disable workspace Autobuild
+        // Disable workspace AutoBuild
         _workspace.getBuilder().setAutoBuildEnabled(false);
 
-        // Create and configure task runner for update and start
-        View view = _workspacePane.getUI();
-        String title = "Update files from remote site";
-        TaskMonitor taskMonitor = new TaskMonitorPanel(view, title);
-        Supplier<?> updateFunc = () -> { _versionControl.updateFiles(theFiles, taskMonitor); return null; };
-        TaskRunner<?> updateRunner = new TaskRunner<>(updateFunc);
-        updateRunner.setMonitor(taskMonitor);
-        updateRunner.setOnSuccess(obj -> updateFilesSuccess(theFiles));
+        // Call real update files method and configure callbacks
+        TaskMonitor taskMonitor = new TaskMonitorPanel(_workspacePane.getUI(), "Update files from remote site");
+        TaskRunner<Boolean> updateRunner = _versionControl.updateFiles(updateFiles, taskMonitor);
+        updateRunner.setOnSuccess(completed -> updateFilesSuccess(updateFiles));
         updateRunner.setOnFinished(() -> updateFilesFinished());
-        updateRunner.start();
     }
 
     /**
@@ -252,8 +237,8 @@ public class VersionControlTool extends ProjectTool {
         for (WebFile file : theFiles)
             file.reload();
         for (WebFile file : theFiles)
-            getBrowser().reloadFile(file); // Refresh replaced files
-        _workspacePane.resetLater(); // Reset UI
+            getBrowser().reloadFile(file);
+        _workspacePane.resetLater();
     }
 
     /**
@@ -292,28 +277,14 @@ public class VersionControlTool extends ProjectTool {
         if (!new VcsTransferPane().showPanel(this, replaceFiles, VersionControl.Op.Replace))
             return;
 
-        // Call real replace method
-        replaceFilesImpl(replaceFiles);
-    }
-
-    /**
-     * Replace files.
-     */
-    protected void replaceFilesImpl(List<WebFile> theFiles)
-    {
-        // Create TaskRunner and start
+        // Disable workspace AutoBuild
         _workspace.getBuilder().setAutoBuildEnabled(false);
 
-        // Create and configure task runner for replace and start
-        View view = _workspacePane.getUI();
-        String title = "Replace files from remote site";
-        TaskMonitor taskMonitor = new TaskMonitorPanel(view, title);
-        Supplier<?> replaceFunc = () -> { _versionControl.replaceFiles(theFiles, taskMonitor); return null; };
-        TaskRunner<?> replaceRunner = new TaskRunner<>(replaceFunc);
-        replaceRunner.setMonitor(taskMonitor);
-        replaceRunner.setOnSuccess(obj -> updateFilesSuccess(theFiles));
+        // Call real replace method and configure callbacks
+        TaskMonitor taskMonitor = new TaskMonitorPanel(_workspacePane.getUI(), "Replace files from remote site");
+        TaskRunner<Boolean> replaceRunner = _versionControl.replaceFiles(replaceFiles, taskMonitor);
+        replaceRunner.setOnSuccess(obj -> updateFilesSuccess(replaceFiles));
         replaceRunner.setOnFinished(() -> updateFilesFinished());
-        replaceRunner.start();
     }
 
     /**
@@ -338,22 +309,9 @@ public class VersionControlTool extends ProjectTool {
             return;
 
         // Do real commit
-        commitFilesImpl(commitFiles, transferPane.getCommitMessage());
-    }
-
-    /**
-     * Commit files.
-     */
-    protected void commitFilesImpl(List<WebFile> theFiles, String aMessage)
-    {
-        // Create TaskRunner and start
-        View view = _workspacePane.getUI();
-        String title = "Commit files to remote site";
-        TaskMonitor taskMonitor = new TaskMonitorPanel(view, title);
-        Supplier<?> commitFunc = () -> { _versionControl.commitFiles(theFiles, aMessage, taskMonitor); return null; };
-        TaskRunner<?> commitRunner = new TaskRunner<>(commitFunc);
-        commitRunner.setMonitor(taskMonitor);
-        commitRunner.start();
+        String commitMessage = transferPane.getCommitMessage();
+        TaskMonitor taskMonitor = new TaskMonitorPanel(_workspacePane.getUI(), "Commit files to remote site");
+        _versionControl.commitFiles(theFiles, taskMonitor, commitMessage);
     }
 
     /**
