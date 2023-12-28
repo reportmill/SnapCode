@@ -54,6 +54,9 @@ public class VersionControl {
         String urls = getRemoteURLString(aSite);
         if (urls != null)
             _remoteURL = WebURL.getURL(urls);
+
+        // Set in project site
+        aSite.setProp(VersionControl.class.getName(), this);
     }
 
     /**
@@ -771,25 +774,23 @@ public class VersionControl {
     }
 
     /**
-     * Returns the VersionControl for a site.
+     * Returns the VersionControl for the given site.
      */
     public synchronized static VersionControl getVersionControlForProjectSite(WebSite projectSite)
     {
         // Get VersionControl for project site (create if missing)
         VersionControl versionControl = (VersionControl) projectSite.getProp(VersionControl.class.getName());
-        if (versionControl == null) {
+        if (versionControl == null)
             versionControl = createVersionControlForProjectSite(projectSite);
-            projectSite.setProp(VersionControl.class.getName(), versionControl);
-        }
 
         // Return
         return versionControl;
     }
 
     /**
-     * Returns the VersionControl for a site.
+     * Creates the VersionControl for the given site.
      */
-    public static VersionControl createVersionControlForProjectSite(WebSite projectSite)
+    private static VersionControl createVersionControlForProjectSite(WebSite projectSite)
     {
         //String urls = getRemoteURLString(projectSite);
         //if (urls != null) urls = urls.toLowerCase();

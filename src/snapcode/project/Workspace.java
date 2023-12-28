@@ -377,7 +377,7 @@ public class Workspace extends PropObject {
 
             // Checkout project for URL
             VersionControl.setRemoteURLString(projSite, repoURL.getString());
-            VersionControl versionControl = VersionControl.createVersionControlForProjectSite(projSite);
+            VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
             View view = null; //_workspacePane.getUI()
             TaskRunner<?> checkoutRunner = versionControl.checkout(view);
             checkoutRunner.setOnSuccess(obj -> projectCheckoutFinished(projSite));

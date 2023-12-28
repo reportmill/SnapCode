@@ -398,23 +398,4 @@ public class WelcomePanel extends ViewOwner {
         // Return not project file
         return false;
     }
-
-    /**
-     * Creates a WorkspacePaneX if available.
-     */
-    private static WorkspacePane createWorkspacePaneX()
-    {
-        // Get WorkspacePaneX class name
-        String workspaceXClassName = "snapcode.app.WorkspacePaneX";
-
-        // Create/return
-        try {
-            Class<? extends WorkspacePane> workspacePaneClass = (Class<? extends WorkspacePane>) Class.forName(workspaceXClassName);
-            return ClassUtils.newInstance(workspacePaneClass);
-        }
-        catch (Exception e) {
-            System.err.println("WelcomePanel.openWorkspace: Couldn't create WorkspaceX");
-            return null;
-        }
-    }
 }

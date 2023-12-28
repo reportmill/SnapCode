@@ -96,7 +96,7 @@ public class BuildFileTool extends ProjectTool {
 
             // Checkout project for URL
             VersionControl.setRemoteURLString(projSite, aURLString);
-            VersionControl versionControl = VersionControl.createVersionControlForProjectSite(projSite);
+            VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
             TaskRunner<?> checkoutRunner = versionControl.checkout(_workspacePane.getUI());
             checkoutRunner.setOnSuccess(obj -> addProjectForNameImpl(aName));
             return;
