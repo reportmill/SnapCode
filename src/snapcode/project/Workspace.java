@@ -12,10 +12,10 @@ import snap.viewx.DialogBox;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.app.SnapCodeUtils;
-import snapcode.apptools.VersionControlTool;
 import java.io.Closeable;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Objects;
 
 /**
  * This class manages working with a set of one or more projects.
@@ -161,7 +161,7 @@ public class Workspace extends PropObject {
      */
     public void setStatus(String aString)
     {
-        if (aString.equals(_status)) return;
+        if (Objects.equals(aString, _status)) return;
         firePropChange(Status_Prop, _status, _status = aString);
     }
 
@@ -175,7 +175,7 @@ public class Workspace extends PropObject {
      */
     public void setActivity(String aString)
     {
-        if (aString.equals(_activity)) return;
+        if (Objects.equals(aString, _activity)) return;
         firePropChange(Activity_Prop, _activity, _activity = aString);
     }
 

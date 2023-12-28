@@ -164,7 +164,13 @@ public class WorkspaceBuilder {
         // Get RootProj and child projects
         Project rootProj = _workspace.getRootProject();
         Project[] childProjects = rootProj.getProjects();
-        TaskMonitor taskMonitor = new BuildWorkspaceMonitor();
+
+        // Start building
+        _workspace.setBuilding(true);
+
+        // Create task monitor
+        TaskMonitor taskMonitor = new TaskMonitor();
+        taskMonitor.addPropChangeListener(pc -> _workspace.setActivity(taskMonitor.getTaskTitle()), TaskMonitor.TaskTitle_Prop);
 
         // Build child projects
         for (Project childProject : childProjects) {
@@ -178,7 +184,14 @@ public class WorkspaceBuilder {
 
         // Build root project
         ProjectBuilder rootBuilder = rootProj.getBuilder();
-        return rootBuilder.buildProject(taskMonitor);
+        boolean buildSuccess = rootBuilder.buildProject(taskMonitor);
+
+        // Stop building
+        _workspace.setActivity(null);
+        _workspace.setBuilding(false);
+
+        // Return
+        return buildSuccess;
     }
 
     /**
@@ -201,19 +214,6 @@ public class WorkspaceBuilder {
         for (Project proj : projects) {
             ProjectBuilder projBuilder = proj.getBuilder();
             projBuilder.addBuildFilesAll();
-        }
-    }
-
-    /**
-     * A TaskMonitor implementation to update workspace Activity and Building properties.
-     */
-    private class BuildWorkspaceMonitor implements TaskMonitor {
-
-        @Override
-        public void beginTask(String aTitle, int theTotalWork)
-        {
-            _workspace.setActivity(aTitle);
-            _workspace.setBuilding(true);
         }
     }
 

@@ -127,7 +127,7 @@ public class VersionControl {
     public TaskRunner<Object> checkout(View aView)
     {
         String title = "Checkout from " + getRemoteURLString();
-        TaskMonitor checkoutMonitor = aView != null ? new TaskMonitorPanel(aView, title) : TaskMonitor.NULL;
+        TaskMonitor checkoutMonitor = aView != null ? new TaskMonitorPanel(aView, title) : new TaskMonitor();
         TaskRunner<Object> checkoutRunner = new TaskRunner<>(() -> { checkout(aView, checkoutMonitor); return null; });
         checkoutRunner.start();
         return checkoutRunner;

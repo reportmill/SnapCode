@@ -423,11 +423,11 @@ public class Project extends PropObject {
     /**
      * Deletes the project.
      */
-    public void deleteProject(TaskMonitor aTM) throws Exception
+    public void deleteProject(TaskMonitor taskMonitor) throws Exception
     {
         // Start TaskMonitor
-        aTM.startTasks(1);
-        aTM.beginTask("Deleting files", -1);
+        taskMonitor.startTasks(1);
+        taskMonitor.beginTask("Deleting files", -1);
 
         // Clear ClassLoader
         Workspace workspace = getWorkspace();
@@ -440,7 +440,7 @@ public class Project extends PropObject {
         projSite.deleteSite();
 
         // Finish TaskMonitor
-        aTM.endTask();
+        taskMonitor.endTask();
     }
 
     /**

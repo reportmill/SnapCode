@@ -1,6 +1,7 @@
 package snapcode.app;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
+import snap.util.TaskMonitor;
 import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.util.TaskMonitorPanel;
@@ -52,7 +53,7 @@ public class ProjectPane extends ViewOwner {
         projSite.setProp(ProjectPane.class.getName(), this);
 
         // Set VersionControlPane
-        String urls = getRemoteURLString();
+        //String urls = getRemoteURLString();
         //_vcp = VersionControl.get(_site) instanceof VersionControlGit ? new VcsPaneGit(this) : new VcsPane(this);
         _versionControlTool = new VersionControlTool(this);
     }
@@ -155,8 +156,8 @@ public class ProjectPane extends ViewOwner {
 
         // Delete project
         Project project = getProject();
-        TaskMonitorPanel taskMonitorPanel = new TaskMonitorPanel(aView, "Delete Project");
-        try { project.deleteProject(taskMonitorPanel); }
+        TaskMonitor taskMonitor = new TaskMonitorPanel(aView, "Delete Project");
+        try { project.deleteProject(taskMonitor); }
         catch (Exception e) { DialogBox.showExceptionDialog(aView, "Delete Project Failed", e); }
     }
 

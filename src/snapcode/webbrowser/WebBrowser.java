@@ -13,6 +13,7 @@ import snap.web.WebResponse;
 import snap.web.WebURL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A panel to browser Snap files.
@@ -427,7 +428,7 @@ public class WebBrowser extends TransitionPane {
      */
     public void setStatus(String aString)
     {
-        if (aString.equals(_status)) return;
+        if (Objects.equals(aString, _status)) return;
         firePropChange(Status_Prop, _status, _status = aString);
     }
 
@@ -441,7 +442,7 @@ public class WebBrowser extends TransitionPane {
      */
     public void setActivity(String aString)
     {
-        if (aString.equals(_activity)) return;
+        if (Objects.equals(aString, _activity)) return;
         firePropChange(Activity_Prop, _activity, _activity = aString);
     }
 

@@ -160,7 +160,7 @@ public class VersionControlTool extends ProjectTool {
     public void deactivate()
     {
         try {
-            TaskMonitor taskMonitor = new TaskMonitor.Text(System.out);
+            TaskMonitor taskMonitor = new TaskMonitor(System.out);
             _versionControl.disconnect(taskMonitor);
         }
 
@@ -204,134 +204,46 @@ public class VersionControlTool extends ProjectTool {
     }
 
     /**
-     * Called to commit files.
-     */
-    public void commitFiles(List<WebFile> theFiles)
-    {
-        if (!_versionControl.getExists()) {
-            beep();
-            return;
-        }
-
-        // Get base files and all files to transfer
-        List<WebFile> selFiles = theFiles != null ? theFiles : getSelFiles();
-        List<WebFile> commitFiles = getCommitFiles(selFiles);
-
-        // Run VersionControlFilesPane for files and op
-        VcsTransferPane transferPane = new VcsTransferPane();
-        if (!transferPane.showPanel(this, commitFiles, VersionControl.Op.Commit))
-            return;
-        commitFilesImpl(commitFiles, transferPane.getCommitMessage());
-    }
-
-    /**
-     * Returns the Commit files.
-     */
-    protected List<WebFile> getCommitFiles(List<WebFile> theFromFiles)
-    {
-        // Create list
-        List<WebFile> fromFiles = theFromFiles != null ? theFromFiles : getSiteRootDirAsList();
-        List<WebFile> commitFiles = new ArrayList<>();
-
-        try {
-            for (WebFile file : fromFiles)
-                _versionControl.findCommitFiles(file, commitFiles);
-        }
-
-        catch (AccessException e) {
-            if (ClientUtils.setAccess(e.getSite()))
-                return getCommitFiles(theFromFiles);
-            throw e;
-        }
-
-        // Sort files and return
-        Collections.sort(commitFiles);
-        return commitFiles;
-    }
-
-    /**
-     * Commit files.
-     */
-    protected void commitFilesImpl(final List<WebFile> theFiles, final String aMessage)
-    {
-        // Create TaskRunner and start
-        View view = _workspacePane.getUI();
-        String title = "Commit files to remote site";
-        TaskMonitorPanel taskMonitorPanel = new TaskMonitorPanel(view, title);
-        Supplier<?> commitFunc = () -> { _versionControl.commitFiles(theFiles, aMessage, taskMonitorPanel); return null; };
-        TaskRunner<?> commitRunner = new TaskRunner<>(commitFunc);
-        commitRunner.setOnFinished(() -> taskMonitorPanel.hide());
-        commitRunner.start();
-    }
-
-    /**
      * Called to update files.
      */
     public void updateFiles(List<WebFile> theFiles)
     {
-        if (!_versionControl.getExists()) {
-            beep();
+        // Sanity check
+        if (!_versionControl.getExists()) { beep(); return; }
+
+        // Get root files
+        List<WebFile> rootFiles = theFiles != null ? theFiles : getSelFiles();
+        if (rootFiles.size() == 0)
+            rootFiles = getSiteRootDirAsList();
+
+        // Get update files for root files
+        List<WebFile> updateFiles = getChangedFilesForRootFiles(rootFiles, VersionControl.Op.Update);
+
+        // Run VcsTransferPane for files and op to confirm
+        if (!new VcsTransferPane().showPanel(this, updateFiles, VersionControl.Op.Update))
             return;
-        }
 
-        // Get base files and all files to transfer
-        List<WebFile> bfiles = theFiles != null ? theFiles : getSelFiles();
-        List<WebFile> sfiles = getUpdateFiles(bfiles);
-
-        // Run VersionControlFilesPane for files and op
-        if (!new VcsTransferPane().showPanel(this, sfiles, VersionControl.Op.Update))
-            return;
-        updateFilesImpl(sfiles);
-    }
-
-    /**
-     * Returns the Update files.
-     */
-    protected List<WebFile> getUpdateFiles(List<WebFile> theFromFiles)
-    {
-        // Create list
-        List<WebFile> fromFiles = theFromFiles != null ? theFromFiles : getSiteRootDirAsList();
-        List<WebFile> xfiles = new ArrayList<>();
-
-        try {
-            for (WebFile file : fromFiles)
-                _versionControl.findUpdateFiles(file, xfiles);
-        }
-
-        // Handle AccessException:
-        catch (AccessException e) {
-            if (ClientUtils.setAccess(e.getSite())) return getUpdateFiles(theFromFiles);
-            throw e;
-        }
-
-        // Handle Exception
-        catch (Exception e) {
-            DialogBox db = new DialogBox("Disconnect Error");
-            db.setErrorMessage(e.toString());
-            db.showMessageDialog(_workspacePane.getUI());
-        }
-
-        // Sort files and return
-        Collections.sort(xfiles);
-        return xfiles;
+        // Call real update method
+        updateFilesImpl(updateFiles);
     }
 
     /**
      * Update files.
      */
-    protected void updateFilesImpl(final List<WebFile> theFiles)
+    protected void updateFilesImpl(List<WebFile> theFiles)
     {
-        // Get old Autobuild
-        final boolean oldAutoBuild = _workspace.getBuilder().setAutoBuildEnabled(false);
+        // Disable workspace Autobuild
+        _workspace.getBuilder().setAutoBuildEnabled(false);
 
         // Create and configure task runner for update and start
         View view = _workspacePane.getUI();
         String title = "Update files from remote site";
-        TaskMonitorPanel taskMonitorPanel = new TaskMonitorPanel(view, title);
-        Supplier<?> updateFunc = () -> { _versionControl.updateFiles(theFiles, taskMonitorPanel); return null; };
+        TaskMonitor taskMonitor = new TaskMonitorPanel(view, title);
+        Supplier<?> updateFunc = () -> { _versionControl.updateFiles(theFiles, taskMonitor); return null; };
         TaskRunner<?> updateRunner = new TaskRunner<>(updateFunc);
+        updateRunner.setMonitor(taskMonitor);
         updateRunner.setOnSuccess(obj -> updateFilesSuccess(theFiles));
-        updateRunner.setOnFinished(() -> updateFilesFinished(oldAutoBuild, taskMonitorPanel));
+        updateRunner.setOnFinished(() -> updateFilesFinished());
         updateRunner.start();
     }
 
@@ -350,15 +262,12 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called when update files finishes.
      */
-    private void updateFilesFinished(boolean oldAutoBuild, TaskMonitorPanel taskMonitorPanel)
+    private void updateFilesFinished()
     {
-        // Hide task monitor panel
-        taskMonitorPanel.hide();
-
         // Reset AutoBuildEnabled and build Project
         WorkspaceBuilder builder = _workspace.getBuilder();
-        builder.setAutoBuildEnabled(oldAutoBuild);
-        if (oldAutoBuild)
+        builder.setAutoBuildEnabled(true);
+        if (builder.isAutoBuild())
             builder.buildWorkspaceLater();
 
         // Connect to remote site
@@ -371,63 +280,119 @@ public class VersionControlTool extends ProjectTool {
      */
     public void replaceFiles(List<WebFile> theFiles)
     {
-        if (!_versionControl.getExists()) {
-            beep();
+        // Sanity check
+        if (!_versionControl.getExists()) { beep(); return; }
+
+        // Get root files
+        List<WebFile> rootFiles = theFiles != null ? theFiles : getSelFiles();
+        if (rootFiles.size() == 0)
+            rootFiles = getSiteRootDirAsList();
+
+        // Get replace files for root files
+        List<WebFile> replaceFiles = getChangedFilesForRootFiles(rootFiles, VersionControl.Op.Replace);
+
+        // Run VcsTransferPane for files and op
+        if (!new VcsTransferPane().showPanel(this, replaceFiles, VersionControl.Op.Replace))
             return;
-        }
 
-        // Get base files and all files to transfer
-        List<WebFile> bfiles = theFiles != null ? theFiles : getSelFiles();
-        List<WebFile> sfiles = getReplaceFiles(bfiles);
-
-        // Run VersionControlFilesPane for files and op
-        if (!new VcsTransferPane().showPanel(this, sfiles, VersionControl.Op.Replace))
-            return;
-        replaceFilesImpl(sfiles);
-    }
-
-    /**
-     * Returns the Replace files.
-     */
-    protected List<WebFile> getReplaceFiles(List<WebFile> theFromFiles)
-    {
-        // Create list
-        List<WebFile> fromFiles = theFromFiles != null ? theFromFiles : getSiteRootDirAsList();
-        List<WebFile> replaceFiles = new ArrayList<>();
-
-        try {
-            for (WebFile file : fromFiles)
-                _versionControl.findReplaceFiles(file, replaceFiles);
-        }
-
-        catch (AccessException e) {
-            if (ClientUtils.setAccess(e.getSite()))
-                return getReplaceFiles(theFromFiles);
-            throw e;
-        }
-
-        // Sort files and return
-        Collections.sort(replaceFiles);
-        return replaceFiles;
+        // Call real replace method
+        replaceFilesImpl(replaceFiles);
     }
 
     /**
      * Replace files.
      */
-    protected void replaceFilesImpl(final List<WebFile> theFiles)
+    protected void replaceFilesImpl(List<WebFile> theFiles)
     {
         // Create TaskRunner and start
-        final boolean oldAutoBuild = _workspace.getBuilder().setAutoBuildEnabled(false);
+        _workspace.getBuilder().setAutoBuildEnabled(false);
 
         // Create and configure task runner for replace and start
         View view = _workspacePane.getUI();
         String title = "Replace files from remote site";
-        TaskMonitorPanel taskMonitorPanel = new TaskMonitorPanel(view, title);
-        Supplier<?> replaceFunc = () -> { _versionControl.replaceFiles(theFiles, taskMonitorPanel); return null; };
+        TaskMonitor taskMonitor = new TaskMonitorPanel(view, title);
+        Supplier<?> replaceFunc = () -> { _versionControl.replaceFiles(theFiles, taskMonitor); return null; };
         TaskRunner<?> replaceRunner = new TaskRunner<>(replaceFunc);
+        replaceRunner.setMonitor(taskMonitor);
         replaceRunner.setOnSuccess(obj -> updateFilesSuccess(theFiles));
-        replaceRunner.setOnFinished(() -> updateFilesFinished(oldAutoBuild, taskMonitorPanel));
+        replaceRunner.setOnFinished(() -> updateFilesFinished());
         replaceRunner.start();
+    }
+
+    /**
+     * Called to commit files.
+     */
+    public void commitFiles(List<WebFile> theFiles)
+    {
+        // Sanity check
+        if (!_versionControl.getExists()) { beep(); return; }
+
+        // Get root files
+        List<WebFile> rootFiles = theFiles != null ? theFiles : getSelFiles();
+        if (rootFiles.size() == 0)
+            rootFiles = getSiteRootDirAsList();
+
+        // Get commit files for root files
+        List<WebFile> commitFiles = getChangedFilesForRootFiles(rootFiles, VersionControl.Op.Commit);
+
+        // Run VersionControlFilesPane for files and op
+        VcsTransferPane transferPane = new VcsTransferPane();
+        if (!transferPane.showPanel(this, commitFiles, VersionControl.Op.Commit))
+            return;
+
+        // Do real commit
+        commitFilesImpl(commitFiles, transferPane.getCommitMessage());
+    }
+
+    /**
+     * Commit files.
+     */
+    protected void commitFilesImpl(List<WebFile> theFiles, String aMessage)
+    {
+        // Create TaskRunner and start
+        View view = _workspacePane.getUI();
+        String title = "Commit files to remote site";
+        TaskMonitor taskMonitor = new TaskMonitorPanel(view, title);
+        Supplier<?> commitFunc = () -> { _versionControl.commitFiles(theFiles, aMessage, taskMonitor); return null; };
+        TaskRunner<?> commitRunner = new TaskRunner<>(commitFunc);
+        commitRunner.setMonitor(taskMonitor);
+        commitRunner.start();
+    }
+
+    /**
+     * Returns the changed files for given root files and version control operation.
+     */
+    protected List<WebFile> getChangedFilesForRootFiles(List<WebFile> rootFiles, VersionControl.Op operation)
+    {
+        List<WebFile> changedFiles = new ArrayList<>();
+
+        try {
+            for (WebFile file : rootFiles) {
+                switch (operation) {
+                    case Update: _versionControl.findUpdateFiles(file, changedFiles); break;
+                    case Replace: _versionControl.findReplaceFiles(file, changedFiles); break;
+                    case Commit: _versionControl.findCommitFiles(file, changedFiles); break;
+                }
+            }
+        }
+
+        // Handle AccessException:
+        catch (AccessException e) {
+            if (ClientUtils.setAccess(e.getSite()))
+                return getChangedFilesForRootFiles(rootFiles, operation);
+            throw e;
+        }
+
+        // Handle Exception
+        catch (Exception e) {
+            DialogBox dialogBox = new DialogBox("Disconnect Error");
+            dialogBox.setErrorMessage(e.toString());
+            dialogBox.showMessageDialog(_workspacePane.getUI());
+        }
+
+        // Sort and return
+        Collections.sort(changedFiles);
+        return changedFiles;
     }
 
     /**
