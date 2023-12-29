@@ -7,7 +7,6 @@ import snap.props.PropObject;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
 import snap.util.TaskRunner;
-import snap.view.View;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.app.SnapCodeUtils;
@@ -353,7 +352,17 @@ public class Workspace extends PropObject {
     /**
      * Adds a project with given repo URL.
      */
-    public void addProjectForRepoURL(WebURL repoURL)
+    public TaskRunner<Boolean> addProjectForRepoURL(WebURL repoURL)
+    {
+        TaskRunner<Boolean> taskRunner = new TaskRunner<>(() -> addProjectForRepoURLImpl(repoURL));
+        taskRunner.start();
+        return taskRunner;
+    }
+
+    /**
+     * Adds a project with given repo URL.
+     */
+    private boolean addProjectForRepoURLImpl(WebURL repoURL)
     {
         // Get project name
         String projName = repoURL.getFilenameSimple();
@@ -361,7 +370,7 @@ public class Workspace extends PropObject {
         // If project already present, just return
         Project existingProj = getProjectForName(projName);
         if (existingProj != null)
-            return;
+            return true;
 
         // Get project site
         WebURL snapCodeDirURL = SnapCodeUtils.getSnapCodeDirURL();
@@ -371,15 +380,18 @@ public class Workspace extends PropObject {
         // If exists, just add and return
         if (projSite.getExists()) {
             addProjectForSite(projSite);
-            return;
+            return true;
         }
 
         // Checkout project for URL
         VersionControl.setRemoteURLString(projSite, repoURL.getString());
         VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
-        View view = null; //_workspacePane.getUI()
-        TaskRunner<?> checkoutRunner = versionControl.checkout(view);
+        TaskRunner<Boolean> checkoutRunner = versionControl.checkout(null);
         checkoutRunner.setOnSuccess(obj -> addProjectForSite(projSite));
+
+        // Wait till done
+        checkoutRunner.join();
+        return checkoutRunner.getResult();
     }
 
     /**

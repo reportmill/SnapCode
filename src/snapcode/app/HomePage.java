@@ -1,16 +1,19 @@
 package snapcode.app;
 import snap.gfx.Color;
 import snap.gfx.GFXEnv;
+import snap.util.TaskRunner;
 import snap.view.ScrollView;
 import snap.view.View;
 import snap.view.ViewArchiver;
 import snap.view.ViewEvent;
+import snap.web.WebURL;
+import snapcode.project.Project;
+import snapcode.project.Workspace;
 import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.apptools.FilesTool;
-import snapcode.apptools.BuildFileTool;
 import snapcode.project.RunConfig;
 import snapcode.project.RunConfigs;
 
@@ -21,6 +24,14 @@ public class HomePage extends WebPage {
 
     // Whether to do stupid animation (rotate buttons on mouse enter)
     boolean _stupidAnim;
+
+    /**
+     * Constructor.
+     */
+    public HomePage()
+    {
+        super();
+    }
 
     /**
      * Returns the WorkspacePane.
@@ -108,9 +119,7 @@ public class HomePage extends WebPage {
 
         // Handle NewSnapScene
         if (anEvent.equals("NewSnapScene") && anEvent.isMouseRelease()) {
-            ProjectPane projectPane = ProjectPane.getProjectPaneForSite(getRootSite());
-            BuildFileTool buildFileTool = projectPane.getProjectTools().getBuildFileTool();
-            buildFileTool.addProjectForName("SnapKit", "https://github.com/reportmill/SnapKit.git");
+            addSnapKitDependency();
             addSceneFiles(getRootSite(), "Scene1");
         }
 
@@ -123,12 +132,33 @@ public class HomePage extends WebPage {
 
         // Handle SnapDocs
         if (anEvent.equals("SnapDocs") && anEvent.isMouseRelease())
-            GFXEnv.getEnv().openURL("http://www.reportmill.com/snap1/javadoc");
+            GFXEnv.getEnv().openURL("https://www.reportmill.com/snap1/javadoc");
 
         // Handle RMDocs
         if (anEvent.equals("RMDocs") && anEvent.isMouseRelease())
-            GFXEnv.getEnv().openURL("http://www.reportmill.com/support");
+            GFXEnv.getEnv().openURL("https://www.reportmill.com/support");
         //getBrowser().setURLString("http://www.reportmill.com/support/UserGuide.pdf");
+    }
+
+    /**
+     * Adds SnapKit project to root project.
+     */
+    private void addSnapKitDependency()
+    {
+        // Get workspace
+        WebSite rootSite = getRootSite();
+        Project project = Project.getProjectForSite(rootSite);
+        Workspace workspace = project.getWorkspace();
+
+        // Get snapkit url
+        WebURL snapkitRepoURL = WebURL.getURL("https://github.com/reportmill/SnapKit.git");
+        assert (snapkitRepoURL != null);
+
+        // Add SnapKit project to workspace
+        TaskRunner<Boolean> taskRunner = workspace.addProjectForRepoURL(snapkitRepoURL);
+
+        // When done, add project to root project
+        taskRunner.setOnSuccess(completed -> project.addProjectForPath("SnapKit"));
     }
 
     /**
@@ -180,56 +210,45 @@ public class HomePage extends WebPage {
     /**
      * Creates the Scene file.
      */
-    protected WebFile addSceneJavaFile(WebSite aSite, String aName)
+    protected void addSceneJavaFile(WebSite aSite, String aName)
     {
         // Get snap file (return if already exists)
         String path = "/src/" + aName + ".java";
         WebFile jfile = aSite.getFileForPath(path);
-        if (jfile != null) return null;
+        if (jfile != null)
+            return;
 
         // Create content
-        StringBuffer sb = new StringBuffer();
-        sb.append("import snap.view.*;\n\n");
-        sb.append("import snap.viewx.*;\n\n");
-        sb.append("/**\n").append(" * A SnapStudio SceneOwner subclass. SnapEdit=true.\n").append(" */\n");
-        sb.append("public class Scene1 extends SnapSceneOwner {\n\n");
-        sb.append("/**\n").append(" * Initialize UI.\n").append(" */\n");
-        sb.append("protected void initUI()\n").append("{\n}\n\n");
-        sb.append("/**\n").append(" * Reset UI.\n").append(" */\n");
-        sb.append("protected void resetUI()\n").append("{\n}\n\n");
-        sb.append("/**\n").append(" * Respond to UI changes.\n").append(" */\n");
-        sb.append("protected void respondUI(ViewEvent anEvent)\n").append("{\n}\n\n");
-        sb.append("/**\n").append(" * Called on every frame.\n").append(" */\n");
-        sb.append("public void act()\n").append("{\n}\n\n");
-        sb.append("/**\n").append(" * Standard main method.\n").append(" */\n");
-        sb.append("public static void main(String args[])\n{\n");
-        sb.append("    new Scene1().setWindowVisible(true);\n}\n\n");
-        sb.append("}");
+        String sb = "import snap.view.*;\n\n" +
+            "import snap.viewx.*;\n\n" +
+            "/**\n" + " * A SnapStudio SceneOwner subclass. SnapEdit=true.\n" + " */\n" +
+            "public class Scene1 extends SnapSceneOwner {\n\n" +
+            "/**\n" + " * Initialize UI.\n" + " */\n" +
+            "protected void initUI()\n" + "{\n}\n\n" +
+            "/**\n" + " * Reset UI.\n" + " */\n" +
+            "protected void resetUI()\n" + "{\n}\n\n" +
+            "/**\n" + " * Respond to UI changes.\n" + " */\n" +
+            "protected void respondUI(ViewEvent anEvent)\n" + "{\n}\n\n" +
+            "/**\n" + " * Called on every frame.\n" + " */\n" +
+            "public void act()\n" + "{\n}\n\n" +
+            "/**\n" + " * Standard main method.\n" + " */\n" +
+            "public static void main(String args[])\n{\n" +
+            "    new Scene1().setWindowVisible(true);\n}\n\n" + "}";
 
         // Create file, set content, save and return
         jfile = aSite.createFileForPath(path, false);
-        jfile.setText(sb.toString());
-        try {
-            jfile.save();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return jfile;
+        jfile.setText(sb);
+        try { jfile.save(); }
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**
      * Override to suppress.
      */
-    public void reload()
-    {
-    }
+    public void reload()  { }
 
     /**
      * Return better title.
      */
-    public String getTitle()
-    {
-        return getRootSite().getName() + " Home Page";
-    }
-
+    public String getTitle()  { return getRootSite().getName() + " Home Page";  }
 }
