@@ -3,7 +3,6 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.GFXEnv;
 import snap.props.PropChangeListener;
-import snap.util.TaskRunner;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.app.*;
@@ -69,62 +68,6 @@ public class BuildFileTool extends ProjectTool {
         _dependenciesListArea.setItems(buildFile.getDependencies());
         _dependenciesListArea.setSelItem(null);
         resetLater();
-    }
-
-    /**
-     * Adds a project with given name.
-     */
-    public void addProjectForName(String aName, String aURLString)
-    {
-        // If project already present, just return
-        Project existingProj = _proj.getProjectForName(aName);
-        if (existingProj != null) {
-            View view = isUISet() && getUI().isShowing() ? getUI() : _workspacePane.getUI();
-            DialogBox.showWarningDialog(view, "Error Adding Project", "Project already present: " + aName);
-            return;
-        }
-
-        // Get project site
-        WebSite projSite = findProjectSiteForName(aName);
-
-        // If project site not found but VersionControl URL provided, try to check out project
-        boolean projectNotFound = projSite == null || !projSite.getExists();
-        if (projectNotFound && aURLString != null) {
-
-            // Create project site if missing
-            //if (projSite == null) projSite = AppBase.getShared().createProjectSiteForName(aName);
-
-            // Checkout project for URL
-            VersionControl.setRemoteURLString(projSite, aURLString);
-            VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
-            TaskRunner<?> checkoutRunner = versionControl.checkout(_workspacePane.getUI());
-            checkoutRunner.setOnSuccess(obj -> addProjectForNameImpl(aName));
-            return;
-        }
-
-        // If site still null complain and return
-        if (projSite == null) {
-            View view = isUISet() && getUI().isShowing() ? getUI() : _workspacePane.getUI();
-            DialogBox.showErrorDialog(view, "Error Adding Project", "Project not found.");
-            return;
-        }
-
-        // Add project for name
-        addProjectForNameImpl(aName);
-    }
-
-    /**
-     * Adds a project with given name.
-     */
-    public void addProjectForNameImpl(String aName)
-    {
-        // Add project for name
-        _proj.addProjectForPath(aName);
-
-        // Build workspace
-        WorkspaceBuilder builder = _workspace.getBuilder();
-        builder.addAllFilesToBuild();
-        builder.buildWorkspaceLater();
     }
 
     /**

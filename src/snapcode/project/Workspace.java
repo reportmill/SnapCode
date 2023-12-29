@@ -8,7 +8,6 @@ import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
 import snap.util.TaskRunner;
 import snap.view.View;
-import snap.viewx.DialogBox;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.app.SnapCodeUtils;
@@ -361,40 +360,26 @@ public class Workspace extends PropObject {
 
         // If project already present, just return
         Project existingProj = getProjectForName(projName);
-        if (existingProj != null) {
-            View view = null; //isUISet() && getUI().isShowing() ? getUI() : _workspacePane.getUI();
-            DialogBox.showWarningDialog(view, "Error Adding Project", "Project already present: " + projName);
+        if (existingProj != null)
             return;
-        }
 
         // Get project site
         WebURL snapCodeDirURL = SnapCodeUtils.getSnapCodeDirURL();
         WebURL projDirURL = snapCodeDirURL.getChild(projName);
         WebSite projSite = projDirURL.getAsSite();
 
-        // If project site not found but VersionControl URL provided, try to check out project
-        if (!projSite.getExists()) {
-
-            // Checkout project for URL
-            VersionControl.setRemoteURLString(projSite, repoURL.getString());
-            VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
-            View view = null; //_workspacePane.getUI()
-            TaskRunner<?> checkoutRunner = versionControl.checkout(view);
-            checkoutRunner.setOnSuccess(obj -> projectCheckoutFinished(projSite));
+        // If exists, just add and return
+        if (projSite.getExists()) {
+            addProjectForSite(projSite);
             return;
         }
 
-        // Add project for name
-        projectCheckoutFinished(projSite);
-    }
-
-    /**
-     * Called when project is successfully checked out.
-     */
-    private void projectCheckoutFinished(WebSite projectSite)
-    {
-        Project project = new Project(this, projectSite);
-        addProject(project);
+        // Checkout project for URL
+        VersionControl.setRemoteURLString(projSite, repoURL.getString());
+        VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
+        View view = null; //_workspacePane.getUI()
+        TaskRunner<?> checkoutRunner = versionControl.checkout(view);
+        checkoutRunner.setOnSuccess(obj -> addProjectForSite(projSite));
     }
 
     /**
