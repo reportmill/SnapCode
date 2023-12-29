@@ -1,8 +1,6 @@
 package snapcode.apptools;
-import snap.util.TaskMonitorPanel;
 import snapcode.project.WorkspaceBuilder;
 import snap.props.PropChange;
-import snap.view.View;
 import snapcode.app.ProjectPane;
 import snapcode.app.ProjectTool;
 import snapcode.app.WorkspaceTools;
@@ -175,9 +173,13 @@ public class VersionControlTool extends ProjectTool {
         WorkspaceBuilder builder = _workspace.getBuilder();
         builder.setAutoBuildEnabled(false);
 
-        View view = _workspacePane.getUI();
-        TaskRunner<?> checkoutRunner = _versionControl.checkout(view);
+        // Get checkout task runner and configure
+        TaskRunner<?> checkoutRunner = _versionControl.checkout();
         checkoutRunner.setOnSuccess(obj -> checkoutSuccess());
+
+        // Show progress dialog
+        TaskMonitor taskMonitor = checkoutRunner.getMonitor();
+        taskMonitor.showProgressPanel(_workspacePane.getUI());
     }
 
     /**
@@ -223,10 +225,13 @@ public class VersionControlTool extends ProjectTool {
         _workspace.getBuilder().setAutoBuildEnabled(false);
 
         // Call real update files method and configure callbacks
-        TaskMonitor taskMonitor = new TaskMonitorPanel(_workspacePane.getUI(), "Update files from remote site");
-        TaskRunner<Boolean> updateRunner = _versionControl.updateFiles(updateFiles, taskMonitor);
+        TaskRunner<Boolean> updateRunner = _versionControl.updateFiles(updateFiles);
         updateRunner.setOnSuccess(completed -> updateFilesSuccess(updateFiles));
         updateRunner.setOnFinished(() -> updateFilesFinished());
+
+        // Show progress dialog
+        TaskMonitor taskMonitor = updateRunner.getMonitor();
+        taskMonitor.showProgressPanel(_workspacePane.getUI());
     }
 
     /**
@@ -281,10 +286,13 @@ public class VersionControlTool extends ProjectTool {
         _workspace.getBuilder().setAutoBuildEnabled(false);
 
         // Call real replace method and configure callbacks
-        TaskMonitor taskMonitor = new TaskMonitorPanel(_workspacePane.getUI(), "Replace files from remote site");
-        TaskRunner<Boolean> replaceRunner = _versionControl.replaceFiles(replaceFiles, taskMonitor);
+        TaskRunner<Boolean> replaceRunner = _versionControl.replaceFiles(replaceFiles);
         replaceRunner.setOnSuccess(obj -> updateFilesSuccess(replaceFiles));
         replaceRunner.setOnFinished(() -> updateFilesFinished());
+
+        // Show progress dialog
+        TaskMonitor taskMonitor = replaceRunner.getMonitor();
+        taskMonitor.showProgressPanel(_workspacePane.getUI());
     }
 
     /**
@@ -310,8 +318,11 @@ public class VersionControlTool extends ProjectTool {
 
         // Do real commit
         String commitMessage = transferPane.getCommitMessage();
-        TaskMonitor taskMonitor = new TaskMonitorPanel(_workspacePane.getUI(), "Commit files to remote site");
-        _versionControl.commitFiles(theFiles, taskMonitor, commitMessage);
+        TaskRunner<Boolean> commitRunner =_versionControl.commitFiles(theFiles, commitMessage);
+
+        // Show progress dialog
+        TaskMonitor taskMonitor = commitRunner.getMonitor();
+        taskMonitor.showProgressPanel(_workspacePane.getUI());
     }
 
     /**

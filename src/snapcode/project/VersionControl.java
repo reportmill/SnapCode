@@ -7,8 +7,6 @@ import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
 import snap.util.ArrayUtils;
 import snap.util.TaskRunner;
-import snap.view.View;
-import snap.util.TaskMonitorPanel;
 import snapcode.webbrowser.ClientUtils;
 import snap.util.TaskMonitor;
 import snap.web.AccessException;
@@ -128,11 +126,12 @@ public class VersionControl {
     /**
      * Load remote files and VCS files into site directory.
      */
-    public TaskRunner<Boolean> checkout(View aView)
+    public TaskRunner<Boolean> checkout()
     {
         String title = "Checkout from " + getRemoteURLString();
-        TaskMonitor taskMonitor = aView != null ? new TaskMonitorPanel(aView, title) : new TaskMonitor();
-        TaskRunner<Boolean> taskRunner = new TaskRunner<>(() -> checkout(aView, taskMonitor));
+        TaskMonitor taskMonitor = new TaskMonitor(title);
+        TaskRunner<Boolean> taskRunner = new TaskRunner<>(() -> checkoutImpl(taskMonitor));
+        taskRunner.setMonitor(taskMonitor);
         taskRunner.start();
         return taskRunner;
     }
@@ -140,10 +139,10 @@ public class VersionControl {
     /**
      * Load remote files and VCS files into site directory.
      */
-    private boolean checkout(View aView, TaskMonitor taskMonitor)
+    private boolean checkoutImpl(TaskMonitor taskMonitor)
     {
         // Try basic checkout
-        try { return checkoutImpl(taskMonitor); }
+        try { return checkoutImpl2(taskMonitor); }
 
         // If failure
         catch (Exception e) {
@@ -152,13 +151,13 @@ public class VersionControl {
             WebSite remoteSite = getRemoteSite();
             boolean setPermissionsSuccess = ClientUtils.setAccess(remoteSite);
             if (setPermissionsSuccess)
-                return checkoutImpl(taskMonitor);
+                return checkoutImpl2(taskMonitor);
 
             // If attempt to login succeeds, try again
             LoginPage loginPage = new LoginPage();
-            boolean loginSuccess = loginPage.showPanel(aView, remoteSite);
+            boolean loginSuccess = loginPage.showPanel(null, remoteSite);
             if (loginSuccess)
-                return checkoutImpl(taskMonitor);
+                return checkoutImpl2(taskMonitor);
 
             throw e;
         }
@@ -167,7 +166,7 @@ public class VersionControl {
     /**
      * Load remote files and VCS files into site directory.
      */
-    private boolean checkoutImpl(TaskMonitor taskMonitor)
+    private boolean checkoutImpl2(TaskMonitor taskMonitor)
     {
         // Find all files to update
         WebSite localSite = getLocalSite();
@@ -182,8 +181,9 @@ public class VersionControl {
     /**
      * Update files.
      */
-    public TaskRunner<Boolean> updateFiles(List<WebFile> theFiles, TaskMonitor taskMonitor)
+    public TaskRunner<Boolean> updateFiles(List<WebFile> theFiles)
     {
+        TaskMonitor taskMonitor = new TaskMonitor("Update files from remote site");
         Supplier<Boolean> updateFunc = () -> updateFilesImpl(theFiles, taskMonitor);
         TaskRunner<Boolean> taskRunner = new TaskRunner<>(updateFunc);
         taskRunner.setMonitor(taskMonitor);
@@ -268,8 +268,9 @@ public class VersionControl {
     /**
      * Replace files.
      */
-    public TaskRunner<Boolean> replaceFiles(List<WebFile> theFiles, TaskMonitor taskMonitor)
+    public TaskRunner<Boolean> replaceFiles(List<WebFile> theFiles)
     {
+        TaskMonitor taskMonitor = new TaskMonitor("Replace files from remote site");
         Supplier<Boolean> replaceFunc = () -> replaceFilesImpl(theFiles, taskMonitor);
         TaskRunner<Boolean> taskRunner = new TaskRunner<>(replaceFunc);
         taskRunner.setMonitor(taskMonitor);
@@ -339,8 +340,9 @@ public class VersionControl {
     /**
      * Commit files.
      */
-    public TaskRunner<Boolean> commitFiles(List<WebFile> theFiles, TaskMonitor taskMonitor, String aMessage)
+    public TaskRunner<Boolean> commitFiles(List<WebFile> theFiles, String aMessage)
     {
+        TaskMonitor taskMonitor = new TaskMonitor("Commit files to remote site");
         Supplier<Boolean> commitFunc = () -> commitFilesImpl(theFiles, aMessage, taskMonitor);
         TaskRunner<Boolean> taskRunner = new TaskRunner<>(commitFunc);
         taskRunner.setMonitor(taskMonitor);

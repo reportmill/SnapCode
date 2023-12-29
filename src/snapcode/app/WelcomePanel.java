@@ -193,8 +193,15 @@ public class WelcomePanel extends ViewOwner {
     {
         Workspace workspace = new Workspace();
         workspace.setUseRealCompiler(true);
-        workspace.addProjectForRepoURL(repoURL);
-        openWorkspace(workspace);
+        TaskRunner<Boolean> checkoutRunner = workspace.addProjectForRepoURL(repoURL);
+
+        // Create and show workspace pane
+        WorkspacePane workspacePane = new WorkspacePane(workspace);
+        workspacePane.show();
+        hide();
+
+        // Show check progress panel
+        checkoutRunner.getMonitor().showProgressPanel(workspacePane.getUI());
     }
 
     /**

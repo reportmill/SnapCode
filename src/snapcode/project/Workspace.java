@@ -6,6 +6,7 @@ import javakit.resolver.Resolver;
 import snap.props.PropObject;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
+import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
 import snap.web.WebSite;
 import snap.web.WebURL;
@@ -354,7 +355,9 @@ public class Workspace extends PropObject {
      */
     public TaskRunner<Boolean> addProjectForRepoURL(WebURL repoURL)
     {
-        TaskRunner<Boolean> taskRunner = new TaskRunner<>(() -> addProjectForRepoURLImpl(repoURL));
+        TaskMonitor taskMonitor = new TaskMonitor("Checkout " + repoURL.getString());
+        TaskRunner<Boolean> taskRunner = new TaskRunner<>(() -> addProjectForRepoURLImpl(repoURL, taskMonitor));
+        taskRunner.setMonitor(taskMonitor);
         taskRunner.start();
         return taskRunner;
     }
@@ -362,7 +365,7 @@ public class Workspace extends PropObject {
     /**
      * Adds a project with given repo URL.
      */
-    private boolean addProjectForRepoURLImpl(WebURL repoURL)
+    private boolean addProjectForRepoURLImpl(WebURL repoURL, TaskMonitor taskMonitor)
     {
         // Get project name
         String projName = repoURL.getFilenameSimple();
@@ -386,8 +389,11 @@ public class Workspace extends PropObject {
         // Checkout project for URL
         VersionControl.setRemoteURLString(projSite, repoURL.getString());
         VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
-        TaskRunner<Boolean> checkoutRunner = versionControl.checkout(null);
+        TaskRunner<Boolean> checkoutRunner = versionControl.checkout();
         checkoutRunner.setOnSuccess(obj -> addProjectForSite(projSite));
+
+        // Attach checkout task monitor to given task monitor
+        taskMonitor.setMonitor(checkoutRunner.getMonitor());
 
         // Wait till done
         checkoutRunner.join();

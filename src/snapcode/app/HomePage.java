@@ -159,6 +159,9 @@ public class HomePage extends WebPage {
 
         // When done, add project to root project
         taskRunner.setOnSuccess(completed -> project.addProjectForPath("SnapKit"));
+
+        // Show task progress panel
+        taskRunner.getMonitor().showProgressPanel(getUI());
     }
 
     /**
