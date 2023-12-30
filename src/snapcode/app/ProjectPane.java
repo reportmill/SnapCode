@@ -270,6 +270,13 @@ public class ProjectPane extends ViewOwner {
     {
         Project project = getProject();
         setViewText("ProjectNameLabel", "Project: " + project.getName());
+
+        // Configure TabView
+        TabView tabView = getView("TabView", TabView.class);
+        Tab versionControlTab = new Tab();
+        versionControlTab.setTitle("Version Control");
+        versionControlTab.setContentOwner(_versionControlTool);
+        tabView.addTab(versionControlTab);
     }
 
     /**
