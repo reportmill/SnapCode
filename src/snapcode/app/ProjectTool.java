@@ -44,6 +44,11 @@ public class ProjectTool extends ViewOwner {
     public WebSite getProjectSite()  { return _proj.getSite(); }
 
     /**
+     * Returns the WorkspacePane.
+     */
+    public WorkspacePane getWorkspacePane()  { return _workspacePane; }
+
+    /**
      * Returns the WorkspaceTools.
      */
     public WorkspaceTools getWorkspaceTools()  { return _workspacePane.getWorkspaceTools(); }

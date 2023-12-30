@@ -34,6 +34,7 @@ public class JavaAgent {
     public JavaAgent(WebFile aFile)
     {
         _file = aFile;
+        aFile.addPropChangeListener(this::fileDidChangeBytes, WebFile.Bytes_Prop);
     }
 
     /**
@@ -215,6 +216,22 @@ public class JavaAgent {
         if (propName == TextDoc.Chars_Prop && _jfile != null) {
             TextBlockUtils.CharsChange charsChange = (TextBlockUtils.CharsChange) aPC;
             updateJFileForChange(charsChange);
+        }
+    }
+
+    /**
+     * Called when file changes.
+     */
+    private void fileDidChangeBytes(PropChange aPC)
+    {
+        // If file.Bytes changed externally, reset JavaTextDoc and JFile
+        if (_javaTextDoc != null) {
+            String fileText = _file.getText();
+            String textDocText = _javaTextDoc.getString();
+            if (!fileText.equals(textDocText)) {
+                _javaTextDoc.setString(fileText);
+                _jfile = null;
+            }
         }
     }
 
