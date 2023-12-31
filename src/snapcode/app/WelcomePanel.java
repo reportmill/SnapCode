@@ -3,12 +3,15 @@
  */
 package snapcode.app;
 import snap.util.*;
+import snapcode.apptools.FileTreeTool;
 import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
 import snap.props.PropChange;
 import snap.view.*;
 import snap.viewx.FilePanel;
 import snap.web.*;
+import snapcode.project.WorkspaceBuilder;
+
 import java.io.File;
 
 /**
@@ -136,7 +139,7 @@ public class WelcomePanel extends ViewOwner {
     {
         // Handle alt down
         if (ViewUtils.isAltDown()) {
-            WebURL repoURL = WebURL.getURL("/Users/jeff/Samples/SnapCode/VectorGraphics.zip");
+            WebURL repoURL = WebURL.getURL("https://reportmill.com/SnapCode/Samples/Samples.zip");
             openWorkspaceForRepoURL(repoURL);
             return;
         }
@@ -191,8 +194,11 @@ public class WelcomePanel extends ViewOwner {
      */
     private void openWorkspaceForRepoURL(WebURL repoURL)
     {
+        // Create workspace
         Workspace workspace = new Workspace();
         workspace.setUseRealCompiler(true);
+
+        // Add project
         TaskRunner<Boolean> checkoutRunner = workspace.addProjectForRepoURL(repoURL);
 
         // Create and show workspace pane
@@ -200,8 +206,22 @@ public class WelcomePanel extends ViewOwner {
         workspacePane.show();
         hide();
 
+        // After add project, trigger build and show files
+        checkoutRunner.setOnSuccess(val -> openWorkspaceForRepoUrlFinished(workspacePane));
+
         // Show check progress panel
         checkoutRunner.getMonitor().showProgressPanel(workspacePane.getUI());
+    }
+
+    /**
+     * Called when openWorkspaceForRepoURL finished.
+     */
+    private void openWorkspaceForRepoUrlFinished(WorkspacePane workspacePane)
+    {
+        // Build all files
+        WorkspaceBuilder builder = workspacePane.getWorkspace().getBuilder();
+        builder.addAllFilesToBuild();
+        builder.buildWorkspaceLater();
     }
 
     /**

@@ -89,6 +89,11 @@ public class JavaFileBuilderX extends JavaFileBuilder {
     @Override
     protected boolean buildFilesImpl(TaskMonitor aTaskMonitor, List<WebFile> sourceFiles)
     {
+        // Make sure build dir exists
+        WebFile buildDir = _proj.getBuildDir();
+        if (!buildDir.getExists())
+            buildDir.save();
+
         // Create compiler
         _compiler = new SnapCompiler(_proj);
         boolean buildFilesSuccess = true;

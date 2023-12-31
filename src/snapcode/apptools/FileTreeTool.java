@@ -64,12 +64,33 @@ public class FileTreeTool extends WorkspaceTool {
     /**
      * Resets root files.
      */
-    public void resetRootFiles()  { _rootFiles = null; }
+    public void resetRootFiles()
+    {
+        _rootFiles = null;
+
+        if (_filesTree != null && _filesTree.getItemsList().size() == 0) {
+            resetLater();
+            ViewUtils.runLater(this::showRootProject);
+        }
+    }
+
+    /**
+     * Shows the root project.
+     */
+    private void showRootProject()
+    {
+        FileTreeFile[] rootFiles = getRootFiles();
+        if (rootFiles.length > 0)
+            _filesTree.expandItem(rootFiles[0]);
+        List<FileTreeFile> filesTreeFiles = _filesTree.getItemsList();
+        if (filesTreeFiles.size() > 1)
+            _filesTree.expandItem(filesTreeFiles.get(1));
+    }
 
     /**
      * Returns an AppFile for given WebFile.
      */
-    public FileTreeFile getTreeFile(WebFile aFile)
+    private FileTreeFile getTreeFile(WebFile aFile)
     {
         // Handle null
         if (aFile == null) return null;
@@ -165,15 +186,7 @@ public class FileTreeTool extends WorkspaceTool {
     @Override
     protected void initShowing()
     {
-        // Expand first project
-        runLater(() -> {
-            FileTreeFile[] rootFiles = getRootFiles();
-            if (rootFiles.length > 0)
-                _filesTree.expandItem(rootFiles[0]);
-            List<FileTreeFile> filesTreeFiles = _filesTree.getItemsList();
-            if (filesTreeFiles.size() > 1)
-                _filesTree.expandItem(filesTreeFiles.get(1));
-        });
+        runLater(() -> showRootProject());
     }
 
     /**

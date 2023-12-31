@@ -150,7 +150,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
         _compiler._compiledJavaFiles.add(_sourceFile);
 
         // Get bytes and whether class file is modified
-        boolean modified = !Arrays.equals(classFileBytes, _file.getBytes());
+        boolean modified = !_file.getExists() || !Arrays.equals(classFileBytes, _file.getBytes());
 
         // If modified, set File.Bytes and add ClassFile to ModifiedFiles and SourceFile to ModifiedSources
         if (modified) {

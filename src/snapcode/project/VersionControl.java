@@ -54,10 +54,9 @@ public class VersionControl {
         String urlString = getRemoteSiteUrlString(aSite);
         if (urlString != null)
             _remoteSiteUrl = WebURL.getURL(urlString);
-        assert (_remoteSiteUrl != null);
 
         // If remote size is Zip file with single dir with same name as Zip file, use dir
-        if (_remoteSiteUrl.getType().equals("zip")) {
+        if (_remoteSiteUrl != null && _remoteSiteUrl.getType().equals("zip")) {
             WebSite zipSite = _remoteSiteUrl.getAsSite();
             String siteName = _remoteSiteUrl.getFilenameSimple();
             WebFile dirFile = zipSite.getFileForPath('/' + siteName);
@@ -77,7 +76,7 @@ public class VersionControl {
     /**
      * Returns the remote site URL string.
      */
-    public String getRemoteSiteUrlString()  { return _remoteSiteUrl.getString(); }
+    public String getRemoteSiteUrlString()  { return _remoteSiteUrl != null ? _remoteSiteUrl.getString() : null; }
 
     /**
      * Returns the local cache directory of remote site.

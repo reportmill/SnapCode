@@ -196,6 +196,8 @@ public class ProjectFiles {
         // Get Class file path
         String javaFilePath = aJavaFile.getPath();
         String classFilePath = javaFilePath.replace(".java", ".class");
+        if (javaFilePath.endsWith("jepl"))
+            classFilePath = javaFilePath.replace(".jepl", ".class");
 
         // Return class file for classFilePath
         return getBuildFile(classFilePath, true, false);
