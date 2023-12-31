@@ -242,11 +242,6 @@ public class WorkspaceTools {
     }
 
     /**
-     * Runs the given file.
-     */
-    public void runFile(WebFile aFile, boolean isDebug)  { }
-
-    /**
      * Reset visible tools.
      */
     public void resetLater()
@@ -315,7 +310,7 @@ public class WorkspaceTools {
         // Kick off run
         RunTool runTool = getToolForClass(RunTool.class);
         if (runTool != null)
-            ViewUtils.runLater(() -> runTool.runAppForSelFile());
+            ViewUtils.runLater(() -> runTool.runAppForSelFile(false));
     }
 
     /**

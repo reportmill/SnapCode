@@ -1,7 +1,6 @@
 package snapcode.app;
 import snap.geom.Side;
 import snap.props.PropChange;
-import snap.web.WebFile;
 import snapcode.apptools.*;
 
 /**
@@ -15,18 +14,6 @@ public class WorkspaceToolsX extends WorkspaceTools {
     public WorkspaceToolsX(WorkspacePane workspacePane)
     {
         super(workspacePane);
-    }
-
-    /**
-     * Runs the given file.
-     */
-    @Override
-    public void runFile(WebFile aFile, boolean isDebug)
-    {
-        RunTool debugTool = getToolForClass(RunTool.class);
-        debugTool.runConfigOrFile(null, aFile, false);
-
-        showToolForClass(isDebug ? DebugTool.class : RunTool.class);
     }
 
     /**

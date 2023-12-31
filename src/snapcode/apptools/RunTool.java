@@ -127,10 +127,19 @@ public class RunTool extends WorkspaceTool implements AppListener {
     /**
      * Runs app for selected file.
      */
-    public void runAppForSelFile()
+    public void runAppForSelFile(boolean isDebug)
     {
+        // Show tool
+        _workspaceTools.showToolForClass(isDebug ? DebugTool.class : RunTool.class);
+
         // Clear display
         clearConsole();
+
+        // Set debug through real runner
+        if (isDebug) {
+            runConfigOrFile(null, getSelFile(), isDebug);
+            return;
+        }
 
         // If workspace needs build, trigger build
         WorkspaceBuilder workspaceBuilder = _workspace.getBuilder();
@@ -152,7 +161,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         if (noErrors)
             runAppForSelFileImpl();
 
-            // Otherwise, show build tool
+        // Otherwise, show build tool
         else _workspaceTools.showToolForClass(BuildTool.class);
     }
 
@@ -486,7 +495,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
     {
         // Handle RunButton, TerminateButton
         if (anEvent.equals("RunButton"))
-            runAppForSelFile();
+            runAppForSelFile(false);
         else if (anEvent.equals("TerminateButton"))
             cancelRun();
 

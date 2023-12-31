@@ -282,9 +282,9 @@ public class FileTreeTool extends WorkspaceTool {
 
         // Handle RunFileMenuItem, DebugFileMenuItem
         if (anEvent.equals("RunFileMenuItem"))
-            runFile(getSelFile(), false);
+            runAppForSelFile(false);
         if (anEvent.equals("DebugFileMenuItem"))
-            runFile(getSelFile(), true);
+            runAppForSelFile(true);
 
         // Handle UpdateFilesMenuItem
         if (anEvent.equals("UpdateFilesMenuItem")) {
@@ -363,7 +363,7 @@ public class FileTreeTool extends WorkspaceTool {
         // Handle MouseClick (double-click): RunSelectedFile
         if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
             if (getSelFile().isFile())
-                runFile(getSelFile(), false);
+                runAppForSelFile(false);
         }
     }
 
@@ -527,9 +527,10 @@ public class FileTreeTool extends WorkspaceTool {
     /**
      * Runs the given file.
      */
-    private void runFile(WebFile aFile, boolean isDebug)
+    private void runAppForSelFile(boolean isDebug)
     {
-        _workspaceTools.runFile(aFile, isDebug);
+        RunTool runTool = _workspaceTools.getToolForClass(RunTool.class);
+        runTool.runAppForSelFile(isDebug);
     }
 
     /**
