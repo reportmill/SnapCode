@@ -81,7 +81,7 @@ public class VersionControlTool extends ProjectTool {
     public void resetUI()
     {
         // Update RemoteURLText
-        setViewValue("RemoteURLText", _versionControl.getRemoteURLString());
+        setViewValue("RemoteURLText", _versionControl.getRemoteSiteUrlString());
 
         // Update ProgressBar
         ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
@@ -135,7 +135,7 @@ public class VersionControlTool extends ProjectTool {
     {
         if (_versionControl.getExists())
             return;
-        if (_versionControl.getRemoteURL() == null)
+        if (_versionControl.getRemoteSiteUrl() == null)
             return;
 
         String msg = "Do you want to load remote files into project directory?";

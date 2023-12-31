@@ -94,7 +94,7 @@ public class ProjectPane extends ViewOwner {
     public String getRemoteURLString()
     {
         WebSite projectSite = getProjectSite();
-        return VersionControl.getRemoteURLString(projectSite);
+        return VersionControl.getRemoteSiteUrlString(projectSite);
     }
 
     /**

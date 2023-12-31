@@ -136,7 +136,7 @@ public class WelcomePanel extends ViewOwner {
     {
         // Handle alt down
         if (ViewUtils.isAltDown()) {
-            WebURL repoURL = WebURL.getURL("/Users/jeff/Samples/SnapCode/VectorGraphics");
+            WebURL repoURL = WebURL.getURL("/Users/jeff/Samples/SnapCode/VectorGraphics.zip");
             openWorkspaceForRepoURL(repoURL);
             return;
         }
@@ -202,16 +202,6 @@ public class WelcomePanel extends ViewOwner {
 
         // Show check progress panel
         checkoutRunner.getMonitor().showProgressPanel(workspacePane.getUI());
-    }
-
-    /**
-     * Opens a workspace.
-     */
-    private void openWorkspace(Workspace aWorkspace)
-    {
-        WorkspacePane workspacePane = new WorkspacePane(aWorkspace);
-        workspacePane.show();
-        hide();
     }
 
     /**
