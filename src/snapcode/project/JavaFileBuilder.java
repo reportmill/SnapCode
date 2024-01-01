@@ -20,9 +20,6 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     // A list of files to be compiled
     protected Set<WebFile>  _buildFiles = Collections.synchronizedSet(new HashSet<>());
 
-    // Whether current build has been interrupted
-    protected boolean _interrupted;
-
     // The final set of compiled files
     protected Set<WebFile> _compiledFiles;
 
@@ -78,11 +75,10 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     /**
      * Compiles files.
      */
-    public boolean buildFiles(TaskMonitor aTaskMonitor)
+    public boolean buildFiles(TaskMonitor taskMonitor)
     {
-        // Clear compiled files and reset Interrupt flag
+        // Clear compiled files
         _compiledFiles.clear();
-        _interrupted = false;
 
         // If no build files, just return
         if (_buildFiles.size() == 0)
@@ -93,7 +89,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
         _buildFiles.clear();
 
         // Do real build
-        boolean buildSuccess = buildFilesImpl(aTaskMonitor, javaFiles);
+        boolean buildSuccess = buildFilesImpl(taskMonitor, javaFiles);
 
         // Find unused imports
         findUnusedImports();
@@ -140,14 +136,6 @@ public class JavaFileBuilder implements ProjectFileBuilder {
 
         // Return
         return buildIssues.length == 0;
-    }
-
-    /**
-     * Interrupts build.
-     */
-    public void interruptBuild()
-    {
-        _interrupted = true;
     }
 
     /**

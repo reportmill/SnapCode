@@ -89,17 +89,15 @@ public class WorkspaceBuilder {
      */
     public TaskRunner<Boolean> buildWorkspace()
     {
-        // If already building: Configure new build and interrupt
+        // If already building, cancel last build
         TaskRunner<?> lastRunner = _buildWorkspaceRunner;
         if (lastRunner != null) {
 
-            // Stop active build
-            lastRunner.getMonitor().setCancelled(true);
-            Project rootProj = _workspace.getRootProject();
-            ProjectBuilder rootProjBuilder = rootProj.getBuilder();
-            rootProjBuilder.interruptBuild();
+            // Cancel last build
+            TaskMonitor taskMonitor = lastRunner.getMonitor();
+            taskMonitor.setCancelled(true);
 
-            // This is lame - give last build time to hit interrupt before this one resets it. Use monitor for interrupt!
+            // Give last build a chance to hit interrupt before this starts (not if sure this is helpful)
             try { Thread.sleep(200); }
             catch (Exception ignore) { }
         }

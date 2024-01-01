@@ -87,7 +87,7 @@ public class JavaFileBuilderX extends JavaFileBuilder {
      * Compiles files.
      */
     @Override
-    protected boolean buildFilesImpl(TaskMonitor aTaskMonitor, List<WebFile> sourceFiles)
+    protected boolean buildFilesImpl(TaskMonitor taskMonitor, List<WebFile> sourceFiles)
     {
         // Make sure build dir exists
         WebFile buildDir = _proj.getBuildDir();
@@ -107,7 +107,7 @@ public class JavaFileBuilderX extends JavaFileBuilder {
                 continue;
 
             // If interrupted, add remaining build files and return
-            if (_interrupted) {
+            if (taskMonitor.isCancelled()) {
                 List<WebFile> remainingSourceFiles = sourceFiles.subList(i, sourceFiles.size());
                 remainingSourceFiles.forEach(this::addBuildFile);
                 return false;
@@ -116,7 +116,7 @@ public class JavaFileBuilderX extends JavaFileBuilder {
             // Add task manager task with message: "Compiling MyClass (X of MaxX)"
             String className = _proj.getProjectFiles().getClassNameForFile(sourceFile);
             String msg = String.format("Compiling %s (%d of %d)", className, i, sourceFiles.size());
-            aTaskMonitor.beginTask(msg, -1);
+            taskMonitor.beginTask(msg, -1);
 
             // Build file
             boolean buildFileSuccess = buildFile(sourceFile);
@@ -126,15 +126,19 @@ public class JavaFileBuilderX extends JavaFileBuilder {
                 findDependenciesForModifiedJavaFiles(sourceFiles);
 
             // Otherwise, mark build failure
-            else buildFilesSuccess = false;
+            else {
+                buildFilesSuccess = false;
+                if (_compiler._errorCount >= 1000)
+                    taskMonitor.setCancelled(true);
+            }
 
             // Stop task manager task
-            aTaskMonitor.endTask();
+            taskMonitor.endTask();
         }
 
         // Finalize TaskMonitor
-        aTaskMonitor.beginTask("Build Completed", -1);
-        aTaskMonitor.endTask();
+        taskMonitor.beginTask("Build Completed", -1);
+        taskMonitor.endTask();
 
         // Return
         return buildFilesSuccess;
@@ -155,8 +159,6 @@ public class JavaFileBuilderX extends JavaFileBuilder {
         // If compile failed, re-add to BuildFiles and return
         if (!compileSuccess) {
             addBuildFile(sourceFile);
-            if (_compiler._errorCount >= 1000)
-                _interrupted = true;
             return false;
         }
 

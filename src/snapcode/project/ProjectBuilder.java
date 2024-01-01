@@ -55,23 +55,15 @@ public class ProjectBuilder {
     /**
      * Builds the project.
      */
-    public boolean buildProject(TaskMonitor aTM)
+    public boolean buildProject(TaskMonitor taskMonitor)
     {
         // Build files
-        boolean buildSuccess = _javaFileBuilder.buildFiles(aTM);
-        buildSuccess &= _defaultFileBuilder.buildFiles(aTM);
+        boolean buildSuccess = _javaFileBuilder.buildFiles(taskMonitor);
+        buildSuccess &= _defaultFileBuilder.buildFiles(taskMonitor);
         _buildDate = new Date();
 
         // Return build success
         return buildSuccess;
-    }
-
-    /**
-     * Interrupts build.
-     */
-    public void interruptBuild()
-    {
-        _javaFileBuilder.interruptBuild();
     }
 
     /**
