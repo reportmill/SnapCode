@@ -395,9 +395,8 @@ public class Workspace extends PropObject {
         // Attach checkout task monitor to given task monitor
         taskMonitor.setMonitor(checkoutRunner.getMonitor());
 
-        // Wait till done
-        checkoutRunner.join();
-        return checkoutRunner.getResult();
+        // Wait till done and return result
+        return checkoutRunner.awaitResult();
     }
 
     /**
