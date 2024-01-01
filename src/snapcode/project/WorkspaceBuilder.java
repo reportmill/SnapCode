@@ -3,7 +3,6 @@ import snap.util.ArrayUtils;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
 import snap.view.ViewUtils;
-import snap.viewx.DialogBox;
 
 /**
  * This class handles building a Workspace.
@@ -91,26 +90,34 @@ public class WorkspaceBuilder {
     public TaskRunner<Boolean> buildWorkspace()
     {
         // If already building: Configure new build and interrupt
-        if (_buildWorkspaceRunner != null) {
-
-            // Update BuildFilesRunner.[ AddFiles, RunAgain ]
-            if (_addAllFilesToBuild)
-                _buildWorkspaceRunner._addAllFiles = true;
-            _buildWorkspaceRunner._runAgain = true;
+        TaskRunner<?> lastRunner = _buildWorkspaceRunner;
+        if (lastRunner != null) {
 
             // Stop active build
+            lastRunner.getMonitor().setCancelled(true);
             Project rootProj = _workspace.getRootProject();
             ProjectBuilder rootProjBuilder = rootProj.getBuilder();
             rootProjBuilder.interruptBuild();
+
+            // This is lame - give last build time to hit interrupt before this one resets it. Use monitor for interrupt!
+            try { Thread.sleep(200); }
+            catch (Exception ignore) { }
         }
 
-        // If not building: Create BuildFilesRunner and start
-        else {
-            _buildWorkspaceRunner = new BuildWorkspaceRunner();
-            _buildWorkspaceRunner.start();
-        }
+        // Create task monitor
+        TaskMonitor taskMonitor = new TaskMonitor();
+        taskMonitor.addPropChangeListener(pc -> _workspace.setActivity(taskMonitor.getTaskTitle()), TaskMonitor.TaskTitle_Prop);
 
+        // Create configure task runner and start
+        _buildWorkspaceRunner = new BuildWorkspaceRunner();
+        _buildWorkspaceRunner.setTaskFunction(() -> buildWorkspaceImpl(_addAllFilesToBuild, taskMonitor));
+        _buildWorkspaceRunner.setMonitor(taskMonitor);
+        _buildWorkspaceRunner.start();
+
+        // Reset AddAllFilesToBuild property
         _addAllFilesToBuild = false;
+
+        // Return
         return _buildWorkspaceRunner;
     }
 
@@ -155,7 +162,7 @@ public class WorkspaceBuilder {
     /**
      * Build workspace real.
      */
-    private boolean buildWorkspaceImpl(boolean addAllFilesToBuild)
+    private boolean buildWorkspaceImpl(boolean addAllFilesToBuild, TaskMonitor taskMonitor)
     {
         // Handle AddFiles
         if (addAllFilesToBuild)
@@ -167,10 +174,6 @@ public class WorkspaceBuilder {
 
         // Start building
         _workspace.setBuilding(true);
-
-        // Create task monitor
-        TaskMonitor taskMonitor = new TaskMonitor();
-        taskMonitor.addPropChangeListener(pc -> _workspace.setActivity(taskMonitor.getTaskTitle()), TaskMonitor.TaskTitle_Prop);
 
         // Build child projects
         for (Project childProject : childProjects) {
@@ -222,41 +225,23 @@ public class WorkspaceBuilder {
      */
     private class BuildWorkspaceRunner extends TaskRunner<Boolean> {
 
-        // Whether to add all files to build
-        private boolean _addAllFiles;
-
-        // Whether to run again
-        private boolean _runAgain;
-
         /**
          * Constructor.
          */
-        public BuildWorkspaceRunner()
-        {
-            super();
-            _addAllFiles = _addAllFilesToBuild;
-        }
+        public BuildWorkspaceRunner()  { super(); }
 
         /**
-         * Called to start runner.
+         * Override to reset Workspace Activity/Building properties and clear runner.
          */
-        public Boolean run()
-        {
-            return buildWorkspaceImpl(_addAllFiles);
-        }
-
-        /**
-         * Called when runner finishes all tasks.
-         */
+        @Override
         public void finished()
         {
-            // Handle RunAgain request
-            if (_runAgain) {
-                _runAgain = false;
-                start();
-            }
+            // If this runner is retired, just return
+            if (_buildWorkspaceRunner != this)
+                return;
 
-            else _buildWorkspaceRunner = null;
+            // Clear runner
+            _buildWorkspaceRunner = null;
 
             // Update Workspace Activity/Building
             _workspace.setActivity("Build Completed");
@@ -264,13 +249,12 @@ public class WorkspaceBuilder {
         }
 
         /**
-         * Called when runner hits exception.
+         * Override to print exception.
          */
+        @Override
         public void failure(final Exception e)
         {
             e.printStackTrace();
-            ViewUtils.runLater(() -> DialogBox.showExceptionDialog(null, "Build Failed", e));
-            _runAgain = false;
         }
     }
 }
