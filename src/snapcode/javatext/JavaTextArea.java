@@ -33,13 +33,16 @@ public class JavaTextArea extends TextArea {
     private boolean _hoverEnabled;
 
     // The node that the mouse is hovering over (if command down)
-    protected JNode  _hoverNode;
+    private JNode _hoverNode;
 
     // The list of selected tokens
-    protected TextToken[] _selTokens = new TextToken[0];
+    private TextToken[] _selTokens = new TextToken[0];
+
+    // The last painted token bounds
+    private Rect _selTokensBounds = new Rect();
 
     // A PopupList to show code completion stuff
-    protected JavaPopupList  _popup;
+    private JavaPopupList _popup;
 
     // Constants for properties
     public static final String SelNode_Prop = "SelNode";
@@ -196,7 +199,7 @@ public class JavaTextArea extends TextArea {
         if (_selTokens.length == 0 && theTokens.length == 0) return;
 
         // Set + Repaint
-        repaintTokensBounds(_selTokens);
+        repaint(_selTokensBounds);
         _selTokens = theTokens;
         repaintTokensBounds(_selTokens);
     }
@@ -377,6 +380,7 @@ public class JavaTextArea extends TextArea {
 
         // Paint selected tokens highlight rects
         TextToken[] selTokens = getSelTokens();
+        _selTokensBounds.setRect(0, 0, 0, 0);
         if (selTokens.length > 0) {
             aPntr.setColor(new Color("#FFF3AA"));
             for (TextToken token : selTokens) {
@@ -385,6 +389,7 @@ public class JavaTextArea extends TextArea {
                 double tokenW = Math.ceil(token.getTextMaxX()) - tokenX + 1;
                 double tokenH = Math.ceil(token.getTextMaxY()) - tokenY + 1;
                 aPntr.fillRect(tokenX, tokenY, tokenW, tokenH);
+                _selTokensBounds.union(tokenX, tokenY, tokenW, tokenH);
             }
         }
 
@@ -647,6 +652,9 @@ public class JavaTextArea extends TextArea {
             if (addChars != null)
                 didAddChars(addChars, charIndex);
             else didRemoveChars(removeChars, charIndex);
+
+            // Reset sel tokens
+            setSelTokens(new TextToken[0]);
         }
     }
 
