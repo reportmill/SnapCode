@@ -11,8 +11,13 @@
   <RectView PrefHeight="1" GrowWidth="true">
     <Fill Color="#CC" />
   </RectView>
-  <Label Margin="8" text="Build Issues:" />
-  <ListView Name="ErrorsList" Margin="0,5,5,5" GrowWidth="true" GrowHeight="true" BorderRadius="5">
-    <font name="Arial" size="14" />
-  </ListView>
+  <SplitView Vertical="true" GrowHeight="true">
+    <ColView GrowHeight="true">
+      <Label Margin="8" text="Build Issues:" />
+      <ListView Name="ErrorsList" Margin="0,5,5,5" GrowWidth="true" GrowHeight="true" BorderRadius="5">
+        <font name="Arial" size="14" />
+      </ListView>
+    </ColView>
+    <TextView Name="BuildLogTextView" PrefHeight="250" />
+  </SplitView>
 </ColView>

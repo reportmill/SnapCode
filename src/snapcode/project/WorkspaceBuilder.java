@@ -104,16 +104,13 @@ public class WorkspaceBuilder {
 
         // Create task monitor
         TaskMonitor taskMonitor = new TaskMonitor();
-        taskMonitor.addPropChangeListener(pc -> _workspace.setActivity(taskMonitor.getTaskTitle()), TaskMonitor.TaskTitle_Prop);
+        taskMonitor.addPropChangeListener(pc -> taskMonitorTaskTitleChanged(taskMonitor), TaskMonitor.TaskTitle_Prop);
 
         // Create configure task runner and start
         _buildWorkspaceRunner = new BuildWorkspaceRunner();
-        _buildWorkspaceRunner.setTaskFunction(() -> buildWorkspaceImpl(_addAllFilesToBuild, taskMonitor));
+        _buildWorkspaceRunner.setTaskFunction(() -> buildWorkspaceImpl(taskMonitor));
         _buildWorkspaceRunner.setMonitor(taskMonitor);
         _buildWorkspaceRunner.start();
-
-        // Reset AddAllFilesToBuild property
-        _addAllFilesToBuild = false;
 
         // Return
         return _buildWorkspaceRunner;
@@ -160,11 +157,13 @@ public class WorkspaceBuilder {
     /**
      * Build workspace real.
      */
-    private boolean buildWorkspaceImpl(boolean addAllFilesToBuild, TaskMonitor taskMonitor)
+    private boolean buildWorkspaceImpl(TaskMonitor taskMonitor)
     {
         // Handle AddFiles
-        if (addAllFilesToBuild)
+        if (_addAllFilesToBuild) {
             addAllFilesToBuildImpl();
+            _addAllFilesToBuild = false;
+        }
 
         // Get RootProj and child projects
         Project rootProj = _workspace.getRootProject();
@@ -215,6 +214,19 @@ public class WorkspaceBuilder {
         for (Project proj : projects) {
             ProjectBuilder projBuilder = proj.getBuilder();
             projBuilder.addBuildFilesAll();
+        }
+    }
+
+    /**
+     * Called when task monitor task changes.
+     */
+    private void taskMonitorTaskTitleChanged(TaskMonitor taskMonitor)
+    {
+        String taskTitle = taskMonitor.getTaskTitle();
+        System.out.println(taskTitle);
+        TaskRunner<?> taskRunner = _buildWorkspaceRunner;
+        if (taskRunner != null && taskMonitor == taskRunner.getMonitor()) {
+            _workspace.setActivity(taskTitle);
         }
     }
 

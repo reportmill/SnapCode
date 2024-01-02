@@ -16,6 +16,12 @@ public class BuildTool extends WorkspaceTool {
     // The selected issue
     private BuildIssue  _selIssue;
 
+    // The last build log
+    private StringBuilder _buildLogStringBuilder;
+
+    // The build log text
+    private TextView _buildLogTextView;
+
     // Constants
     private static Image ErrorImage = Image.getImageForClassResource(JavaTextUtils.class, "ErrorMarker.png");
     private static Image WarningImage = Image.getImageForClassResource(JavaTextUtils.class, "WarningMarker.png");
@@ -26,6 +32,11 @@ public class BuildTool extends WorkspaceTool {
     public BuildTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
+        _buildLogStringBuilder = new StringBuilder();
+
+        // Start listening to  workspace prop changes
+        _workspace.addPropChangeListener(pc -> workspaceActivityChanged(), Workspace.Activity_Prop);
+        _workspace.addPropChangeListener(pc -> workspaceBuildingChanged(), Workspace.Building_Prop);
     }
 
     /**
@@ -72,15 +83,10 @@ public class BuildTool extends WorkspaceTool {
         ListView<BuildIssue> errorsList = getView("ErrorsList", ListView.class);
         errorsList.setCellConfigure(this::configureErrorsCell);
         errorsList.setRowHeight(24);
-    }
 
-    /**
-     * Initialize when showing.
-     */
-    @Override
-    protected void initShowing()
-    {
-        _workspace.addPropChangeListener(pc -> resetLater(), Workspace.Building_Prop);
+        // Get BuildLogTextView
+        _buildLogTextView = getView("BuildLogTextView", TextView.class);
+        _buildLogTextView.getTextBlock().setString(_buildLogStringBuilder.toString());
     }
 
     /**
@@ -155,6 +161,37 @@ public class BuildTool extends WorkspaceTool {
         // Set cell image
         aCell.setImage(buildIssue.isError() ? ErrorImage : WarningImage);
         aCell.getGraphic().setPadding(2, 5, 2, 5);
+    }
+
+    /**
+     * Called when Workspace Building property changes.
+     */
+    private void workspaceBuildingChanged()
+    {
+        if (_workspace.isBuilding()) {
+            _buildLogStringBuilder.setLength(0);
+            _buildLogStringBuilder.append("Build started\n");
+            if (_buildLogTextView != null)
+                ViewUtils.runLater(() -> _buildLogTextView.getTextBlock().setString("Build started\n"));
+        }
+        resetLater();
+    }
+
+    /**
+     * Called when Workspace Activity changes.
+     */
+    private void workspaceActivityChanged()
+    {
+        String activityText = _workspace.getActivity();
+        if (_workspace.isBuilding() && activityText != null) {
+            activityText += '\n';
+            _buildLogStringBuilder.append(activityText);
+            if (_buildLogTextView != null) {
+                String activityText2 = activityText;
+                ViewUtils.runLater(() -> _buildLogTextView.getTextBlock().addChars(activityText2, null,
+                        _buildLogTextView.getTextBlock().length()));
+            }
+        }
     }
 
     /**
