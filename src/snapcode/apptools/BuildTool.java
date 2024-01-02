@@ -107,8 +107,11 @@ public class BuildTool extends WorkspaceTool {
     public void respondUI(ViewEvent anEvent)
     {
         // Handle BuildButton, Handle StopButton
-        if (anEvent.equals("BuildButton"))
+        if (anEvent.equals("BuildButton")) {
+            if (anEvent.isAltDown())
+                _workspace.getBuilder().addAllFilesToBuild();
             _workspace.getBuilder().buildWorkspaceLater();
+        }
         else if (anEvent.equals("StopButton"))
             _workspace.getBuilder().stopBuild();
 

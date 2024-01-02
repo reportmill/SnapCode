@@ -1,6 +1,7 @@
 package snapcode.app;
 import snap.geom.Rect;
 import snap.gfx.GFXEnv;
+import snap.viewx.DevPane;
 import snapcode.project.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
@@ -478,6 +479,10 @@ public class WorkspacePane extends ViewOwner {
             copyWebLink();
         if (anEvent.equals("OpenWebLinkMenuItem"))
             openWebLink();
+
+        // Handle ShowDevToolsMenuItem
+        if (anEvent.equals("ShowDevToolsMenuItem"))
+            DevPane.setDevPaneShowing(getUI(), true);
 
         // Handle ShowJavaHomeMenuItem
         if (anEvent.equals("ShowJavaHomeMenuItem")) {
