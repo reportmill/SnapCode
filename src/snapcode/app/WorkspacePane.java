@@ -584,7 +584,7 @@ public class WorkspacePane extends ViewOwner {
         String propName = aPC.getPropName();
 
         // Handle ModTime/Exists: Update file in FileTreeTool
-        if (propName == WebFile.ModTime_Prop || propName == WebFile.Exists_Prop) {
+        if (propName == WebFile.LastModTime_Prop || propName == WebFile.Exists_Prop) {
             FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
             fileTreeTool.updateChangedFile(file);
         }

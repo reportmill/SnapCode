@@ -188,7 +188,7 @@ public class ProjectPane extends ViewOwner {
         }
 
         // Handle ModifedTime property: Call file saved
-        if (propName == WebFile.ModTime_Prop && file.getExists())
+        if (propName == WebFile.LastModTime_Prop && file.getExists())
             fileSaved(file);
     }
 

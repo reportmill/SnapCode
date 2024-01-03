@@ -321,7 +321,7 @@ public class HttpServerTool extends WorkspaceTool {
             // Get length and LastModified
             FileHeader fhdr = resp.getFileHeader();
             long len = fhdr.getSize();
-            Date lastMod = new Date(fhdr.getModTime());
+            Date lastMod = new Date(fhdr.getLastModTime());
             String ext = FilePathUtils.getExtension(url.getPath());
 
             // Add ResponseHeaders: last-modified, cache-control, content-length, content-type
@@ -356,7 +356,7 @@ public class HttpServerTool extends WorkspaceTool {
             // Get length and LastModified
             FileHeader fhdr = resp.getFileHeader();
             long len = fhdr.getSize();
-            Date lastMod = new Date(fhdr.getModTime());
+            Date lastMod = new Date(fhdr.getLastModTime());
             String ext = FilePathUtils.getExtension(url.getPath());
             byte[] bytes = resp.getBytes();
 

@@ -252,13 +252,13 @@ public class VersionControl {
             if (localFile.isFile())
                 localFile.setBytes(repoFile.getBytes());
             localFile.save();
-            localFile.setModTimeSaved(repoFile.getLastModTime());
+            localFile.saveLastModTime(repoFile.getLastModTime());
 
             // Update clone file and save
             if (cloneFile.isFile())
                 cloneFile.setBytes(repoFile.getBytes());
             cloneFile.save();
-            cloneFile.setModTimeSaved(repoFile.getLastModTime());
+            cloneFile.saveLastModTime(repoFile.getLastModTime());
 
             // Update status
             setFileStatus(localFile, null);
@@ -334,7 +334,7 @@ public class VersionControl {
             if (localFile.isFile())
                 localFile.setBytes(cloneFile.getBytes());
             localFile.save();
-            localFile.setModTimeSaved(cloneFile.getLastModTime());
+            localFile.saveLastModTime(cloneFile.getLastModTime());
             setFileStatus(localFile, null);
         }
 
@@ -418,8 +418,8 @@ public class VersionControl {
             if (localFile.isFile())
                 cloneFile.setBytes(localFile.getBytes());
             cloneFile.save();
-            cloneFile.setModTimeSaved(repoFile.getLastModTime());
-            localFile.setModTimeSaved(repoFile.getLastModTime());
+            cloneFile.saveLastModTime(repoFile.getLastModTime());
+            localFile.saveLastModTime(repoFile.getLastModTime());
             setFileStatus(localFile, null);
         }
     }
