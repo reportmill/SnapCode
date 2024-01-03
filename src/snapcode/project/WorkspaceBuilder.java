@@ -27,6 +27,9 @@ public class WorkspaceBuilder {
     // The runner to build workspace
     private BuildWorkspaceRunner _buildWorkspaceRunner;
 
+    // The last build log
+    private StringBuffer _buildLogBuffer;
+
     /**
      * Constructor.
      */
@@ -34,6 +37,7 @@ public class WorkspaceBuilder {
     {
         super();
         _workspace = workspace;
+        _buildLogBuffer = new StringBuffer();
     }
 
     /**
@@ -170,6 +174,8 @@ public class WorkspaceBuilder {
         Project[] childProjects = rootProj.getProjects();
 
         // Start building
+        _buildLogBuffer.setLength(0);
+        _buildLogBuffer.append("Build Started\n");
         _workspace.setBuilding(true);
 
         // Build child projects
@@ -200,6 +206,11 @@ public class WorkspaceBuilder {
     public void addAllFilesToBuild()  { _addAllFilesToBuild = true; }
 
     /**
+     * Returns the build log.
+     */
+    public StringBuffer getBuildLogBuffer()  { return _buildLogBuffer; }
+
+    /**
      * Adds a build file.
      */
     private void addAllFilesToBuildImpl()
@@ -223,10 +234,10 @@ public class WorkspaceBuilder {
     private void taskMonitorTaskTitleChanged(TaskMonitor taskMonitor)
     {
         String taskTitle = taskMonitor.getTaskTitle();
-        System.out.println(taskTitle);
         TaskRunner<?> taskRunner = _buildWorkspaceRunner;
         if (taskRunner != null && taskMonitor == taskRunner.getMonitor()) {
             _workspace.setActivity(taskTitle);
+            _buildLogBuffer.append(taskTitle).append('\n');
         }
     }
 

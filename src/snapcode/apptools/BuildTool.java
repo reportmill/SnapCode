@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import snap.text.TextBlock;
 import snapcode.project.*;
 import snapcode.javatext.JavaTextUtils;
 import snap.gfx.Image;
@@ -16,11 +17,8 @@ public class BuildTool extends WorkspaceTool {
     // The selected issue
     private BuildIssue  _selIssue;
 
-    // The last build log
-    private StringBuilder _buildLogStringBuilder;
-
     // The build log text
-    private TextView _buildLogTextView;
+    private TextBlock _buildLogTextBlock;
 
     // Constants
     private static Image ErrorImage = Image.getImageForClassResource(JavaTextUtils.class, "ErrorMarker.png");
@@ -32,11 +30,6 @@ public class BuildTool extends WorkspaceTool {
     public BuildTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
-        _buildLogStringBuilder = new StringBuilder();
-
-        // Start listening to  workspace prop changes
-        _workspace.addPropChangeListener(pc -> workspaceActivityChanged(), Workspace.Activity_Prop);
-        _workspace.addPropChangeListener(pc -> workspaceBuildingChanged(), Workspace.Building_Prop);
     }
 
     /**
@@ -84,9 +77,20 @@ public class BuildTool extends WorkspaceTool {
         errorsList.setCellConfigure(this::configureErrorsCell);
         errorsList.setRowHeight(24);
 
-        // Get BuildLogTextView
-        _buildLogTextView = getView("BuildLogTextView", TextView.class);
-        _buildLogTextView.getTextBlock().setString(_buildLogStringBuilder.toString());
+        // Get BuildLogTextBlock
+        TextView buildLogTextView = getView("BuildLogTextView", TextView.class);
+        _buildLogTextBlock = buildLogTextView.getTextBlock();
+    }
+
+    /**
+     * Initialize when showing.
+     */
+    @Override
+    protected void initShowing()
+    {
+        // Start listening to  workspace prop changes
+        _workspace.addPropChangeListener(pc -> resetLater(), Workspace.Activity_Prop);
+        _workspace.addPropChangeListener(pc -> workspaceBuildingChanged(), Workspace.Building_Prop);
     }
 
     /**
@@ -105,6 +109,13 @@ public class BuildTool extends WorkspaceTool {
 
         setViewItems("ErrorsList", getIssues());
         setViewSelItem("ErrorsList", getSelIssue());
+
+        // Update BuildLogTextBlock: If Workspace.Builder.BuildLogBuffer is longer, append to BuildLogTextView
+        StringBuffer buildLogBuffer = _workspace.getBuilder().getBuildLogBuffer();
+        if (buildLogBuffer.length() > _buildLogTextBlock.length()) {
+            CharSequence appendStr = buildLogBuffer.subSequence(_buildLogTextBlock.length(), buildLogBuffer.length());
+            _buildLogTextBlock.addChars(appendStr, null, _buildLogTextBlock.length());
+        }
     }
 
     /**
@@ -168,30 +179,9 @@ public class BuildTool extends WorkspaceTool {
      */
     private void workspaceBuildingChanged()
     {
-        if (_workspace.isBuilding()) {
-            _buildLogStringBuilder.setLength(0);
-            _buildLogStringBuilder.append("Build started\n");
-            if (_buildLogTextView != null)
-                ViewUtils.runLater(() -> _buildLogTextView.getTextBlock().setString("Build started\n"));
-        }
+        if (_workspace.isBuilding())
+            ViewUtils.runLater(() -> _buildLogTextBlock.clear());
         resetLater();
-    }
-
-    /**
-     * Called when Workspace Activity changes.
-     */
-    private void workspaceActivityChanged()
-    {
-        String activityText = _workspace.getActivity();
-        if (_workspace.isBuilding() && activityText != null) {
-            activityText += '\n';
-            _buildLogStringBuilder.append(activityText);
-            if (_buildLogTextView != null) {
-                String activityText2 = activityText;
-                ViewUtils.runLater(() -> _buildLogTextView.getTextBlock().addChars(activityText2, null,
-                        _buildLogTextView.getTextBlock().length()));
-            }
-        }
     }
 
     /**
