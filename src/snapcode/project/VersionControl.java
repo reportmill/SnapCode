@@ -84,7 +84,7 @@ public class VersionControl {
     protected WebFile getCloneDir()
     {
         WebSite localSite = getLocalSite();
-        WebSite sandboxSite = localSite.getSandbox();
+        WebSite sandboxSite = localSite.getSandboxSite();
         WebFile cloneDir = sandboxSite.getFileForPath("Remote.clone");
         if (cloneDir == null) {
             cloneDir = sandboxSite.createFileForPath("Remote.clone", true);
@@ -736,7 +736,7 @@ public class VersionControl {
     public static String getRemoteSiteUrlString(WebSite projectSite)
     {
         // Get remote settings file
-        WebSite sandboxSite = projectSite.getSandbox();
+        WebSite sandboxSite = projectSite.getSandboxSite();
         WebFile remoteSettingsFile = sandboxSite.getFileForPath("/settings/remote");
         if (remoteSettingsFile == null)
             return null;
@@ -756,7 +756,7 @@ public class VersionControl {
         if (Objects.equals(urlString, getRemoteSiteUrlString(projectSite))) return;
 
         // Get remote settings file
-        WebSite sandboxSite = projectSite.getSandbox();
+        WebSite sandboxSite = projectSite.getSandboxSite();
         WebFile file = sandboxSite.getFileForPath("/settings/remote");
         if (file == null)
             file = sandboxSite.createFileForPath("/settings/remote", false);

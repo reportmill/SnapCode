@@ -257,7 +257,7 @@ public class FileTreeTool extends WorkspaceTool {
         // Handle RefreshFileMenuItem
         if (anEvent.equals("RefreshFileMenuItem")) {
             for (WebFile file : getSelFiles())
-                file.reload();
+                file.resetAndVerify();
         }
 
         // Handle OpenInTextEditorMenuItem
@@ -480,7 +480,7 @@ public class FileTreeTool extends WorkspaceTool {
     {
         // If file has been changed since last load, reload
         if (aFile.isModifiedExternally()) {
-            aFile.reload();
+            aFile.resetAndVerify();
             _pagePane.reloadFile(aFile);
         }
 

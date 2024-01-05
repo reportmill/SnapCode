@@ -138,7 +138,7 @@ public class DiffPage extends WebPage {
     TextArea getText(WebFile aFile)
     {
         // Refresh file to get latest version
-        aFile.reload();
+        aFile.resetAndVerify();
 
         // Handle JavaFile
         if (aFile.getType().equals("java")) {

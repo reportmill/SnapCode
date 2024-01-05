@@ -3,7 +3,6 @@
  */
 package snapcode.app;
 import snap.util.*;
-import snapcode.apptools.FileTreeTool;
 import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
 import snap.props.PropChange;
@@ -11,7 +10,6 @@ import snap.view.*;
 import snap.viewx.FilePanel;
 import snap.web.*;
 import snapcode.project.WorkspaceBuilder;
-
 import java.io.File;
 
 /**

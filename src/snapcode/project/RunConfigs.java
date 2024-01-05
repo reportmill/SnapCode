@@ -113,8 +113,8 @@ public class RunConfigs {
      */
     protected WebFile getFile()
     {
-        WebFile file = _site.getSandbox().getFileForPath("/settings/run_configs");
-        if (file == null) file = _site.getSandbox().createFileForPath("/settings/run_configs", false);
+        WebFile file = _site.getSandboxSite().getFileForPath("/settings/run_configs");
+        if (file == null) file = _site.getSandboxSite().createFileForPath("/settings/run_configs", false);
         return file;
     }
 

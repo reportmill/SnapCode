@@ -455,7 +455,7 @@ public class PagePane extends ViewOwner {
     public void revertFile(WebFile aFile)
     {
         removeOpenFile(aFile);
-        aFile.reload();
+        aFile.resetAndVerify();
         setPageForURL(aFile.getURL(), null);
         setSelFile(aFile);
     }

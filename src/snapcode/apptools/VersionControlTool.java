@@ -101,7 +101,7 @@ public class VersionControlTool extends ProjectTool {
 
         // Handle ConnectButton
         if (anEvent.equals("ConnectButton")) {
-            if (getRepoSite() != null) getRepoSite().getRootDir().reload();
+            if (getRepoSite() != null) getRepoSite().getRootDir().resetAndVerify();
             connectToRemoteSite();
         }
 
@@ -189,7 +189,7 @@ public class VersionControlTool extends ProjectTool {
     {
         // Reload files
         WebSite projectSite = getProjectSite();
-        projectSite.getRootDir().reload();
+        projectSite.getRootDir().resetAndVerify();
 
         // Reset UI
         _workspacePane.resetLater();
@@ -240,7 +240,7 @@ public class VersionControlTool extends ProjectTool {
     private void updateFilesSuccess(List<WebFile> theFiles)
     {
         for (WebFile file : theFiles)
-            file.reload();
+            file.resetAndVerify();
         for (WebFile file : theFiles)
             getBrowser().reloadFile(file);
         _workspacePane.resetLater();

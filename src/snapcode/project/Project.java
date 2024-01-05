@@ -229,7 +229,7 @@ public class Project extends PropObject {
         WebSite parentSite = parentSiteURL.getSite();
 
         // Get URL and site for project path
-        WebURL projURL = parentSite.getURL(projectPath);
+        WebURL projURL = parentSite.getUrlForPath(projectPath);
         WebSite projSite = projURL.getAsSite();
 
         // Get Project
@@ -435,7 +435,7 @@ public class Project extends PropObject {
 
         // Delete SandBox, Site
         WebSite projSite = getSite();
-        WebSite projSiteSandbox = projSite.getSandbox();
+        WebSite projSiteSandbox = projSite.getSandboxSite();
         projSiteSandbox.deleteSite();
         projSite.deleteSite();
 
