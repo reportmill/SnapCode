@@ -149,8 +149,8 @@ public class Project extends PropObject {
     public String[] getRuntimeClassPaths()
     {
         // Get build path
-        String buildPath = _buildFile.getBuildPathAbsolute();
-        String[] runtimeClassPaths = { buildPath };
+        String buildPath = _buildFile.getBuildPathAbsolute(); // Will be null for Project with http site
+        String[] runtimeClassPaths = buildPath != null ? new String[] { buildPath } : new String[0];
 
         // Add CompileClassPaths
         String[] compileClassPaths = getCompileClassPaths();

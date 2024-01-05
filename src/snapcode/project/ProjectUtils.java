@@ -59,7 +59,10 @@ public class ProjectUtils {
             String rootPath = getRootDirPath(aProj);
             if (rootPath != null)
                 absPath = rootPath + absPath;
-            else System.err.println("ProjectUtils.getAbsolutePath: Can't find project root path");
+            else {
+                System.err.println("ProjectUtils.getAbsolutePath: Can't find project root path for: " + aProj.getSite().getURLString());
+                return null;
+            }
         }
 
         // Handle dir (except .jar/.zip)
