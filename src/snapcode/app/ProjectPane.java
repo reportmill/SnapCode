@@ -7,10 +7,7 @@ import snap.viewx.DialogBox;
 import snap.util.TaskMonitorPanel;
 import snapcode.apptools.ProjectAnalysisTool;
 import snapcode.apptools.VersionControlTool;
-import snapcode.project.Project;
-import snapcode.project.VersionControl;
-import snapcode.project.Workspace;
-import snapcode.project.WorkspaceBuilder;
+import snapcode.project.*;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -204,9 +201,12 @@ public class ProjectPane extends ViewOwner {
         // If BuildDir file, just return
         if (_project.getBuildDir().containsFile(aFile)) return;
 
-        // Add file to project and build workspace
+        // Add file to project
         _project.fileAdded(aFile);
-        buildWorkspace();
+
+        // If build file, build workspace later
+        if (isBuildFile(aFile))
+            buildWorkspaceAfterDelay();
     }
 
     /**
@@ -221,9 +221,12 @@ public class ProjectPane extends ViewOwner {
         // If BuildDir file, just return
         if (_project.getBuildDir().containsFile(aFile)) return;
 
-        // Remove from project and build workspace
+        // Remove from project
         _project.fileRemoved(aFile);
-        buildWorkspace();
+
+        // If build file, build workspace later
+        if (isBuildFile(aFile))
+            buildWorkspaceAfterDelay();
     }
 
     /**
@@ -240,18 +243,30 @@ public class ProjectPane extends ViewOwner {
 
         // Notify saved and build workspace
         _project.fileSaved(aFile);
-        buildWorkspace();
+
+        // If build file, build workspace later
+        if (isBuildFile(aFile))
+            buildWorkspaceAfterDelay();
+    }
+
+    /**
+     * Returns whether file is build file.
+     */
+    private boolean isBuildFile(WebFile aFile)
+    {
+        ProjectBuilder projectBuilder = _project.getBuilder();
+        return projectBuilder.isBuildFile(aFile);
     }
 
     /**
      * Called to build workspace.
      */
-    private void buildWorkspace()
+    private void buildWorkspaceAfterDelay()
     {
         Workspace workspace = _project.getWorkspace();
         WorkspaceBuilder builder = workspace.getBuilder();
         if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
-            builder.buildWorkspaceLater();
+            builder.buildWorkspaceAfterDelay(500);
     }
 
     /**

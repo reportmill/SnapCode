@@ -116,6 +116,15 @@ public class ProjectBuilder {
     }
 
     /**
+     * Returns whether given file is a build file.
+     */
+    public boolean isBuildFile(WebFile aFile)
+    {
+        ProjectFileBuilder builder = getFileBuilder(aFile);
+        return builder != null;
+    }
+
+    /**
      * Returns the file builder for given file.
      */
     public ProjectFileBuilder getFileBuilder(WebFile aFile)
