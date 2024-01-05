@@ -20,11 +20,11 @@ public class ProjectUtils {
      */
     public static String getRootDirPath(Project aProj)
     {
-        // If Project not local file, return null
+        // If Project not on local file system, return null
         WebSite projSite = aProj.getSite();
         WebURL projURL = projSite.getURL();
         String scheme = projURL.getScheme();
-        if (!(scheme.equals("file") || scheme.equals("local")))
+        if (!scheme.equals("file"))
             return null;
 
         // Get project root dir path
