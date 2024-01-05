@@ -299,7 +299,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
      */
     public void execProc(RunApp runApp)
     {
-        setSelApp(null);
         addApp(runApp);
         setSelApp(runApp);
         runApp.exec();
