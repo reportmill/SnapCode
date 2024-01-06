@@ -172,12 +172,18 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         // Add JavaDecl for each declared method - also make sure return/parameter types are in refs
         for (JMethodDecl methodDecl : methodDecls) {
 
+            // Set MethodDecl
+            mb.methodDecl(methodDecl);
+
+            // Get/set modifiers
+            int mods = methodDecl.getMods().getValue();
+            mb.mods(mods);
+
             // Get/set name
             String methodName = methodDecl.getName();
             if (methodName == null)
                 continue;
             mb.name(methodName);
-            mb.methodDecl(methodDecl);
 
             // Get/set param types
             List<JVarDecl> paramsList = methodDecl.getParameters();
