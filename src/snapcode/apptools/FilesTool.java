@@ -1,4 +1,7 @@
 package snapcode.apptools;
+import javakit.parse.JFile;
+import javakit.parse.JavaParser;
+import snap.view.Clipboard;
 import snapcode.project.Project;
 import snapcode.project.WorkspaceBuilder;
 import snap.util.ArrayUtils;
@@ -42,6 +45,12 @@ public class FilesTool extends WorkspaceTool {
         if (extension == null)
             return;
 
+        // Handle Java from clipboard
+        if (extension.equals(".java-from-clipboard")) {
+            newJavaFileFromClipboard();
+            return;
+        }
+
         // Get source dir
         WebSite selSite = getSelSite();
         WebFile selFile = getSelFile();
@@ -56,16 +65,16 @@ public class FilesTool extends WorkspaceTool {
         }
 
         // Get suggested "Untitled.xxx" path for SelDir and extension
-        String path = selDir.getDirPath() + "Untitled" + extension;
+        String filePath = selDir.getDirPath() + "Untitled" + extension;
 
         // Create file
-        WebFile file = createFileForPath(path, workspacePaneUI);
+        WebFile file = createFileForPath(filePath, workspacePaneUI);
 
         // Select file
         setSelFile(file);
 
         // Hide RightTray
-        _workspaceTools.getRightTray().setSelTool(null);
+        _workspaceTools.setShowRightTray(false);
     }
 
     /**
@@ -374,6 +383,45 @@ public class FilesTool extends WorkspaceTool {
     }
 
     /**
+     * Creates a new Java file from clipboard.
+     */
+    public void newJavaFileFromClipboard()
+    {
+        // Get Java string from clipboard
+        Clipboard clipboard = Clipboard.get();
+        String javaString = clipboard.getString();
+        if (javaString == null || javaString.length() < 10) {
+            String title = "New Java File from clipboard";
+            String msg = "No text found in clibpard";
+            DialogBox.showErrorDialog(_workspacePane.getUI(), title, msg);
+            return;
+        }
+
+        // Get Java class name
+        JavaParser javaParser = JavaParser.getShared();
+        JFile jfile = javaParser.getJavaFile(javaString);
+        String className = jfile.getName();
+        if (className == null || className.length() == 0) {
+            String title = "New Java File from clipboard";
+            String msg = "No class name found";
+            DialogBox.showErrorDialog(_workspacePane.getUI(), title, msg);
+            return;
+        }
+
+        // Get source dir
+        WebSite selSite = getSelSite();
+        Project proj = Project.getProjectForSite(selSite);
+        WebFile selDir = proj.getSourceDir();
+
+        // Create file and save
+        String filePath = selDir.getDirPath() + className + ".java";
+        WebFile newJavaFile = selSite.createFileForPath(filePath, false);
+        newJavaFile.setText(javaString);
+        newJavaFile.save();
+        setSelFile(newJavaFile);
+    }
+
+    /**
      * Runs a panel for a new file extension (Java, Jepl, snp, etc.).
      */
     public static String showNewFileExtensionPanel(View aView)
@@ -386,7 +434,8 @@ public class FilesTool extends WorkspaceTool {
 
         // Define options
         String[][] options = {
-                {"Java Programming File", ".java"},
+                {"Java File", ".java"},
+                {"Java File from clipboard", ".java-from-clipboard"},
                 {"Java REPL File", ".jepl"},
                 {"SnapKit UI File", ".snp"},
                 {"Directory", ".dir"},
