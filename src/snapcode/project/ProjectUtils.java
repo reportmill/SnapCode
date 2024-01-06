@@ -60,7 +60,7 @@ public class ProjectUtils {
             if (rootPath != null)
                 absPath = rootPath + absPath;
             else {
-                System.err.println("ProjectUtils.getAbsolutePath: Can't find project root path for: " + aProj.getSite().getURLString());
+                //System.err.println("ProjectUtils.getAbsolutePath: Can't find project root path for: " + aProj.getSite().getURLString());
                 return null;
             }
         }

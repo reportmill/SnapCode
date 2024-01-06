@@ -400,11 +400,19 @@ public abstract class RunApp {
     public void removeBreakpoint(Breakpoint aBP)  { }
 
     /**
-     * Sets listener.
+     * Adds listener.
      */
     public void addListener(AppListener aListener)
     {
         _appLsnrs = ArrayUtils.add(_appLsnrs, aListener);
+    }
+
+    /**
+     * Removes listener.
+     */
+    public void removeListener(AppListener aListener)
+    {
+        _appLsnrs = ArrayUtils.removeId(_appLsnrs, aListener);
     }
 
     /**

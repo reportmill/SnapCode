@@ -82,7 +82,8 @@ public class RunTool extends WorkspaceTool implements AppListener {
      */
     public void removeApp(int anIndex)
     {
-        _apps.remove(anIndex);
+        RunApp runApp = _apps.remove(anIndex);
+        runApp.removeListener(this);
     }
 
     /**

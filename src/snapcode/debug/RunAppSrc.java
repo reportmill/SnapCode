@@ -51,10 +51,6 @@ public class RunAppSrc extends RunApp {
     @Override
     public void exec()
     {
-        // Set console
-        Console.setShared(null);
-        Console.setConsoleCreatedHandler(this::consoleWasCreated);
-
         // Create and start new thread to run
         _runAppThread = new Thread(() -> runAppImpl());
         _running = true;
@@ -73,10 +69,18 @@ public class RunAppSrc extends RunApp {
         if (javaAgent == null)
             return;
 
-        // Replace System.in with proxy versions to allow input/output
-        System.setIn(_standardInInputStream = new ScanPane.BytesInputStream(null));
-        System.setOut(new ProxyPrintStream(REAL_SYSTEM_OUT));
-        System.setErr(new ProxyPrintStream(REAL_SYSTEM_ERR));
+        // Set shared resources
+        synchronized (RunAppSrc.class) {
+
+            // Replace System.in with proxy versions to allow input/output
+            System.setIn(_standardInInputStream = new ScanPane.BytesInputStream(null));
+            System.setOut(new ProxyPrintStream(REAL_SYSTEM_OUT));
+            System.setErr(new ProxyPrintStream(REAL_SYSTEM_ERR));
+
+            // Set console
+            Console.setShared(null);
+            Console.setConsoleCreatedHandler(this::consoleWasCreated);
+        }
 
         // Run code
         _javaShell.runJavaCode(javaAgent);
@@ -145,21 +149,30 @@ public class RunAppSrc extends RunApp {
         // If already called, just return (possible if soft interrupt somehow finishes after hard thread interrupt has been triggered)
         if (_runAppThread == null) return;
 
-        // Restore System.in/out/err
-        System.setIn(REAL_SYSTEM_IN);
-        System.setOut(REAL_SYSTEM_OUT);
-        System.setErr(REAL_SYSTEM_ERR);
+        // Reset shared resources
+        synchronized (RunAppSrc.class) {
+
+            // If another app already set new values, just skip
+            if (System.in == _standardInInputStream) {
+
+                // Restore System.in/out/err
+                System.setIn(REAL_SYSTEM_IN);
+                System.setOut(REAL_SYSTEM_OUT);
+                System.setErr(REAL_SYSTEM_ERR);
+
+                // Reset Console
+                Console.setShared(null);
+                Console.setConsoleCreatedHandler(null);
+            }
+        }
 
         // Reset thread
         _runAppThread = null;
         _running = false;
 
         // If console app, clear console
-        if (_runAppThreadWaiting) {
-            Console.setShared(null);
-            Console.setConsoleCreatedHandler(null);
+        if (_runAppThreadWaiting)
             setAltConsoleView(null);
-        }
 
         // Notify exited
         for (AppListener appLsnr : _appLsnrs)
@@ -200,6 +213,7 @@ public class RunAppSrc extends RunApp {
     {
         View consoleView = Console.getShared().getConsoleView();
         setAltConsoleView(consoleView);
+        Console.setConsoleCreatedHandler(null);
     }
 
     /**
