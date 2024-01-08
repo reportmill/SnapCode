@@ -28,6 +28,15 @@ public class VersionControl {
     // The remote site URL
     private WebURL _remoteSiteUrl;
 
+    // The clone site
+    private WebSite _cloneSite;
+
+    // The remote site
+    private WebSite _remoteSite;
+
+    // Whether this version control is available
+    private Boolean _isAvailable;
+
     // A map of file to it's status
     private Map<WebFile, FileStatus> _filesStatusCache = new HashMap<>();
 
@@ -69,6 +78,11 @@ public class VersionControl {
     }
 
     /**
+     * Returns the local site.
+     */
+    public WebSite getLocalSite()  { return _localSite; }
+
+    /**
      * Returns the remote site URL.
      */
     public WebURL getRemoteSiteUrl()  { return _remoteSiteUrl; }
@@ -79,32 +93,21 @@ public class VersionControl {
     public String getRemoteSiteUrlString()  { return _remoteSiteUrl != null ? _remoteSiteUrl.getString() : null; }
 
     /**
-     * Returns the local cache directory of remote site.
-     */
-    protected WebFile getCloneDir()
-    {
-        WebSite localSite = getLocalSite();
-        WebSite sandboxSite = localSite.getSandboxSite();
-        WebFile cloneDir = sandboxSite.getFileForPath("Remote.clone");
-        if (cloneDir == null) {
-            cloneDir = sandboxSite.createFileForPath("Remote.clone", true);
-            cloneDir.save();
-        }
-        return cloneDir;
-    }
-
-    /**
-     * Returns the local site.
-     */
-    public WebSite getLocalSite()  { return _localSite; }
-
-    /**
      * Returns the local cache site of remote site.
      */
     public WebSite getCloneSite()
     {
-        WebFile cloneDir = getCloneDir();
-        return cloneDir.getURL().getAsSite();
+        if (_cloneSite != null) return _cloneSite;
+
+        // Get clone site (via clone dir and url)
+        WebSite localSite = getLocalSite();
+        WebSite sandboxSite = localSite.getSandboxSite();
+        WebFile cloneDir = sandboxSite.createFileForPath("Remote.clone", true);
+        WebURL cloneUrl = cloneDir.getURL();
+        WebSite cloneSite = cloneUrl.getAsSite();
+
+        // Set and return
+        return _cloneSite = cloneSite;
     }
 
     /**
@@ -120,16 +123,22 @@ public class VersionControl {
      */
     public WebSite getRemoteSite()
     {
-        return _remoteSiteUrl.getAsSite();
+        if (_remoteSite != null) return _remoteSite;
+        WebSite remoteSite = _remoteSiteUrl != null ? _remoteSiteUrl.getAsSite() : null;
+        return _remoteSite = remoteSite;
     }
 
     /**
      * Returns whether existing VCS artifacts are detected for site.
      */
-    public boolean getExists()
+    public boolean isAvailable()
     {
+        if (_isAvailable != null) return _isAvailable;
         WebSite cloneSite = getCloneSite();
-        return cloneSite != null && cloneSite.getExists();
+        boolean cloneAvailable = cloneSite != null && cloneSite.getExists();
+        WebSite remoteSite = getRemoteSite();
+        boolean remoteAvailable = remoteSite != null && remoteSite.getExists();
+        return _isAvailable = cloneAvailable || remoteAvailable;
     }
 
     /**
@@ -463,7 +472,7 @@ public class VersionControl {
     private void findUpdateFiles(WebFile aFile, List<WebFile> updateFiles)
     {
         // If no clone site, just return
-        if (!getExists()) return;
+        if (!isAvailable()) return;
 
         // Get remote file for given file
         WebFile remoteFile = getRepoFile(aFile.getPath(), true, aFile.isDir());
@@ -485,7 +494,7 @@ public class VersionControl {
     private void findReplaceFiles(WebFile aFile, List<WebFile> replaceFiles)
     {
         // If no clone site, just return
-        if (!getExists()) return;
+        if (!isAvailable()) return;
 
         // Find local changed files and add to replace files list
         Set<WebFile> changedFiles = new HashSet<>();
@@ -499,7 +508,7 @@ public class VersionControl {
     private void findCommitFiles(WebFile aFile, List<WebFile> commitFiles)
     {
         // If no clone site, just return
-        if (!getExists()) return;
+        if (!isAvailable()) return;
 
         // Find local changed files and add to commit files list
         Set<WebFile> changedFiles = new HashSet<>();
@@ -610,7 +619,7 @@ public class VersionControl {
     protected FileStatus getFileStatus(WebFile aFile, boolean isDeep)
     {
         // If no clone site or is ignore file, just return
-        if (!getExists())
+        if (!isAvailable())
             return FileStatus.Identical;
         if (isIgnoreFile(aFile))
             return FileStatus.Identical;

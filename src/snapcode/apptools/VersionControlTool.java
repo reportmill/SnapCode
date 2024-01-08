@@ -133,7 +133,7 @@ public class VersionControlTool extends ProjectTool {
      */
     public void projectDidOpen()
     {
-        if (_versionControl.getExists())
+        if (_versionControl.isAvailable())
             return;
         if (_versionControl.getRemoteSiteUrl() == null)
             return;
@@ -207,7 +207,7 @@ public class VersionControlTool extends ProjectTool {
     public void updateFiles(List<WebFile> theFiles)
     {
         // Sanity check
-        if (!_versionControl.getExists()) { beep(); return; }
+        if (!_versionControl.isAvailable()) { beep(); return; }
 
         // Get root files
         List<WebFile> rootFiles = theFiles != null ? theFiles : getSelFiles();
@@ -268,7 +268,7 @@ public class VersionControlTool extends ProjectTool {
     public void replaceFiles(List<WebFile> theFiles)
     {
         // Sanity check
-        if (!_versionControl.getExists()) { beep(); return; }
+        if (!_versionControl.isAvailable()) { beep(); return; }
 
         // Get root files
         List<WebFile> rootFiles = theFiles != null ? theFiles : getSelFiles();
@@ -301,7 +301,7 @@ public class VersionControlTool extends ProjectTool {
     public void commitFiles(List<WebFile> theFiles)
     {
         // Sanity check
-        if (!_versionControl.getExists()) { beep(); return; }
+        if (!_versionControl.isAvailable()) { beep(); return; }
 
         // Get root files
         List<WebFile> rootFiles = theFiles != null ? theFiles : getSelFiles();

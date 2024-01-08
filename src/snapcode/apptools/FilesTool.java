@@ -76,7 +76,7 @@ public class FilesTool extends WorkspaceTool {
         setSelFile(file);
 
         // Hide RightTray
-        _workspaceTools.setShowRightTray(false);
+        _workspaceTools.getRightTray().setSelTool(null);
     }
 
     /**
