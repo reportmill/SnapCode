@@ -136,8 +136,8 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // Clear display
         clearConsole();
 
-        // Set debug through real runner
-        if (isDebug) {
+        // If debug or real compile, forward to real launch
+        if (isDebug || _workspace.isUseRealCompiler() && !_workspace.getRootProject().getBuildFile().isRunWithInterpreter()) {
             runConfigOrFile(null, getSelFile(), isDebug);
             return;
         }
@@ -239,7 +239,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // Try to replace file with project file
         Project proj = Project.getProjectForFile(runFile);
         if (proj == null) {
-            System.err.println("DebugTool: not project file: " + runFile);
+            System.err.println("RunTool: not project file: " + runFile);
             return;
         }
 
