@@ -13,8 +13,9 @@
       <RowView>
         <Button Name="NewButton" PrefWidth="80" PrefHeight="24" Text="New" Position="CENTER_LEFT"/>
         <MenuButton PrefWidth="20" PrefHeight="24" Position="CENTER_RIGHT">
-          <MenuItem Name="NewButton" text="New Java REPL" />
           <MenuItem Name="NewJavaClassMenu" text="New Java Class" />
+          <MenuItem Name="NewJavaReplMenu" text="New Java REPL" />
+          <MenuItem Name="NewProjectButton" text="New Java Project" />
           <MenuItem Name="NewUIFileMenu" text="New SnapKit UI File" />
         </MenuButton>
       </RowView>

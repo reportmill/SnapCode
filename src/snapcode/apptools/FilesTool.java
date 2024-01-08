@@ -2,6 +2,8 @@ package snapcode.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JavaParser;
 import snap.view.Clipboard;
+import snap.viewx.FilePanel;
+import snapcode.app.SnapCodeUtils;
 import snapcode.project.Project;
 import snapcode.project.WorkspaceBuilder;
 import snap.util.ArrayUtils;
@@ -380,6 +382,54 @@ public class FilesTool extends WorkspaceTool {
 
         // Update tree again
         setSelFile(parent);
+    }
+
+    /**
+     * Shows a panel to create new project.
+     */
+    public Project showNewProjectPanel(View aView)
+    {
+        // Create file panel to select new directory file
+        FilePanel filePanel = new FilePanel();
+        filePanel.setSaving(true);
+        filePanel.setDesc("Create New Project");
+
+        // Initialize to SnapCode dir
+        filePanel.getUI();
+        WebFile snapCodeDir = SnapCodeUtils.getSnapCodeDir();
+        if (snapCodeDir.getExists())
+            filePanel.getSelSitePane().setSelFile(snapCodeDir);
+
+        // Show file panel to select new directory file
+        WebFile newProjectFile = filePanel.showFilePanel(aView);
+        if (newProjectFile == null)
+            return null;
+
+        // Return
+        return createNewProjectForProjectDir(newProjectFile);
+    }
+
+    /**
+     * Creates a new project.
+     */
+    private Project createNewProjectForProjectDir(WebFile newProjectFile)
+    {
+        // Create new dir
+        if (!newProjectFile.getExists())
+            newProjectFile.save();
+
+        // Create new project
+        WebSite projectSite = newProjectFile.getURL().getAsSite();
+        Project newProject = _workspace.addProjectForSite(projectSite);
+
+        // Create src and build files?
+        newProject.getSourceDir().save();
+        WebFile buildFile = newProject.getBuildFile().getBuildFile();
+        if (!buildFile.getExists())
+            buildFile.save();
+
+        // Return
+        return newProject;
     }
 
     /**

@@ -3,6 +3,8 @@
  */
 package snapcode.app;
 import snap.util.*;
+import snapcode.apptools.FilesTool;
+import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
 import snap.props.PropChange;
@@ -104,8 +106,8 @@ public class WelcomePanel extends ViewOwner {
         if (anEvent.equals("SamplesButton"))
             newFile(true);
 
-        // Handle NewButton
-        if (anEvent.equals("NewButton"))
+        // Handle NewButton, NewJavaReplMenu
+        if (anEvent.equals("NewButton") || anEvent.equals("NewJavaReplMenu"))
             newFile(false);
 
         // Handle OpenButton
@@ -114,16 +116,20 @@ public class WelcomePanel extends ViewOwner {
             openWorkspaceForFile(selFile);
         }
 
-        // Handle QuitButton
-        if (anEvent.equals("QuitButton"))
-            App.getShared().quitApp();
-
         // Handle NewJavaClassMenu
         if (anEvent.equals("NewJavaClassMenu")) {
             String javaContents = JavaPage.getJavaContentStringForPackageAndClassName(null, "JavaFiddle");
             WebFile javaFile = ProjectUtils.getTempJavaFile("JavaFiddle", javaContents, false);
             openWorkspaceForFile(javaFile);
         }
+
+        // Handle NewProjectButton
+        if (anEvent.equals("NewProjectButton"))
+            openWorkspaceForNewProject();
+
+        // Handle QuitButton
+        if (anEvent.equals("QuitButton"))
+            App.getShared().quitApp();
 
         // Handle WinClosing
         if (anEvent.isWinClose())
@@ -220,6 +226,29 @@ public class WelcomePanel extends ViewOwner {
         WorkspaceBuilder builder = workspacePane.getWorkspace().getBuilder();
         builder.addAllFilesToBuild();
         builder.buildWorkspaceLater();
+    }
+
+    /**
+     * Opens a new workspace for a new project.
+     */
+    private void openWorkspaceForNewProject()
+    {
+        // Create workspace
+        Workspace workspace = new Workspace();
+        workspace.setUseRealCompiler(true);
+
+        // Create workspace pane
+        WorkspacePane workspacePane = new WorkspacePane(workspace);
+
+        // Show new project panel (if cancelled, just return)
+        FilesTool filesTool = workspacePane.getWorkspaceTools().getFilesTool();
+        Project newProject = filesTool.showNewProjectPanel(getUI());
+        if (newProject == null)
+            return;
+
+        // Show workspace pane
+        workspacePane.show();
+        hide();
     }
 
     /**
