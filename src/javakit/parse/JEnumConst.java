@@ -14,7 +14,7 @@ public class JEnumConst extends JMemberDecl {
     protected List<JExpr>  _args = Collections.EMPTY_LIST;
 
     // The class or interface body
-    protected String  _classBody;
+    protected JMemberDecl[] _classBody;
 
     /**
      * Constructor.
@@ -49,12 +49,12 @@ public class JEnumConst extends JMemberDecl {
     /**
      * Returns the class decl.
      */
-    public String getClassBody()  { return _classBody; }
+    public JMemberDecl[] getClassBody()  { return _classBody; }
 
     /**
      * Sets the class decl.
      */
-    public void setClassBody(String aBody)
+    public void setClassBody(JMemberDecl[] aBody)
     {
         _classBody = aBody;
     }

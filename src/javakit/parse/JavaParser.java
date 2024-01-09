@@ -309,7 +309,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * ClassDecl Handler.
+     * ClassDecl Handler: ("class" | "interface") Identifier TypeParams? ExtendsList? ImplementsList? ClassBody
      */
     public static class ClassDeclHandler extends JNodeParseHandler<JClassDecl> {
 
@@ -324,35 +324,38 @@ public class JavaParser extends JavaParserStmt {
             // Get class decl
             JClassDecl classDecl = getPart();
 
-            // Handle ClassBodyDecl (JavaMembers): ClassDecl, EnumDecl,
-            // ConstrDecl, FieldDecl, MethodDecl, AnnotationDecl
-            if (aNode.getCustomNode() instanceof JMemberDecl) {
-                JMemberDecl memberDecl = aNode.getCustomNode(JMemberDecl.class);
-                classDecl.addMemberDecl(memberDecl);
-            }
+            switch (anId) {
 
-            // Handle "class" or "interface"
-            else if (anId == "interface")
-                classDecl.setClassType(JClassDecl.ClassType.Interface);
+                // Handle ClassBody (JavaMembers): ClassDecl, EnumDecl, ConstrDecl, FieldDecl, MethodDecl, AnnotationDecl
+                case "ClassBody":
+                    JMemberDecl[] memberDecls = aNode.getCustomNode(JMemberDecl[].class);
+                    classDecl.setMemberDecls(memberDecls);
+                    break;
 
-            // Handle Identifier
-            else if (anId == "Identifier")
-                classDecl.setId(aNode.getCustomNode(JExprId.class));
+                // Handle "class" or "interface"
+                case "interface": classDecl.setClassType(JClassDecl.ClassType.Interface); break;
 
-            // Handle TypeParams
-            else if (anId == "TypeParams")
-                classDecl.setTypeVars(aNode.getCustomNode(List.class));
+                // Handle Identifier
+                case "Identifier": {
+                    JExprId classId = aNode.getCustomNode(JExprId.class);
+                    classDecl.setId(classId);
+                    break;
+                }
 
-            // Handle ExtendsList or ImplementsList mode and extendsList/implementsList
-            else if (anId == "extends")
-                _extending = true;
-            else if (anId == "implements")
-                _extending = false;
-            else if (anId == "ClassType") {
-                JType type = aNode.getCustomNode(JType.class);
-                if (_extending)
-                    classDecl.addExtendsType(type);
-                else classDecl.addImplementsType(type);
+                // Handle TypeParams
+                case "TypeParams":
+                    classDecl.setTypeVars(aNode.getCustomNode(List.class));
+                    break;
+
+                // Handle ExtendsList or ImplementsList mode and extendsList/implementsList
+                case "extends": _extending = true; break;
+                case "implements": _extending = false; break;
+                case "ClassType":
+                    JType type = aNode.getCustomNode(JType.class);
+                    if (_extending)
+                        classDecl.addExtendsType(type);
+                    else classDecl.addImplementsType(type);
+                    break;
             }
         }
 
@@ -360,7 +363,45 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * ClassBodyDecl Handler.
+     * ClassBodyHandler: "{" ClassBodyDecl* "}"
+     */
+    public static class ClassBodyHandler extends ParseHandler<JMemberDecl[]> {
+
+        // List of MemberDecls
+        private List<JMemberDecl> _memberDecls = new ArrayList<>();
+
+        /**
+         * ParseHandler method.
+         */
+        protected void parsedOne(ParseNode aNode, String anId)
+        {
+            if (anId == "ClassBodyDecl") {
+                JMemberDecl memberDecl = aNode.getCustomNode(JMemberDecl.class);
+                _memberDecls.add(memberDecl);
+            }
+        }
+
+        /**
+         * Override to return array.
+         */
+        public JMemberDecl[] parsedAll()  { return _memberDecls.toArray(new JMemberDecl[0]); }
+
+        /**
+         * Override to clear MemberDecls list.
+         */
+        @Override
+        public void reset()
+        {
+            super.reset();
+            _memberDecls.clear();
+        }
+
+        @Override
+        protected Class getPartClass()  { return JMemberDecl[].class; }
+    }
+
+    /**
+     * ClassBodyDecl Handler: LookAhead(2) Initializer | Modifiers MemberDecl | ";"
      */
     public static class ClassBodyDeclHandler extends JNodeParseHandler<JMemberDecl> {
 
@@ -413,7 +454,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * EnumDecl Handler.
+     * EnumDecl Handler: "enum" Identifier ImplementsList? "{" (EnumConstant (LookAhead(2) "," EnumConstant)*)? ","? (";" ClassBodyDecl*)? "}"
      */
     public static class EnumDeclHandler extends JNodeParseHandler<JClassDecl> {
 
@@ -425,21 +466,29 @@ public class JavaParser extends JavaParserStmt {
             // Get enum decl
             JClassDecl enumDecl = getPart();
 
-            // Handle MethodDeclarator Identifier
-            if (anId == "Identifier")
-                enumDecl.setId(aNode.getCustomNode(JExprId.class));
+            switch (anId) {
 
-            // Handle ImplementsList ClassType
-            else if (anId == "ClassType")
-                enumDecl.getImplementsTypes().add(aNode.getCustomNode(JType.class));
+                // Handle Identifier
+                case "Identifier":
+                    enumDecl.setId(aNode.getCustomNode(JExprId.class));
+                    break;
 
-            // Handle EnumConstant
-            else if (anId == "EnumConstant")
-                enumDecl.addEnumConstant(aNode.getCustomNode(JEnumConst.class));
+                // Handle ImplementsList ClassType
+                case "ClassType":
+                    enumDecl.getImplementsTypes().add(aNode.getCustomNode(JType.class));
+                    break;
 
-            // Handle ClassBodyDecl (JMemberDecl): ClassDecl, EnumDecl, ConstrDecl, FieldDecl, MethodDecl, AnnotationDecl
-            else if (aNode.getCustomNode() instanceof JMemberDecl)
-                enumDecl.addMemberDecl(aNode.getCustomNode(JMemberDecl.class));
+                // Handle EnumConstant
+                case "EnumConstant":
+                    enumDecl.addEnumConstant(aNode.getCustomNode(JEnumConst.class));
+                    break;
+
+                // Handle ClassBodyDecl
+                case "ClassBodyDecl":
+                    JMemberDecl memberDecl = aNode.getCustomNode(JMemberDecl.class);
+                    enumDecl.addMemberDecl(memberDecl);
+                    break;
+            }
         }
 
         /**
@@ -466,21 +515,29 @@ public class JavaParser extends JavaParserStmt {
             // Get enum constant
             JEnumConst enumConst = getPart();
 
-            // Handle Modifiers
-            if (anId == "Modifiers")
-                enumConst.setMods(aNode.getCustomNode(JModifiers.class));
+            switch (anId) {
 
-            // Handle name Identifier
-            else if (anId == "Identifier")
-                enumConst.setId(aNode.getCustomNode(JExprId.class));
+                // Handle Modifiers
+                case "Modifiers":
+                    enumConst.setMods(aNode.getCustomNode(JModifiers.class));
+                    break;
 
-            // Handle Arguments
-            else if (anId == "Arguments")
-                enumConst.setArgs(aNode.getCustomNode(List.class));
+                // Handle name Identifier
+                case "Identifier":
+                    enumConst.setId(aNode.getCustomNode(JExprId.class));
+                    break;
 
-            // Handle ClassBody
-            else if (anId == "ClassBody")
-                enumConst.setClassBody(aNode.getString());
+                // Handle Arguments
+                case "Arguments":
+                    enumConst.setArgs(aNode.getCustomNode(List.class));
+                    break;
+
+                // Handle ClassBody
+                case "ClassBody":
+                    JMemberDecl[] memberDecls = aNode.getCustomNode(JMemberDecl[].class);
+                    enumConst.setClassBody(memberDecls);
+                    break;
+            }
         }
 
         protected Class<JEnumConst> getPartClass()  { return JEnumConst.class; }
@@ -754,7 +811,7 @@ public class JavaParser extends JavaParserStmt {
         StatementHandler.class, ConstrCallHandler.class, ThrowsListHandler.class,
         ConstrDeclHandler.class, MethodDeclHandler.class, FieldDeclHandler.class,
         TypeParamsHandler.class, TypeParamHandler.class, EnumConstantHandler.class,
-        EnumDeclHandler.class, InitializerHandler.class, ClassBodyDeclHandler.class,
+        EnumDeclHandler.class, InitializerHandler.class, ClassBodyHandler.class, ClassBodyDeclHandler.class,
         ClassDeclHandler.class, TypeDeclHandler.class, ImportDeclHandler.class,
         PackageDeclHandler.class, JavaFileImportsHandler.class, JavaFileHandler.class
     };

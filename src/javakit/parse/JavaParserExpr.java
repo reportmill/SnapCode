@@ -653,7 +653,9 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * AllocExpr Handler.
+     * AllocExpr Handler:
+     *     LookAhead(2) "new" PrimitiveType ArrayDimsAndInits |
+     *     "new" ClassType TypeArgs? (ArrayDimsAndInits | Arguments ClassBody?)
      */
     public static class AllocExprHandler extends JNodeParseHandler<JExprAlloc> {
 
@@ -703,11 +705,8 @@ public class JavaParserExpr extends Parser {
 
                 // Handle ClassBody
                 case "ClassBody":
-                    JClassDecl classDecl = aNode.getCustomNode(JClassDecl.class);
-                    if (classDecl != null) {
-                        classDecl.addExtendsType(allocType);
-                        allocExpr.setClassDecl(classDecl);
-                    }
+                    JMemberDecl[] classBodyDecls = aNode.getCustomNode(JMemberDecl[].class);
+                    allocExpr.setClassBodyDecls(classBodyDecls);
                     break;
             }
         }

@@ -18,14 +18,17 @@ public class JExprAlloc extends JExpr {
     // The allocation args
     protected List<JExpr>  _args = Collections.EMPTY_LIST;
 
-    // The dimensions expression, if array
+    // The array dimension expression, if array
     protected JExpr  _arrayDims;
 
-    // The array initializer, if array (or array of arrays if multidimensional)
+    // The array initializer expression, if array (or array of arrays if multidimensional)
     protected JExprArrayInit _arrayInit;
 
-    // The allocation JClassDecl
-    protected JClassDecl  _classDecl;
+    // The allocation ClassDecl
+    protected JClassDecl _classDecl;
+
+    // The allocation ClassBody body declarations
+    protected JMemberDecl[] _classBodyDecls;
 
     /**
      * Constructor.
@@ -114,16 +117,45 @@ public class JExprAlloc extends JExpr {
     }
 
     /**
-     * Returns the allocation ClassBodyDecl.
+     * Returns the ClassDecl for anonymous class, if allocation has body declarations.
      */
     public JClassDecl getClassDecl()  { return _classDecl; }
 
     /**
-     * Sets the allocation ClassBodyDecl.
+     * Returns the allocation ClassBody body declarations.
      */
-    public void setClassDecl(JClassDecl aCD)
+    public JMemberDecl[] getClassBodyDecls()  { return _classBodyDecls; }
+
+    /**
+     * Sets the allocation ClassBodyDecl body declarations.
+     */
+    public void setClassBodyDecls(JMemberDecl[] bodyDecls)
     {
-        replaceChild(_classDecl, _classDecl = aCD);
+        _classBodyDecls = bodyDecls;
+
+        _classDecl = new JClassDecl();
+        _classDecl.addExtendsType(getType());
+        _classDecl.setMemberDecls(bodyDecls);
+        addChild(_classDecl);
+    }
+
+    /**
+     * Returns the JavaType of the allocation.
+     */
+    private JavaType getJavaType()
+    {
+        // If ClassDecl, return its type
+        JClassDecl classDecl = getClassDecl();
+        if (classDecl != null)
+            return classDecl.getDecl();
+
+        // Get type - just return if null
+        JType type = getType();
+        if (type != null)
+            return type.getDecl();
+
+        // Return not found
+        return null;
     }
 
     /**
@@ -131,9 +163,8 @@ public class JExprAlloc extends JExpr {
      */
     protected JavaDecl getDeclImpl()
     {
-        // Get type - just return if null
-        JType type = getType();
-        JavaType javaType = type != null ? type.getDecl() : null;
+        // Get JavaType - just return if null
+        JavaType javaType = getJavaType();
         if (javaType == null)
             return null;
 

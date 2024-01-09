@@ -212,6 +212,15 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
     }
 
     /**
+     * Sets the list of member declarations.
+     */
+    public void setMemberDecls(JMemberDecl[] memberDecls)
+    {
+        for (JMemberDecl memberDecl : memberDecls)
+            addMemberDecl(memberDecl);
+    }
+
+    /**
      * Adds a member declaration.
      */
     public void addMemberDecl(JMemberDecl aDecl)
