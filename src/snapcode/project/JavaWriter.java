@@ -133,7 +133,25 @@ public class JavaWriter {
      */
     private void appendFieldDecl(JFieldDecl fieldDecl)
     {
+        // Append indent
+        _sb.append('\n');
+        _sb.append(_indent);
 
+        // Append modifiers
+        JModifiers mods = fieldDecl.getMods();
+        appendModifiers(mods);
+
+        // Append field type
+        JType fieldType = fieldDecl.getType();
+        String fieldTypeStr = fieldType.getString();
+        _sb.append(fieldTypeStr);
+        _sb.append(' ');
+
+        // Append field vars
+        List<JVarDecl> varDecls = fieldDecl.getVarDecls();
+        String varDeclsStr = varDecls.stream().map(JVarDecl::getString).collect(Collectors.joining(", "));
+        _sb.append(varDeclsStr);
+        _sb.append(";\n");
     }
 
     /**
