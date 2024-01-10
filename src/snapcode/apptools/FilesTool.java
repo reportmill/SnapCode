@@ -424,9 +424,7 @@ public class FilesTool extends WorkspaceTool {
 
         // Create src and build files?
         newProject.getSourceDir().save();
-        WebFile buildFile = newProject.getBuildFile().getBuildFile();
-        if (!buildFile.getExists())
-            buildFile.save();
+        newProject.getBuildFile().writeFile();
 
         // Return
         return newProject;

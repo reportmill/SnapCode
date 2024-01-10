@@ -15,17 +15,12 @@ public class JavaFileBuilderX extends JavaFileBuilder {
     // The SnapCompiler used for last compiles
     private SnapCompiler  _compiler;
 
-    // Whether to do source-hybrid compile
-    private boolean _doSourceHybridCompile;
-
     /**
      * Creates a new JavaFileBuilder for given Project.
      */
     public JavaFileBuilderX(Project aProject)
     {
         super(aProject);
-
-        _doSourceHybridCompile = aProject.getBuildFile().isRunWithInterpreter();
     }
 
     /**
@@ -153,8 +148,8 @@ public class JavaFileBuilderX extends JavaFileBuilder {
         boolean compileSuccess = _compiler.compileFile(sourceFile);
 
         // If successful but doing source-hybrid compile, do super version to check source
-        if (compileSuccess && _doSourceHybridCompile)
-            compileSuccess = super.buildFile(sourceFile);
+        //if (compileSuccess && _proj.getBuildFile().isRunWithInterpreter())
+        //    compileSuccess = super.buildFile(sourceFile);
 
         // If compile failed, re-add to BuildFiles and return
         if (!compileSuccess) {

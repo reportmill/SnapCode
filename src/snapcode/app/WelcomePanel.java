@@ -165,12 +165,8 @@ public class WelcomePanel extends ViewOwner {
         // Get whether file is just a source file
         boolean isSourceFile = ArrayUtils.contains(FILE_TYPES, aFile.getType());
 
-        // Create Workspace
+        // Create workspace and workspace pane
         Workspace workspace = new Workspace();
-        if (!isSourceFile)
-            workspace.setUseRealCompiler(true);
-
-        // Create WorkspacePane, set source, show
         WorkspacePane workspacePane = new WorkspacePane(workspace);
 
         // Handle source file
@@ -200,7 +196,6 @@ public class WelcomePanel extends ViewOwner {
     {
         // Create workspace
         Workspace workspace = new Workspace();
-        workspace.setUseRealCompiler(true);
 
         // Add project
         TaskRunner<Boolean> checkoutRunner = workspace.addProjectForRepoURL(repoURL);
@@ -233,11 +228,8 @@ public class WelcomePanel extends ViewOwner {
      */
     private void openWorkspaceForNewProject()
     {
-        // Create workspace
+        // Create workspace and workspace pane
         Workspace workspace = new Workspace();
-        workspace.setUseRealCompiler(true);
-
-        // Create workspace pane
         WorkspacePane workspacePane = new WorkspacePane(workspace);
 
         // Show new project panel (if cancelled, just return)

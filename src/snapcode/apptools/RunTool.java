@@ -137,7 +137,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         clearConsole();
 
         // If debug or real compile, forward to real launch
-        if (isDebug || _workspace.isUseRealCompiler() && !_workspace.getRootProject().getBuildFile().isRunWithInterpreter()) {
+        if (isDebug || ViewUtils.isAltDown()) {
             runConfigOrFile(null, getSelFile(), isDebug);
             return;
         }

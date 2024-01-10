@@ -21,9 +21,6 @@ import java.util.Objects;
  */
 public class Workspace extends PropObject {
 
-    // Whether to use real compiler
-    private boolean _useRealCompiler;
-
     // The projects in the workspace
     private Project[]  _projects = new Project[0];
 
@@ -73,16 +70,6 @@ public class Workspace extends PropObject {
 
         _builder = new WorkspaceBuilder(this);
     }
-
-    /**
-     * Returns whether to use real compiler.
-     */
-    public boolean isUseRealCompiler()  { return _useRealCompiler; }
-
-    /**
-     * Sets whether to use real compiler.
-     */
-    public void setUseRealCompiler(boolean aValue)  { _useRealCompiler = aValue; }
 
     /**
      * Returns the projects that this workspace manages.

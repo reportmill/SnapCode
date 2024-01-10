@@ -139,7 +139,6 @@ public class WorkspacePane extends ViewOwner {
         getUI(); //_workspaceTools.setShowLeftTray(false);
         _workspaceTools.getLeftTray().setSelTool(null);
         _workspaceTools.getRightTray().setSelToolForClass(RunTool.class);
-        _workspaceTools.setShowBottomTray(false);
         _toolBar.getUI().setVisible(false);
         getView("MainColView", ColView.class).getChild(2).setVisible(false);
 
@@ -182,9 +181,7 @@ public class WorkspacePane extends ViewOwner {
      */
     protected WorkspaceTools createWorkspaceTools()
     {
-        if (_workspace.isUseRealCompiler())
-            return new WorkspaceToolsX(this);
-        return new WorkspaceTools(this);
+        return new WorkspaceToolsX(this);
     }
 
     /**
@@ -232,12 +229,7 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Returns the home page URL.
      */
-    public WebURL getHomePageURL()
-    {
-        if (_workspace.isUseRealCompiler())
-            return getHomePage().getURL();
-        return null;
-    }
+    public WebURL getHomePageURL()  { return null; } // getHomePage().getURL();
 
     /**
      * Returns the HomePage.

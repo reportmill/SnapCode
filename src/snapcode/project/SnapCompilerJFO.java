@@ -100,7 +100,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     private String getJavaTextString()
     {
         // Handle RunWithInterpreter
-        if (_proj.getBuildFile().isRunWithInterpreter() || _file.getType().equals("jepl")) {
+        if (_file.getType().equals("jepl")) {
             JavaAgent javaAgent = JavaAgent.getAgentForFile(_file);
             JFile jFile = javaAgent.getJFile();
             String javaText = new JavaWriter(jFile).getJava();

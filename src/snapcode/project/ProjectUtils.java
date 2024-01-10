@@ -298,6 +298,12 @@ public class ProjectUtils {
         if (!snapChartsClassPath.equals(snapKitClassPath))
             snapClassPaths = ArrayUtils.add(snapClassPaths, snapChartsClassPath);
 
+        // Iterate over paths and add "/resources" if "/classes" found
+        for (String snapClassPath : snapClassPaths) {
+            if (snapClassPath.contains("/classes"))
+                snapClassPaths = ArrayUtils.add(snapClassPaths, snapClassPath.replace("/classes", "/resources"));
+        }
+
         // Return
         return snapClassPaths;
     }

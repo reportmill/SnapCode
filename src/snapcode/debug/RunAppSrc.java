@@ -11,14 +11,12 @@ import snapcode.project.JavaAgent;
 import snapcode.project.Project;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 
 /**
  * This RunApp subclass runs an app from source.
  */
 public class RunAppSrc extends RunApp {
-
-    // The JavaShell
-    protected JavaShell _javaShell;
 
     // The thread to reset views
     private Thread _runAppThread;
@@ -28,6 +26,9 @@ public class RunAppSrc extends RunApp {
 
     // An input stream for standard in
     protected ScanPane.BytesInputStream _standardInInputStream;
+
+    // The JavaShell
+    protected JavaShell _javaShell;
 
     // The real system in/out/err
     private static final InputStream REAL_SYSTEM_IN = System.in;
@@ -40,9 +41,6 @@ public class RunAppSrc extends RunApp {
     public RunAppSrc(RunTool runTool, WebURL mainClassFileURL, String[] args)
     {
         super(runTool, mainClassFileURL, args);
-
-        // Create JavaShell
-        _javaShell = new JavaShell(this);
     }
 
     /**
@@ -62,13 +60,6 @@ public class RunAppSrc extends RunApp {
      */
     protected void runAppImpl()
     {
-        // Get JavaAgent
-        WebURL mainClassURL = getURL();
-        WebFile mainClassFile = mainClassURL.getFile();
-        JavaAgent javaAgent = mainClassFile != null ? JavaAgent.getAgentForFile(mainClassFile) : null;
-        if (javaAgent == null)
-            return;
-
         // Set shared resources
         synchronized (RunAppSrc.class) {
 
@@ -83,7 +74,7 @@ public class RunAppSrc extends RunApp {
         }
 
         // Run code
-        _javaShell.runJavaCode(javaAgent);
+        runMainMethod();
 
         // If console app, wait for explicit termination
         if (getAltConsoleView() != null) {
@@ -115,13 +106,17 @@ public class RunAppSrc extends RunApp {
                 try { notifyAll(); }
                 catch (Exception e) { throw new RuntimeException(e); }
             }
+            return;
         }
 
-        // Otherwise, send interrupt to shell (soft interrupt)
-        else _javaShell.interrupt();
+        // If JavaShell, send interrupt to shell (soft interrupt)
+        if (_javaShell != null) {
+            terminateJavaShell();
+            return;
+        }
 
-        // Register timeout to check if hard thread interrupt is needed
-        ViewUtils.runDelayed(() -> hardTerminate(), 600);
+        // Otherwise, hard terminate
+        hardTerminate();
     }
 
     /**
@@ -189,12 +184,66 @@ public class RunAppSrc extends RunApp {
     }
 
     /**
-     * Returns whether run app is source hybrid.
+     * Runs the main method.
      */
-    public boolean isSrcHybrid()
+    private void runMainMethod()
     {
-        Project project = _runTool.getProject();
-        return project.getBuildFile().isRunWithInterpreter();
+        if (false) {
+            runJavaShell();
+            return;
+        }
+
+        // Get main method and invoke
+        try {
+            Class<?> mainClass = getMainClass();
+            assert (mainClass != null);
+            Method mainMethod = mainClass.getMethod("main", String[].class);
+            mainMethod.invoke(null, (Object) new String[0]);
+        }
+        catch (Exception e) { throw new RuntimeException(e); }
+    }
+
+    /**
+     * Runs app via JavaShell.
+     */
+    private void runJavaShell()
+    {
+        // Get JavaAgent
+        WebURL mainClassURL = getURL();
+        WebFile mainClassFile = mainClassURL.getFile();
+        JavaAgent javaAgent = mainClassFile != null ? JavaAgent.getAgentForFile(mainClassFile) : null;
+
+        // Create JavaShell
+        _javaShell = new JavaShell(this);
+        _javaShell.runJavaCode(javaAgent);
+    }
+
+    /**
+     * Terminates app via JavaShell.
+     */
+    private void terminateJavaShell()
+    {
+        _javaShell.interrupt();
+
+        // Register timeout to check if hard thread interrupt is needed
+        ViewUtils.runDelayed(() -> hardTerminate(), 600);
+    }
+
+    /**
+     * Returns the main class.
+     */
+    private Class<?> getMainClass()
+    {
+        String className = getMainClassName();
+        ClassLoader classLoader = _runTool.getWorkspace().getClassLoader();
+
+        // Do normal Class.forName
+        try { return Class.forName(className, false, classLoader); }
+
+        // Handle Exceptions
+        catch(ClassNotFoundException e) { return null; }
+        catch(NoClassDefFoundError t) { System.err.println("ClassUtils.getClass: " + t); return null; }
+        catch(Throwable t) { System.err.println("ClassUtils.getClass: Unknown error: " + t); return null; }
     }
 
     /**

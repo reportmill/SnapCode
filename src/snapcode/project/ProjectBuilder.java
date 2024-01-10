@@ -30,13 +30,8 @@ public class ProjectBuilder {
     {
         super();
         _proj = aProject;
-        _javaFileBuilder = new JavaFileBuilder(aProject);
+        _javaFileBuilder = new JavaFileBuilderX(aProject);
         _defaultFileBuilder = new ProjectFileBuilder.DefaultBuilder(aProject);
-
-        // If Project.Workspace.UseRealCompiler, use JavaFileBuilderX
-        Workspace workspace = aProject.getWorkspace();
-        if (workspace.isUseRealCompiler())
-            _javaFileBuilder = new JavaFileBuilderX(aProject);
     }
 
     /**

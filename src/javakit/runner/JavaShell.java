@@ -60,7 +60,7 @@ public class JavaShell {
         Simpiler.setVarStackIndexForJFile(jfile);
 
         // Run as main method (RunApp.SrcHybrid) or main statements (legacy)
-        if (_runApp.isSrcHybrid())
+        if (true) // _runApp._runTool.getProject().getBuildFile().isRunWithInterpreter())
             runMainMethod(javaAgent);
 
         // Otherwise just run main statements
