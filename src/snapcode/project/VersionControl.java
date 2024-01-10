@@ -134,11 +134,9 @@ public class VersionControl {
     public boolean isAvailable()
     {
         if (_isAvailable != null) return _isAvailable;
-        WebSite cloneSite = getCloneSite();
-        boolean cloneAvailable = cloneSite != null && cloneSite.getExists();
         WebSite remoteSite = getRemoteSite();
         boolean remoteAvailable = remoteSite != null && remoteSite.getExists();
-        return _isAvailable = cloneAvailable || remoteAvailable;
+        return _isAvailable = remoteAvailable;
     }
 
     /**
