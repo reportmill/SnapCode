@@ -103,9 +103,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
         if (_file.getType().equals("jepl")) {
             JavaAgent javaAgent = JavaAgent.getAgentForFile(_file);
             JFile jFile = javaAgent.getJFile();
-            String javaText = new JavaWriter(jFile).getJava();
-            //SnapUtils.writeBytes(javaText.getBytes(), "/tmp/" + _file.getName());
-            return javaText;
+            return new JeplToJava(jFile).getJava();
         }
 
         // Get string

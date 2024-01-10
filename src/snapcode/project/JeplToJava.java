@@ -1,22 +1,18 @@
 package snapcode.project;
 import javakit.parse.*;
-import snap.util.ArrayUtils;
+import javakit.resolver.JavaType;
 import snap.util.ListUtils;
 import java.lang.reflect.Modifier;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * This class generates a Java class with dispatches to JavaShell to process source.
+ * This class generates a Java class from a parsed Jepl file.
  */
-public class JavaWriter {
+public class JeplToJava {
 
     // The JFile
     private JFile _jfile;
-
-    // Whether this is repl
-    private boolean _isJepl;
 
     // The StringBuilder
     private StringBuilder _sb;
@@ -27,10 +23,9 @@ public class JavaWriter {
     /**
      * Constructor.
      */
-    public JavaWriter(JFile jFile)
+    public JeplToJava(JFile jFile)
     {
         _jfile = jFile;
-        _isJepl = _jfile.isRepl();
         _sb = new StringBuilder();
     }
 
@@ -62,7 +57,7 @@ public class JavaWriter {
 
         // Return string
         String javaString = _sb.toString();
-        //snap.util.SnapUtils.writeBytes(javaString.getBytes(), "/tmp/" + _jfile.getName() + ".java");
+        snap.util.SnapUtils.writeBytes(javaString.getBytes(), "/tmp/" + _jfile.getName() + ".java");
         return javaString;
     }
 
@@ -163,10 +158,8 @@ public class JavaWriter {
         _sb.append('\n');
         _sb.append(_indent);
 
-        // Append modifiers - If Jepl, make all methods 'public static'
-        JModifiers mods = methodDecl.getMods();
-        if (_isJepl)
-            mods = new JModifiers(Modifier.PUBLIC | Modifier.STATIC);
+        // Append modifiers - make all Jepl methods 'public static'
+        JModifiers mods = new JModifiers(Modifier.PUBLIC | Modifier.STATIC); // methodDecl.getMods()
         appendModifiers(mods);
 
         // Append return type
@@ -180,77 +173,10 @@ public class JavaWriter {
         _sb.append(methodName);
 
         // Append parameters
-        _sb.append('(');
-        List<JVarDecl> varDecls = methodDecl.getParameters();
-        String varDeclsStr = varDecls.stream().map(JVarDecl::getString).collect(Collectors.joining(", "));
-        _sb.append(varDeclsStr);
-        _sb.append(")\n");
+        appendParameters(methodDecl);
 
         // Append method body
-        appendMethodBody(methodDecl, mods, returnTypeStr, methodName, varDecls);
-    }
-
-    /**
-     * Appends the method body:
-     *    Object[] __args = { param1, param2, ... };
-     *    [return] snapcharts.repl.CallHandler.Call("className", "methodName", args);
-     */
-    private void appendMethodBody(JMemberDecl memberDecl, JModifiers mods, String returnTypeStr, String methodName, List<JVarDecl> varDecls)
-    {
-        // Append method body open
-        _sb.append(_indent).append("{\n");
-        indent();
-
-        // Append constructor call
-        if (memberDecl instanceof JConstrDecl) {
-            JConstrDecl constrDecl = (JConstrDecl) memberDecl;
-            JStmt[] bodyStmts = constrDecl.getBlockStatements();
-            if (bodyStmts.length > 0 && bodyStmts[0] instanceof JStmtConstrCall) {
-                JStmtConstrCall constrCall = (JStmtConstrCall) bodyStmts[0];
-                String constrCallStr = constrCall.getString();
-                _sb.append(_indent);
-                _sb.append(constrCallStr).append('\n');
-            }
-        }
-
-        // Append args array declaration: Object[] args = { param1, param2, ... };
-        if (varDecls.size() > 0) {
-            _sb.append(_indent);
-            _sb.append("Object[] __args = { ");
-            String varDeclNamesStr = varDecls.stream().map(JVarDecl::getName).collect(Collectors.joining(", "));
-            _sb.append(varDeclNamesStr);
-            _sb.append(" };\n");
-        }
-
-        // Append call to JavaShell: return (type) snapcharts.repl.CallHandler.Call(
-        _sb.append(_indent);
-        if (!returnTypeStr.equals("void")) {
-            _sb.append("return ");
-            if (!returnTypeStr.equals("Object"))
-                _sb.append('(').append(returnTypeStr).append(") ");
-        }
-        _sb.append("snapcharts.repl.CallHandler.Call(");
-
-        // Append class name arg
-        JClassDecl classDecl = memberDecl.getEnclosingClassDecl();
-        String className = classDecl.getName();
-        _sb.append("\"").append(className);
-        _sb.append("\", ");
-
-        // Append method name arg
-        _sb.append("\"").append(methodName);
-        _sb.append("\", ");
-
-        // Append 'this' and '__args' args
-        String thisObjectString = mods.isStatic() ? "null" : "this";
-        _sb.append(thisObjectString).append(',');
-        String argsStr = varDecls.size() > 0 ? " __args" : " null";
-        _sb.append(argsStr);
-        _sb.append(");\n");
-
-        // Append method body close
-        outdent();
-        _sb.append(_indent).append("}\n");
+        appendMethodBody(methodDecl);
     }
 
     /**
@@ -262,10 +188,8 @@ public class JavaWriter {
         _sb.append('\n');
         _sb.append(_indent);
 
-        // Append modifiers - If Jepl, make all constructors public
-        JModifiers mods = constrDecl.getMods();
-        if (_isJepl)
-            mods = new JModifiers(Modifier.PUBLIC);
+        // Append modifiers - make all Jepl constructors public
+        JModifiers mods = new JModifiers(Modifier.PUBLIC); // constrDecl.getMods()
         appendModifiers(mods);
 
         // Append class name
@@ -273,14 +197,10 @@ public class JavaWriter {
         _sb.append(className);
 
         // Append parameters
-        _sb.append('(');
-        List<JVarDecl> varDecls = constrDecl.getParameters();
-        String varDeclsStr = varDecls.stream().map(JVarDecl::getString).collect(Collectors.joining(", "));
-        _sb.append(varDeclsStr);
-        _sb.append(")\n");
+        appendParameters(constrDecl);
 
         // Append method body
-        appendMethodBody(constrDecl, mods, "void", "__init", varDecls);
+        appendMethodBody(constrDecl);
     }
 
     /**
@@ -288,22 +208,71 @@ public class JavaWriter {
      */
     private void appendInitializerDecl(JInitializerDecl initializerDecl)
     {
-        // Handle Jepl file
-        if (_isJepl) {
-            _sb.append('\n');
-            _sb.append(_indent);
-            _sb.append("public static void main(String[] args)\n");
-        }
-
-        // Get initializer id
-        JClassDecl classDecl = initializerDecl.getEnclosingClassDecl();
-        JInitializerDecl[] initializerDecls = classDecl.getInitDecls();
-        int initializerIndex = ArrayUtils.indexOfId(initializerDecls, initializerDecl);
-        String initializerId = "__initializer" + initializerIndex;
-        JModifiers modifiers = new JModifiers(Modifier.STATIC);
+        // Handle Jepl file - convert initializer to main method
+        _sb.append('\n');
+        _sb.append(_indent);
+        _sb.append("public static void main(String[] args)\n");
+        _sb.append("{\n");
 
         // Append body
-        appendMethodBody(initializerDecl, modifiers, "void", initializerId, Collections.EMPTY_LIST);
+        appendMethodBody(initializerDecl);
+        _sb.append("}\n");
+    }
+
+    /**
+     * Appends the method body.
+     */
+    private void appendMethodBody(JMemberDecl memberDecl)
+    {
+        // Get the block statement as string and add
+        JStmtBlock blockStmt = ((WithBlockStmt) memberDecl).getBlock();
+        String blockStmtStr = blockStmt.getString();
+        _sb.append(blockStmtStr);
+
+        // Fix var decls and statements with missing semicolons
+        int sbStart = _sb.length() - blockStmtStr.length();
+        int blockStart = blockStmt.getStartCharIndex();
+        int offset = sbStart - blockStart;
+        fixVarDeclsAndSemicolons(blockStmt, offset);
+
+        // Append trailing newline
+        _sb.append('\n');
+    }
+
+    /**
+     * This method converts 'var' declarations to actual and adds missing semicolons.
+     */
+    private void fixVarDeclsAndSemicolons(JNode aNode, int offset)
+    {
+        List<JNode> children = aNode.getChildren();
+
+        // If node is statement with missing semicolon, add it
+        if (aNode instanceof JStmt && children.size() > 0) {
+            JNode lastChild = children.get(children.size() - 1);
+            if (!(lastChild instanceof JStmt)) {
+                int lastCharIndex = aNode.getEndCharIndex() - 1 + offset;
+                if (_sb.charAt(lastCharIndex) != ';')
+                    _sb.insert(lastCharIndex + 1, ';');
+            }
+        }
+
+        // Recurse into children
+        for (int i = children.size() - 1; i >= 0; i--) {
+            JNode child = children.get(i);
+            fixVarDeclsAndSemicolons(child, offset);
+        }
+
+        // Fix var decl with 'var'
+        if (aNode instanceof JVarDecl) {
+            JVarDecl varDecl = (JVarDecl) aNode;
+            JType varDeclType = varDecl.getType();
+            if (varDeclType.isVarType()) {
+                JavaType type = varDeclType.getEvalType();
+                String typeName = type.getFullName();
+                int typeStart = varDeclType.getStartCharIndex() + offset;
+                _sb.replace(typeStart, typeStart + 3, typeName);
+            }
+        }
     }
 
     /**
@@ -317,18 +286,25 @@ public class JavaWriter {
     }
 
     /**
+     * Appends parameters.
+     */
+    private void appendParameters(JExecutableDecl methodDecl)
+    {
+        // Append parameters
+        _sb.append('(');
+        List<JVarDecl> varDecls = methodDecl.getParameters();
+        String varDeclsStr = varDecls.stream().map(JVarDecl::getString).collect(Collectors.joining(", "));
+        _sb.append(varDeclsStr);
+        _sb.append(")\n");
+    }
+
+    /**
      * Indent.
      */
-    private void indent()
-    {
-        _indent += "    ";
-    }
+    private void indent()  { _indent += "    "; }
 
     /**
      * Outdent.
      */
-    private void outdent()
-    {
-        _indent = _indent.substring(0, _indent.length() - 4);
-    }
+    private void outdent()  { _indent = _indent.substring(0, _indent.length() - 4); }
 }
