@@ -2,8 +2,6 @@ package snapcode.apptools;
 import snap.view.*;
 import snapcode.debug.*;
 import snapcode.javatext.JavaTextArea;
-import snapcode.project.Breakpoint;
-import snapcode.project.Breakpoints;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
 import snapcode.webbrowser.WebPage;
@@ -47,21 +45,6 @@ public class DebugTool extends WorkspaceTool {
         _debugFramesPane = new DebugFramesPane(this);
         _debugVarsPane = new DebugVarsPane(this);
         _debugExprsPane = new DebugExprsPane(this);
-    }
-
-    /**
-     * Launches app for given main file for debug.
-     */
-    public void debugAppForFileAndArgs(WebFile mainFile, String[] args)
-    {
-        DebugApp proc = new DebugApp(_runTool, mainFile, args);
-        Breakpoints breakpointsHpr = _workspace.getBreakpoints();
-        Breakpoint[] breakpoints = breakpointsHpr.getArray();
-        for (Breakpoint breakpoint : breakpoints)
-            proc.addBreakpoint(breakpoint);
-
-        // Exec process
-        _runTool.execProc(proc);
     }
 
     /**
@@ -139,9 +122,9 @@ public class DebugTool extends WorkspaceTool {
     }
 
     /**
-     * Returns the processes pane.
+     * Returns the DebugFramesPane pane.
      */
-    public DebugFramesPane getProcPane()  { return _debugFramesPane; }
+    public DebugFramesPane getDebugFramesPane()  { return _debugFramesPane; }
 
     /**
      * Returns the DebugVarsPane.
@@ -238,9 +221,9 @@ public class DebugTool extends WorkspaceTool {
         RunApp selApp = getSelApp();
         DebugApp debugApp = getSelDebugApp();
 
-        // Handle DebugButton
+        // Handle DebugButton: Run default config
         if (anEvent.equals("DebugButton"))
-            _runTool.runDefaultConfig(true);
+            _runTool.runConfigOrFile(null, null,true);
 
         // Handle ResumeButton, SuspendButton, TerminateButton
         else if (anEvent.equals("ResumeButton"))

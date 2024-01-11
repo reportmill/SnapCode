@@ -1,11 +1,13 @@
 package snapcode.apptools;
 import snap.util.FilePathUtils;
+import snap.view.ViewUtils;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import snapcode.project.Project;
-import snapcode.project.ProjectFiles;
-import snapcode.project.RunConfig;
-import snapcode.project.RunConfigs;
+import snapcode.debug.DebugApp;
+import snapcode.debug.RunApp;
+import snapcode.debug.RunAppBin;
+import snapcode.debug.RunAppSrc;
+import snapcode.project.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,18 +21,61 @@ public class RunToolUtils {
     private static WebFile _lastRunFile;
 
     /**
+     * Creates a run app for given config and/or main file and debug option.
+     */
+    public static RunApp createRunAppForConfigOrFile(RunTool runTool, RunConfig aConfig, WebFile aFile, boolean isDebug)
+    {
+        // Get config (if no config or file provided, get default config)
+        RunConfig runConfig = aConfig;
+        if (runConfig == null && aFile == null) {
+            WebSite rootSite = runTool.getRootSite();
+            runConfig = RunConfigs.get(rootSite).getRunConfig();
+        }
+
+        // Get main file and args for given config or main file
+        WebFile mainFile = RunToolUtils.getMainFileForConfigAndFile(runTool, runConfig, aFile);
+        if (mainFile == null)
+            return null;
+
+        // Get args for given config or main file
+        String[] runArgs = RunToolUtils.getRunArgsForConfigAndFile(runConfig, mainFile, isDebug);
+
+        // Handle debug
+        if (isDebug) {
+            DebugApp debugApp = new DebugApp(runTool, mainFile, runArgs);
+            Workspace workspace = runTool.getWorkspace();
+            Breakpoints breakpointsHpr = workspace.getBreakpoints();
+            Breakpoint[] breakpoints = breakpointsHpr.getArray();
+            for (Breakpoint breakpoint : breakpoints)
+                debugApp.addBreakpoint(breakpoint);
+            return debugApp;
+        }
+
+        // Handle Run Remote: Create app
+        if (ViewUtils.isAltDown())
+            return new RunAppBin(runTool, mainFile, runArgs);
+
+        // Handle run local
+        Project proj = runTool.getProject();
+        String className = proj.getClassNameForFile(mainFile);
+        String[] args = { className };
+
+        // Create app and run
+        return new RunAppSrc(runTool, mainFile, args);
+    }
+
+    /**
      * Returns the main file for config and file.
      */
-    public static WebFile getMainFileForConfigAndFile(RunTool runTool, RunConfig aConfig, WebFile aFile)
+    public static WebFile getMainFileForConfigAndFile(RunTool runTool, RunConfig runConfig, WebFile aFile)
     {
-        // Get site and RunConfig (if available)
-        WebSite rootSite = runTool.getRootSite();
-        RunConfig runConfig = aConfig != null || aFile != null ? aConfig : RunConfigs.get(rootSite).getRunConfig();
-
         // Try to get main file from: (1) run config, (2) LastFile or (3) SelFile
         WebFile mainFile = aFile;
-        if (mainFile == null && runConfig != null)
-            mainFile = rootSite.createFileForPath(runConfig.getMainFilePath(), false);
+        if (mainFile == null && runConfig != null) {
+            WebSite rootSite = runTool.getRootSite();
+            String mainFilePath = runConfig.getMainFilePath();
+            mainFile = rootSite.createFileForPath(mainFilePath, false);
+        }
         if (mainFile == null)
             mainFile = _lastRunFile;
         if (mainFile == null)

@@ -3,7 +3,6 @@ import snap.props.PropChange;
 import snap.util.ListUtils;
 import snap.util.TaskRunner;
 import snap.web.WebFile;
-import snap.web.WebSite;
 import snap.view.*;
 import snapcode.app.JavaPage;
 import snapcode.app.WorkspacePane;
@@ -126,37 +125,58 @@ public class RunTool extends WorkspaceTool implements AppListener {
      */
     public void runAppForSelFile(boolean isDebug)
     {
+        WebFile selFile = getSelFile();
+        runConfigOrFile(null, selFile, isDebug);
+    }
+
+    /**
+     * Runs app for given RunConfig or file.
+     */
+    public void runConfigOrFile(RunConfig aConfig, WebFile aFile, boolean isDebug)
+    {
+        RunApp proc = RunToolUtils.createRunAppForConfigOrFile(this, aConfig, aFile, isDebug);
+        runApp(proc);
+    }
+
+    /**
+     * Runs the given app.
+     */
+    private void runApp(RunApp runApp)
+    {
+        // If no app, just return
+        if (runApp == null)
+            return;
+
+        // Automatically save all files
+        FilesTool filesTool = _workspaceTools.getFilesTool();
+        filesTool.saveAllFiles();
+
         // Show tool
+        boolean isDebug = runApp instanceof DebugApp;
         _workspaceTools.showToolForClass(isDebug ? DebugTool.class : RunTool.class);
 
         // Clear display
         clearConsole();
 
-        // If debug or real compile, forward to real launch
-        if (isDebug || ViewUtils.isAltDown()) {
-            runConfigOrFile(null, getSelFile(), isDebug);
-            return;
-        }
-
         // If workspace needs build, trigger build
         WorkspaceBuilder workspaceBuilder = _workspace.getBuilder();
         if (workspaceBuilder.isNeedsBuild() || workspaceBuilder.isBuilding()) {
             TaskRunner<Boolean> buildRunner = workspaceBuilder.buildWorkspace();
-            buildRunner.setOnSuccess(success -> buildFinished(success));
+            buildRunner.setOnSuccess(success -> buildFinished(runApp, success));
         }
 
         // Otherwise, just launch
-        else runAppForSelFileImpl();
+        else runAppImpl(runApp);
     }
 
     /**
      * Called after build finished.
      */
-    private void buildFinished(boolean noErrors)
+    private void buildFinished(RunApp runApp, boolean noErrors)
     {
         // If no errors, just run app
         if (noErrors)
-            runAppForSelFileImpl();
+            runAppImpl(runApp);
 
         // Otherwise, show build tool
         else _workspaceTools.showToolForClass(BuildTool.class);
@@ -165,60 +185,10 @@ public class RunTool extends WorkspaceTool implements AppListener {
     /**
      * Runs app for selected file.
      */
-    private void runAppForSelFileImpl()
+    private void runAppImpl(RunApp runApp)
     {
-        // Run app
-        WebFile selFile = getSelFile();
-        if (selFile == null)
-            return;
-
-        // Get args
-        Project proj = getProject();
-        String className = proj.getClassNameForFile(selFile);
-        String[] args = { className };
-
-        // Create app and run
-        RunApp runApp = new RunAppSrc(this, selFile, args);
         execProc(runApp);
-
-        // Reset UI
         resetLater();
-    }
-
-    /**
-     * Run application.
-     */
-    public void runDefaultConfig(boolean withDebug)
-    {
-        WebSite site = getRootSite();
-        RunConfig config = RunConfigs.get(site).getRunConfig();
-        runConfigOrFile(config, null, withDebug);
-    }
-
-    /**
-     * Runs a given RunConfig or file as a separate process.
-     */
-    public void runConfigOrFile(RunConfig aConfig, WebFile aFile, boolean isDebug)
-    {
-        // Automatically save all files
-        FilesTool filesTool = _workspaceTools.getFilesTool();
-        filesTool.saveAllFiles();
-
-        // Get main file and args for given config or main file
-        WebSite rootSite = getRootSite();
-        RunConfig runConfig = aConfig != null || aFile != null ? aConfig : RunConfigs.get(rootSite).getRunConfig();
-        WebFile mainFile = RunToolUtils.getMainFileForConfigAndFile(this, runConfig, aFile);
-        String[] runArgs = RunToolUtils.getRunArgsForConfigAndFile(runConfig, mainFile, isDebug);
-
-        // Handle debug
-        if (isDebug) {
-            getDebugTool().debugAppForFileAndArgs(mainFile, runArgs);
-            return;
-        }
-
-        // Create app and run
-        RunApp proc = new RunAppBin(this, mainFile, runArgs);
-        execProc(proc);
     }
 
     /**
