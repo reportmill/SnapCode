@@ -583,8 +583,8 @@ public class WorkspacePane extends ViewOwner {
         WebFile file = (WebFile) aPC.getSource();
         String propName = aPC.getPropName();
 
-        // Handle LastModTime, Updater: Update file in FileTreeTool
-        if (propName == WebFile.LastModTime_Prop || propName == WebFile.Updater_Prop) {
+        // Handle LastModTime, Modified: Update file in FileTreeTool
+        if (propName == WebFile.LastModTime_Prop || propName == WebFile.Modified_Prop) {
 
             // Notify FileTreeTool to update file
             FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();

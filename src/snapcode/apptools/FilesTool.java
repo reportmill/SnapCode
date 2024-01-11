@@ -263,53 +263,32 @@ public class FilesTool extends WorkspaceTool {
     {
         WebSite rootSite = getRootSite();
         WebFile rootDir = rootSite.getRootDir();
-        saveFiles(rootDir, true);
+        saveFilesImpl(rootDir);
     }
 
     /**
-     * Saves any unsaved files in given directory.
+     * Saves all unsaved files for given file and its children.
      */
-    public int saveFiles(WebFile aFile, boolean doSaveAll)
+    private void saveFilesImpl(WebFile aFile)
     {
         // Handle directory
         if (aFile.isDir()) {
 
             // Skip build dir
             if (aFile == _workspacePane.getBuildDir())
-                return doSaveAll ? 1 : 0;
+                return;
 
-            // Iterate over child files
+            // Iterate over child files and recurse
             WebFile[] dirFiles = aFile.getFiles();
-            for (WebFile file : dirFiles) {
-                int choice = saveFiles(file, doSaveAll);
-                if (choice < 0 || choice == 2)
-                    return -1;
-                if (choice == 1)
-                    doSaveAll = true;
-            }
+            for (WebFile file : dirFiles)
+                saveFilesImpl(file);
         }
 
         // Handle file
-        else if (aFile.isUpdateSet()) {
-
-            // Show dialog box
-            DialogBox dialogBox = new DialogBox("Save Modified File");
-            dialogBox.setMessage("File has been modified:\n" + aFile.getPath());
-            dialogBox.setOptions("Save File", "Save All Files", "Cancel");
-            int choice = doSaveAll ? 1 : dialogBox.showOptionDialog(_workspacePane.getUI(), "Save File");
-
-            // Handle Save file
-            if (choice == 0 || choice == 1) {
-                try { aFile.save(); }
-                catch (Exception e) { throw new RuntimeException(e); }
-            }
-
-            // Return
-            return choice;
+        else if (aFile.isModified()) {
+            try { aFile.save(); }
+            catch (Exception e) { throw new RuntimeException(e); }
         }
-
-        // Return
-        return doSaveAll ? 1 : 0;
     }
 
     /**
