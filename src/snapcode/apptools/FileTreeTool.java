@@ -315,18 +315,6 @@ public class FileTreeTool extends WorkspaceTool {
             _pagePane.setBrowserURL(diffPage.getURL());
         }
 
-        // Handle CleanProjectMenuItem
-        if (anEvent.equals("CleanProjectMenuItem")) {
-            WorkspaceBuilder builder = _workspace.getBuilder();
-            builder.cleanWorkspace();
-        }
-
-        // Handle BuildProjectMenuItem
-        if (anEvent.equals("BuildProjectMenuItem")) {
-            WorkspaceBuilder builder = _workspace.getBuilder();
-            builder.buildWorkspaceLater();
-        }
-
         // Handle ShowClassInfoMenuItem
         if (anEvent.equals("ShowClassInfoMenuItem")) {
             WebFile javaFile = getSelFile();

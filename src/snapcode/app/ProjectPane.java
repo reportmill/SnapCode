@@ -117,14 +117,6 @@ public class ProjectPane extends ViewOwner {
      */
     public void workspaceDidOpen()
     {
-        // Do AutoBuild
-        Workspace workspace = getWorkspace();
-        WorkspaceBuilder builder = workspace.getBuilder();
-        if (builder.isAutoBuildEnabled()) {
-            builder.addAllFilesToBuild();
-            builder.buildWorkspaceLater();
-        }
-
         // Activate VersionControlPane
         if (_versionControlTool != null)
             _versionControlTool.projectDidOpen();
@@ -203,10 +195,6 @@ public class ProjectPane extends ViewOwner {
 
         // Add file to project
         _project.fileAdded(aFile);
-
-        // If build file, build workspace later
-        if (isBuildFile(aFile))
-            buildWorkspaceAfterDelay();
     }
 
     /**
@@ -223,10 +211,6 @@ public class ProjectPane extends ViewOwner {
 
         // Remove from project
         _project.fileRemoved(aFile);
-
-        // If build file, build workspace later
-        if (isBuildFile(aFile))
-            buildWorkspaceAfterDelay();
     }
 
     /**
@@ -243,30 +227,6 @@ public class ProjectPane extends ViewOwner {
 
         // Notify saved and build workspace
         _project.fileSaved(aFile);
-
-        // If build file, build workspace later
-        if (isBuildFile(aFile))
-            buildWorkspaceAfterDelay();
-    }
-
-    /**
-     * Returns whether file is build file.
-     */
-    private boolean isBuildFile(WebFile aFile)
-    {
-        ProjectBuilder projectBuilder = _project.getBuilder();
-        return projectBuilder.isBuildFile(aFile);
-    }
-
-    /**
-     * Called to build workspace.
-     */
-    private void buildWorkspaceAfterDelay()
-    {
-        Workspace workspace = _project.getWorkspace();
-        WorkspaceBuilder builder = workspace.getBuilder();
-        if (builder.isAutoBuild() && builder.isAutoBuildEnabled())
-            builder.buildWorkspaceAfterDelay(500);
     }
 
     /**

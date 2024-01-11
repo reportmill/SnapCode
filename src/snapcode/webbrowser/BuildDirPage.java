@@ -89,22 +89,5 @@ public class BuildDirPage extends WebPage {
             if (file != null && !file.isDir())
                 _pageBrowser.setURL(file.getURL());
         }
-
-        // Handle BuildButton
-        if (anEvent.equals("BuildButton")) {
-            Project proj = getProject();
-            Workspace workspace = proj.getWorkspace();
-            WorkspaceBuilder builder = workspace.getBuilder();
-            builder.addAllFilesToBuild();
-            builder.buildWorkspaceLater();
-        }
-
-        // Handle CleanButton
-        if (anEvent.equals("CleanButton")) {
-            Project proj = getProject();
-            Workspace workspace = proj.getWorkspace();
-            WorkspaceBuilder builder = workspace.getBuilder();
-            builder.cleanWorkspace();
-        }
     }
 }

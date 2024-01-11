@@ -24,9 +24,6 @@
       <MenuItem Name="CommitFilesMenuItem" text="Commit File(s) to Remote Source" />
       <MenuItem Name="DiffFilesMenuItem" text="Compare File to Remote File" />
       <MenuItem />
-      <MenuItem Name="CleanProjectMenuItem" text="Clean Project" />
-      <MenuItem Name="BuildProjectMenuItem" text="Build Project" />
-      <MenuItem />
       <MenuItem Name="ShowClassInfoMenuItem" text="Show Class File Info" />
     </MenuButton>
     <Button Name="NewFileButton" PrefWidth="20" PrefHeight="20" Margin="5" LeanX="RIGHT" ShowArea="false" Image="Add.png" />

@@ -289,6 +289,14 @@ public class WorkspacePane extends ViewOwner {
         for (ProjectPane projPane : projectPanes)
             projPane.workspaceDidOpen();
 
+        // Do AutoBuild
+        Workspace workspace = getWorkspace();
+        WorkspaceBuilder builder = workspace.getBuilder();
+        if (builder.isAutoBuildEnabled()) {
+            builder.addAllFilesToBuild();
+            builder.buildWorkspaceLater();
+        }
+
         // Show HomePage
         WebURL homePageURL = getHomePageURL();
         if (homePageURL != null)

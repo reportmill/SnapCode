@@ -6,6 +6,7 @@
     <Button Name="BuildButton" PrefWidth="24" PrefHeight="24" Image="pkg.images/Build.png" ShowArea="false" />
     <Button Name="StopButton" PrefWidth="24" PrefHeight="24" ToolTip="Clear console" Image="pkg.images/Terminate.gif" ShowArea="false" />
     <Label Name="BuildStatusLabel" Margin="0,0,0,40" />
+    <Button Name="CleanButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" ToolTip="Clear console" Image="pkg.images/Clear.png" ShowArea="false" />
     <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Text="–" ShowArea="false" />
   </RowView>
   <RectView PrefHeight="1" GrowWidth="true">

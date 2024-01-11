@@ -148,6 +148,13 @@ public class BuildTool extends WorkspaceTool {
             }
         }
 
+        // Handle CleanButton
+        if (anEvent.equals("CleanButton")) {
+            WorkspaceBuilder workspaceBuilder = _workspace.getBuilder();
+            workspaceBuilder.cleanWorkspace();
+            workspaceBuilder.addAllFilesToBuild();
+        }
+
         // Do normal version
         else super.respondUI(anEvent);
     }
