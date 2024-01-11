@@ -2,9 +2,11 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-
 import snap.util.ArrayUtils;
 import snap.util.StringUtils;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This class represents an error in a JNode.
@@ -84,5 +86,32 @@ public class NodeError {
     {
         NodeError error = new NodeError(aNode, errorMessage);
         return ArrayUtils.add(theErrors, error, index);
+    }
+
+    /**
+     * Return all node errors in given node.
+     */
+    public static NodeError[] getAllNodeErrors(JNode aNode)
+    {
+        List<NodeError> errorsList = new ArrayList<>();
+        NodeError.findAllNodeErrors(aNode, errorsList);
+        return errorsList.toArray(NodeError.NO_ERRORS);
+    }
+
+    /**
+     * Find all node errors in given node and adds to given list.
+     */
+    public static void findAllNodeErrors(JNode aNode, List<NodeError> errorsList)
+    {
+        NodeError[] errors = aNode.getErrors();
+        if (errors.length > 0)
+            Collections.addAll(errorsList, errors);
+
+        if (aNode instanceof JStmtExpr)
+            return;
+
+        List<JNode> children = aNode.getChildren();
+        for (JNode child : children)
+            findAllNodeErrors(child, errorsList);
     }
 }

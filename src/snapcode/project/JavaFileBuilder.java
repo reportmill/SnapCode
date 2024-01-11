@@ -127,14 +127,11 @@ public class JavaFileBuilder implements ProjectFileBuilder {
      */
     protected boolean buildFile(WebFile javaFile)
     {
-        // Get BuildIssues for parsed file
-        BuildIssue[] buildIssues = getBuildIssuesForFile(javaFile);
-
-        // Set build issues
         JavaAgent javaAgent = JavaAgent.getAgentForFile(javaFile);
-        javaAgent.setBuildIssues(buildIssues);
+        javaAgent.checkFileForErrors();
 
         // Return
+        BuildIssue[] buildIssues = javaAgent.getBuildIssues();
         return buildIssues.length == 0;
     }
 
@@ -154,24 +151,6 @@ public class JavaFileBuilder implements ProjectFileBuilder {
             for (BuildIssue buildIssue : unusedImportIssues)
                 buildIssues.add(buildIssue);
         }
-    }
-
-    /**
-     * Returns an array of build issues for Java file.
-     */
-    protected BuildIssue[] getBuildIssuesForFile(WebFile javaFile)
-    {
-        // Get JavaAgent and JFile
-        JavaAgent javaAgent = JavaAgent.getAgentForFile(javaFile);
-        JFile jFile = javaAgent.getJFile();
-        List<NodeError> errorsList = new ArrayList<>();
-
-        // Find errors in JFile
-        findNodeErrors(jFile, errorsList);
-        NodeError[] errors = errorsList.toArray(NodeError.NO_ERRORS);
-
-        // Convert to BuildIssues and set in agent
-        return ArrayUtils.map(errors, error -> BuildIssue.createIssueForNodeError(error, javaFile), BuildIssue.class);
     }
 
     /**
@@ -200,22 +179,5 @@ public class JavaFileBuilder implements ProjectFileBuilder {
         int startCharIndex = importDecl.getStartCharIndex();
         int endCharIndex = importDecl.getEndCharIndex();
         return new BuildIssue().init(javaFile, BuildIssue.Kind.Warning, msg, lineIndex, 0, startCharIndex, endCharIndex);
-    }
-
-    /**
-     * Recurse into nodes
-     */
-    private static void findNodeErrors(JNode aNode, List<NodeError> theErrors)
-    {
-        NodeError[] errors = aNode.getErrors();
-        if (errors.length > 0)
-            Collections.addAll(theErrors, errors);
-
-        if (aNode instanceof JStmtExpr)
-            return;
-
-        List<JNode> children = aNode.getChildren();
-        for (JNode child : children)
-            findNodeErrors(child, theErrors);
     }
 }

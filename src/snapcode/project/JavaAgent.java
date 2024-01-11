@@ -6,6 +6,8 @@ import javakit.parse.*;
 import snap.props.PropChange;
 import snap.text.TextDoc;
 import snap.text.TextBlockUtils;
+import snap.util.ArrayUtils;
+import snap.view.ViewUtils;
 import snap.web.WebFile;
 
 /**
@@ -27,6 +29,9 @@ public class JavaAgent {
 
     // The parsed version of this JavaFile
     protected JFile  _jfile;
+
+    // A runnable to check file for errors after delay
+    private Runnable _checkFileRun = () -> checkFileForErrors();
 
     /**
      * Constructor for given file.
@@ -138,25 +143,6 @@ public class JavaAgent {
     }
 
     /**
-     * Builds this file.
-     */
-    public void buildFileAfterDelay(int aDelay)
-    {
-        // Get ProjectBuilder and add build file
-        Project proj = getProject();
-        ProjectBuilder projectBuilder = proj.getBuilder();
-        projectBuilder.addBuildFile(_file, true);
-
-        // Clear build issues
-        setBuildIssues(new BuildIssue[0]);
-
-        // Build workspace after delay
-        Workspace workspace = getWorkspace();
-        WorkspaceBuilder workspaceBuilder = workspace.getBuilder();
-        workspaceBuilder.buildWorkspaceAfterDelay(aDelay);
-    }
-
-    /**
      * Returns the build issues.
      */
     public BuildIssue[] getBuildIssues()
@@ -191,6 +177,34 @@ public class JavaAgent {
      */
     public void clearBuildIssues()
     {
+        setBuildIssues(new BuildIssue[0]);
+    }
+
+    /**
+     * Checks this file for errors.
+     */
+    public void checkFileForErrors()
+    {
+        // Get JFile errors
+        JFile jFile = getJFile();
+        NodeError[] errors = NodeError.getAllNodeErrors(jFile);
+
+        // Convert to BuildIssues and set in agent
+        WebFile javaFile = getFile();
+        BuildIssue[] buildIssues = ArrayUtils.map(errors, error -> BuildIssue.createIssueForNodeError(error, javaFile), BuildIssue.class);
+
+        // Set build issues
+        setBuildIssues(buildIssues);
+    }
+
+    /**
+     * Checks this file for errors after given delay.
+     */
+    public void checkFileForErrorsAfterDelay(int aDelay)
+    {
+        ViewUtils.runDelayedCancelPrevious(_checkFileRun, aDelay);
+
+        // Clear build issues
         setBuildIssues(new BuildIssue[0]);
     }
 

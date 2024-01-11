@@ -320,18 +320,18 @@ public class JavaTextPane extends TextPane {
             if (CharSequenceUtils.indexOfNewline(chars, 0) >= 0)
                 _lineNumView.resetAll();
             _lineFootView.resetAll();
-            buildFileAfterDelay();
+            checkFileForErrorsAfterDelay();
         }
     }
 
     /**
-     * Register to build file after slight delay.
+     * Register to check file for errors after slight delay.
      */
-    private void buildFileAfterDelay()
+    private void checkFileForErrorsAfterDelay()
     {
         JavaTextDoc javaTextDoc = getJavaTextDoc();
         JavaAgent javaAgent = javaTextDoc.getAgent();
-        javaAgent.buildFileAfterDelay(1000);
+        javaAgent.checkFileForErrorsAfterDelay(1000);
     }
 
     /**
