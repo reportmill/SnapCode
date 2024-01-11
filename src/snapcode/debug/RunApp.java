@@ -5,6 +5,7 @@ import snap.view.TextArea;
 import snap.view.View;
 import snap.view.ViewEnv;
 import snap.view.ViewUtils;
+import snap.web.WebFile;
 import snapcharts.repl.Console;
 import snapcode.apptools.RunTool;
 import snapcode.project.Breakpoint;
@@ -19,8 +20,8 @@ public abstract class RunApp {
     // The RunTook
     protected RunTool _runTool;
 
-    // The URL
-    private WebURL _url;
+    // The main file
+    private WebFile _mainFile;
 
     // The args
     private String[] _args;
@@ -67,11 +68,11 @@ public abstract class RunApp {
     /**
      * Creates a new RunApp for URL and args.
      */
-    public RunApp(RunTool runTool, WebURL aURL, String[] theArgs)
+    public RunApp(RunTool runTool, WebFile mainFile, String[] theArgs)
     {
         super();
         _runTool = runTool;
-        _url = aURL;
+        _mainFile = mainFile;
         setArgs(theArgs);
 
         // Create TextBlock to hold system console output
@@ -87,6 +88,22 @@ public abstract class RunApp {
         _consoleTextView.setSourceText(_consoleText);
         _consoleView = _consoleTextView;
     }
+
+    /**
+     * Returns the name of this app.
+     */
+    public String getName()
+    {
+        String appName = _mainFile.getSimpleName();
+        if (isTerminated())
+            appName += " <terminated>";
+        return appName;
+    }
+
+    /**
+     * Returns the main file.
+     */
+    public WebFile getMainFile()  { return _mainFile; }
 
     /**
      * Returns the app launch args.
@@ -232,22 +249,6 @@ public abstract class RunApp {
      * Sets the app class path.
      */
     public void setClassPath(String aPath)  { _classPath = aPath; }
-
-    /**
-     * Returns the main class url.
-     */
-    public WebURL getURL()  { return _url; }
-
-    /**
-     * Returns the name.
-     */
-    public String getName()
-    {
-        String name = getURL().getFilenameSimple();
-        if (isTerminated())
-            name += " <terminated>";
-        return name;
-    }
 
     /**
      * Returns the console view.

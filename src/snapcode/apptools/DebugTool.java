@@ -2,6 +2,8 @@ package snapcode.apptools;
 import snap.view.*;
 import snapcode.debug.*;
 import snapcode.javatext.JavaTextArea;
+import snapcode.project.Breakpoint;
+import snapcode.project.Breakpoints;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
 import snapcode.webbrowser.WebPage;
@@ -45,6 +47,21 @@ public class DebugTool extends WorkspaceTool {
         _debugFramesPane = new DebugFramesPane(this);
         _debugVarsPane = new DebugVarsPane(this);
         _debugExprsPane = new DebugExprsPane(this);
+    }
+
+    /**
+     * Launches app for given main file for debug.
+     */
+    public void debugAppForFileAndArgs(WebFile mainFile, String[] args)
+    {
+        DebugApp proc = new DebugApp(_runTool, mainFile, args);
+        Breakpoints breakpointsHpr = _workspace.getBreakpoints();
+        Breakpoint[] breakpoints = breakpointsHpr.getArray();
+        for (Breakpoint breakpoint : breakpoints)
+            proc.addBreakpoint(breakpoint);
+
+        // Exec process
+        _runTool.execProc(proc);
     }
 
     /**

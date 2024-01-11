@@ -4,7 +4,6 @@ import snap.util.ListUtils;
 import snap.util.TaskRunner;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import snap.web.WebURL;
 import snap.view.*;
 import snapcode.app.JavaPage;
 import snapcode.app.WorkspacePane;
@@ -28,9 +27,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
 
     // The limit to the number of running processes
     private int  _procLimit = 1;
-
-    // The last executed file
-    private static WebFile _lastRunFile;
 
     /**
      * Constructor.
@@ -182,7 +178,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         String[] args = { className };
 
         // Create app and run
-        RunApp runApp = new RunAppSrc(this, selFile.getURL(), args);
+        RunApp runApp = new RunAppSrc(this, selFile, args);
         execProc(runApp);
 
         // Reset UI
@@ -200,21 +196,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
     }
 
     /**
-     * Run application.
-     */
-    public void runConfigForName(String configName, boolean withDebug)
-    {
-        RunConfigs runConfigs = RunConfigs.get(getRootSite());
-        RunConfig runConfig = runConfigs.getRunConfig(configName);
-        if (runConfig != null) {
-            runConfigs.getRunConfigs().remove(runConfig);
-            runConfigs.getRunConfigs().add(0, runConfig);
-            runConfigs.writeFile();
-            runConfigOrFile(runConfig, null, withDebug);
-        }
-    }
-
-    /**
      * Runs a given RunConfig or file as a separate process.
      */
     public void runConfigOrFile(RunConfig aConfig, WebFile aFile, boolean isDebug)
@@ -223,75 +204,20 @@ public class RunTool extends WorkspaceTool implements AppListener {
         FilesTool filesTool = _workspaceTools.getFilesTool();
         filesTool.saveAllFiles();
 
-        // Get site and RunConfig (if available)
-        WebSite site = getRootSite();
-        RunConfig config = aConfig != null || aFile != null ? aConfig : RunConfigs.get(site).getRunConfig();
+        // Get main file and args for given config or main file
+        WebSite rootSite = getRootSite();
+        RunConfig runConfig = aConfig != null || aFile != null ? aConfig : RunConfigs.get(rootSite).getRunConfig();
+        WebFile mainFile = RunToolUtils.getMainFileForConfigAndFile(this, runConfig, aFile);
+        String[] runArgs = RunToolUtils.getRunArgsForConfigAndFile(runConfig, mainFile, isDebug);
 
-        // Get file
-        WebFile runFile = aFile;
-        if (runFile == null && config != null)
-            runFile = site.createFileForPath(config.getMainFilePath(), false);
-        if (runFile == null)
-            runFile = _lastRunFile;
-        if (runFile == null)
-            runFile = getSelFile();
-
-        // Try to replace file with project file
-        Project proj = Project.getProjectForFile(runFile);
-        if (proj == null) {
-            System.err.println("RunTool: not project file: " + runFile);
+        // Handle debug
+        if (isDebug) {
+            getDebugTool().debugAppForFileAndArgs(mainFile, runArgs);
             return;
         }
 
-        // Get class file for given file (should be JavaFile)
-        ProjectFiles projectFiles = proj.getProjectFiles();
-        WebFile classFile;
-        if (runFile.getType().equals("java"))
-            classFile = projectFiles.getClassFileForJavaFile(runFile);
-
-            // Try generic way to get class file
-        else classFile = projectFiles.getBuildFile(runFile.getPath(), false, runFile.isDir());
-
-        // If ClassFile found, set run file
-        if (classFile != null)
-            runFile = classFile;
-
-        // Set last run file
-        _lastRunFile = runFile;
-
-        // Run/debug file
-        String[] runArgs = RunToolUtils.getRunArgs(proj, config, runFile, isDebug);
-        runAppForFileAndArgs(runFile, runArgs, isDebug);
-    }
-
-    /**
-     * Runs the provided file as straight app.
-     */
-    public void runAppForFileAndArgs(WebFile aFile, String[] args, boolean isDebug)
-    {
-        WebURL fileURL = aFile.getURL();
-
-        // Print run command to console
-        String commandLineStr = String.join(" ", args);
-        if (isDebug)
-            commandLineStr = "debug " + commandLineStr;
-        System.err.println(commandLineStr);
-
-        // Get process
-        RunApp proc;
-        if (!isDebug)
-            proc = new RunAppBin(this, fileURL, args);
-
-            // Handle isDebug: Create DebugApp with Workspace.Breakpoints
-        else {
-            proc = new DebugApp(this, fileURL, args);
-            Breakpoints breakpointsHpr = _workspace.getBreakpoints();
-            Breakpoint[] breakpoints = breakpointsHpr.getArray();
-            for (Breakpoint breakpoint : breakpoints)
-                proc.addBreakpoint(breakpoint);
-        }
-
-        // Create RunApp and exec
+        // Create app and run
+        RunApp proc = new RunAppBin(this, mainFile, runArgs);
         execProc(proc);
     }
 

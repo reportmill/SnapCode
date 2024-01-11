@@ -3,7 +3,6 @@ import javakit.runner.JavaShell;
 import snap.view.View;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
-import snap.web.WebURL;
 import snapcharts.repl.Console;
 import snapcharts.repl.ScanPane;
 import snapcode.apptools.RunTool;
@@ -38,9 +37,9 @@ public class RunAppSrc extends RunApp {
     /**
      * Constructor.
      */
-    public RunAppSrc(RunTool runTool, WebURL mainClassFileURL, String[] args)
+    public RunAppSrc(RunTool runTool, WebFile mainFile, String[] args)
     {
-        super(runTool, mainClassFileURL, args);
+        super(runTool, mainFile, args);
     }
 
     /**
@@ -209,8 +208,7 @@ public class RunAppSrc extends RunApp {
     private void runJavaShell()
     {
         // Get JavaAgent
-        WebURL mainClassURL = getURL();
-        WebFile mainClassFile = mainClassURL.getFile();
+        WebFile mainClassFile = getMainFile();
         JavaAgent javaAgent = mainClassFile != null ? JavaAgent.getAgentForFile(mainClassFile) : null;
 
         // Create JavaShell
