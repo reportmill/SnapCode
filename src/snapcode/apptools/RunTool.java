@@ -162,7 +162,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         WorkspaceBuilder workspaceBuilder = _workspace.getBuilder();
         if (workspaceBuilder.isNeedsBuild() || workspaceBuilder.isBuilding()) {
             TaskRunner<Boolean> buildRunner = workspaceBuilder.buildWorkspace();
-            buildRunner.setOnSuccess(success -> buildFinished(runApp, success));
+            buildRunner.setOnSuccess(success -> runAppBuildFinished(runApp, success));
         }
 
         // Otherwise, just launch
@@ -172,7 +172,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
     /**
      * Called after build finished.
      */
-    private void buildFinished(RunApp runApp, boolean noErrors)
+    private void runAppBuildFinished(RunApp runApp, boolean noErrors)
     {
         // If no errors, just run app
         if (noErrors)

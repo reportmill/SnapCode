@@ -467,9 +467,22 @@ public class FileTreeTool extends WorkspaceTool {
      */
     protected void windowFocusChanged()
     {
-        if (_workspacePane.getWindow().isFocused() && !SnapUtils.isWebVM) {
-            for (FileTreeFile file : getRootFiles())
-                checkForExternalMods(file.getFile());
+        boolean isWindowFocused = _workspacePane.getWindow().isFocused();
+
+        // If window focus gained, check for external file mods
+        if (isWindowFocused) {
+            if (!SnapUtils.isWebVM) { // No reason to do this for WebVM ?
+                for (FileTreeFile file : getRootFiles())
+                    checkForExternalMods(file.getFile());
+            }
+        }
+
+        // If window focus lost, save all files
+        else {
+            FilesTool filesTool = _workspaceTools.getFilesTool();
+            filesTool.saveAllFiles();
+            if (SnapUtils.isWebVM)
+                System.out.println("FileTreeTool.windowFocusChanged: Focus lost - sav all files");
         }
     }
 

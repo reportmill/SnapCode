@@ -21,6 +21,9 @@ public class WorkspaceBuilder {
     // Whether to add all files to next build
     private boolean _addAllFilesToBuild;
 
+    // Whether to build again after current build
+    private boolean _buildAgain;
+
     // A runnable to build file after delay
     private Runnable _buildWorkspaceRun = () -> buildWorkspace();
 
@@ -93,17 +96,11 @@ public class WorkspaceBuilder {
      */
     public TaskRunner<Boolean> buildWorkspace()
     {
-        // If already building, cancel last build
-        TaskRunner<?> lastRunner = _buildWorkspaceRunner;
+        // If already building, register for build again and return build runner
+        TaskRunner<Boolean> lastRunner = _buildWorkspaceRunner;
         if (lastRunner != null) {
-
-            // Cancel last build
-            TaskMonitor taskMonitor = lastRunner.getMonitor();
-            taskMonitor.setCancelled(true);
-
-            // Give last build a chance to hit interrupt before this starts (not if sure this is helpful)
-            try { Thread.sleep(200); }
-            catch (Exception ignore) { }
+            _buildAgain = true;
+            return lastRunner;
         }
 
         // Create task monitor
@@ -144,6 +141,7 @@ public class WorkspaceBuilder {
         BuildWorkspaceRunner buildRunner = _buildWorkspaceRunner;
         if (buildRunner != null)
             buildRunner.cancel();
+        _buildAgain = false;
     }
 
     /**
@@ -163,6 +161,9 @@ public class WorkspaceBuilder {
      */
     private boolean buildWorkspaceImpl(TaskMonitor taskMonitor)
     {
+        // Reset BuildAgain
+        _buildAgain = false;
+
         // Handle AddFiles
         if (_addAllFilesToBuild) {
             addAllFilesToBuildImpl();
@@ -178,23 +179,34 @@ public class WorkspaceBuilder {
         _buildLogBuffer.append("Build Started\n");
         _workspace.setBuilding(true);
 
+        // Track buildSuccess
+        boolean buildSuccess = true;
+
         // Build child projects
         for (Project childProject : childProjects) {
 
             // Build project
             ProjectBuilder projectBuilder = childProject.getBuilder();
             boolean projBuildSuccess = projectBuilder.buildProject(taskMonitor);
-            if (!projBuildSuccess)
-                return false;
+            if (!projBuildSuccess) {
+                buildSuccess = false;
+                break;
+            }
         }
 
         // Build root project
-        ProjectBuilder rootBuilder = rootProj.getBuilder();
-        boolean buildSuccess = rootBuilder.buildProject(taskMonitor);
+        if (buildSuccess) {
+            ProjectBuilder rootBuilder = rootProj.getBuilder();
+            buildSuccess = rootBuilder.buildProject(taskMonitor);
+        }
 
         // Stop building
         _workspace.setActivity(null);
         _workspace.setBuilding(false);
+
+        // Handle BuildAgain
+        if (_buildAgain)
+            buildSuccess = buildWorkspaceImpl(taskMonitor);
 
         // Return
         return buildSuccess;
@@ -255,7 +267,7 @@ public class WorkspaceBuilder {
          * Override to reset Workspace Activity/Building properties and clear runner.
          */
         @Override
-        public void finished()
+        protected void finished()
         {
             // If this runner is retired, just return
             if (_buildWorkspaceRunner != this)
@@ -273,7 +285,7 @@ public class WorkspaceBuilder {
          * Override to print exception.
          */
         @Override
-        public void failure(final Exception e)
+        protected void failure(final Exception e)
         {
             e.printStackTrace();
         }
