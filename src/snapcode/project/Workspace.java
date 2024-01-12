@@ -8,6 +8,7 @@ import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
+import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.app.SnapCodeUtils;
@@ -335,6 +336,44 @@ public class Workspace extends PropObject {
     protected Project createProjectForSite(WebSite aSite)
     {
         return new Project(this, aSite);
+    }
+
+    /**
+     * Saves all unsaved files.
+     */
+    public void saveAllFiles()
+    {
+        Project[] projects = getProjects();
+        for (Project project : projects) {
+            WebSite projSite = project.getSite();
+            WebFile rootDir = projSite.getRootDir();
+            saveAllFilesImpl(project, rootDir);
+        }
+    }
+
+    /**
+     * Saves all unsaved files for given file and its children.
+     */
+    private void saveAllFilesImpl(Project project, WebFile aFile)
+    {
+        // Handle directory
+        if (aFile.isDir()) {
+
+            // Skip build dir
+            if (aFile == project.getBuildDir())
+                return;
+
+            // Iterate over child files and recurse
+            WebFile[] dirFiles = aFile.getFiles();
+            for (WebFile file : dirFiles)
+                saveAllFilesImpl(project, file);
+        }
+
+        // Handle file
+        else if (aFile.isModified()) {
+            try { aFile.save(); }
+            catch (Exception e) { throw new RuntimeException(e); }
+        }
     }
 
     /**

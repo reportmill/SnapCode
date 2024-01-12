@@ -164,6 +164,9 @@ public class WorkspaceBuilder {
         // Reset BuildAgain
         _buildAgain = false;
 
+        // Save all files
+        _workspace.saveAllFiles();
+
         // Handle AddFiles
         if (_addAllFilesToBuild) {
             addAllFilesToBuildImpl();

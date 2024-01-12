@@ -257,41 +257,6 @@ public class FilesTool extends WorkspaceTool {
     }
 
     /**
-     * Saves all unsaved files.
-     */
-    public void saveAllFiles()
-    {
-        WebSite rootSite = getRootSite();
-        WebFile rootDir = rootSite.getRootDir();
-        saveFilesImpl(rootDir);
-    }
-
-    /**
-     * Saves all unsaved files for given file and its children.
-     */
-    private void saveFilesImpl(WebFile aFile)
-    {
-        // Handle directory
-        if (aFile.isDir()) {
-
-            // Skip build dir
-            if (aFile == _workspacePane.getBuildDir())
-                return;
-
-            // Iterate over child files and recurse
-            WebFile[] dirFiles = aFile.getFiles();
-            for (WebFile file : dirFiles)
-                saveFilesImpl(file);
-        }
-
-        // Handle file
-        else if (aFile.isModified()) {
-            try { aFile.save(); }
-            catch (Exception e) { throw new RuntimeException(e); }
-        }
-    }
-
-    /**
      * Renames a file.
      */
     public boolean renameFile(WebFile aFile, String aName)

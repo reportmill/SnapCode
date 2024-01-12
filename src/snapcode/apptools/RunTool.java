@@ -147,9 +147,8 @@ public class RunTool extends WorkspaceTool implements AppListener {
         if (runApp == null)
             return;
 
-        // Automatically save all files
-        FilesTool filesTool = _workspaceTools.getFilesTool();
-        filesTool.saveAllFiles();
+        // Automatically save all files - this is getting done twice for build, maybe this should call build tool
+        _workspace.saveAllFiles();
 
         // Show tool
         boolean isDebug = runApp instanceof DebugApp;
