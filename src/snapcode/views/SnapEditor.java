@@ -188,7 +188,6 @@ public class SnapEditor extends StackView {
     protected void replaceText(String aString, int aStart, int anEnd)
     {
         JavaTextArea tview = getJavaTextArea();
-        tview.undoerSaveChanges();
         tview.replaceChars(aString, null, aStart, anEnd, true);
         rebuildUI();
     }
