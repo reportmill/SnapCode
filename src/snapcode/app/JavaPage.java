@@ -1,7 +1,5 @@
 package snapcode.app;
 import javakit.parse.*;
-import snap.text.TextDoc;
-import snap.view.TextArea;
 import snap.view.ViewEvent;
 import snapcode.apptools.DebugTool;
 import snapcode.apptools.RunTool;
@@ -96,9 +94,6 @@ public class JavaPage extends WebPage {
         // If not java file, hide SnapCodeButton (jepl file)
         if (!javaFile.getType().equals("java"))
             _javaTextPane.setViewVisible("SnapCodeButton", false);
-
-        // Bind TextDoc.TextModified to JavaPage.TextModified
-        javaTextDoc.addPropChangeListener(pc -> setTextModified(javaTextDoc.isTextModified()), TextDoc.TextModified_Prop);
     }
 
     /**
@@ -404,27 +399,6 @@ public class JavaPage extends WebPage {
         SearchTool searchTool = workspaceTools.getToolForClass(SearchTool.class);
         searchTool.searchDeclaration(aNode);
         workspaceTools.showToolForClass(SearchTool.class);
-    }
-
-    /**
-     * Called to set File.Updater (or clear it).
-     */
-    private void setTextModified(boolean aFlag)
-    {
-        WebFile javaFile = getFile();
-        WebFile.Updater updater = f -> updateFile();
-        javaFile.setUpdater(aFlag ? updater : null);
-    }
-
-    /**
-     * Called to update File.Text before save.
-     */
-    private void updateFile()
-    {
-        WebFile file = getFile();
-        TextArea textArea = getTextArea();
-        String textAreaText = textArea.getText();
-        file.setText(textAreaText);
     }
 
     /**

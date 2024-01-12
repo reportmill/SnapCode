@@ -39,7 +39,7 @@ public class JavaAgent {
     public JavaAgent(WebFile aFile)
     {
         _file = aFile;
-        aFile.addPropChangeListener(this::fileDidChangeBytes, WebFile.Bytes_Prop);
+        aFile.addPropChangeListener(this::fileBytesDidChange, WebFile.Bytes_Prop);
     }
 
     /**
@@ -231,12 +231,31 @@ public class JavaAgent {
             TextBlockUtils.CharsChange charsChange = (TextBlockUtils.CharsChange) aPC;
             updateJFileForChange(charsChange);
         }
+
+        // Handle TextModified: Register updater to update JavaFile before save
+        else if (propName == TextDoc.TextModified_Prop) {
+            boolean textDocTextModified = _javaTextDoc.isTextModified();
+            WebFile javaFile = getFile();
+            WebFile.Updater updater = textDocTextModified ? file -> updateFileFromTextDoc() : null;
+            javaFile.setUpdater(updater);
+        }
+    }
+
+    /**
+     * Called to update File.Text before save.
+     */
+    private void updateFileFromTextDoc()
+    {
+        WebFile javaFile = getFile();
+        String javaText = _javaTextDoc.getString();
+        javaFile.setText(javaText);
+        _javaTextDoc.setTextModified(false);
     }
 
     /**
      * Called when file changes.
      */
-    private void fileDidChangeBytes(PropChange aPC)
+    private void fileBytesDidChange(PropChange aPC)
     {
         // If file.Bytes changed externally, reset JavaTextDoc and JFile
         if (_javaTextDoc != null) {
