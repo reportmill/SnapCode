@@ -133,6 +133,14 @@ public class ProjectUtils {
      */
     public static Project getTempProject()
     {
+        return getTempProject(null);
+    }
+
+    /**
+     * Returns a temp project.
+     */
+    public static Project getTempProject(Workspace workspace)
+    {
         // Get path to temp dir named TempProj
         String tempProjPath = FileUtils.getTempFile("TempProj").getAbsolutePath();
         if (SnapUtils.isMac)
@@ -146,8 +154,11 @@ public class ProjectUtils {
         // Get project for site - create if missing
         Project tempProj = Project.getProjectForSite(tempProjSite);
         if (tempProj == null) {
-            Workspace newWorkspace = new Workspace();
-            tempProj = newWorkspace.addProjectForSite(tempProjSite);
+            if (workspace == null)
+                workspace = new Workspace();
+            tempProj = workspace.addProjectForSite(tempProjSite);
+            tempProj.getBuildFile().setIncludeSnapKitRuntime(true);
+            tempProj.getBuildFile().writeFile();
         }
 
         // Return

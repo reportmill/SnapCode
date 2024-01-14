@@ -375,6 +375,54 @@ public class FilesTool extends WorkspaceTool {
     }
 
     /**
+     * Creates a new source file for given external source file.
+     */
+    public WebFile newSourceFileForExternalSourceFile(WebFile sourceFile)
+    {
+        String sourceName = sourceFile.getSimpleName();
+        String sourceType = sourceFile.getType();
+        String sourceText = sourceFile.getText();
+
+        if (sourceType.equals("java"))
+            return newJavaFileForString(sourceText);
+        if (sourceType.equals("jepl"))
+            return newJeplFileForNameAndString(sourceName, sourceText);
+        return null;
+    }
+
+    /**
+     * Creates a new Java file from given string.
+     */
+    public WebFile newJavaFileForString(String javaString)
+    {
+        // Get Java class name
+        JavaParser javaParser = JavaParser.getShared();
+        JFile jfile = javaParser.getJavaFile(javaString);
+        String className = jfile.getName();
+        if (className == null || className.length() == 0) {
+            String title = "New Java File from clipboard";
+            String msg = "No class name found";
+            DialogBox.showErrorDialog(_workspacePane.getUI(), title, msg);
+            return null;
+        }
+
+        // Get source dir
+        WebSite selSite = getSelSite();
+        Project proj = Project.getProjectForSite(selSite);
+        WebFile selDir = proj.getSourceDir();
+
+        // Create file and save
+        String filePath = selDir.getDirPath() + className + ".java";
+        WebFile newJavaFile = selSite.createFileForPath(filePath, false);
+        newJavaFile.setText(javaString);
+        newJavaFile.save();
+        setSelFile(newJavaFile);
+
+        // Return
+        return newJavaFile;
+    }
+
+    /**
      * Creates a new Java file from clipboard.
      */
     public void newJavaFileFromClipboard()
@@ -389,28 +437,29 @@ public class FilesTool extends WorkspaceTool {
             return;
         }
 
-        // Get Java class name
-        JavaParser javaParser = JavaParser.getShared();
-        JFile jfile = javaParser.getJavaFile(javaString);
-        String className = jfile.getName();
-        if (className == null || className.length() == 0) {
-            String title = "New Java File from clipboard";
-            String msg = "No class name found";
-            DialogBox.showErrorDialog(_workspacePane.getUI(), title, msg);
-            return;
-        }
+        // Create java file for java string
+        newJavaFileForString(javaString);
+    }
 
+    /**
+     * Creates a new Jepl file from given string.
+     */
+    public WebFile newJeplFileForNameAndString(String jeplName, String jeplString)
+    {
         // Get source dir
         WebSite selSite = getSelSite();
         Project proj = Project.getProjectForSite(selSite);
         WebFile selDir = proj.getSourceDir();
 
         // Create file and save
-        String filePath = selDir.getDirPath() + className + ".java";
-        WebFile newJavaFile = selSite.createFileForPath(filePath, false);
-        newJavaFile.setText(javaString);
-        newJavaFile.save();
-        setSelFile(newJavaFile);
+        String filePath = selDir.getDirPath() + jeplName + ".jepl";
+        WebFile newJeplFile = selSite.createFileForPath(filePath, false);
+        newJeplFile.setText(jeplString);
+        newJeplFile.save();
+        setSelFile(newJeplFile);
+
+        // Return
+        return newJeplFile;
     }
 
     /**

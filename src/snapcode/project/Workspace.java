@@ -127,7 +127,7 @@ public class Workspace extends PropObject {
     /**
      * Returns the root project.
      */
-    public Project getRootProject()  { return _projects[0]; }
+    public Project getRootProject()  { return _projects.length > 0 ? _projects[0] : null; }
 
     /**
      * Returns the sites.

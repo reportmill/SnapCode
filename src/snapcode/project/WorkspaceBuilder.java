@@ -3,6 +3,7 @@ import snap.util.ArrayUtils;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
 import snap.view.ViewUtils;
+import java.util.Date;
 
 /**
  * This class handles building a Workspace.
@@ -173,20 +174,19 @@ public class WorkspaceBuilder {
             _addAllFilesToBuild = false;
         }
 
-        // Get RootProj and child projects
-        Project rootProj = _workspace.getRootProject();
-        Project[] childProjects = rootProj.getProjects();
+        // Get all projects
+        Project[] projects = _workspace.getProjects();
 
         // Start building
         _buildLogBuffer.setLength(0);
-        _buildLogBuffer.append("Build Started\n");
+        _buildLogBuffer.append("Build Started - " + new Date() + '\n');
         _workspace.setBuilding(true);
 
         // Track buildSuccess
         boolean buildSuccess = true;
 
-        // Build child projects
-        for (Project childProject : childProjects) {
+        // Build child projects - need to recurse!!!
+        for (Project childProject : projects) {
 
             // Build project
             ProjectBuilder projectBuilder = childProject.getBuilder();
@@ -195,12 +195,6 @@ public class WorkspaceBuilder {
                 buildSuccess = false;
                 break;
             }
-        }
-
-        // Build root project
-        if (buildSuccess) {
-            ProjectBuilder rootBuilder = rootProj.getBuilder();
-            buildSuccess = rootBuilder.buildProject(taskMonitor);
         }
 
         // Stop building
@@ -230,13 +224,8 @@ public class WorkspaceBuilder {
      */
     private void addAllFilesToBuildImpl()
     {
-        // Make RootProject addBuildFiles
-        Project rootProj = _workspace.getRootProject();
-        ProjectBuilder rootProjBuilder = rootProj.getBuilder();
-        rootProjBuilder.addBuildFilesAll();
-
         // Make RootProject.Projects addBuildFiles
-        Project[] projects = rootProj.getProjects();
+        Project[] projects = _workspace.getProjects();
         for (Project proj : projects) {
             ProjectBuilder projBuilder = proj.getBuilder();
             projBuilder.addBuildFilesAll();
