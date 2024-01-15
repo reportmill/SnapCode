@@ -164,26 +164,41 @@ public class WelcomePanel extends ViewOwner {
     {
         // Get whether file is just a source file
         boolean isSourceFile = ArrayUtils.contains(FILE_TYPES, aFile.getType());
+        if (isSourceFile)
+            return openWorkspaceForSourceFile(aFile);
 
         // Create workspace and workspace pane
         Workspace workspace = new Workspace();
         WorkspacePane workspacePane = new WorkspacePane(workspace);
 
-        // Handle source file
-        if (isSourceFile) {
-            workspacePane.openWorkspaceForSource(aFile);
-        }
-
         // Handle Project file: Get project site and add to workspace
-        else {
-            WebFile projectDir = aFile.isDir() ? aFile : aFile.getParent();
-            WebSite projectSite = projectDir.getURL().getAsSite();
-            workspace.addProjectForSite(projectSite);
-        }
+        WebFile projectDir = aFile.isDir() ? aFile : aFile.getParent();
+        WebSite projectSite = projectDir.getURL().getAsSite();
+        workspace.addProjectForSite(projectSite);
 
         // Show workspace, hide WelcomePanel
         workspacePane.show();
         hide();
+
+        // Return
+        return workspacePane;
+    }
+
+    /**
+     * Opens a Workspace for given Java/Jepl file.
+     */
+    protected WorkspacePane openWorkspaceForSourceFile(WebFile sourceFile)
+    {
+        // Create workspace and workspace pane
+        Workspace workspace = new Workspace();
+        WorkspacePane workspacePane = new WorkspacePane(workspace);
+
+        // Show workspace, hide WelcomePanel
+        workspacePane.show();
+        hide();
+
+        // Open source file
+        ViewUtils.runLater(() -> workspacePane.openExternalSourceFile(sourceFile));
 
         // Return
         return workspacePane;

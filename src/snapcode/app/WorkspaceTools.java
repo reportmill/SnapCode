@@ -305,7 +305,8 @@ public class WorkspaceTools {
      */
     private void showSamplesDidReturnURL(WebURL aURL)
     {
-        _workspacePane.openWorkspaceForSource(aURL);
+        WebFile externalSourceFile = aURL.createFile(false);
+        _workspacePane.openExternalSourceFile(externalSourceFile);
 
         // Kick off run
         RunTool runTool = getToolForClass(RunTool.class);

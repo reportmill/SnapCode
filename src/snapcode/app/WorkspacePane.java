@@ -111,6 +111,43 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
+     * Opens a source file.
+     */
+    public void openExternalSourceFile(WebFile sourceFile)
+    {
+        // Get temp proj
+        Project tempProj = ProjectUtils.getTempProject(_workspace);
+
+        // Create new source file for given external source file
+        FilesTool filesTool = _workspaceTools.getFilesTool();
+        WebFile newSourceFile = filesTool.newSourceFileForExternalSourceFile(sourceFile);
+        if (newSourceFile == null) {
+            System.out.println("WorkspacePane.openSourceFile: Couldn't open source file: " + sourceFile);
+            return;
+        }
+
+        // If not "TempProj" file, add to RecentFiles
+        WebURL sourceURL = sourceFile.getURL();
+        if (!sourceURL.getString().contains("TempProj"))
+            RecentFiles.addURL(sourceURL);
+
+        // Create WorkspacePane and show
+        _workspaceTools.getLeftTray().setSelTool(null);
+        _workspaceTools.getRightTray().setSelToolForClass(RunTool.class);
+        _toolBar.getUI().setVisible(false);
+        getView("MainColView", ColView.class).getChild(2).setVisible(false);
+
+        // Clear PagePane
+        _pagePane.removeAllOpenFilesExcept(null);
+
+        // Show JeplDoc
+        runLater(() -> {
+            PagePane pagePane = getPagePane();
+            pagePane.setSelFile(newSourceFile);
+        });
+    }
+
+    /**
      * Opens a Workspace for Java/Jepl file source.
      */
     public void openWorkspaceForSource(Object aSource)

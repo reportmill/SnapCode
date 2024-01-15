@@ -153,13 +153,18 @@ public class ProjectUtils {
 
         // Get project for site - create if missing
         Project tempProj = Project.getProjectForSite(tempProjSite);
-        if (tempProj == null) {
-            if (workspace == null)
-                workspace = new Workspace();
-            tempProj = workspace.addProjectForSite(tempProjSite);
-            tempProj.getBuildFile().setIncludeSnapKitRuntime(true);
-            tempProj.getBuildFile().writeFile();
-        }
+        if (tempProj != null)
+            return tempProj;
+
+        // Delete old version
+        deleteTempProject();
+
+        // Create new temp project
+        if (workspace == null)
+            workspace = new Workspace();
+        tempProj = workspace.addProjectForSite(tempProjSite);
+        tempProj.getBuildFile().setIncludeSnapKitRuntime(true);
+        tempProj.getBuildFile().writeFile();
 
         // Return
         return tempProj;
