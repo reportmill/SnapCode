@@ -3,6 +3,7 @@ import javakit.parse.JFile;
 import javakit.parse.JavaParser;
 import snap.view.Clipboard;
 import snap.viewx.FilePanel;
+import snapcode.app.JavaPage;
 import snapcode.app.SnapCodeUtils;
 import snapcode.project.Project;
 import snapcode.project.WorkspaceBuilder;
@@ -375,6 +376,15 @@ public class FilesTool extends WorkspaceTool {
     }
 
     /**
+     * Creates a new Java file for given class name.
+     */
+    public WebFile newJavaFileForName(String className)
+    {
+        String javaString = JavaPage.getJavaContentStringForPackageAndClassName(null, className);
+        return newJavaFileForString(javaString);
+    }
+
+    /**
      * Creates a new source file for given external source file.
      */
     public WebFile newSourceFileForExternalSourceFile(WebFile sourceFile)
@@ -418,6 +428,9 @@ public class FilesTool extends WorkspaceTool {
         newJavaFile.save();
         setSelFile(newJavaFile);
 
+        // Start build?
+        _workspace.getBuilder().buildWorkspaceLater();
+
         // Return
         return newJavaFile;
     }
@@ -457,6 +470,9 @@ public class FilesTool extends WorkspaceTool {
         newJeplFile.setText(jeplString);
         newJeplFile.save();
         setSelFile(newJeplFile);
+
+        // Start build?
+        _workspace.getBuilder().buildWorkspaceLater();
 
         // Return
         return newJeplFile;

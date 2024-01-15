@@ -428,19 +428,4 @@ public class JavaTextPane extends TextPane {
         // Return
         return pathLabels.toArray(new Label[0]);
     }
-
-    /**
-     * Standard main implementation.
-     */
-    public static void main(String[] args)
-    {
-        // Get test file
-        JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForSource("/tmp/Test.java");
-
-        // Create JavaTextPane and show
-        JavaTextPane javaTextPane = new JavaTextPane();
-        javaTextPane.getTextArea().setSourceText(javaTextDoc);
-        javaTextPane.getUI().setPrefHeight(800);
-        javaTextPane.setWindowVisible(true);
-    }
 }

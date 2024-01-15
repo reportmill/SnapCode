@@ -147,16 +147,11 @@ public class JavaTextDoc extends TextDoc {
      */
     public static JavaTextDoc getJavaTextDocForSource(Object aSource)
     {
-        // If Source is null, create temp file
-        Object source = aSource;
-        if (source == null)
-            source = ProjectUtils.getTempSourceFile(null, "Untitled", "java");
-
         // Get Source file
-        WebURL url = WebURL.getURL(source);
-        if (url == null)
-            throw new RuntimeException("JavaTextDoc.getJavaTextDocForSource: Invalid source: " + source);
-        WebFile sourceFile = ProjectUtils.getProjectSourceFileForURL(url);
+        WebURL sourceURL = WebURL.getURL(aSource);
+        if (sourceURL == null)
+            throw new RuntimeException("JavaTextDoc.getJavaTextDocForSource: Invalid source: " + aSource);
+        WebFile sourceFile = ProjectUtils.getProjectSourceFileForURL(sourceURL);
 
         // Get java agent and TextDoc
         JavaAgent javaAgent = JavaAgent.getAgentForFile(sourceFile);

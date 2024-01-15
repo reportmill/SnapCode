@@ -115,8 +115,8 @@ public class WorkspacePane extends ViewOwner {
      */
     public void openExternalSourceFile(WebFile sourceFile)
     {
-        // Get temp proj
-        Project tempProj = ProjectUtils.getTempProject(_workspace);
+        // Make sure workspace has temp project
+        ProjectUtils.getTempProject(_workspace);
 
         // Create new source file for given external source file
         FilesTool filesTool = _workspaceTools.getFilesTool();
@@ -131,65 +131,14 @@ public class WorkspacePane extends ViewOwner {
         if (!sourceURL.getString().contains("TempProj"))
             RecentFiles.addURL(sourceURL);
 
-        // Create WorkspacePane and show
+        // Hide LeftTray and show RunTool
         _workspaceTools.getLeftTray().setSelTool(null);
         _workspaceTools.getRightTray().setSelToolForClass(RunTool.class);
-        _toolBar.getUI().setVisible(false);
-        getView("MainColView", ColView.class).getChild(2).setVisible(false);
 
-        // Clear PagePane
-        _pagePane.removeAllOpenFilesExcept(null);
-
-        // Show JeplDoc
+        // Show source file
         runLater(() -> {
             PagePane pagePane = getPagePane();
             pagePane.setSelFile(newSourceFile);
-        });
-    }
-
-    /**
-     * Opens a Workspace for Java/Jepl file source.
-     */
-    public void openWorkspaceForSource(Object aSource)
-    {
-        // Get JavaTextDoc and source file for source
-        JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForSource(aSource);
-        WebFile sourceFile = javaTextDoc.getSourceFile();
-
-        // If not "TempProj" file, add to RecentFiles
-        WebURL sourceURL = sourceFile.getURL();
-        if (!sourceURL.getString().contains("TempProj"))
-            RecentFiles.addURL(sourceURL);
-
-        // Get project/workspace
-        Project project = Project.getProjectForFile(sourceFile);
-
-        // Configure single source file project: Add dependencies for SnapKit and SnapCharts
-        BuildFile buildFile = project.getBuildFile();
-        buildFile.setIncludeSnapKitRuntime(true);
-
-        // Get/set Workspace
-        Workspace workspace = project.getWorkspace();
-        setWorkspace(workspace);
-
-        // Create WorkspacePane and show
-        getUI(); //_workspaceTools.setShowLeftTray(false);
-        _workspaceTools.getLeftTray().setSelTool(null);
-        _workspaceTools.getRightTray().setSelToolForClass(RunTool.class);
-        _toolBar.getUI().setVisible(false);
-        getView("MainColView", ColView.class).getChild(2).setVisible(false);
-
-        // Clear PagePane
-        _pagePane.removeAllOpenFilesExcept(null);
-
-        // Disable build
-        WorkspaceBuilder workspaceBuilder = _workspace.getBuilder();
-        workspaceBuilder.setAutoBuild(false);
-
-        // Show JeplDoc
-        runLater(() -> {
-            PagePane pagePane = getPagePane();
-            pagePane.setSelFile(sourceFile);
         });
     }
 
@@ -373,6 +322,23 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
+     * Returns whether ToolBar is showing.
+     */
+    public boolean isToolBarShowing()  { return _toolBar.isShowing(); }
+
+    /**
+     * Sets whether ToolBar is showing.
+     */
+    public void setToolBarShowing(boolean aValue)
+    {
+        if (aValue == isToolBarShowing()) return;
+
+        // Show/hide tooBar.UI and adjacent separator rect
+        _toolBar.getUI().setVisible(aValue);
+        getView("MainColView", ColView.class).getChild(2).setVisible(aValue);
+    }
+
+    /**
      * Initializes UI panel.
      */
     protected void initUI()
@@ -389,6 +355,10 @@ public class WorkspacePane extends ViewOwner {
         // Install ToolBar
         ColView mainColView = getView("MainColView", ColView.class);
         mainColView.addChild(_toolBar.getUI(), 1);
+
+        // Hide ToolBar and separator by default
+        _toolBar.getUI().setVisible(false);
+        mainColView.getChild(2).setVisible(false);
 
         // Get PagePaneSplitView
         SplitView pagePaneSplitView = getView("PagePaneSplitView", SplitView.class);

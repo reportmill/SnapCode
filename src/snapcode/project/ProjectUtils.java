@@ -129,15 +129,7 @@ public class ProjectUtils {
     }
 
     /**
-     * Returns a temp project.
-     */
-    public static Project getTempProject()
-    {
-        return getTempProject(null);
-    }
-
-    /**
-     * Returns a temp project.
+     * Returns a temp project for given workspace.
      */
     public static Project getTempProject(Workspace workspace)
     {
@@ -160,8 +152,6 @@ public class ProjectUtils {
         deleteTempProject();
 
         // Create new temp project
-        if (workspace == null)
-            workspace = new Workspace();
         tempProj = workspace.addProjectForSite(tempProjSite);
         tempProj.getBuildFile().setIncludeSnapKitRuntime(true);
         tempProj.getBuildFile().writeFile();
@@ -186,54 +176,6 @@ public class ProjectUtils {
         WebFile tempProjFile = tempProjURL.getFile();
         if (tempProjFile != null)
             tempProjFile.delete();
-    }
-
-    /**
-     * Returns a temp java source file for given project. If null project, uses TempProject.
-     */
-    public static WebFile getTempJavaFile(String aName, String javaContents, boolean isRepl)
-    {
-        // Delete temp project
-        ProjectUtils.deleteTempProject();
-
-        // Get source file
-        String ext = isRepl ? "jepl" : "java";
-        WebFile sourceFile = ProjectUtils.getTempSourceFile(null, aName, ext);
-        sourceFile.setText(javaContents);
-        sourceFile.save();
-
-        // Return
-        return sourceFile;
-    }
-
-    /**
-     * Returns a temp source file for given project and extension. If null project, uses TempProject.
-     */
-    public static WebFile getTempSourceFile(Project aProj, String aName, String anExt)
-    {
-        // Get project - if given null project, use TempProject
-        Project proj = aProj != null ? aProj : getTempProject();
-
-        // If file already exists, delete it (shouldn't happen, but WebVM?)
-        String fileName = '/' + aName + '.' + anExt;
-        WebFile tempFile = proj.getSourceFile(fileName, false, false);
-        if (tempFile != null)
-            tempFile.delete();
-
-        // Create and return new file
-        return proj.getSourceFile(fileName, true, false);
-
-        // Return project source file for "Untitled.ext", if not present
-        //String fileName = '/' + aName + '.' + anExt;
-        //WebFile tempFile = proj.getSourceFile(fileName, false, false);
-        //if (tempFile == null) return proj.getSourceFile(fileName, true, false);
-        // Report project source file for "Untitled-X.ext" where X is first unused file name
-        //for (int i = 1; i < 1000; i++) {
-        //    String fileName2 = '/' + aName + '-' + i + '.' + anExt;
-        //    tempFile = proj.getSourceFile(fileName2, false, false);
-        //    if (tempFile == null) return proj.getSourceFile(fileName2, true, false); }
-        // Should never get here
-        //throw new RuntimeException("ProjectUtils.getTempSourceFile: What is your deal with temp files?");
     }
 
     /**

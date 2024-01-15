@@ -5,6 +5,9 @@ package snapcode.javatext;
 import java.util.*;
 import javakit.parse.*;
 import javakit.resolver.JavaDecl;
+import snap.util.FileUtils;
+import snap.web.WebSite;
+import snap.web.WebURL;
 import snapcode.project.JavaTextDoc;
 import snap.geom.Rect;
 import snap.gfx.*;
@@ -63,11 +66,9 @@ public class JavaTextArea extends TextArea {
         setPadding(5, 5, 5,5);
         setEditable(true);
 
-        // Create DUMMY_TEXT_DOC (first time only)
-        if (DUMMY_TEXT_DOC == null) {
-            WebFile tempFile = ProjectUtils.getTempSourceFile(null, "Dummy", "java");
-            DUMMY_TEXT_DOC = JavaTextDoc.getJavaTextDocForSource(tempFile);
-        }
+        // Create shared DUMMY_TEXT_DOC
+        if (DUMMY_TEXT_DOC == null)
+            DUMMY_TEXT_DOC = createDummyTextDoc();
 
         // Set default TextDoc to JavaTextDoc
         setSourceText(DUMMY_TEXT_DOC);
@@ -924,5 +925,23 @@ public class JavaTextArea extends TextArea {
 
         // Do normal version
         super.replaceCharsWithContent(theContent);
+    }
+
+    /**
+     * Creates a dummy Java text doc. I don't like this!
+     */
+    private static JavaTextDoc createDummyTextDoc()
+    {
+        // Create dummy project/workspace
+        String tempProjPath = FileUtils.getTempFile("DummyProj").getAbsolutePath();
+        WebURL tempProjURL = WebURL.getURL(tempProjPath);
+        assert (tempProjURL != null);
+        WebSite tempProjSite = tempProjURL.getAsSite();
+        Workspace workspace = new Workspace();
+        Project proj = workspace.addProjectForSite(tempProjSite);
+
+        // Create dummy java file
+        WebFile tempFile = proj.getSourceFile("/Dummy.java", true, false);
+        return JavaTextDoc.getJavaTextDocForSource(tempFile);
     }
 }
