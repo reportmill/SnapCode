@@ -218,7 +218,7 @@ public class WorkspacePane extends ViewOwner {
      */
     protected WorkspaceTools createWorkspaceTools()
     {
-        return new WorkspaceToolsX(this);
+        return new WorkspaceTools(this);
     }
 
     /**

@@ -79,19 +79,30 @@ public class WorkspaceTools {
         HelpTool helpTool = new HelpTool(_workspacePane);
         CompleterTool completerTool = new CompleterTool(_workspacePane);
 
+        // Support tools
+        SearchTool searchTool = new SearchTool(_workspacePane);
+        RunConfigsTool runConfigsTool = new RunConfigsTool(_workspacePane);
+        BreakpointsTool breakpointsTool = new BreakpointsTool(_workspacePane);
+        HttpServerTool httpServerTool = new HttpServerTool(_workspacePane);
+
         // Create tools array
-        _tools = new WorkspaceTool[] { filesTool, fileTreeTool, runTool, debugTool, buildTool, helpTool, completerTool };
+        _tools = new WorkspaceTool[] {
+                filesTool, fileTreeTool, runTool, debugTool, buildTool,
+                searchTool, helpTool, completerTool,
+                runConfigsTool, breakpointsTool,
+                httpServerTool
+        };
 
         // Create LeftTray
         WorkspaceTool[] leftTools = { fileTreeTool };
         _leftTray = new ToolTray(Side.LEFT, leftTools);
 
         // Create RightTray
-        WorkspaceTool[] rightTools = { runTool, buildTool, helpTool, completerTool };
+        WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, helpTool, completerTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray
-        WorkspaceTool[] bottomTools = { };
+        WorkspaceTool[] bottomTools = { runConfigsTool, breakpointsTool, httpServerTool };
         _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
 
         // Add SamplesButton to RightTray
@@ -254,12 +265,21 @@ public class WorkspaceTools {
     /**
      * Closes the project.
      */
-    public void closeProject()  { }
+    public void closeProject()
+    {
+        HttpServerTool httpServerTool = getToolForClass(HttpServerTool.class);
+        if (httpServerTool != null)
+            httpServerTool.stopServer();
+    }
 
     /**
      * Called when Workspace.BreakPoints change.
      */
-    protected void breakpointsDidChange(PropChange pc)  { }
+    protected void breakpointsDidChange(PropChange pc)
+    {
+        RunTool runTool = getToolForClass(RunTool.class);
+        runTool.breakpointsDidChange(pc);
+    }
 
     /**
      * Called when Project.BuildIssues change.
