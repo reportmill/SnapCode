@@ -77,11 +77,8 @@ public class WorkspaceBuilder {
     {
         if (_addAllFilesToBuild)
             return true;
-        Project rootProj = _workspace.getRootProject();
-        if (rootProj.getBuilder().isNeedsBuild())
-            return true;
-        Project[] childProjects = rootProj.getProjects();
-        return ArrayUtils.hasMatch(childProjects, proj -> proj.getBuilder().isNeedsBuild());
+        Project[] projects = _workspace.getProjects();
+        return ArrayUtils.hasMatch(projects, proj -> proj.getBuilder().isNeedsBuild());
     }
 
     /**
