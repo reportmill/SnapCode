@@ -128,9 +128,9 @@ public class JavaTextDoc extends TextDoc {
     }
 
     /**
-     * Returns a new JavaTextDoc from given source.
+     * Returns a new JavaTextDoc for given source file.
      */
-    public static JavaTextDoc getJavaTextDocForSource(WebFile sourceFile)
+    public static JavaTextDoc getJavaTextDocForFile(WebFile sourceFile)
     {
         JavaAgent javaAgent = JavaAgent.getAgentForFile(sourceFile);
         return javaAgent.getJavaTextDoc();

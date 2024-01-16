@@ -943,6 +943,6 @@ public class JavaTextArea extends TextArea {
         }
 
         // Return text doc for temp file
-        return JavaTextDoc.getJavaTextDocForSource(tempFile);
+        return JavaTextDoc.getJavaTextDocForFile(tempFile);
     }
 }

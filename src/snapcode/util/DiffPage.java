@@ -144,7 +144,7 @@ public class DiffPage extends WebPage {
         if (aFile.getType().equals("java")) {
 
             // Create JavaTextDoc
-            JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForSource(aFile);
+            JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForFile(aFile);
 
             // Create DiffJavaTextArea and set JavaTextDoc
             DiffJavaTextArea diffJavaTextArea = new DiffJavaTextArea();

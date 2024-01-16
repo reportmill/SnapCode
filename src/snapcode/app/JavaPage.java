@@ -81,7 +81,7 @@ public class JavaPage extends WebPage {
     {
         // Create JavaTextDoc
         WebFile javaFile = getFile();
-        JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForSource(javaFile);
+        JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForFile(javaFile);
 
         // Set TextArea.TextDoc and FirstFocus
         JavaTextArea javaTextArea = getTextArea();
@@ -134,7 +134,7 @@ public class JavaPage extends WebPage {
 
         // Create JavaTextDoc
         WebFile javaFile = getFile();
-        JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForSource(javaFile);
+        JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForFile(javaFile);
 
         // Set TextArea.TextDoc
         JavaTextArea javaTextArea = getTextArea();
