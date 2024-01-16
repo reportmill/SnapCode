@@ -110,7 +110,7 @@ public class JavaFileBuilderX extends JavaFileBuilder {
 
             // Add task manager task with message: "Compiling MyClass (X of MaxX)"
             String className = _proj.getProjectFiles().getClassNameForFile(sourceFile);
-            String msg = String.format("Compiling %s (%d of %d)", className, i, sourceFiles.size());
+            String msg = String.format("Compiling %s (%d of %d)", className, i + 1, sourceFiles.size());
             taskMonitor.beginTask(msg, -1);
 
             // Build file
@@ -130,10 +130,6 @@ public class JavaFileBuilderX extends JavaFileBuilder {
             // Stop task manager task
             taskMonitor.endTask();
         }
-
-        // Finalize TaskMonitor
-        taskMonitor.beginTask("Build Completed", -1);
-        taskMonitor.endTask();
 
         // Return
         return buildFilesSuccess;

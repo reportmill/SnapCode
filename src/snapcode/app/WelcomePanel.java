@@ -3,6 +3,7 @@
  */
 package snapcode.app;
 import snap.util.*;
+import snapcode.apptools.FileTreeTool;
 import snapcode.apptools.FilesTool;
 import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
@@ -194,6 +195,10 @@ public class WelcomePanel extends ViewOwner {
     {
         // Open empty workspace pane
         WorkspacePane workspacePane = openEmptyWorkspace();
+        workspacePane.showProjectTool();
+
+        // Show FileTreeTool
+        workspacePane.getWorkspaceTools().getLeftTray().setSelToolForClass(FileTreeTool.class);
 
         // Show new project panel
         runLater(() -> {
@@ -228,6 +233,7 @@ public class WelcomePanel extends ViewOwner {
     {
         // Open empty workspace pane
         WorkspacePane workspacePane = openEmptyWorkspace();
+        workspacePane.showProjectTool();
 
         // Add project for repo URL
         Workspace workspace = workspacePane.getWorkspace();

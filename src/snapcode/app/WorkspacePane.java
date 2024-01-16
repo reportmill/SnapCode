@@ -131,9 +131,8 @@ public class WorkspacePane extends ViewOwner {
         if (!sourceURL.getString().contains("TempProj"))
             RecentFiles.addURL(sourceURL);
 
-        // Hide LeftTray and show RunTool
-        _workspaceTools.getLeftTray().setSelTool(null);
-        _workspaceTools.getRightTray().setSelToolForClass(RunTool.class);
+        // Show RunTool
+        showRunTool();
 
         // Show source file
         runLater(() -> {
@@ -313,6 +312,22 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
+     * Shows the project tool (FileTreeTool).
+     */
+    public void showProjectTool()
+    {
+        _workspaceTools.showToolForClass(FileTreeTool.class);
+    }
+
+    /**
+     * Shows the run tool (FileTreeTool).
+     */
+    public void showRunTool()
+    {
+        _workspaceTools.showToolForClass(RunTool.class);
+    }
+
+    /**
      * Returns the build directory.
      */
     public WebFile getBuildDir()
@@ -375,7 +390,6 @@ public class WorkspacePane extends ViewOwner {
         // Add LeftTray
         ToolTray leftTray = _workspaceTools.getLeftTray();
         View leftTrayUI = leftTray.getUI();
-        leftTray.setSelToolForClass(FileTreeTool.class);
         pagePaneSplitView.addItem(leftTrayUI, 0);
 
         // Add RightTray
@@ -597,8 +611,8 @@ public class WorkspacePane extends ViewOwner {
             FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
             fileTreeTool.updateChangedFile(file);
 
-            // If LastModTime, add build file
-            if (propName == WebFile.LastModTime_Prop) {
+            // If LastModTime and not dir, add build file
+            if (propName == WebFile.LastModTime_Prop && file.isFile()) {
                 Project proj = Project.getProjectForFile(file);
                 if (proj != null) {
                     ProjectBuilder projectBuilder = proj.getBuilder();

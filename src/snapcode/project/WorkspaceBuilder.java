@@ -1,5 +1,6 @@
 package snapcode.project;
 import snap.util.ArrayUtils;
+import snap.util.FormatUtils;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
 import snap.view.ViewUtils;
@@ -174,15 +175,19 @@ public class WorkspaceBuilder {
             _addAllFilesToBuild = false;
         }
 
-        // Get all projects
-        Project[] projects = _workspace.getProjects();
+        // If no file to build, just return
+        if (!isNeedsBuild())
+            return _workspace.getBuildIssues().getErrorCount() == 0;
 
         // Start building
         _buildLogBuffer.setLength(0);
-        _buildLogBuffer.append("Build Started - " + new Date() + '\n');
+        String dateString = FormatUtils.formatDate(new Date(), "MMM dd, HH:mm:ss");
+        _buildLogBuffer.append("Build Started - ").append(dateString).append('\n');
         _workspace.setBuilding(true);
+        long buildStartTime = System.currentTimeMillis();
 
-        // Track buildSuccess
+        // Get all projects and declare var for buildSuccess
+        Project[] projects = _workspace.getProjects();
         boolean buildSuccess = true;
 
         // Build child projects - need to recurse!!!
@@ -196,6 +201,10 @@ public class WorkspaceBuilder {
                 break;
             }
         }
+
+        // Long finished
+        String elapsedTimeString = FormatUtils.formatNum((System.currentTimeMillis() - buildStartTime) / 1000d);
+        _buildLogBuffer.append("Build Completed (").append(elapsedTimeString).append(" seconds)");
 
         // Stop building
         _workspace.setActivity(null);
@@ -267,10 +276,6 @@ public class WorkspaceBuilder {
 
             // Clear runner
             _buildWorkspaceRunner = null;
-
-            // Update Workspace Activity/Building
-            _workspace.setActivity("Build Completed");
-            _workspace.setBuilding(false);
         }
 
         /**
