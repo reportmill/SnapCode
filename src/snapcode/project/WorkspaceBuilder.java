@@ -149,9 +149,9 @@ public class WorkspaceBuilder {
     public void cleanWorkspace()
     {
         boolean old = setAutoBuildEnabled(false);
-        Project rootProj = _workspace.getRootProject();
-        ProjectBuilder rootProjBuilder = rootProj.getBuilder();
-        rootProjBuilder.cleanProject();
+        Project[] projects = _workspace.getProjects();
+        for (Project project : projects)
+            project.getBuilder().cleanProject();
         setAutoBuildEnabled(old);
     }
 
