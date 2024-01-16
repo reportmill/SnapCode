@@ -179,42 +179,6 @@ public class ProjectUtils {
     }
 
     /**
-     * Returns a URL to the project source file implied by given URL.
-     * If URL is null, gets temp project and creates temp source file.
-     * If URL site doesn't have project, creates project for URL parent and returns source file URL.
-     */
-    public static WebFile getProjectSourceFileForURL(WebURL aSourceURL)
-    {
-        // Check for existing project for SourceURL - if found, just return URL
-        WebSite sourceSite = aSourceURL.getSite();
-        Project proj = Project.getProjectForSite(sourceSite);
-        if (proj != null) {
-            String path = aSourceURL.getPath();
-            return proj.getSourceFile(path, true, false);
-        }
-
-        // Get parent dir URL as site to act as project root site
-        WebURL parentDirURL = aSourceURL.getParent();
-        WebSite parentDirSite = parentDirURL.getAsSite();
-
-        // Create new project for parent dir site
-        Workspace newWorkspace = new Workspace();
-        Project newProj = newWorkspace.addProjectForSite(parentDirSite);
-        newProj.setReadOnly(true); // Not sure I love this
-
-        // Clear source dir
-        BuildFile buildFile = newProj.getBuildFile();
-        buildFile.setSourcePath("");
-
-        // Create source file for SourceURL file name
-        String fileName = '/' + aSourceURL.getFilename();
-        WebFile projectSourceFile = newProj.getSourceFile(fileName, true, false);
-
-        // Return
-        return projectSourceFile;
-    }
-
-    /**
      * Returns a class path for given class.
      */
     public static String getClassPathForClass(Class<?> aClass)

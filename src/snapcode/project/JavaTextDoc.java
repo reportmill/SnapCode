@@ -9,7 +9,6 @@ import snap.gfx.Font;
 import snap.parse.*;
 import snap.text.*;
 import snap.web.WebFile;
-import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class JavaTextDoc extends TextDoc {
     /**
      * Constructor.
      */
-    public JavaTextDoc()
+    protected JavaTextDoc()
     {
         super();
 
@@ -129,35 +128,11 @@ public class JavaTextDoc extends TextDoc {
     }
 
     /**
-     * Returns the source file.
-     */
-    @Override
-    public WebFile getSourceFile()
-    {
-        WebFile sourceFile = super.getSourceFile();
-        if (sourceFile != null)
-            return sourceFile;
-
-        WebURL sourceURL = getSourceURL();
-        return ProjectUtils.getProjectSourceFileForURL(sourceURL);
-    }
-
-    /**
      * Returns a new JavaTextDoc from given source.
      */
-    public static JavaTextDoc getJavaTextDocForSource(Object aSource)
+    public static JavaTextDoc getJavaTextDocForSource(WebFile sourceFile)
     {
-        // Get Source file
-        WebURL sourceURL = WebURL.getURL(aSource);
-        if (sourceURL == null)
-            throw new RuntimeException("JavaTextDoc.getJavaTextDocForSource: Invalid source: " + aSource);
-        WebFile sourceFile = ProjectUtils.getProjectSourceFileForURL(sourceURL);
-
-        // Get java agent and TextDoc
         JavaAgent javaAgent = JavaAgent.getAgentForFile(sourceFile);
-        JavaTextDoc javaTextDoc = javaAgent.getJavaTextDoc();
-
-        // Return
-        return javaTextDoc;
+        return javaAgent.getJavaTextDoc();
     }
 }

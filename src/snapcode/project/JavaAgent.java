@@ -66,6 +66,8 @@ public class JavaAgent {
     public Workspace getWorkspace()
     {
         Project proj = getProject();
+        if (proj == null)
+            return null;
         return proj.getWorkspace();
     }
 
@@ -136,7 +138,8 @@ public class JavaAgent {
         // Set SourceFile
         jfile.setSourceFile(_file);
         Project project = getProject();
-        jfile.setResolverSupplier(() -> project.getResolver());
+        if (project != null)
+            jfile.setResolverSupplier(() -> project.getResolver());
 
         // Return
         return jfile;
@@ -148,6 +151,8 @@ public class JavaAgent {
     public BuildIssue[] getBuildIssues()
     {
         Workspace workspace = getWorkspace();
+        if (workspace == null)
+            return new BuildIssue[0];
         BuildIssues projBuildIssues = workspace.getBuildIssues();
         return projBuildIssues.getIssuesForFile(_file);
     }
@@ -159,6 +164,8 @@ public class JavaAgent {
     {
         // Get Workspace.BuildIssues and clear
         Workspace workspace = getWorkspace();
+        if (workspace == null)
+            return;
         BuildIssues buildIssuesMgr = workspace.getBuildIssues();
 
         // Remove old issues

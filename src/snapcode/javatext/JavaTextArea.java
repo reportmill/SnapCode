@@ -6,7 +6,6 @@ import java.util.*;
 import javakit.parse.*;
 import javakit.resolver.JavaDecl;
 import snap.util.FileUtils;
-import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.project.JavaTextDoc;
 import snap.geom.Rect;
@@ -932,16 +931,18 @@ public class JavaTextArea extends TextArea {
      */
     private static JavaTextDoc createDummyTextDoc()
     {
-        // Create dummy project/workspace
-        String tempProjPath = FileUtils.getTempFile("DummyProj").getAbsolutePath();
-        WebURL tempProjURL = WebURL.getURL(tempProjPath);
-        assert (tempProjURL != null);
-        WebSite tempProjSite = tempProjURL.getAsSite();
-        Workspace workspace = new Workspace();
-        Project proj = workspace.addProjectForSite(tempProjSite);
+        // Get/Create dummy java file
+        String tempFilePath = FileUtils.getTempFile("Dummy.java").getAbsolutePath();
+        WebURL tempFileURL = WebURL.getURL(tempFilePath);
+        assert (tempFileURL != null);
+        WebFile tempFile = tempFileURL.getFile();
+        if (tempFile == null) {
+            tempFile = tempFileURL.createFile(false);
+            tempFile.setBytes(new byte[0]);
+            tempFile.save();
+        }
 
-        // Create dummy java file
-        WebFile tempFile = proj.getSourceFile("/Dummy.java", true, false);
+        // Return text doc for temp file
         return JavaTextDoc.getJavaTextDocForSource(tempFile);
     }
 }
