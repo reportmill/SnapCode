@@ -4,13 +4,14 @@ import snap.view.View;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
 import snapcharts.repl.Console;
-import snapcharts.repl.ScanPane;
 import snapcode.apptools.RunTool;
 import snapcode.project.JavaAgent;
 import snapcode.project.Project;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * This RunApp subclass runs an app from source.
@@ -24,7 +25,7 @@ public class RunAppSrc extends RunApp {
     private boolean _runAppThreadWaiting;
 
     // An input stream for standard in
-    protected ScanPane.BytesInputStream _standardInInputStream;
+    protected BytesInputStream _standardInInputStream;
 
     // The JavaShell
     protected JavaShell _javaShell;
@@ -63,7 +64,7 @@ public class RunAppSrc extends RunApp {
         synchronized (RunAppSrc.class) {
 
             // Replace System.in with proxy versions to allow input/output
-            System.setIn(_standardInInputStream = new ScanPane.BytesInputStream(null));
+            System.setIn(_standardInInputStream = new BytesInputStream());
             System.setOut(new ProxyPrintStream(REAL_SYSTEM_OUT));
             System.setErr(new ProxyPrintStream(REAL_SYSTEM_ERR));
 
@@ -301,5 +302,103 @@ public class RunAppSrc extends RunApp {
             String str = new String(buf, off, len);
             appendConsoleOutput(str, this == System.err);
         }
+    }
+
+    /**
+     * An InputStream that lets you add bytes on the fly.
+     */
+    private static class BytesInputStream extends InputStream {
+
+        // The byte array
+        private byte[]  buf = new byte[0];
+        private byte[]  buf2 = new byte[1];
+
+        // The index of the next character to read, the currently marked position, and the number of bytes.
+        private int  pos, mark, count;
+
+        // Whether waiting for more input
+        private boolean  _waiting;
+
+        /** Constructor */
+        public BytesInputStream()
+        {
+            super();
+        }
+
+        /** Adds string to stream. */
+        public void add(String aStr)
+        {
+            add(aStr.getBytes());
+        }
+
+        /** Adds bytes to stream. */
+        public void add(byte[] theBytes)
+        {
+            int len = buf.length;
+            buf = Arrays.copyOf(buf, len + theBytes.length);
+            System.arraycopy(theBytes, 0, buf, len, theBytes.length);
+            count = buf.length;
+            if (_waiting) {
+                synchronized(this) {
+                    try { notifyAll(); _waiting = false; }
+                    catch(Exception e) { throw new RuntimeException(e); }
+                }
+            }
+        }
+
+        /** Reads the next byte of data from this input stream. */
+        @Override
+        public int read()
+        {
+            int len = read(buf2, 0, 1);
+            return len > 0 ? buf2[0] : -1;
+        }
+
+        /** Reads up to <code>len</code> bytes of data into an array of bytes from this input stream. */
+        @Override
+        public int read(byte[] theBytes, int off, int len)
+        {
+            while (pos >= count) {
+                synchronized(this) {
+                    try { _waiting = true; wait(); }
+                    catch(Exception ignore) { }
+                }
+            }
+
+            int avail = count - pos;
+            if (len > avail) len = avail;
+            if (len <= 0)
+                return 0;
+            System.arraycopy(buf, pos, theBytes, off, len);
+            pos += len;
+            return len;
+        }
+
+        /** Skips <code>n</code> bytes of input from this input stream. */
+        @Override
+        public synchronized long skip(long n)
+        {
+            long k = count - pos;
+            if (n < k) {
+                k = n < 0 ? 0 : n;
+            }
+            pos += k;
+            return k;
+        }
+
+        /** Returns the number of remaining bytes that can be read (or skipped over) from this input stream. */
+        public synchronized int available() { return count - pos; }
+
+        /** Tests if this <code>InputStream</code> supports mark/reset. */
+        public boolean markSupported() { return true; }
+
+        /** Set the current marked position in the stream. */
+        public void mark(int readAheadLimit) { mark = pos; }
+
+        /** Resets the buffer to the marked position. */
+        public synchronized void reset() { pos = mark; }
+
+        /** Closing a <tt>BytesArrayInputStream</tt> has no effect. */
+        public void close() throws IOException  { }
     }
 }
