@@ -1,12 +1,10 @@
 package snapcode.apptools;
 import snap.util.FilePathUtils;
+import snap.util.SnapUtils;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import snapcode.debug.DebugApp;
-import snapcode.debug.RunApp;
-import snapcode.debug.RunAppBin;
-import snapcode.debug.RunAppSrc;
+import snapcode.debug.*;
 import snapcode.project.*;
 import java.io.File;
 import java.util.ArrayList;
@@ -52,8 +50,11 @@ public class RunToolUtils {
         }
 
         // Handle Run Remote: Create app
-        if (ViewUtils.isAltDown())
+        if (ViewUtils.isAltDown()) {
+            if (SnapUtils.isWebVM)
+                return new RunAppWeb(runTool, mainFile, runArgs);
             return new RunAppBin(runTool, mainFile, runArgs);
+        }
 
         // Handle run local
         Project proj = runTool.getProject();
