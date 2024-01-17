@@ -134,8 +134,12 @@ public class RunTool extends WorkspaceTool implements AppListener {
      */
     public void runConfigOrFile(RunConfig aConfig, WebFile aFile, boolean isDebug)
     {
-        RunApp proc = RunToolUtils.createRunAppForConfigOrFile(this, aConfig, aFile, isDebug);
-        runApp(proc);
+        // Automatically save all files - this is getting done twice for build, maybe this should call build tool
+        _workspace.saveAllFiles();
+
+        // Create RunApp and run
+        RunApp runApp = RunToolUtils.createRunAppForConfigOrFile(this, aConfig, aFile, isDebug);
+        runApp(runApp);
     }
 
     /**
@@ -146,9 +150,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // If no app, just return
         if (runApp == null)
             return;
-
-        // Automatically save all files - this is getting done twice for build, maybe this should call build tool
-        _workspace.saveAllFiles();
 
         // Show tool
         boolean isDebug = runApp instanceof DebugApp;
