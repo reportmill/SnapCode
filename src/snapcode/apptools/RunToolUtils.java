@@ -49,8 +49,11 @@ public class RunToolUtils {
             return debugApp;
         }
 
+        // Get whether to run externally
+        boolean runSeparateProcess = ViewUtils.isAltDown() || aFile != null && aFile.getText().contains("javax.swing");
+
         // Handle Run Remote: Create app
-        if (ViewUtils.isAltDown()) {
+        if (runSeparateProcess) {
             if (SnapUtils.isWebVM)
                 return new RunAppWeb(runTool, mainFile, runArgs);
             return new RunAppBin(runTool, mainFile, runArgs);
