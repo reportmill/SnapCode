@@ -29,7 +29,6 @@ public class RunAppWeb extends RunApp {
     public RunAppWeb(RunTool runTool, WebFile mainFile, String[] theArgs)
     {
         super(runTool, mainFile, theArgs);
-        System.out.println("RunAppWeb.init: " + Arrays.toString(theArgs));
     }
 
     /**

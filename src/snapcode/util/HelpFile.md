@@ -290,3 +290,24 @@
     var image3D = Quick3D.createImage3D(image)
     show(image3D)
 ```
+
+# Swing
+
+## Create Button
+
+```
+    import java.awt.Dimension;
+    import javax.swing.JButton;
+    import javax.swing.JFrame;
+
+    // Create button
+    JButton button = new JButton("Hello World");
+    
+    // Create frame and show
+    JFrame frame = new JFrame("Hello World");
+    frame.setPreferredSize(new Dimension(300, 300));
+    frame.setContentPane(button);
+    frame.pack();
+    frame.setLocationRelativeTo(null);
+    frame.setVisible(true);
+```

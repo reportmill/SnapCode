@@ -121,10 +121,8 @@ public class RunToolUtils {
         List<String> commands = new ArrayList<>();
 
         // If not debug, add Java command path
-        if (!isDebug) {
-            String javaCmdPath = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-            commands.add(javaCmdPath);
-        }
+        if (!isDebug)
+            commands.add(getJavaCmdPath());
 
         // Try to replace file with project file
         Project proj = Project.getProjectForFile(aFile);
@@ -167,5 +165,14 @@ public class RunToolUtils {
             runConfigs.writeFile();
             runTool.runConfigOrFile(runConfig, null, withDebug);
         }
+    }
+
+    /**
+     * Returns the path for the java command.
+     */
+    private static String getJavaCmdPath()
+    {
+        if (SnapUtils.isWebVM) return "java";
+        return System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
     }
 }
