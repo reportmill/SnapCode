@@ -199,6 +199,9 @@ public class WelcomePanel extends ViewOwner {
             return;
         }
 
+        // Show project tool
+        workspacePane.showProjectTool();
+
         // Open project: Get project site and add to workspace
         WebFile projectDir = aFile.isDir() ? aFile : aFile.getParent();
         WebSite projectSite = projectDir.getURL().getAsSite();
