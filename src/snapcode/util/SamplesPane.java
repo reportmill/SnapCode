@@ -1,16 +1,11 @@
 package snapcode.util;
 import snap.geom.Pos;
-import snap.geom.Size;
-import snap.geom.VPos;
 import snap.gfx.*;
-import snap.util.StringUtils;
+import snap.util.TaskRunner;
 import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.viewx.DialogSheet;
-import snap.web.WebResponse;
 import snap.web.WebURL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -21,25 +16,17 @@ public class SamplesPane extends ViewOwner {
     // A consumer for resulting URL
     private Consumer<WebURL>  _handler;
 
-    // The selected index
-    private int  _selIndex;
+    // The selected doc
+    private SampleDoc _selDoc;
 
     // The dialog box
     private DialogSheet  _dialogSheet;
 
-    // The shared document names
-    private static String[]  _docNames;
-
-    // The shared document images
-    private static Image[]  _docImages;
+    // The samples docs
+    private static SampleDoc[] _sampleDocs = new SampleDoc[0];
 
     // Constants
-    private static final String SAMPLES_ROOT = "https://reportmill.com/SnapCode/Samples/";
-    private static final String SAMPLES_EXT = ".jepl";
-    private static final String SAMPLES_LABEL = "Select a Java REPL file:";
-    private static final Size DOC_SIZE = new Size(130, 102);
-    private static final Effect SHADOW = new ShadowEffect(20, Color.GRAY, 0, 0);
-    private static final Effect SHADOW_SEL = new ShadowEffect(20, Color.get("#038ec3"), 0, 0);
+    private static final String SAMPLES_LABEL = "Select a sample file:";
     private static final Color CONTENT_FILL = new Color(.98, .98, 1d);
 
     /**
@@ -65,8 +52,33 @@ public class SamplesPane extends ViewOwner {
         if (_dialogSheet.isCancelled()) return;
 
         // Get selected URL and send to handler
-        WebURL url = getDocURL(_selIndex);
+        SampleDoc selDoc = getSelDoc();
+        WebURL url = selDoc.getURL();
         runLater(() -> _handler.accept(url));
+    }
+
+    /**
+     * Returns the selected doc.
+     */
+    public SampleDoc getSelDoc()  { return _selDoc; }
+
+    /**
+     * Sets the selected doc.
+     */
+    public void setSelDoc(SampleDoc aDoc)
+    {
+        // If already set, just return
+        if (aDoc == _selDoc) return;
+
+        // If old selection, turn off selected
+        if (_selDoc != null)
+            _selDoc.setSelected(false);
+
+        _selDoc = aDoc;
+
+        // If new selection, turn on selected
+        if (_selDoc != null)
+            _selDoc.setSelected(true);
     }
 
     /**
@@ -120,59 +132,29 @@ public class SamplesPane extends ViewOwner {
     @Override
     protected void initUI()
     {
-        if (_docNames == null)
-            loadIndexFile();
+        if (_sampleDocs.length == 0)
+            loadSampleDocs();
         else buildUI();
     }
 
     /**
-     * Starts loading.
+     * Returns the samples docs.
      */
-    private void loadIndexFile()
+    private void loadSampleDocs()
     {
-        WebURL url = WebURL.getURL(SAMPLES_ROOT + "index.txt");
-        url.getResponseAndCall(resp -> indexFileLoaded(resp));
-    }
-
-    /**
-     * Loads content.
-     */
-    private void indexFileLoaded(WebResponse aResp)
-    {
-        // If response is bogus, report it
-        if (aResp.getCode() != WebResponse.OK) {
-            runLater(() -> indexFileLoadFailed(aResp));
-            return;
-        }
-
-        // Get text and break into lines
-        String text = aResp.getText();
-        String[] lines = text.split("\\s*\n\\s*");
-
-        // Get names list from lines
-        List<String> docNamesList = new ArrayList<>();
-        for (String line : lines) {
-            line = line.trim();
-            if (line.length() > 0)
-                docNamesList.add(line);
-        }
-
-        // Get DocNames from list
-        _docNames = docNamesList.toArray(new String[0]);
-        _docImages = new Image[_docNames.length];
-
-        // Rebuild UI
-        runLater(() -> buildUI());
+        TaskRunner<SampleDoc[]> loadSampleDocsRunner = new TaskRunner<>(SampleDoc::getSampleDocs);
+        loadSampleDocsRunner.setOnSuccess(sdocs -> { _sampleDocs = sdocs; buildUI(); });
+        loadSampleDocsRunner.setOnFailure(this::loadSampleDocsFailed);
+        loadSampleDocsRunner.start();
     }
 
     /**
      * Loads failure condition.
      */
-    private void indexFileLoadFailed(WebResponse aResp)
+    private void loadSampleDocsFailed(Exception anException)
     {
         // Get error string and TextArea
-        String str = "Failed to load index file.\n" + "Response code: " + aResp.getCodeString() + "\n" +
-                "Exception: " + aResp.getException();
+        String str = "Failed to load index file.\n" + "Exception: " + anException;
         TextArea textArea = new TextArea();
         textArea.setText(str);
 
@@ -191,9 +173,11 @@ public class SamplesPane extends ViewOwner {
         ColView colView = getView("ItemColView", ColView.class);
         colView.removeChildren();
 
-        // Create RowViews
+        // Keep running RowView to add doc boxes to rows instead of column
         RowView rowView = null;
-        for (int i = 0; i < _docNames.length; i++) {
+
+        // Create RowViews
+        for (int i = 0; i < _sampleDocs.length; i++) {
 
             // Create/add new RowView for every three samples
             if (i % 3 == 0) {
@@ -202,162 +186,29 @@ public class SamplesPane extends ViewOwner {
                 colView.addChild(rowView);
             }
 
-            // Create/add new ItemBox for index
-            View itemBox = createItemBox(i);
-            rowView.addChild(itemBox);
+            // Add doc view to row
+            SampleDoc sampleDoc = _sampleDocs[i];
+            ColView docView = sampleDoc.getDocView();
+            rowView.addChild(docView);
+            sampleDoc._samplesPane = this;
+            sampleDoc.setSelected(i == 0);
         }
 
         // Make sure all row views and image boxes are owned by ui
         for (View child : colView.getChildren())
             child.setOwner(this);
-
-        // Load images
-        loadImagesInBackground();
-    }
-
-    /**
-     * Creates an item box for given index.
-     */
-    private ColView createItemBox(int anIndex)
-    {
-        // Create ImageViewX for sample
-        ImageView imageView = new ImageView();
-        imageView.setPrefSize(DOC_SIZE);
-        imageView.setName("ImageView" + anIndex);
-
-        // Create label for sample
-        String name = getDocName(anIndex);
-        String labelText = name.replace('_', ' ');
-        Label label = new Label(labelText);
-        label.setFont(Font.Arial13);
-        label.setPadding(3, 4, 3, 4);
-        label.setLeanY(VPos.BOTTOM);
-
-        // Create/add ItemBox for Sample and add ImageView + Label
-        ColView itemBox = new ColView();
-        itemBox.setPrefSize(200, 200);
-        itemBox.setAlign(Pos.CENTER);
-        itemBox.setPadding(0, 0, 8, 0);
-        itemBox.setName("ItemBox" + anIndex);
-        itemBox.addEventHandler(e -> itemBoxWasPressed(itemBox, e), MousePress);
-        itemBox.setChildren(imageView, label);
-        setItemBoxSelected(itemBox, anIndex == 0);
-
-        // Return
-        return itemBox;
-    }
-
-    /**
-     * Configures an item box.
-     */
-    private void setItemBoxSelected(ColView itemBox, boolean isSelected)
-    {
-        // Set ImageView.Effect
-        ImageView imageView = (ImageView) itemBox.getChild(0);
-        imageView.setEffect(isSelected ? SHADOW_SEL : SHADOW);
-
-        // Set Label Fill and TextFill
-        Label oldLabel = (Label) itemBox.getChild(1);
-        oldLabel.setFill(isSelected ? Color.BLUE : null);
-        oldLabel.setTextFill(isSelected ? Color.WHITE : null);
     }
 
     /**
      * Called when template ItemBox is clicked.
      */
-    private void itemBoxWasPressed(ColView anItemBox, ViewEvent anEvent)
+    protected void docBoxWasPressed(SampleDoc sampleDoc, ViewEvent anEvent)
     {
-        // Get name and index of pressed ItemBox
-        String name = anItemBox.getName();
-        int index = StringUtils.intValue(name);
-
-        // Set attributes of current selection back to normal
-        ColView oldItemBox = getView("ItemBox" + _selIndex, ColView.class);
-        setItemBoxSelected(oldItemBox, false);
-
-        // Set attributes of new selection to selected effect
-        setItemBoxSelected(anItemBox, true);
-
-        // Set new index
-        _selIndex = index;
+        setSelDoc(sampleDoc);
 
         // If double-click, confirm dialog box
         if (anEvent.getClickCount() > 1)
             _dialogSheet.confirm();
-    }
-
-    /**
-     * Returns the number of docs.
-     */
-    private static int getDocCount()  { return _docNames.length; }
-
-    /**
-     * Returns the doc name at index.
-     */
-    private static String getDocName(int anIndex)  { return _docNames[anIndex]; }
-
-    /**
-     * Returns the doc url at given index.
-     */
-    private static WebURL getDocURL(int anIndex)
-    {
-        // Get document name, URL string and URL
-        String name = getDocName(anIndex);
-        String urls = SAMPLES_ROOT + name + '/' + name + SAMPLES_EXT;
-        WebURL url = WebURL.getURL(urls);
-        return url;
-    }
-
-    /**
-     * Returns the doc thumnail image at given index.
-     */
-    private Image getDocImage(int anIndex)
-    {
-        // If image already set, just return
-        Image image = _docImages[anIndex];
-        if (image != null) return image;
-
-        // Get image name, URL string, and URL
-        String name = getDocName(anIndex);
-        String urls = SAMPLES_ROOT + name + '/' + name + ".png";
-        WebURL imgURL = WebURL.getURL(urls);
-
-        // Create Image. Then make sure image is loaded by requesting Image.Native.
-        image = _docImages[anIndex] = Image.getImageForSource(imgURL);
-        image.getNative();
-        return image;
-    }
-
-    /**
-     * Loads the thumbnail image for each sample in background thread.
-     */
-    private void loadImagesInBackground()
-    {
-        new Thread(() -> loadImages()).start();
-    }
-
-    /**
-     * Loads the thumbnail image for each sample in background thread.
-     */
-    private void loadImages()
-    {
-        // Iterate over sample names and load/set images
-        for (int i = 0; i < getDocCount(); i++) {
-            int index = i;
-            Image img = getDocImage(i);
-            runLater(() -> setImage(img, index));
-        }
-    }
-
-    /**
-     * Called after an image is loaded to set in ImageView in app thread.
-     */
-    private void setImage(Image anImg, int anIndex)
-    {
-        String name = "ImageView" + anIndex;
-        ImageView iview = getView(name, ImageView.class);
-        iview.setImage(anImg);
-        iview.setPrefSize(-1, -1);
     }
 
     /**
@@ -370,6 +221,8 @@ public class SamplesPane extends ViewOwner {
         anim.getAnim(400).setScale(1.3).getAnim(800).setScale(1.1).getAnim(1200).setScale(1.3).getAnim(1600).setScale(1.0)
                 .getAnim(2400).setRotate(360);
         anim.setLoopCount(3).play();
+
+        new Thread(() -> SampleDoc.getSampleDocs()).start();
     }
 
     /**

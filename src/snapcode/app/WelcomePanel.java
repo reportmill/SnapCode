@@ -36,6 +36,9 @@ public class WelcomePanel extends ViewOwner {
     {
         super();
         _shared = this;
+
+        // Java Desktop seems to take a ~second to do first URL fetch
+        primeNetworkConnection();
     }
 
     /**
@@ -439,5 +442,15 @@ public class WelcomePanel extends ViewOwner {
 
         // Return not project file
         return false;
+    }
+
+    /**
+     * Prime network connections: Java desktop seems to take a second+ to do first URL fetch.
+     */
+    private static void primeNetworkConnection()
+    {
+        if (SnapUtils.isWebVM) return;
+        Thread primeThread = new Thread(() -> WebURL.getURL("https://reportmill.com/index.html").getHead());
+        ViewUtils.runDelayed(() -> primeThread.start(), 1000);
     }
 }
