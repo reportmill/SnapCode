@@ -11,7 +11,6 @@ import snap.props.PropChange;
 import snap.view.*;
 import snap.viewx.FilePanel;
 import snap.web.*;
-import snapcode.project.WorkspaceBuilder;
 
 /**
  * An implementation of a panel to manage/open user Snap sites (projects).
@@ -106,11 +105,11 @@ public class WelcomePanel extends ViewOwner {
     {
         // Handle SamplesButton
         if (anEvent.equals("SamplesButton"))
-            openWorkspaceForNewFileOfType("jepl", true);
+            openWorkspaceForShowSamples();
 
         // Handle NewButton, NewJavaReplMenu
         if (anEvent.equals("NewButton") || anEvent.equals("NewJavaReplMenu"))
-            openWorkspaceForNewFileOfType("jepl", false);
+            openWorkspaceForNewFileOfType("jepl");
 
         // Handle OpenButton
         if (anEvent.equals("OpenButton")) {
@@ -120,7 +119,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Handle NewJavaClassMenu
         if (anEvent.equals("NewJavaClassMenu"))
-            openWorkspaceForNewFileOfType("java", false);
+            openWorkspaceForNewFileOfType("java");
 
         // Handle NewProjectButton
         if (anEvent.equals("NewProjectButton"))
@@ -136,14 +135,29 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
+     * Opens empty workspace and triggers show samples.
+     */
+    protected void openWorkspaceForShowSamples()
+    {
+        //openWorkspaceForNewFileOfType("jepl", true);
+
+        // Open empty workspace pane with temp project
+        WorkspacePane workspacePane = openEmptyWorkspace();
+
+        // Show samples
+        runDelayed(300, () -> workspacePane.getWorkspaceTools().showSamples());
+    }
+
+    /**
      * Creates a new file.
      */
-    protected void openWorkspaceForNewFileOfType(String fileType, boolean showSamples)
+    protected void openWorkspaceForNewFileOfType(String fileType)
     {
         // Handle alt down
         if (ViewUtils.isAltDown()) {
             WebURL repoURL = WebURL.getURL("https://reportmill.com/SnapCode/Samples/Samples.zip");
-            openWorkspaceForRepoURL(repoURL);
+            assert (repoURL != null);
+            openWorkspaceForFile(repoURL.createFile(false));
             return;
         }
 
@@ -160,25 +174,29 @@ public class WelcomePanel extends ViewOwner {
             else filesTool.newJavaFileForName("JavaFiddle");
         });
 
-        // Show samples or start sample button anim
-        if (showSamples)
-            runDelayed(300, () -> workspacePane.getWorkspaceTools().showSamples());
-        else runLater(() -> workspacePane.getWorkspaceTools().startSamplesButtonAnim());
+        // Start sample button anim
+        runLater(() -> workspacePane.getWorkspaceTools().startSamplesButtonAnim());
     }
 
     /**
      * Opens a Workspace for given Java/Jepl file or project dir/file.
      */
-    protected WorkspacePane openWorkspaceForFile(WebFile aFile)
+    protected void openWorkspaceForFile(WebFile aFile)
     {
         // Open empty workspace pane
         WorkspacePane workspacePane = openEmptyWorkspace();
 
-        // Get whether file is just a source file
+        // If file is just a source file, open external source file
         boolean isSourceFile = ArrayUtils.contains(FILE_TYPES, aFile.getType());
         if (isSourceFile) {
             ViewUtils.runLater(() -> workspacePane.openExternalSourceFile(aFile));
-            return workspacePane;
+            return;
+        }
+
+        // If file is zip file, open repo
+        if (aFile.getType().equals("zip")) {
+            WorkspacePaneUtils.addProjectForRepoURL(workspacePane, aFile.getURL());
+            return;
         }
 
         // Open project: Get project site and add to workspace
@@ -186,9 +204,6 @@ public class WelcomePanel extends ViewOwner {
         WebSite projectSite = projectDir.getURL().getAsSite();
         Workspace workspace = workspacePane.getWorkspace();
         workspace.addProjectForSite(projectSite);
-
-        // Return
-        return workspacePane;
     }
 
     /**
@@ -227,37 +242,6 @@ public class WelcomePanel extends ViewOwner {
                 filesTool.newJeplFileForNameAndString("JavaFiddle", javaString);
             else filesTool.newJavaFileForString(javaString);
         });
-    }
-
-    /**
-     * Opens a workspace for repo URL.
-     */
-    private void openWorkspaceForRepoURL(WebURL repoURL)
-    {
-        // Open empty workspace pane
-        WorkspacePane workspacePane = openEmptyWorkspace();
-        workspacePane.showProjectTool();
-
-        // Add project for repo URL
-        Workspace workspace = workspacePane.getWorkspace();
-        TaskRunner<Boolean> checkoutRunner = workspace.addProjectForRepoURL(repoURL);
-
-        // After add project, trigger build and show files
-        checkoutRunner.setOnSuccess(val -> openWorkspaceForRepoUrlFinished(workspacePane));
-
-        // Show check progress panel
-        checkoutRunner.getMonitor().showProgressPanel(workspacePane.getUI());
-    }
-
-    /**
-     * Called when openWorkspaceForRepoURL finished.
-     */
-    private void openWorkspaceForRepoUrlFinished(WorkspacePane workspacePane)
-    {
-        // Build all files
-        WorkspaceBuilder builder = workspacePane.getWorkspace().getBuilder();
-        builder.addAllFilesToBuild();
-        builder.buildWorkspaceLater();
     }
 
     /**

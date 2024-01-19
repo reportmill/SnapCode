@@ -11,7 +11,6 @@ import snap.util.ArrayUtils;
 import snap.view.*;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
-import snap.web.WebURL;
 import snapcode.apptools.*;
 import snapcode.util.SamplesPane;
 
@@ -317,21 +316,7 @@ public class WorkspaceTools {
     public void showSamples()
     {
         stopSamplesButtonAnim();
-        new SamplesPane().showSamples(_workspacePane, url -> showSamplesDidReturnURL(url));
-    }
-
-    /**
-     * Called when SamplesPane returns a URL.
-     */
-    private void showSamplesDidReturnURL(WebURL aURL)
-    {
-        WebFile externalSourceFile = aURL.createFile(false);
-        _workspacePane.openExternalSourceFile(externalSourceFile);
-
-        // Kick off run
-        RunTool runTool = getToolForClass(RunTool.class);
-        if (runTool != null)
-            ViewUtils.runLater(() -> runTool.runAppForSelFile(false));
+        new SamplesPane().showSamples(_workspacePane, url -> WorkspacePaneUtils.openSamplesUrl(_workspacePane, url));
     }
 
     /**

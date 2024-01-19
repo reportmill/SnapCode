@@ -1,6 +1,7 @@
 package snapcode.util;
 import snap.geom.*;
 import snap.gfx.*;
+import snap.util.FilePathUtils;
 import snap.util.SnapUtils;
 import snap.view.*;
 import snap.web.WebFile;
@@ -16,6 +17,9 @@ public class SampleDoc {
     // The name
     private String _name;
 
+    // The main file type
+    private String _fileType;
+
     // The image
     private Image _image;
 
@@ -30,7 +34,7 @@ public class SampleDoc {
 
     // Constants
     private static final String SAMPLES_ROOT = "https://reportmill.com/SnapCode/Samples/";
-    private static final String SAMPLES_EXT = ".jepl";
+    private static final String SAMPLES_INDEX = SAMPLES_ROOT +  "index2.txt";
     private static final Effect SHADOW = new ShadowEffect(20, Color.GRAY, 0, 0);
     private static final Effect SHADOW_SEL = new ShadowEffect(20, Color.get("#038ec3"), 0, 0);
     private static final Size DOC_SIZE = new Size(130, 102);
@@ -40,7 +44,8 @@ public class SampleDoc {
      */
     public SampleDoc(String aName)
     {
-        _name = aName;
+        _name = FilePathUtils.getFilenameSimple(aName);
+        _fileType = FilePathUtils.getType(aName);
     }
 
     /**
@@ -54,7 +59,7 @@ public class SampleDoc {
     public WebURL getURL()
     {
         String name = getName();
-        String usrString = SAMPLES_ROOT + name + '/' + name + SAMPLES_EXT;
+        String usrString = SAMPLES_ROOT + name + '/' + name + '.' + _fileType;
         return WebURL.getURL(usrString);
     }
 
@@ -163,7 +168,7 @@ public class SampleDoc {
     private static SampleDoc[] getSampleDocsImpl()
     {
         // Get index file URL
-        WebURL indexFileURL = WebURL.getURL(SAMPLES_ROOT + "index.txt");
+        WebURL indexFileURL = WebURL.getURL(SAMPLES_INDEX);
         assert (indexFileURL != null);
 
         // Get index file and text

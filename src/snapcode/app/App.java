@@ -111,13 +111,13 @@ public class App {
 
         // Handle 'New'
         if (arg0.equalsIgnoreCase("new")) {
-            WelcomePanel.getShared().openWorkspaceForNewFileOfType("jepl", false);
+            WelcomePanel.getShared().openWorkspaceForNewFileOfType("jepl");
             return true;
         }
 
         // Handle 'Samples'
         if (arg0.equalsIgnoreCase("samples")) {
-            WelcomePanel.getShared().openWorkspaceForNewFileOfType("jepl", true);
+            WelcomePanel.getShared().openWorkspaceForShowSamples();
             return true;
         }
 

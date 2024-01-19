@@ -1,6 +1,5 @@
 package snapcode.apptools;
 import snap.util.SnapUtils;
-import snapcode.project.WorkspaceBuilder;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
@@ -59,6 +58,32 @@ public class FileTreeTool extends WorkspaceTool {
 
         // Set array and Return
         return _rootFiles = rootFiles.toArray(new FileTreeFile[0]);
+    }
+
+    /**
+     * Shows the given file.
+     */
+    public void showFile(WebFile aFile)
+    {
+        FileTreeFile file = getTreeFile(aFile);
+        FileTreeFile[] rootTreeFiles = getRootFiles();
+        _filesTree.setItems(rootTreeFiles);
+        expandParent(file);
+        _filesTree.setSelItem(file);
+
+        setSelFile(aFile);
+    }
+
+    /**
+     * Lame - TreeView.setSelItem() should do this.
+     */
+    private void expandParent(FileTreeFile file)
+    {
+        FileTreeFile parent = file.getParent();
+        if (parent != null) {
+            expandParent(parent);
+            _filesTree.expandItem(parent);
+        }
     }
 
     /**
