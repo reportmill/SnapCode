@@ -393,6 +393,8 @@ public class WelcomePanel extends ViewOwner {
     {
         if (isSourceFile(aFile))
             return true;
+        if (aFile.getType().equals("zip"))
+            return true;
         return isProjectFile(aFile);
     }
 
