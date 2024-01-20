@@ -35,8 +35,11 @@ public class RunToolUtils {
         if (mainFile == null)
             return null;
 
+        // Get whether app is swing
+        boolean isSwing = aFile != null && aFile.getText().contains("javax.swing");
+
         // Get args for given config or main file
-        String[] runArgs = getRunArgsForConfigAndFile(runConfig, mainFile, isDebug);
+        String[] runArgs = getRunArgsForConfigAndFile(runConfig, mainFile, isDebug, isSwing);
 
         // Handle debug
         if (isDebug) {
@@ -52,7 +55,7 @@ public class RunToolUtils {
         // Run local if (1) TempProj and (2) jepl file and (3) not swing and (4) not alt-key-down
         Project proj = Project.getProjectForFile(mainFile);
         boolean runLocal = proj.getName().equals("TempProj") && aFile.getType().equals("jepl") &&
-                !aFile.getText().contains("javax.swing") && !ViewUtils.isControlDown();
+                !isSwing && !ViewUtils.isControlDown();
         if (runLocal) {
             String className = proj.getClassNameForFile(mainFile);
             String[] args = { className };
@@ -114,7 +117,7 @@ public class RunToolUtils {
     /**
      * Returns an array of args for given config and file.
      */
-    public static String[] getRunArgsForConfigAndFile(RunConfig aConfig, WebFile aFile, boolean isDebug)
+    public static String[] getRunArgsForConfigAndFile(RunConfig aConfig, WebFile aFile, boolean isDebug, boolean isSwing)
     {
         // Get basic run command and add to list
         List<String> commands = new ArrayList<>();
@@ -130,8 +133,9 @@ public class RunToolUtils {
         if (!isDebug) {
             String javaCmdPath = getJavaCmdPath();
             if (SnapUtils.isWebVM) {
+                System.out.println("Proj.buildfile: " + proj.getBuildFile());
                 boolean isSnapKit = proj.getBuildFile().isIncludeSnapKitRuntime();
-                boolean isSnapKitDom = isSnapKit && !ViewUtils.isAltDown();
+                boolean isSnapKitDom = isSnapKit && !ViewUtils.isAltDown() && !isSwing;
                 if (isSnapKitDom)
                     javaCmdPath = "java-dom";
             }
