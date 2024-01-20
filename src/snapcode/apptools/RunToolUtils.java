@@ -31,12 +31,12 @@ public class RunToolUtils {
         }
 
         // Get main file and args for given config or main file
-        WebFile mainFile = RunToolUtils.getMainFileForConfigAndFile(runTool, runConfig, aFile);
+        WebFile mainFile = getMainFileForConfigAndFile(runTool, runConfig, aFile);
         if (mainFile == null)
             return null;
 
         // Get args for given config or main file
-        String[] runArgs = RunToolUtils.getRunArgsForConfigAndFile(runConfig, mainFile, isDebug);
+        String[] runArgs = getRunArgsForConfigAndFile(runConfig, mainFile, isDebug);
 
         // Handle debug
         if (isDebug) {
@@ -49,23 +49,22 @@ public class RunToolUtils {
             return debugApp;
         }
 
-        // Get whether to run externally
-        boolean runSeparateProcess = ViewUtils.isAltDown() || aFile != null && aFile.getText().contains("javax.swing");
-
-        // Handle Run Remote: Create app
-        if (runSeparateProcess) {
-            if (SnapUtils.isWebVM)
-                return new RunAppWeb(runTool, mainFile, runArgs);
-            return new RunAppBin(runTool, mainFile, runArgs);
+        // Run local if (1) TempProj and (2) jepl file and (3) not swing and (4) not alt-key-down
+        Project proj = Project.getProjectForFile(mainFile);
+        boolean runLocal = proj.getName().equals("TempProj") && aFile.getType().equals("jepl") &&
+                !aFile.getText().contains("javax.swing") && !ViewUtils.isControlDown();
+        if (runLocal) {
+            String className = proj.getClassNameForFile(mainFile);
+            String[] args = { className };
+            return new RunAppSrc(runTool, mainFile, args);
         }
 
-        // Handle run local
-        Project proj = runTool.getProject();
-        String className = proj.getClassNameForFile(mainFile);
-        String[] args = { className };
+        // Handle web: Create and return RunAppWeb for browser launch
+        if (SnapUtils.isWebVM)
+            return new RunAppWeb(runTool, mainFile, runArgs);
 
-        // Create app and run
-        return new RunAppSrc(runTool, mainFile, args);
+        // Create and return RunAppBin for desktop
+        return new RunAppBin(runTool, mainFile, runArgs);
     }
 
     /**
@@ -98,7 +97,7 @@ public class RunToolUtils {
         if (mainFile.getType().equals("java"))
             classFile = projectFiles.getClassFileForJavaFile(mainFile);
 
-            // Try generic way to get class file
+        // Try generic way to get class file
         else classFile = projectFiles.getBuildFile(mainFile.getPath(), false, mainFile.isDir());
 
         // If ClassFile found, set run file
@@ -120,15 +119,23 @@ public class RunToolUtils {
         // Get basic run command and add to list
         List<String> commands = new ArrayList<>();
 
-        // If not debug, add Java command path
-        if (!isDebug)
-            commands.add(getJavaCmdPath());
-
         // Try to replace file with project file
         Project proj = Project.getProjectForFile(aFile);
         if (proj == null) {
             System.err.println("RunTool: not project file: " + aFile);
             return null;
+        }
+
+        // If not debug, add Java command path
+        if (!isDebug) {
+            String javaCmdPath = getJavaCmdPath();
+            if (SnapUtils.isWebVM) {
+                boolean isSnapKit = proj.getBuildFile().isIncludeSnapKitRuntime();
+                boolean isSnapKitDom = isSnapKit && !ViewUtils.isAltDown();
+                if (isSnapKitDom)
+                    javaCmdPath = "java-dom";
+            }
+            commands.add(javaCmdPath);
         }
 
         // Get Class path and add to list

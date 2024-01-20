@@ -4,7 +4,6 @@ import snap.util.StringUtils;
 import snap.web.WebFile;
 import snapcode.apptools.RunTool;
 import java.io.*;
-import java.util.Arrays;
 
 /**
  * A class to run an external process.
