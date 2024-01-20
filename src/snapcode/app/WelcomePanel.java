@@ -189,7 +189,7 @@ public class WelcomePanel extends ViewOwner {
         // If file is just a source file, open external source file
         boolean isSourceFile = ArrayUtils.contains(FILE_TYPES, aFile.getType());
         if (isSourceFile) {
-            ViewUtils.runLater(() -> workspacePane.openExternalSourceFile(aFile));
+            ViewUtils.runLater(() -> WorkspacePaneUtils.openExternalSourceFile(workspacePane, aFile));
             return;
         }
 

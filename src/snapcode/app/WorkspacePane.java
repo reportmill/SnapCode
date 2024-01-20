@@ -11,7 +11,6 @@ import snap.util.SnapUtils;
 import snap.view.*;
 import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
-import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
@@ -108,37 +107,6 @@ public class WorkspacePane extends ViewOwner {
 
         // Install in tools
         _workspaceTools.setWorkspace(_workspace);
-    }
-
-    /**
-     * Opens a source file.
-     */
-    public void openExternalSourceFile(WebFile sourceFile)
-    {
-        // Make sure workspace has temp project
-        ProjectUtils.getTempProject(_workspace);
-
-        // Create new source file for given external source file
-        FilesTool filesTool = _workspaceTools.getFilesTool();
-        WebFile newSourceFile = filesTool.newSourceFileForExternalSourceFile(sourceFile);
-        if (newSourceFile == null) {
-            System.out.println("WorkspacePane.openSourceFile: Couldn't open source file: " + sourceFile);
-            return;
-        }
-
-        // If not "TempProj" file, add to RecentFiles
-        WebURL sourceURL = sourceFile.getURL();
-        if (!sourceURL.getString().contains("TempProj"))
-            RecentFiles.addURL(sourceURL);
-
-        // Show RunTool
-        showRunTool();
-
-        // Show source file
-        runLater(() -> {
-            PagePane pagePane = getPagePane();
-            pagePane.setSelFile(newSourceFile);
-        });
     }
 
     /**

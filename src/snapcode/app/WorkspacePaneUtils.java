@@ -1,11 +1,14 @@
 package snapcode.app;
 import snap.util.TaskRunner;
 import snap.view.ViewUtils;
+import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.apptools.FileTreeTool;
+import snapcode.apptools.FilesTool;
 import snapcode.apptools.RunTool;
 import snapcode.project.Project;
+import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
 import snapcode.project.WorkspaceBuilder;
 
@@ -26,7 +29,7 @@ public class WorkspacePaneUtils {
         if (fileType.equals("java") || fileType.equals("jepl")) {
 
             // Open
-            workspacePane.openExternalSourceFile(sampleFile);
+            openExternalSourceFile(workspacePane, sampleFile);
 
             // Kick off run
             RunTool runTool = workspacePane.getWorkspaceTools().getToolForClass(RunTool.class);
@@ -41,10 +44,45 @@ public class WorkspacePaneUtils {
     }
 
     /**
+     * Opens a source file.
+     */
+    public static void openExternalSourceFile(WorkspacePane workspacePane, WebFile sourceFile)
+    {
+        // Make sure workspace has temp project
+        Workspace workspace = workspacePane.getWorkspace();
+        ProjectUtils.getTempProject(workspace);
+
+        // Create new source file for given external source file
+        FilesTool filesTool = workspacePane.getWorkspaceTools().getFilesTool();
+        WebFile newSourceFile = filesTool.newSourceFileForExternalSourceFile(sourceFile);
+        if (newSourceFile == null) {
+            System.out.println("WorkspacePane.openSourceFile: Couldn't open source file: " + sourceFile);
+            return;
+        }
+
+        // If not "TempProj" file, add to RecentFiles
+        WebURL sourceURL = sourceFile.getURL();
+        if (!sourceURL.getString().contains("TempProj"))
+            RecentFiles.addURL(sourceURL);
+
+        // Show RunTool
+        workspacePane.showRunTool();
+
+        // Show source file
+        ViewUtils.runLater(() -> {
+            PagePane pagePane = workspacePane.getPagePane();
+            pagePane.setSelFile(newSourceFile);
+        });
+    }
+
+    /**
      * Adds a project to given workspace pane for repo URL.
      */
     public static void addProjectForRepoURL(WorkspacePane workspacePane, WebURL repoURL)
     {
+        // Add repoURL to recent files
+        RecentFiles.addURL(repoURL);
+
         // Open empty workspace pane
         workspacePane.showProjectTool();
 
