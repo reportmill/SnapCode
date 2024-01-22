@@ -31,7 +31,7 @@ public class JNode {
     protected JavaType _evalType;
 
     // The errors in this node
-    private NodeError[]  _errors;
+    protected NodeError[]  _errors;
 
     // The string for this node
     private String _string;

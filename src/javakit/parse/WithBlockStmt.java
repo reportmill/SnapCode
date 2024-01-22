@@ -49,6 +49,13 @@ public interface WithBlockStmt {
             else break;
         }
 
+        // Clear ancestor errors
+        ancestor = thisNode;
+        while (ancestor != null) {
+            ancestor._errors = null;
+            ancestor = ancestor.getParent();
+        }
+
         // Clear enclosing class decl ClassDecls in case new block added/removed anonymous inner class
         JClassDecl classDecl = thisNode.getParent(JClassDecl.class);
         classDecl._classDecls = null;
