@@ -377,7 +377,8 @@ public class JavaParser extends JavaParserStmt {
         {
             if (anId == "ClassBodyDecl") {
                 JMemberDecl memberDecl = aNode.getCustomNode(JMemberDecl.class);
-                _memberDecls.add(memberDecl);
+                if (memberDecl != null) // Can be null if parse only found ClassBodyDecl modifiers
+                    _memberDecls.add(memberDecl);
             }
         }
 

@@ -260,6 +260,11 @@ public class JavaClass extends JavaType {
     }
 
     /**
+     * Returns whether class is anonymous class.
+     */
+    public boolean isAnonymousClass()  { return _simpleName.length() == 0; }
+
+    /**
      * Returns whether class is member.
      */
     public boolean isMemberClass()  { return _declaringClass != null; }

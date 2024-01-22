@@ -401,8 +401,8 @@ public class Resolver {
      */
     private JavaDecl getParentPackageOrClassForClass(Class<?> aClass)
     {
-        // Get parent class, get decl from parent decl
-        Class<?> parentClass = aClass.getDeclaringClass();
+        // If class has enclosing class, return it
+        Class<?> parentClass = aClass.getEnclosingClass();
         if (parentClass != null)
             return getJavaClassForClass(parentClass);
 

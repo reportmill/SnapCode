@@ -159,18 +159,8 @@ public class JavaTextDocUtils {
         // Replace old statement with new statement
         JNode stmtParent = oldStmt.getParent();
         if (stmtParent instanceof WithBlockStmt)
-            ((WithBlockStmt) stmtParent).setBlock(newStmt);
+            ((WithBlockStmt) stmtParent).replaceBlock(newStmt);
         else System.err.println("JavaTextDocUtils.updateJFileForChange: Parent not WithBlockStmt: " + stmtParent);
-
-        // Extend ancestor ends if needed
-        JNode ancestor = stmtParent.getParent();
-        while (ancestor != null) {
-            if (ancestor.getEndToken() == null || ancestor.getEndCharIndex() < endToken.getEndCharIndex()) {
-                ancestor.setEndToken(endToken);
-                ancestor = ancestor.getParent();
-            }
-            else break;
-        }
 
         // Return success
         return true;

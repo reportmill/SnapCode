@@ -117,6 +117,10 @@ public abstract class JExpr extends JNode {
                 return prefixExpr;
             }
 
+            // If suffix not id, just return prefix - shouldn't happen unless parse is really whacked
+            if (!(prefixExpr instanceof JExprId))
+                return prefixExpr;
+
             // Otherwise set id and return method call
             JExprId idExpr = (JExprId) prefixExpr;
             methodCall.setId(idExpr);

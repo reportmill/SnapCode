@@ -134,7 +134,7 @@ public class JExprAlloc extends JExpr {
         _classBodyDecls = bodyDecls;
 
         _classDecl = new JClassDecl();
-        _classDecl.addExtendsType(getType());
+        _classDecl.getExtendsTypes().add(getType()); // Want to reference type, not steal it
         _classDecl.setMemberDecls(bodyDecls);
         addChild(_classDecl);
     }
@@ -163,20 +163,39 @@ public class JExprAlloc extends JExpr {
      */
     protected JavaDecl getDeclImpl()
     {
+        // If array alloc, just return Type decl
+        if (_arrayDims != null || _arrayInit != null)
+            return getJavaType();
+
+        // Return Constructor
+        return getConstructorImpl();
+    }
+
+    /**
+     * Returns this alloc expressions constructor.
+     */
+    protected JavaDecl getConstructorImpl()
+    {
         // Get JavaType - just return if null
         JavaType javaType = getJavaType();
         if (javaType == null)
             return null;
 
-        // If array alloc, just return Type decl
-        if (_arrayDims != null || _arrayInit != null)
-            return javaType;
-
-        // Get class decl and constructor arg types
+        // Get class decl
         JavaClass javaClass = javaType.getEvalClass();
+
+        // If anonymous class, just return first constructor
+        if (javaClass.isAnonymousClass()) {
+            JavaConstructor[] constrs = javaClass.getDeclaredConstructors();
+            if (constrs.length != 1)
+                System.out.println("JExprAlloc.getConstructorImpl(): Invalid constructor count (should be 1): " + constrs.length);
+            return constrs.length > 0 ? constrs[0] : null;
+        }
+
+        // Get arg classes
         JavaClass[] argClasses = getArgClasses();
 
-        // If inner class and not static, add implied class type to arg types array
+        // If inner class and not static, add implied class types to arg types array
         if (javaClass.isMemberClass() && !javaClass.isStatic()) {
             JavaClass parentClass = javaClass.getDeclaringClass();
             argClasses = ArrayUtils.add(argClasses, parentClass, 0);

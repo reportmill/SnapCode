@@ -379,7 +379,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
         // Get enclosingClass and inner class decls
         JClassDecl enclosingClassDecl = getEnclosingClassDecl();
         JClassDecl[] classDecls = enclosingClassDecl != null ? enclosingClassDecl.getClassDecls() : new JClassDecl[0];
-        int anonymousIndex = 0;
+        int anonymousIndex = 1;
 
         // Iterate over inner class decls and return anonymousIndex when this class decl found
         for (JClassDecl classDecl : classDecls) {
