@@ -55,9 +55,9 @@ public class FilesTool extends WorkspaceTool {
         }
 
         // Get source dir
-        WebSite selSite = getSelSite();
+        WebSite selSite = getSelSiteOrFirst();
         WebFile selFile = getSelFile();
-        if (selFile.getSite() != selSite)
+        if (selFile == null || selFile.getSite() != selSite)
             selFile = selSite.getRootDir();
         WebFile selDir = selFile.isDir() ? selFile : selFile.getParent();
         if (extension.equals(".java") || extension.equals(".jepl")) {
@@ -87,24 +87,24 @@ public class FilesTool extends WorkspaceTool {
     {
         // Create suggested file and page
         boolean isDir = FilePathUtils.getExtension(aPath).length() == 0;
-        WebSite selSite = getSelSite();
-        WebFile file = selSite.createFileForPath(aPath, isDir);
-        WebPage page = _pagePane.createPageForURL(file.getURL());
+        WebSite selSite = getSelSiteOrFirst();
+        WebFile newFile = selSite.createFileForPath(aPath, isDir);
+        WebPage page = _pagePane.createPageForURL(newFile.getURL());
 
         // ShowNewFilePanel (just return if cancelled)
-        file = page.showNewFilePanel(aView, file);
-        if (file == null)
+        newFile = page.showNewFilePanel(aView, newFile);
+        if (newFile == null)
             return null;
 
         // Save file
-        try { file.save(); }
+        try { newFile.save(); }
         catch (Exception e) {
-            _pagePane.showException(file.getURL(), e);
+            _pagePane.showException(newFile.getURL(), e);
             return null;
         }
 
         // Return
-        return file;
+        return newFile;
     }
 
     /**
@@ -113,9 +113,9 @@ public class FilesTool extends WorkspaceTool {
     public boolean addFiles(List<File> theFiles)
     {
         // Get target (selected) directory
-        WebSite site = getSelSite();
+        WebSite site = getSelSiteOrFirst();
         WebFile selFile = getSelFile();
-        if (selFile.getSite() != site)
+        if (selFile == null || selFile.getSite() != site)
             selFile = site.getRootDir();
         WebFile selDir = selFile.isDir() ? selFile : selFile.getParent();
 
@@ -350,6 +350,12 @@ public class FilesTool extends WorkspaceTool {
         if (newProjectFile == null)
             return null;
 
+        // Make sure file is dir
+        if (!newProjectFile.isDir()) {
+            WebSite fileSite = newProjectFile.getSite();
+            newProjectFile = fileSite.createFileForPath(newProjectFile.getPath(), true);
+        }
+
         // Return
         return createNewProjectForProjectDir(newProjectFile);
     }
@@ -417,7 +423,7 @@ public class FilesTool extends WorkspaceTool {
         }
 
         // Get source dir
-        WebSite selSite = getSelSite();
+        WebSite selSite = getSelSiteOrFirst();
         Project proj = Project.getProjectForSite(selSite);
         WebFile selDir = proj.getSourceDir();
 
@@ -460,7 +466,7 @@ public class FilesTool extends WorkspaceTool {
     public WebFile newJeplFileForNameAndString(String jeplName, String jeplString)
     {
         // Get source dir
-        WebSite selSite = getSelSite();
+        WebSite selSite = getSelSiteOrFirst();
         Project proj = Project.getProjectForSite(selSite);
         WebFile selDir = proj.getSourceDir();
 
@@ -520,5 +526,16 @@ public class FilesTool extends WorkspaceTool {
 
         // Return
         return extension;
+    }
+
+    /**
+     * Returns the selected site or first site.
+     */
+    private WebSite getSelSiteOrFirst()
+    {
+        WebSite selSite = getSelSite();
+        if (selSite == null)
+            selSite = getRootSite();
+        return selSite;
     }
 }

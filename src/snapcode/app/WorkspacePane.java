@@ -176,7 +176,7 @@ public class WorkspacePane extends ViewOwner {
     public WebSite getRootSite()
     {
         Project rootProj = _workspace.getRootProject();
-        return rootProj.getSite();
+        return rootProj != null ? rootProj.getSite() : null;
     }
 
     /**
