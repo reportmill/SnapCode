@@ -3,6 +3,7 @@ import javakit.parse.JFile;
 import javakit.parse.JavaParser;
 import snap.view.Clipboard;
 import snap.viewx.FilePanel;
+import snap.web.RecentFiles;
 import snapcode.app.JavaPage;
 import snapcode.app.SnapCodeUtils;
 import snapcode.project.Project;
@@ -365,17 +366,20 @@ public class FilesTool extends WorkspaceTool {
      */
     private Project createNewProjectForProjectDir(WebFile newProjectFile)
     {
-        // Create new dir
-        if (!newProjectFile.getExists())
-            newProjectFile.save();
-
         // Create new project
         WebSite projectSite = newProjectFile.getURL().getAsSite();
-        Project newProject = _workspace.addProjectForSite(projectSite);
+        Project newProject = _workspace.getProjectForSite(projectSite);
 
-        // Create src and build files?
+        // Create src and build files
         newProject.getSourceDir().save();
         newProject.getBuildFile().writeFile();
+        newProjectFile.resetAndVerify();
+
+        // Add project
+        _workspace.addProject(newProject);
+
+        // Add project to recent files
+        RecentFiles.addURL(newProjectFile.getURL());
 
         // Return
         return newProject;
