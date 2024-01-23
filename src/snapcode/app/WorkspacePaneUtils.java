@@ -3,6 +3,7 @@ import snap.util.TaskRunner;
 import snap.view.ViewUtils;
 import snap.web.RecentFiles;
 import snap.web.WebFile;
+import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.apptools.FileTreeTool;
 import snapcode.apptools.FilesTool;
@@ -40,7 +41,7 @@ public class WorkspacePaneUtils {
 
         // If zip file, open project
         if (fileType.equals("zip"))
-            addProjectForRepoURL(workspacePane, sampleFile.getURL());
+            openProjectForRepoURL(workspacePane, sampleFile.getURL());
     }
 
     /**
@@ -76,9 +77,29 @@ public class WorkspacePaneUtils {
     }
 
     /**
+     * Opens a project for given project file.
+     */
+    public static void openProjectForProjectFile(WorkspacePane workspacePane, WebFile projectFile)
+    {
+        // Show project tool
+        workspacePane.showProjectTool();
+
+        // Get project dir and project site
+        WebFile projectDir = projectFile.isDir() ? projectFile : projectFile.getParent();
+        WebSite projectSite = projectDir.getURL().getAsSite();
+
+        // Open project: Get project site and add to workspace
+        Workspace workspace = workspacePane.getWorkspace();
+        workspace.addProjectForSite(projectSite);
+
+        // Add recent file
+        RecentFiles.addURL(projectDir.getURL());
+    }
+
+    /**
      * Adds a project to given workspace pane for repo URL.
      */
-    public static void addProjectForRepoURL(WorkspacePane workspacePane, WebURL repoURL)
+    public static void openProjectForRepoURL(WorkspacePane workspacePane, WebURL repoURL)
     {
         // Add repoURL to recent files
         RecentFiles.addURL(repoURL);

@@ -195,18 +195,12 @@ public class WelcomePanel extends ViewOwner {
 
         // If file is zip file, open repo
         if (aFile.getType().equals("zip")) {
-            WorkspacePaneUtils.addProjectForRepoURL(workspacePane, aFile.getURL());
+            WorkspacePaneUtils.openProjectForRepoURL(workspacePane, aFile.getURL());
             return;
         }
 
-        // Show project tool
-        workspacePane.showProjectTool();
-
-        // Open project: Get project site and add to workspace
-        WebFile projectDir = aFile.isDir() ? aFile : aFile.getParent();
-        WebSite projectSite = projectDir.getURL().getAsSite();
-        Workspace workspace = workspacePane.getWorkspace();
-        workspace.addProjectForSite(projectSite);
+        // Open project for given file
+        WorkspacePaneUtils.openProjectForProjectFile(workspacePane, aFile);
     }
 
     /**
