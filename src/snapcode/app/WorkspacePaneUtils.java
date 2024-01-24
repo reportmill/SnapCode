@@ -1,6 +1,7 @@
 package snapcode.app;
 import snap.util.TaskRunner;
 import snap.view.ViewUtils;
+import snap.viewx.DialogBox;
 import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -23,10 +24,17 @@ public class WorkspacePaneUtils {
      */
     public static void openSamplesUrl(WorkspacePane workspacePane, WebURL sampleURL)
     {
-        WebFile sampleFile = sampleURL.createFile(false);
-        String fileType = sampleFile.getType();
+        // Get sample file - complain and return if not found
+        WebFile sampleFile = sampleURL.getFile();
+        if (sampleFile == null) {
+            String msg = "Couldn't find sample for name: " + sampleURL.getFilename();
+            DialogBox.showErrorDialog(workspacePane.getUI(), "Unknown Sample", msg);
+            return;
+        }
+
 
         // If java/jepl file, open and run
+        String fileType = sampleFile.getType();
         if (fileType.equals("java") || fileType.equals("jepl")) {
 
             // Open

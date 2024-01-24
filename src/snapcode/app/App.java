@@ -121,6 +121,13 @@ public class App {
             return true;
         }
 
+        // Handle 'Sample:'
+        if (arg0.startsWith("sample:")) {
+            String sampleName = arg0.substring("sample:".length());
+            WelcomePanel.getShared().openWorkspaceForSample(sampleName);
+            return true;
+        }
+
         // Handle 'Play'
         if (arg0.equals("autorun")) {
             ViewUtils.runDelayed(() -> autoRunOpenFile(), 800);

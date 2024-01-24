@@ -149,6 +149,24 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
+     * Opens empty workspace and opens given sample name.
+     */
+    protected void openWorkspaceForSample(String sampleName)
+    {
+        // Open empty workspace pane with temp project
+        WorkspacePane workspacePane = openEmptyWorkspace();
+
+        // Get sample url
+        String SAMPLES_ROOT = "https://reportmill.com/SnapCode/Samples/";
+        String samplePath = FilePathUtils.getFilenameSimple(sampleName) + '/' + sampleName;
+        WebURL sampleURL = WebURL.getURL(SAMPLES_ROOT + samplePath);
+        assert (sampleURL != null);
+
+        // Open sample URL
+        WorkspacePaneUtils.openSamplesUrl(workspacePane, sampleURL);
+    }
+
+    /**
      * Creates a new file.
      */
     protected void openWorkspaceForNewFileOfType(String fileType)
