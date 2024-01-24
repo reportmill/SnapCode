@@ -516,6 +516,10 @@ public class PagePane extends ViewOwner {
         if (type.equals("snp"))
             return SnapBuilderPage.class;
 
+        // Handle mark down file
+        if (type.equals("md"))
+            return MarkDownPage.class;
+
         // Handle BuildDir
         WebFile snapFile = aResp.getFile();
         if (snapFile == _workspacePane.getBuildDir())
