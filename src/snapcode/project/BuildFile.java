@@ -26,6 +26,9 @@ public class BuildFile extends PropObject {
     // The dependencies
     private BuildDependency[] _dependencies;
 
+    // The main class name
+    private String _mainClassName;
+
     // Whether to include the built-in SnapKit runtime as dependency
     private boolean _includeSnapKitRuntime;
 
@@ -45,6 +48,7 @@ public class BuildFile extends PropObject {
     public static final String SourcePath_Prop = "SourcePath";
     public static final String BuildPath_Prop = "BuildPath";
     public static final String Dependencies_Prop = "Dependencies";
+    public static final String MainClassName_Prop = "MainClassName";
     public static final String IncludeSnapKitRuntime_Prop = "IncludeSnapKitRuntime";
     public static final String RunWithInterpreter_Prop = "RunWithInterpreter";
 
@@ -188,6 +192,23 @@ public class BuildFile extends PropObject {
     }
 
     /**
+     * Returns the main class name.
+     */
+    public String getMainClassName()  { return _mainClassName; }
+
+    /**
+     * Sets the main class name.
+     */
+    public void setMainClassName(String aName)
+    {
+        // If already set, just return
+        if (Objects.equals(aName, _mainClassName)) return;
+
+        // Set, firePropChange
+        firePropChange(SourcePath_Prop, _mainClassName, _mainClassName = aName);
+    }
+
+    /**
      * Returns whether to include the built-in SnapKit runtime as dependency.
      */
     public boolean isIncludeSnapKitRuntime()  { return _includeSnapKitRuntime; }
@@ -315,10 +336,11 @@ public class BuildFile extends PropObject {
         // Do normal version
         super.initProps(aPropSet);
 
-        // SourcePath, BuildPath, Dependencies, IncludeSnapKitRuntime, RunWithInterpreter
+        // SourcePath, BuildPath, Dependencies, MainClassName, IncludeSnapKitRuntime, RunWithInterpreter
         aPropSet.addPropNamed(SourcePath_Prop, String.class);
         aPropSet.addPropNamed(BuildPath_Prop, String.class);
         aPropSet.addPropNamed(Dependencies_Prop, BuildDependency[].class);
+        aPropSet.addPropNamed(MainClassName_Prop, String.class);
         aPropSet.addPropNamed(IncludeSnapKitRuntime_Prop, boolean.class);
         aPropSet.addPropNamed(RunWithInterpreter_Prop, boolean.class);
     }
@@ -332,10 +354,11 @@ public class BuildFile extends PropObject {
         // Handle properties
         switch (aPropName) {
 
-            // SourcePath, BuildPath, Dependencies, IncludeSnapKitRuntime, RunWithInterpreter
+            // SourcePath, BuildPath, Dependencies, MainClassName, IncludeSnapKitRuntime, RunWithInterpreter
             case SourcePath_Prop: return getSourcePath();
             case BuildPath_Prop: return getBuildPath();
             case Dependencies_Prop: return getDependencies();
+            case MainClassName_Prop: return getMainClassName();
             case IncludeSnapKitRuntime_Prop: return isIncludeSnapKitRuntime();
             case RunWithInterpreter_Prop: return isRunWithInterpreter();
 
@@ -353,10 +376,11 @@ public class BuildFile extends PropObject {
         // Handle properties
         switch (aPropName) {
 
-            // SourcePath, BuildPath, Dependencies, IncludeSnapKitRuntime, RunWithInterpreter
+            // SourcePath, BuildPath, Dependencies, MainClassName, IncludeSnapKitRuntime, RunWithInterpreter
             case SourcePath_Prop: setSourcePath(Convert.stringValue(aValue)); break;
             case BuildPath_Prop: setBuildPath(Convert.stringValue(aValue)); break;
             case Dependencies_Prop: setDependencies((BuildDependency[]) aValue); break;
+            case MainClassName_Prop: setMainClassName(Convert.stringValue(aValue)); break;
             case IncludeSnapKitRuntime_Prop: setIncludeSnapKitRuntime(Convert.boolValue(aValue)); break;
             case RunWithInterpreter_Prop: setRunWithInterpreter(Convert.boolValue(aValue)); break;
 

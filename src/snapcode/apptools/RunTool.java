@@ -125,7 +125,14 @@ public class RunTool extends WorkspaceTool implements AppListener {
      */
     public void runAppForSelFile(boolean isDebug)
     {
+        // Get SelFile - if not main class file, try to replace with defined main class file
         WebFile selFile = getSelFile();
+        if (selFile == null || !RunToolUtils.isMainClassFile(selFile)) {
+            WebFile mainClassFile = RunToolUtils.getMainClassSourceFile(this);
+            if (mainClassFile != null)
+                selFile = mainClassFile;
+        }
+
         runConfigOrFile(null, selFile, isDebug);
     }
 

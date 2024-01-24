@@ -102,4 +102,8 @@
       </RowView>
     </ColView>
   </ColView>
+  <RowView Spacing="5">
+    <Label text="Main Class Name:" />
+    <TextField Name="MainClassNameText" PrefWidth="255" />
+  </RowView>
 </ColView>

@@ -134,9 +134,9 @@ public class ProjectFiles {
     }
 
     /**
-     * Returns a Java file for class name.
+     * Returns a source file for class name.
      */
-    public WebFile getJavaFileForClassName(String aClassName)
+    public WebFile getSourceFileForClassName(String aClassName)
     {
         // Get base class name (strip inner class names)
         String className = aClassName;

@@ -9,10 +9,7 @@ import snap.web.WebURL;
 import snapcode.apptools.FileTreeTool;
 import snapcode.apptools.FilesTool;
 import snapcode.apptools.RunTool;
-import snapcode.project.Project;
-import snapcode.project.ProjectUtils;
-import snapcode.project.Workspace;
-import snapcode.project.WorkspaceBuilder;
+import snapcode.project.*;
 
 /**
  * Utilities for WorkspacePane.
@@ -32,6 +29,8 @@ public class WorkspacePaneUtils {
             return;
         }
 
+        // Show run tool
+        workspacePane.showRunTool();
 
         // If java/jepl file, open and run
         String fileType = sampleFile.getType();
@@ -100,6 +99,9 @@ public class WorkspacePaneUtils {
         Workspace workspace = workspacePane.getWorkspace();
         workspace.addProjectForSite(projectSite);
 
+        // Select good file
+        selectGoodDefaultFile(workspacePane);
+
         // Add recent file
         RecentFiles.addURL(projectDir.getURL());
     }
@@ -134,22 +136,35 @@ public class WorkspacePaneUtils {
         // Show project tool
         workspacePane.showProjectTool();
 
-        // Select first file in project
+        // Select good default file
         String projName = repoURL.getFilenameSimple();
         Workspace workspace = workspacePane.getWorkspace();
         Project project = workspace.getProjectForName(projName);
-        if (project != null) {
-            WebFile srcDir = project.getSourceDir();
-            if (srcDir.getFileCount() > 0) {
-                WebFile srcFile = srcDir.getFiles()[0];
-                FileTreeTool fileTreeTool = workspacePane.getWorkspaceTools().getFileTreeTool();
-                fileTreeTool.showFile(srcFile);
-            }
+        WebFile defaultFile = ProjectUtils.getGoodDefaultFile(project);
+        if (defaultFile != null) {
+            FileTreeTool fileTreeTool = workspacePane.getWorkspaceTools().getFileTreeTool();
+            fileTreeTool.showFile(defaultFile);
         }
 
         // Build all files
         WorkspaceBuilder builder = workspacePane.getWorkspace().getBuilder();
         builder.addAllFilesToBuild();
         builder.buildWorkspaceLater();
+    }
+
+    /**
+     * Selects a good default file.
+     */
+    private static void selectGoodDefaultFile(WorkspacePane workspacePane)
+    {
+        // Get good default file
+        Workspace workspace = workspacePane.getWorkspace();
+        WebFile defaultFile = WorkspaceUtils.getGoodDefaultFile(workspace);
+        if (defaultFile == null)
+            return;
+
+        // Select it
+        FileTreeTool fileTreeTool = workspacePane.getWorkspaceTools().getFileTreeTool();
+        fileTreeTool.showFile(defaultFile);
     }
 }

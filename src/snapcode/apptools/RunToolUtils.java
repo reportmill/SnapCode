@@ -19,6 +19,45 @@ public class RunToolUtils {
     private static WebFile _lastRunFile;
 
     /**
+     * Returns whether given file is main class file.
+     */
+    public static boolean isMainClassFile(WebFile aFile)
+    {
+        String fileType = aFile.getType();
+        if (fileType.equals("jepl"))
+            return true;
+        if (!fileType.equals("java"))
+            return false;
+        String fileText = aFile.getText();
+        return fileText.contains(" main(String");
+    }
+
+    /**
+     * Returns a main file if available.
+     */
+    public static WebFile getMainClassSourceFile(RunTool runTool)
+    {
+        // If last file is main class file, return it
+        if (_lastRunFile != null && isMainClassFile(_lastRunFile))
+            return _lastRunFile;
+
+        // Search all workspace projects for first that defines a main class name
+        Workspace workspace = runTool.getWorkspace();
+        Project[] projects = workspace.getProjects();
+        for (Project project : projects) {
+            String mainClassName = project.getBuildFile().getMainClassName();
+            if (mainClassName != null) {
+                WebFile mainClassSourceFile = project.getJavaFileForClassName(mainClassName);
+                if (mainClassSourceFile != null)
+                    return mainClassSourceFile;
+            }
+        }
+
+        // Return not found
+        return null;
+    }
+
+    /**
      * Creates a run app for given config and/or main file and debug option.
      */
     public static RunApp createRunAppForConfigOrFile(RunTool runTool, RunConfig aConfig, WebFile aFile, boolean isDebug)

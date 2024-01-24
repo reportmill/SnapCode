@@ -354,7 +354,7 @@ public class Project extends PropObject {
     {
         // Check this project
         ProjectFiles projFiles = getProjectFiles();
-        WebFile file = projFiles.getJavaFileForClassName(aClassName);
+        WebFile file = projFiles.getSourceFileForClassName(aClassName);
         if (file != null)
             return file;
 
@@ -362,7 +362,7 @@ public class Project extends PropObject {
         Project[] projects = getProjects();
         for (Project proj : projects) {
             projFiles = proj.getProjectFiles();
-            file = projFiles.getJavaFileForClassName(aClassName);
+            file = projFiles.getSourceFileForClassName(aClassName);
             if (file != null)
                 return file;
         }

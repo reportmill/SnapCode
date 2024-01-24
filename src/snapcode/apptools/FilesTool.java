@@ -372,6 +372,7 @@ public class FilesTool extends WorkspaceTool {
 
         // Create src and build files
         newProject.getSourceDir().save();
+        newProject.getBuildFile().setIncludeSnapKitRuntime(true);
         newProject.getBuildFile().writeFile();
         newProjectFile.resetAndVerify();
 

@@ -251,7 +251,7 @@ public class RunAppSrc extends RunApp {
     public WebFile getSourceFileForClassName(String className)
     {
         Project project = _runTool.getProject();
-        return project.getProjectFiles().getJavaFileForClassName(className);
+        return project.getProjectFiles().getSourceFileForClassName(className);
     }
 
     /**

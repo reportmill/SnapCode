@@ -16,6 +16,37 @@ import java.io.File;
 public class ProjectUtils {
 
     /**
+     * Returns a good default file.
+     */
+    public static WebFile getGoodDefaultFile(Project aProj)
+    {
+        // Look for read me
+        WebFile projRootDir = aProj.getSite().getRootDir();
+        WebFile[] projRootFiles = projRootDir.getFiles();
+        WebFile readMeFile = ArrayUtils.findMatch(projRootFiles, file -> file.getSimpleName().equalsIgnoreCase("readme"));
+        if (readMeFile != null)
+            return readMeFile;
+
+        // Look for first defined main class file
+        String mainClassName = aProj.getBuildFile().getMainClassName();
+        if (mainClassName != null) {
+            WebFile mainClassFile = aProj.getJavaFileForClassName(mainClassName);
+            if (mainClassFile != null)
+                return mainClassFile;
+        }
+
+        // Return first source file
+        WebFile srcDir = aProj.getSourceDir();
+        if (srcDir.getFileCount() > 0) {
+            WebFile srcFile = srcDir.getFiles()[0];
+            return srcFile;
+        }
+
+        // Return project root
+        return aProj.getSite().getRootDir();
+    }
+
+    /**
      * Returns the project root path.
      */
     public static String getRootDirPath(Project aProj)

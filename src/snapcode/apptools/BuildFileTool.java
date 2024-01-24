@@ -167,6 +167,9 @@ public class BuildFileTool extends ProjectTool {
             BuildDependency.ProjectDependency projectDependency = (BuildDependency.ProjectDependency) selDependency;
             setViewValue("ProjectNameText", projectDependency.getProjectName());
         }
+
+        // Update MainClassNameText
+        setViewValue("MainClassNameText", buildFile.getMainClassName());
     }
 
     /**
@@ -254,6 +257,10 @@ public class BuildFileTool extends ProjectTool {
         // Handle DependencyTypeComboBox
         if (anEvent.equals("DependencyTypeComboBox"))
             changeSelectedDependencyType();
+
+        // Handle MainClassNameText
+        if (anEvent.equals("MainClassNameText"))
+            buildFile.setMainClassName(anEvent.getStringValue());
     }
 
     /**
