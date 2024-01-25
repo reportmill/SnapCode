@@ -29,12 +29,14 @@ public class JavaTextDocUtils {
      */
     public static Font getCodeFont()
     {
-        if (_codeFont == null) {
-            String[] names = { "Monaco", "Consolas", "Courier"};
-            for (String name : names) {
-                _codeFont = new Font(name, 12);
-                if (_codeFont.getFamily().startsWith(name))
-                    break;
+        if (_codeFont != null) return _codeFont;
+
+        // Look for font
+        String[] names = { "Monaco", "Consolas", "Courier New" };
+        for (String name : names) {
+            _codeFont = new Font(name, 12);
+            if (_codeFont.getFamily().startsWith(name)) {
+                break;
             }
         }
 
