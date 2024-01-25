@@ -6,7 +6,6 @@ import javakit.parse.*;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.TypeVariable;
 import java.util.*;
 
 /**
@@ -36,56 +35,21 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     }
 
     /**
-     * Updates JavaDecls. Returns whether the decls changed since last update.
-     */
-    @Override
-    public boolean updateDeclsImpl() throws SecurityException
-    {
-        // If first time, set decls
-        if (_javaClass._fields == null)
-            _javaClass._fields = new JavaField[0];
-
-        // Update SuperClass
-        JavaClass superClass = _classDecl.getSuperClass();
-        _javaClass._superClass = superClass;
-        _javaClass._superClassName = superClass.getName();
-
-        // Update interfaces
-        //_javaClass._interfaces = getInterfaces();
-
-        // Update type variables
-        //_javaClass._typeVars = getTypeVariables();
-
-        // Update inner classes
-        _javaClass._innerClasses = getDeclaredClasses();
-
-        // Update fields
-        _javaClass._fields = getDeclaredFields();
-
-        // Update methods
-        _javaClass._methods = getDeclaredMethods();
-
-        // Update constructors
-        //_javaClass._constructors = getDeclaredConstructors();
-
-        // Return
-        return true;
-    }
-
-
-    /**
      * Override to just return anything.
      */
+    @Override
     protected Class<?> getRealClassImpl()  { return Object.class; }
 
     /**
      * Returns the modifiers.
      */
+    @Override
     protected int getModifiers()  { return _classDecl.getMods().getValue(); }
 
     /**
      * Returns the super class name.
      */
+    @Override
     protected String getSuperClassName()
     {
         JavaClass superClass = _classDecl.getSuperClass();
@@ -95,6 +59,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     /**
      * Returns interfaces.
      */
+    @Override
     protected JavaClass[] getInterfaces()
     {
         return new JavaClass[0];
@@ -103,6 +68,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     /**
      * Returns JavaTypeVariable array for given class TypeVariables.
      */
+    @Override
     protected JavaTypeVariable[] getTypeVariables()
     {
         return new JavaTypeVariable[0];
@@ -111,6 +77,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     /**
      * Updates inner classes.
      */
+    @Override
     protected JavaClass[] getDeclaredClasses()
     {
         JClassDecl[] innerClassDecls = _classDecl.getClassDecls();
@@ -139,6 +106,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     /**
      * Updates methods.
      */
+    @Override
     protected JavaField[] getDeclaredFields()
     {
         // Get FieldDecls
@@ -199,6 +167,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     /**
      * Updates methods.
      */
+    @Override
     protected JavaMethod[] getDeclaredMethods() throws SecurityException
     {
         // Get Methods
@@ -206,7 +175,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         JavaMethod.MethodBuilder mb = new JavaMethod.MethodBuilder();
         mb.init(_resolver, _javaClass.getClassName());
 
-        // Add JavaDecl for each declared method - also make sure return/parameter types are in refs
+        // Add JavaDecl for each declared method
         for (JMethodDecl methodDecl : methodDecls) {
 
             // Set MethodDecl
@@ -223,16 +192,9 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
             mb.name(methodName);
 
             // Get/set param types
-            List<JVarDecl> paramsList = methodDecl.getParameters();
-            JavaType[] params = new JavaType[paramsList.size()];
-            for (int i = 0, iMax = paramsList.size(); i < iMax; i++) {
-                JVarDecl paramDecl = paramsList.get(i);
-                JavaType paramType = paramDecl.getEvalType();
-                if (paramType == null)
-                    paramType = _resolver.getJavaTypeForType(Object.class);
-                params[i] = paramType;
-            }
-            mb.paramTypes(params);
+            List<JVarDecl> paramsDecls = methodDecl.getParameters();
+            JavaType[] paramTypes = ListUtils.mapToArray(paramsDecls, varDecl -> getJavaTypeForVarDecl(varDecl), JavaType.class);
+            mb.paramTypes(paramTypes);
 
             // Get/set return type
             JType returnTypeDecl = methodDecl.getType();
@@ -249,6 +211,45 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     }
 
     /**
+     * Returns JavaConstructor array for given class.
+     */
+    protected JavaConstructor[] getDeclaredConstructors()
+    {
+        // Get constructors
+        JConstrDecl[] constrDecls = _classDecl.getConstructorDecls();
+        JavaConstructor.ConstructorBuilder cb = new JavaConstructor.ConstructorBuilder();
+        cb.init(_resolver, _javaClass.getClassName());
+
+        // Add JavaDecl for each declared constructor
+        for (JConstrDecl methodDecl : constrDecls) {
+
+            // Get/set modifiers
+            int mods = methodDecl.getMods().getValue();
+            cb.mods(mods);
+
+            // Get/set param types
+            List<JVarDecl> paramsDecls = methodDecl.getParameters();
+            JavaType[] paramTypes = ListUtils.mapToArray(paramsDecls, varDecl -> getJavaTypeForVarDecl(varDecl), JavaType.class);
+            cb.paramTypes(paramTypes);
+
+            // Add to builder list
+            cb.save();
+        }
+
+        // Get constructors
+        JavaConstructor[] constructors = cb.buildAll();
+
+        // If none, add default
+        if (constructors.length == 0) {
+            cb.mods(Modifier.PUBLIC);
+            constructors = cb.buildAll();
+        }
+
+        // Return
+        return constructors;
+    }
+
+    /**
      * Returns a field value.
      */
     public Object getFieldValue(JavaField aField, Object anObj)
@@ -262,5 +263,16 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
 
         // Complain
         throw new RuntimeException("JavaClassUpdaterDecl.getFieldValue: Can't resolve field: " + aField.getName());
+    }
+
+    /**
+     * Returns a JavaType for given var decl (substituting Object if not found).
+     */
+    private JavaType getJavaTypeForVarDecl(JVarDecl varDecl)
+    {
+        JavaType javaType = varDecl.getEvalType();
+        if (javaType == null)
+            javaType = _resolver.getJavaTypeForType(Object.class);
+        return javaType;
     }
 }

@@ -95,7 +95,7 @@ public class JavaConstructor extends JavaExecutable {
         if (paramTypes.length == 0) return prefix + "()";
 
         // Add ParamTypes: "(pkg.pkg.ClassName,pkg.pkg.ClassName,...)"
-        StringBuffer sb = new StringBuffer(prefix).append('(');
+        StringBuilder sb = new StringBuilder(prefix).append('(');
         for (JavaType type : paramTypes)
             sb.append(type.getId()).append(',');
         sb.setLength(sb.length() - 1);
@@ -137,6 +137,7 @@ public class JavaConstructor extends JavaExecutable {
 
         // Properties.
         public ConstructorBuilder mods(int mods)  { _mods = mods; return this; }
+        public ConstructorBuilder paramTypes(JavaType ...  paramTypes)  { _paramTypes = paramTypes; return this; }
         public ConstructorBuilder paramTypes(Type...  paramTypes)  { _paramTypes = _resolver.getJavaTypesForTypes(paramTypes); return this; }
         public ConstructorBuilder typeVars(String aName)  { return this; }
         public ConstructorBuilder isVarArgs(boolean varArgs)  { _varArgs = varArgs; return this; }
