@@ -6,6 +6,7 @@ import javakit.parse.*;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.TypeVariable;
 import java.util.*;
 
 /**
@@ -71,10 +72,46 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         return true;
     }
 
+
+    /**
+     * Override to just return anything.
+     */
+    protected Class<?> getRealClassImpl()  { return Object.class; }
+
+    /**
+     * Returns the modifiers.
+     */
+    protected int getModifiers()  { return _classDecl.getMods().getValue(); }
+
+    /**
+     * Returns the super class name.
+     */
+    protected String getSuperClassName()
+    {
+        JavaClass superClass = _classDecl.getSuperClass();
+        return superClass != null ? superClass.getName() : null;
+    }
+
+    /**
+     * Returns interfaces.
+     */
+    protected JavaClass[] getInterfaces()
+    {
+        return new JavaClass[0];
+    }
+
+    /**
+     * Returns JavaTypeVariable array for given class TypeVariables.
+     */
+    protected JavaTypeVariable[] getTypeVariables()
+    {
+        return new JavaTypeVariable[0];
+    }
+
     /**
      * Updates inner classes.
      */
-    private JavaClass[] getDeclaredClasses()
+    protected JavaClass[] getDeclaredClasses()
     {
         JClassDecl[] innerClassDecls = _classDecl.getClassDecls();
         return ArrayUtils.map(innerClassDecls, cdecl -> getJavaClassForClassDecl(cdecl), JavaClass.class);
@@ -102,7 +139,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     /**
      * Updates methods.
      */
-    private JavaField[] getDeclaredFields()
+    protected JavaField[] getDeclaredFields()
     {
         // Get FieldDecls
         List<JVarDecl> fieldDecls = _classDecl.getVarDecls();
@@ -162,7 +199,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     /**
      * Updates methods.
      */
-    private JavaMethod[] getDeclaredMethods() throws SecurityException
+    protected JavaMethod[] getDeclaredMethods() throws SecurityException
     {
         // Get Methods
         JMethodDecl[] methodDecls = _classDecl.getMethodDecls();

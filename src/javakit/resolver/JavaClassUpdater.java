@@ -15,6 +15,9 @@ public class JavaClassUpdater {
     // The JavaClass
     protected JavaClass  _javaClass;
 
+    // The real class (if available)
+    protected Class<?> _realClass;
+
     // The Resolver that produced this decl
     protected Resolver  _resolver;
 
@@ -51,54 +54,63 @@ public class JavaClassUpdater {
         if (_javaClass._fields == null)
             _javaClass._fields = new JavaField[0];
 
-        // Get ClassName
-        String className = _javaClass.getClassName();
-
         // Get real class
-        Class<?> realClass = _javaClass.getRealClass();
-        if (realClass == null) {
-            System.err.println("JavaClass: Failed to load class: " + className);
+        _realClass = getRealClassImpl();
+        if (_realClass == null) {
+            System.err.println("JavaClass: Failed to load class: " + _javaClass.getClassName());
             return false;
         }
 
-        // Set Decls from Object[] for efficiency
-        if (realClass.isArray() && realClass != Object[].class) {
+        // Handle arrays special
+        if (_javaClass.isArray()) {
             updateArrayClass();
-            return true;
+            return false;
         }
 
-        // Whether class changed
+        // Declare return value for whether class changed
         boolean classChanged = false;
 
         // Update modifiers
-        if (_javaClass.getModifiers() != realClass.getModifiers())
-            _javaClass._mods = realClass.getModifiers();
+        int oldMods = _javaClass._mods;
+        int newMods = _javaClass._mods = getModifiers();
+        if (oldMods != newMods)
+            classChanged = true;
+
+        // Update superclass
+        String superClassName = getSuperClassName();
+        if (!Objects.equals(superClassName, _javaClass._superClassName)) {
+            _javaClass._superClassName = superClassName;
+            _javaClass._superClass = null;
+            classChanged = true;
+        }
 
         // Update interfaces
-        JavaClass[] interfaces = getInterfaces(realClass);
-        _javaClass._interfaces = interfaces;
+        JavaClass[] oldInterfaces = _javaClass._interfaces;
+        JavaClass[] newInterfaces = _javaClass._interfaces = getInterfaces();
+        if (!ArrayUtils.equalsId(oldInterfaces, newInterfaces))
+            classChanged = true;
 
         // Update type variables
-        JavaTypeVariable[] typeVars = getTypeVariables(realClass);
-        if (!ArrayUtils.equalsId(typeVars, _javaClass._typeVars))
+        JavaTypeVariable[] oldTypeVars = _javaClass._typeVars;
+        JavaTypeVariable[] newTypeVars = _javaClass._typeVars = getTypeVariables();
+        if (!ArrayUtils.equalsId(oldTypeVars, newTypeVars))
             classChanged = true;
-        _javaClass._typeVars = typeVars;
 
         // Update inner classes
-        JavaClass[] innerClasses = getDeclaredClasses(realClass);
-        if (!ArrayUtils.equalsId(innerClasses, _javaClass._innerClasses))
+        JavaClass[] oldInnerClasses = _javaClass._innerClasses;
+        JavaClass[] newInnerClasses = _javaClass._innerClasses = getDeclaredClasses();
+        if (!ArrayUtils.equalsId(oldInnerClasses, newInnerClasses))
             classChanged = true;
-        _javaClass._innerClasses = innerClasses;
 
         // Update fields
-        JavaField[] fields = getDeclaredFields(realClass);
-        if (!ArrayUtils.equalsId(fields, _javaClass._fields))
+        JavaField[] oldFields = _javaClass._fields;
+        JavaField[] newFields = _javaClass._fields = getDeclaredFields();
+        if (!ArrayUtils.equalsId(oldFields, newFields))
             classChanged = true;
-        _javaClass._fields = fields;
 
         // Update methods
         JavaMethod[] oldMethods = _javaClass._methods;
-        JavaMethod[] newMethods = _javaClass._methods = getDeclaredMethods(realClass);
+        JavaMethod[] newMethods = _javaClass._methods = getDeclaredMethods();
         if (!ArrayUtils.equalsId(oldMethods, newMethods)) {
             for (JavaMethod method : newMethods)
                 method.initTypes();
@@ -107,17 +119,10 @@ public class JavaClassUpdater {
 
         // Update constructors
         JavaConstructor[] oldConstrs = _javaClass._constructors;
-        JavaConstructor[] newConstrs = _javaClass._constructors = getDeclaredConstructors(realClass);
+        JavaConstructor[] newConstrs = _javaClass._constructors = getDeclaredConstructors();
         if (!ArrayUtils.equalsId(oldConstrs, newConstrs)) {
             for (JavaConstructor constr : newConstrs)
                 constr.initTypes();
-            classChanged = true;
-        }
-
-        // Array.length: Handle this special for Object[]
-        if (_javaClass.isArray() && _javaClass.getFieldForName("length") == null) {
-            JavaField javaField = getLengthField();
-            _javaClass._fields = new JavaField[] { javaField };
             classChanged = true;
         }
 
@@ -130,20 +135,39 @@ public class JavaClassUpdater {
     }
 
     /**
+     * Returns the real class.
+     */
+    protected Class<?> getRealClassImpl()  { return _javaClass.getRealClass(); }
+
+    /**
+     * Returns the modifiers.
+     */
+    protected int getModifiers()  { return _realClass.getModifiers(); }
+
+    /**
+     * Returns the super class name.
+     */
+    protected String getSuperClassName()
+    {
+        Class<?> superClass = _realClass.getSuperclass();
+        return superClass != null ? superClass.getName() : null;
+    }
+
+    /**
      * Returns interfaces.
      */
-    private JavaClass[] getInterfaces(Class<?> realClass)
+    protected JavaClass[] getInterfaces()
     {
-        Class<?>[] interfaces = realClass.getInterfaces();
+        Class<?>[] interfaces = _realClass.getInterfaces();
         return ArrayUtils.map(interfaces, cls -> _javaClass.getJavaClassForClass(cls), JavaClass.class);
     }
 
     /**
      * Returns JavaTypeVariable array for given class TypeVariables.
      */
-    private JavaTypeVariable[] getTypeVariables(Class<?> realClass)
+    protected JavaTypeVariable[] getTypeVariables()
     {
-        TypeVariable<?>[] typeVariables = realClass.getTypeParameters();
+        TypeVariable<?>[] typeVariables = _realClass.getTypeParameters();
         return ArrayUtils.map(typeVariables, tvar -> getJavaTypeVarForTypeVar(tvar), JavaTypeVariable.class);
     }
 
@@ -162,11 +186,11 @@ public class JavaClassUpdater {
     /**
      * Returns JavaClass array of declared inner classes for given class.
      */
-    private JavaClass[] getDeclaredClasses(Class<?> realClass)
+    protected JavaClass[] getDeclaredClasses()
     {
         // Get Inner Classes
         Class<?>[] innerClasses;
-        try { innerClasses = realClass.getDeclaredClasses(); }
+        try { innerClasses = _realClass.getDeclaredClasses(); }
         catch (Throwable e) {
             System.err.println("JavaClassUpdater.getDeclaredClasses: Can't get declared classes: " + e);
             innerClasses = new Class[0];
@@ -191,10 +215,10 @@ public class JavaClassUpdater {
     /**
      * Returns JavaField array for given class.
      */
-    private JavaField[] getDeclaredFields(Class<?> realClass)
+    protected JavaField[] getDeclaredFields()
     {
         Field[] fields;
-        try { fields = realClass.getDeclaredFields(); }
+        try { fields = _realClass.getDeclaredFields(); }
         catch (Throwable e) { return new JavaField[0]; }
         return ArrayUtils.map(fields, field -> getJavaFieldForField(field), JavaField.class);
     }
@@ -213,10 +237,10 @@ public class JavaClassUpdater {
     /**
      * Returns JavaMethod array for given class.
      */
-    private JavaMethod[] getDeclaredMethods(Class<?> realClass)
+    protected JavaMethod[] getDeclaredMethods()
     {
         Method[] methods;
-        try { methods = realClass.getDeclaredMethods(); }
+        try { methods = _realClass.getDeclaredMethods(); }
         catch (Throwable e) { return new JavaMethod[0]; }
         return Stream.of(methods).filter(m -> !m.isSynthetic()).map(m -> getJavaMethodForMethod(m)).toArray(size -> new JavaMethod[size]);
     }
@@ -235,10 +259,10 @@ public class JavaClassUpdater {
     /**
      * Returns JavaConstructor array for given class.
      */
-    private JavaConstructor[] getDeclaredConstructors(Class<?> realClass)
+    protected JavaConstructor[] getDeclaredConstructors()
     {
         Constructor<?>[] constrs;
-        try { constrs = realClass.getDeclaredConstructors(); }
+        try { constrs = _realClass.getDeclaredConstructors(); }
         catch (Throwable e) { return new JavaConstructor[0]; }
         return Stream.of(constrs).filter(c -> !c.isSynthetic()).map(c -> getJavaConstructorForConstructor(c)).toArray(size -> new JavaConstructor[size]);
     }
@@ -259,13 +283,28 @@ public class JavaClassUpdater {
      */
     private void updateArrayClass()
     {
-        JavaClass aryDecl = _resolver.getJavaClassForClass(Object[].class);
-        _javaClass._fields = aryDecl.getDeclaredFields();
-        _javaClass._interfaces = aryDecl._interfaces;
-        _javaClass._methods = aryDecl._methods;
-        _javaClass._constructors = aryDecl._constructors;
-        _javaClass._innerClasses = aryDecl._innerClasses;
-        _javaClass._typeVars = aryDecl._typeVars;
+        // Handle Object[] special: Add Array.length field
+        if (_javaClass.getName().equals("java.lang.Object[]") && _javaClass.getFieldForName("length") == null) {
+            if (_javaClass.getFieldForName("length") == null) {
+                JavaField javaField = getLengthField();
+                _javaClass._fields = new JavaField[]{ javaField };
+                _javaClass._interfaces = new JavaClass[0];
+                _javaClass._methods = new JavaMethod[0];
+                _javaClass._constructors = new JavaConstructor[0];
+                _javaClass._innerClasses = new JavaClass[0];
+                _javaClass._typeVars = new JavaTypeVariable[0];
+            }
+            return;
+        }
+
+        // Handle other arrays: Just copy over from object array
+        JavaClass arrayDecl = _resolver.getJavaClassForClass(Object[].class);
+        _javaClass._fields = arrayDecl.getDeclaredFields();
+        _javaClass._interfaces = arrayDecl._interfaces;
+        _javaClass._methods = arrayDecl._methods;
+        _javaClass._constructors = arrayDecl._constructors;
+        _javaClass._innerClasses = arrayDecl._innerClasses;
+        _javaClass._typeVars = arrayDecl._typeVars;
     }
 
     /**
