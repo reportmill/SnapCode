@@ -37,13 +37,11 @@ public class RunToolUtils {
      */
     public static WebFile getMainClassSourceFile(RunTool runTool)
     {
-        // If last file is main class file, return it
-        if (_lastRunFile != null && isMainClassFile(_lastRunFile))
-            return _lastRunFile;
-
-        // Search all workspace projects for first that defines a main class name
+        // Get all workspace projects
         Workspace workspace = runTool.getWorkspace();
         Project[] projects = workspace.getProjects();
+
+        // Search all projects for first that defines a main class name
         for (Project project : projects) {
             String mainClassName = project.getBuildFile().getMainClassName();
             if (mainClassName != null) {
@@ -52,6 +50,10 @@ public class RunToolUtils {
                     return mainClassSourceFile;
             }
         }
+
+        // If last file is main class file, return it
+        if (_lastRunFile != null && isMainClassFile(_lastRunFile))
+            return _lastRunFile;
 
         // Return not found
         return null;
@@ -66,7 +68,8 @@ public class RunToolUtils {
         RunConfig runConfig = aConfig;
         if (runConfig == null && aFile == null) {
             WebSite rootSite = runTool.getRootSite();
-            runConfig = RunConfigs.get(rootSite).getRunConfig();
+            if (rootSite != null)
+                runConfig = RunConfigs.get(rootSite).getRunConfig();
         }
 
         // Get main file and args for given config or main file
