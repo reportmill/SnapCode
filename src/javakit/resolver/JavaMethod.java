@@ -40,23 +40,6 @@ public class JavaMethod extends JavaExecutable {
     }
 
     /**
-     * Resolves types.
-     */
-    @Override
-    protected void initTypes()
-    {
-        // If already initialized, just return
-        if (_evalType != null) return;
-
-        // Get/set EvalType to method return Type
-        Type returnType = _method.getGenericReturnType();
-        _evalType = _resolver.getJavaTypeForType(returnType);
-
-        // Do normal version
-        super.initTypes();
-    }
-
-    /**
      * Returns whether Method is default type.
      */
     public boolean isDefault()  { return _default; }
@@ -70,6 +53,22 @@ public class JavaMethod extends JavaExecutable {
      * Returns the return type.
      */
     public JavaClass getReturnType()  { return getEvalClass(); }
+
+    /**
+     * Override to get eval type dynamically.
+     */
+    @Override
+    public JavaType getEvalType()
+    {
+        if (_evalType != null) return _evalType;
+
+        // Get EvalType from method return Type
+        Type returnType = _method.getGenericReturnType();
+        JavaType evalType = _resolver.getJavaTypeForType(returnType);
+
+        // Set and return
+        return _evalType = evalType;
+    }
 
     /**
      * Returns the JMethodDecl.

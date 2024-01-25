@@ -111,22 +111,16 @@ public class JavaClassUpdater {
         // Update methods
         JavaMethod[] oldMethods = _javaClass._methods;
         JavaMethod[] newMethods = _javaClass._methods = getDeclaredMethods();
-        if (!ArrayUtils.equalsId(oldMethods, newMethods)) {
-            for (JavaMethod method : newMethods)
-                method.initTypes();
+        if (!ArrayUtils.equalsId(oldMethods, newMethods))
             classChanged = true;
-        }
 
         // Update constructors
         JavaConstructor[] oldConstrs = _javaClass._constructors;
         JavaConstructor[] newConstrs = _javaClass._constructors = getDeclaredConstructors();
-        if (!ArrayUtils.equalsId(oldConstrs, newConstrs)) {
-            for (JavaConstructor constr : newConstrs)
-                constr.initTypes();
+        if (!ArrayUtils.equalsId(oldConstrs, newConstrs))
             classChanged = true;
-        }
 
-        // Return whether decls were changed
+        // If decls changed, clear AllDecls
         if (classChanged)
             _allDecls = null;
 

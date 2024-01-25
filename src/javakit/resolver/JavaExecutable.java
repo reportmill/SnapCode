@@ -42,23 +42,6 @@ public class JavaExecutable extends JavaMember {
     }
 
     /**
-     * Resolves types.
-     */
-    protected void initTypes()
-    {
-        // If already initialized, just return
-        if (_parameterTypes != null) return;
-
-        // Get GenericParameterTypes (this can fail https://bugs.openjdk.java.net/browse/JDK-8075483))
-        Executable exec = this instanceof JavaMethod ? ((JavaMethod) this).getMethod() : ((JavaConstructor) this).getConstructor();
-        Type[] paramTypes = exec.getGenericParameterTypes();
-        if (paramTypes.length < exec.getParameterCount())
-            paramTypes = exec.getParameterTypes();
-
-        _parameterTypes = _resolver.getJavaTypesForTypes(paramTypes);
-    }
-
-    /**
      * Returns the super decl of this JavaDecl (Class, Method, Constructor).
      */
     public JavaExecutable getSuper()  { return null; }
@@ -81,7 +64,8 @@ public class JavaExecutable extends JavaMember {
      */
     public int getParameterCount()
     {
-        return _parameterTypes.length;
+        JavaType[] paramTypes = getParameterTypes();
+        return paramTypes.length;
     }
 
     /**
@@ -89,13 +73,28 @@ public class JavaExecutable extends JavaMember {
      */
     public JavaType getParameterType(int anIndex)
     {
-        return _parameterTypes[anIndex];
+        JavaType[] paramTypes = getParameterTypes();
+        return paramTypes[anIndex];
     }
 
     /**
      * Returns the parameter types.
      */
-    public JavaType[] getParameterTypes()  { return _parameterTypes; }
+    public JavaType[] getParameterTypes()
+    {
+        if (_parameterTypes != null) return _parameterTypes;
+
+        // Get GenericParameterTypes (this can fail https://bugs.openjdk.java.net/browse/JDK-8075483))
+        Executable exec = this instanceof JavaMethod ? ((JavaMethod) this).getMethod() : ((JavaConstructor) this).getConstructor();
+        Type[] paramTypesReal = exec.getGenericParameterTypes();
+        if (paramTypesReal.length < exec.getParameterCount())
+            paramTypesReal = exec.getParameterTypes();
+
+        JavaType[] parameterTypes = _resolver.getJavaTypesForTypes(paramTypesReal);
+
+        // Set and return
+        return _parameterTypes = parameterTypes;
+    }
 
     /**
      * Returns whether Method/Constructor is VarArgs type.
