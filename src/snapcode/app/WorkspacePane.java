@@ -207,11 +207,7 @@ public class WorkspacePane extends ViewOwner {
      */
     public void show()
     {
-        // Show window
-        getUI();
-        getWindow().setSaveName("AppPane");
-        getWindow().setSaveSize(true);
-        getWindow().setVisible(true);
+        setWindowVisible(true);
     }
 
     /**
@@ -335,14 +331,6 @@ public class WorkspacePane extends ViewOwner {
         // Add key binding to OpenMenuItem and CloseWindow
         //addKeyActionHandler("OpenMenuItem", "meta O");
         //addKeyActionHandler("CloseFileAction", "meta W");
-
-        // Register for WelcomePanel on close
-        WindowView window = getWindow();
-        enableEvents(window, WinClose);
-
-        // If TeaVM, maximize window
-        if (SnapUtils.isWebVM)
-            window.setMaximized(true);
     }
 
     /**
@@ -352,11 +340,30 @@ public class WorkspacePane extends ViewOwner {
     protected void initShowing()
     {
         // Do AutoBuild
-        buildWorkspaceAllLater();
+        if (getProjects().length > 0)
+            buildWorkspaceAllLater();
 
         // Hack when running in browser in Swing to always fill available screen size
         if (SnapUtils.isWebVM && getEnv().getClass().getSimpleName().startsWith("Swing"))
             new ViewTimer(1000, e -> checkScreenSize()).start();
+    }
+
+    /**
+     * Initialize window.
+     */
+    @Override
+    protected void initWindow(WindowView aWindow)
+    {
+        // Configure save name and size
+        aWindow.setSaveName("AppPane");
+        aWindow.setSaveSize(true);
+
+        // If browser, maximize window
+        if (SnapUtils.isWebVM)
+            aWindow.setMaximized(true);
+
+        // Register for WelcomePanel on close
+        enableEvents(aWindow, WinClose);
     }
 
     /**
@@ -447,7 +454,7 @@ public class WorkspacePane extends ViewOwner {
         WorkspaceBuilder builder = workspace.getBuilder();
         if (builder.isAutoBuildEnabled()) {
             builder.addAllFilesToBuild();
-            builder.buildWorkspaceLater();
+            builder.buildWorkspaceAfterDelay(800);
         }
     }
 
