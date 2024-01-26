@@ -5,10 +5,7 @@ package snapcode.project;
 import javakit.resolver.Resolver;
 import snap.props.PropObject;
 import snap.util.*;
-import snap.web.WebFile;
-import snap.web.WebSite;
-import snap.web.WebURL;
-
+import snap.web.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -24,9 +21,6 @@ public class Project extends PropObject {
 
     // The encapsulated data site
     protected WebSite  _site;
-
-    // Whether this project is read-only
-    private boolean _readOnly;
 
     // The child projects this project depends on
     private Project[]  _projects;
@@ -48,24 +42,11 @@ public class Project extends PropObject {
      */
     public Project(Workspace aWorkspace, WebSite aSite)
     {
+        super();
         _workspace = aWorkspace;
 
         // Set Site
         setSite(aSite);
-
-        // Set ReadOnly
-        boolean isReadOnly = aSite.getURL().getScheme().startsWith("http");
-        if (isReadOnly)
-            setReadOnly(true);
-
-        // If not ReadOnly and doesn't exist, create root directory, src and bin
-        if (!isReadOnly) {
-            if (!aSite.getExists()) {
-                aSite.getRootDir().save();
-                aSite.createFileForPath("/src", true).save();
-                aSite.createFileForPath("/bin", true).save();
-            }
-        }
 
         // Create/set ProjectFiles, ProjectBuilder
         _projFiles = new ProjectFiles(this);
@@ -103,19 +84,17 @@ public class Project extends PropObject {
      */
     protected void setSite(WebSite aSite)
     {
+        // Set site and add Site.Project property to this project
         _site = aSite;
         _site.setProp(Project.class.getSimpleName(), this);
+
+        // If site doesn't exist, create root dir, src dir and build file
+        if (!aSite.getExists()) {
+            WebFile srcDir = _site.createFileForPath("/src", true);
+            srcDir.save();
+            getBuildFile().writeFile();
+        }
     }
-
-    /**
-     * Returns whether project is read-only.
-     */
-    public boolean isReadOnly()  { return _readOnly; }
-
-    /**
-     * Sets whether project is read-only.
-     */
-    public void setReadOnly(boolean aValue)  { _readOnly = aValue; }
 
     /**
      * Returns the BuildFile that manages project properties.
@@ -377,10 +356,8 @@ public class Project extends PropObject {
     private void buildFileDidChange()
     {
         // Save build file
-        if (!isReadOnly()) {
-            BuildFile buildFile = getBuildFile();
-            buildFile.writeFile();
-        }
+        BuildFile buildFile = getBuildFile();
+        buildFile.writeFile();
 
         // Clear Workspace classloader
         Workspace workspace = getWorkspace();
@@ -418,6 +395,15 @@ public class Project extends PropObject {
         // If plain file, add as BuildFile
         if (!aFile.isDir())
             _projBuilder.addBuildFile(aFile, false);
+    }
+
+    /**
+     * Closes a project.
+     */
+    public void closeProject()
+    {
+        // Clear Site.Project
+        _site.setProp(Project.class.getSimpleName(), null);
     }
 
     /**

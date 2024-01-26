@@ -129,8 +129,9 @@ public class JavaExecutable extends JavaMember {
      */
     protected String getParametersString(boolean simpleNames)
     {
+        JavaType[] paramTypes = getParameterTypes();
         Function<JavaDecl,String> namesFunction = simpleNames ? JavaDecl::getSimpleName : JavaDecl::getName;
-        String paramTypesString = Stream.of(_parameterTypes).map(namesFunction).collect(Collectors.joining(","));
+        String paramTypesString = Stream.of(paramTypes).map(namesFunction).collect(Collectors.joining(","));
         return '(' + paramTypesString + ')';
     }
 

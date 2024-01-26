@@ -370,11 +370,8 @@ public class FilesTool extends WorkspaceTool {
         WebSite projectSite = newProjectFile.getURL().getAsSite();
         Project newProject = _workspace.getProjectForSite(projectSite);
 
-        // Create src and build files
-        newProject.getSourceDir().save();
+        // Configure to include SnapKit
         newProject.getBuildFile().setIncludeSnapKitRuntime(true);
-        newProject.getBuildFile().writeFile();
-        newProjectFile.resetAndVerify();
 
         // Add project
         _workspace.addProject(newProject);

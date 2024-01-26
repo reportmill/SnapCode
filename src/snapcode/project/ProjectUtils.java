@@ -176,11 +176,17 @@ public class ProjectUtils {
 
         // Get project for site - create if missing
         Project tempProj = Project.getProjectForSite(tempProjSite);
-        if (tempProj != null)
+        if (tempProj != null && tempProj.getWorkspace() == workspace)
             return tempProj;
 
-        // Delete old version
-        deleteTempProject();
+        // If attached to old workspace, close project
+        if (tempProj != null)
+            tempProj.closeProject();
+
+        // Delete site root directory
+        WebFile tempProjRootDir = tempProjSite.getRootDir();
+        if (tempProjRootDir.getExists())
+            tempProjRootDir.delete();
 
         // Create new temp project
         tempProj = workspace.addProjectForSite(tempProjSite);
@@ -189,24 +195,6 @@ public class ProjectUtils {
 
         // Return
         return tempProj;
-    }
-
-    /**
-     * Deletes the temp project.
-     */
-    public static void deleteTempProject()
-    {
-        // Get path to temp dir named TempProj
-        String tempProjPath = FileUtils.getTempFile("TempProj").getAbsolutePath();
-        if (SnapUtils.isMac)
-            tempProjPath = "/tmp/TempProj";
-
-        // Get URL and Site for TempProjPath
-        WebURL tempProjURL = WebURL.getURL(tempProjPath);
-        assert (tempProjURL != null);
-        WebFile tempProjFile = tempProjURL.getFile();
-        if (tempProjFile != null)
-            tempProjFile.delete();
     }
 
     /**

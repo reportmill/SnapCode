@@ -34,7 +34,7 @@ public class SampleDoc {
 
     // Constants
     private static final String SAMPLES_ROOT = "https://reportmill.com/SnapCode/Samples/";
-    private static final String SAMPLES_INDEX = SAMPLES_ROOT +  "index2.txt";
+    private static final String SAMPLES_INDEX = SAMPLES_ROOT +  "index.txt";
     private static final Effect SHADOW = new ShadowEffect(20, Color.GRAY, 0, 0);
     private static final Effect SHADOW_SEL = new ShadowEffect(20, Color.get("#038ec3"), 0, 0);
     private static final Size DOC_SIZE = new Size(130, 102);
