@@ -242,6 +242,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         // If none, add default
         if (constructors.length == 0) {
             cb.mods(Modifier.PUBLIC);
+            cb.save();
             constructors = cb.buildAll();
         }
 

@@ -105,6 +105,15 @@ public class JavaTextPane extends TextPane {
     }
 
     /**
+     * Initialization after showing.
+     */
+    @Override
+    protected void initShowing()
+    {
+        checkFileForErrorsAfterDelay(0);
+    }
+
+    /**
      * Reset UI.
      */
     protected void resetUI()
@@ -320,18 +329,18 @@ public class JavaTextPane extends TextPane {
             if (CharSequenceUtils.indexOfNewline(chars, 0) >= 0)
                 _lineNumView.resetAll();
             _lineFootView.resetAll();
-            checkFileForErrorsAfterDelay();
+            checkFileForErrorsAfterDelay(1000);
         }
     }
 
     /**
      * Register to check file for errors after slight delay.
      */
-    private void checkFileForErrorsAfterDelay()
+    private void checkFileForErrorsAfterDelay(int aDelay)
     {
         JavaTextDoc javaTextDoc = getJavaTextDoc();
         JavaAgent javaAgent = javaTextDoc.getAgent();
-        javaAgent.checkFileForErrorsAfterDelay(1000);
+        javaAgent.checkFileForErrorsAfterDelay(aDelay);
     }
 
     /**

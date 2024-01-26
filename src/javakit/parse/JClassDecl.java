@@ -66,6 +66,8 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
      */
     public String getSimpleName()
     {
+        if (isAnonymousClass())
+            return "";
         return getName();
     }
 
