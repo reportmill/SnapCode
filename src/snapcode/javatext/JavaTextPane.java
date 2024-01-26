@@ -110,7 +110,7 @@ public class JavaTextPane extends TextPane {
     @Override
     protected void initShowing()
     {
-        checkFileForErrorsAfterDelay(0);
+        checkFileForErrorsAfterDelay(500);
     }
 
     /**
