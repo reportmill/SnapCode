@@ -4,7 +4,6 @@ import snap.gfx.GFXEnv;
 import snap.viewx.DevPane;
 import snapcode.project.*;
 import snap.props.PropChange;
-import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.util.FileUtils;
 import snap.util.SnapUtils;
@@ -13,7 +12,6 @@ import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import snap.web.WebURL;
 import snapcode.apptools.*;
 
 /**
@@ -38,12 +36,6 @@ public class WorkspacePane extends ViewOwner {
 
     // The WorkspaceTools
     protected WorkspaceTools _workspaceTools;
-
-    // A PropChangeListener to watch for site file changes
-    private PropChangeListener _siteFileLsnr = pc -> siteFileChanged(pc);
-
-    // The default HomePage
-    private HomePage  _homePage;
 
     /**
      * Constructor.
@@ -180,22 +172,6 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
-     * Returns the home page URL.
-     */
-    public WebURL getHomePageURL()  { return null; } // getHomePage().getURL();
-
-    /**
-     * Returns the HomePage.
-     */
-    private HomePage getHomePage()
-    {
-        if (_homePage != null) return _homePage;
-        _homePage = new HomePage();
-        _pagePane.setPageForURL(_homePage.getURL(), _homePage);
-        return _homePage;
-    }
-
-    /**
      * Returns the selected file.
      */
     public WebFile getSelFile()  { return _pagePane.getSelFile(); }
@@ -236,24 +212,6 @@ public class WorkspacePane extends ViewOwner {
         getWindow().setSaveName("AppPane");
         getWindow().setSaveSize(true);
         getWindow().setVisible(true);
-
-        // Open Projects
-        ProjectPane[] projectPanes = getProjectPanes();
-        for (ProjectPane projPane : projectPanes)
-            projPane.workspaceDidOpen();
-
-        // Do AutoBuild
-        Workspace workspace = getWorkspace();
-        WorkspaceBuilder builder = workspace.getBuilder();
-        if (builder.isAutoBuildEnabled()) {
-            builder.addAllFilesToBuild();
-            builder.buildWorkspaceLater();
-        }
-
-        // Show HomePage
-        WebURL homePageURL = getHomePageURL();
-        if (homePageURL != null)
-            _pagePane.setBrowserURL(homePageURL);
     }
 
     /**
@@ -261,21 +219,10 @@ public class WorkspacePane extends ViewOwner {
      */
     public void hide()
     {
-        ProjectPane[] projectPanes = getProjectPanes();
+        // Close workspace
+        _workspace.closeWorkspace();
 
-        // Flush and refresh sites
-        for (ProjectPane projectPane : projectPanes) {
-
-            // Close ProjectPane
-            projectPane.workspaceDidClose();
-
-            // Close project site
-            WebSite projectSite = projectPane.getProjectSite();
-            try { projectSite.flush(); }
-            catch (Exception e) { throw new RuntimeException(e); }
-            projectSite.resetFiles();
-        }
-
+        // Close tools
         _workspaceTools.closeProject();
     }
 
@@ -404,6 +351,10 @@ public class WorkspacePane extends ViewOwner {
     @Override
     protected void initShowing()
     {
+        // Do AutoBuild
+        buildWorkspaceAllLater();
+
+        // Hack when running in browser in Swing to always fill available screen size
         if (SnapUtils.isWebVM && getEnv().getClass().getSimpleName().startsWith("Swing"))
             new ViewTimer(1000, e -> checkScreenSize()).start();
     }
@@ -487,6 +438,20 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
+     * Called to build workspace.
+     */
+    private void buildWorkspaceAllLater()
+    {
+        // Do AutoBuild
+        Workspace workspace = getWorkspace();
+        WorkspaceBuilder builder = workspace.getBuilder();
+        if (builder.isAutoBuildEnabled()) {
+            builder.addAllFilesToBuild();
+            builder.buildWorkspaceLater();
+        }
+    }
+
+    /**
      * Called when Workspace does a property change.
      */
     private void workspaceDidPropChange(PropChange aPC)
@@ -526,13 +491,12 @@ public class WorkspacePane extends ViewOwner {
      */
     private void workspaceDidAddProject(Project aProject)
     {
-        // Start listening to file changes
-        WebSite projSite = aProject.getSite();
-        projSite.addFileChangeListener(_siteFileLsnr);
-
         // Create/add ProjectPane
         ProjectPane projPane = new ProjectPane(this, aProject);
         _projectPanes = ArrayUtils.addId(_projectPanes, projPane);
+
+        // Open project pane
+        projPane.openProjectPane();
 
         // Clear root files
         FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
@@ -540,6 +504,10 @@ public class WorkspacePane extends ViewOwner {
 
         // Reset UI
         resetLater();
+
+        // If showing, build workspace
+        if (isShowing())
+            buildWorkspaceAllLater();
     }
 
     /**
@@ -551,9 +519,8 @@ public class WorkspacePane extends ViewOwner {
         ProjectPane projPane = getProjectPaneForProject(aProject);
         _projectPanes = ArrayUtils.remove(_projectPanes, projPane);
 
-        // Stop listening to file changes
-        WebSite projSite = aProject.getSite();
-        projSite.removeFileChangeListener(_siteFileLsnr);
+        // Close ProjectPane
+        projPane.closeProjectPane();
 
         // Clear root files
         FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
@@ -569,24 +536,13 @@ public class WorkspacePane extends ViewOwner {
     protected void siteFileChanged(PropChange aPC)
     {
         // Get file/prop
-        WebFile file = (WebFile) aPC.getSource();
         String propName = aPC.getPropName();
+        WebFile file = (WebFile) aPC.getSource();
 
         // Handle LastModTime, Modified: Update file in FileTreeTool
         if (propName == WebFile.LastModTime_Prop || propName == WebFile.Modified_Prop) {
-
-            // Notify FileTreeTool to update file
             FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
             fileTreeTool.updateChangedFile(file);
-
-            // If LastModTime and not dir, add build file
-            if (propName == WebFile.LastModTime_Prop && file.isFile()) {
-                Project proj = Project.getProjectForFile(file);
-                if (proj != null) {
-                    ProjectBuilder projectBuilder = proj.getBuilder();
-                    projectBuilder.addBuildFile(file, true);
-                }
-            }
         }
     }
 

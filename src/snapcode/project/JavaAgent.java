@@ -4,6 +4,7 @@
 package snapcode.project;
 import javakit.parse.*;
 import snap.props.PropChange;
+import snap.props.PropChangeListener;
 import snap.text.TextDoc;
 import snap.text.TextBlockUtils;
 import snap.util.ArrayUtils;
@@ -30,6 +31,9 @@ public class JavaAgent {
     // The parsed version of this JavaFile
     protected JFile  _jfile;
 
+    // A listener for file prop changes
+    private PropChangeListener _fileBytesChangedLsnr;
+
     // A runnable to check file for errors after delay
     private Runnable _checkFileRun = () -> checkFileForErrors();
 
@@ -39,7 +43,29 @@ public class JavaAgent {
     public JavaAgent(WebFile aFile)
     {
         _file = aFile;
-        aFile.addPropChangeListener(this::fileBytesDidChange, WebFile.Bytes_Prop);
+
+        // Set File JavaAgent property to this agent
+        _file.setProp(JavaAgent.class.getName(), this);
+
+        // Start listening for file bytes changed
+        _fileBytesChangedLsnr = this::fileBytesDidChange;
+        _file.addPropChangeListener(_fileBytesChangedLsnr, WebFile.Bytes_Prop);
+    }
+
+    /**
+     * Closes this agent.
+     */
+    public void closeAgent()
+    {
+        // If already close, complain and return
+        if (_file == null) { System.err.println("JavaAgent.closeAgent: Multiple closes"); return; }
+
+        // Clear everything
+        clearBuildIssues();
+        _file.setProp(JavaAgent.class.getName(), null);
+        _file.removePropChangeListener(_fileBytesChangedLsnr);
+        _file.reset();
+        _file = null; _jfile = null; _javaTextDoc = null; _proj = null; _javaParser = null;
     }
 
     /**
@@ -294,22 +320,16 @@ public class JavaAgent {
      */
     public static JavaAgent getAgentForFile(WebFile aFile)
     {
-        // Get JavaAgent for given source file
+        // Get JavaAgent for given source file - just return if found
         JavaAgent javaAgent = (JavaAgent) aFile.getProp(JavaAgent.class.getName());
+        if (javaAgent != null)
+            return javaAgent;
 
-        // If missing, create/set
-        if (javaAgent == null) {
-
-            // Create JavaAgent for java/jepl file
-            if (aFile.getType().equals("java"))
-                javaAgent = new JavaAgent(aFile);
-            else if (aFile.getType().equals("jepl"))
-                javaAgent = new JeplAgent(aFile);
-
-            // Set agent as file property
-            if (javaAgent != null)
-                aFile.setProp(JavaAgent.class.getName(), javaAgent);
-        }
+        // Create JavaAgent for java/jepl file
+        if (aFile.getType().equals("java"))
+            javaAgent = new JavaAgent(aFile);
+        else if (aFile.getType().equals("jepl"))
+            javaAgent = new JeplAgent(aFile);
 
         // Return
         return javaAgent;

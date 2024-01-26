@@ -176,12 +176,8 @@ public class ProjectUtils {
 
         // Get project for site - create if missing
         Project tempProj = Project.getProjectForSite(tempProjSite);
-        if (tempProj != null && tempProj.getWorkspace() == workspace)
-            return tempProj;
-
-        // If attached to old workspace, close project
         if (tempProj != null)
-            tempProj.closeProject();
+            return tempProj;
 
         // Delete site root directory
         WebFile tempProjRootDir = tempProjSite.getRootDir();

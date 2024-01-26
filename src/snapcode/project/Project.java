@@ -381,10 +381,10 @@ public class Project extends PropObject {
         // Remove build files
         _projBuilder.removeBuildFile(aFile);
 
-        // Remove BuildIssues for file
+        // If source file, close agent
         JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
         if (javaAgent != null)
-            javaAgent.clearBuildIssues();
+            javaAgent.closeAgent();
     }
 
     /**
@@ -393,7 +393,7 @@ public class Project extends PropObject {
     public void fileSaved(WebFile aFile)
     {
         // If plain file, add as BuildFile
-        if (!aFile.isDir())
+        if (aFile.isFile())
             _projBuilder.addBuildFile(aFile, false);
     }
 
@@ -402,8 +402,17 @@ public class Project extends PropObject {
      */
     public void closeProject()
     {
+        // If already close, just return
+        if (_site == null) { System.err.println("Project.closeProject: Multiple closes"); return; }
+
         // Clear Site.Project
         _site.setProp(Project.class.getSimpleName(), null);
+
+        // Close project site
+        try { _site.flush(); }
+        catch (Exception e) { throw new RuntimeException(e); }
+        _site.resetFiles();
+        _site = null;
     }
 
     /**

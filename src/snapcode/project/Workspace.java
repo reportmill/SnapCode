@@ -73,6 +73,17 @@ public class Workspace extends PropObject {
     }
 
     /**
+     * Close workspace.
+     */
+    public void closeWorkspace()
+    {
+        // Remove all projects
+        Project[] projects = getProjects();
+        for (Project project : projects)
+            removeProject(project);
+    }
+
+    /**
      * Returns the projects that this workspace manages.
      */
     public Project[] getProjects()  { return _projects; }

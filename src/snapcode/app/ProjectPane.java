@@ -115,7 +115,7 @@ public class ProjectPane extends ViewOwner {
     /**
      * Called when project is opened.
      */
-    public void workspaceDidOpen()
+    public void openProjectPane()
     {
         // Activate VersionControlPane
         if (_versionControlTool != null)
@@ -123,13 +123,20 @@ public class ProjectPane extends ViewOwner {
     }
 
     /**
-     * Called when project is closed.
+     * Called to close project.
      */
-    public void workspaceDidClose()
+    public void closeProjectPane()
     {
+        // If already close, just return
+        if (_workspacePane == null) return;
+
+        // Stop listening to project site and unregister Project.Site.ProjectPane
         WebSite projSite = _project.getSite();
         projSite.removeFileChangeListener(_siteFileLsnr);
         projSite.setProp(ProjectPane.class.getName(), null);
+
+        // Close project and clear workspace pane
+        _project.closeProject();
         _workspacePane = null;
     }
 
@@ -176,9 +183,12 @@ public class ProjectPane extends ViewOwner {
             else fileRemoved(file);
         }
 
-        // Handle ModifedTime property: Call file saved
+        // Handle LastModTime property: Call file saved
         if (propName == WebFile.LastModTime_Prop && file.getExists())
             fileSaved(file);
+
+        // Forward to WorkspacePane
+        _workspacePane.siteFileChanged(aPC);
     }
 
     /**
@@ -223,7 +233,8 @@ public class ProjectPane extends ViewOwner {
             _versionControlTool.fileSaved(aFile);
 
         // If BuildDir file, just return
-        if (_project.getBuildDir().containsFile(aFile)) return;
+        if (_project.getBuildDir().containsFile(aFile))
+            return;
 
         // Notify saved and build workspace
         _project.fileSaved(aFile);
