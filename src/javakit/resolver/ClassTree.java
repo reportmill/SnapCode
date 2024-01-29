@@ -46,6 +46,8 @@ public class ClassTree {
 
             // Get site root files
             WebFile siteRootDir = site.getRootDir();
+            if (!siteRootDir.getExists())
+                continue;
             WebFile[] rootFiles = siteRootDir.getFiles();
 
             // Iterate over site root files and create/add packages
