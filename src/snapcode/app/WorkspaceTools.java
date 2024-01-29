@@ -154,6 +154,11 @@ public class WorkspaceTools {
     public FileTreeTool getFileTreeTool()  { return getToolForClass(FileTreeTool.class); }
 
     /**
+     * Returns the RunTool.
+     */
+    public RunTool getRunTool()  { return getToolForClass(RunTool.class); }
+
+    /**
      * Returns the left side tray.
      */
     public ToolTray getLeftTray()  { return _leftTray; }
@@ -276,7 +281,7 @@ public class WorkspaceTools {
      */
     protected void breakpointsDidChange(PropChange pc)
     {
-        RunTool runTool = getToolForClass(RunTool.class);
+        RunTool runTool = getRunTool();
         runTool.breakpointsDidChange(pc);
     }
 

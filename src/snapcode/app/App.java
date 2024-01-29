@@ -159,7 +159,7 @@ public class App {
     {
         WorkspacePane workspacePane = WindowView.getOpenWindowOwner(WorkspacePane.class);
         if (workspacePane != null) {
-            RunTool runTool = workspacePane.getWorkspaceTools().getToolForClass(RunTool.class);
+            RunTool runTool = workspacePane.getWorkspaceTools().getRunTool();
             runTool.runAppForSelFile(false);
         }
     }

@@ -171,14 +171,6 @@ public class WelcomePanel extends ViewOwner {
      */
     protected void openWorkspaceForNewFileOfType(String fileType)
     {
-        // Handle alt down
-        if (ViewUtils.isAltDown()) {
-            WebURL repoURL = WebURL.getURL("https://reportmill.com/SnapCode/Samples/Samples.zip");
-            assert (repoURL != null);
-            openWorkspaceForFile(repoURL.createFile(false));
-            return;
-        }
-
         // Open empty workspace pane with temp project
         WorkspacePane workspacePane = openEmptyWorkspace();
         Workspace workspace = workspacePane.getWorkspace();

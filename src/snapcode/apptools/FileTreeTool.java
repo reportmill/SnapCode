@@ -554,7 +554,7 @@ public class FileTreeTool extends WorkspaceTool {
      */
     private void runAppForSelFile(boolean isDebug)
     {
-        RunTool runTool = _workspaceTools.getToolForClass(RunTool.class);
+        RunTool runTool = _workspaceTools.getRunTool();
         runTool.runAppForSelFile(isDebug);
     }
 

@@ -84,16 +84,15 @@ public class WorkspacePane extends ViewOwner {
     {
         if (aWorkspace == _workspace) return;
 
-        // Uninstall
-        Project[] projects = _workspace.getProjects();
-        for (Project proj : projects)
-            workspaceDidRemoveProject(proj);
+        // Close old workspace
+        if (_workspace != null)
+            _workspace.closeWorkspace();
 
         // Set
         _workspace = aWorkspace;
 
         // Install
-        projects = _workspace.getProjects();
+        Project[] projects = _workspace.getProjects();
         for (Project proj : projects)
             workspaceDidAddProject(proj);
 

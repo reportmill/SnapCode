@@ -119,9 +119,8 @@ public class JavaPage extends WebPage {
         if (anEvent.equals("EnterAction")) {
             WorkspacePane workspacePane = getWorkspacePane();
             WorkspaceTools workspaceTools = workspacePane.getWorkspaceTools();
-            RunTool runTool = workspaceTools.getToolForClass(RunTool.class);
-            if (runTool != null)
-                runTool.runAppForSelFile(false);
+            RunTool runTool = workspaceTools.getRunTool();
+            runTool.runAppForSelFile(false);
         }
     }
 

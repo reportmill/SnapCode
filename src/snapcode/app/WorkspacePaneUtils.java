@@ -21,6 +21,14 @@ public class WorkspacePaneUtils {
      */
     public static void openSamplesUrl(WorkspacePane workspacePane, WebURL sampleURL)
     {
+        // This isn't great, but remove any non-TempProj projects
+        Workspace workspace = workspacePane.getWorkspace();
+        Project[] projects = workspace.getProjects();
+        for (Project project : projects) {
+            if (!project.getName().equals("TempProj"))
+                workspace.removeProject(project);
+        }
+
         // Get sample file - complain and return if not found
         WebFile sampleFile = sampleURL.getFile();
         if (sampleFile == null) {
@@ -40,9 +48,8 @@ public class WorkspacePaneUtils {
             openExternalSourceFile(workspacePane, sampleFile);
 
             // Kick off run
-            RunTool runTool = workspacePane.getWorkspaceTools().getToolForClass(RunTool.class);
-            if (runTool != null)
-                ViewUtils.runLater(() -> runTool.runAppForSelFile(false));
+            RunTool runTool = workspacePane.getWorkspaceTools().getRunTool();
+            ViewUtils.runLater(() -> runTool.runAppForSelFile(false));
             return;
         }
 
@@ -73,14 +80,8 @@ public class WorkspacePaneUtils {
         if (!sourceURL.getString().contains("TempProj"))
             RecentFiles.addURL(sourceURL);
 
-        // Show RunTool
-        workspacePane.showRunTool();
-
         // Show source file
-        ViewUtils.runLater(() -> {
-            PagePane pagePane = workspacePane.getPagePane();
-            pagePane.setSelFile(newSourceFile);
-        });
+        ViewUtils.runLater(() -> showFile(workspacePane, newSourceFile));
     }
 
     /**
@@ -156,7 +157,15 @@ public class WorkspacePaneUtils {
             return;
 
         // Select it
+        showFile(workspacePane, defaultFile);
+    }
+
+    /**
+     * Show file.
+     */
+    private static void showFile(WorkspacePane workspacePane, WebFile aFile)
+    {
         FileTreeTool fileTreeTool = workspacePane.getWorkspaceTools().getFileTreeTool();
-        fileTreeTool.showFile(defaultFile);
+        fileTreeTool.showFile(aFile);
     }
 }
