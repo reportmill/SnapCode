@@ -73,7 +73,7 @@ public class JEnumConst extends JMemberDecl {
             return null;
 
         // Get JavaField for enum constant
-        JavaField field = javaClass.getFieldForName(enumName);
+        JavaField field = javaClass.getDeclaredFieldForName(enumName);
         return field;
     }
 }

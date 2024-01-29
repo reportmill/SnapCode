@@ -471,7 +471,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
         // See if it's a field reference from superclass
         JavaClass superClass = getSuperClass();
         if (superClass != null) {
-            JavaField field = superClass.getFieldForName(name);
+            JavaField field = superClass.getFieldDeepForName(name);
             if (field != null)
                 return field;
         }
@@ -480,7 +480,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
         List<JType> implementsTypes = getImplementsTypes();
         for (JType implementsType : implementsTypes) {
             JavaClass interf = implementsType.getEvalClass();
-            JavaField field2 = interf != null ? interf.getFieldForName(name) : null;
+            JavaField field2 = interf != null ? interf.getDeclaredFieldForName(name) : null;
             if (field2 != null)
                 return field2;
         }
@@ -493,7 +493,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
         // Look for InnerClass of given name
         JavaClass evalClass = getEvalClass();
         if (evalClass != null) {
-            JavaClass innerClass = evalClass.getInnerClassForName(name);
+            JavaClass innerClass = evalClass.getDeclaredClassForName(name);
             if (innerClass != null)
                 return innerClass;
         }
@@ -545,7 +545,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
         // See if it's a field reference from superclass - from old getDeclForChildNode() is this really needed ???
         JavaClass superClass = getSuperClass();
         if (superClass != null) {
-            JavaField field = superClass.getFieldForName(name);
+            JavaField field = superClass.getDeclaredFieldForName(name);
             if (field != null)
                 return field;
         }
@@ -558,7 +558,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
         // Look for InnerClass of given name - from old getDeclForChildNode() is this really needed ???
         JavaClass evalClass = getEvalClass();
         if (evalClass != null) {
-            JavaClass innerClass = evalClass.getInnerClassForName(name);
+            JavaClass innerClass = evalClass.getDeclaredClassForName(name);
             if (innerClass != null)
                 return innerClass;
         }

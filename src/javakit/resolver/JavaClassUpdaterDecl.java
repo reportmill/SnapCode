@@ -91,7 +91,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     {
         // Get or create class for class name
         String innerClassName = anInnerClassDecl.getSimpleName();
-        JavaClass innerClass = _javaClass.getInnerClassForName(innerClassName);
+        JavaClass innerClass = _javaClass.getDeclaredClassForName(innerClassName);
         if (innerClass == null)
             innerClass = anInnerClassDecl.getDecl();
 
@@ -135,7 +135,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     {
         JFieldDecl fieldDecl = (JFieldDecl) varDecl.getParent();
         String fieldName = varDecl.getName();
-        JavaField javaField = _javaClass.getFieldForName(fieldName);
+        JavaField javaField = _javaClass.getDeclaredFieldForName(fieldName);
         if (javaField == null) {
             fb.name(fieldName);
             fb.mods(fieldDecl.getMods().getValue());
@@ -158,7 +158,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     private JavaField getJavaFieldForEnumConst(JEnumConst enumConst, JavaField.FieldBuilder fb)
     {
         String enumConstName = enumConst.getName();
-        JavaField enumField = _javaClass.getFieldForName(enumConstName);
+        JavaField enumField = _javaClass.getDeclaredFieldForName(enumConstName);
         if (enumField == null) // Need to make sure type and mods match too
             enumField = fb.name(enumConstName).type(_javaClass).mods(Modifier.PUBLIC | Modifier.STATIC).build();
         return enumField;

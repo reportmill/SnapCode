@@ -395,13 +395,14 @@ public class JavaTextArea extends TextArea {
 
         // If HoverNode, underline
         if (_hoverNode != null) {
-            //TextBoxToken hoverToken = (TextBoxToken) _hoverNode.getStartToken();
             TextToken hoverToken = getTokenForCharIndex(_hoverNode.getStartCharIndex());
-            double tokenX = hoverToken.getTextX();
-            double tokenY = hoverToken.getTextStringY() + 1;
-            double tokenMaxX = tokenX + hoverToken.getWidth();
-            aPntr.setColor(Color.BLACK);
-            aPntr.drawLine(tokenX, tokenY, tokenMaxX, tokenY);
+            if (hoverToken != null) {
+                double tokenX = hoverToken.getTextX();
+                double tokenY = hoverToken.getTextStringY() + 1;
+                double tokenMaxX = tokenX + hoverToken.getWidth();
+                aPntr.setColor(Color.BLACK);
+                aPntr.drawLine(tokenX, tokenY, tokenMaxX, tokenY);
+            }
         }
     }
 

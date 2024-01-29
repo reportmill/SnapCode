@@ -51,7 +51,7 @@ public class JConstrDecl extends JExecutableDecl {
         }
 
         // Return Constructor for param types
-        return javaClass.getConstructorForTypes(paramTypes);
+        return javaClass.getDeclaredConstructorForTypes(paramTypes);
     }
 
     /**

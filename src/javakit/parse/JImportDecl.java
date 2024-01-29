@@ -231,7 +231,7 @@ public class JImportDecl extends JNode {
 
         // If no params, try for field
         if (paramTypes == null)
-            return cls.getFieldForName(aName);
+            return cls.getDeclaredFieldForName(aName);
 
         // Otherwise, look for method
         return JavaClassUtils.getCompatibleMethodAll(cls, aName, paramTypes, true);

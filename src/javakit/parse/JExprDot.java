@@ -106,7 +106,7 @@ public class JExprDot extends JExpr {
         }
 
         // Handle inner class
-        JavaClass innerClass = parentClass.getInnerClassDeepForName(name);
+        JavaClass innerClass = parentClass.getClassDeepForName(name);
         if (innerClass != null)
             return innerClass;
 

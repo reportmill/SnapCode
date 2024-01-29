@@ -110,7 +110,7 @@ public class JStmtSwitchCase extends JNode implements WithStmts, WithVarDeclsX {
         if (switchExprType.isEnum()) {
             JavaClass enumClass = (JavaClass) switchExprType;
             String enumName = _expr.getName();
-            JavaField enumConst = enumClass.getFieldForName(enumName);
+            JavaField enumConst = enumClass.getDeclaredFieldForName(enumName);
             if (enumConst != null)
                 return enumConst;
         }

@@ -307,7 +307,7 @@ public class JFile extends JNode {
             // Get JavaClass for name
             JavaClass javaClass = getJavaClassForName(className);
             for (int i = 1; javaClass != null && i < names.length; i++)
-                javaClass = javaClass.getInnerClassForName(names[i]);
+                javaClass = javaClass.getDeclaredClassForName(names[i]);
 
             // Return class name
             return javaClass != null ? javaClass.getName() : null;

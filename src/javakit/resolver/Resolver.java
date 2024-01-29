@@ -180,7 +180,7 @@ public class Resolver {
             if (separtorIndex < 0)
                 System.err.println("Resolver.getJavaClassForClass: Simple name not found for: " + className);
             String simpleName = className.substring(separtorIndex + 1);
-            javaClass = parentClass.getInnerClassForName(simpleName);
+            javaClass = parentClass.getDeclaredClassForName(simpleName);
             if (javaClass != null)
                 return javaClass;
         }

@@ -200,7 +200,7 @@ public class JavaClassUpdater {
     private JavaClass getJavaClassForClass(Class<?> anInnerClass)
     {
         String innerClassName = anInnerClass.getSimpleName();
-        JavaClass innerClass = _javaClass.getInnerClassForName(innerClassName);
+        JavaClass innerClass = _javaClass.getDeclaredClassForName(innerClassName);
         if (innerClass == null)
             innerClass = _resolver.getJavaClassForClass(anInnerClass);
         return innerClass;
@@ -278,8 +278,8 @@ public class JavaClassUpdater {
     private void updateArrayClass()
     {
         // Handle Object[] special: Add Array.length field
-        if (_javaClass.getName().equals("java.lang.Object[]") && _javaClass.getFieldForName("length") == null) {
-            if (_javaClass.getFieldForName("length") == null) {
+        if (_javaClass.getName().equals("java.lang.Object[]") && _javaClass.getDeclaredFieldForName("length") == null) {
+            if (_javaClass.getDeclaredFieldForName("length") == null) {
                 JavaField javaField = getLengthField();
                 _javaClass._fields = new JavaField[]{ javaField };
                 _javaClass._interfaces = new JavaClass[0];
