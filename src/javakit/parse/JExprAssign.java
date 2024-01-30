@@ -118,10 +118,16 @@ public class JExprAssign extends JExpr {
         if (valueExprErrors.length > 0)
             return valueExprErrors;
 
-        // Get assign to class and value class - return error if no match
+        // Get assign to class - return error if null (impossible since no left side errors)
         JavaClass assignToClass = leftSideExpr.getEvalClass();
+        if (assignToClass == null)
+            return NodeError.newErrorArray(this, "Can't resolve type: " + leftSideExpr.getName());
+
+        // Get assign to class and value class - return error if no match
         JavaClass valueClass = valueExpr.getEvalClass();
-        if (assignToClass == null || valueClass == null || !assignToClass.isAssignableFrom(valueClass))
+        if (valueClass == null && assignToClass.isPrimitive())
+            return NodeError.newErrorArray(this, "Incompatible types: <nulltype> cannot be converted to " + assignToClass.getName());
+        if (!assignToClass.isAssignableFrom(valueClass))
             return NodeError.newErrorArray(this, "Invalid assignment type");
 
         // Return

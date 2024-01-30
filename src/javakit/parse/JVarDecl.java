@@ -216,6 +216,8 @@ public class JVarDecl extends JNode implements WithId {
             JavaClass varClass = getEvalClass();
             if (varClass != null) {
                 JavaClass initClass = initExpr.getEvalClass();
+                if (initClass == null && varClass.isPrimitive())
+                    return NodeError.newErrorArray(this, "Incompatible types: <nulltype> cannot be converted to " + varClass.getName());
                 if (!varClass.isAssignableFrom(initClass))
                     return NodeError.newErrorArray(this, "Invalid assignment type");
             }
