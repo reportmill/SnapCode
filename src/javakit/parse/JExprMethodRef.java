@@ -150,32 +150,6 @@ public class JExprMethodRef extends JExprLambdaBase {
     }
 
     /**
-     * Override to get eval type from expression if possible.
-     */
-    @Override
-    protected JavaType getEvalTypeImpl()
-    {
-        // If parent is variable declaration, return its type
-        JNode parentNode = getParent();
-        if (parentNode instanceof JVarDecl)
-            return parentNode.getEvalType();
-
-        // If method is found, return its eval type
-        JavaMethod method = getMethod();
-        if (method != null) {
-            JavaType evalType = method.getEvalType();
-            if (evalType != null && !evalType.isResolvedType()) {
-                JavaType resolvedType = getResolvedTypeForType(evalType);
-                evalType = resolvedType != null ? resolvedType : evalType.getEvalClass();
-            }
-            return evalType;
-        }
-
-        // Do normal version
-        return super.getEvalTypeImpl();
-    }
-
-    /**
      * Returns the JavaDecl most closely associated with given child JExprId node.
      */
     protected JavaDecl getDeclForChildId(JExprId anExprId)

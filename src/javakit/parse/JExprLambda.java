@@ -109,27 +109,6 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
     }
 
     /**
-     * Override to get eval type from expression if possible.
-     */
-    @Override
-    protected JavaType getEvalTypeImpl()
-    {
-        // If parent is variable declaration, return its type
-        JNode parentNode = getParent();
-        if (parentNode instanceof JVarDecl)
-            return parentNode.getEvalType();
-
-        // If expression is set, return it's eval type
-        if (_expr != null) {
-            JavaDecl exprDecl = _expr.getDecl();
-            return exprDecl != null ? exprDecl.getEvalType() : null;
-        }
-
-        // Do normal version
-        return super.getEvalTypeImpl();
-    }
-
-    /**
      * Creates and returns a JType node for given VarDecl.
      */
     protected JType createTypeNodeForLambdaParameterVarDecl(JVarDecl varDecl)
