@@ -530,10 +530,8 @@ public class PagePane extends ViewOwner {
             return BuildFileTool.BuildFilePage.class;
 
         // Handle class file
-        if (type.equals("class") && isProjectFile(file))
+        if (type.equals("class"))
             return ClassInfoPage.class;
-        if (type.equals("pgd"))
-            return JavaShellPage.class;
 
         // Return no page class
         return null;
