@@ -2,10 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.javatext;
-import java.util.*;
-import javakit.parse.JClassDecl;
-import snapcode.project.Breakpoint;
-import snapcode.project.BuildIssue;
 import snap.geom.*;
 import snap.gfx.*;
 import snap.text.*;
@@ -29,8 +25,8 @@ public class LineHeadView extends View {
     // Whether to show line markers
     private boolean  _showLineMarkers = true;
 
-    // The list of markers
-    private LineMarker<?>[]  _markers;
+    // The list of line markers
+    private LineMarker<?>[] _lineMarkers;
 
     // The last mouse moved position
     private double  _mx, _my;
@@ -39,7 +35,7 @@ public class LineHeadView extends View {
     private static Color BACKGROUND_FILL = new Color(.98);
     private static Color LINE_NUMBERS_COLOR = Color.GRAY6;
 
-    // Constants for Markers width
+    // Constant for line markers width
     public static final int LINE_MARKERS_WIDTH = 12;
 
     /**
@@ -100,57 +96,20 @@ public class LineHeadView extends View {
     }
 
     /**
-     * Returns the markers.
+     * Returns the line markers.
      */
-    public LineMarker<?>[] getMarkers()
+    public LineMarker<?>[] getLineMarkers()
     {
-        // If already set, just return
-        if (_markers != null) return _markers;
-
-        // Get, set, return
-        LineMarker<?>[] markers = createMarkers();
-        return _markers = markers;
+        if (_lineMarkers != null) return _lineMarkers;
+        return _lineMarkers = LineMarker.getMarkersForJavaTextPane(_textPane);
     }
 
     /**
-     * Returns the list of markers.
-     */
-    protected LineMarker<?>[] createMarkers()
-    {
-        // Create list
-        List<LineMarker<?>> markers = new ArrayList<>();
-
-        // Add markers for member Overrides/Implements
-        JClassDecl classDecl = _textArea.getJFile().getClassDecl();
-        if (classDecl != null)
-            LineMarker.findMarkersForMethodAndConstructorOverrides(classDecl, _textPane, markers);
-
-        // Add markers for BuildIssues
-        BuildIssue[] buildIssues = _textArea.getBuildIssues();
-        for (BuildIssue issue : buildIssues)
-            if (issue.getEnd() <= _textArea.length())
-                markers.add(new LineMarker.BuildIssueMarker(_textPane, issue));
-
-        // Add markers for breakpoints
-        Breakpoint[] breakpoints = _textArea.getBreakpoints();
-        if (breakpoints != null) {
-            for (Breakpoint bp : breakpoints) {
-                if (bp.getLine() < _textArea.getLineCount())
-                    markers.add(new LineMarker.BreakpointMarker(_textPane, bp));
-                else _textArea.removeBreakpoint(bp);
-            }
-        }
-
-        // Return markers
-        return markers.toArray(new LineMarker[0]);
-    }
-
-    /**
-     * Override to reset markers.
+     * Override to reset line markers.
      */
     public void resetAll()
     {
-        _markers = null;
+        _lineMarkers = null;
         setPrefSizeForText();
         repaint();
     }
@@ -205,7 +164,7 @@ public class LineHeadView extends View {
         else if (anEvent.isMouseMove()) {
             _mx = anEvent.getX();
             _my = anEvent.getY();
-            for (LineMarker<?> marker : getMarkers()) {
+            for (LineMarker<?> marker : getLineMarkers()) {
                 if (marker.contains(_mx, _my)) {
                     setCursor(Cursor.HAND);
                     return;
@@ -221,13 +180,13 @@ public class LineHeadView extends View {
     private void handleMouseClick(ViewEvent anEvent)
     {
         // Get reversed markers (so click effects top marker)
-        LineMarker<?>[] markers = getMarkers().clone();
-        ArrayUtils.reverse(markers);
+        LineMarker<?>[] lineMarkers = getLineMarkers().clone();
+        ArrayUtils.reverse(lineMarkers);
         double eventX = anEvent.getX();
         double eventY = anEvent.getY();
 
         // If mouse hits marker, forward to marker
-        for (LineMarker<?> marker : markers) {
+        for (LineMarker<?> marker : lineMarkers) {
             if (marker.contains(eventX, eventY)) {
                 marker.mouseClicked(anEvent);
                 return;
@@ -243,14 +202,14 @@ public class LineHeadView extends View {
     }
 
     /**
-     * Paint markers.
+     * Paint line markers.
      */
     protected void paintFront(Painter aPntr)
     {
-        // Get markers and paint each
-        LineMarker<?>[] markers = getMarkers();
-        for (LineMarker<?> marker : markers)
-            aPntr.drawImage(marker._image, marker.x, marker.y);
+        // Get line markers and paint each
+        LineMarker<?>[] lineMarkers = getLineMarkers();
+        for (LineMarker<?> lineMarker : lineMarkers)
+            aPntr.drawImage(lineMarker._image, lineMarker.x, lineMarker.y);
 
         if (isShowLineNumbers())
             paintLineNumbers(aPntr);
@@ -302,8 +261,8 @@ public class LineHeadView extends View {
      */
     public String getToolTip(ViewEvent anEvent)
     {
-        LineMarker<?>[] markers = getMarkers();
-        LineMarker<?> marker = ArrayUtils.findMatch(markers, m -> m.contains(_mx, _my));
-        return marker != null ? marker.getToolTip() : null;
+        LineMarker<?>[] lineMarkers = getLineMarkers();
+        LineMarker<?> lineMarker = ArrayUtils.findMatch(lineMarkers, m -> m.contains(_mx, _my));
+        return lineMarker != null ? lineMarker.getToolTip() : null;
     }
 }

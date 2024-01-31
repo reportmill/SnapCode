@@ -11,7 +11,7 @@ import snap.geom.Rect;
 import snap.gfx.Image;
 import snap.text.TextLine;
 import snap.view.ViewEvent;
-
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -60,9 +60,44 @@ public abstract class LineMarker<T> extends Rect {
     public abstract void mouseClicked(ViewEvent anEvent);
 
     /**
+     * Returns the list of markers.
+     */
+    public static LineMarker<?>[] getMarkersForJavaTextPane(JavaTextPane textPane)
+    {
+        JavaTextArea javaTextArea = textPane.getTextArea();
+
+        // Create list
+        List<LineMarker<?>> markers = new ArrayList<>();
+
+        // Add markers for member Overrides/Implements
+        JClassDecl classDecl = javaTextArea.getJFile().getClassDecl();
+        if (classDecl != null)
+            LineMarker.findMarkersForMethodAndConstructorOverrides(classDecl, textPane, markers);
+
+        // Add markers for BuildIssues
+        BuildIssue[] buildIssues = javaTextArea.getBuildIssues();
+        for (BuildIssue issue : buildIssues)
+            if (issue.getEnd() <= javaTextArea.length())
+                markers.add(new BuildIssueMarker(textPane, issue));
+
+        // Add markers for breakpoints
+        Breakpoint[] breakpoints = javaTextArea.getBreakpoints();
+        if (breakpoints != null) {
+            for (Breakpoint bp : breakpoints) {
+                if (bp.getLine() < javaTextArea.getLineCount())
+                    markers.add(new BreakpointMarker(textPane, bp));
+                else javaTextArea.removeBreakpoint(bp);
+            }
+        }
+
+        // Return markers
+        return markers.toArray(new LineMarker[0]);
+    }
+
+    /**
      * Loads a list of SuperMemberMarkers for a class declaration (recursing for inner classes).
      */
-    public static void findMarkersForMethodAndConstructorOverrides(JClassDecl aClassDecl, JavaTextPane textPane, List<LineMarker<?>> theMarkers)
+    private static void findMarkersForMethodAndConstructorOverrides(JClassDecl aClassDecl, JavaTextPane textPane, List<LineMarker<?>> theMarkers)
     {
         TextArea textArea = textPane.getTextArea();
 
@@ -71,7 +106,7 @@ public abstract class LineMarker<T> extends Rect {
         for (JConstrDecl constrDecl : constrDecls) {
             JavaConstructor constr  = constrDecl.getConstructor();
             if (constr != null && constr.getSuper() != null && constrDecl.getEndCharIndex() < textArea.length())
-                theMarkers.add(new LineMarker.SuperMemberMarker(textPane, constrDecl));
+                theMarkers.add(new SuperMemberMarker(textPane, constrDecl));
         }
 
         // Check methods
@@ -79,7 +114,7 @@ public abstract class LineMarker<T> extends Rect {
         for (JMethodDecl methodDecl : methodDecls) {
             JavaMethod method  = methodDecl.getMethod();
             if (method != null && method.getSuper() != null && methodDecl.getEndCharIndex() < textArea.length())
-                theMarkers.add(new LineMarker.SuperMemberMarker(textPane, methodDecl));
+                theMarkers.add(new SuperMemberMarker(textPane, methodDecl));
         }
 
         // Recurse into inner classes. What about anonymous inner classes?
