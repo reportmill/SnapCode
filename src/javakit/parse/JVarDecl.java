@@ -244,7 +244,7 @@ public class JVarDecl extends JNode implements WithId {
             enclosingPathStr = enclosingClass.getName() + '.';
 
         // Add enclosing method
-        JMemberDecl enclosingExec = aNode.getEnclosingMemberDecl();
+        JMemberDecl enclosingExec = aNode.getParent(JMemberDecl.class);
         if (enclosingExec != null)
             enclosingPathStr += enclosingExec.getName() + '.';
 

@@ -247,42 +247,6 @@ public class JNode {
     }
 
     /**
-     * Returns the enclosing method declaration, if in method.
-     */
-    public JMethodDecl getEnclosingMethodDecl()
-    {
-        return getParent(JMethodDecl.class);
-    }
-
-    /**
-     * Returns the enclosing member declaration, if in member.
-     */
-    public JMemberDecl getEnclosingMemberDecl()
-    {
-        return getParent(JMemberDecl.class);
-    }
-
-    /**
-     * Returns the enclosing JavaDecl (JVarDecl, JConstrDecl, JMethodDecl or JClassDecl).
-     */
-    public JavaDecl getEnclosingDecl()
-    {
-        JNode enclosingDeclNode = getEnclosingDeclNode();
-        return enclosingDeclNode != null ? enclosingDeclNode.getDecl() : null;
-    }
-
-    /**
-     * Returns the enclosing JavaDecl (JVarDecl, JConstrDecl, JMethodDecl or JClassDecl).
-     */
-    public JNode getEnclosingDeclNode()
-    {
-        JNode enclosingDeclNode = getParent(JMemberDecl.class);
-        if (enclosingDeclNode instanceof JFieldDecl && getParent(JVarDecl.class) != null)
-            enclosingDeclNode = getParent(JVarDecl.class);
-        return enclosingDeclNode;
-    }
-
-    /**
      * Returns whether node is a declaration id node (JClassDecl JMethodDecl, JFieldDecl, JVarDecl).
      */
     public boolean isDeclIdNode()

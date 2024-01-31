@@ -2,8 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.apptools;
-import javakit.parse.JFile;
-import javakit.parse.JNode;
+import javakit.parse.*;
 import snapcode.project.JavaAgent;
 import snapcode.project.Project;
 import javakit.resolver.JavaDecl;
@@ -394,6 +393,9 @@ public class SearchTool extends WorkspaceTool {
         // The JNode
         JNode _node;
 
+        // The decl
+        JavaDecl _decl;
+
         // The match count
         int _count = 1;
 
@@ -412,6 +414,14 @@ public class SearchTool extends WorkspaceTool {
         {
             _node = aNode;
             _file = _node.getFile().getSourceFile();
+
+            if (_node != null) {
+                JNode enclosingDeclNode = _node.getParent(JMemberDecl.class);
+                if (enclosingDeclNode instanceof JFieldDecl && _node.getParent(JVarDecl.class) != null)
+                    enclosingDeclNode = _node.getParent(JVarDecl.class);
+                if (enclosingDeclNode != null)
+                    _decl = enclosingDeclNode.getDecl();
+            }
         }
 
         /**
@@ -419,8 +429,8 @@ public class SearchTool extends WorkspaceTool {
          */
         public String getDescriptor()
         {
-            JavaDecl decl = _node != null ? _node.isDeclIdNode() ? _node.getDecl() : _node.getEnclosingDecl() : null;
-            if (decl != null) return decl.getFullNameWithSimpleParameterTypes();
+            if (_decl != null)
+                return _decl.getFullNameWithSimpleParameterTypes();
             String s = _file.getName() + " - " + _file.getParent().getPath();
             s += " (" + _count + " match" + (_count == 1 ? "" : "es") + ")";
             return s;
@@ -431,10 +441,9 @@ public class SearchTool extends WorkspaceTool {
          */
         public Image getImage()
         {
-            JavaDecl decl = _node != null ? _node.isDeclIdNode() ? _node.getDecl() : _node.getEnclosingDecl() : null;
-            if (decl == null)
-                return FileIcons.getFileIconImage(_file);
-            return JavaTextUtils.getImageForJavaDecl(decl);
+            if (_decl != null)
+                return JavaTextUtils.getImageForJavaDecl(_decl);
+            return FileIcons.getFileIconImage(_file);
         }
 
         /**
