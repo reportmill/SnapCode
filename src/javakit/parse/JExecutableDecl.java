@@ -3,6 +3,7 @@
  */
 package javakit.parse;
 import javakit.resolver.JavaDecl;
+import javakit.resolver.JavaExecutable;
 import javakit.resolver.JavaType;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
 /**
  * A Java member for MethodDeclaration.
  */
-public class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithVarDecls {
+public abstract class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithVarDecls {
 
     // The type/return-type
     protected JType  _type;
@@ -125,6 +126,11 @@ public class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithV
     {
         return getParameters();
     }
+
+    /**
+     * Returns the actual method or constructor.
+     */
+    public abstract JavaExecutable getExecutable();
 
     /**
      * Override to check formal parameters.

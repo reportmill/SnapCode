@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import javakit.resolver.*;
 import java.util.List;
 
 /**
@@ -81,36 +80,5 @@ public class JMemberDecl extends JNode implements WithId {
 
         // Return not found
         return null;
-    }
-
-    /**
-     * Returns the member that this member overrides or implements, if available.
-     */
-    public JavaExecutable getSuperDecl()
-    {
-        JavaDecl decl = getDecl();
-        if (decl instanceof JavaMethod)
-            return ((JavaMethod) decl).getSuper();
-        if (decl instanceof JavaConstructor)
-            return ((JavaConstructor) decl).getSuper();
-
-        // Return null
-        return null;
-    }
-
-    /**
-     * Returns whether super declaration is interface.
-     */
-    public boolean isSuperDeclInterface()
-    {
-        JavaExecutable superDecl = getSuperDecl();
-        if (superDecl == null)
-            return false;
-
-        JavaClass javaClass = superDecl.getDeclaringClass();
-        if (javaClass == null)
-            return false;
-
-        return javaClass.isInterface();
     }
 }

@@ -277,7 +277,7 @@ public class JavaTextPane extends TextPane {
     /**
      * Open a super declaration.
      */
-    public void openSuperDeclaration(JMemberDecl aMemberDecl)  { }
+    public void openSuperDeclaration(JExecutableDecl aMethodOrConstrDecl)  { }
 
     /**
      * Show References.

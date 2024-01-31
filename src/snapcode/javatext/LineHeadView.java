@@ -4,7 +4,6 @@
 package snapcode.javatext;
 import java.util.*;
 import javakit.parse.JClassDecl;
-import javakit.parse.JMemberDecl;
 import snapcode.project.Breakpoint;
 import snapcode.project.BuildIssue;
 import snap.geom.*;
@@ -122,9 +121,9 @@ public class LineHeadView extends View {
         List<LineMarker<?>> markers = new ArrayList<>();
 
         // Add markers for member Overrides/Implements
-        JClassDecl cd = _textArea.getJFile().getClassDecl();
-        if (cd != null)
-            getSuperMemberMarkers(cd, markers);
+        JClassDecl classDecl = _textArea.getJFile().getClassDecl();
+        if (classDecl != null)
+            LineMarker.findMarkersForMethodAndConstructorOverrides(classDecl, _textPane, markers);
 
         // Add markers for BuildIssues
         BuildIssue[] buildIssues = _textArea.getBuildIssues();
@@ -144,19 +143,6 @@ public class LineHeadView extends View {
 
         // Return markers
         return markers.toArray(new LineMarker[0]);
-    }
-
-    /**
-     * Loads a list of SuperMemberMarkers for a class declaration (recursing for inner classes).
-     */
-    private void getSuperMemberMarkers(JClassDecl aCD, List<LineMarker<?>> theMarkers)
-    {
-        for (JMemberDecl md : aCD.getMemberDecls()) {
-            if (md.getSuperDecl() != null && md.getEndCharIndex() < _textArea.length())
-                theMarkers.add(new LineMarker.SuperMemberMarker(_textPane, md));
-            if (md instanceof JClassDecl)
-                getSuperMemberMarkers((JClassDecl) md, theMarkers);
-        }
     }
 
     /**

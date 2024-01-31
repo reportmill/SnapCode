@@ -2,15 +2,16 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import javakit.resolver.JavaDecl;
-import javakit.resolver.JavaClass;
-import javakit.resolver.JavaType;
+import javakit.resolver.*;
 import snap.util.ArrayUtils;
 
 /**
  * A Java member for a constructor declaration.
  */
 public class JConstrDecl extends JExecutableDecl {
+
+    // The constructor
+    private JavaConstructor _constructor;
 
     /**
      * Constructor.
@@ -21,9 +22,23 @@ public class JConstrDecl extends JExecutableDecl {
     }
 
     /**
-     * Override to get declaration from actual Constructor.
+     * Override to get declaration from Constructor.
      */
-    protected JavaDecl getDeclImpl()
+    protected JavaConstructor getDeclImpl()  { return getConstructor(); }
+
+    /**
+     * Returns the Constructor.
+     */
+    public JavaConstructor getConstructor()
+    {
+        if (_constructor != null) return _constructor;
+        return _constructor = getConstructorImpl();
+    }
+
+    /**
+     * Returns the Constructor.
+     */
+    private JavaConstructor getConstructorImpl()
     {
         // Get param types
         JavaType[] paramTypes = getParamClassTypesSafe();
@@ -53,6 +68,12 @@ public class JConstrDecl extends JExecutableDecl {
         // Return Constructor for param types
         return javaClass.getDeclaredConstructorForTypes(paramTypes);
     }
+
+    /**
+     * Override to return constructor.
+     */
+    @Override
+    public JavaExecutable getExecutable()  { return getConstructor(); }
 
     /**
      * Returns the part name.

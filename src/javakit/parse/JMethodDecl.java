@@ -2,14 +2,18 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
+import javakit.resolver.JavaExecutable;
+import javakit.resolver.JavaMethod;
 import javakit.resolver.JavaType;
 
 /**
  * A Java member for a method declaration.
  */
 public class JMethodDecl extends JExecutableDecl {
+
+    // The method
+    private JavaMethod _method;
 
     /**
      * Constructor.
@@ -23,7 +27,21 @@ public class JMethodDecl extends JExecutableDecl {
      * Override to get decl from method.
      */
     @Override
-    protected JavaDecl getDeclImpl()
+    protected JavaMethod getDeclImpl()  { return getMethod(); }
+
+    /**
+     * Returns the method.
+     */
+    public JavaMethod getMethod()
+    {
+        if (_method != null) return _method;
+        return _method = getMethodImpl();
+    }
+
+    /**
+     * Returns the method.
+     */
+    private JavaMethod getMethodImpl()
     {
         // Get method name
         String name = getName();
@@ -46,6 +64,12 @@ public class JMethodDecl extends JExecutableDecl {
         // Return method for name and param types
         return javaClass.getDeclaredMethodForNameAndTypes(name, paramTypes);
     }
+
+    /**
+     * Override to return method.
+     */
+    @Override
+    public JavaExecutable getExecutable()  { return getMethod(); }
 
     /**
      * Returns the part name.

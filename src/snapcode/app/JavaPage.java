@@ -1,5 +1,6 @@
 package snapcode.app;
 import javakit.parse.*;
+import javakit.resolver.JavaExecutable;
 import snap.view.ViewEvent;
 import snapcode.apptools.DebugTool;
 import snapcode.apptools.RunTool;
@@ -307,11 +308,12 @@ public class JavaPage extends WebPage {
     /**
      * Open a super declaration.
      */
-    protected void openSuperDeclaration(JMemberDecl aMemberDecl)
+    protected void openSuperDeclaration(JExecutableDecl aMethodOrConstrDecl)
     {
-        JavaDecl superDecl = aMemberDecl.getSuperDecl();
-        if (superDecl != null)
-            openDecl(superDecl);
+        JavaExecutable methodOrConstr = aMethodOrConstrDecl.getExecutable();
+        JavaExecutable superMethodOrConstr = methodOrConstr.getSuper();
+        if (superMethodOrConstr != null)
+            openDecl(superMethodOrConstr);
     }
 
     /**
@@ -449,9 +451,9 @@ public class JavaPage extends WebPage {
         /**
          * Open a super declaration.
          */
-        public void openSuperDeclaration(JMemberDecl aMemberDecl)
+        public void openSuperDeclaration(JExecutableDecl aMethodOrConstrDecl)
         {
-            JavaPage.this.openSuperDeclaration(aMemberDecl);
+            JavaPage.this.openSuperDeclaration(aMethodOrConstrDecl);
         }
 
         /**
