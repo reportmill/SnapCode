@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * A JExpr to represent lambda expressions.
  */
-public class JExprLambdaBase extends JExpr {
+public abstract class JExprLambdaBase extends JExpr {
 
     // The type for this lambda
     private JavaType _lambdaType;
@@ -163,19 +163,33 @@ public class JExprLambdaBase extends JExpr {
     }
 
     /**
+     * Returns the resolved lambda method return type.
+     */
+    public JavaType getLambdaMethodReturnTypeResolved()
+    {
+        // Return lambda method eval type - this is a fallback and isn't any help if method return type is type var
+        JavaMethod lambdaMethod = getLambdaMethod();
+        if (lambdaMethod != null)
+            return lambdaMethod.getReturnType();
+
+        // Return not found
+        return null;
+    }
+
+    /**
      * Override to try to resolve with lambda type.
      */
     @Override
     protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
     {
-        JavaType lambdaType = getLambdaType();
+        JavaMethod lambdaMethod = getLambdaMethod();
+        JavaType lambdaMethodReturnType = lambdaMethod != null ? lambdaMethod.getGenericReturnType() : null;
 
-        // If lambda type is parameterized type, try to resolve
-        if (lambdaType instanceof JavaParameterizedType) {
-            JavaParameterizedType paramType = (JavaParameterizedType) lambdaType;
-            JavaType resolvedType = paramType.getResolvedTypeForTypeVar(aTypeVar);
-            if (resolvedType != null)
-                return resolvedType;
+        // If type var matches lambda method return type, return resolved version. This needs to be fixed to support param types
+        if (lambdaMethodReturnType instanceof JavaTypeVariable) {
+            JavaTypeVariable lambdaMethodTypeVar = (JavaTypeVariable) lambdaMethodReturnType;
+            if (aTypeVar.getName().equals(lambdaMethodTypeVar.getName()))
+                return getLambdaMethodReturnTypeResolved();
         }
 
         // Do normal version

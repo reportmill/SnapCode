@@ -150,6 +150,21 @@ public class JExprMethodRef extends JExprLambdaBase {
     }
 
     /**
+     * Returns the resolved lambda method return type.
+     */
+    @Override
+    public JavaType getLambdaMethodReturnTypeResolved()
+    {
+        // If method is set, return its eval type
+        JavaMethod method = getMethod();
+        if (method != null)
+            return method.getReturnType();
+
+        // Do normal version
+        return super.getLambdaMethodReturnTypeResolved();
+    }
+
+    /**
      * Returns the JavaDecl most closely associated with given child JExprId node.
      */
     protected JavaDecl getDeclForChildId(JExprId anExprId)

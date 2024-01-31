@@ -3,7 +3,6 @@
  */
 package javakit.resolver;
 import javakit.parse.JMethodDecl;
-
 import java.lang.reflect.*;
 import java.util.Arrays;
 
@@ -14,6 +13,9 @@ public class JavaMethod extends JavaExecutable {
 
     // Whether method is Default method
     private boolean  _default;
+
+    // The generic return type
+    private JavaType _genericReturnType;
 
     // The super implementation of this method
     protected JavaMethod  _super;
@@ -52,7 +54,26 @@ public class JavaMethod extends JavaExecutable {
     /**
      * Returns the return type.
      */
-    public JavaClass getReturnType()  { return getEvalClass(); }
+    public JavaClass getReturnType()
+    {
+        JavaType returnType = getGenericReturnType();
+        return returnType.getEvalClass();
+    }
+
+    /**
+     * Returns the return type.
+     */
+    public JavaType getGenericReturnType()
+    {
+        if (_genericReturnType != null) return _genericReturnType;
+
+        // Get EvalType from method return Type
+        Type returnTypeReal = _method.getGenericReturnType();
+        JavaType returnType = _resolver.getJavaTypeForType(returnTypeReal);
+
+        // Set and return
+        return _genericReturnType = returnType;
+    }
 
     /**
      * Override to get eval type dynamically.
@@ -61,13 +82,7 @@ public class JavaMethod extends JavaExecutable {
     public JavaType getEvalType()
     {
         if (_evalType != null) return _evalType;
-
-        // Get EvalType from method return Type
-        Type returnType = _method.getGenericReturnType();
-        JavaType evalType = _resolver.getJavaTypeForType(returnType);
-
-        // Set and return
-        return _evalType = evalType;
+        return _evalType = getGenericReturnType();
     }
 
     /**
@@ -261,7 +276,7 @@ public class JavaMethod extends JavaExecutable {
             m._name = m._simpleName = _name;
             m._declaringClass = _declaringClass;
             m._parameterTypes = _paramTypes;
-            m._evalType = _returnType;
+            m._genericReturnType = _returnType;
             m._typeVars = _typeVars;
             m._default = _default;
             m._methodDecl = _methodDecl;

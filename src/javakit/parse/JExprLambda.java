@@ -109,6 +109,23 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
     }
 
     /**
+     * Returns the resolved lambda method return type.
+     */
+    @Override
+    public JavaType getLambdaMethodReturnTypeResolved()
+    {
+        // If expression is set, return its eval type
+        if (_expr != null) {
+            JavaType exprEvalType = _expr.getEvalType();
+            if (exprEvalType != null)
+                return exprEvalType;
+        }
+
+        // Do normal version
+        return super.getLambdaMethodReturnTypeResolved();
+    }
+
+    /**
      * Creates and returns a JType node for given VarDecl.
      */
     protected JType createTypeNodeForLambdaParameterVarDecl(JVarDecl varDecl)
