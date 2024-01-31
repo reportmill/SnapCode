@@ -7,17 +7,18 @@ import javakit.resolver.JavaExecutable;
 import javakit.resolver.JavaType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * A Java member for MethodDeclaration.
  */
-public abstract class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithVarDecls {
+public abstract class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithVarDecls, WithTypeVars {
 
     // The type/return-type
     protected JType  _type;
 
     // Type variables
-    protected List<JTypeVar>  _typeVars;
+    private JTypeVar[] _typeVars;
 
     // The formal parameters
     protected List<JVarDecl>  _params = new ArrayList<>();
@@ -52,20 +53,20 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     /**
      * Returns the method type variables.
      */
-    public List<JTypeVar> getTypeVars()  { return _typeVars; }
+    public JTypeVar[] getTypeVars()  { return _typeVars; }
 
     /**
      * Sets the method type variables.
      */
-    public void setTypeVars(List<JTypeVar> theTVs)
+    public void setTypeVars(JTypeVar[] theTVs)
     {
         if (_typeVars != null)
-            _typeVars.forEach(tvar -> removeChild(tvar));
+            Stream.of(_typeVars).forEach(tvar -> removeChild(tvar));
 
         _typeVars = theTVs;
 
         if (_typeVars != null)
-            _typeVars.forEach(tvar -> addChild(tvar));
+            Stream.of(_typeVars).forEach(tvar -> addChild(tvar));
     }
 
     /**

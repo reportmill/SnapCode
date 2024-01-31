@@ -343,9 +343,11 @@ public class JavaParser extends JavaParserStmt {
                 }
 
                 // Handle TypeParams
-                case "TypeParams":
-                    classDecl.setTypeVars(aNode.getCustomNode(List.class));
+                case "TypeParams": {
+                    List<JTypeVar> typeVars = aNode.getCustomNode(List.class);
+                    classDecl.setTypeVars(typeVars.toArray(new JTypeVar[0]));
                     break;
+                }
 
                 // Handle ExtendsList or ImplementsList mode and extendsList/implementsList
                 case "extends": _extending = true; break;
@@ -635,9 +637,11 @@ public class JavaParser extends JavaParserStmt {
             switch (anId) {
 
                 // Handle TypeParams
-                case "TypeParams":
-                    methodDecl.setTypeVars(aNode.getCustomNode(List.class));
+                case "TypeParams": {
+                    List<JTypeVar> typeVars = aNode.getCustomNode(List.class);
+                    methodDecl.setTypeVars(typeVars.toArray(new JTypeVar[0]));
                     break;
+                }
 
                 // Handle ResultType
                 case "ResultType":
@@ -685,9 +689,11 @@ public class JavaParser extends JavaParserStmt {
             switch (anId) {
 
                 // Handle TypeParams
-                case "TypeParams":
-                    constrDecl.setTypeVars(aNode.getCustomNode(List.class));
+                case "TypeParams": {
+                    List<JTypeVar> typeVars = aNode.getCustomNode(List.class);
+                    constrDecl.setTypeVars(typeVars.toArray(new JTypeVar[0]));
                     break;
+                }
 
                 // Handle Identifier
                 case "Identifier":

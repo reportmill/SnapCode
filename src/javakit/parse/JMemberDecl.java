@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import java.util.List;
 
 /**
  * A JNode for type members: Initializer, TypeDecl, EnumDecl, ConstrDecl, FieldDecl, MedthodDecl, AnnotationDecl.
@@ -58,27 +57,5 @@ public class JMemberDecl extends JNode implements WithId {
         replaceChild(_id, _id = anId);
         if (_id != null)
             setName(_id.getName());
-    }
-
-    /**
-     * Returns the type variables for this member.
-     */
-    public List<JTypeVar> getTypeVars()  { return null; }
-
-    /**
-     * Returns the type variable for this member with given name.
-     */
-    public JTypeVar getTypeVar(String aName)
-    {
-        List<JTypeVar> typeVars = getTypeVars();
-        if (typeVars == null)
-            return null;
-
-        for (JTypeVar tvar : typeVars)
-            if (tvar.getName().equals(aName))
-                return tvar;
-
-        // Return not found
-        return null;
     }
 }

@@ -12,13 +12,13 @@ import snap.util.ListUtils;
 /**
  * A Java member for ClassDecl.
  */
-public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
+public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVars {
 
     // The type of class (Class, Interface, Enum, Annotation)
     protected ClassType  _classType = ClassType.Class;
 
     // TypeVars
-    protected List<JTypeVar>  _typeVars;
+    private JTypeVar[] _typeVars;
 
     // The extends list
     protected List<JType>  _extendsTypes = new ArrayList<>();
@@ -74,23 +74,23 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX {
     /**
      * Returns the JTypeVar(s).
      */
-    public List<JTypeVar> getTypeVars()  { return _typeVars; }
+    public JTypeVar[] getTypeVars()  { return _typeVars; }
 
     /**
      * Sets the JTypeVar(s).
      */
-    public void setTypeVars(List<JTypeVar> theTVs)
+    public void setTypeVars(JTypeVar[] theTVs)
     {
         // Remove old type vars
         if (_typeVars != null)
-            _typeVars.forEach(tvar -> removeChild(tvar));
+            Stream.of(_typeVars).forEach(tvar -> removeChild(tvar));
 
         // Set new
         _typeVars = theTVs;
 
         // Add new type vars
         if (_typeVars != null)
-            _typeVars.forEach(tvar -> addChild(tvar));
+            Stream.of(_typeVars).forEach(tvar -> addChild(tvar));
     }
 
     /**
