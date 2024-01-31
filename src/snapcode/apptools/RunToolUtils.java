@@ -175,7 +175,6 @@ public class RunToolUtils {
         if (!isDebug) {
             String javaCmdPath = getJavaCmdPath();
             if (SnapUtils.isWebVM) {
-                System.out.println("Proj.buildfile: " + proj.getBuildFile());
                 boolean isSnapKit = proj.getBuildFile().isIncludeSnapKitRuntime();
                 boolean isSnapKitDom = isSnapKit && !ViewUtils.isAltDown() && !isSwing;
                 if (isSnapKitDom)
