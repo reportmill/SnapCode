@@ -328,8 +328,8 @@ public class JavaParser extends JavaParserStmt {
 
                 // Handle ClassBody (JavaMembers): ClassDecl, EnumDecl, ConstrDecl, FieldDecl, MethodDecl, AnnotationDecl
                 case "ClassBody":
-                    JMemberDecl[] memberDecls = aNode.getCustomNode(JMemberDecl[].class);
-                    classDecl.setBodyDecls(memberDecls);
+                    JBodyDecl[] bodyDecls = aNode.getCustomNode(JBodyDecl[].class);
+                    classDecl.setBodyDecls(bodyDecls);
                     break;
 
                 // Handle "class" or "interface"
@@ -367,10 +367,10 @@ public class JavaParser extends JavaParserStmt {
     /**
      * ClassBodyHandler: "{" ClassBodyDecl* "}"
      */
-    public static class ClassBodyHandler extends ParseHandler<JMemberDecl[]> {
+    public static class ClassBodyHandler extends ParseHandler<JBodyDecl[]> {
 
-        // List of MemberDecls
-        private List<JMemberDecl> _memberDecls = new ArrayList<>();
+        // List of BodyDecls
+        private List<JBodyDecl> _bodyDecls = new ArrayList<>();
 
         /**
          * ParseHandler method.
@@ -378,38 +378,38 @@ public class JavaParser extends JavaParserStmt {
         protected void parsedOne(ParseNode aNode, String anId)
         {
             if (anId == "ClassBodyDecl") {
-                JMemberDecl memberDecl = aNode.getCustomNode(JMemberDecl.class);
-                if (memberDecl != null) // Can be null if parse only found ClassBodyDecl modifiers
-                    _memberDecls.add(memberDecl);
+                JBodyDecl bodyDecl = aNode.getCustomNode(JBodyDecl.class);
+                if (bodyDecl != null) // Can be null if parse only found ClassBodyDecl modifiers
+                    _bodyDecls.add(bodyDecl);
             }
         }
 
         /**
          * Override to return array.
          */
-        public JMemberDecl[] parsedAll()  { return _memberDecls.toArray(new JMemberDecl[0]); }
+        public JBodyDecl[] parsedAll()  { return _bodyDecls.toArray(new JBodyDecl[0]); }
 
         /**
-         * Override to clear MemberDecls list.
+         * Override to clear BodyDecls list.
          */
         @Override
         public void reset()
         {
             super.reset();
-            _memberDecls.clear();
+            _bodyDecls.clear();
         }
 
         @Override
-        protected Class getPartClass()  { return JMemberDecl[].class; }
+        protected Class getPartClass()  { return JBodyDecl[].class; }
     }
 
     /**
      * ClassBodyDecl Handler: LookAhead(2) Initializer | Modifiers MemberDecl | ";"
      */
-    public static class ClassBodyDeclHandler extends JNodeParseHandler<JMemberDecl> {
+    public static class ClassBodyDeclHandler extends JNodeParseHandler<JBodyDecl> {
 
         // Modifiers
-        JModifiers _mods;
+        private JModifiers _modifiers;
 
         /**
          * ParseHandler method.
@@ -418,17 +418,29 @@ public class JavaParser extends JavaParserStmt {
         {
             // Handle Modifiers
             if (anId == "Modifiers")
-                _mods = aNode.getCustomNode(JModifiers.class);
+                _modifiers = aNode.getCustomNode(JModifiers.class);
 
-            // Handle Member
-            else if (aNode.getCustomNode() instanceof JMemberDecl) {
-                _part = aNode.getCustomNode(JMemberDecl.class);
-                _part.setModifiers(_mods);
-                _mods = null;
+            // Handle Initializer or Member
+            else if (aNode.getCustomNode() instanceof JBodyDecl) {
+                _part = aNode.getCustomNode(JBodyDecl.class);
+                if (_part instanceof JMemberDecl)
+                    ((JMemberDecl) _part).setModifiers(_modifiers);
+                _modifiers = null;
             }
         }
 
-        protected Class<JMemberDecl> getPartClass()  { return JMemberDecl.class; }
+        /**
+         * Override to clear modifiers.
+         */
+        @Override
+        public void reset()
+        {
+            super.reset();
+            _modifiers = null;
+        }
+
+        @Override
+        protected Class<JBodyDecl> getPartClass()  { return JBodyDecl.class; }
     }
 
     /**
@@ -488,8 +500,8 @@ public class JavaParser extends JavaParserStmt {
 
                 // Handle ClassBodyDecl
                 case "ClassBodyDecl":
-                    JMemberDecl memberDecl = aNode.getCustomNode(JMemberDecl.class);
-                    enumDecl.addBodyDecl(memberDecl);
+                    JBodyDecl bodyDecl = aNode.getCustomNode(JBodyDecl.class);
+                    enumDecl.addBodyDecl(bodyDecl);
                     break;
             }
         }
@@ -537,8 +549,8 @@ public class JavaParser extends JavaParserStmt {
 
                 // Handle ClassBody
                 case "ClassBody":
-                    JMemberDecl[] memberDecls = aNode.getCustomNode(JMemberDecl[].class);
-                    enumConst.setClassBody(memberDecls);
+                    JBodyDecl[] bodyDecls = aNode.getCustomNode(JBodyDecl[].class);
+                    enumConst.setClassBody(bodyDecls);
                     break;
             }
         }
