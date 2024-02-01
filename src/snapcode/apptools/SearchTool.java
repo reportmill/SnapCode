@@ -136,7 +136,7 @@ public class SearchTool extends WorkspaceTool {
             // Set in browser
             if (result != null) {
                 String resultURL = result.getURLString();
-                getBrowser().setURLString(resultURL);
+                getBrowser().setSelUrlForUrlString(resultURL);
             }
         }
     }

@@ -144,7 +144,7 @@ public class BuildTool extends WorkspaceTool {
                 WebFile file = issue.getFile();
                 WebURL fileURL = file.getURL();
                 String urls = fileURL.getString() + "#LineNumber=" + issue.getLineNumber();
-                getBrowser().setURLString(urls);
+                getBrowser().setSelUrlForUrlString(urls);
             }
         }
 

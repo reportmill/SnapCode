@@ -81,7 +81,7 @@ public class WebBrowserPane extends ViewOwner {
         // Get URL
         WebBrowser browser = getBrowser();
         WebURL url = browser.getLoader().getURL();
-        if (url == null) url = browser.getURL();
+        if (url == null) url = browser.getSelUrl();
 
         // Set address text
         setViewText("AddressText", url != null ? url.getString() : "");
@@ -119,7 +119,7 @@ public class WebBrowserPane extends ViewOwner {
 
         // Handle AddressText
         if (anEvent.equals("AddressText"))
-            getBrowser().setURLString(anEvent.getStringValue());
+            getBrowser().setSelUrlForUrlString(anEvent.getStringValue());
 
         // Handle AddressTextAction
         if (anEvent.equals("AddressTextAction")) {

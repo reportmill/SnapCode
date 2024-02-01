@@ -102,7 +102,7 @@ public class PagePane extends ViewOwner {
         if (aFile == _selFile) {
             WebURL url = getFallbackURL();
             getBrowser().setTransition(WebBrowser.Instant);
-            getBrowser().setURL(url);
+            getBrowser().setSelUrl(url);
         }
 
         // Fire prop change
@@ -140,7 +140,7 @@ public class PagePane extends ViewOwner {
 
         // Set selected file and update tree
         if (isPageAvailableForFile(_selFile))
-            getBrowser().setFile(_selFile);
+            getBrowser().setSelFile(_selFile);
 
         // Add to OpenFiles
         addOpenFile(aFile);
@@ -164,12 +164,12 @@ public class PagePane extends ViewOwner {
     /**
      * Sets the browser URL.
      */
-    public void setBrowserURL(WebURL aURL)  { _browser.setURL(aURL); }
+    public void setBrowserURL(WebURL aURL)  { _browser.setSelUrl(aURL); }
 
     /**
      * Sets the browser URL.
      */
-    public void setBrowserFile(WebFile aFile)  { _browser.setFile(aFile); }
+    public void setBrowserFile(WebFile aFile)  { _browser.setSelFile(aFile); }
 
     /**
      * Sets the browser URL.
@@ -184,14 +184,14 @@ public class PagePane extends ViewOwner {
     /**
      * Returns the selected page.
      */
-    public WebPage getSelPage()  { return _browser.getPage(); }
+    public WebPage getSelPage()  { return _browser.getSelPage(); }
 
     /**
      * Sets the selected page.
      */
     public void setSelPage(WebPage aPage)
     {
-        _browser.setPage(aPage);
+        _browser.setSelPage(aPage);
     }
 
     /**
@@ -546,11 +546,11 @@ public class PagePane extends ViewOwner {
          * Override to make sure that PagePane is in sync.
          */
         @Override
-        public void setPage(WebPage aPage)
+        public void setSelPage(WebPage aPage)
         {
             // Do normal version
-            if (aPage == getPage()) return;
-            super.setPage(aPage);
+            if (aPage == getSelPage()) return;
+            super.setSelPage(aPage);
 
             // Select page file
             WebFile file = aPage != null ? aPage.getFile() : null;

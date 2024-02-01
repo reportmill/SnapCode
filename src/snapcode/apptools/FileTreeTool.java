@@ -297,7 +297,7 @@ public class FileTreeTool extends WorkspaceTool {
         if (anEvent.equals("OpenInBrowserMenuItem")) {
             WebFile file = getSelFile();
             WebBrowserPane browserPane = new WebBrowserPane();
-            browserPane.getBrowser().setURL(file.getURL());
+            browserPane.getBrowser().setSelUrl(file.getURL());
             browserPane.getWindow().setVisible(true);
         }
 

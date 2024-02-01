@@ -99,7 +99,7 @@ public class SnapEditorPage extends WebPage {
         WebURL url = getURL();
         WebBrowser browser = getBrowser();
         browser.setPageForURL(url, _javaPage);
-        browser.setURL(url);
+        browser.setSelUrl(url);
     }
 
     /**

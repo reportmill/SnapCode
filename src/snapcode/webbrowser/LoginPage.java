@@ -47,7 +47,7 @@ public class LoginPage extends WebPage {
 
         // If previous access found, try again
         if (ClientUtils.setAccess(getSite()))
-            getBrowser().setURL(getURL());
+            getBrowser().setSelUrl(getURL());
     }
 
     /**
@@ -70,7 +70,7 @@ public class LoginPage extends WebPage {
             if (getRememberLogin())
                 ClientUtils.setAccess(getSite(), getName(), getPassword());
             if (getBrowser() != null)
-                getBrowser().setURL(getURL());
+                getBrowser().setSelUrl(getURL());
         }
     }
 

@@ -124,8 +124,8 @@ public class VersionControlTool extends ProjectTool {
     public void connectToRemoteSite()
     {
         if (getRepoSite() != null)
-            _remoteBrowser.setURLString(getRepoSite().getURLString() + "!/");
-        else _remoteBrowser.setFile(null);
+            _remoteBrowser.setSelUrlForUrlString(getRepoSite().getURLString() + "!/");
+        else _remoteBrowser.setSelFile(null);
     }
 
     /**

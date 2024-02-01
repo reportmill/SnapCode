@@ -80,7 +80,7 @@ public class ZipPage extends WebPage {
         if (anEvent.equals("FileBrowser")) {
             WebFile file = _fileBrsr.getSelItem();
             if (file == null) return;
-            _pageBrsr.setFile(file.isFile() ? file : null);
+            _pageBrsr.setSelFile(file.isFile() ? file : null);
         }
     }
 

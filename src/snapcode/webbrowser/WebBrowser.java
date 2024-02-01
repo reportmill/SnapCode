@@ -16,15 +16,15 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * A panel to browser Snap files.
+ * A browser to show content for WebURLs.
  */
 public class WebBrowser extends TransitionPane {
 
     // The current WebPage
-    private WebPage _page;
+    private WebPage _selPage;
 
     // A cache of WebPages for WebURLs
-    protected Map<WebURL, WebPage>  _pages = new HashMap<>();
+    protected Map<WebURL, WebPage> _allPages = new HashMap<>();
 
     // The file loader
     private WebBrowserLoader _loader = new WebBrowserLoader(this);
@@ -48,22 +48,22 @@ public class WebBrowser extends TransitionPane {
     public static final String Activity_Prop = "Activity";
 
     /**
-     * Returns the current SnapURL.
+     * Returns the current page URL.
      */
-    public WebURL getURL()
+    public WebURL getSelUrl()
     {
-        WebPage page = getPage();
+        WebPage page = getSelPage();
         return page != null ? page.getURL() : null;
     }
 
     /**
      * Sets a URL in browser immediately. This is usually called by setLoaderURL instead.
      */
-    public void setURL(WebURL aURL)
+    public void setSelUrl(WebURL aURL)
     {
         // If url is null, clear page
         if (aURL == null) {
-            setPage(null);
+            setSelPage(null);
             return;
         }
 
@@ -76,50 +76,41 @@ public class WebBrowser extends TransitionPane {
 
         // Update page display URL, set page and update history
         page.setURL(aURL);
-        setPage(page);
-    }
-
-    /**
-     * Returns the URL string of the current browser URL.
-     */
-    public String getURLString()
-    {
-        WebURL url = getURL();
-        return url != null ? url.getString() : null;
+        setSelPage(page);
     }
 
     /**
      * Sets the browser URL from given relative URL string to the current page.
      */
-    public void setURLString(String aURLString)
+    public void setSelUrlForUrlString(String aURLString)
     {
-        WebFile file = getFile();
-        WebURL url = file != null ? file.getURL(aURLString) : WebURL.getURL(aURLString);
-        setURL(url);
+        WebFile selFile = getSelFile();
+        WebURL url = selFile != null ? selFile.getURL(aURLString) : WebURL.getURL(aURLString);
+        setSelUrl(url);
     }
 
     /**
      * Returns the WebFile for the current page.
      */
-    public WebFile getFile()
+    public WebFile getSelFile()
     {
-        WebPage page = getPage();
-        return page != null ? page.getFile() : null;
+        WebPage selPage = getSelPage();
+        return selPage != null ? selPage.getFile() : null;
     }
 
     /**
      * Sets the browser to a page for given WebFile.
      */
-    public void setFile(WebFile aFile)
+    public void setSelFile(WebFile aFile)
     {
         // Handle null
         if (aFile == null) {
-            setPage(null);
+            setSelPage(null);
             return;
         }
 
         // If already set, just return
-        if (aFile == getFile()) return;
+        if (aFile == getSelFile()) return;
 
         // Get cached page for URL - create if missing
         WebURL url = aFile.getURL();
@@ -130,63 +121,49 @@ public class WebBrowser extends TransitionPane {
         }
 
         // Set page
-        setPage(page);
-    }
-
-    /**
-     * Sets the response in the browser.
-     */
-    public void setResponse(WebResponse aResp)
-    {
-        // Create page for URL and set
-        WebPage page = createPageForResponse(aResp);
-        setPage(page);
-
-        // If response has file, cache page
-        if (aResp.getFile() != null)
-            setPageForURL(page.getURL(), page);
+        setSelPage(page);
     }
 
     /**
      * Returns the current WebPage.
      */
-    public WebPage getPage()  { return _page; }
+    public WebPage getSelPage()  { return _selPage; }
 
     /**
      * Sets the current WebPage.
      */
-    public void setPage(WebPage aPage)
+    public void setSelPage(WebPage aPage)
     {
         // If already set, just return
-        if (aPage == getPage()) return;
+        if (aPage == getSelPage()) return;
 
         // Notify current page of imminent removal
-        if (_page != null) _page.notifyPageRemoved(this);
+        if (_selPage != null) _selPage.notifyPageRemoved(this);
 
         // Set page
-        _page = aPage;
+        _selPage = aPage;
 
         // Get page UI - if already set, just return
-        View pageUI = _page != null ? _page.getUI() : null;
+        View pageUI = _selPage != null ? _selPage.getUI() : null;
         if (pageUI == getContent()) return;
 
         // Set component
         setContent(pageUI);
 
         // Focus default component
-        if (_page != null) {
-            _page.setBrowser(this);
-            _page.notifyPageAdded(this);                 // Notify PageAdded
-            if (_page.getFirstFocus() != null)              // Set Page Focus
-                _page.requestFocus(_page.getFirstFocus());
-            getHistory().setURL(_page.getURL());  // Update History
+        if (_selPage != null) {
+            _selPage.setBrowser(this);
+            _selPage.notifyPageAdded(this);                 // Notify PageAdded
+            if (_selPage.getFirstFocus() != null)              // Set Page Focus
+                _selPage.requestFocus(_selPage.getFirstFocus());
+            getHistory().setURL(_selPage.getURL());  // Update History
         }
 
         // Notify change
-        firePropChange(Page_Prop, null, _page);
+        firePropChange(Page_Prop, null, _selPage);
 
         // Flush WebSite for the heck of it?
-        WebFile file = getFile();
+        WebFile file = getSelFile();
         if (file != null) {
             try { file.getSite().flush(); }
             catch (Exception e) { throw new RuntimeException(e); }
@@ -194,11 +171,26 @@ public class WebBrowser extends TransitionPane {
     }
 
     /**
+     * Sets the response in the browser.
+     */
+    protected void setSelPageForResponse(WebResponse aResp)
+    {
+        // Create page for URL and set
+        WebPage page = createPageForResponse(aResp);
+        setSelPage(page);
+
+        // If response has file, cache page
+        if (aResp.getFile() != null)
+            setPageForURL(page.getURL(), page);
+    }
+
+    /**
      * Returns the WebPage for given WebURL.
      */
     public WebPage getPageForURL(WebURL aURL)
     {
-        return _pages.get(aURL.getQueryURL());
+        WebURL baseUrl = aURL.getQueryURL();
+        return _allPages.get(baseUrl);
     }
 
     /**
@@ -206,12 +198,12 @@ public class WebBrowser extends TransitionPane {
      */
     public void setPageForURL(WebURL aURL, WebPage aPage)
     {
-        WebURL url = aURL.getQueryURL();
+        WebURL baseUrl = aURL.getQueryURL();
         if (aPage != null) {
-            _pages.put(url, aPage);
+            _allPages.put(baseUrl, aPage);
             aPage.setBrowser(this);
         }
-        else _pages.remove(url);
+        else _allPages.remove(baseUrl);
     }
 
     /**
@@ -338,7 +330,7 @@ public class WebBrowser extends TransitionPane {
      */
     public void reloadPage()
     {
-        WebPage page = getPage();
+        WebPage page = getSelPage();
         if (page != null)
             page.reload();
     }
@@ -374,7 +366,7 @@ public class WebBrowser extends TransitionPane {
 
         // Create page and set
         TextPage textPage = createExceptionPage(resp);
-        setPage(textPage);
+        setSelPage(textPage);
     }
 
     /**
@@ -451,7 +443,7 @@ public class WebBrowser extends TransitionPane {
      */
     public boolean performURLClick(String aURL)
     {
-        setURLString(aURL);
+        setSelUrlForUrlString(aURL);
         return true;
     }
 

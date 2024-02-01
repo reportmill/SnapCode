@@ -58,7 +58,7 @@ public class DirFilePage extends WebPage {
             if (anEvent.getClickCount() == 1) {
                 WebFile file = _fileBrowser.getSelItem();
                 if (file == null) return;
-                _pageBrowser.setFile(file.isFile() ? file : null);
+                _pageBrowser.setSelFile(file.isFile() ? file : null);
             }
 
             // Handle double click: set enclosing browser file
@@ -70,7 +70,7 @@ public class DirFilePage extends WebPage {
         if (anEvent.equals("FileBrowser")) {
             WebFile file = _fileBrowser.getSelItem();
             if (file == null) return;
-            _pageBrowser.setFile(file.isFile() ? file : null);
+            _pageBrowser.setSelFile(file.isFile() ? file : null);
             getUI().relayout();
         }
     }
@@ -82,7 +82,7 @@ public class DirFilePage extends WebPage {
     {
         WebFile file = _fileBrowser.getSelItem();
         if (file == null) return;
-        getBrowser().setFile(file);
+        getBrowser().setSelFile(file);
     }
 
     /**

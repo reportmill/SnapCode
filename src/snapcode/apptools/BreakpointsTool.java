@@ -83,7 +83,7 @@ public class BreakpointsTool extends WorkspaceTool {
             Breakpoint breakpoint = getSelBreakpoint();
             String urlStr = breakpoint.getFile().getUrlString();
             String urlStrForLine = urlStr + "#LineNumber=" + (breakpoint.getLine() + 1);
-            getBrowser().setURLString(urlStrForLine);
+            getBrowser().setSelUrlForUrlString(urlStrForLine);
         }
     }
 

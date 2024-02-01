@@ -231,7 +231,7 @@ public class WebPage extends ViewOwner {
             file.resetAndVerify();
 
         WebBrowser browser = getBrowser();
-        if (browser != null && browser.getPage() == this)
+        if (browser != null && browser.getSelPage() == this)
             browser.getLoader().setURL(url);
     }
 

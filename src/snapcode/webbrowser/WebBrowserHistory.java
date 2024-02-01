@@ -91,7 +91,7 @@ public class WebBrowserHistory {
         if (lastURL == null) return;
         getBrowser().setTransition(WebBrowser.MoveUp);
         setEnabled(false);
-        getBrowser().setURL(lastURL);
+        getBrowser().setSelUrl(lastURL);
         setEnabled(true);
         addNextURL(_url);
         _url = lastURL;
@@ -105,7 +105,7 @@ public class WebBrowserHistory {
         WebURL nextURL = removeNextURL();
         if (nextURL == null) return;
         setEnabled(false);
-        getBrowser().setURL(nextURL);
+        getBrowser().setSelUrl(nextURL);
         setEnabled(true);
         addLastURL(_url);
         _url = nextURL;
@@ -188,7 +188,7 @@ public class WebBrowserHistory {
     {
         _lastURLs.remove(aURL);
         _nextURLs.remove(aURL);
-        if (getBrowser().getURL() == aURL) getBrowser().setURL(null);
+        if (getBrowser().getSelUrl() == aURL) getBrowser().setSelUrl(null);
         getBrowser().setPageForURL(aURL, null);
     }
 
@@ -201,7 +201,7 @@ public class WebBrowserHistory {
         WebURL[] nextURLs = _nextURLs.toArray(new WebURL[0]);
         for (WebURL url : lastURLs) if (url.getFile() == aFile) _lastURLs.remove(url);
         for (WebURL url : nextURLs) if (url.getFile() == aFile) _lastURLs.remove(url);
-        if (getBrowser().getFile() == aFile) getBrowser().setURL(null);
+        if (getBrowser().getSelFile() == aFile) getBrowser().setSelUrl(null);
         getBrowser().setPageForURL(aFile.getURL(), null);
     }
 
@@ -210,8 +210,8 @@ public class WebBrowserHistory {
      */
     public void clearHistory()
     {
-        getBrowser().setURL(null);
-        getBrowser()._pages.clear();
+        getBrowser().setSelUrl(null);
+        getBrowser()._allPages.clear();
         _lastURLs.clear();
         _nextURLs.clear();
     }

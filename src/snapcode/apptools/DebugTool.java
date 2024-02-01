@@ -241,7 +241,7 @@ public class DebugTool extends WorkspaceTool {
         else if (anEvent.equals("StepReturnButton"))
             debugApp.stepOut();
         else if (anEvent.equals("RunToLineButton")) {
-            WebPage page = getBrowser().getPage();
+            WebPage page = getBrowser().getSelPage();
             JavaPage jpage = page instanceof JavaPage ? (JavaPage) page : null;
             if (jpage == null) return;
             JavaTextArea tarea = jpage.getTextArea();
@@ -387,6 +387,6 @@ public class DebugTool extends WorkspaceTool {
         WebURL url = WebURL.getURL(sourceCodeFilePath);
         WebFile file = url.getFile();
         setProgramCounter(file, lineNum - 1);
-        getBrowser().setURL(url);
+        getBrowser().setSelUrl(url);
     }
 }

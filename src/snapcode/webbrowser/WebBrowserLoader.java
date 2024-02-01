@@ -45,7 +45,7 @@ public class WebBrowserLoader {
     public void setURL(WebURL aURL)
     {
         if (aURL == null) {
-            _browser.setPage(null);
+            _browser.setSelPage(null);
             return;
         }
         WebRequest req = new WebRequest(aURL);
@@ -104,7 +104,7 @@ public class WebBrowserLoader {
     protected void loadURLSuccess(WebResponse aResp)
     {
         if (aResp.getRequest() != _req) return; // Just return if loader is already loading another request
-        _browser.setResponse(aResp);
+        _browser.setSelPageForResponse(aResp);
         _browser.setActivity("");
         _browser.setLoading(false);
         _req = null;

@@ -1,7 +1,5 @@
 package snapcode.webbrowser;
 import snapcode.project.Project;
-import snapcode.project.Workspace;
-import snapcode.project.WorkspaceBuilder;
 import snap.view.BrowserView;
 import snap.view.ChildView;
 import snap.view.ViewEvent;
@@ -87,7 +85,7 @@ public class BuildDirPage extends WebPage {
         if (anEvent.equals("FileBrowser")) {
             WebFile file = _fileBrowser.getSelItem();
             if (file != null && !file.isDir())
-                _pageBrowser.setURL(file.getURL());
+                _pageBrowser.setSelUrl(file.getURL());
         }
     }
 }

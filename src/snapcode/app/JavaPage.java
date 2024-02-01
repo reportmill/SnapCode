@@ -13,7 +13,6 @@ import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMember;
 import snapcode.project.JavaTextDoc;
 import snap.util.Convert;
-import snap.util.ListUtils;
 import snap.text.TextLine;
 import snap.view.View;
 import snapcode.javatext.JavaTextArea;
@@ -24,7 +23,7 @@ import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebURL;
-import java.util.List;
+
 import java.util.Objects;
 
 /**
@@ -293,7 +292,7 @@ public class JavaPage extends WebPage {
     protected void setTextSel(int aStart, int anEnd)
     {
         String urlString = getFile().getUrlString() + String.format("#Sel=%d-%d", aStart, anEnd);
-        getBrowser().setURLString(urlString);
+        getBrowser().setSelUrlForUrlString(urlString);
     }
 
     /**
@@ -355,7 +354,7 @@ public class JavaPage extends WebPage {
             urlString += String.format("#Sel=%d-%d", declarationNode.getStartCharIndex(), declarationNode.getEndCharIndex());
 
         // Open URL
-        getBrowser().setURLString(urlString);
+        getBrowser().setSelUrlForUrlString(urlString);
     }
 
     /**
@@ -376,7 +375,7 @@ public class JavaPage extends WebPage {
         String urlString = javaURL.getString() + "#Member=" + aDecl.getSimpleName();
 
         // Open URL
-        getBrowser().setURLString(urlString);
+        getBrowser().setSelUrlForUrlString(urlString);
     }
 
     /**
@@ -425,7 +424,7 @@ public class JavaPage extends WebPage {
         page.setFile(file);
         WebBrowser browser = getBrowser();
         browser.setPageForURL(url, page);
-        browser.setURL(file.getURL());
+        browser.setSelUrl(file.getURL());
     }
 
     /**
