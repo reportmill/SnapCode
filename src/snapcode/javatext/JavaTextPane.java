@@ -12,7 +12,6 @@ import snap.text.TextDoc;
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.TextPane;
-import snapcode.project.JeplTextDoc;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -359,8 +358,8 @@ public class JavaTextPane extends TextPane {
     protected Label[] getLabelsForSelNodePath()
     {
         // If Jepl, labels root should be JClassDecl
-        JavaTextDoc textDoc = getJavaTextDoc();
-        if (textDoc instanceof JeplTextDoc)
+        JavaTextDoc javaTextDoc = getJavaTextDoc();
+        if (javaTextDoc.isJepl())
             return getLabelsForSelNodePathForJepl();
 
         // Do normal version

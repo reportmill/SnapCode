@@ -920,8 +920,11 @@ public class JavaTextArea extends TextArea {
     public void replaceCharsWithContent(Object theContent)
     {
         // If String, trim extra indent
-        if (theContent instanceof String && getSourceText() instanceof JeplTextDoc)
-            theContent = JavaTextUtils.removeExtraIndentFromString((String) theContent);
+        if (theContent instanceof String) {
+            JavaTextDoc javaTextDoc = (JavaTextDoc) getSourceText();
+            if (javaTextDoc.isJepl())
+                theContent = JavaTextUtils.removeExtraIndentFromString((String) theContent);
+        }
 
         // Do normal version
         super.replaceCharsWithContent(theContent);

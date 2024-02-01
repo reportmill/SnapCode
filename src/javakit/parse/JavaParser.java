@@ -65,9 +65,7 @@ public class JavaParser extends JavaParserStmt {
 
         // Get parse node
         ParseNode node = null;
-        try {
-            node = parse(anInput);
-        }
+        try { node = parse(anInput); }
 
         // Catch ParseException
         catch (ParseException e) {
@@ -91,10 +89,56 @@ public class JavaParser extends JavaParserStmt {
         if (jfile == null)
             jfile = new JFile();
 
-        // Set string
+        // Set string and exception
         jfile.setJavaFileString(anInput.toString());
+        jfile.setException(_exception);
 
-        // Set Exception
+        // Return
+        return jfile;
+    }
+
+    /**
+     * Parses for java file for given char input.
+     */
+    public synchronized JFile parseJeplFile(CharSequence anInput, String className, String[] importNames, String superClassName)
+    {
+        // Clear exception
+        _exception = null;
+
+        // If no input, just return
+        if (anInput.length() == 0)
+            return new JFile();
+
+        // Get JeplRule
+        ParseRule jeplRule = getRule("JeplFile");
+        jeplRule.setHandler(new JeplFileHandler(className, importNames, superClassName));
+        setInput(anInput);
+
+        // Get parse node
+        JFile jfile = null;
+        try { jfile = parseCustom(jeplRule, JFile.class); }
+
+        // Catch ParseException
+        catch (ParseException e) {
+            if (_exception == null)
+                _exception = e;
+        }
+
+        // Catch other exception (probably Tokenizer)
+        catch (Exception e) {
+            _exception = e;
+            ParseToken token = getToken();
+            if (token != null) {
+                int lineNum = token.getLineIndex() + 1;
+                System.err.println("JavaParser.getJavaFile: Exception at line " + lineNum);
+            }
+            e.printStackTrace();
+        }
+
+        // Set string and exception
+        if (jfile == null)
+            jfile = new JFile();
+        jfile.setJavaFileString(anInput.toString());
         jfile.setException(_exception);
 
         // Return

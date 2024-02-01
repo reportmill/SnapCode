@@ -11,6 +11,9 @@ import snap.util.ArrayUtils;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class holds a parsed Java file.
  */
@@ -18,6 +21,9 @@ public class JavaAgent {
 
     // The java file
     private WebFile  _file;
+
+    // Whether Java file is really Java REPL (.jepl)
+    private boolean _isJepl;
 
     // The Project that owns this file
     private Project  _proj;
@@ -37,12 +43,16 @@ public class JavaAgent {
     // A runnable to check file for errors after delay
     private Runnable _checkFileRun = () -> checkFileForErrors();
 
+    // The Jepl default imports
+    private static String[] _jeplImports;
+
     /**
      * Constructor for given file.
      */
     public JavaAgent(WebFile aFile)
     {
         _file = aFile;
+        _isJepl = aFile.getType().equals("jepl");
 
         // Set File JavaAgent property to this agent
         _file.setProp(JavaAgent.class.getName(), this);
@@ -67,6 +77,11 @@ public class JavaAgent {
         _file.reset();
         _file = null; _jfile = null; _javaTextDoc = null; _proj = null; _javaParser = null;
     }
+
+    /**
+     * Returns whether file is really Jepl.
+     */
+    public boolean isJepl()  { return  _isJepl; }
 
     /**
      * Returns the WebFile.
@@ -121,24 +136,6 @@ public class JavaAgent {
     protected JavaTextDoc createJavaTextDoc()  { return new JavaTextDoc(); }
 
     /**
-     * Returns the parser to parse java file.
-     */
-    public JavaParser getJavaParser()
-    {
-        // If already set, just return
-        if (_javaParser != null) return _javaParser;
-
-        // Create, set, return
-        JavaParser javaParser = getJavaParserImpl();
-        return _javaParser = javaParser;
-    }
-
-    /**
-     * Returns the parser to parse java file.
-     */
-    protected JavaParser getJavaParserImpl()  { return JavaParser.getShared(); }
-
-    /**
      * Returns the JFile (parsed Java file).
      */
     public JFile getJFile()
@@ -157,9 +154,18 @@ public class JavaAgent {
     protected JFile createJFile()
     {
         // Get parsed java file
-        JavaParser javaParser = getJavaParser();
+        JavaParser javaParser = JavaParser.getShared();
         String javaStr = getJavaText();
-        JFile jfile = javaParser.parseFile(javaStr);
+
+        // Parse file
+        JFile jfile;
+        if (_isJepl) {
+            String className = getFile().getSimpleName();
+            String[] importNames = getJeplDefaultImports();
+            String superClassName = "Object";
+            jfile = javaParser.parseJeplFile(javaStr, className, importNames, superClassName);
+        }
+        else jfile = javaParser.parseFile(javaStr);
 
         // Set SourceFile
         jfile.setSourceFile(_file);
@@ -325,13 +331,30 @@ public class JavaAgent {
         if (javaAgent != null)
             return javaAgent;
 
-        // Create JavaAgent for java/jepl file
-        if (aFile.getType().equals("java"))
-            javaAgent = new JavaAgent(aFile);
-        else if (aFile.getType().equals("jepl"))
-            javaAgent = new JeplAgent(aFile);
-
         // Return
-        return javaAgent;
+        return new JavaAgent(aFile);
+    }
+
+    /**
+     * Returns the default JEPL imports.
+     */
+    public static String[] getJeplDefaultImports()
+    {
+        if (_jeplImports != null) return _jeplImports;
+
+        // Initialize imports
+        List<String> imports = new ArrayList<>();
+        imports.add("java.util.*");
+        imports.add("java.util.function.*");
+        imports.add("java.util.stream.*");
+        imports.add("snap.view.*");
+        imports.add("snap.gfx.*");
+        imports.add("snap.geom.*");
+        imports.add("snapcharts.data.*");
+        imports.add("snapcharts.repl.*");
+        imports.add("static snapcharts.repl.ReplObject.*");
+        imports.add("static snapcharts.repl.QuickCharts.*");
+        imports.add("static snapcharts.repl.QuickData.*");
+        return _jeplImports = imports.toArray(new String[0]);
     }
 }

@@ -5,7 +5,7 @@ package snapcode.app;
 import snap.gfx.GFXEnv;
 import snapcode.apptools.BuildFileTool;
 import snapcode.javatext.JavaTextArea;
-import snapcode.project.JeplTextDoc;
+import snapcode.project.JavaTextDoc;
 import snapcode.project.Workspace;
 import snap.gfx.Color;
 import snap.gfx.Font;
@@ -246,8 +246,9 @@ public class PagePane extends ViewOwner {
         if (selPage instanceof JavaPage) {
             JavaPage javaPage = (JavaPage) selPage;
             JavaTextArea javaTextArea = javaPage.getTextArea();
-            String prefix = javaTextArea.getSourceText() instanceof JeplTextDoc ? "Jepl:" : "Java:";
-            String javaText = javaTextArea.getTextBlock().getString();
+            JavaTextDoc javaTextDoc = (JavaTextDoc) javaTextArea.getSourceText();
+            String prefix = javaTextDoc.isJepl() ? "Jepl:" : "Java:";
+            String javaText = javaTextDoc.getString();
             String javaTextLZ = LZString.compressToEncodedURIComponent(javaText);
             return prefix + javaTextLZ;
         }

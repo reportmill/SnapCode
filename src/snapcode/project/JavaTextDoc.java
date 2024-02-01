@@ -20,6 +20,9 @@ public class JavaTextDoc extends TextDoc {
     // The JavaAgent
     private JavaAgent  _javaAgent;
 
+    // A code tokenizer
+    private static CodeTokenizer JAVA_TOKENIZER;
+
     /**
      * Constructor.
      */
@@ -39,7 +42,21 @@ public class JavaTextDoc extends TextDoc {
         //double tabW = codeTextStyle.getCharAdvance(' ') * 4;
         //lineStyleSpaced.setTabs(new double[] { tabW, tabW, tabW, tabW, tabW, tabW, tabW, tabW, tabW, tabW });
         setDefaultLineStyle(lineStyleSpaced);
+
+        // Create tokenizer
+        if (JAVA_TOKENIZER == null) {
+            JAVA_TOKENIZER = new CodeTokenizer();
+            JAVA_TOKENIZER.setReadSingleLineComments(true);
+            JAVA_TOKENIZER.setReadMultiLineComments(true);
+            ParseRule rule = JavaParser.getShared().getRule();
+            JAVA_TOKENIZER.addPatternsForRule(rule);
+        }
     }
+
+    /**
+     * Returns whether JavaTextDoc is really Jepl.
+     */
+    public boolean isJepl()  { return getAgent().isJepl(); }
 
     /**
      * Returns the JavaAgent.
@@ -75,15 +92,10 @@ public class JavaTextDoc extends TextDoc {
         List<TextToken> tokens = new ArrayList<>();
         TextRun textRun = aTextLine.getRun(0);
 
-        // Get tokenizer
-        JavaAgent javaAgent = getAgent();
-        JavaParser javaParser = javaAgent.getJavaParser();
-        CodeTokenizer tokenizer = javaParser.getTokenizer();
-
         // Get first token in line
         Exception exception = null;
         ParseToken parseToken = null;
-        try { parseToken = JavaTextDocUtils.getNextToken(tokenizer, aTextLine); }
+        try { parseToken = JavaTextDocUtils.getNextToken(JAVA_TOKENIZER, aTextLine); }
         catch (Exception e) {
             exception = e;
             System.out.println("JavaTextDoc.createTokensForTextLine: Parse error: " + e);
@@ -107,7 +119,7 @@ public class JavaTextDoc extends TextDoc {
                 textToken.setTextColor(color);
 
             // Get next token
-            try { parseToken = JavaTextDocUtils.getNextToken(tokenizer, null); }
+            try { parseToken = JavaTextDocUtils.getNextToken(JAVA_TOKENIZER, null); }
             catch (Exception e) {
                 exception = e;
                 parseToken = null;
@@ -117,7 +129,7 @@ public class JavaTextDoc extends TextDoc {
 
         // If exception was hit, create token for rest of line
         if (exception != null) {
-            int tokenStart = tokenizer.getCharIndex();
+            int tokenStart = JAVA_TOKENIZER.getCharIndex();
             int tokenEnd = aTextLine.length();
             TextToken textToken = new TextToken(aTextLine, tokenStart, tokenEnd, textRun);
             tokens.add(textToken);
