@@ -142,7 +142,7 @@ public class JavaClass extends JavaType {
         aResolver._classes.put(_id, this);
 
         // Set Mods, Enum, Interface, Primitive
-        _mods = aClassDecl.getMods().getValue();
+        _mods = aClassDecl.getModifiers().getValue();
         _mods |= Modifier.PUBLIC; // Lame - but used for NodeCompleter until it handles current class properly
         _enum = aClassDecl.isEnum();
         _interface = aClassDecl.isInterface();

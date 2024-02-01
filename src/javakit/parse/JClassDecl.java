@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
-import snap.util.ListUtils;
+import snap.util.ObjectArray;
 
 /**
- * A Java member for ClassDecl.
+ * This class represents a Java class declaration.
  */
 public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVars {
 
@@ -27,10 +27,10 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     protected List<JType>  _implementsTypes = new ArrayList<>();
 
     // The list of fields, methods, enums annotations and child classes
-    protected List<JMemberDecl>  _members = new ArrayList<>();
+    protected ObjectArray<JBodyDecl> _bodyDecls = new ObjectArray<>(JBodyDecl.class);
 
-    // The enum constants (if ClassType Enum)
-    protected JEnumConst[] _enumConstants = new JEnumConst[0];
+    // The list of fields, methods, enums annotations and child classes
+    protected JMemberDecl[] _memberDecls;
 
     // The field declarations
     protected JFieldDecl[]  _fieldDecls;
@@ -42,10 +42,13 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     protected JMethodDecl[]  _methodDecls;
 
     // The initializer declarations
-    protected JInitializerDecl[]  _initDecls;
+    protected JInitializerDecl[] _initializerDecls;
 
     // An array of class declarations that are members of this class
     protected JClassDecl[]  _classDecls;
+
+    // The enum constants (if ClassType Enum)
+    protected JEnumConst[] _enumConstants = new JEnumConst[0];
 
     // An array of VarDecls held by JFieldDecls
     private List<JVarDecl> _varDecls;
@@ -206,29 +209,35 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     }
 
     /**
+     * Returns the list of body declarations.
+     */
+    public JBodyDecl[] getBodyDecls()  { return _bodyDecls.getArray(); }
+
+    /**
+     * Sets the body declarations.
+     */
+    public void setBodyDecls(JBodyDecl[] bodyDecls)
+    {
+        for (JBodyDecl bodyDecl : bodyDecls)
+            addBodyDecl(bodyDecl);
+    }
+
+    /**
+     * Adds a body declaration.
+     */
+    public void addBodyDecl(JBodyDecl bodyDecl)
+    {
+        _bodyDecls.add(bodyDecl);
+        addChild(bodyDecl);
+    }
+
+    /**
      * Returns the list of member declarations.
      */
-    public List<JMemberDecl> getMemberDecls()
+    public JMemberDecl[] getMemberDecls()
     {
-        return _members;
-    }
-
-    /**
-     * Sets the list of member declarations.
-     */
-    public void setMemberDecls(JMemberDecl[] memberDecls)
-    {
-        for (JMemberDecl memberDecl : memberDecls)
-            addMemberDecl(memberDecl);
-    }
-
-    /**
-     * Adds a member declaration.
-     */
-    public void addMemberDecl(JMemberDecl aDecl)
-    {
-        _members.add(aDecl);
-        addChild(aDecl);
+        if (_memberDecls != null) return _memberDecls;
+        return _memberDecls = ArrayUtils.filterByClass(getBodyDecls(), JMemberDecl.class);
     }
 
     /**
@@ -236,11 +245,8 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
      */
     public JFieldDecl[] getFieldDecls()
     {
-        // If already set, just return
         if (_fieldDecls != null) return _fieldDecls;
-
-        // Get fields from members
-        return _fieldDecls = ListUtils.filterToArray(_members, m -> m instanceof JFieldDecl, JFieldDecl.class);
+        return _fieldDecls = ArrayUtils.filterByClass(getBodyDecls(), JFieldDecl.class);
     }
 
     /**
@@ -248,11 +254,8 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
      */
     public JConstrDecl[] getConstructorDecls()
     {
-        // If already set, just return
         if (_constrDecls != null) return _constrDecls;
-
-        // Get constructors from members
-        return _constrDecls = ListUtils.filterToArray(_members, m -> m instanceof JConstrDecl, JConstrDecl.class);
+        return _constrDecls = ArrayUtils.filterByClass(getBodyDecls(), JConstrDecl.class);
     }
 
     /**
@@ -274,11 +277,8 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
      */
     public JMethodDecl[] getMethodDecls()
     {
-        // If already set, just return
         if (_methodDecls != null) return _methodDecls;
-
-        // Get constructors from members
-        return _methodDecls = ListUtils.filterToArray(_members, m -> m instanceof JMethodDecl, JMethodDecl.class);
+        return _methodDecls = ArrayUtils.filterByClass(getBodyDecls(), JMethodDecl.class);
     }
 
     /**
@@ -301,13 +301,10 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     /**
      * Returns the class initializer declarations.
      */
-    public JInitializerDecl[] getInitDecls()
+    public JInitializerDecl[] getInitializerDecls()
     {
-        // If already set, just return
-        if (_initDecls != null) return _initDecls;
-
-        // Get constructors from members
-        return _initDecls = ListUtils.filterToArray(_members, m -> m instanceof JInitializerDecl, JInitializerDecl.class);
+        if (_initializerDecls != null) return _initializerDecls;
+        return _initializerDecls = ArrayUtils.filterByClass(getBodyDecls(), JInitializerDecl.class);
     }
 
     /**
@@ -318,19 +315,19 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
         // If already set, just return
         if (_classDecls != null) return _classDecls;
 
-        // Get class decls from members
+        // Get class decls from body decls
         List<JClassDecl> cds = new ArrayList<>();
-        for (JMemberDecl mbr : _members)
-            getClassDecls(mbr, cds);
+        for (JBodyDecl bodyDecl : getBodyDecls())
+            findClassDecls(bodyDecl, cds);
 
-        // Set, return
-        return _classDecls = cds.toArray(new JClassDecl[0]); // Return class declarations
+        // Set array and return
+        return _classDecls = cds.toArray(new JClassDecl[0]);
     }
 
     /**
      * Returns the class constructor declarations.
      */
-    private void getClassDecls(JNode aNode, List<JClassDecl> theCDs)
+    private void findClassDecls(JNode aNode, List<JClassDecl> theCDs)
     {
         // Handle Class decl
         if (aNode instanceof JClassDecl)
@@ -338,13 +335,13 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
 
         // Otherwise recurse
         else for (JNode c : aNode.getChildren())
-            getClassDecls(c, theCDs);
+            findClassDecls(c, theCDs);
     }
 
     /**
      * Returns the class declaration for class name.
      */
-    public JClassDecl getClassDecl(String aName)
+    public JClassDecl getClassDeclForName(String aName)
     {
         int index = aName.indexOf('.');
         String name = index > 0 ? aName.substring(0, index) : aName;
@@ -353,7 +350,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
         // Iterate over ClassDecls
         for (JClassDecl classDecl : getClassDecls())
             if (classDecl.getSimpleName().equals(name))
-                return remainder != null ? classDecl.getClassDecl(remainder) : classDecl;
+                return remainder != null ? classDecl.getClassDeclForName(remainder) : classDecl;
 
         // Return not found
         return null;
@@ -609,7 +606,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
      */
     protected JVarDecl getVarDeclForIdReplHack(JExprId idExpr)
     {
-        JInitializerDecl[] initializerDecls = getInitDecls();
+        JInitializerDecl[] initializerDecls = getInitializerDecls();
 
         // Iterate over initializers to find matching var decl (break at one holding given id)
         for (JInitializerDecl initializerDecl : initializerDecls) {

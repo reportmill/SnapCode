@@ -23,12 +23,12 @@ public class Simpiler {
      */
     protected static void setVarStackIndexForClass(JClassDecl aClassDecl)
     {
-        List<JMemberDecl> memberDeclList = aClassDecl.getMemberDecls();
+        JBodyDecl[] bodyDecls = aClassDecl.getBodyDecls();
 
         // Iterate over members and setVarStackIndex for members WithBlockStmt (method, constr, initializer)
-        for (JMemberDecl memberDecl : memberDeclList)
-            if (memberDecl instanceof WithBlockStmt)
-                setVarStackIndexForNode(memberDecl, 0);
+        for (JBodyDecl bodyDecl : bodyDecls)
+            if (bodyDecl instanceof WithBlockStmt)
+                setVarStackIndexForNode(bodyDecl, 0);
     }
 
     /**

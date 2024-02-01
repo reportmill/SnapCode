@@ -58,7 +58,7 @@ public class JavaShellUtils {
             return new JStmt[0];
 
         // Get initializers
-        JInitializerDecl[] initDecls = classDecl.getInitDecls();
+        JInitializerDecl[] initDecls = classDecl.getInitializerDecls();
         JStmt[] stmtsAll = new JStmt[0];
 
         // Iterate over initializers and add statements

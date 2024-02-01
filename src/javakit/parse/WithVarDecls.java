@@ -79,32 +79,32 @@ public interface WithVarDecls {
         if (bodyDecl instanceof JMethodDecl) {
 
             // If field static, return true (static fields always accessible from any method)
-            if (fieldDecl.getMods().isStatic())
+            if (fieldDecl.getModifiers().isStatic())
                 return true;
 
             // Return true if method and field are instance
             JMethodDecl methodDecl = (JMethodDecl) bodyDecl;
-            return !methodDecl.getMods().isStatic();
+            return !methodDecl.getModifiers().isStatic();
         }
 
         // If initializer, check static
         if (bodyDecl instanceof JInitializerDecl) {
 
             // If field static, return true (static fields always accessible from any method)
-            if (fieldDecl.getMods().isStatic())
+            if (fieldDecl.getModifiers().isStatic())
                 return true;
 
             // Return true if method and field are instance
             JInitializerDecl initDecl = (JInitializerDecl) bodyDecl;
-            return !initDecl.getMods().isStatic();
+            return !initDecl.getModifiers().isStatic();
         }
 
         // If field, check static and location
         if (bodyDecl instanceof JFieldDecl) {
             JFieldDecl otherField = (JFieldDecl) bodyDecl;
-            if (fieldDecl.getMods().isStatic())
-                return !otherField.getMods().isStatic() || varDecl.getStartCharIndex() < exprId.getEndCharIndex();
-            return !otherField.getMods().isStatic() && varDecl.getStartCharIndex() < exprId.getEndCharIndex();
+            if (fieldDecl.getModifiers().isStatic())
+                return !otherField.getModifiers().isStatic() || varDecl.getStartCharIndex() < exprId.getEndCharIndex();
+            return !otherField.getModifiers().isStatic() && varDecl.getStartCharIndex() < exprId.getEndCharIndex();
         }
 
         // Return not valid

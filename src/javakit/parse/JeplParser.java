@@ -83,7 +83,7 @@ public class JeplParser extends JavaParser {
                         // Create InitDecl and add to class
                         _initDecl = new JInitializerDecl();
                         _initDecl.setStartToken(aNode.getStartToken());
-                        classDecl.addMemberDecl(_initDecl);
+                        classDecl.addBodyDecl(_initDecl);
 
                         // Create block statement and add to InitDecl
                         JStmtBlock blockStmt = new JStmtBlock();
@@ -115,8 +115,8 @@ public class JeplParser extends JavaParser {
                 // Handle MethodDecl
                 case "MethodDecl": {
                     JMethodDecl methodDecl = aNode.getCustomNode(JMethodDecl.class);
-                    methodDecl.setMods(_mods); _mods = null;
-                    classDecl.addMemberDecl(methodDecl);
+                    methodDecl.setModifiers(_mods); _mods = null;
+                    classDecl.addBodyDecl(methodDecl);
                     jfile.setEndToken(endToken);
                     _initDecl = null;
                     break;
@@ -125,8 +125,8 @@ public class JeplParser extends JavaParser {
                 // Handle EnumDecl
                 case "EnumDecl": {
                     JClassDecl enumDecl = aNode.getCustomNode(JClassDecl.class);
-                    enumDecl.setMods(_mods); _mods = null;
-                    classDecl.addMemberDecl(enumDecl);
+                    enumDecl.setModifiers(_mods); _mods = null;
+                    classDecl.addBodyDecl(enumDecl);
                     jfile.setEndToken(endToken);
                     _initDecl = null;
                     break;
@@ -154,7 +154,7 @@ public class JeplParser extends JavaParser {
             JModifiers modifiers = new JModifiers(Modifier.PUBLIC);
             modifiers.setStartToken(startToken);
             modifiers.getString();
-            classDecl.setMods(modifiers);
+            classDecl.setModifiers(modifiers);
             classDecl.setName(_className);
             classDecl.setStartToken(startToken);
             jfile.addClassDecl(classDecl);

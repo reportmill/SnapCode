@@ -4,13 +4,12 @@
 package javakit.parse;
 
 /**
- * A JNode for type members: Initializer, TypeDecl, EnumDecl, ConstrDecl, FieldDecl, MedthodDecl, AnnotationDecl.
- * For JavaParseRule: ClassBodyDecl.
+ * A JNode for type members: fields, methods, constructors, inner classes.
  */
-public class JMemberDecl extends JNode implements WithId {
+public class JMemberDecl extends JBodyDecl implements WithId {
 
     // The modifiers
-    protected JModifiers  _mods;
+    protected JModifiers _modifiers;
 
     // The name identifier
     protected JExprId  _id;
@@ -26,21 +25,21 @@ public class JMemberDecl extends JNode implements WithId {
     /**
      * Returns the modifiers.
      */
-    public JModifiers getMods()
+    public JModifiers getModifiers()
     {
-        if (_mods == null)
-            _mods = new JModifiers();
-        return _mods;
+        if (_modifiers == null)
+            _modifiers = new JModifiers();
+        return _modifiers;
     }
 
     /**
      * Sets the modifiers.
      */
-    public void setMods(JModifiers aValue)
+    public void setModifiers(JModifiers aValue)
     {
-        if (_mods == null)
-            addChild(_mods = aValue, 0);
-        else replaceChild(_mods, _mods = aValue);
+        if (_modifiers == null)
+            addChild(_modifiers = aValue, 0);
+        else replaceChild(_modifiers, _modifiers = aValue);
     }
 
     /**

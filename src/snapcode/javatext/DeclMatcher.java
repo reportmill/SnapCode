@@ -303,7 +303,7 @@ public class DeclMatcher {
      */
     private void findVarDeclsForIdReplHack(JExprId idExpr, JClassDecl classDecl, List<JVarDecl> matchingVarDecls)
     {
-        JInitializerDecl[] initializerDecls = classDecl.getInitDecls();
+        JInitializerDecl[] initializerDecls = classDecl.getInitializerDecls();
 
         // Iterate over initializers to find matching var decls (break at one holding given id)
         for (JInitializerDecl initializerDecl : initializerDecls) {

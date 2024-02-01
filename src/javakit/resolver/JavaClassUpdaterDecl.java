@@ -44,7 +44,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
      * Returns the modifiers.
      */
     @Override
-    protected int getModifiers()  { return _classDecl.getMods().getValue(); }
+    protected int getModifiers()  { return _classDecl.getModifiers().getValue(); }
 
     /**
      * Returns the super class name.
@@ -138,7 +138,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         JavaField javaField = _javaClass.getDeclaredFieldForName(fieldName);
         if (javaField == null) {
             fb.name(fieldName);
-            fb.mods(fieldDecl.getMods().getValue());
+            fb.mods(fieldDecl.getModifiers().getValue());
 
             // Get/set type
             JType varTypeDecl = varDecl.getType();
@@ -182,7 +182,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
             mb.methodDecl(methodDecl);
 
             // Get/set modifiers
-            int mods = methodDecl.getMods().getValue();
+            int mods = methodDecl.getModifiers().getValue();
             mb.mods(mods);
 
             // Get/set name
@@ -224,7 +224,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         for (JConstrDecl methodDecl : constrDecls) {
 
             // Get/set modifiers
-            int mods = methodDecl.getMods().getValue();
+            int mods = methodDecl.getModifiers().getValue();
             cb.mods(mods);
 
             // Get/set param types

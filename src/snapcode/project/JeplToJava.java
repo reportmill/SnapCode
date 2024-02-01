@@ -5,6 +5,7 @@ import snap.util.ListUtils;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class generates a Java class from a parsed Jepl file.
@@ -69,7 +70,7 @@ public class JeplToJava {
         _sb.append(_indent);
 
         // Append class modifiers
-        JModifiers mods = classDecl.getMods();
+        JModifiers mods = classDecl.getModifiers();
         appendModifiers(mods);
 
         // Append class name
@@ -99,8 +100,8 @@ public class JeplToJava {
         indent();
 
         // Append all class members
-        List<JMemberDecl> memberDecls = classDecl.getMemberDecls();
-        memberDecls.forEach(this::appendMemberDecl);
+        JBodyDecl[] bodyDecls = classDecl.getBodyDecls();
+        Stream.of(bodyDecls).forEach(this::appendBodyDecl);
 
         // Outdent
         outdent();
@@ -109,18 +110,18 @@ public class JeplToJava {
     }
 
     /**
-     * Appends a member decl.
+     * Appends a body decl.
      */
-    private void appendMemberDecl(JMemberDecl memberDecl)
+    private void appendBodyDecl(JBodyDecl bodyDecl)
     {
-        if (memberDecl instanceof JFieldDecl)
-            appendFieldDecl((JFieldDecl) memberDecl);
-        else if (memberDecl instanceof JMethodDecl)
-            appendMethodDecl((JMethodDecl) memberDecl);
-        else if (memberDecl instanceof JConstrDecl)
-            appendConstructorDecl((JConstrDecl) memberDecl);
-        else if (memberDecl instanceof JInitializerDecl)
-            appendInitializerDecl((JInitializerDecl) memberDecl);
+        if (bodyDecl instanceof JFieldDecl)
+            appendFieldDecl((JFieldDecl) bodyDecl);
+        else if (bodyDecl instanceof JMethodDecl)
+            appendMethodDecl((JMethodDecl) bodyDecl);
+        else if (bodyDecl instanceof JConstrDecl)
+            appendConstructorDecl((JConstrDecl) bodyDecl);
+        else if (bodyDecl instanceof JInitializerDecl)
+            appendInitializerDecl((JInitializerDecl) bodyDecl);
     }
 
     /**
@@ -133,7 +134,7 @@ public class JeplToJava {
         _sb.append(_indent);
 
         // Append modifiers
-        JModifiers mods = fieldDecl.getMods();
+        JModifiers mods = fieldDecl.getModifiers();
         appendModifiers(mods);
 
         // Append field type

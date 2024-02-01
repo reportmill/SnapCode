@@ -65,11 +65,13 @@ public class FileTreeTool extends WorkspaceTool {
      */
     public void showFile(WebFile aFile)
     {
-        FileTreeFile file = getTreeFile(aFile);
-        FileTreeFile[] rootTreeFiles = getRootFiles();
-        _filesTree.setItems(rootTreeFiles);
-        expandParent(file);
-        _filesTree.setSelItem(file);
+        if (_filesTree != null) {
+            FileTreeFile file = getTreeFile(aFile);
+            FileTreeFile[] rootTreeFiles = getRootFiles();
+            _filesTree.setItems(rootTreeFiles);
+            expandParent(file);
+            _filesTree.setSelItem(file);
+        }
 
         setSelFile(aFile);
     }

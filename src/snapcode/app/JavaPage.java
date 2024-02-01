@@ -1,6 +1,7 @@
 package snapcode.app;
 import javakit.parse.*;
 import javakit.resolver.JavaExecutable;
+import snap.util.ArrayUtils;
 import snap.view.ViewEvent;
 import snapcode.apptools.DebugTool;
 import snapcode.apptools.RunTool;
@@ -213,8 +214,8 @@ public class JavaPage extends WebPage {
 
             // Look for member matching name
             else {
-                List<JMemberDecl> memberDecls = classDecl.getMemberDecls();
-                JMemberDecl match = ListUtils.findMatch(memberDecls, md -> Objects.equals(memberName, md.getName()));
+                JMemberDecl[] memberDecls = classDecl.getMemberDecls();
+                JMemberDecl match = ArrayUtils.findMatch(memberDecls, md -> Objects.equals(memberName, md.getName()));
                 if (match != null)
                     id = match.getId();
             }

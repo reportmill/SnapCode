@@ -300,7 +300,7 @@ public class JavaParser extends JavaParserStmt {
                 // Handle ClassDecl, EnumDecl or AnnotationDecl
             else if (aNode.getCustomNode() instanceof JClassDecl) {
                 _part = aNode.getCustomNode(JClassDecl.class);
-                _part.setMods(_mods);
+                _part.setModifiers(_mods);
                 _mods = null;
             }
         }
@@ -329,7 +329,7 @@ public class JavaParser extends JavaParserStmt {
                 // Handle ClassBody (JavaMembers): ClassDecl, EnumDecl, ConstrDecl, FieldDecl, MethodDecl, AnnotationDecl
                 case "ClassBody":
                     JMemberDecl[] memberDecls = aNode.getCustomNode(JMemberDecl[].class);
-                    classDecl.setMemberDecls(memberDecls);
+                    classDecl.setBodyDecls(memberDecls);
                     break;
 
                 // Handle "class" or "interface"
@@ -423,7 +423,7 @@ public class JavaParser extends JavaParserStmt {
             // Handle Member
             else if (aNode.getCustomNode() instanceof JMemberDecl) {
                 _part = aNode.getCustomNode(JMemberDecl.class);
-                _part.setMods(_mods);
+                _part.setModifiers(_mods);
                 _mods = null;
             }
         }
@@ -489,7 +489,7 @@ public class JavaParser extends JavaParserStmt {
                 // Handle ClassBodyDecl
                 case "ClassBodyDecl":
                     JMemberDecl memberDecl = aNode.getCustomNode(JMemberDecl.class);
-                    enumDecl.addMemberDecl(memberDecl);
+                    enumDecl.addBodyDecl(memberDecl);
                     break;
             }
         }
@@ -522,7 +522,7 @@ public class JavaParser extends JavaParserStmt {
 
                 // Handle Modifiers
                 case "Modifiers":
-                    enumConst.setMods(aNode.getCustomNode(JModifiers.class));
+                    enumConst.setModifiers(aNode.getCustomNode(JModifiers.class));
                     break;
 
                 // Handle name Identifier

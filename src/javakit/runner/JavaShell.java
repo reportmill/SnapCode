@@ -182,7 +182,7 @@ public class JavaShell {
         // Handle initializer
         if (methodName.startsWith("__initializer")) {
             int initializerIndex = Convert.intValue(methodName);
-            JInitializerDecl[] initializerDecls = classDecl.getInitDecls();
+            JInitializerDecl[] initializerDecls = classDecl.getInitializerDecls();
             JInitializerDecl initializerDecl = initializerDecls[initializerIndex];
             JStmt[] stmts = initializerDecl.getBlockStatements();
             evalStatements(stmts, thisObject);
