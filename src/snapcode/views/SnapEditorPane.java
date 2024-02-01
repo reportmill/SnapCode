@@ -1,4 +1,5 @@
 package snapcode.views;
+import javakit.parse.JavaParser;
 import snapcode.javatext.JavaDoc;
 import javakit.parse.JNode;
 import snapcode.javatext.JavaTextArea;
@@ -276,25 +277,26 @@ public class SnapEditorPane extends ViewOwner {
      */
     public void paste()
     {
-        // Get Clipboard String and create node
-        Clipboard cb = Clipboard.get();
-        if (!cb.hasString()) return;
-        String str = cb.getString();
+        // Get Clipboard String
+        Clipboard clipboard = Clipboard.get();
+        String str = clipboard.hasString() ? clipboard.getString() : null;
+        if (str == null)
+            return;
+
+        // Parse for statement or expression
+        JavaParser javaParser = JavaParser.getShared();
         JNode node = null;
-        try {
-            node = _supportPane._stmtParser.parseCustom(str, JNode.class);
-        } catch (Exception e) {
+        try { node = javaParser.parseStatement(str, 0, 0); }
+        catch (Exception ignore) { }
+        if (node == null) {
+            try { node = javaParser.parseExpression(str); }
+            catch (Exception ignore) { }
         }
-        if (node == null)
-            try {
-                node = _supportPane._exprParser.parseCustom(str, JNode.class);
-            } catch (Exception e) {
-            }
 
         // Get SelectedPart and drop node
-        JNodeView spart = getSelectedPart();
-        if (spart != null && node != null)
-            spart.dropNode(node, spart.getWidth() / 2, spart.getHeight());
+        JNodeView selPart = getSelectedPart();
+        if (selPart != null && node != null)
+            selPart.dropNode(node, selPart.getWidth() / 2, selPart.getHeight());
     }
 
     /**

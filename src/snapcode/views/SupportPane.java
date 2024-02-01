@@ -3,7 +3,6 @@ import javakit.parse.JNode;
 import javakit.parse.JavaParser;
 import snap.geom.Point;
 import snap.gfx.Image;
-import snap.parse.Parser;
 import snap.view.*;
 
 /**
@@ -19,10 +18,6 @@ public class SupportPane extends ViewOwner {
 
     // The drag image
     //private static Image  _dragImage;
-
-    // The statement parser and expression parser
-    protected Parser  _stmtParser = JavaParser.getShared().getStmtParser();
-    protected Parser  _exprParser = JavaParser.getShared().getExprParser();
 
     /**
      * Returns the editor pane.
@@ -55,7 +50,7 @@ public class SupportPane extends ViewOwner {
             _dragSP = getSnapPart(getDragUI(), e.getX(), e.getY()); if(_dragSP==null) return;
             javafx.scene.SnapshotParameters sp = new javafx.scene.SnapshotParameters(); sp.setFill(Color.TRANSPARENT);
             _dragImage = _dragSP.getNative().snapshot(sp, null);
-            //JNode copy = _stmtParser.parseCustom(_dragSP.getJNode().getString(), JNode.class);
+            //JNode copy = javaParser.getJavaStatement(_dragSP.getJNode().getString(), 0, 0);
             //_dragSP = SnapPart.createSnapPart(copy);
             //Dragboard db = getDragUI().startDragAndDrop(TransferMode.ANY);
             //ClipboardContent cc = new ClipboardContent(); cc.putString("Hello World"); db.setContent(cc);
@@ -183,7 +178,8 @@ public class SupportPane extends ViewOwner {
      */
     protected JNodeView<?> createSnapPartStmt(String aString)
     {
-        JNode node = _stmtParser.parseCustom(aString, JNode.class);
+        JavaParser javaParser = JavaParser.getShared();
+        JNode node = javaParser.parseStatement(aString, 0, 0);
         JNodeView<?> nodeView = JNodeView.createView(node);
         nodeView.getEventAdapter().disableEvents(DragEvents);
         return nodeView;

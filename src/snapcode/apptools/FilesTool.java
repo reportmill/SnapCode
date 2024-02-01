@@ -415,7 +415,7 @@ public class FilesTool extends WorkspaceTool {
     {
         // Get Java class name
         JavaParser javaParser = JavaParser.getShared();
-        JFile jfile = javaParser.getJavaFile(javaString);
+        JFile jfile = javaParser.parseFile(javaString);
         String className = jfile.getName();
         if (className == null || className.length() == 0) {
             String title = "New Java File from clipboard";

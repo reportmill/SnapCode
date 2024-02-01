@@ -159,7 +159,7 @@ public class JavaAgent {
         // Get parsed java file
         JavaParser javaParser = getJavaParser();
         String javaStr = getJavaText();
-        JFile jfile = javaParser.getJavaFile(javaStr);
+        JFile jfile = javaParser.parseFile(javaStr);
 
         // Set SourceFile
         jfile.setSourceFile(_file);

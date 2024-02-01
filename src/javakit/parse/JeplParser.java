@@ -7,7 +7,7 @@ import snap.parse.*;
 import java.lang.reflect.Modifier;
 
 /**
- * This class.
+ * This JavaParser subclass supports parsing Java code with implicit class and main declarations.
  */
 public class JeplParser extends JavaParser {
 

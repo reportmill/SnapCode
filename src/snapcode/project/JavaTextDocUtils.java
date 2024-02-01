@@ -137,20 +137,14 @@ public class JavaTextDocUtils {
         if (oldStmt == null)
             return false;
 
-        // If StmtParser not yet set, create
-        if (_stmtParser == null) {
-            JavaAgent javaAgent = javaTextDoc.getAgent();
-            _stmtParser = new StmtParser(javaAgent.getJavaParser());
-        }
-
         // Parse new JStmtBlock (create empty one if there wasn't enough in block to create it)
-        _stmtParser.setInput(javaTextDoc);
-        _stmtParser.setCharIndex(oldStmt.getStartCharIndex());
-        _stmtParser.getTokenizer().setLineIndex(oldStmt.getLineIndex());
+        JavaParser javaParser = JavaParser.getShared();
+        int charIndex = oldStmt.getStartCharIndex();
+        int lineIndex = oldStmt.getLineIndex();
 
         // Parse new statement
         JStmtBlock newStmt = null;
-        try { newStmt = _stmtParser.parseCustom(JStmtBlock.class); }
+        try { newStmt = (JStmtBlock) javaParser.parseStatement(javaTextDoc, charIndex, lineIndex); }
         catch (Exception ignore) { }
 
         // If parse failed, return failed
@@ -166,33 +160,5 @@ public class JavaTextDocUtils {
 
         // Return success
         return true;
-    }
-
-
-    // Special statement parser
-    private static StmtParser _stmtParser;
-
-    /**
-     * A Parser for JavaText modified statements.
-     */
-    private static class StmtParser extends Parser {
-
-        private JavaParser _javaParser;
-
-        /** Constructor. */
-        StmtParser(JavaParser javaParser)
-        {
-            super(javaParser.getRule("Statement"));
-            _javaParser = javaParser;
-        }
-
-        /** Override to use JavaParser.Tokenizer. */
-        public Tokenizer getTokenizer()
-        {
-            return _javaParser.getTokenizer();
-        }
-
-        /** Override to ignore exception. */
-        protected void parseFailed(ParseRule aRule, ParseHandler<?> aHandler)  { }
     }
 }

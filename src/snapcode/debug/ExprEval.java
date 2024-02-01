@@ -1,9 +1,6 @@
 package snapcode.debug;
-
 import com.sun.jdi.*;
 import javakit.parse.*;
-import snap.parse.Parser;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,24 +9,19 @@ import java.util.List;
  */
 public class ExprEval {
 
-    // A parser to parse expressions
-    static Parser _exprParser = JavaParser.getShared().getExprParser();
-
     /**
      * Evaluate expression.
      */
     public static Object eval(DebugApp anApp, String anExpr)
     {
-        _exprParser.setInput(anExpr);
+        // Parse expression
+        JavaParser javaParser = JavaParser.getShared();
+        JExpr expr = javaParser.parseExpression(anExpr);
+
+        // Evaluate expression
         ObjectReference oref = anApp.thisObject();
-        JExpr expr = _exprParser.parseCustom(JExpr.class);
-        Value value;
-        try {
-            value = evalExpr(anApp, oref, expr);
-        } catch (Exception e) {
-            return e;
-        }
-        return value;
+        try { return evalExpr(anApp, oref, expr); }
+        catch (Exception e) { return e; }
     }
 
     /**
@@ -59,24 +51,15 @@ public class ExprEval {
     {
         VirtualMachine aVM = anApp._vm;
         switch (aLiteral.getLiteralType()) {
-            case Boolean:
-                return aVM.mirrorOf((Boolean) aLiteral.getValue());
-            case Integer:
-                return aVM.mirrorOf((Integer) aLiteral.getValue());
-            case Long:
-                return aVM.mirrorOf((Long) aLiteral.getValue());
-            case Float:
-                return aVM.mirrorOf((Float) aLiteral.getValue());
-            case Double:
-                return aVM.mirrorOf((Double) aLiteral.getValue());
-            case Character:
-                return aVM.mirrorOf((Character) aLiteral.getValue());
-            case String:
-                return aVM.mirrorOf((String) aLiteral.getValue());
-            case Null:
-                return null;
-            default:
-                throw new RuntimeException("No Literal Type");
+            case Boolean: return aVM.mirrorOf((Boolean) aLiteral.getValue());
+            case Integer: return aVM.mirrorOf((Integer) aLiteral.getValue());
+            case Long: return aVM.mirrorOf((Long) aLiteral.getValue());
+            case Float: return aVM.mirrorOf((Float) aLiteral.getValue());
+            case Double: return aVM.mirrorOf((Double) aLiteral.getValue());
+            case Character: return aVM.mirrorOf((Character) aLiteral.getValue());
+            case String: return aVM.mirrorOf((String) aLiteral.getValue());
+            case Null: return null;
+            default: throw new RuntimeException("No Literal Type");
         }
     }
 
@@ -113,7 +96,7 @@ public class ExprEval {
     static Value evalMethod(DebugApp anApp, ObjectReference anOR, JExprMethodCall anExpr) throws Exception
     {
         ObjectReference thisObj = anApp.thisObject();
-        List<Value> args = new ArrayList();
+        List<Value> args = new ArrayList<>();
         for (JExpr arg : anExpr.getArgs())
             args.add(evalExpr(anApp, thisObj, arg));
         return anApp.invokeMethod(anOR, anExpr.getName(), args);
@@ -186,11 +169,11 @@ public class ExprEval {
                     return anApp._vm.mirrorOf(-val);
                 }
                 throw new RuntimeException("Numeric Negate MathExpr not numeric: " + anExpr);
-            } else switch (op) {
+            }
+            else switch (op) {
                 case Not:
-                default:
-                    throw new RuntimeException("Operator not supported " + anExpr.getOp());
-                    //PreIncrement, PreDecrement, BitComp, PostIncrement, PostDecrement
+                default: throw new RuntimeException("Operator not supported " + anExpr.getOp());
+                //PreIncrement, PreDecrement, BitComp, PostIncrement, PostDecrement
             }
         }
 
@@ -199,29 +182,21 @@ public class ExprEval {
             JExpr expr2 = anExpr.getOperand(1);
             Value val2 = evalExpr(anApp, anOR, expr2);
             switch (op) {
-                case Add:
-                    return add(anApp, val1, val2);
-                case Subtract:
-                    return subtract(anApp, val1, val2);
-                case Multiply:
-                    return multiply(anApp, val1, val2);
-                case Divide:
-                    return divide(anApp, val1, val2);
-                case Mod:
-                    return mod(anApp, val1, val2);
+                case Add: return add(anApp, val1, val2);
+                case Subtract: return subtract(anApp, val1, val2);
+                case Multiply: return multiply(anApp, val1, val2);
+                case Divide: return divide(anApp, val1, val2);
+                case Mod: return mod(anApp, val1, val2);
                 case Equal:
                 case NotEqual:
                 case LessThan:
                 case GreaterThan:
                 case LessThanOrEqual:
-                case GreaterThanOrEqual:
-                    return compareNumeric(anApp, val1, val2, op);
+                case GreaterThanOrEqual: return compareNumeric(anApp, val1, val2, op);
                 case Or:
-                case And:
-                    return compareLogical(anApp, val1, val2, op);
-                default:
-                    throw new RuntimeException("Operator not supported " + anExpr.getOp());
-                    // BitOr, BitXOr, BitAnd, InstanceOf, ShiftLeft, ShiftRight, ShiftRightUnsigned,
+                case And: return compareLogical(anApp, val1, val2, op);
+                default: throw new RuntimeException("Operator not supported " + anExpr.getOp());
+                // BitOr, BitXOr, BitAnd, InstanceOf, ShiftLeft, ShiftRight, ShiftRightUnsigned,
             }
         }
 
@@ -319,20 +294,13 @@ public class ExprEval {
     private static boolean compareNumeric(double aVal1, double aVal2, JExprMath.Op anOp)
     {
         switch (anOp) {
-            case Equal:
-                return aVal1 == aVal2;
-            case NotEqual:
-                return aVal1 != aVal2;
-            case LessThan:
-                return aVal1 < aVal2;
-            case GreaterThan:
-                return aVal1 > aVal2;
-            case LessThanOrEqual:
-                return aVal1 <= aVal2;
-            case GreaterThanOrEqual:
-                return aVal1 >= aVal2;
-            default:
-                throw new RuntimeException("Not a compare op " + anOp);
+            case Equal: return aVal1 == aVal2;
+            case NotEqual: return aVal1 != aVal2;
+            case LessThan: return aVal1 < aVal2;
+            case GreaterThan: return aVal1 > aVal2;
+            case LessThanOrEqual: return aVal1 <= aVal2;
+            case GreaterThanOrEqual: return aVal1 >= aVal2;
+            default: throw new RuntimeException("Not a compare op " + anOp);
         }
     }
 

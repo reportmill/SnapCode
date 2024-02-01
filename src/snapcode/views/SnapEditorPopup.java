@@ -5,7 +5,6 @@ import javakit.parse.JavaParser;
 import javakit.resolver.JavaDecl;
 import snapcode.javatext.NodeCompleter;
 import snap.gfx.Font;
-import snap.parse.Parser;
 import snap.view.*;
 import java.util.Objects;
 
@@ -26,9 +25,6 @@ public class SnapEditorPopup extends ViewOwner {
     // The fixed expression
     private String  _startText, _endText, _idText;
 
-    // Expression parser
-    private Parser  _exprParser = JavaParser.getShared().getExprParser();
-
     /**
      * Returns a shared instance.
      */
@@ -48,8 +44,9 @@ public class SnapEditorPopup extends ViewOwner {
         _nodeView = aPart;
 
         // Create expression from string
+        JavaParser javaParser = JavaParser.getShared();
         JNode node = null;
-        try { node = _exprParser.parseCustom(aString, JNode.class); }
+        try { node = javaParser.parseExpression(aString); }
         catch (Exception e) { }
 
         if (node == null) {

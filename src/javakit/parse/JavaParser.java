@@ -14,15 +14,6 @@ public class JavaParser extends JavaParserStmt {
     // The exception, if one was hit
     private Exception  _exception;
 
-    // An expression parser created from subset of JavaParser
-    private Parser  _exprParser;
-
-    // A statement parser created from subset of JavaParser
-    private Parser  _stmtParser;
-
-    // An imports parser created from subset of JavaParser
-    private Parser  _importsParser;
-
     // The shared parser
     private static JavaParser  _shared;
 
@@ -44,38 +35,6 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * Returns the shared expression parser.
-     */
-    public Parser getExprParser()
-    {
-        if (_exprParser != null) return _exprParser;
-        ParseRule exprRule = getShared().getRule("Expression");
-        return _exprParser = new Parser(exprRule);
-    }
-
-    /**
-     * Returns the shared expression parser.
-     */
-    public Parser getStmtParser()
-    {
-        if (_stmtParser != null) return _stmtParser;
-        ParseRule stmtRule = getShared().getRule("Statement");
-        return _stmtParser = new Parser(stmtRule);
-    }
-
-    /**
-     * Returns the shared imports parser.
-     */
-    public Parser getImportsParser()
-    {
-        if (_importsParser != null) return _importsParser;
-        Parser javaParser = new JavaParser();
-        ParseRule importsRule = javaParser.getRule("JavaFileImports");
-        javaParser.setRule(importsRule);
-        return _importsParser = javaParser;
-    }
-
-    /**
      * Override so subclasses will find grammar file.
      */
     protected ParseRule createRule()
@@ -93,9 +52,9 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * Returns a JavaFile for input Java.
+     * Parses for java file for given char input.
      */
-    public JFile getJavaFile(CharSequence anInput)
+    public synchronized JFile parseFile(CharSequence anInput)
     {
         // Clear exception
         _exception = null;
@@ -140,6 +99,41 @@ public class JavaParser extends JavaParserStmt {
 
         // Return
         return jfile;
+    }
+
+    /**
+     * Parses for a statement for given char input and char index.
+     */
+    public synchronized JStmt parseStatement(CharSequence charInput, int charIndex, int lineIndex)
+    {
+        _exception = null;
+        ParseRule stmtRule = getRule("Statement");
+        setInput(charInput);
+        setCharIndex(charIndex);
+        getTokenizer().setLineIndex(lineIndex);
+        return parseCustom(stmtRule, JStmt.class);
+    }
+
+    /**
+     * Parses for an expression for given char input.
+     */
+    public synchronized JExpr parseExpression(CharSequence charInput)
+    {
+        _exception = null;
+        ParseRule exprRule = getRule("Expression");
+        setInput(charInput);
+        return parseCustom(exprRule, JExpr.class);
+    }
+
+    /**
+     * Parses for file imports for given char input.
+     */
+    public synchronized JFile parseFileImports(CharSequence charInput)
+    {
+        _exception = null;
+        ParseRule importsRule = getRule("JavaFileImports");
+        setInput(charInput);
+        return parseCustom(importsRule, JFile.class);
     }
 
     /**
