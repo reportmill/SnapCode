@@ -31,9 +31,6 @@ public class JavaAgent {
     // The JavaTextDoc version of this file
     private JavaTextDoc  _javaTextDoc;
 
-    // The parser to parse Java
-    private JavaParser  _javaParser;
-
     // The parsed version of this JavaFile
     protected JFile  _jfile;
 
@@ -49,7 +46,7 @@ public class JavaAgent {
     /**
      * Constructor for given file.
      */
-    public JavaAgent(WebFile aFile)
+    private JavaAgent(WebFile aFile)
     {
         _file = aFile;
         _isJepl = aFile.getType().equals("jepl");
@@ -75,7 +72,7 @@ public class JavaAgent {
         _file.setProp(JavaAgent.class.getName(), null);
         _file.removePropChangeListener(_fileBytesChangedLsnr);
         _file.reset();
-        _file = null; _jfile = null; _javaTextDoc = null; _proj = null; _javaParser = null;
+        _file = null; _jfile = null; _javaTextDoc = null; _proj = null;
     }
 
     /**
@@ -331,8 +328,13 @@ public class JavaAgent {
         if (javaAgent != null)
             return javaAgent;
 
-        // Return
-        return new JavaAgent(aFile);
+        // If java file, create and return
+        String fileType = aFile.getType();
+        if (fileType.equals("java") || fileType.equals("jepl"))
+            return new JavaAgent(aFile);
+
+        // Return not found
+        return null;
     }
 
     /**
