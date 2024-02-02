@@ -19,9 +19,9 @@ public class ClassInfoPage extends TextPage {
     protected String getDefaultText()
     {
         WebFile classFile = getFile();
-        String jpath = classFile.getPath().replace(".class", ".java").replace("/bin/", "/src/");
-        WebFile jfile = classFile.getSite().getFileForPath(jpath);
-        JavaData javaData = jfile != null ? JavaData.getJavaDataForFile(jfile) : null;
+        String javaFilePath = classFile.getPath().replace(".class", ".java").replace("/bin/", "/src/");
+        WebFile javaFile = classFile.getSite().getFileForPath(javaFilePath);
+        JavaData javaData = javaFile != null ? JavaData.getJavaDataForFile(javaFile) : null;
         if (javaData == null)
             return "Class File not found";
 
@@ -30,7 +30,7 @@ public class ClassInfoPage extends TextPage {
         Set<JavaDecl> refs = javaData.getRefs();
 
         // Create StringBuffer and append Declarations
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("\n    - - - - - - - - - - Declarations - - - - - - - - - -\n\n");
         JavaDecl[] declArray = decls.toArray(new JavaDecl[0]);
         Arrays.sort(declArray);

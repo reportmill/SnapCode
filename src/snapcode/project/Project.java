@@ -34,6 +34,9 @@ public class Project extends PropObject {
     // The ProjectBuilder
     protected ProjectBuilder  _projBuilder;
 
+    // The JavaAgents created for this project
+    private List<JavaAgent> _javaAgents = new ArrayList<>();
+
     // Constants for properties
     private static final String Projects_Prop = "Projects";
 
@@ -383,8 +386,10 @@ public class Project extends PropObject {
 
         // If source file, close agent
         JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
-        if (javaAgent != null)
+        if (javaAgent != null) {
+            _javaAgents.remove(javaAgent);
             javaAgent.closeAgent();
+        }
     }
 
     /**
@@ -398,12 +403,25 @@ public class Project extends PropObject {
     }
 
     /**
+     * Adds a java agent.
+     */
+    protected void addJavaAgent(JavaAgent javaAgent)
+    {
+        _javaAgents.add(javaAgent);
+    }
+
+    /**
      * Closes a project.
      */
     public void closeProject()
     {
         // If already close, just return
         if (_site == null) { System.err.println("Project.closeProject: Multiple closes"); return; }
+
+        // Close JavaAgents
+        for (JavaAgent javaAgent : _javaAgents)
+            javaAgent.closeAgent();
+        _javaAgents.clear();
 
         // Clear Site.Project
         _site.setProp(Project.class.getSimpleName(), null);

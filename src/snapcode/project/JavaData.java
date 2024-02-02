@@ -32,25 +32,18 @@ public class JavaData {
     private boolean  _isDependenciesSet;
 
     /**
-     * Creates a new JavaData for given file.
+     * Constructor for given java file.
      */
-    public JavaData(WebFile aFile)
+    protected JavaData(WebFile javaFile, Project project)
     {
-        _javaFile = aFile;
+        _javaFile = javaFile;
+        _proj = project;
     }
 
     /**
      * Returns the project for this JavaFile.
      */
-    public Project getProject()
-    {
-        // If already set, just return
-        if (_proj != null) return _proj;
-
-        // Get, set, return
-        Project proj = Project.getProjectForFile(_javaFile);
-        return _proj = proj;
-    }
+    public Project getProject()  { return _proj; }
 
     /**
      * Returns the class files for this JavaFile.
@@ -151,16 +144,8 @@ public class JavaData {
         // Get new refs
         Set<JavaDecl> newRefs = new HashSet<>();
         if (classFiles != null) {
-            for (WebFile classFile : classFiles) {
-                ClassData classData = ClassData.getClassDataForFile(classFile);
-                try {
-                    classData.getRefs(newRefs);
-                }
-
-                catch (Throwable t) {
-                    System.err.printf("JavaData.updateDepends failed to get refs in %s: %s\n", classFile, t);
-                }
-            }
+            for (WebFile classFile : classFiles)
+                ClassFileUtils.findRefsForClassFile(classFile, newRefs);
         }
 
         // If references haven't changed, just return
@@ -192,10 +177,10 @@ public class JavaData {
                 continue;
 
             //
-            WebFile file = rootProj.getJavaFileForClassName(className);
-            if (file != null && file != _javaFile && !_dependencies.contains(file)) {
-                _dependencies.add(file);
-                JavaData javaData = JavaData.getJavaDataForFile(file);
+            WebFile javaFile = rootProj.getJavaFileForClassName(className);
+            if (javaFile != null && javaFile != _javaFile && !_dependencies.contains(javaFile)) {
+                _dependencies.add(javaFile);
+                JavaData javaData = getJavaDataForFile(javaFile);
                 javaData._dependents.add(_javaFile);
             }
         }
@@ -208,10 +193,10 @@ public class JavaData {
             if (javaClass == null) continue;
 
             String className = javaClass.getRootClassName();
-            WebFile file = rootProj.getJavaFileForClassName(className);
-            if (file != null && _dependencies.contains(file)) {
-                _dependencies.remove(file);
-                JavaData javaData = JavaData.getJavaDataForFile(file);
+            WebFile javaFile = rootProj.getJavaFileForClassName(className);
+            if (javaFile != null && _dependencies.contains(javaFile)) {
+                _dependencies.remove(javaFile);
+                JavaData javaData = getJavaDataForFile(javaFile);
                 javaData._dependents.remove(_javaFile);
             }
         }
@@ -226,7 +211,7 @@ public class JavaData {
     public void removeDependencies()
     {
         for (WebFile depFile : _dependencies) {
-            JavaData javaData = JavaData.getJavaDataForFile(depFile);
+            JavaData javaData = getJavaDataForFile(depFile);
             javaData._dependents.remove(_javaFile);
         }
 
@@ -241,16 +226,7 @@ public class JavaData {
      */
     public static JavaData getJavaDataForFile(WebFile aFile)
     {
-        // Get JavaData for given source file
-        JavaData javaData = (JavaData) aFile.getProp(JavaData.class.getName());
-
-        // If missing, create/set
-        if (javaData == null) {
-            javaData = new JavaData(aFile);
-            aFile.setProp(JavaData.class.getName(), javaData);
-        }
-
-        // Return
-        return javaData;
+        JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
+        return javaAgent != null ? javaAgent.getJavaData() : null;
     }
 }

@@ -12,12 +12,12 @@ import java.lang.reflect.*;
 import java.util.Set;
 
 /**
- * A file to represent a Java class.
+ * This class finds external refs in a class file.
  */
-public class ClassData {
+public class ClassFileUtils {
 
     // The class file
-    private WebFile  _file;
+    private WebFile _classFile;
 
     // The project
     private Project  _proj;
@@ -25,44 +25,44 @@ public class ClassData {
     // The Resolver
     private Resolver  _resolver;
 
-    // The class name
-    String _cname;
-
     /**
      * Creates a new ClassData for given file.
      */
-    public ClassData(WebFile aFile)
+    private ClassFileUtils(WebFile aFile)
     {
-        _file = aFile;
-        _proj = Project.getProjectForFile(_file);
+        _classFile = aFile;
+        _proj = Project.getProjectForFile(_classFile);
         _resolver = _proj.getResolver();
     }
 
     /**
      * Returns the set of JavaDecls that this class references.
      */
-    public void getRefs(Set<JavaDecl> theRefs)
+    private void findRefs(Set<JavaDecl> theRefs)
     {
         // Get bytes
-        if (_file.getBytes() == null) return;
+        if (_classFile.getBytes() == null)
+            return;
 
         // Get ClassFile reader and read
-        ClassFileData classFileData = new ClassFileData();
+        ClassFileReader classFileReader = new ClassFileReader();
         try {
-            DataInputStream dataInputStream = new DataInputStream(_file.getInputStream());
-            classFileData.read(dataInputStream);
+            DataInputStream dataInputStream = new DataInputStream(_classFile.getInputStream());
+            classFileReader.read(dataInputStream);
         }
         catch (Exception e) {
             System.err.println(e);
             return;
         }
 
-        // Iterate over constants and add to set top level class names
-        String cname = _cname = getRootClassName(_proj.getClassNameForFile(_file));
+        // Get base class name
+        String className = _proj.getClassNameForFile(_classFile);
+        className = getRootClassName(className);
 
-        for (int i = 1, iMax = classFileData.getConstantCount(); i <= iMax; i++) {
-            ClassFileData.Constant constant = classFileData.getConstant(i);
-            if (constant.isClass() && (isInRootClassName(cname, constant.getClassName()) ||
+        // Iterate over constants and add to set top level class names
+        for (int i = 1, iMax = classFileReader.getConstantCount(); i <= iMax; i++) {
+            ClassFileReader.Constant constant = classFileReader.getConstant(i);
+            if (constant.isClass() && (isInRootClassName(className, constant.getClassName()) ||
                     ClassUtils.isPrimitiveClassName(constant.getClassName())))
                 continue;
             JavaDecl ref = getRef(constant);
@@ -71,50 +71,39 @@ public class ClassData {
         }
 
         // Get class and make sure TypeParameters, superclass and interfaces are in refs
-        Class cls = _proj.getClassForFile(_file);
-        for (TypeVariable tp : cls.getTypeParameters())
-            addClassRef(tp, theRefs);
+        Class<?> cls = _proj.getClassForFile(_classFile);
+        for (TypeVariable<?> typeVar : cls.getTypeParameters())
+            addClassRef(typeVar, theRefs);
         addClassRef(cls.getGenericSuperclass(), theRefs);
-        for (Type tp : cls.getGenericInterfaces())
-            addClassRef(tp, theRefs);
+        for (Type interfc : cls.getGenericInterfaces())
+            addClassRef(interfc, theRefs);
 
         // Fields: add JavaDecl for each declared field - also make sure field type is in refs
         Field[] fields;
-        try {
-            fields = cls.getDeclaredFields();
-        } catch (Throwable e) {
-            System.err.println(e + " in " + _file);
-            return;
-        }
+        try { fields = cls.getDeclaredFields(); }
+        catch (Throwable e) { System.err.println(e + " in " + _classFile); return; }
         for (Field field : fields)
             addClassRef(field.getGenericType(), theRefs);
 
         // Constructors: Add JavaDecl for each constructor - also make sure parameter types are in refs
-        Constructor[] constrs;
-        try {
-            constrs = cls.getDeclaredConstructors();
-        } catch (Throwable e) {
-            System.err.println(e + " in " + _file);
-            return;
-        }
-        for (Constructor constr : constrs) {
-            if (constr.isSynthetic()) continue;
-            for (Type t : constr.getGenericParameterTypes())
-                addClassRef(t, theRefs);
+        Constructor<?>[] constrs;
+        try { constrs = cls.getDeclaredConstructors(); }
+        catch (Throwable e) { System.err.println(e + " in " + _classFile); return; }
+        for (Constructor<?> constr : constrs) {
+            if (constr.isSynthetic())
+                continue;
+            for (Type paramType : constr.getGenericParameterTypes())
+                addClassRef(paramType, theRefs);
         }
 
         // Methods: Add JavaDecl for each declared method - also make sure return/parameter types are in refs
         Method[] methods;
-        try {
-            methods = cls.getDeclaredMethods();
-        } catch (Throwable e) {
-            System.err.println(e + " in " + _file);
-            return;
-        }
-        for (Method meth : methods) {
-            if (meth.isSynthetic()) continue;
-            addClassRef(meth.getGenericReturnType(), theRefs);
-            for (Type t : meth.getGenericParameterTypes())
+        try { methods = cls.getDeclaredMethods(); }
+        catch (Throwable e) { System.err.println(e + " in " + _classFile); return; }
+        for (Method method : methods) {
+            if (method.isSynthetic()) continue;
+            addClassRef(method.getGenericReturnType(), theRefs);
+            for (Type t : method.getGenericParameterTypes())
                 addClassRef(t, theRefs);
         }
     }
@@ -122,7 +111,7 @@ public class ClassData {
     /**
      * Returns the JavaDecl for given Class ConstantPool Constant if external reference.
      */
-    private JavaDecl getRef(ClassFileData.Constant aConst)
+    private JavaDecl getRef(ClassFileReader.Constant aConst)
     {
         // Handle Class reference
         if (aConst.isClass()) {
@@ -197,11 +186,11 @@ public class ClassData {
     /**
      * Adds a ref for a declaration type class.
      */
-    private final void addClassRef(Type aType, Set<JavaDecl> theRefs)
+    private void addClassRef(Type aType, Set<JavaDecl> theRefs)
     {
         // Handle simple Class
         if (aType instanceof Class) {
-            Class<?> cls = (Class) aType;
+            Class<?> cls = (Class<?>) aType;
             while (cls.isArray())
                 cls = cls.getComponentType();
             if (cls.isAnonymousClass() || cls.isPrimitive() || cls.isSynthetic())
@@ -221,8 +210,8 @@ public class ClassData {
 
         // Handle TypeVariable
         else if (aType instanceof TypeVariable) {
-            TypeVariable tv = (TypeVariable) aType;
-            for (Type type : tv.getBounds())
+            TypeVariable<?> typeVar = (TypeVariable<?>) aType;
+            for (Type type : typeVar.getBounds())
                 if (type instanceof Class)  // Bogus!
                     addClassRef(type, theRefs);
         }
@@ -240,11 +229,12 @@ public class ClassData {
     /**
      * Returns the top level class name.
      */
-    private static String getRootClassName(String cname)
+    private static String getRootClassName(String className)
     {
-        int i = cname.indexOf('$');
-        if (i > 0) cname = cname.substring(0, i);
-        return cname;
+        int i = className.indexOf('$');
+        if (i > 0)
+            className = className.substring(0, i);
+        return className;
     }
 
     /**
@@ -256,20 +246,16 @@ public class ClassData {
     }
 
     /**
-     * Returns the ClassData for given file.
+     * Finds external references in given class file and adds to given set.
      */
-    public static ClassData getClassDataForFile(WebFile aFile)
+    public static void findRefsForClassFile(WebFile classFile, Set<JavaDecl> theRefsSet)
     {
-        // Get from File.Props
-        ClassData classData = (ClassData) aFile.getProp(ClassData.class.getName());
-
-        // If missing, create/set
-        if (classData == null) {
-            classData = new ClassData(aFile);
-            aFile.setProp(ClassData.class.getName(), classData);
+        try {
+            ClassFileUtils classFileUtils = new ClassFileUtils(classFile);
+            classFileUtils.findRefs(theRefsSet);
         }
-
-        // Return
-        return classData;
+        catch (Throwable t) {
+            System.err.printf("ClassData.findRefsForClass: failed to get refs in %s: %s\n", classFile, t);
+        }
     }
 }

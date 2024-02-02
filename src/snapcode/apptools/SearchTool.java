@@ -273,7 +273,7 @@ public class SearchTool extends WorkspaceTool {
 
             // Get JavaAgent, JavaData and references
             JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
-            JavaData javaData = JavaData.getJavaDataForFile(aFile);
+            JavaData javaData = javaAgent.getJavaData();
             Set<JavaDecl> refs = javaData.getRefs();
 
             // Iterate over references
@@ -348,7 +348,7 @@ public class SearchTool extends WorkspaceTool {
 
             // Get JavaAgent, JavaData, and declarations
             JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
-            JavaData javaData = JavaData.getJavaDataForFile(aFile);
+            JavaData javaData = javaAgent.getJavaData();
             Set<JavaDecl> decls = javaData.getDecls();
 
             // Iterate over decls

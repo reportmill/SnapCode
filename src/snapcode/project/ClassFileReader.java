@@ -2,11 +2,11 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * Reads a class file.
@@ -14,16 +14,18 @@ import java.util.Vector;
  * @author Tanmay K. Mohapatra
  * @version 1.03, 28th Sep, 2003
  */
-class ClassFileData {
+class ClassFileReader {
 
     // Version numbers
-    int magicNumber;
-    int minorVersion;
-    int majorVersion;
+    protected int magicNumber;
+    protected int minorVersion;
+    protected int majorVersion;
 
-    // Ivars
-    public ConstantPool constantPool = new ConstantPool();
-    public ClassNames classNames = new ClassNames();
+    // The constant pool
+    private ConstantPool constantPool = new ConstantPool();
+
+    // The class names
+    private ClassNames classNames = new ClassNames();
 
     /**
      * reads the class file into data structures.
@@ -49,33 +51,36 @@ class ClassFileData {
     /**
      * Returns the number of constants.
      */
-    public int getConstantCount()
-    {
-        return constantPool.getPoolInfoCount();
-    }
+    public int getConstantCount()  { return constantPool.getPoolInfoCount(); }
 
     /**
      * Returns the individual constant at given index.
      */
-    public Constant getConstant(int anIndex)
-    {
-        return constantPool.getPoolInfo(anIndex);
-    }
+    public Constant getConstant(int anIndex)  { return constantPool.getPoolInfo(anIndex); }
 
     /**
      * ConstantPool.
      */
     public static class ConstantPool {
-        int constantCount; // as per class file entry
-        int iNumPoolInfos;      // number of actual pool infos
-        Vector _constants;      // collection of pool infos
 
+        // as per class file entry
+        private int constantCount;
+
+        // number of actual pool infos
+        private int iNumPoolInfos;
+
+        // collection of pool infos
+        private List<Constant> _constants;
+
+        /**
+         * Read constants.
+         */
         void read(DataInputStream dis) throws IOException
         {
             // const pool index 0 is not present in the class file and is for internal use of JVMs
             constantCount = dis.readUnsignedShort();
             iNumPoolInfos = constantCount - 1;
-            _constants = new Vector(iNumPoolInfos);
+            _constants = new ArrayList<>(iNumPoolInfos);
             for (int i = 0; i < iNumPoolInfos; i++) {
                 Constant newInfo = new Constant();
                 newInfo.read(dis);
@@ -105,7 +110,7 @@ class ClassFileData {
         // The index is the value as referred to in the class file. The first valid index is 1.
         public Constant getPoolInfo(int iIndex)
         {
-            return (Constant) _constants.get(iIndex - 1);
+            return _constants.get(iIndex - 1);
         }
 
         public int getPoolInfoCount()
@@ -119,6 +124,8 @@ class ClassFileData {
      * A class to represent a constant from the Class file Constant Pool Table.
      */
     public static class Constant {
+
+        // Constant pool types
         public static final int CONSTANT_Class = 7;
         public static final int CONSTANT_Fieldref = 9;
         public static final int CONSTANT_Methodref = 10;
@@ -173,39 +180,25 @@ class ClassFileData {
                     iClassIndex = dis.readUnsignedShort(); // points to a Class
                     iNameAndTypeIndex = dis.readUnsignedShort(); // points to a NameAndType
                     break;
-                case CONSTANT_Integer:
-                    iIntValue = dis.readInt();
-                    break;
-                case CONSTANT_Float:
-                    fFloatVal = dis.readFloat();
-                    break;
+                case CONSTANT_Integer: iIntValue = dis.readInt(); break;
+                case CONSTANT_Float: fFloatVal = dis.readFloat(); break;
                 case CONSTANT_NameAndType:
                     iNameIndex = dis.readUnsignedShort(); // points to UTF8
                     iDescriptorIndex = dis.readUnsignedShort(); // points to UTF8
                     break;
-                case CONSTANT_Long:
-                    lLongVal = dis.readLong();
-                    break;
-                case CONSTANT_Double:
-                    dDoubleVal = dis.readDouble();
-                    break;
-                case CONSTANT_Utf8:
-                    sUTFStr = dis.readUTF();
-                    break;
+                case CONSTANT_Long: lLongVal = dis.readLong(); break;
+                case CONSTANT_Double: dDoubleVal = dis.readDouble(); break;
+                case CONSTANT_Utf8: sUTFStr = dis.readUTF(); break;
                 case CONSTANT_MethodHandle:
                     iReferenceKind = dis.readByte();
                     iReferenceIndex = dis.readUnsignedShort();
                     break;
-                case CONSTANT_MethodType:
-                    iDescriptorIndex = dis.readUnsignedShort();
-                    break;
+                case CONSTANT_MethodType: iDescriptorIndex = dis.readUnsignedShort(); break;
                 case CONSTANT_InvokeDynamic:
                     iBootstrapMethodAttrIndex = dis.readUnsignedShort();
                     iNameAndTypeIndex = dis.readUnsignedShort();
                     break;
-                default:
-                    System.out.println("Unknown constant pool type: " + iTag);
-                    break;
+                default: System.out.println("ClassFileReader: Unknown constant pool type: " + iTag); break;
             }
         }
 
@@ -238,60 +231,42 @@ class ClassFileData {
         /**
          * Returns whether constant is Class type.
          */
-        public boolean isClass()
-        {
-            return iTag == CONSTANT_Class;
-        }
+        public boolean isClass()  { return iTag == CONSTANT_Class; }
 
         /**
          * Returns whether constant is Field reference type.
          */
-        public boolean isField()
-        {
-            return iTag == CONSTANT_Fieldref;
-        }
+        public boolean isField()  { return iTag == CONSTANT_Fieldref; }
 
         /**
          * Returns whether constant is constructor reference type.
          */
-        public boolean isConstructor()
-        {
-            return iTag == CONSTANT_Methodref && getMemberName().equals("<init>");
-        }
+        public boolean isConstructor()  { return iTag == CONSTANT_Methodref && getMemberName().equals("<init>"); }
 
         /**
          * Returns whether constant is Method reference type.
          */
-        public boolean isMethod()
-        {
-            return iTag == CONSTANT_Methodref || iTag == CONSTANT_InterfaceMethodref;
-        }
+        public boolean isMethod()  { return iTag == CONSTANT_Methodref || iTag == CONSTANT_InterfaceMethodref; }
 
         /**
          * Returns the class name.
          */
         public String getClassName()
         {
-            String cname = refUTF8.sUTFStr.replace('/', '.');
+            String className = refUTF8.sUTFStr.replace('/', '.');
             //if(cname.startsWith("[")) cname = getType(cname).replace("[]", "");
-            return cname;
+            return className;
         }
 
         /**
          * Returns the method declaring class name.
          */
-        public String getMemberName()
-        {
-            return refNameAndType.refUTF8.sUTFStr;
-        }
+        public String getMemberName()  { return refNameAndType.refUTF8.sUTFStr; }
 
         /**
          * Returns the declaring class name of method/field.
          */
-        public String getDeclClassName()
-        {
-            return refClass.refUTF8.sUTFStr.replace('/', '.');
-        }
+        public String getDeclClassName()  { return refClass.refUTF8.sUTFStr.replace('/', '.'); }
 
         /**
          * Returns the type/return-type of method/field.
@@ -317,33 +292,15 @@ class ClassFileData {
                 char c = aStr.charAt(i);
                 if (c == ')') break;
                 switch (c) {
-                    case 'B':
-                        type = "byte";
-                        break;
-                    case 'C':
-                        type = "char";
-                        break;
-                    case 'D':
-                        type = "double";
-                        break;
-                    case 'F':
-                        type = "float";
-                        break;
-                    case 'I':
-                        type = "int";
-                        break;
-                    case 'J':
-                        type = "long";
-                        break;
-                    case 'S':
-                        type = "short";
-                        break;
-                    case 'Z':
-                        type = "boolean";
-                        break;
-                    case 'V':
-                        type = "void";
-                        break;
+                    case 'B': type = "byte"; break;
+                    case 'C': type = "char"; break;
+                    case 'D': type = "double"; break;
+                    case 'F': type = "float"; break;
+                    case 'I': type = "int"; break;
+                    case 'J': type = "long"; break;
+                    case 'S': type = "short"; break;
+                    case 'Z': type = "boolean"; break;
+                    case 'V': type = "void"; break;
                     case 'L':
                         int end = aStr.indexOf(';', i + 1);
                         type = aStr.substring(i + 1, end);
@@ -374,33 +331,15 @@ class ClassFileData {
                 char c = aStr.charAt(i);
                 if (c == ')') break;
                 switch (c) {
-                    case 'B':
-                        types[tcount++] = "byte";
-                        break;
-                    case 'C':
-                        types[tcount++] = "char";
-                        break;
-                    case 'D':
-                        types[tcount++] = "double";
-                        break;
-                    case 'F':
-                        types[tcount++] = "float";
-                        break;
-                    case 'I':
-                        types[tcount++] = "int";
-                        break;
-                    case 'J':
-                        types[tcount++] = "long";
-                        break;
-                    case 'S':
-                        types[tcount++] = "short";
-                        break;
-                    case 'Z':
-                        types[tcount++] = "boolean";
-                        break;
-                    case 'V':
-                        types[tcount++] = "void";
-                        break;
+                    case 'B': types[tcount++] = "byte"; break;
+                    case 'C': types[tcount++] = "char"; break;
+                    case 'D': types[tcount++] = "double"; break;
+                    case 'F': types[tcount++] = "float"; break;
+                    case 'I': types[tcount++] = "int"; break;
+                    case 'J': types[tcount++] = "long"; break;
+                    case 'S': types[tcount++] = "short"; break;
+                    case 'Z': types[tcount++] = "boolean"; break;
+                    case 'V': types[tcount++] = "void"; break;
                     case 'L':
                         int end = aStr.indexOf(';', i + 1);
                         types[tcount++] = aStr.substring(i + 1, end);
@@ -414,7 +353,8 @@ class ClassFileData {
                     types[tcount - 1] += "[]";
                     acount--;
                 }
-                if (tcount == types.length) types = Arrays.copyOf(types, types.length * 2);
+                if (tcount == types.length)
+                    types = Arrays.copyOf(types, types.length * 2);
             }
             return Arrays.copyOf(types, tcount);
         }
@@ -425,30 +365,18 @@ class ClassFileData {
         public String getTagName()
         {
             switch (iTag) {
-                case CONSTANT_Class:
-                    return "CLASS";
-                case CONSTANT_Fieldref:
-                    return "FIELDREF";
-                case CONSTANT_Methodref:
-                    return "METHODREF";
-                case CONSTANT_InterfaceMethodref:
-                    return "INTERFACEMETHODREF";
-                case CONSTANT_String:
-                    return "STRING";
-                case CONSTANT_Integer:
-                    return "INTEGER";
-                case CONSTANT_Float:
-                    return "FLOAT";
-                case CONSTANT_Long:
-                    return "LONG";
-                case CONSTANT_Double:
-                    return "DOUBLE";
-                case CONSTANT_NameAndType:
-                    return "NAMEANDTYPE";
-                case CONSTANT_Utf8:
-                    return "UTF8";
-                default:
-                    return "Unknown";
+                case CONSTANT_Class: return "CLASS";
+                case CONSTANT_Fieldref: return "FIELDREF";
+                case CONSTANT_Methodref: return "METHODREF";
+                case CONSTANT_InterfaceMethodref: return "INTERFACEMETHODREF";
+                case CONSTANT_String: return "STRING";
+                case CONSTANT_Integer: return "INTEGER";
+                case CONSTANT_Float: return "FLOAT";
+                case CONSTANT_Long: return "LONG";
+                case CONSTANT_Double: return "DOUBLE";
+                case CONSTANT_NameAndType: return "NAMEANDTYPE";
+                case CONSTANT_Utf8: return "UTF8";
+                default: return "Unknown";
             }
         }
 
@@ -465,42 +393,26 @@ class ClassFileData {
                     sDesc = "class=" + refClass.refUTF8.sUTFStr +
                             ", name=" + refNameAndType.refUTF8.sUTFStr + ", type=" + refNameAndType.refExtraUTF8.sUTFStr;
                     break;
-                case CONSTANT_String:
-                    sDesc = "string=" + refUTF8.sUTFStr;
-                    break;
-                case CONSTANT_Integer:
-                    sDesc = "int_value=" + iIntValue;
-                    break;
-                case CONSTANT_Float:
-                    sDesc = "float_value=" + fFloatVal;
-                    break;
-                case CONSTANT_Long:
-                    sDesc = "long_value=" + lLongVal;
-                    break;
-                case CONSTANT_Double:
-                    sDesc = "double_value=" + dDoubleVal;
-                    break;
-                case CONSTANT_NameAndType:
-                    sDesc = "name=" + refUTF8.sUTFStr + ", descriptor=" + refExtraUTF8.sUTFStr;
-                    break;
-                case CONSTANT_Utf8:
-                    sDesc = "string=" + sUTFStr;
-                    break;
+                case CONSTANT_String: sDesc = "string=" + refUTF8.sUTFStr; break;
+                case CONSTANT_Integer: sDesc = "int_value=" + iIntValue; break;
+                case CONSTANT_Float: sDesc = "float_value=" + fFloatVal; break;
+                case CONSTANT_Long: sDesc = "long_value=" + lLongVal; break;
+                case CONSTANT_Double: sDesc = "double_value=" + dDoubleVal; break;
+                case CONSTANT_NameAndType: sDesc = "name=" + refUTF8.sUTFStr + ", descriptor=" + refExtraUTF8.sUTFStr; break;
+                case CONSTANT_Utf8: sDesc = "string=" + sUTFStr; break;
             }
 
             return getTagName() + ": " + sDesc;
         }
 
-        public boolean isDoubleSizeConst()
-        {
-            return iTag == CONSTANT_Long || iTag == CONSTANT_Double;
-        }
+        public boolean isDoubleSizeConst()  { return iTag == CONSTANT_Long || iTag == CONSTANT_Double; }
     }
 
     /**
      * Class to handle class names.
      */
-    public class ClassNames {
+    public static class ClassNames {
+
         int iThisClass;
         int iSuperClass;
         public Constant cpThisClass;  //CONSTANT_Class
@@ -536,5 +448,4 @@ class ClassFileData {
     {
         return sInStr.replace('/', '.');
     }
-
 }

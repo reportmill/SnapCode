@@ -34,6 +34,9 @@ public class JavaAgent {
     // The parsed version of this JavaFile
     protected JFile  _jfile;
 
+    // The JavaData for file (provides information on dependencies)
+    private JavaData _javaData;
+
     // A listener for file prop changes
     private PropChangeListener _fileBytesChangedLsnr;
 
@@ -57,6 +60,12 @@ public class JavaAgent {
         // Start listening for file bytes changed
         _fileBytesChangedLsnr = this::fileBytesDidChange;
         _file.addPropChangeListener(_fileBytesChangedLsnr, WebFile.Bytes_Prop);
+
+        // Add to Project
+        _proj = Project.getProjectForFile(_file);
+        if (_proj != null)
+            _proj.addJavaAgent(this);
+        else System.out.println("JavaAgent.init: No project for java file");
     }
 
     /**
@@ -72,7 +81,7 @@ public class JavaAgent {
         _file.setProp(JavaAgent.class.getName(), null);
         _file.removePropChangeListener(_fileBytesChangedLsnr);
         _file.reset();
-        _file = null; _jfile = null; _javaTextDoc = null; _proj = null;
+        _file = null; _proj = null; _jfile = null; _javaTextDoc = null; _javaData = null;
     }
 
     /**
@@ -88,15 +97,7 @@ public class JavaAgent {
     /**
      * Returns the project for this JavaFile.
      */
-    public Project getProject()
-    {
-        // If already set, just return
-        if (_proj != null) return _proj;
-
-        // Get, set, return
-        Project proj = Project.getProjectForFile(_file);
-        return _proj = proj;
-    }
+    public Project getProject()  { return  _proj; }
 
     /**
      * Returns the workspace for this JavaFile.
@@ -104,9 +105,7 @@ public class JavaAgent {
     public Workspace getWorkspace()
     {
         Project proj = getProject();
-        if (proj == null)
-            return null;
-        return proj.getWorkspace();
+        return proj != null ? proj.getWorkspace() : null;
     }
 
     /**
@@ -172,6 +171,15 @@ public class JavaAgent {
 
         // Return
         return jfile;
+    }
+
+    /**
+     * Returns the JavaData.
+     */
+    public JavaData getJavaData()
+    {
+        if (_javaData != null) return _javaData;
+        return _javaData = new JavaData(_file, _proj);
     }
 
     /**
