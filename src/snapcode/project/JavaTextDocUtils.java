@@ -32,12 +32,11 @@ public class JavaTextDocUtils {
         if (_codeFont != null) return _codeFont;
 
         // Look for font
-        String[] names = { "Monaco", "Consolas", "Courier New" };
+        String[] names = { "Monaco", "Consolas", "Lucida Console", "Courier New" };
         for (String name : names) {
             _codeFont = new Font(name, 12);
-            if (_codeFont.getFamily().startsWith(name)) {
+            if (_codeFont.getFamily().startsWith(name))
                 break;
-            }
         }
 
         // Return
