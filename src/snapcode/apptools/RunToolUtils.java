@@ -2,6 +2,7 @@ package snapcode.apptools;
 import snap.util.FilePathUtils;
 import snap.util.SnapUtils;
 import snap.view.ViewUtils;
+import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.debug.*;
@@ -85,6 +86,15 @@ public class RunToolUtils {
 
         // Handle debug
         if (isDebug) {
+
+            // If in browser, complain and run normal
+            if (SnapUtils.isWebVM) {
+                String msg = "Debug support for browser is not currently available,\nbut is coming soon. Executing normal run instead";
+                DialogBox.showWarningDialog(runTool.getWorkspacePane().getUI(), "Debug Support Coming Soon", msg);
+                return createRunAppForConfigOrFile(runTool, aConfig, aFile, false);
+            }
+
+            // Create debug app
             DebugApp debugApp = new DebugApp(runTool, mainFile, runArgs);
             Workspace workspace = runTool.getWorkspace();
             Breakpoints breakpointsHpr = workspace.getBreakpoints();
