@@ -6,7 +6,7 @@ import snap.view.View;
 import snap.view.ViewEnv;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
-import snapcharts.repl.Console;
+import snap.viewx.Console;
 import snapcode.apptools.RunTool;
 import snapcode.project.Breakpoint;
 import snap.web.WebURL;

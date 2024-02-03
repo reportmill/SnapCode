@@ -3,7 +3,7 @@ import javakit.runner.JavaShell;
 import snap.view.View;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
-import snapcharts.repl.Console;
+import snap.viewx.Console;
 import snapcode.apptools.RunTool;
 import snapcode.project.JavaAgent;
 import snapcode.project.Project;

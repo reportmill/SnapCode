@@ -7,9 +7,9 @@ import javakit.resolver.JavaClass;
 import snap.util.Convert;
 import snap.util.StringUtils;
 import snap.web.WebFile;
-import snapcharts.repl.CallHandler;
-import snapcharts.repl.Console;
-import snapcharts.repl.ReplObject;
+import snap.viewx.CallHandler;
+import snap.viewx.Console;
+import snap.viewx.ConsoleX;
 import snapcode.debug.RunAppSrc;
 import snapcode.project.JavaAgent;
 import snapcode.util.ExceptionUtil;
@@ -133,7 +133,7 @@ public class JavaShell {
             // Show exception
             if (Console.getShared() != null) {
                 Object exceptionText = ExceptionUtil.getTextBlockForException(e);
-                ReplObject.show(exceptionText);
+                ConsoleX.show(exceptionText);
             }
 
             // Return null

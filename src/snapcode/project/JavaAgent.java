@@ -360,11 +360,21 @@ public class JavaAgent {
         imports.add("snap.view.*");
         imports.add("snap.gfx.*");
         imports.add("snap.geom.*");
-        imports.add("snapcharts.data.*");
-        imports.add("snapcharts.repl.*");
-        imports.add("static snapcharts.repl.ReplObject.*");
-        imports.add("static snapcharts.repl.QuickCharts.*");
-        imports.add("static snapcharts.repl.QuickData.*");
+        imports.add("snap.viewx.Quick3D");
+        imports.add("snap.viewx.QuickDraw");
+        imports.add("snap.viewx.QuickDrawPen");
+        imports.add("static snap.viewx.ConsoleX.*");
+
+        // If SnapChars is available, add those
+        boolean isSnapChartsAvailable = false;
+        try { Class.forName("snapcharts.app.QuickCharts"); isSnapChartsAvailable = true; }
+        catch (Exception ignore) { }
+        if (isSnapChartsAvailable) {
+            imports.add("snapcharts.data.*");
+            imports.add("static snapcharts.app.QuickCharts.*");
+        }
+
+        // Set array and return
         return _jeplImports = imports.toArray(new String[0]);
     }
 }
