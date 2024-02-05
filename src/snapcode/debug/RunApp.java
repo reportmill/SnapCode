@@ -10,6 +10,8 @@ import snap.viewx.Console;
 import snapcode.apptools.RunTool;
 import snapcode.project.Breakpoint;
 import snap.web.WebURL;
+import snapcode.project.Project;
+
 import java.io.*;
 
 /**
@@ -249,6 +251,15 @@ public abstract class RunApp {
      * Sets the app class path.
      */
     public void setClassPath(String aPath)  { _classPath = aPath; }
+
+    /**
+     * Returns the project for the main file.
+     */
+    public Project getMainFileProject()
+    {
+        WebFile mainFile = getMainFile();
+        return Project.getProjectForFile(mainFile);
+    }
 
     /**
      * Returns the console view.

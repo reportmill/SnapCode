@@ -186,10 +186,8 @@ public class SnapCompiler {
         }
 
         // If there were modified files, clear Project.ClassLoader
-        if (_modifiedJavaFiles.size() > 0) {
-            Workspace workspace = _proj.getWorkspace();
-            workspace.clearClassLoader();
-        }
+        if (_modifiedJavaFiles.size() > 0)
+            _proj.clearClassLoader();
     }
 
     /**

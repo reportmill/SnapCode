@@ -6,6 +6,7 @@ import javakit.resolver.Resolver;
 import snap.props.PropObject;
 import snap.util.*;
 import snap.web.*;
+import java.io.Closeable;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -33,6 +34,12 @@ public class Project extends PropObject {
 
     // The ProjectBuilder
     protected ProjectBuilder  _projBuilder;
+
+    // The ClassLoader for compiled class info
+    protected ClassLoader _classLoader;
+
+    // The resolver
+    protected Resolver _resolver;
 
     // The JavaAgents created for this project
     private List<JavaAgent> _javaAgents = new ArrayList<>();
@@ -63,11 +70,6 @@ public class Project extends PropObject {
      * Returns the Workspace that manages this project.
      */
     public Workspace getWorkspace()  { return _workspace; }
-
-    /**
-     * Returns root project if part of hierarchy.
-     */
-    public Project getRootProject()  { return this; }
 
     /**
      * Returns the project name.
@@ -123,51 +125,6 @@ public class Project extends PropObject {
     protected BuildFile getBuildFileImpl()
     {
         return new BuildFile(this);
-    }
-
-    /**
-     * Returns the paths needed to run project.
-     */
-    public String[] getRuntimeClassPaths()
-    {
-        // Get build path
-        String buildPath = _buildFile.getBuildPathAbsolute(); // Will be null for Project with http site
-        String[] runtimeClassPaths = buildPath != null ? new String[] { buildPath } : new String[0];
-
-        // Add CompileClassPaths
-        String[] compileClassPaths = getCompileClassPaths();
-        runtimeClassPaths = ArrayUtils.addAll(runtimeClassPaths, compileClassPaths);
-
-        // Return
-        return runtimeClassPaths;
-    }
-
-    /**
-     * Returns the paths needed to compile project (does not include project build dir).
-     */
-    public String[] getCompileClassPaths()
-    {
-        // Get build file dependencies
-        BuildFile buildFile = getBuildFile();
-        BuildDependency[] dependencies = buildFile.getDependencies();
-        String[] compileClassPaths = new String[0];
-
-        // If BuildFile.IncludeSnapKitRuntime, add SnapKit jar path
-        if (buildFile.isIncludeSnapKitRuntime()) {
-            String[] snapKitPaths = ProjectUtils.getSnapKitAndSnapChartsClassPaths();
-            compileClassPaths = ArrayUtils.addAllUnique(snapKitPaths);
-        }
-
-        // Iterate over compile dependencies and add runtime class paths for each
-        for (BuildDependency dependency : dependencies) {
-            String[] classPaths = dependency.getClassPaths();
-            if (classPaths != null)
-                compileClassPaths = ArrayUtils.addAllUnique(compileClassPaths, classPaths);
-            else System.err.println("Project.getCompileClassPaths: Can't get class path for: " + dependency);
-        }
-
-        // Return
-        return compileClassPaths;
     }
 
     /**
@@ -272,12 +229,132 @@ public class Project extends PropObject {
     public ProjectBuilder getBuilder()  { return _projBuilder; }
 
     /**
+     * Returns the paths needed to compile project (does not include project build dir).
+     */
+    public String[] getCompileClassPaths()
+    {
+        // Get build file dependencies
+        BuildFile buildFile = getBuildFile();
+        BuildDependency[] dependencies = buildFile.getDependencies();
+        String[] compileClassPaths = new String[0];
+
+        // If BuildFile.IncludeSnapKitRuntime, add SnapKit jar path
+        if (buildFile.isIncludeSnapKitRuntime()) {
+            String[] snapKitPaths = ProjectUtils.getSnapKitAndSnapChartsClassPaths();
+            compileClassPaths = ArrayUtils.addAllUnique(snapKitPaths);
+        }
+
+        // Iterate over compile dependencies and add runtime class paths for each
+        for (BuildDependency dependency : dependencies) {
+            String[] classPaths = dependency.getClassPaths();
+            if (classPaths != null)
+                compileClassPaths = ArrayUtils.addAllUnique(compileClassPaths, classPaths);
+            else System.err.println("Project.getCompileClassPaths: Can't get class path for: " + dependency);
+        }
+
+        // Return
+        return compileClassPaths;
+    }
+
+    /**
+     * Returns the paths needed to run project.
+     */
+    public String[] getRuntimeClassPaths()
+    {
+        // Get build path
+        String buildPath = _buildFile.getBuildPathAbsolute(); // Will be null for Project with http site
+        String[] runtimeClassPaths = buildPath != null ? new String[] { buildPath } : new String[0];
+
+        // Add CompileClassPaths
+        String[] compileClassPaths = getCompileClassPaths();
+        runtimeClassPaths = ArrayUtils.addAll(runtimeClassPaths, compileClassPaths);
+
+        // Return
+        return runtimeClassPaths;
+    }
+
+    /**
+     * Returns the ClassLoader for runtime class paths.
+     */
+    public ClassLoader getRuntimeClassLoader()
+    {
+        if (_classLoader != null) return _classLoader;
+        return _classLoader = createRuntimeClassLoader();
+    }
+
+    /**
+     * Creates the ClassLoader for runtime class paths.
+     */
+    private ClassLoader createRuntimeClassLoader()
+    {
+        // Get all project class paths
+        String[] classPaths = getRuntimeClassPaths();
+
+        // Get all project ClassPath URLs
+        URL[] urls = FilePathUtils.getUrlsForPaths(classPaths);
+
+        // Get root ClassLoader
+        ClassLoader workspaceClassLoader = ClassLoader.getSystemClassLoader();
+
+        // If IncludeSnapKitRuntime is set, use platform class loader instead
+        BuildFile buildFile = getBuildFile();
+        if (!buildFile.isIncludeSnapKitRuntime())
+            workspaceClassLoader = workspaceClassLoader.getParent();
+
+        // Create special URLClassLoader subclass so when debugging SnapCode, we can ignore classes loaded by Project
+        ClassLoader urlClassLoader = new SnapCodeDebugClassLoader(urls, workspaceClassLoader);
+
+        // Return
+        return urlClassLoader;
+    }
+
+    /**
+     * Clears the class loader.
+     */
+    public void clearClassLoader()
+    {
+        // If ClassLoader closeable, close it
+        if (_classLoader instanceof SnapCodeDebugClassLoader) {
+            try {  ((Closeable) _classLoader).close(); }
+            catch (Exception e) { throw new RuntimeException(e); }
+        }
+
+        _classLoader = null;
+        _resolver = null;
+    }
+
+    /**
      * Returns the resolver.
      */
     public Resolver getResolver()
     {
-        Workspace workspace = getWorkspace();
-        return workspace.getResolver();
+        // If already set, just return
+        if (_resolver != null) return _resolver;
+
+        // Create Resolver
+        ClassLoader classLoader = getRuntimeClassLoader();
+        Resolver resolver = new Resolver(classLoader);
+        String[] classPaths = getRuntimeClassPaths();
+        resolver.setClassPaths(classPaths);
+
+        // Set, return
+        return _resolver = resolver;
+    }
+
+    /**
+     * Returns a class loader to be used with compiler.
+     */
+    public ClassLoader createCompilerClassLoader()
+    {
+        // Get CompilerClassPaths and ClassPathUrls
+        String[] classPaths = getCompileClassPaths();
+        URL[] classPathUrls = FilePathUtils.getUrlsForPaths(classPaths);
+
+        // Get System ClassLoader
+        ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader().getParent();
+
+        // Create/Return URLClassLoader for classPath
+        return new URLClassLoader(classPathUrls, systemClassLoader);
     }
 
     /**
@@ -362,9 +439,8 @@ public class Project extends PropObject {
         BuildFile buildFile = getBuildFile();
         buildFile.writeFile();
 
-        // Clear Workspace classloader
-        Workspace workspace = getWorkspace();
-        workspace.clearClassLoader();
+        // Clear classloader
+        clearClassLoader();
     }
 
     /**
@@ -443,8 +519,7 @@ public class Project extends PropObject {
         taskMonitor.beginTask("Deleting files", -1);
 
         // Clear ClassLoader
-        Workspace workspace = getWorkspace();
-        workspace.clearClassLoader();
+        clearClassLoader();
 
         // Delete SandBox, Site
         WebSite projSite = getSite();
@@ -454,22 +529,6 @@ public class Project extends PropObject {
 
         // Finish TaskMonitor
         taskMonitor.endTask();
-    }
-
-    /**
-     * Returns a class loader to be used with compiler.
-     */
-    public ClassLoader createCompilerClassLoader()
-    {
-        // Get CompilerClassPaths and ClassPathUrls
-        String[] classPaths = getCompileClassPaths();
-        URL[] classPathUrls = FilePathUtils.getUrlsForPaths(classPaths);
-
-        // Get System ClassLoader
-        ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader().getParent();
-
-        // Create/Return URLClassLoader for classPath
-        return new URLClassLoader(classPathUrls, systemClassLoader);
     }
 
     /**
@@ -496,5 +555,16 @@ public class Project extends PropObject {
     {
         Project proj = (Project) aSite.getProp(Project.class.getSimpleName());
         return proj;
+    }
+
+    /**
+     * Needs unique name so that when debugging SnapCode, we can ignore classes loaded by Project.
+     */
+    public static class SnapCodeDebugClassLoader extends URLClassLoader {
+
+        public SnapCodeDebugClassLoader(URL[] urls, ClassLoader aPar)
+        {
+            super(urls, aPar);
+        }
     }
 }

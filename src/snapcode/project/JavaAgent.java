@@ -65,7 +65,6 @@ public class JavaAgent {
         _proj = Project.getProjectForFile(_file);
         if (_proj != null)
             _proj.addJavaAgent(this);
-        else System.out.println("JavaAgent.init: No project for java file");
     }
 
     /**
@@ -98,15 +97,6 @@ public class JavaAgent {
      * Returns the project for this JavaFile.
      */
     public Project getProject()  { return  _proj; }
-
-    /**
-     * Returns the workspace for this JavaFile.
-     */
-    public Workspace getWorkspace()
-    {
-        Project proj = getProject();
-        return proj != null ? proj.getWorkspace() : null;
-    }
 
     /**
      * Returns the JavaTextDoc for this JavaFile.
@@ -187,7 +177,7 @@ public class JavaAgent {
      */
     public BuildIssue[] getBuildIssues()
     {
-        Workspace workspace = getWorkspace();
+        Workspace workspace = _proj != null ? _proj.getWorkspace() : null;
         if (workspace == null)
             return new BuildIssue[0];
         BuildIssues projBuildIssues = workspace.getBuildIssues();
@@ -200,7 +190,7 @@ public class JavaAgent {
     public void setBuildIssues(BuildIssue[] buildIssues)
     {
         // Get Workspace.BuildIssues and clear
-        Workspace workspace = getWorkspace();
+        Workspace workspace = _proj != null ? _proj.getWorkspace() : null;
         if (workspace == null)
             return;
         BuildIssues buildIssuesMgr = workspace.getBuildIssues();

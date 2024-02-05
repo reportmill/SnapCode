@@ -234,7 +234,8 @@ public class RunAppSrc extends RunApp {
     private Class<?> getMainClass()
     {
         String className = getMainClassName();
-        ClassLoader classLoader = _runTool.getWorkspace().getClassLoader();
+        Project project = getMainFileProject();
+        ClassLoader classLoader = project.getRuntimeClassLoader();
 
         // Do normal Class.forName
         try { return Class.forName(className, false, classLoader); }
