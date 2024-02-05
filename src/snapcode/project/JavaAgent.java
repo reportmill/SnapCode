@@ -367,11 +367,11 @@ public class JavaAgent {
 
         // If SnapChars is available, add those
         boolean isSnapChartsAvailable = false;
-        try { Class.forName("snapcharts.app.QuickCharts"); isSnapChartsAvailable = true; }
+        try { Class.forName("snapcharts.charts.SnapCharts"); isSnapChartsAvailable = true; }
         catch (Exception ignore) { }
         if (isSnapChartsAvailable) {
             imports.add("snapcharts.data.*");
-            imports.add("static snapcharts.app.QuickCharts.*");
+            imports.add("static snapcharts.charts.SnapCharts.*");
         }
 
         // Set array and return

@@ -7,8 +7,6 @@ import snap.util.FileUtils;
 import snap.util.SnapUtils;
 import snap.util.StringUtils;
 import snap.web.*;
-import snapcharts.app.QuickCharts;
-
 import java.io.File;
 
 /**
@@ -231,7 +229,7 @@ public class ProjectUtils {
         String[] snapClassPaths = new String[] { snapKitClassPath };
 
         // Get SnapCharts class path (different if running from project build dir)
-        String snapChartsClassPath = getClassPathForClass(QuickCharts.class);
+        String snapChartsClassPath = getClassPathForClass(snapcharts.charts.SnapCharts.class);
         assert (snapChartsClassPath != null);
         if (!snapChartsClassPath.equals(snapKitClassPath))
             snapClassPaths = ArrayUtils.add(snapClassPaths, snapChartsClassPath);
