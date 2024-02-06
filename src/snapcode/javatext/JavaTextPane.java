@@ -104,15 +104,6 @@ public class JavaTextPane extends TextPane {
     }
 
     /**
-     * Initialization after showing.
-     */
-    @Override
-    protected void initShowing()
-    {
-        checkFileForErrorsAfterDelay(500);
-    }
-
-    /**
      * Reset UI.
      */
     protected void resetUI()

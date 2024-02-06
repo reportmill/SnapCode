@@ -53,8 +53,12 @@ public class JeplToJava {
 
         // Append class
         JClassDecl classDecl = _jfile.getClassDecl();
-        if (classDecl != null)
-            appendClassDecl(classDecl);
+        if (classDecl != null) {
+            try {
+                appendClassDecl(classDecl);
+            }
+            catch (Exception e) { e.printStackTrace(); }
+        }
 
         // Return string
         String javaString = _sb.toString();

@@ -5,6 +5,7 @@ package snapcode.app;
 import snap.util.*;
 import snapcode.apptools.FileTreeTool;
 import snapcode.apptools.FilesTool;
+import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
 import snap.props.PropChange;
@@ -240,7 +241,11 @@ public class WelcomePanel extends ViewOwner {
         // Open empty workspace pane with temp project
         WorkspacePane workspacePane = openEmptyWorkspace();
         Workspace workspace = workspacePane.getWorkspace();
-        ProjectUtils.getTempProject(workspace);
+        Project tempProj = ProjectUtils.getTempProject(workspace);
+
+        // If new source file has word 'chart', add SnapCharts runtime to tempProj
+        if (isJepl && javaString.contains("chart"))
+            tempProj.getBuildFile().setIncludeSnapChartsRuntime(true);
 
         // Show new project panel
         runLater(() -> {

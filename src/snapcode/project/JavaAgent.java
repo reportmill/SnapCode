@@ -46,6 +46,9 @@ public class JavaAgent {
     // The Jepl default imports
     private static String[] _jeplImports;
 
+    // The Jepl default imports with charts
+    private static String[] _jeplImportsWithCharts;
+
     /**
      * Constructor for given file.
      */
@@ -148,6 +151,8 @@ public class JavaAgent {
         if (_isJepl) {
             String className = getFile().getSimpleName();
             String[] importNames = getJeplDefaultImports();
+            if (_proj.getBuildFile().isIncludeSnapChartsRuntime())
+                importNames = getJeplDefaultImportsWithCharts();
             String superClassName = "Object";
             jfile = javaParser.parseJeplFile(javaStr, className, importNames, superClassName);
         }
@@ -355,16 +360,17 @@ public class JavaAgent {
         imports.add("snap.viewx.QuickDrawPen");
         imports.add("static snap.viewx.ConsoleX.*");
 
-        // If SnapChars is available, add those
-        boolean isSnapChartsAvailable = false;
-        try { Class.forName("snapcharts.charts.SnapCharts"); isSnapChartsAvailable = true; }
-        catch (Exception ignore) { }
-        if (isSnapChartsAvailable) {
-            imports.add("snapcharts.data.*");
-            imports.add("static snapcharts.charts.SnapCharts.*");
-        }
-
         // Set array and return
         return _jeplImports = imports.toArray(new String[0]);
+    }
+
+    /**
+     * Returns the default JEPL imports with charts support.
+     */
+    public static String[] getJeplDefaultImportsWithCharts()
+    {
+        if (_jeplImportsWithCharts != null) return _jeplImportsWithCharts;
+        String[] jeplImports = getJeplDefaultImports();
+        return _jeplImportsWithCharts = ArrayUtils.addAll(jeplImports, "snapcharts.data.*", "static snapcharts.charts.SnapCharts.*");
     }
 }

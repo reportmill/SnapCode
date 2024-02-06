@@ -20,6 +20,10 @@
     <CheckBox Name="IncludeSnapKitRuntimeCheckBox" />
   </RowView>
   <RowView Spacing="5">
+    <Label text="Include SnapCharts Runtime" />
+    <CheckBox Name="IncludeSnapChartsRuntimeCheckBox" />
+  </RowView>
+  <RowView Spacing="5">
     <Label text="Run Apps with Source Interpreter" />
     <CheckBox Name="RunWithInterpreterCheckBox" />
   </RowView>

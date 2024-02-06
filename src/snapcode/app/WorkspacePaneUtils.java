@@ -65,7 +65,11 @@ public class WorkspacePaneUtils {
     {
         // Make sure workspace has temp project
         Workspace workspace = workspacePane.getWorkspace();
-        ProjectUtils.getTempProject(workspace);
+        Project tempProj = ProjectUtils.getTempProject(workspace);
+
+        // If new source file has word 'chart', add SnapCharts runtime to tempProj
+        if (sourceFile.getText().contains("chart"))
+            tempProj.getBuildFile().setIncludeSnapChartsRuntime(true);
 
         // Create new source file for given external source file
         FilesTool filesTool = workspacePane.getWorkspaceTools().getFilesTool();

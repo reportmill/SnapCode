@@ -106,10 +106,11 @@ public class BuildFileTool extends ProjectTool {
     {
         BuildFile buildFile = getBuildFile();
 
-        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, RunWithInterpreterCheckBox
+        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox, RunWithInterpreterCheckBox
         setViewValue("SourcePathText", buildFile.getSourcePath());
         setViewValue("BuildPathText", buildFile.getBuildPath());
         setViewValue("IncludeSnapKitRuntimeCheckBox", buildFile.isIncludeSnapKitRuntime());
+        setViewValue("IncludeSnapChartsRuntimeCheckBox", buildFile.isIncludeSnapChartsRuntime());
         setViewValue("RunWithInterpreterCheckBox", buildFile.isRunWithInterpreter());
 
         // Update RemoveDependencyButton
@@ -179,13 +180,15 @@ public class BuildFileTool extends ProjectTool {
     {
         BuildFile buildFile = getBuildFile();
 
-        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, RunWithInterpreterCheckBox
+        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox, RunWithInterpreterCheckBox
         if (anEvent.equals("SourcePathText"))
             buildFile.setSourcePath(anEvent.getStringValue());
         if (anEvent.equals("BuildPathText"))
             buildFile.setBuildPath(anEvent.getStringValue());
         if (anEvent.equals("IncludeSnapKitRuntimeCheckBox"))
             buildFile.setIncludeSnapKitRuntime(anEvent.getBoolValue());
+        if (anEvent.equals("IncludeSnapChartsRuntimeCheckBox"))
+            buildFile.setIncludeSnapChartsRuntime(anEvent.getBoolValue());
         if (anEvent.equals("RunWithInterpreterCheckBox"))
             buildFile.setRunWithInterpreter(anEvent.getBoolValue());
 

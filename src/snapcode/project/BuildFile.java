@@ -32,6 +32,9 @@ public class BuildFile extends PropObject {
     // Whether to include the built-in SnapKit runtime as dependency
     private boolean _includeSnapKitRuntime;
 
+    // Whether to include the built-in SnapCharts runtime as dependency
+    private boolean _includeSnapChartsRuntime;
+
     // Whether to run project apps with source interpreter
     private boolean _runWithInterpreter;
 
@@ -50,6 +53,7 @@ public class BuildFile extends PropObject {
     public static final String Dependencies_Prop = "Dependencies";
     public static final String MainClassName_Prop = "MainClassName";
     public static final String IncludeSnapKitRuntime_Prop = "IncludeSnapKitRuntime";
+    public static final String IncludeSnapChartsRuntime_Prop = "IncludeSnapChartsRuntime";
     public static final String RunWithInterpreter_Prop = "RunWithInterpreter";
 
     // Constants for defaults
@@ -223,6 +227,20 @@ public class BuildFile extends PropObject {
     }
 
     /**
+     * Returns whether to include the built-in SnapCharts runtime as dependency.
+     */
+    public boolean isIncludeSnapChartsRuntime()  { return _includeSnapChartsRuntime; }
+
+    /**
+     * Sets whether to include the built-in SnapCharts runtime as dependency.
+     */
+    public void setIncludeSnapChartsRuntime(boolean aValue)
+    {
+        if (aValue == _includeSnapChartsRuntime) return;
+        firePropChange(IncludeSnapChartsRuntime_Prop, _includeSnapChartsRuntime, _includeSnapChartsRuntime = aValue);
+    }
+
+    /**
      * Returns whether to run project files with source interpreter.
      */
     public boolean isRunWithInterpreter()  { return _runWithInterpreter; }
@@ -336,12 +354,13 @@ public class BuildFile extends PropObject {
         // Do normal version
         super.initProps(aPropSet);
 
-        // SourcePath, BuildPath, Dependencies, MainClassName, IncludeSnapKitRuntime, RunWithInterpreter
+        // SourcePath, BuildPath, Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime, RunWithInterpreter
         aPropSet.addPropNamed(SourcePath_Prop, String.class);
         aPropSet.addPropNamed(BuildPath_Prop, String.class);
         aPropSet.addPropNamed(Dependencies_Prop, BuildDependency[].class);
         aPropSet.addPropNamed(MainClassName_Prop, String.class);
         aPropSet.addPropNamed(IncludeSnapKitRuntime_Prop, boolean.class);
+        aPropSet.addPropNamed(IncludeSnapChartsRuntime_Prop, boolean.class);
         aPropSet.addPropNamed(RunWithInterpreter_Prop, boolean.class);
     }
 
@@ -354,12 +373,13 @@ public class BuildFile extends PropObject {
         // Handle properties
         switch (aPropName) {
 
-            // SourcePath, BuildPath, Dependencies, MainClassName, IncludeSnapKitRuntime, RunWithInterpreter
+            // SourcePath, BuildPath, Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime, RunWithInterpreter
             case SourcePath_Prop: return getSourcePath();
             case BuildPath_Prop: return getBuildPath();
             case Dependencies_Prop: return getDependencies();
             case MainClassName_Prop: return getMainClassName();
             case IncludeSnapKitRuntime_Prop: return isIncludeSnapKitRuntime();
+            case IncludeSnapChartsRuntime_Prop: return isIncludeSnapChartsRuntime();
             case RunWithInterpreter_Prop: return isRunWithInterpreter();
 
             // Handle super class properties (or unknown)
@@ -376,12 +396,13 @@ public class BuildFile extends PropObject {
         // Handle properties
         switch (aPropName) {
 
-            // SourcePath, BuildPath, Dependencies, MainClassName, IncludeSnapKitRuntime, RunWithInterpreter
+            // SourcePath, BuildPath, Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime, RunWithInterpreter
             case SourcePath_Prop: setSourcePath(Convert.stringValue(aValue)); break;
             case BuildPath_Prop: setBuildPath(Convert.stringValue(aValue)); break;
             case Dependencies_Prop: setDependencies((BuildDependency[]) aValue); break;
             case MainClassName_Prop: setMainClassName(Convert.stringValue(aValue)); break;
             case IncludeSnapKitRuntime_Prop: setIncludeSnapKitRuntime(Convert.boolValue(aValue)); break;
+            case IncludeSnapChartsRuntime_Prop: setIncludeSnapChartsRuntime(Convert.boolValue(aValue)); break;
             case RunWithInterpreter_Prop: setRunWithInterpreter(Convert.boolValue(aValue)); break;
 
             // Handle super class properties (or unknown)
