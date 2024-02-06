@@ -294,9 +294,6 @@ public class WorkspacePane extends ViewOwner {
         View pagePaneUI = _pagePane.getUI();
         pagePaneSplitView.addItem(pagePaneUI);
 
-        // Listen to PagePane
-        _pagePane.addPropChangeListener(pc -> pagePaneDidPropChange(pc), PagePane.SelFile_Prop);
-
         // Add LeftTray
         ToolTray leftTray = _workspaceTools.getLeftTray();
         View leftTrayUI = leftTray.getUI();
@@ -549,19 +546,6 @@ public class WorkspacePane extends ViewOwner {
         if (propName == WebFile.LastModTime_Prop || propName == WebFile.Modified_Prop) {
             FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
             fileTreeTool.updateChangedFile(file);
-        }
-    }
-
-    /**
-     * Called when PagePane does prop change.
-     */
-    protected void pagePaneDidPropChange(PropChange aPC)
-    {
-        // Handle SelFile
-        String propName = aPC.getPropName();
-        if (propName == PagePane.SelFile_Prop) {
-            FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
-            fileTreeTool.resetLater();
         }
     }
 

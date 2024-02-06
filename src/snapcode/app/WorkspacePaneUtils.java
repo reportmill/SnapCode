@@ -102,10 +102,10 @@ public class WorkspacePaneUtils {
 
         // Open project: Get project site and add to workspace
         Workspace workspace = workspacePane.getWorkspace();
-        workspace.addProjectForSite(projectSite);
+        Project project = workspace.addProjectForSite(projectSite);
 
         // Select good file
-        ViewUtils.runDelayed(() -> selectGoodDefaultFile(workspacePane, null), 400);
+        ViewUtils.runDelayed(() -> selectGoodDefaultFile(workspacePane, project), 400);
 
         // Add recent file
         RecentFiles.addURL(projectDir.getURL());
@@ -153,6 +153,13 @@ public class WorkspacePaneUtils {
      */
     private static void selectGoodDefaultFile(WorkspacePane workspacePane, Project project)
     {
+        // If project, expand source dir
+        if (project != null) {
+            FileTreeTool fileTreeTool = workspacePane.getWorkspaceTools().getFileTreeTool();
+            WebFile sourceDir = project.getSourceDir();
+            fileTreeTool.showDir(sourceDir);
+        }
+
         // Get good default file
         Workspace workspace = workspacePane.getWorkspace();
         WebFile defaultFile = project != null ? ProjectUtils.getGoodDefaultFile(project) :

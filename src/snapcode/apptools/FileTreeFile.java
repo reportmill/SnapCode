@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import snap.util.ArrayUtils;
 import snapcode.project.BuildIssue;
 import snapcode.javatext.JavaTextUtils;
 import snapcode.project.BuildIssues;
@@ -11,7 +12,7 @@ import snap.view.*;
 import snap.web.WebFile;
 import snapcode.util.FileIcons;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -82,24 +83,19 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
         // If already set, just return
         if (_children != null) return _children;
 
-        // Get files
+        // Get child files mapped to tree files and sort
         WebFile[] files = getChildFiles();
-        List<FileTreeFile> children = new ArrayList<>();
-        for (WebFile file : files) {
-            FileTreeFile child = createChildAppFile(file);
-            if (child != null)
-                children.add(child);
-        }
+        FileTreeFile[] treeFiles = ArrayUtils.mapNonNull(files, file -> createChildFile(file), FileTreeFile.class);
+        Arrays.sort(treeFiles);
 
-        // Sort and return
-        Collections.sort(children);
-        return _children = children.toArray(new FileTreeFile[0]);
+        // Return
+        return _children = treeFiles;
     }
 
     /**
      * Returns a FileTreeItem for child file.
      */
-    protected FileTreeFile createChildAppFile(WebFile aFile)
+    private FileTreeFile createChildFile(WebFile aFile)
     {
         // Get basic file info
         String name = aFile.getName();
@@ -161,7 +157,7 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
     /**
      * Adds child packages directory files.
      */
-    private void addPackageDirFiles(WebFile aDir, List aList)
+    private void addPackageDirFiles(WebFile aDir, List<WebFile> aList)
     {
         boolean hasNonPkgFile = false;
         for (WebFile child : aDir.getFiles())

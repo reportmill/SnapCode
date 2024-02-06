@@ -65,27 +65,20 @@ public class FileTreeTool extends WorkspaceTool {
      */
     public void showFile(WebFile aFile)
     {
-        if (_filesTree != null) {
-            FileTreeFile file = getTreeFile(aFile);
-            FileTreeFile[] rootTreeFiles = getRootFiles();
-            _filesTree.setItems(rootTreeFiles);
-            expandParent(file);
-            _filesTree.setSelItem(file);
-        }
-
+        if (_filesTree != null)
+            showDir(aFile.getParent());
         setSelFile(aFile);
     }
 
     /**
-     * Lame - TreeView.setSelItem() should do this.
+     * Shows the given directory (but doesn't select it).
      */
-    private void expandParent(FileTreeFile file)
+    public void showDir(WebFile aFile)
     {
-        FileTreeFile parent = file.getParent();
-        if (parent != null) {
-            expandParent(parent);
-            _filesTree.expandItem(parent);
-        }
+        if (_filesTree == null) return;
+        FileTreeFile treeFile = getTreeFile(aFile);
+        if (treeFile != null)
+            _filesTree.expandItem(treeFile);
     }
 
     /**
@@ -202,6 +195,9 @@ public class FileTreeTool extends WorkspaceTool {
         // Register for copy/paste
         addKeyActionHandler("CopyAction", "Shortcut+C");
         addKeyActionHandler("PasteAction", "Shortcut+V");
+
+        // Register for PagePane.SelFile change to reset UI
+        _pagePane.addPropChangeListener(pc -> resetLater(), PagePane.SelFile_Prop);
 
         // Register for Window.Focused change
         _workspacePane.getWindow().addPropChangeListener(pc -> windowFocusChanged(), View.Focused_Prop);
