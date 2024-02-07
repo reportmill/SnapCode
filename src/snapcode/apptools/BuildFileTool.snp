@@ -23,10 +23,6 @@
     <Label text="Include SnapCharts Runtime" />
     <CheckBox Name="IncludeSnapChartsRuntimeCheckBox" />
   </RowView>
-  <RowView Spacing="5">
-    <Label text="Run Apps with Source Interpreter" />
-    <CheckBox Name="RunWithInterpreterCheckBox" />
-  </RowView>
   <ColView Name="BuildDependenciesBox" >
     <RowView PrefWidth="400" Margin="0,0,4,0" >
       <Label text="Build Dependencies:" />

@@ -60,13 +60,12 @@ public class BuildFileTool extends ProjectTool {
      */
     public void removeDependency(BuildDependency buildDependency)
     {
-        // Add dependency
+        // Remove dependency from build file
         BuildFile buildFile = getBuildFile();
         buildFile.removeDependency(buildDependency);
 
-        // Reset items and selection
-        _dependenciesListArea.setItems(buildFile.getDependencies());
-        _dependenciesListArea.setSelItem(null);
+        // Remove dependency from ListArea
+        _dependenciesListArea.removeItemAndUpdateSel(buildDependency);
         resetLater();
     }
 
@@ -106,12 +105,11 @@ public class BuildFileTool extends ProjectTool {
     {
         BuildFile buildFile = getBuildFile();
 
-        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox, RunWithInterpreterCheckBox
+        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox
         setViewValue("SourcePathText", buildFile.getSourcePath());
         setViewValue("BuildPathText", buildFile.getBuildPath());
         setViewValue("IncludeSnapKitRuntimeCheckBox", buildFile.isIncludeSnapKitRuntime());
         setViewValue("IncludeSnapChartsRuntimeCheckBox", buildFile.isIncludeSnapChartsRuntime());
-        setViewValue("RunWithInterpreterCheckBox", buildFile.isRunWithInterpreter());
 
         // Update RemoveDependencyButton
         setViewDisabled("RemoveDependencyButton", _dependenciesListArea.getSelItem() == null);
@@ -180,7 +178,7 @@ public class BuildFileTool extends ProjectTool {
     {
         BuildFile buildFile = getBuildFile();
 
-        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox, RunWithInterpreterCheckBox
+        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox
         if (anEvent.equals("SourcePathText"))
             buildFile.setSourcePath(anEvent.getStringValue());
         if (anEvent.equals("BuildPathText"))
@@ -189,26 +187,12 @@ public class BuildFileTool extends ProjectTool {
             buildFile.setIncludeSnapKitRuntime(anEvent.getBoolValue());
         if (anEvent.equals("IncludeSnapChartsRuntimeCheckBox"))
             buildFile.setIncludeSnapChartsRuntime(anEvent.getBoolValue());
-        if (anEvent.equals("RunWithInterpreterCheckBox"))
-            buildFile.setRunWithInterpreter(anEvent.getBoolValue());
 
         // Handle AddDependencyButton, RemoveDependencyButton
         if (anEvent.equals("AddDependencyButton"))
             showAddDependencyPanel();
-        if (anEvent.equals("RemoveDependencyButton")) {
-
-            // Ask user to confirm (just return if cancelled)
-            String msg = "Are you sure you want to remove selected dependency?";
-            if (!DialogBox.showConfirmDialog(getUI(), "Remove Dependency", msg))
-                return;
-
-            // Remove selected
-            int selIndex = _dependenciesListArea.getSelIndex();
-            if (selIndex >= 0)
-                buildFile.removeDependency(selIndex);
-            int newSelIndex = Math.max(selIndex, _dependenciesListArea.getItemCount() - 1);
-            _dependenciesListArea.setSelIndex(newSelIndex);
-        }
+        if (anEvent.equals("RemoveDependencyButton"))
+            removeSelectedDependency();
 
         // Handle DependenciesList
         if (anEvent.equals("DependenciesListView")) {
@@ -310,6 +294,21 @@ public class BuildFileTool extends ProjectTool {
 
         // Focus MavenIdText
         runLater(() -> getView("MavenIdText").requestFocus());
+    }
+
+    /**
+     * Removes the currently selected dependency.
+     */
+    private void removeSelectedDependency()
+    {
+        // Ask user to confirm (just return if cancelled)
+        String msg = "Are you sure you want to remove selected dependency?";
+        if (!DialogBox.showConfirmDialog(getUI(), "Remove Dependency", msg))
+            return;
+
+        // Remove selected
+        BuildDependency selDependency = _dependenciesListArea.getSelItem();
+        removeDependency(selDependency);
     }
 
     /**
