@@ -1,0 +1,29 @@
+Copyright (c) 2024, ReportMill Software, Inc.
+All rights reserved.
+
+ReportMill intends for SnapCode to be free for individuals and any user that needs it to be free.
+Please interpret that liberally: If you have any doubt, contact ReportMill to receive an explicit
+and free license/waiver for your use case.
+
+For commercial use or use in a large organization, please contact ReportMill directly for a license
+to meet your needs and provide for the health and future development of this project.
+
+ReportMill intends for SnapCode source to be free for any use that needs it to be free.
+For commercial for-profit entities deriving significant value and/or revenue from SnapCode,
+contact ReportMill directly for a license to meet your needs and provide for the
+health and future development of this project.
+
+In accordance with this, SnapCode is available via either of two licenses:
+
+    1. Free GNU General Public License v3.0
+       (https://www.gnu.org/licenses/gpl-3.0.txt)
+
+    2. Purchased Commercial Unlimited Use and Redistribution License
+       (http://reportmill.com/legal/ISV_License.html)
+
+Other options are available upon request to meet individual needs. Please contact us
+if we can help with specific requirements for the mutual benefit of SnapCode and the
+community.
+
+Jeff Martin <jeff@reportmill.com>
+ReportMill Software, Inc.
