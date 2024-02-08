@@ -172,7 +172,7 @@ public class SampleDoc {
         assert (indexFileURL != null);
 
         // Get index file and text
-        WebFile indexFile = indexFileURL.getFile();
+        WebFile indexFile = indexFileURL.createFile(false);
         String indexText = indexFile.getText();
 
         // Get text and break into lines

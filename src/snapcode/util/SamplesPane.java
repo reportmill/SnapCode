@@ -191,8 +191,11 @@ public class SamplesPane extends ViewOwner {
             ColView docView = sampleDoc.getDocView();
             rowView.addChild(docView);
             sampleDoc._samplesPane = this;
-            sampleDoc.setSelected(i == 0);
         }
+
+        // Select first doc
+        if (_sampleDocs.length > 0)
+            setSelDoc(_sampleDocs[0]);
 
         // Make sure all row views and image boxes are owned by ui
         for (View child : colView.getChildren())
