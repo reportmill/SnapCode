@@ -33,12 +33,14 @@ public class JavaExecutable extends JavaMember {
 
         // Get VarArgs
         _varArgs = anExecutable.isVarArgs();
+    }
 
-        // Get TypeVariables
-        TypeVariable<?>[] typeVars = anExecutable.getTypeParameters();
-        _typeVars = new JavaTypeVariable[typeVars.length];
-        for (int i = 0, iMax = typeVars.length; i < iMax; i++)
-            _typeVars[i] = new JavaTypeVariable(_resolver, this, typeVars[i]);
+    /**
+     * Returns the executable.
+     */
+    private Executable getExecutable()
+    {
+        return this instanceof JavaMethod ? ((JavaMethod) this).getMethod() : ((JavaConstructor) this).getConstructor();
     }
 
     /**
@@ -49,14 +51,28 @@ public class JavaExecutable extends JavaMember {
     /**
      * Returns the TypeVars.
      */
-    public JavaTypeVariable[] getTypeVars()  { return _typeVars; }
+    public JavaTypeVariable[] getTypeVars()
+    {
+        if (_typeVars != null) return _typeVars;
+
+        // Get TypeVariables
+        Executable executable = getExecutable();
+        TypeVariable<?>[] typeVars = executable.getTypeParameters();
+        JavaTypeVariable[] javaTypeVars = new JavaTypeVariable[typeVars.length];
+        for (int i = 0, iMax = typeVars.length; i < iMax; i++)
+            javaTypeVars[i] = new JavaTypeVariable(_resolver, this, typeVars[i]);
+
+        // Set and return
+        return _typeVars = javaTypeVars;
+    }
 
     /**
      * Returns the TypeVar with given name.
      */
     public JavaTypeVariable getTypeVarForName(String aName)
     {
-        return ArrayUtils.findMatch(_typeVars, tvar -> tvar.getName().equals(aName));
+        JavaTypeVariable[] typeVars = getTypeVars();
+        return ArrayUtils.findMatch(typeVars, tvar -> tvar.getName().equals(aName));
     }
 
     /**
@@ -85,10 +101,10 @@ public class JavaExecutable extends JavaMember {
         if (_parameterTypes != null) return _parameterTypes;
 
         // Get GenericParameterTypes (this can fail https://bugs.openjdk.java.net/browse/JDK-8075483))
-        Executable exec = this instanceof JavaMethod ? ((JavaMethod) this).getMethod() : ((JavaConstructor) this).getConstructor();
-        Type[] paramTypesReal = exec.getGenericParameterTypes();
-        if (paramTypesReal.length < exec.getParameterCount())
-            paramTypesReal = exec.getParameterTypes();
+        Executable executable = getExecutable();
+        Type[] paramTypesReal = executable.getGenericParameterTypes();
+        if (paramTypesReal.length < executable.getParameterCount())
+            paramTypesReal = executable.getParameterTypes();
 
         JavaType[] parameterTypes = _resolver.getJavaTypesForTypes(paramTypesReal);
 

@@ -19,14 +19,11 @@ public class JavaField extends JavaMember {
     public JavaField(Resolver aResolver, JavaClass aDeclaringClass, Field aField)
     {
         super(aResolver, DeclType.Field, aDeclaringClass, aField);
-        if (aField == null) return;
+        if (aField == null)
+            return;
 
         // Set field
         _field = aField;
-
-        // Set EvalType
-        Type fieldType = aField.getGenericType();
-        _evalType = _resolver.getJavaTypeForType(fieldType);
     }
 
     /**
@@ -36,6 +33,18 @@ public class JavaField extends JavaMember {
     {
         JavaClass fieldClass = getDeclaringClass();
         return fieldClass != null && fieldClass.isEnum();
+    }
+
+    /**
+     * Override to get eval type dynamically.
+     */
+    @Override
+    public JavaType getEvalType()
+    {
+        if (_evalType != null) return _evalType;
+        Type fieldType = _field.getGenericType();
+        JavaType evalType = _resolver.getJavaTypeForType(fieldType);
+        return _evalType = evalType;
     }
 
     /**
@@ -64,7 +73,7 @@ public class JavaField extends JavaMember {
         String evalTypeName = evalType != null ? evalType.getSimpleName() : null;
 
         // Construct string: SimpleName : EvalType.SimpleName
-        StringBuffer sb = new StringBuffer(simpleName);
+        StringBuilder sb = new StringBuilder(simpleName);
         if (evalTypeName != null)
             sb.append(" - ").append(evalTypeName);
 
