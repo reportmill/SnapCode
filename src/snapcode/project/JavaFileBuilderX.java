@@ -27,16 +27,16 @@ public class JavaFileBuilderX extends JavaFileBuilder {
      * Returns whether given file needs to be built.
      */
     @Override
-    public boolean isFileNeedsBuild(WebFile aFile)
+    public boolean isFileNeedsBuild(WebFile javaFile)
     {
         // See if Java file has out of date Class file
         ProjectFiles projectFiles = _proj.getProjectFiles();
-        WebFile classFile = projectFiles.getClassFileForJavaFile(aFile);
-        boolean needsBuild = !classFile.getExists() || classFile.getLastModTime() < aFile.getLastModTime();
+        WebFile classFile = projectFiles.getClassFileForJavaFile(javaFile);
+        boolean needsBuild = !classFile.getExists() || classFile.getLastModTime() < javaFile.getLastModTime();
 
         // If not out of date, updateDependencies, compatibilities
         if (!needsBuild) {
-            JavaData javaData = JavaData.getJavaDataForFile(aFile);
+            JavaData javaData = JavaData.getJavaDataForFile(javaFile);
             if (!javaData.isDependenciesSet()) {
                 javaData.updateDependencies();
                 needsBuild = true;
@@ -52,13 +52,13 @@ public class JavaFileBuilderX extends JavaFileBuilder {
      * Remove a build file.
      */
     @Override
-    public void removeBuildFile(WebFile aFile)
+    public void removeBuildFile(WebFile javaFile)
     {
         // Do normal version
-        super.removeBuildFile(aFile);
+        super.removeBuildFile(javaFile);
 
         // Get dependent files and add to BuildFiles
-        JavaData javaData = JavaData.getJavaDataForFile(aFile);
+        JavaData javaData = JavaData.getJavaDataForFile(javaFile);
         Set<WebFile> dependents = javaData.getDependents();
         for (WebFile dependant : dependents)
             if (dependant.getExists())
@@ -69,7 +69,7 @@ public class JavaFileBuilderX extends JavaFileBuilder {
 
         // Get JavaFile.ClassFiles and remove them
         ProjectFiles projectFiles = _proj.getProjectFiles();
-        WebFile[] classFiles = projectFiles.getClassFilesForJavaFile(aFile);
+        WebFile[] classFiles = projectFiles.getClassFilesForJavaFile(javaFile);
 
         // Iterate over class files and delete
         for (WebFile classFile : classFiles) {
