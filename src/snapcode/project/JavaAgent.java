@@ -316,7 +316,7 @@ public class JavaAgent {
     protected void updateJFileForChange(TextBlockUtils.CharsChange charsChange)
     {
         // If partial parse fails, clear JFile for full reparse
-        boolean jfileUpdated = JavaTextDocUtils.updateJFileForChange(_javaTextDoc, _jfile, charsChange);
+        boolean jfileUpdated = !_isJepl && JavaTextDocUtils.updateJFileForChange(_javaTextDoc, _jfile, charsChange);
         if (!jfileUpdated)
             _jfile = null;
     }

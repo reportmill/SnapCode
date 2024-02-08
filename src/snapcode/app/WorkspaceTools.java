@@ -332,6 +332,9 @@ public class WorkspaceTools {
         View samplesButton = getSamplesButton();
         samplesButton.setVisible(true);
         SamplesPane.startSamplesButtonAnim(samplesButton);
+
+        // Show the run tool
+        ViewUtils.runDelayed(_workspacePane::showRunTool, 300);
     }
 
     /**
