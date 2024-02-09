@@ -61,6 +61,9 @@ public class JavaClass extends JavaType {
     // The array of enum constants (enum only)
     private Object[] _enumConstants;
 
+    // A cached list of all decls
+    private List<JavaDecl>  _allDecls;
+
     // The updater
     private JavaClassUpdater  _updater;
 
@@ -98,19 +101,20 @@ public class JavaClass extends JavaType {
         _interface = aClass.isInterface();
         _primitive = aClass.isPrimitive();
 
+        // If array, configure special
+        if (aClass.isArray()) {
+            Class<?> compClass = aClass.getComponentType();
+            _componentTypeName = compClass.getName();
+            configureArrayClass();
+        }
+
         // Create/set updater
-        _updater = new JavaClassUpdater(this);
+        else _updater = new JavaClassUpdater(this);
 
         // Get type super type and set in decl
         Class<?> superClass = aClass.getSuperclass();
         if (superClass != null)
             _superClassName = superClass.getName();
-
-        // If Array, set Component class
-        if (aClass.isArray()) {
-            Class<?> compClass = aClass.getComponentType();
-            _componentTypeName = compClass.getName();
-        }
     }
 
     /**
@@ -804,7 +808,18 @@ public class JavaClass extends JavaType {
      */
     public boolean updateDecls()
     {
-        return _updater.updateDecls();
+        // Update decls, if decls changed, clear AllDecls
+        try {
+            boolean classChanged = _updater.updateDeclsImpl();
+            if (classChanged)
+                _allDecls = null;
+            return classChanged;
+        }
+
+        catch (SecurityException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -812,7 +827,50 @@ public class JavaClass extends JavaType {
      */
     public List<JavaDecl> getAllDecls()
     {
-        return _updater.getAllDecls();
+        // If already set, just return
+        if (_allDecls != null) return _allDecls;
+
+        // Create new AllDecls cached list with decls for fields, methods, constructors, inner classes and this class
+        JavaField[] fields = getDeclaredFields();
+        int memberCount = fields.length + _methods.length + _constructors.length;
+        int declCount = memberCount + _innerClasses.length + 1;
+        List<JavaDecl> decls = new ArrayList<>(declCount);
+        decls.add(this);
+        Collections.addAll(decls, _fields);
+        Collections.addAll(decls, _methods);
+        Collections.addAll(decls, _constructors);
+        Collections.addAll(decls, _innerClasses);
+
+        // Set/return
+        return _allDecls = decls;
+    }
+
+    /**
+     * Updates array class.
+     */
+    private void configureArrayClass()
+    {
+        // Handle Object[] special: Add Array.length field
+        if (getName().equals("java.lang.Object[]")) {
+            JavaField.FieldBuilder fb = new JavaField.FieldBuilder();
+            fb.init(_resolver, getClassName());
+            _fields = fb.name("length").type(int.class).save().buildAll();
+            _interfaces = new JavaClass[0];
+            _methods = new JavaMethod[0];
+            _constructors = new JavaConstructor[0];
+            _innerClasses = new JavaClass[0];
+            _typeVars = new JavaTypeVariable[0];
+            return;
+        }
+
+        // Handle other arrays: Just copy over from object array
+        JavaClass arrayDecl = _resolver.getJavaClassForClass(Object[].class);
+        _fields = arrayDecl.getDeclaredFields();
+        _interfaces = arrayDecl._interfaces;
+        _methods = arrayDecl._methods;
+        _constructors = arrayDecl._constructors;
+        _innerClasses = arrayDecl._innerClasses;
+        _typeVars = arrayDecl._typeVars;
     }
 
     /**

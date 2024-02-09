@@ -21,9 +21,6 @@ public class JavaClassUpdater {
     // The Resolver that produced this decl
     protected Resolver  _resolver;
 
-    // A cached list of all decls
-    private List<JavaDecl>  _allDecls;
-
     /**
      * Constructor.
      */
@@ -31,18 +28,6 @@ public class JavaClassUpdater {
     {
         _javaClass = aClass;
         _resolver = aClass._resolver;
-    }
-
-    /**
-     * Updates JavaDecls. Returns whether the decls changed since last update.
-     */
-    public boolean updateDecls()
-    {
-        try { return updateDeclsImpl(); }
-        catch (SecurityException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
     /**
@@ -58,12 +43,6 @@ public class JavaClassUpdater {
         _realClass = getRealClassImpl();
         if (_realClass == null) {
             System.err.println("JavaClass: Failed to load class: " + _javaClass.getClassName());
-            return false;
-        }
-
-        // Handle arrays special
-        if (_javaClass.isArray()) {
-            updateArrayClass();
             return false;
         }
 
@@ -119,10 +98,6 @@ public class JavaClassUpdater {
         JavaConstructor[] newConstrs = _javaClass._constructors = getDeclaredConstructors();
         if (!ArrayUtils.equalsId(oldConstrs, newConstrs))
             classChanged = true;
-
-        // If decls changed, clear AllDecls
-        if (classChanged)
-            _allDecls = null;
 
         // Return
         return classChanged;
@@ -270,68 +245,5 @@ public class JavaClassUpdater {
         if (javaConstr == null)
             javaConstr = new JavaConstructor(_resolver, _javaClass, aConstr);
         return javaConstr;
-    }
-
-    /**
-     * Updates array class.
-     */
-    private void updateArrayClass()
-    {
-        // Handle Object[] special: Add Array.length field
-        if (_javaClass.getName().equals("java.lang.Object[]") && _javaClass.getDeclaredFieldForName("length") == null) {
-            if (_javaClass.getDeclaredFieldForName("length") == null) {
-                JavaField javaField = getLengthField();
-                _javaClass._fields = new JavaField[]{ javaField };
-                _javaClass._interfaces = new JavaClass[0];
-                _javaClass._methods = new JavaMethod[0];
-                _javaClass._constructors = new JavaConstructor[0];
-                _javaClass._innerClasses = new JavaClass[0];
-                _javaClass._typeVars = new JavaTypeVariable[0];
-            }
-            return;
-        }
-
-        // Handle other arrays: Just copy over from object array
-        JavaClass arrayDecl = _resolver.getJavaClassForClass(Object[].class);
-        _javaClass._fields = arrayDecl.getDeclaredFields();
-        _javaClass._interfaces = arrayDecl._interfaces;
-        _javaClass._methods = arrayDecl._methods;
-        _javaClass._constructors = arrayDecl._constructors;
-        _javaClass._innerClasses = arrayDecl._innerClasses;
-        _javaClass._typeVars = arrayDecl._typeVars;
-    }
-
-    /**
-     * Returns the list of all decls.
-     */
-    public List<JavaDecl> getAllDecls()
-    {
-        // If already set, just return
-        if (_allDecls != null) return _allDecls;
-
-        // Create new AllDecls cached list with decls for fields, methods, constructors, inner classes and this class
-        JavaField[] fields = _javaClass.getDeclaredFields();
-        int memberCount = fields.length + _javaClass._methods.length + _javaClass._constructors.length;
-        int declCount = memberCount + _javaClass._innerClasses.length + 1;
-        List<JavaDecl> decls = new ArrayList<>(declCount);
-        decls.add(_javaClass);
-        Collections.addAll(decls, _javaClass._fields);
-        Collections.addAll(decls, _javaClass._methods);
-        Collections.addAll(decls, _javaClass._constructors);
-        Collections.addAll(decls, _javaClass._innerClasses);
-
-        // Set/return
-        return _allDecls = decls;
-    }
-
-    /**
-     * Returns the length field.
-     */
-    private JavaField getLengthField()
-    {
-        JavaField.FieldBuilder fb = new JavaField.FieldBuilder();
-        fb.init(_resolver, _javaClass.getClassName());
-        JavaField javaField = fb.name("length").type(int.class).build();
-        return javaField;
     }
 }
