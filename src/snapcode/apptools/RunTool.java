@@ -380,11 +380,10 @@ public class RunTool extends WorkspaceTool implements AppListener {
     @Override
     protected void resetUI()
     {
-        // Update RunButton, TerminateButton, ProgressBar
+        // Update RunButton, TerminateButton
         boolean isRunning = isRunning();
         setViewEnabled("RunButton", !isRunning);
         setViewEnabled("TerminateButton", isRunning);
-        setProgressBarVisible(isRunning);
 
         // Update SwapConsoleButton
         RunApp selApp = getSelApp();
@@ -436,25 +435,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
 
         // Do normal version
         else super.respondUI(anEvent);
-    }
-
-    /**
-     * Shows or hides the 'is running' progress bar.
-     */
-    private void setProgressBarVisible(boolean aValue)
-    {
-        ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
-
-        // Show ProgressBar
-        if (aValue && !progressBar.isVisible()) {
-            progressBar.setVisible(true);
-            progressBar.setOpacity(0);
-            progressBar.getAnimCleared(600).setOpacity(1).play();
-        }
-
-        // Hide ProgressBar
-        else if (!aValue && progressBar.isVisible())
-            progressBar.getAnimCleared(300).setOpacity(0).setOnFinish(() -> progressBar.setVisible(false)).play();
     }
 
     /**
