@@ -6,8 +6,6 @@ import javakit.parse.*;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
 import snap.util.StringUtils;
-import snapcode.project.Project;
-
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -450,25 +448,5 @@ public class DeclMatcher {
 
         // Return string
         return regexSB.toString();
-    }
-
-    /**
-     * Prime completions for given resolver.
-     */
-    public static void primeCompletions(Project aProject)
-    {
-        new Thread(() -> primeCompletionsImpl(aProject)).start();
-    }
-
-    /**
-     * Prime completions for given resolver.
-     */
-    private static void primeCompletionsImpl(Project aProject)
-    {
-        Resolver resolver = aProject.getResolver();
-        DeclMatcher declMatcher = new DeclMatcher("x");
-        JavaClass[] classes = declMatcher.getClassesForResolver(resolver);
-        for (JavaClass cls : classes)
-            cls.getDeclaredMethods();
     }
 }
