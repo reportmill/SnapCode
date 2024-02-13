@@ -321,7 +321,6 @@ public class Project extends PropObject {
         }
 
         _classLoader = null;
-        _resolver = null;
     }
 
     /**
@@ -329,17 +328,8 @@ public class Project extends PropObject {
      */
     public Resolver getResolver()
     {
-        // If already set, just return
         if (_resolver != null) return _resolver;
-
-        // Create Resolver
-        ClassLoader classLoader = getRuntimeClassLoader();
-        Resolver resolver = new Resolver(classLoader);
-        String[] classPaths = getRuntimeClassPaths();
-        resolver.setClassPaths(classPaths);
-
-        // Set, return
-        return _resolver = resolver;
+        return _resolver = new Resolver(this);
     }
 
     /**

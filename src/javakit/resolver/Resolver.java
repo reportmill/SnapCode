@@ -6,17 +6,15 @@ import java.lang.reflect.*;
 import java.util.*;
 import snap.util.ArrayUtils;
 import snap.util.ClassUtils;
+import snapcode.project.Project;
 
 /**
  * A class that manages all the JavaDecls for a project.
  */
 public class Resolver {
 
-    // The ClassLoader for compiled class info
-    protected ClassLoader  _classLoader;
-
-    // The ClassPaths
-    private String[]  _classPaths = new String[0];
+    // The project this resolver works for
+    private Project _project;
 
     // The ClassTree
     private ClassTree  _classTree;
@@ -39,34 +37,18 @@ public class Resolver {
     /**
      * Constructor.
      */
-    public Resolver(ClassLoader aClassLoader)
+    public Resolver(Project aProject)
     {
-        _classLoader = aClassLoader;
-    }
-
-    /**
-     * Returns the ClassPaths.
-     */
-    public String[] getClassPaths()  { return _classPaths; }
-
-    /**
-     * Sets the ClassPaths.
-     */
-    public void setClassPaths(String[] theClassPaths)
-    {
-        _classPaths = theClassPaths;
+        _project = aProject;
     }
 
     /**
      * Returns the ClassTree.
      */
-    public ClassTree getClassTree()
+    private ClassTree getClassTree()
     {
-        // If already set, just return
         if (_classTree != null) return _classTree;
-
-        // Create, set, return
-        String[] classPaths = getClassPaths();
+        String[] classPaths = _project.getRuntimeClassPaths();
         return _classTree = new ClassTree(classPaths);
     }
 
@@ -97,19 +79,16 @@ public class Resolver {
         if (classTreeNode.isPackage)
             return new JavaPackage(this, parentPackage, classTreeNode.fullName);
 
-        // Otherwise, create and return class
-        Class<?> cls = getClassForName(classTreeNode.fullName);
-        if (cls == null) { // This should never happen
+        // Get real class
+        Class<?> realClass = getClassForName(classTreeNode.fullName);
+        if (realClass == null) { // This should never happen
             System.err.println("Resolver.getJavaDeclForClassTreeNode: Can't find class: " + classTreeNode.fullName);
             return null;
         }
-        return new JavaClass(this, parentPackage, cls);
-    }
 
-    /**
-     * Returns the ClassLoader.
-     */
-    public ClassLoader getClassLoader()  { return _classLoader; }
+        // Create and return JavaClass
+        return new JavaClass(this, parentPackage, realClass);
+    }
 
     /**
      * Returns a Class for given name.
@@ -117,7 +96,7 @@ public class Resolver {
     public Class<?> getClassForName(String aName)
     {
         // Get Class loader, find class
-        ClassLoader classLoader = getClassLoader();
+        ClassLoader classLoader =  _project.getRuntimeClassLoader();
         Class<?> cls = ClassUtils.getClassForName(aName, classLoader);
 
         // If not found and name doesn't contain '.', try java.lang.Name
