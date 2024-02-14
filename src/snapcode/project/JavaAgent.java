@@ -174,7 +174,7 @@ public class JavaAgent {
     public JavaData getJavaData()
     {
         if (_javaData != null) return _javaData;
-        return _javaData = new JavaData(_file, _proj);
+        return _javaData = new JavaData(_file);
     }
 
     /**
