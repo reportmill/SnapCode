@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
+import javakit.resolver.JavaClass;
 import javakit.resolver.Resolver;
 import snap.props.PropObject;
 import snap.util.*;
@@ -387,6 +388,16 @@ public class Project extends PropObject {
         String className = getClassNameForFile(aFile);
         Resolver resolver = getResolver();
         return resolver.getClassForName(className);
+    }
+
+    /**
+     * Returns the java class for given file.
+     */
+    public JavaClass getJavaClassForFile(WebFile aFile)
+    {
+        String className = getClassNameForFile(aFile);
+        Resolver resolver = getResolver();
+        return resolver.getJavaClassForName(className);
     }
 
     /**

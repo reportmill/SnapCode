@@ -16,9 +16,6 @@ public class JavaData {
     // The Project that owns this file
     private Project  _proj;
 
-    // The set of declarations in this JavaFile
-    private Set<JavaDecl>  _decls = new HashSet<>();
-
     // The set of references in this JavaFile
     private Set<JavaDecl>  _refs = new HashSet<>();
 
@@ -53,34 +50,6 @@ public class JavaData {
         Project proj = getProject();
         ProjectFiles projectFiles = proj.getProjectFiles();
         return projectFiles.getClassFilesForJavaFile(_javaFile);
-    }
-
-    /**
-     * Returns the declarations in this JavaFile.
-     */
-    public synchronized Set<JavaDecl> getDecls()
-    {
-        // If already loaded, just return
-        if (_decls.size() > 0) return _decls;
-
-        // Get Resolver
-        Project proj = getProject();
-        Resolver resolver = proj.getResolver();
-
-        // Iterate over JavaFile.Class files
-        WebFile[] classFiles = getClassFiles();
-        for (WebFile classFile : classFiles) {
-            String className = proj.getClassNameForFile(classFile);
-            JavaClass javaClass = resolver.getJavaClassForName(className);
-            if (javaClass == null) {
-                System.err.println("JavaData.getDecls: Can't find decl " + className);
-                continue;
-            }
-            _decls.addAll(javaClass.getAllDecls());
-        }
-
-        // Return decls
-        return _decls;
     }
 
     /**
@@ -133,10 +102,6 @@ public class JavaData {
                 }
             }
         }
-
-        // If declarations have changed, clear cached list
-        if (declsChanged)
-            _decls.clear();
 
         // Set isDependenciesSet
         _isDependenciesSet = true;
@@ -213,7 +178,6 @@ public class JavaData {
         }
 
         _dependencies.clear();
-        _decls.clear();
         _refs.clear();
         _isDependenciesSet = false;
     }

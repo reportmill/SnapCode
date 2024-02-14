@@ -3,11 +3,9 @@
  */
 package snapcode.apptools;
 import javakit.parse.*;
+import javakit.resolver.*;
 import snapcode.project.JavaAgent;
 import snapcode.project.Project;
-import javakit.resolver.JavaDecl;
-import javakit.resolver.JavaMethod;
-import javakit.resolver.JavaParameterizedType;
 import snapcode.javatext.NodeMatcher;
 import snapcode.javatext.JavaTextUtils;
 import snap.geom.HPos;
@@ -343,25 +341,45 @@ public class SearchTool extends WorkspaceTool {
                 searchDeclaration(file, theResults, aDecl);
         }
 
-        // Handle JavaFile
+        // Handle JavaFile: If file class contains matching decl, return node(s)
         else if (aFile.getType().equals("java")) {
-
-            // Get JavaAgent, JavaData, and declarations
-            JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
-            JavaData javaData = javaAgent.getJavaData();
-            Set<JavaDecl> decls = javaData.getDecls();
-
-            // Iterate over decls
-            for (JavaDecl decl : decls) {
-                if (aDecl.matches(decl)) {
-                    JFile jfile = javaAgent.getJFile();
-                    JNode[] declarationNodes = NodeMatcher.getDeclarationNodesForDecl(jfile, aDecl);
-                    for (JNode node : declarationNodes)
-                        theResults.add(new Result(node));
-                    return;
-                }
+            JavaClass javaClass = proj.getJavaClassForFile(aFile);
+            if (javaClassContainsMatchingDecl(javaClass, aDecl)) {
+                JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
+                JFile jfile = javaAgent.getJFile();
+                JNode[] declarationNodes = NodeMatcher.getDeclarationNodesForDecl(jfile, aDecl);
+                for (JNode node : declarationNodes)
+                    theResults.add(new Result(node));
             }
         }
+    }
+
+    /**
+     * Returns whether given JavaDecl contains matching decl.
+     */
+    private static boolean javaClassContainsMatchingDecl(JavaClass javaClass, JavaDecl matchDecl)
+    {
+        // Check for class, field, constructor or method
+        if (matchDecl instanceof JavaClass) {
+            if (javaClass.matches(matchDecl))
+                return true;
+        }
+        else if (matchDecl instanceof JavaField) {
+            if (ArrayUtils.hasMatch(javaClass.getDeclaredFields(), field -> field.matches(matchDecl)))
+                return true;
+        }
+        else if (matchDecl instanceof JavaConstructor) {
+            if (ArrayUtils.hasMatch(javaClass.getDeclaredConstructors(), constr -> constr.matches(matchDecl)))
+                return true;
+        }
+        else if (matchDecl instanceof JavaMethod) {
+            if (ArrayUtils.hasMatch(javaClass.getDeclaredMethods(), method -> method.matches(matchDecl)))
+                return true;
+        }
+
+        // Recurse into inner classes
+        JavaClass[] innerClasses = javaClass.getDeclaredClasses();
+        return ArrayUtils.hasMatch(innerClasses, cls -> javaClassContainsMatchingDecl(cls, matchDecl));
     }
 
     /**

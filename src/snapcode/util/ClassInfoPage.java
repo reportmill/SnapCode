@@ -1,8 +1,7 @@
 package snapcode.util;
-import javakit.resolver.JavaClass;
-import javakit.resolver.JavaDecl;
-import javakit.resolver.JavaMember;
+import javakit.resolver.*;
 import snapcode.project.JavaData;
+import snapcode.project.Project;
 import snapcode.webbrowser.TextPage;
 import snap.web.WebFile;
 import java.util.Arrays;
@@ -18,55 +17,65 @@ public class ClassInfoPage extends TextPage {
      */
     protected String getDefaultText()
     {
+        // Get JavaClass for class file
         WebFile classFile = getFile();
-        String javaFilePath = classFile.getPath().replace(".class", ".java").replace("/bin/", "/src/");
-        WebFile javaFile = classFile.getSite().getFileForPath(javaFilePath);
-        JavaData javaData = javaFile != null ? JavaData.getJavaDataForFile(javaFile) : null;
-        if (javaData == null)
-            return "Class File not found";
-
-        // Get decls and refs
-        Set<JavaDecl> decls = javaData.getDecls();
-        Set<JavaDecl> refs = javaData.getRefs();
+        Project project = Project.getProjectForFile(classFile);
+        JavaClass javaClass = project.getJavaClassForFile(classFile);
+        if (javaClass == null)
+            return "Java class not found for class file: " + classFile.getPath();
 
         // Create StringBuffer and append Declarations
         StringBuilder sb = new StringBuilder();
         sb.append("\n    - - - - - - - - - - Declarations - - - - - - - - - -\n\n");
-        JavaDecl[] declArray = decls.toArray(new JavaDecl[0]);
-        Arrays.sort(declArray);
+        appendClassDecl(sb, javaClass);
 
-        // Iterate over decls
-        for (JavaDecl decl : declArray) {
-
-            // Print class
-            if (decl instanceof JavaClass) {
-                sb.append("Class ").append(decl.getDeclarationString()).append('\n');
-
-                // Iterate over decls
-                for (JavaDecl d2 : declArray) {
-
-                    // Print Members
-                    if (d2 instanceof JavaMember) {
-                        JavaMember member = (JavaMember) d2;
-                        if (member.getDeclaringClass() == decl)
-                            sb.append("    ").append(d2.getType()).append(' ').append(d2.getDeclarationString()).append('\n');
-                    }
-                }
-                sb.append('\n');
-            }
-        }
+        // Get external references
+        String className = project.getClassNameForFile(classFile);
+        WebFile javaFile = project.getJavaFileForClassName(className);
+        JavaData javaData = javaFile != null ? JavaData.getJavaDataForFile(javaFile) : null;
+        if (javaData == null)
+            return "Class File not found";
+        Set<JavaDecl> externalReferencesSet = javaData.getRefs();
+        JavaDecl[] externalReferences = externalReferencesSet.toArray(new JavaDecl[0]);
+        Arrays.sort(externalReferences);
 
         // Append References
         sb.append("\n    - - - - - - - - - - References - - - - - - - - - -\n\n");
-        JavaDecl[] refArray = refs.toArray(new JavaDecl[0]);
-        Arrays.sort(refArray);
-
-        // Iterate over refs
-        for (JavaDecl ref : refArray)
+        for (JavaDecl ref : externalReferences)
             sb.append(ref.getType()).append(' ').append(ref.getDeclarationString()).append('\n');
 
         // Set Text
         return sb.toString();
     }
 
+    /**
+     * Appends a class declaration.
+     */
+    private static void appendClassDecl(StringBuilder sb, JavaClass javaClass)
+    {
+        // Append class string
+        sb.append("Class ").append(javaClass.getDeclarationString()).append('\n');
+
+        // Append Fields, Constructors, Methods
+        for (JavaField field : javaClass.getDeclaredFields())
+            appendMemberDecl(sb, field);
+        for (JavaConstructor constr : javaClass.getDeclaredConstructors())
+            appendMemberDecl(sb, constr);
+        for (JavaMethod method : javaClass.getDeclaredMethods())
+            appendMemberDecl(sb, method);
+
+        // Append inner classes
+        for (JavaClass innerClass : javaClass.getDeclaredClasses())
+            appendClassDecl(sb, innerClass);
+
+        sb.append('\n');
+    }
+
+    /**
+     * Appends a member declaration.
+     */
+    private static void appendMemberDecl(StringBuilder sb, JavaMember aMember)
+    {
+        sb.append("    ").append(aMember.getType()).append(' ').append(aMember.getDeclarationString()).append('\n');
+    }
 }
