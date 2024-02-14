@@ -624,20 +624,40 @@ public class JavaParser extends JavaParserStmt {
     /**
      * TypeParams Handler.
      */
-    public static class TypeParamsHandler extends ParseHandler<ArrayList<JTypeVar>> {
+    public static class TypeParamsHandler extends ParseHandler<JTypeVar[]> {
+
+        // List of TypeVars
+        private List<JTypeVar> _typeVars = new ArrayList<>();
 
         /**
          * ParseHandler method.
          */
+        @Override
         protected void parsedOne(ParseNode aNode, String anId)
         {
             // Handle TypeParam
             if (anId == "TypeParam")
-                getPart().add(aNode.getCustomNode(JTypeVar.class));
+                _typeVars.add(aNode.getCustomNode(JTypeVar.class));
+        }
+
+        /**
+         * Override to return array.
+         */
+        @Override
+        public JTypeVar[] parsedAll()  { return _typeVars.toArray(new JTypeVar[0]); }
+
+        /**
+         * Override to clear list.
+         */
+        @Override
+        public void reset()
+        {
+            super.reset();
+            _typeVars.clear();
         }
 
         @Override
-        protected Class getPartClass()  { return ArrayList.class; }
+        protected Class getPartClass()  { return JTypeVar[].class; }
     }
 
     /**
