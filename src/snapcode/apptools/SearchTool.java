@@ -272,11 +272,11 @@ public class SearchTool extends WorkspaceTool {
             // Get JavaAgent, JavaData and references
             JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
             JavaData javaData = javaAgent.getJavaData();
-            Set<JavaDecl> refs = javaData.getRefs();
+            Set<JavaDecl> externalRefs = javaData.getExternalReferences();
 
             // Iterate over references
-            for (JavaDecl decl : refs) {
-                if (aDecl.matches(decl)) {
+            for (JavaDecl externalRef : externalRefs) {
+                if (aDecl.matches(externalRef)) {
                     JFile jfile = javaAgent.getJFile();
                     JNode[] referenceNodes = NodeMatcher.getReferenceNodesForDecl(jfile, aDecl);
                     for (JNode node : referenceNodes)

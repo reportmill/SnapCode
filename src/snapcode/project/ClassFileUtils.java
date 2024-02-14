@@ -9,6 +9,7 @@ import snap.util.ClassUtils;
 import snap.web.WebFile;
 import java.io.DataInputStream;
 import java.lang.reflect.*;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -243,6 +244,16 @@ public class ClassFileUtils {
     private static boolean isInRootClassName(String aRoot, String aChild)
     {
         return aChild.startsWith(aRoot) && (aChild.length() == aRoot.length() || aChild.charAt(aRoot.length()) == '$');
+    }
+
+    /**
+     * Returns external references in given class file.
+     */
+    public static JavaDecl[] getExternalReferencesForClassFile(WebFile classFile)
+    {
+        Set<JavaDecl> externalReferencesSet = new HashSet<>();
+        ClassFileUtils.findRefsForClassFile(classFile, externalReferencesSet);
+        return externalReferencesSet.toArray(new JavaDecl[0]);
     }
 
     /**

@@ -32,20 +32,7 @@ public class JavaFileBuilderX extends JavaFileBuilder {
         // See if Java file has out of date Class file
         ProjectFiles projectFiles = _proj.getProjectFiles();
         WebFile classFile = projectFiles.getClassFileForJavaFile(javaFile);
-        boolean needsBuild = !classFile.getExists() || classFile.getLastModTime() < javaFile.getLastModTime();
-
-        // If not out of date, updateDependencies, compatibilities
-        if (!needsBuild) {
-            JavaData javaData = JavaData.getJavaDataForFile(javaFile);
-            if (!javaData.isDependenciesSet()) {
-                javaData.updateDependencies();
-                needsBuild = true;
-                //int c = updateCompatability(aFile); if(c<0) needsBuild=true; if(c!=-2) jdata.updateDependencies();
-            }
-        }
-
-        // Return NeedsBuild
-        return needsBuild;
+        return !classFile.getExists() || classFile.getLastModTime() < javaFile.getLastModTime();
     }
 
     /**

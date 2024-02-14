@@ -413,6 +413,10 @@ public class Project extends PropObject {
      */
     public WebFile getJavaFileForClassName(String aClassName)
     {
+        // Probably a stupid optimization
+        if (aClassName.startsWith("java") && (aClassName.startsWith("java.") || aClassName.startsWith("javax.")))
+            return null;
+
         // Check this project
         ProjectFiles projFiles = getProjectFiles();
         WebFile file = projFiles.getSourceFileForClassName(aClassName);

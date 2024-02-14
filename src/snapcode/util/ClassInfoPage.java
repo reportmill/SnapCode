@@ -1,11 +1,10 @@
 package snapcode.util;
 import javakit.resolver.*;
-import snapcode.project.JavaData;
+import snapcode.project.ClassFileUtils;
 import snapcode.project.Project;
 import snapcode.webbrowser.TextPage;
 import snap.web.WebFile;
 import java.util.Arrays;
-import java.util.Set;
 
 /**
  * A WebPage subclass to show class info for a .class file.
@@ -30,17 +29,11 @@ public class ClassInfoPage extends TextPage {
         appendClassDecl(sb, javaClass);
 
         // Get external references
-        String className = project.getClassNameForFile(classFile);
-        WebFile javaFile = project.getJavaFileForClassName(className);
-        JavaData javaData = javaFile != null ? JavaData.getJavaDataForFile(javaFile) : null;
-        if (javaData == null)
-            return "Class File not found";
-        Set<JavaDecl> externalReferencesSet = javaData.getRefs();
-        JavaDecl[] externalReferences = externalReferencesSet.toArray(new JavaDecl[0]);
+        JavaDecl[] externalReferences = ClassFileUtils.getExternalReferencesForClassFile(classFile);
         Arrays.sort(externalReferences);
 
         // Append References
-        sb.append("\n    - - - - - - - - - - References - - - - - - - - - -\n\n");
+        sb.append("\n    - - - - - - - - - - " + externalReferences.length + " References - - - - - - - - - -\n\n");
         for (JavaDecl ref : externalReferences)
             sb.append(ref.getType()).append(' ').append(ref.getDeclarationString()).append('\n');
 
