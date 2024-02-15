@@ -50,6 +50,9 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     // The enum constants (if ClassType Enum)
     protected JEnumConst[] _enumConstants = new JEnumConst[0];
 
+    // The Java class
+    private JavaClass _javaClass;
+
     // An array of VarDecls held by JFieldDecls
     private List<JVarDecl> _varDecls;
 
@@ -264,7 +267,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     public JConstrDecl getConstructorDeclForTypes(JavaType[] argTypes)
     {
         // Get compatible constructor
-        JavaClass javaClass = getDecl();
+        JavaClass javaClass = getJavaClass();
         JavaConstructor constructor = JavaClassUtils.getCompatibleConstructor(javaClass, new JavaClass[0]);
 
         // Get constructor decls and return the one that has matching constructor
@@ -308,26 +311,32 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     }
 
     /**
-     * Returns the class constructor declarations.
+     * Returns inner class declarations.
      */
-    public JClassDecl[] getClassDecls()
+    public JClassDecl[] getDeclaredClassDecls()
     {
-        // If already set, just return
         if (_classDecls != null) return _classDecls;
-
-        // Get class decls from body decls
-        List<JClassDecl> cds = new ArrayList<>();
-        for (JBodyDecl bodyDecl : getBodyDecls())
-            findClassDecls(bodyDecl, cds);
-
-        // Set array and return
-        return _classDecls = cds.toArray(new JClassDecl[0]);
+        return _classDecls = ArrayUtils.filterByClass(getBodyDecls(), JClassDecl.class);
     }
 
     /**
-     * Returns the class constructor declarations.
+     * Returns inner class declarations and anonymous class declarations in Alloc expressions.
      */
-    private void findClassDecls(JNode aNode, List<JClassDecl> theCDs)
+    public JClassDecl[] getEnclosedClassDecls()
+    {
+        // Get class decls from body decls
+        List<JClassDecl> cds = new ArrayList<>();
+        for (JBodyDecl bodyDecl : getBodyDecls())
+            findEnclosedClassDecls(bodyDecl, cds);
+
+        // Return array
+        return cds.toArray(new JClassDecl[0]);
+    }
+
+    /**
+     * Finds inner class declarations and anonymous class declarations in Alloc expressions.
+     */
+    private void findEnclosedClassDecls(JNode aNode, List<JClassDecl> theCDs)
     {
         // Handle Class decl
         if (aNode instanceof JClassDecl)
@@ -335,22 +344,24 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
 
         // Otherwise recurse
         else for (JNode c : aNode.getChildren())
-            findClassDecls(c, theCDs);
+            findEnclosedClassDecls(c, theCDs);
     }
 
     /**
      * Returns the class declaration for class name.
      */
-    public JClassDecl getClassDeclForName(String aName)
+    public JClassDecl getDeclaredClassDeclForName(String aName)
     {
         int index = aName.indexOf('.');
         String name = index > 0 ? aName.substring(0, index) : aName;
-        String remainder = index >= 0 ? aName.substring(index + 1) : null;
 
         // Iterate over ClassDecls
-        for (JClassDecl classDecl : getClassDecls())
-            if (classDecl.getSimpleName().equals(name))
-                return remainder != null ? classDecl.getClassDeclForName(remainder) : classDecl;
+        JClassDecl[] classDecls = getDeclaredClassDecls();
+        JClassDecl classDecl = ArrayUtils.findMatch(classDecls, cdecl -> cdecl.getSimpleName().equals(name));
+        if (classDecl != null) {
+            String remainder = index >= 0 ? aName.substring(index + 1) : null;
+            return remainder != null ? classDecl.getDeclaredClassDeclForName(remainder) : classDecl;
+        }
 
         // Return not found
         return null;
@@ -359,6 +370,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     /**
      * Returns the simple name.
      */
+    @Override
     protected String getNameImpl()
     {
         // Get anonymous class name (number really)
@@ -377,7 +389,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     {
         // Get enclosingClass and inner class decls
         JClassDecl enclosingClassDecl = getEnclosingClassDecl();
-        JClassDecl[] classDecls = enclosingClassDecl != null ? enclosingClassDecl.getClassDecls() : new JClassDecl[0];
+        JClassDecl[] classDecls = enclosingClassDecl != null ? enclosingClassDecl.getEnclosedClassDecls() : new JClassDecl[0];
         int anonymousIndex = 1;
 
         // Iterate over inner class decls and return anonymousIndex when this class decl found
@@ -394,14 +406,24 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     }
 
     /**
-     * Returns the class declaration.
+     * Override to return Java class.
      */
-    public JavaClass getDecl()  { return (JavaClass) super.getDecl(); }
+    @Override
+    protected JavaClass getDeclImpl()  { return getJavaClass(); }
 
     /**
-     * Returns the class declaration.
+     * Returns the Java class.
      */
-    protected JavaClass getDeclImpl()
+    public JavaClass getJavaClass()
+    {
+        if (_javaClass != null) return _javaClass;
+        return _javaClass = getJavaClassImpl();
+    }
+
+    /**
+     * Returns the Java class.
+     */
+    protected JavaClass getJavaClassImpl()
     {
         // If enclosing class declaration, return ThatClassName$ThisName, otherwise return JFile.Name
         String className = getName();
@@ -632,7 +654,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
     {
         // Just resolve typeVar to bounds
-        JavaClass javaClass = getDecl();
+        JavaClass javaClass = getJavaClass();
         JavaType resolvedType = javaClass.getResolvedTypeForTypeVariable(aTypeVar);
 
         // Do normal version

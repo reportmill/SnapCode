@@ -134,7 +134,7 @@ public class JavaClass extends JavaType {
         // Set DeclaringClass or Package
         JClassDecl enclosingClass = aClassDecl.getEnclosingClassDecl();
         if (enclosingClass != null) {
-            _declaringClass = enclosingClass.getDecl();
+            _declaringClass = enclosingClass.getJavaClass();
             _package = _declaringClass.getPackage();
         }
         else {

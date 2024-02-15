@@ -79,7 +79,7 @@ public class JStmtConstrCall extends JStmt {
     {
         // Get class decl and constructor call arg types
         JClassDecl enclosingClassDecl = getEnclosingClassDecl();
-        JavaClass enclosingClass = enclosingClassDecl.getDecl();
+        JavaClass enclosingClass = enclosingClassDecl.getJavaClass();
         if (enclosingClass == null)
             return null;
         JavaClass[] argClasses = getArgClasses();

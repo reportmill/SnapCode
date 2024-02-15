@@ -201,7 +201,7 @@ public class JFile extends JNode {
     protected JavaDecl getDeclImpl()
     {
         JClassDecl classDecl = getClassDecl();
-        return classDecl != null ? classDecl.getDecl() : null;
+        return classDecl != null ? classDecl.getJavaClass() : null;
     }
 
     /**

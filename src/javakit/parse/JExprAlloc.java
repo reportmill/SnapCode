@@ -147,7 +147,7 @@ public class JExprAlloc extends JExpr {
         // If ClassDecl, return its type
         JClassDecl classDecl = getClassDecl();
         if (classDecl != null)
-            return classDecl.getDecl();
+            return classDecl.getJavaClass();
 
         // Get type - just return if null
         JType type = getType();

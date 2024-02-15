@@ -84,27 +84,8 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     @Override
     protected JavaClass[] getDeclaredClasses()
     {
-        JClassDecl[] innerClassDecls = _classDecl.getClassDecls();
-        return ArrayUtils.map(innerClassDecls, cdecl -> getJavaClassForClassDecl(cdecl), JavaClass.class);
-    }
-
-    /**
-     * Returns a JavaClass for given inner Class from JavaClass, creating if missing.
-     */
-    private JavaClass getJavaClassForClassDecl(JClassDecl anInnerClassDecl)
-    {
-        // Get or create class for class name
-        String innerClassName = anInnerClassDecl.getSimpleName();
-        JavaClass innerClass = _javaClass.getDeclaredClassForName(innerClassName);
-        if (innerClass == null)
-            innerClass = anInnerClassDecl.getDecl();
-
-        // Reset decl
-        JavaClassUpdaterDecl classUpdater = (JavaClassUpdaterDecl) innerClass.getUpdater();
-        classUpdater.setClassDecl(anInnerClassDecl);
-
-        // Return
-        return innerClass;
+        JClassDecl[] classDecls = _classDecl.getDeclaredClassDecls();
+        return ArrayUtils.mapNonNull(classDecls, cdecl -> cdecl.getJavaClass(), JavaClass.class);
     }
 
     /**

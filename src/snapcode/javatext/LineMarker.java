@@ -118,7 +118,7 @@ public abstract class LineMarker<T> extends Rect {
         }
 
         // Recurse into inner classes. What about anonymous inner classes?
-        JClassDecl[] innerClasses = aClassDecl.getClassDecls();
+        JClassDecl[] innerClasses = aClassDecl.getEnclosedClassDecls();
         for (JClassDecl classDecl : innerClasses)
             findMarkersForMethodAndConstructorOverrides(classDecl, textPane, theMarkers);
     }

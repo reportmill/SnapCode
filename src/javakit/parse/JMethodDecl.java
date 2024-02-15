@@ -57,7 +57,7 @@ public class JMethodDecl extends JExecutableDecl {
         JClassDecl enclosingClassDecl = getEnclosingClassDecl();
         if (enclosingClassDecl == null)
             return null;
-        JavaClass javaClass = enclosingClassDecl.getDecl();
+        JavaClass javaClass = enclosingClassDecl.getJavaClass();
         if (javaClass == null)
             return null;
 

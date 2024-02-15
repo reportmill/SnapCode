@@ -162,7 +162,7 @@ public class JVarDecl extends JNode implements WithId {
             JClassDecl enclosingClassDecl = getEnclosingClassDecl();
             if (enclosingClassDecl == null)
                 return null;
-            JavaClass enclosingClass = enclosingClassDecl.getDecl();
+            JavaClass enclosingClass = enclosingClassDecl.getJavaClass();
             if (enclosingClass == null)
                 return null;
             JavaField field = enclosingClass.getDeclaredFieldForName(name);
