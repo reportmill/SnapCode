@@ -192,7 +192,7 @@ public class JavaFileBuilderX extends JavaFileBuilder {
                 continue;
 
             // Update decls
-            boolean changed = javaClass.updateDecls();
+            boolean changed = javaClass.reloadClass();
             if (changed)
                 classChanged = true;
         }

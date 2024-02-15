@@ -228,6 +228,20 @@ public class JavaDecl implements Comparable<JavaDecl> {
     }
 
     /**
+     * Standard equals implementation.
+     */
+    @Override
+    public boolean equals(Object anObj)
+    {
+        if (anObj == this) return true;
+        JavaDecl other = anObj instanceof JavaDecl ? (JavaDecl) anObj : null;
+        if (other == null) return false;
+        String id = getId();
+        String otherId = other.getId();
+        return id.equals(otherId);
+    }
+
+    /**
      * Standard hashcode implementation.
      */
     public int hashCode()

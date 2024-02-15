@@ -36,6 +36,9 @@ public class JavaClass extends JavaType {
     // The array of interfaces
     protected JavaClass[] _interfaces = new JavaClass[0];
 
+    // The type var decls
+    protected JavaTypeVariable[] _typeVars = new JavaTypeVariable[0];
+
     // The field decls
     protected JavaField[] _fields;
 
@@ -48,8 +51,8 @@ public class JavaClass extends JavaType {
     // The inner class decls
     protected JavaClass[] _innerClasses = new JavaClass[0];
 
-    // The type var decls
-    protected JavaTypeVariable[] _typeVars = new JavaTypeVariable[0];
+    // The array of enum constants (enum only)
+    private Object[] _enumConstants;
 
     // The Array component type name (if Array)
     private String _componentTypeName;
@@ -57,8 +60,8 @@ public class JavaClass extends JavaType {
     // The Array component type (if Array)
     private JavaClass  _componentType;
 
-    // The array of enum constants (enum only)
-    private Object[] _enumConstants;
+    // The real class
+    protected Class<?> _realClass;
 
     // The updater
     private JavaClassUpdater  _updater;
@@ -70,6 +73,9 @@ public class JavaClass extends JavaType {
     {
         // Do normal version
         super(aResolver, DeclType.Class);
+
+        // Set real class
+        _realClass = aClass;
 
         // Set Id, Name, SimpleName
         _id = _name = ResolverUtils.getIdForClass(aClass);
@@ -216,25 +222,7 @@ public class JavaClass extends JavaType {
     /**
      * Returns the class this decl evaluates to when referenced.
      */
-    public Class<?> getRealClass()
-    {
-        String className = getClassName();
-        Class<?> realClass = className != null ? _resolver.getClassForName(className) : null;
-        if (realClass == null) {
-
-            // If from JClassDecl, not surprising
-            if (_updater instanceof JavaClassUpdaterDecl) {
-                JavaClassUpdaterDecl updater = (JavaClassUpdaterDecl) _updater;
-                JavaClass superClass = updater._classDecl.getSuperClass();
-                Class<?> superClassReal = superClass.getRealClass();
-                return superClassReal;
-            }
-
-            // Bigger deal
-            else System.out.println("JavaClass.getRealClass: Couldn't find real class for name: " + className);
-        }
-        return realClass;
-    }
+    public Class<?> getRealClass()  { return _realClass; }
 
     /**
      * Returns the modifiers.
@@ -244,10 +232,7 @@ public class JavaClass extends JavaType {
     /**
      * Returns whether decl is static.
      */
-    public boolean isStatic()
-    {
-        return Modifier.isStatic(_mods);
-    }
+    public boolean isStatic()  { return Modifier.isStatic(_mods); }
 
     /**
      * Returns whether class is anonymous class.
@@ -295,12 +280,21 @@ public class JavaClass extends JavaType {
     }
 
     /**
-     * Returns the interfaces this class implments.
+     * Returns the interfaces this class implements.
      */
     public JavaClass[] getInterfaces()
     {
-        getDeclaredFields();
-        return _interfaces;
+        if (_interfaces != null) return _interfaces;
+        return _interfaces = _updater.getInterfaces();
+    }
+
+    /**
+     * Returns the type variables.
+     */
+    public JavaTypeVariable[] getTypeVars()
+    {
+        if (_typeVars != null) return _typeVars;
+        return _typeVars = _updater.getTypeVariables();
     }
 
     /**
@@ -308,8 +302,8 @@ public class JavaClass extends JavaType {
      */
     public JavaField[] getDeclaredFields()
     {
-        if (_fields == null) updateDecls();
-        return _fields;
+        if (_fields != null) return _fields;
+        return _fields = _updater.getDeclaredFields();
     }
 
     /**
@@ -317,8 +311,8 @@ public class JavaClass extends JavaType {
      */
     public JavaMethod[] getDeclaredMethods()
     {
-        getDeclaredFields();
-        return _methods;
+        if (_methods != null) return _methods;
+        return _methods = _updater.getDeclaredMethods();
     }
 
     /**
@@ -326,8 +320,8 @@ public class JavaClass extends JavaType {
      */
     public JavaConstructor[] getDeclaredConstructors()
     {
-        getDeclaredFields();
-        return _constructors;
+        if (_constructors != null) return _constructors;
+        return _constructors = _updater.getDeclaredConstructors();
     }
 
     /**
@@ -335,17 +329,17 @@ public class JavaClass extends JavaType {
      */
     public JavaClass[] getDeclaredClasses()
     {
-        getDeclaredFields();
-        return _innerClasses;
+        if (_innerClasses != null) return _innerClasses;
+        return _innerClasses = _updater.getDeclaredClasses();
     }
 
     /**
-     * Returns the inner classes.
+     * Returns the enum constants.
      */
-    public JavaTypeVariable[] getTypeVars()
+    public Object[] getEnumConstants()
     {
-        getDeclaredFields();
-        return _typeVars;
+        if (_enumConstants != null || !isEnum()) return _enumConstants;
+        return _enumConstants = _updater.getEnumConstants();
     }
 
     /**
@@ -616,28 +610,6 @@ public class JavaClass extends JavaType {
     }
 
     /**
-     * Returns the enum constants.
-     */
-    public Object[] getEnumConstants()
-    {
-        if (_enumConstants != null || !isEnum()) return _enumConstants;
-
-        // Please don't look at this
-        if (_updater instanceof JavaClassUpdaterDecl) {
-            JavaField[] fields = getDeclaredFields();
-            fields = ArrayUtils.filter(fields, field -> field.isStatic());
-            Object[] enumConsts = new Object[fields.length];
-            for (int i = 0; i < fields.length; i++)
-                enumConsts[i] = new JavaEnum(this, fields[i].getName());
-            return _enumConstants = enumConsts;
-        }
-
-        // Get from real class
-        Class<?> realClass = getRealClass();
-        return _enumConstants = realClass.getEnumConstants();
-    }
-
-    /**
      * Returns a ParamType decl for this base class and given types ( This<typ,type>).
      */
     public JavaType getParameterizedTypeForTypes(JavaType ... theTypes)
@@ -790,13 +762,13 @@ public class JavaClass extends JavaType {
     public JavaClassUpdater getUpdater()  { return _updater; }
 
     /**
-     * Updates JavaDecls. Returns whether the decls changed since last update.
+     * Reloads the class using real class from resolver classloader. Returns whether the class changed during reload.
      */
-    public boolean updateDecls()
+    public boolean reloadClass()
     {
         // Update decls, if decls changed, clear AllDecls
         try {
-            return _updater.updateDeclsImpl();
+            return _updater.reloadClass();
         }
 
         catch (SecurityException e) {

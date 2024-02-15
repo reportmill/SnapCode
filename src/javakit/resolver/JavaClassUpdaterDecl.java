@@ -38,7 +38,11 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
      * Override to just return anything.
      */
     @Override
-    protected Class<?> getRealClassImpl()  { return Object.class; }
+    protected Class<?> getRealClassImpl()
+    {
+        JavaClass superClass = _classDecl.getSuperClass();
+        return superClass.getRealClass();
+    }
 
     /**
      * Returns the modifiers.
@@ -248,6 +252,20 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
 
         // Return
         return constructors;
+    }
+
+    /**
+     * Returns the enum constants.
+     */
+    @Override
+    public Object[] getEnumConstants()
+    {
+        JavaField[] fields = super.getDeclaredFields();
+        fields = ArrayUtils.filter(fields, field -> field.isStatic());
+        Object[] enumConsts = new Object[fields.length];
+        for (int i = 0; i < fields.length; i++)
+            enumConsts[i] = new JavaEnum(_javaClass, fields[i].getName());
+        return enumConsts;
     }
 
     /**
