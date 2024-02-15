@@ -3,6 +3,8 @@
  */
 package snapcode.project;
 import javakit.parse.*;
+import javakit.resolver.JavaClass;
+import javakit.resolver.JavaDecl;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.text.TextDoc;
@@ -11,8 +13,7 @@ import snap.util.ArrayUtils;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class holds a parsed Java file.
@@ -20,22 +21,25 @@ import java.util.List;
 public class JavaAgent {
 
     // The java file
-    private WebFile  _file;
+    private WebFile _javaFile;
 
     // Whether Java file is really Java REPL (.jepl)
     private boolean _isJepl;
 
     // The Project that owns this file
-    private Project  _proj;
+    private Project _project;
 
     // The JavaTextDoc version of this file
-    private JavaTextDoc  _javaTextDoc;
+    private JavaTextDoc _javaTextDoc;
 
     // The parsed version of this JavaFile
-    protected JFile  _jfile;
+    protected JFile _jfile;
 
-    // The JavaData for file (provides information on dependencies)
-    private JavaData _javaData;
+    // The external references in Java file
+    private JavaDecl[] _externalRefs;
+
+    // The external class references in Java file
+    private Set<JavaClass> _externalClassRefs;
 
     // A listener for file prop changes
     private PropChangeListener _fileBytesChangedLsnr;
@@ -54,20 +58,20 @@ public class JavaAgent {
      */
     private JavaAgent(WebFile aFile)
     {
-        _file = aFile;
+        _javaFile = aFile;
         _isJepl = aFile.getType().equals("jepl");
 
         // Set File JavaAgent property to this agent
-        _file.setProp(JavaAgent.class.getName(), this);
+        _javaFile.setProp(JavaAgent.class.getName(), this);
 
         // Start listening for file bytes changed
         _fileBytesChangedLsnr = this::fileBytesDidChange;
-        _file.addPropChangeListener(_fileBytesChangedLsnr, WebFile.Bytes_Prop);
+        _javaFile.addPropChangeListener(_fileBytesChangedLsnr, WebFile.Bytes_Prop);
 
         // Add to Project
-        _proj = Project.getProjectForFile(_file);
-        if (_proj != null)
-            _proj.addJavaAgent(this);
+        _project = Project.getProjectForFile(_javaFile);
+        if (_project != null)
+            _project.addJavaAgent(this);
     }
 
     /**
@@ -76,14 +80,22 @@ public class JavaAgent {
     public void closeAgent()
     {
         // If already close, complain and return
-        if (_file == null) { System.err.println("JavaAgent.closeAgent: Multiple closes"); return; }
+        if (_javaFile == null) {
+            System.err.println("JavaAgent.closeAgent: Multiple closes");
+            return;
+        }
 
         // Clear everything
         clearBuildIssues();
-        _file.setProp(JavaAgent.class.getName(), null);
-        _file.removePropChangeListener(_fileBytesChangedLsnr);
-        _file.reset();
-        _file = null; _proj = null; _jfile = null; _javaTextDoc = null; _javaData = null;
+        _javaFile.setProp(JavaAgent.class.getName(), null);
+        _javaFile.removePropChangeListener(_fileBytesChangedLsnr);
+        _javaFile.reset();
+        _javaFile = null;
+        _project = null;
+        _jfile = null;
+        _javaTextDoc = null;
+        _externalRefs = null;
+        _externalClassRefs = null;
     }
 
     /**
@@ -94,12 +106,12 @@ public class JavaAgent {
     /**
      * Returns the WebFile.
      */
-    public WebFile getFile()  { return _file; }
+    public WebFile getFile()  { return _javaFile; }
 
     /**
      * Returns the project for this JavaFile.
      */
-    public Project getProject()  { return  _proj; }
+    public Project getProject()  { return _project; }
 
     /**
      * Returns the JavaTextDoc for this JavaFile.
@@ -110,7 +122,7 @@ public class JavaAgent {
 
         // Create/load JavaTextDoc
         JavaTextDoc javaTextDoc = createJavaTextDoc();
-        javaTextDoc.readFromSourceURL(_file.getURL());
+        javaTextDoc.readFromSourceURL(_javaFile.getURL());
 
         // Listen for changes
         javaTextDoc.addPropChangeListener(pc -> javaTextDocDidPropChange(pc));
@@ -151,7 +163,7 @@ public class JavaAgent {
         if (_isJepl) {
             String className = getFile().getSimpleName();
             String[] importNames = getJeplDefaultImports();
-            if (_proj.getBuildFile().isIncludeSnapChartsRuntime())
+            if (_project.getBuildFile().isIncludeSnapChartsRuntime())
                 importNames = getJeplDefaultImportsWithCharts();
             String superClassName = "Object";
             jfile = javaParser.parseJeplFile(javaStr, className, importNames, superClassName);
@@ -159,7 +171,7 @@ public class JavaAgent {
         else jfile = javaParser.parseFile(javaStr);
 
         // Set SourceFile
-        jfile.setSourceFile(_file);
+        jfile.setSourceFile(_javaFile);
         Project project = getProject();
         if (project != null)
             jfile.setResolverSupplier(() -> project.getResolver());
@@ -169,24 +181,15 @@ public class JavaAgent {
     }
 
     /**
-     * Returns the JavaData.
-     */
-    public JavaData getJavaData()
-    {
-        if (_javaData != null) return _javaData;
-        return _javaData = new JavaData(_file);
-    }
-
-    /**
      * Returns the build issues.
      */
     public BuildIssue[] getBuildIssues()
     {
-        Workspace workspace = _proj != null ? _proj.getWorkspace() : null;
+        Workspace workspace = _project != null ? _project.getWorkspace() : null;
         if (workspace == null)
             return new BuildIssue[0];
         BuildIssues projBuildIssues = workspace.getBuildIssues();
-        return projBuildIssues.getIssuesForFile(_file);
+        return projBuildIssues.getIssuesForFile(_javaFile);
     }
 
     /**
@@ -195,7 +198,7 @@ public class JavaAgent {
     public void setBuildIssues(BuildIssue[] buildIssues)
     {
         // Get Workspace.BuildIssues and clear
-        Workspace workspace = _proj != null ? _proj.getWorkspace() : null;
+        Workspace workspace = _project != null ? _project.getWorkspace() : null;
         if (workspace == null)
             return;
         BuildIssues buildIssuesMgr = workspace.getBuildIssues();
@@ -254,7 +257,37 @@ public class JavaAgent {
     {
         if (_javaTextDoc != null)
             return _javaTextDoc.getString();
-        return _file.getText();
+        return _javaFile.getText();
+    }
+
+    /**
+     * Returns whether Java file is dependent of class.
+     */
+    public boolean isDependentOnClass(JavaClass javaClass)
+    {
+        Set<JavaClass> externalClassReferences = getExternalClassReferences();
+        return externalClassReferences.contains(javaClass);
+    }
+
+    /**
+     * Returns the external references.
+     */
+    public JavaDecl[] getExternalReferences()
+    {
+        if (_externalRefs != null) return _externalRefs;
+        WebFile[] classFiles = _project.getProjectFiles().getClassFilesForJavaFile(_javaFile);
+        return _externalRefs = ClassFileUtils.getExternalReferencesForClassFiles(classFiles);
+    }
+
+    /**
+     * Returns the external class references.
+     */
+    private Set<JavaClass> getExternalClassReferences()
+    {
+        if (_externalClassRefs != null) return _externalClassRefs;
+        JavaDecl[] externalReferences = getExternalReferences();
+        JavaClass[] externalClassReferences = ArrayUtils.filterByClass(externalReferences, JavaClass.class);
+        return _externalClassRefs = new HashSet<>(Arrays.asList(externalClassReferences));
     }
 
     /**
@@ -293,13 +326,13 @@ public class JavaAgent {
     }
 
     /**
-     * Called when file changes.
+     * Called when java file changes.
      */
     private void fileBytesDidChange(PropChange aPC)
     {
-        // If file.Bytes changed externally, reset JavaTextDoc and JFile
+        // If JavaFile.Bytes changed externally, reset JavaTextDoc and JFile
         if (_javaTextDoc != null) {
-            String fileText = _file.getText();
+            String fileText = _javaFile.getText();
             String textDocText = _javaTextDoc.getString();
             if (!fileText.equals(textDocText)) {
                 _javaTextDoc.setString(fileText);
@@ -319,6 +352,8 @@ public class JavaAgent {
         boolean jfileUpdated = !_isJepl && JavaTextDocUtils.updateJFileForChange(_javaTextDoc, _jfile, charsChange);
         if (!jfileUpdated)
             _jfile = null;
+        _externalRefs = null;
+        _externalClassRefs = null;
     }
 
     /**
@@ -338,6 +373,16 @@ public class JavaAgent {
 
         // Return not found
         return null;
+    }
+
+    /**
+     * Returns the JavaAgent for given file.
+     */
+    public static JavaAgent getAgentForJavaFile(WebFile javaFile)
+    {
+        JavaAgent javaAgent = getAgentForFile(javaFile);
+        assert (javaAgent != null);
+        return javaAgent;
     }
 
     /**

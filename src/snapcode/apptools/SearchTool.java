@@ -13,7 +13,6 @@ import snap.gfx.Image;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.app.ProjectPane;
-import snapcode.project.JavaData;
 import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.web.WebFile;
@@ -21,7 +20,6 @@ import snap.web.WebSite;
 import snapcode.util.FileIcons;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * This class manages project search.
@@ -270,9 +268,8 @@ public class SearchTool extends WorkspaceTool {
         else if (aFile.getType().equals("java")) {
 
             // Get JavaAgent, JavaData and references
-            JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
-            JavaData javaData = javaAgent.getJavaData();
-            Set<JavaDecl> externalRefs = javaData.getExternalReferences();
+            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(aFile);
+            JavaDecl[] externalRefs = javaAgent.getExternalReferences();
 
             // Iterate over references
             for (JavaDecl externalRef : externalRefs) {

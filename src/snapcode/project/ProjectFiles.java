@@ -306,7 +306,6 @@ public class ProjectFiles {
         String filePath = getSimplePath(file.getPath());
 
         // Get package name by swapping slashes for dots
-        String packageName = filePath.substring(1).replace('/', '.');
-        return packageName;
+        return filePath.substring(1).replace('/', '.');
     }
 }

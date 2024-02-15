@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
+import javakit.resolver.JavaClass;
 import snap.util.ListUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
@@ -43,16 +44,6 @@ public class JavaFileBuilderX extends JavaFileBuilder {
     {
         // Do normal version
         super.removeBuildFile(javaFile);
-
-        // Get dependent files and add to BuildFiles
-        JavaData javaData = JavaData.getJavaDataForFile(javaFile);
-        Set<WebFile> dependents = javaData.getDependents();
-        for (WebFile dependant : dependents)
-            if (dependant.getExists())
-                addBuildFile(dependant);
-
-        // Remove JavaFile Dependencies
-        javaData.removeDependencies();
 
         // Get JavaFile.ClassFiles and remove them
         ProjectFiles projectFiles = _proj.getProjectFiles();
@@ -158,29 +149,55 @@ public class JavaFileBuilderX extends JavaFileBuilder {
         // Iterate over JavaFiles for modified ClassFiles and update
         for (WebFile modifiedJavaFile : modifiedJavaFiles) {
 
-            // Update dependencies and get files that need to be updated
-            JavaData javaData = JavaData.getJavaDataForFile(modifiedJavaFile);
-            boolean dependsChanged = javaData.updateDependencies();
-            if (!dependsChanged)
+            // Reload classes for Java file - just continue if no changes
+            boolean classChanged = reloadClassesForJavaFile(modifiedJavaFile);
+            if (!classChanged)
                 continue;
 
-            // Iterate over Java files dependent on loop JavaFile and mark for update
-            Set<WebFile> updateFiles = javaData.getDependents();
-            for (WebFile updateFile : updateFiles) {
+            // Get Java files dependent on JavaFile
+            WebFile[] dependentJavaFiles = WorkspaceUtils.getJavaFilesDependentOnJavaFile(modifiedJavaFile);
+
+            // Iterate over dependent Java files and mark for update
+            for (WebFile dependentJavaFile : dependentJavaFiles) {
 
                 // Make sure updated file is in sourceFiles list
-                Project proj = Project.getProjectForFile(updateFile);
+                Project proj = Project.getProjectForFile(dependentJavaFile);
                 if (proj == _proj) {
-                    if (!_compiledFiles.contains(updateFile))
-                        ListUtils.addUniqueId(sourceFiles, updateFile);
+                    if (!_compiledFiles.contains(dependentJavaFile))
+                        ListUtils.addUniqueId(sourceFiles, dependentJavaFile);
                 }
 
                 // Otherwise, add build file
                 else {
                     ProjectBuilder projectBuilder = proj.getBuilder();
-                    projectBuilder.addBuildFileForce(updateFile);
+                    projectBuilder.addBuildFileForce(dependentJavaFile);
                 }
             }
         }
+    }
+
+    /**
+     * Reload classes for Java file and return whether class changed.
+     */
+    private static boolean reloadClassesForJavaFile(WebFile javaFile)
+    {
+        Project project = Project.getProjectForFile(javaFile);
+        WebFile[] classFiles = project.getProjectFiles().getClassFilesForJavaFile(javaFile);
+        boolean classChanged = false;
+
+        // Get new declarations
+        for (WebFile classFile : classFiles) {
+            JavaClass javaClass = project.getJavaClassForFile(classFile);
+            if (javaClass == null)
+                continue;
+
+            // Update decls
+            boolean changed = javaClass.updateDecls();
+            if (changed)
+                classChanged = true;
+        }
+
+        // Return
+        return classChanged;
     }
 }
