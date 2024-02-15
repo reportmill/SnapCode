@@ -152,7 +152,7 @@ public class JExprAlloc extends JExpr {
         // Get type - just return if null
         JType type = getType();
         if (type != null)
-            return type.getDecl();
+            return type.getJavaType();
 
         // Return not found
         return null;

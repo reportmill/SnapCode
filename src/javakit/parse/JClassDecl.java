@@ -68,6 +68,36 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     }
 
     /**
+     * Returns the full class name.
+     */
+    public String getClassName()
+    {
+        // If enclosing class declaration, return ThatClassName$ThisName, otherwise return JFile.Name
+        String className = getName();
+        if (className == null)
+            return null;
+
+        // If enclosing class, get name from it
+        JClassDecl enclosingClassDecl = getEnclosingClassDecl();
+        if (enclosingClassDecl != null) {
+            String enclosingClassName = enclosingClassDecl.getEvalClassName();
+            if (enclosingClassName != null)
+                className = enclosingClassName + '$' + className;
+        }
+
+        // Otherwise get full name from file
+        else {
+            JFile jfile = getFile();
+            String packageName = jfile.getPackageName();
+            if (packageName != null && packageName.length() > 0)
+                className = packageName + '.' + className;
+        }
+
+        // Return
+        return className;
+    }
+
+    /**
      * Returns the simple name.
      */
     public String getSimpleName()
@@ -368,6 +398,42 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     }
 
     /**
+     * Returns the Java class.
+     */
+    public JavaClass getJavaClass()
+    {
+        if (_javaClass != null) return _javaClass;
+        return _javaClass = getJavaClassImpl();
+    }
+
+    /**
+     * Returns the Java class.
+     */
+    protected JavaClass getJavaClassImpl()
+    {
+        // Get class name
+        String className = getClassName();
+        if (className == null)
+            return null;
+
+        // Get class for name - if not found, use SuperClass (assume this class not compiled)
+        JavaClass javaClass = getJavaClassForName(className);
+        if (javaClass == null) {
+            Resolver resolver = getResolver();
+            javaClass = new JavaClass(resolver, this, className);
+        }
+
+        // Otherwise see if we need to update
+        else if (javaClass.getUpdater() instanceof JavaClassUpdaterDecl) {
+            JavaClassUpdaterDecl updater = (JavaClassUpdaterDecl) javaClass.getUpdater();
+            updater.setClassDecl(this);
+        }
+
+        // Return
+        return javaClass;
+    }
+
+    /**
      * Returns the simple name.
      */
     @Override
@@ -385,7 +451,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     /**
      * Returns the simple name.
      */
-    protected String getAnonymousClassName()
+    private String getAnonymousClassName()
     {
         // Get enclosingClass and inner class decls
         JClassDecl enclosingClassDecl = getEnclosingClassDecl();
@@ -410,58 +476,6 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
      */
     @Override
     protected JavaClass getDeclImpl()  { return getJavaClass(); }
-
-    /**
-     * Returns the Java class.
-     */
-    public JavaClass getJavaClass()
-    {
-        if (_javaClass != null) return _javaClass;
-        return _javaClass = getJavaClassImpl();
-    }
-
-    /**
-     * Returns the Java class.
-     */
-    protected JavaClass getJavaClassImpl()
-    {
-        // If enclosing class declaration, return ThatClassName$ThisName, otherwise return JFile.Name
-        String className = getName();
-        if (className == null)
-            return null;
-
-        // If enclosing class, get name from it
-        JClassDecl enclosingClassDecl = getEnclosingClassDecl();
-        if (enclosingClassDecl != null) {
-            String enclosingClassName = enclosingClassDecl.getEvalClassName();
-            if (enclosingClassName != null)
-                className = enclosingClassName + '$' + className;
-        }
-
-        // Otherwise get full name from file
-        else {
-            JFile jfile = getFile();
-            String packageName = jfile.getPackageName();
-            if (packageName != null && packageName.length() > 0)
-                className = packageName + '.' + className;
-        }
-
-        // Get class for name - if not found, use SuperClass (assume this class not compiled)
-        JavaClass javaClass = getJavaClassForName(className);
-        if (javaClass == null) {
-            Resolver resolver = getResolver();
-            javaClass = new JavaClass(resolver, this, className);
-        }
-
-        // Otherwise see if we need to update
-        else if (javaClass.getUpdater() instanceof JavaClassUpdaterDecl) {
-            JavaClassUpdaterDecl updater = (JavaClassUpdaterDecl) javaClass.getUpdater();
-            updater.setClassDecl(this);
-        }
-
-        // Return
-        return javaClass;
-    }
 
     /**
      * Override to check field declarations for id.
@@ -538,7 +552,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
             // Check for TypeVar
             if (type.getParent() instanceof JType) {
                 JType par = (JType) type.getParent();
-                JavaType baseType = par.getBaseDecl();
+                JavaType baseType = par.getBaseType();
                 if (baseType instanceof JavaClass) {
                     JavaClass baseClass = (JavaClass) baseType;
                     String typeName = type.getName();

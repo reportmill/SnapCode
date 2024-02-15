@@ -48,7 +48,7 @@ public class JVarDecl extends JNode implements WithId {
             if (_arrayCount > 0) {
                 type2._arrayCount = _type._arrayCount + _arrayCount;
                 for (int i = 0; i < _arrayCount && type2._decl != null; i++)
-                    type2._decl = type2.getDecl().getArrayType();
+                    type2._decl = type2.getJavaType().getArrayType();
             }
             _type = type2;
             _type._parent = this;
@@ -147,8 +147,18 @@ public class JVarDecl extends JNode implements WithId {
     }
 
     /**
+     * Returns the Java type.
+     */
+    public JavaType getJavaType()
+    {
+        JType type = getType();
+        return type != null ? type.getJavaType() : null;
+    }
+
+    /**
      * Tries to resolve the class declaration for this node.
      */
+    @Override
     protected JavaDecl getDeclImpl()
     {
         // Get name - if not set, just bail
@@ -165,13 +175,11 @@ public class JVarDecl extends JNode implements WithId {
             JavaClass enclosingClass = enclosingClassDecl.getJavaClass();
             if (enclosingClass == null)
                 return null;
-            JavaField field = enclosingClass.getDeclaredFieldForName(name);
-            return field;
+            return enclosingClass.getDeclaredFieldForName(name);
         }
 
         // Get the eval type
-        JType varDeclType = getType();
-        JavaType evalType = varDeclType != null ? varDeclType.getDecl() : null;
+        JavaType evalType = getJavaType();
         if (evalType == null) // Can happen for Lambdas
             evalType = getJavaClassForClass(Object.class);
 

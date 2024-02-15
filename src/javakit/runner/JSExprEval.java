@@ -315,7 +315,7 @@ public class JSExprEval {
 
         // Get type - if not primative, just return
         JType type = aCastExpr.getType();
-        JavaType typeClass = type != null ? type.getDecl() : null;
+        JavaType typeClass = type != null ? type.getJavaType() : null;
         if (typeClass == null) {
             System.out.println("JSExprEval: Couldn't get type for cast expression: " + aCastExpr);
             return value;

@@ -184,7 +184,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
             // If type is TypeVar, set to TypeVar.BoundsType
             if (typeVar != null)
                 paramTypes[i] = typeVar.getBoundsType();
-            else paramTypes[i] = varDeclType.getBaseDecl();
+            else paramTypes[i] = varDeclType.getBaseType();
 
             // If param type is null, just return (can happen if params are bogus (being edited))
             if (paramTypes[i] == null) return null;

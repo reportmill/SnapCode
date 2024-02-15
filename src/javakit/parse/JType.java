@@ -27,7 +27,10 @@ public class JType extends JNode {
     private List<JType>  _typeArgs;
 
     // The base type
-    private JavaType  _baseDecl;
+    private JavaType _baseType;
+
+    // The JavaType
+    private JavaType _javaType;
 
     /**
      * Constructor.
@@ -126,7 +129,7 @@ public class JType extends JNode {
     public JavaType getTypeArgType(int anIndex)
     {
         JType typeArg = getTypeArg(anIndex);
-        return typeArg.getDecl();
+        return typeArg.getJavaType();
     }
 
     /**
@@ -140,64 +143,59 @@ public class JType extends JNode {
     }
 
     /**
-     * Override to get name from base expression.
+     * Returns the base type.
      */
-    @Override
-    protected String getNameImpl()
+    protected JavaType getBaseType()
     {
-        JExpr baseExpr = getBaseExpr();
-        return baseExpr != null ? baseExpr.getName() : null;
+        if (_baseType != null) return _baseType;
+        return _baseType = getBaseTypeImpl();
     }
 
     /**
-     * Override to return as JavaType.
+     * Returns the base type.
      */
-    @Override
-    public JavaType getDecl()
+    private JavaType getBaseTypeImpl()
     {
-        JavaType javaType = (JavaType) super.getDecl();
-        return javaType;
-    }
-
-    /**
-     * Override to resolve type class name and create declaration from that.
-     */
-    protected JavaType getBaseDecl()
-    {
-        // If already set, just return
-        if (_baseDecl != null) return _baseDecl;
-
         // Handle 'var'
         if (isVarType())
-            return _baseDecl = getDeclForVar();
+            return getDeclForVar();
 
         // Handle primitive type
         String baseName = getName();
         Class<?> primitiveClass = ClassUtils.getPrimitiveClassForName(baseName);
         if (primitiveClass != null)
-            return _baseDecl = getJavaClassForClass(primitiveClass);
+            return getJavaClassForClass(primitiveClass);
 
         // Try to find class directly
         JavaType javaClass = getJavaClassForName(baseName);
         if (javaClass != null)
-            return _baseDecl = javaClass;
+            return javaClass;
 
         // If not primitive, try to resolve class (type might be package name or unresolvable)
         JavaDecl packageOrClassDecl = getDeclForChildType(this);
         if (packageOrClassDecl instanceof JavaType)
             javaClass = (JavaType) packageOrClassDecl;
 
-        // Set/return
-        return _baseDecl = javaClass;
+        // Return
+        return javaClass;
     }
 
     /**
-     * Override to resolve type class name and create declaration from that.
+     * Returns the JavaType.
      */
-    protected JavaType getDeclImpl()
+    public JavaType getJavaType()
+    {
+        if (_javaType != null) return _javaType;
+        return _javaType = getJavaTypeImpl();
+    }
+
+    /**
+     * Returns the JavaType.
+     */
+    private JavaType getJavaTypeImpl()
     {
         // Get base decl
-        JavaType javaType = getBaseDecl();
+        JavaType javaType = getBaseType();
         if (javaType == null)
             return null;
 
@@ -225,6 +223,22 @@ public class JType extends JNode {
         // Return
         return javaType;
     }
+
+    /**
+     * Override to get name from base expression.
+     */
+    @Override
+    protected String getNameImpl()
+    {
+        JExpr baseExpr = getBaseExpr();
+        return baseExpr != null ? baseExpr.getName() : null;
+    }
+
+    /**
+     * Override to return JavaType.
+     */
+    @Override
+    protected JavaType getDeclImpl()  { return getJavaType(); }
 
     /**
      * Override to handle 'var' types.
@@ -287,8 +301,8 @@ public class JType extends JNode {
         NodeError[] errors = NodeError.NO_ERRORS;
 
         // Handle unresolved type
-        JavaType typeClass = getDecl();
-        if (typeClass == null) {
+        JavaType javaType = getJavaType();
+        if (javaType == null) {
             String className = getName();
             String errorString = "Can't resolve type: " + className;
             if ("var".equals(className))

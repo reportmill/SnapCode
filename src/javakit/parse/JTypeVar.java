@@ -62,7 +62,7 @@ public class JTypeVar extends JNode implements WithId {
      */
     public JavaType getBoundsType()
     {
-        return _types.size() > 0 ? _types.get(0).getDecl() : getJavaClassForClass(Object.class);
+        return _types.size() > 0 ? _types.get(0).getJavaType() : getJavaClassForClass(Object.class);
     }
 
     /**

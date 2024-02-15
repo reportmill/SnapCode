@@ -255,15 +255,12 @@ public class NodeCompleter {
     private void addCompletionsForNewVarDecl(JVarDecl varDecl)
     {
         // Get type from var decl
-        JType varDeclType = varDecl.getType();
-        if (varDeclType == null)
-            return;
-        JavaType evalType = varDeclType.getDecl();
-        if (evalType != null && (evalType.isPrimitive() || evalType.isArray() && evalType.getComponentType().isPrimitive()))
+        JavaType evalType = varDecl.getJavaType();
+        if (evalType == null || evalType.isPrimitive() || evalType.isArray() && evalType.getComponentType().isPrimitive())
             return;
 
         // Get suggested var name from type name
-        String typeName = evalType != null ? evalType.getSimpleName() : varDeclType.getSimpleName();
+        String typeName = evalType.getSimpleName();
         String varName = StringUtils.firstCharLowerCase(typeName);
         String prefix = varDecl.getName().toLowerCase();
 
