@@ -6,7 +6,6 @@ import javakit.parse.JClassDecl;
 import javakit.parse.JFile;
 import snap.util.ArrayUtils;
 import java.lang.reflect.*;
-import java.util.*;
 
 /**
  * This JavaType subclass represents a java.lang.Class.
@@ -60,9 +59,6 @@ public class JavaClass extends JavaType {
 
     // The array of enum constants (enum only)
     private Object[] _enumConstants;
-
-    // A cached list of all decls
-    private List<JavaDecl>  _allDecls;
 
     // The updater
     private JavaClassUpdater  _updater;
@@ -181,16 +177,6 @@ public class JavaClass extends JavaType {
      */
     @Override
     public String getClassName()  { return _name; }
-
-    /**
-     * Returns the top level class name.
-     */
-    public String getRootClassName()
-    {
-        if (_declaringClass != null)
-            return _declaringClass.getRootClassName();
-        return getClassName();
-    }
 
     /**
      * Override to return as Class type.
@@ -810,39 +796,13 @@ public class JavaClass extends JavaType {
     {
         // Update decls, if decls changed, clear AllDecls
         try {
-            boolean classChanged = _updater.updateDeclsImpl();
-            if (classChanged)
-                _allDecls = null;
-            return classChanged;
+            return _updater.updateDeclsImpl();
         }
 
         catch (SecurityException e) {
             e.printStackTrace();
             return false;
         }
-    }
-
-    /**
-     * Returns the list of all decls.
-     */
-    public List<JavaDecl> getAllDecls()
-    {
-        // If already set, just return
-        if (_allDecls != null) return _allDecls;
-
-        // Create new AllDecls cached list with decls for fields, methods, constructors, inner classes and this class
-        JavaField[] fields = getDeclaredFields();
-        int memberCount = fields.length + _methods.length + _constructors.length;
-        int declCount = memberCount + _innerClasses.length + 1;
-        List<JavaDecl> decls = new ArrayList<>(declCount);
-        decls.add(this);
-        Collections.addAll(decls, _fields);
-        Collections.addAll(decls, _methods);
-        Collections.addAll(decls, _constructors);
-        Collections.addAll(decls, _innerClasses);
-
-        // Set/return
-        return _allDecls = decls;
     }
 
     /**
