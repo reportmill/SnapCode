@@ -77,6 +77,29 @@ public class JavaField extends JavaMember {
     }
 
     /**
+     * Merges the given new field into this field.
+     */
+    public boolean mergeField(JavaField newField)
+    {
+        // Update modifiers
+        boolean didChange = false;
+        if (newField.getModifiers() != getModifiers()) {
+            _mods = newField.getModifiers();
+            didChange = true;
+        }
+
+        // Update return type
+        if (newField.getEvalType() != getEvalType()) { _evalType = newField.getEvalType(); didChange = true; }
+
+        // Update Field
+        if (newField._field != null)
+            _field = newField._field;
+
+        // Return
+        return didChange;
+    }
+
+    /**
      * A Builder class for JavaField.
      */
     public static class FieldBuilder {

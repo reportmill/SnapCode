@@ -84,18 +84,18 @@ public class JavaClassUpdater {
             classChanged = true;
 
         // Update fields
-        JavaField[] newFields = _javaClass._fields = getDeclaredFields();
-        if (!Arrays.equals(oldFields, newFields))
+        JavaField[] newFields = _javaClass._fields = getMergedFields(oldFields);
+        if (newFields != oldFields)
             classChanged = true;
 
         // Update methods
-        JavaMethod[] newMethods = _javaClass._methods = getDeclaredMethods();
-        if (!Arrays.equals(oldMethods, newMethods))
+        JavaMethod[] newMethods = _javaClass._methods = getMergedMethods(oldMethods);
+        if (newMethods != oldMethods)
             classChanged = true;
 
         // Update constructors
-        JavaConstructor[] newConstrs = _javaClass._constructors = getDeclaredConstructors();
-        if (!Arrays.equals(oldConstrs, newConstrs))
+        JavaConstructor[] newConstrs = _javaClass._constructors = getMergedConstructors(oldConstrs);
+        if (newConstrs != oldConstrs)
             classChanged = true;
 
         // Return
@@ -199,5 +199,77 @@ public class JavaClassUpdater {
     public Object[] getEnumConstants()
     {
         return _realClass.getEnumConstants();
+    }
+
+    /**
+     * Merges an array of old fields and new fields.
+     */
+    protected JavaField[] getMergedFields(JavaField[] oldFields)
+    {
+        JavaField[] newFields = getDeclaredFields();
+        boolean didChange = false;
+
+        // Iterate over new fields and merge with old
+        for (int i = 0; i < newFields.length; i++) {
+            JavaField newField = newFields[i];
+            JavaField oldField = ArrayUtils.findMatch(oldFields, field -> field.equals(newField));
+            if (oldField != null) {
+                if (oldField.mergeField(newField))
+                    didChange = true;
+                newFields[i] = oldField;
+            }
+            else didChange = true;
+        }
+
+        // Return
+        return didChange ? newFields : oldFields;
+    }
+
+    /**
+     * Merges an array of old methods with new methods.
+     */
+    protected JavaMethod[] getMergedMethods(JavaMethod[] oldMethods)
+    {
+        JavaMethod[] newMethods = getDeclaredMethods();
+        boolean didChange = false;
+
+        // Iterate over new fields and merge with old
+        for (int i = 0; i < newMethods.length; i++) {
+            JavaMethod newMethod = newMethods[i];
+            JavaMethod oldMethod = ArrayUtils.findMatch(oldMethods, method -> method.equals(newMethod));
+            if (oldMethod != null) {
+                if (oldMethod.mergeMethod(oldMethod))
+                    didChange = true;
+                newMethods[i] = oldMethod;
+            }
+            else didChange = true;
+        }
+
+        // Return
+        return didChange ? newMethods : oldMethods;
+    }
+
+    /**
+     * Merges an array of old constructors with new constructors.
+     */
+    protected JavaConstructor[] getMergedConstructors(JavaConstructor[] oldConstructors)
+    {
+        JavaConstructor[] newConstructors = getDeclaredConstructors();
+        boolean didChange = false;
+
+        // Iterate over new constructors and merge with old
+        for (int i = 0; i < newConstructors.length; i++) {
+            JavaConstructor newConstr = newConstructors[i];
+            JavaConstructor oldConstr = ArrayUtils.findMatch(oldConstructors, constr -> constr.equals(newConstr));
+            if (oldConstr != null) {
+                if (oldConstr.mergeConstructor(oldConstr))
+                    didChange = true;
+                newConstructors[i] = oldConstr;
+            }
+            else didChange = true;
+        }
+
+        // Return
+        return didChange ? newConstructors : oldConstructors;
     }
 }

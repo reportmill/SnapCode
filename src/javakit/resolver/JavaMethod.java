@@ -185,6 +185,29 @@ public class JavaMethod extends JavaExecutable {
     }
 
     /**
+     * Merges the given new method into this method.
+     */
+    public boolean mergeMethod(JavaMethod newMethod)
+    {
+        // Update modifiers
+        boolean didChange = false;
+        if (newMethod.getModifiers() != getModifiers()) {
+            _mods = newMethod.getModifiers();
+            didChange = true;
+        }
+
+        // Update return type
+        //if (newMethod.getGenericReturnType() != getGenericReturnType()) { _genericReturnType = newMethod.getGenericReturnType(); didChange = true; }
+
+        // Update Method
+        if (newMethod._method != null)
+            _method = newMethod._method;
+
+        // Return
+        return didChange;
+    }
+
+    /**
      * This method repackages a given array of individual method args into an args array for VarArgs method.
      */
     public Object[] repackageArgsForVarArgsMethod(Object[] theArgs)
