@@ -140,6 +140,15 @@ public class ClassTree {
     }
 
     /**
+     * Returns whether given package name is known.
+     */
+    public boolean isKnownPackageName(String packageName)
+    {
+        String filePath = '/' + packageName.replace(".", "/");
+        return ArrayUtils.hasMatch(_classPathSites, site -> site.getFileForPath(filePath) != null);
+    }
+
+    /**
      * Standard toString implementation.
      */
     @Override

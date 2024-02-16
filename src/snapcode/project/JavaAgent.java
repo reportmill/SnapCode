@@ -227,12 +227,19 @@ public class JavaAgent {
      */
     public void checkFileForErrors()
     {
-        // Reload class
-        reloadClassFromClassDecl();
-
-        // Get JFile errors
+        // Check for parse errors
         JFile jFile = getJFile();
-        NodeError[] errors = NodeError.getAllNodeErrors(jFile);
+        NodeError[] errors = NodeError.getNodeErrorForFileParseException(jFile);
+
+        // If no parse errors, do full error check
+        if (errors == null) {
+
+            // Reload class
+            reloadClassFromClassDecl();
+
+            // Get JFile errors
+            errors = NodeError.getAllNodeErrors(jFile);
+        }
 
         // Convert to BuildIssues and set in agent
         WebFile javaFile = getFile();

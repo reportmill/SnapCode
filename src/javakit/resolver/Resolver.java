@@ -180,10 +180,8 @@ public class Resolver {
             return new JavaPackage(this, null, "");
 
         // If package doesn't exist, just return null
-        ClassLoader classLoader =  _project.getRuntimeClassLoader();
-        String path = aName.replace('.', '/');
-        Object url = classLoader.getResource(path);
-        if (url == null)
+        ClassTree classTree = getClassTree();
+        if (!classTree.isKnownPackageName(aName))
             return null;
 
         // Get parent package

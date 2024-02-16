@@ -114,6 +114,7 @@ public class JavaTextDocUtils {
     {
         // If no JFile, just bail
         if (aJFile == null) return true;
+        aJFile.setException(null);
 
         // Get CharsChange and charIndex
         CharSequence addChars = aCharsChange.getNewValue();

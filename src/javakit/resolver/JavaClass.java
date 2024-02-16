@@ -746,7 +746,7 @@ public class JavaClass extends JavaType {
             return suggestionString + " - " + _declaringClass.getName();
 
         // If not-root package, add package name
-        else {
+        else if (_package != null) {
             String packageName = _package.getName();
             if (packageName.length() > 0)
                 return suggestionString + " - " + _package.getName();

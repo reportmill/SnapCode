@@ -170,8 +170,9 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
             // Get/set return type
             JType returnTypeDecl = methodDecl.getType();
             JavaType returnType = returnTypeDecl != null ? returnTypeDecl.getJavaType() : null;
-            if (returnType != null)
-                mb.returnType(returnType);
+            if (returnType == null)
+                returnType = _resolver.getJavaTypeForType(Object.class);
+            mb.returnType(returnType);
 
             // Add to builder list
             mb.save();

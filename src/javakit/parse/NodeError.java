@@ -114,4 +114,23 @@ public class NodeError {
         for (JNode child : children)
             findAllNodeErrors(child, errorsList);
     }
+
+    /**
+     * Returns the node error for a JFile parse exception.
+     */
+    public static NodeError[] getNodeErrorForFileParseException(JFile jfile)
+    {
+        // Get exception - just return null if none
+        Exception exception = jfile.getException();
+        if (exception == null)
+            return null;
+
+        // Get last node
+        JNode lastNode = jfile;
+        while (lastNode.getChildCount() > 0)
+            lastNode = lastNode.getChild(lastNode.getChildCount() - 1);
+
+        // Return error
+        return newErrorArray(lastNode, exception.getMessage());
+    }
 }
