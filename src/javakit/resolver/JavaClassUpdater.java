@@ -28,6 +28,7 @@ public class JavaClassUpdater {
     {
         _javaClass = aClass;
         _resolver = aClass._resolver;
+        _realClass = aClass._realClass;
     }
 
     /**
@@ -69,32 +70,32 @@ public class JavaClassUpdater {
 
         // Update interfaces
         JavaClass[] newInterfaces = _javaClass._interfaces = getInterfaces();
-        if (!ArrayUtils.equalsId(oldInterfaces, newInterfaces))
+        if (!Arrays.equals(oldInterfaces, newInterfaces))
             classChanged = true;
 
         // Update type variables
         JavaTypeVariable[] newTypeVars = _javaClass._typeVars = getTypeVariables();
-        if (!ArrayUtils.equalsId(oldTypeVars, newTypeVars))
+        if (!Arrays.equals(oldTypeVars, newTypeVars))
             classChanged = true;
 
         // Update inner classes
         JavaClass[] newInnerClasses = _javaClass._innerClasses = getDeclaredClasses();
-        if (!ArrayUtils.equalsId(oldInnerClasses, newInnerClasses))
+        if (!Arrays.equals(oldInnerClasses, newInnerClasses))
             classChanged = true;
 
         // Update fields
         JavaField[] newFields = _javaClass._fields = getDeclaredFields();
-        if (!ArrayUtils.equalsId(oldFields, newFields))
+        if (!Arrays.equals(oldFields, newFields))
             classChanged = true;
 
         // Update methods
         JavaMethod[] newMethods = _javaClass._methods = getDeclaredMethods();
-        if (!ArrayUtils.equalsId(oldMethods, newMethods))
+        if (!Arrays.equals(oldMethods, newMethods))
             classChanged = true;
 
         // Update constructors
         JavaConstructor[] newConstrs = _javaClass._constructors = getDeclaredConstructors();
-        if (!ArrayUtils.equalsId(oldConstrs, newConstrs))
+        if (!Arrays.equals(oldConstrs, newConstrs))
             classChanged = true;
 
         // Return

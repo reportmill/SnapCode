@@ -77,17 +77,13 @@ public class Resolver {
     {
         // If package, create/return package
         if (classTreeNode.isPackage)
-            return new JavaPackage(this, parentPackage, classTreeNode.fullName);
+            return getJavaPackageForName(classTreeNode.fullName);
 
-        // Get real class
-        Class<?> realClass = getClassForName(classTreeNode.fullName);
-        if (realClass == null) { // This should never happen
+        // Return class
+        JavaClass javaClass = getJavaClassForName(classTreeNode.fullName);
+        if (javaClass == null) // This should never happen
             System.err.println("Resolver.getJavaDeclForClassTreeNode: Can't find class: " + classTreeNode.fullName);
-            return null;
-        }
-
-        // Create and return JavaClass
-        return new JavaClass(this, parentPackage, realClass);
+        return javaClass;
     }
 
     /**
@@ -97,14 +93,14 @@ public class Resolver {
     {
         // Get Class loader, find class
         ClassLoader classLoader =  _project.getRuntimeClassLoader();
-        Class<?> cls = ClassUtils.getClassForName(aName, classLoader);
+        Class<?> realClass = ClassUtils.getClassForName(aName, classLoader);
 
         // If not found and name doesn't contain '.', try java.lang.Name
-        if (cls == null && aName.indexOf('.') < 0)
-            cls = ClassUtils.getClassForName("java.lang." + aName, classLoader);
+        if (realClass == null && aName.indexOf('.') < 0)
+            realClass = ClassUtils.getClassForName("java.lang." + aName, classLoader);
 
         // Return
-        return cls;
+        return realClass;
     }
 
     /**
@@ -118,9 +114,9 @@ public class Resolver {
             return javaClass;
 
         // Otherwise lookup Class for name
-        Class<?> cls = getClassForName(aClassName);
-        if (cls != null)
-            return getJavaClassForClass(cls);
+        Class<?> realClass = getClassForName(aClassName);
+        if (realClass != null)
+            return getJavaClassForClass(realClass);
 
         // Return
         return null;
@@ -143,29 +139,6 @@ public class Resolver {
 
         // Get parent package or class for class
         JavaDecl parentPackageOrClass = getParentPackageOrClassForClass(aClass);
-
-        // Handle parent package
-        if (parentPackageOrClass instanceof JavaPackage) {
-            JavaPackage javaPackage = (JavaPackage) parentPackageOrClass;
-            javaClass = javaPackage.getClassForFullName(className);
-            if (javaClass != null)
-                return javaClass;
-        }
-
-        // Handle parent class
-        else if (parentPackageOrClass instanceof JavaClass) {
-            JavaClass parentClass = (JavaClass) parentPackageOrClass;
-            int separtorIndex = className.lastIndexOf('$');
-            if (separtorIndex < 0)
-                System.err.println("Resolver.getJavaClassForClass: Simple name not found for: " + className);
-            String simpleName = className.substring(separtorIndex + 1);
-            javaClass = parentClass.getDeclaredClassForName(simpleName);
-            if (javaClass != null)
-                return javaClass;
-        }
-
-        // Create orphan JavaClass
-        //System.err.println("Resolver.getJavaClassForClass: Can't find parent for class: " + aClass);
         return new JavaClass(this, parentPackageOrClass, aClass);
     }
 
@@ -206,17 +179,22 @@ public class Resolver {
         if (aName.length() == 0)
             return new JavaPackage(this, null, "");
 
-        // Get parent package name
-        int lastSeperatorIndex = aName.lastIndexOf('.');
-        String parentPackageName = lastSeperatorIndex > 0 ? aName.substring(0, lastSeperatorIndex) : "";
-
-        // Get parent package
-        JavaPackage parentPackage = getJavaPackageForName(parentPackageName);
-        if (parentPackage == null)
+        // If package doesn't exist, just return null
+        ClassLoader classLoader =  _project.getRuntimeClassLoader();
+        String path = aName.replace('.', '/');
+        Object url = classLoader.getResource(path);
+        if (url == null)
             return null;
 
-        // Find and return child package
-        return parentPackage.getPackageForFullName(aName);
+        // Get parent package
+        int lastSeperatorIndex = aName.lastIndexOf('.');
+        String parentPackageName = lastSeperatorIndex > 0 ? aName.substring(0, lastSeperatorIndex) : "";
+        JavaPackage parentPackage = getJavaPackageForName(parentPackageName);
+        if (parentPackage == null) // Should never happen
+            System.out.println("Resolver.getJavaPackageForNameImpl: Can't find parent package: " + parentPackageName);
+
+        // Return new package
+        return new JavaPackage(this, parentPackage, aName);
     }
 
     /**

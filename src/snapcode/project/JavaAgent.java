@@ -227,6 +227,9 @@ public class JavaAgent {
      */
     public void checkFileForErrors()
     {
+        // Reload class
+        reloadClassFromClassDecl();
+
         // Get JFile errors
         JFile jFile = getJFile();
         NodeError[] errors = NodeError.getAllNodeErrors(jFile);
@@ -237,6 +240,26 @@ public class JavaAgent {
 
         // Set build issues
         setBuildIssues(buildIssues);
+    }
+
+    /**
+     * Reload class from JClassDecl.
+     */
+    private void reloadClassFromClassDecl()
+    {
+        // Get class decl (just return if null)
+        JFile jFile = getJFile();
+        JClassDecl classDecl = jFile.getClassDecl();
+        if (classDecl == null)
+            return;
+
+        // Reload class
+        JavaClass javaClass = classDecl.getJavaClass();
+        if (javaClass != null)
+            javaClass.reloadClassFromClassDecl(classDecl);
+
+        // If not found, create from class decl
+        else new JavaClass(_project.getResolver(), classDecl);
     }
 
     /**

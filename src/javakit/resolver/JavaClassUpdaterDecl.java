@@ -26,15 +26,6 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     }
 
     /**
-     * Sets the class decl.
-     */
-    public void setClassDecl(JClassDecl aClassDecl)
-    {
-        _classDecl = aClassDecl;
-        _javaClass._fields = null;
-    }
-
-    /**
      * Override to just return anything.
      */
     @Override
@@ -242,22 +233,6 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         for (int i = 0; i < fields.length; i++)
             enumConsts[i] = new JavaEnum(_javaClass, fields[i].getName());
         return enumConsts;
-    }
-
-    /**
-     * Returns a field value.
-     */
-    public Object getFieldValue(JavaField aField, Object anObj)
-    {
-        // Handle Enum constants
-        if (_javaClass.isEnum() && aField.isStatic()) {
-            String fieldName = aField.getName();
-            Object[] enumConsts = _javaClass.getEnumConstants();
-            return ArrayUtils.findMatch(enumConsts, obj -> obj.toString().equals(fieldName));
-        }
-
-        // Complain
-        throw new RuntimeException("JavaClassUpdaterDecl.getFieldValue: Can't resolve field: " + aField.getName());
     }
 
     /**

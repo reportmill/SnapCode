@@ -378,59 +378,16 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     }
 
     /**
-     * Returns the class declaration for class name.
-     */
-    public JClassDecl getDeclaredClassDeclForName(String aName)
-    {
-        int index = aName.indexOf('.');
-        String name = index > 0 ? aName.substring(0, index) : aName;
-
-        // Iterate over ClassDecls
-        JClassDecl[] classDecls = getDeclaredClassDecls();
-        JClassDecl classDecl = ArrayUtils.findMatch(classDecls, cdecl -> cdecl.getSimpleName().equals(name));
-        if (classDecl != null) {
-            String remainder = index >= 0 ? aName.substring(index + 1) : null;
-            return remainder != null ? classDecl.getDeclaredClassDeclForName(remainder) : classDecl;
-        }
-
-        // Return not found
-        return null;
-    }
-
-    /**
      * Returns the Java class.
      */
     public JavaClass getJavaClass()
     {
         if (_javaClass != null) return _javaClass;
-        return _javaClass = getJavaClassImpl();
-    }
-
-    /**
-     * Returns the Java class.
-     */
-    protected JavaClass getJavaClassImpl()
-    {
-        // Get class name
         String className = getClassName();
-        if (className == null)
-            return null;
-
-        // Get class for name - if not found, use SuperClass (assume this class not compiled)
-        JavaClass javaClass = getJavaClassForName(className);
-        if (javaClass == null) {
-            Resolver resolver = getResolver();
-            javaClass = new JavaClass(resolver, this, className);
-        }
-
-        // Otherwise see if we need to update
-        else if (javaClass.getUpdater() instanceof JavaClassUpdaterDecl) {
-            JavaClassUpdaterDecl updater = (JavaClassUpdaterDecl) javaClass.getUpdater();
-            updater.setClassDecl(this);
-        }
-
-        // Return
-        return javaClass;
+        JavaClass javaClass = className != null ? getJavaClassForName(className) : null;
+        if (javaClass == null)
+            System.out.println("JClassDecl: Can't find class: " + className);
+        return _javaClass = javaClass;
     }
 
     /**

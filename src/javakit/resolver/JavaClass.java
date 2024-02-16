@@ -34,22 +34,22 @@ public class JavaClass extends JavaType {
     private boolean  _enum, _interface, _primitive;
 
     // The array of interfaces
-    protected JavaClass[] _interfaces = new JavaClass[0];
+    protected JavaClass[] _interfaces;
 
     // The type var decls
-    protected JavaTypeVariable[] _typeVars = new JavaTypeVariable[0];
+    protected JavaTypeVariable[] _typeVars;
 
     // The field decls
     protected JavaField[] _fields;
 
     // The method decls
-    protected JavaMethod[] _methods = new JavaMethod[0];
+    protected JavaMethod[] _methods;
 
     // The constructor decls
-    protected JavaConstructor[] _constructors = new JavaConstructor[0];
+    protected JavaConstructor[] _constructors;
 
     // The inner class decls
-    protected JavaClass[] _innerClasses = new JavaClass[0];
+    protected JavaClass[] _innerClasses;
 
     // The array of enum constants (enum only)
     private Object[] _enumConstants;
@@ -69,7 +69,7 @@ public class JavaClass extends JavaType {
     /**
      * Constructor.
      */
-    public JavaClass(Resolver aResolver, JavaDecl aPar, Class<?> aClass)
+    public JavaClass(Resolver aResolver, JavaDecl declaringPkgOrClass, Class<?> aClass)
     {
         // Do normal version
         super(aResolver, DeclType.Class);
@@ -82,12 +82,12 @@ public class JavaClass extends JavaType {
         _simpleName = aClass.getSimpleName();
 
         // Set DeclaringClass or Package
-        if (aPar instanceof JavaClass) {
-            _declaringClass = (JavaClass) aPar;
+        if (declaringPkgOrClass instanceof JavaClass) {
+            _declaringClass = (JavaClass) declaringPkgOrClass;
             _package = _declaringClass.getPackage();
         }
-        else if (aPar instanceof JavaPackage)
-            _package = (JavaPackage) aPar;
+        else if (declaringPkgOrClass instanceof JavaPackage)
+            _package = (JavaPackage) declaringPkgOrClass;
 
         // Add to decls
         aResolver._classes.put(_id, this);
@@ -122,13 +122,13 @@ public class JavaClass extends JavaType {
     /**
      * Constructor from JClassDecl.
      */
-    public JavaClass(Resolver aResolver, JClassDecl aClassDecl, String aClassName)
+    public JavaClass(Resolver aResolver, JClassDecl aClassDecl)
     {
         // Do normal version
         super(aResolver, DeclType.Class);
 
         // Set Id, Name, SimpleName
-        _id = _name = aClassName;
+        _id = _name = aClassDecl.getClassName();
         _simpleName = aClassDecl.getSimpleName();
 
         // Set DeclaringClass or Package
@@ -775,6 +775,16 @@ public class JavaClass extends JavaType {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * Reloads the class using class decl.
+     */
+    public void reloadClassFromClassDecl(JClassDecl classDecl)
+    {
+        _updater = new JavaClassUpdaterDecl(this, classDecl);
+        reloadClass();
+        _updater = new JavaClassUpdater(this);
     }
 
     /**

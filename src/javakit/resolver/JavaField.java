@@ -52,11 +52,6 @@ public class JavaField extends JavaMember {
      */
     public Object get(Object anObj) throws IllegalArgumentException, IllegalAccessException
     {
-        // Handle JavaClass for JClassDecl for Enum constant
-        if (_field == null && _declaringClass.getUpdater() instanceof JavaClassUpdaterDecl)
-            return ((JavaClassUpdaterDecl) _declaringClass.getUpdater()).getFieldValue(this, anObj);
-
-        // Do normal version
         return _field.get(anObj);
     }
 
