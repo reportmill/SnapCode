@@ -27,7 +27,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     private WebFile  _file;
 
     // The Java source file
-    protected WebFile  _sourceFile;
+    protected WebFile _javaFile;
 
     // The binary name
     private String  _binaryName;
@@ -141,23 +141,29 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     private void compileFinished(byte[] classFileBytes)
     {
         // If SourceFile not set, get it
-        if (_sourceFile == null)
-            _sourceFile = _proj.getProjectFiles().getJavaFileForClassFile(_file);
+        if (_javaFile == null)
+            _javaFile = _proj.getProjectFiles().getJavaFileForClassFile(_file);
 
         // Add SourceFile to Compiler.CompiledJFs
-        _compiler._compiledJavaFiles.add(_sourceFile);
+        _compiler._compiledJavaFiles.add(_javaFile);
 
         // Get bytes and whether class file is modified
         boolean modified = !_file.getExists() || !Arrays.equals(classFileBytes, _file.getBytes());
 
         // If modified, set File.Bytes and add ClassFile to ModifiedFiles and SourceFile to ModifiedSources
         if (modified) {
+
+            // Set enw bytes
             _file.setBytes(classFileBytes);
-            _compiler._modifiedJavaFiles.add(_sourceFile);
+            _compiler._modifiedJavaFiles.add(_javaFile);
+
+            // Clear external references
+            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(_javaFile);
+            javaAgent.clearExternalReferences();
         }
 
         // If file was modified or a real compile file, save
-        if (modified || _file.getLastModTime() < _sourceFile.getLastModTime()) {
+        if (modified || _file.getLastModTime() < _javaFile.getLastModTime()) {
             try { _file.save(); }
             catch (Exception e) { throw new RuntimeException(e); }
         }

@@ -310,6 +310,16 @@ public class JavaAgent {
     }
 
     /**
+     * Clears external references.
+     */
+    public void clearExternalReferences()
+    {
+        _externalRefs = null;
+        _externalClassRefs = null;
+        _jfile = null;
+    }
+
+    /**
      * Returns the external class references.
      */
     private Set<JavaClass> getExternalClassReferences()
@@ -368,9 +378,11 @@ public class JavaAgent {
                 _javaTextDoc.setString(fileText);
                 _javaTextDoc.setTextModified(false);
                 _javaTextDoc.getUndoer().reset();
-                _jfile = null;
             }
         }
+
+        // Clear JFile and external references
+        clearExternalReferences();
     }
 
     /**

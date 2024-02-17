@@ -154,7 +154,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         ProjectFiles projectFiles = _proj.getProjectFiles();
         WebFile classFile = projectFiles.getBuildFile(classPath, true, false);
         SnapCompilerJFO jfo = getJavaFileObject(classFile);
-        jfo._sourceFile = javaFile;
+        jfo._javaFile = javaFile;
         return jfo;
     }
 

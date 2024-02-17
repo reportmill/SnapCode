@@ -154,25 +154,29 @@ public class JavaFileBuilderX extends JavaFileBuilder {
             if (!classChanged)
                 continue;
 
-            // Get Java files dependent on JavaFile
+            // Get Java files dependent on JavaFile and rebuild to account for any member changes
             WebFile[] dependentJavaFiles = WorkspaceUtils.getJavaFilesDependentOnJavaFile(modifiedJavaFile);
+            for (WebFile dependentJavaFile : dependentJavaFiles)
+                rebuildDependentJavaFileToAccountForMemberChanges(dependentJavaFile, sourceFiles);
+        }
+    }
 
-            // Iterate over dependent Java files and mark for update
-            for (WebFile dependentJavaFile : dependentJavaFiles) {
+    /**
+     * Rebuilds a dependent java file that may have been effected by changes to a compiled java file.
+     */
+    private void rebuildDependentJavaFileToAccountForMemberChanges(WebFile dependentJavaFile, List<WebFile> sourceFiles)
+    {
+        // Make sure updated file is in sourceFiles list
+        Project proj = Project.getProjectForFile(dependentJavaFile);
+        if (proj == _proj) {
+            if (!_compiledFiles.contains(dependentJavaFile))
+                ListUtils.addUniqueId(sourceFiles, dependentJavaFile);
+        }
 
-                // Make sure updated file is in sourceFiles list
-                Project proj = Project.getProjectForFile(dependentJavaFile);
-                if (proj == _proj) {
-                    if (!_compiledFiles.contains(dependentJavaFile))
-                        ListUtils.addUniqueId(sourceFiles, dependentJavaFile);
-                }
-
-                // Otherwise, add build file
-                else {
-                    ProjectBuilder projectBuilder = proj.getBuilder();
-                    projectBuilder.addBuildFileForce(dependentJavaFile);
-                }
-            }
+        // Otherwise, add build file
+        else {
+            ProjectBuilder projectBuilder = proj.getBuilder();
+            projectBuilder.addBuildFileForce(dependentJavaFile);
         }
     }
 
