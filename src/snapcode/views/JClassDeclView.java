@@ -52,7 +52,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
 
             // Add separator label
             Label label = new Label(" extends ");
-            label.setFont(Font.Arial14.deriveFont(16));
+            label.setFont(Font.Arial14.copyForSize(16));
             label.setTextFill(Color.WHITE);
             rowView.addChild(label);
 
@@ -134,7 +134,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
             // Create/add view for Class id
             JExprId id = getJNode();
             Label label = createLabel(id.getName());
-            label.setFont(label.getFont().deriveFont(20));
+            label.setFont(label.getFont().copyForSize(20));
             rowView.addChild(label);
         }
 
@@ -179,7 +179,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
             // Create/add label for type
             JType typ = getJNode();
             Label label = createLabel(typ.getName());
-            label.setFont(label.getFont().deriveFont(14));
+            label.setFont(label.getFont().copyForSize(14));
             rowView.addChild(label);
         }
 

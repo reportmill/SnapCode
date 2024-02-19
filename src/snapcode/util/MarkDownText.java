@@ -138,7 +138,7 @@ public class MarkDownText extends TextBlock {
 
         // Create, configure
         TextStyle textStyle = TextStyle.DEFAULT;
-        Font headerFont = Font.Arial16.deriveFont(24).getBold();
+        Font headerFont = Font.Arial16.copyForSize(24).getBold();
         Color headerColor = new Color(.5d, .5d, 1d);
         TextStyle headerStyle = textStyle.copyFor(headerFont, headerColor);
 

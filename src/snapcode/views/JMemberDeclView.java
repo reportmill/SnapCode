@@ -52,7 +52,7 @@ public class JMemberDeclView<JNODE extends JMemberDecl> extends JNodeView<JNODE>
             // Add label for method name
             JExecutableDecl md = getJNode();
             Label label = createLabel(md.getName());
-            label.setFont(label.getFont().deriveFont(14));
+            label.setFont(label.getFont().copyForSize(14));
             rowView.addChild(label);
         }
 

@@ -96,7 +96,7 @@ public class ToolTray extends ViewOwner {
         // Create/config TabView
         _tabView = new TabView();
         _tabView.setName("TabView");
-        _tabView.setFont(_tabView.getFont().deriveFont(12));
+        _tabView.setFont(_tabView.getFont().copyForSize(12));
         _tabView.setTabSide(_side);
         _tabView.getTabBar().setTabMinWidth(70);
         _tabView.getTabBar().setAllowEmptySelection(true);

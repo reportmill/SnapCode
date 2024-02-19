@@ -44,7 +44,7 @@ public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
         // Create label for type and add
         JType typ = getJNode();
         Label label = createLabel(typ.getName());
-        label.setFont(label.getFont().deriveFont(14));
+        label.setFont(label.getFont().copyForSize(14));
         rowView.addChild(label);
     }
 
