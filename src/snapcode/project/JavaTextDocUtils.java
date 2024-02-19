@@ -10,6 +10,7 @@ import snap.text.TextBlockUtils;
 import snap.text.TextLine;
 import snap.text.TextToken;
 import snap.util.CharSequenceUtils;
+import snap.util.Prefs;
 
 /**
  * Utility methods and support for JavaTextDoc.
@@ -17,7 +18,7 @@ import snap.util.CharSequenceUtils;
 public class JavaTextDocUtils {
 
     // The recommended default font for code
-    private static Font _codeFont;
+    private static Font _defaultJavaFont;
 
     // Constants for Syntax Coloring
     private static Color COMMENT_COLOR = new Color("#3F7F5F"); //336633
@@ -25,22 +26,43 @@ public class JavaTextDocUtils {
     private static Color STRING_LITERAL_COLOR = new Color("#C80000"); // CC0000
 
     /**
-     * Returns a suitable code font.
+     * Returns the default font used to display Java text.
      */
-    public static Font getCodeFont()
+    public static Font getDefaultJavaFont()
     {
-        if (_codeFont != null) return _codeFont;
+        if (_defaultJavaFont != null) return _defaultJavaFont;
+
+        // Get font names and size
+        String[] names = { "Monaco", "Consolas", "Lucida Console", "Courier" };
+        double fontSize = getDefaultJavaFontSize();
 
         // Look for font
-        String[] names = { "Monaco", "Consolas", "Lucida Console", "Courier" };
         for (String name : names) {
-            _codeFont = new Font(name, 12);
-            if (_codeFont.getFamily().startsWith(name))
+            _defaultJavaFont = new Font(name, fontSize);
+            if (_defaultJavaFont.getFamily().startsWith(name))
                 break;
         }
 
         // Return
-        return _codeFont;
+        return _defaultJavaFont;
+    }
+
+    /**
+     * Returns the default Java font size.
+     */
+    public static double getDefaultJavaFontSize()
+    {
+        double fontSize = Prefs.getDefaultPrefs().getDouble("JavaFontSize", 12);
+        if (fontSize < 8) fontSize = 12;
+        return fontSize;
+    }
+
+    /**
+     * Sets the default Java font size.
+     */
+    public static void setDefaultJavaFontSize(double aSize)
+    {
+        Prefs.getDefaultPrefs().setValue("JavaFontSize", aSize);
     }
 
     /**

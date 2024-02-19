@@ -45,8 +45,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         listArea.setCellConfigure(listCell -> configureCell(listCell));
 
         // Configure ListArea sizing
-        listArea.setRowHeight(18);
-        listArea.setCellPadding(new Insets(0, 2, 2, 2));
+        listArea.setCellPadding(new Insets(0, 2, 2, 2)); //listArea.setRowHeight(18);
 
         _textArea = aJavaTextArea;
         setPrefWidth(500);
@@ -54,7 +53,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // Set font
         TextBlock textBlock = aJavaTextArea.getTextBlock();
-        Font font = textBlock.getDefaultStyle().getFont();
+        Font font = textBlock.getDefaultFont();
         listArea.setFont(font);
     }
 

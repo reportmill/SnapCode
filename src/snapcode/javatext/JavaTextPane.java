@@ -3,6 +3,7 @@
  */
 package snapcode.javatext;
 import javakit.parse.*;
+import snap.text.TextBlock;
 import snapcode.project.JavaAgent;
 import snapcode.project.JavaTextDoc;
 import javakit.resolver.JavaDecl;
@@ -12,6 +13,8 @@ import snap.text.TextDoc;
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.TextPane;
+import snapcode.project.JavaTextDocUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -79,11 +82,6 @@ public class JavaTextPane extends TextPane {
         _textArea = getTextArea();
         _textArea.setGrowWidth(true);
         enableEvents(_textArea, KeyPress, KeyRelease, MousePress, MouseRelease);
-
-        // Reset TextArea font
-        double fontSize = Prefs.getDefaultPrefs().getDouble("JavaFontSize", 12);
-        if (fontSize < 8) fontSize = 12;
-        _textArea.setFont(new Font(_textArea.getDefaultFont().getName(), fontSize));
 
         // Create/configure LineNumView, LineFootView
         _lineNumView = new LineHeadView(this);
@@ -186,7 +184,7 @@ public class JavaTextPane extends TextPane {
 
         // Handle FontSizeText, IncreaseFontButton, DecreaseFontButton
         else if (anEvent.equals("FontSizeText") || anEvent.equals("IncreaseFontButton") || anEvent.equals("DecreaseFontButton"))
-            Prefs.getDefaultPrefs().setValue("JavaFontSize", _textArea.getFont().getSize());
+            JavaTextDocUtils.setDefaultJavaFontSize(_textArea.getFont().getSize());
 
         // Handle OpenDeclarationMenuItem
         else if (anEvent.equals("OpenDeclarationMenuItem"))
@@ -220,9 +218,6 @@ public class JavaTextPane extends TextPane {
 
         // Do normal version
         super.saveChanges();
-
-        // Force reparse
-        //getTextArea().getTextDoc().clearJFile();
     }
 
     /**

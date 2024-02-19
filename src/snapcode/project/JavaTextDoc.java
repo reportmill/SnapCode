@@ -30,11 +30,9 @@ public class JavaTextDoc extends TextDoc {
     {
         super();
 
-        // Reset default TextStyle for code
-        TextStyle textStyle = getDefaultStyle();
-        Font codeFont = JavaTextDocUtils.getCodeFont();
-        TextStyle codeTextStyle = textStyle.copyFor(codeFont);
-        setDefaultStyle(codeTextStyle);
+        // Get/set default font
+        Font codeFont = JavaTextDocUtils.getDefaultJavaFont();
+        setDefaultFont(codeFont);
 
         // Reset default LineStyle for code
         TextLineStyle lineStyle = getDefaultLineStyle();
