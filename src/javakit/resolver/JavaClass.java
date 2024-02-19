@@ -69,7 +69,7 @@ public class JavaClass extends JavaType {
     /**
      * Constructor.
      */
-    public JavaClass(Resolver aResolver, JavaDecl declaringPkgOrClass, Class<?> aClass)
+    public JavaClass(Resolver aResolver, Class<?> aClass)
     {
         // Do normal version
         super(aResolver, DeclType.Class);
@@ -81,20 +81,31 @@ public class JavaClass extends JavaType {
         _id = _name = ResolverUtils.getIdForClass(aClass);
         _simpleName = aClass.getSimpleName();
 
-        // Set DeclaringClass or Package
+        // Add to Resolver classes
+        aResolver._classes.put(_id, this);
+
+        // Handle array special
+        if (aClass.isArray()) {
+            configureArrayClass(aClass);
+            return;
+        }
+
+        // Get declaring class
+        JavaDecl declaringPkgOrClass = aResolver.getParentPackageOrClassForClass(aClass);
+
+        // If declaring class, set declaring class and Package
         if (declaringPkgOrClass instanceof JavaClass) {
             _declaringClass = (JavaClass) declaringPkgOrClass;
             _package = _declaringClass.getPackage();
         }
-        else if (declaringPkgOrClass instanceof JavaPackage)
-            _package = (JavaPackage) declaringPkgOrClass;
 
-        // Add to decls
-        aResolver._classes.put(_id, this);
-        if (aClass.isArray()) {
-            String altName = aClass.getName();
-            if (!altName.equals(_id))
-                aResolver._classes.put(altName, this);
+        // If declaring package, set and make sure this class is child
+        else if (declaringPkgOrClass instanceof JavaPackage) {
+            _package = (JavaPackage) declaringPkgOrClass;
+            if (_package._children != null) { // Can happen for new classes?
+                _package._children = ArrayUtils.add(_package._children, this);
+                _package._classes = null;
+            }
         }
 
         // Set Mods, Enum, Interface, Primitive
@@ -103,15 +114,8 @@ public class JavaClass extends JavaType {
         _interface = aClass.isInterface();
         _primitive = aClass.isPrimitive();
 
-        // If array, configure special
-        if (aClass.isArray()) {
-            Class<?> compClass = aClass.getComponentType();
-            _componentTypeName = compClass.getName();
-            configureArrayClass();
-        }
-
         // Create/set updater
-        else _updater = new JavaClassUpdater(this);
+        _updater = new JavaClassUpdater(this);
 
         // Get type super type and set in decl
         Class<?> superClass = aClass.getSuperclass();
@@ -131,17 +135,21 @@ public class JavaClass extends JavaType {
         _id = _name = aClassDecl.getClassName();
         _simpleName = aClassDecl.getSimpleName();
 
-        // Set DeclaringClass or Package
+        // If inside class, set class and package
         JClassDecl enclosingClass = aClassDecl.getEnclosingClassDecl();
         if (enclosingClass != null) {
             _declaringClass = enclosingClass.getJavaClass();
             _package = _declaringClass.getPackage();
         }
+
+        // If in package, set package
         else {
             JFile jFile = aClassDecl.getFile();
             String pkgName = jFile.getPackageName();
             if (pkgName == null) pkgName = "";
-            _package = aResolver.getJavaPackageForName(pkgName);
+            _package = aResolver.getJavaPackageForName(pkgName, true);
+            _package._children = ArrayUtils.add(_package.getChildren(), this);
+            _package._classes = null;
         }
 
         // Add to decls
@@ -790,8 +798,19 @@ public class JavaClass extends JavaType {
     /**
      * Updates array class.
      */
-    private void configureArrayClass()
+    private void configureArrayClass(Class<?> arrayClass)
     {
+        // Set alt id?
+        String altName = arrayClass.getName();
+        if (!altName.equals(_id))
+            _resolver._classes.put(altName, this);
+
+        // Set mods, ComponentType, SuperClassName
+        _mods = arrayClass.getModifiers();
+        Class<?> compClass = arrayClass.getComponentType();
+        _componentTypeName = compClass.getName();
+        _superClassName = "java.lang.Object";
+
         // Handle Object[] special: Add Array.length field
         if (getName().equals("java.lang.Object[]")) {
             JavaField.FieldBuilder fb = new JavaField.FieldBuilder();

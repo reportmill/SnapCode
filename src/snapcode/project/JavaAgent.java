@@ -262,11 +262,7 @@ public class JavaAgent {
 
         // Reload class
         JavaClass javaClass = classDecl.getJavaClass();
-        if (javaClass != null)
-            javaClass.reloadClassFromClassDecl(classDecl);
-
-        // If not found, create from class decl
-        else new JavaClass(_project.getResolver(), classDecl);
+        javaClass.reloadClassFromClassDecl(classDecl);
     }
 
     /**

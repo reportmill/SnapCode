@@ -133,13 +133,8 @@ public class Resolver {
         if (javaClass != null)
             return javaClass;
 
-        // Handle array type
-        if (aClass.isArray())
-            return new JavaClass(this, null, aClass);
-
-        // Get parent package or class for class
-        JavaDecl parentPackageOrClass = getParentPackageOrClassForClass(aClass);
-        return new JavaClass(this, parentPackageOrClass, aClass);
+        // Create class and return
+        return new JavaClass(this, aClass);
     }
 
     /**
@@ -152,37 +147,44 @@ public class Resolver {
     }
 
     /**
-     * Returns a package decl.
+     * Returns a java package.
      */
-    public JavaPackage getJavaPackageForName(String aName)
+    public JavaPackage getJavaPackageForName(String pkgName)
+    {
+        return getJavaPackageForName(pkgName, false);
+    }
+
+    /**
+     * Returns a java package, with option to force.
+     */
+    protected JavaPackage getJavaPackageForName(String pkgName, boolean doForce)
     {
         // Get from Packages cache and just return if found
-        JavaPackage pkg = _packages.get(aName);
+        JavaPackage pkg = _packages.get(pkgName);
         if (pkg != null)
             return pkg;
 
+        // If package doesn't exist, just return null
+        ClassTree classTree = getClassTree();
+        if (!doForce && pkgName.length() > 0 && !classTree.isKnownPackageName(pkgName))
+            return null;
+
         // Create JavaPackage and add to Packages cache
-        pkg = getJavaPackageForNameImpl(aName);
-        if (pkg != null)
-            _packages.put(aName, pkg);
+        pkg = getJavaPackageForNameImpl(pkgName);
+        _packages.put(pkgName, pkg);
 
         // Return
         return pkg;
     }
 
     /**
-     * Returns a package decl.
+     * Creates a java package.
      */
     private JavaPackage getJavaPackageForNameImpl(String aName)
     {
         // If root package, just create/return
         if (aName.length() == 0)
             return new JavaPackage(this, null, "");
-
-        // If package doesn't exist, just return null
-        ClassTree classTree = getClassTree();
-        if (!classTree.isKnownPackageName(aName))
-            return null;
 
         // Get parent package
         int lastSeperatorIndex = aName.lastIndexOf('.');
@@ -354,7 +356,7 @@ public class Resolver {
     /**
      * Returns the parent JavaPackage or JavaClass for a class.
      */
-    private JavaDecl getParentPackageOrClassForClass(Class<?> aClass)
+    protected JavaDecl getParentPackageOrClassForClass(Class<?> aClass)
     {
         // If class has enclosing class, return it
         Class<?> parentClass = aClass.getEnclosingClass();

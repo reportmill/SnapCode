@@ -13,13 +13,13 @@ public class JavaPackage extends JavaDecl {
     private JavaPackage  _package;
 
     // The child declarations (packages and classes)
-    private JavaDecl[] _children;
+    protected JavaDecl[] _children;
 
     // The child packages
     private JavaPackage[] _packages;
 
     // The child classes
-    private JavaClass[] _classes;
+    protected JavaClass[] _classes;
 
     /**
      * Constructor.
@@ -34,6 +34,12 @@ public class JavaPackage extends JavaDecl {
         // Set Name, SimpleName
         _id = _name = aPackageName;
         _simpleName = getSimpleName(aPackageName);
+
+        // If not child of parent package, add
+        if (aParent != null && aParent._children != null) {
+            aParent._children = ArrayUtils.add(aParent._children, this);
+            aParent._packages = null;
+        }
     }
 
     /**
@@ -47,12 +53,7 @@ public class JavaPackage extends JavaDecl {
     public JavaDecl[] getChildren()
     {
         if (_children != null) return _children;
-
-        // Get children
-        JavaDecl[] children = _resolver.getChildrenForPackage(this);
-
-        // Set and return
-        return _children = children;
+        return _children = _resolver.getChildrenForPackage(this);
     }
 
     /**
@@ -61,13 +62,8 @@ public class JavaPackage extends JavaDecl {
     public JavaPackage[] getPackages()
     {
         if (_packages != null) return _packages;
-
-        // Get children and filter packages
         JavaDecl[] children = getChildren();
-        JavaPackage[] packages = ArrayUtils.filterByClass(children, JavaPackage.class);
-
-        // Set and return
-        return _packages = packages;
+        return _packages = ArrayUtils.filterByClass(children, JavaPackage.class);
     }
 
     /**
@@ -76,13 +72,8 @@ public class JavaPackage extends JavaDecl {
     public JavaClass[] getClasses()
     {
         if (_classes != null) return _classes;
-
-        // Get children and filter classes
         JavaDecl[] children = getChildren();
-        JavaClass[] classes = ArrayUtils.filterByClass(children, JavaClass.class);
-
-        // Set and return
-        return _classes = classes;
+        return _classes = ArrayUtils.filterByClass(children, JavaClass.class);
     }
 
     /**
