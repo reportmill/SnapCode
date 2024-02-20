@@ -61,9 +61,9 @@ public class NodeCompleter {
             return NO_MATCHES;
         }
 
-        // If completions not yet primed, start prime and return no matches
+        // If completions not yet primed, start prime
         if (!_isPrimed)
-            return primeCompletions(_resolver);
+            primeCompletions(_resolver);
 
         // Get prefix matcher
         String prefix = anId.getName();
@@ -109,14 +109,11 @@ public class NodeCompleter {
             return;
         }
 
-        // Handle JVarDecl.Id: Only offer camel case name
+        // If id is JVarDecl.Id, only offer camel case name
         JNode parent = anId.getParent();
-        if (parent instanceof JVarDecl) {
-            JVarDecl varDecl = (JVarDecl) parent;
-            if (anId == varDecl.getId()) {
-                addCompletionsForNewVarDecl((JVarDecl) parent);
-                return;
-            }
+        if (parent instanceof JVarDecl && anId == ((JVarDecl) parent).getId()) {
+            addCompletionsForNewVarDecl((JVarDecl) parent);
+            return;
         }
 
         // Add reserved word completions (public, private, for, white, etc.)
@@ -144,6 +141,10 @@ public class NodeCompleter {
             enclosingClassDecl = enclosingClassDecl.getEnclosingClassDecl();
             enclosingClass = enclosingClassDecl != null ? enclosingClassDecl.getEvalClass() : null;
         }
+
+        // If not primed, just return because getClassesForResolver() is the expense call since it loads class tree
+        if (!_isPrimed)
+            return;
 
         // Get matching classes and add completion decl
         JavaClass[] matchingClasses = prefixMatcher.getClassesForResolver(_resolver);
@@ -341,12 +342,11 @@ public class NodeCompleter {
     /**
      * Prime completions for given resolver.
      */
-    private static JavaDecl[] primeCompletions(Resolver aResolver)
+    private static void primeCompletions(Resolver aResolver)
     {
         if (!_isPriming)
             new Thread(() -> primeCompletionsImpl(aResolver)).start();
         _isPriming = true;
-        return NO_MATCHES;
     }
 
     /**
