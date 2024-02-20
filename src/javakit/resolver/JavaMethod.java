@@ -24,7 +24,7 @@ public class JavaMethod extends JavaExecutable {
     protected Method  _method;
 
     // The method decl
-    private JMethodDecl  _methodDecl;
+    protected JMethodDecl  _methodDecl;
 
     /**
      * Constructor.
@@ -200,8 +200,12 @@ public class JavaMethod extends JavaExecutable {
         //if (newMethod.getGenericReturnType() != getGenericReturnType()) { _genericReturnType = newMethod.getGenericReturnType(); didChange = true; }
 
         // Update Method
-        if (newMethod._method != null)
+        if (newMethod._method != null) {
             _method = newMethod._method;
+            _methodDecl = null;
+        }
+        else if (newMethod._methodDecl != null)
+            _methodDecl = newMethod._methodDecl;
 
         // Return
         return didChange;

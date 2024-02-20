@@ -5,6 +5,7 @@ package javakit.parse;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaExecutable;
 import javakit.resolver.JavaType;
+import snap.util.ListUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -107,13 +108,24 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     }
 
     /**
+     * Returns the parameter names.
+     */
+    public String[] getParameterNames()
+    {
+        List<JVarDecl> paramTypes = getParameters();
+        return ListUtils.mapToArray(paramTypes, pdecl -> pdecl.getName(), String.class);
+    }
+
+    /**
      * Returns the block.
      */
+    @Override
     public JStmtBlock getBlock()  { return _block; }
 
     /**
      * Sets the block.
      */
+    @Override
     public void setBlock(JStmtBlock aBlock)
     {
         replaceChild(_block, _block = aBlock);

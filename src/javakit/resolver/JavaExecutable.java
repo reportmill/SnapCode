@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.resolver;
+import javakit.parse.JExecutableDecl;
 import snap.util.ArrayUtils;
 import snap.util.StringUtils;
 import java.lang.reflect.*;
@@ -134,6 +135,13 @@ public class JavaExecutable extends JavaMember {
     public String[] getParameterNames()
     {
         if (_parameterNames != null) return _parameterNames;
+
+        // If ExecutableDecl, get from that
+        JExecutableDecl execDecl = this instanceof JavaMethod ? ((JavaMethod) this)._methodDecl : null;
+        if (execDecl != null)
+            return _parameterNames = execDecl.getParameterNames();
+
+        // Get from executable
         Executable executable = getExecutable();
         Parameter[] parameters = executable.getParameters();
         return _parameterNames = ArrayUtils.map(parameters, param -> getNameForParameter(param), String.class);
