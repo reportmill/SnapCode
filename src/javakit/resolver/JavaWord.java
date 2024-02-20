@@ -60,6 +60,9 @@ public class JavaWord extends JavaDecl {
             Switch, Synchronized, Throw, Throws, Try, While
     };
 
+    // Modifiers
+    public static final JavaWord[] MODIFIERS = { Public, Private, Protected, Abstract, Default, Final, Static };
+
     /**
      * Constructor.
      */

@@ -150,6 +150,18 @@ public class NodeCompleter {
         if (!_isPrimed)
             return;
 
+        // Add completions for type id
+        addCompletionsForTypeId(anId, prefixMatcher);
+
+        // Add matches for static imports
+        JFile jfile = anId.getFile();
+        JImportDecl[] staticImportDecls = jfile.getStaticImportDecls();
+        JavaMember[] matchingMembers = prefixMatcher.getMembersForStaticImports(staticImportDecls);
+        addCompletionDecls(matchingMembers);
+    }
+
+    private void addCompletionsForTypeId(JExprId anId, DeclMatcher prefixMatcher)
+    {
         // Get matching classes and add completion decl
         JavaClass[] matchingClasses = prefixMatcher.getClassesForResolver(_resolver);
         addCompletionDecls(matchingClasses);
@@ -159,12 +171,6 @@ public class NodeCompleter {
         JavaPackage[] rootPackages = rootPackage.getPackages();
         JavaPackage[] matchingPackages = ArrayUtils.filter(rootPackages, pkg -> prefixMatcher.matchesString(pkg.getSimpleName()));
         addCompletionDecls(matchingPackages);
-
-        // Add matches for static imports
-        JFile jfile = anId.getFile();
-        JImportDecl[] staticImportDecls = jfile.getStaticImportDecls();
-        JavaMember[] matchingMembers = prefixMatcher.getMembersForStaticImports(staticImportDecls);
-        addCompletionDecls(matchingMembers);
     }
 
     /**
@@ -255,6 +261,17 @@ public class NodeCompleter {
     }
 
     /**
+     * Adds modifiers word completions for matcher.
+     */
+    private void addModifierWordCompletions(DeclMatcher prefixMatcher)
+    {
+        // Add JavaWords
+        for (JavaWord word : JavaWord.MODIFIERS)
+            if (prefixMatcher.matchesString(word.getName()))
+                addCompletionDecl(word);
+    }
+
+    /**
      * Adds a single completion for a new variable declaration using the type name.
      */
     private void addCompletionsForNewVarDecl(JVarDecl varDecl)
@@ -296,6 +313,12 @@ public class NodeCompleter {
             JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(superClass, false);
             addCompletionDecls(matchingMembers);
             superClass = superClass.getSuperClass();
+        }
+
+        // If type, add type completions
+        if (anId.getParent() instanceof JType) {
+            addCompletionsForTypeId(anId, prefixMatcher);
+            addModifierWordCompletions(prefixMatcher);
         }
     }
 

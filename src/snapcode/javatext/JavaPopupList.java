@@ -278,17 +278,18 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Applies the current suggestion.
      */
-    public void applySuggestion()
+    private void applySuggestion()
     {
-        // Get start char index for completion node
+        // Get jnode and completion decl
         JExprId selNode = getIdExprAtCursor();
+        JavaDecl completionDecl = getSelItem();
 
         // Handle body decl
-        if (NodeCompleter.isBodyDeclId(selNode))
-            applySuggestionForBodyDecl(selNode);
+        if (NodeCompleter.isBodyDeclId(selNode) && completionDecl instanceof JavaExecutable)
+            applySuggestionForBodyDecl(selNode, completionDecl);
 
         // Otherwise, general
-        else applySuggestionGeneral(selNode);
+        else applySuggestionGeneral(selNode, completionDecl);
 
         // Hide PopupList
         hide();
@@ -297,7 +298,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Applies a general suggestion.
      */
-    public void applySuggestionGeneral(JExprId selNode)
+    private void applySuggestionGeneral(JExprId selNode, JavaDecl completionDecl)
     {
         // Get replace start and end
         String selNodeStr = selNode.getName();
@@ -305,7 +306,6 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         int replaceStart = replaceEnd - selNodeStr.length();
 
         // Get completion and completionString
-        JavaDecl completionDecl = getSelItem();
         String completionStr = completionDecl.getReplaceString();
 
         // If method ref, just use name
@@ -330,15 +330,14 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Applies a body decl suggestion.
      */
-    public void applySuggestionForBodyDecl(JExprId selNode)
+    private void applySuggestionForBodyDecl(JExprId selNode, JavaDecl completionDecl)
     {
         // Get method decl and the replace start/end
         JMethodDecl methodDecl = selNode.getParent(JMethodDecl.class);
         int replaceStart = methodDecl.getStartCharIndex();
         int replaceEnd = methodDecl.getEndCharIndex();
 
-        // Get completion and completionString
-        JavaDecl completionDecl = getSelItem();
+        // Get completionString
         String methodDeclStr = completionDecl.getDeclarationString();
 
         // Add method body brackets
