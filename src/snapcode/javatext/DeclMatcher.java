@@ -19,6 +19,9 @@ public class DeclMatcher {
     // The prefix
     private String _prefix;
 
+    // The calling class
+    private JavaClass _callingClass;
+
     // The Matcher
     private Matcher _matcher;
 
@@ -32,9 +35,11 @@ public class DeclMatcher {
     /**
      * Constructor.
      */
-    public DeclMatcher(String aPrefix)
+    public DeclMatcher(String aPrefix, JavaClass callingClass)
     {
         _prefix = aPrefix;
+        _callingClass = callingClass;
+
         _matcher = getSkipCharsMatcherForLiteralString(_prefix);
     }
 
@@ -329,8 +334,8 @@ public class DeclMatcher {
      */
     private boolean matchesClass(JavaClass aClass)
     {
-        // If not public class, return false
-        if (!Modifier.isPublic(aClass.getModifiers()))
+        // If class not accessible, return false
+        if (!isAccessibleModifiers(aClass.getModifiers(), aClass))
             return false;
 
         // If name doesn't match, return false
@@ -346,8 +351,8 @@ public class DeclMatcher {
      */
     private boolean matchesField(JavaField field, boolean staticOnly)
     {
-        // If not public, just return - need to eventually handle protected/private
-        if (!field.isPublic())
+        // If field not accessible, just return
+        if (!isAccessibleMember(field))
             return false;
 
         // If name doesn't match, return false
@@ -367,8 +372,8 @@ public class DeclMatcher {
      */
     private boolean matchesMethod(JavaMethod method, boolean staticOnly)
     {
-        // If not public, just return - need to eventually handle protected/private
-        if (!method.isPublic())
+        // If method not accessible, just return
+        if (!isAccessibleMember(method))
             return false;
 
         // If name doesn't match, return false
@@ -385,6 +390,48 @@ public class DeclMatcher {
 
         // Return matches
         return true;
+    }
+
+    /**
+     * Returns whether given member is accessible.
+     */
+    private boolean isAccessibleMember(JavaMember member)
+    {
+        int modifiers = member.getModifiers();
+        JavaClass declaringClass = member.getDeclaringClass();
+        return isAccessibleModifiers(modifiers, declaringClass);
+    }
+
+    /**
+     * Returns whether given member modifiers are accessible for given declaring class and matcher's calling class.
+     */
+    private boolean isAccessibleModifiers(int modifiers, JavaClass declaringClass)
+    {
+        // If public, return true
+        if (Modifier.isPublic(modifiers))
+            return true;
+
+        // If calling class unknown, return false
+        if (_callingClass == null)
+            return false;
+
+        // If private, return whether declaring class and calling class match
+        if (Modifier.isPrivate(modifiers))
+            return declaringClass == _callingClass;
+
+        // Since protected or package private, return true if packages match
+        if (_callingClass.getPackage() == declaringClass.getPackage())
+            return true;
+
+        // If protected, return true if subclass
+        if (Modifier.isProtected(modifiers)) {
+            for (JavaClass cls = _callingClass.getSuperClass(); cls != null; cls = cls.getSuperClass())
+                if (cls == declaringClass)
+                    return true;
+        }
+
+        // Return not accessible
+        return false;
     }
 
     /**

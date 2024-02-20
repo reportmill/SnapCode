@@ -67,7 +67,9 @@ public class NodeCompleter {
 
         // Get prefix matcher
         String prefix = anId.getName();
-        DeclMatcher prefixMatcher = prefix != null ? new DeclMatcher(prefix) : null;
+        JClassDecl classDecl = anId.getEnclosingClassDecl();
+        JavaClass callingClass = classDecl != null ? classDecl.getJavaClass() : null;
+        DeclMatcher prefixMatcher = prefix != null ? new DeclMatcher(prefix, callingClass) : null;
         if (prefixMatcher == null)
             return NO_MATCHES;
 
@@ -160,6 +162,9 @@ public class NodeCompleter {
         addCompletionDecls(matchingMembers);
     }
 
+    /**
+     * Adds class and package completions for given type id.
+     */
     private void addCompletionsForTypeId(JExprId anId, DeclMatcher prefixMatcher)
     {
         // Get matching classes and add completion decl
@@ -419,7 +424,7 @@ public class NodeCompleter {
      */
     private static void primeCompletionsImpl(Resolver aResolver)
     {
-        DeclMatcher declMatcher = new DeclMatcher("a");
+        DeclMatcher declMatcher = new DeclMatcher("a", null);
         declMatcher.getClassesForResolver(aResolver);
         _isPrimed = true;
     }
