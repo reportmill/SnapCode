@@ -298,7 +298,7 @@ public class JavaMethod extends JavaExecutable {
             m._id = getSigForParts(_declaringClass, _name, _paramTypes);
             m._name = m._simpleName = _name;
             m._declaringClass = _declaringClass;
-            m._parameterTypes = _paramTypes;
+            m._genericParameterTypes = _paramTypes;
             m._genericReturnType = _returnType;
             m._typeVars = _typeVars;
             m._default = _default;

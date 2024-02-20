@@ -3,6 +3,7 @@
  */
 package javakit.resolver;
 import snap.util.ArrayUtils;
+import snap.util.StringUtils;
 import java.lang.reflect.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,8 +17,14 @@ public class JavaExecutable extends JavaMember {
     // The JavaDecls for TypeVars for Method/Constructor
     protected JavaTypeVariable[]  _typeVars;
 
-    // The JavaDecls for parameter types for Constructor, Method
-    protected JavaType[] _parameterTypes;
+    // The JavaTypes for parameter types for Constructor, Method
+    protected JavaType[] _genericParameterTypes;
+
+    // The JavaClasses for parameter types for Constructor, Method
+    protected JavaClass[] _parameterTypes;
+
+    // The parameter names
+    private String[] _parameterNames;
 
     // Whether method has VarArgs
     protected boolean  _varArgs;
@@ -98,7 +105,7 @@ public class JavaExecutable extends JavaMember {
      */
     public JavaType[] getParameterTypes()
     {
-        if (_parameterTypes != null) return _parameterTypes;
+        if (_genericParameterTypes != null) return _genericParameterTypes;
 
         // Get GenericParameterTypes (this can fail https://bugs.openjdk.java.net/browse/JDK-8075483))
         Executable executable = getExecutable();
@@ -109,7 +116,35 @@ public class JavaExecutable extends JavaMember {
         JavaType[] parameterTypes = _resolver.getJavaTypesForTypes(paramTypesReal);
 
         // Set and return
-        return _parameterTypes = parameterTypes;
+        return _genericParameterTypes = parameterTypes;
+    }
+
+    /**
+     * Returns the parameter types.
+     */
+    public JavaClass[] getParameterClasses()
+    {
+        if (_parameterTypes != null) return _parameterTypes;
+        return _parameterTypes = ArrayUtils.map(getParameterTypes(), type -> type.getEvalClass(), JavaClass.class);
+    }
+
+    /**
+     * Returns the parameter names.
+     */
+    public String[] getParameterNames()
+    {
+        if (_parameterNames != null) return _parameterNames;
+        Executable executable = getExecutable();
+        Parameter[] parameters = executable.getParameters();
+        return _parameterNames = ArrayUtils.map(parameters, param -> getNameForParameter(param), String.class);
+    }
+
+    /**
+     * Returns the name for given parameter.
+     */
+    private String getNameForParameter(Parameter parameter)
+    {
+        return parameter.getName();
     }
 
     /**
@@ -143,7 +178,21 @@ public class JavaExecutable extends JavaMember {
     /**
      * Returns the parameter types string.
      */
-    protected String getParametersString(boolean simpleNames)
+    protected String getParametersString()
+    {
+        JavaType[] paramTypes = getParameterTypes();
+        String[] paramNames = getParameterNames();
+        String[] paramStrings = new String[paramTypes.length];
+        for (int i = 0; i < paramTypes.length; i++)
+            paramStrings[i] = paramTypes[i].getSimpleName() + ' ' + paramNames[i];
+        String paramsString = StringUtils.join(paramStrings, ",");
+        return '(' + paramsString + ')';
+    }
+
+    /**
+     * Returns the parameter types string.
+     */
+    protected String getParameterTypesString(boolean simpleNames)
     {
         JavaType[] paramTypes = getParameterTypes();
         Function<JavaDecl,String> namesFunction = simpleNames ? JavaDecl::getSimpleName : JavaDecl::getName;

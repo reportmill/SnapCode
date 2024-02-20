@@ -175,7 +175,7 @@ public class JavaConstructor extends JavaExecutable {
             c._id = getSigForParts(_declaringClass, _paramTypes);
             c._name = c._simpleName = _declaringClass.getSimpleName();
             c._declaringClass = _declaringClass;
-            c._parameterTypes = _paramTypes;
+            c._genericParameterTypes = _paramTypes;
             c._evalType = _declaringClass;
             c._typeVars = _typeVars;
             c._varArgs = _varArgs;

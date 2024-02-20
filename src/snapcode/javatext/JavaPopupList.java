@@ -286,7 +286,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // Handle body decl
         if (NodeCompleter.isBodyDeclId(selNode) && completionDecl instanceof JavaExecutable)
-            applySuggestionForBodyDecl(selNode, completionDecl);
+            applySuggestionForBodyDecl(selNode, (JavaExecutable) completionDecl);
 
         // Otherwise, general
         else applySuggestionGeneral(selNode, completionDecl);
@@ -330,7 +330,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Applies a body decl suggestion.
      */
-    private void applySuggestionForBodyDecl(JExprId selNode, JavaDecl completionDecl)
+    private void applySuggestionForBodyDecl(JExprId selNode, JavaExecutable completionDecl)
     {
         // Get method decl and the replace start/end
         JMethodDecl methodDecl = selNode.getParent(JMethodDecl.class);
@@ -348,6 +348,16 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         // Replace selection with completeString
         _textArea.replaceChars(completionStr, null, replaceStart, replaceEnd, false);
         _textArea.setSel(replaceStart + completionStr.length() - 3 - indentStr.length());
+
+        // Add imports for method return type and param types
+        if (completionDecl instanceof JavaMethod) {
+            JavaClass returnType = ((JavaMethod) completionDecl).getReturnType();
+            if (!returnType.isPrimitive())
+                addImportForNodeAndClass(selNode, returnType);
+            JavaClass[] paramClasses = completionDecl.getParameterClasses();
+            for (JavaClass paramClass : paramClasses)
+                addImportForNodeAndClass(selNode, paramClass);
+        }
     }
 
     /**

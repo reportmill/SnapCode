@@ -116,7 +116,7 @@ public class JavaDecl implements Comparable<JavaDecl> {
 
         // If Executable, add parameter types string
         if (this instanceof JavaExecutable)
-            simpleName += ((JavaExecutable) this).getParametersString(true);
+            simpleName += ((JavaExecutable) this).getParameterTypesString(true);
 
         // Return
         return simpleName;
@@ -131,7 +131,7 @@ public class JavaDecl implements Comparable<JavaDecl> {
 
         // If Executable, add parameter types string
         if (this instanceof JavaExecutable)
-            fullName += ((JavaExecutable) this).getParametersString(false);
+            fullName += ((JavaExecutable) this).getParameterTypesString(false);
 
         // Return
         return fullName;
@@ -146,7 +146,7 @@ public class JavaDecl implements Comparable<JavaDecl> {
 
         // If Executable, add parameter types string
         if (this instanceof JavaExecutable)
-            fullName += ((JavaExecutable) this).getParametersString(true);
+            fullName += ((JavaExecutable) this).getParameterTypesString(true);
 
         // Return
         return fullName;
@@ -157,7 +157,9 @@ public class JavaDecl implements Comparable<JavaDecl> {
      */
     public String getDeclarationString()
     {
-        String declString = getSimpleNameWithParameterTypes();
+        String declString = getSimpleName();
+        if (this instanceof JavaExecutable)
+            declString += ((JavaExecutable) this).getParametersString();
 
         // If method or field, prefix return type
         if (this instanceof JavaMethod || this instanceof JavaField) {
