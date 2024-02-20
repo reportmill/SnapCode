@@ -71,8 +71,12 @@ public class NodeCompleter {
         if (prefixMatcher == null)
             return NO_MATCHES;
 
+        // If body decl id, add body decl completions
+        if (isBodyDeclId(anId))
+            addCompletionsForBodyDeclId(anId, prefixMatcher);
+
         // Add completions for id
-        addCompletionsForId(anId, prefixMatcher);
+        else addCompletionsForId(anId, prefixMatcher);
 
         // If alloc expression, replace classes with constructors
         if (isAllocExprId(anId))
@@ -279,6 +283,23 @@ public class NodeCompleter {
     }
 
     /**
+     * Adds completions for body decl id.
+     */
+    private void addCompletionsForBodyDeclId(JExprId anId, DeclMatcher prefixMatcher)
+    {
+        // Get super class
+        JClassDecl classDecl = anId.getEnclosingClassDecl();
+        JavaClass superClass = classDecl.getSuperClass();
+
+        // Add methods of super classes
+        while (superClass != null) {
+            JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(superClass, false);
+            addCompletionDecls(matchingMembers);
+            superClass = superClass.getSuperClass();
+        }
+    }
+
+    /**
      * Adds completion.
      */
     private void addCompletionDecl(JavaDecl aDecl)
@@ -312,6 +333,27 @@ public class NodeCompleter {
                 }
             }
         }
+    }
+
+    /**
+     * Returns whether id is body decl id.
+     */
+    public static boolean isBodyDeclId(JExprId idExpr)
+    {
+        // If parent is method decl id, return true
+        JNode parent = idExpr.getParent();
+        if (parent instanceof JMethodDecl && idExpr == ((JMethodDecl) parent).getId())
+            return true;
+
+        // If parent is type and its parent is method decl type, return true
+        if (parent instanceof JType) {
+            JNode grandParent = parent.getParent();
+            if (grandParent instanceof JMethodDecl && parent == ((JMethodDecl) grandParent).getType())
+                return true;
+        }
+
+        // Return not body decl id
+        return false;
     }
 
     /**

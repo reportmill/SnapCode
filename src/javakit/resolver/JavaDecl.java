@@ -157,12 +157,12 @@ public class JavaDecl implements Comparable<JavaDecl> {
      */
     public String getDeclarationString()
     {
-        String declString = getFullNameWithParameterTypes();
+        String declString = getSimpleNameWithParameterTypes();
 
         // If method or field, prefix return type
         if (this instanceof JavaMethod || this instanceof JavaField) {
             JavaType returnType = getEvalType();
-            String returnTypeName = returnType.getName();
+            String returnTypeName = returnType.getSimpleName();
             declString = returnTypeName + " " + declString;
         }
 

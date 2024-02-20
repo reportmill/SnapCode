@@ -280,36 +280,75 @@ public class JavaPopupList extends PopupList<JavaDecl> {
      */
     public void applySuggestion()
     {
+        // Get start char index for completion node
+        JExprId selNode = getIdExprAtCursor();
+
+        // Handle body decl
+        if (NodeCompleter.isBodyDeclId(selNode))
+            applySuggestionForBodyDecl(selNode);
+
+        // Otherwise, general
+        else applySuggestionGeneral(selNode);
+
+        // Hide PopupList
+        hide();
+    }
+
+    /**
+     * Applies a general suggestion.
+     */
+    public void applySuggestionGeneral(JExprId selNode)
+    {
+        // Get replace start and end
+        String selNodeStr = selNode.getName();
+        int replaceEnd = _textArea.getSelStart();
+        int replaceStart = replaceEnd - selNodeStr.length();
+
         // Get completion and completionString
         JavaDecl completionDecl = getSelItem();
         String completionStr = completionDecl.getReplaceString();
-
-        // Get start char index for completion node
-        JExprId selNode = getIdExprAtCursor();
-        String selNodeStr = selNode.getName();
-        int selStart = _textArea.getSelStart();
-        int nodeStart = selStart - selNodeStr.length();
 
         // If method ref, just use name
         if (selNode.getParent() instanceof JExprMethodRef)
             completionStr = completionDecl.getSimpleName();
 
         // Replace selection with completeString
-        _textArea.replaceChars(completionStr, null, nodeStart, selStart, true);
+        _textArea.replaceChars(completionStr, null, replaceStart, replaceEnd, true);
 
         // If completion has parens needing content, select inside parens
         int argStart = indexOfParenContent(completionDecl, completionStr);
         if (argStart > 0) {
             int argEnd = completionStr.indexOf(')', argStart);
             if (argEnd > 0)
-                _textArea.setSel(nodeStart + argStart + 1, nodeStart + argEnd);
+                _textArea.setSel(replaceStart + argStart + 1, replaceStart + argEnd);
         }
 
         // Add import for suggestion Class, if not present
         addImportForNodeAndDecl(selNode, completionDecl);
+    }
 
-        // Hide PopupList
-        hide();
+    /**
+     * Applies a body decl suggestion.
+     */
+    public void applySuggestionForBodyDecl(JExprId selNode)
+    {
+        // Get method decl and the replace start/end
+        JMethodDecl methodDecl = selNode.getParent(JMethodDecl.class);
+        int replaceStart = methodDecl.getStartCharIndex();
+        int replaceEnd = methodDecl.getEndCharIndex();
+
+        // Get completion and completionString
+        JavaDecl completionDecl = getSelItem();
+        String methodDeclStr = completionDecl.getDeclarationString();
+
+        // Add method body brackets
+        String indentStr = _textArea.getSel().getStartLine().getIndentString();
+        String completionStr = "@Override\n" + indentStr + methodDeclStr;
+        completionStr = completionStr + '\n' + indentStr + "{\n" + indentStr + "    \n" + indentStr + "}\n";
+
+        // Replace selection with completeString
+        _textArea.replaceChars(completionStr, null, replaceStart, replaceEnd, false);
+        _textArea.setSel(replaceStart + completionStr.length() - 3 - indentStr.length());
     }
 
     /**
