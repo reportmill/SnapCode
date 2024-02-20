@@ -11,6 +11,7 @@ import snap.parse.ParseToken;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.text.*;
+import snap.util.StringUtils;
 import snap.view.*;
 
 /**
@@ -340,14 +341,17 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         // Get completionString
         String methodDeclStr = completionDecl.getDeclarationString();
 
-        // Add method body brackets
+        // Add method body: { return super.methodCall(params); }
         String indentStr = _textArea.getSel().getStartLine().getIndentString();
         String completionStr = "@Override\n" + indentStr + methodDeclStr;
-        completionStr = completionStr + '\n' + indentStr + "{\n" + indentStr + "    \n" + indentStr + "}\n";
+        String superStr = getSuperCallStringForMethod(completionDecl);
+        completionStr += '\n' + indentStr + "{\n" + indentStr + "    ";
+        int superStrIndex = replaceStart + completionStr.length();
+        completionStr += superStr + '\n' + indentStr + "}\n";
 
         // Replace selection with completeString
         _textArea.replaceChars(completionStr, null, replaceStart, replaceEnd, false);
-        _textArea.setSel(replaceStart + completionStr.length() - 3 - indentStr.length());
+        _textArea.setSel(superStrIndex, superStrIndex + superStr.length());
 
         // Add imports for method return type and param types
         if (completionDecl instanceof JavaMethod) {
@@ -588,5 +592,17 @@ public class JavaPopupList extends PopupList<JavaDecl> {
             if (!Character.isJavaIdentifierPart(aString.charAt(i)))
                 return false;
         return true;
+    }
+
+    /**
+     * Returns a string for a super method call to given method call (e.g.: "return super.methodCall(arg0, arg1, ...);"
+     */
+    private static String getSuperCallStringForMethod(JavaExecutable completionDecl)
+    {
+        String paramNamesStr = '(' + StringUtils.join(completionDecl.getParameterNames(), ", ") + ')';
+        String superStr = "super." + completionDecl.getSimpleName() + paramNamesStr + ';';
+        if (!completionDecl.getEvalClass().getName().equals("void"))
+            superStr = "return " + superStr;
+        return superStr;
     }
 }
