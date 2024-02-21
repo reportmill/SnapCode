@@ -35,6 +35,13 @@ dependencies {
 
     // Tools jar
     implementation files('lib/tools.jar')
+
+    // ByteBuddy jar
+    //implementation 'net.bytebuddy:byte-buddy:1.14.11'
+
+    // So we can get jars
+    testImplementation project(':CJDom')
+    testImplementation project(':SnapCJ')
 }
 
 mainClassName = 'snapcode.app.App'
@@ -53,8 +60,19 @@ task buildFullJar(type: Jar) {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    exclude('**/org/**', '**/test/**', '**/font_metrics.properties')
+    exclude('**/org/**', '**/test/**') //, '**/sun/**')
     with jar
     dependsOn build
 }
 
+task copyCJ(type: Copy) {
+    from (
+            "../CJDom/cjdom.js",
+            "../CJDom/build/libs/CJDom-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar",
+            "../SnapCJ/build/libs/SnapCJ-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar",
+            "../SnapKit/build/libs/SnapKit-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar",
+            "../SnapCharts/build/libs/SnapCharts-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar"
+    )
+    into "build/libs"
+    dependsOn buildFullJar
+}
