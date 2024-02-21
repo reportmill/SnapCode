@@ -42,6 +42,7 @@ public class JavaField extends JavaMember {
     public JavaType getEvalType()
     {
         if (_evalType != null) return _evalType;
+        if (_field == null) { System.out.println("JavaField.getEvalType: Missing java.lang.Field for: " + getId()); return null; }
         Type fieldType = _field.getGenericType();
         JavaType evalType = _resolver.getJavaTypeForType(fieldType);
         return _evalType = evalType;
@@ -81,15 +82,19 @@ public class JavaField extends JavaMember {
      */
     public boolean mergeField(JavaField newField)
     {
-        // Update modifiers
         boolean didChange = false;
+
+        // Update modifiers
         if (newField.getModifiers() != getModifiers()) {
             _mods = newField.getModifiers();
             didChange = true;
         }
 
         // Update return type
-        if (newField.getEvalType() != getEvalType()) { _evalType = newField.getEvalType(); didChange = true; }
+        if (newField.getEvalType() != getEvalType() && newField.getEvalType() != null) {
+            _evalType = newField.getEvalType();
+            didChange = true;
+        }
 
         // Update Field
         if (newField._field != null)

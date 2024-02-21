@@ -44,12 +44,11 @@ public class JVarDecl extends JNode implements WithId {
 
         // If array count is set, replace with type to account for it
         if (_arrayCount > 0) {
-            JType type2 = JType.createTypeForTypeAndToken(_type.getEvalType(), _startToken);
-            if (_arrayCount > 0) {
-                type2._arrayCount = _type._arrayCount + _arrayCount;
-                for (int i = 0; i < _arrayCount && type2._decl != null; i++)
-                    type2._decl = type2.getJavaType().getArrayType();
-            }
+            JavaType javaType = _type.getJavaType();
+            JType type2 = JType.createTypeForTypeAndToken(javaType, _startToken);
+            type2._arrayCount = _type._arrayCount + _arrayCount;
+            for (int i = 0; i < _arrayCount && type2._javaType != null; i++)
+                type2._javaType = type2._javaType.getArrayType();
             _type = type2;
             _type._parent = this;
         }

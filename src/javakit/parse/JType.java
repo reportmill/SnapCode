@@ -30,7 +30,7 @@ public class JType extends JNode {
     private JavaType _baseType;
 
     // The JavaType
-    private JavaType _javaType;
+    protected JavaType _javaType;
 
     /**
      * Constructor.
@@ -347,7 +347,7 @@ public class JType extends JNode {
         JType type = new JType();
         type._startToken = type._endToken = aToken;
         if (aType != null) {
-            type._decl = aType;
+            type._javaType = aType;
             type._primitive = aType.isPrimitive();
             aName = aType.getName();
         }
