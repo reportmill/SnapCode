@@ -19,6 +19,9 @@ public class NodeCompleter {
     // The resolver
     private Resolver  _resolver;
 
+    // A PrefixMatcher to match current id prefix to completions with fancy camel case matching
+    private DeclMatcher _prefixMatcher;
+
     // The list of completions
     private List<JavaDecl>  _list = new ArrayList<>();
 
@@ -69,16 +72,16 @@ public class NodeCompleter {
         String prefix = anId.getName();
         JClassDecl classDecl = anId.getEnclosingClassDecl();
         JavaClass callingClass = classDecl != null ? classDecl.getJavaClass() : null;
-        DeclMatcher prefixMatcher = prefix != null ? new DeclMatcher(prefix, callingClass) : null;
-        if (prefixMatcher == null)
+        _prefixMatcher = prefix != null ? new DeclMatcher(prefix, callingClass) : null;
+        if (_prefixMatcher == null)
             return NO_MATCHES;
 
         // If body decl id, add body decl completions
         if (isBodyDeclId(anId))
-            addCompletionsForBodyDeclId(anId, prefixMatcher);
+            addCompletionsForBodyDeclId(anId);
 
         // Add completions for id
-        else addCompletionsForId(anId, prefixMatcher);
+        else addCompletionsForId(anId);
 
         // If alloc expression, replace classes with constructors
         if (isAllocExprId(anId))
@@ -95,7 +98,7 @@ public class NodeCompleter {
 
         // Get array and sort
         JavaDecl[] decls = _list.toArray(new JavaDecl[0]);
-        Arrays.sort(decls, new DeclCompare(prefixMatcher, receivingClass));
+        Arrays.sort(decls, new DeclCompare(_prefixMatcher, receivingClass));
         return decls;
     }
 
@@ -106,12 +109,12 @@ public class NodeCompleter {
      *   - Class names
      *   - Package names
      */
-    private void addCompletionsForId(JExprId anId, DeclMatcher prefixMatcher)
+    private void addCompletionsForId(JExprId anId)
     {
         // If id is scoped, do special case
         JExpr scopeExpr = anId.getScopeExpr();
         if (scopeExpr != null) {
-            addCompletionsForScopedId(scopeExpr, prefixMatcher);
+            addCompletionsForScopedId(scopeExpr);
             return;
         }
 
@@ -123,10 +126,10 @@ public class NodeCompleter {
         }
 
         // Add reserved word completions (public, private, for, white, etc.)
-        addWordCompletions(prefixMatcher);
+        addWordCompletions();
 
         // Get variables with prefix of name and add to completions
-        List<JVarDecl> varDecls = prefixMatcher.getVarDeclsForId(anId);
+        List<JVarDecl> varDecls = _prefixMatcher.getVarDeclsForId(anId);
         for (JVarDecl varDecl : varDecls)
             addCompletionDecl(varDecl.getDecl());
 
@@ -138,9 +141,9 @@ public class NodeCompleter {
         while (enclosingClass != null) {
 
             // Add matching members and inner classes for enclosing class
-            JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(enclosingClass, false);
+            JavaMember[] matchingMembers = _prefixMatcher.getMembersForClass(enclosingClass, false);
             addCompletionDecls(matchingMembers);
-            JavaClass[] matchingInnerClasses = prefixMatcher.getInnerClassesForClass(enclosingClass);
+            JavaClass[] matchingInnerClasses = _prefixMatcher.getInnerClassesForClass(enclosingClass);
             addCompletionDecls(matchingInnerClasses);
 
             // Get next enclosing class
@@ -153,28 +156,28 @@ public class NodeCompleter {
             return;
 
         // Add completions for type id
-        addCompletionsForTypeId(anId, prefixMatcher);
+        addCompletionsForTypeId();
 
         // Add matches for static imports
         JFile jfile = anId.getFile();
         JImportDecl[] staticImportDecls = jfile.getStaticImportDecls();
-        JavaMember[] matchingMembers = prefixMatcher.getMembersForStaticImports(staticImportDecls);
+        JavaMember[] matchingMembers = _prefixMatcher.getMembersForStaticImports(staticImportDecls);
         addCompletionDecls(matchingMembers);
     }
 
     /**
      * Adds class and package completions for given type id.
      */
-    private void addCompletionsForTypeId(JExprId anId, DeclMatcher prefixMatcher)
+    private void addCompletionsForTypeId()
     {
         // Get matching classes and add completion decl
-        JavaClass[] matchingClasses = prefixMatcher.getClassesForResolver(_resolver);
+        JavaClass[] matchingClasses = _prefixMatcher.getClassesForResolver(_resolver);
         addCompletionDecls(matchingClasses);
 
         // Get matching packages and add
         JavaPackage rootPackage = _resolver.getJavaPackageForName("");
         JavaPackage[] rootPackages = rootPackage.getPackages();
-        JavaPackage[] matchingPackages = ArrayUtils.filter(rootPackages, pkg -> prefixMatcher.matchesString(pkg.getSimpleName()));
+        JavaPackage[] matchingPackages = ArrayUtils.filter(rootPackages, pkg -> _prefixMatcher.matchesString(pkg.getSimpleName()));
         addCompletionDecls(matchingPackages);
     }
 
@@ -183,7 +186,7 @@ public class NodeCompleter {
      *   - Class or package names (if parent is package)
      *   - Fields or methods names (if parent evaluates to type)
      */
-    private void addCompletionsForScopedId(JExpr scopeExpr, DeclMatcher prefixMatcher)
+    private void addCompletionsForScopedId(JExpr scopeExpr)
     {
         // Get scope expression decl
         JavaDecl scopeDecl = scopeExpr.getDecl();
@@ -202,7 +205,7 @@ public class NodeCompleter {
             JavaDecl[] packageChildren = parentPackage.getChildren();
 
             // Get matching children
-            JavaDecl[] matchingChildren = ArrayUtils.filter(packageChildren, decl -> prefixMatcher.matchesString(decl.getSimpleName()));
+            JavaDecl[] matchingChildren = ArrayUtils.filter(packageChildren, decl -> _prefixMatcher.matchesString(decl.getSimpleName()));
 
             // Add matching children (skip non-public classes)
             for (JavaDecl matchingDecl : matchingChildren) {
@@ -230,19 +233,19 @@ public class NodeCompleter {
                     staticMembersOnly = false;
 
                 // Add completion for "ClassName.class"
-                else if (prefixMatcher.matchesString("class")) {
+                else if (_prefixMatcher.matchesString("class")) {
                     JavaField classField = getClassField(scopeExprEvalClass);
                     addCompletionDecl(classField);
                 }
             }
 
             // Get matching members (fields, methods) for class and add
-            JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(scopeExprEvalClass, staticMembersOnly);
+            JavaMember[] matchingMembers = _prefixMatcher.getMembersForClass(scopeExprEvalClass, staticMembersOnly);
             addCompletionDecls(matchingMembers);
 
             // If class name literal, get matching inner classes
             if (staticMembersOnly) {
-                JavaClass[] matchingInnerClasses = prefixMatcher.getInnerClassesForClass(scopeExprEvalClass);
+                JavaClass[] matchingInnerClasses = _prefixMatcher.getInnerClassesForClass(scopeExprEvalClass);
                 addCompletionDecls(matchingInnerClasses);
             }
         }
@@ -251,28 +254,28 @@ public class NodeCompleter {
     /**
      * Adds word completions for matcher.
      */
-    private void addWordCompletions(DeclMatcher prefixMatcher)
+    private void addWordCompletions()
     {
         // Add JavaWords
         for (JavaWord word : JavaWord.ALL)
-            if (prefixMatcher.matchesString(word.getName()))
+            if (_prefixMatcher.matchesString(word.getName()))
                 addCompletionDecl(word);
 
         // Add Global Literals (true, false, null, this, super
         JavaLocalVar[] globalLiters = _resolver.getGlobalLiterals();
         for (JavaDecl literal : globalLiters)
-            if (prefixMatcher.matchesString(literal.getName()))
+            if (_prefixMatcher.matchesString(literal.getName()))
                 addCompletionDecl(literal);
     }
 
     /**
      * Adds modifiers word completions for matcher.
      */
-    private void addModifierWordCompletions(DeclMatcher prefixMatcher)
+    private void addModifierWordCompletions()
     {
         // Add JavaWords
         for (JavaWord word : JavaWord.MODIFIERS)
-            if (prefixMatcher.matchesString(word.getName()))
+            if (_prefixMatcher.matchesString(word.getName()))
                 addCompletionDecl(word);
     }
 
@@ -289,25 +292,27 @@ public class NodeCompleter {
         // Get suggested var name from type name
         String typeName = evalType.getSimpleName();
         String varName = StringUtils.firstCharLowerCase(typeName);
-        String prefix = varDecl.getName().toLowerCase();
+
+        // If prefixMatcher matches suggested var name, add var name
+        if (_prefixMatcher.matchesString(varName)) {
+            JavaDecl nameDecl = new JavaWord(varName, JavaWord.WordType.Unknown);
+            addCompletionDecl(nameDecl);
+        }
 
         // If Swing class with "J" prefix, create/add suggestion for name without "J"
         if (varName.length() > 1 && varName.charAt(0) == 'j' && Character.isUpperCase(varName.charAt(1))) {
-            String varNameNoJ = StringUtils.firstCharLowerCase(varName.substring(1));
-            if (varNameNoJ.toLowerCase().startsWith(prefix))
-                addCompletionDecl(new JavaWord(varNameNoJ, JavaWord.WordType.Unknown));
+            String varNameStripJ = StringUtils.firstCharLowerCase(varName.substring(1));
+            if (_prefixMatcher.matchesString(varNameStripJ)) {
+                JavaDecl nameDecl = new JavaWord(varNameStripJ, JavaWord.WordType.Unknown);
+                addCompletionDecl(nameDecl);
+            }
         }
-
-        // Create/add suggestion from type name
-        JavaDecl nameDecl = new JavaWord(varName, JavaWord.WordType.Unknown);
-        if (varName.toLowerCase().startsWith(prefix))
-            addCompletionDecl(nameDecl);
     }
 
     /**
      * Adds completions for body decl id.
      */
-    private void addCompletionsForBodyDeclId(JExprId anId, DeclMatcher prefixMatcher)
+    private void addCompletionsForBodyDeclId(JExprId anId)
     {
         // Get super class
         JClassDecl classDecl = anId.getEnclosingClassDecl();
@@ -315,15 +320,15 @@ public class NodeCompleter {
 
         // Add methods of super classes
         while (superClass != null) {
-            JavaMember[] matchingMembers = prefixMatcher.getMembersForClass(superClass, false);
+            JavaMember[] matchingMembers = _prefixMatcher.getMembersForClass(superClass, false);
             addCompletionDecls(matchingMembers);
             superClass = superClass.getSuperClass();
         }
 
         // If type, add type completions
         if (anId.getParent() instanceof JType) {
-            addCompletionsForTypeId(anId, prefixMatcher);
-            addModifierWordCompletions(prefixMatcher);
+            addCompletionsForTypeId();
+            addModifierWordCompletions();
         }
     }
 
