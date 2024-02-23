@@ -246,7 +246,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     {
         // Get prefix string for new id expression
         ParseToken startToken = idExpr.getStartToken();
-        String fullIdString = idExpr.getString();
+        String fullIdString = idExpr.getName();
         int selStart = _textArea.getSelStart();
         int idStart = idExpr.getStartCharIndex();
         int charCount = selStart - idStart;

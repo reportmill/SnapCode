@@ -533,7 +533,7 @@ public class JNode {
         // Get start/end token - if same, just return token string
         ParseToken startToken = getStartToken();
         ParseToken endToken = getEndToken();
-        if (startToken == endToken && startToken != null && startToken.getString().length() > 0)
+        if (startToken == endToken && startToken != null)
             return startToken.getString();
 
         // Java string, and start/end tokens

@@ -144,8 +144,18 @@ public class ClassTree {
      */
     public boolean isKnownPackageName(String packageName)
     {
+        // Get path for package name
         String filePath = '/' + packageName.replace(".", "/");
-        return ArrayUtils.hasMatch(_classPathSites, site -> site.getFileForPath(filePath) != null);
+
+        // If any site has dir with package name (and case matches), return true
+        for (WebSite site : _classPathSites) {
+            WebFile file = site.getFileForPath(filePath);
+            if (file != null && file.isDir() && file.getPath().equals(filePath))
+                return true;
+        }
+
+        // Return not known
+        return false;
     }
 
     /**
