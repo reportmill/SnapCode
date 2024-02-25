@@ -126,11 +126,27 @@ public class NodeError {
             return null;
 
         // Get last node
-        JNode lastNode = jfile;
-        while (lastNode.getChildCount() > 0)
-            lastNode = lastNode.getChild(lastNode.getChildCount() - 1);
+        JNode lastNode = getLastNodeForNode(jfile);
+        if (lastNode == null || lastNode.getStartToken() == null)
+            return null;
+
+        // Get message
+        String msg = exception.getMessage();
+        if (jfile.isRepl() && msg.contains("Expecting: \";"))
+            return null;
 
         // Return error
-        return newErrorArray(lastNode, exception.getMessage());
+        return newErrorArray(lastNode, msg);
+    }
+
+    /**
+     * Returns the last node for given node.
+     */
+    private static JNode getLastNodeForNode(JNode aNode)
+    {
+        JNode lastNode = aNode;
+        while (lastNode.getChildCount() > 0)
+            lastNode = lastNode.getChild(lastNode.getChildCount() - 1);
+        return lastNode;
     }
 }

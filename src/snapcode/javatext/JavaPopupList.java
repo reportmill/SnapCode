@@ -90,6 +90,8 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         TextLine selLine = _textArea.getSel().getStartLine();
         int selLineStart = selLine.getStartCharIndex();
         int nodeStartInLine = nodeStart - selLineStart;
+        if (nodeStartInLine < 0)
+            return;
 
         // Get location for popup and show
         double textX = selLine.getTextXForCharIndex(nodeStartInLine);
