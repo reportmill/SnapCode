@@ -135,6 +135,7 @@ public class JeplFileHandler extends JavaParserExpr.JNodeParseHandler<JFile> {
         JClassDecl classDecl = new JClassDecl();
         JModifiers modifiers = new JModifiers(Modifier.PUBLIC);
         modifiers.setStartToken(startToken);
+        modifiers.getString();
         classDecl.setModifiers(modifiers);
         classDecl.setName(_className);
         classDecl.setStartToken(startToken);
@@ -186,6 +187,7 @@ public class JeplFileHandler extends JavaParserExpr.JNodeParseHandler<JFile> {
         importDecl.setStatic(isStatic);
         importDecl.setStartToken(PHANTOM_TOKEN);
         importDecl.setEndToken(PHANTOM_TOKEN);
+        importDecl.getString();
         aFile.addImportDecl(importDecl);
     }
 }
