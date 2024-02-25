@@ -213,10 +213,6 @@ public class JFile extends JNode {
         // Get node info
         String name = anExprId.getName();
 
-        // If it's in JPackageDecl, it's a Package
-        if (isKnownPackageName(name))
-            return getJavaPackageForName(name);
-
         // See if it's a known class name using imports
         String className = getImportClassName(name);
         JavaClass javaClass = className != null ? getJavaClassForName(className) : null;
@@ -227,6 +223,10 @@ public class JFile extends JNode {
         JavaDecl field = getStaticImportMemberForNameAndParamTypes(name, null);
         if (field != null)
             return field;
+
+        // If name is known package name, return package
+        if (isKnownPackageName(name))
+            return getJavaPackageForName(name);
 
         // Do normal version
         return super.getDeclForChildId(anExprId);
@@ -326,10 +326,10 @@ public class JFile extends JNode {
                 return className;
         }
 
-        // Get import for name
-        JImportDecl imp = getImportForClassName(aName);
-        if (imp != null)
-            return imp.getImportClassName(aName);
+        // If import declaration for name, return import class
+        JImportDecl importDecl = getImportForClassName(aName);
+        if (importDecl != null)
+            return importDecl.getImportClassName(aName);
 
         // Return not found
         return null;
