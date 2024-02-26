@@ -289,15 +289,24 @@ public class ClassTree {
         if (aPath.startsWith("/java/awt/dnd")) return true;
         if (aPath.startsWith("/java/awt/im")) return true;
         if (aPath.startsWith("/java/awt/peer")) return true;
+        if (aPath.startsWith("/java/awt/print")) return true;
         if (aPath.startsWith("/java/beans")) return true;
         if (aPath.startsWith("/java/lang/model")) return true;
+        if (aPath.startsWith("/java/lang/management")) return true;
         if (aPath.startsWith("/java/nio/channels")) return true;
+        if (aPath.startsWith("/java/nio/file/attribute")) return true;
         if (aPath.startsWith("/java/rmi")) return true;
         if (aPath.startsWith("/java/security")) return true;
+        if (aPath.startsWith("/java/sql")) return true;
+        if (aPath.startsWith("/java/time/chrono")) return true;
+        if (aPath.startsWith("/java/time/temporal")) return true;
         if (aPath.startsWith("/java/util/concurrent")) return true;
+        if (aPath.startsWith("/java/util/spi")) return true;
         if (aPath.startsWith("/java/util/Spliterators")) return true;
         if (aPath.startsWith("/javax/crypto")) return true;
         if (aPath.startsWith("/javax/jws")) return true;
+        if (aPath.startsWith("/javax/lang")) return true;
+        if (aPath.startsWith("/javax/naming")) return true;
         if (aPath.startsWith("/javax/net")) return true;
         if (aPath.startsWith("/javax/security")) return true;
         if (aPath.startsWith("/javax/accessibility")) return true;
@@ -307,6 +316,7 @@ public class ClassTree {
         if (aPath.startsWith("/javax/rmi")) return true;
         if (aPath.startsWith("/javax/smartcardio")) return true;
         if (aPath.startsWith("/javax/sound")) return true;
+        if (aPath.startsWith("/javax/sql")) return true;
         if (aPath.startsWith("/javax/swing/b")) return true;
         if (aPath.startsWith("/javax/swing/colorchooser")) return true;
         if (aPath.startsWith("/javax/swing/event")) return true;
@@ -315,9 +325,13 @@ public class ClassTree {
         if (aPath.startsWith("/javax/swing/text")) return true;
         if (aPath.startsWith("/javax/swing/tree")) return true;
         if (aPath.startsWith("/javax/swing/undo")) return true;
+        if (aPath.startsWith("/javax/transaction")) return true;
+        if (aPath.startsWith("/javax/xml")) return true;
         if (aPath.startsWith("/jdk")) return true;
+        if (aPath.startsWith("/org/jcp")) return true;
         if (aPath.startsWith("/org/omg")) return true;
         if (aPath.startsWith("/org/w3c")) return true;
+        if (aPath.startsWith("/org/xml")) return true;
         if (aPath.startsWith("/META-INF")) return true;
 
         // If inner class, return false

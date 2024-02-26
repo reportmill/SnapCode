@@ -31,9 +31,6 @@ public class NodeCompleter {
     // Constant for no matches
     private static JavaDecl[]  NO_MATCHES = new JavaDecl[0];
 
-    // Whether completer has been primed
-    private static boolean _isPrimed, _isPriming;
-
     /**
      * Constructor.
      */
@@ -63,10 +60,6 @@ public class NodeCompleter {
             System.err.println("JavaCompleter: No resolver for source file: " + className);
             return NO_MATCHES;
         }
-
-        // If completions not yet primed, start prime
-        if (!_isPrimed)
-            primeCompletions(_resolver);
 
         // Get prefix matcher
         String prefix = anId.getName();
@@ -150,10 +143,6 @@ public class NodeCompleter {
             enclosingClassDecl = enclosingClassDecl.getEnclosingClassDecl();
             enclosingClass = enclosingClassDecl != null ? enclosingClassDecl.getEvalClass() : null;
         }
-
-        // If not primed, just return because getClassesForResolver() is the expense call since it loads class tree
-        if (!_isPrimed)
-            return;
 
         // Add completions for type id
         addCompletionsForTypeId();
@@ -412,25 +401,5 @@ public class NodeCompleter {
         fb.init(_resolver, classClass.getClassName());
         JavaField javaField = fb.name("class").type(Class.class).build();
         return javaField;
-    }
-
-    /**
-     * Prime completions for given resolver.
-     */
-    private static void primeCompletions(Resolver aResolver)
-    {
-        if (!_isPriming)
-            new Thread(() -> primeCompletionsImpl(aResolver)).start();
-        _isPriming = true;
-    }
-
-    /**
-     * Prime completions for given resolver.
-     */
-    private static void primeCompletionsImpl(Resolver aResolver)
-    {
-        DeclMatcher declMatcher = new DeclMatcher("a", null);
-        declMatcher.getClassesForResolver(aResolver);
-        _isPrimed = true;
     }
 }

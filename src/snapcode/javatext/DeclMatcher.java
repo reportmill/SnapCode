@@ -31,6 +31,7 @@ public class DeclMatcher {
     // Constant for empty members
     private static final JavaField[] EMPTY_FIELDS_ARRAY = new JavaField[0];
     private static final JavaMember[] EMPTY_MEMBERS_ARRAY = new JavaMember[0];
+    private static int LIMIT = 2;
 
     /**
      * Constructor.
@@ -58,26 +59,28 @@ public class DeclMatcher {
      */
     public JavaClass[] getClassesForResolver(Resolver aResolver)
     {
+        // Ease the limit up
+        if (LIMIT < 20) LIMIT += 6;
+
         // Create list
-        List<JavaClass> matchingClasses = new ArrayList<>();
-        int limit = 20;
+        List<JavaClass> matchingClasses = new ArrayList<>(LIMIT);
 
         // Search root package
         JavaPackage rootPackage = aResolver.getJavaPackageForName("");
-        findClassesForPackage(rootPackage, matchingClasses, limit);
+        findClassesForPackage(rootPackage, matchingClasses, LIMIT);
 
         // Search COMMON_PACKAGES
         for (String commonPackageName : COMMON_PACKAGES) {
             JavaPackage commonPackage = aResolver.getJavaPackageForName(commonPackageName);
             if (commonPackage == null) // WebVM
                 continue;
-            findClassesForPackage(commonPackage, matchingClasses, limit);
-            if (matchingClasses.size() >= limit)
+            findClassesForPackage(commonPackage, matchingClasses, LIMIT);
+            if (matchingClasses.size() >= LIMIT)
                 return matchingClasses.toArray(new JavaClass[0]);
         }
 
         // Search all packages
-        findClassesForPackageDeep(rootPackage, matchingClasses, limit);
+        findClassesForPackageDeep(rootPackage, matchingClasses, LIMIT);
 
         // Return
         return matchingClasses.toArray(new JavaClass[0]);
