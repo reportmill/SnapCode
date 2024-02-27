@@ -215,13 +215,17 @@ public class JeplToJava {
     {
         // Handle Jepl file - convert initializer to main method
         _sb.append('\n');
-        _sb.append(_indent);
-        _sb.append("public static void main(String[] args) throws Exception\n");
-        _sb.append("{\n");
+        _sb.append(_indent).append("public static void main(String[] args) throws Exception { ViewUtils.runLater(() -> main2(args)); }\n");
+        _sb.append(_indent).append("public static void main2(String[] args) { try { main3(args); } catch(Exception e) { } }\n");
+
+        // Handle Jepl file - convert initializer to main method
+        _sb.append('\n');
+        _sb.append(_indent).append("public static void main3(String[] args) throws Exception\n");
+        _sb.append(_indent).append("{\n");
 
         // Append body
         appendMethodBody(initializerDecl);
-        _sb.append("}\n");
+        _sb.append(_indent).append("}\n");
     }
 
     /**
