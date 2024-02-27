@@ -71,6 +71,7 @@ task copyCJ(type: Copy) {
             "../CJDom/build/libs/CJDom-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar",
             "../SnapCJ/build/libs/SnapCJ-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar",
             "../SnapKit/build/libs/SnapKit-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar",
+            "../SnapBuilder/build/libs/SnapBuilder-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar",
             "../SnapCharts/build/libs/SnapCharts-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar"
     )
     into "build/libs"
