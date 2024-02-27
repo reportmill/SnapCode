@@ -71,6 +71,10 @@ public class JavaPopupList extends PopupList<JavaDecl> {
      */
     public void showPopupList()
     {
+        // If showing, just return
+        if (isShowing())
+            return;
+
         // Get suggestions (just return if none)
         JavaDecl[] completions = getCompletionsAtCursor();
         if (completions == null || completions.length == 0)
