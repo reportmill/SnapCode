@@ -76,14 +76,35 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         if (keyChar == 0 || keyChar == KeyCode.CHAR_UNDEFINED)
             return;
 
-        // If Java identifier char, show/update popup list
-        boolean isJavaIdentifierOrBackspaceChar = Character.isJavaIdentifierPart(keyChar) || anEvent.isBackSpaceKey();
-        if (isJavaIdentifierOrBackspaceChar && !(anEvent.isShortcutDown() || anEvent.isControlDown()))
+        // If Java identifier char or backspace, show/update popup list
+        if (isUpdateCompletionsEvent(anEvent))
             ViewUtils.runLater(this::updatePopupList);
 
         // Otherwise if Showing, hide
         else if (isShowing())
             hide();
+    }
+
+    /**
+     * Returns whether key released event is update event.
+     */
+    private boolean isUpdateCompletionsEvent(ViewEvent anEvent)
+    {
+        // If backspace event, return true if already showing
+        if (anEvent.isBackSpaceKey())
+            return isShowing();
+
+        // If shortcut or control, return false
+        if (anEvent.isShortcutDown() || anEvent.isControlDown())
+            return false;
+
+        // If java identifier char, return true
+        char keyChar = anEvent.getKeyChar();
+        if (Character.isJavaIdentifierPart(keyChar))
+            return true;
+
+        // Return false
+        return false;
     }
 
     /**
@@ -112,10 +133,6 @@ public class JavaPopupList extends PopupList<JavaDecl> {
      */
     private void showPopupList()
     {
-        // If showing, just return
-        if (isShowing())
-            return;
-
         // Get start char index for completion node
         JExprId selNode = getIdExprAtCursor();
         String selNodeStr = selNode.getName();
