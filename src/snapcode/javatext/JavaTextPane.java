@@ -3,7 +3,6 @@
  */
 package snapcode.javatext;
 import javakit.parse.*;
-import snap.text.TextBlock;
 import snapcode.project.JavaAgent;
 import snapcode.project.JavaTextDoc;
 import javakit.resolver.JavaDecl;
@@ -14,7 +13,6 @@ import snap.util.*;
 import snap.view.*;
 import snap.viewx.TextPane;
 import snapcode.project.JavaTextDocUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -59,14 +57,6 @@ public class JavaTextPane extends TextPane {
     protected JavaTextArea createTextArea()
     {
         return new JavaTextArea();
-    }
-
-    /**
-     * Returns the code completion popup.
-     */
-    public JavaPopupList getPopup()
-    {
-        return getTextArea().getPopup();
     }
 
     /**
@@ -214,7 +204,7 @@ public class JavaTextPane extends TextPane {
     public void saveChanges()
     {
         // Hide Popup
-        getPopup().hide();
+        getTextArea().getPopup().hide();
 
         // Do normal version
         super.saveChanges();

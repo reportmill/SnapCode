@@ -100,15 +100,19 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     @Override
     protected void keyTyped(ViewEvent anEvent)
     {
-        // Get event info
+        // Get keyChar - if undefined or control char, just return
         char keyChar = anEvent.getKeyChar();
-        if (keyChar == KeyCode.CHAR_UNDEFINED) return;
-        boolean charDefined = !Character.isISOControl(keyChar);
+        if (keyChar == KeyCode.CHAR_UNDEFINED  || Character.isISOControl(keyChar))
+            return;
+
+        // If shortcut or control key down, just return
         boolean commandDown = anEvent.isShortcutDown();
         boolean controlDown = anEvent.isControlDown();
+        if (commandDown || controlDown)
+            return;
 
         // Handle paired chars
-        if (charDefined && !commandDown && !controlDown && isSelEmpty()) {
+        if (isSelEmpty()) {
 
             // Handle closer char: If next char is identical closer, assume this char is redundant and just return
             // TODO: Don't do if in string/comment - but should also work if chars are no longer adjacent
@@ -135,36 +139,27 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         // Do normal version
         super.keyTyped(anEvent);
 
-        // Handle paired chars
-        if (charDefined && !commandDown && !controlDown) {
+        // If opener char, insert closer char
+        boolean isPairedOpener = isPairedCharOpener(keyChar);
+        if (isPairedOpener)
+            handlePairedCharOpener(keyChar);
 
-            // If opener char, insert closer char
-            boolean isPairedOpener = isPairedCharOpener(keyChar);
-            if (isPairedOpener)
-                handlePairedCharOpener(keyChar);
+        // Handle close bracket: Remove level of indent
+        if (keyChar == '}') {
 
-            // Handle close bracket: Remove level of indent
-            if (keyChar == '}') {
+            // Get indent for this line and next
+            TextLine thisLine = getSel().getStartLine();
+            TextLine prevLine = thisLine.getPrevious();
+            int thisIndent = thisLine.getIndentLength();
+            int prevIndent = prevLine != null ? prevLine.getIndentLength() : 0;
 
-                // Get indent for this line and next
-                TextLine thisLine = getSel().getStartLine();
-                TextLine prevLine = thisLine.getPrevious();
-                int thisIndent = thisLine.getIndentLength();
-                int prevIndent = prevLine != null ? prevLine.getIndentLength() : 0;
-
-                // If this line starts with close bracket and indent is too much, remove indent level
-                if (thisLine.getString().trim().startsWith("}") && thisIndent > prevIndent && thisIndent > 4) {
-                    int thisLineStart = thisLine.getStartCharIndex();
-                    int deleteIndentEnd = thisLineStart + (thisIndent - prevIndent);
-                    _textArea.delete(thisLineStart, deleteIndentEnd, false);
-                    setSel(getSelStart() - 4);
-                }
+            // If this line starts with close bracket and indent is too much, remove indent level
+            if (thisLine.getString().trim().startsWith("}") && thisIndent > prevIndent && thisIndent > 4) {
+                int thisLineStart = thisLine.getStartCharIndex();
+                int deleteIndentEnd = thisLineStart + (thisIndent - prevIndent);
+                _textArea.delete(thisLineStart, deleteIndentEnd, false);
+                setSel(getSelStart() - 4);
             }
-
-            // Activate PopupList
-            JavaPopupList javaPopup = _javaTextArea.getPopup();
-            if (!javaPopup.isShowing() && !anEvent.isSpaceKey())
-                ViewUtils.runLater(() -> javaPopup.showPopupList());
         }
     }
 

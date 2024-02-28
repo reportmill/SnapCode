@@ -67,22 +67,54 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     }
 
     /**
-     * Shows the popup list if completions found at text area cursor.
+     * Update JavaPopupList (show, hide or update completions) for TextArea KeyReleased event.
      */
-    public void showPopupList()
+    public void updateForTextAreaKeyReleasedEvent(ViewEvent anEvent)
     {
-        // If showing, just return
-        if (isShowing())
+        // If no char, just return
+        char keyChar = anEvent.getKeyChar();
+        if (keyChar == 0 || keyChar == KeyCode.CHAR_UNDEFINED)
             return;
 
-        // Get suggestions (just return if none)
+        // If Java identifier char, show/update popup list
+        boolean isJavaIdentifierOrBackspaceChar = Character.isJavaIdentifierPart(keyChar) || anEvent.isBackSpaceKey();
+        if (isJavaIdentifierOrBackspaceChar && !(anEvent.isShortcutDown() || anEvent.isControlDown()))
+            ViewUtils.runLater(this::updatePopupList);
+
+        // Otherwise if Showing, hide
+        else if (isShowing())
+            hide();
+    }
+
+    /**
+     * Updates popup list if completions found at text area cursor.
+     */
+    private void updatePopupList()
+    {
+        // Get completions (just return if empty)
         JavaDecl[] completions = getCompletionsAtCursor();
-        if (completions == null || completions.length == 0)
+        if (completions == null || completions.length == 0) {
+            hide();
             return;
+        }
 
         // Set completions
         setItems(completions);
         setSelIndex(0);
+
+        // If not showing, show popup list
+        if (!isShowing())
+            showPopupList();
+    }
+
+    /**
+     * Shows the popup list if completions found at text area cursor.
+     */
+    private void showPopupList()
+    {
+        // If showing, just return
+        if (isShowing())
+            return;
 
         // Get start char index for completion node
         JExprId selNode = getIdExprAtCursor();
@@ -101,27 +133,6 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         double textX = selLine.getTextXForCharIndex(nodeStartInLine);
         double textY = selLine.getTextMaxY() + 4;
         show(_textArea, textX, textY);
-    }
-
-    /**
-     * Updates the popup list if new completions found at text area cursor.
-     */
-    public void updatePopupList()
-    {
-        // If not showing, just return
-        if (!isShowing())
-            return;
-
-        // Get completions (just return if empty)
-        JavaDecl[] completions = getCompletionsAtCursor();
-        if (completions == null || completions.length == 0) {
-            hide();
-            return;
-        }
-
-        // Set completions
-        setItems(completions);
-        setSelIndex(0);
     }
 
     /**

@@ -177,10 +177,6 @@ public class JavaTextArea extends TextArea {
         TextToken[] selTokens = getTokensForNode(aNode);
         setSelTokens(selTokens);
 
-        // Reset PopupList
-        JavaPopupList javaPopup = getPopup();
-        javaPopup.updatePopupList();
-
         // Fire prop change
         firePropChange(SelNode_Prop, oldSelNode, _selNode);
     }
@@ -862,6 +858,25 @@ public class JavaTextArea extends TextArea {
     {
         setHoverEnabled(false);
         super.keyReleased(anEvent);
+
+        // Forward to java popup list
+        JavaPopupList javaPopupList = getPopup();
+        javaPopupList.updateForTextAreaKeyReleasedEvent(anEvent);
+    }
+
+    /**
+     * Override to forward to popup list.
+     */
+    @Override
+    protected void mousePressed(ViewEvent anEvent)
+    {
+        // If java popup showing, hide
+        JavaPopupList javaPopupList = getPopup();
+        if (javaPopupList.isShowing())
+            javaPopupList.hide();
+
+        // Do normal version
+        super.mousePressed(anEvent);
     }
 
     /**
