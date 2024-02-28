@@ -380,9 +380,8 @@ public class RunTool extends WorkspaceTool implements AppListener {
     @Override
     protected void resetUI()
     {
-        // Update RunButton, TerminateButton
+        // Update TerminateButton
         boolean isRunning = isRunning();
-        setViewEnabled("RunButton", !isRunning);
         setViewEnabled("TerminateButton", isRunning);
 
         // Update SwapConsoleButton
