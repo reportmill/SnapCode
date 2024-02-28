@@ -209,19 +209,29 @@ public class JeplToJava {
     }
 
     /**
-     * Appends an initializer decl.
+     * Appends initializer decl as main method.
      */
     private void appendInitializerDecl(JInitializerDecl initializerDecl)
     {
-        // Handle Jepl file - convert initializer to main method
-        _sb.append('\n');
-        _sb.append(_indent).append("public static void main(String[] args) throws Exception { ViewUtils.runLater(() -> main2(args)); }\n");
-        _sb.append(_indent).append("public static void main2(String[] args) { try { main3(args); } catch(Exception e) { } }\n");
+        // If run local, just make main method
+        boolean runLocal = _jfile.getSourceFile().getUrlString().contains("TempProj");
+        if (runLocal) {
+            _sb.append('\n');
+            _sb.append(_indent).append("public static void main(String[] args) throws Exception\n");
+            _sb.append(_indent).append("{\n");
+        }
 
-        // Handle Jepl file - convert initializer to main method
-        _sb.append('\n');
-        _sb.append(_indent).append("public static void main3(String[] args) throws Exception\n");
-        _sb.append(_indent).append("{\n");
+        // Make main method with runLater call
+        else {
+            _sb.append('\n');
+            _sb.append(_indent).append("public static void main(String[] args) throws Exception { ViewUtils.runLater(() -> main2(args)); }\n");
+            _sb.append(_indent).append("public static void main2(String[] args) { try { main3(args); } catch(Exception e) { e.printStackTrace(); } }\n");
+
+            // Handle Jepl file - convert initializer to main method
+            _sb.append('\n');
+            _sb.append(_indent).append("public static void main3(String[] args) throws Exception\n");
+            _sb.append(_indent).append("{\n");
+        }
 
         // Append body
         appendMethodBody(initializerDecl);
