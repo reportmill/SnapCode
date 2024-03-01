@@ -174,6 +174,10 @@ public class SampleDoc {
         // Get index file and text
         WebFile indexFile = indexFileURL.createFile(false);
         String indexText = indexFile.getText();
+        if (indexText == null) {
+            System.out.println("SampleDoc.getSampleDocsImpl: Unable to fetch index: " + indexFileURL);
+            return new SampleDoc[0];
+        }
 
         // Get text and break into lines
         String[] lines = indexText.split("\\s*\n\\s*");

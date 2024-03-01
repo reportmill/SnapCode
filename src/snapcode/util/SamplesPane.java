@@ -224,9 +224,6 @@ public class SamplesPane extends ViewOwner {
         anim.getAnim(400).setScale(1.3).getAnim(800).setScale(1.1).getAnim(1200).setScale(1.3).getAnim(1600).setScale(1.0)
                 .getAnim(2400).setRotate(360);
         anim.setLoopCount(3).play();
-
-        // Preload Sample docs
-        new Thread(() -> SampleDoc.getSampleDocs()).start();
     }
 
     /**
