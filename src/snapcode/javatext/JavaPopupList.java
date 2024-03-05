@@ -100,7 +100,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // If java identifier char, return true
         char keyChar = anEvent.getKeyChar();
-        if (Character.isJavaIdentifierPart(keyChar))
+        if (Character.isJavaIdentifierPart(keyChar) || keyChar == '.')
             return true;
 
         // Return false
