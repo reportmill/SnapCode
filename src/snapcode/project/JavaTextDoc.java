@@ -89,6 +89,7 @@ public class JavaTextDoc extends TextDoc {
         // Get iteration vars
         List<TextToken> tokens = new ArrayList<>();
         TextRun textRun = aTextLine.getRun(0);
+        TextStyle textStyle = textRun.getStyle();
 
         // Get first token in line
         Exception exception = null;
@@ -107,7 +108,7 @@ public class JavaTextDoc extends TextDoc {
             int tokenEnd = parseToken.getEndCharIndex();
 
             // Create TextToken
-            TextToken textToken = new TextToken(aTextLine, tokenStart, tokenEnd, textRun);
+            TextToken textToken = new TextToken(aTextLine, tokenStart, tokenEnd, textStyle);
             textToken.setName(parseToken.getName());
             tokens.add(textToken);
 
@@ -129,7 +130,7 @@ public class JavaTextDoc extends TextDoc {
         if (exception != null) {
             int tokenStart = JAVA_TOKENIZER.getCharIndex();
             int tokenEnd = aTextLine.length();
-            TextToken textToken = new TextToken(aTextLine, tokenStart, tokenEnd, textRun);
+            TextToken textToken = new TextToken(aTextLine, tokenStart, tokenEnd, textStyle);
             tokens.add(textToken);
         }
 
@@ -142,7 +143,7 @@ public class JavaTextDoc extends TextDoc {
      */
     public static JavaTextDoc getJavaTextDocForFile(WebFile sourceFile)
     {
-        JavaAgent javaAgent = JavaAgent.getAgentForFile(sourceFile);
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(sourceFile);
         return javaAgent.getJavaTextDoc();
     }
 }

@@ -301,11 +301,6 @@ public class JNode {
     public int getLineIndex()  { return _startToken.getLineIndex(); }
 
     /**
-     * Returns the char index of this node in line.
-     */
-    public int getLineCharIndex()  { return _startToken.getColumnIndex(); }
-
-    /**
      * Returns the parent node.
      */
     public JNode getParent()  { return _parent; }

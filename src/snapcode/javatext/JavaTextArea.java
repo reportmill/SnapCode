@@ -231,7 +231,6 @@ public class JavaTextArea extends TextArea {
         // Convert matching JNodes to TextBoxTokens
         List<TextToken> tokensList = new ArrayList<>(idNodes.length);
         TextBlock textBlock = getTextBlock();
-        int textLineStart = 0;
 
         // Iterate over nodes and convert to TextBoxTokens
         for (JExprId idExpr : idNodes) {
@@ -241,14 +240,16 @@ public class JavaTextArea extends TextArea {
                 continue;
 
             // Get line index (skip if negative - assume Repl import statement or something)
-            int lineIndex = idExpr.getLineIndex() - textLineStart;
+            int lineIndex = idExpr.getLineIndex();
             if (lineIndex < 0)
                 continue;
 
             // Get line and token
             TextLine textLine = textBlock.getLine(lineIndex);
-            int startCharIndex = idExpr.getLineCharIndex();
-            TextToken token = textLine.getTokenForCharIndex(startCharIndex);
+            int textLineStartCharIndex = textLine.getStartCharIndex();
+            int nodeStartCharIndex = idExpr.getStartCharIndex();
+            int tokenStartCharIndexInLine = nodeStartCharIndex - textLineStartCharIndex;
+            TextToken token = textLine.getTokenForCharIndex(tokenStartCharIndexInLine);
 
             // Add to tokens list
             if (token != null)
