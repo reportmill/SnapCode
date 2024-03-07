@@ -114,7 +114,7 @@ public class BuildTool extends WorkspaceTool {
         StringBuffer buildLogBuffer = _workspace.getBuilder().getBuildLogBuffer();
         if (buildLogBuffer.length() > _buildLogTextBlock.length()) {
             CharSequence appendStr = buildLogBuffer.subSequence(_buildLogTextBlock.length(), buildLogBuffer.length());
-            _buildLogTextBlock.addChars(appendStr, null, _buildLogTextBlock.length());
+            _buildLogTextBlock.addChars(appendStr);
         }
     }
 
