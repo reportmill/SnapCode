@@ -286,7 +286,7 @@ public class SnapEditorPane extends ViewOwner {
         // Parse for statement or expression
         JavaParser javaParser = JavaParser.getShared();
         JNode node = null;
-        try { node = javaParser.parseStatement(str, 0, 0); }
+        try { node = javaParser.parseStatement(str, 0); }
         catch (Exception ignore) { }
         if (node == null) {
             try { node = javaParser.parseExpression(str); }

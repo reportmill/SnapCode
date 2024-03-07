@@ -179,7 +179,7 @@ public class SupportPane extends ViewOwner {
     protected JNodeView<?> createSnapPartStmt(String aString)
     {
         JavaParser javaParser = JavaParser.getShared();
-        JNode node = javaParser.parseStatement(aString, 0, 0);
+        JNode node = javaParser.parseStatement(aString, 0);
         JNodeView<?> nodeView = JNodeView.createView(node);
         nodeView.getEventAdapter().disableEvents(DragEvents);
         return nodeView;

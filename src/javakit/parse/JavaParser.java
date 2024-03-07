@@ -148,13 +148,12 @@ public class JavaParser extends JavaParserStmt {
     /**
      * Parses for a statement for given char input and char index.
      */
-    public synchronized JStmt parseStatement(CharSequence charInput, int charIndex, int lineIndex)
+    public synchronized JStmt parseStatement(CharSequence charInput, int charIndex)
     {
         _exception = null;
         ParseRule stmtRule = getRule("Statement");
         setInput(charInput);
         setCharIndex(charIndex);
-        getTokenizer().setLineIndex(lineIndex);
         return parseCustom(stmtRule, JStmt.class);
     }
 
