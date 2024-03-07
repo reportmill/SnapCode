@@ -65,13 +65,13 @@ public class ConsoleText extends TextBlock {
             int parenStartIndex = aStr.lastIndexOf("(", i);
             int parenEndIndex = aStr.indexOf(")", i);
             if (parenStartIndex < start || parenEndIndex < 0) {
-                addChars(aStr.substring(start, start = i + 6), style);
+                addCharsWithStyle(aStr.substring(start, start = i + 6), style);
                 continue;
             }
 
             // Get chars before parens and add
             String prefix = aStr.substring(start, parenStartIndex + 1);
-            addChars(prefix, style);
+            addCharsWithStyle(prefix, style);
 
             // Get link text, link address, TextLink
             String linkText = aStr.substring(parenStartIndex + 1, parenEndIndex);
@@ -80,14 +80,14 @@ public class ConsoleText extends TextBlock {
 
             // Get TextStyle for link and add link chars
             TextStyle linkStyle = style.copyFor(textLink);
-            addChars(linkText, linkStyle);
+            addCharsWithStyle(linkText, linkStyle);
 
             // Update start to end of link text and continue
             start = parenEndIndex;
         }
 
         // Add remainder normally
-        addChars(aStr.substring(start), style);
+        addCharsWithStyle(aStr.substring(start), style);
     }
 
     /**

@@ -45,13 +45,13 @@ public class ExceptionUtil {
             int e = aStr.indexOf(")", i);
             if (s < start || e < 0) {
                 String str = aStr.substring(start, start = i + 6);
-                textBlock.addChars(str, style);
+                textBlock.addCharsWithStyle(str, style);
                 continue;
             }
 
             // Get chars before parens and add
             String prefix = aStr.substring(start, s + 1);
-            textBlock.addChars(prefix, style);
+            textBlock.addCharsWithStyle(prefix, style);
 
             // Get link text, link address, TextLink
             String linkText = aStr.substring(s + 1, e);
@@ -59,8 +59,8 @@ public class ExceptionUtil {
             TextLink textLink = new TextLink(linkAddr);
 
             // Get TextStyle for link and add link chars
-            TextStyle lstyle = style.copyFor(textLink);
-            textBlock.addChars(linkText, lstyle);
+            TextStyle linkStyle = style.copyFor(textLink);
+            textBlock.addCharsWithStyle(linkText, linkStyle);
 
             // Update start to end of link text and continue
             start = e;
@@ -68,7 +68,7 @@ public class ExceptionUtil {
 
         // Add remainder normally
         String remainderStr = aStr.substring(start);
-        textBlock.addChars(remainderStr, style);
+        textBlock.addCharsWithStyle(remainderStr, style);
     }
 
     /**
