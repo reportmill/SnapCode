@@ -246,8 +246,8 @@ public class DebugTool extends WorkspaceTool {
             if (jpage == null) return;
             JavaTextArea tarea = jpage.getTextArea();
             WebFile file = jpage.getFile();
-            int line = tarea.getSel().getStartLine().getIndex();
-            debugApp.runToLine(file, line);
+            int lineIndex = tarea.getSel().getStartLine().getLineIndex();
+            debugApp.runToLine(file, lineIndex);
         }
 
         // Handle ThreadsComboBox

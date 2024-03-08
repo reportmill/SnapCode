@@ -169,7 +169,7 @@ public class LineFootView extends View {
 
         TextBlock textBlock = _textArea.getTextBlock();
         TextLine line = textBlock.getLineForY(_my / getHeight() * _textArea.getHeight());
-        return "Line: " + (line.getIndex() + 1);
+        return "Line: " + (line.getLineIndex() + 1);
     }
 
     /**

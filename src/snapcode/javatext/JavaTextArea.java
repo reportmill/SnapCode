@@ -680,8 +680,8 @@ public class JavaTextArea extends TextArea {
             // Get start/end line index
             TextLine startLine = getLineForCharIndex(charIndex);
             TextLine endLine = getLineForCharIndex(charIndex + charsLength);
-            int startLineIndex = startLine.getIndex();
-            int endLineIndex = endLine.getIndex();
+            int startLineIndex = startLine.getLineIndex();
+            int endLineIndex = endLine.getLineIndex();
             int lineIndexDelta = endLineIndex - startLineIndex;
 
             // Iterate over breakpoints and update
@@ -725,7 +725,7 @@ public class JavaTextArea extends TextArea {
 
             // Get start/end lines
             TextLine startLine = getLineForCharIndex(charIndex);
-            int startLineIndex = startLine.getIndex();
+            int startLineIndex = startLine.getLineIndex();
             int endLineIndex = startLineIndex + newlineCount;
             int lineIndexDelta = endLineIndex - startLineIndex;
 

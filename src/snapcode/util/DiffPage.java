@@ -352,13 +352,13 @@ public class DiffPage extends WebPage {
             for (int i = 0, iMax = markers.size(); i < iMax; i++) {
                 Marker marker = markers.get(i);
                 if (marker.contains(_mx, _my))
-                    return String.format("Diff %d of %d, Line %d", i + 1, iMax, marker._sel.getStartLine().getIndex());
+                    return String.format("Diff %d of %d, Line %d", i + 1, iMax, marker._sel.getStartLine().getLineIndex());
             }
 
             // Otherwise, just return line
             TextBlock textBlock = _leftTextArea.getTextBlock();
             TextLine line = textBlock.getLineForY(_my / getHeight() * _leftTextArea.getHeight());
-            return "Line: " + (line.getIndex() + 1);
+            return "Line: " + (line.getLineIndex() + 1);
         }
     }
 

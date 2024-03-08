@@ -259,8 +259,8 @@ public class CompleterTool extends WorkspaceTool {
 
         // Get DragBlock.String with indent
         TextToken dragToken = (TextToken) _dragNode.getStartToken();
-        TextLine line = dragToken.getTextLine();
-        String indent = getIndentString(line.getIndex());
+        TextLine textLine = dragToken.getTextLine();
+        String indent = getIndentString(textLine);
         String dragString = indent + _dragCodeBlock.getString();
 
         // If DragText needs to be reset, create and reset
@@ -287,10 +287,10 @@ public class CompleterTool extends WorkspaceTool {
     {
         JavaTextArea textArea = getTextArea();
         TextBlock textBlock = textArea.getTextBlock();
-        TextLine line = textBlock.getLineForY(_dragPoint.getY());
-        CharSequence indent = getIndentString(line.getIndex());
+        TextLine textLine = textBlock.getLineForY(_dragPoint.getY());
+        CharSequence indent = getIndentString(textLine);
         String string = _dragCodeBlock.getReplaceString(), fullString = indent + string + "\n";
-        int selStart = line.getStartCharIndex();
+        int selStart = textLine.getStartCharIndex();
         textArea.replaceChars(fullString, null, selStart, selStart, false);
         textArea.setSel(selStart + indent.length(), selStart + indent.length() + string.length());
         //int argStart = string.indexOf('('), argEnd = argStart>0? string.indexOf(')', argStart) : -1;
@@ -356,38 +356,6 @@ public class CompleterTool extends WorkspaceTool {
     }*/
 
     /**
-     * Returns the number of indent spaces for line at given index.
-     */
-    public int getIndentCount(int anIndex)
-    {
-        if (anIndex == 0) return 0;
-
-        JavaTextArea textArea = getTextArea();
-        TextBlock textBox = textArea.getTextBlock();
-        TextLine line = textBox.getLine(anIndex - 1);
-
-        int indentCount = 0;
-        while (indentCount < line.length() && Character.isWhitespace(line.charAt(indentCount)))
-            indentCount++;
-        if (!line.getString().trim().endsWith(";"))
-            indentCount += 4;
-
-        // Return
-        return indentCount;
-    }
-
-    /**
-     * Returns the indent string for line at given index.
-     */
-    public String getIndentString(int anIndex)
-    {
-        int indentCount = getIndentCount(anIndex);
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < indentCount; i++) sb.append(' ');
-        return sb.toString();
-    }
-
-    /**
      * Called when PagePane.SelFile property changes
      */
     private void pagePaneSelFileChanged()
@@ -412,4 +380,32 @@ public class CompleterTool extends WorkspaceTool {
      */
     @Override
     public String getTitle()  { return "Completer"; }
+
+    /**
+     * Returns the indent string for line at given index.
+     */
+    private static String getIndentString(TextLine textLine)
+    {
+        int indentCount = getIndentCount(textLine);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < indentCount; i++) sb.append(' ');
+        return sb.toString();
+    }
+
+    /**
+     * Returns the number of indent spaces for line at given index.
+     */
+    private static int getIndentCount(TextLine textLine)
+    {
+        TextLine prevLine = textLine.getPrevious();
+        if (prevLine == null)
+            return 0;
+
+        int indentCount = prevLine.getIndentLength();
+        if (!prevLine.getString().trim().endsWith(";"))
+            indentCount += 4;
+
+        // Return
+        return indentCount;
+    }
 }
