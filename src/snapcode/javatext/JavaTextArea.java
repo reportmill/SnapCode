@@ -249,6 +249,8 @@ public class JavaTextArea extends TextArea {
             int textLineStartCharIndex = textLine.getStartCharIndex();
             int nodeStartCharIndex = idExpr.getStartCharIndex();
             int tokenStartCharIndexInLine = nodeStartCharIndex - textLineStartCharIndex;
+            if (tokenStartCharIndexInLine > textLine.length())
+                System.currentTimeMillis();
             TextToken token = textLine.getTokenForCharIndex(tokenStartCharIndexInLine);
 
             // Add to tokens list
