@@ -8,9 +8,8 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.parse.*;
 import snap.text.*;
+import snap.util.ArrayUtils;
 import snap.web.WebFile;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class holds the text of a Java file with methods to easily build.
@@ -86,56 +85,32 @@ public class JavaTextDoc extends TextDoc {
         if (aTextLine.isWhiteSpace())
             return new TextToken[0];
 
-        // Get iteration vars
-        List<TextToken> tokens = new ArrayList<>();
-        TextRun textRun = aTextLine.getRun(0);
-        TextStyle textStyle = textRun.getStyle();
+        // Create and return text tokens
+        ParseToken[] parseTokens = JavaTextDocUtils.createParseTokensForTextLine(JAVA_TOKENIZER, aTextLine);
+        TextStyle textStyle = aTextLine.getRun(0).getStyle();
+        return ArrayUtils.map(parseTokens, pt -> createTextTokenForParseToken(pt, aTextLine, textStyle), TextToken.class);
+    }
 
-        // Get first token in line
-        Exception exception = null;
-        ParseToken parseToken = null;
-        try { parseToken = JavaTextDocUtils.getNextToken(JAVA_TOKENIZER, aTextLine); }
-        catch (Exception e) {
-            exception = e;
-            System.out.println("JavaTextDoc.createTokensForTextLine: Parse error: " + e);
-        }
+    /**
+     * Returns a TextToken for given ParseToken.
+     */
+    private static TextToken createTextTokenForParseToken(ParseToken parseToken, TextLine aTextLine, TextStyle textStyle)
+    {
+        // Get token start/end
+        int tokenStart = parseToken.getStartCharIndex();
+        int tokenEnd = parseToken.getEndCharIndex();
 
-        // Get line parse tokens and create TextTokens
-        while (parseToken != null) {
+        // Create TextToken
+        TextToken textToken = new TextToken(aTextLine, tokenStart, tokenEnd, textStyle);
+        textToken.setName(parseToken.getName());
 
-            // Get token start/end
-            int tokenStart = parseToken.getStartCharIndex();
-            int tokenEnd = parseToken.getEndCharIndex();
-
-            // Create TextToken
-            TextToken textToken = new TextToken(aTextLine, tokenStart, tokenEnd, textStyle);
-            textToken.setName(parseToken.getName());
-            tokens.add(textToken);
-
-            // Get/set token color
-            Color color = JavaTextDocUtils.getColorForParseToken(parseToken);
-            if (color != null)
-                textToken.setTextColor(color);
-
-            // Get next token
-            try { parseToken = JavaTextDocUtils.getNextToken(JAVA_TOKENIZER, null); }
-            catch (Exception e) {
-                exception = e;
-                parseToken = null;
-                System.out.println("JavaTextDoc.createTokensForTextLine: Parse error: " + e);
-            }
-        }
-
-        // If exception was hit, create token for rest of line
-        if (exception != null) {
-            int tokenStart = JAVA_TOKENIZER.getCharIndex();
-            int tokenEnd = aTextLine.length();
-            TextToken textToken = new TextToken(aTextLine, tokenStart, tokenEnd, textStyle);
-            tokens.add(textToken);
-        }
+        // Get/set token color
+        Color color = JavaTextDocUtils.getColorForParseToken(parseToken);
+        if (color != null)
+            textToken.setTextColor(color);
 
         // Return
-        return tokens.toArray(new TextToken[0]);
+        return textToken;
     }
 
     /**

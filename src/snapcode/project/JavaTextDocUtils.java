@@ -11,6 +11,8 @@ import snap.text.TextLine;
 import snap.text.TextToken;
 import snap.util.CharSequenceUtils;
 import snap.util.Prefs;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Utility methods and support for JavaTextDoc.
@@ -66,25 +68,50 @@ public class JavaTextDocUtils {
     }
 
     /**
-     * Returns the next token for tokenizer and text line.
+     * Returns the parse tokens for given tokenizer and text line.
      */
-    public static ParseToken getNextToken(CodeTokenizer aTokenizer, TextLine aTextLine)
+    public static ParseToken[] createParseTokensForTextLine(CodeTokenizer aTokenizer, TextLine aTextLine)
     {
-        // If TextLine provided, do set up
-        if (aTextLine != null) {
+        List<ParseToken> parseTokens = new ArrayList<>();
 
-            // If this line is InMultilineComment (do this first, since it may require use of Text.Tokenizer)
-            TextLine prevTextLine = aTextLine.getPrevious();
-            TextToken prevTextLineLastToken = prevTextLine != null ? prevTextLine.getLastToken() : null;
-            boolean inUnterminatedComment = isTextTokenUnterminatedMultilineComment(prevTextLineLastToken);
-
-            // Reset input for Tokenizer
-            aTokenizer.setInput(aTextLine);
-
-            // Get first line token: Handle if already in Multi-line
-            if (inUnterminatedComment)
-                return aTokenizer.getMultiLineCommentTokenMore();
+        // Get tokens in line
+        try {
+            ParseToken parseToken = getFirstToken(aTokenizer, aTextLine);
+            while (parseToken != null) {
+                parseTokens.add(parseToken);
+                parseToken = aTokenizer.getNextSpecialTokenOrToken();
+            }
         }
+
+        // If tokenizer hits invalid chars, just add remaining line chars to bogus token
+        catch (Exception e) {
+            int tokenStart = aTokenizer.getCharIndex();
+            int tokenEnd = aTextLine.length();
+            ParseToken parseToken = aTokenizer.createTokenForProps("ERROR", "ERROR", tokenStart, tokenEnd);
+            parseTokens.add(parseToken);
+            System.out.println("JavaTextDocUtils.createTokensForTextLine: Parse error: " + e);
+        }
+
+        // Return
+        return parseTokens.toArray(new ParseToken[0]);
+    }
+
+    /**
+     * Returns the first token for tokenizer and text line.
+     */
+    private static ParseToken getFirstToken(CodeTokenizer aTokenizer, TextLine aTextLine)
+    {
+        // If this line is InMultilineComment (do this first, since it may require use of Text.Tokenizer)
+        TextLine prevTextLine = aTextLine.getPrevious();
+        TextToken prevTextLineLastToken = prevTextLine != null ? prevTextLine.getLastToken() : null;
+        boolean inUnterminatedComment = isTextTokenUnterminatedMultilineComment(prevTextLineLastToken);
+
+        // Reset input for Tokenizer
+        aTokenizer.setInput(aTextLine);
+
+        // Get first line token: Handle if already in Multi-line
+        if (inUnterminatedComment)
+            return aTokenizer.getMultiLineCommentTokenMore();
 
         // Return next token
         return aTokenizer.getNextSpecialTokenOrToken();
