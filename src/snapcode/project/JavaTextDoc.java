@@ -3,12 +3,8 @@
  */
 package snapcode.project;
 import javakit.parse.JFile;
-import javakit.parse.JavaParser;
-import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.parse.*;
 import snap.text.*;
-import snap.util.ArrayUtils;
 import snap.web.WebFile;
 
 /**
@@ -20,7 +16,7 @@ public class JavaTextDoc extends TextDoc {
     private JavaAgent  _javaAgent;
 
     // A code tokenizer
-    private static CodeTokenizer JAVA_TOKENIZER;
+    private static JavaTextTokenizer JAVA_TOKENIZER;
 
     /**
      * Constructor.
@@ -41,13 +37,8 @@ public class JavaTextDoc extends TextDoc {
         setDefaultLineStyle(lineStyleSpaced);
 
         // Create tokenizer
-        if (JAVA_TOKENIZER == null) {
-            JAVA_TOKENIZER = new CodeTokenizer();
-            JAVA_TOKENIZER.setReadSingleLineComments(true);
-            JAVA_TOKENIZER.setReadMultiLineComments(true);
-            ParseRule rule = JavaParser.getShared().getRule();
-            JAVA_TOKENIZER.addPatternsForRule(rule);
-        }
+        if (JAVA_TOKENIZER == null)
+            JAVA_TOKENIZER = new JavaTextTokenizer();
     }
 
     /**
@@ -81,36 +72,7 @@ public class JavaTextDoc extends TextDoc {
     @Override
     protected TextToken[] createTokensForTextLine(TextLine aTextLine)
     {
-        // Simple case
-        if (aTextLine.isWhiteSpace())
-            return new TextToken[0];
-
-        // Create and return text tokens
-        ParseToken[] parseTokens = JavaTextDocUtils.createParseTokensForTextLine(JAVA_TOKENIZER, aTextLine);
-        TextStyle textStyle = aTextLine.getRun(0).getStyle();
-        return ArrayUtils.map(parseTokens, pt -> createTextTokenForParseToken(pt, aTextLine, textStyle), TextToken.class);
-    }
-
-    /**
-     * Returns a TextToken for given ParseToken.
-     */
-    private static TextToken createTextTokenForParseToken(ParseToken parseToken, TextLine aTextLine, TextStyle textStyle)
-    {
-        // Get token start/end
-        int tokenStart = parseToken.getStartCharIndex();
-        int tokenEnd = parseToken.getEndCharIndex();
-
-        // Create TextToken
-        TextToken textToken = new TextToken(aTextLine, tokenStart, tokenEnd, textStyle);
-        textToken.setName(parseToken.getName());
-
-        // Get/set token color
-        Color color = JavaTextDocUtils.getColorForParseToken(parseToken);
-        if (color != null)
-            textToken.setTextColor(color);
-
-        // Return
-        return textToken;
+        return JAVA_TOKENIZER.createTokensForTextLine(aTextLine);
     }
 
     /**
