@@ -444,9 +444,9 @@ public class JavaTextArea extends TextArea {
             issueStart = lineStartCharIndex;
         TextToken token = getTokenForCharIndex(issueStart);
         if (token != null) {
-            int tend = token.getTextLine().getStartCharIndex() + token.getEndCharIndex();
-            if (issueEnd < tend)
-                issueEnd = tend;
+            int tokenEnd = token.getEndCharIndex();
+            if (issueEnd < tokenEnd)
+                issueEnd = tokenEnd;
         }
 
         // If possible, make sure we underline at least one char

@@ -620,7 +620,7 @@ public class JNode {
         ParseToken startToken = getStartToken();
         if (startToken != null) {
             StringUtils.appendProp(sb, "LineIndex", startToken.getLineIndex());
-            StringUtils.appendProp(sb, "ColumnIndex", startToken.getColumnIndex());
+            StringUtils.appendProp(sb, "ColumnIndex", startToken.getStartCharIndexInLine());
         }
 
         // Append Length

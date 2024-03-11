@@ -288,18 +288,12 @@ public class LineFootView extends View {
         /**
          * Returns the selection start.
          */
-        public int getSelStart()
-        {
-            return _target.getTextLine().getStartCharIndex() + _target.getStartCharIndex();
-        }
+        public int getSelStart()  { return _target.getStartCharIndex(); }
 
         /**
          * Returns the selection start.
          */
-        public int getSelEnd()
-        {
-            return _target.getTextLine().getStartCharIndex() + _target.getEndCharIndex();
-        }
+        public int getSelEnd()  { return _target.getEndCharIndex(); }
 
         /**
          * Returns a tooltip.
