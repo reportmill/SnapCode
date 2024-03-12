@@ -4,6 +4,7 @@
 package javakit.parse;
 import java.util.*;
 import snap.parse.*;
+import snapcode.project.JavaTextDoc;
 
 /**
  * A parser for java files.
@@ -63,6 +64,14 @@ public class JavaParser extends JavaParserStmt {
         if (anInput.length() == 0)
             return new JFile();
 
+        // If JavaTextDoc, swap in tokenizer that uses JavaText tokens
+        Tokenizer oldTokenizer = null;
+        if (anInput instanceof JavaTextDoc) {
+            oldTokenizer = getTokenizer();
+            setTokenizer(((JavaTextDoc) anInput).getTokenizer());
+            getTokenizer().setCharIndex(0);
+        }
+
         // Get parse node
         ParseNode node = null;
         try { node = parse(anInput); }
@@ -84,13 +93,19 @@ public class JavaParser extends JavaParserStmt {
             e.printStackTrace();
         }
 
+        // If old tokenizer, swap it back in
+        if (oldTokenizer != null)
+            setTokenizer(oldTokenizer);
+
         // Get JFile
         JFile jfile = node != null ? node.getCustomNode(JFile.class) : null;
         if (jfile == null)
             jfile = new JFile();
 
         // Set string and exception
-        jfile.setJavaFileString(anInput.toString());
+        if (anInput instanceof JavaTextDoc)
+            jfile.setJavaFileString(((JavaTextDoc) anInput).getString());
+        else jfile.setJavaFileString(anInput.toString());
         jfile.setException(_exception);
 
         // Return
@@ -112,6 +127,16 @@ public class JavaParser extends JavaParserStmt {
         // Get JeplRule
         ParseRule jeplRule = getRule("JeplFile");
         jeplRule.setHandler(new JeplFileHandler(className, importNames, superClassName));
+
+        // If JavaTextDoc, swap in tokenizer that uses JavaText tokens
+        Tokenizer oldTokenizer = null;
+        if (anInput instanceof JavaTextDoc) {
+            oldTokenizer = getTokenizer();
+            setTokenizer(((JavaTextDoc) anInput).getTokenizer());
+            getTokenizer().setCharIndex(0);
+        }
+
+        // Set input text
         setInput(anInput);
 
         // Get parse node
@@ -135,10 +160,16 @@ public class JavaParser extends JavaParserStmt {
             e.printStackTrace();
         }
 
+        // If old tokenizer, swap it back in
+        if (oldTokenizer != null)
+            setTokenizer(oldTokenizer);
+
         // Set string and exception
         if (jfile == null)
             jfile = new JFile();
-        jfile.setJavaFileString(anInput.toString());
+        if (anInput instanceof JavaTextDoc)
+            jfile.setJavaFileString(((JavaTextDoc) anInput).getString());
+        else jfile.setJavaFileString(anInput.toString());
         jfile.setException(_exception);
 
         // Return
@@ -150,21 +181,26 @@ public class JavaParser extends JavaParserStmt {
      */
     public synchronized JStmt parseStatement(CharSequence charInput, int charIndex)
     {
-        return parseStatement(charInput, charIndex, 0);
+        _exception = null;
+        ParseRule stmtRule = getRule("Statement");
+        setInput(charInput);
+        setCharIndex(charIndex);
+        return parseCustom(stmtRule, JStmt.class);
     }
 
     /**
      * Parses for a statement for given char input and char index.
      */
-    public synchronized JStmt parseStatement(CharSequence charInput, int charIndex, int lineIndex)
+    public synchronized JStmt parseStatementForJavaTextDoc(JavaTextDoc javaTextDoc, int charIndex)
     {
-        _exception = null;
-        ParseRule stmtRule = getRule("Statement");
-        setInput(charInput);
-        setCharIndex(charIndex);
-        if (lineIndex > 0)
-            getTokenizer().setTokenDocStartLineIndex(lineIndex);
-        return parseCustom(stmtRule, JStmt.class);
+        Tokenizer oldTokenizer = getTokenizer();
+        setTokenizer(javaTextDoc.getTokenizer());
+
+        JStmt stmt = parseStatement(javaTextDoc, charIndex);
+
+        setTokenizer(oldTokenizer);
+
+        return stmt;
     }
 
     /**
@@ -198,14 +234,6 @@ public class JavaParser extends JavaParserStmt {
             _exception = new ParseException(this, aRule);
             //System.err.println("JavaParse: " + _exception);
         }
-    }
-
-    /**
-     * Override to declare tokenizer as JavaTokenizer.
-     */
-    public CodeTokenizer getTokenizer()
-    {
-        return (CodeTokenizer) super.getTokenizer();
     }
 
     /**

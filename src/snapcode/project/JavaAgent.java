@@ -121,14 +121,15 @@ public class JavaAgent {
         if (_javaTextDoc != null) return _javaTextDoc;
 
         // Create/load JavaTextDoc
-        JavaTextDoc javaTextDoc = createJavaTextDoc();
-        javaTextDoc.readFromSourceURL(_javaFile.getURL());
+        _javaTextDoc = createJavaTextDoc();
+        _jfile = null;
+        _javaTextDoc.readFromSourceURL(_javaFile.getURL());
 
         // Listen for changes
-        javaTextDoc.addPropChangeListener(pc -> javaTextDocDidPropChange(pc));
+        _javaTextDoc.addPropChangeListener(pc -> javaTextDocDidPropChange(pc));
 
         // Set, return
-        return _javaTextDoc = javaTextDoc;
+        return _javaTextDoc;
     }
 
     /**
@@ -156,7 +157,7 @@ public class JavaAgent {
     {
         // Get parsed java file
         JavaParser javaParser = JavaParser.getShared();
-        String javaStr = getJavaText();
+        CharSequence javaStr = getJavaText();
 
         // Parse file
         JFile jfile;
@@ -279,10 +280,10 @@ public class JavaAgent {
     /**
      * Returns the string from Java file.
      */
-    public String getJavaText()
+    public CharSequence getJavaText()
     {
         if (_javaTextDoc != null)
-            return _javaTextDoc.getString();
+            return _javaTextDoc;
         return _javaFile.getText();
     }
 

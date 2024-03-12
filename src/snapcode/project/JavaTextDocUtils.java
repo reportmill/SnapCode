@@ -90,11 +90,10 @@ public class JavaTextDocUtils {
         // Parse new JStmtBlock (create empty one if there wasn't enough in block to create it)
         JavaParser javaParser = JavaParser.getShared();
         int charIndex = oldStmt.getStartCharIndex();
-        int lineIndex = oldStmt.getLineIndex();
 
         // Parse new statement
         JStmtBlock newStmt = null;
-        try { newStmt = (JStmtBlock) javaParser.parseStatement(javaTextDoc, charIndex, lineIndex); }
+        try { newStmt = (JStmtBlock) javaParser.parseStatementForJavaTextDoc(javaTextDoc, charIndex); }
         catch (Exception ignore) { }
 
         // If parse failed, return failed

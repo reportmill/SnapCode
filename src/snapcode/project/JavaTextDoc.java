@@ -4,6 +4,7 @@
 package snapcode.project;
 import javakit.parse.JFile;
 import snap.gfx.Font;
+import snap.parse.Tokenizer;
 import snap.text.*;
 import snap.web.WebFile;
 
@@ -15,8 +16,8 @@ public class JavaTextDoc extends TextDoc {
     // The JavaAgent
     private JavaAgent  _javaAgent;
 
-    // A code tokenizer
-    private static JavaTextTokenizer JAVA_TOKENIZER;
+    // The tokenizer
+    private JavaTextTokenSource _tokenizer;
 
     /**
      * Constructor.
@@ -36,9 +37,8 @@ public class JavaTextDoc extends TextDoc {
         //lineStyleSpaced.setTabs(new double[] { tabW, tabW, tabW, tabW, tabW, tabW, tabW, tabW, tabW, tabW });
         setDefaultLineStyle(lineStyleSpaced);
 
-        // Create tokenizer
-        if (JAVA_TOKENIZER == null)
-            JAVA_TOKENIZER = new JavaTextTokenizer();
+        // Create tokenizer to provide tokens from Java text lines
+        _tokenizer = new JavaTextTokenSource(this);
     }
 
     /**
@@ -67,12 +67,17 @@ public class JavaTextDoc extends TextDoc {
     }
 
     /**
+     * Returns tokenizer that provides tokens from lines.
+     */
+    public Tokenizer getTokenizer()  { return _tokenizer; }
+
+    /**
      * Override to create tokens.
      */
     @Override
     protected TextToken[] createTokensForTextLine(TextLine aTextLine)
     {
-        return JAVA_TOKENIZER.createTokensForTextLine(aTextLine);
+        return JavaTextTokenizer.SHARED.createTokensForTextLine(aTextLine);
     }
 
     /**

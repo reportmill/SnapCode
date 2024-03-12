@@ -25,6 +25,9 @@ public class JavaTextTokenizer extends CodeTokenizer {
     private static Color RESERVED_WORD_COLOR = new Color("#660033");
     private static Color STRING_LITERAL_COLOR = new Color("#C80000"); // CC0000
 
+    // A code tokenizer
+    public static JavaTextTokenizer SHARED = new JavaTextTokenizer();
+
     /**
      * Constructor.
      */
