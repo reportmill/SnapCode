@@ -4,13 +4,12 @@
 package snapcode.javatext;
 import javakit.parse.*;
 import static snapcode.javatext.JavaTextArea.INDENT_STRING;
-import snap.parse.CodeTokenizer;
+import snap.parse.Tokenizer;
 import snap.text.TextLine;
 import snap.text.TextToken;
 import snap.view.KeyCode;
 import snap.view.TextAreaKeys;
 import snap.view.ViewEvent;
-import snap.view.ViewUtils;
 
 /**
  * This class is a helper for JavaTextArea to handle key processing.
@@ -205,7 +204,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     private boolean isEnteringMultilineComment(TextLine aTextLine)
     {
         TextToken lastToken = aTextLine.getLastToken();
-        return lastToken != null && lastToken.getName() == CodeTokenizer.MULTI_LINE_COMMENT;
+        return lastToken != null && lastToken.getName() == Tokenizer.MULTI_LINE_COMMENT;
     }
 
     /**

@@ -69,7 +69,7 @@ public class JavaTextDoc extends TextDoc {
     /**
      * Returns tokenizer that provides tokens from lines.
      */
-    public Tokenizer getTokenizer()  { return _tokenizer; }
+    public Tokenizer getTokenSource()  { return _tokenizer; }
 
     /**
      * Override to create tokens.

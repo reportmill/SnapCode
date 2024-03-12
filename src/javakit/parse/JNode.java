@@ -533,19 +533,19 @@ public class JNode {
 
         // Java string, and start/end tokens
         JFile jfile = getFile();
-        String javaString = jfile != null ? jfile.getJavaFileString() : null;
-        if (javaString == null || startToken == null || endToken == null)
+        CharSequence javaChars = jfile != null ? jfile.getJavaChars() : null;
+        if (javaChars == null || startToken == null || endToken == null)
             return createString(); // "(No string available - JFile, Java string or tokens not found)";
 
         // Get JavaString
         int startIndex = startToken.getStartCharIndex();
         int endIndex = endToken.getEndCharIndex();
-        if (endIndex > javaString.length())
+        if (endIndex > javaChars.length())
             return createString(); // "(No string available - token start/end out of range/synch)";
 
         // Return string
-        String str = javaString.substring(startIndex, endIndex);
-        return str;
+        CharSequence nodeChars = javaChars.subSequence(startIndex, endIndex);
+        return nodeChars.toString();
     }
 
     /**

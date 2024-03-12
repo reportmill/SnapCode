@@ -8,7 +8,6 @@ import snap.parse.Tokenizer;
 import snap.text.TextLine;
 import snap.text.TextStyle;
 import snap.text.TextToken;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class JavaTextTokenizer extends CodeTokenizer {
         setReadSingleLineComments(true);
         setReadMultiLineComments(true);
         ParseRule rule = JavaParser.getShared().getRule();
-        addPatternsForRule(rule);
+        setRegexesForPatternRulesInRule(rule);
     }
 
     /**
@@ -136,7 +135,7 @@ public class JavaTextTokenizer extends CodeTokenizer {
     {
         // Handle comments
         String tokenName = aToken.getName();
-        if (tokenName == CodeTokenizer.SINGLE_LINE_COMMENT || tokenName == CodeTokenizer.MULTI_LINE_COMMENT)
+        if (tokenName == Tokenizer.SINGLE_LINE_COMMENT || tokenName == Tokenizer.MULTI_LINE_COMMENT)
             return COMMENT_COLOR;
 
         // Handle reserved words

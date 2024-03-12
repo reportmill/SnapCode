@@ -57,6 +57,15 @@ public class JavaParser extends JavaParserStmt {
      */
     public synchronized JFile parseFile(CharSequence anInput)
     {
+        ParseRule javaRule = getRule();
+        return parseFileWithRule(anInput, javaRule);
+    }
+
+    /**
+     * Parses for java file for given char input.
+     */
+    protected synchronized JFile parseFileWithRule(CharSequence anInput, ParseRule javaFileRule)
+    {
         // Clear exception
         _exception = null;
 
@@ -68,13 +77,15 @@ public class JavaParser extends JavaParserStmt {
         Tokenizer oldTokenizer = null;
         if (anInput instanceof JavaTextDoc) {
             oldTokenizer = getTokenizer();
-            setTokenizer(((JavaTextDoc) anInput).getTokenizer());
-            getTokenizer().setCharIndex(0);
+            setTokenizer(((JavaTextDoc) anInput).getTokenSource());
         }
 
+        // Set input
+        setInput(anInput);
+
         // Get parse node
-        ParseNode node = null;
-        try { node = parse(anInput); }
+        JFile jfile = null;
+        try { jfile = parseCustom(javaFileRule, JFile.class); }
 
         // Catch ParseException
         catch (ParseException e) {
@@ -97,15 +108,12 @@ public class JavaParser extends JavaParserStmt {
         if (oldTokenizer != null)
             setTokenizer(oldTokenizer);
 
-        // Get JFile
-        JFile jfile = node != null ? node.getCustomNode(JFile.class) : null;
+        // If JFile missing, create empty
         if (jfile == null)
             jfile = new JFile();
 
         // Set string and exception
-        if (anInput instanceof JavaTextDoc)
-            jfile.setJavaFileString(((JavaTextDoc) anInput).getString());
-        else jfile.setJavaFileString(anInput.toString());
+        jfile.setJavaChars(anInput);
         jfile.setException(_exception);
 
         // Return
@@ -117,63 +125,12 @@ public class JavaParser extends JavaParserStmt {
      */
     public synchronized JFile parseJeplFile(CharSequence anInput, String className, String[] importNames, String superClassName)
     {
-        // Clear exception
-        _exception = null;
-
-        // If no input, just return
-        if (anInput.length() == 0)
-            return new JFile();
-
         // Get JeplRule
         ParseRule jeplRule = getRule("JeplFile");
         jeplRule.setHandler(new JeplFileHandler(className, importNames, superClassName));
 
-        // If JavaTextDoc, swap in tokenizer that uses JavaText tokens
-        Tokenizer oldTokenizer = null;
-        if (anInput instanceof JavaTextDoc) {
-            oldTokenizer = getTokenizer();
-            setTokenizer(((JavaTextDoc) anInput).getTokenizer());
-            getTokenizer().setCharIndex(0);
-        }
-
-        // Set input text
-        setInput(anInput);
-
-        // Get parse node
-        JFile jfile = null;
-        try { jfile = parseCustom(jeplRule, JFile.class); }
-
-        // Catch ParseException
-        catch (ParseException e) {
-            if (_exception == null)
-                _exception = e;
-        }
-
-        // Catch other exception (probably Tokenizer)
-        catch (Exception e) {
-            _exception = e;
-            ParseToken token = getToken();
-            if (token != null) {
-                int lineNum = token.getLineIndex() + 1;
-                System.err.println("JavaParser.getJavaFile: Exception at line " + lineNum);
-            }
-            e.printStackTrace();
-        }
-
-        // If old tokenizer, swap it back in
-        if (oldTokenizer != null)
-            setTokenizer(oldTokenizer);
-
-        // Set string and exception
-        if (jfile == null)
-            jfile = new JFile();
-        if (anInput instanceof JavaTextDoc)
-            jfile.setJavaFileString(((JavaTextDoc) anInput).getString());
-        else jfile.setJavaFileString(anInput.toString());
-        jfile.setException(_exception);
-
-        // Return
-        return jfile;
+        // Do normal version
+        return parseFileWithRule(anInput, jeplRule);
     }
 
     /**
@@ -194,7 +151,7 @@ public class JavaParser extends JavaParserStmt {
     public synchronized JStmt parseStatementForJavaTextDoc(JavaTextDoc javaTextDoc, int charIndex)
     {
         Tokenizer oldTokenizer = getTokenizer();
-        setTokenizer(javaTextDoc.getTokenizer());
+        setTokenizer(javaTextDoc.getTokenSource());
 
         JStmt stmt = parseStatement(javaTextDoc, charIndex);
 

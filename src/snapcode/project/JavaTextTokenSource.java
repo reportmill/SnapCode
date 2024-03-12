@@ -1,5 +1,4 @@
 package snapcode.project;
-import snap.parse.CodeTokenizer;
 import snap.parse.ParseToken;
 import snap.parse.Tokenizer;
 import snap.text.TextLine;
@@ -59,7 +58,7 @@ public class JavaTextTokenSource extends Tokenizer {
         // If more line tokens, return next
         if (_tokenIndex < _textLine.getTokenCount()) {
             TextToken textToken = _textLine.getToken(_tokenIndex++);
-            if (textToken.getName() == CodeTokenizer.SINGLE_LINE_COMMENT || textToken.getName() == CodeTokenizer.MULTI_LINE_COMMENT)
+            if (textToken.getName() == Tokenizer.SINGLE_LINE_COMMENT || textToken.getName() == Tokenizer.MULTI_LINE_COMMENT)
                 return getNextToken();
 
             _charIndex = textToken.getEndCharIndex();

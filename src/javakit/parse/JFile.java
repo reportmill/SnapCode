@@ -22,8 +22,8 @@ public class JFile extends JNode {
     // The resolver for source file
     protected Supplier<Resolver> _resolverSupplier;
 
-    // The full Java string (optional)
-    private String  _javaFileString;
+    // The full Java text as chars (optional)
+    private CharSequence _javaChars;
 
     // The package declaration
     protected JPackageDecl  _packageDecl;
@@ -95,14 +95,14 @@ public class JFile extends JNode {
     }
 
     /**
-     * Returns the Java file string if set.
+     * Returns the Java file characters.
      */
-    public String getJavaFileString()  { return _javaFileString; }
+    public CharSequence getJavaChars()  { return _javaChars; }
 
     /**
-     * Sets the Java file string.
+     * Sets the Java file characters.
      */
-    public void setJavaFileString(String aString)  { _javaFileString = aString; }
+    public void setJavaChars(CharSequence theChars)  { _javaChars = theChars; }
 
     /**
      * Returns the package declaration.
