@@ -4,7 +4,6 @@ import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.apptools.FileTreeTool;
 import snapcode.project.*;
 import java.io.File;
 import java.io.IOException;
