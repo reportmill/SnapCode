@@ -33,6 +33,18 @@ public class BuildTool extends WorkspaceTool {
     }
 
     /**
+     * Builds the workspace.
+     */
+    public void buildWorkspace()
+    {
+        if (ViewUtils.isAltDown())
+            _workspace.getBuilder().addAllFilesToBuild();
+        _workspace.getBuilder().buildWorkspaceLater();
+
+        _workspaceTools.showTool(this);
+    }
+
+    /**
      * Returns the array of current build issues.
      */
     public BuildIssue[] getIssues()
@@ -124,11 +136,8 @@ public class BuildTool extends WorkspaceTool {
     public void respondUI(ViewEvent anEvent)
     {
         // Handle BuildButton, Handle StopButton
-        if (anEvent.equals("BuildButton")) {
-            if (anEvent.isAltDown())
-                _workspace.getBuilder().addAllFilesToBuild();
-            _workspace.getBuilder().buildWorkspaceLater();
-        }
+        if (anEvent.equals("BuildButton"))
+            buildWorkspace();
         else if (anEvent.equals("StopButton"))
             _workspace.getBuilder().stopBuild();
 

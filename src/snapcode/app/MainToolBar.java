@@ -1,4 +1,6 @@
 package snapcode.app;
+import snapcode.apptools.BuildTool;
+import snapcode.apptools.DebugTool;
 import snapcode.project.Project;
 import snap.gfx.*;
 import snap.util.StringUtils;
@@ -58,11 +60,32 @@ public class MainToolBar extends WorkspaceTool {
     }
 
     /**
+     * ResetUI
+     */
+    @Override
+    protected void resetUI()
+    {
+        // Update TerminateButton
+        boolean isRunning = _workspaceTools.getRunTool().isRunning();
+        setViewEnabled("TerminateButton", isRunning);
+    }
+
+    /**
      * Respond to UI changes.
      */
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
+        // Handle RunButton, DebugButton, TerminateButton, BuildButton
+        if (anEvent.equals("RunButton"))
+            _workspaceTools.getRunTool().runAppForSelFile(false);
+        if (anEvent.equals("DebugButton"))
+            _workspaceTools.getRunTool().runAppForSelFile(true);
+        if (anEvent.equals("TerminateButton"))
+            _workspaceTools.getRunTool().cancelRun();
+        if (anEvent.equals("BuildButton"))
+            _workspaceTools.getToolForClass(BuildTool.class).buildWorkspace();
+
         // Handle SearchComboBox
         if (anEvent.equals("SearchComboBox"))
             handleSearchComboBox(anEvent);

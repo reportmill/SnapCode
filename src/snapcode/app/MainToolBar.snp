@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RowView PrefHeight="32" Padding="0,12,0,8" Spacing="8">
+<RowView PrefHeight="32" Padding="0,12,0,8" Spacing="4">
   <Font Name="Arial" Size="12" />
-  <ComboBox Name="SearchComboBox" PrefWidth="220" PrefHeight="22" LeanX="RIGHT" ShowTextField="true" ShowButton="false" FilterList="true" />
+  <Button Name="RunButton" PrefWidth="24" PrefHeight="24" Image="/snapcode/apptools/pkg.images/Run.png" ShowArea="false" />
+  <Button Name="DebugButton" PrefWidth="24" PrefHeight="24" Image="/snapcode/apptools/pkg.images/Debug.gif" ShowArea="false" />
+  <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" Image="/snapcode/apptools/pkg.images/Terminate.gif" ShowArea="false" />
+  <Separator PrefHeight="18" Vertical="true" />
+  <Button Name="BuildButton" PrefWidth="24" PrefHeight="24" Margin="0,50,0,10" LeanX="RIGHT" Image="/snapcode/apptools/pkg.images/Build.png" ShowArea="false" />
+  <ComboBox Name="SearchComboBox" PrefWidth="200" PrefHeight="22" ShowTextField="true" ShowButton="false" FilterList="true" />
 </RowView>

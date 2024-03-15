@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.geom.HPos;
 import snap.geom.Rect;
 import snap.gfx.GFXEnv;
 import snap.viewx.DevPane;
@@ -59,12 +60,12 @@ public class WorkspacePane extends ViewOwner {
         // Create PagePane
         _pagePane = createPagePane();
 
+        // Create WorkspaceTools
+        _workspaceTools = createWorkspaceTools();
+
         // Create MainToolBar, StatusBar
         _toolBar = new MainToolBar(this);
         _statusBar = new StatusBar(this);
-
-        // Create WorkspaceTools
-        _workspaceTools = createWorkspaceTools();
 
         // Manage projects
         Project[] projects = _workspace.getProjects();
@@ -247,23 +248,6 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
-     * Returns whether ToolBar is showing.
-     */
-    public boolean isToolBarShowing()  { return _toolBar.isShowing(); }
-
-    /**
-     * Sets whether ToolBar is showing.
-     */
-    public void setToolBarShowing(boolean aValue)
-    {
-        if (aValue == isToolBarShowing()) return;
-
-        // Show/hide tooBar.UI and adjacent separator rect
-        _toolBar.getUI().setVisible(aValue);
-        getView("MainColView", ColView.class).getChild(2).setVisible(aValue);
-    }
-
-    /**
      * Initializes UI panel.
      */
     protected void initUI()
@@ -277,13 +261,10 @@ public class WorkspacePane extends ViewOwner {
         MenuBar menuBar = getView("MenuBar", MenuBar.class);
         menuBar.addEventHandler(e -> { if (e.isShortcutDown()) ViewUtils.processEvent(menuBar, e); }, KeyPress);
 
-        // Install ToolBar
-        ColView mainColView = getView("MainColView", ColView.class);
-        mainColView.addChild(_toolBar.getUI(), 1);
-
-        // Hide ToolBar and separator by default
-        _toolBar.getUI().setVisible(false);
-        mainColView.getChild(2).setVisible(false);
+        // Add toobar to menubar
+        View toolBarUI = _toolBar.getUI();
+        toolBarUI.setLeanX(HPos.RIGHT);
+        ViewUtils.addChild(menuBar, toolBarUI);
 
         // Get PagePaneSplitView
         SplitView pagePaneSplitView = getView("PagePaneSplitView", SplitView.class);

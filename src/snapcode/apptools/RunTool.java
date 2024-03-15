@@ -70,6 +70,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         _apps.add(runApp);
         runApp.addListener(this);
         resetLater();
+        _workspacePane.getToolBar().resetLater();
     }
 
     /**
@@ -108,6 +109,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         runLater(() -> resetConsoleView());
         DebugTool debugTool = getDebugTool();
         debugTool.resetLater();
+        _workspacePane.getToolBar().resetLater();
     }
 
     /**
@@ -203,6 +205,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
     {
         execProc(runApp);
         resetLater();
+        _workspacePane.getToolBar().resetLater();
     }
 
     /**
@@ -305,6 +308,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
 
         // Reset UI
         resetLater();
+        _workspacePane.getToolBar().resetLater();
     }
 
     /**
@@ -381,8 +385,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
     protected void resetUI()
     {
         // Update TerminateButton
-        boolean isRunning = isRunning();
-        setViewEnabled("TerminateButton", isRunning);
+        //setViewEnabled("TerminateButton", isRunning());
 
         // Update SwapConsoleButton
         RunApp selApp = getSelApp();
