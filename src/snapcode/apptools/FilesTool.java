@@ -364,7 +364,7 @@ public class FilesTool extends WorkspaceTool {
     /**
      * Creates a new project.
      */
-    private Project createNewProjectForProjectDir(WebFile newProjectFile)
+    public Project createNewProjectForProjectDir(WebFile newProjectFile)
     {
         // Create new project
         WebSite projectSite = newProjectFile.getURL().getAsSite();

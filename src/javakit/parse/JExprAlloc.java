@@ -28,7 +28,7 @@ public class JExprAlloc extends JExpr {
     protected JClassDecl _classDecl;
 
     // The allocation ClassBody body declarations
-    protected JMemberDecl[] _classBodyDecls;
+    protected JBodyDecl[] _classBodyDecls;
 
     /**
      * Constructor.
@@ -124,12 +124,12 @@ public class JExprAlloc extends JExpr {
     /**
      * Returns the allocation ClassBody body declarations.
      */
-    public JMemberDecl[] getClassBodyDecls()  { return _classBodyDecls; }
+    public JBodyDecl[] getClassBodyDecls()  { return _classBodyDecls; }
 
     /**
      * Sets the allocation ClassBodyDecl body declarations.
      */
-    public void setClassBodyDecls(JMemberDecl[] bodyDecls)
+    public void setClassBodyDecls(JBodyDecl[] bodyDecls)
     {
         _classBodyDecls = bodyDecls;
 

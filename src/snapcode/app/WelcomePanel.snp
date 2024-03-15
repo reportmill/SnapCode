@@ -17,6 +17,7 @@
           <MenuItem Name="NewJavaReplMenu" text="New Java REPL" />
           <MenuItem Name="NewProjectButton" text="New Java Project" />
           <MenuItem Name="NewUIFileMenu" text="New SnapKit UI File" />
+          <MenuItem Name="OpenGreenfootMenu" text="Open Greenfoot Scenario" />
         </MenuButton>
       </RowView>
       <Button Name="OpenButton" PrefWidth="100" PrefHeight="24" text="Open" />

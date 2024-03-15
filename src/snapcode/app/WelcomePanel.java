@@ -105,8 +105,11 @@ public class WelcomePanel extends ViewOwner {
     public void respondUI(ViewEvent anEvent)
     {
         // Handle SamplesButton
-        if (anEvent.equals("SamplesButton"))
-            openWorkspaceForShowSamples();
+        if (anEvent.equals("SamplesButton")) {
+            if (anEvent.isAltDown())
+                GreenImport.showGreenfootPanel();
+            else openWorkspaceForShowSamples();
+        }
 
         // Handle NewButton, NewJavaReplMenu
         if (anEvent.equals("NewButton") || anEvent.equals("NewJavaReplMenu"))
@@ -125,6 +128,10 @@ public class WelcomePanel extends ViewOwner {
         // Handle NewProjectButton
         if (anEvent.equals("NewProjectButton"))
             openWorkspaceForNewProject();
+
+        // Handle OpenGreenfootMenu
+        if (anEvent.equals("OpenGreenfootMenu"))
+            GreenImport.showGreenfootPanel();
 
         // Handle QuitButton
         if (anEvent.equals("QuitButton"))
@@ -223,9 +230,6 @@ public class WelcomePanel extends ViewOwner {
         WorkspacePane workspacePane = openEmptyWorkspace();
         workspacePane.showProjectTool();
 
-        // Show FileTreeTool
-        workspacePane.getWorkspaceTools().getLeftTray().setSelToolForClass(FileTreeTool.class);
-
         // Show new project panel
         runLater(() -> {
             FilesTool filesTool = workspacePane.getWorkspaceTools().getFilesTool();
@@ -259,7 +263,7 @@ public class WelcomePanel extends ViewOwner {
     /**
      * Opens an empty workspace pane.
      */
-    private WorkspacePane openEmptyWorkspace()
+    protected WorkspacePane openEmptyWorkspace()
     {
         // Create workspace and workspace pane
         Workspace workspace = new Workspace();

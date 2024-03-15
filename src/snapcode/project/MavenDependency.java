@@ -58,6 +58,15 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
+     * Constructor with maven id.
+     */
+    public MavenDependency(String mavenId)
+    {
+        super();
+        setId(mavenId);
+    }
+
+    /**
      * Returns the type.
      */
     public Type getType()  { return Type.Maven; }
@@ -208,6 +217,9 @@ public class MavenDependency extends BuildDependency {
         if (_name != null) {
             String name = _name.toLowerCase();
             if (name.contains("reportmill") || name.contains("snapkit") || name.contains("snapcharts"))
+                return "https://reportmill.com/maven";
+            String group = _group.toLowerCase();
+            if (group.contains("reportmill"))
                 return "https://reportmill.com/maven";
         }
         if (SnapUtils.isWebVM)

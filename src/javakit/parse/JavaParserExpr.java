@@ -705,7 +705,7 @@ public class JavaParserExpr extends Parser {
 
                 // Handle ClassBody
                 case "ClassBody":
-                    JMemberDecl[] classBodyDecls = aNode.getCustomNode(JMemberDecl[].class);
+                    JBodyDecl[] classBodyDecls = aNode.getCustomNode(JBodyDecl[].class);
                     allocExpr.setClassBodyDecls(classBodyDecls);
                     break;
             }
