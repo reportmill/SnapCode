@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <SplitView Name="MainSplit" PrefWidth="958" PrefHeight="684" GrowHeight="true" Vertical="true">
   <ColView Name="MainColView" GrowHeight="true" FillWidth="true">
-    <MenuBar Name="MenuBar" MinHeight="32">
+    <MenuBar Name="MenuBar" MinHeight="36">
       <Menu Name="FileMenu" Text="File">
         <MenuItem Name="NewMenuItem" Text="New" key="Shortcut+N" />
         <MenuItem />
