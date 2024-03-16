@@ -182,20 +182,27 @@ public class JavaTextAreaKeys extends TextAreaKeys {
             return;
         }
 
-        // Create string for new line plus indent
+        // Get indent string for new line
         String indentStr = textLine.getIndentString();
-        StringBuilder sb = new StringBuilder().append('\n').append(indentStr);
 
         // If leaving conditional (if, for, do, while) without brackets, remove level of indent
         JNode selNode = _javaTextArea.getSelNode();
         JStmtConditional selNodeParent = selNode != null ? selNode.getParent(JStmtConditional.class) : null;
         if (selNodeParent != null &&  !(selNodeParent.getStatement() instanceof JStmtBlock)) {
-            if (sb.length() > INDENT_STRING.length())
-                sb.delete(sb.length() - INDENT_STRING.length(), sb.length());
+            if (indentStr.length() >= INDENT_STRING.length())
+                indentStr = indentStr.substring(INDENT_STRING.length());
         }
 
+        // Get insert chars: Usually just newline + indent (when at line end or inside line text)
+        String insertChars = '\n' + indentStr;
+
+        // If text selection is inside line indent, shift newline inside indent
+        int selStartInLine = getSelStart() - textLine.getStartCharIndex();
+        if (selStartInLine < indentStr.length())
+            insertChars = indentStr.substring(selStartInLine) + '\n' + indentStr.substring(0, selStartInLine);
+
         // Do normal version
-        _textArea.replaceChars(sb.toString());
+        _textArea.replaceChars(insertChars);
     }
 
     /**
