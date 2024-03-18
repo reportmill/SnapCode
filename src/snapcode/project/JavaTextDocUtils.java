@@ -87,6 +87,10 @@ public class JavaTextDocUtils {
         if (oldStmt == null)
             return false;
 
+        // If enclosing block is constructor decl, just reparse all
+        if (oldStmt.getParent() instanceof JConstrDecl)
+            return false;
+
         // Parse new JStmtBlock (create empty one if there wasn't enough in block to create it)
         JavaParser javaParser = JavaParser.getShared();
         int charIndex = oldStmt.getStartCharIndex();
