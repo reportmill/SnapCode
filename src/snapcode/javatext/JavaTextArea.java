@@ -4,6 +4,7 @@
 package snapcode.javatext;
 import java.util.*;
 import javakit.parse.*;
+import snap.util.ArrayUtils;
 import snap.util.FileUtils;
 import snap.web.WebURL;
 import snapcode.project.JavaTextDoc;
@@ -200,9 +201,9 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
-     * Returns reference tokens for given node.
+     * Returns all matching tokens for given node.
      */
-    protected TextToken[] getTokensForNode(JNode aNode)
+    private TextToken[] getTokensForNode(JNode aNode)
     {
         // Get simple id node, if not found, return empty list
         JExprId idExpr = aNode instanceof JExprId ? (JExprId) aNode : null;
@@ -214,48 +215,36 @@ public class JavaTextArea extends TextArea {
         if (matchingIdNodes.length == 0)
             return new TextToken[0];
 
-        // Return TextBoxTokens
-        return getTokensForIdNodes(matchingIdNodes);
+        // Return TextTokens for nodes
+        return ArrayUtils.mapNonNull(matchingIdNodes, idnode -> getTokenForIdNode(idnode), TextToken.class);
     }
 
     /**
-     * Returns array of respective TextTokens for given id expression nodes.
+     * Returns the text token for given id node.
      */
-    protected TextToken[] getTokensForIdNodes(JExprId[] idNodes)
+    private TextToken getTokenForIdNode(JExprId idExpr)
     {
-        // Convert matching JNodes to TextBoxTokens
-        List<TextToken> tokensList = new ArrayList<>(idNodes.length);
+        // If node is zero length, return null
+        if (idExpr.getCharLength() == 0)
+            return null;
+
+        // Get line index (skip if negative - assume Repl import statement or something)
+        int lineIndex = idExpr.getLineIndex();
+        if (lineIndex < 0)
+            return null;
+
+        // Get node line, then token from line (faster than having to find line by node startCharIndex)
         TextBlock textBlock = getTextBlock();
-
-        // Iterate over nodes and convert to TextBoxTokens
-        for (JExprId idExpr : idNodes) {
-
-            // If node is zero length, skip
-            if (idExpr.getCharLength() == 0)
-                continue;
-
-            // Get line index (skip if negative - assume Repl import statement or something)
-            int lineIndex = idExpr.getLineIndex();
-            if (lineIndex < 0)
-                continue;
-
-            // Get line and token
-            TextLine textLine = textBlock.getLine(lineIndex);
-            int textLineStartCharIndex = textLine.getStartCharIndex();
-            int nodeStartCharIndex = idExpr.getStartCharIndex();
-            int tokenStartCharIndexInLine = nodeStartCharIndex - textLineStartCharIndex;
-            if (tokenStartCharIndexInLine > textLine.length())
-                System.currentTimeMillis();
-            TextToken token = textLine.getTokenForCharIndex(tokenStartCharIndexInLine);
-
-            // Add to tokens list
-            if (token != null)
-                tokensList.add(token);
-            else System.out.println("JavaTextArea.getTokensForNode: Can't find token for matching node: " + idExpr);
-        }
+        TextLine textLine = textBlock.getLine(lineIndex);
+        int textLineStartCharIndex = textLine.getStartCharIndex();
+        int nodeStartCharIndex = idExpr.getStartCharIndex();
+        int tokenStartCharIndexInLine = nodeStartCharIndex - textLineStartCharIndex;
+        TextToken token = textLine.getTokenForCharIndex(tokenStartCharIndexInLine);
+        if (token == null) // Should be impossible
+            System.out.println("JavaTextArea.getTokensForNode: Can't find token for matching node: " + idExpr);
 
         // Return
-        return tokensList.toArray(new TextToken[0]);
+        return token;
     }
 
     /**
