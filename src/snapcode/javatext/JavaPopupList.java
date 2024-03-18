@@ -251,7 +251,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         // Get token for SelStart - just return if none
         TextBlock textBlock = _textArea.getTextBlock();
         int selStart = _textArea.getSelStart();
-        TextToken textToken = textBlock.getTokenForCharIndex(selStart);
+        TextToken textToken = selStart > 0 ? textBlock.getTokenForCharIndex(selStart - 1) : null;
         if (textToken == null)
             return null;
 
