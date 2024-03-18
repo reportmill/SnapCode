@@ -47,12 +47,27 @@ public class JExprId extends JExpr {
     }
 
     /**
-     * Returns the variable declaration if parent is variable declaration.
+     * Returns VarDecl node by looking in parent nodes (i.e., in scope) for this id.
      */
     public JVarDecl getVarDecl()
     {
-        JNode p = getParent();
-        return p instanceof JVarDecl ? (JVarDecl) p : null;
+        // Iterate up parents to look for a JVarDecl that defines this id name (Local vars, method params, class fields, etc.)
+        for (JNode parentNode = getParent(); parentNode != null; parentNode = parentNode.getParent()) {
+
+            // If parent is var decl and this is its id, return it
+            if (parentNode instanceof JVarDecl && ((JVarDecl) parentNode).getId() == this)
+                return (JVarDecl) parentNode;
+
+            // If parent has var decls, and has one that defines this id name, return it
+            if (parentNode instanceof WithVarDecls) {
+                JVarDecl varDecl = ((WithVarDecls) parentNode).getVarDeclForId(this);
+                if (varDecl != null)
+                    return varDecl;
+            }
+        }
+
+        // Return not found
+        return null;
     }
 
     /**
@@ -130,29 +145,9 @@ public class JExprId extends JExpr {
         }
 
         // Look for VarDecl that defines this id (if this id is var reference)
-        JVarDecl varDecl = getVarDeclForId();
+        JVarDecl varDecl = getVarDecl();
         if (varDecl != null)
             return varDecl;
-
-        // Return not found
-        return null;
-    }
-
-    /**
-     * Looks for VarDecl in parent nodes (i.e., in scope) for this id.
-     */
-    private JVarDecl getVarDeclForId()
-    {
-        // Iterate up parents to look for a JVarDecl that defines this id name (Local vars, method params, class fields, etc.)
-        for (JNode parentNode = getParent(); parentNode != null; parentNode = parentNode.getParent()) {
-
-            // If parent has var decls, and has one that defines this id name, return it
-            if (parentNode instanceof WithVarDecls) {
-                JVarDecl varDecl = ((WithVarDecls) parentNode).getVarDeclForId(this);
-                if (varDecl != null)
-                    return varDecl;
-            }
-        }
 
         // Return not found
         return null;

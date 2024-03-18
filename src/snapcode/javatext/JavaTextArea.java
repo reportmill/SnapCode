@@ -4,7 +4,6 @@
 package snapcode.javatext;
 import java.util.*;
 import javakit.parse.*;
-import javakit.resolver.JavaDecl;
 import snap.util.FileUtils;
 import snap.web.WebURL;
 import snapcode.project.JavaTextDoc;
@@ -205,17 +204,13 @@ public class JavaTextArea extends TextArea {
      */
     protected TextToken[] getTokensForNode(JNode aNode)
     {
-        // If not var name or type name, just return
-        if (!(aNode instanceof JExprId || aNode instanceof JType))
-            return new TextToken[0];
-
-        // Handle null
-        JavaDecl nodeDecl = aNode.getDecl();
-        if (nodeDecl == null)
+        // Get simple id node, if not found, return empty list
+        JExprId idExpr = aNode instanceof JExprId ? (JExprId) aNode : null;
+        if (idExpr == null)
             return new TextToken[0];
 
         // Get other matching nodes
-        JExprId[] matchingIdNodes = NodeMatcher.getMatchingIdNodesForDecl(aNode.getFile(), nodeDecl);
+        JExprId[] matchingIdNodes = NodeMatcher.getMatchingIdNodesForIdNode(idExpr);
         if (matchingIdNodes.length == 0)
             return new TextToken[0];
 

@@ -4,6 +4,7 @@
 package snapcode.javatext;
 import javakit.parse.*;
 import javakit.resolver.JavaDecl;
+import javakit.resolver.JavaLocalVar;
 import snap.util.ArrayUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +15,47 @@ import java.util.List;
 public class NodeMatcher {
 
     /**
+     * Returns matching id expression nodes for given id node.
+     */
+    public static JExprId[] getMatchingIdNodesForIdNode(JExprId idExpr)
+    {
+        // Get decl - if null, return empty array
+        JavaDecl nodeDecl = idExpr.getDecl();
+        if (nodeDecl == null)
+            return new JExprId[0];
+
+        // Get root node
+        JNode rootNode = getRootNodeForId(idExpr, nodeDecl);
+
+        // Return matching nodes
+        List<JExprId> matchingNodes = new ArrayList<>();
+        findMatchingIdNodesForDecl(rootNode, nodeDecl, matchingNodes);
+        return matchingNodes.toArray(new JExprId[0]);
+    }
+
+    /**
+     * Returns the root node for given id node and decl.
+     */
+    private static JNode getRootNodeForId(JExprId idExpr, JavaDecl decl)
+    {
+        // If local var, return parent block that holds it
+        if (decl instanceof JavaLocalVar) {
+            JVarDecl varDecl = idExpr.getVarDecl();
+            JNode declBlock = (JNode) varDecl.getParent(WithVarDecls.class);
+            if (declBlock instanceof JExprVarDecl)
+                declBlock = (JNode) declBlock.getParent(WithVarDecls.class);
+            if (declBlock != null) // Probably not possible that this is null
+                return declBlock;
+        }
+
+        // Return file
+        return idExpr.getFile();
+    }
+
+    /**
      * Returns matching id expression nodes for given decl.
      */
-    public static JExprId[] getMatchingIdNodesForDecl(JNode aNode, JavaDecl aDecl)
+    private static JExprId[] getMatchingIdNodesForDecl(JNode aNode, JavaDecl aDecl)
     {
         List<JExprId> matchingNodes = new ArrayList<>();
         findMatchingIdNodesForDecl(aNode, aDecl, matchingNodes);
