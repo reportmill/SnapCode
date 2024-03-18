@@ -1,5 +1,6 @@
 package snapcode.app;
 import snap.gfx.GFXEnv;
+import snap.util.Convert;
 import snap.util.Prefs;
 import snap.view.ViewTheme;
 import snap.view.ViewUtils;
@@ -125,6 +126,14 @@ public class App {
         if (arg0.startsWith("sample:")) {
             String sampleName = arg0.substring("sample:".length());
             WelcomePanel.getShared().openWorkspaceForSample(sampleName);
+            return true;
+        }
+
+        // Handle 'greenfoot:'
+        if (arg0.startsWith("greenfoot:")) {
+            String scenarioIdStr = arg0.substring("greenfoot:".length());
+            int scenarioId = Convert.intValue(scenarioIdStr);
+            GreenImport.openGreenfootScenario(scenarioId);
             return true;
         }
 
