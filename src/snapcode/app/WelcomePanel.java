@@ -96,6 +96,9 @@ public class WelcomePanel extends ViewOwner {
         win.setTitle("Welcome");
         enableEvents(win, WinClose);
         getView("OpenButton", Button.class).setDefaultButton(true);
+
+        // Add drag listener to content view
+        topColView.addEventHandler(e -> handleDragEvent(e), DragEvents);
     }
 
     /**
@@ -328,6 +331,79 @@ public class WelcomePanel extends ViewOwner {
             boolean isOpenFileSet = _filePanel.getSelFile() != null;
             getView("OpenButton").setEnabled(isOpenFileSet);
         }
+    }
+
+    /**
+     * Called when content gets drag event.
+     */
+    private void handleDragEvent(ViewEvent anEvent)
+    {
+        // Handle drag over: Accept
+        if (anEvent.isDragOver()) {
+            if (isSupportedDragEvent(anEvent))
+                anEvent.acceptDrag();
+            return;
+        }
+
+        // Handle drop
+        if (anEvent.isDragDrop()) {
+            if (!isSupportedDragEvent(anEvent))
+                return;
+            anEvent.acceptDrag();
+            Clipboard clipboard = anEvent.getClipboard();
+            ClipboardData clipboardData = clipboard.getFiles().get(0);
+            dropFile(clipboardData);
+            anEvent.dropComplete();
+        }
+    }
+
+    /**
+     * Returns whether event is supported drag event.
+     */
+    private boolean isSupportedDragEvent(ViewEvent anEvent)
+    {
+        Clipboard clipboard = anEvent.getClipboard();
+        if (!clipboard.hasFiles())
+            return false;
+        return true;
+    }
+
+    /**
+     * Called to handle a file drop on top graphic.
+     */
+    private void dropFile(ClipboardData clipboardData)
+    {
+        // If clipboard data not loaded, come back when it is
+        if (!clipboardData.isLoaded()) {
+            clipboardData.addLoadListener(f -> dropFile(clipboardData));
+            return;
+        }
+
+        // Get path and extension (set to empty string if null)
+        String ext = clipboardData.getExtension();
+        if (ext == null)
+            return;
+        ext = ext.toLowerCase();
+        if (!ArrayUtils.contains(new String[] { "zip", "gfar", "java", "jepl" }, ext))
+            return;
+
+        // Handle file available: Open file
+        WebURL sourceUrl = clipboardData.getSourceURL();
+        if (sourceUrl != null) {
+            WebFile sourceFile = sourceUrl.getFile();
+            if (sourceFile != null)
+                openWorkspaceForFile(sourceFile);
+            return;
+        }
+
+        // Handle bytes: Copy to temp file and open
+        byte[] bytes = clipboardData.getBytes();
+        WebURL dropFileUrl = WebURL.getURL(FileUtils.getTempFile(clipboardData.getName()));
+        assert (dropFileUrl != null);
+        WebFile dropFile = dropFileUrl.createFile(false);
+        dropFile.setBytes(bytes);
+        dropFile.save();
+        openWorkspaceForFile(dropFile);
     }
 
     /**

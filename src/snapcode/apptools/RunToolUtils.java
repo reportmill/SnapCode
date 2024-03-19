@@ -89,7 +89,7 @@ public class RunToolUtils {
 
             // If in browser, complain and run normal
             if (SnapUtils.isWebVM) {
-                String msg = "Debug support for browser is not currently available,\nbut is coming soon. Executing normal run instead";
+                String msg = "Debug support for browser is not currently\n available,but is coming soon.\nExecuting normal run instead";
                 DialogBox.showWarningDialog(runTool.getWorkspacePane().getUI(), "Debug Support Coming Soon", msg);
                 return createRunAppForConfigOrFile(runTool, aConfig, aFile, false);
             }
