@@ -8,7 +8,6 @@ import snapcode.project.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.stream.Stream;
 
 /**
  * This class imports a greenfoot gfar file.
@@ -44,6 +43,31 @@ public class GreenImport {
             return;
         }
 
+        // Open greenfoot dir
+        openGreenfootDir(greenfootDir);
+    }
+
+    /**
+     * Opens a new project for Greenfoot scenario id.
+     */
+    public static void openGreenfootForArchiveFilePath(String archiveFilePath)
+    {
+        // Get archive file as zip site
+        WebURL archiveUrl = WebURL.getURL(archiveFilePath);
+        assert (archiveUrl != null);
+
+        // Return greenfoot dir for archive URL
+        WebFile greenfootDir = getGreenfootDirForArchiveUrl(archiveUrl);
+
+        // Open greenfoot dir
+        openGreenfootDir(greenfootDir);
+    }
+
+    /**
+     * Opens a new project for Greenfoot scenario id.
+     */
+    public static void openGreenfootDir(WebFile greenfootDir)
+    {
         // Get scenario name and project dir
         String scenarioName = greenfootDir.getSimpleName().replace(' ', '_');
 
@@ -70,25 +94,6 @@ public class GreenImport {
      */
     private static WebFile getGreenfootDirForScenarioId(int scenarioId)
     {
-        // Get greenfoot archive file as zip site
-        WebSite gfarSite = getSiteForGreenfootScenarioId(scenarioId);
-        if (gfarSite == null)
-            return null;
-
-        // Get greenfoot archive file site root dir files for greenfoot archive
-        WebFile gfarRootDir = gfarSite.getRootDir();
-        printFiles(gfarRootDir);
-        WebFile[] gfarRootFiles = gfarRootDir.getFiles();
-
-        // Return the only file in top level of greenfoot archive zip file
-        return gfarRootFiles.length > 0 ? gfarRootFiles[0] : null;
-    }
-
-    /**
-     * Returns a website for given Greenfoot scenario id.
-     */
-    private static WebSite getSiteForGreenfootScenarioId(int scenarioId)
-    {
         // Get greenfoot archive file for scenario id
         File greenfootArchiveFile;
         try { greenfootArchiveFile = getGreenfootArchiveFileForScenarioId(scenarioId); }
@@ -97,10 +102,26 @@ public class GreenImport {
             return null;
         }
 
-        // Get archive file as zip site
-        WebURL gfarFileURL = WebURL.getURL(greenfootArchiveFile);
-        assert (gfarFileURL != null);
-        return gfarFileURL.getAsSite();
+        // Return greenfoot dir for archive file
+        WebURL greenfootArchiveUrl = WebURL.getURL(greenfootArchiveFile);
+        assert (greenfootArchiveUrl != null);
+        return getGreenfootDirForArchiveUrl(greenfootArchiveUrl);
+    }
+
+    /**
+     * Returns a greenfoot dir for given archive file.
+     */
+    private static WebFile getGreenfootDirForArchiveUrl(WebURL greenfootArchiveURL)
+    {
+        // Get greenfoot archive file as zip site
+        WebSite gfarSite = greenfootArchiveURL.getAsSite();
+
+        // Get greenfoot archive file site root dir files for greenfoot archive
+        WebFile gfarRootDir = gfarSite.getRootDir();
+        WebFile[] gfarRootFiles = gfarRootDir.getFiles();
+
+        // Return the only file in top level of greenfoot archive zip file
+        return gfarRootFiles.length > 0 ? gfarRootFiles[0] : null;
     }
 
     /**
@@ -240,9 +261,8 @@ public class GreenImport {
             "     */\n" +
             "    public static void main(String[] args)\n" +
             "    {\n" +
-            "        snap.view.ViewUtils.runLater(() -> new " + className + "().setWindowVisible(true));\n" +
+            "        greenfoot.Greenfoot.showWorldForClass(" + className + ".class);\n" +
             "    }\n" +
-            '\n' +
 
             // Append close
             "}";
@@ -272,13 +292,6 @@ public class GreenImport {
 
         // Return
         return null;
-    }
-
-    private static void printFiles(WebFile aFile)
-    {
-        System.out.println(aFile.getPath());
-        if (aFile.isDir())
-            Stream.of(aFile.getFiles()).forEach(file -> printFiles(file));
     }
 
     /**

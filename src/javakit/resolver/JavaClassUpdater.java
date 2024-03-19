@@ -153,7 +153,7 @@ public class JavaClassUpdater {
         try { innerClasses = _realClass.getDeclaredClasses(); }
         catch (Throwable e) {
             System.err.println("JavaClassUpdater.getDeclaredClasses: Can't get declared classes: " + e);
-            innerClasses = new Class[0];
+            return new JavaClass[0];
         }
 
         // Add JavaDecl for each inner class
@@ -167,7 +167,7 @@ public class JavaClassUpdater {
     {
         Field[] fields;
         try { fields = _realClass.getDeclaredFields(); }
-        catch (Throwable e) { return new JavaField[0]; }
+        catch (Throwable e) { e.printStackTrace(); return new JavaField[0]; }
         return ArrayUtils.map(fields, field -> new JavaField(_resolver, _javaClass, field), JavaField.class);
     }
 
@@ -178,7 +178,7 @@ public class JavaClassUpdater {
     {
         Method[] methods;
         try { methods = _realClass.getDeclaredMethods(); }
-        catch (Throwable e) { return new JavaMethod[0]; }
+        catch (Throwable e) { e.printStackTrace(); return new JavaMethod[0]; }
         return Stream.of(methods).filter(m -> !m.isSynthetic()).map(m -> new JavaMethod(_resolver, _javaClass, m)).toArray(size -> new JavaMethod[size]);
     }
 
@@ -189,7 +189,7 @@ public class JavaClassUpdater {
     {
         Constructor<?>[] constrs;
         try { constrs = _realClass.getDeclaredConstructors(); }
-        catch (Throwable e) { return new JavaConstructor[0]; }
+        catch (Throwable e) { e.printStackTrace(); return new JavaConstructor[0]; }
         return Stream.of(constrs).filter(c -> !c.isSynthetic()).map(c -> new JavaConstructor(_resolver, _javaClass, c)).toArray(size -> new JavaConstructor[size]);
     }
 

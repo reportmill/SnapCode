@@ -3,7 +3,6 @@
  */
 package snapcode.app;
 import snap.util.*;
-import snapcode.apptools.FileTreeTool;
 import snapcode.apptools.FilesTool;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
@@ -201,6 +200,12 @@ public class WelcomePanel extends ViewOwner {
      */
     protected void openWorkspaceForFile(WebFile aFile)
     {
+        // If file is gfar file, open repo
+        if (aFile.getType().equals("gfar")) {
+            GreenImport.openGreenfootForArchiveFilePath(aFile.getPath());
+            return;
+        }
+
         // Open empty workspace pane
         WorkspacePane workspacePane = openEmptyWorkspace();
 
@@ -407,6 +412,8 @@ public class WelcomePanel extends ViewOwner {
         if (isSourceFile(aFile))
             return true;
         if (aFile.getType().equals("zip"))
+            return true;
+        if (aFile.getType().equals("gfar"))
             return true;
         return isProjectFile(aFile);
     }
