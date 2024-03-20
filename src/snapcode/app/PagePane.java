@@ -286,7 +286,7 @@ public class PagePane extends ViewOwner {
         _browser = new AppBrowser();
         _browser.setGrowHeight(true);
         _browser.addPropChangeListener(pc -> browserDidPropChange(pc),
-                WebBrowser.Activity_Prop, WebBrowser.Status_Prop, WebBrowser.Loading_Prop);
+                WebBrowser.SelPage_Prop, WebBrowser.Activity_Prop, WebBrowser.Status_Prop, WebBrowser.Loading_Prop);
 
         // Create ColView to hold TabsBox and Browser
         ColView colView = new ColView();
@@ -405,7 +405,9 @@ public class PagePane extends ViewOwner {
         String propName = aPC.getPropName();
         Workspace workspace = _workspacePane.getWorkspace();
 
-        // Handle Activity, Status, Loading
+        // Handle SelPage, Activity, Status, Loading
+        if (propName == WebBrowser.SelPage_Prop)
+            setSelFile(_browser.getSelFile());
         if (propName == WebBrowser.Status_Prop)
             workspace.setStatus(_browser.getStatus());
         else if (propName == WebBrowser.Activity_Prop)

@@ -42,7 +42,7 @@ public class WebBrowser extends TransitionPane {
     private String  _activity;
 
     // Constants for properties
-    public static final String Page_Prop = "Page";
+    public static final String SelPage_Prop = "SelPage";
     public static final String Loading_Prop = "Loading";
     public static final String Status_Prop = "Status";
     public static final String Activity_Prop = "Activity";
@@ -160,7 +160,7 @@ public class WebBrowser extends TransitionPane {
         }
 
         // Notify change
-        firePropChange(Page_Prop, null, _selPage);
+        firePropChange(SelPage_Prop, null, _selPage);
 
         // Flush WebSite for the heck of it?
         WebFile file = getSelFile();
