@@ -373,6 +373,9 @@ public class MavenDependency extends BuildDependency {
         if (isLoading())
             return;
 
+        // Set loading
+        setLoading(true);
+
         // Set Loading true and start thread
         new Thread(() -> loadPackageFilesImpl()).start();
     }
@@ -387,9 +390,6 @@ public class MavenDependency extends BuildDependency {
         WebURL localJarURL = getLocalJarURL();
         if (remoteJarURL == null || localJarURL == null)
             return;
-
-        // Set loading
-        setLoading(true);
 
         // Fetch file
         try { copyFileForURLs(remoteJarURL, localJarURL); }
