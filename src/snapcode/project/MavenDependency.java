@@ -208,6 +208,20 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
+     * Returns whether maven package is loading.
+     */
+    public boolean isLoading()  { return _loading; }
+
+    /**
+     * Sets whether maven package is loading.
+     */
+    protected void setLoading(boolean aValue)
+    {
+        if (aValue == _loading) return;
+        firePropChange(Loading_Prop, _loading, _loading = aValue);
+    }
+
+    /**
      * Returns the repository URL or default.
      */
     public String getRepositoryUrlOrDefault()
@@ -314,12 +328,17 @@ public class MavenDependency extends BuildDependency {
      */
     public String getLocalJarPath()
     {
+        // Get local maven cache path
         String homeDir = System.getProperty("user.home");
         String MAVEN_REPO_PATH = ".m2/repository";
         String localMavenCachePath = FilePathUtils.getChild(homeDir, MAVEN_REPO_PATH);
+
+        // Get relative jar path
         String relativeJarPath = getRelativeJarPath();
         if (relativeJarPath == null)
             return null;
+
+        // Return combined path
         return FilePathUtils.getChild(localMavenCachePath, relativeJarPath);
     }
 
@@ -346,21 +365,15 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
-     * Returns whether maven package is loading.
-     */
-    public boolean isLoading()  { return _loading; }
-
-    /**
      * Loads file.
      */
     public void loadPackageFiles()
     {
         // If already loading, just return
-        if (_loading)
+        if (isLoading())
             return;
 
         // Set Loading true and start thread
-        _loading = true;
         new Thread(() -> loadPackageFilesImpl()).start();
     }
 
@@ -375,15 +388,17 @@ public class MavenDependency extends BuildDependency {
         if (remoteJarURL == null || localJarURL == null)
             return;
 
+        // Set loading
+        setLoading(true);
+
         // Fetch file
         try { copyFileForURLs(remoteJarURL, localJarURL); }
         catch (Exception e) {
             _error = e.getMessage();
         }
 
-        // Reset loading and fire prop change
-        _loading = false;
-        firePropChange(Loading_Prop, true, false);
+        // Reset loading
+        setLoading(false);
     }
 
     /**
