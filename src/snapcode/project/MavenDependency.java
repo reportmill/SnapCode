@@ -468,6 +468,10 @@ public class MavenDependency extends BuildDependency {
         String destFilePath = destURL.getPath();
         WebFile destFile = destSite.createFileForPath(destFilePath, false);
 
+        // Shouldn't need this, but seemed to be corruption problem on WebVM. Maybe gone now that FileSite just does writeBytes()
+        if (destFile.getExists())
+            destFile.delete();
+
         // Set source bytes in destination file and save
         destFile.setBytes(sourceBytes);
         WebResponse resp = destFile.save();
