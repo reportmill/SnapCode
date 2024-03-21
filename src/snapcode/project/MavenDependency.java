@@ -330,7 +330,7 @@ public class MavenDependency extends BuildDependency {
     {
         // Get local maven cache path
         String homeDir = System.getProperty("user.home");
-        String MAVEN_REPO_PATH = "maven_cache";
+        String MAVEN_REPO_PATH = SnapUtils.isWebVM ? "maven_cache" : ".m2/repository";
         String localMavenCachePath = FilePathUtils.getChild(homeDir, MAVEN_REPO_PATH);
 
         // Get relative jar path
