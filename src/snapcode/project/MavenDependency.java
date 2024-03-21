@@ -330,7 +330,7 @@ public class MavenDependency extends BuildDependency {
     {
         // Get local maven cache path
         String homeDir = System.getProperty("user.home");
-        String MAVEN_REPO_PATH = ".m2/repository";
+        String MAVEN_REPO_PATH = "maven_cache";
         String localMavenCachePath = FilePathUtils.getChild(homeDir, MAVEN_REPO_PATH);
 
         // Get relative jar path
@@ -394,6 +394,7 @@ public class MavenDependency extends BuildDependency {
         // Fetch file
         try { copyFileForURLs(remoteJarURL, localJarURL); }
         catch (Exception e) {
+            e.printStackTrace();
             _error = e.getMessage();
         }
 
