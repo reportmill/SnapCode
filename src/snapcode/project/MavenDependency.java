@@ -472,5 +472,6 @@ public class MavenDependency extends BuildDependency {
         WebResponse resp = destFile.save();
         if (resp.getException() != null)
             throw new RuntimeException(resp.getException());
+        System.out.println("MavenDependency: Updated " + destFilePath + ", size: " + sourceBytes.length);
     }
 }
