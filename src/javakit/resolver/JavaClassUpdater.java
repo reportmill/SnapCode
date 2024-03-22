@@ -13,13 +13,13 @@ import java.util.stream.Stream;
 public class JavaClassUpdater {
 
     // The JavaClass
-    protected JavaClass  _javaClass;
-
-    // The real class (if available)
-    protected Class<?> _realClass;
+    protected JavaClass _javaClass;
 
     // The Resolver that produced this decl
-    protected Resolver  _resolver;
+    protected Resolver _resolver;
+
+    // The real class (if available)
+    private Class<?> _realClass;
 
     /**
      * Constructor.
@@ -28,7 +28,6 @@ public class JavaClassUpdater {
     {
         _javaClass = aClass;
         _resolver = aClass._resolver;
-        _realClass = aClass._realClass;
     }
 
     /**
@@ -130,7 +129,8 @@ public class JavaClassUpdater {
      */
     protected JavaClass[] getInterfaces()
     {
-        Class<?>[] interfaces = _realClass.getInterfaces();
+        Class<?> realClass = getRealClassImpl();
+        Class<?>[] interfaces = realClass.getInterfaces();
         return ArrayUtils.map(interfaces, cls -> _javaClass.getJavaClassForClass(cls), JavaClass.class);
     }
 
@@ -139,7 +139,8 @@ public class JavaClassUpdater {
      */
     protected JavaTypeVariable[] getTypeVariables()
     {
-        TypeVariable<?>[] typeVariables = _realClass.getTypeParameters();
+        Class<?> realClass = getRealClassImpl();
+        TypeVariable<?>[] typeVariables = realClass.getTypeParameters();
         return ArrayUtils.map(typeVariables, tvar -> new JavaTypeVariable(_resolver, _javaClass, tvar), JavaTypeVariable.class);
     }
 
@@ -149,8 +150,9 @@ public class JavaClassUpdater {
     protected JavaClass[] getDeclaredClasses()
     {
         // Get Inner Classes
+        Class<?> realClass = getRealClassImpl();
         Class<?>[] innerClasses;
-        try { innerClasses = _realClass.getDeclaredClasses(); }
+        try { innerClasses = realClass.getDeclaredClasses(); }
         catch (Throwable e) {
             System.err.println("JavaClassUpdater.getDeclaredClasses: Can't get declared classes: " + e);
             return new JavaClass[0];
@@ -165,8 +167,9 @@ public class JavaClassUpdater {
      */
     protected JavaField[] getDeclaredFields()
     {
+        Class<?> realClass = getRealClassImpl();
         Field[] fields;
-        try { fields = _realClass.getDeclaredFields(); }
+        try { fields = realClass.getDeclaredFields(); }
         catch (Throwable e) { e.printStackTrace(); return new JavaField[0]; }
         return ArrayUtils.map(fields, field -> new JavaField(_resolver, _javaClass, field), JavaField.class);
     }
@@ -176,8 +179,9 @@ public class JavaClassUpdater {
      */
     protected JavaMethod[] getDeclaredMethods()
     {
+        Class<?> realClass = getRealClassImpl();
         Method[] methods;
-        try { methods = _realClass.getDeclaredMethods(); }
+        try { methods = realClass.getDeclaredMethods(); }
         catch (Throwable e) { e.printStackTrace(); return new JavaMethod[0]; }
         return Stream.of(methods).filter(m -> !m.isSynthetic()).map(m -> new JavaMethod(_resolver, _javaClass, m)).toArray(size -> new JavaMethod[size]);
     }
@@ -187,8 +191,9 @@ public class JavaClassUpdater {
      */
     protected JavaConstructor[] getDeclaredConstructors()
     {
+        Class<?> realClass = getRealClassImpl();
         Constructor<?>[] constrs;
-        try { constrs = _realClass.getDeclaredConstructors(); }
+        try { constrs = realClass.getDeclaredConstructors(); }
         catch (Throwable e) { e.printStackTrace(); return new JavaConstructor[0]; }
         return Stream.of(constrs).filter(c -> !c.isSynthetic()).map(c -> new JavaConstructor(_resolver, _javaClass, c)).toArray(size -> new JavaConstructor[size]);
     }
@@ -198,7 +203,8 @@ public class JavaClassUpdater {
      */
     public Object[] getEnumConstants()
     {
-        return _realClass.getEnumConstants();
+        Class<?> realClass = getRealClassImpl();
+        return realClass.getEnumConstants();
     }
 
     /**
