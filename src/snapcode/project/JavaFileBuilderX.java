@@ -33,7 +33,7 @@ public class JavaFileBuilderX extends JavaFileBuilder {
         // See if Java file has out of date Class file
         ProjectFiles projectFiles = _proj.getProjectFiles();
         WebFile classFile = projectFiles.getClassFileForJavaFile(javaFile);
-        return !classFile.getExists() || classFile.getLastModTime() < javaFile.getLastModTime();
+        return classFile == null || classFile.getLastModTime() < javaFile.getLastModTime();
     }
 
     /**

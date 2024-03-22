@@ -193,6 +193,14 @@ public class ProjectFiles {
      */
     public WebFile getClassFileForJavaFile(WebFile aJavaFile)
     {
+        return getClassFileForJavaFile(aJavaFile, false);
+    }
+
+    /**
+     * Returns the class file for a given Java file, with option to create if missing.
+     */
+    public WebFile getClassFileForJavaFile(WebFile aJavaFile, boolean createIfMissing)
+    {
         // Get Class file path
         String javaFilePath = aJavaFile.getPath();
         String classFilePath = javaFilePath.replace(".java", ".class");
@@ -200,7 +208,7 @@ public class ProjectFiles {
             classFilePath = javaFilePath.replace(".jepl", ".class");
 
         // Return class file for classFilePath
-        return getBuildFile(classFilePath, true, false);
+        return getBuildFile(classFilePath, createIfMissing, false);
     }
 
     /**
@@ -208,9 +216,9 @@ public class ProjectFiles {
      */
     public WebFile[] getClassFilesForJavaFile(WebFile aFile)
     {
-        // Get Class file - if bogus, return empty list
+        // Get Class file - if missing, return empty list
         WebFile classFile = getClassFileForJavaFile(aFile);
-        if (classFile.getBytes() == null)
+        if (classFile == null || classFile.getBytes() == null)
             return new WebFile[0];
 
         // Get inner class file - if empty, return class file as array
@@ -227,9 +235,9 @@ public class ProjectFiles {
      */
     public WebFile[] getInnerClassFilesForJavaFile(WebFile aFile)
     {
-        // Get Class file
+        // Get Class file - if missing, return empty list
         WebFile classFile = getClassFileForJavaFile(aFile);
-        if (classFile.getBytes() == null)
+        if (classFile == null || classFile.getBytes() == null)
             return new WebFile[0];
 
         // Get Package files
