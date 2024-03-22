@@ -60,9 +60,6 @@ public class JavaClass extends JavaType {
     // The Array component type (if Array)
     private JavaClass  _componentType;
 
-    // The real class
-    protected Class<?> _realClass;
-
     // The updater
     private JavaClassUpdater  _updater;
 
@@ -73,9 +70,6 @@ public class JavaClass extends JavaType {
     {
         // Do normal version
         super(aResolver, DeclType.Class);
-
-        // Set real class
-        _realClass = aClass;
 
         // Set Id, Name, SimpleName
         _id = _name = ResolverUtils.getIdForClass(aClass);
@@ -230,7 +224,7 @@ public class JavaClass extends JavaType {
     /**
      * Returns the class this decl evaluates to when referenced.
      */
-    public Class<?> getRealClass()  { return _realClass; }
+    public Class<?> getRealClass()  { return _updater.getRealClassImpl(); }
 
     /**
      * Returns the modifiers.
@@ -374,16 +368,7 @@ public class JavaClass extends JavaType {
     public JavaMethod getDeclaredMethodForNameAndTypes(String aName, JavaType[] theTypes)
     {
         JavaMethod[] methods = getDeclaredMethods();
-        for (JavaMethod method : methods) {
-            if (method.getName().equals(aName)) {
-                JavaType[] methodParamTypes = method.getParameterTypes();
-                if (isTypesEqual(methodParamTypes, theTypes))
-                    return method;
-            }
-        }
-
-        // Return not found
-        return null;
+        return ArrayUtils.findMatch(methods, method -> method.isEqualToNameAndTypes(aName, theTypes));
     }
 
     /**

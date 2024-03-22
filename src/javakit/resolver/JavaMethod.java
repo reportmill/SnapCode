@@ -249,6 +249,20 @@ public class JavaMethod extends JavaExecutable {
     }
 
     /**
+     * Returns whether method is equal to name and types.
+     */
+    public boolean isEqualToNameAndTypes(String methodName, JavaType[] theTypes)
+    {
+        // If name not equal, return false
+        if (methodName.equals(getName()))
+            return false;
+
+        // Return whether types are equal
+        JavaType[] methodParamTypes = getParameterTypes();
+        return JavaType.isTypesEqual(methodParamTypes, theTypes);
+    }
+
+    /**
      * A Builder class for JavaMethod.
      */
     public static class MethodBuilder {

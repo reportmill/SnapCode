@@ -44,7 +44,7 @@ public class JavaClassUpdater {
         JavaConstructor[] oldConstrs = _javaClass.getDeclaredConstructors();
 
         // Get real class
-        _realClass = _javaClass._realClass = getRealClassImpl();
+        _realClass = getRealClassImpl();
         if (_realClass == null) {
             System.err.println("JavaClass: Failed to load class: " + _javaClass.getClassName());
             return false;
