@@ -467,16 +467,19 @@ public class MavenDependency extends BuildDependency {
         WebSite destSite = destURL.getSite();
         String destFilePath = destURL.getPath();
         WebFile destFile = destSite.createFileForPath(destFilePath, false);
+        long oldSize = 0;
 
         // Shouldn't need this, but seemed to be corruption problem on WebVM. Maybe gone now that FileSite just does writeBytes()
-        if (destFile.getExists())
+        if (destFile.getExists()) {
+            oldSize = destFile.getSize();
             destFile.delete();
+        }
 
         // Set source bytes in destination file and save
         destFile.setBytes(sourceBytes);
         WebResponse resp = destFile.save();
         if (resp.getException() != null)
             throw new RuntimeException(resp.getException());
-        System.out.println("MavenDependency: Updated " + destFilePath + ", size: " + sourceBytes.length);
+        System.out.println("MavenDependency: Updated " + destFilePath + ", old-size: " + oldSize + ", new-size: " + sourceBytes.length);
     }
 }
