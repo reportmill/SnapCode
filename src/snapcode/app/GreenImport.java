@@ -234,14 +234,33 @@ public class GreenImport {
         WebFile toFile = toDir.getSite().createFileForPath(toFilePath, aFile.isDir());
 
         // If plain file, copy bytes and save
-        if (toFile.isFile()) {
-            byte[] bytes = aFile.getBytes();
-            toFile.setBytes(bytes);
-            toFile.save();
-        }
+        if (toFile.isFile())
+            copyFileToFile(aFile, toFile);
 
         // If file is dir, forward to copyDirFile
         else copyDirFileFilesToDir(aFile, toFile);
+    }
+
+    /**
+     * Copies given file to given file.
+     */
+    private static void copyFileToFile(WebFile aFile, WebFile toFile)
+    {
+        // If Java file, fix text for older greenfoot files that reference java.awt.Color/Font instead of greenfoot.Color/Font
+        if (aFile.getType().equals("java")) {
+            String text = aFile.getText();
+            text = text.replace("java.awt.", "greenfoot.");
+            toFile.setText(text);
+        }
+
+        // Otherwise just copy bytes
+        else {
+            byte[] bytes = aFile.getBytes();
+            toFile.setBytes(bytes);
+        }
+
+        // Save file
+        toFile.save();
     }
 
     /**
