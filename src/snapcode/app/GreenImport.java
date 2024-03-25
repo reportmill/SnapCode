@@ -249,7 +249,10 @@ public class GreenImport {
         // If Java file, fix text for older greenfoot files that reference java.awt.Color/Font instead of greenfoot.Color/Font
         if (aFile.getType().equals("java")) {
             String text = aFile.getText();
-            text = text.replace("java.awt.", "greenfoot.");
+            if (text.contains("java.awt.")) {
+                text = text.replace("java.awt.Font;", "greenfoot.Font;");
+                text = text.replace("java.awt.Color;", "greenfoot.Color;");
+            }
             toFile.setText(text);
         }
 

@@ -280,8 +280,10 @@ public class JavaTextPane extends TextPane {
 
         // Handle SelectedNode change: Reset UI
         String propName = aPC.getPropName();
-        if (propName == JavaTextArea.SelNode_Prop)
+        if (propName == JavaTextArea.SelNode_Prop) {
             resetLater();
+            _lineFootView.resetAll();
+        }
 
         // Handle TextDoc
         if (propName == TextArea.SourceText_Prop) {
