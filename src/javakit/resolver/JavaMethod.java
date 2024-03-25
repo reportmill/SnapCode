@@ -254,7 +254,7 @@ public class JavaMethod extends JavaExecutable {
     public boolean isEqualToNameAndTypes(String methodName, JavaType[] theTypes)
     {
         // If name not equal, return false
-        if (methodName.equals(getName()))
+        if (!methodName.equals(getName()))
             return false;
 
         // Return whether types are equal
