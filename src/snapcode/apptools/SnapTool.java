@@ -1,28 +1,33 @@
-package snapcode.views;
+package snapcode.apptools;
 import javakit.parse.JNode;
 import javakit.parse.JavaParser;
 import snap.geom.Point;
 import snap.gfx.Image;
 import snap.view.*;
+import snapcode.app.WorkspacePane;
+import snapcode.app.WorkspaceTool;
+import snapcode.views.JNodeView;
+import snapcode.views.SnapEditor;
+import snapcode.views.SnapEditorPane;
 
 /**
  * UI to show puzzle pieces.
  */
-public class SupportPane extends ViewOwner {
+public class SnapTool extends WorkspaceTool {
 
     // The SnapEditorPane
     protected SnapEditorPane _editorPane;
-
-    // The SnapPart being dragged
-    protected static JNodeView<?>  _dragSP;
 
     // The drag image
     //private static Image  _dragImage;
 
     /**
-     * Returns the editor pane.
+     * Constructor.
      */
-    public SnapEditorPane getEditorPane()  { return _editorPane; }
+    public SnapTool(WorkspacePane workspacePane)
+    {
+        super(workspacePane);
+    }
 
     /**
      * Returns the editor.
@@ -35,8 +40,10 @@ public class SupportPane extends ViewOwner {
     protected View createUI()
     {
         TabView tabView = new TabView();
+        tabView.setPrefWidth(300);
         tabView.addTab("Methods", createMethodsPane());
         tabView.addTab("Blocks", createBlocksPane());
+        tabView.setSelIndex(1);
         return tabView;
     }
 
@@ -47,17 +54,20 @@ public class SupportPane extends ViewOwner {
     {
         // Add DragDetected action to start statement drag
         /*getDragUI().setOnDragDetected(e -> {
-            _dragSP = getSnapPart(getDragUI(), e.getX(), e.getY()); if(_dragSP==null) return;
+            JNodeView<?> dragSnapPart = JNodeView._dragSnapPart = getSnapPart(getDragUI(), e.getX(), e.getY()); if(dragSnapPart==null) return;
             javafx.scene.SnapshotParameters sp = new javafx.scene.SnapshotParameters(); sp.setFill(Color.TRANSPARENT);
-            _dragImage = _dragSP.getNative().snapshot(sp, null);
-            //JNode copy = javaParser.getJavaStatement(_dragSP.getJNode().getString(), 0, 0);
-            //_dragSP = SnapPart.createSnapPart(copy);
+            _dragImage = dragSnapPart.getNative().snapshot(sp, null);
+            //JNode copy = javaParser.getJavaStatement(dragSnapPart.getJNode().getString(), 0, 0);
+            //dragSnapPart = SnapPart.createSnapPart(copy);
             //Dragboard db = getDragUI().startDragAndDrop(TransferMode.ANY);
             //ClipboardContent cc = new ClipboardContent(); cc.putString("Hello World"); db.setContent(cc);
             //e.consume(); db.setDragView(_dragImage);
         });*/
 
-        enableEvents(getUI(), MouseRelease, DragGesture);
+        enableEvents(getUI(), MouseRelease);
+
+        // Register to handle DragGesture
+        getUI().addEventHandler(this::handleDragGesture, ViewEvent.Type.DragGesture);
     }
 
     /**
@@ -68,23 +78,8 @@ public class SupportPane extends ViewOwner {
         // Handle MouseClick (double click)
         if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
             JNodeView<?> part = getSnapPart(getUI(ParentView.class), anEvent.getX(), anEvent.getY());
-            if (part != null)
-                getEditorPane().getSelectedPart().dropNode(part.getJNode());
-        }
-
-        // Handle Drag: Get Dragboard and drag shape with image (with DragSourceListener to clear DragShape)
-        if (anEvent.isDragGesture()) {
-
-            // Get drag node
-            _dragSP = getSnapPart(getUI(ParentView.class), anEvent.getX(), anEvent.getY());
-            if (_dragSP == null) return;
-
-            // Create Dragboard, set image and start drag
-            Clipboard cboard = anEvent.getClipboard();
-            cboard.addData("SupportPane:" + _dragSP.getClass().getSimpleName());
-            Image img = ViewUtils.getImage(_dragSP);
-            cboard.setDragImage(img);
-            cboard.startDrag();
+            //if (part != null)
+            //    getEditorPane().getSelectedPart().dropNode(part.getJNode());
         }
     }
 
@@ -135,7 +130,7 @@ public class SupportPane extends ViewOwner {
         colView.setSpacing(16);
         colView.setGrowWidth(true);
         colView.setGrowHeight(true);
-        colView.setFill(JFileView.BACK_FILL); //pane.setBorder(bevel);
+        //colView.setFill(JFileView.BACK_FILL); //pane.setBorder(bevel);
 
         // Wrap in ScrollView and return
         ScrollView scrollView = new ScrollView(colView);
@@ -153,19 +148,19 @@ public class SupportPane extends ViewOwner {
         colView.setSpacing(16);
         colView.setGrowWidth(true);
         colView.setGrowHeight(true);
-        colView.setFill(JFileView.BACK_FILL); //pane.setBorder(bevel);
+        //colView.setFill(JFileView.BACK_FILL); //pane.setBorder(bevel);
 
-        // Add node for while(true)
-        JNodeView<?> whileStmtView = createSnapPartStmt("while(true) {\n}");
-        colView.addChild(whileStmtView);
+        // Add node for if(expr)
+        JNodeView<?> ifStmtView = createSnapPartStmt("if(true) {\n}");
+        colView.addChild(ifStmtView);
 
         // Add node for repeat(x)
         JNodeView<?> forStmtView = createSnapPartStmt("for(int i=0; i<10; i++) {\n}");
         colView.addChild(forStmtView);
 
-        // Add node for if(expr)
-        JNodeView<?> ifStmtView = createSnapPartStmt("if(true) {\n}");
-        colView.addChild(ifStmtView);
+        // Add node for while(true)
+        JNodeView<?> whileStmtView = createSnapPartStmt("while(true) {\n}");
+        colView.addChild(whileStmtView);
 
         // Wrap in ScrollView and return
         ScrollView scrollView = new ScrollView(colView);
@@ -204,6 +199,30 @@ public class SupportPane extends ViewOwner {
         }
         return null;
     }
+
+    /**
+     * Handle drag gesture event: Get Dragboard and drag shape with image (with DragSourceListener to clear DragShape)
+     */
+    private void handleDragGesture(ViewEvent anEvent)
+    {
+        // Get drag node
+        JNodeView<?> dragSnapPart = JNodeView._dragSnapPart = getSnapPart(getUI(ParentView.class), anEvent.getX(), anEvent.getY());
+        if (dragSnapPart == null)
+            return;
+
+        // Create Dragboard, set image and start drag
+        Clipboard clipboard = anEvent.getClipboard();
+        clipboard.addData("SupportPane:" + dragSnapPart.getClass().getSimpleName());
+        Image image = ViewUtils.getImage(dragSnapPart);
+        clipboard.setDragImage(image);
+        clipboard.startDrag();
+    }
+
+    /**
+     * Override for title.
+     */
+    @Override
+    public String getTitle()  { return "Snippets"; }
 
     /**
      * Returns SnapActor pieces.

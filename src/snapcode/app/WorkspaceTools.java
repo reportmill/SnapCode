@@ -76,7 +76,7 @@ public class WorkspaceTools {
 
         // Support tools
         HelpTool helpTool = new HelpTool(_workspacePane);
-        CompleterTool completerTool = new CompleterTool(_workspacePane);
+        SnippetTool snippetTool = new SnippetTool(_workspacePane);
 
         // Support tools
         SearchTool searchTool = new SearchTool(_workspacePane);
@@ -87,7 +87,7 @@ public class WorkspaceTools {
         // Create tools array
         _tools = new WorkspaceTool[] {
                 filesTool, fileTreeTool, runTool, debugTool, buildTool,
-                searchTool, helpTool, completerTool,
+                searchTool, helpTool, snippetTool,
                 runConfigsTool, breakpointsTool,
                 httpServerTool
         };
@@ -97,7 +97,7 @@ public class WorkspaceTools {
         _leftTray = new ToolTray(Side.LEFT, leftTools);
 
         // Create RightTray
-        WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, helpTool, completerTool };
+        WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, helpTool, snippetTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView PrefWidth="300" GrowHeight="true" FillWidth="true">
+  <Font name="Arial" size="12" />
+  <RowView Padding="4" PrefHeight="34" GrowWidth="true" Align="CENTER_LEFT">
+    <Label Margin="4,10,4,10" Text="Snippets:" />
+    <Label Name="ClassText" GrowWidth="true" />
+    <CheckBox Name="PlainCheckBox" Text="Plain" Margin="4,15,4,15" LeanX="RIGHT"/>
+  </RowView>
+  <RectView PrefHeight="1">
+    <Fill Color="#CC" />
+  </RectView>
+</ColView>

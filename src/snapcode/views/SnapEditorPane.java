@@ -20,9 +20,6 @@ public class SnapEditorPane extends ViewOwner {
     // A class for editing code
     JavaTextPane _javaPane;
 
-    // The pieces pane
-    SupportPane _supportPane;
-
     // The node path
     RowView _nodePathBox;
 
@@ -38,8 +35,6 @@ public class SnapEditorPane extends ViewOwner {
     public SnapEditorPane(JavaTextPane aJTP)
     {
         _javaPane = aJTP;
-        _supportPane = new SupportPane();
-        _supportPane._editorPane = this;
     }
 
     /**
@@ -67,14 +62,6 @@ public class SnapEditorPane extends ViewOwner {
     }
 
     /**
-     * Returns the SupportPane.
-     */
-    public SupportPane getSupportPane()
-    {
-        return _supportPane;
-    }
-
-    /**
      * Returns the selected part.
      */
     public JNodeView getSelectedPart()
@@ -99,30 +86,25 @@ public class SnapEditorPane extends ViewOwner {
         View toolBar = super.createUI(); //toolBar.setMaxHeight(28);
 
         // Create SnapEditor
-        _editor = new SnapEditor(getJavaTextArea());
+        JavaTextArea javaTextArea = getJavaTextArea();
+        _editor = new SnapEditor(javaTextArea);
 
         // Add to Editor.UI to ScrollView
-        ScrollView sview = new ScrollView(_editor);
-        sview.setGrowWidth(true);
-
-        // Get SupportPane
-        _supportPane = getSupportPane();
-        _supportPane.getUI().setPrefWidth(300);
-
-        // Create SplitView, configure and return
-        SplitView spane = new SplitView();
-        spane.setItems(sview, _supportPane.getUI());
+        ScrollView scrollView = new ScrollView(_editor);
+        scrollView.setGrowWidth(true);
+        scrollView.setGrowHeight(true);
 
         // Create NodePath and add to bottom
         _nodePathBox = new RowView();
         _nodePathBox.setPadding(2, 2, 2, 2);
 
-        // Create BorderView with toolbar
-        BorderView bview = new BorderView();
-        bview.setCenter(spane);
-        bview.setTop(toolBar);
-        bview.setBottom(_nodePathBox);
-        return bview;
+        // Create ColView with toolbar
+        ColView colView = new ColView();
+        colView.setFillWidth(true);
+        colView.setChildren(toolBar, scrollView, _nodePathBox);
+
+        // Return
+        return colView;
     }
 
     /**
@@ -242,7 +224,7 @@ public class SnapEditorPane extends ViewOwner {
      */
     public void updateSelectedPart(JNodeView aPart)
     {
-        _supportPane.rebuildUI();
+        //_supportPane.rebuildUI();
         resetLater();
         _deepPart = aPart;
     }

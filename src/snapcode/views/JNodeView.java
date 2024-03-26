@@ -22,6 +22,9 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
     // The current drag over node
     private static JNodeViewBase _dragOver;
 
+    // The SnapPart being dragged
+    public static JNodeView<?>  _dragSnapPart;
+
     // Constants for colors
     public static Color PieceColor = Color.get("#4C67d6");
     public static Color BlockStmtColor = Color.get("#8f56e3");
@@ -229,10 +232,10 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
         }
 
         // Handle DragDropEvent
-        if (anEvent.isDragDropEvent() && SupportPane._dragSP != null) {
+        if (anEvent.isDragDropEvent() && _dragSnapPart != null) {
             if (_dragOver != null) _dragOver.setUnderDrag(false);
             _dragOver = null;
-            dropNode(SupportPane._dragSP.getJNode(), anEvent.getX(), anEvent.getY());
+            dropNode(_dragSnapPart.getJNode(), anEvent.getX(), anEvent.getY());
             anEvent.dropComplete(); //de.setDropCompleted(true);
         }
     }
