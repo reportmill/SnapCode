@@ -89,8 +89,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         List<JVarDecl> fieldDecls = _classDecl.getVarDecls();
 
         // Get fields
-        JavaField.FieldBuilder fb = new JavaField.FieldBuilder();
-        fb.init(_resolver, _javaClass.getClassName());
+        JavaField.Builder fb = new JavaField.Builder(_javaClass);
         JavaField[] fields = ListUtils.mapToArray(fieldDecls, vd -> getJavaFieldForVarDecl(vd, fb), JavaField.class);
 
         // Handle enum: Add constant fields
@@ -107,7 +106,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     /**
      * Returns a JavaField for given field var decl from class decl, creating if missing.
      */
-    private JavaField getJavaFieldForVarDecl(JVarDecl varDecl, JavaField.FieldBuilder fb)
+    private JavaField getJavaFieldForVarDecl(JVarDecl varDecl, JavaField.Builder fb)
     {
         String fieldName = varDecl.getName();
         fb.name(fieldName);
@@ -126,7 +125,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     /**
      * Returns a JavaField for given enum constant from class decl, creating if missing.
      */
-    private JavaField getJavaFieldForEnumConst(JEnumConst enumConst, JavaField.FieldBuilder fb)
+    private JavaField getJavaFieldForEnumConst(JEnumConst enumConst, JavaField.Builder fb)
     {
         String enumConstName = enumConst.getName();
         fb.name(enumConstName);
@@ -143,8 +142,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     {
         // Get Methods
         JMethodDecl[] methodDecls = _classDecl.getMethodDecls();
-        JavaMethod.MethodBuilder mb = new JavaMethod.MethodBuilder();
-        mb.init(_resolver, _javaClass.getClassName());
+        JavaMethod.Builder mb = new JavaMethod.Builder(_javaClass);
 
         // Add JavaDecl for each declared method
         for (JMethodDecl methodDecl : methodDecls) {
@@ -189,8 +187,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     {
         // Get constructors
         JConstrDecl[] constrDecls = _classDecl.getConstructorDecls();
-        JavaConstructor.ConstructorBuilder cb = new JavaConstructor.ConstructorBuilder();
-        cb.init(_resolver, _javaClass.getClassName());
+        JavaConstructor.Builder cb = new JavaConstructor.Builder(_javaClass);
 
         // Add JavaDecl for each declared constructor
         for (JConstrDecl methodDecl : constrDecls) {

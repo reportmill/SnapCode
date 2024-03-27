@@ -134,7 +134,7 @@ public class JavaClass extends JavaType {
 
         // Handle Object[] special: Add Array.length field
         if (getName().equals("java.lang.Object[]")) {
-            _fields = new JavaField.FieldBuilder(this).name("length").type(int.class).save().buildAll();
+            _fields = new JavaField.Builder(this).name("length").type(int.class).save().buildAll();
             _interfaces = new JavaClass[0];
             _methods = new JavaMethod[0];
             _constructors = new JavaConstructor[0];

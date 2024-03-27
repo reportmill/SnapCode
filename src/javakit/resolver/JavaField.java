@@ -107,7 +107,7 @@ public class JavaField extends JavaMember {
     /**
      * A Builder class for JavaField.
      */
-    public static class FieldBuilder {
+    public static class Builder {
 
         // Ivars
         Resolver  _resolver;
@@ -123,16 +123,11 @@ public class JavaField extends JavaMember {
         /**
          * Constructor.
          */
-        public FieldBuilder(JavaClass declaringClass)
+        public Builder(JavaClass declaringClass)
         {
             _declaringClass = declaringClass;
             _resolver = declaringClass._resolver;
         }
-
-        /**
-         * Constructor.
-         */
-        public FieldBuilder()  { }
 
         /**
          * Init.
@@ -144,10 +139,10 @@ public class JavaField extends JavaMember {
         }
 
         // Properties.
-        public FieldBuilder mods(int mods)  { _mods = mods; return this; }
-        public FieldBuilder name(String name)  { _name = name; return this; }
-        public FieldBuilder type(JavaType type)  { _type = type; return this; }
-        public FieldBuilder type(Type type)  { _type = _resolver.getJavaTypeForType(type); return this; }
+        public Builder mods(int mods)  { _mods = mods; return this; }
+        public Builder name(String name)  { _name = name; return this; }
+        public Builder type(JavaType type)  { _type = type; return this; }
+        public Builder type(Type type)  { _type = _resolver.getJavaTypeForType(type); return this; }
 
         /**
          * Build.
@@ -168,7 +163,7 @@ public class JavaField extends JavaMember {
         /**
          * Builds current field and saves it in array for buildAll.
          */
-        public FieldBuilder save()
+        public Builder save()
         {
             _fields[_fieldCount++] = build(); return this;
         }

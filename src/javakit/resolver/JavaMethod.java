@@ -265,7 +265,7 @@ public class JavaMethod extends JavaExecutable {
     /**
      * A Builder class for JavaMethod.
      */
-    public static class MethodBuilder {
+    public static class Builder {
 
         // Ivars
         Resolver  _resolver;
@@ -285,26 +285,21 @@ public class JavaMethod extends JavaExecutable {
         /**
          * Constructor.
          */
-        public MethodBuilder()  { }
-
-        /**
-         * Init.
-         */
-        public void init(Resolver aResolver, String aClassName)
+        public Builder(JavaClass declaringClass)
         {
-            _resolver = aResolver;
-            _declaringClass = aResolver.getJavaClassForName(aClassName);
+            _declaringClass = declaringClass;
+            _resolver = declaringClass._resolver;
         }
 
         // Properties.
-        public MethodBuilder mods(int mods)  { _mods = mods; return this; }
-        public MethodBuilder name(String name)  { _name = name; return this; }
-        public MethodBuilder paramTypes(JavaType ...  paramTypes)  { _paramTypes = paramTypes; return this; }
-        public MethodBuilder paramTypes(Type ...  paramTypes)  { _paramTypes = _resolver.getJavaTypesForTypes(paramTypes); return this; }
-        public MethodBuilder returnType(JavaType returnType)  { _returnType = returnType; return this; }
-        public MethodBuilder typeVars(String aName)  { return this; }
-        public MethodBuilder isDefault(boolean isDefault)  { _default = isDefault; return this; }
-        public MethodBuilder methodDecl(JMethodDecl methodDecl)  { _methodDecl = methodDecl; return this; }
+        public Builder mods(int mods)  { _mods = mods; return this; }
+        public Builder name(String name)  { _name = name; return this; }
+        public Builder paramTypes(JavaType ...  paramTypes)  { _paramTypes = paramTypes; return this; }
+        public Builder paramTypes(Type ...  paramTypes)  { _paramTypes = _resolver.getJavaTypesForTypes(paramTypes); return this; }
+        public Builder returnType(JavaType returnType)  { _returnType = returnType; return this; }
+        public Builder typeVars(String aName)  { return this; }
+        public Builder isDefault(boolean isDefault)  { _default = isDefault; return this; }
+        public Builder methodDecl(JMethodDecl methodDecl)  { _methodDecl = methodDecl; return this; }
 
         /**
          * Build.
@@ -333,7 +328,7 @@ public class JavaMethod extends JavaExecutable {
         /**
          * Builds current method and saves it in array for buildAll.
          */
-        public MethodBuilder save()
+        public Builder save()
         {
             _methods[_methodCount++] = build(); return this;
         }

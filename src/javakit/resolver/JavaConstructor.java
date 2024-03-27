@@ -130,7 +130,7 @@ public class JavaConstructor extends JavaExecutable {
     /**
      * A Builder class for JavaConstructor.
      */
-    public static class ConstructorBuilder {
+    public static class Builder {
 
         // Ivars
         Resolver  _resolver;
@@ -147,23 +147,18 @@ public class JavaConstructor extends JavaExecutable {
         /**
          * Constructor.
          */
-        public ConstructorBuilder()  { }
-
-        /**
-         * init.
-         */
-        public void init(Resolver aResolver, String aClassName)
+        public Builder(JavaClass declaringClass)
         {
-            _resolver = aResolver;
-            _declaringClass = aResolver.getJavaClassForName(aClassName);
+            _declaringClass = declaringClass;
+            _resolver = declaringClass._resolver;
         }
 
         // Properties.
-        public ConstructorBuilder mods(int mods)  { _mods = mods; return this; }
-        public ConstructorBuilder paramTypes(JavaType ...  paramTypes)  { _paramTypes = paramTypes; return this; }
-        public ConstructorBuilder paramTypes(Type...  paramTypes)  { _paramTypes = _resolver.getJavaTypesForTypes(paramTypes); return this; }
-        public ConstructorBuilder typeVars(String aName)  { return this; }
-        public ConstructorBuilder isVarArgs(boolean varArgs)  { _varArgs = varArgs; return this; }
+        public Builder mods(int mods)  { _mods = mods; return this; }
+        public Builder paramTypes(JavaType ...  paramTypes)  { _paramTypes = paramTypes; return this; }
+        public Builder paramTypes(Type...  paramTypes)  { _paramTypes = _resolver.getJavaTypesForTypes(paramTypes); return this; }
+        public Builder typeVars(String aName)  { return this; }
+        public Builder isVarArgs(boolean varArgs)  { _varArgs = varArgs; return this; }
 
         /**
          * Build.
@@ -189,7 +184,7 @@ public class JavaConstructor extends JavaExecutable {
         /**
          * Builds current constructors and saves it in array for buildAll.
          */
-        public ConstructorBuilder save()
+        public Builder save()
         {
             _constructors[_constructorCount++] = build(); return this;
         }

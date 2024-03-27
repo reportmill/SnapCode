@@ -223,7 +223,7 @@ public class NodeCompleter {
 
                 // Add completion for "ClassName.class"
                 else if (_prefixMatcher.matchesString("class")) {
-                    JavaField classField = getClassField(scopeExprEvalClass);
+                    JavaField classField = new JavaField.Builder(scopeExprEvalClass).name("class").type(Class.class).build();
                     addCompletionDecl(classField);
                 }
             }
@@ -397,9 +397,6 @@ public class NodeCompleter {
      */
     private JavaField getClassField(JavaClass classClass)
     {
-        JavaField.FieldBuilder fb = new JavaField.FieldBuilder();
-        fb.init(_resolver, classClass.getClassName());
-        JavaField javaField = fb.name("class").type(Class.class).build();
-        return javaField;
+        return new JavaField.Builder(classClass).name("class").type(Class.class).build();
     }
 }
