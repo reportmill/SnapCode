@@ -93,11 +93,11 @@ public class Resolver {
     {
         // Get Class loader, find class
         ClassLoader classLoader =  _project.getRuntimeClassLoader();
-        Class<?> realClass = ClassUtils.getClassForName(aName, classLoader);
+        Class<?> realClass = ResolverUtils.getClassForName(aName, classLoader);
 
         // If not found and name doesn't contain '.', try java.lang.Name
         if (realClass == null && aName.indexOf('.') < 0)
-            realClass = ClassUtils.getClassForName("java.lang." + aName, classLoader);
+            realClass = ResolverUtils.getClassForName("java.lang." + aName, classLoader);
 
         // Return
         return realClass;
@@ -282,7 +282,7 @@ public class Resolver {
     private JavaGenericArrayType getGenericArrayTypeDecl(GenericArrayType aGAT)
     {
         // Check ArrayTypes cache and return if found
-        String id = ResolverUtils.getIdForGenericArrayType(aGAT);
+        String id = ResolverIds.getIdForGenericArrayType(aGAT);
         JavaGenericArrayType decl = _arrayTypes.get(id);
         if (decl != null)
             return decl;
@@ -301,7 +301,7 @@ public class Resolver {
     private JavaParameterizedType getJavaParameterizedTypeForType(ParameterizedType aPT)
     {
         // Check ParamTypes cache and return if found
-        String id = ResolverUtils.getIdForParameterizedType(aPT);
+        String id = ResolverIds.getIdForParameterizedType(aPT);
         JavaParameterizedType decl = _paramTypes.get(id);
         if (decl != null)
             return decl;
@@ -325,7 +325,7 @@ public class Resolver {
     protected JavaParameterizedType getJavaParameterizedTypeForTypes(JavaClass aRawType, JavaType[] theTypeArgs)
     {
         // Get id and decl for id (just return if found)
-        String id = ResolverUtils.getIdForParameterizedTypeParts(aRawType, theTypeArgs);
+        String id = ResolverIds.getIdForParameterizedTypeParts(aRawType, theTypeArgs);
         JavaParameterizedType decl = _paramTypes.get(id);
         if (decl != null)
             return decl;

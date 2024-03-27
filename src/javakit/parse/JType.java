@@ -6,6 +6,7 @@ import java.util.*;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaType;
+import javakit.resolver.ResolverUtils;
 import snap.parse.ParseToken;
 import snap.util.ClassUtils;
 
@@ -162,7 +163,7 @@ public class JType extends JNode {
 
         // Handle primitive type
         String baseName = getName();
-        Class<?> primitiveClass = ClassUtils.getPrimitiveClassForName(baseName);
+        Class<?> primitiveClass = ResolverUtils.getPrimitiveClassForName(baseName);
         if (primitiveClass != null)
             return getJavaClassForClass(primitiveClass);
 

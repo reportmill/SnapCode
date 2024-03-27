@@ -5,7 +5,7 @@ package snapcode.project;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
 import javakit.resolver.Resolver;
-import snap.util.ClassUtils;
+import javakit.resolver.ResolverUtils;
 import snap.web.WebFile;
 import java.io.DataInputStream;
 import java.lang.reflect.*;
@@ -64,7 +64,7 @@ public class ClassFileUtils {
         for (int i = 1, iMax = classFileReader.getConstantCount(); i <= iMax; i++) {
             ClassFileReader.Constant constant = classFileReader.getConstant(i);
             if (constant.isClass() && (isInRootClassName(className, constant.getClassName()) ||
-                    ClassUtils.isPrimitiveClassName(constant.getClassName())))
+                    ResolverUtils.isPrimitiveClassName(constant.getClassName())))
                 continue;
             JavaDecl ref = getRef(constant);
             if (ref != null)

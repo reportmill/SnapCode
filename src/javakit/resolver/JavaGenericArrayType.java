@@ -25,7 +25,7 @@ public class JavaGenericArrayType extends JavaType {
         super(anOwner, DeclType.GenArrayType);
 
         // Set Id
-        _id = ResolverUtils.getIdForGenericArrayType(aGenArrayType);
+        _id = ResolverIds.getIdForGenericArrayType(aGenArrayType);
 
         // Set Name, SimpleName
         _name = _simpleName = aGenArrayType.getTypeName();

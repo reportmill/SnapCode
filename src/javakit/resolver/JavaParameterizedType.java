@@ -28,7 +28,7 @@ public class JavaParameterizedType extends JavaType {
         _paramTypes = theTypeArgs;
 
         // Set Id, Name
-        _id = _name = ResolverUtils.getIdForParameterizedTypeParts(aRawType, theTypeArgs);
+        _id = _name = ResolverIds.getIdForParameterizedTypeParts(aRawType, theTypeArgs);
 
         // Get/Set SimpleName
         _simpleName = aRawType.getSimpleName();

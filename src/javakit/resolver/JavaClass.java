@@ -72,7 +72,7 @@ public class JavaClass extends JavaType {
         super(aResolver, DeclType.Class);
 
         // Set Id, Name, SimpleName
-        _id = _name = ResolverUtils.getIdForClass(aClass);
+        _id = _name = ResolverIds.getIdForClass(aClass);
         _simpleName = aClass.getSimpleName();
 
         // Add to Resolver classes
@@ -690,7 +690,7 @@ public class JavaClass extends JavaType {
      */
     public JavaMethod getJavaMethodForMethod(Method aMeth)
     {
-        String id = ResolverUtils.getIdForMember(aMeth);
+        String id = ResolverIds.getIdForMember(aMeth);
         JavaMethod method = getMethodForId(id);
         if (method == null)
             return null;
@@ -717,7 +717,7 @@ public class JavaClass extends JavaType {
      */
     public JavaConstructor getJavaConstructorForConstructor(Constructor<?> aConstr)
     {
-        String id = ResolverUtils.getIdForMember(aConstr);
+        String id = ResolverIds.getIdForMember(aConstr);
         JavaConstructor constructor = getConstructorForId(id);
         if (constructor == null)
             return null;

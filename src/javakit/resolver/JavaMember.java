@@ -24,7 +24,7 @@ public class JavaMember extends JavaDecl {
         if (aMember == null) return;
 
         // Set id
-        _id = ResolverUtils.getIdForMember(aMember);
+        _id = ResolverIds.getIdForMember(aMember);
 
         // Set mods, declaring class
         _mods = aMember.getModifiers();

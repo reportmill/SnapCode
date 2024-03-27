@@ -3,13 +3,39 @@
  */
 package javakit.resolver;
 import java.lang.reflect.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Utility methods for JavaParse package.
  */
 public class ResolverUtils {
+
+    /**
+     * Returns a class for a given name, using the class loader of the given class.
+     */
+    public static Class<?> getClassForName(String aName, ClassLoader aClassLoader)
+    {
+        // Handle arrays, either coded or uncoded (e.g. [I, [D, [LClassName; or  int[], double[] or ClassName[])
+        if (aName.startsWith("["))
+            return getClassForClassCoding(aName, aClassLoader);
+        if (aName.endsWith("[]")) {
+            String cname = aName.substring(0, aName.length() - 2);
+            Class<?> cls = getClassForName(cname, aClassLoader);
+            return cls != null ? Array.newInstance(cls, 0).getClass() : null;
+        }
+
+        // Handle primitive classes
+        Class<?> primitiveClass = getPrimitiveClassForName(aName);
+        if (primitiveClass != null)
+            return primitiveClass;
+
+        // Do normal Class.forName
+        try { return Class.forName(aName, false, aClassLoader); }
+
+        // Handle Exceptions
+        catch(ClassNotFoundException e) { return null; }
+        catch(NoClassDefFoundError t) { System.err.println("ResolverUtils.getClassForName: " + t); return null; }
+        catch(Throwable t) { System.err.println("ResolverUtils.getClassForName: Unknown error: " + t); return null; }
+    }
 
     /**
      * Returns a class for given class coding.
@@ -38,150 +64,61 @@ public class ResolverUtils {
     }
 
     /**
-     * Returns an Id for a Java.lang.Class.
+     * Returns a class for given class coding.
      */
-    public static String getIdForClass(Class<?> aClass)
+    public static Class<?> getClassForClassCoding(String aName, ClassLoader aClassLoader)
     {
-        if (aClass.isArray())
-            return getIdForClass(aClass.getComponentType()) + "[]";
-        return aClass.getName();
-    }
-
-    /**
-     * Returns an Id for Java.lang.reflect.Type.
-     */
-    public static String getIdForType(Type aType)
-    {
-        // Handle Class
-        if (aType instanceof Class)
-            return getIdForClass((Class<?>) aType);
-
-        // Handle GenericArrayType: CompType[]
-        if (aType instanceof GenericArrayType)
-            return getIdForGenericArrayType((GenericArrayType) aType);
-
-        // Handle ParameterizedType: RawType<TypeArg,...>
-        if (aType instanceof ParameterizedType)
-            return getIdForParameterizedType((ParameterizedType) aType);
-
-        // Handle TypeVariable: DeclType.Name
-        if (aType instanceof TypeVariable)
-            return getIdForTypeVariable((TypeVariable<?>) aType);
-
-        // Handle WildcardType: Need to fix for
-        WildcardType wc = (WildcardType) aType;
-        Type[] bounds = wc.getLowerBounds().length > 0 ? wc.getLowerBounds() : wc.getUpperBounds();
-        Type bound = bounds[0];
-        String boundStr = getIdForType(bound);
-        return boundStr;
-    }
-
-    /**
-     * Returns an Id for Java.lang.reflect.ParameterizedType.
-     */
-    public static String getIdForGenericArrayType(GenericArrayType genericArrayType)
-    {
-        Type compType = genericArrayType.getGenericComponentType();
-        String compTypeStr = getIdForType(compType);
-        return compTypeStr + "[]";
-    }
-
-    /**
-     * Returns an Id for Java.lang.reflect.ParameterizedType.
-     */
-    public static String getIdForParameterizedType(ParameterizedType parameterizedType)
-    {
-        // Get RawType id
-        Type rawType = parameterizedType.getRawType();
-        String rawTypeId = getIdForType(rawType);
-
-        // Get typeArgs id (just return rawType id if no args
-        Type[] typeArgs = parameterizedType.getActualTypeArguments();
-        if (typeArgs.length == 0)
-            return rawTypeId;
-
-        // Return RawType<TypeArgs>          // Was map(typeArg -> getIdForType(typeArg))
-        String typeArgsNameStr = Stream.of(typeArgs).map(Type::getTypeName).collect(Collectors.joining(","));
-        return rawTypeId + '<' + typeArgsNameStr + '>';
-    }
-
-    /**
-     * Returns an id string for given Java part.
-     */
-    public static String getIdForParameterizedTypeParts(JavaDecl aRawType, JavaType[] theTypes)
-    {
-        // Get RawType id (just return if no args)
-        String rawTypeId = aRawType.getId();
-        if (theTypes.length == 0)
-            return rawTypeId;
-
-        // Return RawType<TypeArgs>         // Was map(JavaType::getId)
-        String typeArgsNameStr = Stream.of(theTypes).map(JavaType::getName).collect(Collectors.joining(","));
-        return rawTypeId + '<' + typeArgsNameStr + '>';
-    }
-
-    /**
-     * Returns an Id for Java.lang.reflect.TypeVariable.
-     */
-    public static String getIdForTypeVariable(TypeVariable<?> typeVariable)
-    {
-        // Get GenericDecl and TypeVar.Name
-        GenericDeclaration genericDecl = typeVariable.getGenericDeclaration();
-        String genericDeclId = genericDecl instanceof Member ?
-                getIdForMember((Member) genericDecl) :
-                getIdForClass((Class<?>) genericDecl);
-        String typeVarName = typeVariable.getName();
-
-        // Return GenericDecl.TypeVarName
-        return genericDeclId + '.' + typeVarName;
-    }
-
-    /**
-     * Returns an Id string for a Type array.
-     */
-    private static String getIdForTypeArray(Type[] theTypes)
-    {
-        return Stream.of(theTypes).map(type -> getIdForType(type)).collect(Collectors.joining(","));
-    }
-
-    /**
-     * Returns an Id for a Java.lang.reflect.Member.
-     */
-    public static String getIdForMember(Member aMember)
-    {
-        // Get id for Member.DeclaringClass
-        Class<?> declaringClass = aMember.getDeclaringClass();
-        String classId = getIdForClass(declaringClass);
-
-        // Start StringBuffer
-        StringBuilder sb = new StringBuilder(classId);
-
-        // Handle Field: DeclClassName.<Name>
-        if (aMember instanceof Field)
-            sb.append('.').append(aMember.getName());
-
-            // Handle Method: DeclClassName.Name(<ParamType>,...)
-        else if (aMember instanceof Method) {
-            Method meth = (Method) aMember;
-            sb.append('.').append(meth.getName()).append('(');
-            Class<?>[] paramTypes = meth.getParameterTypes();
-            if (paramTypes.length > 0)
-                sb.append(getIdForTypeArray(paramTypes));
-            sb.append(')');
+        char c = aName.charAt(0);
+        switch (c) {
+            case 'B': return byte.class;
+            case 'C': return char.class;
+            case 'D': return double.class;
+            case 'F': return float.class;
+            case 'I': return int.class;
+            case 'J': return long.class;
+            case 'S': return short.class;
+            case 'Z': return boolean.class;
+            case 'V': return void.class;
+            case 'L':
+                int end = aName.indexOf(';', 1);
+                return getClassForName(aName.substring(1, end), aClassLoader);
+            case '[':
+                Class<?> cls = getClassForClassCoding(aName.substring(1), aClassLoader);
+                return cls != null ? Array.newInstance(cls, 0).getClass() : null;
         }
 
-        // Handle Constructor: DeclClassName(<ParamType>,...)
-        else if (aMember instanceof Constructor) {
-            Constructor<?> constr = (Constructor<?>) aMember;
-            Class<?>[] paramTypes = constr.getParameterTypes();
-            sb.append('(');
-            if (paramTypes.length > 0)
-                sb.append(getIdForTypeArray(paramTypes));
-            sb.append(')');
-        }
+        // Unsupported coding char
+        throw new RuntimeException("ResolverUtils.getClassForClassCoding: Not a coded class " + aName);
+    }
 
-        // Return
-        return sb.toString();
+    /**
+     * Returns whether name is a primitive class name.
+     */
+    public static boolean isPrimitiveClassName(String aName)
+    {
+        return getPrimitiveClassForName(aName) != null;
+    }
+
+    /**
+     * Returns a primitive class for name.
+     */
+    public static Class<?> getPrimitiveClassForName(String aName)
+    {
+        if (aName.length() > 7 || !Character.isLowerCase(aName.charAt(0)) || aName.indexOf('.') > 0)
+            return null;
+
+        switch (aName) {
+            case "boolean": return boolean.class;
+            case "char": return char.class;
+            case "byte": return byte.class;
+            case "short": return short.class;
+            case "int": return int.class;
+            case "long": return long.class;
+            case "float": return float.class;
+            case "double": return double.class;
+            case "void": return void.class;
+            default: return null;
+        }
     }
 
     /**
@@ -224,6 +161,6 @@ public class ResolverUtils {
         }
 
         // Complain about anything else
-        throw new RuntimeException("JavaKitUtils.getClass: Can't get class from type: " + aType);
+        throw new RuntimeException("ResolverUtils.getClassForType: Can't get class from type: " + aType);
     }
 }
