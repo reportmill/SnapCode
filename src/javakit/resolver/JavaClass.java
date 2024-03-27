@@ -78,12 +78,6 @@ public class JavaClass extends JavaType {
         // Add to Resolver classes
         aResolver._classes.put(_id, this);
 
-        // Handle array special
-        if (aClass.isArray()) {
-            configureArrayClass(aClass);
-            return;
-        }
-
         // Get declaring class
         JavaDecl declaringPkgOrClass = aResolver.getParentPackageOrClassForClass(aClass);
 
@@ -115,6 +109,48 @@ public class JavaClass extends JavaType {
         Class<?> superClass = aClass.getSuperclass();
         if (superClass != null)
             _superClassName = superClass.getName();
+    }
+
+    /**
+     * Constructor for array class.
+     */
+    public JavaClass(JavaClass compClass)
+    {
+        // Do normal version
+        super(compClass._resolver, DeclType.Class);
+
+        // Set Id, Name, SimpleName
+        _id = _name = compClass.getName() + "[]";
+        _simpleName = compClass.getSimpleName() + "[]";
+        _updater = new JavaClassUpdater(this);
+
+        // Add to Resolver classes
+        _resolver._classes.put(_id, this);
+
+        // Set mods, ComponentType, SuperClassName
+        _mods = compClass.getModifiers() | Modifier.ABSTRACT | Modifier.FINAL;
+        _componentTypeName = compClass.getName();
+        _superClassName = "java.lang.Object";
+
+        // Handle Object[] special: Add Array.length field
+        if (getName().equals("java.lang.Object[]")) {
+            _fields = new JavaField.FieldBuilder(this).name("length").type(int.class).save().buildAll();
+            _interfaces = new JavaClass[0];
+            _methods = new JavaMethod[0];
+            _constructors = new JavaConstructor[0];
+            _innerClasses = new JavaClass[0];
+            _typeVars = new JavaTypeVariable[0];
+            return;
+        }
+
+        // Handle other arrays: Just copy over from object array
+        JavaClass arrayDecl = _resolver.getJavaClassForName("java.lang.Object[]");
+        _fields = arrayDecl.getDeclaredFields();
+        _interfaces = arrayDecl._interfaces;
+        _methods = arrayDecl._methods;
+        _constructors = arrayDecl._constructors;
+        _innerClasses = arrayDecl._innerClasses;
+        _typeVars = arrayDecl._typeVars;
     }
 
     /**
@@ -778,45 +814,6 @@ public class JavaClass extends JavaType {
         _updater = new JavaClassUpdaterDecl(this, classDecl);
         reloadClass();
         _updater = new JavaClassUpdater(this);
-    }
-
-    /**
-     * Updates array class.
-     */
-    private void configureArrayClass(Class<?> arrayClass)
-    {
-        // Set alt id?
-        String altName = arrayClass.getName();
-        if (!altName.equals(_id))
-            _resolver._classes.put(altName, this);
-
-        // Set mods, ComponentType, SuperClassName
-        _mods = arrayClass.getModifiers();
-        Class<?> compClass = arrayClass.getComponentType();
-        _componentTypeName = compClass.getName();
-        _superClassName = "java.lang.Object";
-
-        // Handle Object[] special: Add Array.length field
-        if (getName().equals("java.lang.Object[]")) {
-            JavaField.FieldBuilder fb = new JavaField.FieldBuilder();
-            fb.init(_resolver, getClassName());
-            _fields = fb.name("length").type(int.class).save().buildAll();
-            _interfaces = new JavaClass[0];
-            _methods = new JavaMethod[0];
-            _constructors = new JavaConstructor[0];
-            _innerClasses = new JavaClass[0];
-            _typeVars = new JavaTypeVariable[0];
-            return;
-        }
-
-        // Handle other arrays: Just copy over from object array
-        JavaClass arrayDecl = _resolver.getJavaClassForClass(Object[].class);
-        _fields = arrayDecl.getDeclaredFields();
-        _interfaces = arrayDecl._interfaces;
-        _methods = arrayDecl._methods;
-        _constructors = arrayDecl._constructors;
-        _innerClasses = arrayDecl._innerClasses;
-        _typeVars = arrayDecl._typeVars;
     }
 
     /**

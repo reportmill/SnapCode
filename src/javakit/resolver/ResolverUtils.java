@@ -12,6 +12,32 @@ import java.util.stream.Stream;
 public class ResolverUtils {
 
     /**
+     * Returns a class for given class coding.
+     */
+    public static String getClassNameForClassCoding(String aName)
+    {
+        char char0 = aName.charAt(0);
+        switch (char0) {
+            case 'B': return "byte";
+            case 'C': return "char";
+            case 'D': return "double";
+            case 'F': return "float";
+            case 'I': return "int";
+            case 'J': return "long";
+            case 'S': return "short";
+            case 'Z': return "boolean";
+            case 'V': return "void";
+            case 'L':
+                int end = aName.indexOf(';', 1);
+                return aName.substring(1, end);
+            case '[': return getClassNameForClassCoding(aName.substring(1)) + "[]";
+        }
+
+        // Unsupported coding char
+        throw new RuntimeException("ResolverUtils.getClassNameForClassCoding: Not a coded class string " + aName);
+    }
+
+    /**
      * Returns an Id for a Java.lang.Class.
      */
     public static String getIdForClass(Class<?> aClass)

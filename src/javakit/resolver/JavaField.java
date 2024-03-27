@@ -123,6 +123,15 @@ public class JavaField extends JavaMember {
         /**
          * Constructor.
          */
+        public FieldBuilder(JavaClass declaringClass)
+        {
+            _declaringClass = declaringClass;
+            _resolver = declaringClass._resolver;
+        }
+
+        /**
+         * Constructor.
+         */
         public FieldBuilder()  { }
 
         /**

@@ -113,13 +113,32 @@ public class Resolver {
         if (javaClass != null)
             return javaClass;
 
+        // Handle array coding
+        if (aClassName.startsWith("[")) {
+            String className = ResolverUtils.getClassNameForClassCoding(aClassName);
+            javaClass = getJavaClassForName(className);
+            if (javaClass != null)
+                _classes.put(aClassName, javaClass);
+            return javaClass;
+        }
+
+        // Handle array
+        if (aClassName.endsWith("[]")) {
+            String compClassName = aClassName.substring(0, aClassName.length() - 2);
+            JavaClass compClass = getJavaClassForName(compClassName);
+            if (compClass != null)
+                javaClass = new JavaClass(compClass);
+        }
+
         // Otherwise lookup Class for name
-        Class<?> realClass = getClassForName(aClassName);
-        if (realClass != null)
-            return getJavaClassForClass(realClass);
+        else {
+            Class<?> realClass = getClassForName(aClassName);
+            if (realClass != null)
+                javaClass = new JavaClass(this, realClass);
+        }
 
         // Return
-        return null;
+        return javaClass;
     }
 
     /**
@@ -127,14 +146,8 @@ public class Resolver {
      */
     public JavaClass getJavaClassForClass(Class<?> aClass)
     {
-        // Lookup class decl by name and return if already set
         String className = aClass.getName();
-        JavaClass javaClass = _classes.get(className);
-        if (javaClass != null)
-            return javaClass;
-
-        // Create class and return
-        return new JavaClass(this, aClass);
+        return getJavaClassForName(className);
     }
 
     /**
