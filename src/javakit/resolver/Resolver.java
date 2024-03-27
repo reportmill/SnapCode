@@ -113,6 +113,16 @@ public class Resolver {
         if (javaClass != null)
             return javaClass;
 
+        // Handle java.lang classes special - bogus: this should be handled in JFile.getImportClassName()
+        if (aClassName.indexOf('.') < 0) {
+            String javaLangClassName = "java.lang." + aClassName;
+            javaClass = getJavaClassForName(javaLangClassName);
+            if (javaClass != null) {
+                _classes.put(javaLangClassName, javaClass);
+                return javaClass;
+            }
+        }
+
         // Handle array coding
         if (aClassName.startsWith("[")) {
             String className = ResolverUtils.getClassNameForClassCoding(aClassName);

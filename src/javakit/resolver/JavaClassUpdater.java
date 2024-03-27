@@ -107,7 +107,13 @@ public class JavaClassUpdater {
     protected Class<?> getRealClassImpl()
     {
         String className = _javaClass.getClassName();
-        return _resolver.getClassForName(className);
+        Class<?> realClass = _resolver.getClassForName(className);
+        if (realClass == null) {
+            //System.err.println("JavaClassUpdater.getRealClassImpl: Can't find real class: " + className);
+            JavaClass superClass = _javaClass.getSuperClass();
+            realClass = superClass != null ? superClass.getRealClass() : Object.class;
+        }
+        return realClass;
     }
 
     /**
