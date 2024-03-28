@@ -521,6 +521,11 @@ public class JNode {
     }
 
     /**
+     * Sets the string.
+     */
+    public void setString(String aString)  { _string = aString; }
+
+    /**
      * Returns the string for this node (from Token.Tokenizer.getInput(Start,End)).
      */
     protected String getStringImpl()

@@ -175,6 +175,7 @@ public class SnapTool extends WorkspaceTool {
     {
         JavaParser javaParser = JavaParser.getShared();
         JNode node = javaParser.parseStatement(aString, 0);
+        node.setString(aString);
         JNodeView<?> nodeView = JNodeView.createView(node);
         nodeView.getEventAdapter().disableEvents(DragEvents);
         return nodeView;
@@ -210,11 +211,15 @@ public class SnapTool extends WorkspaceTool {
         if (dragSnapPart == null)
             return;
 
-        // Create Dragboard, set image and start drag
+        // Get drag string and image
+        JNode dragNode = dragSnapPart.getJNode();
+        String dragString = dragNode.getString(); // Was: "SupportPane:" + dragSnapPart.getClass().getSimpleName()
+        Image dragImage = ViewUtils.getImage(dragSnapPart);
+
+        // Create Dragboard, set drag string and image and start drag
         Clipboard clipboard = anEvent.getClipboard();
-        clipboard.addData("SupportPane:" + dragSnapPart.getClass().getSimpleName());
-        Image image = ViewUtils.getImage(dragSnapPart);
-        clipboard.setDragImage(image);
+        clipboard.addData(dragString);
+        clipboard.setDragImage(dragImage);
         clipboard.startDrag();
     }
 
