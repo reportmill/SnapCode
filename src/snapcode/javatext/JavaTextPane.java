@@ -309,13 +309,21 @@ public class JavaTextPane extends TextPane {
 
         // Handle drop
         if (anEvent.isDragDrop()) {
-            if (!clipboard.hasString())
-                return;
             anEvent.acceptDrag();
-            String string = clipboard.getString();
-            _textArea.replaceCharsWithContent(string);
+            dropString(clipboard);
             anEvent.dropComplete();
         }
+    }
+
+    /**
+     * Called to drop string.
+     */
+    private void dropString(Clipboard clipboard)
+    {
+        if (!clipboard.isLoaded()) {
+            clipboard.addLoadListener(() -> dropString(clipboard)); return; }
+        String string = clipboard.getString();
+        _textArea.replaceCharsWithContent(string);
     }
 
     /**
