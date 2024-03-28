@@ -72,6 +72,7 @@ public class JavaTextPane extends TextPane {
         _textArea = getTextArea();
         _textArea.setGrowWidth(true);
         enableEvents(_textArea, KeyPress, KeyRelease, MousePress, MouseRelease);
+        _textArea.addEventHandler(this::textAreaDragEvent, DragEvents);
 
         // Create/configure LineNumView, LineFootView
         _lineNumView = new LineHeadView(this);
@@ -289,6 +290,31 @@ public class JavaTextPane extends TextPane {
         if (propName == TextArea.SourceText_Prop) {
             _lineNumView.resetAll();
             _lineFootView.resetAll();
+        }
+    }
+
+    /**
+     * Called when text area gets drag events.
+     */
+    private void textAreaDragEvent(ViewEvent anEvent)
+    {
+        Clipboard clipboard = anEvent.getClipboard();
+
+        // Handle drag over: Accept
+        if (anEvent.isDragOver()) {
+            if (clipboard.hasString())
+                anEvent.acceptDrag();
+            return;
+        }
+
+        // Handle drop
+        if (anEvent.isDragDrop()) {
+            if (!clipboard.hasString())
+                return;
+            anEvent.acceptDrag();
+            String string = clipboard.getString();
+            _textArea.replaceCharsWithContent(string);
+            anEvent.dropComplete();
         }
     }
 
