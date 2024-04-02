@@ -41,13 +41,13 @@ public class JMemberDeclView<JNODE extends JMemberDecl> extends JNodeView<JNODE>
         {
             // Do normal version and set type to MemberDecl
             super.updateUI();
-            setType(Type.MemberDecl);
+            setType(BlockView.Type.MemberDecl);
             setColor(MemberDeclColor);
 
             // Configure HBox
             RowView rowView = getRowView();
             rowView.setPadding(0, 0, 0, 8);
-            rowView.setMinSize(120, PieceHeight);
+            rowView.setMinSize(120, BlockView.DEFAULT_HEIGHT);
 
             // Add label for method name
             JExecutableDecl md = getJNode();

@@ -24,13 +24,13 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
         // Do normal version and set type, color
         super.updateUI();
         BlockTop = BlockBottom = 2;
-        setType(isBlock() ? Type.BlockStmt : Type.Piece);
+        setType(isBlock() ? BlockView.Type.BlockStmt : BlockView.Type.Piece);
         setColor(isBlock() ? BlockStmtColor : PieceColor);
 
         // Configure HBox
         RowView rowView = getRowView();
         rowView.setPadding(0, 2, 0, 8);
-        rowView.setMinSize(120, PieceHeight);
+        rowView.setMinSize(120, BlockView.DEFAULT_HEIGHT);
     }
 
     /**

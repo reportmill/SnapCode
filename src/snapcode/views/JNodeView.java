@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A View subclass to display a JNode.
+ * A view that manages painting and editing of a JNode as puzzle piece.
  */
 public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
 

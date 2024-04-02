@@ -33,8 +33,8 @@ public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
     {
         // Do normal version and set type, color
         super.updateUI();
-        setType(Type.Piece);
-        setSeg(Seg.Middle);
+        setType(BlockView.Type.Piece);
+        setSeg(BlockView.Seg.Middle);
         setColor(PieceColor);
 
         // Configure HBox

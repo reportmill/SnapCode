@@ -25,7 +25,7 @@ public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
     {
         // Do normal version
         super.updateUI();
-        setSeg(Seg.Middle);
+        setSeg(BlockView.Seg.Middle);
         setColor(null);
 
         // Get/configure HBox

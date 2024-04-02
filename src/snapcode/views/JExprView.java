@@ -29,7 +29,7 @@ public abstract class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
         // Configure RowView
         RowView rowView = getRowView();
         rowView.setPadding(0, 2, 2, 8);
-        setMinHeight(PieceHeight);
+        setMinHeight(BlockView.DEFAULT_HEIGHT);
     }
 
     /**
