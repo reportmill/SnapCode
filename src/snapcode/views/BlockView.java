@@ -18,6 +18,9 @@ public class BlockView extends PathView {
     // Constant for default height
     public static final double DEFAULT_HEIGHT = 32;
 
+    // Constant for notch height
+    public static final double NOTCH_HEIGHT = 3;
+
     // Constant for box tail height
     public static final double BOX_TAIL_HEIGHT = 14;
 
@@ -87,25 +90,37 @@ public class BlockView extends PathView {
     /**
      * Resets block path for size as one piece.
      */
-    protected void resetBlockPathAsFullPiece(double aW, double aH)
+    protected void resetBlockPathAsFullPiece(double blockW, double blockH)
     {
         Path2D path = getPath();
         path.clear();
+
+        // Draw top notch
         path.moveTo(DEFAULT_BORDER_RADIUS, 0);
         path.hlineTo(12);
-        path.lineTo(15, 3);
+        path.lineTo(12 + NOTCH_HEIGHT, NOTCH_HEIGHT);
         path.hlineTo(25);
-        path.lineTo(28, 0); // Divit
-        path.hlineTo(aW - DEFAULT_BORDER_RADIUS);
-        path.arcTo(aW, 0, aW, DEFAULT_BORDER_RADIUS);
-        path.vlineTo(aH - DEFAULT_BORDER_RADIUS);
-        path.arcTo(aW, aH, aW - DEFAULT_BORDER_RADIUS, aH);
-        path.hlineTo(28);
-        path.lineTo(25, aH + 3);
-        path.hlineTo(15);
-        path.lineTo(12, aH); // Divit
+        path.lineTo(25 + NOTCH_HEIGHT, 0);
+
+        // Add top right corner
+        path.hlineTo(blockW - DEFAULT_BORDER_RADIUS);
+        path.arcTo(blockW, 0, blockW, DEFAULT_BORDER_RADIUS);
+
+        // Add bottom right corner
+        path.vlineTo(blockH - DEFAULT_BORDER_RADIUS);
+        path.arcTo(blockW, blockH, blockW - DEFAULT_BORDER_RADIUS, blockH);
+
+        // Add bottom notch
+        path.hlineTo(25 + NOTCH_HEIGHT);
+        path.lineTo(25, blockH + NOTCH_HEIGHT);
+        path.hlineTo(12 + NOTCH_HEIGHT);
+        path.lineTo(12, blockH);
+
+        // Add bottom left corner
         path.hlineTo(DEFAULT_BORDER_RADIUS);
-        path.arcTo(0, aH, 0, aH - DEFAULT_BORDER_RADIUS);
+        path.arcTo(0, blockH, 0, blockH - DEFAULT_BORDER_RADIUS);
+
+        // Add top left corner
         path.vlineTo(DEFAULT_BORDER_RADIUS);
         path.arcTo(0, 0, DEFAULT_BORDER_RADIUS, 0);
         path.close();
@@ -114,23 +129,33 @@ public class BlockView extends PathView {
     /**
      * Resets block path for size as left piece.
      */
-    protected void resetBlockPathAsLeftPiece(double aW, double aH)
+    protected void resetBlockPathAsLeftPiece(double blockW, double blockH)
     {
         Path2D path = getPath();
         path.clear();
+
+        // Add top notch
         path.moveTo(DEFAULT_BORDER_RADIUS, 0);
         path.hlineTo(12);
-        path.lineTo(15, 3);
+        path.lineTo(12 + NOTCH_HEIGHT, NOTCH_HEIGHT);
         path.hlineTo(25);
-        path.lineTo(28, 0); // Divit
-        path.hlineTo(aW); //e.add(new HLineTo(aW-r)); e.add(new ArcTo(r,r,0,aW,r,false,true));
-        path.vlineTo(aH); //e.add(new VLineTo(aH-r)); e.add(new ArcTo(r,r,0,aW-r,aH,false,true));
-        path.hlineTo(28);
-        path.lineTo(25, aH + 3);
-        path.hlineTo(15);
-        path.lineTo(12, aH); // Divit
+        path.lineTo(25 + NOTCH_HEIGHT, 0);
+
+        // Add top right corner
+        path.hlineTo(blockW);
+        path.vlineTo(blockH);
+
+        // Add bottom notch
+        path.hlineTo(25 + NOTCH_HEIGHT);
+        path.lineTo(25, blockH + NOTCH_HEIGHT);
+        path.hlineTo(12 + NOTCH_HEIGHT);
+        path.lineTo(12, blockH);
+
+        // Add bottom left corner
         path.hlineTo(DEFAULT_BORDER_RADIUS);
-        path.arcTo(0, aH, 0, aH - DEFAULT_BORDER_RADIUS);
+        path.arcTo(0, blockH, 0, blockH - DEFAULT_BORDER_RADIUS);
+
+        // Add top left corner
         path.vlineTo(DEFAULT_BORDER_RADIUS);
         path.arcTo(0, 0, DEFAULT_BORDER_RADIUS, 0);
         path.close();
@@ -139,29 +164,37 @@ public class BlockView extends PathView {
     /**
      * Resets block path for size as middle piece.
      */
-    protected void resetBlockPathAsMiddlePiece(double aW, double aH)
+    protected void resetBlockPathAsMiddlePiece(double blockW, double blockH)
     {
         Path2D path = getPath();
         path.clear();
-        path.appendShape(new Rect(0, 0, aW, aH - 3));
-        setSize(aW, aH - 3);
-        //p.moveTo(r,0); p.hlineTo(aW-r); p.arcTo(aW,0,aW,r); p.vlineTo(aH-r); p.arcTo(aW,aH,aW-r,aH);
-        //p.hlineTo(r); p.arcTo(0,aH,0,aH-r); p.vlineTo(r); p.arcTo(0,0,r,0); p.close();
+
+        // Append rounded rect
+        path.appendShape(new Rect(0, 0, blockW, blockH - NOTCH_HEIGHT));
+        setSize(blockW, blockH - NOTCH_HEIGHT);
     }
 
     /**
      * Resets block path for size as right piece.
      */
-    protected void resetBlockPathAsRightPiece(double aW, double aH)
+    protected void resetBlockPathAsRightPiece(double blockW, double blockH)
     {
         Path2D path = getPath();
         path.clear();
-        setSize(aW, aH - 3);
+        setSize(blockW, blockH - NOTCH_HEIGHT);
+
+        // Append top left
         path.moveTo(0, 0);
-        path.hlineTo(aW - DEFAULT_BORDER_RADIUS);
-        path.arcTo(aW, 0, aW, DEFAULT_BORDER_RADIUS);
-        path.vlineTo(aH - DEFAULT_BORDER_RADIUS);
-        path.arcTo(aW, aH, aW - DEFAULT_BORDER_RADIUS, aH);
+
+        // Append top right corner
+        path.hlineTo(blockW - DEFAULT_BORDER_RADIUS);
+        path.arcTo(blockW, 0, blockW, DEFAULT_BORDER_RADIUS);
+
+        // Append bottom right corner
+        path.vlineTo(blockH - DEFAULT_BORDER_RADIUS);
+        path.arcTo(blockW, blockH, blockW - DEFAULT_BORDER_RADIUS, blockH);
+
+        // Append bottom left corner
         path.hlineTo(0);
         path.vlineTo(0);
     }
@@ -173,44 +206,69 @@ public class BlockView extends PathView {
     {
         Path2D path = getPath();
         path.clear();
-        double h1 = DEFAULT_HEIGHT;
-        double boxTailY = blockH - BOX_TAIL_HEIGHT;
+        double headH = DEFAULT_HEIGHT;
+        double tailY = blockH - BOX_TAIL_HEIGHT;
 
+        // Append head top left
         path.moveTo(DEFAULT_BORDER_RADIUS, 0);
+
+        // Append head top notch
         if (doOuter) {
             path.hlineTo(12);
-            path.lineTo(15, 3);
+            path.lineTo(12 + NOTCH_HEIGHT, NOTCH_HEIGHT);
             path.hlineTo(25);
-            path.lineTo(28, 0);
+            path.lineTo(25 + NOTCH_HEIGHT, 0);
         }
+
+        // Append head top right corner
         path.hlineTo(blockW - DEFAULT_BORDER_RADIUS);
         path.arcTo(blockW, 0, blockW, DEFAULT_BORDER_RADIUS);
-        path.vlineTo(h1 - DEFAULT_BORDER_RADIUS);
-        path.arcTo(blockW, h1, blockW - DEFAULT_BORDER_RADIUS, h1);
-        path.hlineTo(40);
-        path.lineTo(37, h1 + 3);
-        path.hlineTo(27);
-        path.lineTo(24, h1); // Divit
+
+        // Append head bottom right corner
+        path.vlineTo(headH - DEFAULT_BORDER_RADIUS);
+        path.arcTo(blockW, headH, blockW - DEFAULT_BORDER_RADIUS, headH);
+
+        // Append head bottom notch
+        path.hlineTo(37 + NOTCH_HEIGHT);
+        path.lineTo(37, headH + NOTCH_HEIGHT);
+        path.hlineTo(24 + NOTCH_HEIGHT);
+        path.lineTo(24, headH);
+
+        // Append head bottom left corner
         path.hlineTo(10 + DEFAULT_BORDER_RADIUS);
-        path.arcTo(10, h1, 10, h1 + DEFAULT_BORDER_RADIUS);
-        path.vlineTo(boxTailY - DEFAULT_BORDER_RADIUS);
-        path.arcTo(10, boxTailY, 10 + DEFAULT_BORDER_RADIUS, boxTailY);
+        path.arcTo(10, headH, 10, headH + DEFAULT_BORDER_RADIUS);
+
+        // Append tail top left corner
+        path.vlineTo(tailY - DEFAULT_BORDER_RADIUS);
+        path.arcTo(10, tailY, 10 + DEFAULT_BORDER_RADIUS, tailY);
+
+        // Append tail top notch
         path.hlineTo(24);
-        path.lineTo(27, boxTailY + 3);
+        path.lineTo(24 + NOTCH_HEIGHT, tailY + NOTCH_HEIGHT);
         path.hlineTo(37);
-        path.lineTo(40, boxTailY); // Divit
+        path.lineTo(37 + NOTCH_HEIGHT, tailY);
+
+        // Append tail top right corner
         path.hlineTo(blockW - DEFAULT_BORDER_RADIUS);
-        path.arcTo(blockW, boxTailY, blockW, boxTailY + DEFAULT_BORDER_RADIUS);
+        path.arcTo(blockW, tailY, blockW, tailY + DEFAULT_BORDER_RADIUS);
+
+        // Append tail bottom right corner
         path.vlineTo(blockH - DEFAULT_BORDER_RADIUS);
         path.arcTo(blockW, blockH, blockW - DEFAULT_BORDER_RADIUS, blockH);
+
+        // Append tail bottom notch
         if (doOuter) {
-            path.hlineTo(28);
-            path.lineTo(25, blockH + 3);
-            path.hlineTo(15);
+            path.hlineTo(25 + NOTCH_HEIGHT);
+            path.lineTo(25, blockH + NOTCH_HEIGHT);
+            path.hlineTo(12 + NOTCH_HEIGHT);
             path.lineTo(12, blockH);
         }
+
+        // Append tail bottom left corner
         path.hlineTo(DEFAULT_BORDER_RADIUS);
         path.arcTo(0, blockH, 0, blockH - DEFAULT_BORDER_RADIUS);
+
+        // Append head top left corner
         path.vlineTo(DEFAULT_BORDER_RADIUS);
         path.arcTo(0, 0, DEFAULT_BORDER_RADIUS, 0);
         path.close();
@@ -219,10 +277,10 @@ public class BlockView extends PathView {
     /**
      * Resets block path for size as simple rectangular piece.
      */
-    protected void resetBlockPathAsRectanglePiece(double aW, double aH)
+    protected void resetBlockPathAsRectanglePiece(double blockW, double blockH)
     {
         Path2D path = getPath();
         path.clear();
-        path.appendShape(new RoundRect(1, 1, aW - 2, aH - 2, 5));
+        path.appendShape(new RoundRect(1, 1, blockW - 2, blockH - 2, 5));
     }
 }
