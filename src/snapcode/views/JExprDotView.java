@@ -33,8 +33,8 @@ public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
         // Create/add views for child expressions
         for (JNodeView child : getJNodeViews())
             rowView.addChild(child);
-        getJNodeView(0).setSeg(BlockView.Seg.First);
-        getJNodeViewLast().setSeg(BlockView.Seg.Last);
+        getJNodeView(0).setBlockType(BlockType.Left);
+        getJNodeViewLast().setBlockType(BlockType.Right);
     }
 
     /**

@@ -12,23 +12,14 @@ import snap.view.PathView;
  */
 public class BlockView extends PathView {
 
-    // The type
-    private Type _type = Type.Piece;
-
-    // The segment position, if piece
-    private Seg _seg = Seg.Only;
-
-    // Constants for type
-    public enum Type { Piece, BlockStmt, MemberDecl, Plain, None }
-
-    // Constants for segment position
-    public enum Seg { Only, First, Middle, Last }
-
-    // Constant for piece height
-    public double BlockTailHeight = 14;
+    // The block type
+    private BlockType _blockType = BlockType.Piece;
 
     // Constant for default height
     public static final double DEFAULT_HEIGHT = 32;
+
+    // Constant for box tail height
+    public static final double BOX_TAIL_HEIGHT = 14;
 
     // Constant for border radius
     private static final double DEFAULT_BORDER_RADIUS = 5;
@@ -48,27 +39,17 @@ public class BlockView extends PathView {
     }
 
     /**
-     * Returns the type.
+     * Returns the block type.
      */
-    public Type getType()  { return _type; }
+    public BlockType getBlockType()  { return _blockType; }
 
     /**
-     * Sets the type.
+     * Sets the block type.
      */
-    public void setType(Type aType)
+    public void setBlockType(BlockType aBlockType)
     {
-        _type = aType;
+        _blockType = aBlockType;
     }
-
-    /**
-     * Returns the segment position.
-     */
-    public Seg getSeg()  { return _seg; }
-
-    /**
-     * Sets the segment position.
-     */
-    public void setSeg(Seg aSeg)  { _seg = aSeg; }
 
     /**
      * Returns the color.
@@ -90,31 +71,23 @@ public class BlockView extends PathView {
     protected void resizeBlock(double aW, double aH)
     {
         setSize(aW, aH);
-        switch (_type) {
-            case Piece: resizeBlockSeg(aW, aH); break;
-            case BlockStmt: resetBlockPathAsContainerPiece(aW, aH, true); break;
-            case MemberDecl: resetBlockPathAsContainerPiece(aW, aH, false); break;
-            case Plain: resetBlockPathAsRectanglePiece(aW, aH); break;
-        }
-    }
 
-    /**
-     * Resets block path for size as simple puzzle piece.
-     */
-    protected void resizeBlockSeg(double aW, double aH)
-    {
-        switch (_seg) {
-            case First: resetBlockPathAsLeftPiece(aW, aH); break;
+        // Reset block path
+        switch (_blockType) {
+            case Piece: resetBlockPathAsFullPiece(aW, aH); break;
+            case Left: resetBlockPathAsLeftPiece(aW, aH); break;
             case Middle: resetBlockPathAsMiddlePiece(aW, aH); break;
-            case Last: resetBlockPathAsRightPiece(aW, aH); break;
-            default: resizeBlockAsFullPiece(aW, aH);
+            case Right: resetBlockPathAsRightPiece(aW, aH); break;
+            case Plain: resetBlockPathAsRectanglePiece(aW, aH); break;
+            case Box: resetBlockPathAsContainerPiece(aW, aH, true); break;
+            case PlainBox: resetBlockPathAsContainerPiece(aW, aH, false); break;
         }
     }
 
     /**
      * Resets block path for size as one piece.
      */
-    protected void resizeBlockAsFullPiece(double aW, double aH)
+    protected void resetBlockPathAsFullPiece(double aW, double aH)
     {
         Path2D path = getPath();
         path.clear();
@@ -196,12 +169,12 @@ public class BlockView extends PathView {
     /**
      * Resets block path for size as container piece.
      */
-    protected void resetBlockPathAsContainerPiece(double aW, double aH, boolean doOuter)
+    protected void resetBlockPathAsContainerPiece(double blockW, double blockH, boolean doOuter)
     {
         Path2D path = getPath();
         path.clear();
         double h1 = DEFAULT_HEIGHT;
-        double h2 = aH - BlockTailHeight;
+        double boxTailY = blockH - BOX_TAIL_HEIGHT;
 
         path.moveTo(DEFAULT_BORDER_RADIUS, 0);
         if (doOuter) {
@@ -210,34 +183,34 @@ public class BlockView extends PathView {
             path.hlineTo(25);
             path.lineTo(28, 0);
         }
-        path.hlineTo(aW - DEFAULT_BORDER_RADIUS);
-        path.arcTo(aW, 0, aW, DEFAULT_BORDER_RADIUS);
+        path.hlineTo(blockW - DEFAULT_BORDER_RADIUS);
+        path.arcTo(blockW, 0, blockW, DEFAULT_BORDER_RADIUS);
         path.vlineTo(h1 - DEFAULT_BORDER_RADIUS);
-        path.arcTo(aW, h1, aW - DEFAULT_BORDER_RADIUS, h1);
+        path.arcTo(blockW, h1, blockW - DEFAULT_BORDER_RADIUS, h1);
         path.hlineTo(40);
         path.lineTo(37, h1 + 3);
         path.hlineTo(27);
         path.lineTo(24, h1); // Divit
         path.hlineTo(10 + DEFAULT_BORDER_RADIUS);
         path.arcTo(10, h1, 10, h1 + DEFAULT_BORDER_RADIUS);
-        path.vlineTo(h2 - DEFAULT_BORDER_RADIUS);
-        path.arcTo(10, h2, 10 + DEFAULT_BORDER_RADIUS, h2);
+        path.vlineTo(boxTailY - DEFAULT_BORDER_RADIUS);
+        path.arcTo(10, boxTailY, 10 + DEFAULT_BORDER_RADIUS, boxTailY);
         path.hlineTo(24);
-        path.lineTo(27, h2 + 3);
+        path.lineTo(27, boxTailY + 3);
         path.hlineTo(37);
-        path.lineTo(40, h2); // Divit
-        path.hlineTo(aW - DEFAULT_BORDER_RADIUS);
-        path.arcTo(aW, h2, aW, h2 + DEFAULT_BORDER_RADIUS);
-        path.vlineTo(aH - DEFAULT_BORDER_RADIUS);
-        path.arcTo(aW, aH, aW - DEFAULT_BORDER_RADIUS, aH);
+        path.lineTo(40, boxTailY); // Divit
+        path.hlineTo(blockW - DEFAULT_BORDER_RADIUS);
+        path.arcTo(blockW, boxTailY, blockW, boxTailY + DEFAULT_BORDER_RADIUS);
+        path.vlineTo(blockH - DEFAULT_BORDER_RADIUS);
+        path.arcTo(blockW, blockH, blockW - DEFAULT_BORDER_RADIUS, blockH);
         if (doOuter) {
             path.hlineTo(28);
-            path.lineTo(25, aH + 3);
+            path.lineTo(25, blockH + 3);
             path.hlineTo(15);
-            path.lineTo(12, aH);
+            path.lineTo(12, blockH);
         }
         path.hlineTo(DEFAULT_BORDER_RADIUS);
-        path.arcTo(0, aH, 0, aH - DEFAULT_BORDER_RADIUS);
+        path.arcTo(0, blockH, 0, blockH - DEFAULT_BORDER_RADIUS);
         path.vlineTo(DEFAULT_BORDER_RADIUS);
         path.arcTo(0, 0, DEFAULT_BORDER_RADIUS, 0);
         path.close();

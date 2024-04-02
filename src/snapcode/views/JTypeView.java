@@ -1,5 +1,4 @@
 package snapcode.views;
-
 import javakit.parse.JType;
 import snap.view.Label;
 import snap.view.RowView;
@@ -33,8 +32,7 @@ public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
     {
         // Do normal version and set type, color
         super.updateUI();
-        setType(BlockView.Type.Piece);
-        setSeg(BlockView.Seg.Middle);
+        setBlockType(BlockType.Middle);
         setColor(PieceColor);
 
         // Configure HBox

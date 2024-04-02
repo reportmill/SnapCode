@@ -24,7 +24,7 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
         // Do normal version and set type, color
         super.updateUI();
         BlockTop = BlockBottom = 2;
-        setType(isBlock() ? BlockView.Type.BlockStmt : BlockView.Type.Piece);
+        setBlockType(isBlock() ? BlockType.Box : BlockType.Piece);
         setColor(isBlock() ? BlockStmtColor : PieceColor);
 
         // Configure HBox

@@ -32,7 +32,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
     {
         // Do normal version and set Type to None
         super.updateUI();
-        setType(BlockView.Type.None);
+        setBlockType(BlockType.None);
         BlockLeft = 0;
 
         // Configure HBox
@@ -121,8 +121,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
         {
             // Do normal version
             super.updateUI();
-            setType(BlockView.Type.Plain);
-            setSeg(BlockView.Seg.Middle);
+            setBlockType(BlockType.Plain);
             setColor(ClassDeclColor);
             _blockView.setBorder(ClassDeclColor.darker(), 2);
 
@@ -167,8 +166,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
         {
             // Do normal version and basic config
             super.updateUI();
-            setType(BlockView.Type.Plain);
-            setSeg(BlockView.Seg.Middle);
+            setBlockType(BlockType.Plain);
             setColor(ClassDeclColor);
 
             // Get/configure HBox

@@ -27,9 +27,9 @@ public class JNodeViewBase extends ChildView {
     boolean _selected;
 
     // Constants for block insets
-    public double BlockTop = 4;
+    public double BlockTop = 3;
     public double BlockLeft = 12;
-    public double BlockBottom = 5;
+    public double BlockBottom = 0;
 
     // Colors
     private static final Color SELECTED_COLOR = Color.get("#FFFFFFCC");
@@ -57,19 +57,11 @@ public class JNodeViewBase extends ChildView {
     }
 
     /**
-     * Sets the type.
+     * Sets the block type.
      */
-    public void setType(BlockView.Type aType)
+    public void setBlockType(BlockType aBlockType)
     {
-        _blockView.setType(aType);
-    }
-
-    /**
-     * Sets the segment position.
-     */
-    public void setSeg(BlockView.Seg aSeg)
-    {
-        _blockView.setSeg(aSeg);
+        _blockView.setBlockType(aBlockType);
     }
 
     /**
@@ -144,6 +136,7 @@ public class JNodeViewBase extends ChildView {
             double colW = _colView.getBestWidth(aH);
             prefW = Math.max(prefW, BlockLeft + colW);
         }
+
         return prefW;
     }
 
@@ -152,11 +145,15 @@ public class JNodeViewBase extends ChildView {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        double prefH = getRowView().getBestHeight(aW);
+        RowView rowView = getRowView();
+        double rowH = rowView.getBestHeight(aW);
+        double prefH = rowH;
+
         if (_colView != null || isBlock()) {
             double colH = _colView.getBestHeight(aW);
-            prefH += BlockTop + colH + BlockBottom + _blockView.BlockTailHeight;
+            prefH += BlockTop + colH + BlockBottom + BlockView.BOX_TAIL_HEIGHT;
         }
+
         return prefH;
     }
 
@@ -177,9 +174,10 @@ public class JNodeViewBase extends ChildView {
         // Layout ColView
         if (_colView != null) {
             ColView colView = getColView();
+            double colY = rowH + BlockTop;
             double colW = viewW - BlockLeft;
-            double colH = viewH - rowH - BlockBottom - _blockView.BlockTailHeight;
-            colView.setBounds(BlockLeft, rowH + BlockTop, colW, colH);
+            double colH = viewH - rowH - BlockBottom - BlockView.BOX_TAIL_HEIGHT;
+            colView.setBounds(BlockLeft, colY, colW, colH);
         }
 
         // Layout Background, Foreground block views

@@ -41,7 +41,7 @@ public class JMemberDeclView<JNODE extends JMemberDecl> extends JNodeView<JNODE>
         {
             // Do normal version and set type to MemberDecl
             super.updateUI();
-            setType(BlockView.Type.MemberDecl);
+            setBlockType(BlockType.PlainBox);
             setColor(MemberDeclColor);
 
             // Configure HBox
