@@ -56,7 +56,6 @@ public class JFileView extends JNodeView<JFile> {
         // Do normal version
         super.updateUI();
         setBlockType(BlockType.None);
-        BlockTop = 0;
         setFill(BACK_FILL);
         setBorder(Color.LIGHTGRAY, 1); //Bevel
 

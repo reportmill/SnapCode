@@ -1,7 +1,6 @@
 package snapcode.views;
 import javakit.parse.JType;
 import snap.view.Label;
-import snap.view.RowView;
 
 /**
  * A JNodeView subclass for JClassDecl.
@@ -35,15 +34,11 @@ public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
         setBlockType(BlockType.Middle);
         setColor(PieceColor);
 
-        // Configure HBox
-        RowView rowView = getRowView();
-        rowView.setPadding(0, 0, 0, 8);
-
         // Create label for type and add
         JType typ = getJNode();
         Label label = createLabel(typ.getName());
         label.setFont(label.getFont().copyForSize(14));
-        rowView.addChild(label);
+        addChildToRowView(label);
     }
 
     /**

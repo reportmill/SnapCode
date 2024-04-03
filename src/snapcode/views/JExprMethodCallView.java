@@ -1,10 +1,7 @@
 package snapcode.views;
-
 import javakit.parse.JExpr;
 import javakit.parse.JExprMethodCall;
 import snap.view.Label;
-import snap.view.RowView;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,17 +19,14 @@ public class JExprMethodCallView<JNODE extends JExprMethodCall> extends JExprVie
         super.updateUI();
         setColor(PieceColor);
 
-        // Configure HBox
-        RowView rowView = getRowView();
-
         // Add label for method name
         JExprMethodCall mc = getJNode();
         Label label = createLabel(mc.getName());
-        rowView.addChild(label);
+        addChildToRowView(label);
 
         // Add child UIs
-        for (JNodeView child : getJNodeViews())
-            rowView.addChild(child);
+        List<JNodeView<?>> nodeViews = getJNodeViews();
+        nodeViews.forEach(this::addChildToRowView);
     }
 
     /**

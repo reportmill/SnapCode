@@ -2,7 +2,6 @@ package snapcode.views;
 import javakit.parse.JExpr;
 import javakit.parse.JStmtIf;
 import snap.view.Label;
-import snap.view.RowView;
 
 /**
  * SnapPartStmt subclass for JStmtIf.
@@ -26,15 +25,15 @@ public class JStmtIfView<JNODE extends JStmtIf> extends JStmtView<JNODE> {
         // Do normal version
         super.updateUI();
 
-        // Configure HBox
-        RowView rowView = getRowView();
-
-        // Create label and condition views and add to box
+        // Add label for 'if'
         Label label = createLabel("if");
+        addChildToRowView(label);
+
+        // Add condition view
         JStmtIf ifStmt = getJNode();
         JExpr condExpr = ifStmt.getConditional();
         JExprView<JExpr> exprView = new JExprEditor<>();
         exprView.setJNode(condExpr);
-        rowView.setChildren(label, exprView);
+        addChildToRowView(exprView);
     }
 }

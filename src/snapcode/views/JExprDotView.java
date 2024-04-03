@@ -1,7 +1,6 @@
 package snapcode.views;
 import javakit.parse.JExpr;
 import javakit.parse.JExprDot;
-import snap.view.RowView;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,13 +25,11 @@ public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
         // Do normal version
         super.updateUI();
 
-        // Get/configure HBox
-        RowView rowView = getRowView();
-        rowView.setPadding(0, 0, 0, 0);
-
         // Create/add views for child expressions
-        for (JNodeView child : getJNodeViews())
-            rowView.addChild(child);
+        List<JNodeView<?>> nodeViews = getJNodeViews();
+        nodeViews.forEach(this::addChildToRowView);
+
+        // Change block types
         getJNodeView(0).setBlockType(BlockType.Left);
         getJNodeViewLast().setBlockType(BlockType.Right);
     }

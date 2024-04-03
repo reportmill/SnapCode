@@ -1,7 +1,6 @@
 package snapcode.views;
 import javakit.parse.*;
 import snap.view.Label;
-import snap.view.RowView;
 
 /**
  * A JNodeView for JStmt.
@@ -14,6 +13,7 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
     public JStmtView()
     {
         super();
+        setMinWidth(120);
     }
 
     /**
@@ -23,14 +23,8 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
     {
         // Do normal version and set type, color
         super.updateUI();
-        BlockTop = BlockBottom = 2;
         setBlockType(isBlock() ? BlockType.Box : BlockType.Piece);
         setColor(isBlock() ? BlockStmtColor : PieceColor);
-
-        // Configure HBox
-        RowView rowView = getRowView();
-        rowView.setPadding(0, 2, 0, 8);
-        rowView.setMinSize(120, BlockView.DEFAULT_HEIGHT);
     }
 
     /**
@@ -48,7 +42,7 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
     {
         // If not statement, bail
         if (!(aNode instanceof JStmt)) {
-            System.out.println("SnapPartStmt.dropNode: Can't drop " + aNode);
+            System.out.println("JStmtView.dropNode: Can't drop " + aNode);
             return;
         }
 
@@ -110,7 +104,7 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
             // Create label for statement and add to HBox
             JStmt stmt = getJNode();
             Label label = createLabel(stmt.getString());
-            getRowView().addChild(label);
+            addChildToRowView(label);
         }
     }
 }

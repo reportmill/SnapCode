@@ -2,7 +2,6 @@ package snapcode.views;
 import javakit.parse.JExpr;
 import javakit.parse.JStmtWhile;
 import snap.view.Label;
-import snap.view.RowView;
 
 /**
  * SnapPartStmt subclass for JStmtWhile.
@@ -25,15 +24,15 @@ public class JStmtWhileView<JNODE extends JStmtWhile> extends JStmtView<JNODE> {
         // Do normal version
         super.updateUI();
 
-        // Configure HBox
-        RowView rowView = getRowView();
-
-        // Creeate label and expr parts and add to HBox
+        // Add label for 'if'
         Label label = createLabel("while");
+        addChildToRowView(label);
+
+        // Add condition view
         JStmtWhile whileStmt = getJNode();
         JExpr condExpr = whileStmt.getConditional();
         JExprView<JExpr> exprView = new JExprEditor<>();
         exprView.setJNode(condExpr);
-        rowView.setChildren(label, exprView);
+        addChildToRowView(exprView);
     }
 }

@@ -1,7 +1,6 @@
 package snapcode.views;
 import javakit.parse.*;
 import snap.view.Label;
-import snap.view.RowView;
 
 /**
  * A SnapPart subclass for JMethodDecl.
@@ -35,6 +34,15 @@ public class JMemberDeclView<JNODE extends JMemberDecl> extends JNodeView<JNODE>
     public static class ExecutableDecl<JNODE extends JExecutableDecl> extends JMemberDeclView<JNODE> {
 
         /**
+         * Constructor.
+         */
+        public ExecutableDecl()
+        {
+            super();
+            setMinWidth(120);
+        }
+
+        /**
          * Override.
          */
         protected void updateUI()
@@ -44,16 +52,11 @@ public class JMemberDeclView<JNODE extends JMemberDecl> extends JNodeView<JNODE>
             setBlockType(BlockType.PlainBox);
             setColor(MemberDeclColor);
 
-            // Configure HBox
-            RowView rowView = getRowView();
-            rowView.setPadding(0, 0, 0, 8);
-            rowView.setMinSize(120, BlockView.DEFAULT_HEIGHT);
-
             // Add label for method name
             JExecutableDecl md = getJNode();
             Label label = createLabel(md.getName());
             label.setFont(label.getFont().copyForSize(14));
-            rowView.addChild(label);
+            addChildToRowView(label);
         }
 
         /**

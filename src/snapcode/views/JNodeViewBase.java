@@ -1,10 +1,12 @@
 package snapcode.views;
+import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.gfx.Color;
 import snap.gfx.Painter;
 import snap.view.ChildView;
 import snap.view.ColView;
 import snap.view.RowView;
+import snap.view.View;
 
 /**
  * A view that manages painting and editing of a JNode as puzzle piece.
@@ -27,30 +29,30 @@ public class JNodeViewBase extends ChildView {
     boolean _selected;
 
     // Constants for block insets
-    public double BlockTop = 3;
     public double BlockLeft = 12;
-    public double BlockBottom = 0;
 
     // Colors
     private static final Color SELECTED_COLOR = Color.get("#FFFFFFCC");
     private static final Color UNDER_DRAG_COLOR = Color.get("#FFFFFF88");
+
+    // Constant for padding on notched blocks
+    private static final Insets PLAIN_PADDING = new Insets(0, 8, 0, 8);
+    private static final Insets NOTCHED_PADDING = new Insets(0, 8, BlockView.NOTCH_HEIGHT, 8);
 
     /**
      * Create new background pane.
      */
     protected JNodeViewBase()
     {
-        // Configure
-        setAlign(Pos.TOP_LEFT); //setFillWidth(true);
+        super();
+        setAlign(Pos.TOP_LEFT);
+        setMargin(-BlockView.NOTCH_HEIGHT, 0, -BlockView.NOTCH_HEIGHT, 0);
 
         // Set background
         _blockView = new BlockView(true);
 
         // Create RowView
-        _rowView = new RowView();
-        _rowView.setAlign(Pos.CENTER_LEFT);
-        _rowView.setSpacing(2);
-        _rowView.setMinHeight(BlockView.DEFAULT_HEIGHT);
+        _rowView = createRowView();
 
         // Set children
         setChildren(_blockView, _rowView);
@@ -62,6 +64,11 @@ public class JNodeViewBase extends ChildView {
     public void setBlockType(BlockType aBlockType)
     {
         _blockView.setBlockType(aBlockType);
+
+        // Set padding for notched
+        boolean isNotched = aBlockType == BlockType.Piece || aBlockType == BlockType.Left || aBlockType == BlockType.Box;
+        Insets padding = isNotched ? NOTCHED_PADDING : PLAIN_PADDING;
+        setPadding(padding);
     }
 
     /**
@@ -78,12 +85,24 @@ public class JNodeViewBase extends ChildView {
     }
 
     /**
-     * Returns the horizontal box.
+     * Returns the row view.
      */
     public RowView getRowView()  { return _rowView; }
 
     /**
-     * Returns the vertical box.
+     * Creates the row view.
+     */
+    protected RowView createRowView()
+    {
+        RowView rowView = new RowView();
+        rowView.setPadding(NOTCHED_PADDING);
+        rowView.setAlign(Pos.CENTER_LEFT);
+        rowView.setMinHeight(BlockView.DEFAULT_HEIGHT);
+        return rowView;
+    }
+
+    /**
+     * Returns the col view.
      */
     public ColView getColView()
     {
@@ -92,15 +111,30 @@ public class JNodeViewBase extends ChildView {
     }
 
     /**
-     * Creates the vertical box.
+     * Creates the col view.
      */
     protected ColView createColView()
     {
         ColView colView = new ColView();
-        colView.setMinHeight(35);
+        colView.setMinHeight(BlockView.DEFAULT_HEIGHT);
+        colView.setSpacing(-BlockView.NOTCH_HEIGHT);
         colView.setFillWidth(true);
         addChild(colView);
         return colView;
+    }
+
+    /**
+     * Adds a view to row.
+     */
+    protected void addChildToRowView(View aView)
+    {
+        // Add child
+        RowView rowView = getRowView();
+        rowView.addChild(aView);
+
+        // If JNodeView, reset padding
+        if (aView instanceof JNodeView && !(aView instanceof JExprEditor))
+            rowView.setPadding(Insets.EMPTY);
     }
 
     /**
@@ -119,6 +153,7 @@ public class JNodeViewBase extends ChildView {
     public void setSelected(boolean aValue)
     {
         _selected = aValue;
+        repaint(-2, -2, getWidth() + 4, getHeight() + 4);
     }
 
     /**
@@ -133,7 +168,7 @@ public class JNodeViewBase extends ChildView {
     {
         double prefW = getRowView().getBestWidth(aH);
         if (_colView != null || isBlock()) {
-            double colW = _colView.getBestWidth(aH);
+            double colW = getColView().getBestWidth(aH);
             prefW = Math.max(prefW, BlockLeft + colW);
         }
 
@@ -149,9 +184,10 @@ public class JNodeViewBase extends ChildView {
         double rowH = rowView.getBestHeight(aW);
         double prefH = rowH;
 
+        // If ColView is present, add ColView pref height minus notch height plus tail height
         if (_colView != null || isBlock()) {
-            double colH = _colView.getBestHeight(aW);
-            prefH += BlockTop + colH + BlockBottom + BlockView.BOX_TAIL_HEIGHT;
+            double colH = getColView().getBestHeight(aW);
+            prefH += colH - BlockView.NOTCH_HEIGHT + BlockView.BOX_TAIL_HEIGHT;
         }
 
         return prefH;
@@ -174,9 +210,9 @@ public class JNodeViewBase extends ChildView {
         // Layout ColView
         if (_colView != null) {
             ColView colView = getColView();
-            double colY = rowH + BlockTop;
+            double colY = rowH - BlockView.NOTCH_HEIGHT;
             double colW = viewW - BlockLeft;
-            double colH = viewH - rowH - BlockBottom - BlockView.BOX_TAIL_HEIGHT;
+            double colH = viewH - colY - BlockView.BOX_TAIL_HEIGHT + BlockView.NOTCH_HEIGHT;
             colView.setBounds(BlockLeft, colY, colW, colH);
         }
 

@@ -1,7 +1,6 @@
 package snapcode.views;
 import javakit.parse.*;
 import snap.view.Label;
-import snap.view.RowView;
 import snap.view.TextField;
 import snap.view.ViewEvent;
 
@@ -26,13 +25,10 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
         // Do normal version
         super.updateUI();
 
-        // Configure HBox
-        RowView rowView = getRowView();
-
         // Create label and add to HBox
         JStmtFor forStmt = getJNode();
         Label label = createLabel("for");
-        rowView.addChild(label);
+        addChildToRowView(label);
 
         // Get for statement parts
         JExpr varDeclExpr = forStmt.getVarDeclExpr();
@@ -47,7 +43,7 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
             tfield.setName("ExprText");
             tfield.setProp("Expr", varDeclExpr);
             tfield.addEventHandler(e -> handleTextEvent(e));
-            rowView.addChild(tfield);
+            addChildToRowView(tfield);
         }
 
         // Add conditional / iterable text
@@ -57,7 +53,7 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
             tfield.setName("ExprText");
             tfield.setProp("Expr", condExpr);
             tfield.addEventHandler(e -> handleTextEvent(e));
-            rowView.addChild(tfield);
+            addChildToRowView(tfield);
         }
 
         // Add update statement text
@@ -67,7 +63,7 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
             tfield.setName("ExprText");
             tfield.setProp("Expr", updateExpr);
             tfield.addEventHandler(e -> handleTextEvent(e));
-            rowView.addChild(tfield);
+            addChildToRowView(tfield);
         }
     }
 

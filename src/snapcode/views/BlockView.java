@@ -2,24 +2,31 @@ package snapcode.views;
 import snap.geom.Path2D;
 import snap.geom.Rect;
 import snap.geom.RoundRect;
+import snap.geom.Shape;
 import snap.gfx.Color;
 import snap.gfx.Effect;
 import snap.gfx.EmbossEffect;
-import snap.view.PathView;
+import snap.view.View;
 
 /**
  * A base view class to display snap blocks.
  */
-public class BlockView extends PathView {
+public class BlockView extends View {
 
     // The block type
     private BlockType _blockType = BlockType.Piece;
 
-    // Constant for default height
-    public static final double DEFAULT_HEIGHT = 32;
+    // The path shape
+    private Path2D _path = new Path2D();
+
+    // Constant for base height
+    public static final double BASE_HEIGHT = 32;
 
     // Constant for notch height
     public static final double NOTCH_HEIGHT = 3;
+
+    // Constant for default height
+    public static final double DEFAULT_HEIGHT = BASE_HEIGHT + NOTCH_HEIGHT;
 
     // Constant for box tail height
     public static final double BOX_TAIL_HEIGHT = 14;
@@ -69,21 +76,32 @@ public class BlockView extends PathView {
     }
 
     /**
+     * Returns the path.
+     */
+    public Path2D getPath()  { return _path; }
+
+    /**
+     * Override to return path as bounds shape.
+     */
+    public Shape getBoundsShape()  { return _path; }
+
+    /**
      * Resets block path for size.
      */
     protected void resizeBlock(double aW, double aH)
     {
         setSize(aW, aH);
+        double blockH = aH - NOTCH_HEIGHT;
 
         // Reset block path
         switch (_blockType) {
-            case Piece: resetBlockPathAsFullPiece(aW, aH); break;
-            case Left: resetBlockPathAsLeftPiece(aW, aH); break;
-            case Middle: resetBlockPathAsMiddlePiece(aW, aH); break;
-            case Right: resetBlockPathAsRightPiece(aW, aH); break;
-            case Plain: resetBlockPathAsRectanglePiece(aW, aH); break;
-            case Box: resetBlockPathAsContainerPiece(aW, aH, true); break;
-            case PlainBox: resetBlockPathAsContainerPiece(aW, aH, false); break;
+            case Piece: resetBlockPathAsFullPiece(aW, blockH); break;
+            case Left: resetBlockPathAsLeftPiece(aW, blockH); break;
+            case Middle: resetBlockPathAsMiddlePiece(aW, blockH); break;
+            case Right: resetBlockPathAsRightPiece(aW, blockH); break;
+            case Plain: resetBlockPathAsRectanglePiece(aW, blockH); break;
+            case Box: resetBlockPathAsContainerPiece(aW, blockH, true); break;
+            case PlainBox: resetBlockPathAsContainerPiece(aW, blockH, false); break;
         }
     }
 
@@ -170,8 +188,8 @@ public class BlockView extends PathView {
         path.clear();
 
         // Append rounded rect
-        path.appendShape(new Rect(0, 0, blockW, blockH - NOTCH_HEIGHT));
-        setSize(blockW, blockH - NOTCH_HEIGHT);
+        path.appendShape(new Rect(0, 0, blockW, blockH));
+        //setSize(blockW, blockH - NOTCH_HEIGHT);
     }
 
     /**
@@ -181,7 +199,7 @@ public class BlockView extends PathView {
     {
         Path2D path = getPath();
         path.clear();
-        setSize(blockW, blockH - NOTCH_HEIGHT);
+        //setSize(blockW, blockH - NOTCH_HEIGHT);
 
         // Append top left
         path.moveTo(0, 0);
@@ -206,7 +224,7 @@ public class BlockView extends PathView {
     {
         Path2D path = getPath();
         path.clear();
-        double headH = DEFAULT_HEIGHT;
+        double headH = BASE_HEIGHT;
         double tailY = blockH - BOX_TAIL_HEIGHT;
 
         // Append head top left

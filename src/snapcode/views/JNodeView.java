@@ -31,6 +31,10 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
     public static Color MemberDeclColor = Color.get("#f0a822");
     public static Color ClassDeclColor = MemberDeclColor; //Color.get("#27B31E");
 
+    // Constants for fonts
+    protected static final Font LABEL_FONT = new Font("Arial Bold", 13);
+    protected static final Font TEXTFIELD_FONT = new Font("Arial", 12);
+
     /**
      * Constructor.
      */
@@ -69,10 +73,11 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
     {
         // Add child UI
         if (isBlock()) {
-            ColView colView = getColView();
-            for (JNodeView<?> child : getJNodeViews())
-                colView.addChild(child);
-            colView.setMinHeight(colView.getChildCount() == 0 ? 30 : -1);
+            List<JNodeView<?>> nodeViews = getJNodeViews();
+            if (nodeViews.size() > 0) {
+                ColView colView = getColView();
+                nodeViews.forEach(colView::addChild);
+            }
         }
 
         if (_jnode.getFile() == null)
@@ -174,30 +179,30 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
     }
 
     /**
-     * Creates a statement label.
+     * Creates a label for this block.
      */
     protected Label createLabel(String aString)
     {
         Label label = new Label(aString);
         label.setPadding(2, 4, 2, 0);
-        label.setFont(new Font("Arial Bold", 12));
+        label.setFont(LABEL_FONT);
         label.setTextFill(Color.WHITE);
         return label;
     }
 
     /**
-     * Creates a statement textfield.
+     * Creates a textfield for this block.
      */
     protected TextField createTextField(String aString)
     {
         TextField textField = new TextField();
-        textField.setText(aString);
-        textField.setFont(new Font("Arial", 11));
+        textField.setPadding(2, 6, 2, 6);
         textField.setAlign(Pos.CENTER);
         textField.setColCount(0);
+        textField.setFont(TEXTFIELD_FONT);
+        textField.setText(aString);
         textField.setMinWidth(36);
         textField.setPrefHeight(18);
-        textField.setPadding(2, 6, 2, 6);
         return textField;
     }
 

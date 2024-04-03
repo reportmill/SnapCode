@@ -2,7 +2,6 @@ package snapcode.views;
 import javakit.parse.JExpr;
 import javakit.parse.JNode;
 import javakit.parse.JStmtExpr;
-import snap.view.RowView;
 import snap.view.TextField;
 import snap.view.ViewEvent;
 import snap.view.ViewUtils;
@@ -28,9 +27,6 @@ public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
         setBlockType(BlockType.Middle);
         setColor(null);
 
-        // Get/configure HBox
-        RowView rowView = getRowView();
-
         // Get expression
         JExpr expr = getJNode();
         String str = expr.getString();
@@ -40,7 +36,7 @@ public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
         _textField.setName(TextFieldName);
         _textField.addEventHandler(e -> handleTextEvent(e), KeyRelease); //enableEvents(_tfield, DragEvents);
         _textField.addEventHandler(e -> handleTextEvent(e), Action);
-        rowView.addChild(_textField);
+        addChildToRowView(_textField);
     }
 
     /**

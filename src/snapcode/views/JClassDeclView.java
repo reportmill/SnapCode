@@ -35,15 +35,11 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
         setBlockType(BlockType.None);
         BlockLeft = 0;
 
-        // Configure HBox
-        RowView rowView = getRowView();
-        rowView.setSpacing(12);
-
         // Create/add node for id
         JClassDecl cd = getJNode();
         JExprId id = cd.getId();
         JNodeView<?> idView = new ClassDeclIdView<>(id);
-        rowView.addChild(idView);
+        addChildToRowView(idView);
 
         // Add JNodeView for extnds type
         List<JType> exts = cd.getExtendsTypes();
@@ -54,11 +50,11 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
             Label label = new Label(" extends ");
             label.setFont(Font.Arial14.copyForSize(16));
             label.setTextFill(Color.WHITE);
-            rowView.addChild(label);
+            addChildToRowView(label);
 
             // Add TypeView
             JNodeView<?> typView = new ClassDeclTypeView<>(ext);
-            rowView.addChild(typView);
+            addChildToRowView(typView);
         }
 
         // Configure ColView special for file
@@ -66,6 +62,17 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
         colView.setPadding(25, 10, 10, 0);
         colView.setSpacing(25);
         colView.setFillWidth(false);
+    }
+
+    /**
+     * Override to customize row view.
+     */
+    @Override
+    protected RowView createRowView()
+    {
+        RowView rowView = super.createRowView();
+        rowView.setSpacing(12);
+        return rowView;
     }
 
     /**
@@ -91,10 +98,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
     /**
      * Override to return false.
      */
-    public boolean isBlock()
-    {
-        return true;
-    }
+    public boolean isBlock()  { return true; }
 
     /**
      * Returns a string describing the part.
@@ -112,6 +116,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
         public ClassDeclIdView(JNODE aCD)
         {
             super(aCD);
+            setMinWidth(240);
         }
 
         /**
@@ -125,25 +130,17 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
             setColor(ClassDeclColor);
             _blockView.setBorder(ClassDeclColor.darker(), 2);
 
-            // Get configure HBox
-            RowView rowView = getRowView();
-            rowView.setPadding(2, 2, 2, 8);
-            rowView.setMinSize(240, 35);
-
             // Create/add view for Class id
             JExprId id = getJNode();
             Label label = createLabel(id.getName());
             label.setFont(label.getFont().copyForSize(20));
-            rowView.addChild(label);
+            addChildToRowView(label);
         }
 
         /**
          * Returns a string describing the part.
          */
-        public String getPartString()
-        {
-            return "ClassId";
-        }
+        public String getPartString()  { return "ClassId"; }
     }
 
     /**
@@ -157,6 +154,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
         public ClassDeclTypeView(JNODE aCD)
         {
             super(aCD);
+            setMinWidth(120);
         }
 
         /**
@@ -169,16 +167,11 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
             setBlockType(BlockType.Plain);
             setColor(ClassDeclColor);
 
-            // Get/configure HBox
-            RowView rowView = getRowView();
-            rowView.setPadding(2, 2, 2, 8);
-            rowView.setMinSize(120, 25);
-
             // Create/add label for type
             JType typ = getJNode();
             Label label = createLabel(typ.getName());
             label.setFont(label.getFont().copyForSize(14));
-            rowView.addChild(label);
+            addChildToRowView(label);
         }
 
         /**
