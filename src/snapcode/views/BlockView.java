@@ -22,6 +22,9 @@ public class BlockView extends View {
     // Constant for base height
     public static final double BASE_HEIGHT = 32;
 
+    // Constant for notch width
+    public static final double NOTCH_WIDTH = 10;
+
     // Constant for notch height
     public static final double NOTCH_HEIGHT = 3;
 
@@ -117,8 +120,8 @@ public class BlockView extends View {
         path.moveTo(DEFAULT_BORDER_RADIUS, 0);
         path.hlineTo(12);
         path.lineTo(12 + NOTCH_HEIGHT, NOTCH_HEIGHT);
-        path.hlineTo(25);
-        path.lineTo(25 + NOTCH_HEIGHT, 0);
+        path.hlineTo(12 + NOTCH_HEIGHT + NOTCH_WIDTH);
+        path.lineTo(12 + NOTCH_HEIGHT * 2 + NOTCH_WIDTH, 0);
 
         // Add top right corner
         path.hlineTo(blockW - DEFAULT_BORDER_RADIUS);
@@ -129,8 +132,8 @@ public class BlockView extends View {
         path.arcTo(blockW, blockH, blockW - DEFAULT_BORDER_RADIUS, blockH);
 
         // Add bottom notch
-        path.hlineTo(25 + NOTCH_HEIGHT);
-        path.lineTo(25, blockH + NOTCH_HEIGHT);
+        path.hlineTo(12 + NOTCH_HEIGHT * 2 + NOTCH_WIDTH);
+        path.lineTo(12 + NOTCH_HEIGHT + NOTCH_WIDTH, blockH + NOTCH_HEIGHT);
         path.hlineTo(12 + NOTCH_HEIGHT);
         path.lineTo(12, blockH);
 
@@ -156,16 +159,16 @@ public class BlockView extends View {
         path.moveTo(DEFAULT_BORDER_RADIUS, 0);
         path.hlineTo(12);
         path.lineTo(12 + NOTCH_HEIGHT, NOTCH_HEIGHT);
-        path.hlineTo(25);
-        path.lineTo(25 + NOTCH_HEIGHT, 0);
+        path.hlineTo(12 + NOTCH_HEIGHT + NOTCH_WIDTH);
+        path.lineTo(12 + NOTCH_HEIGHT * 2 + NOTCH_WIDTH, 0);
 
         // Add top right corner
         path.hlineTo(blockW);
         path.vlineTo(blockH);
 
         // Add bottom notch
-        path.hlineTo(25 + NOTCH_HEIGHT);
-        path.lineTo(25, blockH + NOTCH_HEIGHT);
+        path.hlineTo(12 + NOTCH_HEIGHT * 2 + NOTCH_WIDTH);
+        path.lineTo(12 + NOTCH_HEIGHT + NOTCH_WIDTH, blockH + NOTCH_HEIGHT);
         path.hlineTo(12 + NOTCH_HEIGHT);
         path.lineTo(12, blockH);
 
@@ -234,8 +237,8 @@ public class BlockView extends View {
         if (doOuter) {
             path.hlineTo(12);
             path.lineTo(12 + NOTCH_HEIGHT, NOTCH_HEIGHT);
-            path.hlineTo(25);
-            path.lineTo(25 + NOTCH_HEIGHT, 0);
+            path.hlineTo(12 + NOTCH_HEIGHT + NOTCH_WIDTH);
+            path.lineTo(12 + NOTCH_HEIGHT * 2 + NOTCH_WIDTH, 0);
         }
 
         // Append head top right corner
@@ -247,8 +250,8 @@ public class BlockView extends View {
         path.arcTo(blockW, headH, blockW - DEFAULT_BORDER_RADIUS, headH);
 
         // Append head bottom notch
-        path.hlineTo(37 + NOTCH_HEIGHT);
-        path.lineTo(37, headH + NOTCH_HEIGHT);
+        path.hlineTo(24 + NOTCH_HEIGHT * 2 + NOTCH_WIDTH);
+        path.lineTo(24 + NOTCH_HEIGHT + NOTCH_WIDTH, headH + NOTCH_HEIGHT);
         path.hlineTo(24 + NOTCH_HEIGHT);
         path.lineTo(24, headH);
 
@@ -263,8 +266,8 @@ public class BlockView extends View {
         // Append tail top notch
         path.hlineTo(24);
         path.lineTo(24 + NOTCH_HEIGHT, tailY + NOTCH_HEIGHT);
-        path.hlineTo(37);
-        path.lineTo(37 + NOTCH_HEIGHT, tailY);
+        path.hlineTo(24 + NOTCH_HEIGHT + NOTCH_WIDTH);
+        path.lineTo(24 + NOTCH_HEIGHT * 2 + NOTCH_WIDTH, tailY);
 
         // Append tail top right corner
         path.hlineTo(blockW - DEFAULT_BORDER_RADIUS);
@@ -276,8 +279,8 @@ public class BlockView extends View {
 
         // Append tail bottom notch
         if (doOuter) {
-            path.hlineTo(25 + NOTCH_HEIGHT);
-            path.lineTo(25, blockH + NOTCH_HEIGHT);
+            path.hlineTo(12 + NOTCH_HEIGHT * 2 + NOTCH_WIDTH);
+            path.lineTo(12 + NOTCH_HEIGHT + NOTCH_WIDTH, blockH + NOTCH_HEIGHT);
             path.hlineTo(12 + NOTCH_HEIGHT);
             path.lineTo(12, blockH);
         }
