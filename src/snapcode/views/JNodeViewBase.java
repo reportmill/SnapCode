@@ -16,17 +16,17 @@ public class JNodeViewBase extends ChildView {
     // Background shape
     protected BlockView _blockView;
 
-    // whether under drag
-    private boolean _underDrag;
-
     // The row view
-    RowView _rowView;
+    private RowView _rowView;
 
     // The col view
-    ColView _colView;
+    private ColView _colView;
 
     // Whether part is selected
-    boolean _selected;
+    private boolean _selected;
+
+    // whether under drag
+    private boolean _underDrag;
 
     // Constants for block insets
     public double BlockLeft = 12;
