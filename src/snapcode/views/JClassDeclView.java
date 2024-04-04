@@ -5,11 +5,12 @@ import javakit.parse.JMemberDecl;
 import javakit.parse.JType;
 import snap.gfx.Color;
 import snap.gfx.Font;
+import snap.util.ArrayUtils;
 import snap.view.ColView;
 import snap.view.Label;
 import snap.view.RowView;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * A JNodeView subclass for JClassDecl.
@@ -56,11 +57,9 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
             addChildToRowView(typView);
         }
 
-        // Configure ColView special for file
-        ColView colView = getColView();
-        colView.setPadding(25, 10, 10, 0);
-        colView.setSpacing(25);
-        colView.setFillWidth(false);
+        // Add member views to col view
+        JNodeView<?>[] memberViews = getJNodeViews();
+        Stream.of(memberViews).forEach(this::addChildToColView);
     }
 
     /**
@@ -75,23 +74,27 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
     }
 
     /**
+     * Override to customize.
+     */
+    @Override
+    protected ColView createColView()
+    {
+        ColView colView = super.createColView();
+        colView.setPadding(25, 10, 10, 0);
+        colView.setSpacing(25);
+        colView.setFillWidth(false);
+        return colView;
+    }
+
+    /**
      * Override to return JFile child node owners.
      */
     @Override
-    protected List<JNodeView<?>> createJNodeViews()
+    protected JNodeView<?>[] createJNodeViews()
     {
         JClassDecl classDecl = getJNode();
-        List<JNodeView<?>> childViews = new ArrayList<>();
-
-        for (JMemberDecl memberDecl : classDecl.getMemberDecls()) {
-            JNodeView<?> memberDeclView = JMemberDeclView.createView(memberDecl);
-            if (memberDeclView == null)
-                continue;
-            childViews.add(memberDeclView);
-        }
-
-        // Return
-        return childViews;
+        JMemberDecl[] memberDecls = classDecl.getMemberDecls();
+        return ArrayUtils.mapNonNull(memberDecls, mdecl -> JMemberDeclView.createView(mdecl), JNodeView.class);
     }
 
     /**

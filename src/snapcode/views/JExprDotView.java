@@ -3,6 +3,7 @@ import javakit.parse.JExpr;
 import javakit.parse.JExprDot;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * SnapPartExpr subclass for JExprDot.
@@ -26,8 +27,8 @@ public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
         super.updateUI();
 
         // Create/add views for child expressions
-        List<JNodeView<?>> nodeViews = getJNodeViews();
-        nodeViews.forEach(this::addChildToRowView);
+        JNodeView<?>[] nodeViews = getJNodeViews();
+        Stream.of(nodeViews).forEach(this::addChildToRowView);
 
         // Change block types
         getJNodeView(0).setBlockType(BlockType.Left);
@@ -38,7 +39,7 @@ public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
      * Override to create children.
      */
     @Override
-    protected List<JNodeView<?>> createJNodeViews()
+    protected JNodeView<?>[] createJNodeViews()
     {
         JExprDot dotExpr = getJNode();
         List<JNodeView<?>> childViews = new ArrayList<>();
@@ -57,6 +58,6 @@ public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
         }
 
         // Return
-        return childViews;
+        return childViews.toArray(new JNodeView[0]);
     }
 }

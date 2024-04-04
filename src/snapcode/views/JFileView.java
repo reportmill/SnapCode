@@ -1,13 +1,11 @@
 package snapcode.views;
 import javakit.parse.JClassDecl;
 import javakit.parse.JFile;
-import snap.gfx.Color;
 import snap.gfx.Paint;
 import snap.view.ColView;
 import snap.view.RowView;
 import snap.view.ViewUtils;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * A SnapPart for JFile.
@@ -26,6 +24,8 @@ public class JFileView extends JNodeView<JFile> {
     public JFileView()
     {
         super();
+        setFill(BACK_FILL); //setBorder(Color.LIGHTGRAY, 1);
+        setBlockType(BlockType.None);
     }
 
     /**
@@ -43,50 +43,45 @@ public class JFileView extends JNodeView<JFile> {
 
         // Reset children and their UI
         _jnodeViews = null;
-        getColView().removeChildren();
-        for (JNodeView<?> child : getJNodeViews())
-            getColView().addChild(child);
+        ColView colView = getColView();
+        colView.removeChildren();
+        JNodeView<?>[] jnodeViews = getJNodeViews();
+        Stream.of(jnodeViews).forEach(this::addChildToColView);
     }
 
     /**
-     * Updates UI.
+     * Override to customize.
      */
-    public void updateUI()
+    @Override
+    protected RowView createRowView()
     {
-        // Do normal version
-        super.updateUI();
-        setBlockType(BlockType.None);
-        setFill(BACK_FILL);
-        setBorder(Color.LIGHTGRAY, 1); //Bevel
-
-        // Get/configure HBox
-        RowView rowView = getRowView();
+        RowView rowView = super.createRowView();
         rowView.setMinHeight(-1);
+        return rowView;
+    }
 
-        // Get/configure VBox
-        ColView colView = getColView();
+    /**
+     * Override to customize.
+     */
+    @Override
+    protected ColView createColView()
+    {
+        ColView colView = super.createColView();
         colView.setPadding(25, 10, 10, 10);
         colView.setSpacing(25);
         colView.setFillWidth(false);
+        return colView;
     }
 
     /**
      * Override to return JFile child node owners.
      */
     @Override
-    protected List<JNodeView<?>> createJNodeViews()
+    protected JNodeView<?>[] createJNodeViews()
     {
         JFile jfile = getJNode();
-        List<JNodeView<?>> childViews = new ArrayList<>();
         JClassDecl classDecl = jfile.getClassDecl();
-        if (classDecl == null)
-            return childViews;
-
-        JClassDeclView<?> classDeclView = new JClassDeclView<>(classDecl);
-        childViews.add(classDeclView);
-
-        // Return
-        return childViews;
+        return classDecl != null ? new JNodeView[] { new JClassDeclView<>(classDecl) } : new JNodeView[0];
     }
 
     /**

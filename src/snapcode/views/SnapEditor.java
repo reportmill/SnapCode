@@ -7,7 +7,6 @@ import snap.view.StackView;
 import snap.view.View;
 import snap.view.ViewEvent;
 import snap.view.ViewUtils;
-import java.util.List;
 
 /**
  * The Pane that actually holds SnapPart pieces.
@@ -170,7 +169,7 @@ public class SnapEditor extends StackView {
     public JNodeView<?> getSnapPartAt(JNodeView aPart, int anIndex)
     {
         // Check children
-        List<JNodeView<?>> children = aPart.getJNodeViews();
+        JNodeView<?>[] children = aPart.getJNodeViews();
         for (JNodeView<?> child : children) {
             JNodeView<?> part = getSnapPartAt(child, anIndex);
             if (part != null)

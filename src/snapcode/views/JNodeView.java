@@ -5,10 +5,10 @@ import snap.geom.Pos;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Painter;
+import snap.util.ListUtils;
 import snap.view.*;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * A view that manages painting and editing of a JNode as puzzle piece.
@@ -37,7 +37,10 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     private double _paddingLeft;
 
     // The child node views
-    protected List<JNodeView<?>> _jnodeViews;
+    protected JNodeView<?>[] _jnodeViews;
+
+    // The block statement views
+    protected JNodeView<?>[] _blockStmtViews;
 
     // The current drag over node
     private static JNodeView<?> _dragOver;
@@ -176,6 +179,15 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     }
 
     /**
+     * Adds a view to column view.
+     */
+    protected void addChildToColView(View aView)
+    {
+        ColView colView = getColView();
+        colView.addChild(aView);
+    }
+
+    /**
      * Returns whether part is selected.
      */
     public boolean isSelected()  { return _selected; }
@@ -291,16 +303,12 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     {
         // Add child UI
         if (isBlock()) {
-            List<JNodeView<?>> nodeViews = getJNodeViews();
-            if (nodeViews.size() > 0) {
-                ColView colView = getColView();
-                nodeViews.forEach(colView::addChild);
-            }
+            JNodeView<?>[] blockStmtViews = getBlockStmtViews();
+            Stream.of(blockStmtViews).forEach(this::addChildToColView);
         }
 
-        if (_jnode.getFile() == null)
-            return;
-        enableEvents(DragEvents);
+        if (_jnode.getFile() != null)
+            enableEvents(DragEvents);
     }
 
     /**
@@ -332,7 +340,7 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
      */
     public int getJNodeViewCount()
     {
-        return _jnodeViews != null ? _jnodeViews.size() : 0;
+        return _jnodeViews != null ? _jnodeViews.length : 0;
     }
 
     /**
@@ -340,7 +348,7 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
      */
     public JNodeView<?> getJNodeView(int anIndex)
     {
-        return _jnodeViews.get(anIndex);
+        return _jnodeViews[anIndex];
     }
 
     /**
@@ -349,43 +357,48 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     public JNodeView<?> getJNodeViewLast()
     {
         int cc = getJNodeViewCount();
-        return cc > 0 ? _jnodeViews.get(cc - 1) : null;
+        return cc > 0 ? _jnodeViews[cc - 1] : null;
     }
 
     /**
      * Returns the children.
      */
-    public List<JNodeView<?>> getJNodeViews()
+    public JNodeView<?>[] getJNodeViews()
     {
         if (_jnodeViews != null) return _jnodeViews;
-        List<JNodeView<?>> nodeViews = createJNodeViews();
-        return _jnodeViews = nodeViews;
+        return _jnodeViews = createJNodeViews();
     }
 
     /**
      * Creates the children.
      */
-    protected List<JNodeView<?>> createJNodeViews()
+    protected JNodeView<?>[] createJNodeViews()
+    {
+        return getBlockStmtViews();
+    }
+
+    /**
+     * Returns the children.
+     */
+    public JNodeView<?>[] getBlockStmtViews()
+    {
+        if (_blockStmtViews != null) return _blockStmtViews;
+        return _blockStmtViews = createBlockStmtViews();
+    }
+
+    /**
+     * Creates the children.
+     */
+    protected JNodeView<?>[] createBlockStmtViews()
     {
         JNode jnode = getJNode();
         JStmtBlock blockStmt = jnode instanceof WithBlockStmt ? ((WithBlockStmt) jnode).getBlock() : null;
         if (blockStmt == null)
-            return Collections.EMPTY_LIST;
+            return new JNodeView[0];
 
-        // Get statements
+        // Get statements and return statement views
         List<JStmt> statements = blockStmt.getStatements();
-        List<JNodeView<?>> children = new ArrayList<>();
-
-        // Iterate over statements and create views
-        for (JStmt stmt : statements) {
-            JNodeView<?> stmtView = createView(stmt);
-            if (stmtView == null)
-                continue;
-            children.add(stmtView);
-        }
-
-        // Return children
-        return children;
+        return ListUtils.mapNonNullToArray(statements, stmt -> createView(stmt), JNodeView.class);
     }
 
     /**

@@ -18,6 +18,23 @@ public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
     private static final String TextFieldName = "ExprText";
 
     /**
+     * Constructor.
+     */
+    public JExprEditor()
+    {
+        super();
+    }
+
+    /**
+     * Constructor.
+     */
+    public JExprEditor(JNODE aJNode)
+    {
+        this();
+        setJNode(aJNode);
+    }
+
+    /**
      * Updates UI.
      */
     public void updateUI()
