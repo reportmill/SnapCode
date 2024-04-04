@@ -33,7 +33,6 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
         // Do normal version and set Type to None
         super.updateUI();
         setBlockType(BlockType.None);
-        BlockLeft = 0;
 
         // Create/add node for id
         JClassDecl cd = getJNode();

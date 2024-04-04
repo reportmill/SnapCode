@@ -29,7 +29,7 @@ public class JNodeViewBase extends ChildView {
     private boolean _underDrag;
 
     // Constants for block insets
-    public double BlockLeft = 12;
+    private double _paddingLeft;
 
     // Colors
     private static final Color SELECTED_COLOR = Color.get("#FFFFFFCC");
@@ -69,6 +69,10 @@ public class JNodeViewBase extends ChildView {
         boolean isNotched = aBlockType == BlockType.Piece || aBlockType == BlockType.Left || aBlockType == BlockType.Box;
         Insets padding = isNotched ? NOTCHED_PADDING : PLAIN_PADDING;
         setPadding(padding);
+
+        // Set padding for box
+        boolean isBox = aBlockType == BlockType.Box || aBlockType == BlockType.PlainBox;
+        _paddingLeft = isBox ? BlockView.BOX_BORDER_WIDTH : 0;
     }
 
     /**
@@ -170,7 +174,7 @@ public class JNodeViewBase extends ChildView {
         double prefW = getRowView().getBestWidth(aH);
         if (_colView != null || isBlock()) {
             double colW = getColView().getBestWidth(aH);
-            prefW = Math.max(prefW, BlockLeft + colW);
+            prefW = Math.max(prefW, _paddingLeft + colW);
         }
 
         return prefW;
@@ -212,9 +216,9 @@ public class JNodeViewBase extends ChildView {
         if (_colView != null) {
             ColView colView = getColView();
             double colY = rowH - BlockView.NOTCH_HEIGHT;
-            double colW = viewW - BlockLeft;
+            double colW = viewW - _paddingLeft;
             double colH = viewH - colY - BlockView.BOX_TAIL_HEIGHT + BlockView.NOTCH_HEIGHT;
-            colView.setBounds(BlockLeft, colY, colW, colH);
+            colView.setBounds(_paddingLeft, colY, colW, colH);
         }
 
         // Layout Background, Foreground block views
