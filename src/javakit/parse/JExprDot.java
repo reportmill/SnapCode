@@ -18,8 +18,10 @@ public class JExprDot extends JExpr {
     public JExprDot(JExpr prefixExpr, JExpr anExpr)
     {
         super();
-        setPrefixExpr(prefixExpr);
-        setExpr(anExpr);
+        if (prefixExpr != null)
+            setPrefixExpr(prefixExpr);
+        if (anExpr != null)
+            setExpr(anExpr);
     }
 
     /**

@@ -23,7 +23,8 @@ public class JExprParen extends JExpr {
     public JExprParen(JExpr anExpr)
     {
         super();
-        setExpr(anExpr);
+        if (anExpr != null)
+            setExpr(anExpr);
     }
 
     /**

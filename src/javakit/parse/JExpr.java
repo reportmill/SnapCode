@@ -97,6 +97,15 @@ public abstract class JExpr extends JNode {
      */
     protected static JExpr joinPrimaryPrefixAndSuffixExpressions(JExpr prefixExpr, JExpr suffixExpr)
     {
+        // Handle DotExpr
+        if (suffixExpr instanceof JExprDot) {
+            JExprDot dotExpr = (JExprDot) suffixExpr;
+            if (dotExpr.getPrefixExpr() != null)
+                System.err.println("JExpr.joinExpression: Unexpected dot expression prefix: " + dotExpr.getPrefixExpr());
+            dotExpr.setPrefixExpr(prefixExpr);
+            return suffixExpr;
+        }
+
         // Handle MethodCall: Set prefix expression
         if (suffixExpr instanceof JExprMethodCall) {
 
