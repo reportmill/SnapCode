@@ -49,7 +49,7 @@ public class JNodeViewBase extends ChildView {
         setMargin(-BlockView.NOTCH_HEIGHT, 0, -BlockView.NOTCH_HEIGHT, 0);
 
         // Set background
-        _blockView = new BlockView(true);
+        _blockView = new BlockView();
 
         // Create RowView
         _rowView = createRowView();
@@ -81,7 +81,8 @@ public class JNodeViewBase extends ChildView {
      */
     public void setColor(Color aColor)
     {
-        _blockView.setColor(aColor);
+        _blockView.setFill(aColor);
+        _blockView.setBorder(aColor != null ? aColor.darker() : null, 1);
     }
 
     /**

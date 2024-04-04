@@ -3,7 +3,6 @@ import snap.geom.Path2D;
 import snap.geom.Rect;
 import snap.geom.RoundRect;
 import snap.geom.Shape;
-import snap.gfx.Color;
 import snap.gfx.Effect;
 import snap.gfx.EmbossEffect;
 import snap.view.View;
@@ -23,10 +22,10 @@ public class BlockView extends View {
     public static final double BASE_HEIGHT = 32;
 
     // Constant for notch width
-    public static final double NOTCH_WIDTH = 10;
+    public static final double NOTCH_WIDTH = 12;
 
     // Constant for notch height
-    public static final double NOTCH_HEIGHT = 3;
+    public static final double NOTCH_HEIGHT = 5;
 
     // Constant for default height
     public static final double DEFAULT_HEIGHT = BASE_HEIGHT + NOTCH_HEIGHT;
@@ -43,12 +42,11 @@ public class BlockView extends View {
     /**
      * Constructor.
      */
-    public BlockView(boolean isBackground)
+    public BlockView()
     {
         super();
         setManaged(false);
-        if (isBackground)
-            setEffect(BACKGROUND_EFFECT);
+        setEffect(BACKGROUND_EFFECT);
     }
 
     /**
@@ -62,20 +60,6 @@ public class BlockView extends View {
     public void setBlockType(BlockType aBlockType)
     {
         _blockType = aBlockType;
-    }
-
-    /**
-     * Returns the color.
-     */
-    public Color getColor()  { return getFillColor(); }
-
-    /**
-     * Sets the color.
-     */
-    public void setColor(Color aColor)
-    {
-        setFill(aColor);
-        setBorder(aColor != null ? aColor.darker() : null, 1);
     }
 
     /**
