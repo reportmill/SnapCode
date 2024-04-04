@@ -1,6 +1,7 @@
 package snapcode.views;
 import javakit.parse.JType;
 import snap.view.Label;
+import snap.view.View;
 
 /**
  * A JNodeView subclass for JClassDecl.
@@ -13,6 +14,8 @@ public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
     public JTypeView()
     {
         super();
+        setBlockType(BlockType.Middle);
+        setColor(PieceColor);
     }
 
     /**
@@ -20,25 +23,17 @@ public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
      */
     public JTypeView(JNODE aCD)
     {
-        super(aCD);
+        this();
+        setJNode(aCD);
     }
 
-    /**
-     * Override.
-     */
     @Override
-    protected void updateUI()
+    protected View[] createRowViews()
     {
-        // Do normal version and set type, color
-        super.updateUI();
-        setBlockType(BlockType.Middle);
-        setColor(PieceColor);
-
-        // Create label for type and add
         JType typ = getJNode();
         Label label = createLabel(typ.getName());
         label.setFont(label.getFont().copyForSize(14));
-        addChildToRowView(label);
+        return new View[] { label };
     }
 
     /**

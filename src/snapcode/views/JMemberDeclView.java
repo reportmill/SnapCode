@@ -1,6 +1,7 @@
 package snapcode.views;
 import javakit.parse.*;
 import snap.view.Label;
+import snap.view.View;
 
 /**
  * A SnapPart subclass for JMethodDecl.
@@ -18,14 +19,16 @@ public class JMemberDeclView<JNODE extends JMemberDecl> extends JNodeView<JNODE>
     /**
      * Creates a SnapPart for a JNode.
      */
-    public static JNodeView createView(JNode aNode)
+    public static JNodeView<?> createView(JNode aNode)
     {
-        JNodeView np = null;
-        if (aNode instanceof JConstrDecl) np = new ConstructorDecl();
-        else if (aNode instanceof JMethodDecl) np = new MethodDecl();
+        JNodeView nodeView;
+        if (aNode instanceof JConstrDecl)
+            nodeView = new ConstructorDecl();
+        else if (aNode instanceof JMethodDecl)
+            nodeView = new MethodDecl();
         else return null;
-        np.setJNode(aNode);
-        return np;
+        nodeView.setJNode(aNode);
+        return nodeView;
     }
 
     /**
@@ -40,23 +43,20 @@ public class JMemberDeclView<JNODE extends JMemberDecl> extends JNodeView<JNODE>
         {
             super();
             setMinWidth(120);
+            setBlockType(BlockType.PlainBox);
+            setColor(MemberDeclColor);
         }
 
         /**
-         * Override.
+         * Override to return label.
          */
-        protected void updateUI()
+        @Override
+        protected View[] createRowViews()
         {
-            // Do normal version and set type to MemberDecl
-            super.updateUI();
-            setBlockType(BlockType.PlainBox);
-            setColor(MemberDeclColor);
-
-            // Add label for method name
             JExecutableDecl md = getJNode();
             Label label = createLabel(md.getName());
             label.setFont(label.getFont().copyForSize(14));
-            addChildToRowView(label);
+            return new View[] { label };
         }
 
         /**
@@ -71,7 +71,7 @@ public class JMemberDeclView<JNODE extends JMemberDecl> extends JNodeView<JNODE>
                 getJNodeView(0).dropNode(aNode, anX, 0);
             }
             else {
-                JNodeView lastNodeView = getJNodeViewLast();
+                JNodeView<?> lastNodeView = getJNodeViewLast();
                 lastNodeView.dropNode(aNode, anX, lastNodeView.getHeight());
             }
         }

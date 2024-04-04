@@ -1,6 +1,7 @@
 package snapcode.views;
 import javakit.parse.*;
 import snap.view.Label;
+import snap.view.View;
 
 /**
  * A JNodeView for JStmt.
@@ -17,14 +18,17 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
     }
 
     /**
-     * Override to configure.
+     * Override to update block type and color.
      */
-    protected void updateUI()
+    @Override
+    public void setJNode(JNODE aJNode)
     {
-        // Do normal version and set type, color
-        super.updateUI();
-        setBlockType(isBlock() ? BlockType.Box : BlockType.Piece);
-        setColor(isBlock() ? BlockStmtColor : PieceColor);
+        boolean isBlock = aJNode instanceof WithBlockStmt;
+        setBlockType(isBlock ? BlockType.Box : BlockType.Piece);
+        setColor(isBlock ? BlockStmtColor : PieceColor);
+
+        // Do normal version
+        super.setJNode(aJNode);
     }
 
     /**
@@ -93,18 +97,12 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
             super();
         }
 
-        /**
-         * Override to configure.
-         */
-        protected void updateUI()
+        @Override
+        protected View[] createRowViews()
         {
-            // Do normal version and set type, color
-            super.updateUI();
-
-            // Create label for statement and add to HBox
             JStmt stmt = getJNode();
             Label label = createLabel(stmt.getString());
-            addChildToRowView(label);
+            return new View[] { label };
         }
     }
 }

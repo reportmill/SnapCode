@@ -9,8 +9,9 @@ import snap.util.ArrayUtils;
 import snap.view.ColView;
 import snap.view.Label;
 import snap.view.RowView;
+import snap.view.View;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * A JNodeView subclass for JClassDecl.
@@ -23,23 +24,21 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
     public JClassDeclView(JNODE aCD)
     {
         super(aCD);
+        setBlockType(BlockType.None);
     }
 
     /**
-     * Override.
+     * Override to return labels.
      */
     @Override
-    protected void updateUI()
+    protected View[] createRowViews()
     {
-        // Do normal version and set Type to None
-        super.updateUI();
-        setBlockType(BlockType.None);
-
         // Create/add node for id
         JClassDecl cd = getJNode();
         JExprId id = cd.getId();
         JNodeView<?> idView = new ClassDeclIdView<>(id);
-        addChildToRowView(idView);
+        List<View> rowViews = new ArrayList<>();
+        rowViews.add(idView);
 
         // Add JNodeView for extnds type
         List<JType> exts = cd.getExtendsTypes();
@@ -50,16 +49,26 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
             Label label = new Label(" extends ");
             label.setFont(Font.Arial14.copyForSize(16));
             label.setTextFill(Color.WHITE);
-            addChildToRowView(label);
+            rowViews.add(label);
 
             // Add TypeView
             JNodeView<?> typView = new ClassDeclTypeView<>(ext);
-            addChildToRowView(typView);
+            rowViews.add(typView);
         }
 
-        // Add member views to col view
-        JNodeView<?>[] memberViews = getJNodeViews();
-        Stream.of(memberViews).forEach(this::addChildToColView);
+        // Return array
+        return rowViews.toArray(new View[0]);
+    }
+
+    /**
+     * Override to return member views.
+     */
+    @Override
+    protected JNodeView<?>[] createColViews()
+    {
+        JClassDecl classDecl = getJNode();
+        JMemberDecl[] memberDecls = classDecl.getMemberDecls();
+        return ArrayUtils.mapNonNull(memberDecls, mdecl -> JMemberDeclView.createView(mdecl), JNodeView.class);
     }
 
     /**
@@ -87,22 +96,6 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
     }
 
     /**
-     * Override to return JFile child node owners.
-     */
-    @Override
-    protected JNodeView<?>[] createJNodeViews()
-    {
-        JClassDecl classDecl = getJNode();
-        JMemberDecl[] memberDecls = classDecl.getMemberDecls();
-        return ArrayUtils.mapNonNull(memberDecls, mdecl -> JMemberDeclView.createView(mdecl), JNodeView.class);
-    }
-
-    /**
-     * Override to return false.
-     */
-    public boolean isBlock()  { return true; }
-
-    /**
      * Returns a string describing the part.
      */
     public String getPartString()  { return "Class Declaration"; }
@@ -119,24 +112,21 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
         {
             super(aCD);
             setMinWidth(240);
-        }
-
-        /**
-         * Override.
-         */
-        protected void updateUI()
-        {
-            // Do normal version
-            super.updateUI();
             setBlockType(BlockType.Plain);
             setColor(ClassDeclColor);
             _blockView.setBorder(ClassDeclColor.darker(), 2);
+        }
 
-            // Create/add view for Class id
+        /**
+         * Override to return label.
+         */
+        @Override
+        protected View[] createRowViews()
+        {
             JExprId id = getJNode();
             Label label = createLabel(id.getName());
             label.setFont(label.getFont().copyForSize(20));
-            addChildToRowView(label);
+            return new View[] { label };
         }
 
         /**
@@ -157,23 +147,20 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeView<JNODE> {
         {
             super(aCD);
             setMinWidth(120);
+            setBlockType(BlockType.Plain);
+            setColor(ClassDeclColor);
         }
 
         /**
-         * Override.
+         * Override to return label.
          */
-        protected void updateUI()
+        @Override
+        protected View[] createRowViews()
         {
-            // Do normal version and basic config
-            super.updateUI();
-            setBlockType(BlockType.Plain);
-            setColor(ClassDeclColor);
-
-            // Create/add label for type
             JType typ = getJNode();
             Label label = createLabel(typ.getName());
             label.setFont(label.getFont().copyForSize(14));
-            addChildToRowView(label);
+            return new View[] { label };
         }
 
         /**

@@ -3,6 +3,7 @@ import javakit.parse.JExpr;
 import javakit.parse.JNode;
 import javakit.parse.JStmtExpr;
 import snap.view.TextField;
+import snap.view.View;
 import snap.view.ViewEvent;
 import snap.view.ViewUtils;
 
@@ -23,6 +24,8 @@ public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
     public JExprEditor()
     {
         super();
+        setBlockType(BlockType.Middle);
+        setColor(null);
     }
 
     /**
@@ -35,15 +38,11 @@ public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
     }
 
     /**
-     * Updates UI.
+     * Override to return textfield.
      */
-    public void updateUI()
+    @Override
+    protected View[] createRowViews()
     {
-        // Do normal version
-        super.updateUI();
-        setBlockType(BlockType.Middle);
-        setColor(null);
-
         // Get expression
         JExpr expr = getJNode();
         String str = expr.getString();
@@ -53,7 +52,7 @@ public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
         _textField.setName(TextFieldName);
         _textField.addEventHandler(e -> handleTextEvent(e), KeyRelease); //enableEvents(_tfield, DragEvents);
         _textField.addEventHandler(e -> handleTextEvent(e), Action);
-        addChildToRowView(_textField);
+        return new View[] { _textField };
     }
 
     /**

@@ -18,11 +18,6 @@ public abstract class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
     }
 
     /**
-     * Override to return false.
-     */
-    public boolean isBlock()  { return false; }
-
-    /**
      * Override to forward to parent.
      */
     @Override

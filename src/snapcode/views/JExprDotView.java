@@ -1,9 +1,9 @@
 package snapcode.views;
 import javakit.parse.JExpr;
 import javakit.parse.JExprDot;
+import snap.view.View;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * SnapPartExpr subclass for JExprDot.
@@ -19,27 +19,10 @@ public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
     }
 
     /**
-     * Updates UI.
-     */
-    protected void updateUI()
-    {
-        // Do normal version
-        super.updateUI();
-
-        // Create/add views for child expressions
-        JNodeView<?>[] nodeViews = getJNodeViews();
-        Stream.of(nodeViews).forEach(this::addChildToRowView);
-
-        // Change block types
-        getJNodeView(0).setBlockType(BlockType.Left);
-        getJNodeViewLast().setBlockType(BlockType.Right);
-    }
-
-    /**
-     * Override to create children.
+     * Override to return views for prefix and expression.
      */
     @Override
-    protected JNodeView<?>[] createJNodeViews()
+    protected View[] createRowViews()
     {
         JExprDot dotExpr = getJNode();
         List<JNodeView<?>> childViews = new ArrayList<>();
@@ -47,6 +30,7 @@ public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
         JExpr prefixExpr = dotExpr.getPrefixExpr();
         JExprView<?> prefixView = createView(prefixExpr);
         prefixView.setGrowWidth(true);
+        prefixView.setBlockType(BlockType.Left);
         childViews.add(prefixView);
 
         // Iterate over expression chain children, create expression views and add to list
@@ -54,6 +38,7 @@ public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
         if (expr != null) {
             JExprView<?> exprView = createView(expr);
             exprView.setGrowWidth(true);
+            exprView.setBlockType(BlockType.Right);
             childViews.add(exprView);
         }
 

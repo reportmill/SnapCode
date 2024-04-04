@@ -5,7 +5,6 @@ import snap.gfx.Paint;
 import snap.view.ColView;
 import snap.view.RowView;
 import snap.view.ViewUtils;
-import java.util.stream.Stream;
 
 /**
  * A SnapPart for JFile.
@@ -39,14 +38,14 @@ public class JFileView extends JNodeView<JFile> {
     @Override
     public void setJNode(JFile aJNode)
     {
+        ColView colView = getColView();
+        colView.removeChildren();
+
+        // Do normal version
         super.setJNode(aJNode);
 
         // Reset children and their UI
         _jnodeViews = null;
-        ColView colView = getColView();
-        colView.removeChildren();
-        JNodeView<?>[] jnodeViews = getJNodeViews();
-        Stream.of(jnodeViews).forEach(this::addChildToColView);
     }
 
     /**
@@ -77,17 +76,12 @@ public class JFileView extends JNodeView<JFile> {
      * Override to return JFile child node owners.
      */
     @Override
-    protected JNodeView<?>[] createJNodeViews()
+    protected JNodeView<?>[] createColViews()
     {
         JFile jfile = getJNode();
         JClassDecl classDecl = jfile.getClassDecl();
         return classDecl != null ? new JNodeView[] { new JClassDeclView<>(classDecl) } : new JNodeView[0];
     }
-
-    /**
-     * Override to return false.
-     */
-    public boolean isBlock()  { return false; }
 
     /**
      * Returns a string describing the part.

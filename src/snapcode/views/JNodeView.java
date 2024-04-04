@@ -126,6 +126,39 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     }
 
     /**
+     * Returns the JNode.
+     */
+    public JNODE getJNode()  { return _jnode; }
+
+    /**
+     * Sets the JNode.
+     */
+    public void setJNode(JNODE aJNode)
+    {
+        _jnode = aJNode;
+        updateUI();
+    }
+
+    /**
+     * Updates the UI.
+     */
+    protected void updateUI()
+    {
+        // Add row views
+        View[] rowViews = createRowViews();
+        if (rowViews != null)
+            Stream.of(rowViews).forEach(this::addChildToRowView);
+
+        // Add col views
+        JNodeView<?>[] colViews = createColViews();
+        if (colViews != null)
+            Stream.of(colViews).forEach(this::addChildToColView);
+
+        if (_jnode.getFile() != null)
+            enableEvents(DragEvents);
+    }
+
+    /**
      * Returns the row view.
      */
     public RowView getRowView()  { return _rowView; }
@@ -185,6 +218,21 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     {
         ColView colView = getColView();
         colView.addChild(aView);
+    }
+
+    /**
+     * Creates row views.
+     */
+    protected View[] createRowViews()  { return null; }
+
+    /**
+     * Creates col views.
+     */
+    protected JNodeView<?>[] createColViews()
+    {
+        if (isBlock())
+            return getBlockStmtViews();
+        return null;
     }
 
     /**
@@ -283,35 +331,6 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     }
 
     /**
-     * Returns the JNode.
-     */
-    public JNODE getJNode()  { return _jnode; }
-
-    /**
-     * Sets the JNode.
-     */
-    public void setJNode(JNODE aJNode)
-    {
-        _jnode = aJNode;
-        updateUI();
-    }
-
-    /**
-     * Updates the UI.
-     */
-    protected void updateUI()
-    {
-        // Add child UI
-        if (isBlock()) {
-            JNodeView<?>[] blockStmtViews = getBlockStmtViews();
-            Stream.of(blockStmtViews).forEach(this::addChildToColView);
-        }
-
-        if (_jnode.getFile() != null)
-            enableEvents(DragEvents);
-    }
-
-    /**
      * Returns the SnapEditor.
      */
     public SnapEditor getEditor()
@@ -324,7 +343,8 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
      */
     public boolean isBlock()
     {
-        return getJNode() instanceof WithBlockStmt;
+        JNode jNode = getJNode();
+        return jNode instanceof WithBlockStmt && ((WithBlockStmt) jNode).getBlock() != null;
     }
 
     /**

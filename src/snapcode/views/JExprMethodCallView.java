@@ -1,10 +1,11 @@
 package snapcode.views;
 import javakit.parse.JExpr;
 import javakit.parse.JExprMethodCall;
+import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.Label;
+import snap.view.View;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * SnapPartExpr subclass for JMethodCall.
@@ -12,32 +13,34 @@ import java.util.stream.Stream;
 public class JExprMethodCallView<JNODE extends JExprMethodCall> extends JExprView<JNODE> {
 
     /**
-     * Override.
+     * Constructor.
      */
-    public void updateUI()
+    public JExprMethodCallView()
     {
-        // Do normal version
-        super.updateUI();
+        super();
         setColor(PieceColor);
-
-        // Add label for method name
-        JExprMethodCall mc = getJNode();
-        Label label = createLabel(mc.getName());
-        addChildToRowView(label);
-
-        // Add child UIs
-        JNodeView<?>[] nodeViews = getJNodeViews();
-        Stream.of(nodeViews).forEach(this::addChildToRowView);
     }
 
     /**
-     * Override to create children for method args.
+     * Override to return views for method name and args.
      */
     @Override
-    protected JNodeView<?>[] createJNodeViews()
+    protected View[] createRowViews()
     {
+        // Create for name
+        JExprMethodCall mc = getJNode();
+        Label label = createLabel(mc.getName());
+        View[] rowViews = new View[] { label };
+
+        // Create views for args
         JExprMethodCall methodCall = getJNode();
         List<JExpr> args = methodCall.getArgs();
-        return args != null ? ListUtils.mapNonNullToArray(args, arg -> new JExprEditor<>(arg), JNodeView.class) : new JNodeView[0];
+        if (args != null) {
+            View[] argViews = ListUtils.mapNonNullToArray(args, arg -> new JExprEditor<>(arg), View.class);
+            rowViews = ArrayUtils.add(argViews, label, 0);
+        }
+
+        // Return
+        return rowViews;
     }
 }
