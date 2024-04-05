@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
+import snap.parse.ParseException;
 import snap.util.ArrayUtils;
 import snap.util.StringUtils;
 import java.util.ArrayList;
@@ -126,7 +127,13 @@ public class NodeError {
             return null;
 
         // Get last node
-        JNode lastNode = getLastNodeForNode(jfile);
+        JNode lastNode = null;
+        if (exception instanceof ParseException) {
+            int charIndex = ((ParseException) exception).getCharIndex();
+            lastNode = jfile.getNodeForCharIndex(charIndex);
+        }
+        if (lastNode == null)
+            lastNode = getLastNodeForNode(jfile);
         if (lastNode == null || lastNode.getStartToken() == null)
             return null;
 
