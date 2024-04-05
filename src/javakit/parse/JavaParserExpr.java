@@ -293,7 +293,7 @@ public class JavaParserExpr extends Parser {
     /**
      * BinaryExpr Handler.
      */
-    public static abstract class BinaryExprHandler extends ParseHandler<JExpr> {
+    public static abstract class BinaryExprHandler extends JNodeParseHandler<JExpr> {
 
         /**
          * ParseHandler method.
@@ -757,7 +757,7 @@ public class JavaParserExpr extends Parser {
      * ArrayInit Handler: "{" (VarInit (LookAhead(2) "," VarInit)*)? ","? "}"
      * VarInit: ArrayInit | Expression
      */
-    public static class ArrayInitHandler extends ParseHandler<JExprArrayInit> {
+    public static class ArrayInitHandler extends JNodeParseHandler<JExprArrayInit> {
 
         /**
          * ParseHandler method.
