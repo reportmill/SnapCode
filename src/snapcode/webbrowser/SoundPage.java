@@ -16,7 +16,7 @@ public class SoundPage extends WebPage {
     private SoundClip  _clip;
 
     // A Timer
-    private ViewTimer  _timer = new ViewTimer(100, t -> fireActionEventForObject("ProgressTimer", null));
+    private ViewTimer  _timer = new ViewTimer(() -> fireActionEventForObject("ProgressTimer", null), 100);
 
     /**
      * Returns the clip to be edited.

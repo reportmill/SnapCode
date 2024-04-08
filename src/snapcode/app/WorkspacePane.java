@@ -322,7 +322,7 @@ public class WorkspacePane extends ViewOwner {
 
         // Hack when running in browser in Swing to always fill available screen size
         if (SnapUtils.isWebVM && getEnv().getClass().getSimpleName().startsWith("Swing"))
-            new ViewTimer(1000, e -> checkScreenSize()).start();
+            new ViewTimer(this::checkScreenSize, 1000).start();
     }
 
     /**
