@@ -10,9 +10,7 @@ import snap.props.PropChangeListener;
 import snap.text.TextDoc;
 import snap.text.TextBlockUtils;
 import snap.util.ArrayUtils;
-import snap.view.ViewUtils;
 import snap.web.WebFile;
-
 import java.util.*;
 
 /**
@@ -43,9 +41,6 @@ public class JavaAgent {
 
     // A listener for file prop changes
     private PropChangeListener _fileBytesChangedLsnr;
-
-    // A runnable to check file for errors after delay
-    private Runnable _checkFileRun = () -> checkFileForErrors();
 
     // The Jepl default imports
     private static String[] _jeplImports;
@@ -264,17 +259,6 @@ public class JavaAgent {
         // Reload class
         JavaClass javaClass = classDecl.getJavaClass();
         javaClass.reloadClassFromClassDecl(classDecl);
-    }
-
-    /**
-     * Checks this file for errors after given delay.
-     */
-    public void checkFileForErrorsAfterDelay(int aDelay)
-    {
-        ViewUtils.runDelayedCancelPrevious(_checkFileRun, aDelay);
-
-        // Clear build issues
-        setBuildIssues(new BuildIssue[0]);
     }
 
     /**

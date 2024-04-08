@@ -3,6 +3,7 @@
  */
 package snapcode.javatext;
 import javakit.parse.*;
+import snapcode.project.BuildIssue;
 import snapcode.project.JavaAgent;
 import snapcode.project.JavaTextDoc;
 import javakit.resolver.JavaDecl;
@@ -30,6 +31,9 @@ public class JavaTextPane extends TextPane {
 
     // The OverView
     protected LineFootView  _lineFootView;
+
+    // A runnable to check file for errors after delay
+    private Runnable _checkFileRun = () -> checkFileForErrors();
 
     /**
      * Constructor.
@@ -340,18 +344,38 @@ public class JavaTextPane extends TextPane {
             if (CharSequenceUtils.indexOfNewline(chars, 0) >= 0)
                 _lineNumView.resetAll();
             _lineFootView.resetAll();
-            checkFileForErrorsAfterDelay(1000);
+            checkFileForErrorsAfterDelay();
         }
     }
 
     /**
      * Register to check file for errors after slight delay.
      */
-    private void checkFileForErrorsAfterDelay(int aDelay)
+    protected void checkFileForErrorsAfterDelay()
     {
+        // Register to call checkFileForErrors after delay
+        ViewUtils.runDelayedCancelPrevious(_checkFileRun, 1000);
+
+        // Clear build issues
         JavaTextDoc javaTextDoc = getJavaTextDoc();
         JavaAgent javaAgent = javaTextDoc.getAgent();
-        javaAgent.checkFileForErrorsAfterDelay(aDelay);
+        javaAgent.setBuildIssues(new BuildIssue[0]);
+    }
+
+    /**
+     * Check file for errors.
+     */
+    private void checkFileForErrors()
+    {
+        // If popup is showing, skip check
+        JavaPopupList javaPopupList = getTextArea().getPopup();
+        if (javaPopupList.isShowing())
+            return;
+
+        // Do check
+        JavaTextDoc javaTextDoc = getJavaTextDoc();
+        JavaAgent javaAgent = javaTextDoc.getAgent();
+        javaAgent.checkFileForErrors();
     }
 
     /**

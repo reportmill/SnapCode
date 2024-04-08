@@ -95,7 +95,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
             return isShowing();
 
         // If shortcut or control, return false
-        if (anEvent.isShortcutDown() || anEvent.isControlDown())
+        if (anEvent.isShortcutDown() || anEvent.isControlDown() || anEvent.isEscapeKey())
             return false;
 
         // If java identifier char, return true
@@ -537,13 +537,22 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     }
 
     /**
-     * Override to unregister property change.
+     * Override to remove listener and trigger syntax check
      */
     @Override
-    public void hide()
+    protected void setShowing(boolean aValue)
     {
-        super.hide();
-        _textArea.removePropChangeListener(_textAreaLsnr);
+        // Do normal version
+        if (aValue == isShowing()) return;
+        super.setShowing(aValue);
+
+        // On hide, remove TextArea prop change listener and do syntax check
+        if (!aValue) {
+            _textArea.removePropChangeListener(_textAreaLsnr);
+            JavaTextPane javaTextPane = _textArea.getOwner(JavaTextPane.class);
+            if (javaTextPane != null)
+                javaTextPane.checkFileForErrorsAfterDelay();
+        }
     }
 
     /**
