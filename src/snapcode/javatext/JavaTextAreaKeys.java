@@ -259,10 +259,18 @@ public class JavaTextAreaKeys extends TextAreaKeys {
      */
     private boolean isEnteringBlockStatement(TextLine aTextLine)
     {
+        // Get last token on given line (if at beginning of line, check previous line)
+        TextToken lastToken = aTextLine.getLastToken();
+        if (lastToken == null && getSelStart() == aTextLine.getStartCharIndex() && aTextLine.getPrevious() != null)
+            lastToken = aTextLine.getPrevious().getLastToken();
+
+        // If no last token or token after selection, return false
+        if (lastToken == null || getSelStart() <= lastToken.getStartCharIndex())
+            return false;
+
         // If last token is open bracket, return true
-        TextToken textToken = aTextLine.getLastToken();
-        String textTokenString = textToken != null ? textToken.getString() : "";
-        if (textTokenString.equals("{"))
+        String lastTokenString = lastToken.getString();
+        if (lastTokenString.equals("{"))
             return true;
 
         // If current node is conditional (if, for, do, while), return true
