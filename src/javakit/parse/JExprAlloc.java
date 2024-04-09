@@ -30,6 +30,9 @@ public class JExprAlloc extends JExpr {
     // The allocation ClassBody body declarations
     protected JBodyDecl[] _classBodyDecls;
 
+    // The constructor (if class type constructor)
+    private JavaConstructor _constructor;
+
     /**
      * Constructor.
      */
@@ -81,7 +84,7 @@ public class JExprAlloc extends JExpr {
         // Iterate over args and map to eval types
         for (int i = 0, iMax = args.size(); i < iMax; i++) {
             JExpr arg = args.get(i);
-            if (arg instanceof JExprLambda && arg._decl == null)
+            if ((arg instanceof JExprLambda || arg instanceof JExprMethodRef) && arg._decl == null)
                 arg = null;
             argClasses[i] = arg != null ? arg.getEvalClass() : null;
         }
@@ -168,13 +171,22 @@ public class JExprAlloc extends JExpr {
             return getJavaType();
 
         // Return Constructor
-        return getConstructorImpl();
+        return getConstructor();
+    }
+
+    /**
+     * Returns the constructor.
+     */
+    public JavaConstructor getConstructor()
+    {
+        if (_constructor != null) return _constructor;
+        return _constructor = getConstructorImpl();
     }
 
     /**
      * Returns this alloc expressions constructor.
      */
-    protected JavaDecl getConstructorImpl()
+    private JavaConstructor getConstructorImpl()
     {
         // Get JavaType - just return if null
         JavaType javaType = getJavaType();

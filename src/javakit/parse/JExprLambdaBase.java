@@ -88,10 +88,7 @@ public abstract class JExprLambdaBase extends JExpr {
             // Get arg index of this lambda expr
             List<JExpr> args = methodCallExpr.getArgs();
             int argIndex = ListUtils.indexOfId(args, this);
-            if (argIndex < 0)
-                return null;
-
-            // Get arg type at arg index
+            if (argIndex < 0) { System.err.println("JExprLambdaBase.getLambdaTypeImpl: Can't happen 1"); return null; }
             return method.getParameterType(argIndex);
         }
 
@@ -100,17 +97,14 @@ public abstract class JExprLambdaBase extends JExpr {
 
             // Get alloc expr constructor
             JExprAlloc allocExpr = (JExprAlloc) parentNode;
-            JavaConstructor constructor = (JavaConstructor) allocExpr.getDecl();
+            JavaConstructor constructor = allocExpr.getConstructor();
             if (constructor == null)
                 return null;
 
             // Get arg index of this lambda expr
             List<JExpr> args = allocExpr.getArgs();
             int argIndex = ListUtils.indexOfId(args, this);
-            if (argIndex < 0)
-                return null;
-
-            // Get arg type at arg index
+            if (argIndex < 0) { System.err.println("JExprLambdaBase.getLambdaTypeImpl: Can't happen 2"); return null; }
             return constructor.getParameterType(argIndex);
         }
 
