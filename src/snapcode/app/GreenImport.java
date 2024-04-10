@@ -182,7 +182,7 @@ public class GreenImport {
         // Get build file and configure
         BuildFile buildFile = tempProj.getBuildFile();
         buildFile.setIncludeSnapKitRuntime(true);
-        buildFile.addDependency(new MavenDependency("com.reportmill:greenfoot:2024.03"));
+        buildFile.addDependency(new MavenDependency("com.reportmill:greenfoot:2024.04"));
         buildFile.setMainClassName("Main");
         buildFile.writeFile();
 
