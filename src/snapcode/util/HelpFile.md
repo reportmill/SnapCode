@@ -119,7 +119,7 @@
 ```
     var x = DoubleArray.fromMinMax(-3, 3)
     var y = DoubleArray.fromMinMax(-4, 4)
-    var z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
+    var z = mapXY(x, y, (a,b) -> Math.sin(a) + Math.cos(b))
     var dataSet = dataSet(x, y, z)
     show(dataSet)
 ```
@@ -151,7 +151,7 @@
 ```
     var x = DoubleArray.fromMinMax(-3, 3)
     var y = DoubleArray.fromMinMax(-4, 4)
-    var z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
+    var z = mapXY(x, y, (x,y) -> Math.sin(a) + Math.cos(b))
     var chart = chart(x, y, z)
     show(chart)
 ```
@@ -163,7 +163,7 @@
 ```
     var x = DoubleArray.fromMinMax(-3, 3)
     var y = DoubleArray.fromMinMax(-4, 4)
-    var z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
+    var z = mapXY(x, y, (a,b) -> Math.sin(a) + Math.cos(b))
     var chart = chart3D(x, y, z)
     show(chart)
 ```
@@ -173,7 +173,7 @@
 ```
     var x = DoubleArray.fromMinMax(-3, 3)
     var y = DoubleArray.fromMinMax(-4, 4)
-    var z = mapXY(x, y, (x,y) -> Math.sin(x) + Math.cos(y))
+    var z = mapXY(x, y, (a,b) -> Math.sin(a) + Math.cos(b))
     var dataSet = dataSet(x, y, z)
     var chart = chart3D(dataSet)
     show(chart)
