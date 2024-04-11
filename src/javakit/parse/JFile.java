@@ -444,6 +444,15 @@ public class JFile extends JNode {
     }
 
     /**
+     * Returns any current declaration errors.
+     */
+    public NodeError[] getDeclarationErrors()
+    {
+        JClassDecl classDecl = getClassDecl();
+        return classDecl != null ? classDecl.getErrors() : NodeError.NO_ERRORS;
+    }
+
+    /**
      * Init from another JFile.
      */
     protected void init(JFile aJFile)

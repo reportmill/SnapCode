@@ -19,7 +19,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     protected JType  _type;
 
     // Type variables
-    private JTypeVar[] _typeVars;
+    private JTypeVar[] _typeVars = new JTypeVar[0];
 
     // The formal parameters
     protected List<JVarDecl>  _params = new ArrayList<>();
@@ -61,13 +61,11 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
      */
     public void setTypeVars(JTypeVar[] theTVs)
     {
-        if (_typeVars != null)
-            Stream.of(_typeVars).forEach(tvar -> removeChild(tvar));
+        Stream.of(_typeVars).forEach(tvar -> removeChild(tvar));
 
         _typeVars = theTVs;
 
-        if (_typeVars != null)
-            Stream.of(_typeVars).forEach(tvar -> addChild(tvar));
+        Stream.of(_typeVars).forEach(tvar -> addChild(tvar));
     }
 
     /**
@@ -209,5 +207,31 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
 
         // Return
         return paramTypes;
+    }
+
+    /**
+     * Override to return errors for ReturnValue, Parameters, ThrowsList and TypeVars.
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()
+    {
+        // Get errors for type
+        JType returnType = getType();
+        NodeError[] errors = returnType.getErrors();
+
+        // Get errors for params
+        List<JVarDecl> parameters = getParameters();
+        errors = NodeError.addNodeErrorsForNodesList(errors, parameters);
+
+        // Get errors for throws list
+        List<JExpr> throwsList = getThrowsList();
+        errors = NodeError.addNodeErrorsForNodesList(errors, throwsList);
+
+        // Get errors for type vars
+        JTypeVar[] typeVars = getTypeVars();
+        errors = NodeError.addNodeErrorsForNodes(errors, typeVars);
+
+        // Return
+        return errors;
     }
 }

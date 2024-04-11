@@ -17,8 +17,6 @@ public interface WithTypeVars {
     default JTypeVar getTypeVar(String aName)
     {
         JTypeVar[] typeVars = getTypeVars();
-        if (typeVars != null)
-            return ArrayUtils.findMatch(typeVars, tvar -> tvar.getName().equals(aName));
-        return null;
+        return ArrayUtils.findMatch(typeVars, tvar -> tvar.getName().equals(aName));
     }
 }

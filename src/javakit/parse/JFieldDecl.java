@@ -62,6 +62,16 @@ public class JFieldDecl extends JMemberDecl implements WithVarDecls {
     }
 
     /**
+     * Override to return errors for ReturnValue.
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()
+    {
+        JType returnType = getType();
+        return returnType.getErrors();
+    }
+
+    /**
      * Returns the part name.
      */
     public String getNodeString()

@@ -36,4 +36,10 @@ public class JInitializerDecl extends JMemberDecl implements WithBlockStmt {
     {
         replaceChild(_block, _block = aBlock);
     }
+
+    /**
+     * Override to return no errors for JFile.getDeclarationErrors().
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()  { return NodeError.NO_ERRORS; }
 }

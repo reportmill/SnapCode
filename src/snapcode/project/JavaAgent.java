@@ -223,12 +223,12 @@ public class JavaAgent {
      */
     public void checkFileForErrors()
     {
-        // Check for parse errors
+        // Get errors for body declarations
         JFile jFile = getJFile();
-        NodeError[] errors = NodeError.getNodeErrorForFileParseException(jFile);
+        NodeError[] errors = jFile.getDeclarationErrors();
 
-        // If no parse errors, do full error check
-        if (errors == null) {
+        // If no declaration errors, reload class and do full error check
+        if (errors.length == 0) {
 
             // Reload class
             reloadClassFromClassDecl();

@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * This class represents an error in a JNode.
  */
-public class NodeError {
+public class NodeError implements Comparable<NodeError> {
 
     // The Node that holds error
     private JNode  _node;
@@ -42,6 +42,16 @@ public class NodeError {
      */
     public String getString()  { return _string; }
 
+    /**
+     * Standard compare method.
+     */
+    @Override
+    public int compareTo(NodeError nodeError)
+    {
+        int thisCharIndex = _node.getStartCharIndex();
+        int otherCharIndex = nodeError._node.getStartCharIndex();
+        return Integer.compare(thisCharIndex, otherCharIndex);
+    }
 
     /**
      * Standard toString implementation.
@@ -92,10 +102,20 @@ public class NodeError {
     /**
      * Return all node errors in given node.
      */
-    public static NodeError[] getAllNodeErrors(JNode aNode)
+    public static NodeError[] getAllNodeErrors(JFile jfile)
     {
+        // Get node errors from nodes
         List<NodeError> errorsList = new ArrayList<>();
-        NodeError.findAllNodeErrors(aNode, errorsList);
+        NodeError.findAllNodeErrors(jfile, errorsList);
+
+        // Add node errors for parse exceptions
+        NodeError[] parseErrors = getNodeErrorForFileParseException(jfile);
+        if (parseErrors != null) {
+            Collections.addAll(errorsList, parseErrors);
+            Collections.sort(errorsList);
+        }
+
+        // Return array
         return errorsList.toArray(NodeError.NO_ERRORS);
     }
 
@@ -104,16 +124,38 @@ public class NodeError {
      */
     public static void findAllNodeErrors(JNode aNode, List<NodeError> errorsList)
     {
+        // Get node errors
         NodeError[] errors = aNode.getErrors();
         if (errors.length > 0)
             Collections.addAll(errorsList, errors);
 
+        // If StmtExpr just return (we get anything below this automatically)
         if (aNode instanceof JStmtExpr)
             return;
 
         List<JNode> children = aNode.getChildren();
         for (JNode child : children)
             findAllNodeErrors(child, errorsList);
+    }
+
+    /**
+     * Returns the errors for a list of nodes.
+     */
+    public static NodeError[] addNodeErrorsForNodes(NodeError[] errors, JNode[] nodes)
+    {
+        for (JNode node : nodes)
+            errors = ArrayUtils.addAll(errors, node.getErrors());
+        return errors;
+    }
+
+    /**
+     * Returns the errors for a list of nodes.
+     */
+    public static NodeError[] addNodeErrorsForNodesList(NodeError[] errors, List<? extends JNode> nodesList)
+    {
+        for (JNode node : nodesList)
+            errors = ArrayUtils.addAll(errors, node.getErrors());
+        return errors;
     }
 
     /**

@@ -18,7 +18,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     protected ClassType  _classType = ClassType.Class;
 
     // TypeVars
-    private JTypeVar[] _typeVars;
+    private JTypeVar[] _typeVars = new JTypeVar[0];
 
     // The extends list
     protected List<JType>  _extendsTypes = new ArrayList<>();
@@ -118,15 +118,13 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     public void setTypeVars(JTypeVar[] theTVs)
     {
         // Remove old type vars
-        if (_typeVars != null)
-            Stream.of(_typeVars).forEach(tvar -> removeChild(tvar));
+        Stream.of(_typeVars).forEach(tvar -> removeChild(tvar));
 
         // Set new
         _typeVars = theTVs;
 
         // Add new type vars
-        if (_typeVars != null)
-            Stream.of(_typeVars).forEach(tvar -> addChild(tvar));
+        Stream.of(_typeVars).forEach(tvar -> addChild(tvar));
     }
 
     /**
@@ -634,6 +632,38 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
 
         // Return
         return resolvedType;
+    }
+
+    /**
+     * Override to return errors for ExtendsList, ImplementsList, BodyDecls, TypeVars.
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()
+    {
+        NodeError[] errors = NodeError.NO_ERRORS;
+
+        // Get errors for extends list
+        List<JType> extendsTypes = getExtendsTypes();
+        errors = NodeError.addNodeErrorsForNodesList(errors, extendsTypes);
+
+        // Get errors for implements list
+        List<JType> implementsTypes = getImplementsTypes();
+        errors = NodeError.addNodeErrorsForNodesList(errors, implementsTypes);
+
+        // Get errors for BodyDecls
+        JBodyDecl[] bodyDecls = getBodyDecls();
+        errors = NodeError.addNodeErrorsForNodes(errors, bodyDecls);
+
+        // Get errors for type vars
+        JTypeVar[] typeVars = getTypeVars();
+        errors = NodeError.addNodeErrorsForNodes(errors, typeVars);
+
+        // Get errors for EnumConstants
+        JEnumConst[] enumConst = getEnumConstants();
+        errors = NodeError.addNodeErrorsForNodes(errors, enumConst);
+
+        // Return
+        return errors;
     }
 
     /**
