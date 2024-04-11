@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * A Java member for MethodDeclaration.
+ * This JMemberDecl subclass represents Java executables (methods & constructors).
  */
 public abstract class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithVarDecls, WithTypeVars {
 
@@ -24,8 +24,8 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     // The formal parameters
     protected List<JVarDecl>  _params = new ArrayList<>();
 
-    // The throws names list
-    protected List<JExpr>  _throwsNameList = new ArrayList<>();
+    // The array of thrown exception class name expressions
+    protected JExpr[] _throwsList = new JExpr[0];
 
     // The statement Block
     protected JStmtBlock  _block;
@@ -59,12 +59,10 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     /**
      * Sets the method type variables.
      */
-    public void setTypeVars(JTypeVar[] theTVs)
+    public void setTypeVars(JTypeVar[] typeVars)
     {
         Stream.of(_typeVars).forEach(tvar -> removeChild(tvar));
-
-        _typeVars = theTVs;
-
+        _typeVars = typeVars;
         Stream.of(_typeVars).forEach(tvar -> addChild(tvar));
     }
 
@@ -87,22 +85,18 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     }
 
     /**
-     * Returns the throws list.
+     * Returns the array of thrown exception class name expressions.
      */
-    public List<JExpr> getThrowsList()  { return _throwsNameList; }
+    public JExpr[] getThrowsList()  { return _throwsList; }
 
     /**
-     * Sets the throws list.
+     * Sets the array of thrown exception class name expressions.
      */
-    public void setThrowsList(List<JExpr> theThrows)
+    public void setThrowsList(JExpr[] throwsList)
     {
-        if (_throwsNameList != null)
-            _throwsNameList.forEach(expr -> removeChild(expr));
-
-        _throwsNameList = theThrows;
-
-        if (_throwsNameList != null)
-            _throwsNameList.forEach(expr -> addChild(expr));
+        Stream.of(_throwsList).forEach(expr -> removeChild(expr));
+        _throwsList = throwsList;
+        Stream.of(_throwsList).forEach(expr -> addChild(expr));
     }
 
     /**
@@ -224,8 +218,8 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
         errors = NodeError.addNodeErrorsForNodesList(errors, parameters);
 
         // Get errors for throws list
-        List<JExpr> throwsList = getThrowsList();
-        errors = NodeError.addNodeErrorsForNodesList(errors, throwsList);
+        JExpr[] throwsList = getThrowsList();
+        errors = NodeError.addNodeErrorsForNodes(errors, throwsList);
 
         // Get errors for type vars
         JTypeVar[] typeVars = getTypeVars();

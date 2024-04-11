@@ -724,7 +724,8 @@ public class JavaParser extends JavaParserStmt {
 
                 // Handle ThrowsList
                 case "ThrowsList":
-                    methodDecl.setThrowsList(aNode.getCustomNode(List.class));
+                    JExpr[] throwsList = aNode.getCustomNode(JExpr[].class);
+                    methodDecl.setThrowsList(throwsList);
                     break;
 
                 // Handle Block
@@ -771,7 +772,8 @@ public class JavaParser extends JavaParserStmt {
 
                 // Handle ThrowsList
                 case "ThrowsList":
-                    constrDecl.setThrowsList(aNode.getCustomNode(List.class));
+                    JExpr[] throwsList = aNode.getCustomNode(JExpr[].class);
+                    constrDecl.setThrowsList(throwsList);
                     break;
 
                 // Handle BlockStatement start "{"
@@ -803,21 +805,41 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * ThrowsList Handler.
+     * ThrowsList Handler: "throws" Name ("," Name)*
      */
-    public static class ThrowsListHandler extends ParseHandler<ArrayList<JExpr>> {
+    public static class ThrowsListHandler extends ParseHandler<JExpr[]> {
+
+        // The list of thrown exception class name expressions
+        private List<JExpr> _throwsList = new ArrayList<>();
 
         /**
          * ParseHandler method.
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            if (anId == "Name")
-                getPart().add(aNode.getCustomNode(JExpr.class));
+            if (anId == "Name") {
+                JExpr exceptionClassNameExpr = aNode.getCustomNode(JExpr.class);
+                _throwsList.add(exceptionClassNameExpr);
+            }
+        }
+
+        /**
+         * Override to return array.
+         */
+        public JExpr[] parsedAll()  { return _throwsList.toArray(new JExpr[0]); }
+
+        /**
+         * Override to clear BodyDecls list.
+         */
+        @Override
+        public void reset()
+        {
+            super.reset();
+            _throwsList.clear();
         }
 
         @Override
-        protected Class getPartClass()  { return ArrayList.class; }
+        protected Class getPartClass()  { return JExpr[].class; }
     }
 
     /**

@@ -229,11 +229,7 @@ public class JavaAgent {
 
         // If no declaration errors, reload class and do full error check
         if (errors.length == 0) {
-
-            // Reload class
             reloadClassFromClassDecl();
-
-            // Get JFile errors
             errors = NodeError.getAllNodeErrors(jFile);
         }
 
