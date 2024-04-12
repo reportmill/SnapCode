@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import java.util.*;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaParameterizedType;
 import javakit.resolver.JavaType;
@@ -102,10 +101,9 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
      * WithVarDecls method.
      */
     @Override
-    public List<JVarDecl> getVarDecls()
+    public JVarDecl[] getVarDecls()
     {
-        List<JVarDecl> varDecls = _varDeclExpr != null ? _varDeclExpr.getVarDecls() : Collections.EMPTY_LIST;
-        return varDecls;
+        return _varDeclExpr != null ? _varDeclExpr.getVarDecls() : new JVarDecl[0];
     }
 
     /**

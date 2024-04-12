@@ -532,7 +532,7 @@ public class JSExprEval {
     private Object evalVarDeclExpr(JExprVarDecl anExpr, Object thisObject) throws Exception
     {
         // Get list
-        List<JVarDecl> varDecls = anExpr.getVarDecls();
+        JVarDecl[] varDecls = anExpr.getVarDecls();
         List<Object> vals = new ArrayList<>();
 
         // Iterate over VarDecls

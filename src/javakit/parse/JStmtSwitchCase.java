@@ -22,7 +22,7 @@ public class JStmtSwitchCase extends JNode implements WithStmts, WithVarDeclsX {
     private List<JStmt>  _stmts = new ArrayList<>();
 
     // An array of VarDecls held by JStmtVarDecls
-    private List<JVarDecl> _varDecls;
+    private JVarDecl[] _varDecls;
 
     /**
      * Constructor.
@@ -73,10 +73,10 @@ public class JStmtSwitchCase extends JNode implements WithStmts, WithVarDeclsX {
      * Returns VarDecls encapsulated by class (JFieldDecl VarDecls).
      */
     @Override
-    public List<JVarDecl> getVarDecls()
+    public JVarDecl[] getVarDecls()
     {
         if (_varDecls != null) return _varDecls;
-        List<JVarDecl> varDecls = WithStmts.getWithStmtsVarDecls(this);
+        JVarDecl[] varDecls = WithStmts.getWithStmtsVarDecls(this);
         return _varDecls = varDecls;
     }
 

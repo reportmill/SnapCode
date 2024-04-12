@@ -8,7 +8,6 @@ import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaType;
 import javakit.resolver.ResolverUtils;
 import snap.parse.ParseToken;
-import snap.util.ClassUtils;
 
 /**
  * A JNode for types.
@@ -267,8 +266,8 @@ public class JType extends JNode {
             return null;
 
         // Get StmtVarDecl.VarDecl
-        List<JVarDecl> varDecls = varDeclExpr.getVarDecls();
-        JVarDecl varDecl = varDecls.size() > 0 ? varDecls.get(0) : null;
+        JVarDecl[] varDecls = varDeclExpr.getVarDecls();
+        JVarDecl varDecl = varDecls.length > 0 ? varDecls[0] : null;
         if (varDecl == null)
             return null;
 

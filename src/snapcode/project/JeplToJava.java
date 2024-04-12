@@ -149,8 +149,8 @@ public class JeplToJava {
         _sb.append(' ');
 
         // Append field vars
-        List<JVarDecl> varDecls = fieldDecl.getVarDecls();
-        String varDeclsStr = varDecls.stream().map(JVarDecl::getString).collect(Collectors.joining(", "));
+        JVarDecl[] varDecls = fieldDecl.getVarDecls();
+        String varDeclsStr = ArrayUtils.mapToStringsAndJoin(varDecls, JVarDecl::getString, ", ");
         _sb.append(varDeclsStr);
         _sb.append(";\n");
     }

@@ -1,6 +1,4 @@
 package javakit.parse;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * A JNode for a catch block
@@ -51,8 +49,5 @@ public class JStmtTryCatch extends JNode implements WithVarDecls, WithBlockStmt 
      * WithVarDecls method.
      */
     @Override
-    public List<JVarDecl> getVarDecls()
-    {
-        return Collections.singletonList(_param);
-    }
+    public JVarDecl[] getVarDecls()  { return new JVarDecl[] { _param }; }
 }

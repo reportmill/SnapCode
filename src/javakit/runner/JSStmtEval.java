@@ -349,8 +349,8 @@ public class JSStmtEval {
 
         // Get variable name
         JExprVarDecl varDeclExpr = aForStmt.getVarDeclExpr();
-        List<JVarDecl> varDecls = varDeclExpr.getVarDecls();
-        JVarDecl varDecl = varDecls.get(0);
+        JVarDecl[] varDecls = varDeclExpr.getVarDecls();
+        JVarDecl varDecl = varDecls[0];
         JExprId varId = varDecl.getId();
 
         // Get list value

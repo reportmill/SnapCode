@@ -3,9 +3,6 @@
  */
 package javakit.parse;
 import snap.util.ArrayUtils;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -26,7 +23,7 @@ public class JStmtTry extends JStmt implements WithVarDecls, WithBlockStmt {
     protected JStmtBlock  _finallyBlock;
 
     // Cached array of VarDecls
-    private List<JVarDecl> _varDecls;
+    private JVarDecl[] _varDecls;
 
     /**
      * Constructor.
@@ -113,19 +110,19 @@ public class JStmtTry extends JStmt implements WithVarDecls, WithBlockStmt {
      * WithVarDecls method.
      */
     @Override
-    public List<JVarDecl> getVarDecls()
+    public JVarDecl[] getVarDecls()
     {
         // If already set, just return
         if (_varDecls != null) return _varDecls;
 
         // If no resources, just return empty list
         if (_resources.length == 0)
-            return _varDecls = Collections.EMPTY_LIST;
+            return _varDecls = new JVarDecl[0];
 
         // Get list of VarDecls from VarDecl expression resources
         Stream<JExpr> resourcesStream = Stream.of(_resources);
         Stream<JExprVarDecl> varDeclExprStream = (Stream<JExprVarDecl>) (Stream<?>) resourcesStream.filter(expr -> expr instanceof JExprVarDecl);
-        Stream<JVarDecl> varDeclsStream = varDeclExprStream.flatMap(expr -> expr.getVarDecls().stream());
-        return _varDecls = varDeclsStream.collect(Collectors.toList());
+        Stream<JVarDecl> varDeclsStream = varDeclExprStream.flatMap(expr -> Stream.of(expr.getVarDecls()));
+        return _varDecls = varDeclsStream.toArray(size -> new JVarDecl[size]);
     }
 }

@@ -10,7 +10,7 @@ import java.util.*;
 public class JStmtBlock extends JStmt implements WithStmts, WithVarDeclsX {
 
     // An array of VarDecls held by JStmtVarDecls
-    private List<JVarDecl> _varDecls;
+    private JVarDecl[] _varDecls;
 
     /**
      * Constructor.
@@ -41,10 +41,10 @@ public class JStmtBlock extends JStmt implements WithStmts, WithVarDeclsX {
      * Returns VarDecls encapsulated by class (JFieldDecl VarDecls).
      */
     @Override
-    public List<JVarDecl> getVarDecls()
+    public JVarDecl[] getVarDecls()
     {
         if (_varDecls != null) return _varDecls;
-        List<JVarDecl> varDecls = WithStmts.getWithStmtsVarDecls(this);
+        JVarDecl[] varDecls = WithStmts.getWithStmtsVarDecls(this);
         return _varDecls = varDecls;
     }
 }

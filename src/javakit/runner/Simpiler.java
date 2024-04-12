@@ -65,12 +65,12 @@ public class Simpiler {
     {
         // Get VarDecls
         WithVarDecls withVarDecls = (WithVarDecls) aNode;
-        List<JVarDecl> varDecls = withVarDecls.getVarDecls();
-        int varDeclCount = varDecls.size();
+        JVarDecl[] varDecls = withVarDecls.getVarDecls();
+        int varDeclCount = varDecls.length;
 
         // Iterate over VarDecls and set IndexInStackFrame for each
         for (int i = 0; i < varDeclCount; i++) {
-            JVarDecl varDecl = varDecls.get(i);
+            JVarDecl varDecl = varDecls[i];
 
             // If varDecl.InitExpr is lambda, recurse in
             JExpr initExpr = varDecl.getInitExpr();

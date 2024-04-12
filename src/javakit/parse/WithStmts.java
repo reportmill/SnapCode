@@ -1,6 +1,5 @@
 package javakit.parse;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -13,12 +12,12 @@ public interface WithStmts {
     /**
      * Returns VarDecls encapsulated by WithStmts (JStmtVarDecl.VarDecls).
      */
-    static List<JVarDecl> getWithStmtsVarDecls(WithStmts withStmts)
+    static JVarDecl[] getWithStmtsVarDecls(WithStmts withStmts)
     {
-        // Get Statment.VarDecls
+        // Get Statement.VarDecls
         List<JStmt> statements = withStmts.getStatements();
         Stream<JStmtVarDecl> varDeclStmtsStream = (Stream<JStmtVarDecl>) (Stream<?>) statements.stream().filter(stmt -> stmt instanceof JStmtVarDecl);
-        Stream<JVarDecl> varDeclsStream = varDeclStmtsStream.flatMap(stmt -> stmt.getVarDecls().stream());
-        return varDeclsStream.collect(Collectors.toList());
+        Stream<JVarDecl> varDeclsStream = varDeclStmtsStream.flatMap(stmt -> Stream.of(stmt.getVarDecls()));
+        return varDeclsStream.toArray(size -> new JVarDecl[size]);
     }
 }

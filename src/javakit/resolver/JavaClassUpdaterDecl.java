@@ -4,9 +4,7 @@
 package javakit.resolver;
 import javakit.parse.*;
 import snap.util.ArrayUtils;
-import snap.util.ListUtils;
 import java.lang.reflect.Modifier;
-import java.util.*;
 
 /**
  * This class updates a JavaClass from JClassDecl.
@@ -86,11 +84,11 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     protected JavaField[] getDeclaredFields()
     {
         // Get FieldDecls
-        List<JVarDecl> fieldDecls = _classDecl.getVarDecls();
+        JVarDecl[] fieldDecls = _classDecl.getVarDecls();
 
         // Get fields
         JavaField.Builder fb = new JavaField.Builder(_javaClass);
-        JavaField[] fields = ListUtils.mapToArray(fieldDecls, vd -> getJavaFieldForVarDecl(vd, fb), JavaField.class);
+        JavaField[] fields = ArrayUtils.map(fieldDecls, vd -> getJavaFieldForVarDecl(vd, fb), JavaField.class);
 
         // Handle enum: Add constant fields
         if (_classDecl.isEnum()) {

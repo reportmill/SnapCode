@@ -1,6 +1,5 @@
 package javakit.parse;
-import snap.util.ListUtils;
-import java.util.List;
+import snap.util.ArrayUtils;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -17,16 +16,16 @@ public interface WithVarDecls {
     /**
      * Returns the list of VarDecls associated with this node.
      */
-    List<JVarDecl> getVarDecls();
+    JVarDecl[] getVarDecls();
 
     /**
      * Returns the matching var decl for given name, if present.
      */
     default JVarDecl getVarDeclForName(String aName)
     {
-        List<JVarDecl> varDecls = getVarDecls();
+        JVarDecl[] varDecls = getVarDecls();
         Predicate<JVarDecl> nameEquals = vd -> Objects.equals(aName, vd.getName());
-        return ListUtils.findMatch(varDecls, nameEquals);
+        return ArrayUtils.findMatch(varDecls, nameEquals);
     }
 
     /**

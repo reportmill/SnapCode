@@ -280,7 +280,7 @@ public class DeclMatcher {
      */
     private void findVarDeclsForIdInWithVarDecls(JExprId idExpr, WithVarDecls withVarDecls, List<JVarDecl> matchingVarDecls)
     {
-        List<JVarDecl> varDecls = withVarDecls.getVarDecls();
+        JVarDecl[] varDecls = withVarDecls.getVarDecls();
 
         // Iterate over var decls and add those that match prefix and are declared before id expression
         for (JVarDecl varDecl : varDecls) {

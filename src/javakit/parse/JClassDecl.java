@@ -3,7 +3,6 @@
  */
 package javakit.parse;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
@@ -54,7 +53,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     private JavaClass _javaClass;
 
     // An array of VarDecls held by JFieldDecls
-    private List<JVarDecl> _varDecls;
+    private JVarDecl[] _varDecls;
 
     // The class type
     public enum ClassType { Class, Interface, Enum, Annotation }
@@ -559,15 +558,15 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
      * Returns VarDecls encapsulated by class (JFieldDecl VarDecls).
      */
     @Override
-    public List<JVarDecl> getVarDecls()
+    public JVarDecl[] getVarDecls()
     {
         // If already set, just return
         if (_varDecls != null) return _varDecls;
 
         // Get FieldDecls.VarDecls
         JFieldDecl[] fieldDecls = getFieldDecls();
-        Stream<JVarDecl> varDeclsStream = Stream.of(fieldDecls).flatMap(fieldDecl -> fieldDecl.getVarDecls().stream());
-        List<JVarDecl> varDecls = varDeclsStream.collect(Collectors.toList());
+        Stream<JVarDecl> varDeclsStream = Stream.of(fieldDecls).flatMap(fieldDecl -> Stream.of(fieldDecl.getVarDecls()));
+        JVarDecl[] varDecls = varDeclsStream.toArray(size -> new JVarDecl[size]);
 
         // Set and return
         return _varDecls = varDecls;

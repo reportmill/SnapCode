@@ -3,9 +3,7 @@
  */
 package javakit.parse;
 import javakit.resolver.JavaDecl;
-
-import java.util.ArrayList;
-import java.util.List;
+import snap.util.ArrayUtils;
 
 /**
  * A Java expression for variable declarations.
@@ -18,8 +16,8 @@ public class JExprVarDecl extends JExpr implements WithVarDecls {
     // The type/return-type
     protected JType  _type;
 
-    // List of variable declarations
-    protected List<JVarDecl>  _varDecls = new ArrayList<>();
+    // Array of variable declarations
+    protected JVarDecl[]  _varDecls = new JVarDecl[0];
 
     /**
      * Constructor.
@@ -60,20 +58,20 @@ public class JExprVarDecl extends JExpr implements WithVarDecls {
     /**
      * Returns the first var decl.
      */
-    public JVarDecl getVarDecl()  { return _varDecls.size() > 0 ? _varDecls.get(0) : null; }
+    public JVarDecl getVarDecl()  { return _varDecls.length > 0 ? _varDecls[0] : null; }
 
     /**
      * Returns the variable declarations.
      */
     @Override
-    public List<JVarDecl> getVarDecls()  { return _varDecls; }
+    public JVarDecl[] getVarDecls()  { return _varDecls; }
 
     /**
      * Adds a variable declaration.
      */
     public void addVarDecl(JVarDecl aVarDecl)
     {
-        _varDecls.add(aVarDecl);
+        _varDecls = ArrayUtils.add(_varDecls, aVarDecl);
         addChild(aVarDecl);
     }
 
@@ -94,7 +92,7 @@ public class JExprVarDecl extends JExpr implements WithVarDecls {
     protected NodeError[] getErrorsImpl()
     {
         // Handle compound var
-        if (_type.isVarType() && _varDecls.size() > 1)
+        if (_type.isVarType() && _varDecls.length > 1)
             return NodeError.newErrorArray(_type, "'var' is not allowed in a compound declaration");
 
         // If any child VarDecls has errors, just return that

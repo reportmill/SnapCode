@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import java.util.*;
 import java.util.stream.Stream;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
@@ -165,5 +164,5 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
      * WithVarDecls method.
      */
     @Override
-    public List<JVarDecl> getVarDecls()  { return Arrays.asList(_params); }
+    public JVarDecl[] getVarDecls()  { return _params; }
 }

@@ -3,7 +3,7 @@
  */
 package javakit.parse;
 import javakit.resolver.JavaDecl;
-import java.util.*;
+import snap.util.ArrayUtils;
 
 /**
  * A JMember for Field declarations.
@@ -14,7 +14,7 @@ public class JFieldDecl extends JMemberDecl implements WithVarDecls {
     protected JType  _type;
 
     // List of variable declarations
-    protected List<JVarDecl> _vars = new ArrayList<>();
+    protected JVarDecl[] _vars = new JVarDecl[0];
 
     /**
      * Constructor.
@@ -40,15 +40,15 @@ public class JFieldDecl extends JMemberDecl implements WithVarDecls {
     /**
      * Returns the variable declarations.
      */
-    public List<JVarDecl> getVarDecls()  { return _vars; }
+    public JVarDecl[] getVarDecls()  { return _vars; }
 
     /**
      * Adds a variable declarations.
      */
-    public void addVarDecl(JVarDecl aVD)
+    public void addVarDecl(JVarDecl aVarDecl)
     {
-        _vars.add(aVD);
-        addChild(aVD);
+        _vars = ArrayUtils.add(_vars, aVarDecl);
+        addChild(aVarDecl);
     }
 
     /**
@@ -57,7 +57,7 @@ public class JFieldDecl extends JMemberDecl implements WithVarDecls {
     @Override
     protected JavaDecl getDeclImpl()
     {
-        JVarDecl varDecl = _vars.size() > 0 ? _vars.get(0) : null;
+        JVarDecl varDecl = _vars.length > 0 ? _vars[0] : null;
         return varDecl != null ? varDecl.getDecl() : null;
     }
 
