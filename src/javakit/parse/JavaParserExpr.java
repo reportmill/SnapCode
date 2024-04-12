@@ -788,32 +788,38 @@ public class JavaParserExpr extends Parser {
     public static class LambdaExprHandler extends JNodeParseHandler<JExprLambda> {
 
         /**
-         * ParseHandler method.
+         * ParseHandler method:
+         *     LookAhead (Identifier "->") Identifier "->" (Expression | Block) |
+         *     LookAhead ("(" Identifier ("," Identifier)* ")" "->") "(" Identifier ("," Identifier)* ")" "->" (Expression | Block) |
+         *     LookAhead (FormalParams "->") FormalParams "->" (Expression | Block)
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
+            JExprLambda lambdaExpr = getPart();
+
             switch (anId) {
 
                 // Handle Identifier
                 case "Identifier":
                     JVarDecl vd = new JVarDecl();
                     vd.setId(aNode.getCustomNode(JExprId.class));
-                    getPart().addParameter(vd);
+                    lambdaExpr.addParameter(vd);
                     break;
 
-                // Handle FormalParam
-                case "FormalParam":
-                    getPart().addParameter(aNode.getCustomNode(JVarDecl.class));
+                // Handle FormalParams
+                case "FormalParams":
+                    JVarDecl[] formalParams = aNode.getCustomNode(JVarDecl[].class);
+                    lambdaExpr.setParameters(formalParams);
                     break;
 
                 // Handle Expression
                 case "Expression":
-                    getPart().setExpr(aNode.getCustomNode(JExpr.class));
+                    lambdaExpr.setExpr(aNode.getCustomNode(JExpr.class));
                     break;
 
                 // Handle Block
                 case "Block":
-                    getPart().setBlock(aNode.getCustomNode(JStmtBlock.class));
+                    lambdaExpr.setBlock(aNode.getCustomNode(JStmtBlock.class));
                     break;
             }
         }

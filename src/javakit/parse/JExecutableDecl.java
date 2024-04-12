@@ -6,7 +6,7 @@ import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaExecutable;
 import javakit.resolver.JavaType;
 import snap.util.ListUtils;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -22,7 +22,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     private JTypeVar[] _typeVars = new JTypeVar[0];
 
     // The formal parameters
-    protected List<JVarDecl>  _params = new ArrayList<>();
+    protected JVarDecl[] _params = new JVarDecl[0];
 
     // The array of thrown exception class name expressions
     protected JExpr[] _throwsList = new JExpr[0];
@@ -69,19 +69,16 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     /**
      * Returns the list of formal parameters.
      */
-    public List<JVarDecl> getParameters()  { return _params; }
+    public List<JVarDecl> getParameters()  { return Arrays.asList(_params); }
 
     /**
      * Returns the list of formal parameters.
      */
-    public void addParam(JVarDecl aVarDecl)
+    public void setParameters(JVarDecl[] varDecls)
     {
-        if (aVarDecl == null) {
-            System.err.println("JExecutableDecl.addParam: Add null param!");
-            return;
-        }
-        _params.add(aVarDecl);
-        addChild(aVarDecl);
+        Stream.of(_params).forEach(vdecl -> removeChild(vdecl));
+        _params = varDecls;
+        Stream.of(_params).forEach(vdecl -> addChild(vdecl));
     }
 
     /**
@@ -175,11 +172,11 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     protected JavaType[] getParamClassTypesSafe()
     {
         // Declare array for return types
-        JavaType[] paramTypes = new JavaType[_params.size()];
+        JavaType[] paramTypes = new JavaType[_params.length];
 
         // Iterate over params to get types
-        for (int i = 0, iMax = _params.size(); i < iMax; i++) {
-            JVarDecl varDecl = _params.get(i);
+        for (int i = 0, iMax = _params.length; i < iMax; i++) {
+            JVarDecl varDecl = _params[i];
 
             // Get current type and TypeVar (if type is one)
             JType varDeclType = varDecl.getType();

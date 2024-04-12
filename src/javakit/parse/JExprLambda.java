@@ -3,7 +3,9 @@
  */
 package javakit.parse;
 import java.util.*;
+import java.util.stream.Stream;
 import javakit.resolver.*;
+import snap.util.ArrayUtils;
 
 /**
  * A JExpr to represent lambda expressions.
@@ -11,7 +13,7 @@ import javakit.resolver.*;
 public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBlockStmt {
 
     // The parameters
-    protected List<JVarDecl>  _params = new ArrayList<>();
+    protected JVarDecl[] _params = new JVarDecl[0];
 
     // The expression, if lambda has expression
     protected JExpr  _expr;
@@ -33,19 +35,28 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
     /**
      * Returns the number of parameters.
      */
-    public int getParameterCount()  { return _params.size(); }
+    public int getParameterCount()  { return _params.length; }
 
     /**
      * Returns the list of formal parameters.
      */
-    public List<JVarDecl> getParameters()  { return _params; }
+    public List<JVarDecl> getParameters()  { return Arrays.asList(_params); }
+
+    /**
+     * Set the formal parameters.
+     */
+    public void setParameters(JVarDecl[] varDecls)
+    {
+        _params = varDecls;
+        Stream.of(varDecls).forEach(vdecl -> addChild(vdecl));
+    }
 
     /**
      * Adds a formal parameter.
      */
     public void addParameter(JVarDecl aVarDecl)
     {
-        _params.add(aVarDecl);
+        _params = ArrayUtils.add(_params, aVarDecl);
         addChild(aVarDecl);
     }
 
@@ -99,8 +110,7 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
 
             // Get arg type for lambda arg index
             JavaType argType = lambdaMethod.getParameterType(i);
-            //if (!argType.isResolvedType())
-            //    argType = getResolvedTypeForType(argType);
+            //if (!argType.isResolvedType()) argType = getResolvedTypeForType(argType);
             paramTypes[i] = argType;
         }
 
@@ -131,7 +141,7 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
     protected JType createTypeNodeForLambdaParameterVarDecl(JVarDecl varDecl)
     {
         // Get parameter index for var decl
-        int parameterIndex = _params.indexOf(varDecl);
+        int parameterIndex = ArrayUtils.indexOf(_params, varDecl);
         if (parameterIndex < 0)
             return null;
 
@@ -155,5 +165,5 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
      * WithVarDecls method.
      */
     @Override
-    public List<JVarDecl> getVarDecls()  { return _params; }
+    public List<JVarDecl> getVarDecls()  { return Arrays.asList(_params); }
 }

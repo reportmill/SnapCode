@@ -686,7 +686,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * MethodDecl Handler.
+     * MethodDecl Handler: TypeParams? ResultType Identifier FormalParams ("[" "]")* ThrowsList? (Block | ";")
      */
     public static class MethodDeclHandler extends JNodeParseHandler<JMethodDecl> {
 
@@ -712,14 +712,16 @@ public class JavaParser extends JavaParserStmt {
                     methodDecl.setType(aNode.getCustomNode(JType.class));
                     break;
 
-                // Handle MethodDeclarator Identifier
+                // Handle Identifier
                 case "Identifier":
-                    methodDecl.setId(aNode.getCustomNode(JExprId.class));
+                    JExprId methodNameId = aNode.getCustomNode(JExprId.class);
+                    methodDecl.setId(methodNameId);
                     break;
 
-                // Handle MethodDeclarator FormalParam
-                case "FormalParam":
-                    methodDecl.addParam(aNode.getCustomNode(JVarDecl.class));
+                // Handle FormalParams
+                case "FormalParams":
+                    JVarDecl[] formalParams = aNode.getCustomNode(JVarDecl[].class);
+                    methodDecl.setParameters(formalParams);
                     break;
 
                 // Handle ThrowsList
@@ -739,7 +741,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * ConstrDecl Handler.
+     * ConstrDecl Handler: TypeParams? Identifier FormalParams ThrowsList? "{" (LookAhead (ConstrCall) ConstrCall)? BlockStatement* "}"
      */
     public static class ConstrDeclHandler extends JNodeParseHandler<JConstrDecl> {
 
@@ -765,9 +767,10 @@ public class JavaParser extends JavaParserStmt {
                     constrDecl.setId(aNode.getCustomNode(JExprId.class));
                     break;
 
-                // Handle FormalParam
-                case "FormalParam":
-                    constrDecl.addParam(aNode.getCustomNode(JVarDecl.class));
+                // Handle FormalParams
+                case "FormalParams":
+                    JVarDecl[] formalParams = aNode.getCustomNode(JVarDecl[].class);
+                    constrDecl.setParameters(formalParams);
                     break;
 
                 // Handle ThrowsList
@@ -899,7 +902,7 @@ public class JavaParser extends JavaParserStmt {
         DoStatementHandler.class, WhileStatementHandler.class, IfStatementHandler.class,
         SwitchLabelHandler.class, SwitchStatementHandler.class, ExprStatementHandler.class,
         EmptyStatementHandler.class, VarDeclExprHandler.class, VarDeclHandler.class,
-        FormalParamHandler.class, BlockStatementHandler.class, BlockHandler.class,
+        FormalParamsHandler.class, FormalParamHandler.class, BlockStatementHandler.class, BlockHandler.class,
         LabeledStatementHandler.class, AssertStatementHandler.class, ModifiersHandler.class,
         StatementHandler.class, ConstrCallHandler.class, ThrowsListHandler.class,
         ConstrDeclHandler.class, MethodDeclHandler.class, FieldDeclHandler.class,

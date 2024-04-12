@@ -4,6 +4,7 @@
 package javakit.parse;
 import snap.parse.*;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -180,7 +181,45 @@ public class JavaParserStmt extends JavaParserExpr {
     }
 
     /**
-     * FormalParam Handler.
+     * FormalParams Handler: "(" (FormalParam ("," FormalParam)*)? ")"
+     */
+    public static class FormalParamsHandler extends ParseHandler<JVarDecl[]> {
+
+        // List of FormalParams
+        private List<JVarDecl> _formalParams = new ArrayList<>();
+
+        /**
+         * ParseHandler method.
+         */
+        protected void parsedOne(ParseNode aNode, String anId)
+        {
+            if (anId == "FormalParam") {
+                JVarDecl formalParam = aNode.getCustomNode(JVarDecl.class);
+                _formalParams.add(formalParam);
+            }
+        }
+
+        /**
+         * Override to return array.
+         */
+        public JVarDecl[] parsedAll()  { return _formalParams.toArray(new JVarDecl[0]); }
+
+        /**
+         * Override to clear FormalParams list.
+         */
+        @Override
+        public void reset()
+        {
+            super.reset();
+            _formalParams.clear();
+        }
+
+        @Override
+        protected Class getPartClass()  { return JVarDecl[].class; }
+    }
+
+    /**
+     * FormalParam Handler: Modifiers ("final" | Annotation)? Type "..."? Identifier ("[" "]")*
      */
     public static class FormalParamHandler extends JNodeParseHandler<JVarDecl> {
 
