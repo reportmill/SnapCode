@@ -119,7 +119,11 @@ public class NodeCompleter {
         }
 
         // Add reserved word completions (public, private, for, white, etc.)
-        addWordCompletions();
+        if (parent instanceof JStmtExpr)
+            addWordCompletions();
+
+        // Add global literal completions (true, false, null, this, super)
+        addGlobalLiteralCompletions();
 
         // Get variables with prefix of name and add to completions
         List<JVarDecl> varDecls = _prefixMatcher.getVarDeclsForId(anId);
@@ -249,8 +253,13 @@ public class NodeCompleter {
         for (JavaWord word : JavaWord.ALL)
             if (_prefixMatcher.matchesString(word.getName()))
                 addCompletionDecl(word);
+    }
 
-        // Add Global Literals (true, false, null, this, super
+    /**
+     * Add Global Literals (true, false, null, this, super).
+     */
+    private void addGlobalLiteralCompletions()
+    {
         JavaLocalVar[] globalLiters = _resolver.getGlobalLiterals();
         for (JavaDecl literal : globalLiters)
             if (_prefixMatcher.matchesString(literal.getName()))
