@@ -15,7 +15,6 @@ import snapcode.project.JavaAgent;
 import snapcode.util.ExceptionUtil;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * A class to evaluate JavaShell code.
@@ -213,9 +212,9 @@ public class JavaShell {
         _varStack.pushStackFrame();
 
         // Install params
-        List<JVarDecl> params = aMethodDecl.getParameters();
-        for (int i = 0, iMax = params.size(); i < iMax; i++) {
-            JVarDecl varDecl = params.get(i);
+        JVarDecl[] params = aMethodDecl.getParameters();
+        for (int i = 0, iMax = params.length; i < iMax; i++) {
+            JVarDecl varDecl = params[i];
             JExprId varId = varDecl.getId();
             setExprIdValue(varId, argValues[i]);
         }

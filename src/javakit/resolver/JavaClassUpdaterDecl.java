@@ -161,8 +161,8 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
             mb.name(methodName);
 
             // Get/set param types
-            List<JVarDecl> paramsDecls = methodDecl.getParameters();
-            JavaType[] paramTypes = ListUtils.mapToArray(paramsDecls, varDecl -> getJavaTypeForVarDecl(varDecl), JavaType.class);
+            JVarDecl[] paramsDecls = methodDecl.getParameters();
+            JavaType[] paramTypes = ArrayUtils.map(paramsDecls, varDecl -> getJavaTypeForVarDecl(varDecl), JavaType.class);
             mb.paramTypes(paramTypes);
 
             // Get/set return type
@@ -197,8 +197,8 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
             cb.mods(mods);
 
             // Get/set param types
-            List<JVarDecl> paramsDecls = methodDecl.getParameters();
-            JavaType[] paramTypes = ListUtils.mapToArray(paramsDecls, varDecl -> getJavaTypeForVarDecl(varDecl), JavaType.class);
+            JVarDecl[] paramsDecls = methodDecl.getParameters();
+            JavaType[] paramTypes = ArrayUtils.map(paramsDecls, varDecl -> getJavaTypeForVarDecl(varDecl), JavaType.class);
             cb.paramTypes(paramTypes);
 
             // Add to builder list

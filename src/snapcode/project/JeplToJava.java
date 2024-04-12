@@ -1,6 +1,7 @@
 package snapcode.project;
 import javakit.parse.*;
 import javakit.resolver.JavaType;
+import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import java.lang.reflect.Modifier;
 import java.util.List;
@@ -311,8 +312,8 @@ public class JeplToJava {
     {
         // Append parameters
         _sb.append('(');
-        List<JVarDecl> varDecls = methodDecl.getParameters();
-        String varDeclsStr = varDecls.stream().map(JVarDecl::getString).collect(Collectors.joining(", "));
+        JVarDecl[] varDecls = methodDecl.getParameters();
+        String varDeclsStr = ArrayUtils.mapToStringsAndJoin(varDecls, JVarDecl::getString, ", ");
         _sb.append(varDeclsStr);
         _sb.append(")\n");
     }

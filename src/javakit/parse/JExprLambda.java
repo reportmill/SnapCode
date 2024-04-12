@@ -40,7 +40,7 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
     /**
      * Returns the list of formal parameters.
      */
-    public List<JVarDecl> getParameters()  { return Arrays.asList(_params); }
+    public JVarDecl[] getParameters()  { return _params; }
 
     /**
      * Set the formal parameters.

@@ -5,7 +5,7 @@ package javakit.parse;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaExecutable;
 import javakit.resolver.JavaType;
-import snap.util.ListUtils;
+import snap.util.ArrayUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -69,7 +69,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     /**
      * Returns the list of formal parameters.
      */
-    public List<JVarDecl> getParameters()  { return Arrays.asList(_params); }
+    public JVarDecl[] getParameters()  { return _params; }
 
     /**
      * Returns the list of formal parameters.
@@ -101,8 +101,8 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
      */
     public String[] getParameterNames()
     {
-        List<JVarDecl> paramTypes = getParameters();
-        return ListUtils.mapToArray(paramTypes, pdecl -> pdecl.getName(), String.class);
+        JVarDecl[] paramTypes = getParameters();
+        return ArrayUtils.map(paramTypes, pdecl -> pdecl.getName(), String.class);
     }
 
     /**
@@ -124,10 +124,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
      * WithVarDecls method: Just returns parameters list.
      */
     @Override
-    public List<JVarDecl> getVarDecls()
-    {
-        return getParameters();
-    }
+    public List<JVarDecl> getVarDecls()  { return Arrays.asList(getParameters()); }
 
     /**
      * Returns the actual method or constructor.
@@ -211,8 +208,8 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
         NodeError[] errors = returnType.getErrors();
 
         // Get errors for params
-        List<JVarDecl> parameters = getParameters();
-        errors = NodeError.addNodeErrorsForNodesList(errors, parameters);
+        JVarDecl[] parameters = getParameters();
+        errors = NodeError.addNodeErrorsForNodes(errors, parameters);
 
         // Get errors for throws list
         JExpr[] throwsList = getThrowsList();

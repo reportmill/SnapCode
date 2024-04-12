@@ -9,7 +9,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -150,9 +149,9 @@ public abstract class LambdaWrapper implements InvocationHandler {
             _thisObject = thisObject;
             _contentExpr = lambdaExpr.getExpr();
 
-            List<JVarDecl> varDecls = lambdaExpr.getParameters();
-            _param0 = varDecls.size() > 0 ? varDecls.get(0) : null;
-            _param1 = varDecls.size() > 1 ? varDecls.get(1) : null;
+            JVarDecl[] varDecls = lambdaExpr.getParameters();
+            _param0 = varDecls.length > 0 ? varDecls[0] : null;
+            _param1 = varDecls.length > 1 ? varDecls[1] : null;
         }
 
         /**
