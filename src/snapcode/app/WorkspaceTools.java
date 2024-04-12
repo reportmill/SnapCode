@@ -271,9 +271,11 @@ public class WorkspaceTools {
      */
     public void closeProject()
     {
-        HttpServerTool httpServerTool = getToolForClass(HttpServerTool.class);
-        if (httpServerTool != null)
-            httpServerTool.stopServer();
+        // Notify all tools of close
+        for (WorkspaceTool tool : _tools) {
+            if (!tool.workspaceIsClosing())
+                break;
+        }
     }
 
     /**

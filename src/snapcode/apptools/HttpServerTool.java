@@ -378,4 +378,14 @@ public class HttpServerTool extends WorkspaceTool {
 
     @Override
     public String getTitle()  { return "HTTP Server"; }
+
+    /**
+     * Override to stop server if running.
+     */
+    @Override
+    protected boolean workspaceIsClosing()
+    {
+        stopServer();
+        return true;
+    }
 }

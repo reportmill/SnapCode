@@ -444,4 +444,15 @@ public class RunTool extends WorkspaceTool implements AppListener {
      */
     @Override
     public String getTitle()  { return "Run / Console"; }
+
+    /**
+     * Override to terminate app if running.
+     */
+    @Override
+    protected boolean workspaceIsClosing()
+    {
+        if (isRunning())
+            cancelRun();
+        return true;
+    }
 }

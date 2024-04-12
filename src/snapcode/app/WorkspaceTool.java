@@ -114,6 +114,11 @@ public class WorkspaceTool extends ViewOwner {
     public String getTitle()  { return "Unknown"; }
 
     /**
+     * Called when the workspace wants to close. Should break into workspaceRequestsClose() and workspaceIsClosing().
+     */
+    protected boolean workspaceIsClosing()  { return  true; }
+
+    /**
      * Respond UI.
      */
     @Override

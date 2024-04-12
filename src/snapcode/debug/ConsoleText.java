@@ -110,8 +110,11 @@ public class ConsoleText extends TextBlock {
         String classFilePath = aPrefix.substring(start, end);
         classFilePath = '/' + classFilePath.replace('.', '/') + ".java";
 
-        // Get full path to source file in project (or full URL string if external source)
+        // Get project (if null, return - shouldn't be possible anymore)
         Project rootProject = _runTool.getProject();
+        if (rootProject == null) { System.err.println("ConsoleText.getLink: No Project"); return "/Unknown"; }
+
+        // Get full path to source file in project (or full URL string if external source)
         String sourceCodeFilePath = ProjectUtils.getSourceCodeUrlForClassPath(rootProject, classFilePath);
         String lineStr = linkedText.substring(linkedText.indexOf(":") + 1);
 
