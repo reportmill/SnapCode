@@ -17,6 +17,7 @@ public class JInitializerDecl extends JMemberDecl implements WithBlockStmt {
     /**
      * Returns whether is static.
      */
+    @Override
     public boolean isStatic()  { return isStatic; }
 
     /**

@@ -43,6 +43,11 @@ public class JMemberDecl extends JBodyDecl implements WithId {
     }
 
     /**
+     * Returns whether is static.
+     */
+    public boolean isStatic()  { return _modifiers != null && _modifiers.isStatic(); }
+
+    /**
      * Returns the identifier.
      */
     @Override

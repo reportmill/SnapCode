@@ -9,4 +9,8 @@ package javakit.parse;
  */
 public class JBodyDecl extends JNode {
 
+    /**
+     * Returns whether this decl is static context.
+     */
+    public boolean isStatic()  { return true; }
 }

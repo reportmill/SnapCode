@@ -134,11 +134,15 @@ public class NodeCompleter {
         JClassDecl enclosingClassDecl = anId.getEnclosingClassDecl();
         JavaClass enclosingClass = enclosingClassDecl != null ? enclosingClassDecl.getEvalClass() : null;
 
+        // Get whether in static context
+        JBodyDecl enclosingDecl = anId.getParent(JBodyDecl.class);
+        boolean isStatic = enclosingDecl != null && enclosingDecl.isStatic();
+
         // Add methods of enclosing class
         while (enclosingClass != null) {
 
             // Add matching members and inner classes for enclosing class
-            JavaMember[] matchingMembers = _prefixMatcher.getMembersForClass(enclosingClass, false);
+            JavaMember[] matchingMembers = _prefixMatcher.getMembersForClass(enclosingClass, isStatic);
             addCompletionDecls(matchingMembers);
             JavaClass[] matchingInnerClasses = _prefixMatcher.getInnerClassesForClass(enclosingClass);
             addCompletionDecls(matchingInnerClasses);
