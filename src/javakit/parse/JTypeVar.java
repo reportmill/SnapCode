@@ -3,11 +3,11 @@
  */
 package javakit.parse;
 import javakit.resolver.*;
-import java.util.*;
+import snap.util.ArrayUtils;
 
 /**
- * A JNode subclass for type variables (aka type paramters).
- * These are the unresolved types found in class, method, constructor declarations:
+ * A JNode subclass for type variables (aka type parameters).
+ * These are the generic types found in class, method, constructor declarations:
  * public class MyClass <T>
  * public <T> T myMethod(T anObj) { ... }
  */
@@ -16,8 +16,8 @@ public class JTypeVar extends JNode implements WithId {
     // The name identifier
     private JExprId _id;
 
-    // The list of types
-    private List<JType> _types = new ArrayList<>();
+    // The array of types
+    private JType[] _types = JType.EMPTY_TYPES_ARRAY;
 
     /**
      * Constructor.
@@ -46,14 +46,14 @@ public class JTypeVar extends JNode implements WithId {
     /**
      * Returns the types.
      */
-    public List<JType> getTypes()  { return _types; }
+    public JType[] getTypes()  { return _types; }
 
     /**
      * Adds a type.
      */
     public void addType(JType aType)
     {
-        _types.add(aType);
+        _types = ArrayUtils.add(_types, aType);
         addChild(aType);
     }
 
@@ -62,13 +62,20 @@ public class JTypeVar extends JNode implements WithId {
      */
     public JavaType getBoundsType()
     {
-        return _types.size() > 0 ? _types.get(0).getJavaType() : getJavaClassForClass(Object.class);
+        if (_types == JType.EMPTY_TYPES_ARRAY || _types.length == 0)
+            return getJavaClassForClass(Object.class);
+        return _types[0].getJavaType();
     }
 
     /**
      * Override to get JavaDecl from parent decl (Class, Method).
      */
-    protected JavaDecl getDeclImpl()
+    protected JavaDecl getDeclImpl()  { return getJavaTypeVariable(); }
+
+    /**
+     * Returns the JavaTypeVariable from parent (Class, Method).
+     */
+    protected JavaTypeVariable getJavaTypeVariable()
     {
         // Get Parent declaration
         JNode parent = getParent();
@@ -77,22 +84,20 @@ public class JTypeVar extends JNode implements WithId {
             return null;
 
         // Handle Class
-        String name = getName();
+        String typeVarName = getName();
         if (parentDecl instanceof JavaClass) {
             JavaClass parentClass = (JavaClass) parentDecl;
-            JavaTypeVariable typeVar = parentClass.getTypeVarForName(name);
-            return typeVar;
+            return parentClass.getTypeVarForName(typeVarName);
         }
 
         // Handle Executable (Method/Constructor)
         if (parentDecl instanceof JavaExecutable) {
             JavaExecutable parentMethod = (JavaExecutable) parentDecl;
-            JavaTypeVariable typeVar = parentMethod.getTypeVarForName(name);
-            return typeVar;
+            return parentMethod.getTypeVarForName(typeVarName);
         }
 
         // Return
-        System.out.println("JTypeVar.getDeclImpl: Unsupported parent type: " + parentDecl);
+        System.out.println("JTypeVar.getJavaTypeVariable: Unsupported parent type: " + parentDecl);
         return null;
     }
 

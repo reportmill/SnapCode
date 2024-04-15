@@ -591,7 +591,8 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * TypeParam Handler.
+     * TypeParam Handler: Identifier TypeBound?
+     *     TypeBound: "extends" ClassType ("&" ClassType)*
      */
     public static class TypeParamHandler extends JNodeParseHandler<JTypeVar> {
 
@@ -604,19 +605,23 @@ public class JavaParser extends JavaParserStmt {
             JTypeVar typeVar = getPart();
 
             // Handle Identifier
-            if (anId == "Identifier")
-                typeVar.setId(aNode.getCustomNode(JExprId.class));
+            if (anId == "Identifier") {
+                JExprId idExpr = aNode.getCustomNode(JExprId.class);
+                typeVar.setId(idExpr);
+            }
 
             // Handle ClassType
-            else if (anId == "ClassType")
-                typeVar.addType(aNode.getCustomNode(JType.class));
+            else if (anId == "ClassType") {
+                JType type = aNode.getCustomNode(JType.class);
+                typeVar.addType(type);
+            }
         }
 
         protected Class<JTypeVar> getPartClass()  { return JTypeVar.class; }
     }
 
     /**
-     * TypeParams Handler.
+     * TypeParams Handler: "<" TypeParam ("," TypeParam)* ">"
      */
     public static class TypeParamsHandler extends ParseHandler<JTypeVar[]> {
 

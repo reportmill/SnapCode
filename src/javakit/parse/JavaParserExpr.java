@@ -142,7 +142,7 @@ public class JavaParserExpr extends Parser {
             JType type = getPart();
 
             // Handle Identifier: Add to type
-            if (anId.equals("Identifier")) {
+            if (anId == "Identifier") {
                 JExprId id = aNode.getCustomNode(JExprId.class);
                 type.addId(id);
             }

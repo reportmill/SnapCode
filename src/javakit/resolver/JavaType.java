@@ -8,6 +8,9 @@ package javakit.resolver;
  */
 public class JavaType extends JavaDecl {
 
+    // Constant for empty types array
+    public static final JavaType[] EMPTY_TYPES_ARRAY = new JavaType[0];
+
     /**
      * Constructor.
      */

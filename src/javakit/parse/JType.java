@@ -2,12 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import java.util.*;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaType;
 import javakit.resolver.ResolverUtils;
 import snap.parse.ParseToken;
+import snap.util.ArrayUtils;
 
 /**
  * A JNode for types.
@@ -24,13 +24,16 @@ public class JType extends JNode {
     protected int  _arrayCount;
 
     // The generic Types
-    private List<JType>  _typeArgs;
+    private JType[]  _typeArgs = EMPTY_TYPES_ARRAY;
 
     // The base type
     private JavaType _baseType;
 
     // The JavaType
     protected JavaType _javaType;
+
+    // Constant for empty types array
+    public static final JType[] EMPTY_TYPES_ARRAY = new JType[0];
 
     /**
      * Constructor.
@@ -101,35 +104,24 @@ public class JType extends JNode {
     /**
      * Returns the generic types.
      */
-    public List<JType> getTypeArgs()  { return _typeArgs; }
+    public JType[] getTypeArgs()  { return _typeArgs; }
 
     /**
      * Adds a type arg.
      */
     public void addTypeArg(JType aType)
     {
-        if (_typeArgs == null) _typeArgs = new ArrayList<>();
-        _typeArgs.add(aType);
+        _typeArgs = ArrayUtils.add(_typeArgs, aType);
         addChild(aType);
     }
 
     /**
-     * Returns the number of type args.
+     * Returns the type arg types.
      */
-    public int getTypeArgCount()  { return _typeArgs != null ? _typeArgs.size() : 0; }
-
-    /**
-     * Returns the type arg type at given index.
-     */
-    public JType getTypeArg(int anIndex)  { return _typeArgs.get(anIndex); }
-
-    /**
-     * Returns the type arg decl at given index.
-     */
-    public JavaType getTypeArgType(int anIndex)
+    public JavaType[] getTypeArgTypes()
     {
-        JType typeArg = getTypeArg(anIndex);
-        return typeArg.getJavaType();
+        if (_typeArgs == EMPTY_TYPES_ARRAY) return JavaType.EMPTY_TYPES_ARRAY;
+        return ArrayUtils.map(_typeArgs, jtyp -> getJavaTypeForTypeArg(jtyp), JavaType.class);
     }
 
     /**
@@ -199,19 +191,9 @@ public class JType extends JNode {
         if (javaType == null)
             return null;
 
-        // If type args, build array and get decl for ParamType
-        int typeArgCount = getTypeArgCount();
-        if (typeArgCount > 0) {
-
-            // Get type arg types
-            JavaType[] typeArgTypes = new JavaType[typeArgCount];
-            for (int i = 0; i < typeArgCount; i++) {
-                JavaType typeArgType = typeArgTypes[i] = getTypeArgType(i);
-                if (typeArgType == null)
-                    return getJavaClassForClass(Object.class); // Do something better here!
-            }
-
-            // Get parameterized type
+        // If type args, get ParameterizedType for types
+        JavaType[] typeArgTypes = getTypeArgTypes();
+        if (typeArgTypes.length > 0) {
             JavaClass javaClass = (JavaClass) javaType;
             javaType = javaClass.getParameterizedTypeForTypes(typeArgTypes);
         }
@@ -321,6 +303,15 @@ public class JType extends JNode {
     protected String createString()
     {
         return getName();
+    }
+
+    /**
+     * Returns the JavaType for given type, using java.lang.Object if not found.
+     */
+    private static JavaType getJavaTypeForTypeArg(JType aType)
+    {
+        JavaType javaType = aType.getJavaType();
+        return javaType != null ? javaType : aType.getJavaClassForName("java.lang.Object");
     }
 
     /**
