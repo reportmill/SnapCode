@@ -170,7 +170,7 @@ public class JeplToJava {
 
         // Append return type
         JType returnType = methodDecl.getType();
-        String returnTypeStr = returnType.getString();
+        String returnTypeStr = returnType != null ? returnType.getString() : "";
         _sb.append(returnTypeStr);
         _sb.append(' ');
 

@@ -203,7 +203,9 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     {
         // Get errors for type
         JType returnType = getType();
-        NodeError[] errors = returnType.getErrors();
+        if (returnType == null)
+            return NodeError.newErrorArray(getChild(0), "Missing return type");
+        NodeError[] errors = NodeError.NO_ERRORS; //returnType.getErrors(); Add this back when method type var works (e.g. <T> T ...)
 
         // Get errors for params
         JVarDecl[] parameters = getParameters();

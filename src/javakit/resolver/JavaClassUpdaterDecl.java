@@ -236,7 +236,8 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
      */
     private JavaType getJavaTypeForVarDecl(JVarDecl varDecl)
     {
-        JavaType javaType = varDecl.getEvalType();
+        JType varType = varDecl.getType();
+        JavaType javaType = varType.getJavaType();
         if (javaType == null)
             javaType = _resolver.getJavaTypeForType(Object.class);
         return javaType;
