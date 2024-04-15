@@ -613,7 +613,7 @@ public class JavaParser extends JavaParserStmt {
             // Handle ClassType
             else if (anId == "ClassType") {
                 JType type = aNode.getCustomNode(JType.class);
-                typeVar.addType(type);
+                typeVar.addBound(type);
             }
         }
 

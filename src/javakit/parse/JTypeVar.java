@@ -16,8 +16,8 @@ public class JTypeVar extends JNode implements WithId {
     // The name identifier
     private JExprId _id;
 
-    // The array of types
-    private JType[] _types = JType.EMPTY_TYPES_ARRAY;
+    // The array of bounds types
+    private JType[] _bounds = JType.EMPTY_TYPES_ARRAY;
 
     /**
      * Constructor.
@@ -44,16 +44,16 @@ public class JTypeVar extends JNode implements WithId {
     }
 
     /**
-     * Returns the types.
+     * Returns the bounds.
      */
-    public JType[] getTypes()  { return _types; }
+    public JType[] getBounds()  { return _bounds; }
 
     /**
-     * Adds a type.
+     * Adds a bound.
      */
-    public void addType(JType aType)
+    public void addBound(JType aType)
     {
-        _types = ArrayUtils.add(_types, aType);
+        _bounds = ArrayUtils.add(_bounds, aType);
         addChild(aType);
     }
 
@@ -62,9 +62,9 @@ public class JTypeVar extends JNode implements WithId {
      */
     public JavaType getBoundsType()
     {
-        if (_types == JType.EMPTY_TYPES_ARRAY || _types.length == 0)
+        if (_bounds == JType.EMPTY_TYPES_ARRAY || _bounds.length == 0)
             return getJavaClassForClass(Object.class);
-        return _types[0].getJavaType();
+        return _bounds[0].getJavaType();
     }
 
     /**
