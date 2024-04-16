@@ -3,7 +3,6 @@
  */
 package javakit.resolver;
 import java.lang.reflect.*;
-import java.util.Arrays;
 
 /**
  * This class represents a JavaClass Field.
@@ -105,78 +104,30 @@ public class JavaField extends JavaMember {
     }
 
     /**
-     * A Builder class for JavaField.
+     * Creates a field for given name and type.
      */
-    public static class Builder {
+    public static JavaField createField(JavaClass javaClass, String fieldName, Class<?> fieldType)
+    {
+        JavaField f = new JavaField(javaClass._resolver, javaClass, null);
+        f._mods = Modifier.PUBLIC;
+        f._id = javaClass.getId() + '.' + fieldName;
+        f._name = f._simpleName = fieldName;
+        f._declaringClass = javaClass;
+        f._evalType = javaClass._resolver.getJavaClassForClass(fieldType);
+        return f;
+    }
 
-        // Ivars
-        Resolver  _resolver;
-        JavaClass  _declaringClass;
-        int  _mods =  Modifier.PUBLIC;
-        String  _name;
-        JavaType  _type;
-
-        // For build all
-        private JavaField[]  _fields = new JavaField[20];
-        private int  _fieldCount;
-
-        /**
-         * Constructor.
-         */
-        public Builder(JavaClass declaringClass)
-        {
-            _declaringClass = declaringClass;
-            _resolver = declaringClass._resolver;
-        }
-
-        /**
-         * Init.
-         */
-        public void init(Resolver aResolver, String aClassName)
-        {
-            _resolver = aResolver;
-            _declaringClass = aResolver.getJavaClassForName(aClassName);
-        }
-
-        // Properties.
-        public Builder mods(int mods)  { _mods = mods; return this; }
-        public Builder name(String name)  { _name = name; return this; }
-        public Builder type(JavaType type)  { _type = type; return this; }
-        public Builder type(Type type)  { _type = _resolver.getJavaTypeForType(type); return this; }
-
-        /**
-         * Build.
-         */
-        public JavaField build()
-        {
-            JavaField f = new JavaField(_resolver, _declaringClass, null);
-            f._mods = _mods;
-            f._id = _declaringClass.getId() + '.' + _name;
-            f._name = f._simpleName = _name;
-            f._declaringClass = _declaringClass;
-            f._evalType = _type;
-            _mods = Modifier.PUBLIC;
-            _name = null;
-            return f;
-        }
-
-        /**
-         * Builds current field and saves it in array for buildAll.
-         */
-        public Builder save()
-        {
-            _fields[_fieldCount++] = build(); return this;
-        }
-
-        /**
-         * Returns an array of all currently saved fields.
-         */
-        public JavaField[] buildAll()
-        {
-            if (_name != null) save();
-            JavaField[] fields = Arrays.copyOf(_fields, _fieldCount);
-            _fieldCount = 0;
-            return fields;
-        }
+    /**
+     * Creates a field for given name and type.
+     */
+    public static JavaField createField(JavaClass javaClass, String fieldName, JavaType fieldType, int mods)
+    {
+        JavaField f = new JavaField(javaClass._resolver, javaClass, null);
+        f._mods = mods;
+        f._id = javaClass.getId() + '.' + fieldName;
+        f._name = f._simpleName = fieldName;
+        f._declaringClass = javaClass;
+        f._evalType = fieldType;
+        return f;
     }
 }

@@ -231,7 +231,7 @@ public class NodeCompleter {
 
                 // Add completion for "ClassName.class"
                 else if (_prefixMatcher.matchesString("class")) {
-                    JavaField classField = new JavaField.Builder(scopeExprEvalClass).name("class").type(Class.class).build();
+                    JavaField classField = JavaField.createField(scopeExprEvalClass, "class", Class.class);
                     addCompletionDecl(classField);
                 }
             }
@@ -403,13 +403,5 @@ public class NodeCompleter {
                 return true;
         }
         return false;
-    }
-
-    /**
-     * Returns the class field for a given Class (for Class.class).
-     */
-    private JavaField getClassField(JavaClass classClass)
-    {
-        return new JavaField.Builder(classClass).name("class").type(Class.class).build();
     }
 }

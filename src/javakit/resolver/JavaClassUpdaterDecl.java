@@ -87,13 +87,12 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         JVarDecl[] fieldDecls = _classDecl.getVarDecls();
 
         // Get fields
-        JavaField.Builder fb = new JavaField.Builder(_javaClass);
-        JavaField[] fields = ArrayUtils.map(fieldDecls, vd -> getJavaFieldForVarDecl(vd, fb), JavaField.class);
+        JavaField[] fields = ArrayUtils.map(fieldDecls, vd -> getJavaFieldForVarDecl(vd, _javaClass), JavaField.class);
 
         // Handle enum: Add constant fields
         if (_classDecl.isEnum()) {
             JEnumConst[] enumConsts = _classDecl.getEnumConstants();
-            JavaField[] enumFields = ArrayUtils.map(enumConsts, ec -> getJavaFieldForEnumConst(ec, fb), JavaField.class);
+            JavaField[] enumFields = ArrayUtils.map(enumConsts, ec -> getJavaFieldForEnumConst(ec, _javaClass), JavaField.class);
             fields = ArrayUtils.addAll(fields, enumFields);
         }
 
@@ -104,32 +103,24 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     /**
      * Returns a JavaField for given field var decl from class decl, creating if missing.
      */
-    private JavaField getJavaFieldForVarDecl(JVarDecl varDecl, JavaField.Builder fb)
+    private JavaField getJavaFieldForVarDecl(JVarDecl varDecl, JavaClass javaClass)
     {
         String fieldName = varDecl.getName();
-        fb.name(fieldName);
         JFieldDecl fieldDecl = (JFieldDecl) varDecl.getParent();
-        fb.mods(fieldDecl.getModifiers().getValue());
-
-        // Get/set type
-        JavaType varType = varDecl.getJavaType();
-        if (varType != null)
-            fb.type(varType);
-
-        // Add to builder list
-        return fb.build();
+        int fieldMods = fieldDecl.getModifiers().getValue();
+        JavaType fieldType = varDecl.getJavaType();
+        if (fieldType == null)
+            fieldType = javaClass.getJavaClassForClass(Object.class);
+        return JavaField.createField(javaClass, fieldName, fieldType, fieldMods);
     }
 
     /**
      * Returns a JavaField for given enum constant from class decl, creating if missing.
      */
-    private JavaField getJavaFieldForEnumConst(JEnumConst enumConst, JavaField.Builder fb)
+    private JavaField getJavaFieldForEnumConst(JEnumConst enumConst, JavaClass javaClass)
     {
         String enumConstName = enumConst.getName();
-        fb.name(enumConstName);
-        fb.type(_javaClass);
-        fb.mods(Modifier.PUBLIC | Modifier.STATIC);
-        return fb.build();
+        return JavaField.createField(javaClass, enumConstName, javaClass, Modifier.PUBLIC | Modifier.STATIC);
     }
 
     /**
