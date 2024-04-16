@@ -165,11 +165,8 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         if (constrDecls.length > 0)
             return ArrayUtils.map(constrDecls, this::getJavaConstructorForConstructorDecl, JavaConstructor.class);
 
-        // If none, add default
-        JavaConstructor.Builder cb = new JavaConstructor.Builder(_javaClass);
-        cb.mods(Modifier.PUBLIC);
-        cb.save();
-        return cb.buildAll();
+        // If none, return default
+        return new JavaConstructor[] { JavaConstructor.createDefaultConstructor(_javaClass) };
     }
 
     /**

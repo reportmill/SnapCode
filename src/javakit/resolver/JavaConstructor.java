@@ -4,8 +4,6 @@
 package javakit.resolver;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.util.Arrays;
 
 /**
  * This class represents a Java Method or Constructor.
@@ -125,76 +123,17 @@ public class JavaConstructor extends JavaExecutable {
     }
 
     /**
-     * A Builder class for JavaConstructor.
+     * Creates a default constructor for given class.
      */
-    public static class Builder {
-
-        // Ivars
-        Resolver  _resolver;
-        JavaClass  _declaringClass;
-        int  _mods =  Modifier.PUBLIC;
-        JavaType[]  _paramTypes = new JavaType[0];
-        JavaTypeVariable[]  _typeVars = new JavaTypeVariable[0];
-        boolean  _varArgs;
-
-        // For build all
-        private JavaConstructor[]  _constructors = new JavaConstructor[20];
-        private int  _constructorCount;
-
-        /**
-         * Constructor.
-         */
-        public Builder(JavaClass declaringClass)
-        {
-            _declaringClass = declaringClass;
-            _resolver = declaringClass._resolver;
-        }
-
-        // Properties.
-        public Builder mods(int mods)  { _mods = mods; return this; }
-        public Builder paramTypes(JavaType ...  paramTypes)  { _paramTypes = paramTypes; return this; }
-        public Builder paramTypes(Type...  paramTypes)  { _paramTypes = _resolver.getJavaTypesForTypes(paramTypes); return this; }
-        public Builder typeVars(String aName)  { return this; }
-        public Builder isVarArgs(boolean varArgs)  { _varArgs = varArgs; return this; }
-
-        /**
-         * Build.
-         */
-        public JavaConstructor build()
-        {
-            JavaConstructor c = new JavaConstructor(_resolver, _declaringClass, null);
-            c._mods = _mods;
-            c._id = getSigForParts(_declaringClass, _paramTypes);
-            c._name = c._simpleName = _declaringClass.getSimpleName();
-            c._declaringClass = _declaringClass;
-            c._genericParameterTypes = _paramTypes;
-            c._evalType = _declaringClass;
-            c._typeVars = _typeVars;
-            c._varArgs = _varArgs;
-            _mods = Modifier.PUBLIC;
-            _paramTypes = new JavaType[0];
-            _typeVars = new JavaTypeVariable[0];
-            _varArgs = false;
-            return c;
-        }
-
-        /**
-         * Builds current constructors and saves it in array for buildAll.
-         */
-        public Builder save()
-        {
-            _constructors[_constructorCount++] = build(); return this;
-        }
-
-        /**
-         * Returns an array of all currently saved methods.
-         */
-        public JavaConstructor[] buildAll()
-        {
-            if (_paramTypes.length != 0) save();
-            JavaConstructor[] constructors = Arrays.copyOf(_constructors, _constructorCount);
-            _constructorCount = 0;
-            return constructors;
-        }
+    public static JavaConstructor createDefaultConstructor(JavaClass javaClass)
+    {
+        JavaConstructor c = new JavaConstructor(javaClass._resolver, javaClass, null);
+        c._mods = Modifier.PUBLIC;
+        c._id = getSigForParts(javaClass, JavaType.EMPTY_TYPES_ARRAY);
+        c._name = c._simpleName = javaClass.getSimpleName();
+        c._genericParameterTypes = JavaType.EMPTY_TYPES_ARRAY;
+        c._evalType = javaClass;
+        c._typeVars = new JavaTypeVariable[0];
+        return c;
     }
 }
