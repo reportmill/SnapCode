@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.resolver;
-import javakit.parse.JExecutableDecl;
 import snap.util.ArrayUtils;
 import snap.util.StringUtils;
 import java.lang.reflect.*;
@@ -14,6 +13,9 @@ import java.util.stream.Stream;
  * This class represents a Java Method or Constructor.
  */
 public class JavaExecutable extends JavaMember {
+
+    // The reader that provides properties
+    protected ReflectReader.ExecutableReader _execReader;
 
     // The JavaDecls for TypeVars for Method/Constructor
     protected JavaTypeVariable[]  _typeVars;
@@ -39,16 +41,22 @@ public class JavaExecutable extends JavaMember {
         if (anExecutable == null)
             return;
 
-        // Get VarArgs
-        _varArgs = anExecutable.isVarArgs();
+        // Create and set reader
+        setReader(new ReflectReader.ExecutableReaderImpl(anExecutable));
     }
 
     /**
-     * Returns the executable.
+     * Sets the reader.
      */
-    private Executable getExecutable()
+    protected void setReader(ReflectReader.ExecutableReader executableReader)
     {
-        return this instanceof JavaMethod ? ((JavaMethod) this).getMethod() : ((JavaConstructor) this).getConstructor();
+        _execReader = executableReader;
+        _execReader.setJavaExecutable(this);
+        _id = _execReader.getId();
+        _name = _execReader.getName();
+        _simpleName = _execReader.getSimpleName();
+        _mods = _execReader.getModifiers();
+        _varArgs = _execReader.isVarArgs();
     }
 
     /**
@@ -62,16 +70,7 @@ public class JavaExecutable extends JavaMember {
     public JavaTypeVariable[] getTypeVars()
     {
         if (_typeVars != null) return _typeVars;
-
-        // Get TypeVariables
-        Executable executable = getExecutable();
-        TypeVariable<?>[] typeVars = executable.getTypeParameters();
-        JavaTypeVariable[] javaTypeVars = new JavaTypeVariable[typeVars.length];
-        for (int i = 0, iMax = typeVars.length; i < iMax; i++)
-            javaTypeVars[i] = new JavaTypeVariable(_resolver, this, typeVars[i]);
-
-        // Set and return
-        return _typeVars = javaTypeVars;
+        return _typeVars = _execReader.getTypeVars();
     }
 
     /**
@@ -107,17 +106,7 @@ public class JavaExecutable extends JavaMember {
     public JavaType[] getGenericParameterTypes()
     {
         if (_genericParameterTypes != null) return _genericParameterTypes;
-
-        // Get GenericParameterTypes (this can fail https://bugs.openjdk.java.net/browse/JDK-8075483))
-        Executable executable = getExecutable();
-        Type[] paramTypesReal = executable.getGenericParameterTypes();
-        if (paramTypesReal.length < executable.getParameterCount())
-            paramTypesReal = executable.getParameterTypes();
-
-        JavaType[] parameterTypes = _resolver.getJavaTypesForTypes(paramTypesReal);
-
-        // Set and return
-        return _genericParameterTypes = parameterTypes;
+        return _genericParameterTypes = _execReader.getGenericParameterTypes();
     }
 
     /**
@@ -136,24 +125,7 @@ public class JavaExecutable extends JavaMember {
     public String[] getParameterNames()
     {
         if (_parameterNames != null) return _parameterNames;
-
-        // If ExecutableDecl, get from that
-        JExecutableDecl execDecl = this instanceof JavaMethod ? ((JavaMethod) this)._methodDecl : null;
-        if (execDecl != null)
-            return _parameterNames = execDecl.getParameterNames();
-
-        // Get from executable
-        Executable executable = getExecutable();
-        Parameter[] parameters = executable.getParameters();
-        return _parameterNames = ArrayUtils.map(parameters, param -> getNameForParameter(param), String.class);
-    }
-
-    /**
-     * Returns the name for given parameter.
-     */
-    private String getNameForParameter(Parameter parameter)
-    {
-        return parameter.getName();
+        return _parameterNames = _execReader.getParameterNames();
     }
 
     /**

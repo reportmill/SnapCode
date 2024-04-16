@@ -25,9 +25,6 @@ public class JavaConstructor extends JavaExecutable {
     {
         super(aResolver, DeclType.Constructor, aDeclaringClass, constructor);
 
-        // Reset SimpleName
-        _simpleName = aDeclaringClass.getSimpleName();
-
         // Set EvalType to DeclaringClass
         _evalType = aDeclaringClass;
 

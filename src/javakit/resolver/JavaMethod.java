@@ -34,11 +34,18 @@ public class JavaMethod extends JavaExecutable {
         super(aResolver, DeclType.Method, aDeclaringClass, aMethod);
         if (aMethod == null) return;
 
-        // Get whether default
-        _default = aMethod.isDefault();
-
         // Set Method
         _method = aMethod;
+    }
+
+    /**
+     * Override to customize for method.
+     */
+    @Override
+    protected void setReader(ReflectReader.ExecutableReader executableReader)
+    {
+        super.setReader(executableReader);
+        _default = _execReader.isDefault();
     }
 
     /**
@@ -66,13 +73,7 @@ public class JavaMethod extends JavaExecutable {
     public JavaType getGenericReturnType()
     {
         if (_genericReturnType != null) return _genericReturnType;
-
-        // Get EvalType from method return Type
-        Type returnTypeReal = _method.getGenericReturnType();
-        JavaType returnType = _resolver.getJavaTypeForType(returnTypeReal);
-
-        // Set and return
-        return _genericReturnType = returnType;
+        return _genericReturnType = _execReader.getGenericReturnType();
     }
 
     /**
