@@ -1,8 +1,6 @@
 package javakit.resolver;
 import snap.util.ArrayUtils;
 import java.lang.reflect.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Utility methods to get ids for Resolver objects.
@@ -73,7 +71,7 @@ public class ResolverIds {
             return rawTypeId;
 
         // Return RawType<TypeArgs>          // Was map(typeArg -> getIdForType(typeArg))
-        String typeArgsNameStr = Stream.of(typeArgs).map(Type::getTypeName).collect(Collectors.joining(","));
+        String typeArgsNameStr = ArrayUtils.mapToStringsAndJoin(typeArgs, Type::getTypeName, ",");
         return rawTypeId + '<' + typeArgsNameStr + '>';
     }
 
@@ -88,7 +86,7 @@ public class ResolverIds {
             return rawTypeId;
 
         // Return RawType<TypeArgs>         // Was map(JavaType::getId)
-        String typeArgsNameStr = Stream.of(theTypes).map(JavaType::getName).collect(Collectors.joining(","));
+        String typeArgsNameStr = ArrayUtils.mapToStringsAndJoin(theTypes, JavaType::getName, ",");
         return rawTypeId + '<' + typeArgsNameStr + '>';
     }
 
