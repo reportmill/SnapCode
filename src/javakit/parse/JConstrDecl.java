@@ -41,15 +41,11 @@ public class JConstrDecl extends JExecutableDecl {
     private JavaConstructor getConstructorImpl()
     {
         // Get param types
-        JavaType[] paramTypes = getParamClassTypesSafe();
-        if (paramTypes == null)
-            return null; // Can happen if params bogus/editing
+        JavaType[] paramTypes = getParameterClasses();
 
         // Get parent JClassDecl and JavaDecl
         JClassDecl enclosingClassDecl = getEnclosingClassDecl();
-        if (enclosingClassDecl == null)
-            return null;
-        JavaClass javaClass = enclosingClassDecl.getJavaClass();
+        JavaClass javaClass = enclosingClassDecl != null ? enclosingClassDecl.getJavaClass() : null;
         if (javaClass == null)
             return null;
 

@@ -207,6 +207,66 @@ public class JType extends JNode {
     }
 
     /**
+     * Returns the JavaClass.
+     */
+    public JavaClass getJavaClass()
+    {
+        // Get base class
+        JavaClass javaClass = getBaseClass();
+
+        // If ArrayCount, get decl for array
+        for (int i = 0; i < _arrayCount; i++)
+            javaClass = (JavaClass) javaClass.getArrayType();
+
+        // Return
+        return javaClass;
+    }
+
+    /**
+     * Returns the base type.
+     */
+    private JavaClass getBaseClass()
+    {
+        // Try to find class directly
+        String baseName = getName();
+        JavaClass javaClass = getJavaClassForName(baseName);
+        if (javaClass != null)
+            return javaClass;
+
+        // See if name is type var
+        JTypeVar typeVarDecl = getTypeVarDeclForName(baseName);
+        if (typeVarDecl != null)
+            return typeVarDecl.getBoundsClass();
+
+        // Look for normal type
+        JavaType javaType = getBaseType();
+        if (javaType != null)
+            return javaType.getEvalClass();
+
+        // Return not found
+        System.err.println("JType.getBaseClass: Couldn't find class for name: " + baseName);
+        return getJavaClassForName("java.lang.Object");
+    }
+
+    /**
+     * Searches parent nodes for a TypeVar declaration for given name.
+     */
+    private JTypeVar getTypeVarDeclForName(String typeVarName)
+    {
+        // Search parents for
+        for (JNode parent = _parent; parent != null; parent = parent.getParent()) {
+            if (parent instanceof WithTypeVars) {
+                JTypeVar typeVar = ((WithTypeVars) parent).getTypeVar(typeVarName);
+                if (typeVar != null)
+                    return typeVar;
+            }
+        }
+
+        // Return not found
+        return null;
+    }
+
+    /**
      * Override to get name from base expression.
      */
     @Override

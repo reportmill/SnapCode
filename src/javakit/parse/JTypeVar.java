@@ -58,13 +58,23 @@ public class JTypeVar extends JNode implements WithId {
     }
 
     /**
-     * Returns the bounds type.
+     * Returns the bounds class.
      */
-    public JavaType getBoundsType()
+    public JavaClass getBoundsClass()
     {
+        // If no bounds, just return Object
         if (_bounds == JType.EMPTY_TYPES_ARRAY || _bounds.length == 0)
-            return getJavaClassForClass(Object.class);
-        return _bounds[0].getJavaType();
+            return getJavaClassForName("java.lang.Object");
+
+        // Get bounds type - should always be ClassType (though maybe nested type like: Class <? super T>)
+        JavaType boundsType = _bounds[0].getJavaType();
+        if (boundsType == null) {
+            System.err.println("JTypeVar.getBoundsClass: Couldn't resolve bounds: " + _bounds[0]);
+            boundsType = getJavaClassForName("java.lang.Object");
+        }
+
+        // Return bounds class
+        return boundsType.getEvalClass();
     }
 
     /**

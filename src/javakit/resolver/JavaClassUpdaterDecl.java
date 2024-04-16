@@ -159,13 +159,12 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
             mb.name(methodName);
 
             // Get/set param types
-            JVarDecl[] paramsDecls = methodDecl.getParameters();
-            JavaType[] paramTypes = ArrayUtils.map(paramsDecls, varDecl -> getJavaTypeForVarDecl(varDecl), JavaType.class);
+            JavaType[] paramTypes = methodDecl.getParameterClasses();
             mb.paramTypes(paramTypes);
 
             // Get/set return type
             JType returnTypeDecl = methodDecl.getType();
-            JavaType returnType = returnTypeDecl != null ? returnTypeDecl.getJavaType() : null;
+            JavaType returnType = returnTypeDecl != null ? returnTypeDecl.getJavaClass() : null;
             if (returnType == null)
                 returnType = _resolver.getJavaTypeForType(Object.class);
             mb.returnType(returnType);
@@ -195,8 +194,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
             cb.mods(mods);
 
             // Get/set param types
-            JVarDecl[] paramsDecls = methodDecl.getParameters();
-            JavaType[] paramTypes = ArrayUtils.map(paramsDecls, varDecl -> getJavaTypeForVarDecl(varDecl), JavaType.class);
+            JavaType[] paramTypes = methodDecl.getParameterClasses();
             cb.paramTypes(paramTypes);
 
             // Add to builder list
@@ -229,17 +227,5 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         for (int i = 0; i < fields.length; i++)
             enumConsts[i] = new JavaEnum(_javaClass, fields[i].getName());
         return enumConsts;
-    }
-
-    /**
-     * Returns a JavaType for given var decl (substituting Object if not found).
-     */
-    private JavaType getJavaTypeForVarDecl(JVarDecl varDecl)
-    {
-        JType varType = varDecl.getType();
-        JavaType javaType = varType.getJavaType();
-        if (javaType == null)
-            javaType = _resolver.getJavaTypeForType(Object.class);
-        return javaType;
     }
 }

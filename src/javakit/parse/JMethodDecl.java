@@ -5,7 +5,6 @@ package javakit.parse;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaExecutable;
 import javakit.resolver.JavaMethod;
-import javakit.resolver.JavaType;
 
 /**
  * A Java member for a method declaration.
@@ -48,16 +47,12 @@ public class JMethodDecl extends JExecutableDecl {
         if (name == null)
             return null;
 
-        // Get param types
-        JavaType[] paramTypes = getParamClassTypesSafe();
-        if (paramTypes == null)
-            return null; // Can happen if params are bogus
+        // Get param classes
+        JavaClass[] paramTypes = getParameterClasses();
 
         // Get parent JClassDecl and JavaDecl
         JClassDecl enclosingClassDecl = getEnclosingClassDecl();
-        if (enclosingClassDecl == null)
-            return null;
-        JavaClass javaClass = enclosingClassDecl.getJavaClass();
+        JavaClass javaClass = enclosingClassDecl != null ? enclosingClassDecl.getJavaClass() : null;
         if (javaClass == null)
             return null;
 

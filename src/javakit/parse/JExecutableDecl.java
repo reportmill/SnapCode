@@ -2,9 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
+import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaExecutable;
-import javakit.resolver.JavaType;
 import snap.util.ArrayUtils;
 import java.util.stream.Stream;
 
@@ -164,35 +164,10 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     /**
      * Returns array of parameter class types suitable to resolve method.
      */
-    protected JavaType[] getParamClassTypesSafe()
+    public JavaClass[] getParameterClasses()
     {
-        // Declare array for return types
-        JavaType[] paramTypes = new JavaType[_params.length];
-
-        // Iterate over params to get types
-        for (int i = 0, iMax = _params.length; i < iMax; i++) {
-            JVarDecl varDecl = _params[i];
-
-            // Get current type and TypeVar (if type is one)
-            JType varDeclType = varDecl.getType();
-            JTypeVar typeVar = getTypeVar(varDeclType.getName());
-
-            // If type is TypeVar, set to TypeVar.BoundsType
-            if (typeVar != null)
-                paramTypes[i] = typeVar.getBoundsType();
-            else paramTypes[i] = varDeclType.getBaseType();
-
-            // If param type is null, just return (can happen if params are bogus (being edited))
-            if (paramTypes[i] == null) return null;
-
-            // If array, get array type instead
-            int arrayCount = varDeclType.getArrayCount();
-            for (int j = 0; j < arrayCount; j++)
-                paramTypes[i] = paramTypes[i].getArrayType();
-        }
-
-        // Return
-        return paramTypes;
+        JVarDecl[] parameters = getParameters();
+        return ArrayUtils.map(parameters, pdecl -> pdecl.getType().getJavaClass(), JavaClass.class);
     }
 
     /**
