@@ -108,7 +108,7 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
         for (int i = 0; i < parameterCount; i++) {
 
             // Get arg type for lambda arg index
-            JavaType argType = lambdaMethod.getParameterType(i);
+            JavaType argType = lambdaMethod.getGenericParameterType(i);
             //if (!argType.isResolvedType()) argType = getResolvedTypeForType(argType);
             paramTypes[i] = argType;
         }

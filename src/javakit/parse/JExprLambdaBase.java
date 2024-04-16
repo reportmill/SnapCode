@@ -89,7 +89,7 @@ public abstract class JExprLambdaBase extends JExpr {
             List<JExpr> args = methodCallExpr.getArgs();
             int argIndex = ListUtils.indexOfId(args, this);
             if (argIndex < 0) { System.err.println("JExprLambdaBase.getLambdaTypeImpl: Can't happen 1"); return null; }
-            return method.getParameterType(argIndex);
+            return method.getGenericParameterType(argIndex);
         }
 
         // Handle parent is alloc expression: Get lambda interface from alloc expression param
@@ -105,7 +105,7 @@ public abstract class JExprLambdaBase extends JExpr {
             List<JExpr> args = allocExpr.getArgs();
             int argIndex = ListUtils.indexOfId(args, this);
             if (argIndex < 0) { System.err.println("JExprLambdaBase.getLambdaTypeImpl: Can't happen 2"); return null; }
-            return constructor.getParameterType(argIndex);
+            return constructor.getGenericParameterType(argIndex);
         }
 
         // Handle parent is JVarDecl, JExprCast, JExprAssign: Return parent eval type
@@ -136,7 +136,7 @@ public abstract class JExprLambdaBase extends JExpr {
         JavaMethod lambdaMethod = getLambdaMethod();
         if (lambdaMethod == null)
             return null;
-        JavaType[] paramTypes = lambdaMethod.getParameterTypes();
+        JavaType[] paramTypes = lambdaMethod.getGenericParameterTypes();
         JavaClass[] paramClasses = new JavaClass[paramTypes.length];
 
         // Get node to resolve any unresolved types

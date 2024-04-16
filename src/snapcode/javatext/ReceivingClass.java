@@ -94,7 +94,7 @@ public class ReceivingClass {
             return null;
 
         // Get arg type and return
-        JavaType argType = argIndex < method.getParameterCount() ? method.getParameterType(argIndex) : null;
+        JavaType argType = argIndex < method.getParameterCount() ? method.getGenericParameterType(argIndex) : null;
         return argType;
     }
 

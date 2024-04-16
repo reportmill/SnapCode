@@ -395,7 +395,7 @@ public class JavaClass extends JavaType {
     public JavaConstructor getDeclaredConstructorForTypes(JavaType[] theTypes)
     {
         JavaConstructor[] constructors = getDeclaredConstructors();
-        return ArrayUtils.findMatch(constructors, constr -> isTypesEqual(constr.getParameterTypes(), theTypes));
+        return ArrayUtils.findMatch(constructors, constr -> isTypesEqual(constr.getGenericParameterTypes(), theTypes));
     }
 
     /**

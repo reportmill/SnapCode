@@ -88,23 +88,23 @@ public class JavaExecutable extends JavaMember {
      */
     public int getParameterCount()
     {
-        JavaType[] paramTypes = getParameterTypes();
+        JavaType[] paramTypes = getGenericParameterTypes();
         return paramTypes.length;
     }
 
     /**
      * Returns the individual Method parameter type at index.
      */
-    public JavaType getParameterType(int anIndex)
+    public JavaType getGenericParameterType(int anIndex)
     {
-        JavaType[] paramTypes = getParameterTypes();
+        JavaType[] paramTypes = getGenericParameterTypes();
         return paramTypes[anIndex];
     }
 
     /**
      * Returns the parameter types.
      */
-    public JavaType[] getParameterTypes()
+    public JavaType[] getGenericParameterTypes()
     {
         if (_genericParameterTypes != null) return _genericParameterTypes;
 
@@ -126,7 +126,8 @@ public class JavaExecutable extends JavaMember {
     public JavaClass[] getParameterClasses()
     {
         if (_parameterTypes != null) return _parameterTypes;
-        return _parameterTypes = ArrayUtils.map(getParameterTypes(), type -> type.getEvalClass(), JavaClass.class);
+        JavaType[] genericParameterTypes = getGenericParameterTypes();
+        return _parameterTypes = ArrayUtils.map(genericParameterTypes, type -> type.getEvalClass(), JavaClass.class);
     }
 
     /**
@@ -188,7 +189,7 @@ public class JavaExecutable extends JavaMember {
      */
     protected String getParametersString()
     {
-        JavaType[] paramTypes = getParameterTypes();
+        JavaType[] paramTypes = getGenericParameterTypes();
         String[] paramNames = getParameterNames();
         String[] paramStrings = new String[paramTypes.length];
         for (int i = 0; i < paramTypes.length; i++)
@@ -202,7 +203,7 @@ public class JavaExecutable extends JavaMember {
      */
     protected String getParameterTypesString(boolean simpleNames)
     {
-        JavaType[] paramTypes = getParameterTypes();
+        JavaType[] paramTypes = getGenericParameterTypes();
         Function<JavaDecl,String> namesFunction = simpleNames ? JavaDecl::getSimpleName : JavaDecl::getName;
         String paramTypesString = Stream.of(paramTypes).map(namesFunction).collect(Collectors.joining(","));
         return '(' + paramTypesString + ')';
@@ -218,7 +219,7 @@ public class JavaExecutable extends JavaMember {
             return getMatchRatingForArgClassesWithVarArgs(aMethod, argClasses);
 
         // Get method param types and count (just return if given arg count doesn't match)
-        JavaType[] paramTypes = aMethod.getParameterTypes();
+        JavaType[] paramTypes = aMethod.getGenericParameterTypes();
         int paramCount = paramTypes.length;
         if (argClasses.length != paramCount)
             return 0;
@@ -256,7 +257,7 @@ public class JavaExecutable extends JavaMember {
     private static int getMatchRatingForArgClassesWithVarArgs(JavaExecutable aMethod, JavaClass[] argClasses)
     {
         // Get method param types and count (just return if given arg count is insufficient)
-        JavaType[] paramTypes = aMethod.getParameterTypes();
+        JavaType[] paramTypes = aMethod.getGenericParameterTypes();
         int paramCount = paramTypes.length;
         int varArgIndex = paramCount - 1;
         if (argClasses.length < varArgIndex)

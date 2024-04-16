@@ -107,7 +107,7 @@ public class JavaMethod extends JavaExecutable {
 
         // Get super method
         String name = getName();
-        JavaType[] paramTypes = getParameterTypes();
+        JavaType[] paramTypes = getGenericParameterTypes();
         JavaMethod superMethod = superClass.getMethodDeepForNameAndTypes(name, paramTypes);
 
         // If not found, check interfaces
@@ -258,7 +258,7 @@ public class JavaMethod extends JavaExecutable {
             return false;
 
         // Return whether types are equal
-        JavaType[] methodParamTypes = getParameterTypes();
+        JavaType[] methodParamTypes = getGenericParameterTypes();
         return JavaType.isTypesEqual(methodParamTypes, theTypes);
     }
 
