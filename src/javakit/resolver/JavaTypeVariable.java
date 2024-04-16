@@ -38,6 +38,23 @@ public class JavaTypeVariable extends JavaType {
     }
 
     /**
+     * Constructor.
+     */
+    public JavaTypeVariable(Resolver aResolver, JavaDecl anOwner, String typeVarName, JavaClass boundsClass)
+    {
+        // Do normal version
+        super(aResolver, DeclType.TypeVar);
+
+        // Set Id, Name, SimpleName
+        _id = anOwner.getId() + '.' + typeVarName;
+        _name = _simpleName = typeVarName;
+
+        // Set Owner (class or method/constructor), bounds class
+        _owner = anOwner;
+        _boundingClass = boundsClass != null ? boundsClass : aResolver.getJavaClassForName("java.lang.Object");
+    }
+
+    /**
      * Returns the Class or Executable that owns this TypeVariable.
      */
     public JavaDecl getOwner()  { return _owner; }

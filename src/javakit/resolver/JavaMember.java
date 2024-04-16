@@ -21,17 +21,16 @@ public class JavaMember extends JavaDecl {
     public JavaMember(Resolver aResolver, DeclType aType, JavaClass aDeclaringClass, Member aMember)
     {
         super(aResolver, aType);
-        if (aMember == null) return;
-
-        // Set id
-        _id = ResolverIds.getIdForMember(aMember);
-
-        // Set mods, declaring class
-        _mods = aMember.getModifiers();
         _declaringClass = aDeclaringClass;
 
-        // Set name/simple name
+        // If null member, just return
+        if (aMember == null)
+            return;
+
+        // Set Id, Name, SimpleName, Mods
+        _id = ResolverIds.getIdForMember(aMember);
         _name = _simpleName = aMember.getName();
+        _mods = aMember.getModifiers();
     }
 
     /**
