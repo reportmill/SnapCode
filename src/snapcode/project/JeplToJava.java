@@ -169,7 +169,7 @@ public class JeplToJava {
         appendModifiers(mods);
 
         // Append return type
-        JType returnType = methodDecl.getType();
+        JType returnType = methodDecl.getReturnType();
         String returnTypeStr = returnType != null ? returnType.getString() : "";
         _sb.append(returnTypeStr);
         _sb.append(' ');

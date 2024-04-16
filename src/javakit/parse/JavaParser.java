@@ -714,7 +714,8 @@ public class JavaParser extends JavaParserStmt {
 
                 // Handle ResultType
                 case "ResultType":
-                    methodDecl.setType(aNode.getCustomNode(JType.class));
+                    JType returnType = aNode.getCustomNode(JType.class);
+                    methodDecl.setReturnType(returnType);
                     break;
 
                 // Handle Identifier

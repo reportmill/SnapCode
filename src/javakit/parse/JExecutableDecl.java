@@ -13,9 +13,6 @@ import java.util.stream.Stream;
  */
 public abstract class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithVarDecls, WithTypeVars {
 
-    // The type/return-type
-    protected JType  _type;
-
     // Type variables
     private JTypeVar[] _typeVars = new JTypeVar[0];
 
@@ -34,19 +31,6 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     public JExecutableDecl()
     {
         super();
-    }
-
-    /**
-     * Returns the field type.
-     */
-    public JType getType()  { return _type; }
-
-    /**
-     * Sets the field type.
-     */
-    public void setType(JType aType)
-    {
-        replaceChild(_type, _type = aType);
     }
 
     /**
@@ -176,11 +160,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     @Override
     protected NodeError[] getErrorsImpl()
     {
-        // Get errors for type
-        JType returnType = getType();
-        if (returnType == null)
-            return NodeError.newErrorArray(getChild(0), "Missing return type");
-        NodeError[] errors = NodeError.NO_ERRORS; //returnType.getErrors(); Add this back when method type var works (e.g. <T> T ...)
+        NodeError[] errors = NodeError.NO_ERRORS;
 
         // Get errors for params
         JVarDecl[] parameters = getParameters();

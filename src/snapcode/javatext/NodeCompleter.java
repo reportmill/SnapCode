@@ -383,7 +383,7 @@ public class NodeCompleter {
         // If parent is type and its parent is method decl type, return true
         if (parent instanceof JType) {
             JNode grandParent = parent.getParent();
-            if (grandParent instanceof JMethodDecl && parent == ((JMethodDecl) grandParent).getType())
+            if (grandParent instanceof JMethodDecl && parent == ((JMethodDecl) grandParent).getReturnType())
                 return true;
         }
 

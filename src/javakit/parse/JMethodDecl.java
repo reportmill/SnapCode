@@ -11,6 +11,9 @@ import javakit.resolver.JavaMethod;
  */
 public class JMethodDecl extends JExecutableDecl {
 
+    // The return type
+    protected JType _returnType;
+
     // The method
     private JavaMethod _method;
 
@@ -23,10 +26,17 @@ public class JMethodDecl extends JExecutableDecl {
     }
 
     /**
-     * Override to get decl from method.
+     * Returns the return type.
      */
-    @Override
-    protected JavaMethod getDeclImpl()  { return getMethod(); }
+    public JType getReturnType()  { return _returnType; }
+
+    /**
+     * Sets the return type.
+     */
+    public void setReturnType(JType aType)
+    {
+        replaceChild(_returnType, _returnType = aType);
+    }
 
     /**
      * Returns the method.
@@ -61,6 +71,12 @@ public class JMethodDecl extends JExecutableDecl {
     }
 
     /**
+     * Override to get decl from method.
+     */
+    @Override
+    protected JavaMethod getDeclImpl()  { return getMethod(); }
+
+    /**
      * Override to return method.
      */
     @Override
@@ -70,4 +86,19 @@ public class JMethodDecl extends JExecutableDecl {
      * Returns the part name.
      */
     public String getNodeString()  { return "MethodDecl"; }
+
+    /**
+     * Override to return errors for ReturnValue, Parameters, ThrowsList and TypeVars.
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()
+    {
+        // Get errors for type
+        JType returnType = getReturnType();
+        if (returnType == null)
+            return NodeError.newErrorArray(getChild(0), "Missing return type");
+
+        // Do normal version
+        return super.getErrorsImpl();
+    }
 }
