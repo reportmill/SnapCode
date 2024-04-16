@@ -647,6 +647,16 @@ public class JavaClass extends JavaType {
     }
 
     /**
+     * Override to return the array version of this class.
+     */
+    @Override
+    public JavaClass getArrayType()
+    {
+        String className = getName() + "[]";
+        return _resolver.getJavaClassForName(className);
+    }
+
+    /**
      * Returns a resolved type for given TypeVar.
      */
     @Override

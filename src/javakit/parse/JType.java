@@ -216,7 +216,7 @@ public class JType extends JNode {
 
         // If ArrayCount, get decl for array
         for (int i = 0; i < _arrayCount; i++)
-            javaClass = (JavaClass) javaClass.getArrayType();
+            javaClass = javaClass.getArrayType();
 
         // Return
         return javaClass;
