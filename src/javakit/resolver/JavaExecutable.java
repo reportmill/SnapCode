@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 public class JavaExecutable extends JavaMember {
 
     // The reader that provides properties
-    protected ReflectReader.ExecutableReader _execReader;
+    protected ExecutableReader _execReader;
 
     // The JavaDecls for TypeVars for Method/Constructor
     protected JavaTypeVariable[]  _typeVars;
@@ -42,13 +42,13 @@ public class JavaExecutable extends JavaMember {
             return;
 
         // Create and set reader
-        setReader(new ReflectReader.ExecutableReaderImpl(anExecutable));
+        setReader(new ExecutableReaderImpl(anExecutable));
     }
 
     /**
      * Sets the reader.
      */
-    protected void setReader(ReflectReader.ExecutableReader executableReader)
+    protected void setReader(ExecutableReader executableReader)
     {
         _execReader = executableReader;
         _execReader.setJavaExecutable(this);

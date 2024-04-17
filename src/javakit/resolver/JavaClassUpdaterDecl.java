@@ -141,7 +141,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         if (methodDecl.getName() == null)
             return null;
         JavaMethod javaMethod = new JavaMethod(_javaClass._resolver, _javaClass, null);
-        ReflectReader.ExecutableReader execReader = new ExecutableReaderDecl(methodDecl);
+        ExecutableReader execReader = new ExecutableReaderDecl(methodDecl);
         javaMethod.setReader(execReader);
         return javaMethod;
     }
@@ -166,7 +166,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     private JavaConstructor getJavaConstructorForConstructorDecl(JConstrDecl constrDecl)
     {
         JavaConstructor javaConstr = new JavaConstructor(_javaClass._resolver, _javaClass, null);
-        ReflectReader.ExecutableReader execReader = new ExecutableReaderDecl(constrDecl);
+        ExecutableReader execReader = new ExecutableReaderDecl(constrDecl);
         javaConstr.setReader(execReader);
         return javaConstr;
     }
@@ -188,7 +188,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     /**
      * This class is an ExecutableReader implementation for JExecutableDecl.
      */
-    private static class ExecutableReaderDecl implements ReflectReader.ExecutableReader {
+    private static class ExecutableReaderDecl implements ExecutableReader {
 
         // The JavaExecutable
         private JavaExecutable _javaExecutable;

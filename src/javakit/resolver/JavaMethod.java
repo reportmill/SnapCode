@@ -43,7 +43,7 @@ public class JavaMethod extends JavaExecutable {
      * Override to customize for method.
      */
     @Override
-    protected void setReader(ReflectReader.ExecutableReader executableReader)
+    protected void setReader(ExecutableReader executableReader)
     {
         super.setReader(executableReader);
         _default = _execReader.isDefault();
