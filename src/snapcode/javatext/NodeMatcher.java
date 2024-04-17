@@ -28,9 +28,7 @@ public class NodeMatcher {
         JNode rootNode = getRootNodeForId(idExpr, nodeDecl);
 
         // Return matching nodes
-        List<JExprId> matchingNodes = new ArrayList<>();
-        findMatchingIdNodesForDecl(rootNode, nodeDecl, matchingNodes);
-        return matchingNodes.toArray(new JExprId[0]);
+        return getMatchingIdNodesForDecl(rootNode, nodeDecl);
     }
 
     /**
@@ -55,10 +53,10 @@ public class NodeMatcher {
     /**
      * Returns matching id expression nodes for given decl.
      */
-    private static JExprId[] getMatchingIdNodesForDecl(JNode aNode, JavaDecl aDecl)
+    private static JExprId[] getMatchingIdNodesForDecl(JNode rootNode, JavaDecl aDecl)
     {
         List<JExprId> matchingNodes = new ArrayList<>();
-        findMatchingIdNodesForDecl(aNode, aDecl, matchingNodes);
+        findMatchingIdNodesForDecl(rootNode, aDecl, matchingNodes);
         return matchingNodes.toArray(new JExprId[0]);
     }
 
@@ -84,10 +82,10 @@ public class NodeMatcher {
     /**
      * Returns nodes that reference given decl.
      */
-    public static JExprId[] getReferenceNodesForDecl(JNode aNode, JavaDecl aDecl)
+    public static JExprId[] getReferenceNodesForDecl(JFile jfile, JavaDecl aDecl)
     {
-        JExprId[] matchingIdNodes = getMatchingIdNodesForDecl(aNode, aDecl);
-        return ArrayUtils.filter(matchingIdNodes, node -> isReferenceNode(aNode));
+        JExprId[] matchingIdNodes = getMatchingIdNodesForDecl(jfile, aDecl);
+        return ArrayUtils.filter(matchingIdNodes, node -> isReferenceNode(node));
     }
 
     /**
@@ -101,18 +99,18 @@ public class NodeMatcher {
     /**
      * Returns the declaration node for given decl.
      */
-    public static JNode getDeclarationNodeForDecl(JNode aNode, JavaDecl aDecl)
+    public static JNode getDeclarationNodeForDecl(JFile jfile, JavaDecl aDecl)
     {
-        JNode[] matches = getDeclarationNodesForDecl(aNode, aDecl);
+        JNode[] matches = getDeclarationNodesForDecl(jfile, aDecl);
         return matches.length > 0 ? matches[0] : null;
     }
 
     /**
      * Returns nodes that are declarations or subclass declarations of given decl.
      */
-    public static JExprId[] getDeclarationNodesForDecl(JNode aNode, JavaDecl aDecl)
+    public static JExprId[] getDeclarationNodesForDecl(JFile jfile, JavaDecl aDecl)
     {
-        JExprId[] matchingIdNodes = getMatchingIdNodesForDecl(aNode, aDecl);
+        JExprId[] matchingIdNodes = getMatchingIdNodesForDecl(jfile, aDecl);
         return ArrayUtils.filter(matchingIdNodes, node -> node.isDeclIdNode());
     }
 

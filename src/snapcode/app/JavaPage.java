@@ -197,7 +197,7 @@ public class JavaPage extends WebPage {
 
             // Get ClassDecl
             WebFile javaFile = getFile();
-            JavaAgent javaAgent = JavaAgent.getAgentForFile(javaFile);
+            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
             JFile jfile = javaAgent.getJFile();
             JClassDecl classDecl = jfile.getClassDecl();
             String className = classDecl.getName();
@@ -283,15 +283,6 @@ public class JavaPage extends WebPage {
     }
 
     /**
-     * Override to set selection using browser.
-     */
-    protected void setTextSel(int aStart, int anEnd)
-    {
-        String urlString = getFile().getUrlString() + String.format("#Sel=%d-%d", aStart, anEnd);
-        getBrowser().setSelUrlForUrlString(urlString);
-    }
-
-    /**
      * Override to open declaration.
      */
     protected void openDeclaration(JNode aNode)
@@ -318,8 +309,7 @@ public class JavaPage extends WebPage {
     private void openDecl(JavaDecl aDecl)
     {
         // Get class name for decl
-        String className = aDecl instanceof JavaMember ? ((JavaMember) aDecl).getDeclaringClassName() :
-                aDecl.getEvalClassName();
+        String className = aDecl instanceof JavaMember ? ((JavaMember) aDecl).getDeclaringClassName() : aDecl.getEvalClassName();
         if (className == null)
             return;
 
@@ -340,7 +330,7 @@ public class JavaPage extends WebPage {
             return;
 
         // Get matching node
-        JavaAgent javaAgent = JavaAgent.getAgentForFile(file);
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(file);
         JFile jfile = javaAgent.getJFile();
         JNode declarationNode = NodeMatcher.getDeclarationNodeForDecl(jfile, aDecl);
 
@@ -427,14 +417,6 @@ public class JavaPage extends WebPage {
      * A JavaTextPane for a JavaPage to implement symbol features and such.
      */
     public class JavaPageJavaTextPane extends JavaTextPane {
-
-        /**
-         * Override to set selection using browser.
-         */
-        public void setTextSel(int aStart, int anEnd)
-        {
-            JavaPage.this.setTextSel(aStart, anEnd);
-        }
 
         /**
          * Override to open declaration.
