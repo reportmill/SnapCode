@@ -154,7 +154,7 @@ public class ClassFileUtils {
 
             // Get constructor for parameters
             JavaClass javaClass = _resolver.getJavaClassForName(className);
-            return javaClass.getConstructorDeepForTypes(paramClasses);
+            return javaClass.getConstructorDeepForClasses(paramClasses);
         }
 
         // Handle method reference

@@ -390,16 +390,16 @@ public class JavaClass extends JavaType {
     }
 
     /**
-     * Returns a constructor for parameter types declared in this class.
+     * Returns the constructor matching given parameter classes declared in this class.
      */
-    public JavaConstructor getDeclaredConstructorForTypes(JavaType[] theTypes)
+    public JavaConstructor getDeclaredConstructorForClasses(JavaClass[] paramClasses)
     {
         JavaConstructor[] constructors = getDeclaredConstructors();
-        return ArrayUtils.findMatch(constructors, constr -> isTypesEqual(constr.getGenericParameterTypes(), theTypes));
+        return ArrayUtils.findMatch(constructors, constr -> ArrayUtils.equalsId(paramClasses, constr.getParameterClasses()));
     }
 
     /**
-     * Returns a method for method name and parameter classes declared in this class.
+     * Returns the method matching given method name and parameter classes declared in this class.
      */
     public JavaMethod getDeclaredMethodForNameAndClasses(String aName, JavaClass[] paramClasses)
     {
@@ -436,19 +436,19 @@ public class JavaClass extends JavaType {
     }
 
     /**
-     * Returns a constructor for parameter types from this class or any superclass.
+     * Returns a constructor for parameter classes from this class or any superclass.
      */
-    public JavaConstructor getConstructorDeepForTypes(JavaType[] theTypes)
+    public JavaConstructor getConstructorDeepForClasses(JavaClass[] paramClasses)
     {
         // Check for declared constructor of this class
-        JavaConstructor constr = getDeclaredConstructorForTypes(theTypes);
+        JavaConstructor constr = getDeclaredConstructorForClasses(paramClasses);
         if (constr != null)
             return constr;
 
         // Check superclass
         JavaClass superClass = getSuperClass();
         if (superClass != null)
-            constr = superClass.getConstructorDeepForTypes(theTypes);
+            constr = superClass.getConstructorDeepForClasses(paramClasses);
 
         // Return
         return constr;

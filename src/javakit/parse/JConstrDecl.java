@@ -40,8 +40,8 @@ public class JConstrDecl extends JExecutableDecl {
      */
     private JavaConstructor getConstructorImpl()
     {
-        // Get param types
-        JavaType[] paramTypes = getParameterClasses();
+        // Get parameter classes
+        JavaClass[] parameterClasses = getParameterClasses();
 
         // Get parent JClassDecl and JavaDecl
         JClassDecl enclosingClassDecl = getEnclosingClassDecl();
@@ -52,17 +52,17 @@ public class JConstrDecl extends JExecutableDecl {
         // If inner class and not static, add implied class type to arg types array
         if (javaClass.isMemberClass() && !javaClass.isStatic()) {
             JavaClass parentClass = javaClass.getDeclaringClass();
-            paramTypes = ArrayUtils.add(paramTypes, parentClass, 0);
+            parameterClasses = ArrayUtils.add(parameterClasses, parentClass, 0);
         }
 
         // If enum, add implied args types for name (String) and ordinal (int)
         else if (javaClass.isEnum()) {
-            paramTypes = ArrayUtils.add(paramTypes, getJavaClassForClass(String.class), 0);
-            paramTypes = ArrayUtils.add(paramTypes, getJavaClassForClass(int.class), 1);
+            parameterClasses = ArrayUtils.add(parameterClasses, getJavaClassForClass(String.class), 0);
+            parameterClasses = ArrayUtils.add(parameterClasses, getJavaClassForClass(int.class), 1);
         }
 
         // Return Constructor for param types
-        return javaClass.getDeclaredConstructorForTypes(paramTypes);
+        return javaClass.getDeclaredConstructorForClasses(parameterClasses);
     }
 
     /**
