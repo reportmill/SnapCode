@@ -42,7 +42,7 @@ public class JavaTextTokenizer extends CodeTokenizer {
     /**
      * Returns the parse tokens for given tokenizer and text line.
      */
-    public TextToken[] createTokensForTextLine(TextLine aTextLine)
+    public synchronized TextToken[] createTokensForTextLine(TextLine aTextLine)
     {
         // Simple case
         if (aTextLine.isWhiteSpace())
