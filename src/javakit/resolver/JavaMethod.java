@@ -3,6 +3,7 @@
  */
 package javakit.resolver;
 import javakit.parse.JMethodDecl;
+import snap.util.ArrayUtils;
 import java.lang.reflect.*;
 import java.util.Arrays;
 
@@ -145,23 +146,16 @@ public class JavaMethod extends JavaExecutable {
     }
 
     /**
-     * Returns a signature.
+     * Creates the Id: ClassName.methodName(param,param,...)
      */
-    public static String getSigForParts(JavaClass aClass, String aName, JavaType[] paramTypes)
+    @Override
+    protected String createId()
     {
-        // Basic "pkg.pkg.ClassName.MethodName()"
-        String prefix = aClass.getId() + '.' + aName;
-        if (paramTypes.length == 0)
-            return prefix + "()";
-
-        // Add ParamTypes: "(pkg.pkg.ClassName,pkg.pkg.ClassName,...)"
-        StringBuilder sb = new StringBuilder(prefix).append('(');
-        for (JavaType type : paramTypes)
-            sb.append(type.getId()).append(',');
-        sb.setLength(sb.length() - 1);
-
-        // Return string
-        return sb.append(')').toString();
+        String classId = _declaringClass.getId();
+        String methodName = getName();
+        JavaClass[] paramClasses = getParameterClasses();
+        String paramClassesStr = ArrayUtils.mapToStringsAndJoin(paramClasses, JavaClass::getId, ",");
+        return classId + '.' + methodName + '(' + paramClassesStr + ')';
     }
 
     /**

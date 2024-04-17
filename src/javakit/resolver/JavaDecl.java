@@ -47,7 +47,16 @@ public class JavaDecl implements Comparable<JavaDecl> {
     /**
      * Returns the id.
      */
-    public String getId()  { return _id; }
+    public String getId()
+    {
+        if (_id != null) return _id;
+        return _id = createId();
+    }
+
+    /**
+     * Creates the id.
+     */
+    protected String createId()  { return null; }
 
     /**
      * Returns the type.

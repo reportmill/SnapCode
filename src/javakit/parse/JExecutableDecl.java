@@ -151,7 +151,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     public JavaClass[] getParameterClasses()
     {
         JVarDecl[] parameters = getParameters();
-        return ArrayUtils.map(parameters, pdecl -> pdecl.getType().getJavaClass(), JavaClass.class);
+        return ArrayUtils.map(parameters, pdecl -> pdecl.getJavaClass(), JavaClass.class);
     }
 
     /**

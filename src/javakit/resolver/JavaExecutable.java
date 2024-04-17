@@ -52,7 +52,6 @@ public class JavaExecutable extends JavaMember {
     {
         _execReader = executableReader;
         _execReader.setJavaExecutable(this);
-        _id = _execReader.getId();
         _name = _execReader.getName();
         _simpleName = _execReader.getSimpleName();
         _mods = _execReader.getModifiers();
@@ -115,8 +114,7 @@ public class JavaExecutable extends JavaMember {
     public JavaClass[] getParameterClasses()
     {
         if (_parameterTypes != null) return _parameterTypes;
-        JavaType[] genericParameterTypes = getGenericParameterTypes();
-        return _parameterTypes = ArrayUtils.map(genericParameterTypes, type -> type.getEvalClass(), JavaClass.class);
+        return _parameterTypes = _execReader.getParameterClasses();
     }
 
     /**

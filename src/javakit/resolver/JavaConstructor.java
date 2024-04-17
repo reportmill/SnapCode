@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.resolver;
+import snap.util.ArrayUtils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
@@ -104,22 +105,15 @@ public class JavaConstructor extends JavaExecutable {
     }
 
     /**
-     * Returns a signature.
+     * Creates the id: ClassName(param, param, ...)
      */
-    public static String getSigForParts(JavaClass aClass, JavaType[] paramTypes)
+    @Override
+    protected String createId()
     {
-        // Basic "pkg.pkg.ClassName()"
-        String prefix = aClass.getId();
-        if (paramTypes.length == 0) return prefix + "()";
-
-        // Add ParamTypes: "(pkg.pkg.ClassName,pkg.pkg.ClassName,...)"
-        StringBuilder sb = new StringBuilder(prefix).append('(');
-        for (JavaType type : paramTypes)
-            sb.append(type.getId()).append(',');
-        sb.setLength(sb.length() - 1);
-
-        // Return string
-        return sb.append(')').toString();
+        String classId = _declaringClass.getId();
+        JavaClass[] paramClasses = getParameterClasses();
+        String paramClassesStr = ArrayUtils.mapToStringsAndJoin(paramClasses, JavaClass::getId, ",");
+        return classId + '(' + paramClassesStr + ')';
     }
 
     /**
@@ -129,9 +123,9 @@ public class JavaConstructor extends JavaExecutable {
     {
         JavaConstructor c = new JavaConstructor(javaClass._resolver, javaClass, null);
         c._mods = Modifier.PUBLIC;
-        c._id = getSigForParts(javaClass, JavaType.EMPTY_TYPES_ARRAY);
         c._name = c._simpleName = javaClass.getSimpleName();
         c._genericParameterTypes = JavaType.EMPTY_TYPES_ARRAY;
+        c._parameterTypes = new JavaClass[0];
         c._evalType = javaClass;
         c._typeVars = new JavaTypeVariable[0];
         return c;

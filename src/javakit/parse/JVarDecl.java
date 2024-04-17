@@ -155,6 +155,15 @@ public class JVarDecl extends JNode implements WithId {
     }
 
     /**
+     * Returns the Java class.
+     */
+    public JavaClass getJavaClass()
+    {
+        JType type = getType();
+        return type != null ? type.getJavaClass() : getJavaClassForName("java.lang.Object");
+    }
+
+    /**
      * Tries to resolve the class declaration for this node.
      */
     @Override

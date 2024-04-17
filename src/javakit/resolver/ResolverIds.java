@@ -121,15 +121,14 @@ public class ResolverIds {
 
         // Get executable parameter types string: (type1,type2,...)
         Executable executable = (Executable) aMember;
-        Class<?>[] paramTypes = executable.getParameterTypes();
-        String paramTypesStr = paramTypes.length == 0 ? "()" :
-            ArrayUtils.mapToStringsAndJoin(paramTypes, type -> getIdForType(type), ",");
+        Class<?>[] paramClasses = executable.getParameterTypes();
+        String paramClassesStr = '(' + ArrayUtils.mapToStringsAndJoin(paramClasses, ResolverIds::getIdForClass, ",") + ')';
 
         // Handle constructor: DeclClassName(paramsTypesString)
         if (aMember instanceof Constructor)
-            return classId + paramTypesStr;
+            return classId + paramClassesStr;
 
         // Handle method: DeclClassName.MethodName(paramTypesString)
-        return classId + '.' + aMember.getName() + paramTypesStr;
+        return classId + '.' + aMember.getName() + paramClassesStr;
     }
 }

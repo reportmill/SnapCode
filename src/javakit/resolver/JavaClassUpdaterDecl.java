@@ -211,18 +211,6 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         public void setJavaExecutable(JavaExecutable anExec)  { _javaExecutable = anExec; }
 
         /**
-         * Returns the id.
-         */
-        @Override
-        public String getId()
-        {
-            JavaClass[] paramClasses = _javaExecutable.getParameterClasses();
-            if (_executableDecl instanceof JConstrDecl)
-                return JavaConstructor.getSigForParts(_javaExecutable._declaringClass, paramClasses);
-            return JavaMethod.getSigForParts(_javaExecutable._declaringClass, getName(), paramClasses);
-        }
-
-        /**
          * Returns the name.
          */
         @Override
@@ -293,6 +281,16 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
             JType returnTypeDecl = ((JMethodDecl) _executableDecl).getReturnType();
             JavaType returnType = returnTypeDecl != null ? returnTypeDecl.getJavaClass() : null;
             return returnType != null ? returnType : _javaExecutable._resolver.getJavaClassForName("java.lang.Object");
+        }
+
+        /**
+         * Returns the parameter classes.
+         */
+        @Override
+        public JavaClass[] getParameterClasses()
+        {
+            JVarDecl[] paramVarDecls = _executableDecl.getParameters();
+            return ArrayUtils.map(paramVarDecls, JVarDecl::getJavaClass, JavaClass.class);
         }
 
         /**

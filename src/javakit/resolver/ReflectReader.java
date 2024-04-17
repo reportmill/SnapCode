@@ -18,11 +18,6 @@ public class ReflectReader {
         void setJavaExecutable(JavaExecutable anExec);
 
         /**
-         * Returns the id.
-         */
-        String getId();
-
-        /**
          * Returns the name.
          */
         String getName();
@@ -56,6 +51,11 @@ public class ReflectReader {
          * Returns the parameter types.
          */
         JavaType[] getGenericParameterTypes();
+
+        /**
+         * Returns the parameter classes.
+         */
+        JavaClass[] getParameterClasses();
 
         /**
          * Returns the return type.
@@ -92,12 +92,6 @@ public class ReflectReader {
          */
         @Override
         public void setJavaExecutable(JavaExecutable anExec)  { _javaExecutable = anExec; }
-
-        /**
-         * Returns the id.
-         */
-        @Override
-        public String getId()  { return ResolverIds.getIdForMember(_executable); }
 
         /**
          * Returns the name.
@@ -163,6 +157,16 @@ public class ReflectReader {
 
             // Return JavaTypes
             return _javaExecutable._resolver.getJavaTypesForTypes(paramTypesReal);
+        }
+
+        /**
+         * Returns the parameter classes.
+         */
+        @Override
+        public JavaClass[] getParameterClasses()
+        {
+            Class<?>[] paramClasses = _executable.getParameterTypes();
+            return ArrayUtils.map(paramClasses, _javaExecutable._resolver::getJavaClassForClass, JavaClass.class);
         }
 
         /**

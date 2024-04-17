@@ -5,7 +5,6 @@ package javakit.resolver;
 import java.lang.reflect.*;
 import java.util.*;
 import snap.util.ArrayUtils;
-import snap.util.ClassUtils;
 import snapcode.project.Project;
 
 /**

@@ -26,6 +26,17 @@ public class JavaField extends JavaMember {
     }
 
     /**
+     * Creates the id.
+     */
+    @Override
+    protected String createId()
+    {
+        String classId = _declaringClass.getId();
+        String fieldName = getName();
+        return classId + '.' + fieldName;
+    }
+
+    /**
      * Returns whether field is enum constant.
      */
     public boolean isEnumConstant()
@@ -110,7 +121,6 @@ public class JavaField extends JavaMember {
     {
         JavaField f = new JavaField(javaClass._resolver, javaClass, null);
         f._mods = Modifier.PUBLIC;
-        f._id = javaClass.getId() + '.' + fieldName;
         f._name = f._simpleName = fieldName;
         f._declaringClass = javaClass;
         f._evalType = javaClass._resolver.getJavaClassForClass(fieldType);
@@ -124,7 +134,6 @@ public class JavaField extends JavaMember {
     {
         JavaField f = new JavaField(javaClass._resolver, javaClass, null);
         f._mods = mods;
-        f._id = javaClass.getId() + '.' + fieldName;
         f._name = f._simpleName = fieldName;
         f._declaringClass = javaClass;
         f._evalType = fieldType;
