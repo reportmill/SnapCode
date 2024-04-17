@@ -678,100 +678,6 @@ public class JavaClass extends JavaType {
     }
 
     /**
-     * Returns the JavaField for java.lang.reflect.Field.
-     */
-    public JavaField getJavaFieldForField(Field aField)
-    {
-        String name = aField.getName();
-        JavaField field = getDeclaredFieldForName(name);
-        if (field == null)
-            return null;
-
-        int mods = aField.getModifiers();
-        if (mods != field.getModifiers())
-            return null;
-
-        // Return
-        return field;
-    }
-
-    /**
-     * Returns the JavaMethod for given java.lang.reflect.method.
-     */
-    public JavaMethod getJavaMethodForMethod(Method aMeth)
-    {
-        String id = ResolverIds.getIdForMember(aMeth);
-        JavaMethod method = getMethodForId(id);
-        if (method == null)
-            return null;
-
-        int mods = aMeth.getModifiers();
-        if (mods != method.getModifiers())
-            return null;
-
-        // Check return type?
-        return method;
-    }
-
-    /**
-     * Returns the JavaMethod for id string.
-     */
-    private JavaMethod getMethodForId(String anId)
-    {
-        JavaMethod[] methods = getDeclaredMethods();
-        return ArrayUtils.findMatch(methods, method -> method.getId().equals(anId));
-    }
-
-    /**
-     * Returns the JavaConstructor for java.lang.reflect.Constructor.
-     */
-    public JavaConstructor getJavaConstructorForConstructor(Constructor<?> aConstr)
-    {
-        String id = ResolverIds.getIdForMember(aConstr);
-        JavaConstructor constructor = getConstructorForId(id);
-        if (constructor == null)
-            return null;
-
-        // Check mods
-        int mods = aConstr.getModifiers();
-        if (mods != constructor.getModifiers())
-            return null;
-
-        // Return
-        return constructor;
-    }
-
-    /**
-     * Returns the Constructor decl for id string.
-     */
-    public JavaConstructor getConstructorForId(String anId)
-    {
-        JavaConstructor[] constructors = getDeclaredConstructors();
-        return ArrayUtils.findMatch(constructors, constr -> constr.getId().equals(anId));
-    }
-
-    /**
-     * Returns a JavaMember for given java.lang.reflect.Member.
-     */
-    public JavaMember getJavaMemberForMember(Member aMember)
-    {
-        // Handle Field
-        if (aMember instanceof Field)
-            return getJavaFieldForField((Field) aMember);
-
-        // Handle Method
-        if (aMember instanceof Method)
-            return getJavaMethodForMethod((Method) aMember);
-
-        // Handle Constructor
-        if (aMember instanceof Constructor)
-            return getJavaConstructorForConstructor((Constructor<?>) aMember);
-
-        // Handle MemberName
-        throw new RuntimeException("JavaClass.getJavaMemberForMember: " + aMember);
-    }
-
-    /**
      * Returns a string representation of suggestion.
      */
     @Override
@@ -794,11 +700,6 @@ public class JavaClass extends JavaType {
         // Return
         return suggestionString;
     }
-
-    /**
-     * Returns the updater.
-     */
-    public JavaClassUpdater getUpdater()  { return _updater; }
 
     /**
      * Reloads the class using real class from resolver classloader. Returns whether the class changed during reload.

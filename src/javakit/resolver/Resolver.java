@@ -346,33 +346,38 @@ public class Resolver {
         GenericDeclaration classOrMethod = typeVar.getGenericDeclaration();
         String typeVarName = typeVar.getName();
 
-        // Handle class
+        // Handle class: Get JavaClass and return JavaTypeVariable for name
         if (classOrMethod instanceof Class) {
             Class<?> ownerClass = (Class<?>) classOrMethod;
             JavaClass javaClass = getJavaClassForClass(ownerClass);
             return javaClass.getTypeVarForName(typeVarName);
         }
 
-        // Handle Method/Constructor
-        else if (classOrMethod instanceof Executable) {
-            Executable method = (Executable) classOrMethod;
-            JavaExecutable javaMethod = (JavaExecutable) getJavaMemberForMember(method);
-            return javaMethod.getTypeVarForName(typeVarName);
-        }
-
-        // Can't resolve
-        System.out.println("Resolver.getJavaTypeVariable: Can't resolve name: " + typeVarName + " for " + classOrMethod);
-        return null;
+        // Handle Method/Constructor: Get JavaMethod and return JavaTypeVariable for name
+        Executable methodOrConstr = (Executable) classOrMethod;
+        JavaExecutable javaMethod = getJavaExecutableForExecutable(methodOrConstr);
+        return javaMethod.getTypeVarForName(typeVarName);
     }
 
     /**
-     * Returns a JavaMember for given Member.
+     * Returns a JavaExecutable for given java.lang.reflect.Executable.
      */
-    private JavaMember getJavaMemberForMember(Member aMember)
+    private JavaExecutable getJavaExecutableForExecutable(Executable methodOrConstr)
     {
-        Class<?> declaringClass = aMember.getDeclaringClass();
+        Class<?> declaringClass = methodOrConstr.getDeclaringClass();
         JavaClass javaClass = getJavaClassForClass(declaringClass);
-        return javaClass.getJavaMemberForMember(aMember);
+
+        // Handle Method
+        if (methodOrConstr instanceof Method) {
+            JavaMethod[] methods = javaClass.getDeclaredMethods();
+            String id = ResolverIds.getIdForMember(methodOrConstr);
+            return ArrayUtils.findMatch(methods, method -> method.getId().equals(id));
+        }
+
+        // Handle Constructor
+        JavaConstructor[] constructors = javaClass.getDeclaredConstructors();
+        String id = ResolverIds.getIdForMember(methodOrConstr);
+        return ArrayUtils.findMatch(constructors, constr -> constr.getId().equals(id));
     }
 
     /**
