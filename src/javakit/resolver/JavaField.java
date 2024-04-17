@@ -21,8 +21,10 @@ public class JavaField extends JavaMember {
         if (aField == null)
             return;
 
-        // Set field
+        // Set Field, Name, SimpleName, Mods
         _field = aField;
+        _name = _simpleName = aField.getName();
+        _mods = aField.getModifiers();
     }
 
     /**

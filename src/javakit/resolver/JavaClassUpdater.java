@@ -250,7 +250,7 @@ public class JavaClassUpdater {
             JavaMethod newMethod = newMethods[i];
             JavaMethod oldMethod = ArrayUtils.findMatch(oldMethods, method -> method.equals(newMethod));
             if (oldMethod != null) {
-                if (oldMethod.mergeMethod(oldMethod))
+                if (oldMethod.mergeMethod(newMethod))
                     didChange = true;
                 newMethods[i] = oldMethod;
             }
@@ -274,7 +274,7 @@ public class JavaClassUpdater {
             JavaConstructor newConstr = newConstructors[i];
             JavaConstructor oldConstr = ArrayUtils.findMatch(oldConstructors, constr -> constr.equals(newConstr));
             if (oldConstr != null) {
-                if (oldConstr.mergeConstructor(oldConstr))
+                if (oldConstr.mergeConstructor(newConstr))
                     didChange = true;
                 newConstructors[i] = oldConstr;
             }

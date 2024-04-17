@@ -22,14 +22,6 @@ public class JavaMember extends JavaDecl {
     {
         super(aResolver, aType);
         _declaringClass = aDeclaringClass;
-
-        // If null member, just return
-        if (aMember == null)
-            return;
-
-        // Set Name, SimpleName, Mods
-        _name = _simpleName = aMember.getName();
-        _mods = aMember.getModifiers();
     }
 
     /**
