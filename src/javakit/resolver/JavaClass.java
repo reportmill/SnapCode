@@ -399,12 +399,12 @@ public class JavaClass extends JavaType {
     }
 
     /**
-     * Returns a method for method name and parameter types declared in this class.
+     * Returns a method for method name and parameter classes declared in this class.
      */
-    public JavaMethod getDeclaredMethodForNameAndTypes(String aName, JavaType[] theTypes)
+    public JavaMethod getDeclaredMethodForNameAndClasses(String aName, JavaClass[] paramClasses)
     {
         JavaMethod[] methods = getDeclaredMethods();
-        return ArrayUtils.findMatch(methods, method -> method.isEqualToNameAndTypes(aName, theTypes));
+        return ArrayUtils.findMatch(methods, method -> method.isEqualToNameAndClasses(aName, paramClasses));
     }
 
     /**
@@ -455,19 +455,19 @@ public class JavaClass extends JavaType {
     }
 
     /**
-     * Returns a method for method name and parameter types from this class or any superclass/interface.
+     * Returns a method for method name and parameter classes from this class or any superclass/interface.
      */
-    public JavaMethod getMethodDeepForNameAndTypes(String aName, JavaType[] theTypes)
+    public JavaMethod getMethodDeepForNameAndClasses(String aName, JavaClass[] paramClasses)
     {
-        // Check for declared constructor of this class
-        JavaMethod method = getDeclaredMethodForNameAndTypes(aName, theTypes);
+        // Check for declared method of this class
+        JavaMethod method = getDeclaredMethodForNameAndClasses(aName, paramClasses);
         if (method != null)
             return method;
 
         // Check superclass
         JavaClass superClass = getSuperClass();
         if (superClass != null)
-            method = superClass.getMethodDeepForNameAndTypes(aName, theTypes);
+            method = superClass.getMethodDeepForNameAndClasses(aName, paramClasses);
 
         // Return
         return method;

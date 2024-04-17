@@ -177,7 +177,7 @@ public class ClassFileUtils {
 
             // Get method for name and parameters
             JavaClass javaClass = _resolver.getJavaClassForName(className);
-            return javaClass.getMethodDeepForNameAndTypes(methodName, paramClasses);
+            return javaClass.getMethodDeepForNameAndClasses(methodName, paramClasses);
         }
 
         // Return null since unknown Constant reference

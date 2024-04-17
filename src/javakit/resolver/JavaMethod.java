@@ -109,14 +109,14 @@ public class JavaMethod extends JavaExecutable {
 
         // Get super method
         String name = getName();
-        JavaType[] paramTypes = getGenericParameterTypes();
-        JavaMethod superMethod = superClass.getMethodDeepForNameAndTypes(name, paramTypes);
+        JavaClass[] parameterClasses = getParameterClasses();
+        JavaMethod superMethod = superClass.getMethodDeepForNameAndClasses(name, parameterClasses);
 
         // If not found, check interfaces
         if (superMethod == null) {
             JavaClass[] interfaces = declaringClass.getInterfaces();
             for (JavaClass inf : interfaces) {
-                superMethod = inf.getMethodDeepForNameAndTypes(name, paramTypes);
+                superMethod = inf.getMethodDeepForNameAndClasses(name, parameterClasses);
                 if (superMethod != null)
                     break;
             }
@@ -244,16 +244,16 @@ public class JavaMethod extends JavaExecutable {
     }
 
     /**
-     * Returns whether method is equal to name and types.
+     * Returns whether method is equal to given name and parameter classes.
      */
-    public boolean isEqualToNameAndTypes(String methodName, JavaType[] theTypes)
+    public boolean isEqualToNameAndClasses(String methodName, JavaClass[] paramClasses)
     {
         // If name not equal, return false
         if (!methodName.equals(getName()))
             return false;
 
-        // Return whether types are equal
-        JavaType[] methodParamTypes = getGenericParameterTypes();
-        return JavaType.isTypesEqual(methodParamTypes, theTypes);
+        // Return whether given parameter classes are equal to this method's parameter classes
+        JavaClass[] thisParamClasses = getParameterClasses();
+        return ArrayUtils.equalsId(thisParamClasses, paramClasses);
     }
 }

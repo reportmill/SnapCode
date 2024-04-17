@@ -67,7 +67,7 @@ public class JMethodDecl extends JExecutableDecl {
             return null;
 
         // Return method for name and param types
-        return javaClass.getDeclaredMethodForNameAndTypes(name, paramTypes);
+        return javaClass.getDeclaredMethodForNameAndClasses(name, paramTypes);
     }
 
     /**
