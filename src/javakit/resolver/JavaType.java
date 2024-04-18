@@ -160,28 +160,12 @@ public class JavaType extends JavaDecl {
     }
 
     /**
-     * Returns whether JavaType arrays are equal.
+     * Returns whether this type is assignable from other type. Not sure whether this is lame or not.
      */
-    public static boolean isTypesEqual(JavaType[] theTypes1, JavaType[] theTypes2)
+    public boolean isAssignableFrom(JavaType otherType)
     {
-        // If length different, return false
-        int length = theTypes1.length;
-        if (theTypes2.length != length)
-            return false;
-
-        // Iterate over types
-        for (int i = 0; i < length; i++) {
-            JavaType type1 = theTypes1[i];
-            if (type1 != null)
-                type1 = type1.getEvalClass();
-            JavaType type2 = theTypes2[i];
-            if (type2 != null)
-                type2 = type2.getEvalClass();
-            if (type1 != type2)
-                return false;
-        }
-
-        // Return true since all types equal
-        return true;
+        JavaClass thisClass = getEvalClass();
+        JavaClass otherClass = otherType.getEvalClass();
+        return thisClass.isAssignableFrom(otherClass);
     }
 }

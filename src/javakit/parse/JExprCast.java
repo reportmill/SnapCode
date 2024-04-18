@@ -3,7 +3,6 @@
  */
 package javakit.parse;
 import javakit.resolver.JavaDecl;
-import snap.util.ArrayUtils;
 
 /**
  * A JExpr subclass for Cast expressions.
@@ -11,10 +10,18 @@ import snap.util.ArrayUtils;
 public class JExprCast extends JExpr {
 
     // The cast type
-    JType _type;
+    private JType _type;
 
     // The real expression for cast
-    JExpr _expr;
+    private JExpr _expr;
+
+    /**
+     * Constructor.
+     */
+    public JExprCast()
+    {
+        super();
+    }
 
     /**
      * Returns the cast JType.
@@ -52,9 +59,7 @@ public class JExprCast extends JExpr {
      */
     protected JavaDecl getDeclImpl()
     {
-        if (_type == null)
-            return null;
-        return _type.getDecl();
+        return _type != null ? _type.getDecl() : null;
     }
 
     /**
@@ -63,19 +68,18 @@ public class JExprCast extends JExpr {
     @Override
     protected NodeError[] getErrorsImpl()
     {
+        // If Type or Expr have errors, just return them
         NodeError[] errors = super.getErrorsImpl();
+        if (errors.length > 0)
+            return errors;
 
-        // Handle missing type
-        if (_type == null) {
-            NodeError error = new NodeError(this, "Missing or incomplete type");
-            errors = ArrayUtils.add(errors, error);
-        }
+        // Handle missing type or expression
+        if (_type == null)
+            return NodeError.newErrorArray(this, "Missing or incomplete cast type");
+        if (_expr == null)
+            return NodeError.newErrorArray(this, "Missing or incomplete expression");
 
-        // Handle missing expression
-        if (_expr == null) {
-            NodeError error = new NodeError(this, "Missing or incomplete expression");
-            errors = ArrayUtils.add(errors, error);
-        }
+        // Maybe add an "isCastable()" check? If common superclass is Object and expression class isn't Object, return false?
 
         // Return
         return errors;

@@ -198,21 +198,17 @@ public class JExprId extends JExpr {
     @Override
     protected NodeError[] getErrorsImpl()
     {
-        NodeError[] errors = NodeError.NO_ERRORS;
-
         // If Parent is WithId, just return
         JNode parentNode = getParent();
         if (parentNode instanceof WithId && ((WithId) parentNode).getId() == this)
-            return errors;
+            return NodeError.NO_ERRORS;
 
         // Handle can't resolve id
         JavaDecl decl = getDecl();
-        if (decl == null) {
-            String name = getName();
-            errors = NodeError.addError(errors, this, "Can't resolve id: " + name);
-        }
+        if (decl == null)
+            return NodeError.newErrorArray(this, "Can't resolve id: " + getName());
 
         // Return
-        return errors;
+        return NodeError.NO_ERRORS;
     }
 }
