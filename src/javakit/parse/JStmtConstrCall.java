@@ -1,11 +1,9 @@
 package javakit.parse;
-import java.util.*;
 import java.util.stream.Stream;
-
 import javakit.resolver.JavaClassUtils;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
-import snap.util.ListUtils;
+import snap.util.ArrayUtils;
 
 /**
  * A JStmt subclass to represent an explicit constructor invocation, like: this(x) or super(y).
@@ -13,26 +11,23 @@ import snap.util.ListUtils;
  */
 public class JStmtConstrCall extends JStmt {
 
-    // The identifier
-    private List<JExprId> _idList = new ArrayList<>();
+    // The array of ids
+    private JExprId[] _idList = new JExprId[0];
 
     // The args
     private JExpr[] _args = new JExpr[0];
 
     /**
-     * Returns the list of ids.
+     * Returns the array of ids.
      */
-    public List<JExprId> getIds()
-    {
-        return _idList;
-    }
+    public JExprId[] getIds()  { return _idList; }
 
     /**
      * Adds an Id.
      */
     public void addId(JExprId anId)
     {
-        _idList.add(anId);
+        _idList = ArrayUtils.add(_idList, anId);
         addChild(anId);
     }
 
@@ -79,8 +74,8 @@ public class JStmtConstrCall extends JStmt {
         JavaClass[] argClasses = getArgClasses();
 
         // If Super, switch to super class
-        List<JExprId> exprIds = getIds();
-        String name = exprIds.get(0).getName();
+        JExprId[] exprIds = getIds();
+        String name = exprIds[0].getName();
         if (name.equals("super"))
             enclosingClass = enclosingClass.getSuperClass();
 
@@ -100,7 +95,7 @@ public class JStmtConstrCall extends JStmt {
     protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // Check IdList
-        if (anExprId.getParent() == this && ListUtils.containsId(_idList, anExprId))
+        if (anExprId.getParent() == this && ArrayUtils.containsId(_idList, anExprId))
             return getDecl();
 
         // Do normal version
