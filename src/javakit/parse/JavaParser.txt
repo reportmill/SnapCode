@@ -7,8 +7,8 @@ JeplFile { ImportDecl* JeplNode* }
 
 JeplNode
 {
-    LookAhead (Modifiers ResultType Identifier FormalParams) Modifiers MethodDecl |
-    LookAhead (Modifiers EnumDecl) Modifiers EnumDecl |
+    LookAhead (Modifiers ResultType Identifier "(") Modifiers MethodDecl |
+    LookAhead (Modifiers "enum") Modifiers EnumDecl |
     BlockStatement
 }
 
@@ -26,14 +26,6 @@ Modifier
 
 TypeDecl { ";" | Modifiers (ClassDecl | EnumDecl | AnnotationDecl) }
 
-MemberDecl
-{
-    ClassDecl | EnumDecl |
-    LookAhead (TypeParams? Identifier "(") ConstrDecl |
-    LookAhead (Type Identifier ("[" "]")* ("," | "=" | ";")) FieldDecl |
-    MethodDecl | AnnotationDecl
-}
-
 ClassDecl
 {
     ("class" | "interface") Identifier TypeParams? ExtendsList? ImplementsList? ClassBody
@@ -45,9 +37,11 @@ ImplementsList { "implements" ClassType ("," ClassType)* }
 
 ClassBody { "{" ClassBodyDecl* "}" }
 
-ClassBodyDecl { LookAhead(2) Initializer | Modifiers MemberDecl | ";" }
-
-Initializer { "static"? Block }
+ClassBodyDecl
+{
+    LookAhead(2) Initializer |
+    Modifiers MemberDecl | ";"
+}
 
 EnumDecl
 {
@@ -55,6 +49,18 @@ EnumDecl
 }
 
 EnumConstant { Modifiers Identifier Arguments? ClassBody? }
+
+Initializer { "static"? Block }
+
+MemberDecl
+{
+    ClassDecl |
+    EnumDecl |
+    LookAhead (TypeParams? Identifier "(") ConstrDecl |
+    LookAhead (Type Identifier ("[" "]")* ("," | "=" | ";")) FieldDecl |
+    MethodDecl |
+    AnnotationDecl
+}
 
 FieldDecl { Type VarDecl ("," VarDecl)* ";" }
 
@@ -72,6 +78,10 @@ MethodDecl
 {
     TypeParams? ResultType Identifier FormalParams ("[" "]")* ThrowsList? (Block | ";")
 }
+
+FormalParams { "(" (FormalParam ("," FormalParam)*)? ")" }
+
+FormalParam { ("final" | Annotation)? Type "..."? Identifier ("[" "]")* }
 
 ThrowsList { "throws" Name ("," Name)* }
 
@@ -274,10 +284,6 @@ LambdaExpr
     LookAhead ("(" Identifier ("," Identifier)* ")" "->") "(" Identifier ("," Identifier)* ")" "->" (Expression | Block) |
     LookAhead (FormalParams "->") FormalParams "->" (Expression | Block)
 }
-
-FormalParam { Modifiers ("final" | Annotation)? Type "..."? Identifier ("[" "]")* }
-
-FormalParams { "(" (FormalParam ("," FormalParam)*)? ")" }
 
 Name { Identifier (LookAhead(2) "." Identifier)* }
 
