@@ -2,10 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import java.util.*;
+import java.util.stream.Stream;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
-import snap.util.StringUtils;
 
 /**
  * A JExpr subclass for Allocation expressions.
@@ -16,7 +15,7 @@ public class JExprAlloc extends JExpr {
     protected JType  _type;
 
     // The allocation args
-    protected List<JExpr>  _args = Collections.EMPTY_LIST;
+    protected JExpr[] _args = new JExpr[0];
 
     // The array dimension expression, if array
     protected JExpr  _arrayDims;
@@ -57,20 +56,15 @@ public class JExprAlloc extends JExpr {
     /**
      * Returns the allocation arguments.
      */
-    public List<JExpr> getArgs()  { return _args; }
+    public JExpr[] getArgs()  { return _args; }
 
     /**
      * Sets the allocation arguments.
      */
-    public void setArgs(List<JExpr> theArgs)
+    public void setArgs(JExpr[] theArgs)
     {
-        if (_args != null)
-            _args.forEach(arg -> removeChild(arg));
-
         _args = theArgs;
-
-        if (_args != null)
-            _args.forEach(arg -> addChild(arg));
+        Stream.of(_args).forEach(this::addChild);
     }
 
     /**
@@ -78,12 +72,12 @@ public class JExprAlloc extends JExpr {
      */
     public JavaClass[] getArgClasses()
     {
-        List<JExpr> args = getArgs();
-        JavaClass[] argClasses = new JavaClass[args.size()];
+        JExpr[] args = getArgs();
+        JavaClass[] argClasses = new JavaClass[args.length];
 
         // Iterate over args and map to eval types
-        for (int i = 0, iMax = args.size(); i < iMax; i++) {
-            JExpr arg = args.get(i);
+        for (int i = 0, iMax = args.length; i < iMax; i++) {
+            JExpr arg = args[i];
             if ((arg instanceof JExprLambda || arg instanceof JExprMethodRef) && arg._decl == null)
                 arg = null;
             argClasses[i] = arg != null ? arg.getEvalClass() : null;
@@ -273,16 +267,8 @@ public class JExprAlloc extends JExpr {
      */
     private String getArgTypesString()
     {
-        // Get arg classes
         JavaClass[] argClasses = getArgClasses();
-        if (argClasses.length == 0)
-            return "()";
-
-        // Get arg type string and join by comma
-        String[] argTypeStrings = ArrayUtils.map(argClasses, type -> type != null ? type.getSimpleName() : "null", String.class);
-        String argTypeString = StringUtils.join(argTypeStrings, ",");
-
-        // Return in parens
+        String argTypeString = ArrayUtils.mapToStringsAndJoin(argClasses, type -> type != null ? type.getSimpleName() : "null", ",");
         return '(' + argTypeString + ')';
     }
 }

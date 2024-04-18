@@ -1,5 +1,7 @@
 package javakit.parse;
 import java.util.*;
+import java.util.stream.Stream;
+
 import javakit.resolver.JavaClassUtils;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
@@ -12,10 +14,10 @@ import snap.util.ListUtils;
 public class JStmtConstrCall extends JStmt {
 
     // The identifier
-    List<JExprId> _idList = new ArrayList();
+    private List<JExprId> _idList = new ArrayList<>();
 
     // The args
-    List<JExpr> _args;
+    private JExpr[] _args = new JExpr[0];
 
     /**
      * Returns the list of ids.
@@ -37,23 +39,15 @@ public class JStmtConstrCall extends JStmt {
     /**
      * Returns the method arguments.
      */
-    public List<JExpr> getArgs()
-    {
-        return _args;
-    }
+    public JExpr[] getArgs()  { return _args; }
 
     /**
      * Sets the method arguments.
      */
-    public void setArgs(List<JExpr> theArgs)
+    public void setArgs(JExpr[] theArgs)
     {
-        if (_args != null)
-            _args.forEach(arg -> removeChild(arg));
-
         _args = theArgs;
-
-        if (_args != null)
-            _args.forEach(arg -> addChild(arg));
+        Stream.of(_args).forEach(this::addChild);
     }
 
     /**
@@ -61,11 +55,11 @@ public class JStmtConstrCall extends JStmt {
      */
     public JavaClass[] getArgClasses()
     {
-        List<JExpr> args = getArgs();
-        JavaClass[] argTypes = new JavaClass[args.size()];
+        JExpr[] args = getArgs();
+        JavaClass[] argTypes = new JavaClass[args.length];
 
-        for (int i = 0, iMax = args.size(); i < iMax; i++) {
-            JExpr arg = args.get(i);
+        for (int i = 0, iMax = args.length; i < iMax; i++) {
+            JExpr arg = args[i];
             argTypes[i] = arg != null ? arg.getEvalClass() : null;
         }
 

@@ -4,7 +4,6 @@
 package snapcode.javatext;
 import javakit.parse.*;
 import javakit.resolver.*;
-import java.util.List;
 
 /**
  * This class provides functionality for determining the class a node should be.
@@ -108,13 +107,13 @@ public class ReceivingClass {
         if (methodCall == null) return -1;
 
         // Get args
-        List<JExpr> args = methodCall.getArgs();
+        JExpr[] args = methodCall.getArgs();
 
         // Iterate over args and return index if found
         JNode node = aNode;
         while (node != methodCall) {
-            for (int i = 0, iMax = args.size(); i < iMax; i++)
-                if (args.get(i) == node)
+            for (int i = 0, iMax = args.length; i < iMax; i++)
+                if (args[i] == node)
                     return i;
             node = node.getParent();
         }

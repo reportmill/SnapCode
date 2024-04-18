@@ -3,8 +3,7 @@
  */
 package javakit.parse;
 import javakit.resolver.*;
-import snap.util.ListUtils;
-import java.util.List;
+import snap.util.ArrayUtils;
 
 /**
  * A JExpr to represent lambda expressions.
@@ -86,8 +85,8 @@ public abstract class JExprLambdaBase extends JExpr {
                 return null;
 
             // Get arg index of this lambda expr
-            List<JExpr> args = methodCallExpr.getArgs();
-            int argIndex = ListUtils.indexOfId(args, this);
+            JExpr[] args = methodCallExpr.getArgs();
+            int argIndex = ArrayUtils.indexOfId(args, this);
             if (argIndex < 0) { System.err.println("JExprLambdaBase.getLambdaTypeImpl: Can't happen 1"); return null; }
             return method.getGenericParameterType(argIndex);
         }
@@ -102,8 +101,8 @@ public abstract class JExprLambdaBase extends JExpr {
                 return null;
 
             // Get arg index of this lambda expr
-            List<JExpr> args = allocExpr.getArgs();
-            int argIndex = ListUtils.indexOfId(args, this);
+            JExpr[] args = allocExpr.getArgs();
+            int argIndex = ArrayUtils.indexOfId(args, this);
             if (argIndex < 0) { System.err.println("JExprLambdaBase.getLambdaTypeImpl: Can't happen 2"); return null; }
             return constructor.getGenericParameterType(argIndex);
         }

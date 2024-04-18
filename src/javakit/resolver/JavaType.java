@@ -165,7 +165,7 @@ public class JavaType extends JavaDecl {
     public boolean isAssignableFrom(JavaType otherType)
     {
         JavaClass thisClass = getEvalClass();
-        JavaClass otherClass = otherType.getEvalClass();
+        JavaClass otherClass = otherType != null ? otherType.getEvalClass() : null;
         return thisClass.isAssignableFrom(otherClass);
     }
 }

@@ -657,8 +657,8 @@ public class JavaParserExpr extends Parser {
 
                 // Handle Arguments
                 case "Arguments":
-                    List<JExpr> argsList = aNode.getCustomNode(List.class);
-                    _part = new JExprMethodCall(null, argsList);
+                    JExpr[] argExprs = aNode.getCustomNode(JExpr[].class);
+                    _part = new JExprMethodCall(null, argExprs);
                     break;
             }
         }
@@ -669,25 +669,41 @@ public class JavaParserExpr extends Parser {
     /**
      * Arguments Handler
      */
-    public static class ArgumentsHandler extends ParseHandler<ArrayList<JExpr>> {
+    public static class ArgumentsHandler extends ParseHandler<JExpr[]> {
+
+        // List of argument expressions
+        private List<JExpr> _argExprs = new ArrayList<>();
 
         /**
          * ParseHandler method.
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            ArrayList<JExpr> argsExpr = getPart();
-
             // Handle Expression
             if (anId == "Expression") {
                 JExpr argExpr = aNode.getCustomNode(JExpr.class);
                 if (argExpr != null)
-                    argsExpr.add(argExpr);
+                    _argExprs.add(argExpr);
             }
         }
 
+        /**
+         * Override to return array.
+         */
+        public JExpr[] parsedAll()  { return _argExprs.toArray(new JExpr[0]); }
+
+        /**
+         * Override to clear FormalParams list.
+         */
         @Override
-        protected Class getPartClass()  { return ArrayList.class; }
+        public void reset()
+        {
+            super.reset();
+            _argExprs.clear();
+        }
+
+        @Override
+        protected Class getPartClass()  { return JExpr[].class; }
     }
 
     /**
@@ -737,7 +753,7 @@ public class JavaParserExpr extends Parser {
 
                 // Handle Arguments
                 case "Arguments":
-                    List<JExpr> argExprs = aNode.getCustomNode(List.class);
+                    JExpr[] argExprs = aNode.getCustomNode(JExpr[].class);
                     allocExpr.setArgs(argExprs);
                     break;
 

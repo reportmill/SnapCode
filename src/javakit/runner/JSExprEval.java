@@ -257,8 +257,8 @@ public class JSExprEval {
             return evalAllocArrayExpr(anExpr, thisObject, javaClass);
 
         // Special case
-        List<JExpr> argExprs = anExpr.getArgs();
-        int argCount = argExprs.size();
+        JExpr[] argExprs = anExpr.getArgs();
+        int argCount = argExprs.length;
         if (argCount == 0)
             return realClass.newInstance();
 
@@ -270,7 +270,7 @@ public class JSExprEval {
 
         // Iterate over arg expressions and get evaluated values
         for (int i = 0; i < argCount; i++) {
-            JExpr argExpr = argExprs.get(i);
+            JExpr argExpr = argExprs[i];
             argValues[i] = evalExpr(argExpr, thisObject);
         }
 

@@ -2,8 +2,7 @@ package javakit.parse;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaField;
-import java.util.Collections;
-import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * A JNode for Enum constants.
@@ -11,7 +10,7 @@ import java.util.List;
 public class JEnumConst extends JMemberDecl {
 
     // The args
-    protected List<JExpr>  _args = Collections.EMPTY_LIST;
+    protected JExpr[] _args = new JExpr[0];
 
     // The class or interface body
     protected JBodyDecl[] _classBody;
@@ -27,23 +26,15 @@ public class JEnumConst extends JMemberDecl {
     /**
      * Returns the arguments.
      */
-    public List<JExpr> getArgs()  { return _args; }
+    public JExpr[] getArgs()  { return _args; }
 
     /**
      * Sets the arguments.
      */
-    public void setArgs(List<JExpr> theArgs)
+    public void setArgs(JExpr[] theArgs)
     {
-        // Remove old
-        if (_args != null)
-            _args.forEach(arg -> removeChild(arg));
-
-        // Set new
         _args = theArgs;
-
-        // Add new args
-        if (_args != null)
-            _args.forEach(arg -> addChild(arg));
+        Stream.of(_args).forEach(this::addChild);
     }
 
     /**

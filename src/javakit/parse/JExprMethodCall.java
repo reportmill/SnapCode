@@ -4,10 +4,10 @@
 package javakit.parse;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
-import snap.util.ListUtils;
 import snap.util.StringUtils;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * This class represents a method call in code.
@@ -18,7 +18,7 @@ public class JExprMethodCall extends JExpr implements WithId {
     private JExprId _id;
 
     // The args
-    private List<JExpr> _args;
+    private JExpr[] _args = new JExpr[0];
 
     // The method
     private JavaMethod _method;
@@ -34,7 +34,7 @@ public class JExprMethodCall extends JExpr implements WithId {
     /**
      * Constructor for given identifier (method name) and arg list.
      */
-    public JExprMethodCall(JExprId anId, List<JExpr> theArgs)
+    public JExprMethodCall(JExprId anId, JExpr[] theArgs)
     {
         setId(anId);
         setArgs(theArgs);
@@ -59,30 +59,25 @@ public class JExprMethodCall extends JExpr implements WithId {
     /**
      * Returns the number of arguments.
      */
-    public int getArgCount()  { return _args.size(); }
+    public int getArgCount()  { return _args.length; }
 
     /**
      * Returns the individual argument at index.
      */
-    public JExpr getArg(int anIndex)  { return _args.get(anIndex); }
+    public JExpr getArg(int anIndex)  { return _args[anIndex]; }
 
     /**
      * Returns the method arguments.
      */
-    public List<JExpr> getArgs()  { return _args; }
+    public JExpr[] getArgs()  { return _args; }
 
     /**
      * Sets the method arguments.
      */
-    public void setArgs(List<JExpr> theArgs)
+    public void setArgs(JExpr[] theArgs)
     {
-        if (_args != null)
-            _args.forEach(arg -> removeChild(arg));
-
         _args = theArgs;
-
-        if (_args != null)
-            _args.forEach(arg -> addChild(arg));
+        Stream.of(_args).forEach(this::addChild);
     }
 
     /**
@@ -108,7 +103,7 @@ public class JExprMethodCall extends JExpr implements WithId {
      */
     public JavaType[] getArgEvalTypes()
     {
-        return ListUtils.mapToArray(_args, expr -> expr != null ? expr.getEvalType() : null, JavaType.class);
+        return ArrayUtils.map(_args, expr -> expr != null ? expr.getEvalType() : null, JavaType.class);
     }
 
     /**
@@ -139,11 +134,11 @@ public class JExprMethodCall extends JExpr implements WithId {
 
         // Get method name and arg types
         String name = getName();
-        List<JExpr> args = getArgs();
-        int argCount = args.size();
+        JExpr[] args = getArgs();
+        int argCount = args.length;
         JavaClass[] argClasses = new JavaClass[argCount];
         for (int i = 0; i < argCount; i++) {
-            JExpr arg = args.get(i);
+            JExpr arg = args[i];
             if (arg instanceof JExprLambda || arg instanceof JExprMethodRef)
                 return getMethodForLambdaArgs();
             JavaClass argClass = arg != null ? arg.getEvalClass() : null;
@@ -202,8 +197,8 @@ public class JExprMethodCall extends JExpr implements WithId {
             return null;
 
         // Get arg index of lambda expression
-        List<JExpr> args = getArgs();
-        int argIndex = ListUtils.findMatchIndex(args, arg -> arg instanceof JExprLambda || arg instanceof JExprMethodRef);
+        JExpr[] args = getArgs();
+        int argIndex = ArrayUtils.findMatchIndex(args, arg -> arg instanceof JExprLambda || arg instanceof JExprMethodRef);
         if (argIndex < 0)
             return null;
 
@@ -237,11 +232,11 @@ public class JExprMethodCall extends JExpr implements WithId {
 
         // Get method name and arg types
         String name = getName();
-        List<JExpr> args = getArgs();
-        int argCount = args.size();
+        JExpr[] args = getArgs();
+        int argCount = args.length;
         JavaClass[] argClasses = new JavaClass[argCount];
         for (int i = 0; i < argCount; i++) {
-            JExpr arg = args.get(i);
+            JExpr arg = args[i];
             JavaClass argType = arg instanceof JExprLambda || arg instanceof JExprMethodRef ? null : arg.getEvalClass();
             argClasses[i] = argType;
         }

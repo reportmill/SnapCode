@@ -576,7 +576,8 @@ public class JavaParser extends JavaParserStmt {
 
                 // Handle Arguments
                 case "Arguments":
-                    enumConst.setArgs(aNode.getCustomNode(List.class));
+                    JExpr[] argExprs = aNode.getCustomNode(JExpr[].class);
+                    enumConst.setArgs(argExprs);
                     break;
 
                 // Handle ClassBody
@@ -880,7 +881,8 @@ public class JavaParser extends JavaParserStmt {
 
                 // Handle Arguments
                 case "Arguments":
-                    constrCallStmt.setArgs(aNode.getCustomNode(List.class));
+                    JExpr[] argExprs = aNode.getCustomNode(JExpr[].class);
+                    constrCallStmt.setArgs(argExprs);
                     break;
             }
         }
