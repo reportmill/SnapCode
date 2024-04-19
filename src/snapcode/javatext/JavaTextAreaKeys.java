@@ -259,13 +259,17 @@ public class JavaTextAreaKeys extends TextAreaKeys {
      */
     private boolean isEnteringBlockStatement(TextLine aTextLine)
     {
-        // Get last token on given line (if at beginning of line, check previous line)
-        TextToken lastToken = aTextLine.getLastToken();
-        if (lastToken == null && getSelStart() == aTextLine.getStartCharIndex() && aTextLine.getPrevious() != null)
+        // Get last token on given line
+        int selStart = getSelStart();
+        int selStartInLine = selStart - aTextLine.getStartCharIndex();
+        TextToken lastToken = getLastTokenBeforeCharIndex(aTextLine, selStartInLine);
+
+        // If at beginning of line, check previous line
+        if (lastToken == null && selStartInLine == 0 && aTextLine.getPrevious() != null)
             lastToken = aTextLine.getPrevious().getLastToken();
 
-        // If no last token or token after selection, return false
-        if (lastToken == null || getSelStart() <= lastToken.getStartCharIndex())
+        // If no last token, return false
+        if (lastToken == null)
             return false;
 
         // If last token is open bracket, return true
@@ -273,9 +277,9 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         if (lastTokenString.equals("{"))
             return true;
 
-        // If current node is conditional (if, for, do, while), return true
-        JNode selNode = _javaTextArea.getSelNode();
-        if (selNode instanceof JStmtConditional)
+        // If last node is conditional (if, for, do, while), return true
+        JNode lastNode = _javaTextArea.getNodeForCharIndex(lastToken.getEndCharIndex());
+        if (lastNode instanceof JStmtConditional)
             return true;
 
         // Return false
@@ -289,25 +293,28 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     {
         // Create string for new line plus indent
         String indentStr = aTextLine.getIndentString();
-        StringBuilder sb = new StringBuilder().append('\n').append(indentStr);
+        String insertChars = '\n' + indentStr + INDENT_STRING;
+        int newSelStart = getSelStart() + insertChars.length();
 
-        // Add additional level of indent
-        sb.append(INDENT_STRING);
+        // If trailing white space, remove from insertChars
+        int charIndexInLine = getSelStart() - aTextLine.getStartCharIndex();
+        while (charIndexInLine < aTextLine.length() && Character.isWhitespace(aTextLine.charAt(charIndexInLine)) && insertChars.length() > 1) {
+            insertChars = insertChars.substring(0, insertChars.length() - 1);
+            charIndexInLine++;
+        }
 
         // Do normal version
-        _textArea.replaceChars(sb.toString());
+        _textArea.replaceChars(insertChars);
+        _textArea.setSel(newSelStart);
 
         // If start of code block, proactively append close bracket
         TextToken textToken = aTextLine.getLastToken();
         String textTokenString = textToken != null ? textToken.getString() : "";
         boolean addCloseBracket = textTokenString.equals("{");
         if (addCloseBracket) {
-            if (_javaTextArea.getJFile().getException() != null && sb.length() > INDENT_STRING.length()) { // Sanity check
-                int start = getSelStart();
-                String str = sb.substring(0, sb.length() - INDENT_STRING.length()) + "}";
-                _textArea.replaceChars(str, null, start, start, false);
-                setSel(start);
-            }
+            String closeBracketStr = '\n' + indentStr + "}";
+            int selStart = aTextLine.getNext().getEndCharIndex() - 1;
+            _textArea.replaceChars(closeBracketStr, null, selStart, selStart, false);
         }
     }
 
@@ -414,5 +421,22 @@ public class JavaTextAreaKeys extends TextAreaKeys {
             int selStart2 = newLine.getStartCharIndex() + newLine.getIndentLength();
             _textArea.setSel(selStart2);
         }
+    }
+
+    /**
+     * Returns the last token before given char index.
+     */
+    private static TextToken getLastTokenBeforeCharIndex(TextLine textLine, int charIndex)
+    {
+        // Iterate over line tokens (backwards) and return first token that starts at or before char index
+        TextToken[] tokens = textLine.getTokens();
+        for (int i = tokens.length - 1; i >= 0; i--) {
+            TextToken token = tokens[i];
+            if (charIndex > token.getStartCharIndexInLine())
+                return token;
+        }
+
+        // Return not found
+        return null;
     }
 }
