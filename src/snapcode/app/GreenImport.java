@@ -120,8 +120,8 @@ public class GreenImport {
         WebFile gfarRootDir = gfarSite.getRootDir();
         WebFile[] gfarRootFiles = gfarRootDir.getFiles();
 
-        // Return the only file in top level of greenfoot archive zip file
-        return gfarRootFiles.length > 0 ? gfarRootFiles[0] : null;
+        // Return the first file in top level of greenfoot archive zip file that starts with letter
+        return ArrayUtils.findMatch(gfarRootFiles, file -> Character.isLetter(file.getName().charAt(0)));
     }
 
     /**
@@ -297,6 +297,8 @@ public class GreenImport {
     {
         // Get project file
         WebFile file = projectSrcDir.getFileForName("project.greenfoot");
+        if (file == null)
+            return null;
 
         // Get file text
         String text = file.getText();
