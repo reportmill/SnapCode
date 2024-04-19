@@ -18,7 +18,7 @@ public class JExprMethodCall extends JExpr implements WithId {
     private JExprId _id;
 
     // The args
-    private JExpr[] _args = new JExpr[0];
+    private JExpr[] _args = JExpr.EMPTY_EXPR_ARRAY;
 
     // The method
     private JavaMethod _method;

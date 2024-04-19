@@ -9,6 +9,9 @@ import javakit.resolver.*;
  */
 public abstract class JExpr extends JNode {
 
+    // Constant for empty expressions
+    public static final JExpr[] EMPTY_EXPR_ARRAY = new JExpr[0];
+
     /**
      * Constructor.
      */

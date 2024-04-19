@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 public class JStmtTry extends JStmt implements WithVarDecls, WithBlockStmt {
 
     // The array of resources
-    private JExpr[] _resources = new JExpr[0];
+    private JExpr[] _resources = JExpr.EMPTY_EXPR_ARRAY;
 
     // The statement block
     protected JStmtBlock  _block;

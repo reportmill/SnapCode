@@ -836,7 +836,7 @@ public class JavaParser extends JavaParserStmt {
         /**
          * Override to return array.
          */
-        public JExpr[] parsedAll()  { return _throwsList.toArray(new JExpr[0]); }
+        public JExpr[] parsedAll()  { return _throwsList.toArray(JExpr.EMPTY_EXPR_ARRAY); }
 
         /**
          * Override to clear BodyDecls list.

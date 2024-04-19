@@ -15,7 +15,7 @@ public class JExprAlloc extends JExpr {
     protected JType  _type;
 
     // The allocation args
-    protected JExpr[] _args = new JExpr[0];
+    protected JExpr[] _args = JExpr.EMPTY_EXPR_ARRAY;
 
     // The array dimension expression, if array
     protected JExpr  _arrayDims;

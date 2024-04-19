@@ -19,16 +19,13 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
     protected JExprVarDecl _varDeclExpr;
 
     // The init expressions (if basic for and no VarDecl)
-    private JExpr[] _initExprs = EMPTY_EXPR_ARRAY;
+    private JExpr[] _initExprs = JExpr.EMPTY_EXPR_ARRAY;
 
     // The update expressions
-    private JExpr[] _updateExprs = EMPTY_EXPR_ARRAY;
+    private JExpr[] _updateExprs = JExpr.EMPTY_EXPR_ARRAY;
 
     // The iterable expression (ForEach)
     private JExpr _iterableExpr;
-
-    // Constant for empty expressions
-    private static JExpr[] EMPTY_EXPR_ARRAY = new JExpr[0];
 
     /**
      * Constructor.

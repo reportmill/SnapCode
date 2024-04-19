@@ -15,7 +15,7 @@ public class JStmtConstrCall extends JStmt {
     private JExprId[] _idList = new JExprId[0];
 
     // The args
-    private JExpr[] _args = new JExpr[0];
+    private JExpr[] _args = JExpr.EMPTY_EXPR_ARRAY;
 
     /**
      * Returns the array of ids.

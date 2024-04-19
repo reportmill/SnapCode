@@ -20,7 +20,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     protected JVarDecl[] _params = new JVarDecl[0];
 
     // The array of thrown exception class name expressions
-    protected JExpr[] _throwsList = new JExpr[0];
+    protected JExpr[] _throwsList = JExpr.EMPTY_EXPR_ARRAY;
 
     // The statement Block
     protected JStmtBlock  _block;

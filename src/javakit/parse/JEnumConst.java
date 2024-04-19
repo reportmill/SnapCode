@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 public class JEnumConst extends JMemberDecl {
 
     // The args
-    protected JExpr[] _args = new JExpr[0];
+    protected JExpr[] _args = JExpr.EMPTY_EXPR_ARRAY;
 
     // The class or interface body
     protected JBodyDecl[] _classBody;

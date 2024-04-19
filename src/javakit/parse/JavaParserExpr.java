@@ -690,7 +690,7 @@ public class JavaParserExpr extends Parser {
         /**
          * Override to return array.
          */
-        public JExpr[] parsedAll()  { return _argExprs.toArray(new JExpr[0]); }
+        public JExpr[] parsedAll()  { return _argExprs.toArray(JExpr.EMPTY_EXPR_ARRAY); }
 
         /**
          * Override to clear FormalParams list.
