@@ -1,6 +1,5 @@
 package snapcode.app;
 import snapcode.apptools.BuildTool;
-import snapcode.apptools.DebugTool;
 import snapcode.project.Project;
 import snap.gfx.*;
 import snap.util.StringUtils;
@@ -79,8 +78,10 @@ public class MainToolBar extends WorkspaceTool {
         // Handle RunButton, DebugButton, TerminateButton, BuildButton
         if (anEvent.equals("RunButton"))
             _workspaceTools.getRunTool().runAppForSelFile(false);
-        if (anEvent.equals("DebugButton"))
+        if (anEvent.equals("DebugButton")) {
+            if (anEvent.isAltDown()) { String str = null; str.length(); } // Hidden trigger to test NPE
             _workspaceTools.getRunTool().runAppForSelFile(true);
+        }
         if (anEvent.equals("TerminateButton"))
             _workspaceTools.getRunTool().cancelRun();
         if (anEvent.equals("BuildButton"))
