@@ -298,7 +298,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
 
         // If trailing white space, remove from insertChars
         int charIndexInLine = getSelStart() - aTextLine.getStartCharIndex();
-        while (charIndexInLine < aTextLine.length() && Character.isWhitespace(aTextLine.charAt(charIndexInLine)) && insertChars.length() > 1) {
+        while (charIndexInLine < aTextLine.length() - 1 && Character.isWhitespace(aTextLine.charAt(charIndexInLine)) && insertChars.length() > 1) {
             insertChars = insertChars.substring(0, insertChars.length() - 1);
             charIndexInLine++;
         }
