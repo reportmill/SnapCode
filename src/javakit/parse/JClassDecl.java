@@ -5,6 +5,7 @@ package javakit.parse;
 import java.util.*;
 import java.util.stream.Stream;
 import javakit.resolver.*;
+import snap.parse.ParseToken;
 import snap.util.ArrayUtils;
 import snap.util.ObjectArray;
 
@@ -617,8 +618,28 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     }
 
     /**
+     * Returns whether class is missing close bracket.
+     */
+    public boolean isMissingCloseBracket()
+    {
+        // If class doesn't end with bracket return true
+        ParseToken classEndToken = getEndToken();
+        if (!classEndToken.getString().equals("}"))
+            return true;
+
+        // If class end token really belongs to child, return true
+        JNode lastChild = getLastChild();
+        if (lastChild.getEndToken() == classEndToken)
+            return true;
+
+        // Return not missing close bracket
+        return false;
+    }
+
+    /**
      * Returns a resolved type for given type.
      */
+    @Override
     protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
     {
         // Just resolve typeVar to bounds

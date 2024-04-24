@@ -307,15 +307,28 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         _textArea.replaceChars(insertChars);
         _textArea.setSel(newSelStart);
 
-        // If start of code block, proactively append close bracket
+        // If last token is unbalanced open bracket, proactively append close bracket
         TextToken textToken = aTextLine.getLastToken();
-        String textTokenString = textToken != null ? textToken.getString() : "";
-        boolean addCloseBracket = textTokenString.equals("{");
-        if (addCloseBracket) {
+        if (isUnbalancedOpenBracketToken(textToken)) {
             String closeBracketStr = '\n' + indentStr + "}";
             int selStart = aTextLine.getNext().getEndCharIndex() - 1;
             _textArea.replaceChars(closeBracketStr, null, selStart, selStart, false);
         }
+    }
+
+    /**
+     * Returns whether token is an open bracket and needs a close bracket.
+     */
+    private boolean isUnbalancedOpenBracketToken(TextToken textToken)
+    {
+        // If token isn't open bracket, return false
+        if (textToken == null || !textToken.getString().equals("{"))
+            return false;
+
+        // Return whether class is missing close bracket
+        JFile jFile = _javaTextArea.getJFile();
+        JClassDecl classDecl = jFile.getClassDecl();
+        return classDecl != null && classDecl.isMissingCloseBracket();
     }
 
     /**

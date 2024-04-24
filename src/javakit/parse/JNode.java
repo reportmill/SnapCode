@@ -395,6 +395,11 @@ public class JNode {
     }
 
     /**
+     * Returns the last child.
+     */
+    public JNode getLastChild()  { return ListUtils.getLast(_children); }
+
+    /**
      * Returns whether given node is ancestor of this node.
      */
     public boolean isAncestor(JNode aNode)
