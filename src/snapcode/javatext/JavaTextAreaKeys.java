@@ -62,15 +62,15 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         // Handle delete of adjacent paired chars (parens, quotes, square brackets) - TODO: don't do if in string/comment
         boolean isDelete = keyCode == KeyCode.BACK_SPACE || shortcutDown && !shiftDown && keyCode == KeyCode.X;
         if (isDelete && getSel().getSize() <= 1) {
-            int start = getSelStart();
+            int prevCharIndex = getSelStart();
             if (isSelEmpty())
-                start--;
-            char char1 = start >= 0 && start + 1 < length() ? charAt(start) : 0;
-            if (isPairedCharOpener(char1)) {
-                char char2 = char1 != 0 ? charAt(start + 1) : 0;
-                char closeChar = getPairedCharForOpener(char1);
-                if (char2 == closeChar)
-                    _textArea.delete(start + 1, start + 2, false);
+                prevCharIndex--;
+            char prevChar = prevCharIndex >= 0 && prevCharIndex + 1 < length() ? charAt(prevCharIndex) : 0;
+            if (isPairedCharOpener(prevChar)) {
+                char nextChar = prevChar != 0 ? charAt(prevCharIndex + 1) : 0;
+                char closeChar = getPairedCharForOpener(prevChar);
+                if (nextChar == closeChar)
+                    _textArea.delete(prevCharIndex + 1, prevCharIndex + 2, false);
             }
         }
 
@@ -387,12 +387,9 @@ public class JavaTextAreaKeys extends TextAreaKeys {
      */
     public void handlePairedCharOpener(char aChar)
     {
-        String closer = String.valueOf(getPairedCharForOpener(aChar));
-
-        // Add closer char
-        int i = _textArea.getSelStart();
-        _textArea.replaceChars(closer, null, i, i, false);
-        _textArea.setSel(i);
+        String closeCharStr = String.valueOf(getPairedCharForOpener(aChar));
+        int selStart = _textArea.getSelStart();
+        _textArea.replaceChars(closeCharStr, null, selStart, selStart, false);
     }
 
     /**

@@ -39,7 +39,7 @@ ClassBody { "{" ClassBodyDecl* "}" }
 
 ClassBodyDecl
 {
-    LookAhead(2) Initializer |
+    LookAhead ("static"? "{") Initializer |
     Modifiers MemberDecl | ";"
 }
 
