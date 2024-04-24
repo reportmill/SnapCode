@@ -194,11 +194,13 @@ public class DeclMatcher {
         // Iterate over super classes
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
 
-            // Get Class methods
+            // Iterate over class methods and add if matches and super version not already present
             JavaMethod[] methods = cls.getDeclaredMethods();
             for (JavaMethod method : methods) {
-                if (matchesMethod(method, staticOnly))
-                    matchingMethods.add(method);
+                if (matchesMethod(method, staticOnly)) {
+                    if (!isOverrideAlreadyAdded(matchingMethods, method))
+                        matchingMethods.add(method);
+                }
             }
 
             // Iterate over class interfaces and recurse
@@ -387,10 +389,6 @@ public class DeclMatcher {
         if (staticOnly)
             return method.isStatic();
 
-        // If super exists, return false (will find super version when searching super class)
-        if (method.getSuper() != null)
-            return false;
-
         // Return matches
         return true;
     }
@@ -434,6 +432,23 @@ public class DeclMatcher {
         }
 
         // Return not accessible
+        return false;
+    }
+
+    /**
+     * Returns whether an override method has already been added to given list.
+     */
+    private static boolean isOverrideAlreadyAdded(Set<JavaMethod> methodSet, JavaMethod newMethod)
+    {
+        // Iterate over methods in set and return true if any method overrides given method
+        for (JavaMethod method : methodSet) {
+            for (JavaMethod superMethod = method.getSuper(); superMethod != null; superMethod = superMethod.getSuper()) {
+                if (newMethod == superMethod)
+                    return true;
+            }
+        }
+
+        // Return method has no override
         return false;
     }
 
