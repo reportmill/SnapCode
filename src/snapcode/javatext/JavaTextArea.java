@@ -51,6 +51,7 @@ public class JavaTextArea extends TextArea {
 
     // Constants
     protected static String INDENT_STRING = "    ";
+    protected static int INDENT_LENGTH = INDENT_STRING.length();
     private static JavaTextDoc DUMMY_TEXT_DOC;
     private static final Color ERROR_TEXT_COLOR = Color.RED.brighter().brighter();
     private static final Color PROGRAM_COUNTER_LINE_HIGHLITE_COLOR = new Color(199, 218, 175, 200);
@@ -493,9 +494,9 @@ public class JavaTextArea extends TextArea {
 
             // Adjust Sel start/end
             if (startCharIndex <= selStart)
-                selStart += INDENT_STRING.length();
+                selStart += INDENT_LENGTH;
             if (startCharIndex <= selEnd)
-                selEnd += INDENT_STRING.length();
+                selEnd += INDENT_LENGTH;
 
             // If at end line, break, otherwise get next line
             if (startLine == endLine)
@@ -525,7 +526,7 @@ public class JavaTextArea extends TextArea {
             // Get start/end of line indent
             int startCharIndex = 0;
             int endCharIndex = 0;
-            while (endCharIndex < startLine.length() && startLine.charAt(endCharIndex) == ' ' && endCharIndex - startCharIndex < INDENT_STRING.length())
+            while (endCharIndex < startLine.length() && startLine.charAt(endCharIndex) == ' ' && endCharIndex - startCharIndex < INDENT_LENGTH)
                 endCharIndex++;
 
             // If indent found, remove it

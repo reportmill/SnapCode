@@ -4,7 +4,7 @@
 package snapcode.javatext;
 import javakit.parse.*;
 import static snapcode.javatext.JavaTextArea.INDENT_STRING;
-
+import static snapcode.javatext.JavaTextArea.INDENT_LENGTH;
 import snap.parse.ParseToken;
 import snap.parse.Tokenizer;
 import snap.text.TextLine;
@@ -122,19 +122,6 @@ public class JavaTextAreaKeys extends TextAreaKeys {
                 anEvent.consume();
                 return;
             }
-
-            // Handle open bracket: If empty line and indented more than previous line, remove level of indent
-            if (keyChar == '{') {
-                TextLine thisLine = getSel().getStartLine();
-                if (thisLine.isWhiteSpace() && thisLine.length() >= INDENT_STRING.length()) {
-                    TextLine prevLine = thisLine.getPrevious();
-                    if (prevLine != null && thisLine.getIndentLength() >= prevLine.getIndentLength() + INDENT_STRING.length()) {
-                        int start = getSelStart();
-                        _javaTextArea.delete(thisLine.getStartCharIndex(), thisLine.getStartCharIndex() + 4, false);
-                        setSel(start - 4);
-                    }
-                }
-            }
         }
 
         // Do normal version
@@ -145,8 +132,18 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         if (isPairedOpener)
             handlePairedCharOpener(keyChar);
 
+        // Handle open bracket: If empty line and indented more than previous line, remove level of indent
+        if (keyChar == '{') {
+            TextLine thisLine = getSel().getStartLine();
+            if (thisLine.getString().trim().equals("{") && thisLine.length() >= INDENT_LENGTH) {
+                TextLine prevLine = thisLine.getPrevious();
+                if (prevLine != null && thisLine.getIndentLength() >= prevLine.getIndentLength() + INDENT_LENGTH)
+                    removeIndentLevelFromLine(thisLine);
+            }
+        }
+
         // Handle close bracket: Remove level of indent
-        if (keyChar == '}') {
+        else if (keyChar == '}') {
 
             // Get indent for this line and next
             TextLine thisLine = getSel().getStartLine();
@@ -155,12 +152,8 @@ public class JavaTextAreaKeys extends TextAreaKeys {
             int prevIndent = prevLine != null ? prevLine.getIndentLength() : 0;
 
             // If this line starts with close bracket and indent is too much, remove indent level
-            if (thisLine.getString().trim().startsWith("}") && thisIndent > prevIndent && thisIndent > 4) {
-                int thisLineStart = thisLine.getStartCharIndex();
-                int deleteIndentEnd = thisLineStart + (thisIndent - prevIndent);
-                _textArea.delete(thisLineStart, deleteIndentEnd, false);
-                setSel(getSelStart() - 4);
-            }
+            if (thisLine.getString().trim().startsWith("}") && thisIndent > prevIndent && thisIndent > INDENT_LENGTH)
+                removeIndentLevelFromLine(thisLine);
         }
     }
 
@@ -191,8 +184,8 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         JNode selNode = _javaTextArea.getSelNode();
         JStmtConditional selNodeParent = selNode != null ? selNode.getParent(JStmtConditional.class) : null;
         if (selNodeParent != null &&  !(selNodeParent.getStatement() instanceof JStmtBlock)) {
-            if (indentStr.length() >= INDENT_STRING.length())
-                indentStr = indentStr.substring(INDENT_STRING.length());
+            if (indentStr.length() >= INDENT_LENGTH)
+                indentStr = indentStr.substring(INDENT_LENGTH);
         }
 
         // Get insert chars: Usually just newline + indent (when at line end or inside line text)
@@ -309,6 +302,14 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         _textArea.replaceChars(insertChars);
         _textArea.setSel(newSelStart);
 
+        // If next token is close bracket, move it to next line and return
+        TextLine nextLine = aTextLine.getNext();
+        TextToken nextToken = nextLine.getTokenCount() > 0 ? nextLine.getToken(0) : null;
+        if (nextToken != null && nextToken.getString().equals("}")) {
+            _textArea.replaceChars('\n' + indentStr, null, newSelStart, newSelStart, false);
+            return;
+        }
+
         // If last token is unbalanced open bracket, proactively append close bracket
         TextToken textToken = aTextLine.getLastToken();
         if (isUnbalancedOpenBracketToken(textToken)) {
@@ -341,6 +342,10 @@ public class JavaTextAreaKeys extends TextAreaKeys {
                 if (!nodeEndToken.getString().equals("}"))
                     return true;
 
+                // Skip initializer since it does share last child (JStmtBlock) token
+                if (node instanceof JInitializerDecl)
+                    continue;
+
                 // If node end token is really it's last child end token, return unbalanced
                 JNode nodeLastChild = node.getLastChild();
                 if (nodeLastChild != null && nodeEndToken == nodeLastChild.getEndToken())
@@ -357,7 +362,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
      */
     public boolean isPairedCharOpener(char aChar)
     {
-        return aChar == '\'' || aChar == '"' || aChar == '(' || aChar == '[';
+        return aChar == '\'' || aChar == '"' || aChar == '(' || aChar == '[' || aChar == '{';
     }
 
     /**
@@ -365,7 +370,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
      */
     public boolean isPairedCharCloser(char aChar)
     {
-        return aChar == '\'' || aChar == '"' || aChar == ')' || aChar == ']';
+        return aChar == '\'' || aChar == '"' || aChar == ')' || aChar == ']' || aChar == '}';
     }
 
     /**
@@ -378,6 +383,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
             case '"': return openerChar;
             case '(': return ')';
             case '[': return ']';
+            case '{': return '}';
             default: throw new IllegalArgumentException("JavaTextAreaKey.getPairedCharCloser: Illegal char: " + openerChar);
         }
     }
@@ -387,6 +393,16 @@ public class JavaTextAreaKeys extends TextAreaKeys {
      */
     public void handlePairedCharOpener(char aChar)
     {
+        // If open bracket
+        if (aChar == '{') {
+            int bracketCharIndex = getSelStart() - 1;
+            JNode bracketNode = _javaTextArea.getNodeForCharIndex(bracketCharIndex);
+            JNode bracketNodeParent = bracketNode.getParent();
+            if (bracketNodeParent instanceof JStmt && bracketNodeParent instanceof WithBlockStmt)
+                return;
+        }
+
+        // Add close char after char
         String closeCharStr = String.valueOf(getPairedCharForOpener(aChar));
         int selStart = _textArea.getSelStart();
         _textArea.replaceChars(closeCharStr, null, selStart, selStart, false);
@@ -417,6 +433,16 @@ public class JavaTextAreaKeys extends TextAreaKeys {
 
         // Return true
         return true;
+    }
+
+    /**
+     * Remove indent level from line.
+     */
+    private void removeIndentLevelFromLine(TextLine textLine)
+    {
+        int deleteStartCharIndex = textLine.getStartCharIndex();
+        int deleteEndCharIndex = deleteStartCharIndex + INDENT_LENGTH;
+        _javaTextArea.delete(deleteStartCharIndex, deleteEndCharIndex, false);
     }
 
     /**
