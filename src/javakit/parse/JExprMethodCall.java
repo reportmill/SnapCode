@@ -222,7 +222,7 @@ public class JExprMethodCall extends JExpr implements WithId {
     /**
      * Returns the method decl for the parent method call (assumes this lambda is an arg).
      */
-    protected List<JavaMethod> getCompatibleMethods()
+    private List<JavaMethod> getCompatibleMethods()
     {
         // Get scope class and search for compatible method for name and arg types
         JavaType scopeEvalType = getScopeEvalType();
@@ -231,7 +231,6 @@ public class JExprMethodCall extends JExpr implements WithId {
             return null;
 
         // Get method name and arg types
-        String name = getName();
         JExpr[] args = getArgs();
         int argCount = args.length;
         JavaClass[] argClasses = new JavaClass[argCount];
@@ -241,26 +240,50 @@ public class JExprMethodCall extends JExpr implements WithId {
             argClasses[i] = argType;
         }
 
+        // Find compatible methods for class and arg classes
+        for (int i = 0; i < 4; i++) {
+
+            // Find compatible methods for class and arg classes and return if found
+            List<JavaMethod> compatibleMethods = getCompatibleMethodsForScopeClassAndArgClasses(scopeClass, argClasses);
+            if (compatibleMethods.size() > 0)
+                return compatibleMethods;
+
+            // Try adding a null arg
+            argClasses = ArrayUtils.add(argClasses, null);
+        }
+
+        // Return not found
+        return null;
+    }
+
+    /**
+     * Returns the method decl for the parent method call (assumes this lambda is an arg).
+     */
+    private List<JavaMethod> getCompatibleMethodsForScopeClassAndArgClasses(JavaClass scopeClass, JavaClass[] argClasses)
+    {
+        // Get method name and arg types
+        String methodName = getName();
+
         // Get whether to only search static methods (scope expression is Class)
         JExpr scopeExpr = getScopeExpr();
         boolean staticOnly = scopeExpr != null && scopeExpr.isClassNameLiteral();
 
         // Get scope node class type and search for compatible method for name and arg types
-        List<JavaMethod> compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argClasses, staticOnly);
+        List<JavaMethod> compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, methodName, argClasses, staticOnly);
         if (compatibleMethods.size() > 0)
             return compatibleMethods;
 
         // If scope node class type is member class and not static, go up parent classes
         while (scopeClass.isMemberClass() && !scopeClass.isStatic()) {
             scopeClass = scopeClass.getDeclaringClass();
-            compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, name, argClasses, staticOnly);
+            compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, methodName, argClasses, staticOnly);
             if (compatibleMethods.size() > 0)
                 return compatibleMethods;
         }
 
         // See if method is from static import -
         JFile jfile = getFile();
-        JavaMember importClassMember = jfile.getStaticImportMemberForNameAndParamTypes(name, argClasses);
+        JavaMember importClassMember = jfile.getStaticImportMemberForNameAndParamTypes(methodName, argClasses);
         if (importClassMember instanceof JavaMethod)
             return Collections.singletonList((JavaMethod) importClassMember);
 
@@ -419,6 +442,12 @@ public class JExprMethodCall extends JExpr implements WithId {
             String methodString = getMethodString(hasAnyMethodForName);
             return NodeError.newErrorArray(this, "Can't find method: " + methodString);
         }
+
+        // If missing args, complain
+        int paramCount = method.getParameterCount();
+        int argCount = getArgCount();
+        if (paramCount > argCount)
+            return NodeError.newErrorArray(this, "Missing args, " + paramCount + " expected, " + argCount + " provided");
 
         // Return
         return NodeError.NO_ERRORS;

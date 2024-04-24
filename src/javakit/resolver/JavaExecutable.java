@@ -210,11 +210,21 @@ public class JavaExecutable extends JavaMember {
         // Iterate over classes and add score based on matching classes
         // This is a punt - need to groc the docs on this: https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html
         for (int i = 0; i < aCount; i++) {
+
+            // Get param class and arg class - if arg
             JavaClass paramClass = paramTypes[i].getEvalClass();
             JavaClass argClass = argClasses[i];
-            if (!paramClass.isAssignableFrom(argClass))
+
+            // If null arg class, add 10 (1 if primitive)
+            if (argClass == null)
+                rating += !paramClass.isPrimitive() ? 10 : 1;
+
+            // Otherwise, if not assignable, just return 0
+            else if (!paramClass.isAssignableFrom(argClass))
                 return 0;
-            rating += paramClass == argClass ? 1000 : argClass != null ? 100 : 10;
+
+            // Otherwise add 1000 for exact match, or 100 for subclass
+            else rating += paramClass == argClass ? 1000 : 100;
         }
 
         // Return rating
