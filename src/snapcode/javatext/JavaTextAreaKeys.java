@@ -4,6 +4,8 @@
 package snapcode.javatext;
 import javakit.parse.*;
 import static snapcode.javatext.JavaTextArea.INDENT_STRING;
+
+import snap.parse.ParseToken;
 import snap.parse.Tokenizer;
 import snap.text.TextLine;
 import snap.text.TextToken;
@@ -325,10 +327,29 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         if (textToken == null || !textToken.getString().equals("{"))
             return false;
 
-        // Return whether class is missing close bracket
-        JFile jFile = _javaTextArea.getJFile();
-        JClassDecl classDecl = jFile.getClassDecl();
-        return classDecl != null && classDecl.isMissingCloseBracket();
+        // Get node for text token
+        JNode textTokenNode = _javaTextArea.getNodeForCharIndex(textToken.getStartCharIndex());
+
+        // Iterate over node and parents to see if any is unbalanced block
+        for (JNode node = textTokenNode; node != null; node = node.getParent()) {
+
+            // If node is open bracket (or class decl), return true if no close bracket
+            if (node.getStartToken().getString().equals("{") || node instanceof JClassDecl) {
+
+                // If node end token isn't close bracket return unbalanced
+                ParseToken nodeEndToken = node.getEndToken();
+                if (!nodeEndToken.getString().equals("}"))
+                    return true;
+
+                // If node end token is really it's last child end token, return unbalanced
+                JNode nodeLastChild = node.getLastChild();
+                if (nodeLastChild != null && nodeEndToken == nodeLastChild.getEndToken())
+                    return true;
+            }
+        }
+
+        // Return not unbalanced
+        return false;
     }
 
     /**
