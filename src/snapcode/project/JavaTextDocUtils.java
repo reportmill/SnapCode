@@ -4,7 +4,6 @@
 package snapcode.project;
 import javakit.parse.*;
 import snap.gfx.Font;
-import snap.parse.*;
 import snap.text.TextBlockUtils;
 import snap.util.CharSequenceUtils;
 import snap.util.Prefs;
@@ -100,9 +99,8 @@ public class JavaTextDocUtils {
         try { newStmt = (JStmtBlock) javaParser.parseStatementForJavaTextDoc(javaTextDoc, charIndex); }
         catch (Exception ignore) { }
 
-        // If parse failed, return failed
-        ParseToken endToken = newStmt != null ? newStmt.getEndToken() : null;
-        if (endToken == null || !endToken.getPattern().equals(oldStmt.getEndToken().getPattern()))
+        // If statement parse failed (no statement or alternate end token), return reparse all
+        if (newStmt == null || newStmt.getEndToken() != oldStmt.getEndToken())
             return false;
 
         // Replace old statement with new statement
