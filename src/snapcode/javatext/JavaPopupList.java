@@ -71,11 +71,6 @@ public class JavaPopupList extends PopupList<JavaDecl> {
      */
     public void updateForTextAreaKeyReleasedEvent(ViewEvent anEvent)
     {
-        // If no char, just return
-        char keyChar = anEvent.getKeyChar();
-        if (keyChar == 0 || keyChar == KeyCode.CHAR_UNDEFINED)
-            return;
-
         // If Java identifier char or backspace, show/update popup list
         if (isUpdateCompletionsEvent(anEvent))
             ViewUtils.runLater(this::updatePopupList);
