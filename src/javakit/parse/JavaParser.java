@@ -116,6 +116,13 @@ public class JavaParser extends JavaParserStmt {
         jfile.setJavaChars(anInput);
         jfile.setException(_exception);
 
+        // If parse failed make sure that class extends to end
+        if (_exception != null) {
+            JNode lastClass = jfile.getLastChild();
+            if (lastClass != null)
+                lastClass.setEndToken(jfile.getEndToken());
+        }
+
         // Return
         return jfile;
     }
@@ -206,7 +213,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * Java File Handler.
+     * JavaFile Handler: PackageDecl? ImportDecl* TypeDecl+
      */
     public static class JavaFileHandler extends JNodeParseHandler<JFile> {
 
@@ -215,18 +222,28 @@ public class JavaParser extends JavaParserStmt {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle PackageDecl
-            if (anId == "PackageDecl")
-                getPart().setPackageDecl(aNode.getCustomNode(JPackageDecl.class));
+            JFile jfile = getPart();
 
-            // Handle ImportDecl
-            else if (anId == "ImportDecl")
-                getPart().addImportDecl(aNode.getCustomNode(JImportDecl.class));
+            switch (anId) {
 
-            // Handle TypeDecl
-            else if (anId == "TypeDecl") {
-                if (aNode.getCustomNode() != null)
-                    getPart().addClassDecl(aNode.getCustomNode(JClassDecl.class));
+                // Handle PackageDecl
+                case "PackageDecl":
+                    JPackageDecl packageDecl = aNode.getCustomNode(JPackageDecl.class);
+                    jfile.setPackageDecl(packageDecl);
+                    break;
+
+                // Handle ImportDecl
+                case "ImportDecl":
+                    JImportDecl importDecl = aNode.getCustomNode(JImportDecl.class);
+                    jfile.addImportDecl(importDecl);
+                    break;
+
+                // Handle TypeDecl
+                case "TypeDecl":
+                    JClassDecl classDecl = aNode.getCustomNode(JClassDecl.class);
+                    if (classDecl != null) // Can happen if class only has "public"
+                        jfile.addClassDecl(classDecl);
+                    break;
             }
         }
 
@@ -234,7 +251,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * Java File Handler.
+     * JavaFileImports Handler: PackageDecl? ImportDecl*
      */
     public static class JavaFileImportsHandler extends JNodeParseHandler<JFile> {
 
@@ -243,20 +260,29 @@ public class JavaParser extends JavaParserStmt {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle PackageDecl
-            if (anId == "PackageDecl")
-                getPart().setPackageDecl(aNode.getCustomNode(JPackageDecl.class));
+            JFile jfile = getPart();
 
-            // Handle ImportDecl
-            else if (anId == "ImportDecl")
-                getPart().addImportDecl(aNode.getCustomNode(JImportDecl.class));
+            switch (anId) {
+
+                // Handle PackageDecl
+                case "PackageDecl":
+                    JPackageDecl packageDecl = aNode.getCustomNode(JPackageDecl.class);
+                    jfile.setPackageDecl(packageDecl);
+                    break;
+
+                // Handle ImportDecl
+                case "ImportDecl":
+                    JImportDecl importDecl = aNode.getCustomNode(JImportDecl.class);
+                    jfile.addImportDecl(importDecl);
+                    break;
+            }
         }
 
         protected Class<JFile> getPartClass()  { return JFile.class; }
     }
 
     /**
-     * PackageDecl Handler.
+     * PackageDecl Handler: LookAhead (Annotation* "package") Modifiers "package" Name ";"
      */
     public static class PackageDeclHandler extends JNodeParseHandler<JPackageDecl> {
 
@@ -282,7 +308,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * ImportDecl Handler.
+     * ImportDecl Handler: "import" "static"? Name ("." "*")? ";"
      */
     public static class ImportDeclHandler extends JNodeParseHandler<JImportDecl> {
 
@@ -294,26 +320,29 @@ public class JavaParser extends JavaParserStmt {
             // Get importDecl
             JImportDecl importDecl = getPart();
 
-            // Handle static
-            if (anId == "static")
-                importDecl.setStatic(true);
+            switch (anId) {
 
-            // Handle Name
-            else if (anId == "Name") {
-                JExpr nameExpr = aNode.getCustomNode(JExpr.class);
-                importDecl.setNameExpr(nameExpr);
+                // Handle static
+                case "static": importDecl.setStatic(true);
+                    break;
+
+                // Handle Name
+                case "Name":
+                    JExpr nameExpr = aNode.getCustomNode(JExpr.class);
+                    importDecl.setNameExpr(nameExpr);
+                    break;
+
+                // Handle '*'
+                case "*": importDecl.setInclusive(true);
+                    break;
             }
-
-            // Handle '*'
-            else if (anId == "*")
-                importDecl.setInclusive(true);
         }
 
         protected Class<JImportDecl> getPartClass()  { return JImportDecl.class; }
     }
 
     /**
-     * TypeDecl Handler.
+     * TypeDecl Handler: Modifiers (ClassDecl | EnumDecl | AnnotationDecl) | ";"
      */
     public static class TypeDeclHandler extends JNodeParseHandler<JClassDecl> {
 
@@ -329,7 +358,7 @@ public class JavaParser extends JavaParserStmt {
             if (anId == "Modifiers")
                 _mods = aNode.getCustomNode(JModifiers.class);
 
-                // Handle ClassDecl, EnumDecl or AnnotationDecl
+            // Handle ClassDecl, EnumDecl or AnnotationDecl
             else if (aNode.getCustomNode() instanceof JClassDecl) {
                 _part = aNode.getCustomNode(JClassDecl.class);
                 _part.setModifiers(_mods);
@@ -476,7 +505,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * Initializer Handler.
+     * Initializer Handler: "static"? Block
      */
     public static class InitializerHandler extends JNodeParseHandler<JInitializerDecl> {
 
@@ -488,13 +517,18 @@ public class JavaParser extends JavaParserStmt {
             // Get initializer decl
             JInitializerDecl initDecl = getPart();
 
-            // Handle "static"
-            if (anId == "static")
-                initDecl.setStatic(true);
+            switch (anId) {
 
-            // Handle Block
-            else if (anId == "Block")
-                initDecl.setBlock(aNode.getCustomNode(JStmtBlock.class));
+                // Handle "static"
+                case "static": initDecl.setStatic(true);
+                    break;
+
+                // Handle Block
+                case "Block":
+                    JStmtBlock blockStmt = aNode.getCustomNode(JStmtBlock.class);
+                    initDecl.setBlock(blockStmt);
+                    break;
+            }
         }
 
         protected Class<JInitializerDecl> getPartClass()  { return JInitializerDecl.class; }
@@ -550,7 +584,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * EnumConstant Handler.
+     * EnumConstant Handler: Modifiers Identifier Arguments? ClassBody?
      */
     public static class EnumConstantHandler extends JNodeParseHandler<JEnumConst> {
 

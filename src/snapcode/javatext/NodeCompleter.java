@@ -118,9 +118,16 @@ public class NodeCompleter {
             return;
         }
 
+        // If parent is class, add class words
+        if (parent instanceof JClassDecl)
+            addWordCompletions(JavaWord.CLASS_WORDS);
+
         // Add reserved word completions (public, private, for, white, etc.)
-        if (parent instanceof JStmtExpr)
-            addWordCompletions();
+        else if (parent instanceof JStmtExpr) {
+            addWordCompletions(JavaWord.MODIFIERS);
+            addWordCompletions(JavaWord.CLASS_WORDS);
+            addWordCompletions(JavaWord.STATEMENT_WORDS);
+        }
 
         // Add global literal completions (true, false, null, this, super)
         addGlobalLiteralCompletions();
@@ -251,10 +258,9 @@ public class NodeCompleter {
     /**
      * Adds word completions for matcher.
      */
-    private void addWordCompletions()
+    private void addWordCompletions(JavaWord[] javaWords)
     {
-        // Add JavaWords
-        for (JavaWord word : JavaWord.ALL)
+        for (JavaWord word : javaWords)
             if (_prefixMatcher.matchesString(word.getName()))
                 addCompletionDecl(word);
     }
@@ -268,17 +274,6 @@ public class NodeCompleter {
         for (JavaDecl literal : globalLiters)
             if (_prefixMatcher.matchesString(literal.getName()))
                 addCompletionDecl(literal);
-    }
-
-    /**
-     * Adds modifiers word completions for matcher.
-     */
-    private void addModifierWordCompletions()
-    {
-        // Add JavaWords
-        for (JavaWord word : JavaWord.MODIFIERS)
-            if (_prefixMatcher.matchesString(word.getName()))
-                addCompletionDecl(word);
     }
 
     /**
@@ -330,7 +325,8 @@ public class NodeCompleter {
         // If type, add type completions
         if (anId.getParent() instanceof JType) {
             addCompletionsForTypeId();
-            addModifierWordCompletions();
+            addWordCompletions(JavaWord.MODIFIERS);
+            addWordCompletions(JavaWord.CLASS_WORDS);
         }
     }
 

@@ -260,12 +260,10 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         if (!isJavaIdentifier(tokenStr))
             return null;
 
-        // Create virtual parse token and id expression
-        int tokenStart = selStart - tokenStr.length();
-        ParseToken startToken = new ParseToken.Builder().text(tokenStr).startCharIndex(tokenStart).endCharIndex(selStart).build();
+        // Create virtual id expression
         JExprId virtualIdExpr = new JExprId(tokenStr);
-        virtualIdExpr.setStartToken(startToken);
-        virtualIdExpr.setEndToken(startToken);
+        virtualIdExpr.setStartToken(textToken);
+        virtualIdExpr.setEndToken(textToken);
         JNode selNode = _textArea.getSelNode();
         virtualIdExpr.setParent(selNode);
 

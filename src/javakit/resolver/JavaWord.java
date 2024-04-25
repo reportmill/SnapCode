@@ -52,12 +52,17 @@ public class JavaWord extends JavaDecl {
     public static final JavaWord Try = new JavaWord("try", WordType.Statement);
     public static final JavaWord While = new JavaWord("while", WordType.Statement);
 
-    // All
-    public static final JavaWord[] ALL = {
-            Public, Private, Protected, Abstract, Default, Final, Static,
-            Class, Interface, Enum, Extends, Implements, Import, Package, Var,
+    // File words
+    public static final JavaWord[] FILE_WORDS = { Import, Package };
+
+    // Class words
+    public static final JavaWord[] CLASS_WORDS = { Class, Interface, Enum, Extends, Implements };
+
+    // Statement words
+    public static final JavaWord[] STATEMENT_WORDS = {
             Assert, Break, Case, Catch, Continue, Do, Else, Finally, For, If, Instanceof, New, Return,
-            Switch, Synchronized, Throw, Throws, Try, While
+            Switch, Synchronized, Throw, Throws, Try, While,
+            Var
     };
 
     // Modifiers
