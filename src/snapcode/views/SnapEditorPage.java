@@ -108,7 +108,7 @@ public class SnapEditorPage extends WebPage {
     public static boolean isSnapEditSet(WebFile aFile)
     {
         //JavaData jdata = JavaData.get(aFile); Class cls = jdata.getJFile().getEvalClass();
-        //for(Class c=cls;c!=null;c=c.getSuperclass()) if(c.getSimpleName().equals("SnapActor")) return true;
+        //for(Class c=cls;c!=null;c=c.getSuperclass()) if(c.getSimpleName().equals("GameActor")) return true;
 
         // Return true if 'SnapEdit=true' is found in the first comment
         String str = aFile.getText();

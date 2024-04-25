@@ -106,9 +106,9 @@ public class SnapTool extends WorkspaceTool {
     {
         String[] strings = null;
         String simpleName = aClass.getSimpleName();
-        if (simpleName.equals("SnapActor")) strings = SnapActorPieces;
-        else if (simpleName.equals("SnapPen")) strings = SnapPenPieces;
-        else if (simpleName.equals("SnapScene")) strings = SnapScenePieces;
+        if (simpleName.equals("GameActor")) strings = GameActorPieces;
+        else if (simpleName.equals("GamePen")) strings = GamePenPieces;
+        else if (simpleName.equals("GameView")) strings = GameViewPieces;
         //else try { strings = (String[])ClassUtils.getMethod(aClass, "getSnapPieces").invoke(null); } catch(Exception e){ }
         if (strings == null)
             return;
@@ -230,9 +230,9 @@ public class SnapTool extends WorkspaceTool {
     public String getTitle()  { return "Snippets"; }
 
     /**
-     * Returns SnapActor pieces.
+     * Returns GameActor pieces.
      */
-    private static String[] SnapActorPieces = {
+    private static String[] GameActorPieces = {
             "moveBy(10);", "turnBy(10);", "scaleBy(.1);",
             "getX();", "getY();", "getWidth();", "getHeight();", "setXY(10,10);", "setSize(50,50);",
             "getRotate();", "setRotate(10);", "getScale();", "setScale(1);",
@@ -242,14 +242,14 @@ public class SnapTool extends WorkspaceTool {
     };
 
     /**
-     * Returns SnapPen pieces.
+     * Returns GamePen pieces.
      */
-    private static String[] SnapPenPieces = { "down();", "up();", "clear();", "setColor(\"Random\");", "setWidth(10);" };
+    private static String[] GamePenPieces = { "down();", "up();", "clear();", "setColor(\"Random\");", "setWidth(10);" };
 
     /**
-     * Returns SnapScene pieces.
+     * Returns GameView pieces.
      */
-    private static String[] SnapScenePieces = {
+    private static String[] GameViewPieces = {
             "getWidth();", "getHeight();",
             "isMouseDown();", "isMouseClick();", "getMouseX();", "getMouseY();", "isKeyDown(\"right\");",
             "isKeyClicked(\"right\");", "getActor(\"Cat1\");", "playSound(\"Beep.wav\");",
