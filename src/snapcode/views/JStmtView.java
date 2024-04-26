@@ -36,7 +36,7 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
      */
     public String getPartString()
     {
-        return getJNode().getClass().getSimpleName().substring(5) + " Statement";
+        return _jnode.getClass().getSimpleName().substring(5) + " Statement";
     }
 
     /**
@@ -52,17 +52,17 @@ public class JStmtView<JNODE extends JStmt> extends JNodeView<JNODE> {
 
         // If less than 11, insert node before statement
         if (aY < 11)
-            getEditor().insertNode(getJNode(), aNode, -1);
+            getEditor().insertNode(_jnode, aNode, -1);
 
-            // If greater than Height-6 or simple statement, insert node after statement
+        // If greater than Height-6 or simple statement, insert node after statement
         else if (aY > getHeight() - 6 || !isBlock())
-            getEditor().insertNode(getJNode(), aNode, 1);
+            getEditor().insertNode(_jnode, aNode, 1);
 
-            // If block but no children, insert inside statement
+        // If block but no children, insert inside statement
         else if (getJNodeViewCount() == 0)
-            getEditor().insertNode(getJNode(), aNode, 0);
+            getEditor().insertNode(_jnode, aNode, 0);
 
-            // If before first child statement, have first child dropNode, otherwise have last child dropNode
+        // If before first child statement, have first child dropNode, otherwise have last child dropNode
         else if (aY < getHeight() / 2)
             getJNodeView(0).dropNode(aNode, anX, 0);
         else getJNodeViewLast().dropNode(aNode, anX, getJNodeViewLast().getHeight());

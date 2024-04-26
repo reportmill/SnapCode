@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 public class JNodeView<JNODE extends JNode> extends ChildView {
 
     // The JNode
-    private JNODE _jnode;
+    protected JNODE _jnode;
 
     // Background shape
     protected BlockView _blockView;
@@ -46,7 +46,7 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     private static JNodeView<?> _dragOver;
 
     // The SnapPart being dragged
-    public static JNodeView<?>  _dragSnapPart;
+    public static JNodeView<?> _dragNodeView;
 
     // Constants for colors
     public static Color PieceColor = Color.get("#4C67d6");
@@ -488,10 +488,10 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
         }
 
         // Handle DragDropEvent
-        if (anEvent.isDragDropEvent() && _dragSnapPart != null) {
+        if (anEvent.isDragDropEvent() && _dragNodeView != null) {
             if (_dragOver != null) _dragOver.setUnderDrag(false);
             _dragOver = null;
-            dropNode(_dragSnapPart.getJNode(), anEvent.getX(), anEvent.getY());
+            dropNode(_dragNodeView.getJNode(), anEvent.getX(), anEvent.getY());
             anEvent.dropComplete(); //de.setDropCompleted(true);
         }
     }

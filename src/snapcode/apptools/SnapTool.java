@@ -1,6 +1,7 @@
 package snapcode.apptools;
 import javakit.parse.JNode;
 import javakit.parse.JavaParser;
+import javakit.resolver.JavaClass;
 import snap.geom.Point;
 import snap.gfx.Image;
 import snap.view.*;
@@ -77,7 +78,7 @@ public class SnapTool extends WorkspaceTool {
     {
         // Handle MouseClick (double click)
         if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
-            JNodeView<?> part = getSnapPart(getUI(ParentView.class), anEvent.getX(), anEvent.getY());
+            JNodeView<?> part = getNodeViewForViewAndXY(getUI(ParentView.class), anEvent.getX(), anEvent.getY());
             //if (part != null)
             //    getEditorPane().getSelectedPart().dropNode(part.getJNode());
         }
@@ -88,8 +89,8 @@ public class SnapTool extends WorkspaceTool {
      */
     public void rebuildUI()
     {
-        // Get class for SnapPart.JNode
-        Class<?> cls = getEditor().getSelectedPartEnclClass();
+        // Get eval class for selected node
+        JavaClass selNodeEvalClass = getEditor().getSelNodeEvalClass();
 
         TabView tabView = getUI(TabView.class);
         Tab methodTab = tabView.getTab(0);
@@ -98,24 +99,24 @@ public class SnapTool extends WorkspaceTool {
         colView.removeChildren();
 
         // Add pieces for classes
-        for (Class<?> c = cls; c != null; c = c.getSuperclass())
-            updateTabView(c, colView);
+        for (JavaClass cls = selNodeEvalClass; cls != null; cls = cls.getSuperClass())
+            addNodeViewsForClass(cls, colView);
     }
 
-    public void updateTabView(Class<?> aClass, ChildView aPane)
+    /**
+     * Update node views for given class.
+     */
+    private void addNodeViewsForClass(JavaClass aClass, ChildView aPane)
     {
-        String[] strings = null;
-        String simpleName = aClass.getSimpleName();
-        if (simpleName.equals("GameActor")) strings = GameActorPieces;
-        else if (simpleName.equals("GamePen")) strings = GamePenPieces;
-        else if (simpleName.equals("GameView")) strings = GameViewPieces;
-        //else try { strings = (String[])ClassUtils.getMethod(aClass, "getSnapPieces").invoke(null); } catch(Exception e){ }
-        if (strings == null)
+        // Get statement strings for class - just return if none
+        String[] statementStrings = getStatementStringsForClass(aClass);
+        if (statementStrings == null)
             return;
 
-        for (String str : strings) {
-            JNodeView<?> move = createSnapPartStmt(str);
-            aPane.addChild(move);
+        // Iterate over statement string and create/add node view
+        for (String statementStr : statementStrings) {
+            JNodeView<?> statementView = createNodeViewForStatementString(statementStr);
+            aPane.addChild(statementView);
         }
     }
 
@@ -151,15 +152,15 @@ public class SnapTool extends WorkspaceTool {
         //colView.setFill(JFileView.BACK_FILL); //pane.setBorder(bevel);
 
         // Add node for if(expr)
-        JNodeView<?> ifStmtView = createSnapPartStmt("if(true) {\n}");
+        JNodeView<?> ifStmtView = createNodeViewForStatementString("if(true) {\n}");
         colView.addChild(ifStmtView);
 
         // Add node for repeat(x)
-        JNodeView<?> forStmtView = createSnapPartStmt("for(int i=0; i<10; i++) {\n}");
+        JNodeView<?> forStmtView = createNodeViewForStatementString("for(int i=0; i<10; i++) {\n}");
         colView.addChild(forStmtView);
 
         // Add node for while(true)
-        JNodeView<?> whileStmtView = createSnapPartStmt("while(true) {\n}");
+        JNodeView<?> whileStmtView = createNodeViewForStatementString("while(true) {\n}");
         colView.addChild(whileStmtView);
 
         // Wrap in ScrollView and return
@@ -169,9 +170,9 @@ public class SnapTool extends WorkspaceTool {
     }
 
     /**
-     * Returns a SnapPart for given string of code.
+     * Returns a NodeView for given string of code.
      */
-    protected JNodeView<?> createSnapPartStmt(String aString)
+    protected JNodeView<?> createNodeViewForStatementString(String aString)
     {
         JavaParser javaParser = JavaParser.getShared();
         JNode node = javaParser.parseStatement(aString, 0);
@@ -184,20 +185,36 @@ public class SnapTool extends WorkspaceTool {
     /**
      * Returns the child of given class hit by coords.
      */
-    protected JNodeView<?> getSnapPart(ParentView aPar, double anX, double aY)
+    protected JNodeView<?> getNodeViewForViewAndXY(ParentView aParentView, double anX, double aY)
     {
-        for (View child : aPar.getChildren()) {
+        View[] childView = aParentView.getChildren();
+
+        // Iterate over children
+        for (View child : childView) {
+
+            // If child not visible, skip
             if (!child.isVisible()) continue;
-            Point p = child.parentToLocal(anX, aY);
-            if (child.contains(p.getX(), p.getY()) && JNodeView.getJNodeView(child) != null)
-                return JNodeView.getJNodeView(child);
+
+            // Get point in child coords
+            Point pointInChildCoords = child.parentToLocal(anX, aY);
+
+            // If view contains point and has NodeView, return NodeView
+            if (child.contains(pointInChildCoords.x, pointInChildCoords.y)) {
+                 JNodeView nodeView = JNodeView.getJNodeView(child);
+                 if (nodeView != null)
+                     return nodeView;
+            }
+
+            // If view is parent, recurse
             if (child instanceof ParentView) {
-                ParentView par = (ParentView) child;
-                JNodeView<?> no = getSnapPart(par, p.getX(), p.getY());
-                if (no != null)
-                    return no;
+                ParentView parView = (ParentView) child;
+                JNodeView<?> nodeView = getNodeViewForViewAndXY(parView, pointInChildCoords.x, pointInChildCoords.y);
+                if (nodeView != null)
+                    return nodeView;
             }
         }
+
+        // Return not found
         return null;
     }
 
@@ -207,14 +224,14 @@ public class SnapTool extends WorkspaceTool {
     private void handleDragGesture(ViewEvent anEvent)
     {
         // Get drag node
-        JNodeView<?> dragSnapPart = JNodeView._dragSnapPart = getSnapPart(getUI(ParentView.class), anEvent.getX(), anEvent.getY());
-        if (dragSnapPart == null)
+        JNodeView<?> dragNodeView = JNodeView._dragNodeView = getNodeViewForViewAndXY(getUI(ParentView.class), anEvent.getX(), anEvent.getY());
+        if (dragNodeView == null)
             return;
 
         // Get drag string and image
-        JNode dragNode = dragSnapPart.getJNode();
+        JNode dragNode = dragNodeView.getJNode();
         String dragString = dragNode.getString(); // Was: "SupportPane:" + dragSnapPart.getClass().getSimpleName()
-        Image dragImage = ViewUtils.getImage(dragSnapPart);
+        Image dragImage = ViewUtils.getImage(dragNodeView);
 
         // Create Dragboard, set drag string and image and start drag
         Clipboard clipboard = anEvent.getClipboard();
@@ -228,6 +245,21 @@ public class SnapTool extends WorkspaceTool {
      */
     @Override
     public String getTitle()  { return "Snippets"; }
+
+    /**
+     * Returns the statement strings for given class.
+     */
+    private static String[] getStatementStringsForClass(JavaClass javaClass)
+    {
+        String simpleName = javaClass.getSimpleName();
+        switch (simpleName) {
+            case "GameActor": return GameActorPieces;
+            case "GamePen": return GamePenPieces;
+            case "GameView": return GameViewPieces;
+            default: return null;
+        }
+        //else try { strings = (String[])ClassUtils.getMethod(aClass, "getSnapPieces").invoke(null); } catch(Exception e){ }
+    }
 
     /**
      * Returns GameActor pieces.

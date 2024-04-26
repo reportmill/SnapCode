@@ -66,7 +66,7 @@ public class SnapEditorPane extends ViewOwner {
      */
     public JNodeView getSelectedPart()
     {
-        return _editor.getSelectedPart();
+        return _editor.getSelNodeView();
     }
 
     /**
@@ -74,7 +74,7 @@ public class SnapEditorPane extends ViewOwner {
      */
     public void setSelectedPart(JNodeView aPart)
     {
-        _editor.setSelectedPart(aPart);
+        _editor.setSelNodeView(aPart);
     }
 
     /**

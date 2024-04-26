@@ -79,7 +79,7 @@ public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
             String str = _textField.getText();
             if (hpop.isShowing()) str = hpop.getFixedText();
             SnapEditor sed = getEditor();
-            sed.replaceJNode(getJNode(), str);
+            sed.replaceJNodeWithString(getJNode(), str);
             hpop.hide();
         }
     }
@@ -98,6 +98,6 @@ public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
 
         // Replace expression with DropNode
         String str = aJNode.getString();
-        getEditor().replaceJNode(getJNode(), str);
+        getEditor().replaceJNodeWithString(getJNode(), str);
     }
 }

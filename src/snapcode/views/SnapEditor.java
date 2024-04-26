@@ -14,33 +14,34 @@ import snap.view.ViewUtils;
 public class SnapEditor extends StackView {
 
     // The JavaTextArea
-    private JavaTextArea  _jtextArea;
+    private JavaTextArea _javaTextArea;
 
-    // The scripts pane
-    private JFileView  _filePart;
+    // The file view
+    private JFileView _fileView;
 
     // The selected part
-    private JNodeView<?> _selPart;
+    private JNodeView<?> _selNodeView;
 
-    // The mouse node and X/Y during mouse drag
-    private View  _mnode;
-    private JNodeView<?>  _mpart;
-    private double  _mx, _my;
+    // The mouse X/Y during mouse drag
+    private double _mouseX, _mouseY;
+
+    // The currently dragging node view
+    private JNodeView<?> _dragNodeView;
 
     /**
-     * Creates a new SnapCodeArea.
+     * Constructor.
      */
-    public SnapEditor(JavaTextArea aJTA)
+    public SnapEditor(JavaTextArea javaTextArea)
     {
         // Set JavaTextArea
-        _jtextArea = aJTA;
+        _javaTextArea = javaTextArea;
 
         // Create FilePart and add
-        _filePart = new JFileView();
-        _filePart._editor = this;
-        _filePart.setGrowWidth(true);
-        _filePart.setGrowHeight(true);
-        addChild(_filePart);
+        _fileView = new JFileView();
+        _fileView._editor = this;
+        _fileView.setGrowWidth(true);
+        _fileView.setGrowHeight(true);
+        addChild(_fileView);
 
         // Configure mouse handling
         enableEvents(MousePress, MouseDrag, MouseRelease);
@@ -58,55 +59,52 @@ public class SnapEditor extends StackView {
     /**
      * Returns the JavaTextArea.
      */
-    public JavaTextArea getJavaTextArea()  { return _jtextArea; }
+    public JavaTextArea getJavaTextArea()  { return _javaTextArea; }
 
     /**
-     * Returns the selected part.
+     * Returns the selected node view.
      */
-    public JNodeView<?> getSelectedPart()
-    {
-        return _selPart;
-    }
+    public JNodeView<?> getSelNodeView()  { return _selNodeView; }
 
     /**
-     * Sets the selected parts.
+     * Sets the selected node view.
      */
-    public void setSelectedPart(JNodeView<?> aPart)
+    public void setSelNodeView(JNodeView<?> aNodeView)
     {
-        if (_selPart != null) _selPart.setSelected(false);
-        _selPart = aPart != null ? aPart : _filePart;
-        _selPart.setSelected(true);
+        if (_selNodeView != null)
+            _selNodeView.setSelected(false);
+        _selNodeView = aNodeView != null ? aNodeView : _fileView;
+        _selNodeView.setSelected(true);
 
         // Update JavaTextArea selection
-        JNode jnode = _selPart.getJNode();
-        int ss = jnode.getStartCharIndex(), se = jnode.getEndCharIndex();
-        getJavaTextArea().setSel(ss, se);
+        JNode jnode = _selNodeView.getJNode();
+        int nodeStartCharIndex = jnode.getStartCharIndex();
+        int nodeEndCharIndex = jnode.getEndCharIndex();
+        _javaTextArea.setSel(nodeStartCharIndex, nodeEndCharIndex);
 
         // Forward to editor
-        SnapEditorPane ep = getEditorPane();
-        if (ep != null) ep.updateSelectedPart(_selPart);
+        SnapEditorPane editorPane = getEditorPane();
+        if (editorPane != null)
+            editorPane.updateSelectedPart(_selNodeView);
     }
 
     /**
      * Returns the FilePart.
      */
-    public JFileView getFilePart()  { return _filePart; }
+    public JFileView getFilePart()  { return _fileView; }
 
     /**
      * Returns the JFile JNode.
      */
-    public JFile getJFile()
-    {
-        return getJavaTextArea().getJFile();
-    }
+    public JFile getJFile()  { return _javaTextArea.getJFile(); }
 
     /**
      * Returns the selected part's class.
      */
-    public Class<?> getSelectedPartClass()
+    public JavaClass getSelNodeEvalClass()
     {
         // Get selected NodeView
-        JNodeView<?> selNodeView = getSelectedPart();
+        JNodeView<?> selNodeView = getSelNodeView();
         if (selNodeView == null)
             selNodeView = getFilePart();
 
@@ -115,31 +113,8 @@ public class SnapEditor extends StackView {
         while (selNode != null && selNode.getEvalClass() == null)
             selNode = selNode.getParent();
 
-        // Return class
-        JavaClass javaClass = selNode != null ? selNode.getEvalClass() : null;
-        Class<?> realClass = javaClass != null ? javaClass.getRealClass() : null;
-        return realClass;
-    }
-
-    /**
-     * Returns the selected part's class or the enclosing class, if void.class.
-     */
-    public Class<?> getSelectedPartEnclClass()
-    {
-        // Get selected NodeView
-        JNodeView<?> selNodeView = getSelectedPart();
-        if (selNodeView == null)
-            selNodeView = getFilePart();
-
-        // Get first parent JNode that resolves to class
-        JNode selNode = selNodeView.getJNode();
-        while (selNode != null && (selNode.getEvalClass() == null || selNode.getEvalClass().isPrimitive()))
-            selNode = selNode.getParent();
-
-        // Return class
-        JavaClass javaClass = selNode != null ? selNode.getEvalClass() : null;
-        Class<?> realClass = javaClass != null ? javaClass.getRealClass() : null;
-        return realClass;
+        // Return eval class
+        return selNode != null ? selNode.getEvalClass() : null;
     }
 
     /**
@@ -156,88 +131,113 @@ public class SnapEditor extends StackView {
     /**
      * Sets the selected part from TextArea selection.
      */
-    void setSelectedPartFromTextArea()
+    private void setSelectedPartFromTextArea()
     {
-        int index = getJavaTextArea().getSelStart();
-        JNodeView<?> selPart = getSnapPartAt(getFilePart(), index);
-        setSelectedPart(selPart);
+        // Get node view at text sel start
+        int charIndex = getJavaTextArea().getSelStart();
+        JNodeView<?> nodeView = getNodeViewForCharIndex(charIndex);
+
+        // Select node view
+        setSelNodeView(nodeView);
     }
 
     /**
-     * Returns the snap part at given index.
+     * Returns the node view at given index.
      */
-    public JNodeView<?> getSnapPartAt(JNodeView aPart, int anIndex)
+    public JNodeView<?> getNodeViewForCharIndex(int charIndex)
+    {
+        JFileView fileView = getFilePart();
+        return getNodeViewForNodeAndCharIndex(fileView, charIndex);
+    }
+
+    /**
+     * Returns the node view at given index.
+     */
+    private JNodeView<?> getNodeViewForNodeAndCharIndex(JNodeView<?> parentNodeView, int charIndex)
     {
         // Check children
-        JNodeView<?>[] children = aPart.getJNodeViews();
+        JNodeView<?>[] children = parentNodeView.getJNodeViews();
         for (JNodeView<?> child : children) {
-            JNodeView<?> part = getSnapPartAt(child, anIndex);
-            if (part != null)
-                return part;
+            JNodeView<?> nodeView = getNodeViewForNodeAndCharIndex(child, charIndex);
+            if (nodeView != null)
+                return nodeView;
         }
 
         // Check part
-        JNode jnode = aPart.getJNode();
-        return jnode.getStartCharIndex() <= anIndex && anIndex <= jnode.getEndCharIndex() ? aPart : null;
+        JNode jnode = parentNodeView.getJNode();
+        if (jnode.getStartCharIndex() <= charIndex && charIndex <= jnode.getEndCharIndex())
+            return parentNodeView;
+
+        // Return not found
+        return null;
     }
 
     /**
      * Replaces a string.
      */
-    protected void replaceText(String aString, int aStart, int anEnd)
+    protected void replaceChars(CharSequence theChars, int aStart, int anEnd)
     {
-        JavaTextArea tview = getJavaTextArea();
-        tview.replaceChars(aString, null, aStart, anEnd, true);
+        _javaTextArea.replaceChars(theChars, null, aStart, anEnd, true);
         rebuildUI();
     }
 
     /**
      * Sets text selection.
      */
-    protected void setTextSelection(int aStart, int anEnd)
-    {
-        JavaTextArea tview = getJavaTextArea();
-        tview.setSel(aStart, anEnd);
-    }
+    protected void setTextSel(int aStart, int anEnd)  { _javaTextArea.setSel(aStart, anEnd); }
 
     /**
      * Insets a node.
      */
-    public void insertNode(JNode aBaseNode, JNode aNewNode, int aPos)
+    public void insertNode(JNode baseNode, JNode insertNode, int aPos)
     {
-        if (aBaseNode instanceof JFile) {
+        // If base node is file, complain and return
+        if (baseNode instanceof JFile) {
             System.out.println("Can't add to file");
             return;
         }
 
-        if (aBaseNode instanceof JStmtExpr && aNewNode instanceof JStmtExpr) {
-            JavaClass baseNodeJavaClass = aBaseNode.getEvalClass();
-            Class<?> baseNodeClass = baseNodeJavaClass != null ? baseNodeJavaClass.getRealClass() : null;
-            Class<?> selPartClass = getSelectedPartClass();
-            if (baseNodeClass == selPartClass && baseNodeClass != void.class) {
-                int index = aBaseNode.getEndCharIndex();
-                String nodeStr = aNewNode.getString(), str = '.' + nodeStr;
-                replaceText(str, index - 1, index);
-                setTextSelection(index, index + nodeStr.length());
+        // If base node is statement expr
+        if (baseNode instanceof JStmtExpr && insertNode instanceof JStmtExpr) {
+
+            // Get baseNode class and selNode class
+            JavaClass baseNodeClass = baseNode.getEvalClass();
+            JavaClass selNodeClass = getSelNodeEvalClass();
+
+            //
+            if (baseNodeClass == selNodeClass && !baseNodeClass.getName().equals("void")) {
+
+                // Get insert string and index
+                String nodeStr = insertNode.getString();
+                String insertStr = '.' + nodeStr;
+                int insertCharIndex = baseNode.getEndCharIndex();
+
+                // Replace chars and return
+                replaceChars(insertStr, insertCharIndex - 1, insertCharIndex);
+                setTextSel(insertCharIndex, insertCharIndex + nodeStr.length());
                 return;
             }
         }
 
-        //
-        int index = aPos < 0 ? getBeforeNode(aBaseNode) : aPos > 0 ? getAfterNode(aBaseNode) : getInNode(aBaseNode);
-        String indent = getIndent(aBaseNode, aPos);
-        String nodeStr = aNewNode.getString().trim().replace("\n", "\n" + indent);
-        String str = indent + nodeStr + '\n';
-        replaceText(str, index, index);
-        setTextSelection(index + indent.length(), index + indent.length() + nodeStr.trim().length());
+        // Get insert char index for base node
+        int insertCharIndex = aPos < 0 ? getCharIndexBeforeNode(baseNode) : aPos > 0 ? getCharIndexAfterNode(baseNode) : getCharIndexInNode(baseNode);
+
+        // Get string for insert node
+        String indentStr = getIndentStringForNode(baseNode, aPos);
+        String nodeStr = insertNode.getString().trim().replace("\n", "\n" + indentStr);
+        String insertStr = indentStr + nodeStr + '\n';
+
+        // Replace chars
+        replaceChars(insertStr, insertCharIndex, insertCharIndex);
+        setTextSel(insertCharIndex + indentStr.length(), insertCharIndex + indentStr.length() + nodeStr.trim().length());
     }
 
     /**
      * Replaces a JNode with string.
      */
-    public void replaceJNode(JNode aNode, String aString)
+    public void replaceJNodeWithString(JNode aNode, String aString)
     {
-        replaceText(aString, aNode.getStartCharIndex(), aNode.getEndCharIndex());
+        replaceChars(aString, aNode.getStartCharIndex(), aNode.getEndCharIndex());
     }
 
     /**
@@ -245,61 +245,60 @@ public class SnapEditor extends StackView {
      */
     public void removeNode(JNode aNode)
     {
-        int start = getBeforeNode(aNode);
-        int end = getAfterNode(aNode);
-        replaceText(null, start, end);
+        int startCharIndex = getCharIndexBeforeNode(aNode);
+        int endCharIndex = getCharIndexAfterNode(aNode);
+        replaceChars(null, startCharIndex, endCharIndex);
     }
 
     /**
-     * Returns after node.
+     * Returns char index before given node.
      */
-    public int getBeforeNode(JNode aNode)
+    public int getCharIndexBeforeNode(JNode aNode)
     {
         int nodeStartCharIndex = aNode.getStartCharIndex();
         JExpr scopeExpr = aNode instanceof JExpr ? ((JExpr) aNode).getScopeExpr() : null;
         if (scopeExpr != null)
             return scopeExpr.getEndCharIndex();
 
-        JavaTextArea javaTextArea = getJavaTextArea();
-        TextLine textLine = javaTextArea.getLineForCharIndex(nodeStartCharIndex);
+        TextLine textLine = _javaTextArea.getLineForCharIndex(nodeStartCharIndex);
         return textLine.getStartCharIndex();
     }
 
     /**
-     * Returns after node.
+     * Returns char index after given node.
      */
-    public int getAfterNode(JNode aNode)
+    public int getCharIndexAfterNode(JNode aNode)
     {
-        int index = aNode.getEndCharIndex();
+        int nodeEndCharIndex = aNode.getEndCharIndex();
         JNode nodeParent = aNode.getParent();
         JExprDot dotExpr = nodeParent instanceof JExprDot ? (JExprDot) nodeParent : null;
         if (dotExpr != null)
             return dotExpr.getExpr().getEndCharIndex();
 
-        JavaTextArea javaTextArea = getJavaTextArea();
-        TextLine tline = javaTextArea.getLineForCharIndex(index);
-        return tline.getEndCharIndex();
+        TextLine textLine = _javaTextArea.getLineForCharIndex(nodeEndCharIndex);
+        return textLine.getEndCharIndex();
     }
 
     /**
      * Returns in the node.
      */
-    public int getInNode(JNode aNode)
+    public int getCharIndexInNode(JNode aNode)
     {
-        JavaTextArea tview = getJavaTextArea();
-        int index = aNode.getStartCharIndex();
-        while (index < tview.length() && tview.charAt(index) != '{') index++;
-        TextLine tline = tview.getLineForCharIndex(index);
-        return tline.getEndCharIndex();
+        int nodeStartCharIndex = aNode.getStartCharIndex();
+        while (nodeStartCharIndex < _javaTextArea.length() && _javaTextArea.charAt(nodeStartCharIndex) != '{')
+            nodeStartCharIndex++;
+
+        TextLine textLine = _javaTextArea.getLineForCharIndex(nodeStartCharIndex);
+        return textLine.getEndCharIndex();
     }
 
     /**
      * Returns the indent.
      */
-    String getIndent(JNode aNode, int aPos)
+    private String getIndentStringForNode(JNode aNode, int aPos)
     {
-        int index = aNode.getStartCharIndex();
-        TextLine textLine = getJavaTextArea().getLineForCharIndex(index);
+        int nodeStartCharIndex = aNode.getStartCharIndex();
+        TextLine textLine = _javaTextArea.getLineForCharIndex(nodeStartCharIndex);
         String indentStr = textLine.getIndentString();
         if (aPos == 0)
             indentStr += "    ";
@@ -312,37 +311,64 @@ public class SnapEditor extends StackView {
     protected void processEvent(ViewEvent anEvent)
     {
         // Handle MousePressed
-        if (anEvent.isMousePress()) {
-            _mx = anEvent.getX();
-            _my = anEvent.getY();
-            _mnode = ViewUtils.getDeepestChildAt(this, _mx, _my);
-            _mpart = JNodeView.getJNodeView(_mnode);
-            if (_mpart == null) _mnode = null;
-            else _mnode = _mpart;
-            if (_mpart == _filePart) {
-                setSelectedPart(null);
-                _mpart = null;
-            }
-            setSelectedPart(_mpart);
+        switch (anEvent.getType()) {
+            case MousePress: mousePress(anEvent); break;
+            case MouseDrag: mouseDragged(anEvent); break;
+            case MouseRelease: mouseReleased(anEvent); break;
         }
+    }
 
-        // Handle MouseDragged
-        else if (anEvent.isMouseDrag()) {
-            if (_mpart == null) return;
-            double mx = anEvent.getX(), my = anEvent.getY();
-            _mnode.setTransX(_mnode.getTransX() + mx - _mx);
-            _mx = mx;
-            _mnode.setTransY(_mnode.getTransY() + my - _my);
-            _my = my;
-        }
+    /**
+     * Handle mouse press.
+     */
+    private void mousePress(ViewEvent anEvent)
+    {
+        // Get mouse point
+        _mouseX = anEvent.getX();
+        _mouseY = anEvent.getY();
 
-        // Handle MouseReleased
-        else if (anEvent.isMouseRelease()) {
-            if (_mpart == null) return;
-            if (_mnode.getTransX() > 150 && _mpart.getJNodeViewParent() != null) removeNode(_mpart.getJNode());
-            _mnode.setTransX(0);
-            _mnode.setTransY(0);
-            _mnode = null;
-        }
+        // Get NodeView at mouse point
+        View deepestView = ViewUtils.getDeepestChildAt(this, _mouseX, _mouseY);
+        _dragNodeView = JNodeView.getJNodeView(deepestView);
+        if (_dragNodeView == _fileView)
+            _dragNodeView = null;
+
+        // Select drag node
+        setSelNodeView(_dragNodeView);
+    }
+
+    /**
+     * Handle mouse dragged.
+     */
+    private void mouseDragged(ViewEvent anEvent)
+    {
+        // If no drag node view, just return
+        if (_dragNodeView == null) return;
+
+        // Translate drag node view by mouse delta
+        double mouseX = anEvent.getX();
+        double mouseY = anEvent.getY();
+        _dragNodeView.setTransX(_dragNodeView.getTransX() + mouseX - _mouseX);
+        _dragNodeView.setTransY(_dragNodeView.getTransY() + mouseY - _mouseY);
+        _mouseX = mouseX;
+        _mouseY = mouseY;
+    }
+
+    /**
+     * Handle mouse released.
+     */
+    private void mouseReleased(ViewEvent anEvent)
+    {
+        // If no drag node view, just return
+        if (_dragNodeView == null) return;
+
+        // If drag node is outside bounds, remove node
+        if (_dragNodeView.getTransX() > 150 && _dragNodeView.getJNodeViewParent() != null)
+            removeNode(_dragNodeView.getJNode());
+
+        // Reset translation
+        _dragNodeView.setTransX(0);
+        _dragNodeView.setTransY(0);
+        _dragNodeView = null;
     }
 }
