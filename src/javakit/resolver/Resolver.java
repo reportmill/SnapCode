@@ -58,7 +58,7 @@ public class Resolver {
     {
         ClassTree classTree = getClassTree();
         String packageName = parentPackage.getName();
-        ClassTree.ClassTreeNode[] childNodes = classTree.getChildNodesForPackageName(packageName);
+        ClassTree.ClassTreeNode[] childNodes = classTree.getClassTreeNodesForPackageName(packageName);
         JavaDecl[] children = ArrayUtils.map(childNodes, classTreeNode -> getJavaDeclForClassTreeNode(parentPackage, classTreeNode), JavaDecl.class);
 
         // Filter out null
@@ -392,12 +392,8 @@ public class Resolver {
 
         // Get parent package
         Package pkg = aClass.getPackage();
-        String pkgName = pkg != null ? pkg.getName() : null;
-        if (pkgName != null && pkgName.length() > 0)
-            return getJavaPackageForName(pkgName);
-
-        // Return root package
-        return null;
+        String pkgName = pkg != null ? pkg.getName() : "";
+        return getJavaPackageForName(pkgName);
     }
 
     /**

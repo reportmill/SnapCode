@@ -10,6 +10,7 @@ import snap.web.WebSite;
 import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,9 +20,6 @@ public class ClassTree {
 
     // The array of class path sites
     private WebSite[] _classPathSites;
-
-    // The root package
-    protected ClassTreeNode[] _rootChildren;
 
     // Constants
     public static final ClassTreeNode[] EMPTY_NODE_ARRAY = new ClassTreeNode[0];
@@ -33,56 +31,31 @@ public class ClassTree {
     {
         super();
 
-        // Add primitive classes
-        Class<?>[] primitives = { boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class, void.class };
-        _rootChildren = ArrayUtils.map(primitives, cls -> new ClassTreeNode(cls.getName(), false), ClassTreeNode.class);
-
         // Get ClassPathSites for ClassPaths
         _classPathSites = getClassPathSitesForClassPaths(classPaths);
-        List<ClassTreeNode> rootPackagesList = new ArrayList<>();
-
-        // Iterate over ClassPathSites and add classes for each
-        for (WebSite site : _classPathSites) {
-
-            // Get site root files
-            WebFile siteRootDir = site.getRootDir();
-            if (!siteRootDir.getExists())
-                continue;
-            WebFile[] rootFiles = siteRootDir.getFiles();
-
-            // Iterate over site root files and create/add packages
-            for (WebFile rootFile : rootFiles) {
-                if (isPackageDir(rootFile)) {
-                    String packageName = rootFile.getName();
-                    if (!ListUtils.hasMatch(rootPackagesList, pkgNode -> packageName.equals(pkgNode.fullName))) {
-                        ClassTreeNode rootPackage = new ClassTreeNode(packageName, true);
-                        rootPackagesList.add(rootPackage);
-                    }
-                }
-            }
-        }
-
-        // Add to RootPackage.Children
-        ClassTreeNode[] rootPackages = rootPackagesList.toArray(EMPTY_NODE_ARRAY);
-        _rootChildren = ArrayUtils.addAll(_rootChildren, rootPackages);
     }
 
     /**
      * Returns ClassTreeNode array for classes and child packages for given node.
      */
-    protected ClassTreeNode[] getChildNodesForPackageName(String packageName)
+    protected ClassTreeNode[] getClassTreeNodesForPackageName(String packageName)
     {
-        // Handle root package special
-        if (packageName.length() == 0)
-            return _rootChildren;
-
         // Get files
         WebFile[] nodeFiles = getFilesForPackageName(packageName);
         if (nodeFiles.length == 0)
             return EMPTY_NODE_ARRAY;
 
-        // Iterate over files and Find child classes and packages for each
+        // Create nodes list
         List<ClassTreeNode> classTreeNodes = new ArrayList<>(nodeFiles[0].getFileCount());
+
+        // If root package, add primitives
+        if (packageName.length() == 0) {
+            Class<?>[] primitives = { boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class, void.class };
+            ClassTreeNode[] primitiveNodes = ArrayUtils.map(primitives, cls -> new ClassTreeNode(cls.getName(), false), ClassTreeNode.class);
+            Collections.addAll(classTreeNodes, primitiveNodes);
+        }
+
+        // Iterate over files and Find child classes and packages for each
         for (WebFile nodeFile : nodeFiles)
             findChildNodesForDirFile(nodeFile, classTreeNodes);
 
