@@ -6,7 +6,7 @@ import snap.view.View;
 /**
  * A SnapPart subclass for JMethodDecl.
  */
-public class JMemberDeclView<JNODE extends JMemberDecl> extends JNodeView<JNODE> {
+public class JMemberDeclView<JNODE extends JMemberDecl> extends JNodeBlockView<JNODE> {
 
     /**
      * Constructor.

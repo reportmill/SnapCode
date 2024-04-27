@@ -30,7 +30,6 @@ public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
         JExpr prefixExpr = dotExpr.getPrefixExpr();
         JExprView<?> prefixView = createView(prefixExpr);
         prefixView.setGrowWidth(true);
-        prefixView.setBlockType(BlockType.Left);
         childViews.add(prefixView);
 
         // Iterate over expression chain children, create expression views and add to list
@@ -38,7 +37,6 @@ public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
         if (expr != null) {
             JExprView<?> exprView = createView(expr);
             exprView.setGrowWidth(true);
-            exprView.setBlockType(BlockType.Right);
             childViews.add(exprView);
         }
 

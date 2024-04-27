@@ -24,8 +24,6 @@ public class JExprEditor<JNODE extends JExpr> extends JExprView<JNODE> {
     public JExprEditor()
     {
         super();
-        setBlockType(BlockType.Middle);
-        setColor(null);
     }
 
     /**

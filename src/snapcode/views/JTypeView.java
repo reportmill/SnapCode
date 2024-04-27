@@ -14,17 +14,6 @@ public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
     public JTypeView()
     {
         super();
-        setBlockType(BlockType.Middle);
-        setColor(PieceColor);
-    }
-
-    /**
-     * Creates a new JTypeView for given JType.
-     */
-    public JTypeView(JNODE aCD)
-    {
-        this();
-        setJNode(aCD);
     }
 
     @Override

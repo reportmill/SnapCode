@@ -153,14 +153,16 @@ public class SnapEditor extends StackView {
     /**
      * Returns the node view at given index.
      */
-    private JNodeView<?> getNodeViewForNodeAndCharIndex(JNodeView<?> parentNodeView, int charIndex)
+    private JNodeView<?> getNodeViewForNodeAndCharIndex(JNodeBlockView<?> parentNodeView, int charIndex)
     {
         // Check children
         JNodeView<?>[] children = parentNodeView.getJNodeViews();
         for (JNodeView<?> child : children) {
-            JNodeView<?> nodeView = getNodeViewForNodeAndCharIndex(child, charIndex);
-            if (nodeView != null)
-                return nodeView;
+            if (child instanceof JNodeBlockView) {
+                JNodeView<?> nodeView = getNodeViewForNodeAndCharIndex((JNodeBlockView<?>) child, charIndex);
+                if (nodeView != null)
+                    return nodeView;
+            }
         }
 
         // Check part
@@ -314,7 +316,7 @@ public class SnapEditor extends StackView {
         switch (anEvent.getType()) {
             case MousePress: mousePress(anEvent); break;
             case MouseDrag: mouseDragged(anEvent); break;
-            case MouseRelease: mouseReleased(anEvent); break;
+            case MouseRelease: mouseReleased(); break;
         }
     }
 
@@ -357,7 +359,7 @@ public class SnapEditor extends StackView {
     /**
      * Handle mouse released.
      */
-    private void mouseReleased(ViewEvent anEvent)
+    private void mouseReleased()
     {
         // If no drag node view, just return
         if (_dragNodeView == null) return;

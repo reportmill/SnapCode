@@ -16,7 +16,6 @@ public class JExprMethodCallView<JNODE extends JExprMethodCall> extends JExprVie
     public JExprMethodCallView()
     {
         super();
-        setColor(PieceColor);
     }
 
     /**

@@ -9,7 +9,7 @@ import snap.view.ViewUtils;
 /**
  * A SnapPart for JFile.
  */
-public class JFileView extends JNodeView<JFile> {
+public class JFileView extends JNodeBlockView<JFile> {
 
     // The SnapCodeArea
     SnapEditor _editor;
