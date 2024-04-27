@@ -71,8 +71,9 @@ public class JavaPopupList extends PopupList<JavaDecl> {
      */
     public void updateForTextAreaKeyReleasedEvent(ViewEvent anEvent)
     {
-        // If shift key, just ignore
-        if (anEvent.getKeyCode() == KeyCode.SHIFT)
+        // If shift key or up/down arrows, just ignore
+        int keyCode = anEvent.getKeyCode();
+        if (keyCode == KeyCode.SHIFT || keyCode == KeyCode.UP || keyCode == KeyCode.DOWN)
             return;
 
         // If Java identifier char or backspace, show/update popup list
