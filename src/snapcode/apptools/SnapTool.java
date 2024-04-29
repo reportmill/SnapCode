@@ -201,7 +201,7 @@ public class SnapTool extends WorkspaceTool {
 
             // If view contains point and has NodeView, return NodeView
             if (child.contains(pointInChildCoords.x, pointInChildCoords.y)) {
-                 JNodeView nodeView = JNodeView.getJNodeView(child);
+                 JNodeView nodeView = JNodeView.getNodeView(child);
                  if (nodeView != null)
                      return nodeView;
             }

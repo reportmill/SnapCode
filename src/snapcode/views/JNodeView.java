@@ -157,9 +157,9 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     }
 
     /**
-     * Returns the SnapPart of a node.
+     * Returns the NodeView for given view.
      */
-    public static JNodeView<?> getJNodeView(View aView)
+    public static JNodeView<?> getNodeView(View aView)
     {
         if (aView instanceof JNodeView)
             return (JNodeView<?>) aView;

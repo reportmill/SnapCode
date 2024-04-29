@@ -401,4 +401,14 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
             anEvent.dropComplete(); //de.setDropCompleted(true);
         }
     }
+
+    /**
+     * Returns the BlockView of a node.
+     */
+    public static JNodeBlockView<?> getBlockView(View aView)
+    {
+        if (aView instanceof JNodeBlockView)
+            return (JNodeBlockView<?>) aView;
+        return aView.getParent(JNodeBlockView.class);
+    }
 }
