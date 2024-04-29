@@ -25,14 +25,14 @@ public class JStmtReturnView<JNODE extends JStmtReturn> extends JStmtView<JNODE>
     protected View[] createRowViews()
     {
         // Add label for 'return'
-        Label label = createLabel("return");
+        Label label = JNodeViewUtils.createLabel("return");
         View[] rowViews = new View[] { label };
 
         // Add return view
         JStmtReturn returnStmt = getJNode();
         JExpr returnExpr = returnStmt.getExpr();
         if (returnExpr != null) {
-            JNodeView<?> exprView = JNodeView.createNodeViewForNode(returnExpr);
+            JNodeView<?> exprView = JNodeViewUtils.createNodeViewForNode(returnExpr);
             rowViews = ArrayUtils.add(rowViews, exprView);
         }
 

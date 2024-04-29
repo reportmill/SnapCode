@@ -35,6 +35,9 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     // Constants for block insets
     private double _paddingLeft;
 
+    // The child node views
+    protected JNodeView<?>[] _jnodeViews;
+
     // The block statement views
     protected JNodeView<?>[] _blockStmtViews;
 
@@ -273,7 +276,7 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
 
         // Get statements and return statement views
         List<JStmt> statements = blockStmt.getStatements();
-        return ListUtils.mapNonNullToArray(statements, stmt -> createNodeViewForNode(stmt), JNodeView.class);
+        return ListUtils.mapNonNullToArray(statements, stmt -> JNodeViewUtils.createNodeViewForNode(stmt), JNodeView.class);
     }
 
     /**

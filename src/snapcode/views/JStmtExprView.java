@@ -4,10 +4,6 @@ import snap.util.ArrayUtils;
 import snap.view.Label;
 import snap.view.View;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * JStmtView subclass for JStmtExpr.
  */
@@ -30,13 +26,13 @@ public class JStmtExprView<JNODE extends JStmtExpr> extends JStmtView<JNODE> {
         // Get expression views
         JStmtExpr exprStmt = getJNode();
         JExpr expr = exprStmt.getExpr();
-        JExprView<?> exprView = (JExprView<?>) JNodeView.createNodeViewForNode(expr);
+        JExprView<?> exprView = (JExprView<?>) JNodeViewUtils.createNodeViewForNode(expr);
         View[] exprViews = new View[] { exprView };
 
         // Add prefix for expression type ('call...', 'set...', 'declare...', etc.)
         String exprPrefix = getExpressionPrefix();
         if (exprPrefix != null) {
-            Label label = createLabel(exprPrefix);
+            Label label = JNodeViewUtils.createLabel(exprPrefix);
             exprViews = ArrayUtils.add(exprViews, label, 0);
         }
 

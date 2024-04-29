@@ -24,12 +24,12 @@ public class JStmtIfView<JNODE extends JStmtIf> extends JStmtView<JNODE> {
     protected View[] createRowViews()
     {
         // Add label for 'if'
-        Label label = createLabel("if   ");
+        Label label = JNodeViewUtils.createLabel("if   ");
 
         // Add condition view
         JStmtIf ifStmt = getJNode();
         JExpr condExpr = ifStmt.getConditional();
-        JNodeView<?> exprView = JNodeView.createNodeViewForNode(condExpr);
+        JNodeView<?> exprView = JNodeViewUtils.createNodeViewForNode(condExpr);
 
         // Return
         return new View[] { label, exprView };

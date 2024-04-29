@@ -42,7 +42,7 @@ public class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
         String str = expr.getString();
 
         // Create text field, configure and return
-        _textField = createTextField(str);
+        _textField = JNodeViewUtils.createTextField(str);
         _textField.setName(TextFieldName);
         _textField.addEventHandler(e -> handleTextEvent(e), KeyRelease); //enableEvents(_tfield, DragEvents);
         _textField.addEventHandler(e -> handleTextEvent(e), Action);

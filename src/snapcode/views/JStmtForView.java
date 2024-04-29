@@ -29,7 +29,7 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
     {
         // Create label and add to HBox
         JStmtFor forStmt = getJNode();
-        Label label = createLabel("for  ");
+        Label label = JNodeViewUtils.createLabel("for  ");
         List<View> rowViews = new ArrayList<>();
         rowViews.add(label);
 
@@ -42,7 +42,7 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
         // Add init declaration text
         if (varDeclExpr != null) {
             String str = varDeclExpr.getString();
-            TextField tfield = createTextField(str);
+            TextField tfield = JNodeViewUtils.createTextField(str);
             tfield.setName("ExprText");
             tfield.setProp("Expr", varDeclExpr);
             tfield.addEventHandler(e -> handleTextEvent(e));
@@ -52,7 +52,7 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
         // Add conditional / iterable text
         if (condExpr != null) {
             String str = condExpr.getString();
-            TextField tfield = createTextField(str);
+            TextField tfield = JNodeViewUtils.createTextField(str);
             tfield.setName("ExprText");
             tfield.setProp("Expr", condExpr);
             tfield.addEventHandler(e -> handleTextEvent(e));
@@ -62,7 +62,7 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
         // Add update statement text
         if (updateExpr != null) {
             String str = updateExpr.getString();
-            TextField tfield = createTextField(str);
+            TextField tfield = JNodeViewUtils.createTextField(str);
             tfield.setName("ExprText");
             tfield.setProp("Expr", updateExpr);
             tfield.addEventHandler(e -> handleTextEvent(e));

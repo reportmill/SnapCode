@@ -68,7 +68,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeBlockView<JNO
     {
         JClassDecl classDecl = getJNode();
         JMemberDecl[] memberDecls = classDecl.getMemberDecls();
-        return ArrayUtils.mapNonNull(memberDecls, mdecl -> JNodeView.createNodeViewForNode(mdecl), JNodeView.class);
+        return ArrayUtils.mapNonNull(memberDecls, mdecl -> JNodeViewUtils.createNodeViewForNode(mdecl), JNodeView.class);
     }
 
     /**
@@ -124,7 +124,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeBlockView<JNO
         protected View[] createRowViews()
         {
             JExprId id = getJNode();
-            Label label = createLabel(id.getName());
+            Label label = JNodeViewUtils.createLabel(id.getName());
             label.setFont(label.getFont().copyForSize(20));
             return new View[] { label };
         }
@@ -158,7 +158,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeBlockView<JNO
         protected View[] createRowViews()
         {
             JType typ = getJNode();
-            Label label = createLabel(typ.getName());
+            Label label = JNodeViewUtils.createLabel(typ.getName());
             label.setFont(label.getFont().copyForSize(14));
             return new View[] { label };
         }

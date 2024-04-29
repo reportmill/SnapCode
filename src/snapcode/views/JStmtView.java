@@ -38,7 +38,7 @@ public class JStmtView<JNODE extends JStmt> extends JNodeBlockView<JNODE> {
     protected View[] createRowViews()
     {
         JStmt stmt = getJNode();
-        Label label = createLabel(stmt.getString());
+        Label label = JNodeViewUtils.createLabel(stmt.getString());
         return new View[]{label};
     }
 

@@ -27,12 +27,12 @@ public class JExprVarDeclView<JNODE extends JExprVarDecl> extends JExprView<JNOD
         // Add child for type
         JType typeDecl = varDecl.getType();
         String typeStr = typeDecl.getString();
-        Label typeLabel = createLabel(typeStr);
+        Label typeLabel = JNodeViewUtils.createLabel(typeStr);
         addChild(typeLabel);
 
         // Add child for var decl id
         JExpr idExpr = varDecl.getId();
-        JNodeView<?> idExprView = createNodeViewForNode(idExpr);
+        JNodeView<?> idExprView = JNodeViewUtils.createNodeViewForNode(idExpr);
         idExprView.setGrowWidth(true);
         addChild(idExprView);
 
@@ -41,11 +41,11 @@ public class JExprVarDeclView<JNODE extends JExprVarDecl> extends JExprView<JNOD
         if (initExpr != null) {
 
             // Create '=' label
-            Label equalsLabel = createLabel("=");
+            Label equalsLabel = JNodeViewUtils.createLabel("=");
             addChild(equalsLabel);
 
             // Add child for assign value expr
-            JNodeView<?> exprView = createNodeViewForNode(initExpr);
+            JNodeView<?> exprView = JNodeViewUtils.createNodeViewForNode(initExpr);
             exprView.setGrowWidth(true);
             addChild(exprView);
          }

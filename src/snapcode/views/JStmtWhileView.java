@@ -24,12 +24,12 @@ public class JStmtWhileView<JNODE extends JStmtWhile> extends JStmtView<JNODE> {
     protected View[] createRowViews()
     {
         // Add label for 'if'
-        Label label = createLabel("while");
+        Label label = JNodeViewUtils.createLabel("while");
 
         // Add condition view
         JStmtWhile whileStmt = getJNode();
         JExpr condExpr = whileStmt.getConditional();
-        JNodeView<?> exprView = JNodeView.createNodeViewForNode(condExpr);
+        JNodeView<?> exprView = JNodeViewUtils.createNodeViewForNode(condExpr);
 
         // Return
         return new View[] { label, exprView };

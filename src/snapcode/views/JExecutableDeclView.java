@@ -28,7 +28,7 @@ public class JExecutableDeclView<JNODE extends JExecutableDecl> extends JNodeBlo
     protected View[] createRowViews()
     {
         JExecutableDecl md = getJNode();
-        Label label = createLabel(md.getName());
+        Label label = JNodeViewUtils.createLabel(md.getName());
         label.setFont(label.getFont().copyForSize(14));
         return new View[]{label};
     }
