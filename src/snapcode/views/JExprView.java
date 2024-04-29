@@ -1,13 +1,20 @@
 package snapcode.views;
-import javakit.parse.JExpr;
-import javakit.parse.JExprDot;
-import javakit.parse.JExprMethodCall;
-import javakit.parse.JNode;
+import javakit.parse.*;
+import snap.view.TextField;
+import snap.view.View;
+import snap.view.ViewEvent;
+import snap.view.ViewUtils;
 
 /**
  * A JNodeView subclass for JExpr.
  */
-public abstract class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
+public class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
+
+    // The text field
+    private TextField _textField;
+
+    // The text field name
+    private static final String TextFieldName = "ExprText";
 
     /**
      * Constructor.
@@ -18,31 +25,73 @@ public abstract class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
     }
 
     /**
-     * Override to forward to parent.
+     * Override to return textfield.
      */
     @Override
-    protected void dropNode(JNode aJNode, double anX, double aY)
+    protected View[] createRowViews()
     {
-        JNodeView<?> parentView = getJNodeViewParent();
-        parentView.dropNode(aJNode, anX, aY);
+        // Get expression
+        JExpr expr = getJNode();
+        String str = expr.getString();
+
+        // Create text field, configure and return
+        _textField = createTextField(str);
+        _textField.setName(TextFieldName);
+        _textField.addEventHandler(e -> handleTextEvent(e), KeyRelease); //enableEvents(_tfield, DragEvents);
+        _textField.addEventHandler(e -> handleTextEvent(e), Action);
+        return new View[] { _textField };
     }
 
     /**
-     * Creates a JNodeView for a JNode.
+     * Fires TextFieldAction.
      */
-    public static JExprView<?> createView(JExpr anExpr)
+    protected void fireTextFieldAction()
     {
-        JExprView<? extends JExpr> exprView;
-        if (anExpr instanceof JExprMethodCall)
-            exprView = new JExprMethodCallView<>();
-        else if (anExpr instanceof JExprDot)
-            exprView = new JExprDotView<>();
-        else exprView = new JExprEditor<>();
+        ViewUtils.fireActionEvent(_textField, null);
+    }
 
-        // Set node
-        ((JExprView<JExpr>) exprView).setJNode(anExpr);
+    /**
+     * Handle TextField event.
+     */
+    protected void handleTextEvent(ViewEvent anEvent)
+    {
+        // Handle KeyEvents: Update PopupList
+        if (anEvent.isKeyRelease())
+            getEnv().runLater(() ->
+                    SnapEditorPopup.getShared().activatePopupList(this, _textField.getText(), _textField.getSelStart()));
 
-        // Return
-        return exprView;
+            // Handle ExprText Action
+        else {
+            SnapEditorPopup hpop = SnapEditorPopup.getShared();
+            String str = _textField.getText();
+            if (hpop.isShowing()) str = hpop.getFixedText();
+            SnapEditor sed = getEditor();
+            sed.replaceJNodeWithString(getJNode(), str);
+            hpop.hide();
+        }
+    }
+
+    /**
+     * Drops a node.
+     */
+    protected void dropNode(JNode aJNode, double anX, double aY)
+    {
+        // If TextField, forward to parent
+        if (_textField == null) {
+            JNodeView<?> parentView = getJNodeViewParent();
+            parentView.dropNode(aJNode, anX, aY);
+            return;
+        }
+
+        if (aJNode instanceof JStmtExpr)
+            aJNode = ((JStmtExpr) aJNode).getExpr();
+        if (!(aJNode instanceof JExpr)) {
+            System.out.println("SnapPartExprEditor: Can't drop node " + aJNode);
+            return;
+        }
+
+        // Replace expression with DropNode
+        String str = aJNode.getString();
+        getEditor().replaceJNodeWithString(getJNode(), str);
     }
 }

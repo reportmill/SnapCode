@@ -4,6 +4,8 @@ import snap.geom.Pos;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.view.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A view that manages painting and editing of a JNode as puzzle piece.
@@ -201,27 +203,66 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     }
 
     /**
-     * Creates a SnapPart for a JNode.
+     * Returns a new nodeView for given node.
      */
-    public static JNodeView<?> createView(JNode aNode)
+    public static JNodeView<?> createNodeViewForNode(JNode aNode)
     {
-        JNodeView<?> nodeView = null;
-        if (aNode instanceof JFile)
-            nodeView = new JFileView();
-        else if (aNode instanceof JMemberDecl)
-            nodeView = JMemberDeclView.createView(aNode);
-        else if (aNode instanceof JStmt)
-            nodeView = JStmtView.createView(aNode);
-        else if (aNode instanceof JExpr)
-            nodeView = JExprView.createView((JExpr) aNode);
-        else if (aNode instanceof JType)
-            nodeView = new JTypeView<>();
-        if (nodeView == null)
-            return null;
+        Class<? extends JNodeView<?>> nodeViewClass = getNodeViewClassForNode(aNode);
+        try {
+            JNodeView<JNode> nodeView = (JNodeView<JNode>) nodeViewClass.getConstructor().newInstance();
+            nodeView.setJNode(aNode);
+            return nodeView;
+        }
+        catch (Exception e) { throw new RuntimeException(e); }
+    }
 
-        ((JNodeView<JNode>) nodeView).setJNode(aNode);
+    // A cache of node classes to node view classes
+    private static Map<Class<? extends JNode>,Class<JNodeView<?>>> _nodeViewClasses = new HashMap<>();
+
+    /**
+     * Returns the nodeView class for node.
+     */
+    private static Class<? extends JNodeView<?>> getNodeViewClassForNode(JNode aNode)
+    {
+        Class<? extends JNode> nodeClass = aNode.getClass();
+        return getNodeViewClassForNodeClass(nodeClass);
+    }
+
+    /**
+     * Returns the nodeView class for node.
+     */
+    private static Class<JNodeView<?>> getNodeViewClassForNodeClass(Class<? extends JNode> nodeClass)
+    {
+        // If class found in NodeViewClasses map, just return it
+        Class<JNodeView<?>> nodeViewClass = _nodeViewClasses.get(nodeClass);
+        if (nodeViewClass != null)
+            return nodeViewClass;
+
+        // Look for class - if found, add to cache map
+        nodeViewClass = getNodeViewClassForNodeClassImpl(nodeClass);
+        if (nodeViewClass != null)
+            _nodeViewClasses.put(nodeClass, nodeViewClass);
 
         // Return
-        return nodeView;
+        return nodeViewClass;
+    }
+
+    /**
+     * Returns the nodeView class for node.
+     */
+    private static Class<JNodeView<?>> getNodeViewClassForNodeClassImpl(Class<? extends JNode> nodeClass)
+    {
+        for (Class<?> cls = nodeClass; cls != null; cls = cls.getSuperclass()) {
+
+            // Construct name from "snapcode.views.<node_class_name>View"
+            String pkgName = JNodeView.class.getPackage().getName();
+            String simpleName = cls.getSimpleName();
+            String className = pkgName + '.' + simpleName + "View";
+            try { return (Class<JNodeView<?>>) Class.forName(className); }
+            catch (Exception ignore) { }
+        }
+
+        // Return not found
+        return null;
     }
 }

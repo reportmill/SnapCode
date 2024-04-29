@@ -32,11 +32,23 @@ public class JStmtView<JNODE extends JStmt> extends JNodeBlockView<JNODE> {
     }
 
     /**
+     * Override to return statement as label.
+     */
+    @Override
+    protected View[] createRowViews()
+    {
+        JStmt stmt = getJNode();
+        Label label = createLabel(stmt.getString());
+        return new View[]{label};
+    }
+
+    /**
      * Returns a string describing the part.
      */
     public String getPartString()
     {
-        return _jnode.getClass().getSimpleName().substring(5) + " Statement";
+        String nodeClassName = _jnode.getClass().getSimpleName();
+        return nodeClassName.substring(5) + " Statement";
     }
 
     /**
@@ -68,41 +80,4 @@ public class JStmtView<JNODE extends JStmt> extends JNodeBlockView<JNODE> {
         else getJNodeViewLast().dropNode(aNode, anX, getJNodeViewLast().getHeight());
     }
 
-    /**
-     * Creates a JStmtView for a JStmt.
-     */
-    public static JNodeView<?> createView(JNode aNode)
-    {
-        if (aNode instanceof JStmtExpr)
-            return new JStmtExprView<>();
-        if (aNode instanceof JStmtWhile)
-            return new JStmtWhileView<>();
-        if (aNode instanceof JStmtIf)
-            return new JStmtIfView<>();
-        if (aNode instanceof JStmtFor)
-            return new JStmtForView<>();
-        return new JStmtOtherView();
-    }
-
-    /**
-     * A subclass of JStmtView for statements not yet implemented.
-     */
-    protected static class JStmtOtherView extends JStmtView<JStmt> {
-
-        /**
-         * Constructor.
-         */
-        public JStmtOtherView()
-        {
-            super();
-        }
-
-        @Override
-        protected View[] createRowViews()
-        {
-            JStmt stmt = getJNode();
-            Label label = createLabel(stmt.getString());
-            return new View[] { label };
-        }
-    }
 }

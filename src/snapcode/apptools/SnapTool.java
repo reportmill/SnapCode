@@ -177,7 +177,7 @@ public class SnapTool extends WorkspaceTool {
         JavaParser javaParser = JavaParser.getShared();
         JNode node = javaParser.parseStatement(aString, 0);
         node.setString(aString);
-        JNodeView<?> nodeView = JNodeView.createView(node);
+        JNodeView<?> nodeView = JNodeView.createNodeViewForNode(node);
         nodeView.getEventAdapter().disableEvents(DragEvents);
         return nodeView;
     }

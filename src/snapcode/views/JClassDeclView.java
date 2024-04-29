@@ -68,7 +68,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeBlockView<JNO
     {
         JClassDecl classDecl = getJNode();
         JMemberDecl[] memberDecls = classDecl.getMemberDecls();
-        return ArrayUtils.mapNonNull(memberDecls, mdecl -> JMemberDeclView.createView(mdecl), JNodeView.class);
+        return ArrayUtils.mapNonNull(memberDecls, mdecl -> JNodeView.createNodeViewForNode(mdecl), JNodeView.class);
     }
 
     /**

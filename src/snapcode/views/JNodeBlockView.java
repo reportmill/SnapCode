@@ -182,13 +182,8 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
      */
     protected void addChildToRowView(View aView)
     {
-        // Add child
         RowView rowView = getRowView();
         rowView.addChild(aView);
-
-        // If JNodeView, reset padding
-        if (aView instanceof JNodeView && !(aView instanceof JExprEditor))
-            rowView.setPadding(Insets.EMPTY);
     }
 
     /**
@@ -273,7 +268,7 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
 
         // Get statements and return statement views
         List<JStmt> statements = blockStmt.getStatements();
-        return ListUtils.mapNonNullToArray(statements, stmt -> createView(stmt), JNodeView.class);
+        return ListUtils.mapNonNullToArray(statements, stmt -> createNodeViewForNode(stmt), JNodeView.class);
     }
 
     /**

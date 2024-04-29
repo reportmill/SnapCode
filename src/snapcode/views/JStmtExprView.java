@@ -28,7 +28,7 @@ public class JStmtExprView<JNODE extends JStmtExpr> extends JStmtView<JNODE> {
     {
         JStmtExpr stmt = getJNode();
         JExpr expr = stmt.getExpr();
-        JExprView exprView = JExprView.createView(expr);
+        JNodeView<?> exprView = JNodeView.createNodeViewForNode(expr);
 
         //exprView.setGrowWidth(true);
         //return new View[] { exprView };
@@ -39,14 +39,14 @@ public class JStmtExprView<JNODE extends JStmtExpr> extends JStmtView<JNODE> {
     /**
      * Returns the expression views.
      */
-    private View[] getExpressionViews(JExprView exprView)
+    private View[] getExpressionViews(JNodeView<?> exprView)
     {
         List<View> exprViews = new ArrayList<>();
         View[] views = exprView.createRowViews();
 
         for (View view : views) {
             if (view instanceof JExprView) {
-                View[] views2 = getExpressionViews((JExprView) view);
+                View[] views2 = getExpressionViews((JExprView<?>) view);
                 Collections.addAll(exprViews, views2);
             }
             else exprViews.add(view);

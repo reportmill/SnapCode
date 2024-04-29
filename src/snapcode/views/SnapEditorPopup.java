@@ -151,7 +151,7 @@ public class SnapEditorPopup extends ViewOwner {
             }
             if (anEvent.isEnterKey()) {
                 if (anEvent.isKeyRelease())
-                    ((JExprEditor<?>) _nodeView).fireTextFieldAction();
+                    ((JExprView<?>) _nodeView).fireTextFieldAction();
                 anEvent.consume();
             }
         }

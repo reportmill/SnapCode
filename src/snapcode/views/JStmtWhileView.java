@@ -29,8 +29,7 @@ public class JStmtWhileView<JNODE extends JStmtWhile> extends JStmtView<JNODE> {
         // Add condition view
         JStmtWhile whileStmt = getJNode();
         JExpr condExpr = whileStmt.getConditional();
-        JExprView<JExpr> exprView = new JExprEditor<>();
-        exprView.setJNode(condExpr);
+        JNodeView<?> exprView = JNodeView.createNodeViewForNode(condExpr);
 
         // Return
         return new View[] { label, exprView };

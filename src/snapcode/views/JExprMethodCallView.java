@@ -32,7 +32,7 @@ public class JExprMethodCallView<JNODE extends JExprMethodCall> extends JExprVie
         // Create views for args
         JExprMethodCall methodCall = getJNode();
         JExpr[] args = methodCall.getArgs();
-        View[] argViews = ArrayUtils.mapNonNull(args, arg -> new JExprEditor<>(arg), View.class);
+        View[] argViews = ArrayUtils.mapNonNull(args, arg -> JNodeView.createNodeViewForNode(arg), View.class);
         rowViews = ArrayUtils.add(argViews, label, 0);
 
         // Return

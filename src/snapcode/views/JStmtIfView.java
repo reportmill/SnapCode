@@ -29,8 +29,7 @@ public class JStmtIfView<JNODE extends JStmtIf> extends JStmtView<JNODE> {
         // Add condition view
         JStmtIf ifStmt = getJNode();
         JExpr condExpr = ifStmt.getConditional();
-        JExprView<JExpr> exprView = new JExprEditor<>();
-        exprView.setJNode(condExpr);
+        JNodeView<?> exprView = JNodeView.createNodeViewForNode(condExpr);
 
         // Return
         return new View[] { label, exprView };
