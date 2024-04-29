@@ -22,20 +22,27 @@ public class JExprMethodCallView<JNODE extends JExprMethodCall> extends JExprVie
      * Override to return views for method name and args.
      */
     @Override
-    protected View[] createRowViews()
+    protected void addChildExprViews()
     {
         // Create for name
-        JExprMethodCall mc = getJNode();
-        Label label = createLabel(mc.getName());
-        View[] rowViews;
+        JExprMethodCall methodCallExpr = getJNode();
+        String methodName = methodCallExpr.getName();
+        Label methodNameLabel = createLabel(methodName);
+        addChild(methodNameLabel);
+
+        // Add open paren
+        Label openParenLabel = createLabel("(");
+        addChild(openParenLabel);
 
         // Create views for args
         JExprMethodCall methodCall = getJNode();
         JExpr[] args = methodCall.getArgs();
         View[] argViews = ArrayUtils.mapNonNull(args, arg -> JNodeView.createNodeViewForNode(arg), View.class);
-        rowViews = ArrayUtils.add(argViews, label, 0);
+        for (View argView : argViews)
+            addChild(argView);
 
-        // Return
-        return rowViews;
+        // Add close paren
+        Label closeParenLabel = createLabel(")");
+        addChild(closeParenLabel);
     }
 }

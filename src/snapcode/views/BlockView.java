@@ -19,7 +19,7 @@ public class BlockView extends View {
     private Path2D _path = new Path2D();
 
     // Constant for base height
-    public static final double BASE_HEIGHT = 32;
+    public static final double BASE_HEIGHT = 34;
 
     // Constant for notch X offset
     public static final double NOTCH_X = 12;

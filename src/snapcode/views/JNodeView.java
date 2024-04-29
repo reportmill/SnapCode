@@ -65,11 +65,6 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     }
 
     /**
-     * Creates row views.
-     */
-    protected View[] createRowViews()  { return null; }
-
-    /**
      * Returns whether part is selected.
      */
     public boolean isSelected()  { return _selected; }
@@ -86,6 +81,7 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     /**
      * Override.
      */
+    @Override
     protected double getPrefWidthImpl(double aH)
     {
         return BoxView.getPrefWidth(this, getChildLast(), aH);
@@ -94,6 +90,7 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     /**
      * Override.
      */
+    @Override
     protected double getPrefHeightImpl(double aW)
     {
         return BoxView.getPrefHeight(this, getChildLast(), -1);
@@ -102,6 +99,7 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     /**
      * Override to resize rects.
      */
+    @Override
     protected void layoutImpl()
     {
         BoxView.layout(this, getChildLast(), true, true);
@@ -146,7 +144,7 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     protected Label createLabel(String aString)
     {
         Label label = new Label(aString);
-        label.setPadding(2, 4, 2, 0);
+        label.setMargin(2, 4, 2, 4);
         label.setFont(LABEL_FONT);
         label.setTextFill(Color.WHITE);
         return label;

@@ -29,7 +29,7 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
     {
         // Create label and add to HBox
         JStmtFor forStmt = getJNode();
-        Label label = createLabel("for");
+        Label label = createLabel("for  ");
         List<View> rowViews = new ArrayList<>();
         rowViews.add(label);
 

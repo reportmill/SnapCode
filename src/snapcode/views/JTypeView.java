@@ -16,13 +16,20 @@ public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
         super();
     }
 
+    /**
+     * Override to add child for type.
+     */
     @Override
-    protected View[] createRowViews()
+    public void setJNode(JNODE aJNode)
     {
+        // Do normal version
+        super.setJNode(aJNode);
+
+        // Add label for type
         JType typ = getJNode();
-        Label label = createLabel(typ.getName());
-        label.setFont(label.getFont().copyForSize(14));
-        return new View[] { label };
+        Label typeLabel = createLabel(typ.getName());
+        typeLabel.setFont(typeLabel.getFont().copyForSize(14));
+        addChild(typeLabel);
     }
 
     /**

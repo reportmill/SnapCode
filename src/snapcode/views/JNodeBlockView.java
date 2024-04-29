@@ -196,6 +196,11 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     }
 
     /**
+     * Creates row views.
+     */
+    protected View[] createRowViews()  { return null; }
+
+    /**
      * Creates col views.
      */
     protected JNodeView<?>[] createColViews()

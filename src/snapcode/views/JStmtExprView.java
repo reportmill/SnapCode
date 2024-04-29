@@ -1,6 +1,7 @@
 package snapcode.views;
-import javakit.parse.JExpr;
-import javakit.parse.JStmtExpr;
+import javakit.parse.*;
+import snap.util.ArrayUtils;
+import snap.view.Label;
 import snap.view.View;
 
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * JStmtView subclass for JStmtExpression.
+ * JStmtView subclass for JStmtExpr.
  */
 public class JStmtExprView<JNODE extends JStmtExpr> extends JStmtView<JNODE> {
 
@@ -26,32 +27,33 @@ public class JStmtExprView<JNODE extends JStmtExpr> extends JStmtView<JNODE> {
     @Override
     protected View[] createRowViews()
     {
-        JStmtExpr stmt = getJNode();
-        JExpr expr = stmt.getExpr();
-        JNodeView<?> exprView = JNodeView.createNodeViewForNode(expr);
+        // Get expression views
+        JStmtExpr exprStmt = getJNode();
+        JExpr expr = exprStmt.getExpr();
+        JExprView<?> exprView = (JExprView<?>) JNodeView.createNodeViewForNode(expr);
+        View[] exprViews = new View[] { exprView };
 
-        //exprView.setGrowWidth(true);
-        //return new View[] { exprView };
+        // Add prefix for expression type ('call...', 'set...', 'declare...', etc.)
+        String exprPrefix = getExpressionPrefix();
+        if (exprPrefix != null) {
+            Label label = createLabel(exprPrefix);
+            exprViews = ArrayUtils.add(exprViews, label, 0);
+        }
 
-        return getExpressionViews(exprView);
+        // Return
+        return exprViews;
     }
 
     /**
-     * Returns the expression views.
+     * Returns the expression prefix.
      */
-    private View[] getExpressionViews(JNodeView<?> exprView)
+    private String getExpressionPrefix()
     {
-        List<View> exprViews = new ArrayList<>();
-        View[] views = exprView.createRowViews();
-
-        for (View view : views) {
-            if (view instanceof JExprView) {
-                View[] views2 = getExpressionViews((JExprView<?>) view);
-                Collections.addAll(exprViews, views2);
-            }
-            else exprViews.add(view);
-        }
-
-        return exprViews.toArray(new View[0]);
+        JStmtExpr exprStmt = getJNode();
+        JExpr expr = exprStmt.getExpr();
+        if (expr instanceof JExprMethodCall) return "call";
+        if (expr instanceof JExprAssign) return "set";
+        if (expr instanceof JExprVarDecl) return "declare";
+        return null;
     }
 }

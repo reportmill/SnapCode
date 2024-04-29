@@ -24,7 +24,7 @@ public class JStmtIfView<JNODE extends JStmtIf> extends JStmtView<JNODE> {
     protected View[] createRowViews()
     {
         // Add label for 'if'
-        Label label = createLabel("if");
+        Label label = createLabel("if   ");
 
         // Add condition view
         JStmtIf ifStmt = getJNode();

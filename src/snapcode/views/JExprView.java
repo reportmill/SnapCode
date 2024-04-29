@@ -1,9 +1,6 @@
 package snapcode.views;
 import javakit.parse.*;
-import snap.view.TextField;
-import snap.view.View;
-import snap.view.ViewEvent;
-import snap.view.ViewUtils;
+import snap.view.*;
 
 /**
  * A JNodeView subclass for JExpr.
@@ -22,13 +19,23 @@ public class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
     public JExprView()
     {
         super();
+        setSpacing(5);
+    }
+
+    @Override
+    public void setJNode(JNODE aJNode)
+    {
+        // Do normal version
+        super.setJNode(aJNode);
+
+        // Create child views
+        addChildExprViews();
     }
 
     /**
      * Override to return textfield.
      */
-    @Override
-    protected View[] createRowViews()
+    protected void addChildExprViews()
     {
         // Get expression
         JExpr expr = getJNode();
@@ -39,7 +46,40 @@ public class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
         _textField.setName(TextFieldName);
         _textField.addEventHandler(e -> handleTextEvent(e), KeyRelease); //enableEvents(_tfield, DragEvents);
         _textField.addEventHandler(e -> handleTextEvent(e), Action);
-        return new View[] { _textField };
+        addChild(_textField);
+    }
+
+    /**
+     * Override.
+     */
+    @Override
+    protected double getPrefWidthImpl(double aH)
+    {
+        if (getChildCount() > 1)
+            return RowView.getPrefWidth(this, aH);
+        return super.getPrefWidthImpl(aH);
+    }
+
+    /**
+     * Override.
+     */
+    @Override
+    protected double getPrefHeightImpl(double aW)
+    {
+        if (getChildCount() > 1)
+            return RowView.getPrefHeight(this, aW);
+        return super.getPrefHeightImpl(aW);
+    }
+
+    /**
+     * Override to resize rects.
+     */
+    @Override
+    protected void layoutImpl()
+    {
+        if (getChildCount() > 1)
+            RowView.layout(this, false);
+        else super.layoutImpl();
     }
 
     /**
