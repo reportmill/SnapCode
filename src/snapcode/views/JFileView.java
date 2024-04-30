@@ -2,6 +2,7 @@ package snapcode.views;
 import javakit.parse.JClassDecl;
 import javakit.parse.JFile;
 import snap.gfx.Paint;
+import snap.gfx.Painter;
 import snap.view.ColView;
 import snap.view.RowView;
 import snap.view.ViewUtils;
@@ -81,6 +82,23 @@ public class JFileView extends JNodeBlockView<JFile> {
         JFile jfile = getJNode();
         JClassDecl classDecl = jfile.getClassDecl();
         return classDecl != null ? new JNodeView[] { new JClassDeclView<>(classDecl) } : new JNodeView[0];
+    }
+
+    /**
+     * Override to paint selected block.
+     */
+    @Override
+    protected void paintAbove(Painter aPntr)
+    {
+        // Get selected block view - just return if not nested piece
+        SnapEditor editor = getEditor();
+        JNodeView<?> selNodeView = editor.getSelNodeView();
+        JNodeBlockView<?> selBlockView = JNodeBlockView.getBlockView(selNodeView);
+        if (selBlockView == null || selBlockView instanceof JFileView || selBlockView instanceof JClassDeclView)
+            return;
+
+        // Paint selected block view again so it will always be on top
+        ViewUtils.paintViewInView(selBlockView, this, aPntr);
     }
 
     /**

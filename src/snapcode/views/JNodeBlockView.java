@@ -29,9 +29,6 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     // The col view
     private ColView _colView;
 
-    // whether under drag
-    private boolean _underDrag;
-
     // Constants for block insets
     private double _paddingLeft;
 
@@ -41,8 +38,8 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     // The block statement views
     protected JNodeView<?>[] _blockStmtViews;
 
-    // The current drag over node
-    private static JNodeBlockView<?> _dragOver;
+    // The current block view under drag (during drag)
+    private static JNodeBlockView<?> _blockViewUnderDrag;
 
     // Colors
     private static final Color SELECTED_COLOR = Color.get("#FFFFFFCC");
@@ -280,11 +277,6 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     }
 
     /**
-     * Sets whether part is being dragged over.
-     */
-    public void setUnderDrag(boolean aValue)  { _underDrag = aValue; }
-
-    /**
      * Override.
      */
     protected double getPrefWidthImpl(double aH)
@@ -350,10 +342,14 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     protected void paintFront(Painter aPntr)
     {
         if (isSelected()) {
-            if (_underDrag) {
+
+            // If under dragged piece, paint highlight
+            if (this == _blockViewUnderDrag) {
                 aPntr.setColor(UNDER_DRAG_COLOR);
                 aPntr.fill(_blockView.getPath());
             }
+
+            // Paint highlighted path border
             aPntr.setColor(SELECTED_COLOR);
             aPntr.setStrokeWidth(2);
             aPntr.draw(_blockView.getPath());
@@ -375,31 +371,39 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     protected void handleDragEvent(ViewEvent anEvent)
     {
         // Handle DragEvent: Accept drag event
-        //DragEvent de = anEvent.getEvent(DragEvent.class); de.acceptTransferModes(TransferMode.COPY); de.consume();
         anEvent.acceptDrag();
         anEvent.consume();
 
-        // Handle DragEnter, DragOver, DragExit: Apply/clear effect from DragEffectNode
-        if (anEvent.isDragEnter() || anEvent.isDragOver() && _dragOver != this) {
-            if (_dragOver != null)
-                _dragOver.setUnderDrag(false);
-            setUnderDrag(true);
-            _dragOver = this;
-        }
+        // Handle DragEnter and DragOver: Set block view under drag
+        if (anEvent.isDragEnter() || anEvent.isDragOver())
+            setBlockViewUnderDrag(this);
+
+        // Handle DragExit
         if (anEvent.isDragExit()) {
-            setUnderDrag(false);
-            if (_dragOver == this)
-                _dragOver = null;
+            if (_blockViewUnderDrag == this)
+                _blockViewUnderDrag = null;
         }
 
         // Handle DragDropEvent
-        if (anEvent.isDragDropEvent() && _dragNodeView != null) {
-            if (_dragOver != null)
-                _dragOver.setUnderDrag(false);
-            _dragOver = null;
-            dropNode(_dragNodeView.getJNode(), anEvent.getX(), anEvent.getY());
-            anEvent.dropComplete(); //de.setDropCompleted(true);
+        if (anEvent.isDragDropEvent()) {
+            setBlockViewUnderDrag(null);
+            if (_dragNodeView != null)
+                dropNode(_dragNodeView.getJNode(), anEvent.getX(), anEvent.getY());
+            anEvent.dropComplete();
         }
+    }
+
+    /**
+     * Sets the block view under drag.
+     */
+    private static void setBlockViewUnderDrag(JNodeBlockView blockView)
+    {
+        if (blockView == _blockViewUnderDrag) return;
+        if (_blockViewUnderDrag != null)
+            _blockViewUnderDrag.repaint();
+        _blockViewUnderDrag = blockView;
+        if (_blockViewUnderDrag != null)
+            _blockViewUnderDrag.repaint();
     }
 
     /**
