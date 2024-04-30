@@ -339,20 +339,19 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
      * Override to paint selected.
      */
     @Override
-    protected void paintFront(Painter aPntr)
+    protected void paintAbove(Painter aPntr)
     {
+        // If selected, paint highlighted path border
         if (isSelected()) {
-
-            // If under dragged piece, paint highlight
-            if (this == _blockViewUnderDrag) {
-                aPntr.setColor(UNDER_DRAG_COLOR);
-                aPntr.fill(_blockView.getPath());
-            }
-
-            // Paint highlighted path border
             aPntr.setColor(SELECTED_COLOR);
             aPntr.setStrokeWidth(2);
             aPntr.draw(_blockView.getPath());
+        }
+
+        // If under dragged piece, paint highlight
+        if (this == _blockViewUnderDrag) {
+            aPntr.setColor(UNDER_DRAG_COLOR);
+            aPntr.fill(_blockView.getPath());
         }
     }
 
@@ -379,13 +378,13 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
             setBlockViewUnderDrag(this);
 
         // Handle DragExit
-        if (anEvent.isDragExit()) {
+        else if (anEvent.isDragExit()) {
             if (_blockViewUnderDrag == this)
-                _blockViewUnderDrag = null;
+                setBlockViewUnderDrag(null);
         }
 
         // Handle DragDropEvent
-        if (anEvent.isDragDropEvent()) {
+        else if (anEvent.isDragDropEvent()) {
             setBlockViewUnderDrag(null);
             if (_dragNodeView != null)
                 dropNode(_dragNodeView.getJNode(), anEvent.getX(), anEvent.getY());
@@ -396,14 +395,14 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     /**
      * Sets the block view under drag.
      */
-    private static void setBlockViewUnderDrag(JNodeBlockView blockView)
+    private static void setBlockViewUnderDrag(JNodeBlockView<?> blockView)
     {
         if (blockView == _blockViewUnderDrag) return;
-        if (_blockViewUnderDrag != null)
-            _blockViewUnderDrag.repaint();
+
+        // Set value with repaints
+        if (_blockViewUnderDrag != null) _blockViewUnderDrag.repaint();
         _blockViewUnderDrag = blockView;
-        if (_blockViewUnderDrag != null)
-            _blockViewUnderDrag.repaint();
+        if (_blockViewUnderDrag != null) _blockViewUnderDrag.repaint();
     }
 
     /**
