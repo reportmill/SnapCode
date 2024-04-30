@@ -6,7 +6,7 @@ import snap.view.View;
 /**
  * A JNodeView for JStmt.
  */
-public class JStmtView<JNODE extends JStmt> extends JNodeBlockView<JNODE> {
+public class JStmtView<JNODE extends JStmt> extends JBlockView<JNODE> {
 
     /**
      * Constructor.

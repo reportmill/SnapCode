@@ -26,7 +26,7 @@ public class SnapEditor extends StackView {
     private double _mouseX, _mouseY;
 
     // The currently dragging node view
-    private JNodeBlockView<?> _dragNodeView;
+    private JBlockView<?> _dragNodeView;
 
     /**
      * Constructor.
@@ -153,13 +153,13 @@ public class SnapEditor extends StackView {
     /**
      * Returns the node view at given index.
      */
-    private JNodeView<?> getNodeViewForNodeAndCharIndex(JNodeBlockView<?> parentNodeView, int charIndex)
+    private JNodeView<?> getNodeViewForNodeAndCharIndex(JBlockView<?> parentNodeView, int charIndex)
     {
         // Check children
         JNodeView<?>[] children = parentNodeView.getJNodeViews();
         for (JNodeView<?> child : children) {
-            if (child instanceof JNodeBlockView) {
-                JNodeView<?> nodeView = getNodeViewForNodeAndCharIndex((JNodeBlockView<?>) child, charIndex);
+            if (child instanceof JBlockView) {
+                JNodeView<?> nodeView = getNodeViewForNodeAndCharIndex((JBlockView<?>) child, charIndex);
                 if (nodeView != null)
                     return nodeView;
             }
@@ -345,7 +345,7 @@ public class SnapEditor extends StackView {
 
         // Get NodeView at mouse point
         View deepestView = ViewUtils.getDeepestChildAt(this, _mouseX, _mouseY);
-        _dragNodeView = JNodeBlockView.getBlockView(deepestView);
+        _dragNodeView = JBlockView.getBlockView(deepestView);
         if (_dragNodeView == _fileView)
             _dragNodeView = null;
 

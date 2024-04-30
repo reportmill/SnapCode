@@ -8,7 +8,7 @@ import snap.view.View;
 /**
  * Subclass for JExecutableDecl.
  */
-public class JExecutableDeclView<JNODE extends JExecutableDecl> extends JNodeBlockView<JNODE> {
+public class JExecutableDeclView<JNODE extends JExecutableDecl> extends JBlockView<JNODE> {
 
     /**
      * Constructor.

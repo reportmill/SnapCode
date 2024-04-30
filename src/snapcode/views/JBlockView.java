@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 /**
  * This subclass of JNodeView renders as a block.
  */
-public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
+public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
 
     // Background shape
     protected BlockView _blockView;
@@ -41,7 +41,7 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     protected JNodeView<?>[] _blockStmtViews;
 
     // The current block view under drag (during drag)
-    private static JNodeBlockView<?> _blockViewUnderDrag;
+    private static JBlockView<?> _blockViewUnderDrag;
 
     // Colors
     private static final Color SELECTED_COLOR = Color.get("#FFFFFFCC");
@@ -54,7 +54,7 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     /**
      * Constructor.
      */
-    public JNodeBlockView()
+    public JBlockView()
     {
         super();
         setAlign(Pos.TOP_LEFT);
@@ -73,7 +73,7 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     /**
      * Constructor.
      */
-    public JNodeBlockView(JNODE aJNode)
+    public JBlockView(JNODE aJNode)
     {
         this();
         setJNode(aJNode);
@@ -425,7 +425,7 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     /**
      * Sets the block view under drag.
      */
-    private static void setBlockViewUnderDrag(JNodeBlockView<?> blockView)
+    private static void setBlockViewUnderDrag(JBlockView<?> blockView)
     {
         if (blockView == _blockViewUnderDrag) return;
 
@@ -438,10 +438,10 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     /**
      * Returns the BlockView of a node.
      */
-    public static JNodeBlockView<?> getBlockView(View aView)
+    public static JBlockView<?> getBlockView(View aView)
     {
-        if (aView instanceof JNodeBlockView)
-            return (JNodeBlockView<?>) aView;
-        return aView.getParent(JNodeBlockView.class);
+        if (aView instanceof JBlockView)
+            return (JBlockView<?>) aView;
+        return aView.getParent(JBlockView.class);
     }
 }

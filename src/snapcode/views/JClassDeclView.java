@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * A JNodeView subclass for JClassDecl.
  */
-public class JClassDeclView<JNODE extends JClassDecl> extends JNodeBlockView<JNODE> {
+public class JClassDeclView<JNODE extends JClassDecl> extends JBlockView<JNODE> {
 
     /**
      * Creates a new JClassDeclView for given JClassDecl.
@@ -103,7 +103,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeBlockView<JNO
     /**
      * A JNodeView subclass for JClassDecl id.
      */
-    public static class ClassDeclIdView<JNODE extends JExprId> extends JNodeBlockView<JNODE> {
+    public static class ClassDeclIdView<JNODE extends JExprId> extends JBlockView<JNODE> {
 
         /**
          * Creates a new JTypeView for given JType.
@@ -138,7 +138,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JNodeBlockView<JNO
     /**
      * A JNodeView subclass for JClassDecl extends type.
      */
-    public static class ClassDeclTypeView<JNODE extends JType> extends JNodeBlockView<JNODE> {
+    public static class ClassDeclTypeView<JNODE extends JType> extends JBlockView<JNODE> {
 
         /**
          * Creates a new JTypeView for given JType.

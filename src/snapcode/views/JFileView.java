@@ -11,7 +11,7 @@ import snap.view.ViewUtils;
 /**
  * A SnapPart for JFile.
  */
-public class JFileView extends JNodeBlockView<JFile> {
+public class JFileView extends JBlockView<JFile> {
 
     // The SnapCodeArea
     SnapEditor _editor;
@@ -119,7 +119,7 @@ public class JFileView extends JNodeBlockView<JFile> {
         // Get selected block view - just return if not nested piece
         SnapEditor editor = getEditor();
         JNodeView<?> selNodeView = editor.getSelNodeView();
-        JNodeBlockView<?> selBlockView = JNodeBlockView.getBlockView(selNodeView);
+        JBlockView<?> selBlockView = JBlockView.getBlockView(selNodeView);
         if (selBlockView == null || selBlockView instanceof JFileView || selBlockView instanceof JClassDeclView)
             return;
 
