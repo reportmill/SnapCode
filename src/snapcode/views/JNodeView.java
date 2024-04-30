@@ -104,7 +104,7 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
      */
     public SnapEditor getEditor()
     {
-        return getJNodeViewParent() != null ? getJNodeViewParent().getEditor() : null;
+        return getNodeViewParent() != null ? getNodeViewParent().getEditor() : null;
     }
 
     /**
@@ -117,9 +117,9 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     }
 
     /**
-     * Returns the parent.
+     * Returns the parent NodeView.
      */
-    public JNodeView<?> getJNodeViewParent()
+    public JNodeView<?> getNodeViewParent()
     {
         return getParent(JNodeView.class);
     }

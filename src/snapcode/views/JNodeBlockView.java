@@ -4,7 +4,9 @@ import javakit.parse.JStmt;
 import javakit.parse.JStmtBlock;
 import javakit.parse.WithBlockStmt;
 import snap.geom.Insets;
+import snap.geom.Point;
 import snap.geom.Pos;
+import snap.geom.Rect;
 import snap.gfx.Color;
 import snap.gfx.Painter;
 import snap.util.ListUtils;
@@ -274,6 +276,34 @@ public class JNodeBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
         // Get statements and return statement views
         List<JStmt> statements = blockStmt.getStatements();
         return ListUtils.mapNonNullToArray(statements, stmt -> JNodeViewUtils.createNodeViewForNode(stmt), JNodeView.class);
+    }
+
+    /**
+     * Moves the block by given offset X/Y.
+     */
+    public void moveBy(double offsetX, double offsetY)
+    {
+        // Handle normal blocks
+        if (isManaged()) {
+            setTransX(getTransX() + offsetX);
+            setTransY(getTransY() + offsetY);
+        }
+
+        // Handle shelf blocks
+        else {
+            setX(getX() + offsetX);
+            setY(getY() + offsetY);
+        }
+    }
+
+    /**
+     * Returns whether block is outside
+     */
+    public boolean isOutsideParent()
+    {
+        Point middlePoint = localToParent(getWidth(), getHeight());
+        Rect parentBounds = getParent().getBoundsLocal();
+        return !parentBounds.contains(middlePoint);
     }
 
     /**

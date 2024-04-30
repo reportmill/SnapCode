@@ -118,7 +118,7 @@ public class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
     {
         // If TextField, forward to parent
         if (_textField == null) {
-            JNodeView<?> parentView = getJNodeViewParent();
+            JNodeView<?> parentView = getNodeViewParent();
             parentView.dropNode(aJNode, anX, aY);
             return;
         }

@@ -89,9 +89,9 @@ public class SnapEditor extends StackView {
     }
 
     /**
-     * Returns the FilePart.
+     * Returns the FileView.
      */
-    public JFileView getFilePart()  { return _fileView; }
+    public JFileView getFileView()  { return _fileView; }
 
     /**
      * Returns the JFile JNode.
@@ -106,7 +106,7 @@ public class SnapEditor extends StackView {
         // Get selected NodeView
         JNodeView<?> selNodeView = getSelNodeView();
         if (selNodeView == null)
-            selNodeView = getFilePart();
+            selNodeView = getFileView();
 
         // Get first parent JNode that resolves to class
         JNode selNode = selNodeView.getJNode();
@@ -122,7 +122,7 @@ public class SnapEditor extends StackView {
      */
     protected void rebuildUI()
     {
-        JFileView fileView = getFilePart();
+        JFileView fileView = getFileView();
         JFile jfile = getJFile();
         fileView.setJNode(jfile);
         setSelectedPartFromTextArea();
@@ -146,7 +146,7 @@ public class SnapEditor extends StackView {
      */
     public JNodeView<?> getNodeViewForCharIndex(int charIndex)
     {
-        JFileView fileView = getFilePart();
+        JFileView fileView = getFileView();
         return getNodeViewForNodeAndCharIndex(fileView, charIndex);
     }
 
@@ -253,6 +253,20 @@ public class SnapEditor extends StackView {
     }
 
     /**
+     * Moves a node to shelf.
+     */
+    public void moveNodeToShelf(JNodeView<?> nodeView)
+    {
+        // Remove the node
+        JNode node = nodeView.getJNode();
+        removeNode(node);
+
+        // Add to shelf
+        JFileView fileView = getFileView();
+        fileView.addNodeViewToShelf(nodeView);
+    }
+
+    /**
      * Returns char index before given node.
      */
     public int getCharIndexBeforeNode(JNode aNode)
@@ -347,13 +361,12 @@ public class SnapEditor extends StackView {
         // If no drag node view, just return
         if (_dragNodeView == null) return;
 
-        // Translate drag node view by mouse delta
-        double mouseX = anEvent.getX();
-        double mouseY = anEvent.getY();
-        _dragNodeView.setTransX(_dragNodeView.getTransX() + mouseX - _mouseX);
-        _dragNodeView.setTransY(_dragNodeView.getTransY() + mouseY - _mouseY);
-        _mouseX = mouseX;
-        _mouseY = mouseY;
+        // Move dragNodeView by mouse offset
+        double offsetX = anEvent.getX() - _mouseX;
+        double offsetY = anEvent.getY() - _mouseY;
+        _dragNodeView.moveBy(offsetX, offsetY);
+        _mouseX = anEvent.getX();
+        _mouseY = anEvent.getY();
     }
 
     /**
@@ -365,8 +378,8 @@ public class SnapEditor extends StackView {
         if (_dragNodeView == null) return;
 
         // If drag node is outside bounds, remove node
-        if (_dragNodeView.getTransX() > 150 && _dragNodeView.getJNodeViewParent() != null)
-            removeNode(_dragNodeView.getJNode());
+        if (_dragNodeView.isOutsideParent())
+            moveNodeToShelf(_dragNodeView);
 
         // Reset translation
         _dragNodeView.setTransX(0);

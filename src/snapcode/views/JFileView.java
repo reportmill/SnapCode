@@ -1,6 +1,7 @@
 package snapcode.views;
 import javakit.parse.JClassDecl;
 import javakit.parse.JFile;
+import snap.geom.Point;
 import snap.gfx.Paint;
 import snap.gfx.Painter;
 import snap.view.ColView;
@@ -82,6 +83,31 @@ public class JFileView extends JNodeBlockView<JFile> {
         JFile jfile = getJNode();
         JClassDecl classDecl = jfile.getClassDecl();
         return classDecl != null ? new JNodeView[] { new JClassDeclView<>(classDecl) } : new JNodeView[0];
+    }
+
+    /**
+     * Adds a node view to shelf.
+     */
+    public void addNodeViewToShelf(JNodeView<?> nodeView)
+    {
+        // If node already on shelf, remove and return
+        if (nodeView.getParent() == this) {
+            removeChild(nodeView);
+            return;
+        }
+
+        // Reset node XY for FileView and add child
+        Point nodeViewXYLocal = nodeView.localToParent(0, 0, this);
+        nodeView.setTransX(0);
+        nodeView.setTransY(0);
+        nodeView.setXY(nodeViewXYLocal.x, nodeViewXYLocal.y);
+        nodeView.setManaged(false);
+        addChild(nodeView);
+
+        // Animate size down
+        double newW = nodeView.getPrefWidth();
+        double newX = nodeView.getX() + Math.round((nodeView.getWidth() - newW) / 2);
+        nodeView.getAnim(400).setX(newX).setWidth(newW).play();
     }
 
     /**

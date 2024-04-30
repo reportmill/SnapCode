@@ -202,7 +202,7 @@ public class SnapEditorPane extends ViewOwner {
             _nodePathBox.addChild(label, 0);
             label.setOwner(this);
             enableEvents(label, MouseRelease);
-            part = part.getJNodeViewParent();
+            part = part.getNodeViewParent();
             if (part == null) break;
             Label div = new Label(" \u2022 ");
             div.setFont(Font.Arial12);
@@ -313,7 +313,7 @@ public class SnapEditorPane extends ViewOwner {
      */
     public void escape()
     {
-        JNodeView par = getSelectedPart().getJNodeViewParent();
+        JNodeView par = getSelectedPart().getNodeViewParent();
         if (par != null) setSelectedPart(par);
     }
 }
