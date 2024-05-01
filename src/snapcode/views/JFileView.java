@@ -43,12 +43,10 @@ public class JFileView extends JBlockView<JFile> {
     {
         ColView colView = getColView();
         colView.removeChildren();
+        _childBlockViews = null;
 
         // Do normal version
         super.setJNode(aJNode);
-
-        // Reset children and their UI
-        _childBlockViews = null;
     }
 
     /**
