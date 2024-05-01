@@ -489,11 +489,7 @@ public class FileTreeTool extends WorkspaceTool {
         }
 
         // If window focus lost, save all files
-        else {
-            _workspace.saveAllFiles();
-            if (SnapUtils.isWebVM)
-                System.out.println("FileTreeTool.windowFocusChanged: Focus lost - sav all files");
-        }
+        //else _workspace.saveAllFiles();
     }
 
     /**

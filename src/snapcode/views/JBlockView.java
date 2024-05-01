@@ -5,12 +5,11 @@ import snap.geom.Point;
 import snap.geom.Pos;
 import snap.geom.Rect;
 import snap.gfx.Color;
+import snap.gfx.Effect;
 import snap.gfx.Painter;
+import snap.gfx.ShadowEffect;
 import snap.util.ListUtils;
-import snap.view.ColView;
-import snap.view.RowView;
-import snap.view.View;
-import snap.view.ViewEvent;
+import snap.view.*;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -38,12 +37,18 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     private static JBlockView<?> _blockViewUnderDrag;
 
     // Colors
-    private static final Color SELECTED_COLOR = Color.get("#FFFFFFCC");
+    private static final Color SELECTED_OVERLAY_COLOR = Color.get("#FFFFFF20");
     private static final Color UNDER_DRAG_COLOR = Color.get("#FFFFFF88");
 
     // Constant for padding on notched blocks
     private static final Insets PLAIN_PADDING = new Insets(0, 8, 0, 8);
     private static final Insets NOTCHED_PADDING = new Insets(0, 8, BlockView.NOTCH_HEIGHT, 8);
+
+    // Constants for selection effect
+    private static final Color  SELECT_COLOR = Color.get("#039ed3").brighter().brighter();
+    private static final Color  SELECT_COLOR_TOP_LEVEL = Color.get("#039ed3").brighter();
+    private static final Effect SELECT_EFFECT = new ShadowEffect(20, SELECT_COLOR, 0, 0);
+    private static final Effect SELECT_EFFECT_TOP_LEVEL = new ShadowEffect(12, SELECT_COLOR_TOP_LEVEL, 0, 0);
 
     /**
      * Constructor.
@@ -265,9 +270,26 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
      */
     public boolean isOutsideParent()
     {
-        Point middlePoint = localToParent(getWidth(), getHeight());
+        Point middlePoint = localToParent(getWidth() / 2, getHeight() / 2);
         Rect parentBounds = getParent().getBoundsLocal();
         return !parentBounds.contains(middlePoint);
+    }
+
+    /**
+     * Override to set glow effect when selected.
+     */
+    @Override
+    public void setSelected(boolean aValue)
+    {
+        // Do normal version
+        if (aValue == isSelected()) return;
+        super.setSelected(aValue);
+
+        // Set SELECT_EFFECT (or clear)
+        boolean isTopLevel = _jnode instanceof JBodyDecl || getParent() instanceof JFileView;
+        Effect selEffect = isTopLevel ? SELECT_EFFECT_TOP_LEVEL : SELECT_EFFECT;
+        Effect effect = aValue ? selEffect : null;
+        setEffect(effect);
     }
 
     /**
@@ -335,16 +357,15 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     @Override
     protected void paintAbove(Painter aPntr)
     {
-        // If selected, paint highlighted path border
-        if (isSelected()) {
-            aPntr.setColor(SELECTED_COLOR);
-            aPntr.setStrokeWidth(2);
-            aPntr.draw(_blockView.getPath());
-        }
-
-        // If under dragged piece, paint highlight
+        // If under dragged piece, paint bright highlight overlay
         if (this == _blockViewUnderDrag) {
             aPntr.setColor(UNDER_DRAG_COLOR);
+            aPntr.fill(_blockView.getPath());
+        }
+
+        // If selected, paint slight highlight overlay
+        else if (isSelected()) {
+            aPntr.setColor(SELECTED_OVERLAY_COLOR);
             aPntr.fill(_blockView.getPath());
         }
     }

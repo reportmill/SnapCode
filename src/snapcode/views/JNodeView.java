@@ -68,8 +68,9 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
      */
     public void setSelected(boolean aValue)
     {
+        if (aValue == _selected) return;
         _selected = aValue;
-        repaint(-2, -2, getWidth() + 4, getHeight() + 4);
+        repaint();
     }
 
     /**

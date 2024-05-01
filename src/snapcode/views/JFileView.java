@@ -138,6 +138,7 @@ public class JFileView extends JBlockView<JFile> {
         blockView.setSize(blockView.getBestSize());
         blockView.setXY(aX - Math.round(blockView.getWidth() / 2), aY - Math.round(blockView.getHeight() / 2));
         addNodeViewToShelf(blockView);
+        getEditor().setSelNodeView(blockView);
     }
 
     /**
