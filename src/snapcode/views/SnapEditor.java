@@ -1,12 +1,10 @@
 package snapcode.views;
 import javakit.parse.*;
 import javakit.resolver.JavaClass;
+import snap.view.*;
+import snap.viewx.Explode;
 import snapcode.javatext.JavaTextArea;
 import snap.text.TextLine;
-import snap.view.StackView;
-import snap.view.View;
-import snap.view.ViewEvent;
-import snap.view.ViewUtils;
 
 /**
  * The Pane that actually holds SnapPart pieces.
@@ -44,7 +42,9 @@ public class SnapEditor extends StackView {
         addChild(_fileView);
 
         // Configure mouse handling
-        enableEvents(MousePress, MouseDrag, MouseRelease);
+        setFocusable(true);
+        setFocusWhenPressed(true);
+        enableEvents(KeyPress, MousePress, MouseDrag, MouseRelease);
         rebuildUI();
     }
 
@@ -253,6 +253,29 @@ public class SnapEditor extends StackView {
     }
 
     /**
+     * Removes given node view.
+     */
+    public void removeNodeView(JNodeView<?> nodeView)
+    {
+        // If not removable, just return
+        if (nodeView == null || nodeView instanceof JFileView || nodeView instanceof JClassDeclView || nodeView.getNodeViewParent() instanceof JClassDeclView)
+            return;
+
+        // Start explode
+        int gridW = (int) nodeView.getWidth() / 10;
+        int gridH = Math.max((int) nodeView.getHeight() / 10, 10);
+        Explode explode = new Explode(nodeView, gridW, gridH, null);
+        explode.setHostView(this);
+        explode.play();
+
+        // Remove the node
+        if (nodeView.isManaged()) {
+            JNode node = nodeView.getJNode();
+            removeNode(node);
+        }
+    }
+
+    /**
      * Moves a node to shelf.
      */
     public void moveNodeToShelf(JNodeView<?> nodeView)
@@ -328,9 +351,26 @@ public class SnapEditor extends StackView {
     {
         // Handle MousePressed
         switch (anEvent.getType()) {
+            case KeyPress: keyPress(anEvent); break;
             case MousePress: mousePress(anEvent); break;
             case MouseDrag: mouseDragged(anEvent); break;
             case MouseRelease: mouseReleased(); break;
+        }
+    }
+
+    /**
+     * Handle key press.
+     */
+    private void keyPress(ViewEvent anEvent)
+    {
+        JNodeView<?> selNodeView = getSelNodeView();
+        int keyCode = anEvent.getKeyCode();
+
+        switch (keyCode) {
+
+            // Handle Backspace, delete
+            case KeyCode.BACK_SPACE:
+            case KeyCode.DELETE: removeNodeView(selNodeView); anEvent.consume(); break;
         }
     }
 
