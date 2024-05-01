@@ -64,11 +64,11 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JBlockView<JNODE> 
      * Override to return member views.
      */
     @Override
-    protected JNodeView<?>[] createColViews()
+    protected JBlockView<?>[] createChildBlockViews()
     {
         JClassDecl classDecl = getJNode();
         JMemberDecl[] memberDecls = classDecl.getMemberDecls();
-        return ArrayUtils.mapNonNull(memberDecls, mdecl -> JNodeView.createNodeViewForNode(mdecl), JNodeView.class);
+        return ArrayUtils.mapNonNull(memberDecls, mdecl -> JBlockView.createBlockViewForNode(mdecl), JBlockView.class);
     }
 
     /**

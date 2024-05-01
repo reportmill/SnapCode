@@ -47,7 +47,7 @@ public class JFileView extends JBlockView<JFile> {
         super.setJNode(aJNode);
 
         // Reset children and their UI
-        _jnodeViews = null;
+        _childBlockViews = null;
     }
 
     /**
@@ -78,11 +78,11 @@ public class JFileView extends JBlockView<JFile> {
      * Override to return JFile child node owners.
      */
     @Override
-    protected JNodeView<?>[] createColViews()
+    protected JBlockView<?>[] createChildBlockViews()
     {
         JFile jfile = getJNode();
         JClassDecl classDecl = jfile.getClassDecl();
-        return classDecl != null ? new JNodeView[] { new JClassDeclView<>(classDecl) } : new JNodeView[0];
+        return classDecl != null ? new JBlockView[] { new JClassDeclView<>(classDecl) } : new JBlockView[0];
     }
 
     /**
