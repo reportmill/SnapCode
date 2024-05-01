@@ -108,15 +108,6 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     }
 
     /**
-     * Returns whether NodePane is a block.
-     */
-    public boolean isBlock()
-    {
-        JNode jNode = getJNode();
-        return jNode instanceof WithBlockStmt && ((WithBlockStmt) jNode).getBlock() != null;
-    }
-
-    /**
      * Returns the parent NodeView.
      */
     public JNodeView<?> getNodeViewParent()
@@ -130,14 +121,6 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     public String getPartString()
     {
         return getJNode().getNodeString();
-    }
-
-    /**
-     * Drops a node at center of part.
-     */
-    protected void dropNode(JNode aJNode)
-    {
-        dropNode(aJNode, getWidth() / 2, getHeight() / 2);
     }
 
     /**

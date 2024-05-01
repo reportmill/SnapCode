@@ -1,8 +1,5 @@
 package snapcode.views;
-import javakit.parse.JClassDecl;
-import javakit.parse.JExprId;
-import javakit.parse.JMemberDecl;
-import javakit.parse.JType;
+import javakit.parse.*;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.util.ArrayUtils;
@@ -93,6 +90,16 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JBlockView<JNODE> 
         colView.setSpacing(25);
         colView.setFillWidth(false);
         return colView;
+    }
+
+    /**
+     * Override to forward to file.
+     */
+    @Override
+    protected void dropNode(JNode aNode, double aX, double aY)
+    {
+        JFileView fileView = getParent(JFileView.class);
+        fileView.dropNode(aNode, aX + getX(), aY + getY());
     }
 
     /**

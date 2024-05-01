@@ -1,8 +1,5 @@
 package snapcode.views;
-import javakit.parse.JNode;
-import javakit.parse.JStmt;
-import javakit.parse.JStmtBlock;
-import javakit.parse.WithBlockStmt;
+import javakit.parse.*;
 import snap.geom.Insets;
 import snap.geom.Point;
 import snap.geom.Pos;
@@ -193,6 +190,15 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     protected View[] createRowViews()  { return null; }
 
     /**
+     * Returns whether this BlockView can have child blocks.
+     */
+    public boolean isParentBlock()
+    {
+        JNode jNode = getJNode();
+        return jNode instanceof WithBlockStmt && ((WithBlockStmt) jNode).getBlock() != null;
+    }
+
+    /**
      * Returns the child block views array.
      */
     public JBlockView<?>[] getChildBlockViews()
@@ -270,7 +276,7 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     protected double getPrefWidthImpl(double aH)
     {
         double prefW = getRowView().getBestWidth(aH);
-        if (_colView != null || isBlock()) {
+        if (_colView != null || isParentBlock()) {
             double colW = getColView().getBestWidth(aH);
             prefW = Math.max(prefW, _paddingLeft + colW);
         }
@@ -288,7 +294,7 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
         double prefH = rowH;
 
         // If ColView is present, add ColView pref height minus notch height plus tail height
-        if (_colView != null || isBlock()) {
+        if (_colView != null || isParentBlock()) {
             double colH = getColView().getBestHeight(aW);
             prefH += colH - BlockView.NOTCH_HEIGHT + BlockView.BOX_TAIL_HEIGHT;
         }
@@ -391,6 +397,56 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
         if (_blockViewUnderDrag != null) _blockViewUnderDrag.repaint();
         _blockViewUnderDrag = blockView;
         if (_blockViewUnderDrag != null) _blockViewUnderDrag.repaint();
+    }
+
+    /**
+     * Override to drop statement node.
+     */
+    @Override
+    protected void dropNode(JNode aNode, double anX, double aY)
+    {
+        // If not statement, bail
+        if (!(aNode instanceof JStmt)) {
+            System.out.println("JStmtView.dropNode: Can't drop " + aNode);
+            return;
+        }
+
+        // If not a top level block, see if statement goes before or after
+        boolean isTopLevelBlock = _jnode instanceof JBodyDecl;
+        boolean isParentBlock = isParentBlock();
+        SnapEditor editor = getEditor();
+
+        // If not top level, see if drop statement should go before or after
+        if (!isTopLevelBlock) {
+
+            // If drop Y less than half block base height, insert node before statement
+            if (aY < BlockView.BASE_HEIGHT / 2) {
+                editor.insertNode(_jnode, aNode, -1);
+                return;
+            }
+
+            // If not parent block or drop Y greater than half block tail height, insert node after statement
+            else if (!isParentBlock || aY >= getHeight() - BlockView.BOX_TAIL_HEIGHT / 2) {
+                editor.insertNode(_jnode, aNode, 1);
+                return;
+            }
+        }
+
+        // If top level block but no children, insert inside statement
+        if (getChildBlockViewCount() == 0)
+            editor.insertNode(_jnode, aNode, 0);
+
+        // If before first child statement, have first child dropNode, otherwise have last child dropNode
+        else if (aY < getHeight() / 2) {
+            JBlockView<?> firstChildBlockView = getChildBlockView(0);
+            firstChildBlockView.dropNode(aNode, anX, 0);
+        }
+
+        // Otherwise add after last node
+        else {
+            JBlockView<?> lastChildBlockView = getLastChildBlockView();
+            lastChildBlockView.dropNode(aNode, anX, lastChildBlockView.getHeight());
+        }
     }
 
     /**

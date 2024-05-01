@@ -1,6 +1,7 @@
 package snapcode.views;
 import javakit.parse.JClassDecl;
 import javakit.parse.JFile;
+import javakit.parse.JNode;
 import snap.geom.Point;
 import snap.gfx.Paint;
 import snap.gfx.Painter;
@@ -105,7 +106,7 @@ public class JFileView extends JBlockView<JFile> {
         addChild(nodeView);
 
         // Animate size down
-        double newW = nodeView.getPrefWidth();
+        double newW = nodeView.getBestWidth(-1);
         double newX = nodeView.getX() + Math.round((nodeView.getWidth() - newW) / 2);
         nodeView.getAnim(400).setX(newX).setWidth(newW).play();
     }
@@ -125,6 +126,18 @@ public class JFileView extends JBlockView<JFile> {
 
         // Paint selected block view again so it will always be on top
         ViewUtils.paintViewInView(selBlockView, this, aPntr);
+    }
+
+    /**
+     * Override to drop statement node.
+     */
+    @Override
+    protected void dropNode(JNode aNode, double aX, double aY)
+    {
+        JBlockView<?> blockView = JBlockView.createBlockViewForNode(aNode); assert (blockView != null);
+        blockView.setSize(blockView.getBestSize());
+        blockView.setXY(aX - Math.round(blockView.getWidth() / 2), aY - Math.round(blockView.getHeight() / 2));
+        addNodeViewToShelf(blockView);
     }
 
     /**
