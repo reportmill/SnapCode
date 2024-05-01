@@ -33,6 +33,7 @@ public class JNodeViewUtils {
     public static TextField createTextField(String aString)
     {
         TextField textField = new TextField();
+        textField.setBorderRadius(5);
         textField.setPadding(2, 6, 2, 6);
         textField.setAlign(Pos.CENTER);
         textField.setColCount(0);
