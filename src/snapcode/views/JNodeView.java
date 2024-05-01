@@ -165,4 +165,23 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
             return (JNodeView<?>) aView;
         return aView.getParent(JNodeView.class);
     }
+
+    /**
+     * Returns a new nodeView for given node.
+     */
+    public static JNodeView<?> createNodeViewForNode(JNode aNode)
+    {
+        // Get NodeView class for node
+        Class<? extends JNodeView<?>> nodeViewClass = JNodeViewUtils.getNodeViewClassForNode(aNode);
+
+        // Create instance, set node and return
+        try {
+            JNodeView<JNode> nodeView = (JNodeView<JNode>) nodeViewClass.getConstructor().newInstance();
+            nodeView.setJNode(aNode);
+            return nodeView;
+        }
+
+        // If exception, just re-throw
+        catch (Exception e) { throw new RuntimeException(e); }
+    }
 }

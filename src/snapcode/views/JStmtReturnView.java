@@ -32,7 +32,7 @@ public class JStmtReturnView<JNODE extends JStmtReturn> extends JStmtView<JNODE>
         JStmtReturn returnStmt = getJNode();
         JExpr returnExpr = returnStmt.getExpr();
         if (returnExpr != null) {
-            JNodeView<?> exprView = JNodeViewUtils.createNodeViewForNode(returnExpr);
+            JNodeView<?> exprView = JNodeView.createNodeViewForNode(returnExpr);
             rowViews = ArrayUtils.add(rowViews, exprView);
         }
 

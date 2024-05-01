@@ -38,14 +38,20 @@ public class JExecutableDeclView<JNODE extends JExecutableDecl> extends JBlockVi
      */
     protected void dropNode(JNode aNode, double anX, double aY)
     {
-        if (getJNodeViewCount() == 0) {
+        // If no children, just insert node inside this node
+        if (getNodeViewCount() == 0) {
             getEditor().insertNode(getJNode(), aNode, 0);
         }
+
+        // If in header bar, forward to first child
         else if (aY < getHeight() / 2) {
-            getJNodeView(0).dropNode(aNode, anX, 0);
+            JNodeView<?> firstChildNodeView = getNodeView(0);
+            firstChildNodeView.dropNode(aNode, anX, 0);
         }
+
+        // If in footer bar, forward to last child
         else {
-            JNodeView<?> lastNodeView = getJNodeViewLast();
+            JNodeView<?> lastNodeView = getLastNodeView();
             lastNodeView.dropNode(aNode, anX, lastNodeView.getHeight());
         }
     }

@@ -25,7 +25,7 @@ public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
         JExprDot dotExpr = getJNode();
 
         JExpr prefixExpr = dotExpr.getPrefixExpr();
-        JNodeView<?> prefixView = JNodeViewUtils.createNodeViewForNode(prefixExpr);
+        JNodeView<?> prefixView = JNodeView.createNodeViewForNode(prefixExpr);
         prefixView.setGrowWidth(true);
         addChild(prefixView);
 
@@ -36,7 +36,7 @@ public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
         // Iterate over expression chain children, create expression views and add to list
         JExpr expr = dotExpr.getExpr();
         if (expr != null) {
-            JNodeView<?> exprView = JNodeViewUtils.createNodeViewForNode(expr);
+            JNodeView<?> exprView = JNodeView.createNodeViewForNode(expr);
             exprView.setGrowWidth(true);
             addChild(exprView);
         }

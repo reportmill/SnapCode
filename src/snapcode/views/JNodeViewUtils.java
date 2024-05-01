@@ -44,23 +44,9 @@ public class JNodeViewUtils {
     }
 
     /**
-     * Returns a new nodeView for given node.
-     */
-    public static JNodeView<?> createNodeViewForNode(JNode aNode)
-    {
-        Class<? extends JNodeView<?>> nodeViewClass = getNodeViewClassForNode(aNode);
-        try {
-            JNodeView<JNode> nodeView = (JNodeView<JNode>) nodeViewClass.getConstructor().newInstance();
-            nodeView.setJNode(aNode);
-            return nodeView;
-        }
-        catch (Exception e) { throw new RuntimeException(e); }
-    }
-
-    /**
      * Returns the nodeView class for node.
      */
-    private static Class<? extends JNodeView<?>> getNodeViewClassForNode(JNode aNode)
+    public static Class<? extends JNodeView<?>> getNodeViewClassForNode(JNode aNode)
     {
         Class<? extends JNode> nodeClass = aNode.getClass();
         return getNodeViewClassForNodeClass(nodeClass);

@@ -8,7 +8,6 @@ import snap.view.*;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.views.JNodeView;
-import snapcode.views.JNodeViewUtils;
 import snapcode.views.SnapEditor;
 import snapcode.views.SnapEditorPane;
 
@@ -178,7 +177,7 @@ public class SnapTool extends WorkspaceTool {
         JavaParser javaParser = JavaParser.getShared();
         JNode node = javaParser.parseStatement(aString, 0);
         node.setString(aString);
-        JNodeView<?> nodeView = JNodeViewUtils.createNodeViewForNode(node);
+        JNodeView<?> nodeView = JNodeView.createNodeViewForNode(node);
         nodeView.getEventAdapter().disableEvents(DragEvents);
         return nodeView;
     }
@@ -201,7 +200,7 @@ public class SnapTool extends WorkspaceTool {
 
             // If view contains point and has NodeView, return NodeView
             if (child.contains(pointInChildCoords.x, pointInChildCoords.y)) {
-                 JNodeView nodeView = JNodeView.getNodeView(child);
+                 JNodeView<?> nodeView = JNodeView.getNodeView(child);
                  if (nodeView != null)
                      return nodeView;
             }

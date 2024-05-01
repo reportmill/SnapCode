@@ -26,7 +26,7 @@ public class JStmtExprView<JNODE extends JStmtExpr> extends JStmtView<JNODE> {
         // Get expression views
         JStmtExpr exprStmt = getJNode();
         JExpr expr = exprStmt.getExpr();
-        JExprView<?> exprView = (JExprView<?>) JNodeViewUtils.createNodeViewForNode(expr);
+        JExprView<?> exprView = (JExprView<?>) JNodeView.createNodeViewForNode(expr);
         View[] exprViews = new View[] { exprView };
 
         // Add prefix for expression type ('call...', 'set...', 'declare...', etc.)

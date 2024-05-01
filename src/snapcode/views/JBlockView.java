@@ -37,9 +37,6 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     // The child node views
     protected JNodeView<?>[] _jnodeViews;
 
-    // The block statement views
-    protected JNodeView<?>[] _blockStmtViews;
-
     // The current block view under drag (during drag)
     private static JBlockView<?> _blockViewUnderDrag;
 
@@ -208,66 +205,35 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     protected JNodeView<?>[] createColViews()
     {
         if (isBlock())
-            return getBlockStmtViews();
+            return getNodeViews();
         return null;
     }
 
     /**
      * Returns the number of children.
      */
-    public int getJNodeViewCount()
-    {
-        return _jnodeViews != null ? _jnodeViews.length : 0;
-    }
+    public int getNodeViewCount()  { return _jnodeViews != null ? _jnodeViews.length : 0; }
 
     /**
      * Returns the individual child.
      */
-    public JNodeView<?> getJNodeView(int anIndex)
-    {
-        return _jnodeViews[anIndex];
-    }
-
-    /**
-     * Returns the individual child.
-     */
-    public JNodeView<?> getJNodeViewLast()
-    {
-        int cc = getJNodeViewCount();
-        return cc > 0 ? _jnodeViews[cc - 1] : null;
-    }
+    public JNodeView<?> getNodeView(int anIndex)  { return _jnodeViews[anIndex]; }
 
     /**
      * Returns the children.
      */
-    public JNodeView<?>[] getJNodeViews()
+    public JNodeView<?>[] getNodeViews()
     {
         if (_jnodeViews != null) return _jnodeViews;
-        return _jnodeViews = createJNodeViews();
+        return _jnodeViews = createNodeViews();
     }
 
     /**
-     * Creates the children.
+     * Creates the child block views array.
      */
-    protected JNodeView<?>[] createJNodeViews()
+    protected JNodeView<?>[] createNodeViews()
     {
-        return getBlockStmtViews();
-    }
-
-    /**
-     * Returns the children.
-     */
-    public JNodeView<?>[] getBlockStmtViews()
-    {
-        if (_blockStmtViews != null) return _blockStmtViews;
-        return _blockStmtViews = createBlockStmtViews();
-    }
-
-    /**
-     * Creates the children.
-     */
-    protected JNodeView<?>[] createBlockStmtViews()
-    {
+        // Get block statement (method, constructor, conditional statement (if/for/while/do))
         JNode jnode = getJNode();
         JStmtBlock blockStmt = jnode instanceof WithBlockStmt ? ((WithBlockStmt) jnode).getBlock() : null;
         if (blockStmt == null)
@@ -275,7 +241,16 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
 
         // Get statements and return statement views
         List<JStmt> statements = blockStmt.getStatements();
-        return ListUtils.mapNonNullToArray(statements, stmt -> JNodeViewUtils.createNodeViewForNode(stmt), JNodeView.class);
+        return ListUtils.mapNonNullToArray(statements, stmt -> JNodeView.createNodeViewForNode(stmt), JNodeView.class);
+    }
+
+    /**
+     * Returns the last child block view.
+     */
+    public JNodeView<?> getLastNodeView()
+    {
+        int nodeViewCount = getNodeViewCount();
+        return nodeViewCount > 0 ? _jnodeViews[nodeViewCount - 1] : null;
     }
 
     /**

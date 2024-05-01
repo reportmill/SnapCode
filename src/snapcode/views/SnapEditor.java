@@ -156,7 +156,7 @@ public class SnapEditor extends StackView {
     private JNodeView<?> getNodeViewForNodeAndCharIndex(JBlockView<?> parentNodeView, int charIndex)
     {
         // Check children
-        JNodeView<?>[] children = parentNodeView.getJNodeViews();
+        JNodeView<?>[] children = parentNodeView.getNodeViews();
         for (JNodeView<?> child : children) {
             if (child instanceof JBlockView) {
                 JNodeView<?> nodeView = getNodeViewForNodeAndCharIndex((JBlockView<?>) child, charIndex);

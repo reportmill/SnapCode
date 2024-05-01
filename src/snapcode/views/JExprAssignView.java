@@ -26,7 +26,7 @@ public class JExprAssignView<JNODE extends JExprAssign> extends JExprView<JNODE>
 
         // Add child for left side expr
         JExpr prefixExpr = assignExpr.getLeftSideExpr();
-        JNodeView<?> prefixView = JNodeViewUtils.createNodeViewForNode(prefixExpr);
+        JNodeView<?> prefixView = JNodeView.createNodeViewForNode(prefixExpr);
         prefixView.setGrowWidth(true);
         addChild(prefixView);
 
@@ -37,7 +37,7 @@ public class JExprAssignView<JNODE extends JExprAssign> extends JExprView<JNODE>
         // Add child for assign value expr
         JExpr expr = assignExpr.getValueExpr();
         if (expr != null) {
-            JNodeView<?> exprView = JNodeViewUtils.createNodeViewForNode(expr);
+            JNodeView<?> exprView = JNodeView.createNodeViewForNode(expr);
             exprView.setGrowWidth(true);
             addChild(exprView);
         }

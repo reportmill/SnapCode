@@ -71,13 +71,13 @@ public class JStmtView<JNODE extends JStmt> extends JBlockView<JNODE> {
             getEditor().insertNode(_jnode, aNode, 1);
 
         // If block but no children, insert inside statement
-        else if (getJNodeViewCount() == 0)
+        else if (getNodeViewCount() == 0)
             getEditor().insertNode(_jnode, aNode, 0);
 
         // If before first child statement, have first child dropNode, otherwise have last child dropNode
         else if (aY < getHeight() / 2)
-            getJNodeView(0).dropNode(aNode, anX, 0);
-        else getJNodeViewLast().dropNode(aNode, anX, getJNodeViewLast().getHeight());
+            getNodeView(0).dropNode(aNode, anX, 0);
+        else getLastNodeView().dropNode(aNode, anX, getLastNodeView().getHeight());
     }
 
 }
