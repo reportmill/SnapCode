@@ -3,34 +3,30 @@
  */
 package snapcode.apptools;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import javakit.parse.JExprId;
-import javakit.parse.JNode;
 import javakit.resolver.JavaClass;
+import snap.util.ArrayUtils;
 
 /**
  * A class to represent a block of code in the CodeBuilder.
  */
 public class CompleterBlock {
 
-    // The JNode
-    JNode _node;
-
     // The Method
-    Method _method;
+    private Method _method;
+
+    // The prefix
+    private String _prefix = "";
 
     // The code String
-    String _string;
+    private String _string;
 
     /**
-     * Initialize CodeBlock for given Node and Method.
+     * Constructor.
      */
-    public CompleterBlock init(JNode aNode, Method aMethod)
+    public CompleterBlock(Method aMethod, String prefix)
     {
-        _node = aNode;
         _method = aMethod;
-        return this;
+        _prefix = prefix != null ? (prefix + '.') : "";
     }
 
     /**
@@ -38,33 +34,10 @@ public class CompleterBlock {
      */
     public String getString()
     {
-        return _string != null ? _string : (_string = createString());
-    }
-
-    /**
-     * Returns the string for CodeBlock.
-     */
-    protected String createString()
-    {
-        return getMethodString(_method);
-    }
-
-    /**
-     * Returns the method string.
-     */
-    private String getMethodString(Method aMethod)
-    {
-        StringBuffer sb = new StringBuffer(aMethod.getName()).append('(');
-        Class classes[] = aMethod.getParameterTypes();
-        for (Class c : classes)
-            sb.append(c.getSimpleName()).append(",");
-        if (classes.length > 0) sb.delete(sb.length() - 1, sb.length());
-        String string = sb.append(");").toString();
-        if (_node instanceof JExprId) {
-            JExprId id = (JExprId) _node;
-            if (id.isVarId()) string = id.getName() + "." + string;
-        }
-        return string;
+        if (_string != null) return _string;
+        Class<?>[] parameterTypes = _method.getParameterTypes();
+        String paramTypesStr = ArrayUtils.mapToStringsAndJoin(parameterTypes, Class::getSimpleName, ",");
+        return _string = _prefix + _method.getName() + '(' + paramTypesStr + ");";
     }
 
     /**
@@ -72,34 +45,9 @@ public class CompleterBlock {
      */
     public String getReplaceString()
     {
-        return getReplaceMethodString(_method);
-    }
-
-    /**
-     * Returns the method string to use when replacing.
-     */
-    private String getReplaceMethodString(Method aMethod)
-    {
-        StringBuffer sb = new StringBuffer(aMethod.getName()).append('(');
-        Class classes[] = aMethod.getParameterTypes();
-        String argSep = "";
-        for (Class c : classes) {
-            String string = "null";
-            if (c == boolean.class || c == Boolean.class) string = "true";
-            else if (c == char.class || c == Character.class) string = "\'a\'";
-            else if (c == byte.class || c == Byte.class || c == short.class || c == Short.class) string = "0";
-            else if (c == int.class || c == Integer.class || c == long.class || c == Long.class) string = "0";
-            else if (c == float.class || c == Float.class || c == double.class || c == Double.class) string = "0";
-            else if (c == String.class) string = "\"String\"";
-            sb.append(argSep).append(string);
-            argSep = ", ";
-        }
-        String string = sb.append(");").toString();
-        if (_node instanceof JExprId) {
-            JExprId id = (JExprId) _node;
-            if (id.isVarId()) string = id.getName() + "." + string;
-        }
-        return string;
+        Class<?>[] parameterTypes = _method.getParameterTypes();
+        String argsStr = ArrayUtils.mapToStringsAndJoin(parameterTypes, CompleterBlock::getArgStringForClass, ",");
+        return _prefix + _method.getName() + '(' + argsStr + ");";
     }
 
     /**
@@ -113,24 +61,34 @@ public class CompleterBlock {
     /**
      * Returns suggestions for class.
      */
-    public static CompleterBlock[] getCodeBlocksForNode(JNode aNode)
+    public static CompleterBlock[] getCodeBlocksForNode(JavaClass javaClass, String prefix)
     {
-        JavaClass javaClass = aNode != null ? aNode.getEvalClass() : null;
         Class<?> realClass = javaClass != null ? javaClass.getRealClass() : null;
-        Method[] methods = realClass != null ? realClass.getMethods() : null;
-        if (methods == null)
-            return new CompleterBlock[0];
+        Method[] methods = realClass != null ? realClass.getMethods() : new Method[0];
+        return ArrayUtils.mapNonNull(methods, method -> createCompleterBlockForMethod(method, prefix), CompleterBlock.class);
+    }
 
-        List<CompleterBlock> codeBlocks = new ArrayList<>();
+    /**
+     * Returns a completer block for given method.
+     */
+    private static CompleterBlock createCompleterBlockForMethod(Method method, String prefix)
+    {
+        if (method.getDeclaringClass() == Object.class)
+            return null;
+        return new CompleterBlock(method, prefix);
+    }
 
-        for (Method method : methods) {
-            if (method.getDeclaringClass() == Object.class)
-                continue;
-            CompleterBlock codeBlock = new CompleterBlock().init(aNode, method);
-            codeBlocks.add(codeBlock);
-        }
-
-        // Return
-        return codeBlocks.toArray(new CompleterBlock[0]);
+    /**
+     * Returns an arg string for given class.
+     */
+    private static String getArgStringForClass(Class<?> c)
+    {
+        if (c == boolean.class || c == Boolean.class) return "true";
+        if (c == char.class || c == Character.class) return "\'a\'";
+        if (c == byte.class || c == Byte.class || c == short.class || c == Short.class) return "0";
+        if (c == int.class || c == Integer.class || c == long.class || c == Long.class) return "0";
+        if (c == float.class || c == Float.class || c == double.class || c == Double.class) return "0";
+        if (c == String.class) return "\"String\"";
+        return "null";
     }
 }

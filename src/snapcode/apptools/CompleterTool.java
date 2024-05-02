@@ -2,22 +2,28 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.apptools;
+import javakit.parse.JExprId;
 import javakit.parse.JNode;
 import javakit.parse.JStmtBlock;
+import javakit.resolver.JavaClass;
 import snap.geom.*;
 import snap.parse.ParseToken;
 import snap.text.*;
 import snap.view.*;
 import snapcode.app.WorkspacePane;
 import snapcode.javatext.JavaTextUtils;
+import java.util.Objects;
 
 /**
  * A class to manage a Java inspector.
  */
 public class CompleterTool extends SnippetTool.ChildTool {
 
-    // The selected node
-    private JNode _node;
+    // The selected class
+    private JavaClass _selClass;
+
+    // The selected prefix
+    private String _selPrefix;
 
     // The suggestion list
     private ListView<CompleterBlock> _suggestionsList;
@@ -38,7 +44,7 @@ public class CompleterTool extends SnippetTool.ChildTool {
     private TextBox _dragText;
 
     /**
-     * Creates a new JavaInspector.
+     * Constructor.
      */
     public CompleterTool(WorkspacePane workspacePane)
     {
@@ -46,19 +52,39 @@ public class CompleterTool extends SnippetTool.ChildTool {
     }
 
     /**
-     * Sets CodeBlocks for current TextArea.SelectedNode.
+     * Sets the selected class and prefix.
      */
-    public void setCodeBlocks()
+    public void setSelClassAndPrefix(JavaClass javaClass, String prefix)
     {
-        // Get SelectedNode (or first node parent with class) and its class
-        _node = _javaTextArea.getSelNode();
-        while (_node != null && _node.getEvalClass() == null)
-            _node = _node.getParent();
+        // If already set, just return
+        if (javaClass == _selClass && Objects.equals(prefix, _selPrefix)) return;
+
+        // Set values
+        _selClass = javaClass;
+        _selPrefix = prefix;
 
         // Get suggested CodeBlocks for class and set in Suggestions list
-        CompleterBlock[] codeBlocks = CompleterBlock.getCodeBlocksForNode(_node);
+        CompleterBlock[] codeBlocks = CompleterBlock.getCodeBlocksForNode(javaClass, prefix);
         _suggestionsList.setItems(codeBlocks);
         resetLater();
+    }
+
+    /**
+     * Sets CodeBlocks for current TextArea.SelectedNode.
+     */
+    public void resetSelClassFromJavaTextArea()
+    {
+        // Get SelectedNode (or first node parent with class) and its class
+        JNode selNode = _javaTextArea.getSelNode();
+        while (selNode != null && selNode.getEvalClass() == null)
+            selNode = selNode.getParent();
+
+        // Get JavaClass for SelNode and prefix if SelNode is local variable name
+        JavaClass javaClass = selNode != null ? selNode.getEvalClass() : null;
+        String localVarName = selNode instanceof JExprId && ((JExprId) selNode).isVarId() ? selNode.getName() : null;
+
+        // Set selected class and prefix
+        setSelClassAndPrefix(javaClass, localVarName);
     }
 
     /**
@@ -68,8 +94,9 @@ public class CompleterTool extends SnippetTool.ChildTool {
     {
         // Get suggestion list
         _suggestionsList = getView("SuggestionsList", ListView.class);
-        enableEvents(_suggestionsList, ViewEvent.Type.DragGesture, ViewEvent.Type.DragSourceEnd);
         _suggestionsList.setCellConfigure(this::configureSuggestionsList);
+        _suggestionsList.addEventHandler(this::handleSuggestingListDragGestureEvent, ViewEvent.Type.DragGesture);
+        _suggestionsList.addEventHandler(e -> _dragCodeBlock = null, ViewEvent.Type.DragSourceEnd);
     }
 
     /**
@@ -77,36 +104,23 @@ public class CompleterTool extends SnippetTool.ChildTool {
      */
     public void resetUI()
     {
-        String className = _node != null ? _node.getEvalClassName() : null;
+        String className = _selClass != null ? _selClass.getClassName() : null;
         setViewValue("ClassText", className != null ? className + " Methods" : "No Selection");
     }
 
     /**
-     * Responds to UI.
+     * Called when SuggestionList gets DragGesture.
      */
-    public void respondUI(ViewEvent anEvent)
+    private void handleSuggestingListDragGestureEvent(ViewEvent anEvent)
     {
-        // Handle SuggestionsList
-        if (anEvent.is("SuggestionsList")) {
+        // Set DragSuggestion and DragString
+        _dragCodeBlock = (CompleterBlock) anEvent.getSelItem();
+        String dragString = _dragCodeBlock.getString();
 
-            // Handle DragGesture
-            if (anEvent.isDragGesture()) {
-
-                // Set DragSuggestion and DragString
-                _dragCodeBlock = (CompleterBlock) anEvent.getSelItem();
-                String dragString = _dragCodeBlock.getString();
-
-                // Get event dboard and start drag
-                Clipboard cboard = anEvent.getClipboard();
-                cboard.addData(dragString);
-                //cboard.setDragImageFromString(dragString, getTextArea().getFont().deriveFont(10f));
-                //cboard.setDragImagePoint(0, dboard.getDragImage().getHeight()/2);
-                cboard.startDrag();
-            }
-
-            // Handle DragSourceEnd
-            if (anEvent.isDragSourceEnd()) _dragCodeBlock = null;
-        }
+        // Get event clipboard and start drag
+        Clipboard clipboard = anEvent.getClipboard();
+        clipboard.addData(dragString);
+        clipboard.startDrag();
     }
 
     /**
@@ -114,9 +128,9 @@ public class CompleterTool extends SnippetTool.ChildTool {
      */
     protected void configureSuggestionsList(ListCell<CompleterBlock> aCell)
     {
-        CompleterBlock cb = aCell.getItem();
-        if (cb == null) return;
-        aCell.setText(cb.getString());
+        CompleterBlock codeBlock = aCell.getItem();
+        if (codeBlock == null) return;
+        aCell.setText(codeBlock.getString());
         aCell.setImage(JavaTextUtils.CodeImage);
         aCell.getGraphic().setPadding(4, 4, 4, 4);
     }
@@ -127,7 +141,7 @@ public class CompleterTool extends SnippetTool.ChildTool {
     @Override
     protected void javaTextAreaSelNodeChanged()
     {
-        setCodeBlocks();
+        resetSelClassFromJavaTextArea();
     }
 
     /**
@@ -156,8 +170,8 @@ public class CompleterTool extends SnippetTool.ChildTool {
         _javaTextArea.repaint();
 
         // Set DragNode
-        int index = _javaTextArea.getCharIndexForXY(anX, aY);
-        _dragNode = _javaTextArea.getJFile().getNodeForCharIndex(index);
+        int dragCharIndex = _javaTextArea.getCharIndexForXY(anX, aY);
+        _dragNode = _javaTextArea.getJFile().getNodeForCharIndex(dragCharIndex);
 
         // Get DragBlock
         _dragBlock = _dragNode instanceof JStmtBlock ? (JStmtBlock) _dragNode : _dragNode.getParent(JStmtBlock.class);
@@ -207,15 +221,19 @@ public class CompleterTool extends SnippetTool.ChildTool {
      */
     public void drop(double anX, double aY)
     {
+        // Get insert string for drop
         TextBlock textBlock = _javaTextArea.getTextBlock();
         TextLine textLine = textBlock.getLineForY(_dragPoint.getY());
-        CharSequence indent = textLine.getIndentString();
-        String string = _dragCodeBlock.getReplaceString(), fullString = indent + string + "\n";
+        CharSequence indentString = textLine.getIndentString();
+        String dropCodeString = _dragCodeBlock.getReplaceString();
+        String insertStr = indentString + dropCodeString + "\n";
+
+        // Add insert string
         int selStart = textLine.getStartCharIndex();
-        _javaTextArea.replaceChars(fullString, null, selStart, selStart, false);
-        _javaTextArea.setSel(selStart + indent.length(), selStart + indent.length() + string.length());
-        //int argStart = string.indexOf('('), argEnd = argStart>0? string.indexOf(')', argStart) : -1;
-        //if(argEnd>argStart+1) textArea.setSelection(selStart + argStart + 1, selStart + argEnd);
+        _javaTextArea.replaceChars(insertStr, null, selStart, selStart, false);
+        _javaTextArea.setSel(selStart + indentString.length(), selStart + indentString.length() + dropCodeString.length());
+
+        // Clear drag
         _javaTextArea.requestFocus();
         clearDrag();
     }

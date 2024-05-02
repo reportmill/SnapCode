@@ -42,18 +42,6 @@ public class SnapTool extends SnippetTool.ChildTool {
      */
     protected void initUI()
     {
-        // Add DragDetected action to start statement drag
-        /*getDragUI().setOnDragDetected(e -> {
-            JNodeView<?> dragSnapPart = JNodeView._dragSnapPart = getSnapPart(getDragUI(), e.getX(), e.getY()); if(dragSnapPart==null) return;
-            javafx.scene.SnapshotParameters sp = new javafx.scene.SnapshotParameters(); sp.setFill(Color.TRANSPARENT);
-            _dragImage = dragSnapPart.getNative().snapshot(sp, null);
-            //JNode copy = javaParser.getJavaStatement(dragSnapPart.getJNode().getString(), 0, 0);
-            //dragSnapPart = SnapPart.createSnapPart(copy);
-            //Dragboard db = getDragUI().startDragAndDrop(TransferMode.ANY);
-            //ClipboardContent cc = new ClipboardContent(); cc.putString("Hello World"); db.setContent(cc);
-            //e.consume(); db.setDragView(_dragImage);
-        });*/
-
         enableEvents(getUI(), MouseRelease);
 
         // Register to handle DragGesture
