@@ -2,11 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.apptools;
-
 import java.lang.reflect.Method;
-
+import java.util.ArrayList;
+import java.util.List;
 import javakit.parse.JExprId;
 import javakit.parse.JNode;
+import javakit.resolver.JavaClass;
 
 /**
  * A class to represent a block of code in the CodeBuilder.
@@ -109,4 +110,27 @@ public class CompleterBlock {
         return getClass().getSimpleName() + ": " + getString();
     }
 
+    /**
+     * Returns suggestions for class.
+     */
+    public static CompleterBlock[] getCodeBlocksForNode(JNode aNode)
+    {
+        JavaClass javaClass = aNode != null ? aNode.getEvalClass() : null;
+        Class<?> realClass = javaClass != null ? javaClass.getRealClass() : null;
+        Method[] methods = realClass != null ? realClass.getMethods() : null;
+        if (methods == null)
+            return new CompleterBlock[0];
+
+        List<CompleterBlock> codeBlocks = new ArrayList<>();
+
+        for (Method method : methods) {
+            if (method.getDeclaringClass() == Object.class)
+                continue;
+            CompleterBlock codeBlock = new CompleterBlock().init(aNode, method);
+            codeBlocks.add(codeBlock);
+        }
+
+        // Return
+        return codeBlocks.toArray(new CompleterBlock[0]);
+    }
 }

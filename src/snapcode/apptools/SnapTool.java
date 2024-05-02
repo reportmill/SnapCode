@@ -6,18 +6,12 @@ import snap.geom.Point;
 import snap.gfx.Image;
 import snap.view.*;
 import snapcode.app.WorkspacePane;
-import snapcode.app.WorkspaceTool;
 import snapcode.views.JNodeView;
-import snapcode.views.SnapEditor;
-import snapcode.views.SnapEditorPane;
 
 /**
  * UI to show puzzle pieces.
  */
-public class SnapTool extends WorkspaceTool {
-
-    // The SnapEditorPane
-    protected SnapEditorPane _editorPane;
+public class SnapTool extends SnippetTool.ChildTool {
 
     // The drag image
     //private static Image  _dragImage;
@@ -29,11 +23,6 @@ public class SnapTool extends WorkspaceTool {
     {
         super(workspacePane);
     }
-
-    /**
-     * Returns the editor.
-     */
-    public SnapEditor getEditor()  { return _editorPane.getEditor(); }
 
     /**
      * Create UI.
@@ -85,13 +74,28 @@ public class SnapTool extends WorkspaceTool {
     }
 
     /**
+     * Called when JavaTextArea.SelNode changes.
+     */
+    @Override
+    protected void javaTextAreaSelNodeChanged()
+    {
+        rebuildUI();
+    }
+
+    /**
      * Update tab.
      */
     public void rebuildUI()
     {
-        // Get eval class for selected node
-        JavaClass selNodeEvalClass = getEditor().getSelNodeEvalClass();
+        // Get selected node
+        JNode selNode = _javaTextArea != null ? _javaTextArea.getSelNode() : null;
+        while (selNode != null && selNode.getEvalClass() == null)
+            selNode = selNode.getParent();
 
+        // Get eval class for selected node
+        JavaClass selNodeEvalClass = selNode != null ? selNode.getEvalClass() : null;
+
+        // Get parent view for
         TabView tabView = getUI(TabView.class);
         Tab methodTab = tabView.getTab(0);
         ScrollView scrollView = (ScrollView) methodTab.getContent();

@@ -2,56 +2,40 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.apptools;
-import java.lang.reflect.Method;
-import java.util.*;
 import javakit.parse.JNode;
 import javakit.parse.JStmtBlock;
-import javakit.resolver.JavaClass;
 import snap.geom.*;
 import snap.parse.ParseToken;
-import snap.props.PropChangeListener;
 import snap.text.*;
 import snap.view.*;
-import snap.view.EventListener;
-import snapcode.app.JavaPage;
-import snapcode.app.PagePane;
 import snapcode.app.WorkspacePane;
-import snapcode.app.WorkspaceTool;
-import snapcode.javatext.JavaTextArea;
 import snapcode.javatext.JavaTextUtils;
-import snapcode.webbrowser.WebPage;
 
 /**
  * A class to manage a Java inspector.
  */
-public class CompleterTool extends WorkspaceTool {
-
-    // The JavaTextArea this inspector works for.
-    private JavaTextArea _textArea;
+public class CompleterTool extends SnippetTool.ChildTool {
 
     // The selected node
-    private JNode  _node;
+    private JNode _node;
 
     // The suggestion list
-    private ListView<CompleterBlock>  _suggestionsList;
+    private ListView<CompleterBlock> _suggestionsList;
 
     // The dragging CodeBlock
     private CompleterBlock _dragCodeBlock;
 
     // The current drag point
-    private Point  _dragPoint;
+    private Point _dragPoint;
 
     // The current node at drag point
-    private JNode  _dragNode, _dragBlock;
+    private JNode _dragNode;
+
+    // The current statement node at drag point
+    private JNode _dragBlock;
 
     // The drag text
     private TextBox _dragText;
-
-    // Listener for JavaTextArea prop change
-    private PropChangeListener _textAreaPropChangeLsnr = pc -> javaTextAreaSelNodeChanged();
-
-    // Listener for JavaTextArea drag events
-    private EventListener _textAreaDragEventLsnr = e -> handleJavaTextAreaDragEvent(e);
 
     /**
      * Creates a new JavaInspector.
@@ -62,78 +46,19 @@ public class CompleterTool extends WorkspaceTool {
     }
 
     /**
-     * Returns the JavaTextArea associated with text pane.
-     */
-    public JavaTextArea getTextArea()  { return _textArea; }
-
-    /**
-     * Sets the JavaTextArea associated with text pane.
-     */
-    private void setTextArea(JavaTextArea textArea)
-    {
-        if (textArea == _textArea) return;
-
-        if (_textArea != null) {
-            _textArea.removePropChangeListener(_textAreaPropChangeLsnr);
-            _textArea.removeEventHandler(_textAreaDragEventLsnr);
-        }
-
-        _textArea = textArea;
-
-        // Start listening to JavaTextArea SelNode prop and drag events
-        if (_textArea != null) {
-            _textArea.addPropChangeListener(_textAreaPropChangeLsnr, JavaTextArea.SelNode_Prop);
-            _textArea.addEventHandler(_textAreaDragEventLsnr, View.DragEvents);
-            javaTextAreaSelNodeChanged();
-        }
-    }
-
-    /**
-     * Whether inspector is visible.
-     */
-    public boolean isVisible()
-    {
-        return isUISet() && getUI().isVisible();
-    }
-
-    /**
      * Sets CodeBlocks for current TextArea.SelectedNode.
      */
     public void setCodeBlocks()
     {
         // Get SelectedNode (or first node parent with class) and its class
-        _node = getTextArea().getSelNode();
+        _node = _javaTextArea.getSelNode();
         while (_node != null && _node.getEvalClass() == null)
             _node = _node.getParent();
 
         // Get suggested CodeBlocks for class and set in Suggestions list
-        Object[] items = getCodeBlocks(_node);
-        setViewItems(_suggestionsList, items);
+        CompleterBlock[] codeBlocks = CompleterBlock.getCodeBlocksForNode(_node);
+        _suggestionsList.setItems(codeBlocks);
         resetLater();
-    }
-
-    /**
-     * Returns suggestions for class.
-     */
-    private CompleterBlock[] getCodeBlocks(JNode aNode)
-    {
-        JavaClass javaClass = _node != null ? _node.getEvalClass() : null;
-        Class<?> realClass = javaClass != null ? javaClass.getRealClass() : null;
-        Method[] methods = realClass != null ? realClass.getMethods() : null;
-        if (methods == null)
-            return new CompleterBlock[0];
-
-        List<CompleterBlock> codeBlocks = new ArrayList<>();
-
-        for (Method method : methods) {
-            if (method.getDeclaringClass() == Object.class)
-                continue;
-            CompleterBlock codeBlock = new CompleterBlock().init(aNode, method);
-            codeBlocks.add(codeBlock);
-        }
-
-        // Return
-        return codeBlocks.toArray(new CompleterBlock[0]);
     }
 
     /**
@@ -185,17 +110,6 @@ public class CompleterTool extends WorkspaceTool {
     }
 
     /**
-     * Init showing.
-     */
-    @Override
-    protected void initShowing()
-    {
-        // Start listening to PagePane.SelFile prop change
-        _pagePane.addPropChangeListener(pc -> pagePaneSelFileChanged(), PagePane.SelFile_Prop);
-        pagePaneSelFileChanged();
-    }
-
-    /**
      * Called to configure ListCell.
      */
     protected void configureSuggestionsList(ListCell<CompleterBlock> aCell)
@@ -208,9 +122,18 @@ public class CompleterTool extends WorkspaceTool {
     }
 
     /**
+     * Called when JavaTextArea SelNode prop changes.
+     */
+    @Override
+    protected void javaTextAreaSelNodeChanged()
+    {
+        setCodeBlocks();
+    }
+
+    /**
      * Called when JavaTextArea gets drag events.
      */
-    private void handleJavaTextAreaDragEvent(ViewEvent anEvent)
+    protected void handleJavaTextAreaDragEvent(ViewEvent anEvent)
     {
         if (anEvent.isDragOver())
             dragOver(anEvent.getX(), anEvent.getY());
@@ -230,21 +153,20 @@ public class CompleterTool extends WorkspaceTool {
 
         // Set DragPoint and register TextArea to repaint
         _dragPoint = new Point(anX, aY);
-        JavaTextArea textArea = getTextArea();
-        textArea.repaint();
+        _javaTextArea.repaint();
 
         // Set DragNode
-        int index = textArea.getCharIndexForXY(anX, aY);
-        _dragNode = textArea.getJFile().getNodeForCharIndex(index);
+        int index = _javaTextArea.getCharIndexForXY(anX, aY);
+        _dragNode = _javaTextArea.getJFile().getNodeForCharIndex(index);
 
         // Get DragBlock
-        _dragBlock = _dragNode;
-        while (_dragBlock != null && !(_dragBlock instanceof JStmtBlock)) _dragBlock = _dragBlock.getParent();
+        _dragBlock = _dragNode instanceof JStmtBlock ? (JStmtBlock) _dragNode : _dragNode.getParent(JStmtBlock.class);
         if (_dragBlock == null) {
             clearDrag();
             return;
         }
 
+        // Get token
         ParseToken dragNodeToken = _dragBlock.getStartToken();
         if (!(dragNodeToken instanceof TextToken)) {
             System.out.println("CompleterTool: Node token no longer TextToken - update this code");
@@ -260,12 +182,12 @@ public class CompleterTool extends WorkspaceTool {
         // Get DragBlock.String with indent
         TextToken dragToken = (TextToken) _dragNode.getStartToken();
         TextLine textLine = dragToken.getTextLine();
-        String indent = getIndentString(textLine);
+        String indent = textLine.getIndentString();
         String dragString = indent + _dragCodeBlock.getString();
 
         // If DragText needs to be reset, create and reset
         if (_dragText == null || !_dragText.getString().equals(dragString)) {
-            TextBlock textBlock = textArea.getTextBlock();
+            TextBlock textBlock = _javaTextArea.getTextBlock();
             _dragText = new TextBox();
             _dragText.setX(textBlock.getX());
             _dragText.setString(dragString);
@@ -285,17 +207,16 @@ public class CompleterTool extends WorkspaceTool {
      */
     public void drop(double anX, double aY)
     {
-        JavaTextArea textArea = getTextArea();
-        TextBlock textBlock = textArea.getTextBlock();
+        TextBlock textBlock = _javaTextArea.getTextBlock();
         TextLine textLine = textBlock.getLineForY(_dragPoint.getY());
-        CharSequence indent = getIndentString(textLine);
+        CharSequence indent = textLine.getIndentString();
         String string = _dragCodeBlock.getReplaceString(), fullString = indent + string + "\n";
         int selStart = textLine.getStartCharIndex();
-        textArea.replaceChars(fullString, null, selStart, selStart, false);
-        textArea.setSel(selStart + indent.length(), selStart + indent.length() + string.length());
+        _javaTextArea.replaceChars(fullString, null, selStart, selStart, false);
+        _javaTextArea.setSel(selStart + indent.length(), selStart + indent.length() + string.length());
         //int argStart = string.indexOf('('), argEnd = argStart>0? string.indexOf(')', argStart) : -1;
         //if(argEnd>argStart+1) textArea.setSelection(selStart + argStart + 1, selStart + argEnd);
-        textArea.requestFocus();
+        _javaTextArea.requestFocus();
         clearDrag();
     }
 
@@ -356,56 +277,8 @@ public class CompleterTool extends WorkspaceTool {
     }*/
 
     /**
-     * Called when PagePane.SelFile property changes
-     */
-    private void pagePaneSelFileChanged()
-    {
-        WebPage selPage = _pagePane.getSelPage();
-        JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
-        JavaTextArea javaTextArea = javaPage != null ? javaPage.getTextArea() : null;
-        setTextArea(javaTextArea);
-    }
-
-    /**
-     * Called when JavaTextArea SelNode prop changes.
-     */
-    private void javaTextAreaSelNodeChanged()
-    {
-        if (isVisible())
-            setCodeBlocks();
-    }
-
-    /**
      * Returns the tool title.
      */
     @Override
     public String getTitle()  { return "Completer"; }
-
-    /**
-     * Returns the indent string for line at given index.
-     */
-    private static String getIndentString(TextLine textLine)
-    {
-        int indentCount = getIndentCount(textLine);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < indentCount; i++) sb.append(' ');
-        return sb.toString();
-    }
-
-    /**
-     * Returns the number of indent spaces for line at given index.
-     */
-    private static int getIndentCount(TextLine textLine)
-    {
-        TextLine prevLine = textLine.getPrevious();
-        if (prevLine == null)
-            return 0;
-
-        int indentCount = prevLine.getIndentLength();
-        if (!prevLine.getString().trim().endsWith(";"))
-            indentCount += 4;
-
-        // Return
-        return indentCount;
-    }
 }
