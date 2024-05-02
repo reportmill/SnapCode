@@ -45,7 +45,7 @@ public class JStmtView<JNODE extends JStmt> extends JBlockView<JNODE> {
     /**
      * Returns a string describing the part.
      */
-    public String getPartString()
+    public String getNodeString()
     {
         String nodeClassName = _jnode.getClass().getSimpleName();
         return nodeClassName.substring(5) + " Statement";

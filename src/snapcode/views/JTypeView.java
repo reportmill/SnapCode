@@ -34,5 +34,5 @@ public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
     /**
      * Returns a string describing the part.
      */
-    public String getPartString()  { return "Type"; }
+    public String getNodeString()  { return "Type"; }
 }

@@ -1,20 +1,30 @@
 package snapcode.apptools;
 import javakit.parse.JNode;
+import javakit.parse.JStmt;
 import javakit.parse.JavaParser;
 import javakit.resolver.JavaClass;
 import snap.geom.Point;
 import snap.gfx.Image;
+import snap.util.ArrayUtils;
 import snap.view.*;
 import snapcode.app.WorkspacePane;
+import snapcode.views.JBlockView;
 import snapcode.views.JNodeView;
+import java.util.stream.Stream;
 
 /**
  * UI to show puzzle pieces.
  */
 public class SnapTool extends SnippetTool.ChildTool {
 
-    // The drag image
-    //private static Image  _dragImage;
+    // The ColView to hold Method blocks
+    private ColView _methodBlocksColView;
+
+    // The ColView to hold conditional blocks
+    private ColView _conditionalBlocksColView;
+
+    // The selected class
+    private JavaClass _selClass;
 
     /**
      * Constructor.
@@ -25,55 +35,33 @@ public class SnapTool extends SnippetTool.ChildTool {
     }
 
     /**
-     * Create UI.
+     * Returns the selected class.
      */
-    protected View createUI()
+    public JavaClass getSelClass()  { return _selClass; }
+
+    /**
+     * Sets the selected class.
+     */
+    public void setSelClass(JavaClass javaClass)
     {
-        TabView tabView = new TabView();
-        tabView.setPrefWidth(300);
-        tabView.addTab("Methods", createMethodsPane());
-        tabView.addTab("Blocks", createBlocksPane());
-        tabView.setSelIndex(1);
-        return tabView;
+        // If already set, just return
+        if (javaClass == getSelClass()) return;
+
+        // Set value
+        _selClass = javaClass;
+
+        // Remove existing method blocks
+        _methodBlocksColView.removeChildren();
+
+        // Get blockView for SelClass and add to blocksColView
+        JBlockView<?>[] blockViews = getBlockViewsForClass(_selClass);
+        Stream.of(blockViews).forEach(_methodBlocksColView::addChild);
     }
 
     /**
-     * Configure UI.
+     * Sets CodeBlocks for current TextArea.SelectedNode.
      */
-    protected void initUI()
-    {
-        enableEvents(getUI(), MouseRelease);
-
-        // Register to handle DragGesture
-        getUI().addEventHandler(this::handleDragGesture, ViewEvent.Type.DragGesture);
-    }
-
-    /**
-     * Respond to UI.
-     */
-    protected void respondUI(ViewEvent anEvent)
-    {
-        // Handle MouseClick (double click)
-        if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
-            JNodeView<?> part = getNodeViewForViewAndXY(getUI(ParentView.class), anEvent.getX(), anEvent.getY());
-            //if (part != null)
-            //    getEditorPane().getSelectedPart().dropNode(part.getJNode());
-        }
-    }
-
-    /**
-     * Called when JavaTextArea.SelNode changes.
-     */
-    @Override
-    protected void javaTextAreaSelNodeChanged()
-    {
-        rebuildUI();
-    }
-
-    /**
-     * Update tab.
-     */
-    public void rebuildUI()
+    public void resetSelClassFromJavaTextArea()
     {
         // Get selected node
         JNode selNode = _javaTextArea != null ? _javaTextArea.getSelNode() : null;
@@ -82,102 +70,139 @@ public class SnapTool extends SnippetTool.ChildTool {
 
         // Get eval class for selected node
         JavaClass selNodeEvalClass = selNode != null ? selNode.getEvalClass() : null;
-
-        // Get parent view for
-        TabView tabView = getUI(TabView.class);
-        Tab methodTab = tabView.getTab(0);
-        ScrollView scrollView = (ScrollView) methodTab.getContent();
-        ColView colView = (ColView) scrollView.getContent();
-        colView.removeChildren();
-
-        // Add pieces for classes
-        for (JavaClass cls = selNodeEvalClass; cls != null; cls = cls.getSuperClass())
-            addNodeViewsForClass(cls, colView);
+        setSelClass(selNodeEvalClass);
     }
 
     /**
-     * Update node views for given class.
+     * Create UI.
      */
-    private void addNodeViewsForClass(JavaClass aClass, ChildView aPane)
+    protected View createUI()
     {
-        // Get statement strings for class - just return if none
-        String[] statementStrings = getStatementStringsForClass(aClass);
-        if (statementStrings == null)
+        // Create method blocks ColView
+        _methodBlocksColView = new ColView();
+        _methodBlocksColView.setPadding(20, 20, 20, 20);
+        _methodBlocksColView.setSpacing(16);
+        _methodBlocksColView.setGrowWidth(true);
+        _methodBlocksColView.setGrowHeight(true);
+
+        // Create method blocks ScrollView
+        ScrollView methodBlocksScrollView = new ScrollView(_methodBlocksColView);
+        methodBlocksScrollView.setPrefWidth(200);
+
+        _conditionalBlocksColView = new ColView();
+        _conditionalBlocksColView.setPadding(20, 20, 20, 20);
+        _conditionalBlocksColView.setSpacing(16);
+        _conditionalBlocksColView.setGrowWidth(true);
+        _conditionalBlocksColView.setGrowHeight(true);
+
+        // Wrap in ScrollView and return
+        ScrollView conditionalBlocksScrollView = new ScrollView(_conditionalBlocksColView);
+        conditionalBlocksScrollView.setPrefWidth(200);
+
+        // Create TabView to hold method blocks and conditional blocks
+        TabView tabView = new TabView();
+        tabView.setPrefWidth(300);
+        tabView.addTab("Methods", methodBlocksScrollView);
+        tabView.addTab("Blocks", conditionalBlocksScrollView);
+        tabView.setSelIndex(1);
+
+        // Return
+        return tabView;
+    }
+
+    /**
+     * Configure UI.
+     */
+    protected void initUI()
+    {
+        // Create conditional statement block views and add to ConditionalBlocksColView
+        String ifStmtStr = "if (true) {\n}";
+        String forStmtStr = "for (int i = 0; i < 10; i++) {\n}";
+        String whileStmtStr = "while (true) {\n}";
+        String[] condStmtStrings = { ifStmtStr, forStmtStr, whileStmtStr };
+        JBlockView<?>[] condBlockViews = ArrayUtils.map(condStmtStrings, stmtStr -> createBlockViewForStatementString(stmtStr), JBlockView.class);
+        Stream.of(condBlockViews).forEach(_conditionalBlocksColView::addChild);
+
+        // Register to handle MouseRelease, DragGesture
+        View uiView = getUI();
+        uiView.addEventHandler(this::handleMouseRelease, MouseRelease);
+        uiView.addEventHandler(this::handleDragGesture, ViewEvent.Type.DragGesture);
+    }
+
+    /**
+     * Respond to UI.
+     */
+    private void handleMouseRelease(ViewEvent anEvent)
+    {
+        // Handle MouseClick (double click)
+//        if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
+//            JBlockView<?> blockView = getNodeViewForViewAndXY(getUI(ParentView.class), anEvent.getX(), anEvent.getY());
+//            if (blockView != null) _javaTextArea.getNodeHpr().replaceNodeWithNode(blockView.getJNode());
+//        }
+    }
+
+    /**
+     * Handle drag gesture event: Get Dragboard and drag shape with image (with DragSourceListener to clear DragShape)
+     */
+    private void handleDragGesture(ViewEvent anEvent)
+    {
+        // Get drag node
+        JNodeView<?> dragNodeView = JNodeView._dragNodeView = getNodeViewForViewAndXY(getUI(ParentView.class), anEvent.getX(), anEvent.getY());
+        if (dragNodeView == null)
             return;
 
-        // Iterate over statement string and create/add node view
-        for (String statementStr : statementStrings) {
-            JNodeView<?> statementView = createNodeViewForStatementString(statementStr);
-            aPane.addChild(statementView);
-        }
+        // Get drag string and image
+        JNode dragNode = dragNodeView.getJNode();
+        String dragString = dragNode.getString(); // Was: "SupportPane:" + dragSnapPart.getClass().getSimpleName()
+        Image dragImage = ViewUtils.getImage(dragNodeView);
+
+        // Create Dragboard, set drag string and image and start drag
+        Clipboard clipboard = anEvent.getClipboard();
+        clipboard.addData(dragString);
+        clipboard.setDragImage(dragImage);
+        clipboard.startDrag();
     }
 
     /**
-     * Returns the motion pane.
+     * Called when JavaTextArea.SelNode changes.
      */
-    private View createMethodsPane()
+    @Override
+    protected void javaTextAreaSelNodeChanged()
     {
-        // Create vertical box
-        ColView colView = new ColView();
-        colView.setPadding(20, 20, 20, 20);
-        colView.setSpacing(16);
-        colView.setGrowWidth(true);
-        colView.setGrowHeight(true);
-        //colView.setFill(JFileView.BACK_FILL); //pane.setBorder(bevel);
-
-        // Wrap in ScrollView and return
-        ScrollView scrollView = new ScrollView(colView);
-        scrollView.setPrefWidth(200);
-        return scrollView;
+        resetSelClassFromJavaTextArea();
     }
 
     /**
-     * Returns the control pane.
+     * Returns the BlockViews for method invocations for given class.
      */
-    private View createBlocksPane()
+    private JBlockView<?>[] getBlockViewsForClass(JavaClass aClass)
     {
-        ColView colView = new ColView();
-        colView.setPadding(20, 20, 20, 20);
-        colView.setSpacing(16);
-        colView.setGrowWidth(true);
-        colView.setGrowHeight(true);
-        //colView.setFill(JFileView.BACK_FILL); //pane.setBorder(bevel);
-
-        // Add node for if(expr)
-        JNodeView<?> ifStmtView = createNodeViewForStatementString("if(true) {\n}");
-        colView.addChild(ifStmtView);
-
-        // Add node for repeat(x)
-        JNodeView<?> forStmtView = createNodeViewForStatementString("for(int i=0; i<10; i++) {\n}");
-        colView.addChild(forStmtView);
-
-        // Add node for while(true)
-        JNodeView<?> whileStmtView = createNodeViewForStatementString("while(true) {\n}");
-        colView.addChild(whileStmtView);
-
-        // Wrap in ScrollView and return
-        ScrollView scrollView = new ScrollView(colView);
-        scrollView.setPrefWidth(200);
-        return scrollView;
+        String[] stmtStrings = getStatementStringsForClass(aClass);
+        return ArrayUtils.map(stmtStrings, stmtStr -> createBlockViewForStatementString(stmtStr), JBlockView.class);
     }
 
     /**
-     * Returns a NodeView for given string of code.
+     * Returns a BlockView for given statement string.
      */
-    protected JNodeView<?> createNodeViewForStatementString(String aString)
+    protected JBlockView<?> createBlockViewForStatementString(String stmtStr)
     {
+        // Create statement node for statement string
         JavaParser javaParser = JavaParser.getShared();
-        JNode node = javaParser.parseStatement(aString, 0);
-        node.setString(aString);
-        JNodeView<?> nodeView = JNodeView.createNodeViewForNode(node);
-        nodeView.getEventAdapter().disableEvents(DragEvents);
-        return nodeView;
+        JStmt stmtNode = javaParser.parseStatement(stmtStr, 0);
+        stmtNode.setString(stmtStr);
+
+        // Create block view for statement node
+        JBlockView<?> blockView = JBlockView.createBlockViewForNode(stmtNode); assert (blockView != null);
+        blockView.getEventAdapter().disableEvents(DragEvents);
+
+        // Return
+        return blockView;
     }
 
     /**
      * Returns the child of given class hit by coords.
      */
-    protected JNodeView<?> getNodeViewForViewAndXY(ParentView aParentView, double anX, double aY)
+    protected static JNodeView<?> getNodeViewForViewAndXY(ParentView aParentView, double anX, double aY)
     {
         View[] childView = aParentView.getChildren();
 
@@ -211,28 +236,6 @@ public class SnapTool extends SnippetTool.ChildTool {
     }
 
     /**
-     * Handle drag gesture event: Get Dragboard and drag shape with image (with DragSourceListener to clear DragShape)
-     */
-    private void handleDragGesture(ViewEvent anEvent)
-    {
-        // Get drag node
-        JNodeView<?> dragNodeView = JNodeView._dragNodeView = getNodeViewForViewAndXY(getUI(ParentView.class), anEvent.getX(), anEvent.getY());
-        if (dragNodeView == null)
-            return;
-
-        // Get drag string and image
-        JNode dragNode = dragNodeView.getJNode();
-        String dragString = dragNode.getString(); // Was: "SupportPane:" + dragSnapPart.getClass().getSimpleName()
-        Image dragImage = ViewUtils.getImage(dragNodeView);
-
-        // Create Dragboard, set drag string and image and start drag
-        Clipboard clipboard = anEvent.getClipboard();
-        clipboard.addData(dragString);
-        clipboard.setDragImage(dragImage);
-        clipboard.startDrag();
-    }
-
-    /**
      * Override for title.
      */
     @Override
@@ -248,7 +251,7 @@ public class SnapTool extends SnippetTool.ChildTool {
             case "GameActor": return GameActorPieces;
             case "GamePen": return GamePenPieces;
             case "GameView": return GameViewPieces;
-            default: return null;
+            default: return new String[0];
         }
         //else try { strings = (String[])ClassUtils.getMethod(aClass, "getSnapPieces").invoke(null); } catch(Exception e){ }
     }

@@ -142,5 +142,5 @@ public class JFileView extends JBlockView<JFile> {
     /**
      * Returns a string describing the part.
      */
-    public String getPartString()  { return "Class"; }
+    public String getNodeString()  { return "Class"; }
 }

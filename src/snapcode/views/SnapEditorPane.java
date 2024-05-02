@@ -15,66 +15,54 @@ import snap.view.*;
 public class SnapEditorPane extends ViewOwner {
 
     // The main editor UI
-    SnapEditor _editor;
+    private SnapEditor _editor;
 
-    // A class for editing code
-    JavaTextPane _javaPane;
+    // The JavaTextPane to do real editing
+    private JavaTextPane _javaTextPane;
 
     // The node path
-    RowView _nodePathBox;
+    private RowView _nodePathBox;
 
-    // The deepest part of current NodePath (which is SelectedPart, unless NodePath changed SelectedPart)
-    JNodeView _deepPart;
+    // The deepest node view of current NodePath (which is SelNodeView, unless NodePath changed SelNode)
+    private JNodeView<?> _deepSelNodeView;
 
-    // Whether to rebuild CodeArea
-    boolean _rebuild = true;
+    // Whether to have editor rebuild all block views
+    private boolean _rebuildAllBlockViews = true;
 
     /**
      * Creates a new SnapEditorPane for given JavaTextPane.
      */
     public SnapEditorPane(JavaTextPane aJTP)
     {
-        _javaPane = aJTP;
+        _javaTextPane = aJTP;
     }
 
     /**
      * Returns the SnapEditor.
      */
-    public SnapEditor getEditor()
-    {
-        return _editor;
-    }
+    public SnapEditor getEditor()  { return _editor; }
 
     /**
      * Returns the SnapJavaPane.
      */
-    public JavaTextPane getJavaTextPane()
-    {
-        return _javaPane;
-    }
+    public JavaTextPane getJavaTextPane()  { return _javaTextPane; }
 
     /**
      * Returns the JavaTextArea.
      */
-    public JavaTextArea getJavaTextArea()
-    {
-        return _javaPane.getTextArea();
-    }
+    public JavaTextArea getJavaTextArea()  { return _javaTextPane.getTextArea(); }
 
     /**
-     * Returns the selected part.
+     * Returns the selected node view.
      */
-    public JNodeView getSelectedPart()
-    {
-        return _editor.getSelNodeView();
-    }
+    public JNodeView<?> getSelNodeView()  { return _editor.getSelNodeView(); }
 
     /**
-     * Sets the selected parts.
+     * Sets the selected node view.
      */
-    public void setSelectedPart(JNodeView aPart)
+    public void setSelNodeView(JNodeView<?> nodeView)
     {
-        _editor.setSelNodeView(aPart);
+        _editor.setSelNodeView(nodeView);
     }
 
     /**
@@ -90,9 +78,9 @@ public class SnapEditorPane extends ViewOwner {
         _editor = new SnapEditor(javaTextArea);
 
         // Add to Editor.UI to ScrollView
-        ScrollView scrollView = new ScrollView(_editor);
-        scrollView.setGrowWidth(true);
-        scrollView.setGrowHeight(true);
+        ScrollView editorScrollView = new ScrollView(_editor);
+        editorScrollView.setGrowWidth(true);
+        editorScrollView.setGrowHeight(true);
 
         // Create NodePath and add to bottom
         _nodePathBox = new RowView();
@@ -101,7 +89,7 @@ public class SnapEditorPane extends ViewOwner {
         // Create ColView with toolbar
         ColView colView = new ColView();
         colView.setFillWidth(true);
-        colView.setChildren(toolBar, scrollView, _nodePathBox);
+        colView.setChildren(toolBar, editorScrollView, _nodePathBox);
 
         // Return
         return colView;
@@ -110,7 +98,8 @@ public class SnapEditorPane extends ViewOwner {
     /**
      * Initialize UI.
      */
-    protected void initU()
+    @Override
+    protected void initUI()
     {
         addKeyActionHandler("CutButton", "Shortcut+X");
         addKeyActionHandler("CopyButton", "Shortcut+C");
@@ -123,14 +112,15 @@ public class SnapEditorPane extends ViewOwner {
     }
 
     /**
-     * ResetUI.
+     * Reset UI.
      */
-    public void resetUI()
+    @Override
+    protected void resetUI()
     {
         // If needs rebuild, do rebuild
-        if (_rebuild) {
-            _editor.rebuildUI();
-            _rebuild = false;
+        if (_rebuildAllBlockViews) {
+            _editor.rebuildAllBlockViews();
+            _rebuildAllBlockViews = false;
         }
 
         // Update UndoButton, RedoButton
@@ -140,7 +130,7 @@ public class SnapEditorPane extends ViewOwner {
         setViewEnabled("RedoButton",  undoer.hasRedos());
 
         // Update JavaDocButton
-        JavaDoc javaDoc = _javaPane.getJavaDoc();
+        JavaDoc javaDoc = _javaTextPane.getJavaDoc();
         setViewVisible("JavaDocButton", javaDoc != null);
         String javaDocButtonText = javaDoc != null ? (javaDoc.getSimpleName() + " Doc") : null;
         setViewText("JavaDocButton", javaDocButtonText);
@@ -152,18 +142,12 @@ public class SnapEditorPane extends ViewOwner {
     /**
      * Respond to UI changes.
      */
+    @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle NodePathLabel
-        if (anEvent.equals("NodePathLabel")) {
-            Label label = anEvent.getView(Label.class);
-            JNodeView part = (JNodeView) label.getProp("SnapPart"), dpart = _deepPart;
-            setSelectedPart(part);
-            _deepPart = dpart;
-        }
-
         // Handle SaveButton
-        if (anEvent.equals("SaveButton")) getJavaTextPane().saveChanges();
+        if (anEvent.equals("SaveButton"))
+            getJavaTextPane().saveChanges();
 
         // Handle CutButton, CopyButton, PasteButton, Escape
         if (anEvent.equals("CutButton")) cut();
@@ -178,7 +162,7 @@ public class SnapEditorPane extends ViewOwner {
 
             // Handle JavaDocButton
         else if (anEvent.equals("JavaDocButton")) {
-            JavaDoc javaDoc = _javaPane.getJavaDoc();
+            JavaDoc javaDoc = _javaTextPane.getJavaDoc();
             if (javaDoc != null)
                 javaDoc.openUrl();
         }
@@ -187,26 +171,34 @@ public class SnapEditorPane extends ViewOwner {
     /**
      * Rebuilds the NodePathBox.
      */
-    void rebuildNodePath()
+    private void rebuildNodePath()
     {
         // Clear path and get font
         _nodePathBox.removeChildren();
 
-        // Iterate up from DeepPart and add parts
-        for (JNodeView part = _deepPart, spart = getSelectedPart(); part != null; ) {
-            Label label = new Label(part.getPartString());
-            label.setFont(Font.Arial12);
-            label.setName("NodePathLabel");
-            label.setProp("SnapPart", part);
-            if (part == spart) label.setFill(Color.LIGHTGRAY);
-            _nodePathBox.addChild(label, 0);
-            label.setOwner(this);
-            enableEvents(label, MouseRelease);
-            part = part.getNodeViewParent();
-            if (part == null) break;
-            Label div = new Label(" \u2022 ");
-            div.setFont(Font.Arial12);
-            _nodePathBox.addChild(div, 0);
+        // Iterate up from DeepNodeView and add all nodes
+        for (JNodeView<?> nodeView = _deepSelNodeView, selNodeView = getSelNodeView(); nodeView != null; ) {
+
+            // Create and configure label for node view
+            Label nodeViewLabel = new Label(nodeView.getNodeString());
+            nodeViewLabel.setFont(Font.Arial12);
+            nodeViewLabel.setName("NodePathLabel");
+            nodeViewLabel.setProp("SnapPart", nodeView);
+            if (nodeView == selNodeView)
+                nodeViewLabel.setFill(Color.LIGHTGRAY);
+            nodeViewLabel.addEventHandler(this::handleNodePathLabelMouseRelease, MouseRelease);
+            _nodePathBox.addChild(nodeViewLabel, 0);
+            nodeViewLabel.setOwner(this);
+
+            // Iterate
+            nodeView = nodeView.getNodeViewParent();
+            if (nodeView == null)
+                break;
+
+            // Add divider
+            Label dividerLabel = new Label(" \u2022 ");
+            dividerLabel.setFont(Font.Arial12);
+            _nodePathBox.addChild(dividerLabel, 0);
         }
     }
 
@@ -215,18 +207,29 @@ public class SnapEditorPane extends ViewOwner {
      */
     protected void rebuildLater()
     {
-        _rebuild = true;
+        _rebuildAllBlockViews = true;
         resetLater();
     }
 
     /**
-     * Sets the selected parts.
+     * Called when NodePathLabel has mouse release.
      */
-    public void updateSelectedPart(JNodeView aPart)
+    private void handleNodePathLabelMouseRelease(ViewEvent anEvent)
     {
-        //_supportPane.rebuildUI();
+        Label nodePathLabel = anEvent.getView(Label.class);
+        JNodeView<?> labelNodeView = (JNodeView<?>) nodePathLabel.getProp("SnapPart");
+        JNodeView<?> deepSelNodeView = _deepSelNodeView;
+        setSelNodeView(labelNodeView);
+        _deepSelNodeView = deepSelNodeView;
+    }
+
+    /**
+     * Sets the selected node view.
+     */
+    protected void updateSelNodeView(JNodeView<?> nodeView)
+    {
+        _deepSelNodeView = nodeView;
         resetLater();
-        _deepPart = aPart;
     }
 
     /**
@@ -244,10 +247,12 @@ public class SnapEditorPane extends ViewOwner {
     public void copy()
     {
         // Make sure statement is selected
-        if (!(getSelectedPart() instanceof JStmtView)) {
-            JStmtView stmt = getSelectedPart().getParent(JStmtView.class);
-            if (stmt == null) return;
-            setSelectedPart(stmt);
+        if (!(getSelNodeView() instanceof JStmtView)) {
+            JNodeView<?> selNodeView = getSelNodeView();
+            JStmtView<?> stmtView = selNodeView instanceof JStmtView ? (JStmtView<?>) selNodeView : selNodeView.getParent(JStmtView.class);
+            if (stmtView == null)
+                return;
+            setSelNodeView(stmtView);
         }
 
         // Do copy
@@ -275,10 +280,10 @@ public class SnapEditorPane extends ViewOwner {
             catch (Exception ignore) { }
         }
 
-        // Get SelectedPart and drop node
-        JNodeView selPart = getSelectedPart();
-        if (selPart != null && node != null)
-            selPart.dropNode(node, selPart.getWidth() / 2, selPart.getHeight());
+        // Get SelNodeView and drop node
+        JNodeView<?> selNodeView = getSelNodeView();
+        if (selNodeView != null && node != null)
+            selNodeView.dropNode(node, selNodeView.getWidth() / 2, selNodeView.getHeight());
     }
 
     /**
@@ -313,7 +318,7 @@ public class SnapEditorPane extends ViewOwner {
      */
     public void escape()
     {
-        JNodeView par = getSelectedPart().getNodeViewParent();
-        if (par != null) setSelectedPart(par);
+        JNodeView par = getSelNodeView().getNodeViewParent();
+        if (par != null) setSelNodeView(par);
     }
 }

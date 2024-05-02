@@ -117,12 +117,9 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     }
 
     /**
-     * Returns a string describing the part.
+     * Returns a string describing the node.
      */
-    public String getPartString()
-    {
-        return getJNode().getNodeString();
-    }
+    public String getNodeString()  { return _jnode.getNodeString(); }
 
     /**
      * Drops a node.
@@ -135,9 +132,10 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     /**
      * Standard toString implementation.
      */
+    @Override
     public String toString()
     {
-        return getJNode().toString();
+        return _jnode.toString();
     }
 
     /**

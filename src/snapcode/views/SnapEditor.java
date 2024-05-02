@@ -7,7 +7,7 @@ import snapcode.javatext.JavaTextArea;
 import snap.text.TextLine;
 
 /**
- * The Pane that actually holds SnapPart pieces.
+ * The Pane that actually holds BlockView pieces.
  */
 public class SnapEditor extends StackView {
 
@@ -17,7 +17,7 @@ public class SnapEditor extends StackView {
     // The file view
     private JFileView _fileView;
 
-    // The selected part
+    // The selected node view
     private JNodeView<?> _selNodeView;
 
     // The mouse X/Y during mouse drag
@@ -31,21 +31,24 @@ public class SnapEditor extends StackView {
      */
     public SnapEditor(JavaTextArea javaTextArea)
     {
+        // Basic config
+        super();
+        setFocusable(true);
+        setFocusWhenPressed(true);
+        enableEvents(KeyPress, MousePress, MouseDrag, MouseRelease);
+
         // Set JavaTextArea
         _javaTextArea = javaTextArea;
 
-        // Create FilePart and add
+        // Create FileView and add to editor
         _fileView = new JFileView();
         _fileView._editor = this;
         _fileView.setGrowWidth(true);
         _fileView.setGrowHeight(true);
         addChild(_fileView);
 
-        // Configure mouse handling
-        setFocusable(true);
-        setFocusWhenPressed(true);
-        enableEvents(KeyPress, MousePress, MouseDrag, MouseRelease);
-        rebuildUI();
+        // Rebuild all blocks
+        rebuildAllBlockViews();
     }
 
     /**
@@ -60,6 +63,16 @@ public class SnapEditor extends StackView {
      * Returns the JavaTextArea.
      */
     public JavaTextArea getJavaTextArea()  { return _javaTextArea; }
+
+    /**
+     * Returns the FileView.
+     */
+    public JFileView getFileView()  { return _fileView; }
+
+    /**
+     * Returns the JFile JNode.
+     */
+    public JFile getJFile()  { return _javaTextArea.getJFile(); }
 
     /**
      * Returns the selected node view.
@@ -85,21 +98,11 @@ public class SnapEditor extends StackView {
         // Forward to editor
         SnapEditorPane editorPane = getEditorPane();
         if (editorPane != null)
-            editorPane.updateSelectedPart(_selNodeView);
+            editorPane.updateSelNodeView(_selNodeView);
     }
 
     /**
-     * Returns the FileView.
-     */
-    public JFileView getFileView()  { return _fileView; }
-
-    /**
-     * Returns the JFile JNode.
-     */
-    public JFile getJFile()  { return _javaTextArea.getJFile(); }
-
-    /**
-     * Returns the selected part's class.
+     * Returns the selected node's class.
      */
     public JavaClass getSelNodeEvalClass()
     {
@@ -120,21 +123,21 @@ public class SnapEditor extends StackView {
     /**
      * Rebuilds the pieces.
      */
-    protected void rebuildUI()
+    protected void rebuildAllBlockViews()
     {
         JFileView fileView = getFileView();
         JFile jfile = getJFile();
         fileView.setJNode(jfile);
-        setSelectedPartFromTextArea();
+        setSelNodeViewFromJavaTextArea();
     }
 
     /**
-     * Sets the selected part from TextArea selection.
+     * Sets the selected node view from JavaTextArea selection.
      */
-    private void setSelectedPartFromTextArea()
+    private void setSelNodeViewFromJavaTextArea()
     {
         // Get node view at text sel start
-        int charIndex = getJavaTextArea().getSelStart();
+        int charIndex = _javaTextArea.getSelStart();
         JNodeView<?> nodeView = getNodeViewForCharIndex(charIndex);
 
         // Select node view
@@ -165,7 +168,7 @@ public class SnapEditor extends StackView {
             }
         }
 
-        // Check part
+        // If char index within node char range, return node view
         JNode jnode = parentNodeView.getJNode();
         if (jnode.getStartCharIndex() <= charIndex && charIndex <= jnode.getEndCharIndex())
             return parentNodeView;
@@ -180,7 +183,7 @@ public class SnapEditor extends StackView {
     protected void replaceChars(CharSequence theChars, int aStart, int anEnd)
     {
         _javaTextArea.replaceChars(theChars, null, aStart, anEnd, true);
-        rebuildUI();
+        rebuildAllBlockViews();
     }
 
     /**

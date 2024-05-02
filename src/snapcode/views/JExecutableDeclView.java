@@ -36,7 +36,7 @@ public class JExecutableDeclView<JNODE extends JExecutableDecl> extends JBlockVi
      * Returns a string describing the part.
      */
     @Override
-    public String getPartString()
+    public String getNodeString()
     {
         return _jnode instanceof JMethodDecl ? "Method" : "Constructor";
     }

@@ -105,7 +105,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JBlockView<JNODE> 
     /**
      * Returns a string describing the part.
      */
-    public String getPartString()  { return "Class Declaration"; }
+    public String getNodeString()  { return "Class Declaration"; }
 
     /**
      * A JNodeView subclass for JClassDecl id.
@@ -139,7 +139,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JBlockView<JNODE> 
         /**
          * Returns a string describing the part.
          */
-        public String getPartString()  { return "ClassId"; }
+        public String getNodeString()  { return "ClassId"; }
     }
 
     /**
@@ -173,6 +173,6 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JBlockView<JNODE> 
         /**
          * Returns a string describing the part.
          */
-        public String getPartString()  { return "Type"; }
+        public String getNodeString()  { return "Type"; }
     }
 }
