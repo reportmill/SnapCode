@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import javakit.parse.JClassDecl;
 import javakit.parse.JNode;
 import javakit.parse.JStmt;
 import javakit.parse.JavaParser;
@@ -6,17 +7,27 @@ import javakit.resolver.JavaClass;
 import snap.geom.Point;
 import snap.geom.Rect;
 import snap.gfx.Image;
+import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.view.*;
+import snapcode.app.JavaPage;
+import snapcode.app.PagePane;
 import snapcode.app.WorkspacePane;
+import snapcode.app.WorkspaceTool;
+import snapcode.javatext.JavaTextArea;
 import snapcode.views.JBlockView;
 import snapcode.views.JNodeView;
+import snapcode.views.SnapEditorPage;
+import snapcode.webbrowser.WebPage;
 import java.util.stream.Stream;
 
 /**
- * UI to show puzzle pieces.
+ * Tool to show puzzle blocks for drag and drop coding.
  */
-public class SnapTool extends SnippetTool.ChildTool {
+public class BlocksTool extends WorkspaceTool {
+
+    // The current JavaTextArea
+    protected JavaTextArea _javaTextArea;
 
     // The ColView to hold Method blocks
     private ColView _methodBlocksColView;
@@ -30,10 +41,16 @@ public class SnapTool extends SnippetTool.ChildTool {
     // The selected class
     private JavaClass _selClass;
 
+    // Listener for JavaTextArea prop change
+    private PropChangeListener _textAreaPropChangeLsnr = pc -> javaTextAreaSelNodeChanged();
+
+    // Listener for JavaTextArea drag events
+    private EventListener _textAreaDragEventLsnr = e -> handleJavaTextAreaDragEvent(e);
+
     /**
      * Constructor.
      */
-    public SnapTool(WorkspacePane workspacePane)
+    public BlocksTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
     }
@@ -54,6 +71,9 @@ public class SnapTool extends SnippetTool.ChildTool {
         // Set value
         _selClass = javaClass;
 
+        // Reset UI
+        resetLater();
+
         // Remove existing method blocks
         _methodBlocksColView.removeChildren();
 
@@ -63,17 +83,47 @@ public class SnapTool extends SnippetTool.ChildTool {
     }
 
     /**
+     * Returns whether current is ShowBlocks.
+     */
+    public boolean isShowBlocks()
+    {
+        WebPage selPage = _pagePane.getSelPage();
+        return selPage instanceof SnapEditorPage;
+    }
+
+    /**
+     * Sets whether current page is ShowBlocks.
+     */
+    public void setShowBlocks(boolean aValue)
+    {
+        if (aValue == isShowBlocks()) return;
+
+        // Handle ShowBlocks
+        if (aValue) {
+            WebPage selPage = _pagePane.getSelPage();
+            if (selPage instanceof JavaPage)
+                ((JavaPage) selPage).openAsSnapCode();
+        }
+
+        // Handle show Java text
+        else {
+            WebPage selPage = _pagePane.getSelPage();
+            if (selPage instanceof SnapEditorPage)
+                ((SnapEditorPage) selPage).openAsJavaText();
+        }
+    }
+
+    /**
      * Sets CodeBlocks for current TextArea.SelectedNode.
      */
     public void resetSelClassFromJavaTextArea()
     {
         // Get selected node
         JNode selNode = _javaTextArea != null ? _javaTextArea.getSelNode() : null;
-        while (selNode != null && selNode.getEvalClass() == null)
-            selNode = selNode.getParent();
+        JClassDecl classDecl = selNode != null ? selNode.getParent(JClassDecl.class) : null;
 
-        // Get eval class for selected node
-        JavaClass selNodeEvalClass = selNode != null ? selNode.getEvalClass() : null;
+        // Get eval class for class decl
+        JavaClass selNodeEvalClass = classDecl != null ? classDecl.getEvalClass() : null;
         setSelClass(selNodeEvalClass);
     }
 
@@ -82,15 +132,6 @@ public class SnapTool extends SnippetTool.ChildTool {
      */
     protected View createUI()
     {
-        // Create ListView for directory
-        ListView<String> directoryListView = new ListView<>();
-        directoryListView.setName("DirectoryListView");
-        directoryListView.setMargin(5, 5, 5, 5);
-        directoryListView.setMinHeight(60);
-        directoryListView.setFocusWhenPressed(false);
-        directoryListView.setItems(new String[] { "Methods", "Conditionals" });
-        directoryListView.setSelIndex(0);
-
         // Create method blocks ColView
         _methodBlocksColView = new ColView();
         _methodBlocksColView.setMargin(10, 20, 10, 20);
@@ -112,14 +153,12 @@ public class SnapTool extends SnippetTool.ChildTool {
         ScrollView allBlocksScrollView = new ScrollView(_allBlocksColView);
         allBlocksScrollView.setGrowHeight(true);
 
-        // Create ColView to directoryListView and AllBlockColView and return
-        ColView topColView = new ColView();
-        topColView.setFillWidth(true);
-        topColView.setPrefWidth(300);
-        topColView.setChildren(directoryListView, allBlocksScrollView);
+        // Do normal version and add allBlocksScrollView
+        ColView superUI = (ColView) super.createUI();
+        superUI.addChild(allBlocksScrollView);
 
         // Return
-        return topColView;
+        return superUI;
     }
 
     /**
@@ -127,6 +166,12 @@ public class SnapTool extends SnippetTool.ChildTool {
      */
     protected void initUI()
     {
+        // Get DirectoryListView and configure
+        ListView<String> directoryListView = getView("DirectoryListView", ListView.class);
+        directoryListView.setFocusWhenPressed(false);
+        directoryListView.setItems(new String[] { "Methods", "Conditionals" });
+        directoryListView.setSelIndex(0);
+
         // Create conditional statement block views and add to ConditionalBlocksColView
         String ifStmtStr = "if (true) {\n}";
         String forStmtStr = "for (int i = 0; i < 10; i++) {\n}";
@@ -142,18 +187,50 @@ public class SnapTool extends SnippetTool.ChildTool {
     }
 
     /**
+     * Init showing.
+     */
+    @Override
+    protected void initShowing()
+    {
+        // Start listening to PagePane.SelFile prop change
+        _pagePane.addPropChangeListener(pc -> pagePaneSelFileChanged(), PagePane.SelFile_Prop);
+        pagePaneSelFileChanged();
+    }
+
+    /**
+     * Reset UI.
+     */
+    @Override
+    protected void resetUI()
+    {
+        // Update ClassText
+        JavaClass selClass = getSelClass();
+        setViewText("ClassText", selClass != null ? selClass.getSimpleName() : null);
+
+        // Update ShowBlocksCheckBox
+        setViewValue("ShowBlocksCheckBox", isShowBlocks());
+        setViewEnabled("ShowBlocksCheckBox", _javaTextArea != null);
+    }
+
+    /**
      * Handle UI changes.
      */
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle DirectoryListView
-        if (anEvent.equals("DirectoryListView")) {
-            int selIndex = anEvent.getSelIndex();
-            View selView = _allBlocksColView.getChild(selIndex);
-            Rect selRect = selView.getBoundsLocal();
-            selRect.height = selView.getParent(Scroller.class).getHeight();
-            selView.scrollToVisible(selRect);
+        switch (anEvent.getName()) {
+
+            // Handle DirectoryListView
+            case "DirectoryListView":
+                int selIndex = anEvent.getSelIndex();
+                View selView = _allBlocksColView.getChild(selIndex);
+                Rect selRect = selView.getBoundsLocal();
+                selRect.height = selView.getParent(Scroller.class).getHeight();
+                selView.scrollToVisible(selRect);
+                break;
+
+            // Handle ShowBlocksCheckBox
+            case "ShowBlocksCheckBox": setShowBlocks(anEvent.getBoolValue()); break;
         }
     }
 
@@ -192,13 +269,57 @@ public class SnapTool extends SnippetTool.ChildTool {
     }
 
     /**
+     * Called when PagePane.SelFile property changes
+     */
+    private void pagePaneSelFileChanged()
+    {
+        // Get PagePane JavaPage
+        WebPage selPage = _pagePane.getSelPage();
+        JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
+        if (selPage instanceof SnapEditorPage)
+            javaPage = ((SnapEditorPage) selPage).getJavaPage();
+
+        // Get JavaPage JavaTextArea and set
+        JavaTextArea javaTextArea = javaPage != null ? javaPage.getTextArea() : null;
+        setJavaTextArea(javaTextArea);
+    }
+
+    /**
+     * Sets the JavaTextArea associated with text pane.
+     */
+    private void setJavaTextArea(JavaTextArea javaTextArea)
+    {
+        if (javaTextArea == _javaTextArea) return;
+
+        // Remove listener from old JavaTextArea
+        if (_javaTextArea != null) {
+            _javaTextArea.removePropChangeListener(_textAreaPropChangeLsnr);
+            _javaTextArea.removeEventHandler(_textAreaDragEventLsnr);
+        }
+
+        // Set
+        _javaTextArea = javaTextArea;
+
+        // Start listening to JavaTextArea SelNode prop
+        if (_javaTextArea != null) {
+            _javaTextArea.addPropChangeListener(_textAreaPropChangeLsnr, JavaTextArea.SelNode_Prop);
+            _javaTextArea.addEventHandler(_textAreaDragEventLsnr, View.DragEvents);
+            javaTextAreaSelNodeChanged();
+        }
+    }
+
+    /**
      * Called when JavaTextArea.SelNode changes.
      */
-    @Override
     protected void javaTextAreaSelNodeChanged()
     {
         resetSelClassFromJavaTextArea();
     }
+
+    /**
+     * Called when JavaTextArea gets drag events.
+     */
+    protected void handleJavaTextAreaDragEvent(ViewEvent anEvent)  { }
 
     /**
      * Returns the BlockViews for method invocations for given class.
@@ -267,7 +388,7 @@ public class SnapTool extends SnippetTool.ChildTool {
      * Override for title.
      */
     @Override
-    public String getTitle()  { return "Snippets"; }
+    public String getTitle()  { return "Blocks"; }
 
     /**
      * Returns the statement strings for given class.
