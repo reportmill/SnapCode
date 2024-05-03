@@ -4,6 +4,7 @@ import javakit.parse.JStmt;
 import javakit.parse.JavaParser;
 import javakit.resolver.JavaClass;
 import snap.geom.Point;
+import snap.geom.Rect;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
 import snap.view.*;
@@ -22,6 +23,9 @@ public class SnapTool extends SnippetTool.ChildTool {
 
     // The ColView to hold conditional blocks
     private ColView _conditionalBlocksColView;
+
+    // The ColView to hold all blocks
+    private ColView _allBlocksColView;
 
     // The selected class
     private JavaClass _selClass;
@@ -78,36 +82,44 @@ public class SnapTool extends SnippetTool.ChildTool {
      */
     protected View createUI()
     {
+        // Create ListView for directory
+        ListView<String> directoryListView = new ListView<>();
+        directoryListView.setName("DirectoryListView");
+        directoryListView.setMargin(5, 5, 5, 5);
+        directoryListView.setMinHeight(60);
+        directoryListView.setFocusWhenPressed(false);
+        directoryListView.setItems(new String[] { "Methods", "Conditionals" });
+        directoryListView.setSelIndex(0);
+
         // Create method blocks ColView
         _methodBlocksColView = new ColView();
-        _methodBlocksColView.setPadding(20, 20, 20, 20);
-        _methodBlocksColView.setSpacing(16);
-        _methodBlocksColView.setGrowWidth(true);
-        _methodBlocksColView.setGrowHeight(true);
+        _methodBlocksColView.setMargin(10, 20, 10, 20);
+        _methodBlocksColView.setSpacing(8);
 
-        // Create method blocks ScrollView
-        ScrollView methodBlocksScrollView = new ScrollView(_methodBlocksColView);
-        methodBlocksScrollView.setPrefWidth(200);
-
+        // Create conditional blocks ColView
         _conditionalBlocksColView = new ColView();
-        _conditionalBlocksColView.setPadding(20, 20, 20, 20);
-        _conditionalBlocksColView.setSpacing(16);
-        _conditionalBlocksColView.setGrowWidth(true);
-        _conditionalBlocksColView.setGrowHeight(true);
+        _conditionalBlocksColView.setMargin(10, 20, 10, 20);
+        _conditionalBlocksColView.setPadding(0, 0, 150, 0);
+        _conditionalBlocksColView.setSpacing(8);
 
-        // Wrap in ScrollView and return
-        ScrollView conditionalBlocksScrollView = new ScrollView(_conditionalBlocksColView);
-        conditionalBlocksScrollView.setPrefWidth(200);
+        // Create colView to hold all blocks
+        _allBlocksColView = new ColView();
+        _allBlocksColView.setFillWidth(true);
+        _allBlocksColView.setGrowHeight(true);
+        _allBlocksColView.setChildren(_methodBlocksColView, _conditionalBlocksColView);
 
-        // Create TabView to hold method blocks and conditional blocks
-        TabView tabView = new TabView();
-        tabView.setPrefWidth(300);
-        tabView.addTab("Methods", methodBlocksScrollView);
-        tabView.addTab("Blocks", conditionalBlocksScrollView);
-        tabView.setSelIndex(1);
+        // Wrap in ScrollView
+        ScrollView allBlocksScrollView = new ScrollView(_allBlocksColView);
+        allBlocksScrollView.setGrowHeight(true);
+
+        // Create ColView to directoryListView and AllBlockColView and return
+        ColView topColView = new ColView();
+        topColView.setFillWidth(true);
+        topColView.setPrefWidth(300);
+        topColView.setChildren(directoryListView, allBlocksScrollView);
 
         // Return
-        return tabView;
+        return topColView;
     }
 
     /**
@@ -127,6 +139,22 @@ public class SnapTool extends SnippetTool.ChildTool {
         View uiView = getUI();
         uiView.addEventHandler(this::handleMouseRelease, MouseRelease);
         uiView.addEventHandler(this::handleDragGesture, ViewEvent.Type.DragGesture);
+    }
+
+    /**
+     * Handle UI changes.
+     */
+    @Override
+    protected void respondUI(ViewEvent anEvent)
+    {
+        // Handle DirectoryListView
+        if (anEvent.equals("DirectoryListView")) {
+            int selIndex = anEvent.getSelIndex();
+            View selView = _allBlocksColView.getChild(selIndex);
+            Rect selRect = selView.getBoundsLocal();
+            selRect.height = selView.getParent(Scroller.class).getHeight();
+            selView.scrollToVisible(selRect);
+        }
     }
 
     /**
