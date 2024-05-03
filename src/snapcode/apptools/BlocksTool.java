@@ -121,6 +121,8 @@ public class BlocksTool extends WorkspaceTool {
         // Get selected node
         JNode selNode = _javaTextArea != null ? _javaTextArea.getSelNode() : null;
         JClassDecl classDecl = selNode != null ? selNode.getParent(JClassDecl.class) : null;
+        if (classDecl == null && _javaTextArea != null)
+            classDecl = _javaTextArea.getJFile().getClassDecl();
 
         // Get eval class for class decl
         JavaClass selNodeEvalClass = classDecl != null ? classDecl.getEvalClass() : null;
