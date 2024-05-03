@@ -9,6 +9,7 @@ import snapcode.app.PagePane;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.javatext.JavaTextArea;
+import snapcode.views.SnapEditorPage;
 import snapcode.webbrowser.WebPage;
 
 /**
@@ -104,8 +105,13 @@ public class SnippetTool extends WorkspaceTool {
      */
     private void pagePaneSelFileChanged()
     {
+        // Get PagePane JavaPage
         WebPage selPage = _pagePane.getSelPage();
         JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
+        if (selPage instanceof SnapEditorPage)
+            javaPage = ((SnapEditorPage) selPage).getJavaPage();
+
+        // Get JavaPage JavaTextArea and set
         JavaTextArea javaTextArea = javaPage != null ? javaPage.getTextArea() : null;
         setJavaTextArea(javaTextArea);
     }

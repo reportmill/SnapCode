@@ -246,6 +246,23 @@ public class SnapTool extends SnippetTool.ChildTool {
      */
     private static String[] getStatementStringsForClass(JavaClass javaClass)
     {
+        String[] statementStrings = new String[0];
+
+        // Iterate up class hierarchy adding statements strings
+        for (JavaClass cls = javaClass; cls != null; cls = cls.getSuperClass()) {
+            String[] stmtStrs = getStatementStringsForClassImpl(cls);
+            statementStrings = ArrayUtils.addAll(statementStrings, stmtStrs);
+        }
+
+        // Return
+        return statementStrings;
+    }
+
+    /**
+     * Returns the statement strings for given class.
+     */
+    private static String[] getStatementStringsForClassImpl(JavaClass javaClass)
+    {
         String simpleName = javaClass.getSimpleName();
         switch (simpleName) {
             case "GameActor": return GameActorPieces;

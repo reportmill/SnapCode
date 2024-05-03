@@ -39,6 +39,11 @@ public class SnapEditorPage extends WebPage {
     }
 
     /**
+     * Return the JavaPage.
+     */
+    public JavaPage getJavaPage()  { return _javaPage; }
+
+    /**
      * Override to forward to JavaPage.
      */
     public void setBrowser(WebBrowser aBrowser)
