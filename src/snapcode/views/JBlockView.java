@@ -8,7 +8,6 @@ import snap.gfx.*;
 import snap.util.ListUtils;
 import snap.view.*;
 import snapcode.javatext.JavaTextAreaNodeHpr;
-
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -83,26 +82,27 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     public void setJNode(JNODE aJNode)
     {
         super.setJNode(aJNode);
-        updateUI();
+        rebuildChildViews();
     }
 
     /**
-     * Updates the UI.
+     * Rebuilds child views.
      */
-    protected void updateUI()
+    protected void rebuildChildViews()
     {
-        // Add row views
+        // Rebuild row views and add to RowView
         View[] rowViews = createRowViews();
         if (rowViews != null)
             Stream.of(rowViews).forEach(this::addChildToRowView);
 
-        // Add child block views to colView
+        // Rebuild child block views and add to colView
         JBlockView<?>[] childBlockViews = getChildBlockViews();
         if (childBlockViews.length > 0) {
             ColView colView = getColView();
             Stream.of(childBlockViews).forEach(colView::addChild);
         }
 
+        // If part of hierarchy, enable drag events
         if (_jnode.getFile() != null)
             enableEvents(DragEvents);
     }
@@ -291,6 +291,28 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     }
 
     /**
+     * Override to paint selected.
+     */
+    @Override
+    protected void paintAbove(Painter aPntr)
+    {
+        // If under dragged piece, paint bright highlight overlay
+        if (this == _blockViewUnderDrag) {
+            aPntr.setColor(UNDER_DRAG_COLOR);
+            aPntr.fill(_blockView.getPath());
+        }
+
+        // If selected, paint slight highlight overlay
+        else if (isSelected()) {
+            aPntr.setColor(SELECTED_OVERLAY_COLOR);
+            aPntr.fill(_blockView.getPath());
+            aPntr.setColor(SELECTED_OVERLAY_STROKE_COLOR);
+            aPntr.setStroke(Stroke.Stroke1);
+            aPntr.draw(_blockView.getPath());
+        }
+    }
+
+    /**
      * Override.
      */
     protected double getPrefWidthImpl(double aH)
@@ -347,28 +369,6 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
 
         // Layout Background, Foreground block views
         _blockView.resizeBlock(viewW, viewH);
-    }
-
-    /**
-     * Override to paint selected.
-     */
-    @Override
-    protected void paintAbove(Painter aPntr)
-    {
-        // If under dragged piece, paint bright highlight overlay
-        if (this == _blockViewUnderDrag) {
-            aPntr.setColor(UNDER_DRAG_COLOR);
-            aPntr.fill(_blockView.getPath());
-        }
-
-        // If selected, paint slight highlight overlay
-        else if (isSelected()) {
-            aPntr.setColor(SELECTED_OVERLAY_COLOR);
-            aPntr.fill(_blockView.getPath());
-            aPntr.setColor(SELECTED_OVERLAY_STROKE_COLOR);
-            aPntr.setStroke(Stroke.Stroke1);
-            aPntr.draw(_blockView.getPath());
-        }
     }
 
     /**

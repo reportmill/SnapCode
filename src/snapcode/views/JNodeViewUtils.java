@@ -16,6 +16,30 @@ public class JNodeViewUtils {
     private static Map<Class<? extends JNode>,Class<JNodeView<?>>> _nodeViewClasses = new HashMap<>();
 
     /**
+     * Returns the node view at given index.
+     */
+    public static JNodeView<?> getNodeViewForNodeAndCharIndex(JBlockView<?> parentNodeView, int charIndex)
+    {
+        // Check children
+        JNodeView<?>[] children = parentNodeView.getChildBlockViews();
+        for (JNodeView<?> child : children) {
+            if (child instanceof JBlockView) {
+                JNodeView<?> nodeView = getNodeViewForNodeAndCharIndex((JBlockView<?>) child, charIndex);
+                if (nodeView != null)
+                    return nodeView;
+            }
+        }
+
+        // If char index within node char range, return node view
+        JNode jnode = parentNodeView.getJNode();
+        if (jnode.getStartCharIndex() <= charIndex && charIndex <= jnode.getEndCharIndex())
+            return parentNodeView;
+
+        // Return not found
+        return null;
+    }
+
+    /**
      * Creates a label for this block.
      */
     public static Label createLabel(String aString)

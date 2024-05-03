@@ -141,31 +141,7 @@ public class SnapEditor extends StackView {
     public JNodeView<?> getNodeViewForCharIndex(int charIndex)
     {
         JFileView fileView = getFileView();
-        return getNodeViewForNodeAndCharIndex(fileView, charIndex);
-    }
-
-    /**
-     * Returns the node view at given index.
-     */
-    private JNodeView<?> getNodeViewForNodeAndCharIndex(JBlockView<?> parentNodeView, int charIndex)
-    {
-        // Check children
-        JNodeView<?>[] children = parentNodeView.getChildBlockViews();
-        for (JNodeView<?> child : children) {
-            if (child instanceof JBlockView) {
-                JNodeView<?> nodeView = getNodeViewForNodeAndCharIndex((JBlockView<?>) child, charIndex);
-                if (nodeView != null)
-                    return nodeView;
-            }
-        }
-
-        // If char index within node char range, return node view
-        JNode jnode = parentNodeView.getJNode();
-        if (jnode.getStartCharIndex() <= charIndex && charIndex <= jnode.getEndCharIndex())
-            return parentNodeView;
-
-        // Return not found
-        return null;
+        return JNodeViewUtils.getNodeViewForNodeAndCharIndex(fileView, charIndex);
     }
 
     /**
