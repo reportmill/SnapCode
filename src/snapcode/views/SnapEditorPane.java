@@ -1,4 +1,5 @@
 package snapcode.views;
+import snap.props.PropChangeListener;
 import snapcode.javatext.JavaDoc;
 import snapcode.javatext.JavaTextArea;
 import snapcode.javatext.JavaTextPane;
@@ -27,6 +28,9 @@ public class SnapEditorPane extends ViewOwner {
     // The deepest node view of current NodePath (which is SelNodeView, unless NodePath changed SelNode)
     private JNodeView<?> _deepSelNodeView;
 
+    // A prop change listener for JavaTextArea.SelNode changes
+    private PropChangeListener _javaTextAreaSelNodeChanged = pc -> javaTextAreaSelNodeChanged();
+
     /**
      * Constructor.
      */
@@ -34,6 +38,16 @@ public class SnapEditorPane extends ViewOwner {
     {
         _javaTextPane = javaTextPane;
         _javaTextArea = javaTextPane.getTextArea();
+    }
+
+    /**
+     * Called when done using pane to clean up (remove listeners).
+     */
+    protected void closeEditorPane()
+    {
+        _javaTextArea.removePropChangeListener(_javaTextAreaSelNodeChanged);
+        if (_editor != null)
+            _editor.closeEditor();
     }
 
     /**
@@ -90,7 +104,7 @@ public class SnapEditorPane extends ViewOwner {
     protected void initUI()
     {
         // Register to reset UI when JavaTextArea.SelNode changes
-        _javaTextArea.addPropChangeListener(pc -> javaTextAreaSelNodeChanged(), JavaTextArea.SelNode_Prop);
+        _javaTextArea.addPropChangeListener(_javaTextAreaSelNodeChanged, JavaTextArea.SelNode_Prop);
 
         // Add action handlers
         addKeyActionHandler("CutButton", "Shortcut+X");

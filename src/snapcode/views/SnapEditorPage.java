@@ -101,6 +101,10 @@ public class SnapEditorPage extends WebPage {
      */
     public void openAsJavaText()
     {
+        // Close editor pane to remove listeners
+        _editorPane.closeEditorPane();
+
+        // Reset JavaPage
         WebURL url = getURL();
         WebBrowser browser = getBrowser();
         browser.setPageForURL(url, _javaPage);
