@@ -1,11 +1,10 @@
 package snapcode.views;
 import javakit.parse.*;
-import javakit.resolver.JavaClass;
 import snap.text.TextBlock;
 import snap.view.*;
 import snap.viewx.Explode;
 import snapcode.javatext.JavaTextArea;
-import snap.text.TextLine;
+import snapcode.javatext.JavaTextAreaNodeHpr;
 
 /**
  * The Pane that actually holds BlockView pieces.
@@ -14,6 +13,9 @@ public class SnapEditor extends StackView {
 
     // The JavaTextArea
     private JavaTextArea _javaTextArea;
+
+    // The JavaTextAreaNodeHpr
+    private JavaTextAreaNodeHpr _nodeHpr;
 
     // The file view
     private JFileView _fileView;
@@ -44,6 +46,7 @@ public class SnapEditor extends StackView {
         // Set JavaTextArea and start listening to changes
         _javaTextArea = javaTextArea;
         _javaTextArea.getTextBlock().addPropChangeListener(pc -> rebuildAllBlockViewsLater(), TextBlock.Chars_Prop);
+        _nodeHpr = _javaTextArea.getNodeHpr();
 
         // Create FileView and add to editor
         _fileView = new JFileView();
@@ -55,6 +58,16 @@ public class SnapEditor extends StackView {
         // Rebuild all blocks
         rebuildAllBlockViews();
     }
+
+    /**
+     * Returns the JavaTextArea.
+     */
+    //public JavaTextArea getJavaTextArea()  { return _javaTextArea; }
+
+    /**
+     * Returns the JavaTextArea NodeHpr.
+     */
+    public JavaTextAreaNodeHpr getNodeHpr()  { return _nodeHpr; }
 
     /**
      * Returns the FileView.
@@ -86,25 +99,6 @@ public class SnapEditor extends StackView {
         int nodeStartCharIndex = jnode.getStartCharIndex();
         int nodeEndCharIndex = jnode.getEndCharIndex();
         _javaTextArea.setSel(nodeStartCharIndex, nodeEndCharIndex);
-    }
-
-    /**
-     * Returns the selected node's class.
-     */
-    public JavaClass getSelNodeEvalClass()
-    {
-        // Get selected NodeView
-        JNodeView<?> selNodeView = getSelNodeView();
-        if (selNodeView == null)
-            selNodeView = getFileView();
-
-        // Get first parent JNode that resolves to class
-        JNode selNode = selNodeView.getJNode();
-        while (selNode != null && selNode.getEvalClass() == null)
-            selNode = selNode.getParent();
-
-        // Return eval class
-        return selNode != null ? selNode.getEvalClass() : null;
     }
 
     /**
@@ -175,72 +169,6 @@ public class SnapEditor extends StackView {
     }
 
     /**
-     * Insets a node.
-     */
-    public void insertNode(JNode baseNode, JNode insertNode, int aPos)
-    {
-        // If base node is file, complain and return
-        if (baseNode instanceof JFile) {
-            System.out.println("Can't add to file");
-            return;
-        }
-
-        // If base node is statement expr
-        if (baseNode instanceof JStmtExpr && insertNode instanceof JStmtExpr) {
-
-            // Get baseNode class and selNode class
-            JavaClass baseNodeClass = baseNode.getEvalClass();
-            JavaClass selNodeClass = getSelNodeEvalClass();
-
-            //
-            if (baseNodeClass == selNodeClass && !baseNodeClass.getName().equals("void")) {
-
-                // Get insert string and index
-                String nodeStr = insertNode.getString();
-                String insertStr = '.' + nodeStr;
-                int insertCharIndex = baseNode.getEndCharIndex();
-
-                // Replace chars and return
-                _javaTextArea.replaceChars(insertStr, insertCharIndex - 1, insertCharIndex);
-                _javaTextArea.setSel(insertCharIndex, insertCharIndex + nodeStr.length());
-                return;
-            }
-        }
-
-        // Get insert char index for base node
-        int insertCharIndex = aPos < 0 ? getCharIndexBeforeNode(baseNode) : aPos > 0 ? getCharIndexAfterNode(baseNode) : getCharIndexInNode(baseNode);
-
-        // Get string for insert node
-        String indentStr = getIndentStringForNode(baseNode, aPos);
-        String nodeStr = insertNode.getString().trim().replace("\n", "\n" + indentStr);
-        String insertStr = indentStr + nodeStr + '\n';
-
-        // Replace chars
-        _javaTextArea.replaceChars(insertStr, insertCharIndex, insertCharIndex);
-        _javaTextArea.setSel(insertCharIndex + indentStr.length(), insertCharIndex + indentStr.length() + nodeStr.trim().length());
-    }
-
-    /**
-     * Replaces a JNode with string.
-     */
-    public void replaceNodeWithString(JNode aNode, String aString)
-    {
-        int startCharIndex = aNode.getStartCharIndex();
-        int endCharIndex = aNode.getEndCharIndex();
-        _javaTextArea.replaceChars(aString, startCharIndex, endCharIndex);
-    }
-
-    /**
-     * Removes a node.
-     */
-    public void removeNode(JNode aNode)
-    {
-        int startCharIndex = getCharIndexBeforeNode(aNode);
-        int endCharIndex = getCharIndexAfterNode(aNode);
-        _javaTextArea.replaceChars(null, startCharIndex, endCharIndex);
-    }
-
-    /**
      * Removes given node view.
      */
     public void removeNodeView(JNodeView<?> nodeView)
@@ -260,7 +188,7 @@ public class SnapEditor extends StackView {
         // Remove the node
         if (nodeView.isManaged()) {
             JNode node = nodeView.getJNode();
-            removeNode(node);
+            _nodeHpr.removeNode(node);
         }
 
         // Or remove shelved node
@@ -277,66 +205,11 @@ public class SnapEditor extends StackView {
     {
         // Remove the node
         JNode node = nodeView.getJNode();
-        removeNode(node);
+        _nodeHpr.removeNode(node);
 
         // Add to shelf
         JFileView fileView = getFileView();
         fileView.addNodeViewToShelf(nodeView);
-    }
-
-    /**
-     * Returns char index before given node.
-     */
-    public int getCharIndexBeforeNode(JNode aNode)
-    {
-        int nodeStartCharIndex = aNode.getStartCharIndex();
-        JExpr scopeExpr = aNode instanceof JExpr ? ((JExpr) aNode).getScopeExpr() : null;
-        if (scopeExpr != null)
-            return scopeExpr.getEndCharIndex();
-
-        TextLine textLine = _javaTextArea.getLineForCharIndex(nodeStartCharIndex);
-        return textLine.getStartCharIndex();
-    }
-
-    /**
-     * Returns char index after given node.
-     */
-    public int getCharIndexAfterNode(JNode aNode)
-    {
-        int nodeEndCharIndex = aNode.getEndCharIndex();
-        JNode nodeParent = aNode.getParent();
-        JExprDot dotExpr = nodeParent instanceof JExprDot ? (JExprDot) nodeParent : null;
-        if (dotExpr != null)
-            return dotExpr.getExpr().getEndCharIndex();
-
-        TextLine textLine = _javaTextArea.getLineForCharIndex(nodeEndCharIndex);
-        return textLine.getEndCharIndex();
-    }
-
-    /**
-     * Returns in the node.
-     */
-    public int getCharIndexInNode(JNode aNode)
-    {
-        int nodeStartCharIndex = aNode.getStartCharIndex();
-        while (nodeStartCharIndex < _javaTextArea.length() && _javaTextArea.charAt(nodeStartCharIndex) != '{')
-            nodeStartCharIndex++;
-
-        TextLine textLine = _javaTextArea.getLineForCharIndex(nodeStartCharIndex);
-        return textLine.getEndCharIndex();
-    }
-
-    /**
-     * Returns the indent.
-     */
-    private String getIndentStringForNode(JNode aNode, int aPos)
-    {
-        int nodeStartCharIndex = aNode.getStartCharIndex();
-        TextLine textLine = _javaTextArea.getLineForCharIndex(nodeStartCharIndex);
-        String indentStr = textLine.getIndentString();
-        if (aPos == 0)
-            indentStr += "    ";
-        return indentStr;
     }
 
     /**

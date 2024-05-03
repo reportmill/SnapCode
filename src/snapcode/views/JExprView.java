@@ -1,6 +1,7 @@
 package snapcode.views;
 import javakit.parse.*;
 import snap.view.*;
+import snapcode.javatext.JavaTextAreaNodeHpr;
 
 /**
  * A JNodeView subclass for JExpr.
@@ -100,14 +101,19 @@ public class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
             getEnv().runLater(() ->
                     SnapEditorPopup.getShared().activatePopupList(this, _textField.getText(), _textField.getSelStart()));
 
-            // Handle ExprText Action
+        // Handle ExprText Action
         else {
-            SnapEditorPopup hpop = SnapEditorPopup.getShared();
-            String str = _textField.getText();
-            if (hpop.isShowing()) str = hpop.getFixedText();
-            SnapEditor sed = getEditor();
-            sed.replaceNodeWithString(getJNode(), str);
-            hpop.hide();
+
+            // Get expression string
+            SnapEditorPopup javaPopup = SnapEditorPopup.getShared();
+            String exprStr = _textField.getText();
+            if (javaPopup.isShowing())
+                exprStr = javaPopup.getFixedText();
+
+            // Replace node with expression string
+            JavaTextAreaNodeHpr nodeHpr = getNodeHpr();
+            nodeHpr.replaceNodeWithString(_jnode, exprStr);
+            javaPopup.hide();
         }
     }
 
@@ -123,15 +129,16 @@ public class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
             return;
         }
 
-        if (aJNode instanceof JStmtExpr)
-            aJNode = ((JStmtExpr) aJNode).getExpr();
-        if (!(aJNode instanceof JExpr)) {
+        JStmtExpr exprStmt = aJNode instanceof JStmtExpr ? (JStmtExpr) aJNode : null;
+        JExpr expr = exprStmt != null ? exprStmt.getExpr() : null;
+        if (expr == null) {
             System.out.println("SnapPartExprEditor: Can't drop node " + aJNode);
             return;
         }
 
         // Replace expression with DropNode
-        String str = aJNode.getString();
-        getEditor().replaceNodeWithString(getJNode(), str);
+        String exprStr = expr.getString();
+        JavaTextAreaNodeHpr nodeHpr = getNodeHpr();
+        nodeHpr.replaceNodeWithString(getJNode(), exprStr);
     }
 }

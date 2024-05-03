@@ -3,6 +3,7 @@ import javakit.parse.*;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.view.*;
+import snapcode.javatext.JavaTextAreaNodeHpr;
 
 /**
  * A view that manages painting and editing of a JNode as puzzle piece.
@@ -59,6 +60,37 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     }
 
     /**
+     * Returns the SnapEditor.
+     */
+    public SnapEditor getEditor()
+    {
+        JNodeView<?> parentNodeView = getNodeViewParent();
+        return parentNodeView != null ? parentNodeView.getEditor() : null;
+    }
+
+    /**
+     * Returns the JavaTextArea.NodeHpr.
+     */
+    public JavaTextAreaNodeHpr getNodeHpr()
+    {
+        SnapEditor editor = getEditor();
+        return editor != null ? editor.getNodeHpr() : null;
+    }
+
+    /**
+     * Returns the parent NodeView.
+     */
+    public JNodeView<?> getNodeViewParent()
+    {
+        return getParent(JNodeView.class);
+    }
+
+    /**
+     * Returns a string describing the node.
+     */
+    public String getNodeString()  { return _jnode.getNodeString(); }
+
+    /**
      * Returns whether part is selected.
      */
     public boolean isSelected()  { return _selected; }
@@ -71,6 +103,14 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
         if (aValue == _selected) return;
         _selected = aValue;
         repaint();
+    }
+
+    /**
+     * Drops a node.
+     */
+    protected void dropNode(JNode aNode, double anX, double aY)
+    {
+        System.out.println("Cannot add node to " + getClass().getSimpleName());
     }
 
     /**
@@ -98,35 +138,6 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     protected void layoutImpl()
     {
         BoxView.layout(this, getChildLast(), true, true);
-    }
-
-    /**
-     * Returns the SnapEditor.
-     */
-    public SnapEditor getEditor()
-    {
-        return getNodeViewParent() != null ? getNodeViewParent().getEditor() : null;
-    }
-
-    /**
-     * Returns the parent NodeView.
-     */
-    public JNodeView<?> getNodeViewParent()
-    {
-        return getParent(JNodeView.class);
-    }
-
-    /**
-     * Returns a string describing the node.
-     */
-    public String getNodeString()  { return _jnode.getNodeString(); }
-
-    /**
-     * Drops a node.
-     */
-    protected void dropNode(JNode aNode, double anX, double aY)
-    {
-        System.out.println("Cannot add node to " + getClass().getSimpleName());
     }
 
     /**

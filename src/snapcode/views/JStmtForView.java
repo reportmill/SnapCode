@@ -4,6 +4,7 @@ import snap.view.Label;
 import snap.view.TextField;
 import snap.view.View;
 import snap.view.ViewEvent;
+import snapcode.javatext.JavaTextAreaNodeHpr;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,8 +79,13 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
      */
     protected void handleTextEvent(ViewEvent anEvent)
     {
-        TextField tfield = anEvent.getView(TextField.class);
-        JNode jnode = (JNode) tfield.getProp("Expr");
-        getEditor().replaceNodeWithString(jnode, anEvent.getStringValue());
+        // Get node from textField
+        TextField textField = anEvent.getView(TextField.class);
+        JNode jnode = (JNode) textField.getProp("Expr");
+
+        // Replace node with string
+        String exprStr = anEvent.getStringValue();
+        JavaTextAreaNodeHpr nodeHpr = getNodeHpr();
+        nodeHpr.replaceNodeWithString(jnode, exprStr);
     }
 }

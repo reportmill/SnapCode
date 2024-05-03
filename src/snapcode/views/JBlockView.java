@@ -7,6 +7,8 @@ import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.ListUtils;
 import snap.view.*;
+import snapcode.javatext.JavaTextAreaNodeHpr;
+
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -434,27 +436,27 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
         // If not a top level block, see if statement goes before or after
         boolean isTopLevelBlock = _jnode instanceof JBodyDecl;
         boolean isParentBlock = isParentBlock();
-        SnapEditor editor = getEditor();
+        JavaTextAreaNodeHpr nodeHpr = getNodeHpr();
 
         // If not top level, see if drop statement should go before or after
         if (!isTopLevelBlock) {
 
             // If drop Y less than half block base height, insert node before statement
             if (aY < BlockView.BASE_HEIGHT / 2) {
-                editor.insertNode(_jnode, aNode, -1);
+                nodeHpr.insertNode(_jnode, aNode, -1);
                 return;
             }
 
             // If not parent block or drop Y greater than half block tail height, insert node after statement
             else if (!isParentBlock || aY >= getHeight() - BlockView.BOX_TAIL_HEIGHT / 2) {
-                editor.insertNode(_jnode, aNode, 1);
+                nodeHpr.insertNode(_jnode, aNode, 1);
                 return;
             }
         }
 
         // If top level block but no children, insert inside statement
         if (getChildBlockViewCount() == 0)
-            editor.insertNode(_jnode, aNode, 0);
+            nodeHpr.insertNode(_jnode, aNode, 0);
 
         // If before first child statement, have first child dropNode, otherwise have last child dropNode
         else if (aY < getHeight() / 2) {

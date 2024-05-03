@@ -43,6 +43,9 @@ public class JavaTextArea extends TextArea {
     // The last painted token bounds
     private Rect _selTokensBounds = new Rect();
 
+    // A helper class to manipulate text via nodes
+    private JavaTextAreaNodeHpr _nodeHpr;
+
     // A PopupList to show code completion stuff
     private JavaPopupList _popup;
 
@@ -108,6 +111,15 @@ public class JavaTextArea extends TextArea {
         // Get JavaTextDoc and forward
         JavaTextDoc javaTextDoc = (JavaTextDoc) getSourceText();
         return javaTextDoc.getJFile();
+    }
+
+    /**
+     * Returns the JavaTextAreaNodeHpr, a helper class to manipulate text with nodes.
+     */
+    public JavaTextAreaNodeHpr getNodeHpr()
+    {
+        if (_nodeHpr != null) return _nodeHpr;
+        return _nodeHpr = new JavaTextAreaNodeHpr(this);
     }
 
     /**
