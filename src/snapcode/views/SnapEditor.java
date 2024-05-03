@@ -1,6 +1,7 @@
 package snapcode.views;
 import javakit.parse.*;
 import javakit.resolver.JavaClass;
+import snap.text.TextBlock;
 import snap.view.*;
 import snap.viewx.Explode;
 import snapcode.javatext.JavaTextArea;
@@ -26,6 +27,9 @@ public class SnapEditor extends StackView {
     // The currently dragging node view
     private JBlockView<?> _dragNodeView;
 
+    // A run to rebuild all blocks after delay
+    private Runnable _rebuildAllBlocksRun, REBUILD_ALL_BLOCKS_RUN = this::rebuildAllBlockViews;
+
     /**
      * Constructor.
      */
@@ -37,8 +41,9 @@ public class SnapEditor extends StackView {
         setFocusWhenPressed(true);
         enableEvents(KeyPress, MousePress, MouseDrag, MouseRelease);
 
-        // Set JavaTextArea
+        // Set JavaTextArea and start listening to changes
         _javaTextArea = javaTextArea;
+        _javaTextArea.getTextBlock().addPropChangeListener(pc -> rebuildAllBlockViewsLater(), TextBlock.Chars_Prop);
 
         // Create FileView and add to editor
         _fileView = new JFileView();
@@ -50,19 +55,6 @@ public class SnapEditor extends StackView {
         // Rebuild all blocks
         rebuildAllBlockViews();
     }
-
-    /**
-     * Returns the SnapEditorPane.
-     */
-    public SnapEditorPane getEditorPane()
-    {
-        return getOwner(SnapEditorPane.class);
-    }
-
-    /**
-     * Returns the JavaTextArea.
-     */
-    public JavaTextArea getJavaTextArea()  { return _javaTextArea; }
 
     /**
      * Returns the FileView.
@@ -94,11 +86,6 @@ public class SnapEditor extends StackView {
         int nodeStartCharIndex = jnode.getStartCharIndex();
         int nodeEndCharIndex = jnode.getEndCharIndex();
         _javaTextArea.setSel(nodeStartCharIndex, nodeEndCharIndex);
-
-        // Forward to editor
-        SnapEditorPane editorPane = getEditorPane();
-        if (editorPane != null)
-            editorPane.updateSelNodeView(_selNodeView);
     }
 
     /**
@@ -129,6 +116,16 @@ public class SnapEditor extends StackView {
         JFile jfile = getJFile();
         fileView.setJNode(jfile);
         setSelNodeViewFromJavaTextArea();
+        _rebuildAllBlocksRun = null;
+    }
+
+    /**
+     * Rebuilds the pieces.
+     */
+    protected void rebuildAllBlockViewsLater()
+    {
+        if (_rebuildAllBlocksRun == null)
+            ViewUtils.runLater(_rebuildAllBlocksRun = REBUILD_ALL_BLOCKS_RUN);
     }
 
     /**
@@ -178,20 +175,6 @@ public class SnapEditor extends StackView {
     }
 
     /**
-     * Replaces a string.
-     */
-    protected void replaceChars(CharSequence theChars, int aStart, int anEnd)
-    {
-        _javaTextArea.replaceChars(theChars, null, aStart, anEnd, true);
-        rebuildAllBlockViews();
-    }
-
-    /**
-     * Sets text selection.
-     */
-    protected void setTextSel(int aStart, int anEnd)  { _javaTextArea.setSel(aStart, anEnd); }
-
-    /**
      * Insets a node.
      */
     public void insertNode(JNode baseNode, JNode insertNode, int aPos)
@@ -218,8 +201,8 @@ public class SnapEditor extends StackView {
                 int insertCharIndex = baseNode.getEndCharIndex();
 
                 // Replace chars and return
-                replaceChars(insertStr, insertCharIndex - 1, insertCharIndex);
-                setTextSel(insertCharIndex, insertCharIndex + nodeStr.length());
+                _javaTextArea.replaceChars(insertStr, insertCharIndex - 1, insertCharIndex);
+                _javaTextArea.setSel(insertCharIndex, insertCharIndex + nodeStr.length());
                 return;
             }
         }
@@ -233,16 +216,18 @@ public class SnapEditor extends StackView {
         String insertStr = indentStr + nodeStr + '\n';
 
         // Replace chars
-        replaceChars(insertStr, insertCharIndex, insertCharIndex);
-        setTextSel(insertCharIndex + indentStr.length(), insertCharIndex + indentStr.length() + nodeStr.trim().length());
+        _javaTextArea.replaceChars(insertStr, insertCharIndex, insertCharIndex);
+        _javaTextArea.setSel(insertCharIndex + indentStr.length(), insertCharIndex + indentStr.length() + nodeStr.trim().length());
     }
 
     /**
      * Replaces a JNode with string.
      */
-    public void replaceJNodeWithString(JNode aNode, String aString)
+    public void replaceNodeWithString(JNode aNode, String aString)
     {
-        replaceChars(aString, aNode.getStartCharIndex(), aNode.getEndCharIndex());
+        int startCharIndex = aNode.getStartCharIndex();
+        int endCharIndex = aNode.getEndCharIndex();
+        _javaTextArea.replaceChars(aString, startCharIndex, endCharIndex);
     }
 
     /**
@@ -252,7 +237,7 @@ public class SnapEditor extends StackView {
     {
         int startCharIndex = getCharIndexBeforeNode(aNode);
         int endCharIndex = getCharIndexAfterNode(aNode);
-        replaceChars(null, startCharIndex, endCharIndex);
+        _javaTextArea.replaceChars(null, startCharIndex, endCharIndex);
     }
 
     /**
@@ -373,14 +358,14 @@ public class SnapEditor extends StackView {
      */
     private void keyPress(ViewEvent anEvent)
     {
-        JNodeView<?> selNodeView = getSelNodeView();
         int keyCode = anEvent.getKeyCode();
 
         switch (keyCode) {
 
             // Handle Backspace, delete
             case KeyCode.BACK_SPACE:
-            case KeyCode.DELETE: removeNodeView(selNodeView); anEvent.consume(); break;
+            case KeyCode.DELETE: delete(); anEvent.consume(); break;
+            case KeyCode.ESCAPE: escape(); anEvent.consume(); break;
         }
     }
 
@@ -435,5 +420,89 @@ public class SnapEditor extends StackView {
         _dragNodeView.setTransX(0);
         _dragNodeView.setTransY(0);
         _dragNodeView = null;
+    }
+
+    /**
+     * Cut current selection to clipboard.
+     */
+    public void cut()
+    {
+        copy();
+        delete();
+    }
+
+    /**
+     * Copy current selection to clipboard.
+     */
+    public void copy()
+    {
+        // Make sure statement is selected
+        JNodeView<?> selNodeView = getSelNodeView();
+        if (!(selNodeView instanceof JStmtView)) {
+            JStmtView<?> stmtView = selNodeView.getParent(JStmtView.class);
+            if (stmtView == null)
+                return;
+            setSelNodeView(stmtView);
+        }
+
+        // Do copy
+        _javaTextArea.copy();
+    }
+
+    /**
+     * Paste ClipBoard contents.
+     */
+    public void paste()
+    {
+        // Get Clipboard String
+        Clipboard clipboard = Clipboard.get();
+        String str = clipboard.hasString() ? clipboard.getString() : null;
+        if (str == null)
+            return;
+
+        // Parse for statement or expression
+        JavaParser javaParser = JavaParser.getShared();
+        JNode node = null;
+        try { node = javaParser.parseStatement(str, 0); }
+        catch (Exception ignore) { }
+        if (node == null) {
+            try { node = javaParser.parseExpression(str); }
+            catch (Exception ignore) { }
+        }
+
+        // Get SelNodeView and drop node
+        JNodeView<?> selNodeView = getSelNodeView();
+        if (selNodeView != null && node != null)
+            selNodeView.dropNode(node, selNodeView.getWidth() / 2, selNodeView.getHeight());
+    }
+
+    /**
+     * Deletes current selection.
+     */
+    public void delete()
+    {
+        JNodeView<?> selNodeView = getSelNodeView();
+        removeNodeView(selNodeView);
+    }
+
+    /**
+     * Undo last change.
+     */
+    public void undo()  { _javaTextArea.undo(); }
+
+    /**
+     * Redo last undo.
+     */
+    public void redo()  { _javaTextArea.redo(); }
+
+    /**
+     * Escape.
+     */
+    public void escape()
+    {
+        JNodeView<?> selNodeView = getSelNodeView();
+        JNodeView<?> parentNodeView = selNodeView.getNodeViewParent();
+        if (parentNodeView != null)
+            setSelNodeView(parentNodeView);
     }
 }

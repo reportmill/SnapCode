@@ -80,6 +80,6 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
     {
         TextField tfield = anEvent.getView(TextField.class);
         JNode jnode = (JNode) tfield.getProp("Expr");
-        getEditor().replaceJNodeWithString(jnode, anEvent.getStringValue());
+        getEditor().replaceNodeWithString(jnode, anEvent.getStringValue());
     }
 }

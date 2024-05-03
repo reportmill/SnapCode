@@ -106,7 +106,7 @@ public class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
             String str = _textField.getText();
             if (hpop.isShowing()) str = hpop.getFixedText();
             SnapEditor sed = getEditor();
-            sed.replaceJNodeWithString(getJNode(), str);
+            sed.replaceNodeWithString(getJNode(), str);
             hpop.hide();
         }
     }
@@ -132,6 +132,6 @@ public class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
 
         // Replace expression with DropNode
         String str = aJNode.getString();
-        getEditor().replaceJNodeWithString(getJNode(), str);
+        getEditor().replaceNodeWithString(getJNode(), str);
     }
 }
