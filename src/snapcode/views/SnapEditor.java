@@ -172,11 +172,13 @@ public class SnapEditor extends StackView {
         explode.setRunTime(300);
         explode.setHostView(this);
         explode.play();
+
+        // Hide nodeView
+        nodeView.setVisible(false);
     }
 
     /**
      * Called when anim is done.
-     * @param nodeView
      */
     private void removeNodeViewAnimDone(JNodeView<?> nodeView)
     {
