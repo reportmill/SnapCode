@@ -3,27 +3,22 @@ import javakit.parse.JFile;
 import javakit.parse.JavaParser;
 import snap.view.Clipboard;
 import snap.viewx.FilePanel;
-import snap.web.RecentFiles;
+import snap.web.*;
 import snapcode.app.JavaPage;
 import snapcode.app.SnapCodeUtils;
 import snapcode.project.Project;
 import snapcode.project.WorkspaceBuilder;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
-import snap.util.FileUtils;
 import snap.util.StringUtils;
 import snap.view.View;
 import snap.viewx.DialogBox;
 import snap.viewx.FormBuilder;
 import snapcode.webbrowser.WebPage;
-import snap.web.WebFile;
-import snap.web.WebSite;
-import snap.web.WebUtils;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import java.io.File;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * This class is a WorkspaceTool to manage file operations on project files: create, add, remove, rename.
@@ -57,10 +52,7 @@ public class FilesTool extends WorkspaceTool {
 
         // Get source dir
         WebSite selSite = getSelSiteOrFirst();
-        WebFile selFile = getSelFile();
-        if (selFile == null || selFile.getSite() != selSite)
-            selFile = selSite.getRootDir();
-        WebFile selDir = selFile.isDir() ? selFile : selFile.getParent();
+        WebFile selDir = getSelDir();
         if (extension.equals(".java") || extension.equals(".jepl")) {
             if (selDir == selSite.getRootDir()) {
                 Project proj = Project.getProjectForSite(selSite);
@@ -111,24 +103,19 @@ public class FilesTool extends WorkspaceTool {
     /**
      * Adds a list of files.
      */
-    public boolean addFiles(List<File> theFiles)
+    public void addFiles(List<File> theFiles)
     {
         // Get target (selected) directory
-        WebSite site = getSelSiteOrFirst();
-        WebFile selFile = getSelFile();
-        if (selFile == null || selFile.getSite() != site)
-            selFile = site.getRootDir();
-        WebFile selDir = selFile.isDir() ? selFile : selFile.getParent();
+        WebFile selDir = getSelDir();
 
         // Get builder and disable AutoBuild
         WorkspaceBuilder builder = _workspace.getBuilder();
         builder.setAutoBuildEnabled(false);
 
         // Add files (disable site build)
-        boolean success = true;
         for (File file : theFiles) {
-            if (!addFileToDirectory(selDir, file)) {
-                success = false;
+            WebFile webFile = WebFile.getFileForJavaFile(file); assert (webFile != null);
+            if (!addFileToDirectory(selDir, webFile)) {
                 break;
             }
         }
@@ -136,83 +123,116 @@ public class FilesTool extends WorkspaceTool {
         // Enable auto build and build
         builder.setAutoBuildEnabled(true);
         builder.buildWorkspaceLater();
-
-        // Return files
-        return success && theFiles.size() > 0;
     }
 
     /**
-     * Adds a file.
+     * Adds a file to given directory
      */
-    public boolean addFileToDirectory(WebFile aDirectory, File aFile)
+    public boolean addFileToDirectory(WebFile aDirectory, WebFile sourceFile)
+    {
+        // Handle directory: Create new directory and recurse
+        if (sourceFile.isDir()) {
+
+            // Create new directory
+            WebSite dirSite = aDirectory.getSite();
+            String dirPath = aDirectory.getDirPath() + sourceFile.getName();
+            WebFile newDir = dirSite.createFileForPath(dirPath, true);
+
+            // Recurse for source dir files
+            WebFile[] dirFiles = sourceFile.getFiles();
+            for (WebFile file : dirFiles)
+                if (!addFileToDirectory(newDir, file))
+                    return false;
+            return true;
+        }
+
+        // Handle plain file
+        return addFileToDirectoryImpl(aDirectory, sourceFile);
+    }
+
+    /**
+     * Adds a simple file to given directory.
+     */
+    private boolean addFileToDirectoryImpl(WebFile aDirectory, WebFile sourceFile)
     {
         // Get site
         WebSite site = aDirectory.getSite();
 
-        // Handle directory
-        if (aFile.isDirectory()) {
+        // Get name and file
+        String fileName = sourceFile.getName();
+        WebFile newFile = site.getFileForPath(aDirectory.getDirPath() + fileName);
 
-            // Create new directory
-            String dirPath = aDirectory.getDirPath() + aFile.getName();
-            WebFile directory = site.createFileForPath(dirPath, true);
-            File[] dirFiles = aFile.listFiles();
-            if (dirFiles != null) {
-                for (File file : dirFiles)
-                    addFileToDirectory(directory, file);
+        // If file exists, run option panel for replace
+        if (newFile != null) {
+
+            // If not duplicating, ask user if they want to Replace, Rename, Cancel
+            String[] options = new String[] { "Replace", "Rename", "Cancel" };
+            String defaultOption = "Replace";
+            int option = 1;
+
+            // If not duplicating, ask if user wants to proceed
+            if (sourceFile != newFile) {
+                String msg = "A file named " + fileName + " already exists in this location.\n Do you want to proceed?";
+                DialogBox dialogBox = new DialogBox("Add File");
+                dialogBox.setWarningMessage(msg);
+                dialogBox.setOptions(options);
+                option = dialogBox.showOptionDialog(_workspacePane.getUI(), defaultOption);
+                if (option < 0 || options[option].equals("Cancel"))
+                    return false;
+            }
+
+            // If duplicating or user wants to Rename, ask for new name
+            if (options[option].equals("Rename")) {
+                if (sourceFile == newFile)
+                    fileName = "Duplicate " + fileName;
+                DialogBox dialogBox = new DialogBox("Rename File");
+                dialogBox.setQuestionMessage("Enter new file name:");
+                fileName = dialogBox.showInputDialog(_workspacePane.getUI(), fileName);
+                if (fileName == null)
+                    return false;
+                fileName = fileName.replace(" ", "");
+                if (!StringUtils.endsWithIC(fileName, '.' + newFile.getType()))
+                    fileName = fileName + '.' + newFile.getType();
+                if (fileName.equals(sourceFile.getName()))
+                    return addFileToDirectory(aDirectory, sourceFile);
             }
         }
 
-        // Handle plain file
-        else {
-
-            // Get name and file
-            String name = aFile.getName();
-            WebFile siteFile = site.getFileForPath(aDirectory.getDirPath() + name);
-
-            // See if IsDuplicating (there is a local file and it is the same as given file)
-            File siteLocalFile = siteFile != null ? siteFile.getJavaFile() : null;
-            boolean isDuplicating = Objects.equals(aFile, siteLocalFile);
-
-            // If file exists, run option panel for replace
-            if (siteFile != null) {
-
-                // If not duplicating, ask user if they want to Replace, Rename, Cancel
-                String[] options = new String[]{"Replace", "Rename", "Cancel"};
-                String defaultOption = "Replace";
-                int option = 1;
-                if (!isDuplicating) {
-                    String msg = "A file named " + name + " already exists in this location.\n Do you want to proceed?";
-                    DialogBox dbox = new DialogBox("Add File");
-                    dbox.setWarningMessage(msg);
-                    dbox.setOptions(options);
-                    option = dbox.showOptionDialog(_workspacePane.getUI(), defaultOption);
-                    if (option < 0 || options[option].equals("Cancel")) return false;
-                }
-
-                // If user wants to Rename, ask for new name
-                if (options[option].equals("Rename")) {
-                    if (isDuplicating) name = "Duplicate " + name;
-                    DialogBox dbox = new DialogBox("Rename File");
-                    dbox.setQuestionMessage("Enter new file name:");
-                    name = dbox.showInputDialog(_workspacePane.getUI(), name);
-                    if (name == null) return false;
-                    name = name.replace(" ", "");
-                    if (!StringUtils.endsWithIC(name, '.' + siteFile.getType())) name = name + '.' + siteFile.getType();
-                    if (name.equals(aFile.getName()))
-                        return addFileToDirectory(aDirectory, aFile);
-                }
-            }
-
-            // Get file (force this time), set bytes, save and select file
-            siteFile = site.createFileForPath(aDirectory.getDirPath() + name, false);
-            siteFile.setBytes(FileUtils.getBytes(aFile));
-            try { siteFile.save(); }
-            catch (Exception e) { throw new RuntimeException(e); }
-            setSelFile(siteFile);
-        }
-
-        // Return true
+        // Get file (force this time), set bytes, save and select file
+        byte[] fileBytes = sourceFile.getBytes();
+        newFile = addFileToDirectoryForNameAndBytes(aDirectory, fileName, fileBytes);
+        setSelFile(newFile);
         return true;
+    }
+
+    /**
+     * Adds a new file to selected directory for given name and bytes.
+     */
+    public void addFileForNameAndBytes(String fileName, byte[] fileBytes)
+    {
+        // Get target (selected) directory
+        WebFile selDir = getSelDir();
+
+        // Create new file for path and set bytes
+        addFileToDirectoryForNameAndBytes(selDir, fileName, fileBytes);
+    }
+
+    /**
+     * Adds a new file to given directory for given name and bytes.
+     */
+    public WebFile addFileToDirectoryForNameAndBytes(WebFile parentDir, String fileName, byte[] fileBytes)
+    {
+        // Create new file for path and set bytes
+        String filePath = parentDir.getDirPath() + fileName;
+        WebSite parentSite = parentDir.getSite();
+        WebFile newFile = parentSite.createFileForPath(filePath, false);
+        newFile.setBytes(fileBytes);
+
+        // Save file
+        newFile.save();
+
+        // Return file
+        return newFile;
     }
 
     /**
@@ -528,6 +548,18 @@ public class FilesTool extends WorkspaceTool {
 
         // Return
         return extension;
+    }
+
+    /**
+     * Returns the selected dir.
+     */
+    private WebFile getSelDir()
+    {
+        WebSite selSite = getSelSiteOrFirst();
+        WebFile selFile = getSelFile();
+        if (selFile == null || selFile.getSite() != selSite)
+            selFile = selSite.getRootDir();
+        return selFile.isDir() ? selFile : selFile.getParent();
     }
 
     /**

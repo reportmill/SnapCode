@@ -388,16 +388,37 @@ public class FileTreeTool extends WorkspaceTool {
         if (clipboard.getDragSourceView() != null)
             return;
 
-        // Accept drag and add files
+        // Accept drag
         anEvent.acceptDrag();
+
+        // Add files
         if (anEvent.isDragDropEvent() && clipboard.hasFiles()) {
-            List<File> files = clipboard.getJavaFiles();
-            if (files == null || files.size() == 0)
-                return;
-            FilesTool filesTool = _workspaceTools.getFilesTool();
-            filesTool.addFiles(files);
+
+            List<ClipboardData> clipboardFiles = clipboard.getFiles();
+            for (ClipboardData clipboardData : clipboardFiles)
+                handleTreeViewDropFile(clipboardData);
+
+            // Complete drop
             anEvent.dropComplete();
         }
+    }
+
+    /**
+     * Called when TreeView or ListView gets drop file.
+     */
+    private void handleTreeViewDropFile(ClipboardData dropFile)
+    {
+        // If file not loaded, come back later
+        if (!dropFile.isLoaded()) {
+            dropFile.addLoadListener(this::handleTreeViewDropFile); return; }
+
+        // Get file name and bytes
+        String fileName = dropFile.getName();
+        byte[] fileBytes = dropFile.getBytes();
+
+        // Add files
+        FilesTool filesTool = _workspaceTools.getFilesTool();
+        filesTool.addFileForNameAndBytes(fileName, fileBytes);
     }
 
     /**
