@@ -8,6 +8,7 @@ import snap.viewx.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.app.*;
+import snapcode.project.Project;
 import snapcode.util.DiffPage;
 import snapcode.webbrowser.*;
 import java.io.File;
@@ -236,120 +237,129 @@ public class FileTreeTool extends WorkspaceTool {
      */
     public void respondUI(ViewEvent anEvent)
     {
-        View eventView = anEvent.getView();
+        switch (anEvent.getName()) {
 
-        // Handle FilesTree
-        if (eventView == _filesTree || eventView == _filesList) {
-            FileTreeFile item = (FileTreeFile) anEvent.getSelItem();
-            WebFile file = item != null ? item.getFile() : null;
-            setSelFile(file);
+            // Handle FilesTree
+            case "FilesTree": case "FilesList": {
+                FileTreeFile item = (FileTreeFile) anEvent.getSelItem();
+                WebFile file = item != null ? item.getFile() : null;
+                setSelFile(file);
+                break;
+            }
+
+            // Handle AllFilesButton
+            case "AllFilesButton":
+                boolean flip = !_filesTree.isVisible(), flop = !flip;
+                _filesTree.setVisible(flip);
+                _filesTree.setPickable(flip);
+                _filesList.setVisible(flop);
+                _filesList.setPickable(flop);
+                getView("AllFilesButton", ButtonBase.class).setImage(flip ? FILES_TREE_ICON : FILES_LIST_ICON);
+                break;
+
+            // Handle NewFileMenuItem, NewFileButton
+            case "NewFileMenuItem": case "NewFileButton": {
+                FilesTool filesTool = _workspaceTools.getFilesTool();
+                filesTool.showNewFilePanel();
+                break;
+            }
+
+            // Handle RemoveFileMenuItem
+            case "RemoveFileMenuItem": {
+                FilesTool filesTool = _workspaceTools.getFilesTool();
+                filesTool.showRemoveFilePanel();
+                break;
+            }
+
+            // Handle RenameFileMenuItem
+            case "RenameFileMenuItem": renameFile(); break;
+
+            // Handle DuplicateFileMenuItem
+            case "DuplicateFileMenuItem":
+                copy();
+                paste();
+                break;
+
+            // Handle RefreshFileMenuItem
+            case "RefreshFileMenuItem":
+                for (WebFile file : getSelFiles())
+                    file.resetAndVerify();
+                break;
+
+            // Handle OpenInTextEditorMenuItem
+            case "OpenInTextEditorMenuItem": {
+                WebFile selFile = getSelFile();
+                _pagePane.showFileInTextEditor(selFile);
+                break;
+            }
+
+            // Handle OpenInBrowserMenuItem
+            case "OpenInBrowserMenuItem": {
+                WebFile selFile = getSelFile();
+                WebBrowserPane browserPane = new WebBrowserPane();
+                browserPane.getBrowser().setSelUrl(selFile.getURL());
+                browserPane.getWindow().setVisible(true);
+                break;
+            }
+
+            // Handle ShowFileMenuItem
+            case "ShowFileMenuItem": {
+                WebFile selFile = getSelFile();
+                _pagePane.showFileInFinder(selFile);
+                break;
+            }
+
+            // Handle RunFileMenuItem, DebugFileMenuItem
+            case "RunFileMenuItem": runAppForSelFile(false); break;
+            case "DebugFileMenuItem": runAppForSelFile(true); break;
+
+            // Handle UpdateFilesMenuItem
+            case "UpdateFilesMenuItem": {
+                ProjectPane projectPane = getSelProjectPane();
+                VersionControlTool versionControlTool = projectPane.getVersionControlTool();
+                versionControlTool.updateFiles(null);
+                break;
+            }
+
+            // Handle ReplaceFileMenuItem
+            case "ReplaceFilesMenuItem": {
+                ProjectPane projectPane = getSelProjectPane();
+                VersionControlTool versionControlTool = projectPane.getVersionControlTool();
+                versionControlTool.replaceFiles(null);
+                break;
+            }
+
+            // Handle CommitFileMenuItem
+            case "CommitFilesMenuItem": {
+                ProjectPane projectPane = getSelProjectPane();
+                VersionControlTool versionControlTool = projectPane.getVersionControlTool();
+                versionControlTool.commitFiles(null);
+                break;
+            }
+
+            // Handle DiffFilesMenuItem
+            case "DiffFilesMenuItem": {
+                WebFile selFile = getSelFile();
+                DiffPage diffPage = new DiffPage(selFile);
+                _pagePane.setPageForURL(diffPage.getURL(), diffPage);
+                _pagePane.setBrowserURL(diffPage.getURL());
+                break;
+            }
+
+            // Handle ShowClassInfoMenuItem
+            case "ShowClassInfoMenuItem": {
+                WebFile selFile = getSelFile();
+                Project selProj = getSelProject();
+                WebFile classFile = selProj.getProjectFiles().getClassFileForJavaFile(selFile);
+                if (classFile != null)
+                    _pagePane.setBrowserFile(classFile);
+                break;
+            }
+
+            // Handle CopyAction, PasteAction
+            case "CopyAction": copy(); break;
+            case "PasteAction": paste(); break;
         }
-
-        // Handle AllFilesButton
-        if (anEvent.equals("AllFilesButton")) {
-            boolean flip = !_filesTree.isVisible(), flop = !flip;
-            _filesTree.setVisible(flip);
-            _filesTree.setPickable(flip);
-            _filesList.setVisible(flop);
-            _filesList.setPickable(flop);
-            getView("AllFilesButton", ButtonBase.class).setImage(flip ? FILES_TREE_ICON : FILES_LIST_ICON);
-        }
-
-        // Handle NewFileMenuItem, NewFileButton
-        if (anEvent.equals("NewFileMenuItem") || anEvent.equals("NewFileButton")) {
-            FilesTool filesTool = _workspaceTools.getFilesTool();
-            filesTool.showNewFilePanel();
-        }
-
-        // Handle RemoveFileMenuItem
-        if (anEvent.equals("RemoveFileMenuItem")) {
-            FilesTool filesTool = _workspaceTools.getFilesTool();
-            filesTool.showRemoveFilePanel();
-        }
-
-        // Handle RenameFileMenuItem
-        if (anEvent.equals("RenameFileMenuItem"))
-            renameFile();
-
-        // Handle DuplicateFileMenuItem
-        if (anEvent.equals("DuplicateFileMenuItem")) {
-            copy();
-            paste();
-        }
-
-        // Handle RefreshFileMenuItem
-        if (anEvent.equals("RefreshFileMenuItem")) {
-            for (WebFile file : getSelFiles())
-                file.resetAndVerify();
-        }
-
-        // Handle OpenInTextEditorMenuItem
-        if (anEvent.equals("OpenInTextEditorMenuItem")) {
-            WebFile file = getSelFile();
-            _pagePane.showFileInTextEditor(file);
-        }
-
-        // Handle OpenInBrowserMenuItem
-        if (anEvent.equals("OpenInBrowserMenuItem")) {
-            WebFile file = getSelFile();
-            WebBrowserPane browserPane = new WebBrowserPane();
-            browserPane.getBrowser().setSelUrl(file.getURL());
-            browserPane.getWindow().setVisible(true);
-        }
-
-        // Handle ShowFileMenuItem
-        if (anEvent.equals("ShowFileMenuItem")) {
-            WebFile file = getSelFile();
-            _pagePane.showFileInFinder(file);
-        }
-
-        // Handle RunFileMenuItem, DebugFileMenuItem
-        if (anEvent.equals("RunFileMenuItem"))
-            runAppForSelFile(false);
-        if (anEvent.equals("DebugFileMenuItem"))
-            runAppForSelFile(true);
-
-        // Handle UpdateFilesMenuItem
-        if (anEvent.equals("UpdateFilesMenuItem")) {
-            ProjectPane projectPane = getSelProjectPane();
-            VersionControlTool versionControlTool = projectPane.getVersionControlTool();
-            versionControlTool.updateFiles(null);
-        }
-
-        // Handle ReplaceFileMenuItem
-        if (anEvent.equals("ReplaceFilesMenuItem")) {
-            ProjectPane projectPane = getSelProjectPane();
-            VersionControlTool versionControlTool = projectPane.getVersionControlTool();
-            versionControlTool.replaceFiles(null);
-        }
-
-        // Handle CommitFileMenuItem
-        if (anEvent.equals("CommitFilesMenuItem")) {
-            ProjectPane projectPane = getSelProjectPane();
-            VersionControlTool versionControlTool = projectPane.getVersionControlTool();
-            versionControlTool.commitFiles(null);
-        }
-
-        // Handle DiffFilesMenuItem
-        if (anEvent.equals("DiffFilesMenuItem")) {
-            WebFile file = getSelFile();
-            DiffPage diffPage = new DiffPage(file);
-            _pagePane.setPageForURL(diffPage.getURL(), diffPage);
-            _pagePane.setBrowserURL(diffPage.getURL());
-        }
-
-        // Handle ShowClassInfoMenuItem
-        if (anEvent.equals("ShowClassInfoMenuItem")) {
-            WebFile javaFile = getSelFile();
-            String classFilePath = javaFile.getPath().replace("/src/", "/bin/").replace(".java", ".class");
-            WebFile classFile = javaFile.getSite().getFileForPath(classFilePath);
-            if (classFile != null)
-                _pagePane.setBrowserFile(classFile);
-        }
-
-        // Handle CopyAction, PasteAction
-        if (anEvent.equals("CopyAction")) copy();
-        if (anEvent.equals("PasteAction")) paste();
     }
 
     /**
