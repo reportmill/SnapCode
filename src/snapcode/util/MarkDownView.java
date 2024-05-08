@@ -51,7 +51,7 @@ public class MarkDownView extends ChildView {
             return _selCodeBlockNode;
 
         MDNode[] rootNodes = _rootMarkdownNode.getChildNodes();
-        return ArrayUtils.findMatch(rootNodes, node -> node.getNodeType() == MDNode.NodeType.Code);
+        return ArrayUtils.findMatch(rootNodes, node -> node.getNodeType() == MDNode.NodeType.CodeBlock);
     }
 
     /**
@@ -61,8 +61,8 @@ public class MarkDownView extends ChildView {
     {
         switch (markNode.getNodeType()) {
             case Header1: case Header2: return createViewForHeaderNode(markNode);
-            case Content: return createViewForContentNode(markNode);
-            case Code: return createViewForCodeBlockNode(markNode);
+            case Text: return createViewForContentNode(markNode);
+            case CodeBlock: return createViewForCodeBlockNode(markNode);
             default:
                 System.err.println("MarkDownView.createViewForNode: No support for type: " + markNode.getNodeType());
                 return null;

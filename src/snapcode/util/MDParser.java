@@ -4,7 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class parses a Markdown file and returns a tree of nodes.
+ * This class parses a Markdown file and returns a tree of nodes. Supported syntax is:
+ *     # My Main Header                   |  Header1
+ *     ## My Subheader                    |  Header2
+ *     * My list item 1                   |  ListItem (reads till next ListItem or blank line)
+ *     [My Link Text](http:...)           |  Link
+ *     ![My Image Text](http:...)         |  Image
+ *     @ [ Header1:CustomName]            |  Directive - to redefine rendering
+ *     ``` My Code ```                    |  CodeBlock
+ *     ---                                |  Separator (maybe soon)
+ *     > My block quote                   |  BlockQuote (maybe soon)
  */
 public class MDParser {
 
@@ -15,7 +24,11 @@ public class MDParser {
     private int _charIndex;
 
     // Constants
-    public static final String CODE_MARKER = "```";
+    public static final String LIST_ITEM_MARKER = "* ";
+    public static final String LINK_MARKER = "[";
+    public static final String IMAGE_MARKER = "![";
+    public static final String DIRECTIVE_MARKER = "@[";
+    public static final String CODE_BLOCK_MARKER = "```";
 
     /**
      * Constructor.
@@ -66,28 +79,181 @@ public class MDParser {
         if (nextCharsStartWith("#"))
             return parseHeaderNode();
 
-        // Handle code block
-        if (nextCharsStartWith(CODE_MARKER))
-            return parseCodeBlockNode();
-
-        // Handle list item
-        if (nextCharsStartWith("* "))
-            return parseListItemNode();
-
         // Handle link
-        if (nextCharsStartWith("["))
+        if (nextCharsStartWith(LINK_MARKER))
             return parseLinkNode();
 
         // Handle image
-        if (nextCharsStartWith("!["))
+        if (nextCharsStartWith(IMAGE_MARKER))
             return parseImageNode();
 
+        // Handle code block
+        if (nextCharsStartWith(CODE_BLOCK_MARKER))
+            return parseCodeBlockNode();
+
+        // Handle list item
+        if (nextCharsStartWith(LIST_ITEM_MARKER))
+            return parseListNode();
+
         // Handle directive
-        if (nextCharsStartWith("@["))
+        if (nextCharsStartWith(DIRECTIVE_MARKER))
             return parseDirectiveNode();
 
         // Return text node
         return parseTextNode();
+    }
+
+    /**
+     * Parses a Header node.
+     */
+    private MDNode parseHeaderNode()
+    {
+        // Get header level by counting hash chars
+        int headerLevel = 0;
+        while (hasChars() && nextChar() == '#') {
+            headerLevel++;
+            eatChar();
+        }
+
+        // Get Header level NodeType and chars till line end
+        MDNode.NodeType nodeType = headerLevel == 1 ? MDNode.NodeType.Header1 : MDNode.NodeType.Header2;
+        String charsTillLineEnd = getCharsTillLineEnd().toString().trim();
+
+        // Return header node
+        return new MDNode(nodeType, charsTillLineEnd);
+    }
+
+    /**
+     * Parses a text node.
+     */
+    private MDNode parseTextNode()
+    {
+        String charsTillLineEnd = getCharsTillLineEnd().toString().trim();
+
+        while (true) {
+            String moreChars = getCharsTillLineEnd().toString().trim();
+            if (moreChars.length() == 0)
+                break;
+            charsTillLineEnd += ' ' + moreChars;
+        }
+
+        // Return text node
+        return new MDNode(MDNode.NodeType.Text, charsTillLineEnd);
+    }
+
+    /**
+     * Parses a code block node.
+     */
+    private MDNode parseCodeBlockNode()
+    {
+        eatChars(CODE_BLOCK_MARKER.length());
+        String charsTillBlockEnd = getCharsTillMatchingTerminator(CODE_BLOCK_MARKER).toString();
+        return new MDNode(MDNode.NodeType.CodeBlock, charsTillBlockEnd);
+    }
+
+    /**
+     * Parses a list node.
+     */
+    private MDNode parseListNode()
+    {
+        // Create list node and listItemNodes
+        MDNode listNode = new MDNode(MDNode.NodeType.Text, null);
+        List<MDNode> listItemNodes = new ArrayList<>();
+
+        // Parse available list items and add to listItemNodes
+        while (nextCharsStartWith(LIST_ITEM_MARKER)) {
+            MDNode listItemNode = parseListItemNode();
+            listItemNodes.add(listItemNode);
+        }
+
+        // Add listItemsNodes to list node and return
+        listNode.setChildNodes(listItemNodes.toArray(new MDNode[0]));
+        return listNode;
+    }
+
+    /**
+     * Parses a list item node. These can contain
+     */
+    private MDNode parseListItemNode()
+    {
+        // Eat identifier chars
+        eatChars(LIST_ITEM_MARKER.length());
+
+        // Get all chars
+        StringBuilder allChars = new StringBuilder();
+
+        // Get chars till next list item or empty line
+        while (true) {
+            CharSequence lineChars = getCharsTillLineEnd();
+            allChars.append(lineChars);
+            if (nextCharsStartWith(LIST_ITEM_MARKER))
+                break;
+            if (isAtEmptyLine())
+                break;
+            allChars.append(' ');
+        }
+
+        // Create ListItem node and return
+        return new MDNode(MDNode.NodeType.ListItem, allChars.toString());
+    }
+
+    /**
+     * Parses a link node.
+     */
+    private MDNode parseLinkNode()
+    {
+        // Eat marker chars
+        eatChars(LINK_MARKER.length());
+
+        // Get chars till link close
+        String linkText = getCharsTillMatchingTerminator("]").toString().trim();
+
+        // Create link node
+        MDNode linkNode = new MDNode(MDNode.NodeType.Link, linkText);
+
+        // Look for url marker
+        skipWhiteSpace();
+        if (nextCharsStartWith("(")) {
+            String urlText = getCharsTillMatchingTerminator(")").toString().trim();
+            linkNode.setOtherText(urlText);
+        }
+
+        // Return
+        return linkNode;
+    }
+
+    /**
+     * Parses an image node.
+     */
+    private MDNode parseImageNode()
+    {
+        // Eat first char
+        eatChar();
+
+        // Parse link node and reassign NodeType to Image
+        MDNode imageNode = parseLinkNode();
+        imageNode._nodeType = MDNode.NodeType.Image;
+
+        // Return
+        return imageNode;
+    }
+
+    /**
+     * Parses a directive node.
+     */
+    private MDNode parseDirectiveNode()
+    {
+        // Eat marker chars
+        eatChars(DIRECTIVE_MARKER.length());
+
+        // Get chars till link close
+        String directiveText = getCharsTillMatchingTerminator("]").toString().trim();
+
+        // Create directive node
+        MDNode directiveNode = new MDNode(MDNode.NodeType.Link, directiveText);
+
+        // Return
+        return directiveNode;
     }
 
     /**
@@ -199,82 +365,20 @@ public class MDParser {
     }
 
     /**
-     * Parses a Header node.
+     * Returns the length of leading whitespace chars for given char sequence.
      */
-    private MDNode parseHeaderNode()
+    private boolean isAtEmptyLine()
     {
-        // Get header level by counting hash chars
-        int headerLevel = 0;
-        while (hasChars() && nextChar() == '#') {
-            headerLevel++;
-            eatChar();
-        }
-
-        // Get Header level NodeType and chars till line end
-        MDNode.NodeType nodeType = headerLevel == 1 ? MDNode.NodeType.Header1 : MDNode.NodeType.Header2;
-        String charsTillLineEnd = getCharsTillLineEnd().toString().trim();
-
-        // Return header node
-        return new MDNode(nodeType, charsTillLineEnd);
-    }
-
-    /**
-     * Parses a text node.
-     */
-    private MDNode parseTextNode()
-    {
-        String charsTillLineEnd = getCharsTillLineEnd().toString().trim();
-
-        while (true) {
-            String moreChars = getCharsTillLineEnd().toString().trim();
-            if (moreChars.length() == 0)
+        // Get leading space chars
+        for (int i = 0; i < _input.length(); i++) {
+            char loopChar = _input.charAt(i);
+            if (!Character.isWhitespace(loopChar))
+                return false;
+            if (loopChar == '\n')
                 break;
-            charsTillLineEnd += ' ' + moreChars;
         }
 
-        // Return text node
-        return new MDNode(MDNode.NodeType.Content, charsTillLineEnd);
-    }
-
-    /**
-     * Parses a code block node.
-     */
-    private MDNode parseCodeBlockNode()
-    {
-        eatChars(CODE_MARKER.length());
-        String charsTillBlockEnd = getCharsTillMatchingTerminator(CODE_MARKER).toString();
-        return new MDNode(MDNode.NodeType.Code, charsTillBlockEnd);
-    }
-
-    /**
-     * Parses a list item node.
-     */
-    private MDNode parseListItemNode()
-    {
-        return null;
-    }
-
-    /**
-     * Parses a link node.
-     */
-    private MDNode parseLinkNode()
-    {
-        return null;
-    }
-
-    /**
-     * Parses an image node.
-     */
-    private MDNode parseImageNode()
-    {
-        return null;
-    }
-
-    /**
-     * Parses a directive node.
-     */
-    private MDNode parseDirectiveNode()
-    {
-        return null;
+        // Return
+        return true;
     }
 }

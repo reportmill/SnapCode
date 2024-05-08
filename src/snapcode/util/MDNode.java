@@ -6,16 +6,19 @@ package snapcode.util;
 public class MDNode {
 
     // The node type
-    private NodeType _nodeType;
+    protected NodeType _nodeType;
 
     // The text
     private String _text;
+
+    // Other text
+    private String _otherText;
 
     // Child nodes
     private MDNode[] _childNodes;
 
     // Constants for node type
-    public enum NodeType { Root, Header1, Header2, Content, Code }
+    public enum NodeType { Root, Header1, Header2, Text, Link, Image, CodeBlock, List, ListItem }
 
     /**
      * Constructor.
@@ -35,6 +38,16 @@ public class MDNode {
      * Returns the text.
      */
     public String getText()  { return _text; }
+
+    /**
+     * Returns the other text.
+     */
+    public String getOtherText()  { return _otherText; }
+
+    /**
+     * Sets the other text.
+     */
+    public void setOtherText(String otherText)  { _otherText = otherText; }
 
     /**
      * Returns the child nodes.
