@@ -261,20 +261,7 @@ viewOwner.setWindowVisible(true);
 
 # Animate UI
 
-## Animate Button
-
-```
-var button = new Button("Hello World");
-button.setMargin(50,50,50,50);
-var anim = button.getAnim(0);
-anim.getAnim(1000).setScale(3).getAnim(2000).setScale(1);
-anim.getAnim(2000).setRotate(360);
-anim.setLoopCount(4);
-anim.play();
-show(button);
-```
-
-## Animate Button - via setAnimString()
+## Animate Button - shorthand
 
 ```
 var button = new Button("Hello World");
@@ -282,6 +269,18 @@ button.setMargin(50,50,50,50);
 button.setAnimString("time: 1000; scale: 3; time: 2000; scale: 1");
 button.setAnimString("time: 2000; rotate: 360");
 button.getAnim(0).setLoopCount(4).play();
+show(button);
+```
+
+## Animate Button - traditional
+
+```
+var button = new Button("Hello World");
+button.setMargin(50,50,50,50);
+var anim = button.getAnim(0);
+anim.getAnim(1000).setScale(3).getAnim(2000).setScale(1);
+anim.getAnim(2000).setRotate(360);
+anim.setLoopCount(4).play();
 show(button);
 ```
 
