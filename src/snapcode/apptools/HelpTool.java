@@ -2,21 +2,19 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.apptools;
-import snap.text.TextBlock;
 import snapcode.javatext.JavaTextArea;
 import snap.geom.Insets;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.view.*;
 import snap.viewx.TextPane;
+import snapcode.project.Project;
+import snapcode.util.*;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebURL;
 import snapcode.app.JavaPage;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
-import snapcode.util.HelpFile;
-import snapcode.util.HelpSection;
-import snapcode.util.MarkDownText;
 
 /**
  * This class shows a help file for the app.
@@ -32,8 +30,8 @@ public class HelpTool extends WorkspaceTool {
     // The ListArea showing HelpSections
     private ListArea<HelpSection>  _topicListArea;
 
-    // The TextArea showing the help text
-    private TextArea  _helpTextArea;
+    // The ScrollView showing the help text
+    private ScrollView _helpTextScrollView;
 
     /**
      * Constructor.
@@ -87,8 +85,8 @@ public class HelpTool extends WorkspaceTool {
         _selSection = aSection;
 
         // Update SectionTextArea
-        TextBlock sectionText = aSection.getMarkDownText();
-        _helpTextArea.setSourceText(sectionText);
+        MarkDownView sectionText = aSection.getMarkDownView();
+        _helpTextScrollView.setContent(sectionText);
     }
 
     /**
@@ -120,10 +118,9 @@ public class HelpTool extends WorkspaceTool {
         _topicListArea.setCellConfigure(cell -> configureTopicListAreaCell(cell));
         _topicListArea.setCellPadding(new Insets(4, 4, 3, 4));
 
-        // Get SectionTextArea
-        TextView helpTextView = getView("HelpTextView", TextView.class);
-        _helpTextArea = helpTextView.getTextArea();
-        _helpTextArea.setPadding(8, 8, 8, 8);
+        // Get HelpTextScrollView
+        _helpTextScrollView = getView("HelpTextScrollView", ScrollView.class);
+        _helpTextScrollView.setBarSize(14);
 
         // Get HelpSections and set in TopicListArea
         HelpFile helpFile = getHelpFile();
@@ -132,9 +129,7 @@ public class HelpTool extends WorkspaceTool {
 
         // Set ScrollView BarSize to mini
         ScrollView topicListScrollView = topicListView.getScrollView();
-        ScrollView helpTextScrollView = helpTextView.getScrollView();
         topicListScrollView.setBarSize(14);
-        helpTextScrollView.setBarSize(14);
     }
 
     private void configureTopicListAreaCell(ListCell<HelpSection> aCell)
@@ -194,6 +189,9 @@ public class HelpTool extends WorkspaceTool {
         if (helpCode == null)
             return;
 
+        // Add SnapCharts if needed
+        addSnapChartsToProjectIfNeeded();
+
         // Get JavaPage (just return if not found)
         WebPage selPage = _pagePane.getSelPage();
         JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
@@ -239,21 +237,27 @@ public class HelpTool extends WorkspaceTool {
     {
         // Get current section and MarkDown doc
         HelpSection selSection = getSelSection();
-        MarkDownText markDown = selSection.getMarkDownText();
+        MarkDownView markDown = selSection.getMarkDownView();
 
-        // Get selection char index from SectionTextArea
-        int selStart = _helpTextArea.getSelStart();
-        int selEnd = _helpTextArea.getSelEnd();
-        int selCharIndex = (selStart + selEnd) / 2;
+        // Return selected code block node text
+        MDNode codeBlockNode = markDown.getSelCodeBlockNode();
+        return codeBlockNode != null ? codeBlockNode.getText() : null;
+    }
 
-        // Get the code for selection char index
-        MarkDownText.MarkDownRun codeRun = markDown.getCodeRunForCharIndex(selCharIndex);
-        if (codeRun == null)
-            return null;
+    /**
+     * Adds SnapCharts to project.
+     */
+    private void addSnapChartsToProjectIfNeeded()
+    {
+        // If not needed, just return
+        HelpSection selSection = getSelSection();
+        String header = selSection.getHeader().toLowerCase();
+        if (!header.contains(" chart") && !header.contains(" datasets"))
+            return;
 
-        // Get code string and return
-        String helpStr = markDown.subSequence(codeRun.startCharIndex, codeRun.endCharIndex).toString();
-        return helpStr;
+        // Add
+        Project project = getSelProject();
+        project.getBuildFile().setIncludeSnapChartsRuntime(true);
     }
 
     /**

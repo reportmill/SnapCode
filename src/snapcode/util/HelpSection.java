@@ -20,8 +20,8 @@ public class HelpSection {
     // The content
     private String  _content;
 
-    // The MarkDownText
-    private MarkDownText _markDownText;
+    // The MarkDownView
+    private MarkDownView _markDownView;
 
     /**
      * Constructor.
@@ -78,18 +78,18 @@ public class HelpSection {
     }
 
     /**
-     * Returns the MarkDownText.
+     * Returns the MarkDownView.
      */
-    public MarkDownText getMarkDownText()
+    public MarkDownView getMarkDownView()
     {
         // If already set, just return
-        if (_markDownText != null) return _markDownText;
+        if (_markDownView != null) return _markDownView;
 
         // Create and configure
-        MarkDownText markDownText = new MarkDownText();
-        markDownText.setMarkDown("# " + _sectionText);
+        MarkDownView markDownView = new MarkDownView();
+        markDownView.setMarkDown("# " + _sectionText);
 
         // Set and return
-        return _markDownText = markDownText;
+        return _markDownView = markDownView;
     }
 }

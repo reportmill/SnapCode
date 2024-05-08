@@ -3,12 +3,19 @@ import snap.geom.Pos;
 import snap.gfx.Color;
 import snap.text.TextBlock;
 import snap.text.TextStyle;
+import snap.util.ArrayUtils;
 import snap.view.*;
 
 /**
  * This view class renders mark down.
  */
 public class MarkDownView extends ChildView {
+
+    // The root markdown node
+    private MDNode _rootMarkdownNode;
+
+    // The selected code block node
+    private MDNode _selCodeBlockNode;
 
     /**
      * Constructor.
@@ -25,14 +32,26 @@ public class MarkDownView extends ChildView {
      */
     public void setMarkDown(String markDown)
     {
-        MDNode rootNode = new MDParser().parseMarkdownChars(markDown);
-        MDNode[] rootNodes = rootNode.getChildNodes();
+        _rootMarkdownNode = new MDParser().parseMarkdownChars(markDown);
+        MDNode[] rootNodes = _rootMarkdownNode.getChildNodes();
 
         for (MDNode mdnode : rootNodes) {
             View nodeView = createViewForNode(mdnode);
             if (nodeView != null)
                 addChild(nodeView);
         }
+    }
+
+    /**
+     * Returns the selected code block node.
+     */
+    public MDNode getSelCodeBlockNode()
+    {
+        if (_selCodeBlockNode != null)
+            return _selCodeBlockNode;
+
+        MDNode[] rootNodes = _rootMarkdownNode.getChildNodes();
+        return ArrayUtils.findMatch(rootNodes, node -> node.getNodeType() == MDNode.NodeType.Code);
     }
 
     /**
@@ -102,6 +121,8 @@ public class MarkDownView extends ChildView {
         textArea.setPadding(16, 16, 16, 16);
         textArea.setBorderRadius(8);
         textArea.setFill(new Color(.96, .97, .98));
+        textArea.setEditable(true);
+        textArea.setFocusPainted(true);
 
         // Reset style
         TextStyle textStyle = MDUtils.getCodeStyle();
@@ -110,6 +131,9 @@ public class MarkDownView extends ChildView {
 
         // Set text
         textBlock.addChars(codeNode.getText());
+
+        // Add listener to select code block
+        textArea.addEventFilter(e -> _selCodeBlockNode = codeNode, MousePress);
 
         // Wrap in box and return
         BoxView codeBlockBox = new BoxView(textArea);

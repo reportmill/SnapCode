@@ -11,6 +11,6 @@
       <Font name="Arial" size="11" />
       <LineBorder Color="#c0c0c0" />
     </ListView>
-    <TextView Name="HelpTextView" BorderRadius="4" Margin="0,6,6,6" GrowWidth="true" GrowHeight="true" PrefHeight="400" Rich="true" />
+    <ScrollView Name="HelpTextScrollView" BorderRadius="4" Margin="0,6,6,6" GrowWidth="true" GrowHeight="true" PrefHeight="400" />
   </SplitView>
 </ColView>
