@@ -157,7 +157,7 @@ public class MDParser {
     private MDNode parseListNode()
     {
         // Create list node and listItemNodes
-        MDNode listNode = new MDNode(MDNode.NodeType.Text, null);
+        MDNode listNode = new MDNode(MDNode.NodeType.List, null);
         List<MDNode> listItemNodes = new ArrayList<>();
 
         // Parse available list items and add to listItemNodes
@@ -188,7 +188,7 @@ public class MDParser {
             allChars.append(lineChars);
             if (nextCharsStartWith(LIST_ITEM_MARKER))
                 break;
-            if (isAtEmptyLine())
+            if (!hasChars() || isAtEmptyLine())
                 break;
             allChars.append(' ');
         }
@@ -214,6 +214,7 @@ public class MDParser {
         // Look for url marker
         skipWhiteSpace();
         if (nextCharsStartWith("(")) {
+            eatChar();
             String urlText = getCharsTillMatchingTerminator(")").toString().trim();
             linkNode.setOtherText(urlText);
         }
@@ -370,7 +371,7 @@ public class MDParser {
     private boolean isAtEmptyLine()
     {
         // Get leading space chars
-        for (int i = 0; i < _input.length(); i++) {
+        for (int i = _charIndex; i < _input.length(); i++) {
             char loopChar = _input.charAt(i);
             if (!Character.isWhitespace(loopChar))
                 return false;

@@ -1,10 +1,14 @@
 package snapcode.util;
 import snap.geom.Pos;
 import snap.gfx.Color;
+import snap.gfx.Image;
 import snap.text.TextBlock;
+import snap.text.TextLink;
 import snap.text.TextStyle;
 import snap.util.ArrayUtils;
 import snap.view.*;
+import snap.web.WebURL;
+import java.util.stream.Stream;
 
 /**
  * This view class renders mark down.
@@ -61,8 +65,11 @@ public class MarkDownView extends ChildView {
     {
         switch (markNode.getNodeType()) {
             case Header1: case Header2: return createViewForHeaderNode(markNode);
-            case Text: return createViewForContentNode(markNode);
+            case Text: return createViewForTextNode(markNode);
+            case Link: return createViewForLinkNode(markNode);
+            case Image: return createViewForImageNode(markNode);
             case CodeBlock: return createViewForCodeBlockNode(markNode);
+            case List: return createViewForListNode(markNode);
             default:
                 System.err.println("MarkDownView.createViewForNode: No support for type: " + markNode.getNodeType());
                 return null;
@@ -92,9 +99,92 @@ public class MarkDownView extends ChildView {
     }
 
     /**
-     * Creates a view for header node.
+     * Creates a view for text node.
      */
-    private View createViewForContentNode(MDNode contentNode)
+    private View createViewForTextNode(MDNode contentNode)
+    {
+        TextArea textArea = new TextArea();
+        textArea.setWrapLines(true);
+        textArea.setMargin(8, 8, 8, 8);
+
+        // Reset style
+        TextStyle textStyle = MDUtils.getContentStyle();
+        TextBlock textBlock = textArea.getTextBlock();
+        textBlock.setDefaultStyle(textStyle);
+
+        // Set text
+        textBlock.addChars(contentNode.getText());
+
+        // Return
+        return textArea;
+    }
+
+    /**
+     * Creates a view for link node.
+     */
+    private View createViewForLinkNode(MDNode linkNode)
+    {
+        TextArea textArea = new TextArea();
+        textArea.setMargin(8, 8, 8, 8);
+
+        // Reset style
+        TextStyle textStyle = MDUtils.getContentStyle();
+        TextBlock textBlock = textArea.getTextBlock();
+        textBlock.setDefaultStyle(textStyle);
+
+        // Create link style
+        String urlAddr = linkNode.getOtherText();
+        TextLink textLink = new TextLink(urlAddr);
+        TextStyle linkTextStyle = textStyle.copyFor(textLink);
+
+        // Set text
+        textBlock.addCharsWithStyle(linkNode.getText(), linkTextStyle);
+
+        // Return
+        return textArea;
+    }
+
+    /**
+     * Creates a view for image node.
+     */
+    private View createViewForImageNode(MDNode imageNode)
+    {
+        String urlAddr = imageNode.getOtherText();
+        WebURL url = WebURL.getURL(urlAddr);
+        Image image = url != null ? Image.getImageForSource(url) : null;
+        ImageView imageView = new ImageView(image);
+
+        // Wrap in box
+        BoxView boxView = new BoxView(imageView);
+        boxView.setAlign(Pos.CENTER_LEFT);
+        boxView.setMargin(8, 8, 8, 8);
+
+        // Return
+        return boxView;
+    }
+
+    /**
+     * Creates a view for list node.
+     */
+    private View createViewForListNode(MDNode listNode)
+    {
+        // Create list view
+        ColView listNodeView = new ColView();
+        listNodeView.setMargin(8, 8, 8, 8);
+
+        // Get list item views and add to listNodeView
+        MDNode[] listItemNodes = listNode.getChildNodes();
+        View[] listItemViews = ArrayUtils.map(listItemNodes, node -> createViewForListItemNode(node), View.class);
+        Stream.of(listItemViews).forEach(listNodeView::addChild);
+
+        // Return
+        return listNodeView;
+    }
+
+    /**
+     * Creates a view for list item node.
+     */
+    private View createViewForListItemNode(MDNode listItemNode)
     {
         TextArea textArea = new TextArea();
         textArea.setMargin(8, 8, 8, 8);
@@ -105,7 +195,8 @@ public class MarkDownView extends ChildView {
         textBlock.setDefaultStyle(textStyle);
 
         // Set text
-        textBlock.addChars(contentNode.getText());
+        String listItemText = "• " + listItemNode.getText();
+        textBlock.addChars(listItemText);
 
         // Return
         return textArea;
