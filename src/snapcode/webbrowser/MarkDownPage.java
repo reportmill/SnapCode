@@ -5,14 +5,15 @@ package snapcode.webbrowser;
 import snap.view.*;
 import snap.web.WebFile;
 import snapcode.util.MarkDownText;
+import snapcode.util.MarkDownView;
 
 /**
  * A page for mark down.
  */
 public class MarkDownPage extends WebPage {
 
-    // The TextArea
-    private TextArea _textArea;
+    // The MarkDownView
+    private MarkDownView _markdownView;
 
     /**
      * Constructor.
@@ -28,12 +29,15 @@ public class MarkDownPage extends WebPage {
     @Override
     protected View createUI()
     {
-        TextView textView = new TextView();
-        _textArea = textView.getTextArea();
-        _textArea.setPadding(20, 20, 20, 20);
+        _markdownView = new MarkDownView();
+        _markdownView.setGrowWidth(true);
+        _markdownView.setGrowHeight(true);
+
+        // Wrap in scrollview
+        ScrollView scrollView = new ScrollView(_markdownView);
 
         // Return
-        return textView;
+        return scrollView;
     }
 
     /**
@@ -44,9 +48,6 @@ public class MarkDownPage extends WebPage {
     {
         WebFile file = getFile();
         String fileText = file.getText();
-
-        MarkDownText markDownText = new MarkDownText();
-        markDownText.setMarkDown(fileText);
-        _textArea.setSourceText(markDownText);
+        _markdownView.setMarkDown(fileText);
     }
 }

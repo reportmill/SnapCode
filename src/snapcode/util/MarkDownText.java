@@ -2,8 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.util;
-import snap.gfx.Color;
-import snap.gfx.Font;
 import snap.text.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,18 +11,6 @@ import java.util.stream.Stream;
  * This TextBlock subclass can be created with MarkDown.
  */
 public class MarkDownText extends TextBlock {
-
-    // The header 1 style
-    private TextStyle  _header1Style;
-
-    // The header 2 style
-    private TextStyle  _header2Style;
-
-    // The content style
-    private TextStyle  _contentStyle;
-
-    // The code style
-    private TextStyle  _codeStyle;
 
     // The MarkDownRuns
     private MarkDownRun[]  _markDownRuns;
@@ -51,7 +37,7 @@ public class MarkDownText extends TextBlock {
      */
     public void setMarkDown(String markDown)
     {
-        setDefaultStyle(getContentStyle());
+        setDefaultStyle(MDUtils.getContentStyle());
 
         setString(markDown);
 
@@ -88,7 +74,7 @@ public class MarkDownText extends TextBlock {
             int lineEndCharIndex = textLine.getEndCharIndex();
 
             // Get header style
-            TextStyle headerStyle = aLevel == 1 ? getHeader1Style() : getHeader2Style();
+            TextStyle headerStyle = aLevel == 1 ? MDUtils.getHeader1Style() : MDUtils.getHeader2Style();
             setStyle(headerStyle, lineStartCharIndex, lineEndCharIndex);
 
             // Get next marker
@@ -112,7 +98,7 @@ public class MarkDownText extends TextBlock {
                 break;
 
             // Change font to codeStyle
-            TextStyle codeStyle = getCodeStyle();
+            TextStyle codeStyle = MDUtils.getCodeStyle();
             setStyle(codeStyle, codeIndex + codeMarkerLength, codeEndIndex);
 
             // Remove end code marker
@@ -126,86 +112,6 @@ public class MarkDownText extends TextBlock {
             // Look for next block
             codeIndex = indexOf(CODE_MARKER, codeIndex);
         }
-    }
-
-    /**
-     * Returns the header 1 style.
-     */
-    public TextStyle getHeader1Style()
-    {
-        // If already set, just return
-        if (_header1Style != null) return _header1Style;
-
-        // Create, configure
-        TextStyle textStyle = TextStyle.DEFAULT;
-        Font headerFont = Font.Arial16.copyForSize(24).getBold();
-        Color headerColor = new Color(.5d, .5d, 1d);
-        TextStyle headerStyle = textStyle.copyFor(headerFont, headerColor);
-
-        // Set, return
-        return _header1Style = headerStyle;
-    }
-
-    /**
-     * Returns the header 2 style.
-     */
-    public TextStyle getHeader2Style()
-    {
-        // If already set, just return
-        if (_header2Style != null) return _header2Style;
-
-        // Create, configure
-        TextStyle textStyle = TextStyle.DEFAULT;
-        Font headerFont = Font.Arial16.getBold();
-        Color headerColor = Color.GRAY3;
-        TextStyle headerStyle = textStyle.copyFor(headerFont, headerColor);
-
-        // Set, return
-        return _header2Style = headerStyle;
-    }
-
-    /**
-     * Returns the content style.
-     */
-    public TextStyle getContentStyle()
-    {
-        // If already set, just return
-        if (_contentStyle != null) return _contentStyle;
-
-        // Create, configure
-        TextStyle textStyle = TextStyle.DEFAULT;
-        Font contentFont = Font.Arial14;
-        Color contentColor = Color.GRAY3;
-        TextStyle contentStyle = textStyle.copyFor(contentFont, contentColor);
-
-        // Set, return
-        return _contentStyle = contentStyle;
-    }
-
-    /**
-     * Returns the code style.
-     */
-    public TextStyle getCodeStyle()
-    {
-        // If already set, just return
-        if (_codeStyle != null) return _codeStyle;
-
-        // Get code font
-        Font codeFont = null;
-        String[] names = { "Monaco", "Consolas", "Courier" };
-        for (String name : names) {
-            codeFont = new Font(name, 13);
-            if (codeFont.getFamily().startsWith(name))
-                break;
-        }
-
-        // Create, configure
-        TextStyle textStyle = TextStyle.DEFAULT;
-        Color codeColor = Color.GRAY3;
-        TextStyle codeStyle = textStyle.copyFor(codeFont, codeColor);
-
-        // Set, return
-        return _codeStyle = codeStyle;
     }
 
     /**
@@ -310,10 +216,10 @@ public class MarkDownText extends TextBlock {
      */
     public MarkType getMarkTypeForStyle(TextStyle aTextStyle)
     {
-        if (aTextStyle == getHeader1Style()) return MarkType.Header1;
-        if (aTextStyle == getHeader2Style()) return MarkType.Header2;
-        if (aTextStyle == getContentStyle()) return MarkType.Content;
-        if (aTextStyle == getCodeStyle()) return MarkType.Code;
+        if (aTextStyle == MDUtils.getHeader1Style()) return MarkType.Header1;
+        if (aTextStyle == MDUtils.getHeader2Style()) return MarkType.Header2;
+        if (aTextStyle == MDUtils.getContentStyle()) return MarkType.Content;
+        if (aTextStyle == MDUtils.getCodeStyle()) return MarkType.Code;
         return null;
     }
 
