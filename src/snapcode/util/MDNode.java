@@ -1,4 +1,5 @@
 package snapcode.util;
+import snap.util.ArrayUtils;
 
 /**
  * This class represents a Markdown node.
@@ -9,16 +10,16 @@ public class MDNode {
     protected NodeType _nodeType;
 
     // The text
-    private String _text;
+    protected String _text;
 
     // Other text
     private String _otherText;
 
     // Child nodes
-    private MDNode[] _childNodes;
+    protected MDNode[] _childNodes;
 
     // Constants for node type
-    public enum NodeType { Root, Header1, Header2, Text, Link, Image, CodeBlock, List, ListItem }
+    public enum NodeType { Root, Header1, Header2, Text, Link, Image, CodeBlock, List, ListItem, Mixed }
 
     /**
      * Constructor.
@@ -57,8 +58,29 @@ public class MDNode {
     /**
      * Sets the child nodes.
      */
-    public void setChildNodes(MDNode[] nodesArray)
+    protected void setChildNodes(MDNode[] nodesArray)
     {
         _childNodes = nodesArray;
+    }
+
+    /**
+     * Adds a child node.
+     */
+    protected void addChildNode(MDNode aNode)
+    {
+        if (_childNodes == null) _childNodes = new MDNode[0];
+        _childNodes = ArrayUtils.add(_childNodes, aNode);
+    }
+
+    /**
+     * Returns a mixable node for given node.
+     */
+    protected static MDNode getMixedNodeForNode(MDNode aNode)
+    {
+        if (aNode.getNodeType() == NodeType.Mixed)
+            return aNode;
+        MDNode mixedNode = new MDNode(NodeType.Mixed, null);
+        mixedNode.addChildNode(aNode);
+        return mixedNode;
     }
 }

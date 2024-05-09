@@ -1,4 +1,5 @@
 package snapcode.util;
+import snap.util.ArrayUtils;
 import snap.util.CharSequenceUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +25,16 @@ public class MDParser {
     private int _charIndex;
 
     // Constants
+    public static final String HEADER_MARKER = "# ";
     public static final String LIST_ITEM_MARKER = "* ";
     public static final String LINK_MARKER = "[";
     public static final String IMAGE_MARKER = "![";
     public static final String DIRECTIVE_MARKER = "@[";
     public static final String CODE_BLOCK_MARKER = "```";
+
+    // Constant for Nodes that are stand-alone
+    private static final String[] MIXABLE_NODE_MARKERS = { LINK_MARKER, IMAGE_MARKER, CODE_BLOCK_MARKER };
+    private static final String[] NON_MIXABLE_NODE_MARKERS = { HEADER_MARKER, LIST_ITEM_MARKER, DIRECTIVE_MARKER };
 
     /**
      * Constructor.
@@ -76,9 +82,36 @@ public class MDParser {
             return null;
 
         // Handle headers
-        if (nextCharsStartWith("#"))
+        if (nextCharsStartWith(HEADER_MARKER))
             return parseHeaderNode();
 
+        // Handle list item
+        if (nextCharsStartWith(LIST_ITEM_MARKER))
+            return parseListNode();
+
+        // Handle directive
+        if (nextCharsStartWith(DIRECTIVE_MARKER))
+            return parseDirectiveNode();
+
+        // Parse mixable node: Text, Link, Image, CodeBlock
+        MDNode mixableNode = parseMixableNode();
+
+        // While next chars start with mixable node, parse and add child node
+        while (nextCharsStartWithMixableNode()) {
+            mixableNode = MDNode.getMixedNodeForNode(mixableNode);
+            MDNode nextMixedNode = parseMixableNode();
+            mixableNode.addChildNode(nextMixedNode);
+        }
+
+        // Return
+        return mixableNode;
+    }
+
+    /**
+     * Parses mixable nodes: Text, Link, Image, CodeBlock
+     */
+    private MDNode parseMixableNode()
+    {
         // Handle link
         if (nextCharsStartWith(LINK_MARKER))
             return parseLinkNode();
@@ -90,14 +123,6 @@ public class MDParser {
         // Handle code block
         if (nextCharsStartWith(CODE_BLOCK_MARKER))
             return parseCodeBlockNode();
-
-        // Handle list item
-        if (nextCharsStartWith(LIST_ITEM_MARKER))
-            return parseListNode();
-
-        // Handle directive
-        if (nextCharsStartWith(DIRECTIVE_MARKER))
-            return parseDirectiveNode();
 
         // Return text node
         return parseTextNode();
@@ -128,17 +153,8 @@ public class MDParser {
      */
     private MDNode parseTextNode()
     {
-        String charsTillLineEnd = getCharsTillLineEnd().toString().trim();
-
-        while (true) {
-            String moreChars = getCharsTillLineEnd().toString().trim();
-            if (moreChars.length() == 0)
-                break;
-            charsTillLineEnd += ' ' + moreChars;
-        }
-
-        // Return text node
-        return new MDNode(MDNode.NodeType.Text, charsTillLineEnd);
+        String textChars = getCharsTillTextEnd().toString().trim();
+        return new MDNode(MDNode.NodeType.Text, textChars);
     }
 
     /**
@@ -358,6 +374,35 @@ public class MDParser {
     }
 
     /**
+     * Returns chars till text end (which is either at next non-mixable node start or line end).
+     */
+    private CharSequence getCharsTillTextEnd()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        // Iterate over chars until next mixable node start or line end to get chars
+        while (hasChars()) {
+
+            // If next chars start with mixable node, break
+            boolean nextCharsStartWithMixableNode = ArrayUtils.hasMatch(MIXABLE_NODE_MARKERS, str -> nextCharsStartWith(str));
+            if (nextCharsStartWithMixableNode)
+                break;
+
+            // If next char is newline, break
+            char nextChar = nextChar();
+            if (nextChar == '\n')
+                break;
+
+            // Append char to buffer and eat
+            sb.append(nextChar);
+            eatChar();
+        }
+
+        // Return
+        return sb;
+    }
+
+    /**
      * Returns chars for char range.
      */
     private CharSequence getCharsForCharRange(int startCharIndex, int endCharIndex)
@@ -380,6 +425,33 @@ public class MDParser {
         }
 
         // Return
+        return true;
+    }
+
+    /**
+     * Returns whether next chars associated with current node line start with mixable node.
+     * Eats any chars before next node.
+     */
+    private boolean nextCharsStartWithMixableNode()
+    {
+        // If not at empty line, return true (any next chars will be text node)
+        if (!isAtEmptyLine())
+            return true;
+
+        // Eat reset of line
+        getCharsTillLineEnd();
+
+        // If at empty line, return false (next node will be stand-alone)
+        if (isAtEmptyLine())
+            return false;
+
+        // If next char is non-mixable node
+        skipWhiteSpace();
+        boolean nextCharStartsWithNonMixableNode = ArrayUtils.hasMatch(NON_MIXABLE_NODE_MARKERS, this::nextCharsStartWith);
+        if (nextCharStartsWithNonMixableNode)
+            return false;
+
+        // Return true
         return true;
     }
 }
