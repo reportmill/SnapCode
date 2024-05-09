@@ -70,6 +70,7 @@ public class MarkDownView extends ChildView {
             case Image: return createViewForImageNode(markNode);
             case CodeBlock: return createViewForCodeBlockNode(markNode);
             case List: return createViewForListNode(markNode);
+            case Mixed: return createViewForMixedNode(markNode);
             default:
                 System.err.println("MarkDownView.createViewForNode: No support for type: " + markNode.getNodeType());
                 return null;
@@ -132,13 +133,8 @@ public class MarkDownView extends ChildView {
         TextBlock textBlock = textArea.getTextBlock();
         textBlock.setDefaultStyle(textStyle);
 
-        // Create link style
-        String urlAddr = linkNode.getOtherText();
-        TextLink textLink = new TextLink(urlAddr);
-        TextStyle linkTextStyle = textStyle.copyFor(textLink);
-
-        // Set text
-        textBlock.addCharsWithStyle(linkNode.getText(), linkTextStyle);
+        // Add link
+        addTextOrLinkNodeToTextArea(textArea, linkNode);
 
         // Return
         return textArea;
@@ -186,26 +182,43 @@ public class MarkDownView extends ChildView {
      */
     private View createViewForListItemNode(MDNode listItemNode)
     {
-        TextArea textArea = new TextArea();
-        textArea.setMargin(8, 8, 8, 8);
+        // Create view for mixed node
+        RowView mixedNodeView = createViewForMixedNode(listItemNode);
 
-        // Reset style
-        TextStyle textStyle = MDUtils.getContentStyle();
-        TextBlock textBlock = textArea.getTextBlock();
-        textBlock.setDefaultStyle(textStyle);
+        // If first child is TextArea, add bullet
+        if (mixedNodeView.getChild(0) instanceof TextArea) {
+            TextArea textArea = (TextArea) mixedNodeView.getChild(0);
+            textArea.addChars("• ", null, 0);
+        }
 
-        // Set text
-        String listItemText = "• " + listItemNode.getText();
-        textBlock.addChars(listItemText);
+        // Otherwise create text area and insert
+        else {
+            View bulletTextArea = createViewForTextNode(new MDNode(MDNode.NodeType.Text, "• "));
+            bulletTextArea.setMargin(0, 0, 0, 0);
+            mixedNodeView.addChild(bulletTextArea, 0);
+        }
 
         // Return
-        return textArea;
+        return mixedNodeView;
     }
 
     /**
      * Creates a view for code block.
      */
     private View createViewForCodeBlockNode(MDNode codeNode)
+    {
+        TextArea textArea = createTextAreaViewForCodeBlockNode(codeNode);
+
+        // Wrap in box and return
+        BoxView codeBlockBox = new BoxView(textArea);
+        codeBlockBox.setAlign(Pos.CENTER_LEFT);
+        return codeBlockBox;
+    }
+
+    /**
+     * Creates a view for code block.
+     */
+    private TextArea createTextAreaViewForCodeBlockNode(MDNode codeNode)
     {
         TextArea textArea = new TextArea();
         textArea.setMargin(8, 8, 8, 8);
@@ -226,10 +239,66 @@ public class MarkDownView extends ChildView {
         // Add listener to select code block
         textArea.addEventFilter(e -> _selCodeBlockNode = codeNode, MousePress);
 
-        // Wrap in box and return
-        BoxView codeBlockBox = new BoxView(textArea);
-        codeBlockBox.setAlign(Pos.CENTER_LEFT);
-        return codeBlockBox;
+        // Return
+        return textArea;
+    }
+
+    /**
+     * Creates a view for mixed node (children are Text, Link, Image or CodeBlock).
+     */
+    private RowView createViewForMixedNode(MDNode mixedNode)
+    {
+        // Create row view for mixed node
+        RowView mixedNodeView = new RowView();
+        mixedNodeView.setMargin(8, 8, 8, 8);
+        mixedNodeView.setSpacing(4);
+
+        // Get children
+        MDNode[] childNodes = mixedNode.getChildNodes();
+        TextArea lastTextArea = null;
+
+        // Iterate over children
+        for (MDNode childNode : childNodes) {
+
+            // If last node is Text or Link and last view is TextArea, just add chars
+            MDNode.NodeType nodeType = childNode.getNodeType();
+            if (lastTextArea != null && (nodeType == MDNode.NodeType.Text || nodeType == MDNode.NodeType.Link))
+                addTextOrLinkNodeToTextArea(lastTextArea, childNode);
+
+            // Otherwise create view and add
+            else {
+                View childNodeView = createViewForMixedNodeChildNode(childNode);
+                childNodeView.setMargin(0, 0, 0, 0);
+                mixedNodeView.addChild(childNodeView);
+                if (childNodeView instanceof TextArea && nodeType != MDNode.NodeType.CodeBlock)
+                    lastTextArea = (TextArea) childNodeView;
+                else lastTextArea = null;
+            }
+        }
+
+        // Return
+        return mixedNodeView;
+    }
+
+    /**
+     * Creates a view for mixed node (children are Text, Link, Image or CodeBlock).
+     */
+    private View createViewForMixedNodeChildNode(MDNode childNode)
+    {
+        MDNode.NodeType nodeType = childNode.getNodeType();
+
+        // Handle CodeBlock special
+        if (nodeType == MDNode.NodeType.CodeBlock) {
+            View childNodeView = createTextAreaViewForCodeBlockNode(childNode);
+            childNodeView.setMargin(0, 0, 0, 0);
+            childNodeView.setPadding(8, 8, 8, 8);
+            return childNodeView;
+        }
+
+        // Handle anything else
+        View childNodeView = createViewForNode(childNode); assert (childNodeView != null);
+        childNodeView.setMargin(0, 0, 0, 0);
+        return childNodeView;
     }
 
     /**
@@ -254,5 +323,36 @@ public class MarkDownView extends ChildView {
     protected void layoutImpl()
     {
         ColView.layout(this, true);
+    }
+
+    /**
+     * Adds a text or link node content to a given text area.
+     */
+    private void addTextOrLinkNodeToTextArea(TextArea textArea, MDNode aNode)
+    {
+        // Handle link node
+        if (aNode.getNodeType() == MDNode.NodeType.Link) {
+
+            // Create link style
+            String urlAddr = aNode.getOtherText();
+            TextLink textLink = new TextLink(urlAddr);
+            TextBlock textBlock = textArea.getTextBlock();
+            TextStyle textStyle = textBlock.getDefaultStyle();
+            TextStyle linkTextStyle = textStyle.copyFor(textLink);
+
+            // If text already present, add space
+            if (textBlock.length() > 0)
+                textBlock.addChars(" ");
+
+            // Set text
+            textBlock.addCharsWithStyle(aNode.getText(), linkTextStyle);
+        }
+
+        // Otherwise, add chars
+        else {
+            String nodeText = aNode.getText();
+            if (nodeText != null)
+                textArea.addChars(nodeText);
+        }
     }
 }

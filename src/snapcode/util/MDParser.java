@@ -25,7 +25,7 @@ public class MDParser {
     private int _charIndex;
 
     // Constants
-    public static final String HEADER_MARKER = "# ";
+    public static final String HEADER_MARKER = "#";
     public static final String LIST_ITEM_MARKER = "* ";
     public static final String LINK_MARKER = "[";
     public static final String IMAGE_MARKER = "![";
@@ -94,12 +94,21 @@ public class MDParser {
             return parseDirectiveNode();
 
         // Parse mixable node: Text, Link, Image, CodeBlock
-        MDNode mixableNode = parseMixableNode();
+        return parseMixableNode();
+    }
+
+    /**
+     * Parses mixable nodes: Text, Link, Image, CodeBlock or Mixed.
+     */
+    private MDNode parseMixableNode()
+    {
+        // Parse mixable node: Text, Link, Image, CodeBlock
+        MDNode mixableNode = parseMixableNodeImpl();
 
         // While next chars start with mixable node, parse and add child node
         while (nextCharsStartWithMixableNode()) {
             mixableNode = MDNode.getMixedNodeForNode(mixableNode);
-            MDNode nextMixedNode = parseMixableNode();
+            MDNode nextMixedNode = parseMixableNodeImpl();
             mixableNode.addChildNode(nextMixedNode);
         }
 
@@ -110,7 +119,7 @@ public class MDParser {
     /**
      * Parses mixable nodes: Text, Link, Image, CodeBlock
      */
-    private MDNode parseMixableNode()
+    private MDNode parseMixableNodeImpl()
     {
         // Handle link
         if (nextCharsStartWith(LINK_MARKER))
@@ -195,22 +204,19 @@ public class MDParser {
         // Eat identifier chars
         eatChars(LIST_ITEM_MARKER.length());
 
-        // Get all chars
-        StringBuilder allChars = new StringBuilder();
+        // Parse mixable child node
+        MDNode mixableNode = parseMixableNode();
 
-        // Get chars till next list item or empty line
-        while (true) {
-            CharSequence lineChars = getCharsTillLineEnd();
-            allChars.append(lineChars);
-            if (nextCharsStartWith(LIST_ITEM_MARKER))
-                break;
-            if (!hasChars() || isAtEmptyLine())
-                break;
-            allChars.append(' ');
-        }
+        // Create ListItem node
+        MDNode listItemNode = new MDNode(MDNode.NodeType.ListItem, null);
 
-        // Create ListItem node and return
-        return new MDNode(MDNode.NodeType.ListItem, allChars.toString());
+        // If node is mixed, move its children to new node, otherwise just add child
+        if (mixableNode.getNodeType() == MDNode.NodeType.Mixed)
+            listItemNode.setChildNodes(mixableNode.getChildNodes());
+        else listItemNode.addChildNode(mixableNode);
+
+        // Return
+        return listItemNode;
     }
 
     /**
