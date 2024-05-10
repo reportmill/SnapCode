@@ -31,6 +31,7 @@ public class MDParser {
     public static final String IMAGE_MARKER = "![";
     public static final String DIRECTIVE_MARKER = "@[";
     public static final String CODE_BLOCK_MARKER = "```";
+    private static final String LINK_END_MARKER = "]";
 
     // Constant for Nodes that are stand-alone
     private static final String[] MIXABLE_NODE_MARKERS = { LINK_MARKER, IMAGE_MARKER, CODE_BLOCK_MARKER };
@@ -227,22 +228,43 @@ public class MDParser {
         // Eat marker chars
         eatChars(LINK_MARKER.length());
 
-        // Get chars till link close
-        String linkText = getCharsTillMatchingTerminator("]").toString().trim();
+        // Parse nodes till link close
+        MDNode mixableNode = parseMixableNode();
+
+        // If missing link close char, complain
+        if (!nextCharsStartWith(LINK_END_MARKER))
+            System.err.println("MDParser.parseLinkNode: Missing link close char");
+        else eatChar();
 
         // Create link node
-        MDNode linkNode = new MDNode(MDNode.NodeType.Link, linkText);
+        MDNode linkNode = new MDNode(MDNode.NodeType.Link, null);
 
-        // Look for url marker
-        skipWhiteSpace();
-        if (nextCharsStartWith("(")) {
-            eatChar();
-            String urlText = getCharsTillMatchingTerminator(")").toString().trim();
-            linkNode.setOtherText(urlText);
-        }
+        // If node is mixed, move its children to new node, otherwise just add child
+        if (mixableNode.getNodeType() == MDNode.NodeType.Mixed)
+            linkNode.setChildNodes(mixableNode.getChildNodes());
+        else linkNode.addChildNode(mixableNode);
+
+        // Parse and set url text
+        String urlAddr = parseLinkUrlAddress();
+        linkNode.setOtherText(urlAddr);
 
         // Return
         return linkNode;
+    }
+
+    /**
+     * Parses a link URL address.
+     */
+    private String parseLinkUrlAddress()
+    {
+        // If no link Url marker, just return
+        skipWhiteSpace();
+        if (!nextCharsStartWith("("))
+            return null;
+
+        // Return link chars
+        eatChar();
+        return getCharsTillMatchingTerminator(")").toString().trim();
     }
 
     /**
@@ -250,15 +272,21 @@ public class MDParser {
      */
     private MDNode parseImageNode()
     {
-        // Eat first char
-        eatChar();
+        // Eat marker chars
+        eatChars(IMAGE_MARKER.length());
 
-        // Parse link node and reassign NodeType to Image
-        MDNode imageNode = parseLinkNode();
-        imageNode._nodeType = MDNode.NodeType.Image;
+        // Get chars till image text close
+        String imageText = getCharsTillMatchingTerminator("]").toString().trim();
+
+        // Create link node
+        MDNode linkNode = new MDNode(MDNode.NodeType.Image, imageText);
+
+        // Parse and set url text
+        String urlAddr = parseLinkUrlAddress();
+        linkNode.setOtherText(urlAddr);
 
         // Return
-        return imageNode;
+        return linkNode;
     }
 
     /**
@@ -270,7 +298,7 @@ public class MDParser {
         eatChars(DIRECTIVE_MARKER.length());
 
         // Get chars till link close
-        String directiveText = getCharsTillMatchingTerminator("]").toString().trim();
+        String directiveText = getCharsTillMatchingTerminator(LINK_END_MARKER).toString().trim();
 
         // Create directive node
         MDNode directiveNode = new MDNode(MDNode.NodeType.Directive, directiveText);
@@ -399,6 +427,10 @@ public class MDParser {
             if (nextChar == '\n')
                 break;
 
+            // If next chars is link end, break
+            if (nextCharsStartWith(LINK_END_MARKER))
+                break;
+
             // Append char to buffer and eat
             sb.append(nextChar);
             eatChar();
@@ -440,9 +472,17 @@ public class MDParser {
      */
     private boolean nextCharsStartWithMixableNode()
     {
-        // If not at empty line, return true (any next chars will be text node)
-        if (!isAtEmptyLine())
+        // If not at empty line, return true (any next chars will be text node). Except for link end marker
+        if (!isAtEmptyLine()) {
+
+            // If next char is link end, return false
+            skipWhiteSpace();
+            if (nextCharsStartWith(LINK_END_MARKER))
+                return false;
+
+            // Return true
             return true;
+        }
 
         // Eat reset of line
         getCharsTillLineEnd();

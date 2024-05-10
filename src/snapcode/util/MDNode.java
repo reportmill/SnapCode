@@ -83,4 +83,17 @@ public class MDNode {
         mixedNode.addChildNode(aNode);
         return mixedNode;
     }
+
+    /**
+     * Standard toString implementation.
+     */
+    @Override
+    public String toString()
+    {
+        String str = "MDNode { NodeType: " + _nodeType;
+        if (_text != null) str += ", Text: " + _text;
+        if (_otherText != null) str += ", Link: " + _otherText;
+        if (_childNodes != null) str += ", ChildCount: " + _childNodes.length;
+        return str + " }";
+    }
 }

@@ -71,6 +71,7 @@ public class MarkDownView extends ChildView {
             case CodeBlock: return createViewForCodeBlockNode(markNode);
             case List: return createViewForListNode(markNode);
             case Mixed: return createViewForMixedNode(markNode);
+            case Directive: return null;
             default:
                 System.err.println("MarkDownView.createViewForNode: No support for type: " + markNode.getNodeType());
                 return null;
@@ -125,19 +126,27 @@ public class MarkDownView extends ChildView {
      */
     private View createViewForLinkNode(MDNode linkNode)
     {
-        TextArea textArea = new TextArea();
-        textArea.setMargin(8, 8, 8, 8);
+        // Create view for mixed node
+        RowView linkedNodeView = createViewForMixedNode(linkNode);
+        View[] linkNodeViewChildren = linkedNodeView.getChildren();
 
-        // Reset style
+        // Create link style
+        String urlAddr = linkNode.getOtherText();
+        TextLink textLink = new TextLink(urlAddr);
         TextStyle textStyle = MDUtils.getContentStyle();
-        TextBlock textBlock = textArea.getTextBlock();
-        textBlock.setDefaultStyle(textStyle);
+        TextStyle linkTextStyle = textStyle.copyFor(textLink);
 
-        // Add link
-        addTextOrLinkNodeToTextArea(textArea, linkNode);
+        // Iterate over children and add link
+        for (View childView : linkNodeViewChildren) {
+            if (childView instanceof TextArea) {
+                TextArea textArea = (TextArea) childView;
+                TextBlock textBlock = textArea.getTextBlock();
+                textBlock.setStyle(linkTextStyle, 0, textBlock.length());
+            }
+        }
 
         // Return
-        return textArea;
+        return linkedNodeView;
     }
 
     /**
