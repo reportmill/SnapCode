@@ -6,7 +6,7 @@
 
 ## Create New:
 
-@[List=RowButtonsList]
+@[CreateNew=true]
 
 * [![](https://reportmill.com/SnapCode/images/JavaFile_64.png) Java Class ]( NewJavaClassButton )
 * [![](https://reportmill.com/SnapCode/images/JeplFile_64.png) Java Repl ]( NewJavaReplButton )

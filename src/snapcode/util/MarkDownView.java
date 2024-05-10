@@ -8,6 +8,8 @@ import snap.text.TextStyle;
 import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.web.WebURL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -20,6 +22,9 @@ public class MarkDownView extends ChildView {
 
     // The selected code block node
     private MDNode _selCodeBlockNode;
+
+    // Map of directive values
+    private Map<String,String> _directives = new HashMap<>();
 
     /**
      * Constructor.
@@ -47,6 +52,22 @@ public class MarkDownView extends ChildView {
     }
 
     /**
+     * Returns the directive value.
+     */
+    public String getDirectiveValue(String aKey)
+    {
+        return _directives.get(aKey);
+    }
+
+    /**
+     * Sets the directive value.
+     */
+    public void setDirectiveValue(String aKey, String aValue)
+    {
+        _directives.put(aKey, aValue);
+    }
+
+    /**
      * Returns the selected code block node.
      */
     public MDNode getSelCodeBlockNode()
@@ -71,7 +92,7 @@ public class MarkDownView extends ChildView {
             case CodeBlock: return createViewForCodeBlockNode(markNode);
             case List: return createViewForListNode(markNode);
             case Mixed: return createViewForMixedNode(markNode);
-            case Directive: return null;
+            case Directive: return createViewForDirectiveNode(markNode);
             default:
                 System.err.println("MarkDownView.createViewForNode: No support for type: " + markNode.getNodeType());
                 return null;
@@ -171,7 +192,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for list node.
      */
-    private View createViewForListNode(MDNode listNode)
+    protected ChildView createViewForListNode(MDNode listNode)
     {
         // Create list view
         ColView listNodeView = new ColView();
@@ -189,7 +210,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for list item node.
      */
-    private View createViewForListItemNode(MDNode listItemNode)
+    protected ChildView createViewForListItemNode(MDNode listItemNode)
     {
         // Create view for mixed node
         RowView mixedNodeView = createViewForMixedNode(listItemNode);
@@ -250,6 +271,18 @@ public class MarkDownView extends ChildView {
 
         // Return
         return textArea;
+    }
+
+    /**
+     * Creates a view for directive.
+     */
+    protected View createViewForDirectiveNode(MDNode directiveNode)
+    {
+        String directiveString = directiveNode.getText();
+        String[] dirParts = directiveString.split("=");
+        if (dirParts.length == 2)
+            setDirectiveValue(dirParts[0], dirParts[1]);
+        return null;
     }
 
     /**

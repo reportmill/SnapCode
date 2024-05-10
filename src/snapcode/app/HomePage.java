@@ -1,7 +1,9 @@
 package snapcode.app;
-import snap.view.ScrollView;
-import snap.view.View;
+import snap.geom.Pos;
+import snap.gfx.Color;
+import snap.view.*;
 import snap.web.WebURL;
+import snapcode.util.MDNode;
 import snapcode.util.MarkDownView;
 import snapcode.webbrowser.WebPage;
 
@@ -60,6 +62,53 @@ public class HomePage extends WebPage {
      */
     private class HomePageView extends MarkDownView {
 
+        /**
+         * Override to remap CreateNew list.
+         */
+        @Override
+        protected ChildView createViewForListNode(MDNode listNode)
+        {
+            ChildView listNodeView = super.createViewForListNode(listNode);
 
+            // Handle CreateNew list
+            if ("true".equals(getDirectiveValue("CreateNew"))) {
+                setDirectiveValue("CreateNew", null);
+                RowView newView = new RowView();
+                newView.setMargin(listNodeView.getMargin());
+                newView.setChildren(listNodeView.getChildren());
+                listNodeView = newView;
+            }
+
+            // Return
+            return listNodeView;
+        }
+
+        /**
+         * Override to remap CreateNew list.
+         */
+        @Override
+        protected ChildView createViewForListItemNode(MDNode listItemNode)
+        {
+            ChildView listItemView = super.createViewForListItemNode(listItemNode);
+
+            // Handle CreateNew list
+            if ("true".equals(getDirectiveValue("CreateNew"))) {
+                listItemView.removeChild(0);
+                listItemView = (ChildView) listItemView.getChild(0);
+                ColView newView = new ColView();
+                newView.setFill(new Color(.98));
+                newView.setBorderRadius(8);
+                newView.setMargin(20, 20, 20, 20);
+                newView.setPadding(20, 20, 20, 20);
+                newView.setSpacing(10);
+                newView.setAlign(Pos.TOP_CENTER);
+                newView.setMinWidth(140);
+                newView.setChildren(listItemView.getChildren());
+                listItemView = newView;
+            }
+
+            // Return
+            return listItemView;
+        }
     }
 }
