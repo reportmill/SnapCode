@@ -273,7 +273,7 @@ public class MDParser {
         String directiveText = getCharsTillMatchingTerminator("]").toString().trim();
 
         // Create directive node
-        MDNode directiveNode = new MDNode(MDNode.NodeType.Link, directiveText);
+        MDNode directiveNode = new MDNode(MDNode.NodeType.Directive, directiveText);
 
         // Return
         return directiveNode;
