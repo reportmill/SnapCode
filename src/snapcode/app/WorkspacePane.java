@@ -263,7 +263,7 @@ public class WorkspacePane extends ViewOwner {
 
         // Add toobar to menubar
         View toolBarUI = _toolBar.getUI();
-        toolBarUI.setLeanX(HPos.RIGHT);
+        toolBarUI.setGrowWidth(true);
         ViewUtils.addChild(menuBar, toolBarUI);
 
         // Get PagePaneSplitView

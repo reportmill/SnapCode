@@ -75,21 +75,22 @@ public class MainToolBar extends WorkspaceTool {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle RunButton, DebugButton, TerminateButton, BuildButton
-        if (anEvent.equals("RunButton"))
-            _workspaceTools.getRunTool().runAppForSelFile(false);
-        if (anEvent.equals("DebugButton")) {
-            if (anEvent.isAltDown()) { String str = null; str.length(); } // Hidden trigger to test NPE
-            _workspaceTools.getRunTool().runAppForSelFile(true);
-        }
-        if (anEvent.equals("TerminateButton"))
-            _workspaceTools.getRunTool().cancelRun();
-        if (anEvent.equals("BuildButton"))
-            _workspaceTools.getToolForClass(BuildTool.class).buildWorkspace();
+        switch (anEvent.getName()) {
 
-        // Handle SearchComboBox
-        if (anEvent.equals("SearchComboBox"))
-            handleSearchComboBox(anEvent);
+            // Handle HomeButton
+            case "HomeButton": _pagePane.showHomePage(); break;
+
+            // Handle RunButton, DebugButton, TerminateButton, BuildButton
+            case "RunButton": _workspaceTools.getRunTool().runAppForSelFile(false); break;
+            case "DebugButton":
+                if (anEvent.isAltDown()) { String str = null; str.length(); } // Hidden trigger to test NPE
+                _workspaceTools.getRunTool().runAppForSelFile(true); break;
+            case "TerminateButton": _workspaceTools.getRunTool().cancelRun(); break;
+            case "BuildButton": _workspaceTools.getToolForClass(BuildTool.class).buildWorkspace(); break;
+
+            // Handle SearchComboBox
+            case "SearchComboBox": handleSearchComboBox(anEvent); break;
+        }
     }
 
     /**

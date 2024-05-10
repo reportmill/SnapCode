@@ -203,6 +203,15 @@ public class PagePane extends ViewOwner {
     }
 
     /**
+     * Shows the home page.
+     */
+    public void showHomePage()
+    {
+        HomePage homePage = HomePage.getShared();
+        setSelPage(homePage);
+    }
+
+    /**
      * Shows the given exception.
      */
     public void showException(WebURL aURL, Exception e)

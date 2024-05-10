@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RowView PrefHeight="32" Padding="0,12,0,8" Spacing="5">
   <Font Name="Arial" Size="12" />
-  <Button Name="RunButton" PrefWidth="28" PrefHeight="28" Image="/snapcode/apptools/pkg.images/Run.png" ShowArea="false" />
+  <Separator PrefHeight="18" Margin="0,0,0,90" Vertical="true" />
+  <Button Name="HomeButton" PrefWidth="28" PrefHeight="28" Opacity=".5" Image="pkg.images/Home.png" ShowArea="false" />
+  <Button Name="RunButton" PrefWidth="28" PrefHeight="28" LeanX="RIGHT" Image="/snapcode/apptools/pkg.images/Run.png" ShowArea="false" />
   <Button Name="DebugButton" PrefWidth="28" PrefHeight="28" Image="/snapcode/apptools/pkg.images/Debug.gif" ShowArea="false" />
   <Button Name="TerminateButton" PrefWidth="28" PrefHeight="28" Image="/snapcode/apptools/pkg.images/Terminate.gif" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
