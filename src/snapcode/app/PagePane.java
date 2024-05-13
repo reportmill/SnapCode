@@ -31,6 +31,9 @@ public class PagePane extends ViewOwner {
     // The WorkspacePane
     protected WorkspacePane  _workspacePane;
 
+    // The HomePage
+    private HomePage _homePage;
+
     // A list of open files
     List<WebFile>  _openFiles = new ArrayList<>();
 
@@ -59,6 +62,7 @@ public class PagePane extends ViewOwner {
     {
         super();
         _workspacePane = workspacePane;
+        _homePage = new HomePage(workspacePane);
     }
 
     /**
@@ -207,8 +211,7 @@ public class PagePane extends ViewOwner {
      */
     public void showHomePage()
     {
-        HomePage homePage = HomePage.getShared();
-        setSelPage(homePage);
+        setSelPage(_homePage);
     }
 
     /**

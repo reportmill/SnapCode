@@ -151,24 +151,43 @@ public class MarkDownView extends ChildView {
         RowView linkedNodeView = createViewForMixedNode(linkNode);
         View[] linkNodeViewChildren = linkedNodeView.getChildren();
 
-        // Create link style
+        // Add link to children
         String urlAddr = linkNode.getOtherText();
-        TextLink textLink = new TextLink(urlAddr);
-        TextStyle textStyle = MDUtils.getContentStyle();
-        TextStyle linkTextStyle = textStyle.copyFor(textLink);
-
-        // Iterate over children and add link
-        for (View childView : linkNodeViewChildren) {
-            if (childView instanceof TextArea) {
-                TextArea textArea = (TextArea) childView;
-                TextBlock textBlock = textArea.getTextBlock();
-                textBlock.setStyle(linkTextStyle, 0, textBlock.length());
-            }
-        }
+        if (urlAddr != null)
+            Stream.of(linkNodeViewChildren).forEach(childView -> addLinkToLinkView(urlAddr, childView));
 
         // Return
         return linkedNodeView;
     }
+
+    /**
+     * Adds a link to link view.
+     */
+    protected void addLinkToLinkView(String urlAddr, View linkNodeView)
+    {
+        // Add link handler
+        linkNodeView.addEventFilter(e -> handleLinkClick(urlAddr), MouseRelease);
+        linkNodeView.setCursor(Cursor.HAND);
+
+        // Handle TextArea: Add link style
+        if (linkNodeView instanceof TextArea) {
+
+            // Create link style
+            TextLink textLink = new TextLink(urlAddr);
+            TextStyle textStyle = MDUtils.getContentStyle();
+            TextStyle linkTextStyle = textStyle.copyFor(textLink);
+
+            // Add link
+            TextArea textArea = (TextArea) linkNodeView;
+            TextBlock textBlock = textArea.getTextBlock();
+            textBlock.setStyle(linkTextStyle, 0, textBlock.length());
+        }
+    }
+
+    /**
+     * Called when link is clicked.
+     */
+    protected void handleLinkClick(String urlAddr)  { }
 
     /**
      * Creates a view for image node.

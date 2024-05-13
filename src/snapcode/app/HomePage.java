@@ -1,10 +1,9 @@
 package snapcode.app;
-import snap.geom.Pos;
-import snap.gfx.Color;
 import snap.view.*;
 import snap.web.WebURL;
-import snapcode.util.MDNode;
-import snapcode.util.MarkDownView;
+import snapcode.apptools.FilesTool;
+import snapcode.project.ProjectUtils;
+import snapcode.project.Workspace;
 import snapcode.webbrowser.WebPage;
 
 /**
@@ -12,21 +11,71 @@ import snapcode.webbrowser.WebPage;
  */
 public class HomePage extends WebPage {
 
+    // The WorkspacePane
+    private WorkspacePane _workspacePane;
+
     // The HomePageView
     private HomePageView _homePageView;
-
-    // The shared instance
-    private static HomePage _shared = new HomePage();
 
     /**
      * Constructor.
      */
-    public HomePage()
+    public HomePage(WorkspacePane workspacePane)
     {
         super();
+        _workspacePane = workspacePane;
 
         WebURL homePageUrl = WebURL.getURL(getClass(), "HomePage.md"); assert (homePageUrl != null);
         setURL(homePageUrl);
+    }
+
+    /**
+     * Creates a new file.
+     */
+    private void createNewJavaFile(String fileType)
+    {
+        Workspace workspace = _workspacePane.getWorkspace();
+        ProjectUtils.getTempProject(workspace);
+
+        // Open new Jepl file
+        runLater(() -> {
+            FilesTool filesTool = _workspacePane.getWorkspaceTools().getFilesTool();
+            if (fileType.equals("jepl"))
+                filesTool.newJeplFileForNameAndString("JavaFiddle", "");
+            else filesTool.newJavaFileForName("JavaFiddle");
+        });
+    }
+
+    /**
+     * Creates a new project.
+     */
+    private void createNewProject()
+    {
+        // Open empty workspace pane
+        _workspacePane.showProjectTool();
+
+        // Show new project panel
+        runLater(() -> {
+            FilesTool filesTool = _workspacePane.getWorkspaceTools().getFilesTool();
+            filesTool.showNewProjectPanel(getUI());
+        });
+    }
+
+    /**
+     * Called to resolve links.
+     */
+    protected void handleLinkClick(String urlAddr)
+    {
+        switch (urlAddr) {
+
+            // Handle NewJavaClassButton, NewJavaReplButton
+            case "NewJavaClassButton": createNewJavaFile("java"); break;
+            case "NewJavaReplButton": createNewJavaFile("jepl"); break;
+
+            // Handle NewProjectButton, NewBlockProjectButton
+            case "NewProjectButton":
+            case "NewBlockProjectButton": createNewProject(); break;
+        }
     }
 
     /**
@@ -35,7 +84,7 @@ public class HomePage extends WebPage {
     @Override
     protected View createUI()
     {
-        _homePageView = new HomePageView();
+        _homePageView = new HomePageView(this);
         ScrollView scrollView = new ScrollView(_homePageView);
         scrollView.setFillWidth(true);
         return scrollView;
@@ -50,65 +99,5 @@ public class HomePage extends WebPage {
         WebURL homePageUrl = getURL();
         String homePageText = homePageUrl.getText();
         _homePageView.setMarkDown(homePageText);
-    }
-
-    /**
-     * Returns the shared instance.
-     */
-    public static HomePage getShared()  { return _shared; }
-
-    /**
-     * The MarkDownView for HomePage.
-     */
-    private class HomePageView extends MarkDownView {
-
-        /**
-         * Override to remap CreateNew list.
-         */
-        @Override
-        protected ChildView createViewForListNode(MDNode listNode)
-        {
-            ChildView listNodeView = super.createViewForListNode(listNode);
-
-            // Handle CreateNew list
-            if ("true".equals(getDirectiveValue("CreateNew"))) {
-                setDirectiveValue("CreateNew", null);
-                RowView newView = new RowView();
-                newView.setMargin(listNodeView.getMargin());
-                newView.setChildren(listNodeView.getChildren());
-                listNodeView = newView;
-            }
-
-            // Return
-            return listNodeView;
-        }
-
-        /**
-         * Override to remap CreateNew list.
-         */
-        @Override
-        protected ChildView createViewForListItemNode(MDNode listItemNode)
-        {
-            ChildView listItemView = super.createViewForListItemNode(listItemNode);
-
-            // Handle CreateNew list
-            if ("true".equals(getDirectiveValue("CreateNew"))) {
-                listItemView.removeChild(0);
-                listItemView = (ChildView) listItemView.getChild(0);
-                ColView newView = new ColView();
-                newView.setFill(new Color(.98));
-                newView.setBorderRadius(8);
-                newView.setMargin(20, 20, 20, 20);
-                newView.setPadding(20, 20, 20, 20);
-                newView.setSpacing(10);
-                newView.setAlign(Pos.TOP_CENTER);
-                newView.setMinWidth(140);
-                newView.setChildren(listItemView.getChildren());
-                listItemView = newView;
-            }
-
-            // Return
-            return listItemView;
-        }
     }
 }
