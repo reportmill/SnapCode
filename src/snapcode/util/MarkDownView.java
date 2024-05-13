@@ -218,7 +218,7 @@ public class MarkDownView extends ChildView {
         // If first child is TextArea, add bullet
         if (mixedNodeView.getChild(0) instanceof TextArea) {
             TextArea textArea = (TextArea) mixedNodeView.getChild(0);
-            textArea.addChars("• ", null, 0);
+            textArea.getTextBlock().addChars("• ");
         }
 
         // Otherwise create text area and insert
@@ -394,7 +394,7 @@ public class MarkDownView extends ChildView {
         else {
             String nodeText = aNode.getText();
             if (nodeText != null)
-                textArea.addChars(nodeText);
+                textArea.getTextBlock().addChars(nodeText);
         }
     }
 }

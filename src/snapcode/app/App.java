@@ -7,6 +7,7 @@ import snap.view.ViewUtils;
 import snap.view.WindowView;
 import snap.viewx.DevPaneExceptions;
 import snapcode.apptools.RunTool;
+import snapcode.project.Workspace;
 import snapcode.util.LZString;
 
 /**
@@ -55,7 +56,22 @@ public class App {
             return;
 
         // Show WelcomePanel
-        showWelcomePanel();
+        //showWelcomePanel();
+        openDefaultWorkspace();
+    }
+
+    /**
+     * Opens default workspace and triggers home page.
+     */
+    protected void openDefaultWorkspace()
+    {
+        // Create workspace and workspace pane
+        Workspace workspace = new Workspace();
+        WorkspacePane workspacePane = new WorkspacePane(workspace);
+        workspacePane.show();
+
+        // Show home page
+        ViewUtils.runDelayed(() -> workspacePane.getPagePane().showHomePage(), 300);
     }
 
     /**
