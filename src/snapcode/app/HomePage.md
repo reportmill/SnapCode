@@ -1,17 +1,16 @@
-@[Header1=Header1]
-@[Header2=Header2]
-@[List=List]
 
 # Welcome to SnapCode
 
-## Create New:
-
 @[CreateNew=true]
+
+## Create New:
 
 * [![](https://reportmill.com/SnapCode/images/JavaFile_64.png) Java Class ]( NewJavaClassButton )
 * [![](https://reportmill.com/SnapCode/images/JeplFile_64.png) Java Repl ]( NewJavaReplButton )
 * [![](https://reportmill.com/SnapCode/images/Project_64.png) Java Project ]( NewProjectButton )
 * [![](https://reportmill.com/SnapCode/images/BlockProject_64.png) Block Project ]( NewBlockProjectButton )
+
+@[OpenRecent=true]
 
 ## Open Recent:
 
@@ -19,9 +18,9 @@
 * [Asteroids.zip](https://reportmill.com/SnapCode/Samples/Asteroids/Asteroids.zip)
 * [Tetris.zip](https://reportmill.com/SnapCode/Samples/Tetris/Tetris.zip)
 
-## Open Samples:
+@[OpenSamples=true]
 
-@[List=HeaderImageDescriptionList]
+## Open Samples:
 
 * Charting
 ![](https://reportmill.com/SnapCode/Samples/Charting/Charting.png)

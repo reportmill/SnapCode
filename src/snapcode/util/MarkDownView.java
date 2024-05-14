@@ -54,6 +54,14 @@ public class MarkDownView extends ChildView {
     /**
      * Returns the directive value.
      */
+    public boolean isDirectiveSet(String aKey)
+    {
+        return _directives.get(aKey) != null;
+    }
+
+    /**
+     * Returns the directive value.
+     */
     public String getDirectiveValue(String aKey)
     {
         return _directives.get(aKey);
@@ -82,7 +90,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates view for node.
      */
-    private View createViewForNode(MDNode markNode)
+    protected View createViewForNode(MDNode markNode)
     {
         switch (markNode.getNodeType()) {
             case Header1: case Header2: return createViewForHeaderNode(markNode);
@@ -102,7 +110,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for header node.
      */
-    private View createViewForHeaderNode(MDNode headerNode)
+    protected View createViewForHeaderNode(MDNode headerNode)
     {
         TextArea textArea = new TextArea();
         textArea.setMargin(16, 8, 16, 8);
@@ -124,7 +132,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for text node.
      */
-    private View createViewForTextNode(MDNode contentNode)
+    protected View createViewForTextNode(MDNode contentNode)
     {
         TextArea textArea = new TextArea();
         textArea.setWrapLines(true);
@@ -145,7 +153,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for link node.
      */
-    private View createViewForLinkNode(MDNode linkNode)
+    protected View createViewForLinkNode(MDNode linkNode)
     {
         // Create view for mixed node
         RowView linkedNodeView = createViewForMixedNode(linkNode);
@@ -192,7 +200,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for image node.
      */
-    private View createViewForImageNode(MDNode imageNode)
+    protected View createViewForImageNode(MDNode imageNode)
     {
         String urlAddr = imageNode.getOtherText();
         WebURL url = WebURL.getURL(urlAddr);
@@ -237,7 +245,7 @@ public class MarkDownView extends ChildView {
         // If first child is TextArea, add bullet
         if (mixedNodeView.getChild(0) instanceof TextArea) {
             TextArea textArea = (TextArea) mixedNodeView.getChild(0);
-            textArea.getTextBlock().addChars("• ");
+            textArea.getTextBlock().addChars("• ", 0);
         }
 
         // Otherwise create text area and insert
@@ -254,7 +262,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for code block.
      */
-    private View createViewForCodeBlockNode(MDNode codeNode)
+    protected View createViewForCodeBlockNode(MDNode codeNode)
     {
         TextArea textArea = createTextAreaViewForCodeBlockNode(codeNode);
 
@@ -267,7 +275,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for code block.
      */
-    private TextArea createTextAreaViewForCodeBlockNode(MDNode codeNode)
+    protected TextArea createTextAreaViewForCodeBlockNode(MDNode codeNode)
     {
         TextArea textArea = new TextArea();
         textArea.setMargin(8, 8, 8, 8);
@@ -307,7 +315,7 @@ public class MarkDownView extends ChildView {
     /**
      * Creates a view for mixed node (children are Text, Link, Image or CodeBlock).
      */
-    private RowView createViewForMixedNode(MDNode mixedNode)
+    protected RowView createViewForMixedNode(MDNode mixedNode)
     {
         // Create row view for mixed node
         RowView mixedNodeView = new RowView();
