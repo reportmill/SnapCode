@@ -196,7 +196,10 @@ public class RunAppSrc extends RunApp {
         // Get main method and invoke
         try {
             Class<?> mainClass = getMainClass();
-            assert (mainClass != null);
+            if (mainClass == null) {
+                System.out.println("Can't find main class for: " + getMainFile());
+                return;
+            }
             Method mainMethod = mainClass.getMethod("main", String[].class);
             mainMethod.invoke(null, (Object) new String[0]);
         }
