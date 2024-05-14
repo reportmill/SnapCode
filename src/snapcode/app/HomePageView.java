@@ -136,6 +136,16 @@ public class HomePageView extends MarkDownView {
         ColView openRecentListView = new ColView();
         openRecentListView.setPropsString("Margin:10,10,10,40;");
         openRecentListView.setChildren(recentFileViews);
+
+        // If no files, add label
+        if (recentFileUrls.length == 0) {
+            Label noRecentFilesLabel = new Label("(No recent files)");
+            noRecentFilesLabel.setPropsString("Font:Arial Italic 16; Margin:5");
+            noRecentFilesLabel.setTextFill(Color.GRAY);
+            openRecentListView.addChild(noRecentFilesLabel);
+        }
+
+        // Return
         return openRecentListView;
     }
 
