@@ -60,9 +60,6 @@ public class WorkspacePaneUtils {
             return;
         }
 
-        // Show run tool
-        workspacePane.showRunTool();
-
         // If java/jepl file, open and run
         String fileType = sampleFile.getType();
         if (fileType.equals("java") || fileType.equals("jepl")) {

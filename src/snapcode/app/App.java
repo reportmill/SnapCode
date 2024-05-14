@@ -71,7 +71,7 @@ public class App {
         workspacePane.show();
 
         // Show home page
-        ViewUtils.runDelayed(() -> workspacePane.getPagePane().showHomePage(), 300);
+        ViewUtils.runDelayed(() -> workspacePane.getPagePane().showHomePage(), 500);
     }
 
     /**

@@ -83,6 +83,8 @@ public class HomePageView extends MarkDownView {
         // Replace list view with row
         RowView newListView = new RowView();
         newListView.setMargin(listNodeView.getMargin());
+        newListView.setPadding(0, 0, 0, 20);
+        newListView.setSpacing(20);
         newListView.setChildren(listNodeView.getChildren());
         return newListView;
     }
@@ -108,7 +110,7 @@ public class HomePageView extends MarkDownView {
 
         // Create container view
         ColView listItemView = new ColView();
-        listItemView.setPropsString("Fill:#F8; Margin:20; Padding:20; Spacing:10; Align: TOP_CENTER; BorderRadius:8; MinWidth:140;");
+        listItemView.setPropsString("Fill:#F8; Padding:15; Spacing:6; Align: TOP_CENTER; BorderRadius:8; MinWidth:140;");
         addLinkToLinkView(listItemView, linkNode.getOtherText());
         listItemView.setChildren(imageNodeView, textNodeView);
 
@@ -132,7 +134,7 @@ public class HomePageView extends MarkDownView {
 
         // Create ColView for list
         ColView openRecentListView = new ColView();
-        openRecentListView.setPropsString("Margin:20,20,20,40;");
+        openRecentListView.setPropsString("Margin:10,10,10,40;");
         openRecentListView.setChildren(recentFileViews);
         return openRecentListView;
     }

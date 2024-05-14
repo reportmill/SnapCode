@@ -116,7 +116,6 @@ public class HomePage extends WebPage {
     {
         _homePageView = new HomePageView(this);
         ScrollView scrollView = new ScrollView(_homePageView);
-        scrollView.setFillWidth(true);
         return scrollView;
     }
 

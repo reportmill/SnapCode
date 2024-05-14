@@ -316,6 +316,9 @@ public class WorkspacePane extends ViewOwner {
     @Override
     protected void initShowing()
     {
+        // Show project tool
+        runLater(this::showProjectTool);
+
         // Do AutoBuild
         if (getProjects().length > 0)
             buildWorkspaceAllLater();

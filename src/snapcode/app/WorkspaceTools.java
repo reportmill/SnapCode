@@ -105,7 +105,7 @@ public class WorkspaceTools {
         _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
 
         // Add SamplesButton to RightTray
-        addSamplesButton();
+        //addSamplesButton();
     }
 
     /**
