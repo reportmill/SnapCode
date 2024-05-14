@@ -211,22 +211,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Open empty workspace pane
         WorkspacePane workspacePane = openEmptyWorkspace();
-
-        // If file is just a source file, open external source file
-        boolean isSourceFile = ArrayUtils.contains(FILE_TYPES, aFile.getType());
-        if (isSourceFile) {
-            ViewUtils.runLater(() -> WorkspacePaneUtils.openExternalSourceFile(workspacePane, aFile));
-            return;
-        }
-
-        // If file is zip file, open repo
-        if (aFile.getType().equals("zip")) {
-            WorkspacePaneUtils.openProjectForRepoURL(workspacePane, aFile.getURL());
-            return;
-        }
-
-        // Open project for given file
-        WorkspacePaneUtils.openProjectForProjectFile(workspacePane, aFile);
+        WorkspacePaneUtils.openFile(workspacePane, aFile);
     }
 
     /**

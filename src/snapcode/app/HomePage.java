@@ -1,5 +1,7 @@
 package snapcode.app;
 import snap.view.*;
+import snap.web.RecentFiles;
+import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.apptools.FilesTool;
 import snapcode.project.ProjectUtils;
@@ -62,10 +64,30 @@ public class HomePage extends WebPage {
     }
 
     /**
+     * Removes recent file for given url.
+     */
+    public void removeRecentFileUrl(WebURL recentFileUrl)
+    {
+        RecentFiles.removeURL(recentFileUrl);
+        _workspacePane.getPagePane().showHomePage();
+    }
+
+    /**
      * Called to resolve links.
      */
     protected void handleLinkClick(String urlAddr)
     {
+        // Handle any link with "OpenRecent:..."
+        if (urlAddr.startsWith("OpenRecent:")) {
+            String recentFileUrlAddr = urlAddr.substring("OpenRecent:".length());
+            WebURL recentFileUrl = WebURL.getURL(recentFileUrlAddr);
+            WebFile recentFile = recentFileUrl != null ? recentFileUrl.getFile() : null;
+            if (recentFile != null)
+                WorkspacePaneUtils.openFile(_workspacePane, recentFile);
+            else removeRecentFileUrl(recentFileUrl);
+            return;
+        }
+
         // Handle any link with "Sample:..."
         if (urlAddr.startsWith("Sample:")) {
             String sampleUrlAddr = urlAddr.substring("Sample:".length());

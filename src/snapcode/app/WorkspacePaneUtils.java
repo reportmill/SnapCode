@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.util.ArrayUtils;
 import snap.util.TaskRunner;
 import snap.view.ViewUtils;
 import snap.viewx.DialogBox;
@@ -15,6 +16,28 @@ import snapcode.project.*;
  * Utilities for WorkspacePane.
  */
 public class WorkspacePaneUtils {
+
+    /**
+     * Opens any file.
+     */
+    public static void openFile(WorkspacePane workspacePane, WebFile aFile)
+    {
+        // If file is just a source file, open external source file
+        boolean isSourceFile = ArrayUtils.contains(WelcomePanel.FILE_TYPES, aFile.getType());
+        if (isSourceFile) {
+            ViewUtils.runLater(() -> openExternalSourceFile(workspacePane, aFile));
+            return;
+        }
+
+        // If file is zip file, open repo
+        if (aFile.getType().equals("zip")) {
+            openProjectForRepoURL(workspacePane, aFile.getURL());
+            return;
+        }
+
+        // Open project for given file
+        openProjectForProjectFile(workspacePane, aFile);
+    }
 
     /**
      * Opens a samples URL.

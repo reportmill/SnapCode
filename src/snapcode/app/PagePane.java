@@ -62,7 +62,6 @@ public class PagePane extends ViewOwner {
     {
         super();
         _workspacePane = workspacePane;
-        _homePage = new HomePage(workspacePane);
     }
 
     /**
@@ -211,6 +210,7 @@ public class PagePane extends ViewOwner {
      */
     public void showHomePage()
     {
+        _homePage = new HomePage(_workspacePane);
         setSelPage(_homePage);
     }
 
