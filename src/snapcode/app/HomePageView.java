@@ -207,25 +207,25 @@ public class HomePageView extends MarkDownView {
         MDNode[] listNodeChildren = listItemNode.getChildNodes();
         MDNode titleNode = listNodeChildren[0];
         Label titleLabel = new Label(titleNode.getText());
-        titleLabel.setPropsString("Font:Arial Bold 16;");
+        titleLabel.setPropsString("Font:Arial Bold 16; Margin:10,10,5,15;");
 
         // Get link node
         MDNode linkNode = listNodeChildren[1];
         String linkUrlAddr = linkNode.getOtherText();
-        WebURL linkUrl = WebURL.getURL(linkUrlAddr);
+        WebURL linkUrl = WebURL.getURL(linkUrlAddr); assert (linkUrl != null);
         WebURL parentUrl = linkUrl.getParent();
 
         // Get image node and create image view
         WebURL imageUrl = parentUrl.getChild(parentUrl.getFilename() + ".png");
         Image image = Image.getImageForSource(imageUrl);
         ImageView imageView = new ImageView(image);
-        imageView.setMargin(10, 10, 10, 10);
-        imageView.setMaxSize(80, 80);
+        imageView.setMargin(5, 0, 5, 5);
+        imageView.setMaxSize(100, 100);
 
         // Create text view
         MDNode textNode = listNodeChildren[2];
         View textNodeView = createViewForTextNode(textNode);
-        textNodeView.setPropsString("Margin:0,0,0,40; PrefWidth:500;");
+        textNodeView.setPropsString("Margin:0,0,0,20; PrefWidth:500;");
 
         // Create row view for image and text
         RowView rowView = new RowView();
@@ -233,7 +233,7 @@ public class HomePageView extends MarkDownView {
 
         // Create container view
         ColView listItemView = new ColView();
-        listItemView.setPropsString("Fill:#F8; Margin:0,20,10,20; Padding:10; BorderRadius:8; Align:TOP_LEFT;");
+        listItemView.setPropsString("Fill:#F8; Margin:10,20,10,20; Padding:5; BorderRadius:8; Align:TOP_LEFT;");
         addLinkToLinkView(listItemView, "Sample:" + linkUrlAddr);
         listItemView.setChildren(titleLabel, rowView);
 
