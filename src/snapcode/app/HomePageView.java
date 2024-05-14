@@ -1,11 +1,11 @@
 package snapcode.app;
+import snap.gfx.Image;
 import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.web.RecentFiles;
 import snap.web.WebURL;
 import snapcode.util.MDNode;
 import snapcode.util.MarkDownView;
-
 import java.util.Arrays;
 
 /**
@@ -37,11 +37,13 @@ public class HomePageView extends MarkDownView {
     @Override
     protected ChildView createViewForListNode(MDNode listNode)
     {
-        // Handle CreateNew, OpenRecent
+        // Handle CreateNew, OpenRecent, OpenSamples
         if (isDirectiveSet("CreateNew"))
             return createViewForCreateNewList(listNode);
         if (isDirectiveSet("OpenRecent"))
             return createViewForOpenRecentList();
+        if (isDirectiveSet("OpenSamples"))
+            return createViewForOpenSamplesList(listNode);
 
         // Do normal version
         return super.createViewForListNode(listNode);
@@ -53,9 +55,11 @@ public class HomePageView extends MarkDownView {
     @Override
     protected ChildView createViewForListItemNode(MDNode listItemNode)
     {
-        // Handle CreateNew list
+        // Handle CreateNew, OpenSamples
         if (isDirectiveSet("CreateNew"))
             return createViewForCreateNewListItem(listItemNode);
+        if (isDirectiveSet("OpenSamples"))
+            return createViewForOpenSamplesListItem(listItemNode);
 
         // Do normal version
         return super.createViewForListItemNode(listItemNode);
@@ -158,5 +162,63 @@ public class HomePageView extends MarkDownView {
 
         // Return
         return recentFileView;
+    }
+
+    /**
+     * Creates a view for "Open Samples" list.
+     */
+    private ChildView createViewForOpenSamplesList(MDNode listNode)
+    {
+        // Do normal version
+        ChildView listNodeView = super.createViewForListNode(listNode);
+
+        // Clear directive
+        setDirectiveValue("OpenSamples", null);
+
+        // Return
+        return listNodeView;
+    }
+
+    /**
+     * Creates a view for "Open Samples" list item.
+     */
+    private ChildView createViewForOpenSamplesListItem(MDNode listItemNode)
+    {
+        // Get title node
+        MDNode[] listNodeChildren = listItemNode.getChildNodes();
+        MDNode titleNode = listNodeChildren[0];
+        Label titleLabel = new Label(titleNode.getText());
+        titleLabel.setPropsString("Font:Arial Bold 16;");
+
+        // Get link node
+        MDNode linkNode = listNodeChildren[1];
+        String linkUrlAddr = linkNode.getOtherText();
+        WebURL linkUrl = WebURL.getURL(linkUrlAddr);
+        WebURL parentUrl = linkUrl.getParent();
+
+        // Get image node and create image view
+        WebURL imageUrl = parentUrl.getChild(parentUrl.getFilename() + ".png");
+        Image image = Image.getImageForSource(imageUrl);
+        ImageView imageView = new ImageView(image);
+        imageView.setMargin(10, 10, 10, 10);
+        imageView.setMaxSize(80, 80);
+
+        // Create text view
+        MDNode textNode = listNodeChildren[2];
+        View textNodeView = createViewForTextNode(textNode);
+        textNodeView.setPropsString("Margin:0,0,0,40; PrefWidth:500;");
+
+        // Create row view for image and text
+        RowView rowView = new RowView();
+        rowView.setChildren(imageView, textNodeView);
+
+        // Create container view
+        ColView listItemView = new ColView();
+        listItemView.setPropsString("Fill:#F8; Margin:0,20,10,20; Padding:10; BorderRadius:8; Align:TOP_LEFT;");
+        addLinkToLinkView("Sample:" + linkUrlAddr, listItemView);
+        listItemView.setChildren(titleLabel, rowView);
+
+        // Return
+        return listItemView;
     }
 }
