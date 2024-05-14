@@ -1,5 +1,8 @@
 package snapcode.app;
+import snap.gfx.Color;
+import snap.gfx.Effect;
 import snap.gfx.Image;
+import snap.gfx.ShadowEffect;
 import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.web.RecentFiles;
@@ -15,6 +18,9 @@ public class HomePageView extends MarkDownView {
 
     // The HomePage
     private HomePage _homePage;
+
+    // Constants
+    private static final Effect LINK_HIGHLIGHT_EFFECT = new ShadowEffect(10, Color.get("#8888FF"), 0, 0);
 
     /**
      * Constructor.
@@ -103,7 +109,7 @@ public class HomePageView extends MarkDownView {
         // Create container view
         ColView listItemView = new ColView();
         listItemView.setPropsString("Fill:#F8; Margin:20; Padding:20; Spacing:10; Align: TOP_CENTER; BorderRadius:8; MinWidth:140;");
-        addLinkToLinkView(linkNode.getOtherText(), listItemView);
+        addLinkToLinkView(listItemView, linkNode.getOtherText());
         listItemView.setChildren(imageNodeView, textNodeView);
 
         // Return
@@ -159,7 +165,7 @@ public class HomePageView extends MarkDownView {
         recentFileView.setPropsString("Fill:#F8; BorderRadius:5; Margin:5; Padding:5;");
         recentFileView.setMinWidth(500);
         recentFileView.setChildren(nameLabel, separator, addressLabel, closeBox);
-        addLinkToLinkView("OpenRecent:" + recentFileUrl.getString(), recentFileView);
+        addLinkToLinkView(recentFileView, "OpenRecent:" + recentFileUrl.getString());
 
         // Return
         return recentFileView;
@@ -216,10 +222,29 @@ public class HomePageView extends MarkDownView {
         // Create container view
         ColView listItemView = new ColView();
         listItemView.setPropsString("Fill:#F8; Margin:0,20,10,20; Padding:10; BorderRadius:8; Align:TOP_LEFT;");
-        addLinkToLinkView("Sample:" + linkUrlAddr, listItemView);
+        addLinkToLinkView(listItemView, "Sample:" + linkUrlAddr);
         listItemView.setChildren(titleLabel, rowView);
 
         // Return
         return listItemView;
+    }
+
+    /**
+     * Override to highlight link views under mouse.
+     */
+    @Override
+    protected void addLinkToLinkView(View linkNodeView, String urlAddr)
+    {
+        super.addLinkToLinkView(linkNodeView, urlAddr);
+
+        linkNodeView.addEventFilter(this::handleLinkViewMouseEnterAndExitEvents, MouseEnter, MouseExit);
+    }
+
+    private void handleLinkViewMouseEnterAndExitEvents(ViewEvent anEvent)
+    {
+        if (anEvent.isMouseEnter())
+            anEvent.getView().setEffect(LINK_HIGHLIGHT_EFFECT);
+        else if (anEvent.isMouseExit())
+            anEvent.getView().setEffect(null);
     }
 }

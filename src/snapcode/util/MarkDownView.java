@@ -162,7 +162,7 @@ public class MarkDownView extends ChildView {
         // Add link to children
         String urlAddr = linkNode.getOtherText();
         if (urlAddr != null)
-            Stream.of(linkNodeViewChildren).forEach(childView -> addLinkToLinkView(urlAddr, childView));
+            Stream.of(linkNodeViewChildren).forEach(childView -> addLinkToLinkView(childView, urlAddr));
 
         // Return
         return linkedNodeView;
@@ -171,10 +171,10 @@ public class MarkDownView extends ChildView {
     /**
      * Adds a link to link view.
      */
-    protected void addLinkToLinkView(String urlAddr, View linkNodeView)
+    protected void addLinkToLinkView(View linkNodeView, String urlAddr)
     {
         // Add link handler
-        linkNodeView.addEventFilter(e -> handleLinkClick(urlAddr), MouseRelease);
+        linkNodeView.addEventHandler(e -> handleLinkClick(urlAddr), MouseRelease);
         linkNodeView.setCursor(Cursor.HAND);
 
         // Handle TextArea: Add link style
