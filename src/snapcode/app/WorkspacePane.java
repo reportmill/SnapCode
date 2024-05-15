@@ -382,8 +382,8 @@ public class WorkspacePane extends ViewOwner {
 
         // Handle NewFileMenuItem, NewFileButton
         if (anEvent.equals("NewFileMenuItem") || anEvent.equals("NewFileButton")) {
-            FilesTool filesTool = _workspaceTools.getFilesTool();
-            filesTool.showNewFilePanel();
+            NewFileTool newFileTool = _workspaceTools.getNewFileTool();
+            newFileTool.showNewFilePanel();
             anEvent.consume();
         }
 

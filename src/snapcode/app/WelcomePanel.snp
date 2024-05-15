@@ -15,8 +15,6 @@
         <MenuButton PrefWidth="20" PrefHeight="24" Position="CENTER_RIGHT">
           <MenuItem Name="NewJavaClassMenu" text="New Java Class" />
           <MenuItem Name="NewJavaReplMenu" text="New Java REPL" />
-          <MenuItem Name="NewProjectButton" text="New Java Project" />
-          <MenuItem Name="NewUIFileMenu" text="New SnapKit UI File" />
           <MenuItem Name="OpenGreenfootMenu" text="Open Greenfoot Scenario" />
         </MenuButton>
       </RowView>

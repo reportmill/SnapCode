@@ -4,7 +4,7 @@ import snap.view.*;
 import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
-import snapcode.apptools.FilesTool;
+import snapcode.apptools.NewFileTool;
 import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
 import snapcode.webbrowser.WebPage;
@@ -39,14 +39,13 @@ public class HomePage extends WebPage {
     private void createNewJavaFile(String fileType)
     {
         Workspace workspace = _workspacePane.getWorkspace();
-        ProjectUtils.getTempProject(workspace);
+        if (workspace.getProjects().length == 0)
+            ProjectUtils.getTempProject(workspace);
 
         // Open new Jepl file
         runLater(() -> {
-            FilesTool filesTool = _workspacePane.getWorkspaceTools().getFilesTool();
-            if (fileType.equals("jepl"))
-                filesTool.newJeplFileForNameAndString("JavaFiddle", "");
-            else filesTool.newJavaFileForName("JavaFiddle");
+            NewFileTool newFileTool = _workspacePane.getWorkspaceTools().getNewFileTool();
+            newFileTool.newJavaOrJeplFileForNameAndTypeAndString("JavaFiddle", fileType, "");
         });
     }
 
@@ -63,8 +62,8 @@ public class HomePage extends WebPage {
 
         // Show new project panel
         runLater(() -> {
-            FilesTool filesTool = _workspacePane.getWorkspaceTools().getFilesTool();
-            filesTool.showNewProjectPanel(getUI());
+            NewFileTool newFileTool = _workspacePane.getWorkspaceTools().getNewFileTool();
+            newFileTool.showNewProjectPanel(getUI());
         });
     }
 

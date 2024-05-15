@@ -9,6 +9,7 @@ import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.apptools.FileTreeTool;
 import snapcode.apptools.FilesTool;
+import snapcode.apptools.NewFileTool;
 import snapcode.apptools.RunTool;
 import snapcode.project.*;
 
@@ -92,8 +93,8 @@ public class WorkspacePaneUtils {
             tempProj.getBuildFile().setIncludeSnapChartsRuntime(true);
 
         // Create new source file for given external source file
-        FilesTool filesTool = workspacePane.getWorkspaceTools().getFilesTool();
-        WebFile newSourceFile = filesTool.newSourceFileForExternalSourceFile(sourceFile);
+        NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
+        WebFile newSourceFile = newFileTool.newSourceFileForExternalSourceFile(sourceFile);
         if (newSourceFile == null) {
             System.out.println("WorkspacePane.openSourceFile: Couldn't open source file: " + sourceFile);
             return;

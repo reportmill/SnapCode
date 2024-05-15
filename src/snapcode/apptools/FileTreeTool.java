@@ -259,8 +259,8 @@ public class FileTreeTool extends WorkspaceTool {
 
             // Handle NewFileMenuItem, NewFileButton
             case "NewFileMenuItem": case "NewFileButton": {
-                FilesTool filesTool = _workspaceTools.getFilesTool();
-                filesTool.showNewFilePanel();
+                NewFileTool newFileTool = _workspaceTools.getNewFileTool();
+                newFileTool.showNewFilePanel();
                 break;
             }
 

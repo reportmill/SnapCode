@@ -4,6 +4,7 @@
 package snapcode.app;
 import snap.util.*;
 import snapcode.apptools.FilesTool;
+import snapcode.apptools.NewFileTool;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
@@ -127,10 +128,6 @@ public class WelcomePanel extends ViewOwner {
         if (anEvent.equals("NewJavaClassMenu"))
             openWorkspaceForNewFileOfType("java");
 
-        // Handle NewProjectButton
-        if (anEvent.equals("NewProjectButton"))
-            openWorkspaceForNewProject();
-
         // Handle OpenGreenfootMenu
         if (anEvent.equals("OpenGreenfootMenu"))
             GreenImport.showGreenfootPanel();
@@ -188,10 +185,8 @@ public class WelcomePanel extends ViewOwner {
 
         // Open new Jepl file
         runLater(() -> {
-            FilesTool filesTool = workspacePane.getWorkspaceTools().getFilesTool();
-            if (fileType.equals("jepl"))
-                filesTool.newJeplFileForNameAndString("JavaFiddle", "");
-            else filesTool.newJavaFileForName("JavaFiddle");
+            NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
+            newFileTool.newJavaOrJeplFileForNameAndTypeAndString("JavaFiddle", fileType, "");
         });
 
         // Start sample button anim
@@ -215,22 +210,6 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
-     * Opens a new workspace for a new project.
-     */
-    private void openWorkspaceForNewProject()
-    {
-        // Open empty workspace pane
-        WorkspacePane workspacePane = openEmptyWorkspace();
-        workspacePane.showProjectTool();
-
-        // Show new project panel
-        runLater(() -> {
-            FilesTool filesTool = workspacePane.getWorkspaceTools().getFilesTool();
-            filesTool.showNewProjectPanel(getUI());
-        });
-    }
-
-    /**
      * Opens a Java string file.
      */
     protected void openJavaString(String javaString, boolean isJepl)
@@ -246,10 +225,9 @@ public class WelcomePanel extends ViewOwner {
 
         // Show new project panel
         runLater(() -> {
-            FilesTool filesTool = workspacePane.getWorkspaceTools().getFilesTool();
-            if (isJepl)
-                filesTool.newJeplFileForNameAndString("JavaFiddle", javaString);
-            else filesTool.newJavaFileForString(javaString);
+            String fileType = isJepl ? "jepl" : "java";
+            NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
+            newFileTool.newJavaOrJeplFileForNameAndTypeAndString("JavaFiddle", fileType, javaString);
         });
     }
 

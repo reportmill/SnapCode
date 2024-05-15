@@ -86,6 +86,29 @@ public class WorkspaceTool extends ViewOwner {
     public WebSite getSelSite()  { return _workspacePane.getSelSite(); }
 
     /**
+     * Returns the selected dir.
+     */
+    public WebFile getSelDirOrFirst()
+    {
+        WebSite selSite = getSelSiteOrFirst();
+        WebFile selFile = getSelFile();
+        if (selFile == null || selFile.getSite() != selSite)
+            selFile = selSite.getRootDir();
+        return selFile.isDir() ? selFile : selFile.getParent();
+    }
+
+    /**
+     * Returns the selected site or first site.
+     */
+    public WebSite getSelSiteOrFirst()
+    {
+        WebSite selSite = getSelSite();
+        if (selSite == null)
+            selSite = getRootSite();
+        return selSite;
+    }
+
+    /**
      * Returns the selected project.
      */
     public Project getSelProject()

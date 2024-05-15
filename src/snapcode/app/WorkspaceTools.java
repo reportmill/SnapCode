@@ -70,6 +70,7 @@ public class WorkspaceTools {
         // Main tools
         FilesTool filesTool = new FilesTool(_workspacePane);
         FileTreeTool fileTreeTool = new FileTreeTool(_workspacePane);
+        NewFileTool newFileTool = new NewFileTool(_workspacePane);
         RunTool runTool = new RunTool(_workspacePane);
         DebugTool debugTool = new DebugTool(_workspacePane, runTool);
         BuildTool buildTool = new BuildTool(_workspacePane);
@@ -86,7 +87,8 @@ public class WorkspaceTools {
 
         // Create tools array
         _tools = new WorkspaceTool[] {
-                filesTool, fileTreeTool, runTool, debugTool, buildTool,
+                filesTool, fileTreeTool, newFileTool,
+                runTool, debugTool, buildTool,
                 searchTool, helpTool, blocksTool,
                 runConfigsTool, breakpointsTool,
                 httpServerTool
@@ -147,6 +149,11 @@ public class WorkspaceTools {
      * Returns the files tool.
      */
     public FilesTool getFilesTool()  { return getToolForClass(FilesTool.class); }
+
+    /**
+     * Returns the files tool.
+     */
+    public NewFileTool getNewFileTool()  { return getToolForClass(NewFileTool.class); }
 
     /**
      * Returns the FileTreeTool.
