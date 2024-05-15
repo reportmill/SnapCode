@@ -36,14 +36,23 @@ public class NewFileTool extends WorkspaceTool {
      */
     public void showNewFilePanel()
     {
-        // Run dialog panel for extension
+        // Run dialog panel for file type
         View workspacePaneUI = _workspacePane.getUI();
-        String extension = showNewFileExtensionPanel(workspacePaneUI);
-        if (extension == null)
+        String fileType = showNewFilePanel(workspacePaneUI);
+        if (fileType == null)
             return;
 
+        // Forward to createFileForType
+        createFileForType(fileType);
+    }
+
+    /**
+     * Creates a file for given type.
+     */
+    public void createFileForType(String fileType)
+    {
         // Handle Java from clipboard
-        if (extension.equals(".java-from-clipboard")) {
+        if (fileType.equals("java-from-clipboard")) {
             newJavaFileFromClipboard();
             return;
         }
@@ -51,7 +60,7 @@ public class NewFileTool extends WorkspaceTool {
         // Get source dir
         WebSite selSite = getSelSiteOrFirst();
         WebFile selDir = getSelDirOrFirst();
-        if (extension.equals(".java") || extension.equals(".jepl")) {
+        if (fileType.equals("java") || fileType.equals("jepl")) {
             if (selDir == selSite.getRootDir()) {
                 Project proj = Project.getProjectForSite(selSite);
                 selDir = proj.getSourceDir();
@@ -59,15 +68,13 @@ public class NewFileTool extends WorkspaceTool {
         }
 
         // Get suggested "Untitled.xxx" path for SelDir and extension
-        String filePath = selDir.getDirPath() + "Untitled" + extension;
+        String filePath = selDir.getDirPath() + "Untitled." + fileType;
 
         // Create file
-        WebFile file = createFileForPath(filePath, workspacePaneUI);
+        WebFile file = createFileForPath(filePath, _workspacePane.getUI());
 
-        // Select file
+        // Select file and hide right tray
         setSelFile(file);
-
-        // Hide RightTray
         _workspaceTools.getRightTray().setSelTool(null);
     }
 
@@ -263,9 +270,9 @@ public class NewFileTool extends WorkspaceTool {
     }
 
     /**
-     * Runs a panel for a new file extension (Java, Jepl, snp, etc.).
+     * Runs a panel for a new file type (Java, Jepl, snp, etc.).
      */
-    public static String showNewFileExtensionPanel(View aView)
+    private static String showNewFilePanel(View aView)
     {
         // Get new FormBuilder and configure
         FormBuilder form = new FormBuilder();
@@ -275,13 +282,13 @@ public class NewFileTool extends WorkspaceTool {
 
         // Define options
         String[][] options = {
-                {"Java File", ".java"},
-                {"Java File from clipboard", ".java-from-clipboard"},
-                {"Java REPL File", ".jepl"},
-                {"SnapKit UI File", ".snp"},
-                {"Directory", ".dir"},
-                {"Sound File", ".wav"},
-                {"ReportMill Report Template", ".rpt"}
+                {"Java File", "java"},
+                {"Java File from clipboard", "java-from-clipboard"},
+                {"Java REPL File", "jepl"},
+                {"SnapKit UI File", "snp"},
+                {"Directory", "dir"},
+                {"Sound File", "wav"},
+                {"ReportMill Report Template", "rpt"}
         };
 
         // Add and configure radio buttons
@@ -298,9 +305,6 @@ public class NewFileTool extends WorkspaceTool {
         String desc = form.getStringValue("EntryType");
         int index = ArrayUtils.findMatchIndex(options, optionInfo -> desc.equals(optionInfo[0]));
         String extension = options[index][1];
-        boolean isDir = extension.equals(".dir");
-        if (isDir)
-            extension = "";
 
         // Return
         return extension;
