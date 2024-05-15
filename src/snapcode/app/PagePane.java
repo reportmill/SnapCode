@@ -516,38 +516,32 @@ public class PagePane extends ViewOwner {
      */
     protected Class<? extends WebPage> getPageClass(WebResponse aResp)
     {
-        // Get file and data
-        WebFile file = aResp.getFile();
-        String type = aResp.getPathType();
+        switch (aResp.getFileType()) {
+
+            // Handle Java / Jepl
+            case "java": case "jepl": return JavaPage.class;
+
+            // Handle Snap file
+            case "snp": return SnapBuilderPage.class;
+
+            // Handle mark down file
+            case "md": return MarkDownPage.class;
+
+            // Handle build file (build.snapcode)
+            case "snapcode": return BuildFileTool.BuildFilePage.class;
+
+            // Handle class file
+            case "class": return ClassInfoPage.class;
+        }
 
         // Handle Project Root directory
+        WebFile file = aResp.getFile();
         if (file != null && file.isRoot() && isProjectFile(file))
             return ProjectPane.ProjectPanePage.class;
 
-        // Handle Java
-        if (type.equals("java") || type.equals("jepl"))
-            return JavaPage.class;
-
-        // Handle Snap file
-        if (type.equals("snp"))
-            return SnapBuilderPage.class;
-
-        // Handle mark down file
-        if (type.equals("md"))
-            return MarkDownPage.class;
-
         // Handle BuildDir
-        WebFile snapFile = aResp.getFile();
-        if (snapFile == _workspacePane.getBuildDir())
+        if (file == _workspacePane.getBuildDir())
             return BuildDirPage.class;
-
-        // Handle build file (build.snapcode)
-        if (type.equals("snapcode"))
-            return BuildFileTool.BuildFilePage.class;
-
-        // Handle class file
-        if (type.equals("class"))
-            return ClassInfoPage.class;
 
         // Return no page class
         return null;

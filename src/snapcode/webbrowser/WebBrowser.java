@@ -256,39 +256,37 @@ public class WebBrowser extends TransitionPane {
      */
     protected Class<? extends WebPage> getPageClass(WebResponse aResp)
     {
-        String type = aResp.getPathType();
+        switch (aResp.getFileType()) {
+
+            // Handle image
+            case "jpg": case "jpeg": case "gif": case "png": return ImagePage.class;
+
+            // Handle text
+            case "txt": return TextPage.class;
+
+            // Handle SnapKit UI file
+            case "snp": return SnapPage.class;
+
+            // Handle sound
+            case "wav": case "snd": case "mp3": case "m4a": return SoundPage.class;
+
+            // Handle Jar
+            case "jar": return ZipPage.class;
+
+            // Handle Java
+            case "java": return getPageClass("javakit.text.JavaPage", TextPage.class);
+
+            // Handle ReportMill
+            case "rpt": return getPageClass("com.reportmill.app.ReportPage", TextPage.class);
+        }
 
         // Handle directory
         WebFile file = aResp.getFile();
         if (file != null && file.isDir())
             return DirFilePage.class;
 
-        // Handle image
-        if (type.equals("jpg") || type.equals("jpeg") || type.equals("gif") || type.equals("png"))
-            return ImagePage.class;
-
-        // Handle Snap file
-        if (type.equals("snp"))
-            return SnapPage.class;
-
-        // Handle ReportMill
-        if (type.equals("rpt"))
-            return getPageClass("com.reportmill.app.ReportPage", TextPage.class);
-
-        // Handle sound
-        if (type.equals("wav") || type.equals("snd") || type.equals("mp3") || type.equals("m4a"))
-            return SoundPage.class;
-
-        // Handle Java
-        if (type.equals("java"))
-            return getPageClass("javakit.text.JavaPage", TextPage.class);
-
-        // Handle Jar
-        if (type.equals("jar"))
-            return ZipPage.class;
-
         // Handle Text
-        if (type.equals("txt") || (file != null && file.isText()))
+        if (file != null && file.isText())
             return TextPage.class;
 
         // Return Unknown

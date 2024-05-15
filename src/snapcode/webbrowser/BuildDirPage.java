@@ -63,7 +63,7 @@ public class BuildDirPage extends WebPage {
         _pageBrowser = new WebBrowser() {
             protected Class<? extends WebPage> getPageClass(WebResponse aResp)
             {
-                String type = aResp.getPathType();
+                String type = aResp.getFileType();
                 if (type.equals("class")) return ClassInfoPage.class;
                 return super.getPageClass(aResp);
             }
