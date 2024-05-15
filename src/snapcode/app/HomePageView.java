@@ -20,6 +20,7 @@ public class HomePageView extends MarkDownView {
     private HomePage _homePage;
 
     // Constants
+    private static final Color BUTTON_BACKGROUND_COLOR = Color.get("#F8F8FC");
     private static final Effect LINK_HIGHLIGHT_EFFECT = new ShadowEffect(10, Color.get("#8888FF"), 0, 0);
 
     /**
@@ -36,6 +37,31 @@ public class HomePageView extends MarkDownView {
      */
     @Override
     protected void handleLinkClick(String urlAddr)  { _homePage.handleLinkClick(urlAddr); }
+
+    /**
+     * Override to add header.
+     */
+    @Override
+    public void setMarkDown(String markDown)
+    {
+        addHeader();
+        super.setMarkDown(markDown);
+    }
+
+    /**
+     * Adds a header.
+     */
+    protected void addHeader()
+    {
+        // Create header image for
+        Image image = Image.getImageForClassResource(getClass(), "pkg.images/SnapCode.png");
+        ImageView imageView = new ImageView(image);
+
+        // Wrap image in row view and add
+        RowView rowView = new RowView();
+        rowView.addChild(imageView);
+        addChild(rowView);
+    }
 
     /**
      * Override to remap CreateNew list.
@@ -249,6 +275,7 @@ public class HomePageView extends MarkDownView {
     {
         super.addLinkToLinkView(linkNodeView, urlAddr);
 
+        linkNodeView.setFill(BUTTON_BACKGROUND_COLOR);
         linkNodeView.addEventFilter(this::handleLinkViewMouseEnterAndExitEvents, MouseEnter, MouseExit);
     }
 

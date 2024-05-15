@@ -1,6 +1,4 @@
 
-# Welcome to SnapCode
-
 @[CreateNew=true]
 
 ## Create New:
