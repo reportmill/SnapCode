@@ -14,6 +14,7 @@ import snap.web.WebURL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * A browser to show content for WebURLs.
@@ -22,6 +23,9 @@ public class WebBrowser extends TransitionPane {
 
     // The current WebPage
     private WebPage _selPage;
+
+    // A helper function to resolve web response to a page class
+    private Function<WebResponse,Class<? extends WebPage>> _pageClassResolver;
 
     // A cache of WebPages for WebURLs
     protected Map<WebURL, WebPage> _allPages = new HashMap<>();
@@ -46,6 +50,22 @@ public class WebBrowser extends TransitionPane {
     public static final String Loading_Prop = "Loading";
     public static final String Status_Prop = "Status";
     public static final String Activity_Prop = "Activity";
+
+    /**
+     * Constructor.
+     */
+    public WebBrowser()
+    {
+        super();
+    }
+
+    /**
+     * Sets the Page class resolver.
+     */
+    public void setPageClassResolver(Function<WebResponse,Class<? extends WebPage>> pageClassResolver)
+    {
+        _pageClassResolver = pageClassResolver;
+    }
 
     /**
      * Returns the current page URL.
@@ -256,6 +276,12 @@ public class WebBrowser extends TransitionPane {
      */
     protected Class<? extends WebPage> getPageClass(WebResponse aResp)
     {
+        // If Page class resolver is set, see if it returns page class
+        Class<? extends WebPage> pageClass = _pageClassResolver != null ? _pageClassResolver.apply(aResp) : null;
+        if (pageClass != null)
+            return pageClass;
+
+        // Handle some common types
         switch (aResp.getFileType()) {
 
             // Handle image

@@ -296,9 +296,10 @@ public class PagePane extends ViewOwner {
         _tabBar.removeTab(0);
 
         // Create browser
-        _browser = new AppBrowser();
+        _browser = new WebBrowser();
         _browser.setGrowHeight(true);
-        _browser.addPropChangeListener(pc -> browserDidPropChange(pc),
+        _browser.setPageClassResolver(this::getPageClassForResponse);
+        _browser.addPropChangeListener(this::browserDidPropChange,
                 WebBrowser.SelPage_Prop, WebBrowser.Activity_Prop, WebBrowser.Status_Prop, WebBrowser.Loading_Prop);
 
         // Create ColView to hold TabsBox and Browser
@@ -411,25 +412,6 @@ public class PagePane extends ViewOwner {
     }
 
     /**
-     * Called when Browser does prop change.
-     */
-    private void browserDidPropChange(PropChange aPC)
-    {
-        String propName = aPC.getPropName();
-        Workspace workspace = _workspacePane.getWorkspace();
-
-        // Handle SelPage, Activity, Status, Loading
-        if (propName == WebBrowser.SelPage_Prop)
-            setSelFile(_browser.getSelFile());
-        if (propName == WebBrowser.Status_Prop)
-            workspace.setStatus(_browser.getStatus());
-        else if (propName == WebBrowser.Activity_Prop)
-            workspace.setActivity(_browser.getActivity());
-        else if (propName == WebBrowser.Loading_Prop)
-            workspace.setLoading(_browser.isLoading());
-    }
-
-    /**
      * Called when TabBar Tab button close box is triggered.
      */
     private void handleTabCloseAction(Tab aTab)
@@ -512,10 +494,30 @@ public class PagePane extends ViewOwner {
     }
 
     /**
+     * Called when Browser does prop change.
+     */
+    private void browserDidPropChange(PropChange aPC)
+    {
+        String propName = aPC.getPropName();
+        Workspace workspace = _workspacePane.getWorkspace();
+
+        // Handle SelPage, Activity, Status, Loading
+        if (propName == WebBrowser.SelPage_Prop)
+            setSelFile(_browser.getSelFile());
+        if (propName == WebBrowser.Status_Prop)
+            workspace.setStatus(_browser.getStatus());
+        else if (propName == WebBrowser.Activity_Prop)
+            workspace.setActivity(_browser.getActivity());
+        else if (propName == WebBrowser.Loading_Prop)
+            workspace.setLoading(_browser.isLoading());
+    }
+
+    /**
      * Returns WebPage class for given response.
      */
-    protected Class<? extends WebPage> getPageClass(WebResponse aResp)
+    private Class<? extends WebPage> getPageClassForResponse(WebResponse aResp)
     {
+        // Handle common types
         switch (aResp.getFileType()) {
 
             // Handle Java / Jepl
@@ -545,41 +547,5 @@ public class PagePane extends ViewOwner {
 
         // Return no page class
         return null;
-    }
-
-    /**
-     * A custom browser subclass.
-     */
-    private class AppBrowser extends WebBrowser {
-
-        /**
-         * Override to make sure that PagePane is in sync.
-         */
-        @Override
-        public void setSelPage(WebPage aPage)
-        {
-            // Do normal version
-            if (aPage == getSelPage()) return;
-            super.setSelPage(aPage);
-
-            // Select page file
-            WebFile file = aPage != null ? aPage.getFile() : null;
-            setSelFile(file);
-        }
-
-        /**
-         * Returns WebPage class for given response.
-         */
-        @Override
-        protected Class<? extends WebPage> getPageClass(WebResponse aResp)
-        {
-            // Forward to PagePane
-            Class<? extends WebPage> pageClass = PagePane.this.getPageClass(aResp);
-            if (pageClass != null)
-                return pageClass;
-
-            // Do normal version
-            return super.getPageClass(aResp);
-        }
     }
 }
