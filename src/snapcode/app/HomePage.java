@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.util.SnapUtils;
 import snap.view.*;
 import snap.web.RecentFiles;
 import snap.web.WebFile;
@@ -7,6 +8,7 @@ import snapcode.apptools.FilesTool;
 import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
 import snapcode.webbrowser.WebPage;
+import java.io.File;
 
 /**
  * This page class is a useful hub for common project functions.
@@ -53,6 +55,9 @@ public class HomePage extends WebPage {
      */
     private void createNewProject()
     {
+        // Removes image temp files
+        removeImageTempFiles();
+
         // Open empty workspace pane
         _workspacePane.showProjectTool();
 
@@ -128,5 +133,22 @@ public class HomePage extends WebPage {
         WebURL homePageUrl = getURL();
         String homePageText = homePageUrl.getText();
         _homePageView.setMarkDown(homePageText);
+    }
+
+    /**
+     * Removes CJ "imageio23452345.tmp" files.
+     */
+    private static void removeImageTempFiles()
+    {
+        if (!SnapUtils.isWebVM) return;
+        try {
+            File rootFile = new File("/files");
+            File[] rootFiles = rootFile.listFiles(); assert (rootFiles != null);
+            for (File file : rootFiles) {
+                if (file.getName().startsWith("imageio"))
+                    file.delete();
+            }
+        }
+        catch (Exception ignore) { }
     }
 }
