@@ -38,6 +38,9 @@ public class App {
         super();
         _shared = this;
 
+        // Prime url fetches - Java Desktop seems to take a second+ to do first URL fetch
+        snap.util.URLUtils.primeNetworkConnection();
+
         // Set Prefs Root
         Prefs prefs = Prefs.getPrefsForName("SnapCode");
         Prefs.setDefaultPrefs(prefs);
