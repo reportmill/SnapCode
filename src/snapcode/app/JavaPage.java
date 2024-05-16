@@ -22,7 +22,6 @@ import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebURL;
-
 import java.util.Objects;
 
 /**
@@ -225,29 +224,19 @@ public class JavaPage extends WebPage {
     }
 
     /**
-     * Creates a new file for use with showNewFilePanel method.
+     * Initializes a Java file.
      */
-    protected WebFile createNewFile(String aPath)
+    public static void initJavaFile(WebFile javaFile)
     {
-        // Create file
-        WebFile newFile = super.createNewFile(aPath);
-
-        // Get project
-        Project proj = Project.getProjectForFile(newFile);
-
-        // Append package declaration
-        WebFile fileDir = newFile.getParent();
-        String packageName = proj != null ? proj.getClassNameForFile(fileDir) : newFile.getSimpleName();
-        String className = newFile.getSimpleName();
+        // Get package name and class name
+        Project project = Project.getProjectForFile(javaFile);
+        WebFile parentDir = javaFile.getParent();
+        String packageName = project != null ? project.getClassNameForFile(parentDir) : javaFile.getSimpleName();
+        String className = javaFile.getSimpleName();
 
         // If Java file, set default java text
-        if (newFile.getType().equals("java")) {
-            String javaText = getJavaContentStringForPackageAndClassName(packageName, className);
-            newFile.setText(javaText);
-        }
-
-        // Return
-        return newFile;
+        String javaText = JavaPage.getJavaContentStringForPackageAndClassName(packageName, className);
+        javaFile.setText(javaText);
     }
 
     /**

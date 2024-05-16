@@ -2,7 +2,6 @@ package snapcode.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JavaParser;
 import snap.util.ArrayUtils;
-import snap.util.FilePathUtils;
 import snap.view.Clipboard;
 import snap.view.View;
 import snap.viewx.DialogBox;
@@ -17,7 +16,6 @@ import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
-import snapcode.webbrowser.WebPage;
 
 /**
  * This class is a WorkspaceTool to manage creating new files.
@@ -38,8 +36,7 @@ public class NewFileTool extends WorkspaceTool {
     public void showNewFilePanel()
     {
         // Run dialog panel for file type
-        View workspacePaneUI = _workspacePane.getUI();
-        String fileType = showNewFilePanel(workspacePaneUI);
+        String fileType = showNewFileTypePanel(_workspacePane.getUI());
         if (fileType == null)
             return;
 
@@ -65,51 +62,44 @@ public class NewFileTool extends WorkspaceTool {
         }
 
         // Get source dir
-        WebSite selSite = getSelSiteOrFirst();
         WebFile selDir = getSelDirOrFirst();
         if (fileType.equals("java") || fileType.equals("jepl")) {
-            if (selDir == selSite.getRootDir()) {
-                Project proj = Project.getProjectForSite(selSite);
+            if (selDir.isRoot()) {
+                Project proj = Project.getProjectForFile(selDir);
                 selDir = proj.getSourceDir();
             }
         }
 
-        // Get suggested "Untitled.xxx" path for SelDir and extension
-        String filePath = selDir.getDirPath() + "Untitled." + fileType;
-
-        // Create file
-        WebFile file = createFileForPath(filePath, _workspacePane.getUI());
-
-        // Select file and hide right tray
-        setSelFile(file);
-        _workspaceTools.getRightTray().setSelTool(null);
+        // Forward to
+        createFileForDirAndType(selDir, fileType);
     }
 
     /**
      * Creates a file for given path.
      */
-    public WebFile createFileForPath(String aPath, View aView)
+    private void createFileForDirAndType(WebFile parentDir, String fileType)
     {
-        // Create suggested file and page
-        boolean isDir = FilePathUtils.getExtension(aPath).length() == 0;
-        WebSite selSite = getSelSiteOrFirst();
-        WebFile newFile = selSite.createFileForPath(aPath, isDir);
-        WebPage page = _pagePane.createPageForURL(newFile.getURL());
-
         // ShowNewFilePanel (just return if cancelled)
-        newFile = page.showNewFilePanel(aView, newFile);
+        WebFile newFile = showNewFilePanelForDirAndType(_workspacePane.getUI(), parentDir, fileType);
         if (newFile == null)
-            return null;
+            return;
+
+        // Initialize file
+        switch (newFile.getType()) {
+            case "java": JavaPage.initJavaFile(newFile); break;
+            case "snp": snapcode.webbrowser.SnapBuilderPage.initSnapFile(newFile); break;
+        }
 
         // Save file
         try { newFile.save(); }
         catch (Exception e) {
             _pagePane.showException(newFile.getURL(), e);
-            return null;
+            return;
         }
 
-        // Return
-        return newFile;
+        // Select file and hide right tray
+        setSelFile(newFile);
+        _workspaceTools.getRightTray().setSelTool(null);
     }
 
     /**
@@ -288,7 +278,7 @@ public class NewFileTool extends WorkspaceTool {
     /**
      * Runs a panel for a new file type (Java, Jepl, snp, etc.).
      */
-    private static String showNewFilePanel(View aView)
+    private static String showNewFileTypePanel(View aView)
     {
         // Get new FormBuilder and configure
         FormBuilder form = new FormBuilder();
@@ -296,8 +286,8 @@ public class NewFileTool extends WorkspaceTool {
         form.addLabel("Select file type:           ").setFont(new snap.gfx.Font("Arial", 24));
         form.setSpacing(15);
 
-        // Define options
-        String[][] options = {
+        // Define file options
+        String[][] fileOptions = {
                 {"Java File", "java"},
                 {"Java File from clipboard", "java-from-clipboard"},
                 {"Java REPL File", "jepl"},
@@ -308,8 +298,8 @@ public class NewFileTool extends WorkspaceTool {
         };
 
         // Add and configure radio buttons
-        for (int i = 0; i < options.length; i++) {
-            String option = options[i][0];
+        for (int i = 0; i < fileOptions.length; i++) {
+            String option = fileOptions[i][0];
             form.addRadioButton("EntryType", option, i == 0);
         }
 
@@ -317,12 +307,45 @@ public class NewFileTool extends WorkspaceTool {
         if (!form.showPanel(aView, "New Project File", DialogBox.infoImage))
             return null;
 
-        // Select type and extension
+        // Get selected index and return file type
         String desc = form.getStringValue("EntryType");
-        int index = ArrayUtils.findMatchIndex(options, optionInfo -> desc.equals(optionInfo[0]));
-        String extension = options[index][1];
+        int selIndex = ArrayUtils.findMatchIndex(fileOptions, optionInfo -> desc.equals(optionInfo[0]));
+        return fileOptions[selIndex][1];
+    }
 
-        // Return
-        return extension;
+    /**
+     * Runs a new show file panel for parent dir and type.
+     */
+    private static WebFile showNewFilePanelForDirAndType(View aView, WebFile parentDir, String fileType)
+    {
+        // Run input panel to get new file name
+        String newFilePanelTitle = "New " + fileType + " File";
+        DialogBox newFilePanel = new DialogBox(newFilePanelTitle);
+        newFilePanel.setQuestionMessage("Enter " + fileType + " file name");
+        String filename = newFilePanel.showInputDialog(aView, "Untitled");
+        if (filename == null)
+            return null;
+
+        // Strip spaces from filename (for now) and make sure it has extension
+        filename = filename.replace(" ", "");
+        if (!filename.toLowerCase().endsWith('.' + fileType) && fileType.length() > 0)
+            filename = filename + '.' + fileType;
+
+        // If file already exists, run option panel for replace
+        WebFile newFile = parentDir.getFileForName(filename);
+        if (newFile != null) {
+            String replaceMessage = "A file named " + newFile.getName() + " already exists.\n Do you want to replace it with new file?";
+            DialogBox replaceFilePanel = new DialogBox(newFilePanelTitle);
+            replaceFilePanel.setWarningMessage(replaceMessage);
+            if (!replaceFilePanel.showConfirmDialog(aView))
+                return showNewFilePanelForDirAndType(aView, parentDir, fileType);
+            return newFile;
+        }
+
+        // Create file and return
+        WebSite fileSite = parentDir.getSite();
+        String filePath = filename.startsWith("/") ? filename : parentDir.getDirPath() + filename;
+        boolean isDir = fileType.length() == 0 || fileType.equals("dir");
+        return fileSite.createFileForPath(filePath, isDir);
     }
 }

@@ -2,10 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.webbrowser;
-import snap.view.View;
 import snap.view.ViewEvent;
 import snap.view.ViewOwner;
-import snap.viewx.DialogBox;
 import snap.web.*;
 import java.util.Objects;
 
@@ -233,63 +231,6 @@ public class WebPage extends ViewOwner {
         WebBrowser browser = getBrowser();
         if (browser != null && browser.getSelPage() == this)
             browser.getLoader().setURL(url);
-    }
-
-    /**
-     * Runs a new show file panel for type.
-     */
-    public WebFile showNewFilePanel(View aView, WebFile aFile)
-    {
-        // Run input panel to get new file name
-        String type = aFile.getType();
-        String msg = "Enter " + type + " file name";
-        String title = "New " + type + " File";
-        DialogBox dialogBox = new DialogBox(title);
-        dialogBox.setQuestionMessage(msg);
-        String filename = dialogBox.showInputDialog(aView, aFile.getName());
-        if (filename == null)
-            return null;
-
-        // Strip spaces from filename (for now) and make sure it has extension
-        filename = filename.replace(" ", "");
-        if (!filename.toLowerCase().endsWith('.' + type) && type.length() > 0)
-            filename = filename + '.' + type;
-
-        // Get file path for filename
-        String filePath = filename;
-        if (!filePath.startsWith("/")) {
-            WebFile parentDir = aFile.getParent();
-            filePath = parentDir.getDirPath() + filename;
-        }
-
-        // Get file for path
-        WebSite site = getSite();
-        WebFile newFile = site.getFileForPath(filePath);
-
-        // If file exists, run option panel for replace
-        if (newFile != null) {
-            msg = "A file named " + newFile.getName() + " already exists.\n Do you want to replace it with new file?";
-            dialogBox = new DialogBox(title);
-            dialogBox.setWarningMessage(msg);
-            if (!dialogBox.showConfirmDialog(aView))
-                return showNewFilePanel(aView, aFile);
-            return newFile;
-        }
-
-        // If directory, just create and return
-        if (aFile.isDir())
-            return site.createFileForPath(filePath, true);
-
-        // Create and return new file
-        return createNewFile(filePath);
-    }
-
-    /**
-     * Creates a new file for use with showNewFilePanel method.
-     */
-    protected WebFile createNewFile(String aPath)
-    {
-        return getSite().createFileForPath(aPath, false);
     }
 
     /**

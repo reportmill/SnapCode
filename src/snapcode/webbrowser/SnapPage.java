@@ -7,7 +7,6 @@ import snap.gfx.Font;
 import snap.gfx.ShadowEffect;
 import snap.util.StringUtils;
 import snap.view.*;
-import snap.web.WebFile;
 
 /**
  * A WebPage subclass for SnapKit files.
@@ -15,15 +14,12 @@ import snap.web.WebFile;
 public class SnapPage extends WebPage {
 
     // The content
-    View _content;
+    private View _content;
 
     /**
      * Returns the content.
      */
-    public View getContent()
-    {
-        return _content;
-    }
+    public View getContent()  { return _content; }
 
     /**
      * Returns the SnapKit file root view.
@@ -34,15 +30,9 @@ public class SnapPage extends WebPage {
 
         // Load UI
         View superUI = null;
-        try {
-            superUI = _content = super.createUI();
-        }
-        catch (Exception e) {
-            return createExceptionUI(e);
-        }
-        finally {
-            ViewArchiver.setUseRealClass(true);
-        }
+        try { superUI = _content = super.createUI(); }
+        catch (Exception e) { return createExceptionUI(e); }
+        finally { ViewArchiver.setUseRealClass(true); }
 
         if (!(superUI instanceof DocView)) {
             superUI.setFill(ViewUtils.getBackFill());
@@ -50,7 +40,8 @@ public class SnapPage extends WebPage {
             superUI.setEffect(new ShadowEffect().copySimple());
             BoxView box = new BoxView(superUI);
             box.setFill(ViewUtils.getBackDarkFill());
-            if (!(superUI instanceof SpringView)) superUI.setMinSize(500, 500);
+            if (!(superUI instanceof SpringView))
+                superUI.setMinSize(500, 500);
             superUI = box;
         }
 
@@ -71,26 +62,5 @@ public class SnapPage extends WebPage {
     /**
      * Override to return UI file.
      */
-    public Object getUISource()
-    {
-        return getFile();
-    }
-
-    /**
-     * Creates a new file for use with showNewFilePanel method.
-     */
-    protected WebFile createNewFile(String aPath)
-    {
-        // Create file
-        WebFile file = super.createNewFile(aPath);
-
-        // Create text
-        StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        sb.append("<SpringView width=\"400\" height=\"400\" PrefWidth=\"400\" PrefHeight=\"400\">\n");
-        //sb.append("\t<Label x=\"100\" y=\"100\" width=\"100\" height=\"25\" text=\"Hello World\" />\n");
-        sb.append("</SpringView>\n");
-        file.setText(sb.toString());
-        return file;
-    }
-
+    public Object getUISource()  { return getFile(); }
 }

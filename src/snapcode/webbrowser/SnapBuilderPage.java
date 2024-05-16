@@ -39,18 +39,12 @@ public class SnapBuilderPage extends WebPage {
     /**
      * Creates a new file for use with showNewFilePanel method.
      */
-    protected WebFile createNewFile(String aPath)
+    public static void initSnapFile(WebFile snapFile)
     {
-        // Create file
-        WebFile newFile = super.createNewFile(aPath);
-
         // Create text
         ParentView newDocView = EditorUtils.createNewDocView();
         ViewArchiver viewArchiver = new ViewArchiver();
         String fileText = viewArchiver.writeToXML(newDocView).getString();
-        newFile.setText(fileText);
-
-        // Return
-        return newFile;
+        snapFile.setText(fileText);
     }
 }
