@@ -137,7 +137,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
             WebFile mainClassFile = RunToolUtils.getMainClassSourceFile(this);
             if (mainClassFile != null && RunToolUtils.isMainClassFile(mainClassFile)) {
                 setSelFile(mainClassFile);
-                runDelayed(800, () -> runAppForSelFile(isDebug));
+                runDelayed(() -> runAppForSelFile(isDebug), 800);
                 return;
             }
         }

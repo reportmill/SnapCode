@@ -82,6 +82,6 @@ public class DebugFramesPane extends WorkspaceTool {
     synchronized void updateProcTreeLater()
     {
         if (_procTreeUpdater == null)
-            runDelayed(250, _procTreeUpdater = _procTreeUpdaterImpl);
+            runDelayed(_procTreeUpdater = _procTreeUpdaterImpl, 250);
     }
 }

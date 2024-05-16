@@ -3,7 +3,6 @@
  */
 package snapcode.app;
 import snap.util.*;
-import snapcode.apptools.FilesTool;
 import snapcode.apptools.NewFileTool;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
@@ -152,7 +151,7 @@ public class WelcomePanel extends ViewOwner {
         WorkspacePane workspacePane = openEmptyWorkspace();
 
         // Show samples
-        runDelayed(300, () -> workspacePane.getWorkspaceTools().showSamples());
+        runDelayed(() -> workspacePane.getWorkspaceTools().showSamples(), 300);
     }
 
     /**
