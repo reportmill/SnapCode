@@ -151,7 +151,7 @@ public class App {
         if (arg0.startsWith("greenfoot:")) {
             String scenarioIdStr = arg0.substring("greenfoot:".length());
             int scenarioId = Convert.intValue(scenarioIdStr);
-            GreenImport.openGreenfootScenario(scenarioId);
+            GreenImport.openGreenfootScenario(null, scenarioId);
             return true;
         }
 

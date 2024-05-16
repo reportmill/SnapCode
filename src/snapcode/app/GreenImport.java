@@ -17,7 +17,7 @@ public class GreenImport {
     /**
      * Show open panel.
      */
-    public static void showGreenfootPanel()
+    public static void showGreenfootPanel(WorkspacePane workspacePane)
     {
         // Show dialog box for scenario id
         String title = "Open Greenfoot Scenario";
@@ -28,13 +28,13 @@ public class GreenImport {
             return;
 
         // Open new project for scenario id
-        openGreenfootScenario(scenarioId);
+        openGreenfootScenario(workspacePane, scenarioId);
     }
 
     /**
      * Opens a new project for Greenfoot scenario id.
      */
-    public static void openGreenfootScenario(int gfId)
+    public static void openGreenfootScenario(WorkspacePane workspacePane, int gfId)
     {
         // Get greenfoot dir for scenario id
         WebFile greenfootDir = getGreenfootDirForScenarioId(gfId);
@@ -44,13 +44,13 @@ public class GreenImport {
         }
 
         // Open greenfoot dir
-        openGreenfootDir(greenfootDir);
+        openGreenfootDir(workspacePane, greenfootDir);
     }
 
     /**
      * Opens a new project for Greenfoot scenario id.
      */
-    public static void openGreenfootForArchiveFilePath(String archiveFilePath)
+    public static void openGreenfootForArchiveFilePath(WorkspacePane workspacePane, String archiveFilePath)
     {
         // Get archive file as zip site
         WebURL archiveUrl = WebURL.getURL(archiveFilePath);
@@ -60,22 +60,23 @@ public class GreenImport {
         WebFile greenfootDir = getGreenfootDirForArchiveUrl(archiveUrl);
 
         // Open greenfoot dir
-        openGreenfootDir(greenfootDir);
+        openGreenfootDir(workspacePane, greenfootDir);
     }
 
     /**
      * Opens a new project for Greenfoot scenario id.
      */
-    public static void openGreenfootDir(WebFile greenfootDir)
+    public static void openGreenfootDir(WorkspacePane workspacePane, WebFile greenfootDir)
     {
-        // Get scenario name and project dir
+        // Make sure workspacePane exists
+        if (workspacePane == null)
+            workspacePane = WelcomePanel.getShared().openEmptyWorkspace();
+
+        // Get scenario name
         String scenarioName = greenfootDir.getSimpleName().replace(' ', '_');
 
-        // Create new Workspace
-        WorkspacePane workspacePane = WelcomePanel.getShared().openEmptyWorkspace();
-        Workspace workspace = workspacePane.getWorkspace();
-
         // Create new project and get src dir
+        Workspace workspace = workspacePane.getWorkspace();
         Project project = getTempProject(workspace, scenarioName);
         WebFile projectSourceDir = project.getSourceDir();
 
@@ -84,9 +85,6 @@ public class GreenImport {
 
         // Create Main class that launches world.lastInstantiated prop
         createMainClassForGreenfootProject(project);
-
-        // Show project tool
-        workspacePane.showProjectTool();
     }
 
     /**

@@ -8,7 +8,6 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.apptools.FileTreeTool;
-import snapcode.apptools.FilesTool;
 import snapcode.apptools.NewFileTool;
 import snapcode.apptools.RunTool;
 import snapcode.project.*;
@@ -114,9 +113,6 @@ public class WorkspacePaneUtils {
      */
     public static void openProjectForProjectFile(WorkspacePane workspacePane, WebFile projectFile)
     {
-        // Show project tool
-        workspacePane.showProjectTool();
-
         // Get project dir and project site
         WebFile projectDir = projectFile.isDir() ? projectFile : projectFile.getParent();
         WebSite projectSite = projectDir.getURL().getAsSite();
@@ -140,9 +136,6 @@ public class WorkspacePaneUtils {
         // Add repoURL to recent files
         RecentFiles.addURL(repoURL);
 
-        // Open empty workspace pane
-        workspacePane.showProjectTool();
-
         // Add project for repo URL
         Workspace workspace = workspacePane.getWorkspace();
         TaskRunner<Boolean> checkoutRunner = workspace.addProjectForRepoURL(repoURL);
@@ -159,9 +152,6 @@ public class WorkspacePaneUtils {
      */
     private static void openWorkspaceForRepoUrlFinished(WorkspacePane workspacePane, WebURL repoURL)
     {
-        // Show project tool
-        workspacePane.showProjectTool();
-
         // Select good default file
         String projName = repoURL.getFilenameSimple();
         Workspace workspace = workspacePane.getWorkspace();

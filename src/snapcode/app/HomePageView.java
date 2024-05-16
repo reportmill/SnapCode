@@ -64,6 +64,26 @@ public class HomePageView extends MarkDownView {
     }
 
     /**
+     * Override.
+     */
+    @Override
+    protected View createViewForHeaderNode(MDNode headerNode)
+    {
+        // Handle "Open Recent": Add OpenButton
+        if (headerNode.getText().equals("Open Recent:")) {
+            View headerView = super.createViewForHeaderNode(headerNode);
+            Button openButton = new Button("Open...");
+            openButton.setPropsString("Name:OpenButton; PrefWidth:100; PrefHeight:24; Margin:0,0,0,20");
+            RowView rowView = new RowView();
+            rowView.setChildren(headerView, openButton);
+            return rowView;
+        }
+
+        // Do normal version
+        return super.createViewForHeaderNode(headerNode);
+    }
+
+    /**
      * Override to remap CreateNew list.
      */
     @Override

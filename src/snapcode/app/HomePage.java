@@ -1,6 +1,7 @@
 package snapcode.app;
 import snap.util.SnapUtils;
 import snap.view.*;
+import snap.viewx.FilePanel;
 import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
@@ -51,6 +52,27 @@ public class HomePage extends WebPage {
         // Show new project panel
         NewFileTool newFileTool = _workspacePane.getWorkspaceTools().getNewFileTool();
         runLater(newFileTool::showNewProjectPanel);
+    }
+
+    /**
+     * Shows the open panel.
+     */
+    private void showOpenPanel()
+    {
+        FilePanel filePanel = new FilePanel();
+        filePanel.setFileValidator(file -> WelcomePanel.isValidOpenFile(file));
+        WebFile openFile = filePanel.showFilePanel(getUI());
+        if (openFile == null)
+            return;
+
+        // If file is gfar file, open repo
+        if (openFile.getType().equals("gfar")) {
+            GreenImport.openGreenfootForArchiveFilePath(_workspacePane, openFile.getPath());
+            return;
+        }
+
+        // Open file
+        WorkspacePaneUtils.openFile(_workspacePane, openFile);
     }
 
     /**
@@ -118,6 +140,23 @@ public class HomePage extends WebPage {
         WebURL homePageUrl = getURL();
         String homePageText = homePageUrl.getText();
         _homePageView.setMarkDown(homePageText);
+    }
+
+    /**
+     * Respond to UI.
+     */
+    @Override
+    protected void respondUI(ViewEvent anEvent)
+    {
+        switch (anEvent.getName()) {
+
+            // Handle OpenButton, Bogus
+            case "OpenButton": showOpenPanel(); break;
+            case "Bogus": break;
+
+            // Do normal version
+            default: super.respondUI(anEvent); break;
+        }
     }
 
     /**

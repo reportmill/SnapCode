@@ -104,11 +104,8 @@ public class WelcomePanel extends ViewOwner {
     public void respondUI(ViewEvent anEvent)
     {
         // Handle SamplesButton
-        if (anEvent.equals("SamplesButton")) {
-            if (anEvent.isAltDown())
-                GreenImport.showGreenfootPanel();
-            else openWorkspaceForShowSamples();
-        }
+        if (anEvent.equals("SamplesButton"))
+            openWorkspaceForShowSamples();
 
         // Handle NewButton, NewJavaReplMenu
         if (anEvent.equals("NewButton") || anEvent.equals("NewJavaReplMenu"))
@@ -126,7 +123,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Handle OpenGreenfootMenu
         if (anEvent.equals("OpenGreenfootMenu"))
-            GreenImport.showGreenfootPanel();
+            GreenImport.showGreenfootPanel(null);
 
         // Handle QuitButton
         if (anEvent.equals("QuitButton"))
@@ -192,7 +189,8 @@ public class WelcomePanel extends ViewOwner {
     {
         // If file is gfar file, open repo
         if (aFile.getType().equals("gfar")) {
-            GreenImport.openGreenfootForArchiveFilePath(aFile.getPath());
+            WorkspacePane workspacePane = openEmptyWorkspace();
+            GreenImport.openGreenfootForArchiveFilePath(workspacePane, aFile.getPath());
             return;
         }
 
@@ -438,7 +436,7 @@ public class WelcomePanel extends ViewOwner {
     /**
      * Returns whether given file can be opened by app (java, jepl, project).
      */
-    private static boolean isValidOpenFile(WebFile aFile)
+    protected static boolean isValidOpenFile(WebFile aFile)
     {
         if (isSourceFile(aFile))
             return true;
