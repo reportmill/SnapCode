@@ -16,6 +16,7 @@ import snapcode.app.SnapCodeUtils;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.project.Project;
+import snapcode.project.ProjectUtils;
 import snapcode.webbrowser.WebPage;
 
 /**
@@ -51,6 +52,12 @@ public class NewFileTool extends WorkspaceTool {
      */
     public void createFileForType(String fileType)
     {
+        // If no projects, create starter file
+        if (_workspace.getProjects().length == 0) {
+            createStarterFileForType(fileType);
+            return;
+        }
+
         // Handle Java from clipboard
         if (fileType.equals("java-from-clipboard")) {
             newJavaFileFromClipboard();
@@ -108,7 +115,7 @@ public class NewFileTool extends WorkspaceTool {
     /**
      * Shows a panel to create new project.
      */
-    public Project showNewProjectPanel(View aView)
+    public void showNewProjectPanel()
     {
         // Create file panel to select new directory file
         FilePanel filePanel = new FilePanel();
@@ -122,9 +129,9 @@ public class NewFileTool extends WorkspaceTool {
             filePanel.getSelSitePane().setSelFile(snapCodeDir);
 
         // Show file panel to select new directory file
-        WebFile newProjectFile = filePanel.showFilePanel(aView);
+        WebFile newProjectFile = filePanel.showFilePanel(_workspacePane.getUI());
         if (newProjectFile == null)
-            return null;
+            return;
 
         // Make sure file is dir
         if (!newProjectFile.isDir()) {
@@ -133,13 +140,13 @@ public class NewFileTool extends WorkspaceTool {
         }
 
         // Return
-        return createNewProjectForProjectDir(newProjectFile);
+        createNewProjectForProjectDir(newProjectFile);
     }
 
     /**
      * Creates a new project.
      */
-    public Project createNewProjectForProjectDir(WebFile newProjectFile)
+    public void createNewProjectForProjectDir(WebFile newProjectFile)
     {
         // Create new project
         WebSite projectSite = newProjectFile.getURL().getAsSite();
@@ -153,9 +160,18 @@ public class NewFileTool extends WorkspaceTool {
 
         // Add project to recent files
         RecentFiles.addURL(newProjectFile.getURL());
+    }
 
-        // Return
-        return newProject;
+    /**
+     * Creates a new Java or Jepl file for name and string.
+     */
+    private void createStarterFileForType(String fileType)
+    {
+        // Get Temp project
+        ProjectUtils.getTempProject(_workspace);
+
+        // Create file
+        newJavaOrJeplFileForNameAndTypeAndString("JavaFiddle", fileType, "");
     }
 
     /**

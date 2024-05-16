@@ -176,14 +176,10 @@ public class WelcomePanel extends ViewOwner {
     {
         // Open empty workspace pane with temp project
         WorkspacePane workspacePane = openEmptyWorkspace();
-        Workspace workspace = workspacePane.getWorkspace();
-        ProjectUtils.getTempProject(workspace);
 
-        // Open new Jepl file
-        runLater(() -> {
-            NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
-            newFileTool.newJavaOrJeplFileForNameAndTypeAndString("JavaFiddle", fileType, "");
-        });
+        // Create Java file
+        NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
+        runLater(() -> newFileTool.createFileForType(fileType));
 
         // Start sample button anim
         runLater(() -> workspacePane.getWorkspaceTools().startSamplesButtonAnim());

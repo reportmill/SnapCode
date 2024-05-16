@@ -5,8 +5,6 @@ import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.apptools.NewFileTool;
-import snapcode.project.ProjectUtils;
-import snapcode.project.Workspace;
 import snapcode.webbrowser.WebPage;
 import java.io.File;
 
@@ -36,17 +34,10 @@ public class HomePage extends WebPage {
     /**
      * Creates a new file.
      */
-    private void createNewJavaFile(String fileType)
+    private void createNewFileForType(String fileType)
     {
-        Workspace workspace = _workspacePane.getWorkspace();
-        if (workspace.getProjects().length == 0)
-            ProjectUtils.getTempProject(workspace);
-
-        // Open new Jepl file
-        runLater(() -> {
-            NewFileTool newFileTool = _workspacePane.getWorkspaceTools().getNewFileTool();
-            newFileTool.newJavaOrJeplFileForNameAndTypeAndString("JavaFiddle", fileType, "");
-        });
+        NewFileTool newFileTool = _workspacePane.getWorkspaceTools().getNewFileTool();
+        runLater(() -> newFileTool.createFileForType(fileType));
     }
 
     /**
@@ -57,14 +48,9 @@ public class HomePage extends WebPage {
         // Removes image temp files
         removeImageTempFiles();
 
-        // Open empty workspace pane
-        _workspacePane.showProjectTool();
-
         // Show new project panel
-        runLater(() -> {
-            NewFileTool newFileTool = _workspacePane.getWorkspaceTools().getNewFileTool();
-            newFileTool.showNewProjectPanel(getUI());
-        });
+        NewFileTool newFileTool = _workspacePane.getWorkspaceTools().getNewFileTool();
+        runLater(newFileTool::showNewProjectPanel);
     }
 
     /**
@@ -103,8 +89,8 @@ public class HomePage extends WebPage {
         switch (urlAddr) {
 
             // Handle NewJavaClassButton, NewJavaReplButton
-            case "NewJavaClassButton": createNewJavaFile("java"); break;
-            case "NewJavaReplButton": createNewJavaFile("jepl"); break;
+            case "NewJavaClassButton": createNewFileForType("java"); break;
+            case "NewJavaReplButton": createNewFileForType("jepl"); break;
 
             // Handle NewProjectButton, NewBlockProjectButton
             case "NewProjectButton":
@@ -145,7 +131,8 @@ public class HomePage extends WebPage {
             File[] rootFiles = rootFile.listFiles(); assert (rootFiles != null);
             for (File file : rootFiles) {
                 if (file.getName().startsWith("imageio"))
-                    file.delete();
+                    if (!file.delete())
+                        System.out.println("HomePage.removeImageTempFiles: Failed to delete: " + file);
             }
         }
         catch (Exception ignore) { }
