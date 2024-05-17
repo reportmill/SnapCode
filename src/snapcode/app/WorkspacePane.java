@@ -304,6 +304,9 @@ public class WorkspacePane extends ViewOwner {
         TabBar tabBar = bottomTrayUI.getTabBar();
         _statusBar.addToView(tabBar);
 
+        // Add drag drop support
+        new WorkspacePaneDnD(this);
+
         // Add key binding to OpenMenuItem and CloseWindow
         //addKeyActionHandler("OpenMenuItem", "meta O");
         //addKeyActionHandler("CloseFileAction", "meta W");

@@ -45,7 +45,7 @@ public class SampleDoc {
     public SampleDoc(String aName)
     {
         _name = FilePathUtils.getFilenameSimple(aName);
-        _fileType = FilePathUtils.getType(aName);
+        _fileType = FilePathUtils.getFileType(aName);
     }
 
     /**
