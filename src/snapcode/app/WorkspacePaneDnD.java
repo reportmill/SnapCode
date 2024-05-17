@@ -24,7 +24,8 @@ public class WorkspacePaneDnD {
         _workspacePane = workspacePane;
 
         // Add drag listener to content view
-        _workspacePane.getUI().addEventHandler(this::handleDragEvent, View.DragEvents);
+        View pagePane = _workspacePane.getPagePane().getUI();
+        pagePane.addEventHandler(this::handleDragEvent, View.DragEvents);
     }
 
     /**
