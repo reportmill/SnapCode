@@ -64,6 +64,10 @@ public class MainToolBar extends WorkspaceTool {
     @Override
     protected void resetUI()
     {
+        // Update BackButton, ForwardButton
+        setViewEnabled("BackButton", _pagePane.getBrowser().getLastURL() != null);
+        setViewEnabled("ForwardButton", _pagePane.getBrowser().getNextURL() != null);
+
         // Update TerminateButton
         boolean isRunning = _workspaceTools.getRunTool().isRunning();
         setViewEnabled("TerminateButton", isRunning);
@@ -77,8 +81,10 @@ public class MainToolBar extends WorkspaceTool {
     {
         switch (anEvent.getName()) {
 
-            // Handle HomeButton
+            // Handle HomeButton, BackButton, ForwardButton
             case "HomeButton": _pagePane.showHomePage(); break;
+            case "BackButton": _pagePane.getBrowser().trackBack(); break;
+            case "ForwardButton": _pagePane.getBrowser().trackForward(); break;
 
             // Handle RunButton, DebugButton, TerminateButton, BuildButton
             case "RunButton": _workspaceTools.getRunTool().runAppForSelFile(false); break;

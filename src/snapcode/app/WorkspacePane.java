@@ -1,5 +1,4 @@
 package snapcode.app;
-import snap.geom.HPos;
 import snap.geom.Rect;
 import snap.gfx.GFXEnv;
 import snap.viewx.DevPane;
@@ -360,6 +359,7 @@ public class WorkspacePane extends ViewOwner {
 
         // Reset FilesPane and SupportTray
         _workspaceTools.resetLater();
+        _toolBar.resetLater();
         _statusBar.resetLater();
     }
 
