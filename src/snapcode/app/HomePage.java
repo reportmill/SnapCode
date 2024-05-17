@@ -65,12 +65,6 @@ public class HomePage extends WebPage {
         if (openFile == null)
             return;
 
-        // If file is gfar file, open repo
-        if (openFile.getType().equals("gfar")) {
-            GreenImport.openGreenfootForArchiveFilePath(_workspacePane, openFile.getPath());
-            return;
-        }
-
         // Open file
         WorkspacePaneUtils.openFile(_workspacePane, openFile);
     }

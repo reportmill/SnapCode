@@ -22,15 +22,22 @@ public class WorkspacePaneUtils {
      */
     public static void openFile(WorkspacePane workspacePane, WebFile aFile)
     {
+        // If file is gfar file, open repo
+        String fileType = aFile.getType();
+        if (fileType.equals("gfar")) {
+            GreenImport.openGreenfootForArchiveFilePath(workspacePane, aFile.getPath());
+            return;
+        }
+
         // If file is just a source file, open external source file
-        boolean isSourceFile = ArrayUtils.contains(WelcomePanel.FILE_TYPES, aFile.getType());
+        boolean isSourceFile = ArrayUtils.contains(WelcomePanel.FILE_TYPES, fileType);
         if (isSourceFile) {
             ViewUtils.runLater(() -> openExternalSourceFile(workspacePane, aFile));
             return;
         }
 
         // If file is zip file, open repo
-        if (aFile.getType().equals("zip")) {
+        if (fileType.equals("zip")) {
             openProjectForRepoURL(workspacePane, aFile.getURL());
             return;
         }

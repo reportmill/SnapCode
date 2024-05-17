@@ -187,14 +187,6 @@ public class WelcomePanel extends ViewOwner {
      */
     protected void openWorkspaceForFile(WebFile aFile)
     {
-        // If file is gfar file, open repo
-        if (aFile.getType().equals("gfar")) {
-            WorkspacePane workspacePane = openEmptyWorkspace();
-            GreenImport.openGreenfootForArchiveFilePath(workspacePane, aFile.getPath());
-            return;
-        }
-
-        // Open empty workspace pane
         WorkspacePane workspacePane = openEmptyWorkspace();
         WorkspacePaneUtils.openFile(workspacePane, aFile);
     }
