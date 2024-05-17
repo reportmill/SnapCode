@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RowView PrefHeight="32" Padding="0,12,0,8" Spacing="5">
   <Font Name="Arial" Size="12" />
-  <Separator PrefHeight="18" Margin="0,0,0,90" Vertical="true" />
-  <Button Name="HomeButton" PrefWidth="28" PrefHeight="28" Opacity=".5" Image="pkg.images/Home.png" ShowArea="false" />
+  <Separator PrefHeight="18" Margin="0,0,0,81" Vertical="true" />
+  <Button Name="HomeButton" Margin="0,0,0,8" PrefWidth="28" PrefHeight="28" Opacity=".5" Image="pkg.images/Home.png" ShowArea="false" />
   <Button Name="BackButton" PrefWidth="22" PrefHeight="22" Opacity=".5" Image="pkg.images/LeftArrow.png" ShowArea="false" />
   <Button Name="ForwardButton" PrefWidth="22" PrefHeight="22" Opacity=".5" Image="pkg.images/RightArrow.png" ShowArea="false" />
+  <ComboBox Name="SearchComboBox" Margin="0,0,0,16" PrefWidth="200" PrefHeight="22" ShowTextField="true" ShowButton="false" FilterList="true" />
   <Button Name="RunButton" PrefWidth="28" PrefHeight="28" LeanX="RIGHT" Image="/snapcode/apptools/pkg.images/Run.png" ShowArea="false" />
   <Button Name="DebugButton" PrefWidth="28" PrefHeight="28" Image="/snapcode/apptools/pkg.images/Debug.gif" ShowArea="false" />
   <Button Name="TerminateButton" PrefWidth="28" PrefHeight="28" Image="/snapcode/apptools/pkg.images/Terminate.gif" ShowArea="false" />
-  <Separator PrefHeight="18" Vertical="true" />
-  <Button Name="BuildButton" PrefWidth="28" PrefHeight="28" Margin="0,50,0,10" LeanX="RIGHT" Image="/snapcode/apptools/pkg.images/Build.png" ShowArea="false" />
-  <ComboBox Name="SearchComboBox" PrefWidth="200" PrefHeight="22" ShowTextField="true" ShowButton="false" FilterList="true" />
+  <Separator Margin="0,5,0,5" PrefHeight="18" Vertical="true" />
+  <Button Name="BuildButton" PrefWidth="28" PrefHeight="28" Margin="0,40,0,10" LeanX="RIGHT" Image="/snapcode/apptools/pkg.images/Build.png" ShowArea="false" />
 </RowView>
