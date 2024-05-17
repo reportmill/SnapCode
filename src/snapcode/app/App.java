@@ -2,10 +2,13 @@ package snapcode.app;
 import snap.gfx.GFXEnv;
 import snap.util.Convert;
 import snap.util.Prefs;
+import snap.util.SnapUtils;
 import snap.view.ViewTheme;
 import snap.view.ViewUtils;
 import snap.view.WindowView;
 import snap.viewx.DevPaneExceptions;
+import snap.web.WebFile;
+import snap.web.WebURL;
 import snapcode.apptools.RunTool;
 import snapcode.project.Workspace;
 import snapcode.util.LZString;
@@ -61,6 +64,8 @@ public class App {
         // Show WelcomePanel
         //showWelcomePanel();
         openDefaultWorkspace();
+
+        ViewUtils.runDelayed(App::deleteSandboxes, 1000);
     }
 
     /**
@@ -198,6 +203,21 @@ public class App {
     {
         Prefs.getDefaultPrefs().flush();
         ViewUtils.runLater(() -> getShared().showWelcomePanel());
+    }
+
+    /**
+     * Deletes sandboxes.
+     */
+    private static void deleteSandboxes()
+    {
+        if (!SnapUtils.isWebVM) return;
+        String[] deleteDirnames = { "Sandboxes", "Tetris", "SnappyBird", "Asteroids" };
+        for (String deleteDirname : deleteDirnames) {
+            WebURL deleteUrl = WebURL.getURL("/files/SnapCode/" + deleteDirname);
+            WebFile deleteDir = deleteUrl != null ? deleteUrl.getFile() : null;
+            if (deleteDir != null)
+                deleteDir.delete();
+        }
     }
 
     /**
