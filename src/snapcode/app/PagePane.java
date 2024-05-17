@@ -198,19 +198,12 @@ public class PagePane extends ViewOwner {
     }
 
     /**
-     * Creates page for given URL.
-     */
-    public WebPage createPageForURL(WebURL aURL)
-    {
-        return _browser.createPageForURL(aURL);
-    }
-
-    /**
      * Shows the home page.
      */
     public void showHomePage()
     {
         _homePage = new HomePage(_workspacePane);
+        setPageForURL(_homePage.getURL(), _homePage);
         setSelPage(_homePage);
         _workspacePane.getWorkspaceTools().getRightTray().hideTools();
     }
