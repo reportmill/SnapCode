@@ -234,8 +234,32 @@ public class HomePageView extends MarkDownView {
      */
     private ChildView createViewForOpenSamplesList(MDNode listNode)
     {
-        // Do normal version
-        ChildView listNodeView = super.createViewForListNode(listNode);
+        // Create views for list items
+        MDNode[] listItemNodes = listNode.getChildNodes();
+        View[] listItemViews = ArrayUtils.map(listItemNodes, node -> createViewForOpenSamplesListItem(node), View.class);
+
+        // Calculate rows and create rowView array
+        int colCount = 5;
+        int rowCount = (int) Math.ceil(listItemViews.length / (double) colCount);
+        RowView[] rowViews = new RowView[rowCount];
+
+        // Add items to row views
+        for (int i = 0; i < rowCount; i++) {
+
+            // Get views in row
+            int startIndex = i * colCount;
+            int endIndex = Math.min(startIndex + colCount, listItemViews.length);
+            View[] rowItemViews = Arrays.copyOfRange(listItemViews, startIndex, endIndex);
+
+            // Create rowView and add row item views
+            RowView rowView = rowViews[i] = new RowView();
+            rowView.setChildren(rowItemViews);
+        }
+
+        // Create ColView and add rows
+        ChildView listNodeView = new ColView();
+        listNodeView.setMargin(0, 20, 0, 30);
+        listNodeView.setChildren(rowViews);
 
         // Clear directive
         setDirectiveValue("OpenSamples", null);
@@ -253,7 +277,7 @@ public class HomePageView extends MarkDownView {
         MDNode[] listNodeChildren = listItemNode.getChildNodes();
         MDNode titleNode = listNodeChildren[0];
         Label titleLabel = new Label(titleNode.getText());
-        titleLabel.setPropsString("Font:Arial Bold 16; Margin:10,10,5,15;");
+        titleLabel.setPropsString("Font:Arial Bold 14; Margin:10,10,5,15;");
 
         // Get link node
         MDNode linkNode = listNodeChildren[1];
@@ -268,20 +292,11 @@ public class HomePageView extends MarkDownView {
         imageView.setMargin(5, 0, 5, 5);
         imageView.setMaxSize(100, 100);
 
-        // Create text view
-        MDNode textNode = listNodeChildren[2];
-        View textNodeView = createViewForTextNode(textNode);
-        textNodeView.setPropsString("Margin:0,0,0,20; PrefWidth:500;");
-
         // Create row view for image and text
-        RowView rowView = new RowView();
-        rowView.setChildren(imageView, textNodeView);
-
-        // Create container view
         ColView listItemView = new ColView();
-        listItemView.setPropsString("Fill:#F8; Margin:10,20,10,20; Padding:5; BorderRadius:8; Align:TOP_LEFT;");
+        listItemView.setPropsString("Fill:#F8; Margin:5,15,5,15; Padding:5; BorderRadius:8; MinWidth:140; Align:TOP_CENTER;");
+        listItemView.setChildren(titleLabel, imageView);
         addLinkToLinkView(listItemView, "Sample:" + linkUrlAddr);
-        listItemView.setChildren(titleLabel, rowView);
 
         // Return
         return listItemView;
