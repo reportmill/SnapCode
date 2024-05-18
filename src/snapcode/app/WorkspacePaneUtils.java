@@ -106,10 +106,8 @@ public class WorkspacePaneUtils {
             return;
         }
 
-        // If not "TempProj" file, add to RecentFiles
-        WebURL sourceURL = sourceFile.getURL();
-        if (!sourceURL.getString().contains("TempProj"))
-            RecentFiles.addURL(sourceURL);
+        // Add to RecentFiles
+        addRecentFileUrl(sourceFile.getURL());
 
         // Show source file
         ViewUtils.runLater(() -> showFile(workspacePane, newSourceFile));
@@ -132,7 +130,7 @@ public class WorkspacePaneUtils {
         ViewUtils.runDelayed(() -> selectGoodDefaultFile(workspacePane, project), 400);
 
         // Add recent file
-        RecentFiles.addURL(projectDir.getURL());
+        addRecentFileUrl(projectDir.getURL());
     }
 
     /**
@@ -141,7 +139,7 @@ public class WorkspacePaneUtils {
     public static void openProjectForRepoURL(WorkspacePane workspacePane, WebURL repoURL)
     {
         // Add repoURL to recent files
-        RecentFiles.addURL(repoURL);
+        addRecentFileUrl(repoURL);
 
         // Add project for repo URL
         Workspace workspace = workspacePane.getWorkspace();
@@ -187,6 +185,17 @@ public class WorkspacePaneUtils {
 
         // Select it
         showFile(workspacePane, defaultFile);
+    }
+
+    /**
+     * Adds a recent file URL.
+     */
+    private static void addRecentFileUrl(WebURL fileUrl)
+    {
+        String urlAddr = fileUrl.getString();
+        if (urlAddr.contains("TempProj") || urlAddr.contains("/SnapCode/Samples/"))
+            return;
+        RecentFiles.addURL(fileUrl);
     }
 
     /**
