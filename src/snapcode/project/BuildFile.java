@@ -32,9 +32,6 @@ public class BuildFile extends PropObject {
     // Whether to include the built-in SnapKit runtime as dependency
     private boolean _includeSnapKitRuntime;
 
-    // Whether to include the built-in SnapCharts runtime as dependency
-    private boolean _includeSnapChartsRuntime;
-
     // The actual build file
     private WebFile _buildFile;
 
@@ -47,10 +44,10 @@ public class BuildFile extends PropObject {
     // Constants for BuildFile properties
     public static final String SourcePath_Prop = "SourcePath";
     public static final String BuildPath_Prop = "BuildPath";
+    public static final String Dependency_Prop = "Dependency";
     public static final String Dependencies_Prop = "Dependencies";
     public static final String MainClassName_Prop = "MainClassName";
     public static final String IncludeSnapKitRuntime_Prop = "IncludeSnapKitRuntime";
-    public static final String IncludeSnapChartsRuntime_Prop = "IncludeSnapChartsRuntime";
 
     // Constants for defaults
     private static final String DEFAULT_SOURCE_PATH = "src";
@@ -170,6 +167,7 @@ public class BuildFile extends PropObject {
         if (ArrayUtils.contains(_dependencies, aDependency)) return;
         BuildDependency[] newDependencies = ArrayUtils.add(_dependencies, aDependency, anIndex);
         setDependencies(newDependencies);
+        firePropChange(Dependency_Prop, null, aDependency);
     }
 
     /**
@@ -177,8 +175,10 @@ public class BuildFile extends PropObject {
      */
     public void removeDependency(int anIndex)
     {
+        BuildDependency dependency = _dependencies[anIndex];
         BuildDependency[] newDependencies = ArrayUtils.remove(_dependencies, anIndex);
         setDependencies(newDependencies);
+        firePropChange(Dependency_Prop, dependency, null);
     }
 
     /**
@@ -225,15 +225,29 @@ public class BuildFile extends PropObject {
     /**
      * Returns whether to include the built-in SnapCharts runtime as dependency.
      */
-    public boolean isIncludeSnapChartsRuntime()  { return _includeSnapChartsRuntime; }
+    public boolean isIncludeSnapChartsRuntime()
+    {
+        BuildDependency[] dependencies = getDependencies();
+        return ArrayUtils.hasMatch(dependencies, dep -> dep.getId().contains("snapcharts"));
+    }
 
     /**
      * Sets whether to include the built-in SnapCharts runtime as dependency.
      */
     public void setIncludeSnapChartsRuntime(boolean aValue)
     {
-        if (aValue == _includeSnapChartsRuntime) return;
-        firePropChange(IncludeSnapChartsRuntime_Prop, _includeSnapChartsRuntime, _includeSnapChartsRuntime = aValue);
+        if (aValue == isIncludeSnapChartsRuntime()) return;
+
+        // Handle Add SnapCharts
+        if (aValue)
+            addDependency(new MavenDependency("com.reportmill:snapcharts:2024.05"));
+
+        // Handle Remove SnapCharts
+        else {
+            BuildDependency[] dependencies = getDependencies();
+            BuildDependency dependency = ArrayUtils.findMatch(dependencies, dep -> dep.getId().contains("snapcharts"));
+            removeDependency(dependency);
+        }
     }
 
     /**
@@ -342,7 +356,7 @@ public class BuildFile extends PropObject {
         aPropSet.addPropNamed(Dependencies_Prop, BuildDependency[].class);
         aPropSet.addPropNamed(MainClassName_Prop, String.class);
         aPropSet.addPropNamed(IncludeSnapKitRuntime_Prop, boolean.class);
-        aPropSet.addPropNamed(IncludeSnapChartsRuntime_Prop, boolean.class);
+        //aPropSet.addPropNamed(IncludeSnapChartsRuntime_Prop, boolean.class);
     }
 
     /**
@@ -360,7 +374,7 @@ public class BuildFile extends PropObject {
             case Dependencies_Prop: return getDependencies();
             case MainClassName_Prop: return getMainClassName();
             case IncludeSnapKitRuntime_Prop: return isIncludeSnapKitRuntime();
-            case IncludeSnapChartsRuntime_Prop: return isIncludeSnapChartsRuntime();
+            //case IncludeSnapChartsRuntime_Prop: return isIncludeSnapChartsRuntime();
 
             // Handle super class properties (or unknown)
             default: System.err.println("BuildFile.getPropValue: Unknown prop: " + aPropName); return null;
@@ -382,7 +396,7 @@ public class BuildFile extends PropObject {
             case Dependencies_Prop: setDependencies((BuildDependency[]) aValue); break;
             case MainClassName_Prop: setMainClassName(Convert.stringValue(aValue)); break;
             case IncludeSnapKitRuntime_Prop: setIncludeSnapKitRuntime(Convert.boolValue(aValue)); break;
-            case IncludeSnapChartsRuntime_Prop: setIncludeSnapChartsRuntime(Convert.boolValue(aValue)); break;
+            //case IncludeSnapChartsRuntime_Prop: setIncludeSnapChartsRuntime(Convert.boolValue(aValue)); break;
 
             // Handle super class properties (or unknown)
             default: System.err.println("BuildFile.setPropValue: Unknown prop: " + aPropName);

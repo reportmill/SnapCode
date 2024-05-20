@@ -24,9 +24,6 @@ dependencies {
     // SnapKit project
     implementation project(':SnapKit')
 
-    // SnapCharts project
-    implementation project(':SnapCharts')
-
     // SnapKitGL project
     implementation project(':SnapKitGL')
 
@@ -35,9 +32,6 @@ dependencies {
 
     // Tools jar
     implementation files('lib/tools.jar')
-
-    // ByteBuddy jar
-    //implementation 'net.bytebuddy:byte-buddy:1.14.11'
 
     // So we can get jars
     testImplementation project(':CJDom')

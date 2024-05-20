@@ -2,14 +2,13 @@ package snapcode.apptools;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.GFXEnv;
+import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.web.WebFile;
-import snap.web.WebURL;
 import snapcode.app.*;
 import snapcode.project.*;
 import snap.view.*;
 import snap.viewx.*;
-import snap.web.WebSite;
 import snapcode.webbrowser.WebPage;
 import java.io.File;
 import java.util.List;
@@ -41,35 +40,6 @@ public class BuildFileTool extends ProjectTool {
     public BuildFile getBuildFile()  { return _proj.getBuildFile(); }
 
     /**
-     * Adds a dependency to build file.
-     */
-    public void addDependency(BuildDependency dependency, int anIndex)
-    {
-        // Add dependency
-        BuildFile buildFile = getBuildFile();
-        buildFile.addDependency(dependency, anIndex);
-
-        // Reset items and select new dependency
-        _dependenciesListArea.setItems(buildFile.getDependencies());
-        _dependenciesListArea.setSelItem(dependency);
-        resetLater();
-    }
-
-    /**
-     * Removes a dependency.
-     */
-    public void removeDependency(BuildDependency buildDependency)
-    {
-        // Remove dependency from build file
-        BuildFile buildFile = getBuildFile();
-        buildFile.removeDependency(buildDependency);
-
-        // Remove dependency from ListArea
-        _dependenciesListArea.removeItemAndUpdateSel(buildDependency);
-        resetLater();
-    }
-
-    /**
      * Initialize UI.
      */
     protected void initUI()
@@ -91,6 +61,7 @@ public class BuildFileTool extends ProjectTool {
         BuildFile buildFile = getBuildFile();
         BuildDependency[] dependencies = buildFile.getDependencies();
         _dependenciesListArea.setItems(dependencies);
+        buildFile.addPropChangeListener(this::buildFileDidChangeDependency, BuildFile.Dependency_Prop);
 
         // Configure DependencyTypeComboBox
         ComboBox<BuildDependency.Type> dependencyTypeComboBox = getView("DependencyTypeComboBox", ComboBox.class);
@@ -206,7 +177,7 @@ public class BuildFileTool extends ProjectTool {
         if (anEvent.equals("DeleteAction") || anEvent.equals("BackSpaceAction")) {
             if (getView("DependenciesListView").isFocused()) {
                 BuildDependency dependency = (BuildDependency) getViewSelItem("DependenciesListView");
-                removeDependency(dependency);
+                buildFile.removeDependency(dependency);
             }
         }
 
@@ -290,7 +261,8 @@ public class BuildFileTool extends ProjectTool {
         BuildDependency newDependency = new MavenDependency();
 
         // Add dependency
-        addDependency(newDependency, _dependenciesListArea.getItemCount());
+        BuildFile buildFile = getBuildFile();
+        buildFile.addDependency(newDependency);
 
         // Focus MavenIdText
         runLater(() -> getView("MavenIdText").requestFocus());
@@ -307,8 +279,9 @@ public class BuildFileTool extends ProjectTool {
             return;
 
         // Remove selected
+        BuildFile buildFile = getBuildFile();
         BuildDependency selDependency = _dependenciesListArea.getSelItem();
-        removeDependency(selDependency);
+        buildFile.removeDependency(selDependency);
     }
 
     /**
@@ -327,7 +300,7 @@ public class BuildFileTool extends ProjectTool {
         BuildDependency newDependency = newType == BuildDependency.Type.Maven ? new MavenDependency() :
                 newType == BuildDependency.Type.JarFile ? new BuildDependency.JarFileDependency() :
                 new BuildDependency.ProjectDependency();
-        addDependency(newDependency, index);
+        buildFile.addDependency(newDependency, index);
     }
 
     /**
@@ -364,28 +337,26 @@ public class BuildFileTool extends ProjectTool {
     }
 
     /**
-     * Finds a project site for given name.
+     * Called when BuildFile changes dependency.
      */
-    private WebSite findProjectSiteForName(String aName)
+    private void buildFileDidChangeDependency(PropChange aPC)
     {
-        // return AppBase.getShared().getProjectSiteForName(aName);
+        BuildFile buildFile = getBuildFile();
 
-        // Get project site parent URL (just return null if null)
-        WebSite thisProjSite = getProjectSite();
-        WebURL thisProjSiteURL = thisProjSite.getURL();
-        WebURL parentURL = thisProjSiteURL.getParent();
-        WebFile parentDir = parentURL.getFile();
-        if (parentDir == null)
-            return null;
+        // If BuildFile adds dependency, update list
+        if (aPC.getNewValue() != null) {
+            BuildDependency dependency = (BuildDependency) aPC.getNewValue();
+            _dependenciesListArea.setItems(buildFile.getDependencies());
+            _dependenciesListArea.setSelItem(dependency);
+        }
 
-        // Get project dir for name (just return null if null)
-        WebFile projDir = parentDir != null ? parentDir.getFileForName(aName) : null;
-        if (projDir == null)
-            return null;
+        // If BuildFile removes dependency, remove from list
+        else {
+            BuildDependency dependency = (BuildDependency) aPC.getOldValue();
+            _dependenciesListArea.removeItemAndUpdateSel(dependency);
+        }
 
-        // Get project dir as site
-        WebURL projSiteURL = projDir.getURL();
-        return projSiteURL.getAsSite();
+        resetLater();
     }
 
     /**

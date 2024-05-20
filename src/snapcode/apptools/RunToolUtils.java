@@ -107,7 +107,7 @@ public class RunToolUtils {
         // Run local if (1) TempProj and (2) jepl file and (3) not swing and (4) not alt-key-down
         Project proj = Project.getProjectForFile(mainFile);
         boolean runLocal = proj.getName().equals("TempProj") && aFile.getType().equals("jepl") &&
-                !isSwing && !ViewUtils.isControlDown();
+                !isSwing && !ViewUtils.isControlDown() && proj.getBuildFile().getDependencies().length == 0;
         if (runLocal) {
             String className = proj.getClassNameForFile(mainFile);
             String[] args = { className };

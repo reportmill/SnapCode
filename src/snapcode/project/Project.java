@@ -241,8 +241,7 @@ public class Project extends PropObject {
 
         // If BuildFile.IncludeSnapKitRuntime, add SnapKit jar path
         if (buildFile.isIncludeSnapKitRuntime()) {
-            boolean includeSnapCharts = buildFile.isIncludeSnapChartsRuntime();
-            String[] snapKitPaths = ProjectUtils.getSnapKitAndSnapChartsClassPaths(includeSnapCharts);
+            String[] snapKitPaths = ProjectUtils.getSnapKitAndSnapChartsClassPaths();
             compileClassPaths = ArrayUtils.addAllUnique(snapKitPaths);
         }
 
