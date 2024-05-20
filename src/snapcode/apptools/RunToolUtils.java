@@ -105,10 +105,9 @@ public class RunToolUtils {
         }
 
         // Run local if (1) TempProj and (2) jepl file and (3) not swing and (4) not alt-key-down
-        Project proj = Project.getProjectForFile(mainFile);
-        boolean runLocal = proj.getName().equals("TempProj") && aFile.getType().equals("jepl") &&
-                !isSwing && !ViewUtils.isControlDown() && proj.getBuildFile().getDependencies().length == 0;
+        boolean runLocal = runLocal(mainFile);
         if (runLocal) {
+            Project proj = Project.getProjectForFile(mainFile);
             String className = proj.getClassNameForFile(mainFile);
             String[] args = { className };
             return new RunAppSrc(runTool, mainFile, args);
@@ -211,6 +210,21 @@ public class RunToolUtils {
 
         // Return commands
         return commands.toArray(new String[0]);
+    }
+
+    /**
+     * Returns whether to run local.
+     */
+    public static boolean runLocal(WebFile mainFile)
+    {
+        if (mainFile == null || !mainFile.getType().equals("jepl"))
+            return false;
+        Project proj = Project.getProjectForFile(mainFile);
+        if (!proj.getName().equals("TempProj"))
+            return false;
+
+        boolean isSwing = mainFile.getText().contains("javax.swing");
+        return !isSwing && !ViewUtils.isControlDown() && proj.getBuildFile().getDependencies().length == 0;
     }
 
     /**

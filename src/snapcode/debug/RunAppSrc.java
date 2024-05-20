@@ -50,7 +50,7 @@ public class RunAppSrc extends RunApp {
     public void exec()
     {
         // Create and start new thread to run
-        _runAppThread = new Thread(() -> runAppImpl());
+        _runAppThread = new Thread(this::runAppImpl);
         _running = true;
         _runAppThread.start();
     }
@@ -76,15 +76,16 @@ public class RunAppSrc extends RunApp {
         // Run code
         runMainMethod();
 
-        // If console app, wait for explicit termination
-        if (getAltConsoleView() != null) {
-            synchronized (this) {
-                try {
-                    _runAppThreadWaiting = true;
-                    wait();
-                }
-                catch (Exception e) { throw new RuntimeException(e); }
+        // Check back after slight delay to terminate if no console was activated
+        ViewUtils.runDelayed(this::terminateIfConsoleNotActivated, 200);
+
+        // Wait for explicit termination
+        synchronized (this) {
+            try {
+                _runAppThreadWaiting = true;
+                wait();
             }
+            catch (Exception e) { throw new RuntimeException(e); }
         }
 
         // Process terminate
@@ -172,6 +173,15 @@ public class RunAppSrc extends RunApp {
         // Notify exited
         for (AppListener appLsnr : _appLsnrs)
             appLsnr.appExited(this);
+    }
+
+    /**
+     * Called after launch to terminate if no console.
+     */
+    private void terminateIfConsoleNotActivated()
+    {
+        if (getAltConsoleView() == null)
+            terminate();
     }
 
     /**

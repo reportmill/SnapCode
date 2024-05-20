@@ -3,6 +3,7 @@ import javakit.parse.*;
 import javakit.resolver.JavaType;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
+import snapcode.apptools.RunToolUtils;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -215,7 +216,7 @@ public class JeplToJava {
     private void appendInitializerDecl(JInitializerDecl initializerDecl)
     {
         // If run local, just make main method
-        boolean runLocal = _jfile.getSourceFile().getUrlString().contains("TempProj");
+        boolean runLocal = RunToolUtils.runLocal(_jfile.getSourceFile());
         if (runLocal) {
             _sb.append('\n');
             _sb.append(_indent).append("public static void main(String[] args) throws Exception\n");
