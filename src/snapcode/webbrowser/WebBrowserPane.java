@@ -119,7 +119,7 @@ public class WebBrowserPane extends ViewOwner {
 
         // Handle AddressText
         if (anEvent.equals("AddressText"))
-            getBrowser().setSelUrlForUrlString(anEvent.getStringValue());
+            getBrowser().setSelUrlForUrlAddress(anEvent.getStringValue());
 
         // Handle AddressTextAction
         if (anEvent.equals("AddressTextAction")) {

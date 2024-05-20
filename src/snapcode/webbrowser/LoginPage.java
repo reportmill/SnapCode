@@ -40,7 +40,7 @@ public class LoginPage extends WebPage {
     {
         // Set FirstFocus and SiteText
         setFirstFocus("NameText");
-        setViewValue("SiteText", "Site: " + getSite().getURLString());
+        setViewValue("SiteText", "Site: " + getSite().getUrlAddress());
 
         // Make LoginButton default
         getView("LoginButton", Button.class).setDefaultButton(true);

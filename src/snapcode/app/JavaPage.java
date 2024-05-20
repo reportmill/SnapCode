@@ -329,7 +329,7 @@ public class JavaPage extends WebPage {
             urlString += String.format("#Sel=%d-%d", declarationNode.getStartCharIndex(), declarationNode.getEndCharIndex());
 
         // Open URL
-        getBrowser().setSelUrlForUrlString(urlString);
+        getBrowser().setSelUrlForUrlAddress(urlString);
     }
 
     /**
@@ -350,7 +350,7 @@ public class JavaPage extends WebPage {
         String urlString = javaURL.getString() + "#Member=" + aDecl.getSimpleName();
 
         // Open URL
-        getBrowser().setSelUrlForUrlString(urlString);
+        getBrowser().setSelUrlForUrlAddress(urlString);
     }
 
     /**

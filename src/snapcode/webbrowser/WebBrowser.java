@@ -100,13 +100,13 @@ public class WebBrowser extends TransitionPane {
     }
 
     /**
-     * Sets the browser URL from given relative URL string to the current page.
+     * Sets the browser URL from given relative URL address string to the current page.
      */
-    public void setSelUrlForUrlString(String aURLString)
+    public void setSelUrlForUrlAddress(String urlAddress)
     {
         WebFile selFile = getSelFile();
-        WebURL url = selFile != null ? selFile.getURL(aURLString) : WebURL.getURL(aURLString);
-        setSelUrl(url);
+        WebURL nextUrl = selFile != null ? selFile.getURL(urlAddress) : WebURL.getURL(urlAddress);
+        setSelUrl(nextUrl);
     }
 
     /**
@@ -467,7 +467,7 @@ public class WebBrowser extends TransitionPane {
      */
     public boolean performURLClick(String aURL)
     {
-        setSelUrlForUrlString(aURL);
+        setSelUrlForUrlAddress(aURL);
         return true;
     }
 

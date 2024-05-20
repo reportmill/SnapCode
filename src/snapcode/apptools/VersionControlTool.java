@@ -121,8 +121,10 @@ public class VersionControlTool extends ProjectTool {
     public void connectToRemoteSite()
     {
         WebSite remoteSite = getRemoteSite();
-        if (remoteSite != null)
-            _remoteBrowser.setSelUrlForUrlString(remoteSite.getURLString() + "!/");
+        if (remoteSite != null) {
+            String remoteUrlAddr = remoteSite.getUrlAddress() + "!/";
+            _remoteBrowser.setSelUrlForUrlAddress(remoteUrlAddr);
+        }
         else _remoteBrowser.setSelFile(null);
     }
 
