@@ -26,7 +26,7 @@ public class VersionControl {
     private WebSite _localSite;
 
     // The remote site URL
-    private WebURL _remoteSiteUrl;
+    protected WebURL _remoteSiteUrl;
 
     // The clone site
     private WebSite _cloneSite;
@@ -53,28 +53,15 @@ public class VersionControl {
     public static final String FileStatus_Prop = "FileStatus";
 
     /**
-     * Creates a VersionControl for a given project site.
+     * Constructor.
      */
-    public VersionControl(WebSite aSite)
+    protected VersionControl(WebSite localSite, WebURL remoteSiteUrl)
     {
-        _localSite = aSite;
-
-        // Get remote site URL
-        String urlString = getRemoteSiteUrlString(aSite);
-        if (urlString != null)
-            _remoteSiteUrl = WebURL.getURL(urlString);
-
-        // If remote size is Zip file with single dir with same name as Zip file, use dir
-        if (_remoteSiteUrl != null && _remoteSiteUrl.getType().equals("zip")) {
-            WebSite zipSite = _remoteSiteUrl.getAsSite();
-            String siteName = _remoteSiteUrl.getFilenameSimple();
-            WebFile dirFile = zipSite.getFileForPath('/' + siteName);
-            if (dirFile != null && dirFile.isDir())
-                _remoteSiteUrl = dirFile.getURL();
-        }
+        _localSite = localSite;
+        _remoteSiteUrl = remoteSiteUrl;
 
         // Set this version control as prop in project site
-        aSite.setProp(VersionControl.class.getName(), this);
+        localSite.setProp(VersionControl.class.getName(), this);
     }
 
     /**
@@ -88,9 +75,9 @@ public class VersionControl {
     public WebURL getRemoteSiteUrl()  { return _remoteSiteUrl; }
 
     /**
-     * Returns the remote site URL string.
+     * Returns the remote site URL address string.
      */
-    public String getRemoteSiteUrlString()  { return _remoteSiteUrl != null ? _remoteSiteUrl.getString() : null; }
+    public String getRemoteSiteUrlAddress()  { return _remoteSiteUrl != null ? _remoteSiteUrl.getString() : null; }
 
     /**
      * Returns the local cache site of remote site.
@@ -144,7 +131,7 @@ public class VersionControl {
      */
     public TaskRunner<Boolean> checkout()
     {
-        String title = "Checkout from " + getRemoteSiteUrlString();
+        String title = "Checkout from " + getRemoteSiteUrlAddress();
         TaskMonitor taskMonitor = new TaskMonitor(title);
         TaskRunner<Boolean> taskRunner = new TaskRunner<>(() -> checkoutImpl(taskMonitor));
         taskRunner.setMonitor(taskMonitor);
@@ -732,64 +719,7 @@ public class VersionControl {
     /**
      * Fires a given property change.
      */
-    protected void firePropChange(PropChange aPC)
-    {
-        _pcs.firePropChange(aPC);
-    }
-
-    /**
-     * Returns the remote site URL string for a given project site.
-     */
-    public static String getRemoteSiteUrlString(WebSite projectSite)
-    {
-        // Get remote settings file
-        WebSite sandboxSite = projectSite.getSandboxSite();
-        WebFile remoteSettingsFile = sandboxSite.getFileForPath("/settings/remote");
-        if (remoteSettingsFile == null)
-            return null;
-
-        // Get file text and return
-        String remoteSettingsText = remoteSettingsFile.getText();
-        String urlString = remoteSettingsText.trim();
-        return urlString.length() > 0 ? urlString : null;
-    }
-
-    /**
-     * Sets the remote site URL string for a given project site.
-     */
-    public static void setRemoteURLString(WebSite projectSite, String urlString)
-    {
-        // If already set, just return
-        if (Objects.equals(urlString, getRemoteSiteUrlString(projectSite))) return;
-
-        // Get remote settings file
-        WebSite sandboxSite = projectSite.getSandboxSite();
-        WebFile file = sandboxSite.getFileForPath("/settings/remote");
-        if (file == null)
-            file = sandboxSite.createFileForPath("/settings/remote", false);
-
-        // Save URL to remote settings file
-        try {
-
-            // If empty URL, delete file
-            if (urlString == null || urlString.length() == 0) {
-                if (file.getExists())
-                    file.delete();
-            }
-
-            // Set file text and save
-            else {
-                file.setText(urlString);
-                file.save();
-            }
-        }
-
-        // Rethrow exceptions
-        catch (Exception e) { throw new RuntimeException(e); }
-
-        // Set VersionControl
-        projectSite.setProp(VersionControl.class.getName(), null);
-    }
+    protected void firePropChange(PropChange aPC)  { _pcs.firePropChange(aPC); }
 
     /**
      * Returns the VersionControl for the given site.
@@ -810,13 +740,16 @@ public class VersionControl {
      */
     private static VersionControl createVersionControlForProjectSite(WebSite projectSite)
     {
-        //String urls = getRemoteURLString(projectSite);
-        //if (urls != null) urls = urls.toLowerCase();
+        WebURL remoteUrl = VersionControlUtils.getRemoteSiteUrl(projectSite);
 
         // Handle Git
-        //if (urls != null && (urls.startsWith("git:") || urls.endsWith(".git"))) return new VersionControlGit(projectSite);
+        //if (urlAddr != null && (urlAddr.startsWith("git:") || urlAddr.endsWith(".git"))) return new VersionControlGit(projectSite);
+
+        // Handle Zip file
+        if (remoteUrl != null && remoteUrl.getFileType().equals("zip"))
+            return new VersionControlZip(projectSite, remoteUrl);
 
         // Handle plain
-        return new VersionControl(projectSite);
+        return new VersionControl(projectSite, remoteUrl);
     }
 }

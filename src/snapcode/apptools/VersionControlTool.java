@@ -81,7 +81,7 @@ public class VersionControlTool extends ProjectTool {
     public void resetUI()
     {
         // Update RemoteURLText
-        setViewValue("RemoteURLText", _versionControl.getRemoteSiteUrlString());
+        setViewValue("RemoteURLText", _versionControl.getRemoteSiteUrlAddress());
 
         // Update ProgressBar
         ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
@@ -97,7 +97,7 @@ public class VersionControlTool extends ProjectTool {
     {
         // Handle RemoteURLText
         if (anEvent.equals("RemoteURLText"))
-            _projPane.setRemoteURLString(anEvent.getStringValue());
+            _projPane.setRemoteUrlAddress(anEvent.getStringValue());
 
         // Handle ConnectButton
         if (anEvent.equals("ConnectButton")) {
