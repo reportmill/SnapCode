@@ -206,6 +206,7 @@ public class PagePane extends ViewOwner {
         setPageForURL(_homePage.getURL(), _homePage);
         setSelPage(_homePage);
         _workspacePane.getWorkspaceTools().getRightTray().hideTools();
+        _workspacePane.getWorkspaceTools().getRunTool().cancelRun();
     }
 
     /**
