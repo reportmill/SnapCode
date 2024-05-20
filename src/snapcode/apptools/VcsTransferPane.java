@@ -146,7 +146,7 @@ public class VcsTransferPane extends ViewOwner {
      */
     protected View getFileGraphic(WebFile aFile)
     {
-        WebFile remoteFile = _versionControlTool.getVC().getRepoFile(aFile.getPath(), false, false);
+        WebFile remoteFile = _versionControlTool.getVC().getRemoteFile(aFile.getPath(), false, false);
         Image badge = null;
 
         // Handle missing LocalFile, missing RemoteFile or Update

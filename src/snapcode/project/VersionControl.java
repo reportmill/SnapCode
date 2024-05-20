@@ -98,15 +98,7 @@ public class VersionControl {
     }
 
     /**
-     * Returns the repository site for remote URL (defaults to RemoteSite).
-     */
-    public WebSite getRepoSite()
-    {
-        return getRemoteSite();
-    }
-
-    /**
-     * Returns the remote site.
+     * Returns the remote site (e.g. Git repository site, Zip file site, etc.).
      */
     public WebSite getRemoteSite()
     {
@@ -233,26 +225,26 @@ public class VersionControl {
      */
     protected void updateFile(WebFile localFile)
     {
-        // Get RepoFile and CloneFile
+        // Get RemoteFile and CloneFile
         String filePath = localFile.getPath();
         boolean isDir = localFile.isDir();
-        WebFile repoFile = getRepoFile(filePath, true, isDir);
+        WebFile remoteFile = getRemoteFile(filePath, true, isDir);
         WebFile cloneFile = getCloneFile(filePath, true, isDir);
 
         // Set new file bytes and save
-        if (repoFile.getExists()) {
+        if (remoteFile.getExists()) {
 
             // Update local file and save
             if (localFile.isFile())
-                localFile.setBytes(repoFile.getBytes());
+                localFile.setBytes(remoteFile.getBytes());
             localFile.save();
-            localFile.saveLastModTime(repoFile.getLastModTime());
+            localFile.saveLastModTime(remoteFile.getLastModTime());
 
             // Update clone file and save
             if (cloneFile.isFile())
-                cloneFile.setBytes(repoFile.getBytes());
+                cloneFile.setBytes(remoteFile.getBytes());
             cloneFile.save();
-            cloneFile.saveLastModTime(repoFile.getLastModTime());
+            cloneFile.saveLastModTime(remoteFile.getLastModTime());
 
             // Update status
             setFileStatus(localFile, null);
@@ -389,31 +381,31 @@ public class VersionControl {
      */
     protected void commitFile(WebFile localFile)
     {
-        // Get RepoFile and CloneFile
+        // Get RemoteFile and CloneFile
         String filePath = localFile.getPath();
         boolean isDir = localFile.isDir();
-        WebFile repoFile = getRepoFile(filePath, true, isDir);
+        WebFile remoteFile = getRemoteFile(filePath, true, isDir);
         WebFile cloneFile = getCloneFile(filePath, true, isDir);
 
-        // If LocalFile was deleted, delete RepoFile and CloneFile
+        // If LocalFile was deleted, delete RemoteFile and CloneFile
         if (!localFile.getExists()) {
-            if (repoFile.getExists())
-                repoFile.delete();
+            if (remoteFile.getExists())
+                remoteFile.delete();
             if (cloneFile.getExists())
                 cloneFile.delete();
             setFileStatus(localFile, null);
         }
 
-        // Otherwise save LocalFile bytes to RepoFile and CloneFile
+        // Otherwise save LocalFile bytes to RemoteFile and CloneFile
         else {
             if (localFile.isFile())
-                repoFile.setBytes(localFile.getBytes());
-            repoFile.save();
+                remoteFile.setBytes(localFile.getBytes());
+            remoteFile.save();
             if (localFile.isFile())
                 cloneFile.setBytes(localFile.getBytes());
             cloneFile.save();
-            cloneFile.saveLastModTime(repoFile.getLastModTime());
-            localFile.saveLastModTime(repoFile.getLastModTime());
+            cloneFile.saveLastModTime(remoteFile.getLastModTime());
+            localFile.saveLastModTime(remoteFile.getLastModTime());
             setFileStatus(localFile, null);
         }
     }
@@ -460,7 +452,7 @@ public class VersionControl {
         if (!isAvailable()) return;
 
         // Get remote file for given file
-        WebFile remoteFile = getRepoFile(aFile.getPath(), true, aFile.isDir());
+        WebFile remoteFile = getRemoteFile(aFile.getPath(), true, aFile.isDir());
 
         // Get remote changed files (update files)
         Set<WebFile> changedFiles = new HashSet<>();
@@ -540,37 +532,37 @@ public class VersionControl {
     /**
      * Returns the site file for path.
      */
-    private WebFile getLocalFile(String aPath, boolean isDir)
+    private WebFile getLocalFile(String filePath, boolean isDir)
     {
         WebSite localSite = getLocalSite(); if (localSite == null) return null;
-        WebFile localFile = localSite.getFileForPath(aPath);
+        WebFile localFile = localSite.getFileForPath(filePath);
         if (localFile == null)
-            localFile = localSite.createFileForPath(aPath, isDir);
+            localFile = localSite.createFileForPath(filePath, isDir);
         return localFile;
     }
 
     /**
      * Returns the local cache file of given path.
      */
-    public WebFile getCloneFile(String aPath, boolean doCreate, boolean isDir)
+    public WebFile getCloneFile(String filePath, boolean doCreate, boolean isDir)
     {
         WebSite cloneSite = getCloneSite(); if (cloneSite == null) return null;
-        WebFile cloneFile = cloneSite.getFileForPath(aPath);
+        WebFile cloneFile = cloneSite.getFileForPath(filePath);
         if (cloneFile == null && doCreate)
-            cloneFile = cloneSite.createFileForPath(aPath, isDir);
+            cloneFile = cloneSite.createFileForPath(filePath, isDir);
         return cloneFile;
     }
 
     /**
      * Returns the remote file for path.
      */
-    public WebFile getRepoFile(String aPath, boolean doCreate, boolean isDir)
+    public WebFile getRemoteFile(String filePath, boolean doCreate, boolean isDir)
     {
-        WebSite repoSite = getRepoSite(); if (repoSite == null) return null;
-        WebFile repoFile = repoSite.getFileForPath(aPath);
-        if (repoFile == null && doCreate)
-            repoFile = repoSite.createFileForPath(aPath, isDir);
-        return repoFile;
+        WebSite remoteSite = getRemoteSite(); if (remoteSite == null) return null;
+        WebFile remoteFile = remoteSite.getFileForPath(filePath);
+        if (remoteFile == null && doCreate)
+            remoteFile = remoteSite.createFileForPath(filePath, isDir);
+        return remoteFile;
     }
 
     /**

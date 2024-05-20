@@ -54,11 +54,6 @@ public class VersionControlTool extends ProjectTool {
     private WebSite getRemoteSite()  { return _versionControl.getRemoteSite(); }
 
     /**
-     * Returns the repository site.
-     */
-    private WebSite getRepoSite()  { return _versionControl.getRepoSite(); }
-
-    /**
      * Initialize UI panel.
      */
     protected void initUI()
@@ -101,7 +96,9 @@ public class VersionControlTool extends ProjectTool {
 
         // Handle ConnectButton
         if (anEvent.equals("ConnectButton")) {
-            if (getRepoSite() != null) getRepoSite().getRootDir().resetAndVerify();
+            WebSite remoteSite = getRemoteSite();
+            if (remoteSite != null)
+                remoteSite.getRootDir().resetAndVerify();
             connectToRemoteSite();
         }
 
@@ -123,8 +120,9 @@ public class VersionControlTool extends ProjectTool {
      */
     public void connectToRemoteSite()
     {
-        if (getRepoSite() != null)
-            _remoteBrowser.setSelUrlForUrlString(getRepoSite().getURLString() + "!/");
+        WebSite remoteSite = getRemoteSite();
+        if (remoteSite != null)
+            _remoteBrowser.setSelUrlForUrlString(remoteSite.getURLString() + "!/");
         else _remoteBrowser.setSelFile(null);
     }
 
