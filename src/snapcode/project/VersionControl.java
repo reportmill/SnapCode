@@ -7,13 +7,10 @@ import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
 import snap.util.ArrayUtils;
 import snap.util.TaskRunner;
-import snapcode.webbrowser.ClientUtils;
 import snap.util.TaskMonitor;
-import snap.web.AccessException;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.webbrowser.LoginPage;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -114,33 +111,6 @@ public class VersionControl {
     {
         if (!isAvailable()) { System.err.println("VersionControl.checkout: Remote not available"); return false; }
 
-        // Try basic checkout
-        try { return checkoutImpl2(taskMonitor); }
-
-        // If failure
-        catch (Exception e) {
-
-            // If attempt to set permissions succeeds, try again
-            WebSite remoteSite = getRemoteSite();
-            boolean setPermissionsSuccess = ClientUtils.setAccess(remoteSite);
-            if (setPermissionsSuccess)
-                return checkoutImpl2(taskMonitor);
-
-            // If attempt to login succeeds, try again
-            LoginPage loginPage = new LoginPage();
-            boolean loginSuccess = loginPage.showPanel(null, remoteSite);
-            if (loginSuccess)
-                return checkoutImpl2(taskMonitor);
-
-            throw e;
-        }
-    }
-
-    /**
-     * Load remote files and VCS files into site directory.
-     */
-    private boolean checkoutImpl2(TaskMonitor taskMonitor)
-    {
         // Find all files to update
         WebSite localSite = getLocalSite();
         WebFile localSiteRootDir = localSite.getRootDir();
@@ -183,14 +153,8 @@ public class VersionControl {
                 break;
             }
 
-            // Update file
-            try { updateFile(localFile); }
-            catch (AccessException e) {
-                ClientUtils.setAccess(e.getSite());
-                updateFile(localFile);
-            }
-
-            // Close task
+            // Update file and close task
+            updateFile(localFile);
             taskMonitor.endTask();
         }
 
@@ -261,14 +225,8 @@ public class VersionControl {
                 break;
             }
 
-            // Replace file
-            try { replaceFile(file); }
-            catch (AccessException e) {
-                ClientUtils.setAccess(e.getSite());
-                updateFile(file);
-            }
-
-            // Close task
+            // Replace file and close task
+            replaceFile(file);
             taskMonitor.endTask();
         }
 
