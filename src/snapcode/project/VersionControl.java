@@ -180,17 +180,14 @@ public class VersionControl {
                 localFile.setBytes(remoteFile.getBytes());
             localFile.save();
             localFile.saveLastModTime(remoteFile.getLastModTime());
-
-            // Update status
-            setFileStatus(localFile, null);
         }
 
         // Otherwise delete LocalFile
-        else {
-            if (localFile.getExists())
-                localFile.delete();
-            setFileStatus(localFile, null);
-        }
+        else if (localFile.getExists())
+            localFile.delete();
+
+        // Clear file status
+        clearFileStatus(localFile);
     }
 
     /**
@@ -249,15 +246,14 @@ public class VersionControl {
                 localFile.setBytes(remoteFile.getBytes());
             localFile.save();
             localFile.saveLastModTime(remoteFile.getLastModTime());
-            setFileStatus(localFile, null);
         }
 
         // Otherwise delete LocalFile
-        else {
-            if (localFile.getExists())
-                localFile.delete();
-            setFileStatus(localFile, null);
-        }
+        else if (localFile.getExists())
+            localFile.delete();
+
+        // Clear file status
+        clearFileStatus(localFile);
     }
 
     /**
@@ -311,21 +307,20 @@ public class VersionControl {
         boolean isDir = localFile.isDir();
         WebFile remoteFile = getRemoteFile(filePath, true, isDir);
 
-        // If LocalFile was deleted, delete RemoteFile
-        if (!localFile.getExists()) {
-            if (remoteFile.getExists())
-                remoteFile.delete();
-            setFileStatus(localFile, null);
-        }
-
-        // Otherwise save LocalFile bytes to RemoteFile
-        else {
+        // If LocalFile exists, save LocalFile bytes to RemoteFile
+        if (localFile.getExists()) {
             if (localFile.isFile())
                 remoteFile.setBytes(localFile.getBytes());
             remoteFile.save();
             localFile.saveLastModTime(remoteFile.getLastModTime());
-            setFileStatus(localFile, null);
         }
+
+        // Otherwise if LocalFile was deleted, delete RemoteFile
+        else if (remoteFile.getExists())
+            remoteFile.delete();
+
+        // Clear file status
+        clearFileStatus(localFile);
     }
 
     /**
@@ -381,39 +376,23 @@ public class VersionControl {
     }
 
     /**
-     * Returns the local files that need to be committed to remote for given root files.
-     */
-    public List<WebFile> getCommitFilesForRootFiles(List<WebFile> rootFiles)
-    {
-        List<WebFile> commitFiles = new ArrayList<>();
-        rootFiles.forEach(rootFile -> findCommitFiles(rootFile, commitFiles));
-        Collections.sort(commitFiles);
-        return commitFiles;
-    }
-
-    /**
-     * Returns the files that need to be committed to server.
-     */
-    private void findCommitFiles(WebFile aFile, List<WebFile> commitFiles)
-    {
-        // Find local changed files and add to commit files list
-        Set<WebFile> changedFiles = new HashSet<>();
-        findChangedFiles(aFile, changedFiles);
-        commitFiles.addAll(changedFiles);
-    }
-
-    /**
      * Returns the files that changed from last checkout.
      */
     private void findChangedFiles(WebFile aFile, Set<WebFile> changedFiles)
     {
-        // If file status is Added/Updated/Removed, add file
-        FileStatus fileStatus = getFileStatus(aFile, false);
-        if (fileStatus != FileStatus.Identical)
-            changedFiles.add(aFile);
+        // If ignored file, just return
+        if (isIgnoreFile(aFile))
+            return;
 
-        // If file is directory, recurse for child files
-        if (aFile.isDir() && !isIgnoreFile(aFile)) {
+        // Handle file: If file status is Added/Updated/Removed, add file
+        if (aFile.isFile()) {
+            FileStatus fileStatus = calcFileStatusForOtherSite(aFile, getRemoteSite());
+            if (fileStatus != FileStatus.Identical)
+                changedFiles.add(aFile);
+        }
+
+        // Handle directory: recurse for child files
+        else {
 
             // Recurse for child files
             WebFile[] childFiles = aFile.getFiles();
@@ -443,13 +422,19 @@ public class VersionControl {
      */
     private void findChangedFilesAlt(WebFile remoteFile, Set<WebFile> changedFiles)
     {
-        // If file status is Added/Updated/Removed, add file
-        FileStatus fileStatus = getFileStatusAlt(remoteFile, false);
-        if (fileStatus != FileStatus.Identical)
-            changedFiles.add(remoteFile);
+        // If ignored file, just return
+        if (isIgnoreFile(remoteFile))
+            return;
 
-        // If file is directory, recurse for child files
-        if (remoteFile.isDir() && !isIgnoreFile(remoteFile)) {
+        // Handle file: If file status is Added/Updated/Removed, add file
+        if (remoteFile.isFile()) {
+            FileStatus fileStatus = calcFileStatusForOtherSite(remoteFile, getLocalSite());
+            if (fileStatus != FileStatus.Identical)
+                changedFiles.add(remoteFile);
+        }
+
+        // Handle directory: recurse for child files
+        else {
 
             // Recurse for child files
             WebFile[] childFiles = remoteFile.getFiles();
@@ -517,7 +502,7 @@ public class VersionControl {
             return fileStatus;
 
         // Determine status, cache and return
-        fileStatus = getFileStatus(aFile, true);
+        fileStatus = calcFileStatusForOtherSite(aFile, getRemoteSite());
         _filesStatusCache.put(aFile, fileStatus);
         return fileStatus;
     }
@@ -525,7 +510,7 @@ public class VersionControl {
     /**
      * Returns the status for a given remote file info.
      */
-    protected FileStatus getFileStatus(WebFile aFile, boolean isDeep)
+    protected FileStatus calcFileStatusForOtherSite(WebFile aFile, WebSite otherSite)
     {
         // If no remote site or is ignore file, just return
         if (!isAvailable())
@@ -535,13 +520,9 @@ public class VersionControl {
 
         // If directory, iterate over child files and if any ChangedLocal, return ChangedLocal, otherwise return Identical
         if (aFile.isDir()) {
-            if (isDeep) {
-                WebFile[] childFiles = aFile.getFiles();
-                for (WebFile childFile : childFiles) {
-                    if (isFileModified(childFile))
-                        return FileStatus.Modified;
-                }
-            }
+            WebFile[] childFiles = aFile.getFiles();
+            if (ArrayUtils.hasMatch(childFiles, file -> isFileModified(file)))
+                return FileStatus.Modified;
             return FileStatus.Identical;
         }
 
@@ -549,61 +530,19 @@ public class VersionControl {
         if (!aFile.getExists())
             return FileStatus.Removed;
 
-        // Get RemoteFile - if not found, return Status.Added
-        WebFile remoteFile = getRemoteFile(aFile.getPath(), false, false);
-        if (remoteFile == null)
+        // Get file from other site
+        WebFile otherFile = otherSite.getFileForPath(aFile.getPath());
+        if (otherFile == null)
             return FileStatus.Added;
 
-        // Check modified times match, or bytes match, return identical
-        long remoteModTime = remoteFile.getLastModTime();
+        // If modified times match, return identical
         long localModTime = aFile.getLastModTime();
-        if (localModTime == remoteModTime)
-            return FileStatus.Identical;
-        if (aFile.isFile() && remoteFile.isFile() && ArrayUtils.equals(aFile.getBytes(), remoteFile.getBytes()))
-            return FileStatus.Identical;
-
-        // Return Modified
-        return FileStatus.Modified;
-    }
-
-    /**
-     * Returns the status for a given remote file info.
-     */
-    protected FileStatus getFileStatusAlt(WebFile remoteFile, boolean isDeep)
-    {
-        // If no remote site or is ignore file, just return
-        if (!isAvailable())
-            return FileStatus.Identical;
-        if (isIgnoreFile(remoteFile))
+        long otherModTime = otherFile.getLastModTime();
+        if (localModTime == otherModTime)
             return FileStatus.Identical;
 
-        // If directory, iterate over child files and if any ChangedLocal, return ChangedLocal, otherwise return Identical
-        if (remoteFile.isDir()) {
-            if (isDeep) {
-                WebFile[] childFiles = remoteFile.getFiles();
-                for (WebFile childFile : childFiles) {
-                    if (isFileModified(childFile))
-                        return FileStatus.Modified;
-                }
-            }
-            return FileStatus.Identical;
-        }
-
-        // If file doesn't exist, return removed
-        if (!remoteFile.getExists())
-            return FileStatus.Removed;
-
-        // Get RemoteFile - if not found, return Status.Added
-        WebFile localFile = getLocalFile(remoteFile.getPath(), false);
-        if (localFile == null)
-            return FileStatus.Added;
-
-        // Check modified times match, or bytes match, return identical
-        long remoteModTime = localFile.getLastModTime();
-        long localModTime = remoteFile.getLastModTime();
-        if (localModTime == remoteModTime)
-            return FileStatus.Identical;
-        if (remoteFile.isFile() && localFile.isFile() && ArrayUtils.equals(remoteFile.getBytes(), localFile.getBytes()))
+        // If bytes match, return identical
+        if (ArrayUtils.equals(aFile.getBytes(), otherFile.getBytes()))
             return FileStatus.Identical;
 
         // Return Modified
@@ -611,22 +550,20 @@ public class VersionControl {
     }
 
     /**
-     * Returns the file VersionControl status.
+     * Clears the file status of given file.
      */
-    public void setFileStatus(WebFile aFile, FileStatus aFileStatus)
+    private synchronized void clearFileStatus(WebFile aFile)
     {
-        // Set new status, get old
-        FileStatus old;
-        synchronized (this) {
-            old = _filesStatusCache.put(aFile, aFileStatus);
-        }
+        // Clear status, get old
+        FileStatus oldStatus = _filesStatusCache.remove(aFile);
 
         // If parent, clear Parent.Status
-        if (aFile.getParent() != null)
-            setFileStatus(aFile.getParent(), null);
+        WebFile parentFie = aFile.getParent();
+        if (parentFie != null)
+            clearFileStatus(parentFie);
 
         // Fire PropChange
-        firePropChange(new PropChange(aFile, FileStatus_Prop, old, aFileStatus));
+        firePropChange(new PropChange(aFile, FileStatus_Prop, oldStatus, null));
     }
 
     /**
@@ -659,7 +596,7 @@ public class VersionControl {
      */
     public void fileRemoved(WebFile aFile)
     {
-        setFileStatus(aFile, null);
+        clearFileStatus(aFile);
     }
 
     /**
@@ -667,7 +604,7 @@ public class VersionControl {
      */
     public void fileSaved(WebFile aFile)
     {
-        setFileStatus(aFile, null);
+        clearFileStatus(aFile);
     }
 
     /**

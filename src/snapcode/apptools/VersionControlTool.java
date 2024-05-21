@@ -309,7 +309,7 @@ public class VersionControlTool extends ProjectTool {
             rootFiles = getSiteRootDirAsList();
 
         // Get commit files for root files
-        List<WebFile> commitFiles = _versionControl.getCommitFilesForRootFiles(rootFiles);
+        List<WebFile> commitFiles = _versionControl.getReplaceFilesForRootFiles(rootFiles);
 
         // Run VersionControlFilesPane for files and op
         VcsTransferPane transferPane = new VcsTransferPane();
