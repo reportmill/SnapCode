@@ -218,7 +218,7 @@ public class VersionControlTool extends ProjectTool {
         List<WebFile> updateFiles = _versionControl.getUpdateFilesForRootFiles(rootFiles);
 
         // Run VcsTransferPane for files and op to confirm
-        if (!new VcsTransferPane().showPanel(this, updateFiles, VersionControl.Op.Update))
+        if (!new VcsTransferPane().showPanel(this, updateFiles, VcsTransferPane.Op.Update))
             return;
 
         // Disable workspace AutoBuild
@@ -279,7 +279,7 @@ public class VersionControlTool extends ProjectTool {
         List<WebFile> replaceFiles = _versionControl.getReplaceFilesForRootFiles(rootFiles);
 
         // Run VcsTransferPane for files and op
-        if (!new VcsTransferPane().showPanel(this, replaceFiles, VersionControl.Op.Replace))
+        if (!new VcsTransferPane().showPanel(this, replaceFiles, VcsTransferPane.Op.Replace))
             return;
 
         // Disable workspace AutoBuild
@@ -313,7 +313,7 @@ public class VersionControlTool extends ProjectTool {
 
         // Run VersionControlFilesPane for files and op
         VcsTransferPane transferPane = new VcsTransferPane();
-        if (!transferPane.showPanel(this, commitFiles, VersionControl.Op.Commit))
+        if (!transferPane.showPanel(this, commitFiles, VcsTransferPane.Op.Commit))
             return;
 
         // Do real commit

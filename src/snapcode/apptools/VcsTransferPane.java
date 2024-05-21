@@ -1,7 +1,6 @@
 package snapcode.apptools;
 import snap.geom.Pos;
 import snap.gfx.Image;
-import snapcode.project.VersionControl.Op;
 import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.web.WebFile;
@@ -25,13 +24,16 @@ public class VcsTransferPane extends ViewOwner {
     // The commit message (if commit)
     private String  _commitMsg;
 
+    // Constants for Synchronization operations
+    public enum Op { Update, Replace, Commit }
+
     // Images
-    static Image AddedLocalBadge = Image.getImageForClassResource(VcsTransferPane.class, "AddedLocalBadge.png");
-    static Image RemovedLocalBadge = Image.getImageForClassResource(VcsTransferPane.class, "RemovedLocalBadge.png");
-    static Image UpdatedLocalBadge = Image.getImageForClassResource(VcsTransferPane.class, "UpdatedLocalBadge.png");
-    static Image AddedRemoteBadge = Image.getImageForClassResource(VcsTransferPane.class, "AddedRemoteBadge.png");
-    static Image RemovedRemoteBadge = Image.getImageForClassResource(VcsTransferPane.class, "RemovedRemoteBadge.png");
-    static Image UpdatedRemoteBadge = Image.getImageForClassResource(VcsTransferPane.class, "UpdatedRemoteBadge.png");
+    private static Image AddedLocalBadge = Image.getImageForClassResource(VcsTransferPane.class, "AddedLocalBadge.png");
+    private static Image RemovedLocalBadge = Image.getImageForClassResource(VcsTransferPane.class, "RemovedLocalBadge.png");
+    private static Image UpdatedLocalBadge = Image.getImageForClassResource(VcsTransferPane.class, "UpdatedLocalBadge.png");
+    private static Image AddedRemoteBadge = Image.getImageForClassResource(VcsTransferPane.class, "AddedRemoteBadge.png");
+    private static Image RemovedRemoteBadge = Image.getImageForClassResource(VcsTransferPane.class, "RemovedRemoteBadge.png");
+    private static Image UpdatedRemoteBadge = Image.getImageForClassResource(VcsTransferPane.class, "UpdatedRemoteBadge.png");
 
     /**
      * Constructor.

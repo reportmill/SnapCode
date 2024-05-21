@@ -40,9 +40,6 @@ public class VersionControl {
     // The PropChangeSupport
     private PropChangeSupport _pcs = PropChangeSupport.EMPTY;
 
-    // Constants for Synchronization operations
-    public enum Op { Update, Replace, Commit }
-
     // Constants for the state of files relative to remote cache
     public enum FileStatus { Added, Removed, Modified, Identical }
 
