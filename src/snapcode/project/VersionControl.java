@@ -115,6 +115,8 @@ public class VersionControl {
      */
     private boolean checkoutImpl(TaskMonitor taskMonitor)
     {
+        if (!isAvailable()) { System.err.println("VersionControl.checkout: Remote not available"); return false; }
+
         // Try basic checkout
         try { return checkoutImpl2(taskMonitor); }
 
@@ -326,20 +328,17 @@ public class VersionControl {
         boolean completed = true;
 
         // Iterate over files
-        for (WebFile file : localFiles) {
+        for (WebFile localFile : localFiles) {
 
             // Update monitor task message
-            taskMonitor.beginTask("Committing " + file.getPath(), -1);
-            if (taskMonitor.isCancelled())
+            taskMonitor.beginTask("Committing " + localFile.getPath(), -1);
+            if (taskMonitor.isCancelled()) {
+                completed = false;
                 break;
-
-            try { commitFile(file); }
-            catch (AccessException e) {
-                ClientUtils.setAccess(e.getSite());
-                commitFile(file);
             }
 
-            // Close task
+            // Commit file and end task
+            commitFile(localFile);
             taskMonitor.endTask();
         }
 
@@ -375,46 +374,21 @@ public class VersionControl {
     }
 
     /**
-     * Returns the changed files for given root files and version control operation.
+     * Returns the local files that need to be updated from remote for given root files.
      */
-    public List<WebFile> getChangedFilesForRootFiles(List<WebFile> rootFiles, VersionControl.Op operation)
+    public List<WebFile> getUpdateFilesForRootFiles(List<WebFile> rootFiles)
     {
-        List<WebFile> changedFiles = new ArrayList<>();
-
-        try {
-            for (WebFile file : rootFiles) {
-                switch (operation) {
-                    case Update: findUpdateFiles(file, changedFiles); break;
-                    case Replace: findReplaceFiles(file, changedFiles); break;
-                    case Commit: findCommitFiles(file, changedFiles); break;
-                }
-            }
-        }
-
-        // Handle AccessException:
-        catch (AccessException e) {
-            if (ClientUtils.setAccess(e.getSite()))
-                return getChangedFilesForRootFiles(rootFiles, operation);
-            throw e;
-        }
-
-        // Handle Exception
-        /*catch (Exception e) { DialogBox dialogBox = new DialogBox("Disconnect Error");
-            dialogBox.setErrorMessage(e.toString()); dialogBox.showMessageDialog(_workspacePane.getUI()); }*/
-
-        // Sort and return
-        Collections.sort(changedFiles);
-        return changedFiles;
+        List<WebFile> updateFiles = new ArrayList<>();
+        rootFiles.forEach(rootFile -> findUpdateFiles(rootFile, updateFiles));
+        Collections.sort(updateFiles);
+        return updateFiles;
     }
 
     /**
-     * Returns the local files for given file or directory that need to be updated.
+     * Finds the local files for given file or directory that need to be updated.
      */
     private void findUpdateFiles(WebFile aFile, List<WebFile> updateFiles)
     {
-        // If no remote site, just return
-        if (!isAvailable()) return;
-
         // Get remote file for given file
         WebFile remoteFile = getRemoteFile(aFile.getPath(), true, aFile.isDir());
 
@@ -430,13 +404,21 @@ public class VersionControl {
     }
 
     /**
+     * Returns the local files that need to be replaced from remote for given root files.
+     */
+    public List<WebFile> getReplaceFilesForRootFiles(List<WebFile> rootFiles)
+    {
+        List<WebFile> replaceFiles = new ArrayList<>();
+        rootFiles.forEach(rootFile -> findReplaceFiles(rootFile, replaceFiles));
+        Collections.sort(replaceFiles);
+        return replaceFiles;
+    }
+
+    /**
      * Returns the local files for given file or directory that need to be replaced.
      */
     private void findReplaceFiles(WebFile aFile, List<WebFile> replaceFiles)
     {
-        // If no remote site, just return
-        if (!isAvailable()) return;
-
         // Find local changed files and add to replace files list
         Set<WebFile> changedFiles = new HashSet<>();
         findChangedFiles(aFile, changedFiles);
@@ -444,13 +426,21 @@ public class VersionControl {
     }
 
     /**
+     * Returns the local files that need to be committed to remote for given root files.
+     */
+    public List<WebFile> getCommitFilesForRootFiles(List<WebFile> rootFiles)
+    {
+        List<WebFile> commitFiles = new ArrayList<>();
+        rootFiles.forEach(rootFile -> findCommitFiles(rootFile, commitFiles));
+        Collections.sort(commitFiles);
+        return commitFiles;
+    }
+
+    /**
      * Returns the files that need to be committed to server.
      */
     private void findCommitFiles(WebFile aFile, List<WebFile> commitFiles)
     {
-        // If no remote site, just return
-        if (!isAvailable()) return;
-
         // Find local changed files and add to commit files list
         Set<WebFile> changedFiles = new HashSet<>();
         findChangedFiles(aFile, changedFiles);
