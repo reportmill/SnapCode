@@ -354,31 +354,19 @@ public class VersionControl {
     }
 
     /**
-     * Returns the local files that need to be replaced from remote for given root files.
+     * Returns the local files that have been modified from remote for given root files.
      */
-    public List<WebFile> getReplaceFilesForRootFiles(List<WebFile> rootFiles)
+    public List<WebFile> getModifiedFilesForRootFiles(List<WebFile> rootFiles)
     {
-        List<WebFile> replaceFiles = new ArrayList<>();
-        rootFiles.forEach(rootFile -> findReplaceFiles(rootFile, replaceFiles));
-        Collections.sort(replaceFiles);
-        return replaceFiles;
+        Set<WebFile> modifiedFiles = new TreeSet<>();
+        rootFiles.forEach(rootFile -> findModifiedFiles(rootFile, modifiedFiles));
+        return new ArrayList<>(modifiedFiles);
     }
 
     /**
-     * Returns the local files for given file or directory that need to be replaced.
+     * Finds the local files that have been modified from remote for given root files.
      */
-    private void findReplaceFiles(WebFile aFile, List<WebFile> replaceFiles)
-    {
-        // Find local changed files and add to replace files list
-        Set<WebFile> changedFiles = new HashSet<>();
-        findChangedFiles(aFile, changedFiles);
-        replaceFiles.addAll(changedFiles);
-    }
-
-    /**
-     * Returns the files that changed from last checkout.
-     */
-    private void findChangedFiles(WebFile aFile, Set<WebFile> changedFiles)
+    private void findModifiedFiles(WebFile aFile, Set<WebFile> modifiedFiles)
     {
         // If ignored file, just return
         if (isIgnoreFile(aFile))
@@ -388,7 +376,7 @@ public class VersionControl {
         if (aFile.isFile()) {
             FileStatus fileStatus = calcFileStatusForOtherSite(aFile, getRemoteSite());
             if (fileStatus != FileStatus.Identical)
-                changedFiles.add(aFile);
+                modifiedFiles.add(aFile);
         }
 
         // Handle directory: recurse for child files
@@ -397,7 +385,7 @@ public class VersionControl {
             // Recurse for child files
             WebFile[] childFiles = aFile.getFiles();
             for (WebFile file : childFiles)
-                findChangedFiles(file, changedFiles);
+                findModifiedFiles(file, modifiedFiles);
 
             // Add missing files
             WebSite fileSite = aFile.getSite();
@@ -410,7 +398,7 @@ public class VersionControl {
                     WebFile otherChildFile = fileSite.getFileForPath(remoteChildFile.getPath());
                     if (otherChildFile == null) {
                         otherChildFile = fileSite.createFileForPath(remoteChildFile.getPath(), remoteChildFile.isDir());
-                        findChangedFiles(otherChildFile, changedFiles);
+                        findModifiedFiles(otherChildFile, modifiedFiles);
                     }
                 }
             }
@@ -456,30 +444,6 @@ public class VersionControl {
                 }
             }
         }
-    }
-
-    /**
-     * Returns the site file for path.
-     */
-    private WebFile getLocalFile(String filePath, boolean isDir)
-    {
-        WebSite localSite = getLocalSite(); if (localSite == null) return null;
-        WebFile localFile = localSite.getFileForPath(filePath);
-        if (localFile == null)
-            localFile = localSite.createFileForPath(filePath, isDir);
-        return localFile;
-    }
-
-    /**
-     * Returns the remote file for path.
-     */
-    public WebFile getRemoteFile(String filePath, boolean doCreate, boolean isDir)
-    {
-        WebSite remoteSite = getRemoteSite(); if (remoteSite == null) return null;
-        WebFile remoteFile = remoteSite.getFileForPath(filePath);
-        if (remoteFile == null && doCreate)
-            remoteFile = remoteSite.createFileForPath(filePath, isDir);
-        return remoteFile;
     }
 
     /**
@@ -585,6 +549,30 @@ public class VersionControl {
      * Delete VCS support files from site directory.
      */
     public void disconnect(TaskMonitor taskMonitor) throws Exception  { }
+
+    /**
+     * Returns the site file for path.
+     */
+    private WebFile getLocalFile(String filePath, boolean isDir)
+    {
+        WebSite localSite = getLocalSite(); if (localSite == null) return null;
+        WebFile localFile = localSite.getFileForPath(filePath);
+        if (localFile == null)
+            localFile = localSite.createFileForPath(filePath, isDir);
+        return localFile;
+    }
+
+    /**
+     * Returns the remote file for path.
+     */
+    private WebFile getRemoteFile(String filePath, boolean doCreate, boolean isDir)
+    {
+        WebSite remoteSite = getRemoteSite(); if (remoteSite == null) return null;
+        WebFile remoteFile = remoteSite.getFileForPath(filePath);
+        if (remoteFile == null && doCreate)
+            remoteFile = remoteSite.createFileForPath(filePath, isDir);
+        return remoteFile;
+    }
 
     /**
      * Called when file added.

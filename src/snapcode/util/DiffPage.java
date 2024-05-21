@@ -1,5 +1,6 @@
 package snapcode.util;
 import snap.text.TextBlock;
+import snap.web.WebSite;
 import snapcode.project.JavaTextDoc;
 import snapcode.javatext.JavaTextArea;
 import snap.geom.Rect;
@@ -129,7 +130,8 @@ public class DiffPage extends WebPage {
     {
         WebFile localFile = getLocalFile();
         VersionControl versionControl = VersionControl.getVersionControlForProjectSite(localFile.getSite());
-        return versionControl.getRemoteFile(localFile.getPath(), false, false);
+        WebSite remoteSite = versionControl.getRemoteSite();
+        return remoteSite.getFileForPath(localFile.getPath());
     }
 
     /**

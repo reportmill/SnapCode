@@ -4,6 +4,8 @@ import snap.gfx.Image;
 import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.web.WebFile;
+import snap.web.WebSite;
+import snapcode.project.VersionControl;
 import snapcode.util.FileIcons;
 import java.util.List;
 
@@ -148,7 +150,9 @@ public class VcsTransferPane extends ViewOwner {
      */
     protected View getFileGraphic(WebFile aFile)
     {
-        WebFile remoteFile = _versionControlTool.getVC().getRemoteFile(aFile.getPath(), false, false);
+        VersionControl versionControl = _versionControlTool.getVC();
+        WebSite remoteSite = versionControl.getRemoteSite();
+        WebFile remoteFile = remoteSite.getFileForPath(aFile.getPath());
         Image badge = null;
 
         // Handle missing LocalFile, missing RemoteFile or Update
