@@ -6,6 +6,7 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
 import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.util.TaskRunner;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
@@ -114,8 +115,7 @@ public class VersionControl {
         // Find all files to update
         WebSite localSite = getLocalSite();
         WebFile localSiteRootDir = localSite.getRootDir();
-        List<WebFile> updateFiles = new ArrayList<>();
-        findUpdateFiles(localSiteRootDir, updateFiles);
+        List<WebFile> updateFiles = getUpdateFilesForRootFiles(Collections.singletonList(localSiteRootDir));
 
         // Update files
         return updateFilesImpl(updateFiles, taskMonitor);
@@ -141,25 +141,18 @@ public class VersionControl {
     {
         // Call TaskMonitor.startTasks
         taskMonitor.startTasks(localFiles.size());
-        boolean completed = true;
 
         // Iterate over files and update each
         for (WebFile localFile : localFiles) {
-
-            // Update monitor task message
             taskMonitor.beginTask("Updating " + localFile.getPath(), -1);
-            if (taskMonitor.isCancelled()) {
-                completed = false;
-                break;
-            }
-
-            // Update file and close task
             updateFile(localFile);
             taskMonitor.endTask();
+            if (taskMonitor.isCancelled())
+                break;
         }
 
         // Return
-        return completed;
+        return !taskMonitor.isCancelled();
     }
 
     /**
@@ -170,7 +163,7 @@ public class VersionControl {
         // Get RemoteFile
         String filePath = localFile.getPath();
         boolean isDir = localFile.isDir();
-        WebFile remoteFile = getRemoteFile(filePath, true, isDir);
+        WebFile remoteFile = getRemoteFile(filePath, true, isDir); assert (remoteFile != null);
 
         // Set new file bytes and save
         if (remoteFile.getExists()) {
@@ -210,25 +203,18 @@ public class VersionControl {
     {
         // Call TaskMonitor.startTasks
         taskMonitor.startTasks(localFiles.size());
-        boolean completed = true;
 
-        // Iterate over files
+        // Iterate over files and replace each
         for (WebFile file : localFiles) {
-
-            // Update monitor task message
-            taskMonitor.beginTask("Updating " + file.getPath(), -1);
-            if (taskMonitor.isCancelled()) {
-                completed = false;
-                break;
-            }
-
-            // Replace file and close task
+            taskMonitor.beginTask("Replacing " + file.getPath(), -1);
             replaceFile(file);
             taskMonitor.endTask();
+            if (taskMonitor.isCancelled())
+                break;
         }
 
         // Return
-        return completed;
+        return !taskMonitor.isCancelled();
     }
 
     /**
@@ -276,25 +262,18 @@ public class VersionControl {
     {
         // Call TaskMonitor.startTasks
         taskMonitor.startTasks(localFiles.size());
-        boolean completed = true;
 
-        // Iterate over files
+        // Iterate over files and commit each
         for (WebFile localFile : localFiles) {
-
-            // Update monitor task message
             taskMonitor.beginTask("Committing " + localFile.getPath(), -1);
-            if (taskMonitor.isCancelled()) {
-                completed = false;
-                break;
-            }
-
-            // Commit file and end task
             commitFile(localFile);
             taskMonitor.endTask();
+            if (taskMonitor.isCancelled())
+                break;
         }
 
         // Return
-        return completed;
+        return !taskMonitor.isCancelled();
     }
 
     /**
@@ -305,7 +284,7 @@ public class VersionControl {
         // Get RemoteFile
         String filePath = localFile.getPath();
         boolean isDir = localFile.isDir();
-        WebFile remoteFile = getRemoteFile(filePath, true, isDir);
+        WebFile remoteFile = getRemoteFile(filePath, true, isDir); assert (remoteFile != null);
 
         // If LocalFile exists, save LocalFile bytes to RemoteFile
         if (localFile.getExists()) {
@@ -328,29 +307,17 @@ public class VersionControl {
      */
     public List<WebFile> getUpdateFilesForRootFiles(List<WebFile> rootFiles)
     {
-        List<WebFile> updateFiles = new ArrayList<>();
-        rootFiles.forEach(rootFile -> findUpdateFiles(rootFile, updateFiles));
-        Collections.sort(updateFiles);
-        return updateFiles;
-    }
+        // Map root files to remote files
+        List<WebFile> remoteRootFiles = ListUtils.map(rootFiles, file -> getRemoteFile(file.getPath(), true, file.isDir()));
 
-    /**
-     * Finds the local files for given file or directory that need to be updated.
-     */
-    private void findUpdateFiles(WebFile aFile, List<WebFile> updateFiles)
-    {
-        // Get remote file for given file
-        WebFile remoteFile = getRemoteFile(aFile.getPath(), true, aFile.isDir());
+        // Get remote modified files
+        WebSite otherSite = getLocalSite();
+        Set<WebFile> modifiedFilesSet = new TreeSet<>();
+        remoteRootFiles.forEach(rootFile -> findModifiedFiles(rootFile, otherSite, modifiedFilesSet));
+        List<WebFile> modifiedFiles = new ArrayList<>(modifiedFilesSet);
 
-        // Get remote changed files (update files)
-        Set<WebFile> changedFiles = new HashSet<>();
-        findChangedFilesAlt(remoteFile, changedFiles);
-
-        // Add local versions to list
-        for (WebFile changedFile : changedFiles) {
-            WebFile localFile = getLocalFile(changedFile.getPath(), changedFile.isDir());
-            updateFiles.add(localFile);
-        }
+        // map remote modified files to local
+        return ListUtils.map(modifiedFiles, file -> getLocalFile(file.getPath(), file.isDir()));
     }
 
     /**
@@ -358,15 +325,16 @@ public class VersionControl {
      */
     public List<WebFile> getModifiedFilesForRootFiles(List<WebFile> rootFiles)
     {
+        WebSite remoteSite = getRemoteSite();
         Set<WebFile> modifiedFiles = new TreeSet<>();
-        rootFiles.forEach(rootFile -> findModifiedFiles(rootFile, modifiedFiles));
+        rootFiles.forEach(rootFile -> findModifiedFiles(rootFile, remoteSite, modifiedFiles));
         return new ArrayList<>(modifiedFiles);
     }
 
     /**
      * Finds the local files that have been modified from remote for given root files.
      */
-    private void findModifiedFiles(WebFile aFile, Set<WebFile> modifiedFiles)
+    private void findModifiedFiles(WebFile aFile, WebSite otherSite, Set<WebFile> modifiedFiles)
     {
         // If ignored file, just return
         if (isIgnoreFile(aFile))
@@ -374,75 +342,46 @@ public class VersionControl {
 
         // Handle file: If file status is Added/Updated/Removed, add file
         if (aFile.isFile()) {
-            FileStatus fileStatus = calcFileStatusForOtherSite(aFile, getRemoteSite());
+            FileStatus fileStatus = calcFileStatusForOtherSite(aFile, otherSite);
             if (fileStatus != FileStatus.Identical)
                 modifiedFiles.add(aFile);
+            return;
         }
 
-        // Handle directory: recurse for child files
-        else {
+        // Handle directory: Recurse for child files
+        WebFile[] childFiles = aFile.getFiles();
+        for (WebFile childFile : childFiles)
+            findModifiedFiles(childFile, otherSite, modifiedFiles);
 
-            // Recurse for child files
-            WebFile[] childFiles = aFile.getFiles();
-            for (WebFile file : childFiles)
-                findModifiedFiles(file, modifiedFiles);
-
-            // Add missing files
-            WebSite fileSite = aFile.getSite();
-            WebFile remoteFile = getRemoteFile(aFile.getPath(), false, false);
-            if (remoteFile != null) {
-
-                // Iterate over child files and recurse for missing files
-                WebFile[] remoteChildFiles = remoteFile.getFiles();
-                for (WebFile remoteChildFile : remoteChildFiles) {
-                    WebFile otherChildFile = fileSite.getFileForPath(remoteChildFile.getPath());
-                    if (otherChildFile == null) {
-                        otherChildFile = fileSite.createFileForPath(remoteChildFile.getPath(), remoteChildFile.isDir());
-                        findModifiedFiles(otherChildFile, modifiedFiles);
-                    }
-                }
-            }
-        }
+        // Find files that exist in other site that are missing from given file site
+        findMissingFiles(aFile, otherSite, modifiedFiles);
     }
 
     /**
-     * Returns the files that changed from last checkout.
+     * Looks for given directory file in other site, and looks for files in other site that are missing in dir file site.
      */
-    private void findChangedFilesAlt(WebFile remoteFile, Set<WebFile> changedFiles)
+    private void findMissingFiles(WebFile dirFile, WebSite otherSite, Set<WebFile> modifiedFiles)
     {
-        // If ignored file, just return
-        if (isIgnoreFile(remoteFile))
+        // Get other dir file - just return if missing
+        WebFile otherDir = otherSite.getFileForPath(dirFile.getPath());
+        if (otherDir == null)
             return;
 
-        // Handle file: If file status is Added/Updated/Removed, add file
-        if (remoteFile.isFile()) {
-            FileStatus fileStatus = calcFileStatusForOtherSite(remoteFile, getLocalSite());
-            if (fileStatus != FileStatus.Identical)
-                changedFiles.add(remoteFile);
-        }
+        // Iterate over child files and recurse for missing files
+        WebFile[] otherDirChildFiles = otherDir.getFiles();
+        WebSite fileSite = dirFile.getSite();
 
-        // Handle directory: recurse for child files
-        else {
+        // Iterate over child files and recurse for missing files
+        for (WebFile otherChildFile : otherDirChildFiles) {
 
-            // Recurse for child files
-            WebFile[] childFiles = remoteFile.getFiles();
-            for (WebFile file : childFiles)
-                findChangedFilesAlt(file, changedFiles);
+            // If matching dir child file exists, just skip
+            WebFile dirChildFile = fileSite.getFileForPath(otherChildFile.getPath());
+            if (dirChildFile != null)
+                continue;
 
-            // Add missing files
-            WebFile localFile = getLocalFile(remoteFile.getPath(),false);
-            if (localFile != null) {
-
-                // Iterate over child files and recurse for missing files
-                WebFile[] localChildFiles = localFile.getFiles();
-                for (WebFile localChildFile : localChildFiles) {
-                    WebFile remoteChildFile = getRemoteFile(localChildFile.getPath(), false, localChildFile.isDir());
-                    if (remoteChildFile == null) {
-                        remoteChildFile = getRemoteFile(localChildFile.getPath(), true, localChildFile.isDir());
-                        findChangedFilesAlt(remoteChildFile, changedFiles);
-                    }
-                }
-            }
+            // Create dir child file and recurse into findModifiedFiles
+            dirChildFile = fileSite.createFileForPath(otherChildFile.getPath(), otherChildFile.isDir());
+            findModifiedFiles(dirChildFile, otherSite, modifiedFiles);
         }
     }
 
