@@ -28,9 +28,6 @@ public class VersionControl {
     // The remote site URL
     protected WebURL _remoteSiteUrl;
 
-    // The clone site
-    private WebSite _cloneSite;
-
     // The remote site
     private WebSite _remoteSite;
 
@@ -78,24 +75,6 @@ public class VersionControl {
      * Returns the remote site URL address string.
      */
     public String getRemoteSiteUrlAddress()  { return _remoteSiteUrl != null ? _remoteSiteUrl.getString() : null; }
-
-    /**
-     * Returns the local cache site of remote site.
-     */
-    public WebSite getCloneSite()
-    {
-        if (_cloneSite != null) return _cloneSite;
-
-        // Get clone site (via clone dir and url)
-        WebSite localSite = getLocalSite();
-        WebSite sandboxSite = localSite.getSandboxSite();
-        WebFile cloneDir = sandboxSite.createFileForPath("Remote.clone", true);
-        WebURL cloneUrl = cloneDir.getURL();
-        WebSite cloneSite = cloneUrl.getAsSite();
-
-        // Set and return
-        return _cloneSite = cloneSite;
-    }
 
     /**
      * Returns the remote site (e.g. Git repository site, Zip file site, etc.).
@@ -225,11 +204,10 @@ public class VersionControl {
      */
     protected void updateFile(WebFile localFile)
     {
-        // Get RemoteFile and CloneFile
+        // Get RemoteFile
         String filePath = localFile.getPath();
         boolean isDir = localFile.isDir();
         WebFile remoteFile = getRemoteFile(filePath, true, isDir);
-        WebFile cloneFile = getCloneFile(filePath, true, isDir);
 
         // Set new file bytes and save
         if (remoteFile.getExists()) {
@@ -240,22 +218,14 @@ public class VersionControl {
             localFile.save();
             localFile.saveLastModTime(remoteFile.getLastModTime());
 
-            // Update clone file and save
-            if (cloneFile.isFile())
-                cloneFile.setBytes(remoteFile.getBytes());
-            cloneFile.save();
-            cloneFile.saveLastModTime(remoteFile.getLastModTime());
-
             // Update status
             setFileStatus(localFile, null);
         }
 
-        // Otherwise delete LocalFile and CloneFile
+        // Otherwise delete LocalFile
         else {
             if (localFile.getExists())
                 localFile.delete();
-            if (cloneFile.getExists())
-                cloneFile.delete();
             setFileStatus(localFile, null);
         }
     }
@@ -274,7 +244,7 @@ public class VersionControl {
     }
 
     /**
-     * Replaces (overwrites) local site files from clone site.
+     * Replaces (overwrites) local site files from remote site.
      */
     protected boolean replaceFilesImpl(List<WebFile> localFiles, TaskMonitor taskMonitor)
     {
@@ -308,23 +278,24 @@ public class VersionControl {
     }
 
     /**
-     * Replaces (overwrites) local site files from clone site.
+     * Replaces (overwrites) local site files from remote site.
      */
     protected void replaceFile(WebFile localFile)
     {
-        // Get CloneFile
-        WebFile cloneFile = getCloneFile(localFile.getPath(), true, localFile.isDir());
+        // Get RemoteFile
+        String filePath = localFile.getPath();
+        WebFile remoteFile = getRemoteFile(filePath, false, localFile.isDir());
 
         // Set new file bytes and save
-        if (cloneFile.getExists()) {
+        if (remoteFile != null) {
             if (localFile.isFile())
-                localFile.setBytes(cloneFile.getBytes());
+                localFile.setBytes(remoteFile.getBytes());
             localFile.save();
-            localFile.saveLastModTime(cloneFile.getLastModTime());
+            localFile.saveLastModTime(remoteFile.getLastModTime());
             setFileStatus(localFile, null);
         }
 
-        // Otherwise delete LocalFile and CloneFile
+        // Otherwise delete LocalFile
         else {
             if (localFile.getExists())
                 localFile.delete();
@@ -381,30 +352,23 @@ public class VersionControl {
      */
     protected void commitFile(WebFile localFile)
     {
-        // Get RemoteFile and CloneFile
+        // Get RemoteFile
         String filePath = localFile.getPath();
         boolean isDir = localFile.isDir();
         WebFile remoteFile = getRemoteFile(filePath, true, isDir);
-        WebFile cloneFile = getCloneFile(filePath, true, isDir);
 
-        // If LocalFile was deleted, delete RemoteFile and CloneFile
+        // If LocalFile was deleted, delete RemoteFile
         if (!localFile.getExists()) {
             if (remoteFile.getExists())
                 remoteFile.delete();
-            if (cloneFile.getExists())
-                cloneFile.delete();
             setFileStatus(localFile, null);
         }
 
-        // Otherwise save LocalFile bytes to RemoteFile and CloneFile
+        // Otherwise save LocalFile bytes to RemoteFile
         else {
             if (localFile.isFile())
                 remoteFile.setBytes(localFile.getBytes());
             remoteFile.save();
-            if (localFile.isFile())
-                cloneFile.setBytes(localFile.getBytes());
-            cloneFile.save();
-            cloneFile.saveLastModTime(remoteFile.getLastModTime());
             localFile.saveLastModTime(remoteFile.getLastModTime());
             setFileStatus(localFile, null);
         }
@@ -448,7 +412,7 @@ public class VersionControl {
      */
     private void findUpdateFiles(WebFile aFile, List<WebFile> updateFiles)
     {
-        // If no clone site, just return
+        // If no remote site, just return
         if (!isAvailable()) return;
 
         // Get remote file for given file
@@ -456,7 +420,7 @@ public class VersionControl {
 
         // Get remote changed files (update files)
         Set<WebFile> changedFiles = new HashSet<>();
-        findChangedFiles(remoteFile, changedFiles);
+        findChangedFilesAlt(remoteFile, changedFiles);
 
         // Add local versions to list
         for (WebFile changedFile : changedFiles) {
@@ -470,7 +434,7 @@ public class VersionControl {
      */
     private void findReplaceFiles(WebFile aFile, List<WebFile> replaceFiles)
     {
-        // If no clone site, just return
+        // If no remote site, just return
         if (!isAvailable()) return;
 
         // Find local changed files and add to replace files list
@@ -484,7 +448,7 @@ public class VersionControl {
      */
     private void findCommitFiles(WebFile aFile, List<WebFile> commitFiles)
     {
-        // If no clone site, just return
+        // If no remote site, just return
         if (!isAvailable()) return;
 
         // Find local changed files and add to commit files list
@@ -513,16 +477,51 @@ public class VersionControl {
 
             // Add missing files
             WebSite fileSite = aFile.getSite();
-            WebFile cloneFile = getCloneFile(aFile.getPath(), false, false);
-            if (cloneFile != null) {
+            WebFile remoteFile = getRemoteFile(aFile.getPath(), false, false);
+            if (remoteFile != null) {
 
                 // Iterate over child files and recurse for missing files
-                WebFile[] cloneChildFiles = cloneFile.getFiles();
-                for (WebFile cloneChildFile : cloneChildFiles) {
-                    WebFile otherChildFile = fileSite.getFileForPath(cloneChildFile.getPath());
+                WebFile[] remoteChildFiles = remoteFile.getFiles();
+                for (WebFile remoteChildFile : remoteChildFiles) {
+                    WebFile otherChildFile = fileSite.getFileForPath(remoteChildFile.getPath());
                     if (otherChildFile == null) {
-                        otherChildFile = fileSite.createFileForPath(cloneChildFile.getPath(), cloneChildFile.isDir());
+                        otherChildFile = fileSite.createFileForPath(remoteChildFile.getPath(), remoteChildFile.isDir());
                         findChangedFiles(otherChildFile, changedFiles);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns the files that changed from last checkout.
+     */
+    private void findChangedFilesAlt(WebFile remoteFile, Set<WebFile> changedFiles)
+    {
+        // If file status is Added/Updated/Removed, add file
+        FileStatus fileStatus = getFileStatusAlt(remoteFile, false);
+        if (fileStatus != FileStatus.Identical)
+            changedFiles.add(remoteFile);
+
+        // If file is directory, recurse for child files
+        if (remoteFile.isDir() && !isIgnoreFile(remoteFile)) {
+
+            // Recurse for child files
+            WebFile[] childFiles = remoteFile.getFiles();
+            for (WebFile file : childFiles)
+                findChangedFilesAlt(file, changedFiles);
+
+            // Add missing files
+            WebFile localFile = getLocalFile(remoteFile.getPath(),false);
+            if (localFile != null) {
+
+                // Iterate over child files and recurse for missing files
+                WebFile[] localChildFiles = localFile.getFiles();
+                for (WebFile localChildFile : localChildFiles) {
+                    WebFile remoteChildFile = getRemoteFile(localChildFile.getPath(), false, localChildFile.isDir());
+                    if (remoteChildFile == null) {
+                        remoteChildFile = getRemoteFile(localChildFile.getPath(), true, localChildFile.isDir());
+                        findChangedFilesAlt(remoteChildFile, changedFiles);
                     }
                 }
             }
@@ -539,18 +538,6 @@ public class VersionControl {
         if (localFile == null)
             localFile = localSite.createFileForPath(filePath, isDir);
         return localFile;
-    }
-
-    /**
-     * Returns the local cache file of given path.
-     */
-    public WebFile getCloneFile(String filePath, boolean doCreate, boolean isDir)
-    {
-        WebSite cloneSite = getCloneSite(); if (cloneSite == null) return null;
-        WebFile cloneFile = cloneSite.getFileForPath(filePath);
-        if (cloneFile == null && doCreate)
-            cloneFile = cloneSite.createFileForPath(filePath, isDir);
-        return cloneFile;
     }
 
     /**
@@ -595,7 +582,7 @@ public class VersionControl {
      */
     protected FileStatus getFileStatus(WebFile aFile, boolean isDeep)
     {
-        // If no clone site or is ignore file, just return
+        // If no remote site or is ignore file, just return
         if (!isAvailable())
             return FileStatus.Identical;
         if (isIgnoreFile(aFile))
@@ -617,17 +604,61 @@ public class VersionControl {
         if (!aFile.getExists())
             return FileStatus.Removed;
 
-        // Get CloneFile - if not found, return Status.Added
-        WebFile cloneFile = getCloneFile(aFile.getPath(), false, false);
-        if (cloneFile == null)
+        // Get RemoteFile - if not found, return Status.Added
+        WebFile remoteFile = getRemoteFile(aFile.getPath(), false, false);
+        if (remoteFile == null)
             return FileStatus.Added;
 
         // Check modified times match, or bytes match, return identical
-        long cloneModTime = cloneFile.getLastModTime();
+        long remoteModTime = remoteFile.getLastModTime();
         long localModTime = aFile.getLastModTime();
-        if (localModTime == cloneModTime)
+        if (localModTime == remoteModTime)
             return FileStatus.Identical;
-        if (aFile.isFile() && cloneFile.isFile() && ArrayUtils.equals(aFile.getBytes(), cloneFile.getBytes()))
+        if (aFile.isFile() && remoteFile.isFile() && ArrayUtils.equals(aFile.getBytes(), remoteFile.getBytes()))
+            return FileStatus.Identical;
+
+        // Return Modified
+        return FileStatus.Modified;
+    }
+
+    /**
+     * Returns the status for a given remote file info.
+     */
+    protected FileStatus getFileStatusAlt(WebFile remoteFile, boolean isDeep)
+    {
+        // If no remote site or is ignore file, just return
+        if (!isAvailable())
+            return FileStatus.Identical;
+        if (isIgnoreFile(remoteFile))
+            return FileStatus.Identical;
+
+        // If directory, iterate over child files and if any ChangedLocal, return ChangedLocal, otherwise return Identical
+        if (remoteFile.isDir()) {
+            if (isDeep) {
+                WebFile[] childFiles = remoteFile.getFiles();
+                for (WebFile childFile : childFiles) {
+                    if (isFileModified(childFile))
+                        return FileStatus.Modified;
+                }
+            }
+            return FileStatus.Identical;
+        }
+
+        // If file doesn't exist, return removed
+        if (!remoteFile.getExists())
+            return FileStatus.Removed;
+
+        // Get RemoteFile - if not found, return Status.Added
+        WebFile localFile = getLocalFile(remoteFile.getPath(), false);
+        if (localFile == null)
+            return FileStatus.Added;
+
+        // Check modified times match, or bytes match, return identical
+        long remoteModTime = localFile.getLastModTime();
+        long localModTime = remoteFile.getLastModTime();
+        if (localModTime == remoteModTime)
+            return FileStatus.Identical;
+        if (remoteFile.isFile() && localFile.isFile() && ArrayUtils.equals(remoteFile.getBytes(), localFile.getBytes()))
             return FileStatus.Identical;
 
         // Return Modified
@@ -671,12 +702,7 @@ public class VersionControl {
     /**
      * Delete VCS support files from site directory.
      */
-    public void disconnect(TaskMonitor taskMonitor) throws Exception
-    {
-        WebSite cloneSite = getCloneSite();
-        if (cloneSite != null)
-            cloneSite.deleteSite();
-    }
+    public void disconnect(TaskMonitor taskMonitor) throws Exception  { }
 
     /**
      * Called when file added.
