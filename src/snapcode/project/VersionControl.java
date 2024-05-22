@@ -159,9 +159,7 @@ public class VersionControl {
     protected void updateFile(WebFile localFile)
     {
         // Get RemoteFile
-        String filePath = localFile.getPath();
-        boolean isDir = localFile.isDir();
-        WebFile remoteFile = getRemoteFile(filePath, true, isDir); assert (remoteFile != null);
+        WebFile remoteFile = createRemoteFile(localFile);
 
         // Set new file bytes and save
         if (remoteFile.getExists()) {
@@ -221,7 +219,7 @@ public class VersionControl {
     {
         // Get RemoteFile
         String filePath = localFile.getPath();
-        WebFile remoteFile = getRemoteFile(filePath, false, localFile.isDir());
+        WebFile remoteFile = getRemoteFile(filePath);
 
         // Set new file bytes and save
         if (remoteFile != null) {
@@ -278,9 +276,7 @@ public class VersionControl {
     protected void commitFile(WebFile localFile)
     {
         // Get RemoteFile
-        String filePath = localFile.getPath();
-        boolean isDir = localFile.isDir();
-        WebFile remoteFile = getRemoteFile(filePath, true, isDir); assert (remoteFile != null);
+        WebFile remoteFile = createRemoteFile(localFile);
 
         // If LocalFile exists, save LocalFile bytes to RemoteFile
         if (localFile.getExists()) {
@@ -304,7 +300,7 @@ public class VersionControl {
     public List<WebFile> getUpdateFilesForRootFiles(List<WebFile> rootFiles)
     {
         // Map root files to remote files
-        List<WebFile> remoteRootFiles = ListUtils.map(rootFiles, file -> getRemoteFile(file.getPath(), true, file.isDir()));
+        List<WebFile> remoteRootFiles = ListUtils.map(rootFiles, file -> createRemoteFile(file));
 
         // Get remote modified files
         WebSite otherSite = getLocalSite();
@@ -313,7 +309,7 @@ public class VersionControl {
         List<WebFile> modifiedFiles = new ArrayList<>(modifiedFilesSet);
 
         // map remote modified files to local
-        return ListUtils.map(modifiedFiles, file -> getLocalFile(file.getPath(), file.isDir()));
+        return ListUtils.map(modifiedFiles, file -> createLocalFile(file));
     }
 
     /**
@@ -488,25 +484,28 @@ public class VersionControl {
     /**
      * Returns the site file for path.
      */
-    private WebFile getLocalFile(String filePath, boolean isDir)
+    private WebFile createLocalFile(WebFile aFile)
     {
-        WebSite localSite = getLocalSite(); if (localSite == null) return null;
-        WebFile localFile = localSite.getFileForPath(filePath);
-        if (localFile == null)
-            localFile = localSite.createFileForPath(filePath, isDir);
-        return localFile;
+        WebSite localSite = getLocalSite();
+        return localSite.createFileForPath(aFile.getPath(), aFile.isDir());
     }
 
     /**
      * Returns the remote file for path.
      */
-    private WebFile getRemoteFile(String filePath, boolean doCreate, boolean isDir)
+    private WebFile getRemoteFile(String filePath)
     {
         WebSite remoteSite = getRemoteSite(); if (remoteSite == null) return null;
-        WebFile remoteFile = remoteSite.getFileForPath(filePath);
-        if (remoteFile == null && doCreate)
-            remoteFile = remoteSite.createFileForPath(filePath, isDir);
-        return remoteFile;
+        return remoteSite.getFileForPath(filePath);
+    }
+
+    /**
+     * Returns the remote file for path.
+     */
+    private WebFile createRemoteFile(WebFile aFile)
+    {
+        WebSite remoteSite = getRemoteSite();
+        return remoteSite.createFileForPath(aFile.getPath(), aFile.isDir());
     }
 
     /**
