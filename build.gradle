@@ -33,6 +33,9 @@ dependencies {
     // Tools jar
     implementation files('lib/tools.jar')
 
+    // JGit
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:5.13.3.202401111512-r'
+
     // So we can get jars
     testImplementation project(':CJDom')
     testImplementation project(':SnapCJ')
