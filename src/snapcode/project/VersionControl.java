@@ -108,7 +108,7 @@ public class VersionControl {
     /**
      * Load remote files and VCS files into site directory.
      */
-    private boolean checkoutImpl(TaskMonitor taskMonitor)
+    protected boolean checkoutImpl(TaskMonitor taskMonitor)
     {
         if (!isAvailable()) { System.err.println("VersionControl.checkout: Remote not available"); return false; }
 
@@ -455,7 +455,7 @@ public class VersionControl {
     /**
      * Clears the file status of given file.
      */
-    private synchronized void clearFileStatus(WebFile aFile)
+    protected synchronized void clearFileStatus(WebFile aFile)
     {
         // Clear status, get old
         FileStatus oldStatus = _filesStatusCache.remove(aFile);

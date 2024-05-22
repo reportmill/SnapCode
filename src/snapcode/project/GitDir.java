@@ -953,7 +953,7 @@ public class GitDir {
     /**
      * Returns a ProgressMonitor for given TaskMonitor.
      */
-    private static ProgressMonitor getProgressMonitor(final TaskMonitor aTM)
+    public static ProgressMonitor getProgressMonitor(final TaskMonitor aTM)
     {
         return new ProgressMonitor() {
             public void update(int arg0)  { aTM.updateTask(arg0); }
