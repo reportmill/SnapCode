@@ -85,17 +85,11 @@ public class VersionControlGit extends VersionControl {
         return gitDir.getIndexSite();
     }
 
-    @Override
-    protected boolean checkoutImpl(TaskMonitor aTM)
-    {
-        try { return checkoutImpl2(aTM); }
-        catch (Exception e) { throw new RuntimeException(e); }
-    }
-
     /**
      * Load all remote files into project directory.
      */
-    protected boolean checkoutImpl2(TaskMonitor aTM) throws Exception
+    @Override
+    protected boolean checkoutImpl(TaskMonitor aTM) throws Exception
     {
         // Get SiteDir, CloneDir and RemoteURL
         File siteDir = getLocalSite().getRootDir().getJavaFile();
@@ -138,18 +132,15 @@ public class VersionControlGit extends VersionControl {
      * Override to do commit.
      */
     @Override
-    protected boolean commitFilesImpl(List<WebFile> theFiles, String aMessage, TaskMonitor aTM)
+    protected boolean commitFilesImpl(List<WebFile> theFiles, String aMessage, TaskMonitor aTM) throws Exception
     {
-        try {
-            GitDir gitDir = getGitDir();
-            gitDir.commitFiles(theFiles, aMessage);
-            gitDir.push(aTM);
+        GitDir gitDir = getGitDir();
+        gitDir.commitFiles(theFiles, aMessage);
+        gitDir.push(aTM);
 
-            // Clear file status
-            theFiles.forEach(this::clearFileStatus);
-            return true;
-        }
-        catch (Exception e) { throw new RuntimeException(e); }
+        // Clear file status
+        theFiles.forEach(this::clearFileStatus);
+        return true;
     }
 
     /**
@@ -173,43 +164,37 @@ public class VersionControlGit extends VersionControl {
      * Override to merge.
      */
     @Override
-    protected boolean updateFilesImpl(List<WebFile> theLocalFiles, TaskMonitor aTM)
+    protected boolean updateFilesImpl(List<WebFile> theLocalFiles, TaskMonitor aTM) throws Exception
     {
-        try {
-            GitDir gitDir = getGitDir();
-            gitDir.merge();
-            return true;
-        }
-        catch (Exception e) { throw new RuntimeException(e); }
+        GitDir gitDir = getGitDir();
+        gitDir.merge();
+        return true;
     }
 
     /**
      * Override for bogus implementation that copies clone back to local file.
      */
     @Override
-    protected void replaceFile(WebFile aLocalFile)
+    protected void replaceFile(WebFile aLocalFile) throws Exception
     {
-        try {
-            // Get CloneFile
-            WebSite cloneSite = getCloneSite();
-            WebFile cloneFile = cloneSite.getFileForPath(aLocalFile.getPath());
+        // Get CloneFile
+        WebSite cloneSite = getCloneSite();
+        WebFile cloneFile = cloneSite.getFileForPath(aLocalFile.getPath());
 
-            // Set new file bytes and save
-            if (cloneFile.getExists()) { //_project.removeBuildFile(aLocalFile);
-                if (aLocalFile.isFile())
-                    aLocalFile.setBytes(cloneFile.getBytes());
-                aLocalFile.save();
-                aLocalFile.saveLastModTime(cloneFile.getLastModTime());
-            }
-
-            // Otherwise delete LocalFile and CloneFile
-            else if (aLocalFile.getExists())
-                aLocalFile.delete();
-
-            // Clear file status
-            clearFileStatus(aLocalFile);
+        // Set new file bytes and save
+        if (cloneFile.getExists()) { //_project.removeBuildFile(aLocalFile);
+            if (aLocalFile.isFile())
+                aLocalFile.setBytes(cloneFile.getBytes());
+            aLocalFile.save();
+            aLocalFile.saveLastModTime(cloneFile.getLastModTime());
         }
-        catch (Exception e) { throw new RuntimeException(e); }
+
+        // Otherwise delete LocalFile and CloneFile
+        else if (aLocalFile.getExists())
+            aLocalFile.delete();
+
+        // Clear file status
+        clearFileStatus(aLocalFile);
     }
 
     /**

@@ -13,7 +13,6 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * This is a class to handle file synchronization for a local WebSite with a remote WebSite.
@@ -108,7 +107,7 @@ public class VersionControl {
     /**
      * Load remote files and VCS files into site directory.
      */
-    protected boolean checkoutImpl(TaskMonitor taskMonitor)
+    protected boolean checkoutImpl(TaskMonitor taskMonitor) throws Exception
     {
         if (!isAvailable()) { System.err.println("VersionControl.checkout: Remote not available"); return false; }
 
@@ -127,8 +126,7 @@ public class VersionControl {
     public TaskRunner<Boolean> updateFiles(List<WebFile> theFiles)
     {
         TaskMonitor taskMonitor = new TaskMonitor("Update files from remote site");
-        Supplier<Boolean> updateFunc = () -> updateFilesImpl(theFiles, taskMonitor);
-        TaskRunner<Boolean> taskRunner = new TaskRunner<>(updateFunc);
+        TaskRunner<Boolean> taskRunner = new TaskRunner<>(() -> updateFilesImpl(theFiles, taskMonitor));
         taskRunner.setMonitor(taskMonitor);
         taskRunner.start();
         return taskRunner;
@@ -137,7 +135,7 @@ public class VersionControl {
     /**
      * Updates (merges) local site files from remote site.
      */
-    protected boolean updateFilesImpl(List<WebFile> localFiles, TaskMonitor taskMonitor)
+    protected boolean updateFilesImpl(List<WebFile> localFiles, TaskMonitor taskMonitor) throws Exception
     {
         // Call TaskMonitor.startTasks
         taskMonitor.startTasks(localFiles.size());
@@ -189,8 +187,7 @@ public class VersionControl {
     public TaskRunner<Boolean> replaceFiles(List<WebFile> theFiles)
     {
         TaskMonitor taskMonitor = new TaskMonitor("Replace files from remote site");
-        Supplier<Boolean> replaceFunc = () -> replaceFilesImpl(theFiles, taskMonitor);
-        TaskRunner<Boolean> taskRunner = new TaskRunner<>(replaceFunc);
+        TaskRunner<Boolean> taskRunner = new TaskRunner<>(() -> replaceFilesImpl(theFiles, taskMonitor));
         taskRunner.setMonitor(taskMonitor);
         taskRunner.start();
         return taskRunner;
@@ -199,7 +196,7 @@ public class VersionControl {
     /**
      * Replaces (overwrites) local site files from remote site.
      */
-    protected boolean replaceFilesImpl(List<WebFile> localFiles, TaskMonitor taskMonitor)
+    protected boolean replaceFilesImpl(List<WebFile> localFiles, TaskMonitor taskMonitor) throws Exception
     {
         // Call TaskMonitor.startTasks
         taskMonitor.startTasks(localFiles.size());
@@ -220,7 +217,7 @@ public class VersionControl {
     /**
      * Replaces (overwrites) local site files from remote site.
      */
-    protected void replaceFile(WebFile localFile)
+    protected void replaceFile(WebFile localFile) throws Exception
     {
         // Get RemoteFile
         String filePath = localFile.getPath();
@@ -248,8 +245,7 @@ public class VersionControl {
     public TaskRunner<Boolean> commitFiles(List<WebFile> theFiles, String aMessage)
     {
         TaskMonitor taskMonitor = new TaskMonitor("Commit files to remote site");
-        Supplier<Boolean> commitFunc = () -> commitFilesImpl(theFiles, aMessage, taskMonitor);
-        TaskRunner<Boolean> taskRunner = new TaskRunner<>(commitFunc);
+        TaskRunner<Boolean> taskRunner = new TaskRunner<>(() -> commitFilesImpl(theFiles, aMessage, taskMonitor));
         taskRunner.setMonitor(taskMonitor);
         taskRunner.start();
         return taskRunner;
@@ -258,7 +254,7 @@ public class VersionControl {
     /**
      * Commits (copies) local site files to remote site.
      */
-    protected boolean commitFilesImpl(List<WebFile> localFiles, String aMessage, TaskMonitor taskMonitor)
+    protected boolean commitFilesImpl(List<WebFile> localFiles, String aMessage, TaskMonitor taskMonitor) throws Exception
     {
         // Call TaskMonitor.startTasks
         taskMonitor.startTasks(localFiles.size());
