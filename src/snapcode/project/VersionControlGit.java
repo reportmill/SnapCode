@@ -5,11 +5,9 @@ package snapcode.project;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import snap.util.ArrayUtils;
 import snapcode.project.GitDir.GitBranch;
 import snapcode.project.GitDir.GitCommit;
-import snapcode.webbrowser.ClientUtils;
 import snap.util.FileUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
@@ -43,7 +41,7 @@ public class VersionControlGit extends VersionControl {
     {
         if (_gitDir != null) return _gitDir;
         WebFile girDirFile = getGitDirFile();
-        return _gitDir = GitDir.get(girDirFile);
+        return _gitDir = GitDir.getGitDirForFile(girDirFile);
     }
 
     /**
@@ -52,10 +50,8 @@ public class VersionControlGit extends VersionControl {
     public WebFile getGitDirFile()
     {
         if (_gitDirFile != null) return _gitDirFile;
-        _gitDirFile = getLocalSite().getFileForPath("/.git");
-        if (_gitDirFile == null)
-            _gitDirFile = getLocalSite().createFileForPath("/.git", true);
-        return _gitDirFile;
+        WebSite localSite = getLocalSite();
+        return _gitDirFile = localSite.createFileForPath("/.git", true);
     }
 
     /**
@@ -111,12 +107,12 @@ public class VersionControlGit extends VersionControl {
 
         // Create CloneCommand and configure
         CloneCommand cloneCmd = Git.cloneRepository();
-        CredentialsProvider credentialsProvider = getCredentialsProvider();
+        CredentialsProvider credentialsProvider = GitUtils.getCredentialsProvider();
         cloneCmd.setURI(gitRemoteUrlAddress).setDirectory(tempDir).setCredentialsProvider(credentialsProvider);
 
         // Wrap TaskMonitor in ProgressMonitor
         if (aTM != null)
-            cloneCmd.setProgressMonitor(GitDir.getProgressMonitor(aTM));
+            cloneCmd.setProgressMonitor(GitUtils.getProgressMonitor(aTM));
 
         // Run clone and move files to site directory
         try {
@@ -225,22 +221,6 @@ public class VersionControlGit extends VersionControl {
     {
         GitDir gitDir = getGitDir();
         gitDir.deleteDir();
-    }
-
-    /**
-     * Returns credentials provider.
-     */
-    private CredentialsProvider getCredentialsProvider()
-    {
-        WebSite remoteSite = getRemoteSite();
-        ClientUtils.setAccess(remoteSite);
-        if (remoteSite.getUserName() == null)
-            return null;
-
-        // Return
-        String userName = remoteSite.getUserName();
-        String password = remoteSite.getPassword();
-        return new UsernamePasswordCredentialsProvider(userName, password);
     }
 
     /**

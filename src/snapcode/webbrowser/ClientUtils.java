@@ -71,9 +71,11 @@ public class ClientUtils {
      */
     public static boolean setAccess(WebSite aSite)
     {
-        String sid = aSite.getURL().getString();
-        String un1 = aSite.getUserName(), pw1 = aSite.getPassword();
-        String un2 = getUserName(sid), pw2 = getPassword(sid);
+        String siteAddress = aSite.getUrlAddress();
+        String un1 = aSite.getUserName();
+        String pw1 = aSite.getPassword();
+        String un2 = getUserName(siteAddress);
+        String pw2 = getPassword(siteAddress);
         if (!Objects.equals(un1, un2) || !Objects.equals(pw1, pw2)) {
             aSite.setUserName(un2);
             aSite.setPassword(pw2);

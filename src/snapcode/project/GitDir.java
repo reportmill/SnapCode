@@ -7,7 +7,6 @@ import org.eclipse.jgit.revwalk.*;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.PushResult;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
@@ -207,8 +206,8 @@ public class GitDir {
 
         // Get push
         PushCommand pushCmd = git.push();
-        pushCmd.setProgressMonitor(getProgressMonitor(aTM));
-        CredentialsProvider credentialsProvider = getCD();
+        pushCmd.setProgressMonitor(GitUtils.getProgressMonitor(aTM));
+        CredentialsProvider credentialsProvider = GitUtils.getCredentialsProvider();
         pushCmd.setCredentialsProvider(credentialsProvider);
         for (PushResult pr : pushCmd.call())
             System.out.println("Pushed: " + pr);
@@ -222,10 +221,10 @@ public class GitDir {
         // Do fetch
         Git git = getGit();
         FetchCommand fetch = git.fetch();
-        CredentialsProvider credentialsProvider = getCD();
+        CredentialsProvider credentialsProvider = GitUtils.getCredentialsProvider();
         fetch.setCredentialsProvider(credentialsProvider);
         if (aTM != null)
-            fetch.setProgressMonitor(getProgressMonitor(aTM));
+            fetch.setProgressMonitor(GitUtils.getProgressMonitor(aTM));
         fetch.call();
 
         // Refresh files
@@ -257,17 +256,6 @@ public class GitDir {
         RevWalk rwalk = new RevWalk(getRepo());
         try { return rwalk.parseAny(anId); }
         catch (Exception e) { throw new RuntimeException(e); }
-    }
-
-    /**
-     * Returns credentials provider.
-     */
-    private CredentialsProvider getCD()
-    {
-        //WebSite rsite = getRemoteSite();
-        //ClientUtils.setAccess(this); if(rsite.getUserName()==null) return null;
-        //return new UsernamePasswordCredentialsProvider(rsite.getUserName(), rsite.getPassword());
-        return new UsernamePasswordCredentialsProvider("reportmill", "rmgithub1");
     }
 
     /**
@@ -951,23 +939,9 @@ public class GitDir {
     }
 
     /**
-     * Returns a ProgressMonitor for given TaskMonitor.
-     */
-    public static ProgressMonitor getProgressMonitor(final TaskMonitor aTM)
-    {
-        return new ProgressMonitor() {
-            public void update(int arg0)  { aTM.updateTask(arg0); }
-            public void start(int arg0)  { aTM.startTasks(arg0); }
-            public boolean isCancelled()  { return aTM.isCancelled(); }
-            public void endTask()  { aTM.endTask(); }
-            public void beginTask(String arg0, int arg1)  { aTM.beginTask(arg0, arg1); }
-        };
-    }
-
-    /**
      * Returns a GitDir for a git directory file.
      */
-    public synchronized static GitDir get(WebFile aFile)
+    public synchronized static GitDir getGitDirForFile(WebFile aFile)
     {
         GitDir gitDir = (GitDir) aFile.getProp(GitDir.class.getName());
         if (gitDir == null)
