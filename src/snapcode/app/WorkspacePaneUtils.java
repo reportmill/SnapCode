@@ -81,7 +81,7 @@ public class WorkspacePaneUtils {
         }
 
         // If zip file, open project
-        if (fileType.equals("zip"))
+        if (fileType.equals("zip") || fileType.equals("git"))
             openProjectForRepoURL(workspacePane, sampleFile.getURL());
     }
 

@@ -97,6 +97,8 @@ public class HomePage extends WebPage {
         // Handle any link with "Sample:..."
         if (urlAddr.startsWith("Sample:")) {
             String sampleUrlAddr = urlAddr.substring("Sample:".length());
+            if (ViewUtils.isAltDown())
+                sampleUrlAddr = "https://github.com/reportmill/SnapDemos.git";
             WebURL sampleUrl = WebURL.getURL(sampleUrlAddr);
             WorkspacePaneUtils.openSamplesUrl(_workspacePane, sampleUrl);
             return;

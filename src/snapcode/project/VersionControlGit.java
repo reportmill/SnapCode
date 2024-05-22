@@ -6,6 +6,7 @@ import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import snap.util.ArrayUtils;
+import snap.web.WebURL;
 import snapcode.project.GitDir.GitBranch;
 import snap.util.FileUtils;
 import snap.util.TaskMonitor;
@@ -28,9 +29,9 @@ public class VersionControlGit extends VersionControl {
     /**
      * Constructor.
      */
-    public VersionControlGit(WebSite projectSite)
+    public VersionControlGit(WebSite projectSite, WebURL remoteSiteUrl)
     {
-        super(projectSite, null);
+        super(projectSite, remoteSiteUrl);
     }
 
     /**
@@ -91,6 +92,13 @@ public class VersionControlGit extends VersionControl {
     @Override
     protected boolean checkoutImpl(TaskMonitor aTM) throws Exception
     {
+        // Make sure local site exists
+        WebSite localSite = getLocalSite();
+        if (!localSite.getExists()) {
+            WebFile rootDir = localSite.getRootDir();
+            rootDir.save();
+        }
+
         // Get SiteDir, CloneDir and RemoteURL
         File siteDir = getLocalSite().getRootDir().getJavaFile();
         File tempDir = new File(siteDir, "git-temp");

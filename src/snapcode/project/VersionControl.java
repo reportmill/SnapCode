@@ -566,7 +566,8 @@ public class VersionControl {
         WebURL remoteUrl = VersionControlUtils.getRemoteSiteUrl(projectSite);
 
         // Handle Git
-        //if (urlAddr != null && (urlAddr.startsWith("git:") || urlAddr.endsWith(".git"))) return new VersionControlGit(projectSite);
+        if (remoteUrl != null && (remoteUrl.getScheme().equals("git") || remoteUrl.getFileType().equals("git")))
+            return new VersionControlGit(projectSite, remoteUrl);
 
         // Handle Zip file
         if (remoteUrl != null && remoteUrl.getFileType().equals("zip"))
