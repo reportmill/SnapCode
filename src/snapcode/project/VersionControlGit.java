@@ -7,7 +7,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import snap.util.ArrayUtils;
 import snapcode.project.GitDir.GitBranch;
-import snapcode.project.GitDir.GitCommit;
 import snap.util.FileUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
