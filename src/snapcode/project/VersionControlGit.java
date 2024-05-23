@@ -79,7 +79,7 @@ public class VersionControlGit extends VersionControl {
     /**
      * Override to return the GitDirSite.
      */
-    //@Override
+    @Override
     public WebSite getCloneSite()
     {
         GitDir gitDir = getGitDir();
