@@ -228,7 +228,7 @@ public class BuildFile extends PropObject {
     public boolean isIncludeSnapChartsRuntime()
     {
         BuildDependency[] dependencies = getDependencies();
-        return ArrayUtils.hasMatch(dependencies, dep -> dep.getId().contains("snapcharts"));
+        return ArrayUtils.hasMatch(dependencies, dep -> dep.getId() != null && dep.getId().contains("snapcharts"));
     }
 
     /**
@@ -245,7 +245,7 @@ public class BuildFile extends PropObject {
         // Handle Remove SnapCharts
         else {
             BuildDependency[] dependencies = getDependencies();
-            BuildDependency dependency = ArrayUtils.findMatch(dependencies, dep -> dep.getId().contains("snapcharts"));
+            BuildDependency dependency = ArrayUtils.findMatch(dependencies, dep -> dep.getId() != null && dep.getId().contains("snapcharts"));
             removeDependency(dependency);
         }
     }
