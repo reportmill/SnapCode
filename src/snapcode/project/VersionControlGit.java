@@ -7,7 +7,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import snap.util.ArrayUtils;
 import snap.web.WebURL;
-import snapcode.project.GitDir.GitBranch;
 import snap.util.FileUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
@@ -71,9 +70,7 @@ public class VersionControlGit extends VersionControl {
     public WebSite getRemoteSite()
     {
         GitDir gitDir = getGitDir();
-        GitBranch remoteBranch = gitDir.getHead().getBranch().getRemoteBranch();
-        GitCommit commit = remoteBranch != null ? remoteBranch.getCommit() : null;
-        return commit != null ? commit.getSite() : null;
+        return gitDir.getRemoteSite();
     }
 
     /**

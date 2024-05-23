@@ -19,8 +19,8 @@ import java.util.Map;
  */
 public class GitDir {
 
-    // The git dir
-    private WebFile _gdir;
+    // The ".git" dir
+    private WebFile _dirFile;
 
     // The repository
     private Repository _repo;
@@ -39,18 +39,22 @@ public class GitDir {
      */
     public GitDir(WebFile aGitDir)
     {
-        _gdir = aGitDir;
+        _dirFile = aGitDir;
     }
 
     /**
      * Returns the git dir file.
      */
-    public WebFile getDir()  { return _gdir; }
+    public WebFile getDir()  { return _dirFile; }
 
     /**
      * Returns the git.
      */
-    protected Git getGit()  { return new Git(_repo); }
+    protected Git getGit()
+    {
+        Repository repository = getRepo();
+        return new Git(repository);
+    }
 
     /**
      * Returns the repo.
@@ -59,48 +63,46 @@ public class GitDir {
     {
         if (_repo != null) return _repo;
 
-        File gitDir = getDir().getJavaFile();
+        // Get ".git" dir file (just return if null)
+        File gitDir = _dirFile.getJavaFile();
         if (!gitDir.exists())
             return null;
+
+        // Create repository and return
         try { _repo = new FileRepositoryBuilder().setGitDir(gitDir).readEnvironment().build(); }
         catch (Exception e) { throw new RuntimeException(e); }
         return _repo;
     }
 
     /**
-     * Returns a git ref for given name.
-     */
-    public GitRef getRef(String aName)
-    {
-        Ref ref;
-        System.out.println("GitDir.getRef: Used to be getRef() but that is gone now. Don't know if this is okay");
-        try { ref = getRepo().exactRef(aName); }
-        catch (Exception e) { throw new RuntimeException(e); }
-        return ref != null ? new GitRef(ref) : null;
-    }
-
-    /**
      * Returns the head branch.
      */
-    public GitRef getHead()  { return getRef(Constants.HEAD); }
+    public GitBranch getHeadBranch()
+    {
+        Ref headRef = findRefForName(Constants.HEAD);
+        String headBranchName = headRef.getName();
+        return getBranchForName(headBranchName);
+    }
 
     /**
      * Returns the named branch.
      */
-    public GitBranch getBranch(String aName)
+    public GitBranch getBranchForName(String aName)
     {
-        Ref ref;
-        System.out.println("GitDir.getRef: Used to be getRef() but that is gone now. Don't know if this is okay");
-        try {
-            ref = getRepo().exactRef(aName);
-            if (ref == null)
-                return null;
-        }
-        catch (Exception e) { throw new RuntimeException(e); }
-        String name = ref.getTarget().getName();
-        GitBranch branch = _branches.get(name);
-        if (branch == null)
-            _branches.put(name, branch = new GitBranch(name));
+        // Get branch ref
+        Ref branchRef = findRefForName(aName);
+        String branchName = branchRef.getTarget().getName();
+
+        // Get cached branch for name (just return if found)
+        GitBranch branch = _branches.get(branchName);
+        if (branch != null)
+            return branch;
+
+        // Create branch and add to cache
+        branch = new GitBranch(this, branchName);
+        _branches.put(branchName, branch);
+
+        // Return
         return branch;
     }
 
@@ -123,16 +125,21 @@ public class GitDir {
     }
 
     /**
-     * Returns the default remote.
+     * Returns the remote site.
      */
-    public GitRemote getRemote()  { return getRemote("origin"); }
-
-    /**
-     * Returns the remote for given name.
-     */
-    public GitRemote getRemote(String aName)
+    public WebSite getRemoteSite()
     {
-        return new GitRemote(aName);
+        // Get head branch
+        GitBranch headBranch = getHeadBranch();
+
+        // Get remote and last commit (just return if null)
+        GitBranch remoteBranch = headBranch.getRemoteBranch();
+        GitCommit commit = remoteBranch != null ? remoteBranch.getCommit() : null;
+        if (commit == null)
+            return null;
+
+        // Return site for commit
+        return commit.getSite();
     }
 
     /**
@@ -143,8 +150,8 @@ public class GitDir {
         if (_repo != null)
             _repo.close();
         _repo = null;
-        _gdir.delete();
-        _gdir.setProp(GitDir.class.getName(), null);
+        _dirFile.delete();
+        _dirFile.setProp(GitDir.class.getName(), null);
     }
 
     /**
@@ -234,7 +241,7 @@ public class GitDir {
     {
         Git git = getGit();
         MergeCommand merge = git.merge();
-        ObjectId remoteOriginMaster = getRepo().resolve("refs/remotes/origin/master");
+        ObjectId remoteOriginMaster = getResolvedObjectId("refs/remotes/origin/master");
         merge.include(remoteOriginMaster);
         MergeResult result = merge.call();
         System.out.println("Merge Result: " + result.getMergeStatus());
@@ -245,85 +252,43 @@ public class GitDir {
     }
 
     /**
-     * Returns the RevObject for given commit and path.
+     * Returns a JGit ref object for name.
      */
-    protected RevObject getRevObject(ObjectId anId)
+    protected Ref findRefForName(String aName)
     {
-        RevWalk rwalk = new RevWalk(getRepo());
-        try { return rwalk.parseAny(anId); }
+        Repository repository = getRepo();
+        try { return repository.findRef(aName); }
         catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**
-     * A class to represent a reference.
+     * Returns an object id.
      */
-    public class GitRef {
-
-        // The Ref
-        private Ref _ref;
-
-        /** Constructor. */
-        GitRef(Ref aRef)
-        {
-            _ref = aRef;
-        }
-
-        /**
-         * Returns the name.
-         */
-        public String getName()  { return _ref.getName(); }
-
-        /**
-         * Returns the branch for ref.
-         */
-        public GitBranch getBranch()
-        {
-            return GitDir.this.getBranch(getName());
-        }
-
-        /**
-         * Standard toString implementation.
-         */
-        public String toString()
-        {
-            return _ref.toString();
-        }
+    private ObjectId getResolvedObjectId(String revisionStr)
+    {
+        Repository repository = getRepo();
+        try { return repository.resolve(revisionStr); }
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**
-     * A class to represent a remote.
+     * Returns the RevObject for given commit and path.
      */
-    public class GitRemote {
-
-        // The name
-        private String _name;
-
-        /**
-         * Constructor.
-         */
-        GitRemote(String aName)
-        {
-            _name = aName;
-        }
-
-        /**
-         * Returns the name.
-         */
-        public String getName()  { return _name; }
-
-        /**
-         * Returns a branch for name.
-         */
-        public GitBranch getBranch(String aName)
-        {
-            return GitDir.this.getBranch(_name + '/' + aName);
-        }
+    protected RevObject getRevObject(ObjectId anId)
+    {
+        Repository repository = getRepo();
+        RevWalk revWalk = new RevWalk(repository);
+        try { return revWalk.parseAny(anId); }
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**
      * A class to represent a branch.
      */
-    public class GitBranch {
+    public static class GitBranch {
+
+        // The GitDir
+        private GitDir _gitDir;
 
         // The name of the branch
         private String _name;
@@ -331,8 +296,9 @@ public class GitDir {
         /**
          * Constructor.
          */
-        public GitBranch(String aName)
+        public GitBranch(GitDir gitDir, String aName)
         {
+            _gitDir = gitDir;
             _name = aName;
         }
 
@@ -351,7 +317,9 @@ public class GitDir {
          */
         public String getPlainName()
         {
-            return _name.replace("refs/heads/", "").replace("refs/remotes/", "");
+            String plainName = _name.replace("refs/heads/", "");
+            plainName = plainName.replace("refs/remotes/", "");
+            return plainName;
         }
 
         /**
@@ -359,11 +327,11 @@ public class GitDir {
          */
         public GitCommit getCommit()
         {
-            ObjectId id;
-            try { id = getRepo().resolve(_name); }
-            catch (Exception e) { throw new RuntimeException(e); }
-            RevCommit rc = (RevCommit) getRevObject(id);
-            return new GitCommit(GitDir.this, rc);
+            ObjectId id = _gitDir.getResolvedObjectId(_name);
+
+            // Get commit and return
+            RevCommit commit = (RevCommit) _gitDir.getRevObject(id);
+            return new GitCommit(_gitDir, commit);
         }
 
         /**
@@ -382,9 +350,13 @@ public class GitDir {
          */
         public GitBranch getRemoteBranch()
         {
-            if (getName().contains("/remotes/"))
+            if (_name.contains("/remotes/"))
                 return null;
-            return getRemote().getBranch(getSimpleName());
+
+            String remoteName = "origin";
+            String simpleName = getSimpleName();
+            String remoteBranchName = remoteName + '/' + simpleName;
+            return _gitDir.getBranchForName(remoteBranchName);
         }
     }
 
