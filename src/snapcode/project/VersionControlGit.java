@@ -4,7 +4,6 @@
 package snapcode.project;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.transport.CredentialsProvider;
 import snap.util.ArrayUtils;
 import snap.web.WebURL;
 import snap.util.FileUtils;
@@ -104,17 +103,22 @@ public class VersionControlGit extends VersionControl {
             gitRemoteUrlAddress = gitRemoteUrlAddress.replace("git:", "https:") + ".git";
 
         // Create CloneCommand and configure
-        CloneCommand cloneCmd = Git.cloneRepository();
-        CredentialsProvider credentialsProvider = GitUtils.getCredentialsProvider();
-        cloneCmd.setURI(gitRemoteUrlAddress).setDirectory(tempDir).setCredentialsProvider(credentialsProvider);
+        CloneCommand cloneCmd = Git.cloneRepository().setURI(gitRemoteUrlAddress);
+        cloneCmd.setDirectory(tempDir);
+        cloneCmd.setCredentialsProvider(GitUtils.getCredentialsProvider());
 
         // Wrap TaskMonitor in ProgressMonitor
         if (aTM != null)
-            cloneCmd.setProgressMonitor(GitUtils.getProgressMonitor(aTM));
+            cloneCmd.setProgressMonitor(GitUtils.getProgressMonitor(new TaskMonitor(System.out)));
 
         // Run clone and move files to site directory
         try {
-            cloneCmd.call().close();
+
+            // Call clone
+            Git result = cloneCmd.call();
+            result.close();
+
+            // Moves files to project dir
             File[] tempDirFiles = tempDir.listFiles();
             if (tempDirFiles != null) {
                 for (File tempDirFile : tempDirFiles) {

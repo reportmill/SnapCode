@@ -12,7 +12,12 @@ public class GitUtils {
     /**
      * Returns the git username.
      */
-    public static String getGitUserName()  { return  null; }
+    public static String getGitUserName()  { return null; }
+
+    /**
+     * Returns the git password.
+     */
+    public static String getGitPassword()  { return null; }
 
     /**
      * Returns credentials provider.
@@ -20,8 +25,8 @@ public class GitUtils {
     public static CredentialsProvider getCredentialsProvider()
     {
         String userName = getGitUserName();
-        String password = null; //getPassword();
-        if (userName == null)
+        String password = getGitPassword();
+        if (userName == null || password == null)
             return null;
 
         // Return

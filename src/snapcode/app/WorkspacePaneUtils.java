@@ -59,17 +59,17 @@ public class WorkspacePaneUtils {
                 workspace.removeProject(project);
         }
 
-        // Get sample file - complain and return if not found
-        WebFile sampleFile = sampleURL.getFile();
-        if (sampleFile == null) {
-            String msg = "Couldn't find sample for name: " + sampleURL.getFilename();
-            DialogBox.showErrorDialog(workspacePane.getUI(), "Unknown Sample", msg);
-            return;
-        }
-
         // If java/jepl file, open and run
-        String fileType = sampleFile.getType();
+        String fileType = sampleURL.getFileType();
         if (fileType.equals("java") || fileType.equals("jepl")) {
+
+            // Get sample file - complain and return if not found
+            WebFile sampleFile = sampleURL.getFile();
+            if (sampleFile == null) {
+                String msg = "Couldn't find sample for name: " + sampleURL.getFilename();
+                DialogBox.showErrorDialog(workspacePane.getUI(), "Unknown Sample", msg);
+                return;
+            }
 
             // Open
             openExternalSourceFile(workspacePane, sampleFile);
@@ -82,7 +82,7 @@ public class WorkspacePaneUtils {
 
         // If zip file, open project
         if (fileType.equals("zip") || fileType.equals("git"))
-            openProjectForRepoURL(workspacePane, sampleFile.getURL());
+            openProjectForRepoURL(workspacePane, sampleURL);
     }
 
     /**
