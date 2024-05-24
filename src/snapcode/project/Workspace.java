@@ -4,6 +4,7 @@
 package snapcode.project;
 import snap.props.PropObject;
 import snap.util.ArrayUtils;
+import snap.util.SnapUtils;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
 import snap.web.WebFile;
@@ -301,6 +302,10 @@ public class Workspace extends PropObject {
      */
     private boolean addProjectForRepoURLImpl(WebURL repoURL, TaskMonitor taskMonitor)
     {
+        // Hack to support github repos in CheerpJ
+        if (repoURL.getFileType().equals("git") && SnapUtils.isWebVM)
+            repoURL = downloadGithubZipFile(repoURL);
+
         // Get project name
         String projName = repoURL.getFilenameSimple();
 
@@ -331,5 +336,29 @@ public class Workspace extends PropObject {
 
         // Wait till done and return result
         return checkoutRunner.awaitResult();
+    }
+
+    /**
+     * Downloads a github zip file.
+     */
+    private static WebURL downloadGithubZipFile(WebURL repoURL)
+    {
+        // Get Zip bytes
+        String PROXY_URL = "https://corsproxy.io/?";
+        String repoUrlAddr = repoURL.getString().replace(".git", "");
+        String zipUrlAddr = PROXY_URL + repoUrlAddr.replace("github.com", "codeload.github.com") + "/zip/refs/heads/master";
+        WebURL zipUrl = WebURL.getURL(zipUrlAddr); assert (zipUrl != null);
+        byte[] zipBytes = zipUrl.getBytes();
+        if (zipBytes == null)
+            throw new RuntimeException("Can't download git zip file");
+
+        // Get zip
+        String zipName = repoURL.getFilename().replace(".git", ".zip");
+        String zipPath = "/files/ZipFiles/" + zipName;
+        WebURL zipUrl2 = WebURL.getURL(zipPath); assert (zipUrl2 != null);
+        WebFile zipFile = zipUrl2.createFile(false);
+        zipFile.setBytes(zipBytes);
+        zipFile.save();
+        return zipUrl2;
     }
 }

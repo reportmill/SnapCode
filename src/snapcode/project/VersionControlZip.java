@@ -19,6 +19,8 @@ public class VersionControlZip extends VersionControl {
         WebSite zipSite = _remoteSiteUrl.getAsSite();
         String siteName = _remoteSiteUrl.getFilenameSimple();
         WebFile dirFile = zipSite.getFileForPath('/' + siteName);
+        if (dirFile == null) // If downloading github zip
+            dirFile = zipSite.getFileForPath('/' + siteName + "-master");
         if (dirFile != null && dirFile.isDir())
             _remoteSiteUrl = dirFile.getURL();
     }
