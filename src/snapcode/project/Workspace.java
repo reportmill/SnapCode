@@ -330,12 +330,16 @@ public class Workspace extends PropObject {
         VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
         TaskRunner<Boolean> checkoutRunner = versionControl.checkout();
         checkoutRunner.setOnSuccess(obj -> addProjectForSite(projSite));
+        checkoutRunner.setOnFailure(e -> e.printStackTrace());
 
         // Attach checkout task monitor to given task monitor
         taskMonitor.setMonitor(checkoutRunner.getMonitor());
 
         // Wait till done and return result
-        return checkoutRunner.awaitResult();
+        boolean result = checkoutRunner.awaitResult();
+        if (checkoutRunner.getException() != null)
+            throw new RuntimeException(checkoutRunner.getException().getMessage(), checkoutRunner.getException());
+        return result;
     }
 
     /**

@@ -147,9 +147,20 @@ public class WorkspacePaneUtils {
 
         // After add project, trigger build and show files
         checkoutRunner.setOnSuccess(val -> openWorkspaceForRepoUrlFinished(workspacePane, repoURL));
+        checkoutRunner.setOnFailure(e -> checkoutFailed(workspacePane, repoURL, e));
 
         // Show check progress panel
         checkoutRunner.getMonitor().showProgressPanel(workspacePane.getUI());
+    }
+
+    /**
+     * Called if checkout fails.
+     */
+    private static void checkoutFailed(WorkspacePane workspacePane, WebURL repoURL, Exception anException)
+    {
+        DialogBox dialogBox = new DialogBox("Checkout failed");
+        dialogBox.setErrorMessage("Failed checkout: " + repoURL.getString() + '\n' + "Error: " + anException.getMessage());
+        dialogBox.showMessageDialog(workspacePane.getUI());
     }
 
     /**
