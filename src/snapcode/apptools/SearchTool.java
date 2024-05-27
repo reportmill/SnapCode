@@ -202,7 +202,7 @@ public class SearchTool extends WorkspaceTool {
      */
     protected boolean isSearchTextFile(WebFile aFile)
     {
-        String type = aFile.getType();
+        String type = aFile.getFileType();
         String[] types = { "java", "snp", "txt", "js" };
         return ArrayUtils.contains(types, type);
     }
@@ -265,7 +265,7 @@ public class SearchTool extends WorkspaceTool {
         }
 
         // Handle JavaFile
-        else if (aFile.getType().equals("java")) {
+        else if (aFile.getFileType().equals("java")) {
 
             // Get JavaAgent, JavaData and references
             JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(aFile);
@@ -339,7 +339,7 @@ public class SearchTool extends WorkspaceTool {
         }
 
         // Handle JavaFile: If file class contains matching decl, return node(s)
-        else if (aFile.getType().equals("java")) {
+        else if (aFile.getFileType().equals("java")) {
             JavaClass javaClass = proj.getJavaClassForFile(aFile);
             if (javaClassContainsMatchingDecl(javaClass, aDecl)) {
                 JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
@@ -466,7 +466,7 @@ public class SearchTool extends WorkspaceTool {
          */
         public String getURLString()
         {
-            String urlString = _file.getUrlString();
+            String urlString = _file.getUrlAddress();
             if (_search._kind == Search.Kind.Text)
                 urlString += "#Find=" + _search._string;
             else if (_node != null)

@@ -17,7 +17,7 @@ public class UnknownPage extends WebPage {
     protected View createUI()
     {
         StackView pane = new StackView();
-        pane.addChild(new Label("Unkown File Type: " + getFile().getType()));
+        pane.addChild(new Label("Unkown File Type: " + getFile().getFileType()));
         return pane;
     }
 }

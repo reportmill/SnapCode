@@ -143,7 +143,7 @@ public class DiffPage extends WebPage {
         aFile.resetAndVerify();
 
         // Handle JavaFile
-        if (aFile.getType().equals("java")) {
+        if (aFile.getFileType().equals("java")) {
 
             // Create JavaTextDoc
             JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForFile(aFile);

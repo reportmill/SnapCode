@@ -357,9 +357,9 @@ public class WelcomePanel extends ViewOwner {
     {
         if (isSourceFile(aFile))
             return true;
-        if (aFile.getType().equals("zip"))
+        if (aFile.getFileType().equals("zip"))
             return true;
-        if (aFile.getType().equals("gfar"))
+        if (aFile.getFileType().equals("gfar"))
             return true;
         return isProjectFile(aFile);
     }
@@ -369,7 +369,7 @@ public class WelcomePanel extends ViewOwner {
      */
     private static boolean isSourceFile(WebFile aFile)
     {
-        String fileType = aFile.getType();
+        String fileType = aFile.getFileType();
         return ArrayUtils.contains(FILE_TYPES, fileType);
     }
 

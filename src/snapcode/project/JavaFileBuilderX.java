@@ -122,7 +122,7 @@ public class JavaFileBuilderX extends JavaFileBuilder {
     protected boolean buildFile(WebFile sourceFile)
     {
         // If Jepl file, check for errors first
-        if (sourceFile.getType().equals("jepl")) {
+        if (sourceFile.getFileType().equals("jepl")) {
             boolean checkErrorsSuccess = super.buildFile(sourceFile);
             if (!checkErrorsSuccess) {
                 addBuildFile(sourceFile);

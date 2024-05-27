@@ -322,7 +322,7 @@ public class PagePane extends ViewOwner {
         // Update TabBar Visible
         boolean showTabBar = getOpenFiles().length > 0;
         if (showTabBar && getOpenFiles().length == 1 && selFile != null) {
-             if ("jepl".equals(selFile.getType()) || selFile.getName().contains("JavaFiddle"))
+             if ("jepl".equals(selFile.getFileType()) || selFile.getName().contains("JavaFiddle"))
                 showTabBar = false;
         }
         _tabBar.setVisible(showTabBar);
@@ -398,7 +398,7 @@ public class PagePane extends ViewOwner {
         if (aFile.isDir()) return false;
 
         // Accept all Java files
-        if (aFile.getType().equals("java"))
+        if (aFile.getFileType().equals("java"))
             return true;
 
         // Accept all project files

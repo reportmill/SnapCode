@@ -85,7 +85,7 @@ public class NewFileTool extends WorkspaceTool {
             return;
 
         // Initialize file
-        switch (newFile.getType()) {
+        switch (newFile.getFileType()) {
             case "java": JavaPage.initJavaFile(newFile); break;
             case "snp": snapcode.webbrowser.SnapBuilderPage.initSnapFile(newFile); break;
         }
@@ -189,7 +189,7 @@ public class NewFileTool extends WorkspaceTool {
     public WebFile newSourceFileForExternalSourceFile(WebFile sourceFile)
     {
         String sourceName = sourceFile.getSimpleName();
-        String sourceType = sourceFile.getType();
+        String sourceType = sourceFile.getFileType();
         String sourceText = sourceFile.getText();
 
         if (sourceType.equals("java") || sourceType.equals("jepl"))

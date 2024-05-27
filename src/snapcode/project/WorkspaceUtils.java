@@ -63,7 +63,7 @@ public class WorkspaceUtils {
         }
 
         // Handle Java file: If isDependentOnClass() add to list
-        else if (searchFile.getType().equals("java") || searchFile.getType().equals("jepl")) {
+        else if (searchFile.getFileType().equals("java") || searchFile.getFileType().equals("jepl")) {
             JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(searchFile);
             if (javaAgent.isDependentOnClass(javaClass))
                 dependentFiles.add(searchFile);

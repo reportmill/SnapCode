@@ -144,14 +144,14 @@ public class ProjectUtils {
         // Look in project
         WebFile file = aProject.getSourceFile(classPath, false, false);
         if (file != null)
-            return file.getUrlString();
+            return file.getUrlAddress();
 
         // Look in child projects
         Project[] projects = aProject.getProjects();
         for (Project proj : projects) {
             file = proj.getSourceFile(classPath, false, false);
             if (file != null)
-                return file.getUrlString();
+                return file.getUrlAddress();
         }
 
         // Return not found

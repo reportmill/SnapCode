@@ -212,7 +212,7 @@ public class BuildIssues extends PropObject {
     private static boolean isPackage(WebFile aFile)
     {
         // If file name has extension, return false
-        if (aFile.getType().length() > 0)
+        if (aFile.getFileType().length() > 0)
             return false;
 
         // If file in Project.SourceDir

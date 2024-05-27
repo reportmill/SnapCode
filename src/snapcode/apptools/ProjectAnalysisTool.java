@@ -64,7 +64,7 @@ public class ProjectAnalysisTool {
         int linesOfCode = 0;
 
         // Handle Java or snp file
-        if (aFile.isFile() && (aFile.getType().equals("java") || aFile.getType().equals("snp"))) {
+        if (aFile.isFile() && (aFile.getFileType().equals("java") || aFile.getFileType().equals("snp"))) {
             String text = aFile.getText();
             for (int i = text.indexOf('\n'); i >= 0; i = text.indexOf('\n', i + 1))
                 linesOfCode++;
@@ -86,7 +86,7 @@ public class ProjectAnalysisTool {
     public void findUndefines(WebFile aFile, TextArea aTextArea)
     {
         // Handle Java file: Find undefines
-        if (aFile.isFile() && aFile.getType().equals("java")) {
+        if (aFile.isFile() && aFile.getFileType().equals("java")) {
             JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
             JNode jfile = javaAgent.getJFile();
             findUndefines(jfile, aTextArea);

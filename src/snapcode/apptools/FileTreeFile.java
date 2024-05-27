@@ -100,7 +100,7 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
         // Get basic file info
         String name = aFile.getName();
         boolean dir = aFile.isDir();
-        String type = aFile.getType();
+        String type = aFile.getFileType();
         int typeLen = type.length();
 
         // Skip hidden files, child packages
@@ -146,7 +146,7 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
         // Iterate over source dir and add child packages and files
         List<WebFile> children = new ArrayList<>();
         for (WebFile child : getFile().getFiles()) {
-            if (child.isDir() && child.getType().length() == 0)
+            if (child.isDir() && child.getFileType().length() == 0)
                 addPackageDirFiles(child, children);
             else children.add(child);
         }
@@ -161,7 +161,7 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
     {
         boolean hasNonPkgFile = false;
         for (WebFile child : aDir.getFiles())
-            if (child.isDir() && child.getType().length() == 0)
+            if (child.isDir() && child.getFileType().length() == 0)
                 addPackageDirFiles(child, aList);
             else hasNonPkgFile = true;
         if (hasNonPkgFile || aDir.getFileCount() == 0) aList.add(aDir);

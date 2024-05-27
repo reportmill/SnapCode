@@ -23,7 +23,7 @@ public class WorkspacePaneUtils {
     public static void openFile(WorkspacePane workspacePane, WebFile aFile)
     {
         // If file is gfar file, open repo
-        String fileType = aFile.getType();
+        String fileType = aFile.getFileType();
         if (fileType.equals("gfar")) {
             GreenImport.openGreenfootForArchiveFilePath(workspacePane, aFile.getPath());
             return;

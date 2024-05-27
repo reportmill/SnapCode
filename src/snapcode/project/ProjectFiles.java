@@ -246,7 +246,7 @@ public class ProjectFiles {
 
         // Return inner class files (start with 'class_name$' and end with '.class')
         String classNamePrefix = classFile.getSimpleName() + '$';
-        return ArrayUtils.filter(pkgFiles, file -> file.getName().startsWith(classNamePrefix) && file.getType().equals("class"));
+        return ArrayUtils.filter(pkgFiles, file -> file.getName().startsWith(classNamePrefix) && file.getFileType().equals("class"));
     }
 
     /**

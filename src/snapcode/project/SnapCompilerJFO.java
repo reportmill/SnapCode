@@ -100,7 +100,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     private String getJavaTextString()
     {
         // Handle RunWithInterpreter
-        if (_file.getType().equals("jepl")) {
+        if (_file.getFileType().equals("jepl")) {
             JavaAgent javaAgent = JavaAgent.getAgentForFile(_file);
             JFile jFile = javaAgent.getJFile();
             return new JeplToJava(jFile).getJava();
@@ -182,7 +182,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
      */
     private static boolean isJavaFile(WebFile aFile)
     {
-        String type = aFile.getType();
+        String type = aFile.getFileType();
         return type.equals("java") || type.equals("jepl");
     }
 
@@ -192,7 +192,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     private static URI getFileURI(WebFile aFile)
     {
         String filePath = aFile.getPath();
-        if (aFile.getType().equals("jepl"))
+        if (aFile.getFileType().equals("jepl"))
             filePath = filePath.substring(0, filePath.length() - 3) + "ava";
         return URI.create(filePath);
     }

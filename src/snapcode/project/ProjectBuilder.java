@@ -100,7 +100,7 @@ public class ProjectBuilder {
 
             // Handle Class file
             WebFile file = dirFiles[i];
-            if (file.getType().equals("class")) {
+            if (file.getFileType().equals("class")) {
                 try { file.delete(); }
                 catch (Exception e) { throw new RuntimeException(e); }
             }

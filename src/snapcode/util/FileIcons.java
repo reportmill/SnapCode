@@ -1,6 +1,5 @@
 package snapcode.util;
 import snap.gfx.Image;
-import snap.view.ViewUtils;
 import snap.web.WebFile;
 
 /**
@@ -23,9 +22,9 @@ public class FileIcons {
         // Handle File types
         if (aFile.isRoot()) return RootFile;
         if (aFile.isDir()) return DirFile;
-        if (aFile.getType().equals("class")) return ClassFile;
-        if (aFile.getType().equals("java") || aFile.getType().equals("jepl")) return JavaFile;
-        if (aFile.getType().equals("table")) return TableFile;
+        if (aFile.getFileType().equals("class")) return ClassFile;
+        if (aFile.getFileType().equals("java") || aFile.getFileType().equals("jepl")) return JavaFile;
+        if (aFile.getFileType().equals("table")) return TableFile;
         return PlainFile;
     }
 

@@ -8,7 +8,6 @@ import snap.view.ViewUtils;
 import snap.view.WindowView;
 import snap.viewx.DevPaneExceptions;
 import snap.web.WebFile;
-import snap.web.WebURL;
 import snapcode.apptools.RunTool;
 import snapcode.project.Workspace;
 import snapcode.util.LZString;
@@ -213,8 +212,7 @@ public class App {
         if (!SnapUtils.isWebVM) return;
         String[] deleteDirnames = { "Sandboxes", "Tetris", "SnappyBird", "Asteroids" };
         for (String deleteDirname : deleteDirnames) {
-            WebURL deleteUrl = WebURL.getURL("/files/SnapCode/" + deleteDirname);
-            WebFile deleteDir = deleteUrl != null ? deleteUrl.getFile() : null;
+            WebFile deleteDir = WebFile.getFileForPath("/files/SnapCode/" + deleteDirname);
             if (deleteDir != null)
                 deleteDir.delete();
         }

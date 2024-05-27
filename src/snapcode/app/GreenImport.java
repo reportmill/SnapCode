@@ -217,7 +217,7 @@ public class GreenImport {
     private static void copyDirFileFilesToDir(WebFile dirFile, WebFile toDir)
     {
         WebFile[] dirFiles = dirFile.getFiles();
-        WebFile[] nonClassFiles = ArrayUtils.filter(dirFiles, file -> !file.getType().equals("class"));
+        WebFile[] nonClassFiles = ArrayUtils.filter(dirFiles, file -> !file.getFileType().equals("class"));
         for (WebFile file : nonClassFiles)
             copyFileToDir(file, toDir);
     }
@@ -245,7 +245,7 @@ public class GreenImport {
     private static void copyFileToFile(WebFile aFile, WebFile toFile)
     {
         // If Java file, fix text for older greenfoot files that reference java.awt.Color/Font instead of greenfoot.Color/Font
-        if (aFile.getType().equals("java")) {
+        if (aFile.getFileType().equals("java")) {
             String text = aFile.getText();
             if (text.contains("java.awt.")) {
                 text = text.replace("java.awt.Font;", "greenfoot.Font;");

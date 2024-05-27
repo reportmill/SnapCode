@@ -91,7 +91,7 @@ public class JavaPage extends WebPage {
         addKeyActionFilter("EnterAction", "Shortcut+ENTER");
 
         // If not java file, hide SnapCodeButton (jepl file)
-        if (!javaFile.getType().equals("java"))
+        if (!javaFile.getFileType().equals("java"))
             _javaTextPane.setViewVisible("SnapCodeButton", false);
     }
 

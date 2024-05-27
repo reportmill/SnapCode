@@ -24,7 +24,7 @@ public class RunToolUtils {
      */
     public static boolean isMainClassFile(WebFile aFile)
     {
-        String fileType = aFile.getType();
+        String fileType = aFile.getFileType();
         if (fileType.equals("jepl"))
             return true;
         if (!fileType.equals("java"))
@@ -148,7 +148,7 @@ public class RunToolUtils {
         // Get class file for given file (should be JavaFile)
         ProjectFiles projectFiles = proj.getProjectFiles();
         WebFile classFile;
-        if (mainFile.getType().equals("java"))
+        if (mainFile.getFileType().equals("java"))
             classFile = projectFiles.getClassFileForJavaFile(mainFile);
 
         // Try generic way to get class file
@@ -217,7 +217,7 @@ public class RunToolUtils {
      */
     public static boolean runLocal(WebFile mainFile)
     {
-        if (mainFile == null || !mainFile.getType().equals("jepl"))
+        if (mainFile == null || !mainFile.getFileType().equals("jepl"))
             return false;
         Project proj = Project.getProjectForFile(mainFile);
         if (!proj.getName().equals("TempProj"))

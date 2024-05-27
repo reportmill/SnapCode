@@ -79,7 +79,7 @@ public abstract class BuildDependency extends PropObject {
             return null;
 
         // If Jar, return JarFileDependency
-        String snapFileType = snapFile.getType();
+        String snapFileType = snapFile.getFileType();
         if (snapFileType.equals("jar")) {
             JarFileDependency jarFileDependency = new JarFileDependency();
             jarFileDependency.setJarPath(snapFile.getPath());

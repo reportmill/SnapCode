@@ -112,8 +112,8 @@ public class FilesTool extends WorkspaceTool {
                 if (fileName == null)
                     return false;
                 fileName = fileName.replace(" ", "");
-                if (!StringUtils.endsWithIC(fileName, '.' + newFile.getType()))
-                    fileName = fileName + '.' + newFile.getType();
+                if (!StringUtils.endsWithIC(fileName, '.' + newFile.getFileType()))
+                    fileName = fileName + '.' + newFile.getFileType();
                 if (fileName.equals(sourceFile.getName()))
                     return addFileToDirectory(aDirectory, sourceFile);
             }
@@ -215,7 +215,7 @@ public class FilesTool extends WorkspaceTool {
 
         // Get file name (if no extension provided, default to file extension) and path
         String name = aName;
-        if (name.indexOf('.') < 0 && aFile.getType().length() > 0) name += "." + aFile.getType();
+        if (name.indexOf('.') < 0 && aFile.getFileType().length() > 0) name += "." + aFile.getFileType();
         String path = aFile.getParent().getDirPath() + name;
 
         // If file for NewPath already exists, complain

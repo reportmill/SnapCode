@@ -54,7 +54,7 @@ public class JavaAgent {
     private JavaAgent(WebFile aFile)
     {
         _javaFile = aFile;
-        _isJepl = aFile.getType().equals("jepl");
+        _isJepl = aFile.getFileType().equals("jepl");
 
         // Set File JavaAgent property to this agent
         _javaFile.setProp(JavaAgent.class.getName(), this);
@@ -386,7 +386,7 @@ public class JavaAgent {
             return javaAgent;
 
         // If java file, create and return
-        String fileType = aFile.getType();
+        String fileType = aFile.getFileType();
         if (fileType.equals("java") || fileType.equals("jepl"))
             return new JavaAgent(aFile);
 
