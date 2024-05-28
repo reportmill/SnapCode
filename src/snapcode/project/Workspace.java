@@ -351,6 +351,7 @@ public class Workspace extends PropObject {
         String PROXY_URL = "https://corsproxy.io/?";
         String repoUrlAddr = repoURL.getString().replace(".git", "");
         String zipUrlAddr = PROXY_URL + repoUrlAddr.replace("github.com", "codeload.github.com") + "/zip/refs/heads/master";
+        zipUrlAddr += "?vers=" + (System.currentTimeMillis() % 3600000); // Defeat caching
         WebURL zipUrl = WebURL.getURL(zipUrlAddr); assert (zipUrl != null);
         byte[] zipBytes = zipUrl.getBytes();
         if (zipBytes == null)
