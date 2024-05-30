@@ -3,10 +3,7 @@
  */
 package snapcode.app;
 import snap.util.*;
-import snapcode.apptools.NewFileTool;
-import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
-import snapcode.project.Workspace;
 import snap.props.PropChange;
 import snap.view.*;
 import snap.viewx.FilePanel;
@@ -131,31 +128,8 @@ public class WelcomePanel extends ViewOwner {
      */
     protected void openWorkspaceForShowSamples()
     {
-        //openWorkspaceForNewFileOfType("jepl", true);
-
-        // Open empty workspace pane with temp project
         WorkspacePane workspacePane = openEmptyWorkspace();
-
-        // Show samples
         runDelayed(() -> workspacePane.getWorkspaceTools().showSamples(), 300);
-    }
-
-    /**
-     * Opens empty workspace and opens given sample name.
-     */
-    protected void openWorkspaceForSample(String sampleName)
-    {
-        // Open empty workspace pane with temp project
-        WorkspacePane workspacePane = openEmptyWorkspace();
-
-        // Get sample url
-        String SAMPLES_ROOT = "https://reportmill.com/SnapCode/Samples/";
-        String samplePath = FilePathUtils.getFilenameSimple(sampleName) + '/' + sampleName;
-        WebURL sampleURL = WebURL.getURL(SAMPLES_ROOT + samplePath);
-        assert (sampleURL != null);
-
-        // Open sample URL
-        WorkspacePaneUtils.openSamplesUrl(workspacePane, sampleURL);
     }
 
     /**
@@ -163,15 +137,8 @@ public class WelcomePanel extends ViewOwner {
      */
     protected void openWorkspaceForNewFileOfType(String fileType)
     {
-        // Open empty workspace pane with temp project
         WorkspacePane workspacePane = openEmptyWorkspace();
-
-        // Create Java file
-        NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
-        runLater(() -> newFileTool.createFileForType(fileType));
-
-        // Start sample button anim
-        runLater(() -> workspacePane.getWorkspaceTools().startSamplesButtonAnim());
+        WorkspacePaneUtils.openNewFileOfType(workspacePane, fileType);
     }
 
     /**
@@ -184,37 +151,12 @@ public class WelcomePanel extends ViewOwner {
     }
 
     /**
-     * Opens a Java string file.
-     */
-    protected void openJavaString(String javaString, boolean isJepl)
-    {
-        // Open empty workspace pane with temp project
-        WorkspacePane workspacePane = openEmptyWorkspace();
-        Workspace workspace = workspacePane.getWorkspace();
-        Project tempProj = ProjectUtils.getTempProject(workspace);
-
-        // If new source file has word 'chart', add SnapCharts runtime to tempProj
-        if (isJepl && javaString.contains("chart"))
-            tempProj.getBuildFile().setIncludeSnapChartsRuntime(true);
-
-        // Show new project panel
-        runLater(() -> {
-            String fileType = isJepl ? "jepl" : "java";
-            NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
-            newFileTool.newJavaOrJeplFileForNameAndTypeAndString("JavaFiddle", fileType, javaString);
-        });
-    }
-
-    /**
      * Opens an empty workspace pane.
      */
     protected WorkspacePane openEmptyWorkspace()
     {
-        // Create workspace and workspace pane
-        Workspace workspace = new Workspace();
-        WorkspacePane workspacePane = new WorkspacePane(workspace);
-
-        // Show workspace, hide WelcomePanel
+        // Create workspace pane and show (and hide welcome panel)
+        WorkspacePane workspacePane = new WorkspacePane();
         workspacePane.show();
         hide();
 
@@ -269,7 +211,6 @@ public class WelcomePanel extends ViewOwner {
             getView("OpenButton").setEnabled(isOpenFileSet);
         }
     }
-
 
     /**
      * Load/configure top graphic WelcomePaneAnim.snp.

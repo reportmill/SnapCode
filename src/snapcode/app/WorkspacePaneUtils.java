@@ -1,5 +1,6 @@
 package snapcode.app;
 import snap.util.ArrayUtils;
+import snap.util.FilePathUtils;
 import snap.util.TaskRunner;
 import snap.view.ViewUtils;
 import snap.viewx.DialogBox;
@@ -16,6 +17,19 @@ import snapcode.project.*;
  * Utilities for WorkspacePane.
  */
 public class WorkspacePaneUtils {
+
+    /**
+     * Opens default workspace and triggers home page.
+     */
+    public static void openDefaultWorkspace()
+    {
+        // Create workspace pane
+        WorkspacePane workspacePane = new WorkspacePane();
+        workspacePane.show();
+
+        // Show home page
+        ViewUtils.runDelayed(() -> workspacePane.getPagePane().showHomePage(), 500);
+    }
 
     /**
      * Opens any file.
@@ -60,6 +74,51 @@ public class WorkspacePaneUtils {
         // Open project for given file
         openProjectForProjectFile(workspacePane, file);
         return true;
+    }
+
+    /**
+     * Creates a new file.
+     */
+    public static void openNewFileOfType(WorkspacePane workspacePane, String fileType)
+    {
+        NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
+        ViewUtils.runLater(() -> newFileTool.createFileForType(fileType));
+    }
+
+    /**
+     * Opens a Java string file.
+     */
+    public static void openJavaString(WorkspacePane workspacePane, String javaString, boolean isJepl)
+    {
+        // Open empty workspace pane with temp project
+        Workspace workspace = workspacePane.getWorkspace();
+        Project tempProj = ProjectUtils.getTempProject(workspace);
+
+        // If new source file has word 'chart', add SnapCharts runtime to tempProj
+        if (isJepl && javaString.contains("chart"))
+            tempProj.getBuildFile().setIncludeSnapChartsRuntime(true);
+
+        // Show new project panel
+        ViewUtils.runLater(() -> {
+            String fileType = isJepl ? "jepl" : "java";
+            NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
+            newFileTool.newJavaOrJeplFileForNameAndTypeAndString("JavaFiddle", fileType, javaString);
+        });
+    }
+
+    /**
+     * Opens empty workspace and opens given sample name.
+     */
+    public static void openSampleForName(WorkspacePane workspacePane, String sampleName)
+    {
+        // Get sample url
+        String SAMPLES_ROOT = "https://reportmill.com/SnapCode/Samples/";
+        String samplePath = FilePathUtils.getFilenameSimple(sampleName) + '/' + sampleName;
+        WebURL sampleURL = WebURL.getURL(SAMPLES_ROOT + samplePath);
+        assert (sampleURL != null);
+
+        // Open sample URL
+        openSamplesUrl(workspacePane, sampleURL);
     }
 
     /**

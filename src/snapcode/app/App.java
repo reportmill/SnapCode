@@ -61,23 +61,10 @@ public class App {
             return;
 
         // Show default workspace - Was WelcomePanel.getShared().showPanel();
-        openDefaultWorkspace();
+        WorkspacePaneUtils.openDefaultWorkspace();
 
+        // Hack - delete samples sandboxes for now
         ViewUtils.runDelayed(App::deleteSandboxes, 1000);
-    }
-
-    /**
-     * Opens default workspace and triggers home page.
-     */
-    protected void openDefaultWorkspace()
-    {
-        // Create workspace and workspace pane
-        Workspace workspace = new Workspace();
-        WorkspacePane workspacePane = new WorkspacePane(workspace);
-        workspacePane.show();
-
-        // Show home page
-        ViewUtils.runDelayed(() -> workspacePane.getPagePane().showHomePage(), 500);
     }
 
     /**
@@ -125,14 +112,16 @@ public class App {
 
         // Handle 'New'
         if (arg0.equalsIgnoreCase("new")) {
-            WelcomePanel.getShared().openWorkspaceForNewFileOfType("jepl");
+            WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
+            WorkspacePaneUtils.openNewFileOfType(workspacePane, "jepl");
             return true;
         }
 
         // Handle 'Sample:'
         if (arg0.startsWith("sample:")) {
             String sampleName = arg0.substring("sample:".length());
-            WelcomePanel.getShared().openWorkspaceForSample(sampleName);
+            WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
+            WorkspacePaneUtils.openSampleForName(workspacePane, sampleName);
             return true;
         }
 
@@ -165,7 +154,8 @@ public class App {
         String javaStr = LZString.decompressFromEncodedURIComponent(javaStrLZ);
 
         // Open Java/Jepl string
-        WelcomePanel.getShared().openJavaString(javaStr, isJepl);
+        WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
+        WorkspacePaneUtils.openJavaString(workspacePane, javaStr, isJepl);
     }
 
     /**
