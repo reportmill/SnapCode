@@ -423,7 +423,7 @@ public class WorkspacePane extends ViewOwner {
         // Handle WinClosing
         if (anEvent.isWinClose()) {
             hide();
-            App.showWelcomePanelLater();
+            App.getShared().openDefaultWorkspace();
         }
     }
 

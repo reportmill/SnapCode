@@ -23,11 +23,6 @@ public class WelcomePanel extends ViewOwner {
     // The shared instance
     private static WelcomePanel _shared;
 
-    // Constants
-    public static final String JAVA_FILE_EXT = "java";
-    public static final String JEPL_FILE_EXT = "jepl";
-    public static final String[] FILE_TYPES = { JAVA_FILE_EXT, JEPL_FILE_EXT };
-
     /**
      * Constructor.
      */
@@ -243,7 +238,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Create/config FilePanel
         FilePanel filePanel = new FilePanel();
-        filePanel.setFileValidator(file -> isValidOpenFile(file)); //filePanel.setTypes(EXTENSIONS);
+        filePanel.setFileValidator(ProjectUtils::isValidOpenFile);
         filePanel.setSelSite(recentFilesSite);
         filePanel.setActionHandler(e -> WelcomePanel.this.fireActionEventForObject("OpenButton", e));
 
@@ -348,58 +343,5 @@ public class WelcomePanel extends ViewOwner {
 
         // Start anim
         topGraphic.playAnimDeep();
-    }
-
-    /**
-     * Returns whether given file can be opened by app (java, jepl, project).
-     */
-    protected static boolean isValidOpenFile(WebFile aFile)
-    {
-        if (isSourceFile(aFile))
-            return true;
-        if (aFile.getFileType().equals("zip"))
-            return true;
-        if (aFile.getFileType().equals("gfar"))
-            return true;
-        return isProjectFile(aFile);
-    }
-
-    /**
-     * Returns whether given file is Java/Jepl.
-     */
-    private static boolean isSourceFile(WebFile aFile)
-    {
-        String fileType = aFile.getFileType();
-        return ArrayUtils.contains(FILE_TYPES, fileType);
-    }
-
-    /**
-     * Returns whether given file is Java/Jepl.
-     */
-    private static boolean isProjectFile(WebFile aFile)
-    {
-        // If BuildFile, return true
-        String BUILD_FILE_NAME = "build.snapcode";
-        if (aFile.getName().equals(BUILD_FILE_NAME))
-            return true;
-
-        // If is dir with BuildFile or source dir or source file, return true
-        if (aFile.isDir()) {
-
-            // If file doesn't exist, return false
-            if (!aFile.getExists())
-                return false;
-
-            // If dir contains build file, src dir, or src file, return true
-            WebFile[] dirFiles = aFile.getFiles();
-            String[] projectFileNames = { "build.snapcode", "src" };
-            for (WebFile file : dirFiles) {
-                if (ArrayUtils.contains(projectFileNames, file.getName()) || isSourceFile(file))
-                    return true;
-            }
-        }
-
-        // Return not project file
-        return false;
     }
 }

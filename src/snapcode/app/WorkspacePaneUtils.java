@@ -51,7 +51,7 @@ public class WorkspacePaneUtils {
         }
 
         // If file is just a source file, open external source file
-        boolean isSourceFile = ArrayUtils.contains(WelcomePanel.FILE_TYPES, fileType);
+        boolean isSourceFile = ArrayUtils.contains(ProjectUtils.FILE_TYPES, fileType);
         if (isSourceFile) {
             ViewUtils.runLater(() -> openExternalSourceFile(workspacePane, file));
             return true;

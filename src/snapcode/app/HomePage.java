@@ -6,6 +6,7 @@ import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.apptools.NewFileTool;
+import snapcode.project.ProjectUtils;
 import snapcode.webbrowser.WebPage;
 import java.io.File;
 
@@ -60,7 +61,7 @@ public class HomePage extends WebPage {
     private void showOpenPanel()
     {
         FilePanel filePanel = new FilePanel();
-        filePanel.setFileValidator(file -> WelcomePanel.isValidOpenFile(file));
+        filePanel.setFileValidator(file -> ProjectUtils.isValidOpenFile(file));
         WebFile openFile = filePanel.showFilePanel(getUI());
         if (openFile == null)
             return;

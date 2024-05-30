@@ -60,8 +60,7 @@ public class App {
         if (handleAppArgs())
             return;
 
-        // Show WelcomePanel
-        //showWelcomePanel();
+        // Show default workspace - Was WelcomePanel.getShared().showPanel();
         openDefaultWorkspace();
 
         ViewUtils.runDelayed(App::deleteSandboxes, 1000);
@@ -79,14 +78,6 @@ public class App {
 
         // Show home page
         ViewUtils.runDelayed(() -> workspacePane.getPagePane().showHomePage(), 500);
-    }
-
-    /**
-     * Show WelcomePanel.
-     */
-    public void showWelcomePanel()
-    {
-        WelcomePanel.getShared().showPanel();
     }
 
     /**
@@ -135,12 +126,6 @@ public class App {
         // Handle 'New'
         if (arg0.equalsIgnoreCase("new")) {
             WelcomePanel.getShared().openWorkspaceForNewFileOfType("jepl");
-            return true;
-        }
-
-        // Handle 'Samples'
-        if (arg0.equalsIgnoreCase("samples")) {
-            WelcomePanel.getShared().openWorkspaceForShowSamples();
             return true;
         }
 
@@ -193,15 +178,6 @@ public class App {
             RunTool runTool = workspacePane.getWorkspaceTools().getRunTool();
             runTool.runAppForSelFile(false);
         }
-    }
-
-    /**
-     * Calls showWelcomePane after delay.
-     */
-    public static void showWelcomePanelLater()
-    {
-        Prefs.getDefaultPrefs().flush();
-        ViewUtils.runLater(() -> getShared().showWelcomePanel());
     }
 
     /**

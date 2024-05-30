@@ -69,8 +69,10 @@ public class GreenImport {
     public static void openGreenfootDir(WorkspacePane workspacePane, WebFile greenfootDir)
     {
         // Make sure workspacePane exists
-        if (workspacePane == null)
-            workspacePane = WelcomePanel.getShared().openEmptyWorkspace();
+        if (workspacePane == null) {
+            workspacePane = new WorkspacePane();
+            workspacePane.show();
+        }
 
         // Get scenario name
         String scenarioName = greenfootDir.getSimpleName().replace(' ', '_');
