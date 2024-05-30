@@ -22,28 +22,44 @@ public class WorkspacePaneUtils {
      */
     public static void openFile(WorkspacePane workspacePane, WebFile aFile)
     {
+        WebURL fileUrl = aFile.getURL();
+        openFileUrl(workspacePane, fileUrl);
+    }
+
+    /**
+     * Opens any file URL.
+     */
+    public static boolean openFileUrl(WorkspacePane workspacePane, WebURL fileUrl)
+    {
+        String fileType = fileUrl.getFileType();
+
+        // If file is zip file, open repo
+        if (fileType.equals("zip") || fileType.equals("git")) {
+            openProjectForRepoURL(workspacePane, fileUrl);
+            return true;
+        }
+
+        // Get file (just return if file doesn't exist)
+        WebFile file = fileUrl.getFile();
+        if (file == null)
+            return false;
+
         // If file is gfar file, open repo
-        String fileType = aFile.getFileType();
         if (fileType.equals("gfar")) {
-            GreenImport.openGreenfootForArchiveFilePath(workspacePane, aFile.getPath());
-            return;
+            GreenImport.openGreenfootForArchiveFilePath(workspacePane, fileUrl.getPath());
+            return true;
         }
 
         // If file is just a source file, open external source file
         boolean isSourceFile = ArrayUtils.contains(WelcomePanel.FILE_TYPES, fileType);
         if (isSourceFile) {
-            ViewUtils.runLater(() -> openExternalSourceFile(workspacePane, aFile));
-            return;
-        }
-
-        // If file is zip file, open repo
-        if (fileType.equals("zip") || fileType.equals("git")) {
-            openProjectForRepoURL(workspacePane, aFile.getURL());
-            return;
+            ViewUtils.runLater(() -> openExternalSourceFile(workspacePane, file));
+            return true;
         }
 
         // Open project for given file
-        openProjectForProjectFile(workspacePane, aFile);
+        openProjectForProjectFile(workspacePane, file);
+        return true;
     }
 
     /**

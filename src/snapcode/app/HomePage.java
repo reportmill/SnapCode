@@ -87,10 +87,9 @@ public class HomePage extends WebPage {
         if (urlAddr.startsWith("OpenRecent:")) {
             String recentFileUrlAddr = urlAddr.substring("OpenRecent:".length());
             WebURL recentFileUrl = WebURL.getURL(recentFileUrlAddr);
-            WebFile recentFile = recentFileUrl != null ? recentFileUrl.getFile() : null;
-            if (recentFile != null)
-                WorkspacePaneUtils.openFile(_workspacePane, recentFile);
-            else removeRecentFileUrl(recentFileUrl);
+            boolean didOpen = recentFileUrl != null && WorkspacePaneUtils.openFileUrl(_workspacePane, recentFileUrl);
+            if (!didOpen)
+                removeRecentFileUrl(recentFileUrl);
             return;
         }
 
