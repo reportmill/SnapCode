@@ -9,7 +9,6 @@ import snap.view.WindowView;
 import snap.viewx.DevPaneExceptions;
 import snap.web.WebFile;
 import snapcode.apptools.RunTool;
-import snapcode.project.Workspace;
 import snapcode.util.LZString;
 
 /**

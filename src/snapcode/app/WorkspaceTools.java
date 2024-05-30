@@ -12,7 +12,6 @@ import snap.view.*;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snapcode.apptools.*;
-import snapcode.util.SamplesPane;
 
 /**
  * This class manages all the WorkspaceTool instances for a WorkspacePane.
@@ -42,9 +41,6 @@ public class WorkspaceTools {
 
     // PropChangeListener for BuildIssues
     private PropChangeListener  _buildIssueLsnr = pc -> buildIssuesDidChange(pc);
-
-    // Samples button
-    private Button  _samplesButton;
 
     /**
      * Constructor.
@@ -322,71 +318,5 @@ public class WorkspaceTools {
         BuildTool buildTool = getToolForClass(BuildTool.class);
         if (buildTool != null && buildTool.isShowing())
             buildTool.resetLater();
-    }
-
-    /**
-     * Shows samples.
-     */
-    public void showSamples()
-    {
-        stopSamplesButtonAnim();
-        new SamplesPane().showSamples(_workspacePane, url -> WorkspacePaneUtils.openSamplesUrl(_workspacePane, url));
-    }
-
-    /**
-     * Animate SampleButton.
-     */
-    public void startSamplesButtonAnim()
-    {
-        View samplesButton = getSamplesButton();
-        samplesButton.setVisible(true);
-        SamplesPane.startSamplesButtonAnim(samplesButton);
-
-        // Show the run tool
-        ViewUtils.runDelayed(_workspacePane::showRunTool, 300);
-    }
-
-    /**
-     * Stops SampleButton animation.
-     */
-    private void stopSamplesButtonAnim()
-    {
-        View samplesButton = getSamplesButton();
-        SamplesPane.stopSamplesButtonAnim(samplesButton);
-    }
-
-    /**
-     * Adds the SamplesButton to RightTray.
-     */
-    private void addSamplesButton()
-    {
-        // Get SamplesButton
-        Button samplesButton = getSamplesButton();
-
-        // Add to RightTray.UI.TabBar.TabsBox
-        TabView tabView = _rightTray.getUI(TabView.class);
-        TabBar tabBar = tabView.getTabBar();
-        ParentView tabsBox = tabBar.getTabsBox();
-        ViewUtils.addChild(tabsBox, samplesButton);
-        tabsBox.setSpacing(6);
-    }
-
-    /**
-     * Adds the SamplesButton to RightTray.
-     */
-    private Button getSamplesButton()
-    {
-        // If already set, just return
-        if (_samplesButton != null) return _samplesButton;
-
-        // Create/config button
-        Button samplesButton = new ViewBuilder<>(Button.class).name("SamplesButton").text("Samples").build();
-        samplesButton.setPrefWidth(80);
-        samplesButton.setMargin(2, 0, 2, 0);
-        samplesButton.setPadding(3, 7, 3, 7);
-        samplesButton.addEventHandler(e -> showSamples(), View.Action);
-
-        // Set/return
-        return _samplesButton = samplesButton;
     }
 }
