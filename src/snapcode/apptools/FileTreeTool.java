@@ -10,6 +10,7 @@ import snap.web.WebSite;
 import snapcode.app.*;
 import snapcode.project.Project;
 import snapcode.util.DiffPage;
+import snapcode.util.FileIcons;
 import snapcode.webbrowser.*;
 import java.io.File;
 import java.util.ArrayList;
@@ -452,6 +453,8 @@ public class FileTreeTool extends WorkspaceTool {
         if (selFile != null && !anEvent.isConsumed()) {
             Clipboard clipboard = anEvent.getClipboard();
             clipboard.addData(selFile.getJavaFile());
+            Image dragImage = FileIcons.getFileIconImage(selFile);
+            clipboard.setDragImage(dragImage);
             clipboard.startDrag();
             anEvent.consume();
         }
