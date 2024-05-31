@@ -329,7 +329,7 @@ public class HttpServerTool extends WorkspaceTool {
             hdrs.add("last-modified", getGMT(lastMod));
             hdrs.add("cache-control", _cacheControl);
             hdrs.add("content-length", String.valueOf(len));
-            String mtype = MIMEType.getType(ext);
+            String mtype = MIMEType.getMimeTypeForPath(ext);
             if (mtype != null) hdrs.add("content-type", mtype);
 
             // Get bytes and append
@@ -365,7 +365,7 @@ public class HttpServerTool extends WorkspaceTool {
             hdrs.add("last-modified", getGMT(lastMod));
             hdrs.add("cache-control", _cacheControl);
             hdrs.add("content-length", String.valueOf(len));
-            String mtype = MIMEType.getType(ext);
+            String mtype = MIMEType.getMimeTypeForPath(ext);
             if (mtype != null) hdrs.add("content-type", mtype);
 
             // Append bytes
