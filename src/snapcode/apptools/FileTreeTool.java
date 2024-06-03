@@ -520,6 +520,7 @@ public class FileTreeTool extends WorkspaceTool {
      */
     public void downloadFile()
     {
+        // Get selected file - if file, just forward to download file
         WebFile selFile = getSelFile();
         if (selFile.isFile()) {
             File selFileJava = selFile.getJavaFile();
@@ -528,9 +529,14 @@ public class FileTreeTool extends WorkspaceTool {
             return;
         }
 
+        // Get filename
+        String filename = selFile.getName();
+        if (selFile.isRoot())
+            filename = selFile.getSite().getName();
+
         // Create zip file
         File zipDir = selFile.getJavaFile();
-        File zipFile = FileUtils.getTempFile(selFile.getName() + ".zip");
+        File zipFile = FileUtils.getTempFile(filename + ".zip");
         try { FilesTool.zipDirectory(zipDir, zipFile); }
         catch (Exception e) { System.err.println(e.getMessage()); }
 
@@ -544,7 +550,8 @@ public class FileTreeTool extends WorkspaceTool {
      */
     public void downloadFile(File fileToDownload)
     {
-        GFXEnv.getEnv().openFile(fileToDownload);
+        WebFile webFile = WebFile.getFileForJavaFile(fileToDownload);
+        GFXEnv.getEnv().downloadFile(webFile);
     }
 
     /**
