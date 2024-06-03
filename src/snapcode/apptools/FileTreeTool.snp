@@ -26,6 +26,7 @@
       <MenuItem />
       <MenuItem Name="ShowClassInfoMenuItem" text="Show Class File Info" />
     </MenuButton>
+    <Button Name="DownloadFileButton" PrefWidth="20" PrefHeight="20" Margin="5" LeanX="RIGHT" ShowArea="false" Image="Download.png" />
     <Button Name="NewFileButton" PrefWidth="20" PrefHeight="20" Margin="5" LeanX="RIGHT" ShowArea="false" Image="Add.png" />
   </RowView>
   <RectView PrefHeight="1">

@@ -1,4 +1,6 @@
 package snapcode.apptools;
+import snap.gfx.GFXEnv;
+import snap.util.FileUtils;
 import snap.util.SnapUtils;
 import snap.gfx.Color;
 import snap.gfx.Image;
@@ -265,6 +267,12 @@ public class FileTreeTool extends WorkspaceTool {
                 break;
             }
 
+            // Handle DownloadFileButton
+            case "DownloadFileButton": {
+                downloadFile();
+                break;
+            }
+
             // Handle RemoveFileMenuItem
             case "RemoveFileMenuItem": {
                 FilesTool filesTool = _workspaceTools.getFilesTool();
@@ -505,6 +513,38 @@ public class FileTreeTool extends WorkspaceTool {
             List<File> files = clipboard.getJavaFiles();
             filesTool.addFiles(files);
         }
+    }
+
+    /**
+     * Handle download file.
+     */
+    public void downloadFile()
+    {
+        WebFile selFile = getSelFile();
+        if (selFile.isFile()) {
+            File selFileJava = selFile.getJavaFile();
+            if (selFileJava != null)
+                downloadFile(selFile.getJavaFile());
+            return;
+        }
+
+        // Create zip file
+        File zipDir = selFile.getJavaFile();
+        File zipFile = FileUtils.getTempFile(selFile.getName() + ".zip");
+        try { FilesTool.zipDirectory(zipDir, zipFile); }
+        catch (Exception e) { System.err.println(e.getMessage()); }
+
+        // Download file
+        downloadFile(zipFile);
+        runDelayed(() -> zipFile.delete(), 1000);
+    }
+
+    /**
+     * Handle download file.
+     */
+    public void downloadFile(File fileToDownload)
+    {
+        GFXEnv.getEnv().openFile(fileToDownload);
     }
 
     /**

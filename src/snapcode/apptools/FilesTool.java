@@ -6,7 +6,12 @@ import snap.viewx.DialogBox;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * This class is a WorkspaceTool to manage file operations on project files: create, add, remove, rename.
@@ -269,5 +274,58 @@ public class FilesTool extends WorkspaceTool {
 
         // Update tree again
         setSelFile(parent);
+    }
+
+    /**
+     * Creates a zip file for given directory file.
+     */
+    public static void zipDirectory(File dirToZip, File zipFile) throws IOException
+    {
+        try (FileOutputStream fos = new FileOutputStream(zipFile); ZipOutputStream zos = new ZipOutputStream(fos)) {
+            addDirectoryToZip(dirToZip, dirToZip.getName(), zos);
+        }
+    }
+
+    /**
+     * Adds a directory to zip output stream.
+     */
+    private static void addDirectoryToZip(File dir, String baseName, ZipOutputStream zos) throws IOException
+    {
+        File[] files = dir.listFiles();
+
+        // Handle empty directory: Create a directory entry in the zip file
+        if (files == null || files.length == 0) {
+            ZipEntry entry = new ZipEntry(baseName + "/");
+            zos.putNextEntry(entry);
+            zos.closeEntry();
+        }
+
+        // Handle normal directory: Iterate over files and either Recursively add directory or add file
+        else {
+            for (File file : files) {
+                if (file.isDirectory())
+                    addDirectoryToZip(file, baseName + "/" + file.getName(), zos);
+                else addFileToZip(file, baseName, zos);
+            }
+        }
+    }
+
+    /**
+     * Adds a file to zip output stream.
+     */
+    private static void addFileToZip(File file, String baseName, ZipOutputStream zos) throws IOException
+    {
+        try (FileInputStream fis = new FileInputStream(file)) {
+            String zipEntryName = baseName + "/" + file.getName();
+            ZipEntry entry = new ZipEntry(zipEntryName);
+            zos.putNextEntry(entry);
+
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = fis.read(buffer)) > 0) {
+                zos.write(buffer, 0, length);
+            }
+            zos.closeEntry();
+        }
     }
 }
