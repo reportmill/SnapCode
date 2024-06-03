@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import snap.util.ArrayUtils;
 import snap.web.*;
 import snapcode.project.WorkspaceBuilder;
 import snap.util.StringUtils;
@@ -291,22 +292,23 @@ public class FilesTool extends WorkspaceTool {
      */
     private static void addDirectoryToZip(File dir, String baseName, ZipOutputStream zos) throws IOException
     {
-        File[] files = dir.listFiles();
+        if (isIgnoreFile(dir))
+            return;
 
         // Handle empty directory: Create a directory entry in the zip file
+        File[] files = dir.listFiles();
         if (files == null || files.length == 0) {
             ZipEntry entry = new ZipEntry(baseName + "/");
             zos.putNextEntry(entry);
             zos.closeEntry();
+            return;
         }
 
         // Handle normal directory: Iterate over files and either Recursively add directory or add file
-        else {
-            for (File file : files) {
-                if (file.isDirectory())
-                    addDirectoryToZip(file, baseName + "/" + file.getName(), zos);
-                else addFileToZip(file, baseName, zos);
-            }
+        for (File file : files) {
+            if (file.isDirectory())
+                addDirectoryToZip(file, baseName + "/" + file.getName(), zos);
+            else addFileToZip(file, baseName, zos);
         }
     }
 
@@ -315,6 +317,9 @@ public class FilesTool extends WorkspaceTool {
      */
     private static void addFileToZip(File file, String baseName, ZipOutputStream zos) throws IOException
     {
+        if (isIgnoreFile(file))
+            return;
+
         try (FileInputStream fis = new FileInputStream(file)) {
             String zipEntryName = baseName + "/" + file.getName();
             ZipEntry entry = new ZipEntry(zipEntryName);
@@ -328,4 +333,16 @@ public class FilesTool extends WorkspaceTool {
             zos.closeEntry();
         }
     }
+
+    /**
+     * Returns whether to ignore file.
+     */
+    private static boolean isIgnoreFile(File file)
+    {
+        String filename = file.getName();
+        return ArrayUtils.contains(IGNORE_NAMES, filename);
+    }
+
+    // Array of ignore names
+    private static String[] IGNORE_NAMES = { "bin", ".git" };
 }
