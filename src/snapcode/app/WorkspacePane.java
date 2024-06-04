@@ -222,15 +222,15 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
-     * Shows the project tool (FileTreeTool).
+     * Shows the project files tool.
      */
     public void showProjectTool()
     {
-        _workspaceTools.showToolForClass(FileTreeTool.class);
+        _workspaceTools.showToolForClass(ProjectFilesTool.class);
     }
 
     /**
-     * Shows the run tool (FileTreeTool).
+     * Shows the run tool.
      */
     public void showRunTool()
     {
@@ -494,8 +494,8 @@ public class WorkspacePane extends ViewOwner {
         projPane.openProjectPane();
 
         // Clear root files
-        FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
-        fileTreeTool.resetRootFiles();
+        ProjectFilesTool projectFilesTool = _workspaceTools.getProjectFilesTool();
+        projectFilesTool.resetRootFiles();
 
         // Reset UI
         resetLater();
@@ -518,8 +518,8 @@ public class WorkspacePane extends ViewOwner {
         projPane.closeProjectPane();
 
         // Clear root files
-        FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
-        fileTreeTool.resetRootFiles();
+        ProjectFilesTool projectFilesTool = _workspaceTools.getProjectFilesTool();
+        projectFilesTool.resetRootFiles();
 
         // Reset UI
         resetLater();
@@ -534,10 +534,10 @@ public class WorkspacePane extends ViewOwner {
         String propName = aPC.getPropName();
         WebFile file = (WebFile) aPC.getSource();
 
-        // Handle LastModTime, Modified: Update file in FileTreeTool
+        // Handle LastModTime, Modified: Update file in ProjectFilesTool
         if (propName == WebFile.LastModTime_Prop || propName == WebFile.Modified_Prop) {
-            FileTreeTool fileTreeTool = _workspaceTools.getFileTreeTool();
-            fileTreeTool.updateChangedFile(file);
+            ProjectFilesTool projectFilesTool = _workspaceTools.getProjectFilesTool();
+            projectFilesTool.updateChangedFile(file);
         }
     }
 

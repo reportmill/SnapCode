@@ -8,7 +8,7 @@ import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.apptools.FileTreeTool;
+import snapcode.apptools.ProjectFilesTool;
 import snapcode.apptools.NewFileTool;
 import snapcode.apptools.RunTool;
 import snapcode.project.*;
@@ -257,9 +257,9 @@ public class WorkspacePaneUtils {
     {
         // If project, expand source dir
         if (project != null) {
-            FileTreeTool fileTreeTool = workspacePane.getWorkspaceTools().getFileTreeTool();
+            ProjectFilesTool projectFilesTool = workspacePane.getWorkspaceTools().getProjectFilesTool();
             WebFile sourceDir = project.getSourceDir();
-            fileTreeTool.showDir(sourceDir);
+            projectFilesTool.showDir(sourceDir);
         }
 
         // Get good default file
@@ -289,7 +289,7 @@ public class WorkspacePaneUtils {
      */
     private static void showFile(WorkspacePane workspacePane, WebFile aFile)
     {
-        FileTreeTool fileTreeTool = workspacePane.getWorkspaceTools().getFileTreeTool();
-        fileTreeTool.showFile(aFile);
+        ProjectFilesTool projectFilesTool = workspacePane.getWorkspaceTools().getProjectFilesTool();
+        projectFilesTool.showFile(aFile);
     }
 }

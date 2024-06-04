@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A class to represent a project file in FileTreeTool.
+ * A class to represent a project file in ProjectFilesTool.
  */
 public class FileTreeFile implements Comparable<FileTreeFile> {
 

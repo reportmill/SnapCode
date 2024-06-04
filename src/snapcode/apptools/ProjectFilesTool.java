@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * A class to handle visual management of project files.
  */
-public class FileTreeTool extends WorkspaceTool {
+public class ProjectFilesTool extends WorkspaceTool {
 
     // The file tree
     private TreeView<FileTreeFile>  _filesTree;
@@ -33,13 +33,13 @@ public class FileTreeTool extends WorkspaceTool {
     protected FileTreeFile[] _rootFiles;
 
     // Images for files tree/list
-    private static Image FILES_TREE_ICON = Image.getImageForClassResource(FileTreeTool.class, "FilesTree.png");
-    private static Image FILES_LIST_ICON = Image.getImageForClassResource(FileTreeTool.class, "FilesList.png");
+    private static Image FILES_TREE_ICON = Image.getImageForClassResource(ProjectFilesTool.class, "FilesTree.png");
+    private static Image FILES_LIST_ICON = Image.getImageForClassResource(ProjectFilesTool.class, "FilesList.png");
 
     /**
      * Constructor.
      */
-    public FileTreeTool(WorkspacePane workspacePane)
+    public ProjectFilesTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
     }

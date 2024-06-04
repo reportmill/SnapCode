@@ -356,8 +356,8 @@ public class VersionControlTool extends ProjectTool {
     {
         WebFile file = (WebFile) aPC.getSource();
         WorkspaceTools workspaceTools = getWorkspaceTools();
-        FileTreeTool fileTreeTool = workspaceTools.getFileTreeTool();
-        fileTreeTool.updateChangedFile(file);
+        ProjectFilesTool projectFilesTool = workspaceTools.getProjectFilesTool();
+        projectFilesTool.updateChangedFile(file);
     }
 
     /**

@@ -65,7 +65,7 @@ public class WorkspaceTools {
     {
         // Main tools
         FilesTool filesTool = new FilesTool(_workspacePane);
-        FileTreeTool fileTreeTool = new FileTreeTool(_workspacePane);
+        ProjectFilesTool projectFilesTool = new ProjectFilesTool(_workspacePane);
         NewFileTool newFileTool = new NewFileTool(_workspacePane);
         RunTool runTool = new RunTool(_workspacePane);
         DebugTool debugTool = new DebugTool(_workspacePane, runTool);
@@ -83,7 +83,7 @@ public class WorkspaceTools {
 
         // Create tools array
         _tools = new WorkspaceTool[] {
-                filesTool, fileTreeTool, newFileTool,
+                filesTool, projectFilesTool, newFileTool,
                 runTool, debugTool, buildTool,
                 searchTool, helpTool, blocksTool,
                 runConfigsTool, breakpointsTool,
@@ -91,7 +91,7 @@ public class WorkspaceTools {
         };
 
         // Create LeftTray
-        WorkspaceTool[] leftTools = { fileTreeTool };
+        WorkspaceTool[] leftTools = {projectFilesTool};
         _leftTray = new ToolTray(Side.LEFT, leftTools);
 
         // Create RightTray
@@ -152,9 +152,9 @@ public class WorkspaceTools {
     public NewFileTool getNewFileTool()  { return getToolForClass(NewFileTool.class); }
 
     /**
-     * Returns the FileTreeTool.
+     * Returns the ProjectFilesTool.
      */
-    public FileTreeTool getFileTreeTool()  { return getToolForClass(FileTreeTool.class); }
+    public ProjectFilesTool getProjectFilesTool()  { return getToolForClass(ProjectFilesTool.class); }
 
     /**
      * Returns the RunTool.
@@ -311,8 +311,8 @@ public class WorkspaceTools {
         }
 
         // Update FilesPane.FilesTree
-        FileTreeTool fileTreeTool = getFileTreeTool();
-        fileTreeTool.updateChangedFile(issueFile);
+        ProjectFilesTool projectFilesTool = getProjectFilesTool();
+        projectFilesTool.updateChangedFile(issueFile);
 
         // Update ProblemsTool
         BuildTool buildTool = getToolForClass(BuildTool.class);
