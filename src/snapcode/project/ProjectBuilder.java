@@ -30,7 +30,7 @@ public class ProjectBuilder {
     {
         super();
         _proj = aProject;
-        _javaFileBuilder = new JavaFileBuilderX(aProject);
+        _javaFileBuilder = new JavaFileBuilder(aProject);
         _defaultFileBuilder = new ProjectFileBuilder.DefaultBuilder(aProject);
     }
 
