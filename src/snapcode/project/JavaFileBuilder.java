@@ -39,7 +39,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     @Override
     public boolean isNeedsBuild()
     {
-        return _buildFiles.size() > 0;
+        return !_buildFiles.isEmpty();
     }
 
     /**
@@ -81,11 +81,11 @@ public class JavaFileBuilder implements ProjectFileBuilder {
         _compiledFiles.clear();
 
         // If no build files, just return
-        if (_buildFiles.size() == 0)
+        if (_buildFiles.isEmpty())
             return true;
 
         // Get files
-        List<WebFile> javaFiles = new ArrayList<>(_buildFiles);;
+        List<WebFile> javaFiles = new ArrayList<>(_buildFiles);
         _buildFiles.clear();
 
         // Do real build
@@ -127,7 +127,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
      */
     protected boolean buildFile(WebFile javaFile)
     {
-        JavaAgent javaAgent = JavaAgent.getAgentForFile(javaFile);
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
         javaAgent.checkFileForErrors();
 
         // Return
@@ -159,7 +159,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     protected BuildIssue[] getUnusedImportBuildIssuesForFile(WebFile javaFile)
     {
         // Get unused import decls
-        JavaAgent javaAgent = JavaAgent.getAgentForFile(javaFile);
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
         JFile jfile = javaAgent.getJFile();
         JImportDecl[] unusedImports = jfile.getUnusedImports();
         if (unusedImports.length == 0)
