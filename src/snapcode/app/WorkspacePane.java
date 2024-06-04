@@ -446,34 +446,39 @@ public class WorkspacePane extends ViewOwner {
      */
     private void workspaceDidPropChange(PropChange aPC)
     {
-        String propName = aPC.getPropName();
+        switch (aPC.getPropName()) {
 
-        // Handle Status, Activity
-        if (propName == Workspace.Status_Prop)
-            getBrowser().setStatus(_workspace.getStatus());
-        else if (propName == Workspace.Activity_Prop)
-            getBrowser().setActivity(_workspace.getActivity());
+            // Handle Status, Activity
+            case Workspace.Status_Prop: getBrowser().setStatus(_workspace.getStatus()); break;
+            case Workspace.Activity_Prop: getBrowser().setActivity(_workspace.getActivity()); break;
 
-        // Handle Building
-        else if (propName == Workspace.Building_Prop) {
-            if (!_workspace.isBuilding())
-                handleBuildCompleted();
-        }
+            // Handle Building
+            case Workspace.Building_Prop:
+                if (!_workspace.isBuilding())
+                    handleBuildCompleted();
+                break;
 
-        // Handle Projects
-        else if (propName == Workspace.Projects_Prop) {
-            Project addedProj = (Project) aPC.getNewValue();
-            if (addedProj != null)
-                workspaceDidAddProject(addedProj);
-            else {
-                Project removedProj = (Project) aPC.getOldValue();
-                if (removedProj != null)
-                    workspaceDidRemoveProject(removedProj);
-            }
+            // Handle Projects
+            case Workspace.Projects_Prop: workspaceDidProjectsChange(aPC); break;
         }
 
         // Handle Loading, Building
         _statusBar.resetLater();
+    }
+
+    /**
+     * Called when Workspace does a Projects prop change.
+     */
+    private void workspaceDidProjectsChange(PropChange aPC)
+    {
+        Project addedProj = (Project) aPC.getNewValue();
+        if (addedProj != null)
+            workspaceDidAddProject(addedProj);
+        else {
+            Project removedProj = (Project) aPC.getOldValue();
+            if (removedProj != null)
+                workspaceDidRemoveProject(removedProj);
+        }
     }
 
     /**

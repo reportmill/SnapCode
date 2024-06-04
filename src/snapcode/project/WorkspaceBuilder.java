@@ -30,7 +30,7 @@ public class WorkspaceBuilder {
     private Runnable _buildWorkspaceRun = () -> buildWorkspace();
 
     // The runner to build workspace
-    private BuildWorkspaceRunner _buildWorkspaceRunner;
+    private TaskRunner<Boolean> _buildWorkspaceRunner;
 
     // The last build log
     private StringBuffer _buildLogBuffer;
@@ -86,7 +86,7 @@ public class WorkspaceBuilder {
      */
     public boolean isBuilding()
     {
-        BuildWorkspaceRunner buildRunner = _buildWorkspaceRunner;
+        TaskRunner<Boolean> buildRunner = _buildWorkspaceRunner;
         return buildRunner != null && buildRunner.isActive();
     }
 
@@ -107,8 +107,9 @@ public class WorkspaceBuilder {
         taskMonitor.addPropChangeListener(pc -> taskMonitorTaskTitleChanged(taskMonitor), TaskMonitor.TaskTitle_Prop);
 
         // Create configure task runner and start
-        _buildWorkspaceRunner = new BuildWorkspaceRunner();
-        _buildWorkspaceRunner.setTaskFunction(() -> buildWorkspaceImpl(taskMonitor));
+        _buildWorkspaceRunner = new TaskRunner<>(() -> buildWorkspaceImpl(taskMonitor));
+        _buildWorkspaceRunner.setOnFailure(e -> e.printStackTrace());
+        _buildWorkspaceRunner.setOnFinished(() -> buildWorkspaceFinished(_buildWorkspaceRunner));
         _buildWorkspaceRunner.setMonitor(taskMonitor);
         _buildWorkspaceRunner.start();
 
@@ -137,7 +138,7 @@ public class WorkspaceBuilder {
      */
     public void stopBuild()
     {
-        BuildWorkspaceRunner buildRunner = _buildWorkspaceRunner;
+        TaskRunner<?> buildRunner = _buildWorkspaceRunner;
         if (buildRunner != null)
             buildRunner.cancel();
         _buildAgain = false;
@@ -216,6 +217,19 @@ public class WorkspaceBuilder {
     }
 
     /**
+     * Called when build is finished.
+     */
+    protected void buildWorkspaceFinished(TaskRunner<?> buildWorkspaceRunner)
+    {
+        // If this runner is retired, just return
+        if (_buildWorkspaceRunner != buildWorkspaceRunner)
+            return;
+
+        // Clear runner
+        _buildWorkspaceRunner = null;
+    }
+
+    /**
      * Adds all workspace source files to next build.
      */
     public void addAllFilesToBuild()  { _addAllFilesToBuild = true; }
@@ -248,40 +262,6 @@ public class WorkspaceBuilder {
         if (taskRunner != null && taskMonitor == taskRunner.getMonitor()) {
             _workspace.setActivity(taskTitle);
             _buildLogBuffer.append(taskTitle).append('\n');
-        }
-    }
-
-    /**
-     * This TaskRunner subclass builds workspace in background thread.
-     */
-    private class BuildWorkspaceRunner extends TaskRunner<Boolean> {
-
-        /**
-         * Constructor.
-         */
-        public BuildWorkspaceRunner()  { super(); }
-
-        /**
-         * Override to reset Workspace Activity/Building properties and clear runner.
-         */
-        @Override
-        protected void finished()
-        {
-            // If this runner is retired, just return
-            if (_buildWorkspaceRunner != this)
-                return;
-
-            // Clear runner
-            _buildWorkspaceRunner = null;
-        }
-
-        /**
-         * Override to print exception.
-         */
-        @Override
-        protected void failure(final Exception e)
-        {
-            e.printStackTrace();
         }
     }
 }
