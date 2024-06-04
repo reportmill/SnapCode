@@ -237,8 +237,28 @@ public class JavaAgent {
         WebFile javaFile = getFile();
         BuildIssue[] buildIssues = ArrayUtils.map(errors, error -> BuildIssue.createIssueForNodeError(error, javaFile), BuildIssue.class);
 
+        // Check for unused imports
+        BuildIssue[] unusedImportErrors = getUnusedImportErrors();
+        if (unusedImportErrors.length > 0)
+            buildIssues = ArrayUtils.addAll(buildIssues, unusedImportErrors);
+
         // Set build issues
         setBuildIssues(buildIssues);
+    }
+
+    /**
+     * Returns an array of unused imports for Java file.
+     */
+    protected BuildIssue[] getUnusedImportErrors()
+    {
+        // Get unused import decls
+        JFile jfile = getJFile();
+        JImportDecl[] unusedImports = jfile.getUnusedImports();
+        if (unusedImports.length == 0)
+            return BuildIssues.NO_ISSUES;
+
+        // Create BuildIssues for each and return
+        return ArrayUtils.map(unusedImports, id -> createUnusedImportBuildIssue(_javaFile, id), BuildIssue.class);
     }
 
     /**
@@ -436,5 +456,17 @@ public class JavaAgent {
         if (_jeplImportsWithCharts != null) return _jeplImportsWithCharts;
         String[] jeplImports = getJeplDefaultImports();
         return _jeplImportsWithCharts = ArrayUtils.addAll(jeplImports, "snapcharts.data.*", "static snapcharts.charts.SnapCharts.*");
+    }
+
+    /**
+     * Returns an "Unused Import" BuildIssue for given import decl.
+     */
+    private static BuildIssue createUnusedImportBuildIssue(WebFile javaFile, JImportDecl importDecl)
+    {
+        String msg = "The import " + importDecl.getName() + " is never used";
+        int lineIndex = importDecl.getLineIndex();
+        int startCharIndex = importDecl.getStartCharIndex();
+        int endCharIndex = importDecl.getEndCharIndex();
+        return new BuildIssue().init(javaFile, BuildIssue.Kind.Warning, msg, lineIndex, 0, startCharIndex, endCharIndex);
     }
 }

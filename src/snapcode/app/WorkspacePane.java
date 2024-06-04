@@ -560,6 +560,9 @@ public class WorkspacePane extends ViewOwner {
             if (bottomTray.getSelTool() instanceof BuildTool)
                 bottomTray.hideTools();
         }
+
+        // Make sure there is a final UI reset
+        runLater(this::resetLater);
     }
 
     /**

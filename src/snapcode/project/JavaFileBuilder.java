@@ -2,11 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import javakit.parse.*;
-import snap.util.ArrayUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
-
 import java.util.*;
 
 /**
@@ -91,8 +88,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
         // Do real build
         boolean buildSuccess = buildFilesImpl(taskMonitor, javaFiles);
 
-        // Find unused imports
-        findUnusedImports();
+        // Clear compiled files
         _compiledFiles.clear();
 
         // Return
@@ -133,51 +129,5 @@ public class JavaFileBuilder implements ProjectFileBuilder {
         // Return
         BuildIssue[] buildIssues = javaAgent.getBuildIssues();
         return buildIssues.length == 0;
-    }
-
-    /**
-     * Checks last set of compiled files for unused imports.
-     */
-    public void findUnusedImports()
-    {
-        Workspace workspace = _proj.getWorkspace();
-        BuildIssues buildIssues = workspace.getBuildIssues();
-
-        // Iterate over compiled files
-        for (WebFile javaFile : _compiledFiles) {
-
-            // Iterate over build issues
-            BuildIssue[] unusedImportIssues = getUnusedImportBuildIssuesForFile(javaFile);
-            for (BuildIssue buildIssue : unusedImportIssues)
-                buildIssues.add(buildIssue);
-        }
-    }
-
-    /**
-     * Returns an array of unused imports for Java file.
-     */
-    protected BuildIssue[] getUnusedImportBuildIssuesForFile(WebFile javaFile)
-    {
-        // Get unused import decls
-        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
-        JFile jfile = javaAgent.getJFile();
-        JImportDecl[] unusedImports = jfile.getUnusedImports();
-        if (unusedImports.length == 0)
-            return BuildIssues.NO_ISSUES;
-
-        // Create BuildIssues for each and return
-        return ArrayUtils.map(unusedImports, id -> createUnusedImportBuildIssue(javaFile, id), BuildIssue.class);
-    }
-
-    /**
-     * Returns an "Unused Import" BuildIssue for given import decl.
-     */
-    private BuildIssue createUnusedImportBuildIssue(WebFile javaFile, JImportDecl importDecl)
-    {
-        String msg = "The import " + importDecl.getName() + " is never used";
-        int lineIndex = importDecl.getLineIndex();
-        int startCharIndex = importDecl.getStartCharIndex();
-        int endCharIndex = importDecl.getEndCharIndex();
-        return new BuildIssue().init(javaFile, BuildIssue.Kind.Warning, msg, lineIndex, 0, startCharIndex, endCharIndex);
     }
 }
