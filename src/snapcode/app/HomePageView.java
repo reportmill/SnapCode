@@ -4,6 +4,7 @@ import snap.gfx.Effect;
 import snap.gfx.Image;
 import snap.gfx.ShadowEffect;
 import snap.util.ArrayUtils;
+import snap.util.SnapUtils;
 import snap.view.*;
 import snap.web.RecentFiles;
 import snap.web.WebURL;
@@ -71,11 +72,26 @@ public class HomePageView extends MarkDownView {
     {
         // Handle "Open Recent": Add OpenButton
         if (headerNode.getText().equals("Open Recent:")) {
+
+            // Create normal headerView
             View headerView = super.createViewForHeaderNode(headerNode);
+
+            // Create OpenButton
             Button openButton = new Button("Open...");
             openButton.setPropsString("Name:OpenButton; PrefWidth:100; PrefHeight:24; Margin:0,0,0,20");
+            if (SnapUtils.isWebVM) {
+                openButton.setText("Open Browser File...");
+                openButton.setPrefWidth(130);
+            }
+
+            // Create OpenDesktopFileButton
+            Button openDesktopFileButton = new Button("Open Desktop File...");
+            openDesktopFileButton.setPropsString("Name:OpenDesktopFileButton; PrefWidth:130; PrefHeight:24; Margin:0,0,0,12");
+            openDesktopFileButton.setVisible(SnapUtils.isWebVM);
+
+            // Create row, add children and return
             RowView rowView = new RowView();
-            rowView.setChildren(headerView, openButton);
+            rowView.setChildren(headerView, openButton, openDesktopFileButton);
             return rowView;
         }
 

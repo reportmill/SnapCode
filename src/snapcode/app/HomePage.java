@@ -71,6 +71,18 @@ public class HomePage extends WebPage {
     }
 
     /**
+     * Shows the open desktop file panel.
+     */
+    private void showOpenDesktopFilePanel()
+    {
+        String[] fileTypes = { "*" };
+        getEnv().showFilePicker(fileTypes, pickedFile -> {
+            System.out.println("OpenFile picked: " + pickedFile);
+            WorkspacePaneUtils.openFile(_workspacePane, pickedFile);
+        });
+    }
+
+    /**
      * Removes recent file for given url.
      */
     public void removeRecentFileUrl(WebURL recentFileUrl)
@@ -154,6 +166,7 @@ public class HomePage extends WebPage {
 
             // Handle OpenButton, Bogus
             case "OpenButton": showOpenPanel(); break;
+            case "OpenDesktopFileButton": showOpenDesktopFilePanel(); break;
             case "Bogus": break;
 
             // Do normal version
