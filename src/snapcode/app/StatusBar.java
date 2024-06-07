@@ -23,8 +23,7 @@ public class StatusBar extends WorkspaceTool {
     {
         // Add StatusBar to MainSplit
         View statusBar = getUI();
-        statusBar.setManaged(false);
-        statusBar.setLean(Pos.BOTTOM_RIGHT);
+        statusBar.setPropsString("Margin: 0,30,0,0; LeanX: RIGHT; LeanY: BOTTOM; Managed:false;");
         statusBar.setSize(500, 30);
         ViewUtils.addChild((ParentView) aView, statusBar);
     }

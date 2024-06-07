@@ -1,4 +1,6 @@
 package snapcode.app;
+import snap.gfx.Image;
+import snap.viewx.DevPane;
 import snapcode.javatext.JavaTextPane;
 import snapcode.project.Breakpoints;
 import snapcode.project.BuildIssue;
@@ -102,8 +104,8 @@ public class WorkspaceTools {
         WorkspaceTool[] bottomTools = { runConfigsTool, breakpointsTool, httpServerTool };
         _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
 
-        // Add SamplesButton to RightTray
-        //addSamplesButton();
+        // Add DevToolsButton
+        addDevToolsButton();
     }
 
     /**
@@ -318,5 +320,21 @@ public class WorkspaceTools {
         BuildTool buildTool = getToolForClass(BuildTool.class);
         if (buildTool != null && buildTool.isShowing())
             buildTool.resetLater();
+    }
+
+    /**
+     * Adds DevToolsButton.
+     */
+    private void addDevToolsButton()
+    {
+        // Add DevToolsButton
+        Button devToolsButton = new Button();
+        devToolsButton.setImage(Image.getImageForClassResource(getClass(), "pkg.images/DevTools.png"));
+        devToolsButton.setPropsString("Margin: 0,8,0,0; Padding: 3; ShowArea: false; Managed: false; LeanX: RIGHT; LeanY: CENTER;");
+        devToolsButton.addEventHandler(e -> DevPane.toggleDevPaneShowing(_workspacePane.getUI()), View.Action);
+        devToolsButton.setPrefSize(22, 22);
+        devToolsButton.setSize(22, 22);
+        TabView tabView = (TabView) _bottomTray.getUI();
+        ViewUtils.addChild(tabView.getTabBar(), devToolsButton);
     }
 }
