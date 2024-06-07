@@ -79,8 +79,15 @@ public class VersionControl {
     public WebSite getRemoteSite()
     {
         if (_remoteSite != null) return _remoteSite;
-        WebSite remoteSite = _remoteSiteUrl != null ? _remoteSiteUrl.getAsSite() : null;
-        return _remoteSite = remoteSite;
+        return _remoteSite = getRemoteSiteImpl();
+    }
+
+    /**
+     * Returns the remote site (e.g. Git repository site, Zip file site, etc.).
+     */
+    protected WebSite getRemoteSiteImpl()
+    {
+        return _remoteSiteUrl != null ? _remoteSiteUrl.getAsSite() : null;
     }
 
     /**
@@ -89,16 +96,20 @@ public class VersionControl {
     public WebSite getCloneSite()
     {
         if (_cloneSite != null) return _cloneSite;
+        return _cloneSite = getCloneSiteImpl();
+    }
 
+    /**
+     * Returns the local cache site of remote site.
+     */
+    protected WebSite getCloneSiteImpl()
+    {
         // Get clone site (via clone dir and url)
         WebSite localSite = getLocalSite();
         WebSite sandboxSite = localSite.getSandboxSite();
         WebFile cloneDir = sandboxSite.createFileForPath("Remote.clone", true);
         WebURL cloneUrl = cloneDir.getURL();
-        WebSite cloneSite = cloneUrl.getAsSite();
-
-        // Set and return
-        return _cloneSite = cloneSite;
+        return cloneUrl.getAsSite();
     }
 
     /**

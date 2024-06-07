@@ -14,14 +14,30 @@ public class VersionControlZip extends VersionControl {
     public VersionControlZip(WebSite localSite, WebURL remoteSiteUrl)
     {
         super(localSite, remoteSiteUrl);
+    }
 
-        // If remote size is Zip file with single dir with same name as Zip file, use dir
+    /**
+     * Override to check ZipFile for nested top level directory and use that site instead.
+     */
+    @Override
+    protected WebSite getRemoteSiteImpl()
+    {
+        // Get normal ZipFile site
         WebSite zipSite = _remoteSiteUrl.getAsSite();
+
+        // Look for nested top level directory
         String siteName = _remoteSiteUrl.getFilenameSimple();
         WebFile dirFile = zipSite.getFileForPath('/' + siteName);
         if (dirFile == null) // If downloading github zip
             dirFile = zipSite.getFileForPath('/' + siteName + "-master");
-        if (dirFile != null && dirFile.isDir())
-            _remoteSiteUrl = dirFile.getURL();
+
+        // If nested top level directory found, use that nested dir site instead
+        if (dirFile != null && dirFile.isDir()) {
+            WebURL dirFileUrl = dirFile.getURL();
+            return dirFileUrl.getAsSite();
+        }
+
+        // Return
+        return zipSite;
     }
 }

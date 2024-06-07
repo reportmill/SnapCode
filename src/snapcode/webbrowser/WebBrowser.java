@@ -300,7 +300,7 @@ public class WebBrowser extends TransitionPane {
             case "jar": return ZipPage.class;
 
             // Handle Java
-            case "java": return getPageClass("javakit.text.JavaPage", TextPage.class);
+            case "java": return TextPage.class; //return getPageClass("snapcode.app.JavaPage", TextPage.class);
 
             // Handle ReportMill
             case "rpt": return getPageClass("com.reportmill.app.ReportPage", TextPage.class);
