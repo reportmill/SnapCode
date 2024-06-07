@@ -237,12 +237,14 @@ public class GitDir {
     /**
      * Merges updates to working dir and commits.
      */
-    public void merge() throws Exception
+    public void merge(TaskMonitor aTM) throws Exception
     {
         Git git = getGit();
         MergeCommand merge = git.merge();
         ObjectId remoteOriginMaster = getResolvedObjectId("refs/remotes/origin/master");
         merge.include(remoteOriginMaster);
+        if (aTM != null)
+            merge.setProgressMonitor(GitUtils.getProgressMonitor(aTM));
         MergeResult result = merge.call();
         System.out.println("Merge Result: " + result.getMergeStatus());
 

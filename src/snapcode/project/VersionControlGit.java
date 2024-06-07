@@ -176,7 +176,7 @@ public class VersionControlGit extends VersionControl {
     protected boolean updateFilesImpl(List<WebFile> theLocalFiles, TaskMonitor aTM) throws Exception
     {
         GitDir gitDir = getGitDir();
-        gitDir.merge();
+        gitDir.merge(aTM);
         return true;
     }
 
