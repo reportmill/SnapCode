@@ -279,7 +279,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     {
         JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
         javaAgent.checkFileForErrors();
-        BuildIssue[] buildIssues = javaAgent.getBuildIssues();
-        return buildIssues.length == 0;
+        BuildIssue[] buildErrors = javaAgent.getBuildErrors();
+        return buildErrors.length == 0;
     }
 }

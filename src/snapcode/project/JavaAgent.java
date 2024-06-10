@@ -189,6 +189,15 @@ public class JavaAgent {
     }
 
     /**
+     * Returns the build errors.
+     */
+    public BuildIssue[] getBuildErrors()
+    {
+        BuildIssue[] buildIssues = getBuildIssues();
+        return ArrayUtils.filter(buildIssues, issue -> issue.isError());
+    }
+
+    /**
      * Sets the build issues.
      */
     public void setBuildIssues(BuildIssue[] buildIssues)
