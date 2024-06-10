@@ -62,8 +62,8 @@ public class App {
         // Show default workspace - Was WelcomePanel.getShared().showPanel();
         WorkspacePaneUtils.openDefaultWorkspace();
 
-        // Hack - delete samples sandboxes for now
-        ViewUtils.runDelayed(App::deleteSandboxes, 1000);
+        // Hack - delete temp files (and some demo sandboxes for now)
+        ViewUtils.runDelayed(App::deleteTempFiles, 1000);
     }
 
     /**
@@ -170,17 +170,33 @@ public class App {
     }
 
     /**
-     * Deletes sandboxes.
+     * Deletes temp files and demo sandboxes.
      */
-    private static void deleteSandboxes()
+    private static void deleteTempFiles()
     {
         if (!SnapUtils.isWebVM) return;
+
+        // Delete temp files (that are more than 10 seconds old)
+        WebFile tempDir = WebFile.getFileForPath(SnapUtils.getTempDir());
+        if (tempDir != null) {
+            for (WebFile tempFile : tempDir.getFiles()) {
+                if (tempFile.getLastModTime() < System.currentTimeMillis() - 10000)
+                    tempFile.delete();
+            }
+        }
+
+        // Delete common demos
         String[] deleteDirnames = { "Sandboxes", "Tetris", "SnappyBird", "Asteroids" };
         for (String deleteDirname : deleteDirnames) {
             WebFile deleteDir = WebFile.getFileForPath("/files/SnapCode/" + deleteDirname);
             if (deleteDir != null)
                 deleteDir.delete();
         }
+
+        // Delete old temp dir (this can go soon)
+        WebFile oldTempDir = WebFile.getFileForPath("/files/snaptmp");
+        if (oldTempDir != null)
+            oldTempDir.delete();
     }
 
     /**
