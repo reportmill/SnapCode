@@ -1,6 +1,7 @@
 package snapcode.app;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
+import snap.util.SnapUtils;
 import snap.util.TaskRunner;
 import snap.view.ViewUtils;
 import snap.viewx.DialogBox;
@@ -213,9 +214,6 @@ public class WorkspacePaneUtils {
      */
     public static void openProjectForRepoURL(WorkspacePane workspacePane, WebURL repoURL)
     {
-        // Add repoURL to recent files
-        addRecentFileUrl(repoURL);
-
         // Add project for repo URL
         Workspace workspace = workspacePane.getWorkspace();
         TaskRunner<Boolean> checkoutRunner = workspace.addProjectForRepoURL(repoURL);
@@ -248,6 +246,15 @@ public class WorkspacePaneUtils {
         Workspace workspace = workspacePane.getWorkspace();
         Project project = workspace.getProjectForName(projName);
         ViewUtils.runDelayed(() -> selectGoodDefaultFile(workspacePane, project), 400);
+
+        // Add repoURL to recent files
+        if (!addRecentFileUrl(repoURL)) {
+
+            // If repo URL wasn't added, add project URL
+            String filePath = repoURL.getPath();
+            if (!filePath.contains("/SnapCode/Samples"))
+                addRecentFileUrl(project.getSite().getURL());
+        }
     }
 
     /**
@@ -276,12 +283,19 @@ public class WorkspacePaneUtils {
     /**
      * Adds a recent file URL.
      */
-    private static void addRecentFileUrl(WebURL fileUrl)
+    private static boolean addRecentFileUrl(WebURL fileUrl)
     {
-        String urlAddr = fileUrl.getString();
-        if (urlAddr.contains("TempProj") || urlAddr.contains("/SnapCode/Samples/"))
-            return;
+        String filePath = fileUrl.getPath();
+        if (filePath.contains("TempProj") || filePath.contains("/SnapCode/Samples/"))
+            return false;
+
+        // If URL is from temp dir, just return
+        if (filePath.startsWith(SnapUtils.getTempDir()))
+            return false;
+
+        // Add URL
         RecentFiles.addURL(fileUrl);
+        return true;
     }
 
     /**
