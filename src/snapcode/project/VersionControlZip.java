@@ -1,4 +1,5 @@
 package snapcode.project;
+import snap.util.ArrayUtils;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
@@ -24,15 +25,16 @@ public class VersionControlZip extends VersionControl {
     {
         // Get normal ZipFile site
         WebSite zipSite = _remoteSiteUrl.getAsSite();
+        WebFile rootDir = zipSite.getRootDir();
+        WebFile[] rootFiles = rootDir.getFiles();
+        if (rootFiles.length == 0)
+            System.out.println("VersionControlZip: No root files found");
+        else if (rootFiles.length > 1)
+            System.out.println("VersionControlZip: ZipFile has multiple files: " + rootFiles.length);
 
-        // Look for nested top level directory
-        String siteName = _remoteSiteUrl.getFilenameSimple();
-        WebFile dirFile = zipSite.getFileForPath('/' + siteName);
-        if (dirFile == null) // If downloading github zip
-            dirFile = zipSite.getFileForPath('/' + siteName + "-master");
-
-        // If nested top level directory found, use that nested dir site instead
-        if (dirFile != null && dirFile.isDir()) {
+        // Look for nested top level directory and use that nested dir site instead
+        WebFile dirFile = ArrayUtils.findMatch(rootFiles, file -> file.isDir());
+        if (dirFile != null) {
             WebURL dirFileUrl = dirFile.getURL();
             return dirFileUrl.getAsSite();
         }
