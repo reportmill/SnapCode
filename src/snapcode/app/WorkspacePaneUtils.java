@@ -1,14 +1,8 @@
 package snapcode.app;
-import snap.util.ArrayUtils;
-import snap.util.FilePathUtils;
-import snap.util.SnapUtils;
-import snap.util.TaskRunner;
+import snap.util.*;
 import snap.view.ViewUtils;
 import snap.viewx.DialogBox;
-import snap.web.RecentFiles;
-import snap.web.WebFile;
-import snap.web.WebSite;
-import snap.web.WebURL;
+import snap.web.*;
 import snapcode.apptools.ProjectFilesTool;
 import snapcode.apptools.NewFileTool;
 import snapcode.apptools.RunTool;
@@ -48,8 +42,14 @@ public class WorkspacePaneUtils {
     {
         String fileType = fileUrl.getFileType();
 
-        // If file is zip file, open repo
-        if (fileType.equals("zip") || fileType.equals("git")) {
+        // If file type is zip, open Zip file
+        if (fileType.equals("zip")) {
+            openProjectForZipUrl(workspacePane, fileUrl);
+            return true;
+        }
+
+        // If file type is git, open repo
+        if (fileType.equals("git")) {
             openProjectForRepoURL(workspacePane, fileUrl);
             return true;
         }
@@ -135,30 +135,35 @@ public class WorkspacePaneUtils {
                 workspace.removeProject(project);
         }
 
-        // If java/jepl file, open and run
-        String fileType = sampleURL.getFileType();
-        if (fileType.equals("java") || fileType.equals("jepl")) {
+        switch (sampleURL.getFileType()) {
 
-            // Get sample file - complain and return if not found
-            WebFile sampleFile = sampleURL.getFile();
-            if (sampleFile == null) {
-                String msg = "Couldn't find sample for name: " + sampleURL.getFilename();
-                DialogBox.showErrorDialog(workspacePane.getUI(), "Unknown Sample", msg);
-                return;
-            }
+            // Handle java/jepl
+            case "java": case "jepl":
 
-            // Open
-            openExternalSourceFile(workspacePane, sampleFile);
+                // Get sample file - complain and return if not found
+                WebFile sampleFile = sampleURL.getFile();
+                if (sampleFile == null) {
+                    String msg = "Couldn't find sample for name: " + sampleURL.getFilename();
+                    DialogBox.showErrorDialog(workspacePane.getUI(), "Unknown Sample", msg);
+                    return;
+                }
 
-            // Kick off run
-            RunTool runTool = workspacePane.getWorkspaceTools().getRunTool();
-            ViewUtils.runLater(() -> runTool.runAppForSelFile(false));
-            return;
+                // Open
+                openExternalSourceFile(workspacePane, sampleFile);
+
+                // Kick off run
+                RunTool runTool = workspacePane.getWorkspaceTools().getRunTool();
+                ViewUtils.runLater(() -> runTool.runAppForSelFile(false));
+                break;
+
+
+            // Handle zip
+            case "zip": openProjectForZipUrl(workspacePane, sampleURL); break;
+
+
+            // Handle git
+            case "git": openProjectForRepoURL(workspacePane, sampleURL); break;
         }
-
-        // If zip file, open project
-        if (fileType.equals("zip") || fileType.equals("git"))
-            openProjectForRepoURL(workspacePane, sampleURL);
     }
 
     /**
@@ -207,6 +212,70 @@ public class WorkspacePaneUtils {
 
         // Add recent file
         addRecentFileUrl(projectDir.getURL());
+    }
+
+    /**
+     * Adds a project to given workspace pane for Zip URL.
+     */
+    public static void openProjectForZipUrl(WorkspacePane workspacePane, WebURL zipURL)
+    {
+        // Get zipped directory file for zip file
+        WebFile zipDirFile = getZipFileMainFile(zipURL);
+        if (zipDirFile == null) {
+            String msg = "Can't find archived directory in zip file: " + zipURL.getString();
+            DialogBox.showErrorDialog(workspacePane.getUI(), "Error Opening Zip Url", msg);
+            return;
+        }
+
+        // If project already exists, ask to replace it
+        Workspace workspace = workspacePane.getWorkspace();
+        String projectName = zipDirFile.getName();
+        Project existingProj = workspace.getProjectForName(projectName);
+        if (existingProj != null) {
+
+            // Ask to replace project - just return if denied
+            DialogBox dialogBox = new DialogBox("Open Zip Url");
+            String msg = "A project with the same name already exists.\nDo you want to replace it?";
+            dialogBox.setQuestionMessage(msg);
+            int answer = dialogBox.showOptionDialog(workspacePane.getUI(), null);
+            if (answer == 1)
+                return;
+
+            // Otherwise, delete files
+            try { existingProj.deleteProject(new TaskMonitor("Delete Project")); }
+            catch (Exception e) {
+                DialogBox.showExceptionDialog(workspacePane.getUI(), "Error Deleting Project", e);
+            }
+        }
+
+        // If project directory already exists, ask to replace it
+        WebFile snapCodeDir = SnapCodeUtils.getSnapCodeDir();
+        WebFile projectDir = snapCodeDir.getFileForName(zipDirFile.getName());
+        if (projectDir != null) {
+
+            // Ask to replace directory - just open directory project if denied
+            DialogBox dialogBox = new DialogBox("Open Zip Url");
+            String msg = "A project directory with the same name already exists.\nDo you want to replace it?";
+            dialogBox.setQuestionMessage(msg);
+            int answer = dialogBox.showOptionDialog(workspacePane.getUI(), null);
+            if (answer == 1) {
+                openProjectForProjectFile(workspacePane, projectDir);
+                return;
+            }
+
+            // Otherwise, delete files
+            try { projectDir.delete(); }
+            catch (Exception e) {
+                DialogBox.showExceptionDialog(workspacePane.getUI(), "Error Deleting Directory", e);
+            }
+        }
+
+        // Copy to SnapCode dir
+        WebUtils.copyFile(zipDirFile, snapCodeDir);
+        projectDir = snapCodeDir.getFileForName(zipDirFile.getName());
+
+        // Select good default file
+        openProjectForProjectFile(workspacePane, projectDir);
     }
 
     /**
@@ -305,5 +374,16 @@ public class WorkspacePaneUtils {
     {
         ProjectFilesTool projectFilesTool = workspacePane.getWorkspaceTools().getProjectFilesTool();
         projectFilesTool.showFile(aFile);
+    }
+
+    /**
+     * Returns the Zip file zipped directory file.
+     */
+    private static WebFile getZipFileMainFile(WebURL zipUrl)
+    {
+        WebSite zipSite = zipUrl.getAsSite();
+        WebFile zipSiteRootDir = zipSite.getRootDir();
+        WebFile[] zipSiteRootFiles = zipSiteRootDir.getFiles();
+        return ArrayUtils.findMatch(zipSiteRootFiles, file -> ProjectUtils.isProjectFile(file));
     }
 }
