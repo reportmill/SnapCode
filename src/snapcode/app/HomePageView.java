@@ -226,7 +226,7 @@ public class HomePageView extends MarkDownView {
         separator.setPrefSize(28, 14);
 
         // Create label for address
-        Label addressLabel = new Label(recentFileUrl.getParent().getString());
+        Label addressLabel = new Label(recentFileUrl.getString());
         addressLabel.setPropsString("Font:Arial 11");
 
         // Create close box
