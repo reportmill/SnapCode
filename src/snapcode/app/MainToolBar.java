@@ -1,5 +1,8 @@
 package snapcode.app;
+import snap.geom.Insets;
 import snapcode.apptools.BuildTool;
+import snapcode.apptools.RunTool;
+import snapcode.apptools.RunToolUtils;
 import snapcode.project.Project;
 import snap.gfx.*;
 import snap.util.StringUtils;
@@ -56,6 +59,10 @@ public class MainToolBar extends WorkspaceTool {
         searchText.setPromptText("Search");
         searchText.getLabel().setImage(Image.getImageForClassResource(TextPane.class, "Find.png"));
         TextField.setBackLabelAlignAnimatedOnFocused(searchText, true);
+
+        // Configure RunConfigMenuButton
+        MenuButton runConfigMenuButton = getView("RunConfigMenuButton", MenuButton.class);
+        runConfigMenuButton.getLabel().setPadding(new Insets(0, 0, 0, 5));
     }
 
     /**
@@ -67,6 +74,13 @@ public class MainToolBar extends WorkspaceTool {
         // Update BackButton, ForwardButton
         setViewEnabled("BackButton", _pagePane.getBrowser().getLastURL() != null);
         setViewEnabled("ForwardButton", _pagePane.getBrowser().getNextURL() != null);
+
+        // Update RunConfigMenuButton
+        MenuButton runConfigMenuButton = getView("RunConfigMenuButton", MenuButton.class);
+        runConfigMenuButton.setText("Run Config");
+        MenuItem[] runConfigMenuItems = getRunConfigMenuItems();
+        runConfigMenuButton.setText(runConfigMenuItems[0].getText());
+        runConfigMenuButton.setItems(Arrays.asList(runConfigMenuItems));
 
         // Update TerminateButton
         boolean isRunning = _workspaceTools.getRunTool().isRunning();
@@ -113,7 +127,7 @@ public class MainToolBar extends WorkspaceTool {
             _pagePane.setBrowserFile(file);
 
             // If text available, either open URL or search for string
-        else if (text != null && text.length() > 0) {
+        else if (text != null && !text.isEmpty()) {
             int colon = text.indexOf(':');
             if (colon > 0 && colon < 6) {
                 WebURL url = WebURL.getURL(text);
@@ -135,19 +149,19 @@ public class MainToolBar extends WorkspaceTool {
      */
     private List<WebFile> getFilesForPrefix(String aPrefix)
     {
-        if (aPrefix.length() == 0) return Collections.EMPTY_LIST;
+        if (aPrefix.isEmpty()) return Collections.EMPTY_LIST;
         List<WebFile> files = new ArrayList<>();
 
         for (WebSite site : _workspacePane.getSites())
-            getFilesForPrefix(aPrefix, site.getRootDir(), files);
+            findFilesForPrefix(aPrefix, site.getRootDir(), files);
         files.sort(_fileComparator);
         return files;
     }
 
     /**
-     * Gets files for given name prefix.
+     * Finds files for given name prefix and adds to list.
      */
-    private void getFilesForPrefix(String aPrefix, WebFile aFile, List<WebFile> theFiles)
+    private void findFilesForPrefix(String aPrefix, WebFile aFile, List<WebFile> theFiles)
     {
         // If hidden file, just return
         Project project = Project.getProjectForFile(aFile);
@@ -157,11 +171,30 @@ public class MainToolBar extends WorkspaceTool {
 
         // If directory, recurse
         if (aFile.isDir()) for (WebFile file : aFile.getFiles())
-            getFilesForPrefix(aPrefix, file, theFiles);
+            findFilesForPrefix(aPrefix, file, theFiles);
 
             // If file that starts with prefix, add to files
         else if (StringUtils.startsWithIC(aFile.getName(), aPrefix))
             theFiles.add(aFile);
+    }
+
+    /**
+     * Returns the run config menu items.
+     */
+    private MenuItem[] getRunConfigMenuItems()
+    {
+        // Create menu item for current main class source file
+        ViewBuilder<MenuItem> menuItemBuilder = new ViewBuilder<>(MenuItem.class);
+        RunTool runTool = _workspaceTools.getRunTool();
+        WebFile mainClassFile = RunToolUtils.getMainClassSourceFile(runTool);
+        if (mainClassFile != null)
+            menuItemBuilder.text(mainClassFile.getSimpleName()).name("RunConfigNameMenuItem").save();
+        else menuItemBuilder.text("Current File").name("RunConfigNameMenuItem").save();
+
+        // Add separator and EditRunConfigsMenuItem
+        menuItemBuilder.save();
+        menuItemBuilder.text("Edit Configurations").name("EditRunConfigsMenuItem").save();
+        return menuItemBuilder.buildAll();
     }
 
     /**
