@@ -43,10 +43,8 @@ public class WorkspacePaneUtils {
         String fileType = fileUrl.getFileType();
 
         // If file type is zip, open Zip file
-        if (fileType.equals("zip")) {
-            openProjectForZipUrl(workspacePane, fileUrl);
-            return true;
-        }
+        if (fileType.equals("zip"))
+            return openProjectForZipUrl(workspacePane, fileUrl);
 
         // If file type is git, open repo
         if (fileType.equals("git")) {
@@ -61,7 +59,7 @@ public class WorkspacePaneUtils {
 
         // If file is gfar file, open repo
         if (fileType.equals("gfar")) {
-            GreenImport.openGreenfootForArchiveFilePath(workspacePane, fileUrl.getPath());
+            GreenImport.openGreenfootForArchiveFileUrl(workspacePane, fileUrl);
             return true;
         }
 
@@ -217,14 +215,14 @@ public class WorkspacePaneUtils {
     /**
      * Adds a project to given workspace pane for Zip URL.
      */
-    public static void openProjectForZipUrl(WorkspacePane workspacePane, WebURL zipURL)
+    public static boolean openProjectForZipUrl(WorkspacePane workspacePane, WebURL zipURL)
     {
         // Get zipped directory file for zip file
         WebFile zipDirFile = getZipFileMainFile(zipURL);
         if (zipDirFile == null) {
             String msg = "Can't find archived directory in zip file: " + zipURL.getString();
             DialogBox.showErrorDialog(workspacePane.getUI(), "Error Opening Zip Url", msg);
-            return;
+            return false;
         }
 
         // If project already exists, ask to replace it
@@ -239,12 +237,13 @@ public class WorkspacePaneUtils {
             dialogBox.setQuestionMessage(msg);
             int answer = dialogBox.showOptionDialog(workspacePane.getUI(), null);
             if (answer == 1)
-                return;
+                return true;
 
             // Otherwise, delete files
             try { existingProj.deleteProject(new TaskMonitor("Delete Project")); }
             catch (Exception e) {
                 DialogBox.showExceptionDialog(workspacePane.getUI(), "Error Deleting Project", e);
+                return true;
             }
         }
 
@@ -260,13 +259,14 @@ public class WorkspacePaneUtils {
             int answer = dialogBox.showOptionDialog(workspacePane.getUI(), null);
             if (answer == 1) {
                 openProjectForProjectFile(workspacePane, projectDir);
-                return;
+                return true;
             }
 
             // Otherwise, delete files
             try { projectDir.delete(); }
             catch (Exception e) {
                 DialogBox.showExceptionDialog(workspacePane.getUI(), "Error Deleting Directory", e);
+                return true;
             }
         }
 
@@ -276,6 +276,7 @@ public class WorkspacePaneUtils {
 
         // Select good default file
         openProjectForProjectFile(workspacePane, projectDir);
+        return true;
     }
 
     /**

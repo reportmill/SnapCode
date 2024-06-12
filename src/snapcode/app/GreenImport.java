@@ -28,34 +28,32 @@ public class GreenImport {
             return;
 
         // Open new project for scenario id
-        openGreenfootScenario(workspacePane, scenarioId);
+        openGreenfootForScenarioId(workspacePane, scenarioId);
     }
 
     /**
      * Opens a new project for Greenfoot scenario id.
      */
-    public static void openGreenfootScenario(WorkspacePane workspacePane, int gfId)
+    public static void openGreenfootForScenarioId(WorkspacePane workspacePane, int scenarioId)
     {
-        // Get greenfoot dir for scenario id
-        WebFile greenfootDir = getGreenfootDirForScenarioId(gfId);
-        if (greenfootDir == null) {
-            complain("GreenImport.openGreenfootScenario: Can't find scenario root dir");
+        // Get greenfoot archive file for scenario id
+        File greenfootArchiveFile;
+        try { greenfootArchiveFile = getGreenfootArchiveFileForScenarioId(scenarioId); }
+        catch (Exception e) {
+            complain("Can't download scenario: " + e);
             return;
         }
 
-        // Open greenfoot dir
-        openGreenfootDir(workspacePane, greenfootDir);
+        // Get URL for archive file and open
+        WebURL gfarFileUrl = WebURL.getURL(greenfootArchiveFile);
+        openGreenfootForArchiveFileUrl(workspacePane, gfarFileUrl);
     }
 
     /**
-     * Opens a new project for Greenfoot scenario id.
+     * Opens a new project for Greenfoot archive file URL.
      */
-    public static void openGreenfootForArchiveFilePath(WorkspacePane workspacePane, String archiveFilePath)
+    public static void openGreenfootForArchiveFileUrl(WorkspacePane workspacePane, WebURL archiveUrl)
     {
-        // Get archive file as zip site
-        WebURL archiveUrl = WebURL.getURL(archiveFilePath);
-        assert (archiveUrl != null);
-
         // Return greenfoot dir for archive URL
         WebFile greenfootDir = getGreenfootDirForArchiveUrl(archiveUrl);
 
@@ -87,25 +85,6 @@ public class GreenImport {
 
         // Create Main class that launches world.lastInstantiated prop
         createMainClassForGreenfootProject(project);
-    }
-
-    /**
-     * Returns a greenfoot dir for given scenario id.
-     */
-    private static WebFile getGreenfootDirForScenarioId(int scenarioId)
-    {
-        // Get greenfoot archive file for scenario id
-        File greenfootArchiveFile;
-        try { greenfootArchiveFile = getGreenfootArchiveFileForScenarioId(scenarioId); }
-        catch (Exception e) {
-            complain("Can't download scenario: " + e);
-            return null;
-        }
-
-        // Return greenfoot dir for archive file
-        WebURL greenfootArchiveUrl = WebURL.getURL(greenfootArchiveFile);
-        assert (greenfootArchiveUrl != null);
-        return getGreenfootDirForArchiveUrl(greenfootArchiveUrl);
     }
 
     /**
