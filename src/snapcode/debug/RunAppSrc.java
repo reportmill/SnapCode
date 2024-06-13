@@ -7,6 +7,8 @@ import snap.viewx.Console;
 import snapcode.apptools.RunTool;
 import snapcode.project.JavaAgent;
 import snapcode.project.Project;
+import snapcode.project.RunConfig;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -25,7 +27,7 @@ public class RunAppSrc extends RunApp {
     private boolean _runAppThreadWaiting;
 
     // An input stream for standard in
-    protected BytesInputStream _standardInInputStream;
+    private BytesInputStream _standardInInputStream;
 
     // The JavaShell
     protected JavaShell _javaShell;
@@ -38,9 +40,19 @@ public class RunAppSrc extends RunApp {
     /**
      * Constructor.
      */
-    public RunAppSrc(RunTool runTool, WebFile mainFile, String[] args)
+    public RunAppSrc(RunTool runTool, RunConfig runConfig)
     {
-        super(runTool, mainFile, args);
+        super(runTool, runConfig);
+    }
+
+    /**
+     * Override to just return main class name.
+     */
+    @Override
+    public String[] getDefaultRunArgs()
+    {
+        String mainClassName = _runConfig.getMainClassName();
+        return new String[] { mainClassName };
     }
 
     /**

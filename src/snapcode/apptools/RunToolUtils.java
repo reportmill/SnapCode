@@ -1,5 +1,4 @@
 package snapcode.apptools;
-import snap.util.FilePathUtils;
 import snap.util.SnapUtils;
 import snap.view.ViewUtils;
 import snap.viewx.DialogBox;
@@ -7,9 +6,6 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.debug.*;
 import snapcode.project.*;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Utility methods for RunTool.
@@ -35,16 +31,9 @@ public class RunToolUtils {
      */
     public static RunApp createRunAppForConfig(RunTool runTool, RunConfig runConfig, boolean isDebug)
     {
-        if (runConfig == null) return null;
-
-        // Get main Java file and class file for config
-        WebFile mainJavaFile = runConfig.getMainJavaFile();
-        WebFile mainClassFile = runConfig.getMainClassFile();
-        if (mainJavaFile == null || mainClassFile == null)
+        // If RunConfig is missing or invalid, just return
+        if (runConfig == null || !runConfig.isRunnable())
             return null;
-
-        // Get args for given config or main file
-        String[] runArgs = getRunArgsForConfig(runConfig, isDebug);
 
         // Handle debug
         if (isDebug) {
@@ -56,78 +45,22 @@ public class RunToolUtils {
                 return createRunAppForConfig(runTool, runConfig, false);
             }
 
-            // Create debug app
-            DebugApp debugApp = new DebugApp(runTool, mainClassFile, runArgs);
-            Workspace workspace = runTool.getWorkspace();
-            Breakpoints breakpointsHpr = workspace.getBreakpoints();
-            Breakpoint[] breakpoints = breakpointsHpr.getArray();
-            for (Breakpoint breakpoint : breakpoints)
-                debugApp.addBreakpoint(breakpoint);
-            return debugApp;
+            // Return new debug app
+            return new DebugApp(runTool, runConfig);
         }
 
         // Run local if (1) TempProj and (2) jepl file and (3) not swing and (4) not alt-key-down
-        boolean runLocal = runLocal(mainClassFile);
-        if (runLocal) {
-            Project proj = Project.getProjectForFile(mainClassFile);
-            String className = proj.getClassNameForFile(mainClassFile);
-            String[] args = { className };
-            return new RunAppSrc(runTool, mainClassFile, args);
-        }
+        WebFile mainJavaFile = runConfig.getMainJavaFile();
+        boolean runLocal = runLocal(mainJavaFile);
+        if (runLocal)
+            return new RunAppSrc(runTool, runConfig);
 
         // Handle web: Create and return RunAppWeb for browser launch
         if (SnapUtils.isWebVM)
-            return new RunAppWeb(runTool, mainClassFile, runArgs);
+            return new RunAppWeb(runTool, runConfig);
 
         // Create and return RunAppBin for desktop
-        return new RunAppBin(runTool, mainClassFile, runArgs);
-    }
-
-    /**
-     * Returns an array of args for given run config.
-     */
-    public static String[] getRunArgsForConfig(RunConfig runConfig, boolean isDebug)
-    {
-        // Get project (just complain and return if not found)
-        Project project = runConfig.getProject();
-        if (project == null) {
-            System.err.println("RunTool: not project file: " + runConfig.getMainClassName());
-            return null;
-        }
-
-        // Get basic run command and add to list
-        List<String> commands = new ArrayList<>();
-
-        // If not debug, add Java command path
-        if (!isDebug) {
-            String javaCmdPath = getJavaCmdPath();
-            if (SnapUtils.isWebVM) {
-                boolean isSnapKit = project.getBuildFile().isIncludeSnapKitRuntime();
-                boolean isSnapKitDom = isSnapKit && !ViewUtils.isAltDown() && !runConfig.isSwing();
-                if (isSnapKitDom)
-                    javaCmdPath = "java-dom";
-            }
-            commands.add(javaCmdPath);
-        }
-
-        // Get Class path and add to list
-        String[] classPaths = project.getRuntimeClassPaths();
-        String[] classPathsNtv = FilePathUtils.getNativePaths(classPaths);
-        String classPath = FilePathUtils.getJoinedPath(classPathsNtv);
-        commands.add("-cp");
-        commands.add(classPath);
-
-        // Add class name
-        String className = runConfig.getMainClassName();
-        commands.add(className);
-
-        // Add App Args
-        String appArgs = runConfig.getAppArgs();
-        if (appArgs != null && !appArgs.isEmpty())
-            commands.add(appArgs);
-
-        // Return commands
-        return commands.toArray(new String[0]);
+        return new RunAppBin(runTool, runConfig);
     }
 
     /**
@@ -159,14 +92,5 @@ public class RunToolUtils {
             runConfigs.writeFile();
             runTool.runAppForConfig(runConfig, withDebug);
         }
-    }
-
-    /**
-     * Returns the path for the java command.
-     */
-    private static String getJavaCmdPath()
-    {
-        if (SnapUtils.isWebVM) return "java";
-        return System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
     }
 }

@@ -2,6 +2,8 @@ package snapcode.debug;
 import snap.util.StringUtils;
 import snap.web.WebFile;
 import snapcode.apptools.RunTool;
+import snapcode.project.RunConfig;
+
 import java.io.*;
 
 /**
@@ -22,11 +24,11 @@ public class RunAppBin extends RunApp {
     private BufferedWriter _stdInWriter;
 
     /**
-     * Constructor for URL and args.
+     * Constructor for RunConfig and args.
      */
-    public RunAppBin(RunTool runTool, WebFile mainFile, String[] theArgs)
+    public RunAppBin(RunTool runTool, RunConfig runConfig)
     {
-        super(runTool, mainFile, theArgs);
+        super(runTool, runConfig);
     }
 
     /**

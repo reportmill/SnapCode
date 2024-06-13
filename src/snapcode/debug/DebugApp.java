@@ -13,6 +13,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.*;
 import snapcode.debug.Exceptions.*;
+import snapcode.project.Breakpoints;
+import snapcode.project.RunConfig;
+import snapcode.project.Workspace;
 
 /**
  * This class manages a DebugApp.
@@ -56,9 +59,27 @@ public class DebugApp extends RunAppBin {
     /**
      * Constructor.
      */
-    public DebugApp(RunTool runTool, WebFile mainFile, String[] args)
+    public DebugApp(RunTool runTool, RunConfig runConfig)
     {
-        super(runTool, mainFile, args);
+        super(runTool, runConfig);
+
+        // Add breakpoints
+        Workspace workspace = runTool.getWorkspace();
+        Breakpoints breakpointsHpr = workspace.getBreakpoints();
+        Breakpoint[] breakpoints = breakpointsHpr.getArray();
+        for (Breakpoint breakpoint : breakpoints)
+            addBreakpoint(breakpoint);
+    }
+
+    /**
+     * Override to remove java command.
+     */
+    @Override
+    public String[] getDefaultRunArgs()
+    {
+        String[] args = super.getDefaultRunArgs();
+        args = ArrayUtils.remove(args, 0);
+        return args;
     }
 
     /**

@@ -1,6 +1,8 @@
 package snapcode.debug;
 import snap.gfx.Color;
 import snap.util.ArrayUtils;
+import snap.util.FilePathUtils;
+import snap.util.SnapUtils;
 import snap.view.TextArea;
 import snap.view.View;
 import snap.view.ViewEnv;
@@ -11,8 +13,11 @@ import snapcode.apptools.RunTool;
 import snapcode.project.Breakpoint;
 import snap.web.WebURL;
 import snapcode.project.Project;
+import snapcode.project.RunConfig;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class to run an external process.
@@ -22,8 +27,8 @@ public abstract class RunApp {
     // The RunTook
     protected RunTool _runTool;
 
-    // The main file
-    private WebFile _mainFile;
+    // The RunConfig
+    protected RunConfig _runConfig;
 
     // The args
     private String[] _args;
@@ -70,12 +75,15 @@ public abstract class RunApp {
     /**
      * Creates a new RunApp for URL and args.
      */
-    public RunApp(RunTool runTool, WebFile mainFile, String[] theArgs)
+    public RunApp(RunTool runTool, RunConfig runConfig)
     {
         super();
         _runTool = runTool;
-        _mainFile = mainFile;
-        setArgs(theArgs);
+        _runConfig = runConfig;
+
+        // Get args and set
+        String[] args = getDefaultRunArgs();
+        setArgs(args);
 
         // Create TextBlock to hold system console output
         _consoleText = new ConsoleText();
@@ -96,7 +104,7 @@ public abstract class RunApp {
      */
     public String getName()
     {
-        String appName = _mainFile.getSimpleName();
+        String appName = _runConfig.getName();
         if (isTerminated())
             appName += " <terminated>";
         return appName;
@@ -105,7 +113,7 @@ public abstract class RunApp {
     /**
      * Returns the main file.
      */
-    public WebFile getMainFile()  { return _mainFile; }
+    public WebFile getMainFile()  { return _runConfig.getMainJavaFile(); }
 
     /**
      * Returns the app launch args.
@@ -433,5 +441,60 @@ public abstract class RunApp {
     public void printDiagnostic(String aString)
     {
         System.out.println(aString);
+    }
+
+
+    /**
+     * Returns an array of args for given run config.
+     */
+    public String[] getDefaultRunArgs()
+    {
+        // Get project (just complain and return if not found)
+        Project project = _runConfig.getProject();
+        if (project == null) {
+            System.err.println("RunApp: no project for main class: " + _runConfig.getMainClassName());
+            return null;
+        }
+
+        // Get basic run command and add to list
+        List<String> commands = new ArrayList<>();
+
+        // Add Java command path
+        String javaCmdPath = getJavaCmdPath();
+        if (SnapUtils.isWebVM) {
+            boolean isSnapKit = project.getBuildFile().isIncludeSnapKitRuntime();
+            boolean isSnapKitDom = isSnapKit && !ViewUtils.isAltDown() && !_runConfig.isSwing();
+            if (isSnapKitDom)
+                javaCmdPath = "java-dom";
+        }
+        commands.add(javaCmdPath);
+
+        // Get Class path and add to list
+        String[] classPaths = project.getRuntimeClassPaths();
+        String[] classPathsNtv = FilePathUtils.getNativePaths(classPaths);
+        String classPath = FilePathUtils.getJoinedPath(classPathsNtv);
+        commands.add("-cp");
+        commands.add(classPath);
+
+        // Add class name
+        String className = _runConfig.getMainClassName();
+        commands.add(className);
+
+        // Add App Args
+        String appArgs = _runConfig.getAppArgs();
+        if (appArgs != null && !appArgs.isEmpty())
+            commands.add(appArgs);
+
+        // Return commands
+        return commands.toArray(new String[0]);
+    }
+
+    /**
+     * Returns the path for the java command.
+     */
+    private static String getJavaCmdPath()
+    {
+        if (SnapUtils.isWebVM) return "java";
+        return System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
     }
 }

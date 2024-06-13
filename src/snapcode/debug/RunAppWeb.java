@@ -3,6 +3,8 @@ import snap.gfx.GFXEnv;
 import snap.util.StringUtils;
 import snap.web.WebFile;
 import snapcode.apptools.RunTool;
+import snapcode.project.RunConfig;
+
 import java.io.*;
 
 /**
@@ -25,9 +27,9 @@ public class RunAppWeb extends RunApp {
     /**
      * Constructor for URL and args.
      */
-    public RunAppWeb(RunTool runTool, WebFile mainFile, String[] theArgs)
+    public RunAppWeb(RunTool runTool, RunConfig runConfig)
     {
-        super(runTool, mainFile, theArgs);
+        super(runTool, runConfig);
     }
 
     /**
