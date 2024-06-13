@@ -23,10 +23,7 @@ public class RunConfig {
     /**
      * Returns the name.
      */
-    public String getName()
-    {
-        return _name;
-    }
+    public String getName()  { return _name; }
 
     /**
      * Sets the name.
@@ -40,10 +37,7 @@ public class RunConfig {
     /**
      * Returns the Main Class Name.
      */
-    public String getMainClassName()
-    {
-        return _mainClassName;
-    }
+    public String getMainClassName()  { return _mainClassName; }
 
     /**
      * Sets the Main Class Name.
@@ -57,20 +51,17 @@ public class RunConfig {
     /**
      * Returns the main class file path.
      */
-    public String getMainFilePath()
+    public String getMainClassFilePath()
     {
-        String name = getMainClassName();
-        if (name == null) name = "null";
-        return "/" + name.replace('.', '/') + ".class";
+        String className = getMainClassName();
+        if (className == null) className = "null";
+        return "/" + className.replace('.', '/') + ".class";
     }
 
     /**
      * Returns the app args.
      */
-    public String getAppArgs()
-    {
-        return _appArgs;
-    }
+    public String getAppArgs()  { return _appArgs; }
 
     /**
      * Sets the app args.
@@ -84,10 +75,7 @@ public class RunConfig {
     /**
      * Returns the VM args.
      */
-    public String getVMArgs()
-    {
-        return _vmArgs;
-    }
+    public String getVMArgs()  { return _vmArgs; }
 
     /**
      * Sets the VM args.

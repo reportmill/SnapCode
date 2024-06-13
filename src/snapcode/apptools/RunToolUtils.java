@@ -20,9 +20,9 @@ public class RunToolUtils {
     private static WebFile _lastRunFile;
 
     /**
-     * Returns whether given file is main class file.
+     * Returns whether given file is a java file with main() (or jepl).
      */
-    public static boolean isMainClassFile(WebFile aFile)
+    public static boolean isJavaFileWithMain(WebFile aFile)
     {
         String fileType = aFile.getFileType();
         if (fileType.equals("jepl"))
@@ -36,7 +36,7 @@ public class RunToolUtils {
     /**
      * Returns a main file if available.
      */
-    public static WebFile getMainClassSourceFile(RunTool runTool)
+    public static WebFile getMainJavaFile(RunTool runTool)
     {
         // Get all workspace projects
         Workspace workspace = runTool.getWorkspace();
@@ -46,14 +46,14 @@ public class RunToolUtils {
         for (Project project : projects) {
             String mainClassName = project.getBuildFile().getMainClassName();
             if (mainClassName != null) {
-                WebFile mainClassSourceFile = project.getJavaFileForClassName(mainClassName);
-                if (mainClassSourceFile != null)
-                    return mainClassSourceFile;
+                WebFile mainJavaFile = project.getJavaFileForClassName(mainClassName);
+                if (mainJavaFile != null)
+                    return mainJavaFile;
             }
         }
 
         // If last file is main class file, return it
-        if (_lastRunFile != null && isMainClassFile(_lastRunFile))
+        if (_lastRunFile != null)
             return _lastRunFile;
 
         // Return not found
@@ -73,16 +73,19 @@ public class RunToolUtils {
                 runConfig = RunConfigs.get(rootSite).getRunConfig();
         }
 
-        // Get main file and args for given config or main file
-        WebFile mainFile = getMainFileForConfigAndFile(runTool, runConfig, aFile);
-        if (mainFile == null)
+        // Get main class file and args for given config or main file
+        WebFile mainClassFile = getMainClassFileForConfigAndFile(runTool, runConfig, aFile);
+        if (mainClassFile == null)
             return null;
+
+        // Set last main file
+        _lastRunFile = mainClassFile;
 
         // Get whether app is swing
         boolean isSwing = aFile != null && aFile.getText().contains("javax.swing");
 
         // Get args for given config or main file
-        String[] runArgs = getRunArgsForConfigAndFile(runConfig, mainFile, isDebug, isSwing);
+        String[] runArgs = getRunArgsForConfigAndFile(runConfig, mainClassFile, isDebug, isSwing);
 
         // Handle debug
         if (isDebug) {
@@ -95,7 +98,7 @@ public class RunToolUtils {
             }
 
             // Create debug app
-            DebugApp debugApp = new DebugApp(runTool, mainFile, runArgs);
+            DebugApp debugApp = new DebugApp(runTool, mainClassFile, runArgs);
             Workspace workspace = runTool.getWorkspace();
             Breakpoints breakpointsHpr = workspace.getBreakpoints();
             Breakpoint[] breakpoints = breakpointsHpr.getArray();
@@ -105,64 +108,61 @@ public class RunToolUtils {
         }
 
         // Run local if (1) TempProj and (2) jepl file and (3) not swing and (4) not alt-key-down
-        boolean runLocal = runLocal(mainFile);
+        boolean runLocal = runLocal(mainClassFile);
         if (runLocal) {
-            Project proj = Project.getProjectForFile(mainFile);
-            String className = proj.getClassNameForFile(mainFile);
+            Project proj = Project.getProjectForFile(mainClassFile);
+            String className = proj.getClassNameForFile(mainClassFile);
             String[] args = { className };
-            return new RunAppSrc(runTool, mainFile, args);
+            return new RunAppSrc(runTool, mainClassFile, args);
         }
 
         // Handle web: Create and return RunAppWeb for browser launch
         if (SnapUtils.isWebVM)
-            return new RunAppWeb(runTool, mainFile, runArgs);
+            return new RunAppWeb(runTool, mainClassFile, runArgs);
 
         // Create and return RunAppBin for desktop
-        return new RunAppBin(runTool, mainFile, runArgs);
+        return new RunAppBin(runTool, mainClassFile, runArgs);
     }
 
     /**
      * Returns the main file for config and file.
      */
-    public static WebFile getMainFileForConfigAndFile(RunTool runTool, RunConfig runConfig, WebFile aFile)
+    private static WebFile getMainClassFileForConfigAndFile(RunTool runTool, RunConfig runConfig, WebFile javaFile)
     {
         // Try to get main file from: (1) run config, (2) LastFile or (3) SelFile
-        WebFile mainFile = aFile;
-        if (mainFile == null && runConfig != null) {
+        WebFile mainClassFile = javaFile;
+        if (mainClassFile == null && runConfig != null) {
             WebSite rootSite = runTool.getRootSite();
-            String mainFilePath = runConfig.getMainFilePath();
-            mainFile = rootSite.createFileForPath(mainFilePath, false);
+            String mainClassFilePath = runConfig.getMainClassFilePath();
+            mainClassFile = rootSite.createFileForPath(mainClassFilePath, false);
         }
-        if (mainFile == null)
-            mainFile = _lastRunFile;
-        if (mainFile == null)
-            mainFile = runTool.getSelFile();
+        if (mainClassFile == null)
+            mainClassFile = _lastRunFile;
+        if (mainClassFile == null)
+            mainClassFile = getMainClassFileForFile(runTool.getSelFile());
+
+        // Return
+        return mainClassFile;
+    }
+
+    /**
+     * Returns the main class file for given file (if Java file with main).
+     */
+    private static WebFile getMainClassFileForFile(WebFile javaFile)
+    {
+        // If not a java file with main(), just return
+        if (!isJavaFileWithMain(javaFile))
+            return null;
 
         // Try to replace file with project file
-        Project proj = Project.getProjectForFile(mainFile);
+        Project proj = Project.getProjectForFile(javaFile);
         if (proj == null) {
-            System.err.println("RunTool: not project file: " + mainFile);
+            System.err.println("RunTool: not project file: " + javaFile);
             return null;
         }
 
         // Get class file for given file (should be JavaFile)
-        ProjectFiles projectFiles = proj.getProjectFiles();
-        WebFile classFile;
-        if (mainFile.getFileType().equals("java"))
-            classFile = projectFiles.getClassFileForJavaFile(mainFile);
-
-        // Try generic way to get class file
-        else classFile = projectFiles.getBuildFile(mainFile.getPath(), false, mainFile.isDir());
-
-        // If ClassFile found, set run file
-        if (classFile != null)
-            mainFile = classFile;
-
-        // Set last main file
-        _lastRunFile = mainFile;
-
-        // Return
-        return mainFile;
+        return proj.getProjectFiles().getClassFileForJavaFile(javaFile);
     }
 
     /**
@@ -205,7 +205,7 @@ public class RunToolUtils {
 
         // Add App Args
         String appArgs = aConfig != null ? aConfig.getAppArgs() : null;
-        if (appArgs != null && appArgs.length() > 0)
+        if (appArgs != null && !appArgs.isEmpty())
             commands.add(appArgs);
 
         // Return commands

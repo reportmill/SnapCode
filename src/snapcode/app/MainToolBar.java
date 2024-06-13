@@ -186,7 +186,7 @@ public class MainToolBar extends WorkspaceTool {
         // Create menu item for current main class source file
         ViewBuilder<MenuItem> menuItemBuilder = new ViewBuilder<>(MenuItem.class);
         RunTool runTool = _workspaceTools.getRunTool();
-        WebFile mainClassFile = RunToolUtils.getMainClassSourceFile(runTool);
+        WebFile mainClassFile = RunToolUtils.getMainJavaFile(runTool);
         if (mainClassFile != null)
             menuItemBuilder.text(mainClassFile.getSimpleName()).name("RunConfigNameMenuItem").save();
         else menuItemBuilder.text("Current File").name("RunConfigNameMenuItem").save();
