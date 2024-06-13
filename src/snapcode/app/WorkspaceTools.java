@@ -2,10 +2,7 @@ package snapcode.app;
 import snap.gfx.Image;
 import snap.viewx.DevPane;
 import snapcode.javatext.JavaTextPane;
-import snapcode.project.Breakpoints;
-import snapcode.project.BuildIssue;
-import snapcode.project.BuildIssues;
-import snapcode.project.Workspace;
+import snapcode.project.*;
 import snap.geom.Side;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
@@ -272,15 +269,25 @@ public class WorkspaceTools {
     }
 
     /**
-     * Closes the project.
+     * Notification that workspace is closing.
      */
-    public void closeProject()
+    protected void workspaceIsClosing()
     {
         // Notify all tools of close
         for (WorkspaceTool tool : _tools) {
             if (!tool.workspaceIsClosing())
                 break;
         }
+    }
+
+    /**
+     * Notification that project is closing.
+     */
+    protected void projectIsClosing(Project aProject)
+    {
+        // Notify all tools of close
+        for (WorkspaceTool tool : _tools)
+            tool.projectIsClosing(aProject);
     }
 
     /**

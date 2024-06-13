@@ -218,7 +218,7 @@ public class WorkspacePane extends ViewOwner {
         _workspace.closeWorkspace();
 
         // Close tools
-        _workspaceTools.closeProject();
+        _workspaceTools.workspaceIsClosing();
     }
 
     /**
@@ -510,6 +510,9 @@ public class WorkspacePane extends ViewOwner {
      */
     private void workspaceDidRemoveProject(Project aProject)
     {
+        // Notify tools
+        _workspaceTools.projectIsClosing(aProject);
+
         // Remove ProjectPane
         ProjectPane projPane = getProjectPaneForProject(aProject);
         _projectPanes = ArrayUtils.remove(_projectPanes, projPane);

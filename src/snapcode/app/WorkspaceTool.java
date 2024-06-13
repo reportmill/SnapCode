@@ -142,6 +142,11 @@ public class WorkspaceTool extends ViewOwner {
     protected boolean workspaceIsClosing()  { return  true; }
 
     /**
+     * Called when a project is closing.
+     */
+    protected void projectIsClosing(Project aProject)  { }
+
+    /**
      * Respond UI.
      */
     @Override

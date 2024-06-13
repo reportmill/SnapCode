@@ -491,4 +491,17 @@ public class RunTool extends WorkspaceTool implements AppListener {
             cancelRun();
         return true;
     }
+
+    /**
+     * Override to clear RunConfig if matching project.
+     */
+    @Override
+    protected void projectIsClosing(Project aProject)
+    {
+        if (_runConfig != null) {
+            Project runConfigProject = _runConfig.getProject();
+            if (runConfigProject == null || runConfigProject == aProject)
+                _runConfig = null;
+        }
+    }
 }
