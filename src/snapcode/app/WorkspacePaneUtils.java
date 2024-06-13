@@ -151,7 +151,7 @@ public class WorkspacePaneUtils {
 
                 // Kick off run
                 RunTool runTool = workspacePane.getWorkspaceTools().getRunTool();
-                ViewUtils.runLater(() -> runTool.runAppForSelFile(false));
+                ViewUtils.runLater(() -> runTool.runApp(false));
                 break;
 
 

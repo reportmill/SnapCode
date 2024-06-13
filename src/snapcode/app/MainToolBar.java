@@ -2,7 +2,6 @@ package snapcode.app;
 import snap.geom.Insets;
 import snapcode.apptools.BuildTool;
 import snapcode.apptools.RunTool;
-import snapcode.apptools.RunToolUtils;
 import snapcode.project.Project;
 import snap.gfx.*;
 import snap.util.StringUtils;
@@ -12,6 +11,7 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.apptools.SearchTool;
+import snapcode.project.RunConfig;
 import java.util.*;
 
 /**
@@ -101,10 +101,10 @@ public class MainToolBar extends WorkspaceTool {
             case "ForwardButton": _pagePane.getBrowser().trackForward(); break;
 
             // Handle RunButton, DebugButton, TerminateButton, BuildButton
-            case "RunButton": _workspaceTools.getRunTool().runAppForSelFile(false); break;
+            case "RunButton": _workspaceTools.getRunTool().runApp(false); break;
             case "DebugButton":
                 if (anEvent.isAltDown()) { String str = null; str.length(); } // Hidden trigger to test NPE
-                _workspaceTools.getRunTool().runAppForSelFile(true); break;
+                _workspaceTools.getRunTool().runApp(true); break;
             case "TerminateButton": _workspaceTools.getRunTool().cancelRun(); break;
             case "BuildButton": _workspaceTools.getToolForClass(BuildTool.class).buildWorkspace(); break;
 
@@ -186,10 +186,9 @@ public class MainToolBar extends WorkspaceTool {
         // Create menu item for current main class source file
         ViewBuilder<MenuItem> menuItemBuilder = new ViewBuilder<>(MenuItem.class);
         RunTool runTool = _workspaceTools.getRunTool();
-        WebFile mainClassFile = RunToolUtils.getMainJavaFile(runTool);
-        if (mainClassFile != null)
-            menuItemBuilder.text(mainClassFile.getSimpleName()).name("RunConfigNameMenuItem").save();
-        else menuItemBuilder.text("Current File").name("RunConfigNameMenuItem").save();
+        RunConfig runConfig = runTool.getRunConfig();
+        String runConfigName = runConfig != null ? runConfig.getName() : "Current File";
+        menuItemBuilder.text(runConfigName).name("RunConfigNameMenuItem").save();
 
         // Add separator and EditRunConfigsMenuItem
         menuItemBuilder.save();

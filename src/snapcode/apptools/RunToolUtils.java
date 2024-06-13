@@ -16,9 +16,6 @@ import java.util.List;
  */
 public class RunToolUtils {
 
-    // The last executed file
-    private static WebFile _lastRunFile;
-
     /**
      * Returns whether given file is a java file with main() (or jepl).
      */
@@ -34,58 +31,20 @@ public class RunToolUtils {
     }
 
     /**
-     * Returns a main file if available.
+     * Creates a run app for given config and debug option.
      */
-    public static WebFile getMainJavaFile(RunTool runTool)
+    public static RunApp createRunAppForConfig(RunTool runTool, RunConfig runConfig, boolean isDebug)
     {
-        // Get all workspace projects
-        Workspace workspace = runTool.getWorkspace();
-        Project[] projects = workspace.getProjects();
+        if (runConfig == null) return null;
 
-        // Search all projects for first that defines a main class name
-        for (Project project : projects) {
-            String mainClassName = project.getBuildFile().getMainClassName();
-            if (mainClassName != null) {
-                WebFile mainJavaFile = project.getJavaFileForClassName(mainClassName);
-                if (mainJavaFile != null)
-                    return mainJavaFile;
-            }
-        }
-
-        // If last file is main class file, return it
-        if (_lastRunFile != null)
-            return _lastRunFile;
-
-        // Return not found
-        return null;
-    }
-
-    /**
-     * Creates a run app for given config and/or main file and debug option.
-     */
-    public static RunApp createRunAppForConfigOrFile(RunTool runTool, RunConfig aConfig, WebFile aFile, boolean isDebug)
-    {
-        // Get config (if no config or file provided, get default config)
-        RunConfig runConfig = aConfig;
-        if (runConfig == null && aFile == null) {
-            WebSite rootSite = runTool.getRootSite();
-            if (rootSite != null)
-                runConfig = RunConfigs.get(rootSite).getRunConfig();
-        }
-
-        // Get main class file and args for given config or main file
-        WebFile mainClassFile = getMainClassFileForConfigAndFile(runTool, runConfig, aFile);
-        if (mainClassFile == null)
+        // Get main Java file and class file for config
+        WebFile mainJavaFile = runConfig.getMainJavaFile();
+        WebFile mainClassFile = runConfig.getMainClassFile();
+        if (mainJavaFile == null || mainClassFile == null)
             return null;
 
-        // Set last main file
-        _lastRunFile = mainClassFile;
-
-        // Get whether app is swing
-        boolean isSwing = aFile != null && aFile.getText().contains("javax.swing");
-
         // Get args for given config or main file
-        String[] runArgs = getRunArgsForConfigAndFile(runConfig, mainClassFile, isDebug, isSwing);
+        String[] runArgs = getRunArgsForConfig(runConfig, isDebug);
 
         // Handle debug
         if (isDebug) {
@@ -94,7 +53,7 @@ public class RunToolUtils {
             if (SnapUtils.isWebVM) {
                 String msg = "Debug support for browser is not currently\n available,but is coming soon.\nExecuting normal run instead";
                 DialogBox.showWarningDialog(runTool.getWorkspacePane().getUI(), "Debug Support Coming Soon", msg);
-                return createRunAppForConfigOrFile(runTool, aConfig, aFile, false);
+                return createRunAppForConfig(runTool, runConfig, false);
             }
 
             // Create debug app
@@ -125,67 +84,26 @@ public class RunToolUtils {
     }
 
     /**
-     * Returns the main file for config and file.
+     * Returns an array of args for given run config.
      */
-    private static WebFile getMainClassFileForConfigAndFile(RunTool runTool, RunConfig runConfig, WebFile javaFile)
+    public static String[] getRunArgsForConfig(RunConfig runConfig, boolean isDebug)
     {
-        // Try to get main file from: (1) run config, (2) LastFile or (3) SelFile
-        WebFile mainClassFile = javaFile;
-        if (mainClassFile == null && runConfig != null) {
-            WebSite rootSite = runTool.getRootSite();
-            String mainClassFilePath = runConfig.getMainClassFilePath();
-            mainClassFile = rootSite.createFileForPath(mainClassFilePath, false);
-        }
-        if (mainClassFile == null)
-            mainClassFile = _lastRunFile;
-        if (mainClassFile == null)
-            mainClassFile = getMainClassFileForFile(runTool.getSelFile());
-
-        // Return
-        return mainClassFile;
-    }
-
-    /**
-     * Returns the main class file for given file (if Java file with main).
-     */
-    private static WebFile getMainClassFileForFile(WebFile javaFile)
-    {
-        // If not a java file with main(), just return
-        if (!isJavaFileWithMain(javaFile))
-            return null;
-
-        // Try to replace file with project file
-        Project proj = Project.getProjectForFile(javaFile);
-        if (proj == null) {
-            System.err.println("RunTool: not project file: " + javaFile);
+        // Get project (just complain and return if not found)
+        Project project = runConfig.getProject();
+        if (project == null) {
+            System.err.println("RunTool: not project file: " + runConfig.getMainClassName());
             return null;
         }
 
-        // Get class file for given file (should be JavaFile)
-        return proj.getProjectFiles().getClassFileForJavaFile(javaFile);
-    }
-
-    /**
-     * Returns an array of args for given config and file.
-     */
-    public static String[] getRunArgsForConfigAndFile(RunConfig aConfig, WebFile aFile, boolean isDebug, boolean isSwing)
-    {
         // Get basic run command and add to list
         List<String> commands = new ArrayList<>();
-
-        // Try to replace file with project file
-        Project proj = Project.getProjectForFile(aFile);
-        if (proj == null) {
-            System.err.println("RunTool: not project file: " + aFile);
-            return null;
-        }
 
         // If not debug, add Java command path
         if (!isDebug) {
             String javaCmdPath = getJavaCmdPath();
             if (SnapUtils.isWebVM) {
-                boolean isSnapKit = proj.getBuildFile().isIncludeSnapKitRuntime();
-                boolean isSnapKitDom = isSnapKit && !ViewUtils.isAltDown() && !isSwing;
+                boolean isSnapKit = project.getBuildFile().isIncludeSnapKitRuntime();
+                boolean isSnapKitDom = isSnapKit && !ViewUtils.isAltDown() && !runConfig.isSwing();
                 if (isSnapKitDom)
                     javaCmdPath = "java-dom";
             }
@@ -193,18 +111,18 @@ public class RunToolUtils {
         }
 
         // Get Class path and add to list
-        String[] classPaths = proj.getRuntimeClassPaths();
+        String[] classPaths = project.getRuntimeClassPaths();
         String[] classPathsNtv = FilePathUtils.getNativePaths(classPaths);
         String classPath = FilePathUtils.getJoinedPath(classPathsNtv);
         commands.add("-cp");
         commands.add(classPath);
 
         // Add class name
-        String className = proj.getClassNameForFile(aFile);
+        String className = runConfig.getMainClassName();
         commands.add(className);
 
         // Add App Args
-        String appArgs = aConfig != null ? aConfig.getAppArgs() : null;
+        String appArgs = runConfig.getAppArgs();
         if (appArgs != null && !appArgs.isEmpty())
             commands.add(appArgs);
 
@@ -239,7 +157,7 @@ public class RunToolUtils {
             runConfigs.getRunConfigs().remove(runConfig);
             runConfigs.getRunConfigs().add(0, runConfig);
             runConfigs.writeFile();
-            runTool.runConfigOrFile(runConfig, null, withDebug);
+            runTool.runAppForConfig(runConfig, withDebug);
         }
     }
 

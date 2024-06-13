@@ -18,6 +18,9 @@ import java.util.List;
  */
 public class RunTool extends WorkspaceTool implements AppListener {
 
+    // The current run config
+    private RunConfig _runConfig;
+
     // The list of recently run apps
     private List<RunApp> _apps = new ArrayList<>();
 
@@ -33,6 +36,37 @@ public class RunTool extends WorkspaceTool implements AppListener {
     public RunTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
+    }
+
+    /**
+     * Returns the current RunConfig.
+     */
+    public RunConfig getRunConfig()
+    {
+        if (_runConfig != null) return _runConfig;
+        return _runConfig = findRunConfig();
+    }
+
+    /**
+     * Finds a run config.
+     */
+    private RunConfig findRunConfig()
+    {
+        // Search all projects for first that defines a main class name
+        Project[] projects = _workspace.getProjects();
+        for (Project project : projects) {
+            String mainClassName = project.getBuildFile().getMainClassName();
+            if (mainClassName != null)
+                return RunConfig.createRunConfigForWorkspaceAndClassName(_workspace, mainClassName);
+        }
+
+        // See if selected file is Java file
+        WebFile selFile = getSelFile();
+        if (selFile != null && RunToolUtils.isJavaFileWithMain(selFile))
+            return RunConfig.createRunConfigForJavaFile(selFile);
+
+        // Return not found
+        return null;
     }
 
     /**
@@ -123,38 +157,38 @@ public class RunTool extends WorkspaceTool implements AppListener {
     public DebugTool getDebugTool()  { return _workspaceTools.getToolForClass(DebugTool.class); }
 
     /**
+     * Runs app.
+     */
+    public void runApp(boolean isDebug)
+    {
+        RunConfig runConfig = getRunConfig();
+        runAppForConfig(runConfig, isDebug);
+    }
+
+    /**
      * Runs app for selected file.
      */
     public void runAppForSelFile(boolean isDebug)
     {
-        // Get SelFile - if not main class file, try to replace with defined main class file
+        // If SelFile is Java file, set as run config
         WebFile selFile = getSelFile();
+        if (RunToolUtils.isJavaFileWithMain(selFile))
+            _runConfig = RunConfig.createRunConfigForJavaFile(selFile);
 
-        // If selFile not main class file, try to replace with defined main class file
-        if (selFile == null || !RunToolUtils.isJavaFileWithMain(selFile)) {
-
-            // Get default or last main class file - if found, select and run again
-            WebFile mainJavaFile = RunToolUtils.getMainJavaFile(this);
-            if (mainJavaFile != null && RunToolUtils.isJavaFileWithMain(mainJavaFile)) {
-                setSelFile(mainJavaFile);
-                runDelayed(() -> runAppForSelFile(isDebug), 800);
-                return;
-            }
-        }
-
-        runConfigOrFile(null, selFile, isDebug);
+        // Run app
+        runApp(isDebug);
     }
 
     /**
-     * Runs app for given RunConfig or file.
+     * Runs app for given RunConfig.
      */
-    public void runConfigOrFile(RunConfig aConfig, WebFile aFile, boolean isDebug)
+    public void runAppForConfig(RunConfig runConfig, boolean isDebug)
     {
         // Automatically save all files - this is getting done twice for build, maybe this should call build tool
         _workspace.saveAllFiles();
 
         // Create RunApp and run
-        RunApp runApp = RunToolUtils.createRunAppForConfigOrFile(this, aConfig, aFile, isDebug);
+        RunApp runApp = RunToolUtils.createRunAppForConfig(this, runConfig, isDebug);
         runApp(runApp);
     }
 
@@ -404,39 +438,41 @@ public class RunTool extends WorkspaceTool implements AppListener {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle RunButton, TerminateButton
-        if (anEvent.equals("RunButton"))
-            runAppForSelFile(false);
-        else if (anEvent.equals("TerminateButton"))
-            cancelRun();
+        switch (anEvent.getName()) {
 
-        // Handle SwapConsoleButton
-        else if (anEvent.equals("SwapConsoleButton")) {
-            RunApp selApp = getSelApp();
-            boolean isAltConsole = selApp.getConsoleView() == selApp.getAltConsoleView();
-            View swapConsoleView = isAltConsole ? selApp.getConsoleTextView() : selApp.getAltConsoleView();
-            selApp.setConsoleView(swapConsoleView);
+            // Handle RunButton, TerminateButton
+            case "RunButton": runApp(false); break;
+            case "TerminateButton": cancelRun(); break;
+
+            // Handle SwapConsoleButton
+            case "SwapConsoleButton": {
+                RunApp selApp = getSelApp();
+                boolean isAltConsole = selApp.getConsoleView() == selApp.getAltConsoleView();
+                View swapConsoleView = isAltConsole ? selApp.getConsoleTextView() : selApp.getAltConsoleView();
+                selApp.setConsoleView(swapConsoleView);
+                break;
+            }
+
+            // Handle ClearButton
+            case "ClearButton": clearConsole(); break;
+
+            // Handle InputTextField: Show input string, add to runner input and clear text
+            case "InputTextField": {
+
+                // Get InputTextField string and send to current process
+                String inputString = anEvent.getStringValue();
+                RunApp selApp = getSelApp();
+                if (selApp != null)
+                    selApp.sendInput(inputString + '\n');
+
+                // Clear InputTextField
+                setViewValue("InputTextField", null);
+                break;
+            }
+
+            // Do normal version
+            default: super.respondUI(anEvent); break;
         }
-
-        // Handle ClearButton
-        else if (anEvent.equals("ClearButton"))
-            clearConsole();
-
-        // Handle InputTextField: Show input string, add to runner input and clear text
-        else if (anEvent.equals("InputTextField")) {
-
-            // Get InputTextField string and send to current process
-            String inputString = anEvent.getStringValue();
-            RunApp selApp = getSelApp();
-            if (selApp != null)
-                selApp.sendInput(inputString + '\n');
-
-            // Clear InputTextField
-            setViewValue("InputTextField", null);
-        }
-
-        // Do normal version
-        else super.respondUI(anEvent);
     }
 
     /**

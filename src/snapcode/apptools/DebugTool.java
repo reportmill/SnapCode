@@ -223,7 +223,7 @@ public class DebugTool extends WorkspaceTool {
 
         // Handle DebugButton: Run default config
         if (anEvent.equals("DebugButton"))
-            _runTool.runConfigOrFile(null, null,true);
+            _runTool.runApp(true);
 
         // Handle ResumeButton, SuspendButton, TerminateButton
         else if (anEvent.equals("ResumeButton"))
