@@ -1,7 +1,6 @@
 package snapcode.apptools;
 import snap.util.SnapUtils;
 import snap.view.ViewUtils;
-import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.debug.*;
@@ -35,24 +34,12 @@ public class RunToolUtils {
         if (runConfig == null || !runConfig.isRunnable())
             return null;
 
-        // Handle debug
-        if (isDebug) {
-
-            // If in browser, complain and run normal
-            if (SnapUtils.isWebVM) {
-                String msg = "Debug support for browser is not currently\n available,but is coming soon.\nExecuting normal run instead";
-                DialogBox.showWarningDialog(runTool.getWorkspacePane().getUI(), "Debug Support Coming Soon", msg);
-                return createRunAppForConfig(runTool, runConfig, false);
-            }
-
-            // Return new debug app
+        // Handle Debug: return DebugApp
+        if (isDebug)
             return new DebugApp(runTool, runConfig);
-        }
 
-        // Run local if (1) TempProj and (2) jepl file and (3) not swing and (4) not alt-key-down
-        WebFile mainJavaFile = runConfig.getMainJavaFile();
-        boolean runLocal = runLocal(mainJavaFile);
-        if (runLocal)
+        // Handle RunLocal: Return new RunAppSrc
+        if (isRunLocal(runConfig.getMainJavaFile()))
             return new RunAppSrc(runTool, runConfig);
 
         // Handle web: Create and return RunAppWeb for browser launch
@@ -66,8 +53,9 @@ public class RunToolUtils {
     /**
      * Returns whether to run local.
      */
-    public static boolean runLocal(WebFile mainFile)
+    public static boolean isRunLocal(WebFile mainFile)
     {
+        // Run local if (1) TempProj and (2) jepl file and (3) not swing and (4) not alt-key-down
         if (mainFile == null || !mainFile.getFileType().equals("jepl"))
             return false;
         Project proj = Project.getProjectForFile(mainFile);

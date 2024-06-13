@@ -216,7 +216,7 @@ public class JeplToJava {
     private void appendInitializerDecl(JInitializerDecl initializerDecl)
     {
         // If run local, just make main method
-        boolean runLocal = RunToolUtils.runLocal(_jfile.getSourceFile());
+        boolean runLocal = RunToolUtils.isRunLocal(_jfile.getSourceFile());
         if (runLocal) {
             _sb.append('\n');
             _sb.append(_indent).append("public static void main(String[] args) throws Exception\n");

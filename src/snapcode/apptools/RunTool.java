@@ -1,7 +1,9 @@
 package snapcode.apptools;
 import snap.props.PropChange;
 import snap.util.ListUtils;
+import snap.util.SnapUtils;
 import snap.util.TaskRunner;
+import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.view.*;
 import snapcode.app.JavaPage;
@@ -157,15 +159,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
     public DebugTool getDebugTool()  { return _workspaceTools.getToolForClass(DebugTool.class); }
 
     /**
-     * Runs app.
-     */
-    public void runApp(boolean isDebug)
-    {
-        RunConfig runConfig = getRunConfig();
-        runAppForConfig(runConfig, isDebug);
-    }
-
-    /**
      * Runs app for selected file.
      */
     public void runAppForSelFile(boolean isDebug)
@@ -180,12 +173,28 @@ public class RunTool extends WorkspaceTool implements AppListener {
     }
 
     /**
+     * Runs app.
+     */
+    public void runApp(boolean isDebug)
+    {
+        RunConfig runConfig = getRunConfig();
+        runAppForConfig(runConfig, isDebug);
+    }
+
+    /**
      * Runs app for given RunConfig.
      */
     public void runAppForConfig(RunConfig runConfig, boolean isDebug)
     {
         // Automatically save all files - this is getting done twice for build, maybe this should call build tool
         _workspace.saveAllFiles();
+
+        // If isDebug in browser, complain and run normal
+        if (isDebug && SnapUtils.isWebVM) {
+            String msg = "Debug support for browser is not currently\n available,but is coming soon.\nExecuting normal run instead";
+            DialogBox.showWarningDialog(_workspacePane.getUI(), "Debug Support Coming Soon", msg);
+            isDebug = false;
+        }
 
         // Create RunApp and run
         RunApp runApp = RunToolUtils.createRunAppForConfig(this, runConfig, isDebug);
