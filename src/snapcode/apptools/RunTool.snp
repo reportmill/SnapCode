@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="440" GrowHeight="true" FillWidth="true">
+<ColView PrefWidth="400" GrowHeight="true" FillWidth="true">
   <Font name="Arial" size="12" />
   <RowView Name="ToolBar" PrefHeight="32" Spacing="4">
     <Label Margin="0,10,0,8" text="Run:" />

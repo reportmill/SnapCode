@@ -157,8 +157,9 @@ public class RunAppWeb extends RunApp {
                 if (!_terminated) {
                     _running = false;
                     _terminated = true;
-                    notifyAppExited();
                 }
+
+                notifyAppExited();
             }
 
             // Handle exception

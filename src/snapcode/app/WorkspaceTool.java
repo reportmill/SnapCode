@@ -26,6 +26,9 @@ public class WorkspaceTool extends ViewOwner {
     // The PagePane
     protected PagePane  _pagePane;
 
+    // Whether this tool was shown automatically
+    private boolean _wasShownAutomatically;
+
     /**
      * Constructor.
      */
@@ -130,6 +133,38 @@ public class WorkspaceTool extends ViewOwner {
      * Returns the browser.
      */
     public WebBrowser getBrowser()  { return _workspacePane.getBrowser(); }
+
+    /**
+     * Shows this tool automatically (setting a flag to indicate it should close automatically).
+     */
+    public void showToolAutomatically()
+    {
+        if (isShowing()) return;
+        _workspaceTools.showTool(this);
+        _wasShownAutomatically = true;
+    }
+
+    /**
+     * Closes this tool automatically (if previously shown automatically).
+     */
+    public void hideToolAutomatically()
+    {
+        System.out.println("HideToolAutomatically: " + _wasShownAutomatically);
+        if (!_wasShownAutomatically) return;
+        ToolTray toolTray = _workspaceTools.getToolTrayForTool(this);
+        toolTray.setSelTool(null);
+    }
+
+    /**
+     * Override to clear WasShownAutomatically.
+     */
+    @Override
+    protected void setShowing(boolean aValue)
+    {
+        if (aValue == isShowing()) return;
+        super.setShowing(aValue);
+        _wasShownAutomatically = false;
+    }
 
     /**
      * Returns the title.

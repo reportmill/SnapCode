@@ -89,9 +89,9 @@ public class DebugApp extends RunAppBin {
     public void exec()
     {
         // Get class name (if no class name, complain and return)
-        String cname = getMainClassName();
-        if (cname.equals("")) {
-            failure("No main class specifed and no current default defined.");
+        String mainClassName = getMainClassName();
+        if (mainClassName.isEmpty()) {
+            failure("No main class specified and no current default defined.");
             return;
         }
 
@@ -102,7 +102,7 @@ public class DebugApp extends RunAppBin {
             // Get command line, create session and start it
             String vmArgs = getVmArgs();
             String appArgs = getAppArgs();
-            String cmdLine = cname + " " + appArgs;
+            String cmdLine = mainClassName + " " + appArgs;
             _vm = DebugUtils.getVM(vmArgs, cmdLine, this);
             _running = true;
             startSession();
@@ -111,7 +111,7 @@ public class DebugApp extends RunAppBin {
 
         // Complain on VMLaunchFailureException and return false
         catch (VMLaunchFailureException e) {
-            failure("Attempt to launch main class \"" + cname + "\" failed.");
+            failure("Attempt to launch main class \"" + mainClassName + "\" failed.");
         }
     }
 
@@ -751,12 +751,6 @@ public class DebugApp extends RunAppBin {
     {
         for (AppListener appLsnr : _appLsnrs)
             appLsnr.appResumed(this);
-    }
-
-    protected void notifyAppExited()
-    {
-        for (AppListener appLsnr : _appLsnrs)
-            appLsnr.appExited(this);
     }
 
     /**

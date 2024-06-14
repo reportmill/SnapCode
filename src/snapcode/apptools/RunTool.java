@@ -210,10 +210,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
         if (runApp == null)
             return;
 
-        // Show tool
-        boolean isDebug = runApp instanceof DebugApp;
-        _workspaceTools.showToolForClass(isDebug ? DebugTool.class : RunTool.class);
-
         // Clear display
         clearConsole();
 
@@ -246,19 +242,20 @@ public class RunTool extends WorkspaceTool implements AppListener {
      */
     private void runAppImpl(RunApp runApp)
     {
-        execProc(runApp);
-        resetLater();
-        _workspacePane.getToolBar().resetLater();
-    }
-
-    /**
-     * Executes a proc and adds it to list.
-     */
-    public void execProc(RunApp runApp)
-    {
+        // Add app to list and select
         addApp(runApp);
         setSelApp(runApp);
+
+        // Start app
         runApp.exec();
+
+        // Reset UI
+        resetLater();
+        _workspacePane.getToolBar().resetLater();
+
+        // Auto-show tool
+        WorkspaceTool appTool = runApp instanceof DebugApp ? getDebugTool() : this;
+        appTool.showToolAutomatically();
     }
 
     /**
@@ -344,14 +341,20 @@ public class RunTool extends WorkspaceTool implements AppListener {
     /**
      * RunProc.Listener method - called when process ends.
      */
-    public void appExited(RunApp aProc)
+    public void appExited(RunApp runApp)
     {
-        DebugTool debugTool = getDebugTool();
-        debugTool.appExited(aProc);
+        if (runApp instanceof DebugApp) {
+            DebugTool debugTool = getDebugTool();
+            debugTool.appExited(runApp);
+        }
 
         // Reset UI
         resetLater();
         _workspacePane.getToolBar().resetLater();
+
+        // Auto-hide tool
+        WorkspaceTool appTool = runApp instanceof DebugApp ? getDebugTool() : this;
+        appTool.hideToolAutomatically();
     }
 
     /**
@@ -408,6 +411,14 @@ public class RunTool extends WorkspaceTool implements AppListener {
         RunApp selApp = getSelApp();
         if (selApp != null)
             selApp.clearConsole();
+    }
+
+    /**
+     * Called to automatically open RunTool when app run started.
+     */
+    private void autoShowPanel()
+    {
+        if (isShowing()) return;
     }
 
     /**
