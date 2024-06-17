@@ -357,15 +357,9 @@ public class WorkspacePane extends ViewOwner {
     {
         switch (anEvent.getName()) {
 
-            // Handle NewFileMenuItem
-            case "NewFileMenuItem":
-                NewFileTool newFileTool = _workspaceTools.getNewFileTool();
-                newFileTool.showNewFilePanel();
-                anEvent.consume();
-                break;
-
-            // Handle OpenMenuItem
-            case "OpenMenuItem": getToolBar().selectSearchText(); anEvent.consume(); break;
+            // Handle NewFileMenuItem, OpenFileMenuItem
+            case "NewFileMenuItem": _workspaceTools.getNewFileTool().showNewFilePanel(); anEvent.consume(); break;
+            case "OpenFileMenuItem": _workspaceTools.getFilesTool().showOpenFilePanel(); anEvent.consume(); break;
 
             // Handle CloseMenuItem, CloseFileAction
             case "CloseMenuItem": case "CloseFileAction":

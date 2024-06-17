@@ -5,7 +5,7 @@
       <Menu Name="FileMenu" Text="File">
         <MenuItem Name="NewFileMenuItem" Text="New..." key="Shortcut+N" />
         <MenuItem />
-        <MenuItem Name="OpenMenuItem" Text="Open..." key="Shortcut+O" />
+        <MenuItem Name="OpenFileMenuItem" Text="Open..." key="Shortcut+O" />
         <MenuItem Name="CloseMenuItem" Text="Close" key="Shortcut+W" />
         <MenuItem Name="SaveMenuItem" Text="Save" key="Shortcut+S" />
         <MenuItem Name="SaveAsMenuItem" Text="Save As..." key="Shortcut+Shift+S" />

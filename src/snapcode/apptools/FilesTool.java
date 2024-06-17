@@ -1,6 +1,9 @@
 package snapcode.apptools;
 import snap.util.ArrayUtils;
+import snap.viewx.FilePanel;
 import snap.web.*;
+import snapcode.app.WorkspacePaneUtils;
+import snapcode.project.ProjectUtils;
 import snapcode.project.WorkspaceBuilder;
 import snap.util.StringUtils;
 import snap.viewx.DialogBox;
@@ -25,6 +28,33 @@ public class FilesTool extends WorkspaceTool {
     public FilesTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
+    }
+
+    /**
+     * Shows the open file panel.
+     */
+    public void showOpenFilePanel()
+    {
+        FilePanel filePanel = new FilePanel();
+        filePanel.setFileValidator(file -> ProjectUtils.isValidOpenFile(file));
+        WebFile openFile = filePanel.showFilePanel(_workspacePane.getUI());
+        if (openFile == null)
+            return;
+
+        // Open file
+        WorkspacePaneUtils.openFile(_workspacePane, openFile);
+    }
+
+    /**
+     * Shows the open desktop file panel.
+     */
+    public void showOpenDesktopFilePanel()
+    {
+        String[] fileTypes = { "*" };
+        getEnv().showFilePicker(fileTypes, pickedFile -> {
+            System.out.println("OpenFile picked: " + pickedFile);
+            WorkspacePaneUtils.openFile(_workspacePane, pickedFile);
+        });
     }
 
     /**
@@ -168,7 +198,7 @@ public class FilesTool extends WorkspaceTool {
     public void removeFiles(List<WebFile> theFiles)
     {
         // Get ProjectPane and disable AutoBuild
-        WebFile file0 = theFiles.size() > 0 ? theFiles.get(0) : null;
+        WebFile file0 = !theFiles.isEmpty() ? theFiles.get(0) : null;
         if (file0 == null) {
             beep();
             return;
@@ -208,7 +238,7 @@ public class FilesTool extends WorkspaceTool {
     /**
      * Renames a file.
      */
-    public boolean renameFile(WebFile aFile, String aName)
+    public boolean renameFile(WebFile aFile, String newFilename)
     {
         // TODO - this is totally bogus
         if (aFile.isDir() && aFile.getFileCount() > 0) {
@@ -220,18 +250,19 @@ public class FilesTool extends WorkspaceTool {
         }
 
         // Get file name (if no extension provided, default to file extension) and path
-        String name = aName;
-        if (name.indexOf('.') < 0 && aFile.getFileType().length() > 0) name += "." + aFile.getFileType();
-        String path = aFile.getParent().getDirPath() + name;
+        String filename = newFilename;
+        if (!filename.contains(".") && !aFile.getFileType().isEmpty())
+            filename += "." + aFile.getFileType();
+        String filePath = aFile.getParent().getDirPath() + filename;
 
         // If file for NewPath already exists, complain
-        if (aFile.getSite().getFileForPath(path) != null) {
+        if (aFile.getSite().getFileForPath(filePath) != null) {
             beep();
             return false;
         }
 
         // Set bytes and save
-        WebFile newFile = aFile.getSite().createFileForPath(path, aFile.isDir());
+        WebFile newFile = aFile.getSite().createFileForPath(filePath, aFile.isDir());
         newFile.setBytes(aFile.getBytes());
         try { newFile.save(); }
         catch (Exception e) { throw new RuntimeException(e); }
@@ -266,7 +297,7 @@ public class FilesTool extends WorkspaceTool {
             return;
 
         // Get top parent
-        WebFile parent = files.size() > 0 ? files.get(0).getParent() : null;
+        WebFile parent = !files.isEmpty() ? files.get(0).getParent() : null;
         for (WebFile file : files)
             parent = WebUtils.getCommonAncestor(parent, file);
 

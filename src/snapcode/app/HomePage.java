@@ -1,12 +1,10 @@
 package snapcode.app;
 import snap.util.SnapUtils;
 import snap.view.*;
-import snap.viewx.FilePanel;
 import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.apptools.NewFileTool;
-import snapcode.project.ProjectUtils;
 import snapcode.webbrowser.WebPage;
 import java.io.File;
 
@@ -53,33 +51,6 @@ public class HomePage extends WebPage {
         // Show new project panel
         NewFileTool newFileTool = _workspacePane.getWorkspaceTools().getNewFileTool();
         runLater(newFileTool::showNewProjectPanel);
-    }
-
-    /**
-     * Shows the open panel.
-     */
-    private void showOpenPanel()
-    {
-        FilePanel filePanel = new FilePanel();
-        filePanel.setFileValidator(file -> ProjectUtils.isValidOpenFile(file));
-        WebFile openFile = filePanel.showFilePanel(getUI());
-        if (openFile == null)
-            return;
-
-        // Open file
-        WorkspacePaneUtils.openFile(_workspacePane, openFile);
-    }
-
-    /**
-     * Shows the open desktop file panel.
-     */
-    private void showOpenDesktopFilePanel()
-    {
-        String[] fileTypes = { "*" };
-        getEnv().showFilePicker(fileTypes, pickedFile -> {
-            System.out.println("OpenFile picked: " + pickedFile);
-            WorkspacePaneUtils.openFile(_workspacePane, pickedFile);
-        });
     }
 
     /**
@@ -164,10 +135,9 @@ public class HomePage extends WebPage {
     {
         switch (anEvent.getName()) {
 
-            // Handle OpenButton, Bogus
-            case "OpenButton": showOpenPanel(); break;
-            case "OpenDesktopFileButton": showOpenDesktopFilePanel(); break;
-            case "Bogus": break;
+            // Handle OpenButton, OpenDesktopFileButton
+            case "OpenButton": _workspacePane.getWorkspaceTools().getFilesTool().showOpenFilePanel(); break;
+            case "OpenDesktopFileButton": _workspacePane.getWorkspaceTools().getFilesTool().showOpenDesktopFilePanel(); break;
 
             // Do normal version
             default: super.respondUI(anEvent); break;
