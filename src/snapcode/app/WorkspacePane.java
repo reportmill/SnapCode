@@ -222,22 +222,6 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
-     * Shows the project files tool.
-     */
-    public void showProjectTool()
-    {
-        _workspaceTools.showToolForClass(ProjectFilesTool.class);
-    }
-
-    /**
-     * Shows the run tool.
-     */
-    public void showRunTool()
-    {
-        _workspaceTools.showToolForClass(RunTool.class);
-    }
-
-    /**
      * Returns the build directory.
      */
     public WebFile getBuildDir()
@@ -319,7 +303,7 @@ public class WorkspacePane extends ViewOwner {
     protected void initShowing()
     {
         // Show project tool
-        runLater(this::showProjectTool);
+        runLater(_workspaceTools.getProjectFilesTool()::showTool);
 
         // Do AutoBuild
         if (getProjects().length > 0)
@@ -344,8 +328,8 @@ public class WorkspacePane extends ViewOwner {
         if (SnapUtils.isWebVM)
             aWindow.setMaximized(true);
 
-        // Register for WelcomePanel on close
-        enableEvents(aWindow, WinClose);
+        // Register for handleWinClose on window close
+        aWindow.addEventHandler(this::handleWinClose, WinClose);
     }
 
     /**
@@ -371,60 +355,54 @@ public class WorkspacePane extends ViewOwner {
      */
     public void respondUI(ViewEvent anEvent)
     {
-        // Handle OpenMenuItem
-        if (anEvent.equals("OpenMenuItem")) {
-            getToolBar().selectSearchText();
-            anEvent.consume();
+        switch (anEvent.getName()) {
+
+            // Handle NewFileMenuItem
+            case "NewFileMenuItem":
+                NewFileTool newFileTool = _workspaceTools.getNewFileTool();
+                newFileTool.showNewFilePanel();
+                anEvent.consume();
+                break;
+
+            // Handle OpenMenuItem
+            case "OpenMenuItem": getToolBar().selectSearchText(); anEvent.consume(); break;
+
+            // Handle CloseMenuItem, CloseFileAction
+            case "CloseMenuItem": case "CloseFileAction":
+                _pagePane.removeOpenFile(getSelFile());
+                anEvent.consume();
+                break;
+
+            // Handle QuitMenuItem
+            case "QuitMenuItem": App.getShared().quitApp(); anEvent.consume(); break;
+
+            // Handle ShowLeftTrayMenuItem, ShowRightTrayMenuItem, ShowBottomTrayMenuItem
+            case "ShowLeftTrayMenuItem": _workspaceTools.setShowLeftTray(!_workspaceTools.isShowLeftTray()); break;
+            case "ShowRightTrayMenuItem": _workspaceTools.setShowRightTray(!_workspaceTools.isShowRightTray()); break;
+            case "ShowBottomTrayMenuItem": _workspaceTools.setShowBottomTray(!_workspaceTools.isShowBottomTray()); break;
+
+            // Handle CopyWebLinkMenuItem, OpenWebLinkMenuItem
+            case "CopyWebLinkMenuItem": copyWebLink(); break;
+            case "OpenWebLinkMenuItem": openWebLink(); break;
+
+            // Handle ShowDevToolsMenuItem
+            case "ShowDevToolsMenuItem": DevPane.setDevPaneShowing(getUI(), true); break;
+
+            // Handle ShowJavaHomeMenuItem
+            case "ShowJavaHomeMenuItem":
+                String java = System.getProperty("java.home");
+                FileUtils.openFile(java);
+                break;
         }
+    }
 
-        // Handle QuitMenuItem
-        if (anEvent.equals("QuitMenuItem")) {
-            App.getShared().quitApp();
-            anEvent.consume();
-        }
-
-        // Handle NewFileMenuItem, NewFileButton
-        if (anEvent.equals("NewFileMenuItem") || anEvent.equals("NewFileButton")) {
-            NewFileTool newFileTool = _workspaceTools.getNewFileTool();
-            newFileTool.showNewFilePanel();
-            anEvent.consume();
-        }
-
-        // Handle CloseMenuItem, CloseFileAction
-        if (anEvent.equals("CloseMenuItem") || anEvent.equals("CloseFileAction")) {
-            _pagePane.removeOpenFile(getSelFile());
-            anEvent.consume();
-        }
-
-        // Handle ShowLeftTrayMenuItem, ShowRightTrayMenuItem, ShowBottomTrayMenuItem
-        if (anEvent.equals("ShowLeftTrayMenuItem"))
-            _workspaceTools.setShowLeftTray(!_workspaceTools.isShowLeftTray());
-        if (anEvent.equals("ShowRightTrayMenuItem"))
-            _workspaceTools.setShowRightTray(!_workspaceTools.isShowRightTray());
-        if (anEvent.equals("ShowBottomTrayMenuItem"))
-            _workspaceTools.setShowBottomTray(!_workspaceTools.isShowBottomTray());
-
-        // Handle CopyWebLinkMenuItem, OpenWebLinkMenuItem
-        if (anEvent.equals("CopyWebLinkMenuItem"))
-            copyWebLink();
-        if (anEvent.equals("OpenWebLinkMenuItem"))
-            openWebLink();
-
-        // Handle ShowDevToolsMenuItem
-        if (anEvent.equals("ShowDevToolsMenuItem"))
-            DevPane.setDevPaneShowing(getUI(), true);
-
-        // Handle ShowJavaHomeMenuItem
-        if (anEvent.equals("ShowJavaHomeMenuItem")) {
-            String java = System.getProperty("java.home");
-            FileUtils.openFile(java);
-        }
-
-        // Handle WinClosing
-        if (anEvent.isWinClose()) {
-            hide();
-            WorkspacePaneUtils.openDefaultWorkspace();
-        }
+    /**
+     * Called when window is closing.
+     */
+    private void handleWinClose(ViewEvent anEvent)
+    {
+        hide();
+        WorkspacePaneUtils.openDefaultWorkspace();
     }
 
     /**

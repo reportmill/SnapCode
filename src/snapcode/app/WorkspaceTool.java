@@ -135,6 +135,15 @@ public class WorkspaceTool extends ViewOwner {
     public WebBrowser getBrowser()  { return _workspacePane.getBrowser(); }
 
     /**
+     * Shows this tool.
+     */
+    public void showTool()
+    {
+        if (isShowing()) return;
+        _workspaceTools.showTool(this);
+    }
+
+    /**
      * Shows this tool automatically (setting a flag to indicate it should close automatically).
      */
     public void showToolAutomatically()
