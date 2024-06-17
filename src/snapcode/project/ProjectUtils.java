@@ -221,10 +221,18 @@ public class ProjectUtils {
      */
     public static Project getTempProject(Workspace workspace)
     {
+        return getTempProject(workspace, "TempProj");
+    }
+
+    /**
+     * Returns a temp project for given workspace.
+     */
+    public static Project getTempProject(Workspace workspace, String projectName)
+    {
         // Get path to temp dir named TempProj
-        String tempProjPath = FileUtils.getTempFile("TempProj").getAbsolutePath();
+        String tempProjPath = FileUtils.getTempFile(projectName).getAbsolutePath();
         if (SnapUtils.isMac)
-            tempProjPath = "/tmp/TempProj";
+            tempProjPath = "/tmp/" + projectName;
 
         // Get URL and Site for TempProjPath
         WebURL tempProjURL = WebURL.getURL(tempProjPath);

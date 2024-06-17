@@ -354,7 +354,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
 
         // Auto-hide tool
         WorkspaceTool appTool = runApp instanceof DebugApp ? getDebugTool() : this;
-        appTool.hideToolAutomatically();
+        runLater(appTool::hideToolAutomatically);
     }
 
     /**

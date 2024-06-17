@@ -77,7 +77,7 @@ public class GreenImport {
 
         // Create new project and get src dir
         Workspace workspace = workspacePane.getWorkspace();
-        Project project = getTempProject(workspace, scenarioName);
+        Project project = getTempGreenfootProject(workspace, scenarioName);
         WebFile projectSourceDir = project.getSourceDir();
 
         // Copy all non-class files from greenfoot project dir to new project src dir
@@ -131,36 +131,15 @@ public class GreenImport {
     }
 
     /**
-     * Returns a temp project for given workspace.
+     * Returns a temp greenfoot project for given workspace.
      */
-    private static Project getTempProject(Workspace workspace, String projectName)
+    private static Project getTempGreenfootProject(Workspace workspace, String projectName)
     {
-        // Get path to temp dir named TempProj
-        String tempProjPath = FileUtils.getTempFile(projectName).getAbsolutePath();
-        if (SnapUtils.isMac)
-            tempProjPath = "/tmp/" + projectName;
-
-        // Get URL and Site for TempProjPath
-        WebURL tempProjURL = WebURL.getURL(tempProjPath);
-        assert (tempProjURL != null);
-        WebSite tempProjSite = tempProjURL.getAsSite();
-
-        // Get project for site - create if missing
-        Project tempProj = Project.getProjectForSite(tempProjSite);
-        if (tempProj != null)
-            return tempProj;
-
-        // Delete site root directory
-        WebFile tempProjRootDir = tempProjSite.getRootDir();
-        if (tempProjRootDir.getExists())
-            tempProjRootDir.delete();
-
         // Create new temp project
-        tempProj = workspace.addProjectForSite(tempProjSite);
+        Project tempProj = ProjectUtils.getTempProject(workspace, projectName);
 
         // Get build file and configure
         BuildFile buildFile = tempProj.getBuildFile();
-        buildFile.setIncludeSnapKitRuntime(true);
         buildFile.addDependency(new MavenDependency("com.reportmill:greenfoot:2024.06"));
         buildFile.setMainClassName("Main");
         buildFile.writeFile();
@@ -281,7 +260,7 @@ public class GreenImport {
 
         // Get file text
         String text = file.getText();
-        if (text != null && text.length() > 0) {
+        if (text != null && !text.isEmpty()) {
             String[] lines = text.split("\\n");
             for (String line : lines) {
                 String[] parts = line.split("=");

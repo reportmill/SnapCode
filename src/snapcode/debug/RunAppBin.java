@@ -1,9 +1,7 @@
 package snapcode.debug;
 import snap.util.StringUtils;
-import snap.web.WebFile;
 import snapcode.apptools.RunTool;
 import snapcode.project.RunConfig;
-
 import java.io.*;
 
 /**

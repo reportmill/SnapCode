@@ -149,7 +149,6 @@ public class WorkspaceTool extends ViewOwner {
      */
     public void hideToolAutomatically()
     {
-        System.out.println("HideToolAutomatically: " + _wasShownAutomatically);
         if (!_wasShownAutomatically) return;
         ToolTray toolTray = _workspaceTools.getToolTrayForTool(this);
         toolTray.setSelTool(null);
