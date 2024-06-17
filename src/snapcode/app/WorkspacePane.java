@@ -291,6 +291,13 @@ public class WorkspacePane extends ViewOwner {
         // Add drag drop support
         new WorkspacePaneDnD(this);
 
+        // Hide Browser menu items
+        if (!SnapUtils.isWebVM) {
+            getView("DownloadFileMenuItem").setVisible(false);
+            getView("OpenDesktopFileMenuItem").setVisible(false);
+            getView("UploadDownloadMenuItemsSeparator").setVisible(false);
+        }
+
         // Add key binding to OpenMenuItem and CloseWindow
         //addKeyActionHandler("OpenMenuItem", "meta O");
         //addKeyActionHandler("CloseFileAction", "meta W");
@@ -370,6 +377,10 @@ public class WorkspacePane extends ViewOwner {
             // Handle CloseFileMenuItem, CloseFileAction
             case "CloseFileMenuItem": case "CloseFileAction":
                 _workspaceTools.getFilesTool().closeSelFile(); anEvent.consume(); break;
+
+            // Handle DownloadFileMenuItem, OpenDesktopFileMenuItem
+            case "DownloadFileMenuItem": _workspaceTools.getFilesTool().downloadFile(); anEvent.consume(); break;
+            case "OpenDesktopFileMenuItem": _workspaceTools.getFilesTool().showOpenDesktopFilePanel(); anEvent.consume(); break;
 
             // Handle QuitMenuItem
             case "QuitMenuItem": App.getShared().quitApp(); anEvent.consume(); break;

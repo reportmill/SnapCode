@@ -1,6 +1,10 @@
 package snapcode.apptools;
+import snap.gfx.GFXEnv;
 import snap.util.ArrayUtils;
+import snap.util.FileUtils;
+import snap.view.View;
 import snap.viewx.FilePanel;
+import snap.viewx.FormBuilder;
 import snap.web.*;
 import snapcode.app.JavaPage;
 import snapcode.app.WorkspacePaneUtils;
@@ -11,7 +15,6 @@ import snap.viewx.DialogBox;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.webbrowser.WebPage;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -339,6 +342,76 @@ public class FilesTool extends WorkspaceTool {
 
         // Update tree again
         setSelFile(parent);
+    }
+
+    /**
+     * Handle download file.
+     */
+    public void downloadFile()
+    {
+        // Get selected file - if file, just forward to download file
+        WebFile selFile = getSelFile();
+        if (selFile.isFile()) {
+            File selFileJava = selFile.getJavaFile();
+            if (selFileJava != null) {
+                int downloadType = showDownloadTypePanel(_workspacePane.getUI());
+                if (downloadType < 0)
+                    return;
+                if (downloadType == 1) {
+                    downloadFile(selFileJava);
+                    return;
+                }
+            }
+        }
+
+        // Get filename
+        WebFile projectDir = selFile.getSite().getRootDir();
+        String filename = selFile.getSite().getName();
+
+        // Create zip file
+        File zipDir = projectDir.getJavaFile();
+        File zipFile = FileUtils.getTempFile(filename + ".zip");
+        try { FilesTool.zipDirectory(zipDir, zipFile); }
+        catch (Exception e) { System.err.println(e.getMessage()); }
+
+        // Download file
+        downloadFile(zipFile);
+        runDelayed(() -> zipFile.delete(), 1000);
+    }
+
+    /**
+     * Handle download file.
+     */
+    public void downloadFile(File fileToDownload)
+    {
+        WebFile webFile = WebFile.getFileForJavaFile(fileToDownload);
+        GFXEnv.getEnv().downloadFile(webFile);
+    }
+
+    /**
+     * Runs a panel to ask user whether user wants to download project zip archive (0) or selected file (1).
+     */
+    private static int showDownloadTypePanel(View aView)
+    {
+        // Get new FormBuilder and configure
+        FormBuilder formBuilder = new FormBuilder();
+        formBuilder.setPadding(20, 5, 15, 5);
+        formBuilder.addLabel("Select download file:      ").setFont(new snap.gfx.Font("Arial", 24));
+        formBuilder.setSpacing(15);
+
+        // Add radio buttons for download type
+        String DOWNLOAD_TYPE = "DownloadType";
+        String downloadProject = "Download project zip archive";
+        formBuilder.addRadioButton(DOWNLOAD_TYPE, downloadProject, true);
+        formBuilder.addRadioButton(DOWNLOAD_TYPE, "Download selected file", false);
+
+        // Run dialog panel (just return if null)
+        if (!formBuilder.showPanel(aView, "Download Project Archive / File", DialogBox.infoImage))
+            return -1;
+
+        // Get selected index and return file type
+        String downloadType = formBuilder.getStringValue(DOWNLOAD_TYPE);
+        return downloadType.equals(downloadProject) ? 0 : 1;
     }
 
     /**

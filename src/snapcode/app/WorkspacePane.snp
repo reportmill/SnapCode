@@ -10,6 +10,9 @@
         <MenuItem Name="RevertFileMenuItem" Text="Revert to Saved" key="Shortcut+U" />
         <MenuItem Name="CloseFileMenuItem" Text="Close" key="Shortcut+W" />
         <MenuItem />
+        <MenuItem Name="DownloadFileMenuItem" Text="Download File/Project..." />
+        <MenuItem Name="OpenDesktopFileMenuItem" Text="Open Desktop File..." />
+        <MenuItem Name="UploadDownloadMenuItemsSeparator" />
         <MenuItem Name="QuitMenuItem" Text="Quit" key="Shortcut+Q" />
       </Menu>
       <Menu Name="EditMenu" Text="Edit">
