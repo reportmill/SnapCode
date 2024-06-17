@@ -446,10 +446,12 @@ public class PagePane extends ViewOwner {
      */
     public void revertFile(WebFile aFile)
     {
+        boolean isSelFile = aFile == getSelFile();
         removeOpenFile(aFile);
         aFile.resetAndVerify();
         setPageForURL(aFile.getURL(), null);
-        setSelFile(aFile);
+        if (isSelFile)
+            setSelFile(aFile);
     }
 
     /**

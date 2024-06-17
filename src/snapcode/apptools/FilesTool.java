@@ -2,6 +2,7 @@ package snapcode.apptools;
 import snap.util.ArrayUtils;
 import snap.viewx.FilePanel;
 import snap.web.*;
+import snapcode.app.JavaPage;
 import snapcode.app.WorkspacePaneUtils;
 import snapcode.project.ProjectUtils;
 import snapcode.project.WorkspaceBuilder;
@@ -9,6 +10,8 @@ import snap.util.StringUtils;
 import snap.viewx.DialogBox;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
+import snapcode.webbrowser.WebPage;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -55,6 +58,36 @@ public class FilesTool extends WorkspaceTool {
             System.out.println("OpenFile picked: " + pickedFile);
             WorkspacePaneUtils.openFile(_workspacePane, pickedFile);
         });
+    }
+
+    /**
+     * Saves the selected file.
+     */
+    public void saveSelFile()
+    {
+        WebPage selPage = _pagePane.getSelPage();
+        if (selPage instanceof JavaPage) {
+            JavaPage javaPage = (JavaPage) selPage;
+            javaPage.getTextPane().saveChanges();
+        }
+    }
+
+    /**
+     * Reverts the selected file.
+     */
+    public void revertSelFiles()
+    {
+        WebFile selFile = getSelFile();
+        _pagePane.revertFile(selFile);
+    }
+
+    /**
+     * Closes the selected file.
+     */
+    public void closeSelFile()
+    {
+        WebFile selFile = getSelFile();
+        _pagePane.removeOpenFile(selFile);
     }
 
     /**

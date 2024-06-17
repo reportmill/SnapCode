@@ -290,10 +290,7 @@ public class ProjectFilesTool extends WorkspaceTool {
                 break;
 
             // Handle RefreshFileMenuItem
-            case "RefreshFileMenuItem":
-                for (WebFile file : getSelFiles())
-                    file.resetAndVerify();
-                break;
+            case "RefreshFileMenuItem": _workspaceTools.getFilesTool().revertSelFiles(); break;
 
             // Handle OpenInTextEditorMenuItem
             case "OpenInTextEditorMenuItem": {
