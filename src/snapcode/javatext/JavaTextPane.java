@@ -147,7 +147,7 @@ public class JavaTextPane extends TextPane {
             // Handle PopupTrigger
             if (anEvent.isPopupTrigger()) { //anEvent.consume();
                 Menu contextMenu = createContextMenu();
-                contextMenu.show(_textArea, anEvent.getX(), anEvent.getY());
+                contextMenu.showMenuAtXY(_textArea, anEvent.getX(), anEvent.getY());
             }
 
             // Handle MouseClick: If alt-down, open JavaDoc. If HoverNode, open declaration

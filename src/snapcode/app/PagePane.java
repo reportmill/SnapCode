@@ -424,7 +424,7 @@ public class PagePane extends ViewOwner {
     {
         if (anEvent.isPopupTrigger()) {
             Menu contextMenu = createFileContextMenu(aFile);
-            contextMenu.show(anEvent.getView(), anEvent.getX(), anEvent.getY());
+            contextMenu.showMenuAtXY(anEvent.getView(), anEvent.getX(), anEvent.getY());
             anEvent.consume();
         }
     }

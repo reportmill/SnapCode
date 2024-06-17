@@ -387,7 +387,7 @@ public class ProjectFilesTool extends WorkspaceTool {
                 menu.addItem(menuItemCopy);
             }
             menu.setOwner(this);
-            menu.show(anEvent.getView(), anEvent.getX(), anEvent.getY());
+            menu.showMenuAtXY(anEvent.getView(), anEvent.getX(), anEvent.getY());
         }
 
         // Handle MouseClick (double-click): RunSelectedFile

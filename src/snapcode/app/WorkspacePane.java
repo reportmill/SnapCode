@@ -361,6 +361,10 @@ public class WorkspacePane extends ViewOwner {
             case "NewFileMenuItem": _workspaceTools.getNewFileTool().showNewFilePanel(); anEvent.consume(); break;
             case "OpenFileMenuItem": _workspaceTools.getFilesTool().showOpenFilePanel(); anEvent.consume(); break;
 
+            // Handle SaveMenuItem, SaveAsMenuItem
+            case "SaveMenuItem": break;
+            case "SaveAsMenuItem": break;
+
             // Handle CloseMenuItem, CloseFileAction
             case "CloseMenuItem": case "CloseFileAction":
                 _pagePane.removeOpenFile(getSelFile());
