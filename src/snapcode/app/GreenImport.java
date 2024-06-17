@@ -198,7 +198,7 @@ public class GreenImport {
     private static void copyDirFileFilesToDir(WebFile dirFile, WebFile toDir)
     {
         WebFile[] dirFiles = dirFile.getFiles();
-        WebFile[] nonClassFiles = ArrayUtils.filter(dirFiles, file -> !file.getFileType().equals("class"));
+        WebFile[] nonClassFiles = ArrayUtils.filter(dirFiles, file -> !isIgnoreFile(file));
         for (WebFile file : nonClassFiles)
             copyFileToDir(file, toDir);
     }
@@ -295,6 +295,17 @@ public class GreenImport {
 
         // Return
         return null;
+    }
+
+    /**
+     * Returns whether given file should be ignored.
+     */
+    private static boolean isIgnoreFile(WebFile aFile)
+    {
+        String fileType = aFile.getFileType();
+        if (fileType.equals("class") || fileType.equals("ctxt"))
+            return true;
+        return false;
     }
 
     /**
