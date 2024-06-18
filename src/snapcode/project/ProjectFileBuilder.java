@@ -67,10 +67,7 @@ public interface ProjectFileBuilder {
          * Returns whether file is build file.
          */
         @Override
-        public boolean isNeedsBuild()
-        {
-            return _buildFiles.size() > 0;
-        }
+        public boolean isNeedsBuild()  { return !_buildFiles.isEmpty(); }
 
         /**
          * Returns whether file is build file.
@@ -87,7 +84,7 @@ public interface ProjectFileBuilder {
         public boolean isFileNeedsBuild(WebFile aFile)
         {
             ProjectFiles projFiles = _proj.getProjectFiles();
-            WebFile buildFile = projFiles.getBuildFile(aFile.getPath(), false, false);
+            WebFile buildFile = projFiles.getBuildFileForPath(aFile.getPath());
             return buildFile == null || !buildFile.getExists() || buildFile.getLastModTime() < aFile.getLastModTime();
         }
 
@@ -105,7 +102,7 @@ public interface ProjectFileBuilder {
         public void removeBuildFile(WebFile aFile)
         {
             ProjectFiles projFiles = _proj.getProjectFiles();
-            WebFile buildFile = projFiles.getBuildFile(aFile.getPath(), false, false);
+            WebFile buildFile = projFiles.getBuildFileForPath(aFile.getPath());
             if (buildFile == null)
                 return;
 
@@ -123,7 +120,7 @@ public interface ProjectFileBuilder {
         public boolean buildFiles(TaskMonitor aTM)
         {
             // If no build files, just return
-            if (_buildFiles.size() == 0) return true;
+            if (_buildFiles.isEmpty()) return true;
 
             // Get build files array (and clear list)
             WebFile[] sourceFiles = _buildFiles.toArray(new WebFile[0]);
@@ -135,8 +132,8 @@ public interface ProjectFileBuilder {
 
                 // Get BuildFile
                 ProjectFiles projFiles = _proj.getProjectFiles();
-                WebFile buildFile = projFiles.getBuildFile(sourceFile.getPath(), true, sourceFile.isDir());
-                if (buildFile.isFile())
+                WebFile buildFile = projFiles.createBuildFileForPath(sourceFile.getPath(), sourceFile.isDir());
+                if (sourceFile.isFile())
                     buildFile.setBytes(sourceFile.getBytes());
 
                 // Save file

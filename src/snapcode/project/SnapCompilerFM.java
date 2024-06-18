@@ -149,7 +149,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         WebFile javaFile = ((SnapCompilerJFO) aSblg).getFile();
         String classPath = "/" + aClassName.replace('.', '/') + ".class";
         ProjectFiles projectFiles = _proj.getProjectFiles();
-        WebFile classFile = projectFiles.getBuildFile(classPath, true, false);
+        WebFile classFile = projectFiles.createBuildFileForPath(classPath, false);
         SnapCompilerJFO jfo = getJavaFileObject(classFile);
         jfo._javaFile = javaFile;
         return jfo;
@@ -200,7 +200,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
             return buildDir;
 
         String pkgPath = '/' + aPackageName.replace('.', '/');
-        return _proj.getProjectFiles().getBuildFile(pkgPath, false, true);
+        return _proj.getProjectFiles().getBuildFileForPath(pkgPath);
     }
 
     /**

@@ -77,20 +77,17 @@ public class ProjectFiles {
      */
     public WebFile getSourceFileForPath(String aPath)
     {
-        // Get path
-        String filePath = aPath;
+        String sourceFilePath = getSourceFilePathForPath(aPath);
+        WebSite projSite = _proj.getSite();
+        return projSite.getFileForPath(sourceFilePath);
+    }
 
-        // If Path in BuildDir, strip BuildPath
-        String buildPath = getBuildDir().getDirPath();
-        if (buildPath.length() > 1 && filePath.startsWith(buildPath))
-            filePath = filePath.substring(buildPath.length() - 1);
-
-        // If Path not in SourceDir, add SourcePath
-        String sourcePath = getSourceDir().getPath();
-        if (sourcePath.length() > 1 && !filePath.startsWith(sourcePath))
-            filePath = sourcePath + filePath;
-
-        // Get file from site
+    /**
+     * Returns the build file for given path.
+     */
+    public WebFile getBuildFileForPath(String aPath)
+    {
+        String filePath = getBuildFilePathForPath(aPath);
         WebSite projSite = _proj.getSite();
         return projSite.getFileForPath(filePath);
     }
@@ -98,32 +95,11 @@ public class ProjectFiles {
     /**
      * Returns the build file for given path.
      */
-    public WebFile getBuildFile(String aPath, boolean doCreate, boolean isDir)
+    public WebFile createBuildFileForPath(String aPath, boolean isDir)
     {
-        // Look for file in build dir
-        String path = aPath;
-
-        // If Path in SourceDir, strip SourcePath
-        String sourcePath = getSourceDir().getDirPath();
-        if (sourcePath.length() > 1 && path.startsWith(sourcePath))
-            path = path.substring(sourcePath.length() - 1);
-
-        // If Path not in BuildDir, add BuildPath
-        WebFile buildDir = getBuildDir();
-        String buildPath = buildDir.getPath();
-        if (buildPath.length() > 1 && !path.startsWith(buildPath))
-            path = buildPath + path;
-
-        // Get file from site
+        String filePath = getBuildFilePathForPath(aPath);
         WebSite projSite = _proj.getSite();
-        WebFile file = projSite.getFileForPath(path);
-
-        // If file still not found, maybe create and return
-        if (file == null && doCreate)
-            file = projSite.createFileForPath(path, isDir);
-
-        // Return
-        return file;
+        return projSite.createFileForPath(filePath, isDir);
     }
 
     /**
@@ -174,25 +150,14 @@ public class ProjectFiles {
      */
     public WebFile getClassFileForClassName(String aClassName)
     {
-        // Get class file path from class name
         String classFilePath = '/' + aClassName.replace('.', '/') + ".class";
-
-        // Return build file for classFilePath
-        return getBuildFile(classFilePath, false, false);
+        return getBuildFileForPath(classFilePath);
     }
 
     /**
      * Returns the class file for a given Java file.
      */
     public WebFile getClassFileForJavaFile(WebFile aJavaFile)
-    {
-        return getClassFileForJavaFile(aJavaFile, false);
-    }
-
-    /**
-     * Returns the class file for a given Java file, with option to create if missing.
-     */
-    public WebFile getClassFileForJavaFile(WebFile aJavaFile, boolean createIfMissing)
     {
         // Get Class file path
         String javaFilePath = aJavaFile.getPath();
@@ -201,7 +166,7 @@ public class ProjectFiles {
             classFilePath = javaFilePath.replace(".jepl", ".class");
 
         // Return class file for classFilePath
-        return getBuildFile(classFilePath, createIfMissing, false);
+        return getBuildFileForPath(classFilePath);
     }
 
     /**
@@ -243,9 +208,47 @@ public class ProjectFiles {
     }
 
     /**
+     * Returns the class name for given class file.
+     */
+    public String getClassNameForFile(WebFile aFile)
+    {
+        // If directory, assume we really want package name
+        if (aFile.isDir())
+            return getPackageNameForFile(aFile);
+
+        // Get File.Path
+        String filePath = aFile.getPath();
+
+        // Strip extension
+        int dotIndex = filePath.lastIndexOf('.');
+        if (dotIndex > 0)
+            filePath = filePath.substring(0, dotIndex);
+
+        String simplePath = getSimplePathForPath(filePath);
+        return simplePath.substring(1).replace('/', '.');
+    }
+
+    /**
+     * Returns the package name for given source file.
+     */
+    public String getPackageNameForFile(WebFile aFile)
+    {
+        // Make sure we have dir file with no '.' in name (those are more likely resource dirs)
+        WebFile file = aFile;
+        while (file.isFile() || file.getName().indexOf('.') >= 0)
+            file = file.getParent();
+
+        // Get Path at SourcePath root
+        String filePath = getSimplePathForPath(file.getPath());
+
+        // Get package name by swapping slashes for dots
+        return filePath.substring(1).replace('/', '.');
+    }
+
+    /**
      * Returns the given path stripped of SourcePath or BuildPath if file is in either.
      */
-    public String getSimplePath(String aPath)
+    private String getSimplePathForPath(String aPath)
     {
         // Get path (make sure it's a path) and get SourcePath/BuildPath
         String path = aPath.startsWith("/") ? aPath : "/" + aPath;
@@ -273,40 +276,46 @@ public class ProjectFiles {
     }
 
     /**
-     * Returns the class name for given class file.
+     * Returns the source file for given path.
      */
-    public String getClassNameForFile(WebFile aFile)
+    private String getSourceFilePathForPath(String aPath)
     {
-        // If directory, assume we really want package name
-        if (aFile.isDir())
-            return getPackageNameForFile(aFile);
+        // Get path
+        String sourceFilePath = aPath;
 
-        // Get File.Path
-        String filePath = aFile.getPath();
+        // If Path in BuildDir, strip BuildPath
+        String buildPath = getBuildDir().getDirPath();
+        if (buildPath.length() > 1 && sourceFilePath.startsWith(buildPath))
+            sourceFilePath = sourceFilePath.substring(buildPath.length() - 1);
 
-        // Strip extension
-        int dotIndex = filePath.lastIndexOf('.');
-        if (dotIndex > 0)
-            filePath = filePath.substring(0, dotIndex);
+        // If Path not in SourceDir, add SourcePath
+        String sourcePath = getSourceDir().getPath();
+        if (sourcePath.length() > 1 && !sourceFilePath.startsWith(sourcePath))
+            sourceFilePath = sourcePath + sourceFilePath;
 
-        String simplePath = getSimplePath(filePath);
-        return simplePath.substring(1).replace('/', '.');
+        // Return
+        return sourceFilePath;
     }
 
     /**
-     * Returns the package name for given source file.
+     * Returns the build path for given file path.
      */
-    public String getPackageNameForFile(WebFile aFile)
+    private String getBuildFilePathForPath(String aPath)
     {
-        // Make sure we have dir file with no '.' in name (those are more likely resource dirs)
-        WebFile file = aFile;
-        while (file.isFile() || file.getName().indexOf('.') >= 0)
-            file = file.getParent();
+        // Get path
+        String buildFilePath = aPath;
 
-        // Get Path at SourcePath root
-        String filePath = getSimplePath(file.getPath());
+        // If path in SourceDir, strip SourcePath
+        String sourceDirPath = getSourceDir().getDirPath();
+        if (sourceDirPath.length() > 1 && buildFilePath.startsWith(sourceDirPath))
+            buildFilePath = buildFilePath.substring(sourceDirPath.length() - 1);
 
-        // Get package name by swapping slashes for dots
-        return filePath.substring(1).replace('/', '.');
+        // If path not in BuildDir, add BuildPath
+        String buildDirPath = getBuildDir().getPath();
+        if (buildDirPath.length() > 1 && !buildFilePath.startsWith(buildDirPath))
+            buildFilePath = buildDirPath + buildFilePath;
+
+        // Return
+        return buildFilePath;
     }
 }
