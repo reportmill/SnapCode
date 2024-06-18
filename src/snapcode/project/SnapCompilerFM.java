@@ -67,11 +67,8 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         if (aLoc != StandardLocation.CLASS_PATH && aLoc != StandardLocation.SOURCE_PATH)
             return iterable;
 
-        // If we need to explicitly exclude SnapKit (because it's in the standard CLASS_PATH), return empty list
-        //if (_excludeSnapKit && aLoc == StandardLocation.CLASS_PATH && aPkgName.startsWith("snap.")) return Collections.EMPTY_LIST;
-
         // If system path (package files were found), just return
-        if (aPkgName.length() > 0 && iterable.iterator().hasNext())
+        if (!aPkgName.isEmpty() && iterable.iterator().hasNext())
             return iterable;
 
         // If known system path (java., javax., etc.), just return
@@ -139,7 +136,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         System.err.println("getJavaFileForInput: " + aClassName + ", kind: " + aKind);
         String sourceDirPath = _proj.getSourceDir().getDirPath();
         String javaFilePath = sourceDirPath + aClassName.replace('.', '/') + ".java";
-        WebFile javaFile = _proj.getFile(javaFilePath);
+        WebFile javaFile = _proj.getFileForPath(javaFilePath);
         return javaFile != null ? getJavaFileObject(javaFile) : null;
     }
 
@@ -199,11 +196,11 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     private WebFile getBuildDir(String aPackageName)
     {
         WebFile buildDir = _proj.getBuildDir();
-        if (aPackageName.length() == 0)
+        if (aPackageName.isEmpty())
             return buildDir;
 
         String pkgPath = '/' + aPackageName.replace('.', '/');
-        return _proj.getProjectFiles().getBuildFile(pkgPath, false, true); //buildDir.getFile(dirname);
+        return _proj.getProjectFiles().getBuildFile(pkgPath, false, true);
     }
 
     /**
@@ -212,11 +209,11 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     private WebFile getSourceDir(String aPackageName)
     {
         WebFile sourceDir = _proj.getSourceDir();
-        if (aPackageName.length() == 0)
+        if (aPackageName.isEmpty())
             return sourceDir;
 
         String pkgPath = '/' + aPackageName.replace('.', '/');
-        return _proj.getSourceFile(pkgPath, false, true);
+        return _proj.getSourceFileForPath(pkgPath);
     }
 
     /**

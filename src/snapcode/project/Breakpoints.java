@@ -145,7 +145,7 @@ public class Breakpoints extends PropObject {
 
             // Get Breakpoint source file (just continue if file no longer found in Workspace)
             Project rootProj = _workspace.getRootProject();
-            WebFile sourceFile = rootProj.getFile(path); // Should be checking whole Workspace
+            WebFile sourceFile = rootProj.getFileForPath(path); // Should be checking whole Workspace
             if (sourceFile == null)
                 continue;
 

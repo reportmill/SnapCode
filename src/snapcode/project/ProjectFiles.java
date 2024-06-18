@@ -75,31 +75,24 @@ public class ProjectFiles {
     /**
      * Returns the source file for given path.
      */
-    public WebFile getSourceFile(String aPath, boolean doCreate, boolean isDir)
+    public WebFile getSourceFileForPath(String aPath)
     {
         // Get path
-        String path = aPath;
+        String filePath = aPath;
 
         // If Path in BuildDir, strip BuildPath
         String buildPath = getBuildDir().getDirPath();
-        if (buildPath.length() > 1 && path.startsWith(buildPath))
-            path = path.substring(buildPath.length() - 1);
+        if (buildPath.length() > 1 && filePath.startsWith(buildPath))
+            filePath = filePath.substring(buildPath.length() - 1);
 
         // If Path not in SourceDir, add SourcePath
         String sourcePath = getSourceDir().getPath();
-        if (sourcePath.length() > 1 && !path.startsWith(sourcePath))
-            path = sourcePath + path;
+        if (sourcePath.length() > 1 && !filePath.startsWith(sourcePath))
+            filePath = sourcePath + filePath;
 
         // Get file from site
         WebSite projSite = _proj.getSite();
-        WebFile file = projSite.getFileForPath(path);
-
-        // If file still not found, maybe create
-        if (file == null && doCreate)
-            file = projSite.createFileForPath(path, isDir);
-
-        // Return
-        return file;
+        return projSite.getFileForPath(filePath);
     }
 
     /**
@@ -148,13 +141,13 @@ public class ProjectFiles {
         String javaFilePath = '/' + className.replace('.', '/') + ".java";
 
         // Return Source file for JavaFilePath
-        WebFile javaFile = getSourceFile(javaFilePath, false, false);
+        WebFile javaFile = getSourceFileForPath(javaFilePath);
         if (javaFile != null)
             return javaFile;
 
         // Try for Jepl file
         String jeplFilePath = '/' + className.replace('.', '/') + ".jepl";
-        return getSourceFile(jeplFilePath, false, false);
+        return getSourceFileForPath(jeplFilePath);
     }
 
     /**
@@ -173,7 +166,7 @@ public class ProjectFiles {
         }
 
         // Return Source file for JavaFilePath
-        return getSourceFile(javaFilePath, false, false);
+        return getSourceFileForPath(javaFilePath);
     }
 
     /**

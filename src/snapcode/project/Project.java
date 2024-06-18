@@ -75,10 +75,7 @@ public class Project extends PropObject {
     /**
      * Returns the project name.
      */
-    public String getName()
-    {
-        return _site.getName();
-    }
+    public String getName()  { return _site.getName(); }
 
     /**
      * Returns the encapsulated WebSite.
@@ -366,18 +363,12 @@ public class Project extends PropObject {
     /**
      * Returns a file for given path.
      */
-    public WebFile getFile(String aPath)
-    {
-        return _site.getFileForPath(aPath);
-    }
+    public WebFile getFileForPath(String aPath)  { return _site.getFileForPath(aPath); }
 
     /**
      * Returns the source file for given path.
      */
-    public WebFile getSourceFile(String aPath, boolean doCreate, boolean isDir)
-    {
-        return _projFiles.getSourceFile(aPath, doCreate, isDir);
-    }
+    public WebFile getSourceFileForPath(String aPath)  { return _projFiles.getSourceFileForPath(aPath); }
 
     /**
      * Returns the class for given file.

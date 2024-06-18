@@ -58,10 +58,10 @@ public class JarBuilder {
      */
     public void addFile(Object aFile, Object aDir)
     {
-        WebURL url = WebURL.getURL(aFile);
-        File file = url.getJavaFile();
-        WebURL durl = WebURL.getURL(aDir);
-        File dir = durl.getJavaFile();
+        WebURL fileUrl = WebURL.getURL(aFile);
+        File file = fileUrl.getJavaFile();
+        WebURL dirUrl = WebURL.getURL(aDir);
+        File dir = dirUrl.getJavaFile();
         if (file != null) {
             _files.add(file);
             _dirs.add(dir);
@@ -164,9 +164,10 @@ public class JarBuilder {
 
         // Iterate over files in build dir. If file is class, dir or exists in src dir, add to jar
         File buildDir = new File(buildPath);
-        for (File file : buildDir.listFiles()) {
-            String name = file.getName();
-            if (name.endsWith(".class") || aProj.getSourceFile('/' + name, false, false) != null)
+        File[] buildDirFiles = buildDir.listFiles(); assert (buildDirFiles != null);
+        for (File file : buildDirFiles) {
+            String filename = file.getName();
+            if (filename.endsWith(".class") || aProj.getSourceFileForPath('/' + filename) != null)
                 jb.addFile(file, buildDir);
         }
 

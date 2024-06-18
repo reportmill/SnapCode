@@ -196,18 +196,16 @@ public class ProjectUtils {
     {
         if (classPath.startsWith("/java/") || classPath.startsWith("/javax/"))
             return "https://reportmill.com/jars/8u05/src.zip!" + classPath;
-        if (classPath.startsWith("/javafx/"))
-            return "https://reportmill.com/jars/8u05/javafx-src.zip!" + classPath;
 
         // Look in project
-        WebFile file = aProject.getSourceFile(classPath, false, false);
+        WebFile file = aProject.getSourceFileForPath(classPath);
         if (file != null)
             return file.getUrlAddress();
 
         // Look in child projects
         Project[] projects = aProject.getProjects();
         for (Project proj : projects) {
-            file = proj.getSourceFile(classPath, false, false);
+            file = proj.getSourceFileForPath(classPath);
             if (file != null)
                 return file.getUrlAddress();
         }
