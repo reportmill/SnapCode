@@ -1,5 +1,6 @@
 package snapcode.app;
 import snap.view.ViewEvent;
+import snapcode.apptools.FilesTool;
 import snapcode.project.Project;
 import snapcode.project.Workspace;
 import snap.view.ViewOwner;
@@ -50,6 +51,11 @@ public class WorkspaceTool extends ViewOwner {
      * Returns the workspace.
      */
     public Workspace getWorkspace()  { return _workspace; }
+
+    /**
+     * Returns the files tool.
+     */
+    public FilesTool getFilesTool()  { return _workspaceTools.getFilesTool(); }
 
     /**
      * Returns the top level site.

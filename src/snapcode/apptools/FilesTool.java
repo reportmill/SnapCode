@@ -2,6 +2,7 @@ package snapcode.apptools;
 import snap.gfx.GFXEnv;
 import snap.util.ArrayUtils;
 import snap.util.FileUtils;
+import snap.view.Clipboard;
 import snap.view.View;
 import snap.viewx.FilePanel;
 import snap.viewx.FormBuilder;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -90,7 +92,72 @@ public class FilesTool extends WorkspaceTool {
     public void closeSelFile()
     {
         WebFile selFile = getSelFile();
-        _pagePane.removeOpenFile(selFile);
+        closeFile(selFile);
+    }
+
+    /**
+     * Closes the given file.
+     */
+    public void closeFile(WebFile buttonFile)
+    {
+        _pagePane.removeOpenFile(buttonFile);
+        resetLater();
+    }
+
+    /**
+     * Renames currently selected file.
+     */
+    public void renameSelFile()
+    {
+        WebFile selFile = getSelFile();
+        if (selFile == null || !ArrayUtils.containsId(_workspacePane.getSites(), selFile.getSite()))
+            return;
+
+        DialogBox dbox = new DialogBox("Rename File");
+        dbox.setMessage("Enter new name for " + selFile.getName());
+        String newName = dbox.showInputDialog(_workspacePane.getUI(), selFile.getName());
+        if (newName != null) {
+            FilesTool filesTool = _workspaceTools.getFilesTool();
+            filesTool.renameFile(selFile, newName);
+        }
+    }
+
+    /**
+     * Handle Copy.
+     */
+    public void copySelFiles()
+    {
+        List<WebFile> selFiles = getSelFiles();
+        List<File> javaFiles = new ArrayList<>();
+        for (WebFile selFile : selFiles) {
+            if (selFile.getJavaFile() != null)
+                javaFiles.add(selFile.getJavaFile());
+        }
+
+        Clipboard clipboard = Clipboard.getCleared();
+        clipboard.addData(javaFiles);
+    }
+
+    /**
+     * Handle Paste.
+     */
+    public void pasteFiles()
+    {
+        Clipboard clipboard = Clipboard.get();
+        if (clipboard.hasFiles()) {
+            FilesTool filesTool = _workspaceTools.getFilesTool();
+            List<File> files = clipboard.getJavaFiles();
+            filesTool.addFiles(files);
+        }
+    }
+
+    /**
+     * Duplicates selected file.
+     */
+    public void duplicateSelFile()
+    {
+        copySelFiles();
+        pasteFiles();
     }
 
     /**

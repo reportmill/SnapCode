@@ -4,7 +4,6 @@ import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
 import snap.view.*;
-import snap.viewx.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.app.*;
@@ -12,7 +11,6 @@ import snapcode.project.Project;
 import snapcode.util.DiffPage;
 import snapcode.util.FileIcons;
 import snapcode.webbrowser.*;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +18,9 @@ import java.util.List;
  * A class to handle visual management of project files.
  */
 public class ProjectFilesTool extends WorkspaceTool {
+
+    // The FilesTool
+    private FilesTool _filesTool;
 
     // The file tree
     private TreeView<FileTreeFile>  _filesTree;
@@ -40,6 +41,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     public ProjectFilesTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
+        _filesTool = _workspaceTools.getFilesTool();
     }
 
     /**
@@ -138,31 +140,39 @@ public class ProjectFilesTool extends WorkspaceTool {
     }
 
     /**
-     * Called to update a file when it has changed (Modified, Exists, ModTime, BuildIssues, child Files (dir)).
+     * Returns the array of FileTreeFiles for a given file and its parents.
      */
-    public void updateChangedFile(WebFile aFile)
+    private FileTreeFile[] getTreeFileAndParentsForFile(WebFile aFile)
     {
         // Create list for changed file and parents
         List<FileTreeFile> treeFiles = new ArrayList<>();
 
-        // Iterate up parent files and clear parent TreeFile.Children
+        // Iterate up parent files and add FileTreeFile for each
         for (WebFile parentFile = aFile; parentFile != null; parentFile = parentFile.getParent()) {
-
-            // Get FileTreeFile for parent file and add to list
             FileTreeFile parentTreeFile = getTreeFile(parentFile);
             if (parentTreeFile != null) {
                 treeFiles.add(parentTreeFile);
-                if (parentFile == aFile)
+                if (parentFile == aFile) // Clear children in case they have changed
                     parentTreeFile._children = null;
             }
         }
 
+        // Return array
+        return treeFiles.toArray(new FileTreeFile[0]);
+    }
+
+    /**
+     * Called to update a file when it has changed (Modified, Exists, ModTime, BuildIssues, child Files (dir)).
+     */
+    public void updateChangedFile(WebFile aFile)
+    {
+        // If UI not set, just return
+        if (_filesTree == null) return;
+
         // Update items in FilesTree/FilesList
-        if (_filesTree != null) {
-            FileTreeFile[] fileTreeFiles = treeFiles.toArray(new FileTreeFile[0]);
-            _filesTree.updateItems(fileTreeFiles);
-            _filesList.updateItems(fileTreeFiles);
-        }
+        FileTreeFile[] fileTreeFiles = getTreeFileAndParentsForFile(aFile);
+        _filesTree.updateItems(fileTreeFiles);
+        _filesList.updateItems(fileTreeFiles);
 
         // Reset UI
         if (aFile.isDir())
@@ -251,10 +261,8 @@ public class ProjectFilesTool extends WorkspaceTool {
             // Handle AllFilesButton
             case "AllFilesButton":
                 boolean flip = !_filesTree.isVisible(), flop = !flip;
-                _filesTree.setVisible(flip);
-                _filesTree.setPickable(flip);
-                _filesList.setVisible(flop);
-                _filesList.setPickable(flop);
+                _filesTree.setVisible(flip); _filesTree.setPickable(flip);
+                _filesList.setVisible(flop); _filesList.setPickable(flop);
                 getView("AllFilesButton", ButtonBase.class).setImage(flip ? FILES_TREE_ICON : FILES_LIST_ICON);
                 break;
 
@@ -262,22 +270,15 @@ public class ProjectFilesTool extends WorkspaceTool {
             case "NewFileMenuItem": case "NewFileButton": _workspaceTools.getNewFileTool().showNewFilePanel(); break;
 
             // Handle DownloadFileButton
-            case "DownloadFileButton": _workspaceTools.getFilesTool().downloadFile(); break;
+            case "DownloadFileButton": _filesTool.downloadFile(); break;
 
-            // Handle RemoveFileMenuItem
-            case "RemoveFileMenuItem": _workspaceTools.getFilesTool().showRemoveFilePanel(); break;
+            // Handle RemoveFileMenuItem, RenameFileMenuItem
+            case "RemoveFileMenuItem": _filesTool.showRemoveFilePanel(); break;
+            case "RenameFileMenuItem": _filesTool.renameSelFile(); break;
 
-            // Handle RenameFileMenuItem
-            case "RenameFileMenuItem": renameFile(); break;
-
-            // Handle DuplicateFileMenuItem
-            case "DuplicateFileMenuItem":
-                copy();
-                paste();
-                break;
-
-            // Handle RefreshFileMenuItem
-            case "RefreshFileMenuItem": _workspaceTools.getFilesTool().revertSelFiles(); break;
+            // Handle DuplicateFileMenuItem, RefreshFileMenuItem
+            case "DuplicateFileMenuItem": _filesTool.duplicateSelFile(); break;
+            case "RefreshFileMenuItem": _filesTool.revertSelFiles(); break;
 
             // Handle OpenInTextEditorMenuItem
             case "OpenInTextEditorMenuItem": {
@@ -350,8 +351,8 @@ public class ProjectFilesTool extends WorkspaceTool {
             }
 
             // Handle CopyAction, PasteAction
-            case "CopyAction": copy(); break;
-            case "PasteAction": paste(); break;
+            case "CopyAction": _filesTool.copySelFiles(); break;
+            case "PasteAction": _filesTool.pasteFiles(); break;
         }
     }
 
@@ -420,8 +421,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         byte[] fileBytes = dropFile.getBytes();
 
         // Add files
-        FilesTool filesTool = _workspaceTools.getFilesTool();
-        filesTool.addFileForNameAndBytes(fileName, fileBytes);
+        _filesTool.addFileForNameAndBytes(fileName, fileBytes);
     }
 
     /**
@@ -451,54 +451,6 @@ public class ProjectFilesTool extends WorkspaceTool {
             anEvent.consume();
         }
     }
-
-    /**
-     * Renames currently selected file.
-     */
-    public void renameFile()
-    {
-        WebFile selFile = getSelFile();
-        if (selFile == null || !ArrayUtils.containsId(_workspacePane.getSites(), selFile.getSite()))
-            return;
-
-        DialogBox dbox = new DialogBox("Rename File");
-        dbox.setMessage("Enter new name for " + selFile.getName());
-        String newName = dbox.showInputDialog(_workspacePane.getUI(), selFile.getName());
-        if (newName != null) {
-            FilesTool filesTool = _workspaceTools.getFilesTool();
-            filesTool.renameFile(selFile, newName);
-        }
-    }
-
-    /**
-     * Handle Copy.
-     */
-    public void copy()
-    {
-        List<WebFile> selFiles = getSelFiles();
-        List<File> javaFiles = new ArrayList<>();
-        for (WebFile selFile : selFiles) {
-            if (selFile.getJavaFile() != null)
-                javaFiles.add(selFile.getJavaFile());
-        }
-
-        Clipboard clipboard = Clipboard.getCleared();
-        clipboard.addData(javaFiles);
-    }
-
-    /**
-     * Handle Paste.
-     */
-    public void paste()
-    {
-        Clipboard clipboard = Clipboard.get();
-        if (clipboard.hasFiles()) {
-            FilesTool filesTool = _workspaceTools.getFilesTool();
-            List<File> files = clipboard.getJavaFiles();
-            filesTool.addFiles(files);
-        }
-    }
-
     /**
      * Called when window focus changes to check if files have been externally modified.
      */
@@ -555,18 +507,9 @@ public class ProjectFilesTool extends WorkspaceTool {
         aCell.getStringView().setGrowWidth(true);
 
         CloseBox closeBox = new CloseBox();
-        closeBox.addEventHandler(e -> closeFile(item.getFile()), View.Action);
+        closeBox.addEventHandler(e -> _filesTool.closeFile(item.getFile()), View.Action);
 
         aCell.setGraphicAfter(closeBox);
-    }
-
-    /**
-     * Closes the given file.
-     */
-    private void closeFile(WebFile buttonFile)
-    {
-        _pagePane.removeOpenFile(buttonFile);
-        resetLater();
     }
 
     /**

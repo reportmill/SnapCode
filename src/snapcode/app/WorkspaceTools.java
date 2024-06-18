@@ -23,6 +23,9 @@ public class WorkspaceTools {
     // The Workspace
     protected Workspace  _workspace;
 
+    // The FilesTool
+    private FilesTool _filesTool;
+
     // Array of all tools
     protected WorkspaceTool[]  _tools;
 
@@ -63,7 +66,7 @@ public class WorkspaceTools {
     protected void createTools()
     {
         // Main tools
-        FilesTool filesTool = new FilesTool(_workspacePane);
+        _filesTool = new FilesTool(_workspacePane);
         ProjectFilesTool projectFilesTool = new ProjectFilesTool(_workspacePane);
         NewFileTool newFileTool = new NewFileTool(_workspacePane);
         RunTool runTool = new RunTool(_workspacePane);
@@ -82,7 +85,7 @@ public class WorkspaceTools {
 
         // Create tools array
         _tools = new WorkspaceTool[] {
-                filesTool, projectFilesTool, newFileTool,
+                _filesTool, projectFilesTool, newFileTool,
                 runTool, debugTool, buildTool,
                 searchTool, helpTool, blocksTool,
                 runConfigsTool, breakpointsTool,
@@ -143,7 +146,7 @@ public class WorkspaceTools {
     /**
      * Returns the files tool.
      */
-    public FilesTool getFilesTool()  { return getToolForClass(FilesTool.class); }
+    public FilesTool getFilesTool()  { return _filesTool; }
 
     /**
      * Returns the files tool.
