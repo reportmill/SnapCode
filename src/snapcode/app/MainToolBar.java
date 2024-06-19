@@ -106,7 +106,7 @@ public class MainToolBar extends WorkspaceTool {
                 if (anEvent.isAltDown()) { String str = null; str.length(); } // Hidden trigger to test NPE
                 _workspaceTools.getRunTool().runApp(true); break;
             case "TerminateButton": _workspaceTools.getRunTool().cancelRun(); break;
-            case "BuildButton": _workspaceTools.getToolForClass(BuildTool.class).buildWorkspace(); break;
+            case "BuildButton": _workspaceTools.getBuildTool().buildWorkspace(); break;
 
             // Handle SearchComboBox
             case "SearchComboBox": handleSearchComboBox(anEvent); break;

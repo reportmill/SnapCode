@@ -200,9 +200,14 @@ public class WorkspaceBuilder {
             }
         }
 
-        // Long finished
+        // Log finished
         String elapsedTimeString = FormatUtils.formatNum((System.currentTimeMillis() - buildStartTime) / 1000d);
-        _buildLogBuffer.append("Build Completed (").append(elapsedTimeString).append(" seconds)");
+        if (buildSuccess)
+            _buildLogBuffer.append("Build Completed (").append(elapsedTimeString).append(" seconds)");
+        else {
+            int errorCount = _workspace.getBuildIssues().getErrorCount();
+            _buildLogBuffer.append("Build Failed - " + errorCount + " error(s)");
+        }
 
         // Stop building
         _workspace.setActivity(null);
@@ -219,7 +224,7 @@ public class WorkspaceBuilder {
     /**
      * Called when build is finished.
      */
-    protected void buildWorkspaceFinished(TaskRunner<?> buildWorkspaceRunner)
+    protected void buildWorkspaceFinished(TaskRunner<Boolean> buildWorkspaceRunner)
     {
         // If this runner is retired, just return
         if (_buildWorkspaceRunner != buildWorkspaceRunner)

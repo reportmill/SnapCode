@@ -30,8 +30,8 @@ public class RunToolUtils {
      */
     public static RunApp createRunAppForConfig(RunTool runTool, RunConfig runConfig, boolean isDebug)
     {
-        // If RunConfig is missing or invalid, just return
-        if (runConfig == null || !runConfig.isRunnable())
+        // If RunConfig is missing, just return
+        if (runConfig == null)
             return null;
 
         // Handle Debug: return DebugApp

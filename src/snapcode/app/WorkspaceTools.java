@@ -164,6 +164,11 @@ public class WorkspaceTools {
     public RunTool getRunTool()  { return getToolForClass(RunTool.class); }
 
     /**
+     * Returns the BuildTool.
+     */
+    public BuildTool getBuildTool()  { return getToolForClass(BuildTool.class); }
+
+    /**
      * Returns the left side tray.
      */
     public ToolTray getLeftTray()  { return _leftTray; }
@@ -322,14 +327,12 @@ public class WorkspaceTools {
             javaTextPane.buildIssueOrBreakPointMarkerChanged();
         }
 
-        // Update FilesPane.FilesTree
+        // Update ProjectFilesTool
         ProjectFilesTool projectFilesTool = getProjectFilesTool();
         projectFilesTool.updateChangedFile(issueFile);
 
-        // Update ProblemsTool
-        BuildTool buildTool = getToolForClass(BuildTool.class);
-        if (buildTool != null && buildTool.isShowing())
-            buildTool.resetLater();
+        // Update BuildTool
+        getBuildTool().resetLater();
     }
 
     /**

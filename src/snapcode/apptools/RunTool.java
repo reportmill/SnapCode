@@ -234,7 +234,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
             runAppImpl(runApp);
 
         // Otherwise, show build tool
-        else _workspaceTools.showToolForClass(BuildTool.class);
+        else runLater(_workspaceTools.getBuildTool()::showToolAutomatically);
     }
 
     /**

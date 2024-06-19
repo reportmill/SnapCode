@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import snap.view.ViewUtils;
 import snap.web.WebFile;
 
 /**
@@ -161,19 +160,9 @@ public class RunConfig {
      */
     private WebFile getMainClassFileImpl()
     {
+        Project project = getProject();
         WebFile javaFile = getMainJavaFile();
-        Project project = javaFile != null ? Project.getProjectForFile(javaFile) : null;
         return project != null ? project.getProjectFiles().getClassFileForJavaFile(javaFile) : null;
-    }
-
-    /**
-     * Returns whether run config is runnable.
-     */
-    public boolean isRunnable()
-    {
-        WebFile mainJavaFile = getMainJavaFile();
-        WebFile mainClassFile = getMainClassFile();
-        return mainJavaFile != null && mainClassFile != null;
     }
 
     /**
