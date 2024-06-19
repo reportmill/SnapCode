@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
+import snap.util.ArrayUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
 import java.util.Date;
@@ -52,6 +53,11 @@ public class ProjectBuilder {
      */
     public boolean buildProject(TaskMonitor taskMonitor)
     {
+        // Check build dependencies
+        boolean dependenciesFound = checkBuildDependencies(taskMonitor);
+        if (!dependenciesFound)
+            return false;
+
         // Build files
         boolean buildSuccess = _javaFileBuilder.buildFiles(taskMonitor);
         buildSuccess &= _defaultFileBuilder.buildFiles(taskMonitor);
@@ -210,5 +216,29 @@ public class ProjectBuilder {
         ProjectFileBuilder fileBuilder = getFileBuilder(aFile);
         if (fileBuilder != null)
             fileBuilder.removeBuildFile(aFile);
+    }
+
+    /**
+     * Checks project dependencies.
+     */
+    public boolean checkBuildDependencies(TaskMonitor taskMonitor)
+    {
+        // Get maven dependencies
+        BuildDependency[] buildDependencies = _proj.getBuildFile().getDependencies();
+        MavenDependency[] mavenDependencies = ArrayUtils.filterByClass(buildDependencies, MavenDependency.class);
+
+        // Iterate over each and load if needed
+        for (MavenDependency mavenDependency : mavenDependencies) {
+            if (!mavenDependency.isLoaded()) {
+                taskMonitor.beginTask("Loading dependency: " + mavenDependency.getName(), 1);
+                mavenDependency.waitForLoad();
+                taskMonitor.endTask();
+                if (!mavenDependency.isLoaded())
+                    return false;
+            }
+        }
+
+        // Return
+        return true;
     }
 }

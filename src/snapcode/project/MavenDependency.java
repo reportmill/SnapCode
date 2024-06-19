@@ -1,11 +1,11 @@
 package snapcode.project;
 import snap.props.PropSet;
+import snap.util.ArrayUtils;
 import snap.util.Convert;
 import snap.util.FilePathUtils;
 import snap.util.SnapUtils;
 import snap.web.WebFile;
 import snap.web.WebResponse;
-import snap.web.WebSite;
 import snap.web.WebURL;
 import java.io.IOException;
 import java.util.Objects;
@@ -30,17 +30,27 @@ public class MavenDependency extends BuildDependency {
     // The id string
     private String _id;
 
+    // Whether dependency is loaded
+    private boolean _loaded;
+
+    // Load listeners
+    private Runnable[] _loadLsnrs = new Runnable[0];
+
     // Whether dependency is loading
     private boolean _loading;
 
     // The error string
     private String _error;
 
+    // Whether a thread is waiting for dependency to load
+    private boolean _waitingForLoad;
+
     // Constants for properties
     public static final String Group_Prop = "Group";
     public static final String Name_Prop = "Name";
     public static final String Version_Prop = "Version";
     public static final String RepositoryURL_Prop = "RepositoryURL";
+    public static final String Loaded_Prop = "Loaded";
     public static final String Loading_Prop = "Loading";
 
     // Constant for Maven central URL
@@ -80,9 +90,7 @@ public class MavenDependency extends BuildDependency {
         if (_id != null) return _id;
 
         // If any part is invalid, just return
-        if (_group == null || _name == null || _version == null)
-            return null;
-        if (_group.length() == 0 || _name.length() == 0 || _version.length() == 0)
+        if (_group == null || _group.isEmpty() || _name == null || _name.isEmpty() || _version == null || _version.isEmpty())
             return null;
 
         // Create id string and return
@@ -102,6 +110,7 @@ public class MavenDependency extends BuildDependency {
         setGroup(names.length > 0 ? names[0] : null);
         setName(names.length > 1 ? names[1] : null);
         setVersion(names.length > 2 ? names[2] : null);
+        setLoaded(false);
     }
 
     /**
@@ -119,6 +128,7 @@ public class MavenDependency extends BuildDependency {
         _id = null;
         _error = null;
         firePropChange(Group_Prop, _group, _group = aValue);
+        setLoaded(false);
     }
 
     /**
@@ -136,6 +146,7 @@ public class MavenDependency extends BuildDependency {
         _id = null;
         _error = null;
         firePropChange(Name_Prop, _name, _name = aValue);
+        setLoaded(false);
     }
 
     /**
@@ -153,6 +164,7 @@ public class MavenDependency extends BuildDependency {
         _id = null;
         _error = null;
         firePropChange(Version_Prop, _version, _version = aValue);
+        setLoaded(false);
     }
 
     /**
@@ -169,6 +181,7 @@ public class MavenDependency extends BuildDependency {
         _classPaths = null;
         _error = null;
         firePropChange(RepositoryURL_Prop, _repositoryURL, _repositoryURL = aValue);
+        setLoaded(false);
     }
 
     /**
@@ -198,13 +211,74 @@ public class MavenDependency extends BuildDependency {
      */
     private String getErrorImpl()
     {
-        if (_group == null || _group.length() == 0)
+        if (_group == null || _group.isEmpty())
             return "Invalid group";
-        if (_name == null || _name.length() == 0)
+        if (_name == null || _name.isEmpty())
             return "Invalid package name";
-        if (_version == null || _version.length() == 0)
+        if (_version == null || _version.isEmpty())
             return "Invalid version";
         return null;
+    }
+
+    /**
+     * Returns whether maven package is loaded.
+     */
+    public boolean isLoaded()  { return _loaded; }
+
+    /**
+     * Sets whether maven package is loaded.
+     */
+    protected synchronized void setLoaded(boolean aValue)
+    {
+        if (aValue == _loaded) return;
+        firePropChange(Loaded_Prop, _loaded, _loaded = aValue);
+
+        // Handle true: Fire load listeners
+        if (aValue) {
+
+            // Fire load listeners
+            for (Runnable loadLsnr : _loadLsnrs)
+                loadLsnr.run();
+            _loadLsnrs = new Runnable[0];
+
+            // If another thread is waiting for image load, wake thread
+            if (_waitingForLoad)
+                wakeForLoad();
+        }
+    }
+
+    /**
+     * Adds a load listener.
+     */
+    public synchronized void addLoadListener(Runnable aRunnable)
+    {
+        if (isLoaded())
+            aRunnable.run();
+        else _loadLsnrs = ArrayUtils.add(_loadLsnrs, aRunnable);
+    }
+
+    /**
+     * Waits for dependency to load.
+     */
+    public synchronized void waitForLoad()
+    {
+        if (!isLoaded()) {
+            loadPackageFiles();
+            try {
+                _waitingForLoad = true;
+                wait();
+                _waitingForLoad = false;
+            }
+            catch (Exception e) { System.out.println("MavenDependency.waitForLoad: Failure: " + e.getMessage()); }
+        }
+    }
+
+    /**
+     * Stop wait.
+     */
+    private synchronized void wakeForLoad()
+    {
+        notify();
     }
 
     /**
@@ -277,38 +351,20 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
-     * Returns the jar URL for local cache directory file.
-     */
-    public WebURL getLocalJarURL()
-    {
-        String urlString = getLocalJarPath();
-        return WebURL.getURL(urlString);
-    }
-
-    /**
-     * Returns the local Jar file, fetching it if missing.
+     * Returns the local Jar file, triggering load if missing.
      */
     public WebFile getLocalJarFile()
     {
-        // If loading, return null
-        if (isLoading() || getError() != null)
-            return null;
+        // Create local jar file
+        String localJarPath = getLocalJarPath();
+        WebFile localJarFile = WebFile.createFileForPath(localJarPath, false);
 
-        // Get local Jar URL (just return if that can't be created)
-        WebURL localJarURL = getLocalJarURL();
-        if (localJarURL == null)
-            return null;
-
-        // Get local Jar file (just return if local file already exists)
-        WebFile localJarFile = localJarURL.getFile();
-        if (localJarFile != null)
-            return localJarFile;
-
-        // Copy maven package to local cache dir
-        loadPackageFiles();
+        // If file doesn't exist, load it
+        if (localJarFile != null && !localJarFile.getExists())
+            loadPackageFiles();
 
         // Return
-        return localJarURL.getFile();
+        return localJarFile;
     }
 
     /**
@@ -351,9 +407,8 @@ public class MavenDependency extends BuildDependency {
         String group = getGroup();
         String packageName = getName();
         String version = getVersion();
-        if (group == null || group.length() == 0 ||
-                packageName == null || packageName.length() == 0 ||
-                version == null || version.length() == 0)
+        if (group == null || group.isEmpty() || packageName == null || packageName.isEmpty() ||
+                version == null || version.isEmpty())
             return null;
 
         // Build relative package jar path and return
@@ -374,6 +429,7 @@ public class MavenDependency extends BuildDependency {
             return;
 
         // Set loading
+        setLoaded(false);
         setLoading(true);
 
         // Set Loading true and start thread
@@ -387,18 +443,23 @@ public class MavenDependency extends BuildDependency {
     {
         // Get remote and local jar file urls - if either is null, just return
         WebURL remoteJarURL = getRemoteJarURL();
-        WebURL localJarURL = getLocalJarURL();
-        if (remoteJarURL == null || localJarURL == null)
+        WebFile localJarFile = getLocalJarFile();
+        if (remoteJarURL == null || localJarFile == null)
             return;
 
         // Fetch file
-        try { copyFileForURLs(remoteJarURL, localJarURL); }
+        try {
+            copyUrlToFile(remoteJarURL, localJarFile);
+            setLoaded(true);
+        }
+
+        // Handle errors
         catch (Exception e) {
             e.printStackTrace();
             _error = e.getMessage();
         }
 
-        // Reset loading
+        // Reset loaded
         setLoading(false);
     }
 
@@ -454,22 +515,17 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
-     * Copies a given source URL to given destination url.
+     * Copies a given source URL to given destination file.
      */
-    private static void copyFileForURLs(WebURL sourceURL, WebURL destURL) throws IOException
+    private static void copyUrlToFile(WebURL sourceURL, WebFile destFile) throws IOException
     {
         // Get bytes from source url
         byte[] sourceBytes = sourceURL.getBytesOrThrow();
         if (sourceBytes == null || sourceBytes.length == 0)
             throw new RuntimeException("Couldn't download remote jar file: " + sourceURL.getString());
 
-        // Create destination file
-        WebSite destSite = destURL.getSite();
-        String destFilePath = destURL.getPath();
-        WebFile destFile = destSite.createFileForPath(destFilePath, false);
-        long oldSize = 0;
-
-        // Shouldn't need this, but seemed to be corruption problem on WebVM. Maybe gone now that FileSite just does writeBytes()
+        // Get old size. Shouldn't need to delete existing, but seemed to be corruption problem on WebVM.
+        long oldSize = 0;          // Maybe gone now that FileSite just does writeBytes()
         if (destFile.getExists()) {
             oldSize = destFile.getSize();
             destFile.delete();
@@ -480,6 +536,8 @@ public class MavenDependency extends BuildDependency {
         WebResponse resp = destFile.save();
         if (resp.getException() != null)
             throw new RuntimeException(resp.getException());
-        System.out.println("MavenDependency: Updated " + destFilePath + ", old-size: " + oldSize + ", new-size: " + sourceBytes.length);
+
+        // Log change
+        System.out.println("MavenDependency: Updated " + destFile.getPath() + ", old-size: " + oldSize + ", new-size: " + sourceBytes.length);
     }
 }

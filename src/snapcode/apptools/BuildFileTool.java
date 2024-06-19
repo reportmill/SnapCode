@@ -18,6 +18,12 @@ import java.util.List;
  */
 public class BuildFileTool extends ProjectTool {
 
+    // The selected build dependency
+    private BuildDependency _selDependency;
+
+    // A prop change listener for selected dependency
+    private PropChangeListener _selDependencyDidPropChangeLsnr = this::selDependencyDidPropChange;
+
     // Dependencies ListArea
     private ListArea<BuildDependency> _dependenciesListArea;
 
@@ -40,6 +46,40 @@ public class BuildFileTool extends ProjectTool {
     public BuildFile getBuildFile()  { return _proj.getBuildFile(); }
 
     /**
+     * Returns the selected build dependency.
+     */
+    public BuildDependency getSelDependency()  { return _selDependency; }
+
+    /**
+     * Sets the selected build dependency.
+     */
+    public void setSelDependency(BuildDependency buildDependency)
+    {
+        if (buildDependency == _selDependency) return;
+
+        // Set value and add/remove prop change listener
+        if (_selDependency != null)
+            _selDependency.removePropChangeListener(_selDependencyDidPropChangeLsnr);
+        _selDependency = buildDependency;
+        if (_selDependency != null)
+            _selDependency.addPropChangeListener(_selDependencyDidPropChangeLsnr);
+
+        // Update DependenciesListArea.Selection
+        _dependenciesListArea.setSelItem(buildDependency);
+        resetLater();
+    }
+
+    /**
+     * Called when selected dependency does prop change.
+     */
+    private void selDependencyDidPropChange(PropChange aPC)
+    {
+        BuildDependency buildDependency = (BuildDependency) aPC.getSource();
+        _dependenciesListArea.updateItem(buildDependency);
+        resetLater();
+    }
+
+    /**
      * Initialize UI.
      */
     protected void initUI()
@@ -50,7 +90,7 @@ public class BuildFileTool extends ProjectTool {
 
         // Configure DependenciesListView
         ListView<BuildDependency> dependenciesListView = getView("DependenciesListView", ListView.class);
-        enableEvents(dependenciesListView, DragEvents);
+        dependenciesListView.addEventHandler(this::handleDependenciesListDragEvent, DragEvents);
 
         // Configure DependenciesListArea
         _dependenciesListArea = dependenciesListView.getListArea();
@@ -83,15 +123,13 @@ public class BuildFileTool extends ProjectTool {
         setViewValue("IncludeSnapChartsRuntimeCheckBox", buildFile.isIncludeSnapChartsRuntime());
 
         // Update RemoveDependencyButton
-        setViewDisabled("RemoveDependencyButton", _dependenciesListArea.getSelItem() == null);
+        BuildDependency selDependency = getSelDependency();
+        setViewDisabled("RemoveDependencyButton", selDependency == null);
 
         // Get selected dependency
-        BuildDependency selDependency = _dependenciesListArea.getSelItem();
         setViewVisible("DependencyTypeBox", selDependency != null);
-        if (selDependency != null) {
+        if (selDependency != null)
             setViewSelItem("DependencyTypeComboBox", selDependency.getType());
-            _dependenciesListArea.updateItem(selDependency);
-        }
 
         // Update MavenDependencyBox
         boolean isMavenDependency = selDependency instanceof MavenDependency;
@@ -145,80 +183,81 @@ public class BuildFileTool extends ProjectTool {
     /**
      * Respond to UI changes.
      */
-    public void respondUI(ViewEvent anEvent)
+    @Override
+    protected void respondUI(ViewEvent anEvent)
     {
         BuildFile buildFile = getBuildFile();
 
-        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox
-        if (anEvent.equals("SourcePathText"))
-            buildFile.setSourcePath(anEvent.getStringValue());
-        if (anEvent.equals("BuildPathText"))
-            buildFile.setBuildPath(anEvent.getStringValue());
-        if (anEvent.equals("IncludeSnapKitRuntimeCheckBox"))
-            buildFile.setIncludeSnapKitRuntime(anEvent.getBoolValue());
-        if (anEvent.equals("IncludeSnapChartsRuntimeCheckBox"))
-            buildFile.setIncludeSnapChartsRuntime(anEvent.getBoolValue());
+        switch (anEvent.getName()) {
 
-        // Handle AddDependencyButton, RemoveDependencyButton
-        if (anEvent.equals("AddDependencyButton"))
-            showAddDependencyPanel();
-        if (anEvent.equals("RemoveDependencyButton"))
-            removeSelectedDependency();
+            // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox
+            case "SourcePathText": buildFile.setSourcePath(anEvent.getStringValue()); break;
+            case "BuildPathText": buildFile.setBuildPath(anEvent.getStringValue()); break;
+            case "IncludeSnapKitRuntimeCheckBox": buildFile.setIncludeSnapKitRuntime(anEvent.getBoolValue()); break;
+            case "IncludeSnapChartsRuntimeCheckBox": buildFile.setIncludeSnapChartsRuntime(anEvent.getBoolValue()); break;
 
-        // Handle DependenciesList
-        if (anEvent.equals("DependenciesListView")) {
+            // Handle AddDependencyButton, RemoveDependencyButton
+            case "AddDependencyButton": showAddDependencyPanel(); break;
+            case "RemoveDependencyButton": removeSelectedDependency(); break;
 
-            // Handle DragEvent
-            if (anEvent.isDragEvent())
-                handleDependenciesListDragEvent(anEvent);
+            // Handle DependenciesList
+            case "DependenciesListView":
+                BuildDependency buildDependency = _dependenciesListArea.getSelItem();
+                setSelDependency(buildDependency);
+                break;
+
+            // Handle DeleteAction
+            case "DeleteAction": case "BackSpaceAction":
+                if (getView("DependenciesListView").isFocused()) {
+                    BuildDependency dependency = (BuildDependency) getViewSelItem("DependenciesListView");
+                    buildFile.removeDependency(dependency);
+                }
+                break;
+
+            // Handle DependencyTypeComboBox
+            case "DependencyTypeComboBox": changeSelectedDependencyType(); break;
+
+            // Handle MainClassNameText
+            case "MainClassNameText": buildFile.setMainClassName(anEvent.getStringValue()); break;
+
+            // Handle dependency
+            default: respondDependencyUI(anEvent); break;
         }
+    }
 
-        // Handle DeleteAction
-        if (anEvent.equals("DeleteAction") || anEvent.equals("BackSpaceAction")) {
-            if (getView("DependenciesListView").isFocused()) {
-                BuildDependency dependency = (BuildDependency) getViewSelItem("DependenciesListView");
-                buildFile.removeDependency(dependency);
+    /**
+     * Respond to UI changes for dependency.
+     */
+    private void respondDependencyUI(ViewEvent anEvent)
+    {
+        // Handle MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText, ShowButton, ReloadButton
+        BuildDependency selDependency = getSelDependency();
+        if (selDependency instanceof MavenDependency) {
+            MavenDependency mavenDependency = (MavenDependency) selDependency;
+            switch (anEvent.getName()) {
+                case "MavenIdText": mavenDependency.setId(anEvent.getStringValue()); break;
+                case "GroupText": mavenDependency.setGroup(anEvent.getStringValue()); break;
+                case "PackageNameText": mavenDependency.setName(anEvent.getStringValue()); break;
+                case "VersionText": mavenDependency.setVersion(anEvent.getStringValue()); break;
+                case "RepositoryURLText": mavenDependency.setRepositoryURL(anEvent.getStringValue()); break;
+                case "ShowButton": showMavenDependencyInFinder(mavenDependency); break;
+                case "ReloadButton": mavenDependency.loadPackageFiles(); break;
             }
         }
 
-        // Handle MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText, ShowButton, ReloadButton
-        BuildDependency selDependency = _dependenciesListArea.getSelItem();
-        if (selDependency instanceof MavenDependency) {
-            MavenDependency mavenDependency = (MavenDependency) selDependency;
-            if (anEvent.equals("MavenIdText"))
-                mavenDependency.setId(anEvent.getStringValue());
-            if (anEvent.equals("GroupText"))
-                mavenDependency.setGroup(anEvent.getStringValue());
-            if (anEvent.equals("PackageNameText"))
-                mavenDependency.setName(anEvent.getStringValue());
-            if (anEvent.equals("VersionText"))
-                mavenDependency.setVersion(anEvent.getStringValue());
-            if (anEvent.equals("RepositoryURLText"))
-                mavenDependency.setRepositoryURL(anEvent.getStringValue());
-            if (anEvent.equals("ShowButton"))
-                showMavenDependencyInFinder(mavenDependency);
-            if (anEvent.equals("ReloadButton"))
-                mavenDependency.loadPackageFiles();
-
-            // If any of the above caused loading, make sure we resetUI after loading - I don't love this
-            mavenDependency.getClassPaths();
-            if (mavenDependency.isLoading())
-                mavenDependency.addPropChangeListener(PropChangeListener.getOneShot(pc -> resetLater()), MavenDependency.Loading_Prop);
+        // Handle JarFileDependency: JarPathText
+        else if (selDependency instanceof BuildDependency.JarFileDependency) {
+            BuildDependency.JarFileDependency jarFileDependency = (BuildDependency.JarFileDependency) selDependency;
+            if (anEvent.equals("JarPathText"))
+                jarFileDependency.setJarPath(anEvent.getStringValue());
         }
 
-        // Handle JarPathText, ProjectNameText
-        if (anEvent.equals("JarPathText"))
-            ((BuildDependency.JarFileDependency) selDependency).setJarPath(anEvent.getStringValue());
-        if (anEvent.equals("ProjectNameText"))
-            ((BuildDependency.ProjectDependency) selDependency).setProjectName(anEvent.getStringValue());
-
-        // Handle DependencyTypeComboBox
-        if (anEvent.equals("DependencyTypeComboBox"))
-            changeSelectedDependencyType();
-
-        // Handle MainClassNameText
-        if (anEvent.equals("MainClassNameText"))
-            buildFile.setMainClassName(anEvent.getStringValue());
+        // Handle ProjectDependency: ProjectNameText
+        else if (selDependency instanceof BuildDependency.ProjectDependency) {
+            BuildDependency.ProjectDependency projectDependency = (BuildDependency.ProjectDependency) selDependency;
+            if (anEvent.equals("ProjectNameText"))
+                projectDependency.setProjectName(anEvent.getStringValue());
+        }
     }
 
     /**
@@ -280,7 +319,7 @@ public class BuildFileTool extends ProjectTool {
 
         // Remove selected
         BuildFile buildFile = getBuildFile();
-        BuildDependency selDependency = _dependenciesListArea.getSelItem();
+        BuildDependency selDependency = getSelDependency();
         buildFile.removeDependency(selDependency);
     }
 
@@ -347,16 +386,15 @@ public class BuildFileTool extends ProjectTool {
         if (aPC.getNewValue() != null) {
             BuildDependency dependency = (BuildDependency) aPC.getNewValue();
             _dependenciesListArea.setItems(buildFile.getDependencies());
-            _dependenciesListArea.setSelItem(dependency);
+            setSelDependency(dependency);
         }
 
         // If BuildFile removes dependency, remove from list
         else {
             BuildDependency dependency = (BuildDependency) aPC.getOldValue();
             _dependenciesListArea.removeItemAndUpdateSel(dependency);
+            setSelDependency(_dependenciesListArea.getSelItem());
         }
-
-        resetLater();
     }
 
     /**
