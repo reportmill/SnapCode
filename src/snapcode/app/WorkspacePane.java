@@ -410,8 +410,7 @@ public class WorkspacePane extends ViewOwner {
      */
     private void handleWinClose(ViewEvent anEvent)
     {
-        hide();
-        WorkspacePaneUtils.openDefaultWorkspace();
+        hide(); //WorkspacePaneUtils.openDefaultWorkspace();
     }
 
     /**

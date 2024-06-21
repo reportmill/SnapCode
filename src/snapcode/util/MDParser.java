@@ -333,6 +333,17 @@ public class MDParser {
     private void eatChars(int charCount)  { _charIndex += charCount; }
 
     /**
+     * Eats the line end char.
+     */
+    private void eatLineEnd()
+    {
+        if (nextChar() == '\r')
+            eatChar();
+        if (hasChars() && nextChar() == '\n')
+            eatChar();
+    }
+
+    /**
      * Returns whether next chars start with given string.
      */
     private boolean nextCharsStartWith(CharSequence startChars)
@@ -371,10 +382,10 @@ public class MDParser {
         while (hasChars() && !CharSequenceUtils.isLineEndChar(nextChar()))
             eatChar();
 
-        // Get endCharIndex and eatChar for line end
+        // Get endCharIndex and eatLineEnd
         int endCharIndex = _charIndex;
         if (hasChars())
-            eatChar();
+            eatLineEnd();
 
         // Return chars
         return getCharsForCharRange(startCharIndex, endCharIndex);
@@ -387,7 +398,7 @@ public class MDParser {
     {
         // If leading newline, just skip it
         if (hasChars() && CharSequenceUtils.isLineEndChar(nextChar()))
-            eatChar();
+            eatLineEnd();
 
         // Get startCharIndex and eatChars till matching chars or text end
         int startCharIndex = _charIndex;
