@@ -1,6 +1,5 @@
 package snapcode.app;
 import snap.util.ArrayUtils;
-import snap.util.FileUtils;
 import snap.view.Clipboard;
 import snap.view.ClipboardData;
 import snap.view.View;
@@ -112,12 +111,8 @@ public class WorkspacePaneDnD {
      */
     private static WebFile createTempFileForNameAndBytes(String filename, byte[] fileBytes)
     {
-        // Create temp file for drop file
-        String tempFilePath = FileUtils.getTempFile(filename).getPath();
-        WebURL tempFileUrl = WebURL.getURL(tempFilePath); assert (tempFileUrl != null);
-        WebFile tempFile = tempFileUrl.createFile(false);
-
-        // Get file bytes, set in temp file and save
+        // Create temp file for drop file, set bytes and save
+        WebFile tempFile = WebFile.createTempFileForName(filename, false);
         tempFile.setBytes(fileBytes);
         tempFile.save();
 

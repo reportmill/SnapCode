@@ -5,8 +5,6 @@ package snapcode.javatext;
 import java.util.*;
 import javakit.parse.*;
 import snap.util.ArrayUtils;
-import snap.util.FileUtils;
-import snap.web.WebURL;
 import snapcode.project.JavaTextDoc;
 import snap.geom.Rect;
 import snap.gfx.*;
@@ -760,7 +758,7 @@ public class JavaTextArea extends TextArea {
     public BuildIssue[] getBuildIssues()
     {
         WebFile javaFile = getSourceFile();
-        JavaAgent javaAgent = JavaAgent.getAgentForFile(javaFile);
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
         return javaAgent.getBuildIssues();
     }
 
@@ -920,7 +918,7 @@ public class JavaTextArea extends TextArea {
         // Try String first
         if (clipboard.hasString()) {
             String str = clipboard.getString();
-            if (str != null && str.length() > 0)
+            if (str != null && !str.isEmpty())
                 return str;
         }
 
@@ -951,12 +949,8 @@ public class JavaTextArea extends TextArea {
     private static JavaTextDoc createDummyTextDoc()
     {
         // Get/Create dummy java file
-        String tempFilePath = FileUtils.getTempFile("Dummy.java").getAbsolutePath();
-        WebURL tempFileURL = WebURL.getURL(tempFilePath);
-        assert (tempFileURL != null);
-        WebFile tempFile = tempFileURL.getFile();
-        if (tempFile == null) {
-            tempFile = tempFileURL.createFile(false);
+        WebFile tempFile = WebFile.createTempFileForName("Dummy.java", false);
+        if (!tempFile.getExists()) {
             tempFile.setBytes(new byte[0]);
             tempFile.save();
         }
