@@ -28,9 +28,9 @@ public class VersionControlZip extends VersionControl {
         WebFile rootDir = zipSite.getRootDir();
         WebFile[] rootFiles = rootDir.getFiles();
         if (rootFiles.length == 0)
-            System.out.println("VersionControlZip: No root files found");
+            System.out.println("VersionControlZip: No root files found for zip: " + _remoteSiteUrl);
         else if (rootFiles.length > 1)
-            System.out.println("VersionControlZip: ZipFile has multiple files: " + rootFiles.length);
+            System.out.println("VersionControlZip: ZipFile has multiple files: " + _remoteSiteUrl + ", " + rootFiles.length);
 
         // Look for nested top level directory and use that nested dir site instead
         WebFile dirFile = ArrayUtils.findMatch(rootFiles, file -> file.isDir());
