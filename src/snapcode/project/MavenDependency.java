@@ -376,7 +376,7 @@ public class MavenDependency extends BuildDependency {
         String relativeJarPath = getRelativeJarPath();
         if (repositoryURL == null || relativeJarPath == null)
             return null;
-        return FilePathUtils.getChild(repositoryURL, relativeJarPath);
+        return FilePathUtils.getChildPath(repositoryURL, relativeJarPath);
     }
 
     /**
@@ -387,7 +387,7 @@ public class MavenDependency extends BuildDependency {
         // Get local maven cache path
         String homeDir = System.getProperty("user.home");
         String MAVEN_REPO_PATH = SnapUtils.isWebVM ? "maven_cache" : ".m2/repository";
-        String localMavenCachePath = FilePathUtils.getChild(homeDir, MAVEN_REPO_PATH);
+        String localMavenCachePath = FilePathUtils.getChildPath(homeDir, MAVEN_REPO_PATH);
 
         // Get relative jar path
         String relativeJarPath = getRelativeJarPath();
@@ -395,7 +395,7 @@ public class MavenDependency extends BuildDependency {
             return null;
 
         // Return combined path
-        return FilePathUtils.getChild(localMavenCachePath, relativeJarPath);
+        return FilePathUtils.getChildPath(localMavenCachePath, relativeJarPath);
     }
 
     /**
@@ -413,10 +413,10 @@ public class MavenDependency extends BuildDependency {
 
         // Build relative package jar path and return
         String groupPath = '/' + group.replace(".", "/");
-        String packagePath = FilePathUtils.getChild(groupPath, packageName);
-        String versionPath = FilePathUtils.getChild(packagePath, version);
+        String packagePath = FilePathUtils.getChildPath(groupPath, packageName);
+        String versionPath = FilePathUtils.getChildPath(packagePath, version);
         String jarName = packageName + '-' + version + ".jar";
-        return FilePathUtils.getChild(versionPath, jarName);
+        return FilePathUtils.getChildPath(versionPath, jarName);
     }
 
     /**

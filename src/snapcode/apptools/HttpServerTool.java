@@ -79,8 +79,8 @@ public class HttpServerTool extends WorkspaceTool {
 
         WebSite site = getRootSite();
         File file = site.getRootDir().getJavaFile();
-        String sitePath = FilePathUtils.getStandardizedPath(file.getAbsolutePath());
-        sitePath = FilePathUtils.getChild(sitePath, "/bin/");
+        String sitePath = FilePathUtils.getNormalizedPath(file.getAbsolutePath());
+        sitePath = FilePathUtils.getChildPath(sitePath, "/bin/");
 
         // Set, return
         return _sitePath = sitePath;
@@ -92,7 +92,7 @@ public class HttpServerTool extends WorkspaceTool {
     public WebURL getURL(String aPath)
     {
         String sitePath = getSitePath();
-        String path = FilePathUtils.getChild(sitePath, aPath);
+        String path = FilePathUtils.getChildPath(sitePath, aPath);
         return WebURL.getURL(path);
     }
 
