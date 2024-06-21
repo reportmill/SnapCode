@@ -1,11 +1,11 @@
 {
     "bin": {"snapcode": "jdeploy-bundle/jdeploy.js"},
     "author": "ReportMill Software, Inc.",
-    "description": "A Java workbench for education",
+    "description": "A Java IDE for education",
     "main": "index.js",
     "preferGlobal": true,
     "repository": "",
-    "version": "2024.2.6",
+    "version": "2024.6.21",
     "jdeploy": {
         "jdk": false,
         "javaVersion": "8",
@@ -14,7 +14,7 @@
             "extension": "java",
             "mimetype": "text/java"
         }],
-        "jar": "build/libs/SnapCodeAll-2024.02.jar",
+        "jar": "build/libs/SnapCodeAll-2024.06.jar",
         "javafx": false,
         "title": "SnapCode"
     },
