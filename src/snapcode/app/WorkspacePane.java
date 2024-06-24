@@ -1,6 +1,7 @@
 package snapcode.app;
 import snap.geom.Rect;
 import snap.gfx.GFXEnv;
+import snap.view.SharedAction;
 import snap.viewx.DevPane;
 import snapcode.project.*;
 import snap.props.PropChange;
@@ -272,6 +273,14 @@ public class WorkspacePane extends ViewOwner {
         ToolTray bottomTray = _workspaceTools.getBottomTray();
         TabView bottomTrayUI = (TabView) bottomTray.getUI();
         mainSplit.addItem(bottomTrayUI);
+
+        // Configure CutMenuItem, CopyMenuItem, PasteMenuItem, SelectAllMenuItem, UndoMenuItem, RedoMenuItem
+        getView("CutMenuItem", MenuItem.class).setSharedAction(SharedAction.Cut_Action);
+        getView("CopyMenuItem", MenuItem.class).setSharedAction(SharedAction.Copy_Action);
+        getView("PasteMenuItem", MenuItem.class).setSharedAction(SharedAction.Paste_Action);
+        getView("SelectAllMenuItem", MenuItem.class).setSharedAction(SharedAction.SelectAll_Action);
+        getView("UndoMenuItem", MenuItem.class).setSharedAction(SharedAction.Undo_Action);
+        getView("RedoMenuItem", MenuItem.class).setSharedAction(SharedAction.Redo_Action);
 
         // Configure Left/Right/BottomTrayMenuItem.Text to update with Left/Right/BottomTrayUI.Visible
         View showLeftTrayMenuItem = getView("ShowLeftTrayMenuItem");
