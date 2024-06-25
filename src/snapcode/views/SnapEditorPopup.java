@@ -134,26 +134,24 @@ public class SnapEditorPopup extends ViewOwner {
         _listView = new ListView<>();
         _listView.setFont(Font.Arial11);
         _listView.setPrefSize(320, 260);
-        enableEvents(_listView, KeyEvents);
+        _listView.addEventHandler(this::handleListViewKeyEvent, KeyEvents);
         return _listView;
     }
 
     /**
-     * Respond to UI events.
+     * Handle ListView KeyEvents to consume Up/Down arrow, Escape and EnterKey.
      */
-    protected void respondUI(ViewEvent anEvent)
+    private void handleListViewKeyEvent(ViewEvent anEvent)
     {
-        // Handle ListView KeyEvents to consume Up/Down arrow, Escape and EnterKey
-        if (anEvent.isKeyEvent()) {
-            if (anEvent.isEscapeKey()) {
-                if (anEvent.isKeyRelease()) getPopup().hide();
-                anEvent.consume();
-            }
-            if (anEvent.isEnterKey()) {
-                if (anEvent.isKeyRelease())
-                    ((JExprView<?>) _nodeView).fireTextFieldAction();
-                anEvent.consume();
-            }
+        if (anEvent.isEscapeKey()) {
+            if (anEvent.isKeyRelease())
+                getPopup().hide();
+            anEvent.consume();
+        }
+        if (anEvent.isEnterKey()) {
+            if (anEvent.isKeyRelease())
+                ((JExprView<?>) _nodeView).fireTextFieldAction();
+            anEvent.consume();
         }
     }
 

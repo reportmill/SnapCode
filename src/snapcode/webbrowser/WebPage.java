@@ -194,6 +194,7 @@ public class WebPage extends ViewOwner {
     /**
      * Override to show exception page.
      */
+    @Override
     protected void invokeResetUI()
     {
         try { super.invokeResetUI(); }
@@ -206,7 +207,8 @@ public class WebPage extends ViewOwner {
     /**
      * Override to show exception page.
      */
-    public void invokeRespondUI(ViewEvent anEvent)
+    @Override
+    protected void invokeRespondUI(ViewEvent anEvent)
     {
         try { super.invokeRespondUI(anEvent); }
         catch (Throwable t) {

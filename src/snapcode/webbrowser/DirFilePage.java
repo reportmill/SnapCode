@@ -13,76 +13,71 @@ import snapcode.util.FileIcons;
 public class DirFilePage extends WebPage {
 
     // The file browser
-    BrowserView<WebFile> _fileBrowser;
+    private BrowserView<WebFile> _fileBrowser;
 
     // The page browser
-    WebBrowser _pageBrowser;
+    private WebBrowser _pageBrowser;
+
+    /**
+     * Constructor.
+     */
+    public DirFilePage()
+    {
+        super();
+    }
 
     /**
      * Creates a file pane for the given file in the requested mode.
      */
     protected View createUI()
     {
-        RowView hbox = new RowView();
-        hbox.setFillHeight(true);
+        // Create/configure FileBrowser
         _fileBrowser = new BrowserView<>();
         _fileBrowser.setName("FileBrowser");
         _fileBrowser.setPrefWidth(400);
         _fileBrowser.setGrowWidth(true);
         _fileBrowser.setResolver(new FileTreeResolver());
         _fileBrowser.setItems(getFile().getFiles());
+        _fileBrowser.addEventHandler(this::handleFileBrowserMouseRelease, MouseRelease);
+
+        // Create and configure PageBrowser
         _pageBrowser = new WebBrowser();
         _pageBrowser.setGrowWidth(true);
-        hbox.setChildren(_fileBrowser, _pageBrowser);
-        return hbox;
-    }
 
-    /**
-     * Initialize UI.
-     */
-    protected void initUI()
-    {
-        // Enable events on FileBrowser
-        enableEvents(_fileBrowser, MouseRelease);
+        // Add to row view and return
+        RowView rowView = new RowView();
+        rowView.setFillHeight(true);
+        rowView.setChildren(_fileBrowser, _pageBrowser);
+        return rowView;
     }
 
     /**
      * Respond to UI.
      */
-    public void respondUI(ViewEvent anEvent)
+    @Override
+    protected void respondUI(ViewEvent anEvent)
     {
-        // Handle FileBrowser MouseClick
-        if (anEvent.isMouseClick()) {
-
-            // Handle single click: set browser to file (or clear if directory)
-            if (anEvent.getClickCount() == 1) {
-                WebFile file = _fileBrowser.getSelItem();
-                if (file == null) return;
-                _pageBrowser.setSelFile(file.isFile() ? file : null);
-            }
-
-            // Handle double click: set enclosing browser file
-            else if (anEvent.getClickCount() == 2)
-                performFileBrowserDoubleClick();
-        }
-
         // Handle FileBrowser click
         if (anEvent.equals("FileBrowser")) {
             WebFile file = _fileBrowser.getSelItem();
-            if (file == null) return;
+            if (file == null)
+                return;
             _pageBrowser.setSelFile(file.isFile() ? file : null);
             getUI().relayout();
         }
     }
 
     /**
-     * Handle file browser double click.
+     * Called when FileBrowser gets mouse release.
      */
-    protected void performFileBrowserDoubleClick()
+    private void handleFileBrowserMouseRelease(ViewEvent anEvent)
     {
-        WebFile file = _fileBrowser.getSelItem();
-        if (file == null) return;
-        getBrowser().setSelFile(file);
+        // Handle FileBrowser double-click
+        if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
+            WebFile file = _fileBrowser.getSelItem();
+            if (file != null)
+                getBrowser().setSelFile(file);
+        }
     }
 
     /**

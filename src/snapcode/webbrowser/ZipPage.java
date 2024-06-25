@@ -7,8 +7,6 @@ import snap.view.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.util.FileIcons;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * A WebPage subclass for Zip/Jar files.
@@ -16,26 +14,26 @@ import java.util.List;
 public class ZipPage extends WebPage {
 
     // The file browser
-    private BrowserView<WebFile>  _fileBrsr;
+    private BrowserView<WebFile> _fileBrowser;
 
     // The page browser
-    private WebBrowser _pageBrsr;
+    private WebBrowser _pageBrowser;
+
+    /**
+     * Constructor.
+     */
+    public ZipPage()
+    {
+        super();
+    }
 
     /**
      * Returns the root files.
      */
-    public List<WebFile> getFiles()
+    public WebFile[] getFiles()
     {
         WebSite site = getFile().getURL().getAsSite();
-        return Arrays.asList(site.getRootDir().getFiles());
-    }
-
-    /**
-     * Returns the selected file in browser.
-     */
-    public WebFile getSelectedFile()
-    {
-        return _fileBrsr.getSelItem();
+        return site.getRootDir().getFiles();
     }
 
     /**
@@ -44,44 +42,33 @@ public class ZipPage extends WebPage {
     protected View createUI()
     {
         // Create FileBrowser and put in ScrollView
-        _fileBrsr = new BrowserView();
-        _fileBrsr.setName("FileBrowser");
-        _fileBrsr.setPrefColCount(3);
-        _fileBrsr.setPrefHeight(350); //_fileBrsr.setGrowHeight(true);
-        _fileBrsr.setResolver(new FileTreeResolver());
-        _fileBrsr.setItemsList(getFiles());
+        _fileBrowser = new BrowserView<>();
+        _fileBrowser.setName("FileBrowser");
+        _fileBrowser.setPrefColCount(3);
+        _fileBrowser.setPrefHeight(350);
+        _fileBrowser.setResolver(new FileTreeResolver());
+        _fileBrowser.setItems(getFiles());
+        _fileBrowser.addEventHandler(this::handleFileBrowserMouseRelease, MouseRelease);
 
         // Create PageBrowser
-        _pageBrsr = new WebBrowser();
-        _pageBrsr.setGrowHeight(true);
+        _pageBrowser = new WebBrowser();
+        _pageBrowser.setGrowHeight(true);
 
         // Put FileBrowser and PageBrowser in VBox
         ColView vbox = new ColView();
         vbox.setFillWidth(true);
-        vbox.setChildren(_fileBrsr, _pageBrsr);
+        vbox.setChildren(_fileBrowser, _pageBrowser);
         return vbox;
-    }
-
-    /**
-     * Initialize UI.
-     */
-    protected void initUI()
-    {
-        // Enable events on FileBrowser
-        enableEvents(_fileBrsr, MouseRelease);
     }
 
     /**
      * Respond to UI.
      */
-    public void respondUI(ViewEvent anEvent)
+    private void handleFileBrowserMouseRelease(ViewEvent anEvent)
     {
-        // Handle FileBrowser click
-        if (anEvent.equals("FileBrowser")) {
-            WebFile file = _fileBrsr.getSelItem();
-            if (file == null) return;
-            _pageBrsr.setSelFile(file.isFile() ? file : null);
-        }
+        WebFile file = _fileBrowser.getSelItem();
+        if (file != null)
+            _pageBrowser.setSelFile(file.isFile() ? file : null);
     }
 
     /**

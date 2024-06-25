@@ -75,7 +75,7 @@ public class JavaTextPane extends TextPane {
         // Get TextArea and start listening for events (KeyEvents, MouseReleased)
         _textArea = getTextArea();
         _textArea.setGrowWidth(true);
-        enableEvents(_textArea, KeyPress, KeyRelease, MousePress, MouseRelease);
+        _textArea.addEventHandler(this::handleTextAreaMouseEvent, MousePress, MouseRelease);
         _textArea.addEventHandler(this::textAreaDragEvent, DragEvents);
 
         // Create/configure LineNumView, LineFootView
@@ -127,8 +127,7 @@ public class JavaTextPane extends TextPane {
         // Get Path node labels
         Label[] pathNodeLabels = getLabelsForSelNodePath();
         for (Label pathNodeLabel : pathNodeLabels) {
-            pathNodeLabel.setOwner(this);
-            enableEvents(pathNodeLabel, MouseRelease);
+            pathNodeLabel.addEventHandler(this::handleNodePathLabelMouseRelease, MouseRelease);
             nodePathBox.addChild(pathNodeLabel);
         }
     }
@@ -141,37 +140,8 @@ public class JavaTextPane extends TextPane {
         // Do normal version
         super.respondUI(anEvent);
 
-        // Handle TextArea key events
-        if (anEvent.equals("TextArea")) {
-
-            // Handle PopupTrigger
-            if (anEvent.isPopupTrigger()) { //anEvent.consume();
-                Menu contextMenu = createContextMenu();
-                contextMenu.showMenuAtXY(_textArea, anEvent.getX(), anEvent.getY());
-            }
-
-            // Handle MouseClick: If alt-down, open JavaDoc. If HoverNode, open declaration
-            else if (anEvent.isMouseClick()) {
-
-                // If alt is down and there is JavaDoc, open it
-                if (anEvent.isAltDown()) {
-                    JavaDoc javaDoc = getJavaDoc();
-                    if (javaDoc != null) {
-                        javaDoc.openUrl();
-                        return;
-                    }
-                }
-
-                // If there is a hover node, open it
-                JavaTextArea textArea = getTextArea();
-                JNode hoverNode = textArea.getHoverNode();
-                if (hoverNode != null)
-                    openDeclaration(hoverNode);
-            }
-        }
-
         // Handle JavaDocButton
-        else if (anEvent.equals("JavaDocButton")) {
+        if (anEvent.equals("JavaDocButton")) {
             JavaDoc javaDoc = getJavaDoc();
             if (javaDoc != null)
                 javaDoc.openUrl();
@@ -192,15 +162,49 @@ public class JavaTextPane extends TextPane {
         // Handle ShowDeclarationsMenuItem
         else if (anEvent.equals("ShowDeclarationsMenuItem"))
             showDeclarations(_textArea.getSelNode());
+    }
 
-        // Handle NodePathLabel
-        else if (anEvent.equals("NodePathLabel")) {
-            JavaTextArea javaTextArea = getTextArea();
-            JNode clickedNode = (JNode) anEvent.getView().getProp("JNode");
-            JNode deepNode = javaTextArea.getDeepNode();
-            javaTextArea.setSel(clickedNode.getStartCharIndex(), clickedNode.getEndCharIndex());
-            javaTextArea.setDeepNode(deepNode);
+    /**
+     * Called when TextArea gets MouseEvent.
+     */
+    private void handleTextAreaMouseEvent(ViewEvent anEvent)
+    {
+        // Handle PopupTrigger
+        if (anEvent.isPopupTrigger()) { //anEvent.consume();
+            Menu contextMenu = createContextMenu();
+            contextMenu.showMenuAtXY(_textArea, anEvent.getX(), anEvent.getY());
         }
+
+        // Handle MouseClick: If alt-down, open JavaDoc. If HoverNode, open declaration
+        else if (anEvent.isMouseClick()) {
+
+            // If alt is down and there is JavaDoc, open it
+            if (anEvent.isAltDown()) {
+                JavaDoc javaDoc = getJavaDoc();
+                if (javaDoc != null) {
+                    javaDoc.openUrl();
+                    return;
+                }
+            }
+
+            // If there is a hover node, open it
+            JavaTextArea textArea = getTextArea();
+            JNode hoverNode = textArea.getHoverNode();
+            if (hoverNode != null)
+                openDeclaration(hoverNode);
+        }
+    }
+
+    /**
+     * Called when NodePathLabel gets MouseRelease.
+     */
+    private void handleNodePathLabelMouseRelease(ViewEvent anEvent)
+    {
+        JavaTextArea javaTextArea = getTextArea();
+        JNode clickedNode = (JNode) anEvent.getView().getProp("JNode");
+        JNode deepNode = javaTextArea.getDeepNode();
+        javaTextArea.setSel(clickedNode.getStartCharIndex(), clickedNode.getEndCharIndex());
+        javaTextArea.setDeepNode(deepNode);
     }
 
     /**
