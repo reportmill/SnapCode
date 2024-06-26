@@ -17,7 +17,7 @@ public class JavaField extends JavaMember {
      */
     public JavaField(Resolver aResolver, JavaClass aDeclaringClass, Field aField)
     {
-        super(aResolver, DeclType.Field, aDeclaringClass, aField);
+        super(aResolver, DeclType.Field, aDeclaringClass);
         if (aField == null)
             return;
 

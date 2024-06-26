@@ -88,7 +88,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
         else {
             JFile jfile = getFile();
             String packageName = jfile.getPackageName();
-            if (packageName != null && packageName.length() > 0)
+            if (packageName != null && !packageName.isEmpty())
                 className = packageName + '.' + className;
         }
 
@@ -175,7 +175,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     {
         // Get extends class
         List<JType> extendsTypes = _extendsTypes;
-        JType extendsType = extendsTypes.size() > 0 ? extendsTypes.get(0) : null;
+        JType extendsType = !extendsTypes.isEmpty() ? extendsTypes.get(0) : null;
         JavaClass extendsClass = extendsType != null ? extendsType.getEvalClass() : null;
 
         // If no ExtendsClass return Object.class (but complain if it was declared but not found)

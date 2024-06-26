@@ -37,7 +37,7 @@ public class JavaExecutable extends JavaMember {
      */
     public JavaExecutable(Resolver aResolver, DeclType aType, JavaClass aDeclaringClass, Executable anExecutable)
     {
-        super(aResolver, aType, aDeclaringClass, anExecutable);
+        super(aResolver, aType, aDeclaringClass);
         if (anExecutable == null)
             return;
 

@@ -275,7 +275,7 @@ public class JavaClass extends JavaType {
     /**
      * Returns whether class is anonymous class.
      */
-    public boolean isAnonymousClass()  { return _simpleName.length() == 0; }
+    public boolean isAnonymousClass()  { return _simpleName.isEmpty(); }
 
     /**
      * Returns whether class is member.
@@ -523,9 +523,22 @@ public class JavaClass extends JavaType {
             return null;
         }
 
-        // Find lambda method
+        // Look for non-static/default method declared in this class - return if found
         JavaMethod[] methods = getDeclaredMethods();
-        return ArrayUtils.findMatch(methods, method -> !(method.isStatic() || method.isDefault()));
+        JavaMethod lambdaMethod = ArrayUtils.findMatch(methods, method -> !(method.isStatic() || method.isDefault()));
+        if (lambdaMethod != null)
+            return lambdaMethod;
+
+        // Check interfaces
+        JavaClass[] interfaces = getInterfaces();
+        for (JavaClass interfaceClass : interfaces) {
+            JavaMethod lambdaMethod1 = interfaceClass.getLambdaMethod();
+            if (lambdaMethod1 != null)
+                return lambdaMethod1;
+        }
+
+        // Return not found
+        return null;
     }
 
     /**
@@ -693,7 +706,7 @@ public class JavaClass extends JavaType {
         // If not-root package, add package name
         else if (_package != null) {
             String packageName = _package.getName();
-            if (packageName.length() > 0)
+            if (!packageName.isEmpty())
                 return suggestionString + " - " + _package.getName();
         }
 

@@ -18,7 +18,7 @@ public class JavaMember extends JavaDecl {
     /**
      * Constructor.
      */
-    public JavaMember(Resolver aResolver, DeclType aType, JavaClass aDeclaringClass, Member aMember)
+    public JavaMember(Resolver aResolver, DeclType aType, JavaClass aDeclaringClass)
     {
         super(aResolver, aType);
         _declaringClass = aDeclaringClass;

@@ -49,7 +49,7 @@ public class ClassTree {
         List<ClassTreeNode> classTreeNodes = new ArrayList<>(nodeFiles[0].getFileCount());
 
         // If root package, add primitives
-        if (packageName.length() == 0) {
+        if (packageName.isEmpty()) {
             Class<?>[] primitives = { boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class, void.class };
             ClassTreeNode[] primitiveNodes = ArrayUtils.map(primitives, cls -> new ClassTreeNode(cls.getName(), false), ClassTreeNode.class);
             Collections.addAll(classTreeNodes, primitiveNodes);

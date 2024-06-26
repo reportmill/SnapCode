@@ -59,7 +59,7 @@ public class Resolver {
         ClassTree classTree = getClassTree();
         String packageName = parentPackage.getName();
         ClassTree.ClassTreeNode[] childNodes = classTree.getClassTreeNodesForPackageName(packageName);
-        JavaDecl[] children = ArrayUtils.map(childNodes, classTreeNode -> getJavaDeclForClassTreeNode(parentPackage, classTreeNode), JavaDecl.class);
+        JavaDecl[] children = ArrayUtils.map(childNodes, classTreeNode -> getJavaDeclForClassTreeNode(classTreeNode), JavaDecl.class);
 
         // Filter out null
         if (ArrayUtils.hasMatch(children, child -> child == null))
@@ -72,7 +72,7 @@ public class Resolver {
     /**
      * Returns a JavaDecl for given ClassTreeNode.
      */
-    private JavaDecl getJavaDeclForClassTreeNode(JavaPackage parentPackage, ClassTree.ClassTreeNode classTreeNode)
+    private JavaDecl getJavaDeclForClassTreeNode(ClassTree.ClassTreeNode classTreeNode)
     {
         // If package, create/return package
         if (classTreeNode.isPackage)
@@ -188,7 +188,7 @@ public class Resolver {
 
         // If package doesn't exist, just return null
         ClassTree classTree = getClassTree();
-        if (!doForce && pkgName.length() > 0 && !classTree.isKnownPackageName(pkgName))
+        if (!doForce && !pkgName.isEmpty() && !classTree.isKnownPackageName(pkgName))
             return null;
 
         // Create JavaPackage and add to Packages cache
@@ -205,7 +205,7 @@ public class Resolver {
     private JavaPackage getJavaPackageForNameImpl(String aName)
     {
         // If root package, just create/return
-        if (aName.length() == 0)
+        if (aName.isEmpty())
             return new JavaPackage(this, null, "");
 
         // Get parent package

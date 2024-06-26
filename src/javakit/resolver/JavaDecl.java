@@ -181,7 +181,7 @@ public class JavaDecl implements Comparable<JavaDecl> {
         if (this instanceof JavaClass || this instanceof JavaMember) {
             int mods = this instanceof JavaClass ? ((JavaClass) this).getModifiers() : ((JavaMember) this).getModifiers();
             String modifierStr = Modifier.toString(mods);
-            if (modifierStr.length() > 0)
+            if (!modifierStr.isEmpty())
                 declString = modifierStr + " " + declString;
         }
 

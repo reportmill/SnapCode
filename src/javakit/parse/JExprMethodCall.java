@@ -193,7 +193,7 @@ public class JExprMethodCall extends JExpr implements WithId {
     {
         // Get matching methods
         List<JavaMethod> methods = getCompatibleMethods();
-        if (methods == null || methods.size() == 0)
+        if (methods == null || methods.isEmpty())
             return null;
 
         // Get arg index of lambda expression
@@ -212,7 +212,7 @@ public class JExprMethodCall extends JExpr implements WithId {
         }
 
         // Otherwise, let's just return first matching method (maybe TeaVM thing)
-        if (methods.size() > 0)
+        if (!methods.isEmpty())
             return methods.get(0);
 
         // Return not found
@@ -245,7 +245,7 @@ public class JExprMethodCall extends JExpr implements WithId {
 
             // Find compatible methods for class and arg classes and return if found
             List<JavaMethod> compatibleMethods = getCompatibleMethodsForScopeClassAndArgClasses(scopeClass, argClasses);
-            if (compatibleMethods.size() > 0)
+            if (!compatibleMethods.isEmpty())
                 return compatibleMethods;
 
             // Try adding a null arg
@@ -270,14 +270,14 @@ public class JExprMethodCall extends JExpr implements WithId {
 
         // Get scope node class type and search for compatible method for name and arg types
         List<JavaMethod> compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, methodName, argClasses, staticOnly);
-        if (compatibleMethods.size() > 0)
+        if (!compatibleMethods.isEmpty())
             return compatibleMethods;
 
         // If scope node class type is member class and not static, go up parent classes
         while (scopeClass.isMemberClass() && !scopeClass.isStatic()) {
             scopeClass = scopeClass.getDeclaringClass();
             compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, methodName, argClasses, staticOnly);
-            if (compatibleMethods.size() > 0)
+            if (!compatibleMethods.isEmpty())
                 return compatibleMethods;
         }
 

@@ -27,7 +27,7 @@ public class JExprMethodRef extends JExprLambdaBase {
 
     // A constant to define the types of method refs.
     // See https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html
-    public enum Type { InstanceMethod, StaticMethod, HelperMethod, Constructor, Unknown };
+    public enum Type { InstanceMethod, StaticMethod, HelperMethod, Constructor, Unknown }
 
     /**
      * Creates a new Method Reference expression for expression and id.
