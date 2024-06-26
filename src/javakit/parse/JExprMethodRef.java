@@ -3,6 +3,7 @@
  */
 package javakit.parse;
 import javakit.resolver.*;
+import java.util.Objects;
 
 /**
  * This JExpr subclass represents a method reference: obj::method.
@@ -20,6 +21,9 @@ public class JExprMethodRef extends JExprLambdaBase {
 
     // The method
     private JavaMethod _method;
+
+    // The constructor
+    private JavaConstructor _constructor;
 
     // A constant to define the types of method refs.
     // See https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html
@@ -76,6 +80,9 @@ public class JExprMethodRef extends JExprLambdaBase {
      */
     private Type getTypeImpl()
     {
+        if (Objects.equals(getMethodName(), "new"))
+            return Type.Constructor;
+
         JavaMethod method = getMethod();
         if (method == null)
             return Type.Unknown;
@@ -150,6 +157,46 @@ public class JExprMethodRef extends JExprLambdaBase {
     }
 
     /**
+     * Tries to resolve the constructor declaration for this node (if type is constructor).
+     */
+    public JavaConstructor getConstructor()
+    {
+        if (_constructor != null) return _constructor;
+        return _constructor = getConstructorImpl();
+    }
+
+    /**
+     * Tries to resolve the constructor declaration for this node (if type is constructor).
+     */
+    protected JavaConstructor getConstructorImpl()
+    {
+        // Get method name
+        String methodName = getMethodName();
+        if (!Objects.equals(methodName, "new"))
+            return null;
+
+        // Get prefix expr eval class
+        JExpr prefixExpr = _prefixExpr;
+        JavaType prefixEvalType = prefixExpr != null ? prefixExpr.getEvalType() : null;
+        JavaClass prefixClass = prefixEvalType != null ? prefixEvalType.getEvalClass() : null;
+        if (prefixClass == null)
+            return null;
+
+        // Return default constructor
+        return prefixClass.getDeclaredConstructorForClasses(new JavaClass[0]);
+    }
+
+    /**
+     * Returns the executable, depending on whether method ref is method or constructor.
+     */
+    public JavaExecutable getExecutable()
+    {
+        if (getType() == Type.Constructor)
+            return getConstructor();
+        return getMethod();
+    }
+
+    /**
      * Returns the resolved lambda method return type.
      */
     @Override
@@ -159,6 +206,11 @@ public class JExprMethodRef extends JExprLambdaBase {
         JavaMethod method = getMethod();
         if (method != null)
             return method.getReturnType();
+
+        // If Constructor is set, return its type
+        JavaConstructor constructor = getConstructor();
+        if (constructor != null)
+            return constructor.getDeclaringClass();
 
         // Do normal version
         return super.getLambdaMethodReturnTypeResolved();
@@ -171,7 +223,7 @@ public class JExprMethodRef extends JExprLambdaBase {
     {
         // If given id is MethodId, return method
         if (anExprId == _methodId)
-            return getMethod();
+            return getExecutable();
 
         // Do normal version
         return super.getDeclForChildId(anExprId);

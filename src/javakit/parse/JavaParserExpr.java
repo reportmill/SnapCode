@@ -601,7 +601,7 @@ public class JavaParserExpr extends Parser {
      *     LookAhead(2) "." AllocExpr |
      *     LookAhead(2) "." TypeArgs? Identifier |
      *     "[" Expression "]" |
-     *     "::" Identifier |
+     *     "::" (Identifier | "new") |
      *     Arguments
      */
     public static class PrimarySuffixHandler extends JNodeParseHandler<JExpr> {
@@ -654,6 +654,12 @@ public class JavaParserExpr extends Parser {
 
                 // Handle "::" Identifier: Set part to JExprMethodRef
                 case "::": _part = new JExprMethodRef(null, null); break;
+
+                // Handle "new" from: "::" (Identifier | new):
+                case "new":
+                    JExprId newId = new JExprId("new");
+                    ((JExprMethodRef) _part).setMethodId(newId);
+                    break;
 
                 // Handle Arguments
                 case "Arguments":

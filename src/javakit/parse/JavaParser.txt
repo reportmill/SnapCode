@@ -246,7 +246,7 @@ PrimarySuffix
     LookAhead(2) "." AllocExpr |
     LookAhead(2) "." TypeArgs? Identifier |
     "[" Expression "]" |
-    "::" Identifier |
+    "::" (Identifier | "new") |
     Arguments
 }
 
