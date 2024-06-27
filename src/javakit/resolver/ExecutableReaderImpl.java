@@ -8,11 +8,14 @@ import java.lang.reflect.*;
  */
 public class ExecutableReaderImpl implements ExecutableReader {
 
+    // The executable
+    private Executable _executable;
+
     // The JavaExecutable
     private JavaExecutable _javaExecutable;
 
-    // The executable
-    private Executable _executable;
+    // The Resolver
+    private Resolver _resolver;
 
     /**
      * Constructor.
@@ -29,16 +32,14 @@ public class ExecutableReaderImpl implements ExecutableReader {
     public void setJavaExecutable(JavaExecutable anExec)
     {
         _javaExecutable = anExec;
+        _resolver = _javaExecutable._resolver;
     }
 
     /**
      * Returns the name.
      */
     @Override
-    public String getName()
-    {
-        return _executable.getName();
-    }
+    public String getName()  { return _executable.getName(); }
 
     /**
      * Returns the simple name.
@@ -55,28 +56,19 @@ public class ExecutableReaderImpl implements ExecutableReader {
      * Returns the modifiers.
      */
     @Override
-    public int getModifiers()
-    {
-        return _executable.getModifiers();
-    }
+    public int getModifiers()  { return _executable.getModifiers(); }
 
     /**
      * Returns whether Method/Constructor is VarArgs type.
      */
     @Override
-    public boolean isVarArgs()
-    {
-        return _executable.isVarArgs();
-    }
+    public boolean isVarArgs()  { return _executable.isVarArgs(); }
 
     /**
      * Returns whether Method is default type.
      */
     @Override
-    public boolean isDefault()
-    {
-        return _executable instanceof Method && ((Method) _executable).isDefault();
-    }
+    public boolean isDefault()  { return _executable instanceof Method && ((Method) _executable).isDefault(); }
 
     /**
      * Returns the TypeVars.
@@ -84,14 +76,8 @@ public class ExecutableReaderImpl implements ExecutableReader {
     @Override
     public JavaTypeVariable[] getTypeVars()
     {
-        // Get TypeVariables
         TypeVariable<?>[] typeVars = _executable.getTypeParameters();
-        JavaTypeVariable[] javaTypeVars = new JavaTypeVariable[typeVars.length];
-        for (int i = 0, iMax = typeVars.length; i < iMax; i++)
-            javaTypeVars[i] = new JavaTypeVariable(_javaExecutable._resolver, _javaExecutable, typeVars[i]);
-
-        // Return
-        return javaTypeVars;
+        return ArrayUtils.map(typeVars, tvar -> new JavaTypeVariable(_resolver, _javaExecutable, tvar), JavaTypeVariable.class);
     }
 
     /**
@@ -106,7 +92,7 @@ public class ExecutableReaderImpl implements ExecutableReader {
             paramTypesReal = _executable.getParameterTypes();
 
         // Return JavaTypes
-        return _javaExecutable._resolver.getJavaTypesForTypes(paramTypesReal);
+        return _resolver.getJavaTypesForTypes(paramTypesReal);
     }
 
     /**
@@ -116,7 +102,7 @@ public class ExecutableReaderImpl implements ExecutableReader {
     public JavaClass[] getParameterClasses()
     {
         Class<?>[] paramClasses = _executable.getParameterTypes();
-        return ArrayUtils.map(paramClasses, _javaExecutable._resolver::getJavaClassForClass, JavaClass.class);
+        return ArrayUtils.map(paramClasses, _resolver::getJavaClassForClass, JavaClass.class);
     }
 
     /**
@@ -126,7 +112,7 @@ public class ExecutableReaderImpl implements ExecutableReader {
     public JavaType getGenericReturnType()
     {
         Type returnTypeReal = ((Method) _executable).getGenericReturnType();
-        return _javaExecutable._resolver.getJavaTypeForType(returnTypeReal);
+        return _resolver.getJavaTypeForType(returnTypeReal);
     }
 
     /**

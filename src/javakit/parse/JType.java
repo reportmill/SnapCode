@@ -5,7 +5,6 @@ package javakit.parse;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaType;
-import javakit.resolver.ResolverUtils;
 import snap.parse.ParseToken;
 import snap.util.ArrayUtils;
 
@@ -152,13 +151,8 @@ public class JType extends JNode {
         if (isVarType())
             return getDeclForVar();
 
-        // Handle primitive type
-        String baseName = getName();
-        Class<?> primitiveClass = ResolverUtils.getPrimitiveClassForName(baseName);
-        if (primitiveClass != null)
-            return getJavaClassForClass(primitiveClass);
-
         // Try to find class directly
+        String baseName = getName();
         JavaType javaClass = getJavaClassForName(baseName);
         if (javaClass != null)
             return javaClass;

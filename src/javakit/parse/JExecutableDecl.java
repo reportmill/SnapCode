@@ -114,6 +114,15 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     public abstract JavaExecutable getExecutable();
 
     /**
+     * Returns array of parameter class types suitable to resolve method.
+     */
+    public JavaClass[] getParameterClasses()
+    {
+        JVarDecl[] parameters = getParameters();
+        return ArrayUtils.map(parameters, JVarDecl::getJavaClass, JavaClass.class);
+    }
+
+    /**
      * Override to check formal parameters.
      */
     @Override
@@ -143,15 +152,6 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
 
         // Do normal version
         return super.getDeclForChildType(aJType);
-    }
-
-    /**
-     * Returns array of parameter class types suitable to resolve method.
-     */
-    public JavaClass[] getParameterClasses()
-    {
-        JVarDecl[] parameters = getParameters();
-        return ArrayUtils.map(parameters, pdecl -> pdecl.getJavaClass(), JavaClass.class);
     }
 
     /**
