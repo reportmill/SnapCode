@@ -150,7 +150,7 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
             return null;
 
         // Get parameter type
-        JavaType parameterType = parameterTypes[parameterIndex];
+        JavaClass parameterType = parameterTypes[parameterIndex];
         if (parameterType == null)
             return null;
 

@@ -148,7 +148,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
         String name = aJType.getName();
         JTypeVar typeVar = getTypeVar(name);
         if (typeVar != null)
-            return typeVar.getDecl();
+            return typeVar.getTypeVariable();
 
         // Do normal version
         return super.getDeclForChildType(aJType);

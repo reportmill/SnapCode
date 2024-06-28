@@ -540,7 +540,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
         // Look for JTypeVar for given name - from old getDeclForChildNode() is this really needed ???
         JTypeVar typeVar = getTypeVar(name);
         if (typeVar != null)
-            return typeVar.getDecl();
+            return typeVar.getTypeVariable();
 
         // Look for InnerClass of given name - from old getDeclForChildNode() is this really needed ???
         JavaClass evalClass = getEvalClass();

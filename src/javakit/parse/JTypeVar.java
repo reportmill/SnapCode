@@ -19,6 +19,9 @@ public class JTypeVar extends JNode implements WithId {
     // The array of bounds types
     private JType[] _bounds = JType.EMPTY_TYPES_ARRAY;
 
+    // The TypeVariable
+    private JavaTypeVariable _typeVariable;
+
     /**
      * Constructor.
      */
@@ -78,14 +81,18 @@ public class JTypeVar extends JNode implements WithId {
     }
 
     /**
-     * Override to get JavaDecl from parent decl (Class, Method).
+     * Returns the JavaTypeVariable from parent (Class, Method).
      */
-    protected JavaDecl getDeclImpl()  { return getJavaTypeVariable(); }
+    public JavaTypeVariable getTypeVariable()
+    {
+        if (_typeVariable != null) return _typeVariable;
+        return _typeVariable = getTypeVariableImpl();
+    }
 
     /**
      * Returns the JavaTypeVariable from parent (Class, Method).
      */
-    protected JavaTypeVariable getJavaTypeVariable()
+    private JavaTypeVariable getTypeVariableImpl()
     {
         // Get Parent declaration
         JNode parent = getParent();
@@ -110,6 +117,12 @@ public class JTypeVar extends JNode implements WithId {
         System.out.println("JTypeVar.getJavaTypeVariable: Unsupported parent type: " + parentDecl);
         return null;
     }
+
+    /**
+     * Override to get JavaDecl from parent decl (Class, Method).
+     */
+    @Override
+    protected JavaDecl getDeclImpl()  { return getTypeVariable(); }
 
     /**
      * Override to handle ID and nested case, e.g.: T extends Class <? super T>

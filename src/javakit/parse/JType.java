@@ -157,6 +157,11 @@ public class JType extends JNode {
         if (javaClass != null)
             return javaClass;
 
+        // See if name is type var
+        JTypeVar typeVarDecl = getTypeVarDeclForName(baseName);
+        if (typeVarDecl != null)
+            return typeVarDecl.getTypeVariable();
+
         // If not primitive, try to resolve class (type might be package name or unresolvable)
         JavaDecl packageOrClassDecl = getDeclForChildType(this);
         if (packageOrClassDecl instanceof JavaType)
