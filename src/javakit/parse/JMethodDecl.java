@@ -2,9 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import javakit.resolver.JavaClass;
-import javakit.resolver.JavaExecutable;
-import javakit.resolver.JavaMethod;
+import javakit.resolver.*;
 
 /**
  * A Java member for a method declaration.
@@ -66,8 +64,13 @@ public class JMethodDecl extends JExecutableDecl {
         if (javaClass == null)
             return null;
 
-        // Return method for name and param types
-        return javaClass.getDeclaredMethodForNameAndClasses(name, paramTypes);
+        // Get method for name and param types - just return if found
+        JavaMethod javaMethod = javaClass.getDeclaredMethodForNameAndClasses(name, paramTypes);
+        if (javaMethod != null)
+            return javaMethod;
+
+        // Otherwise just create and return method
+        return JavaClassUpdaterDecl.createMethodForDecl(this);
     }
 
     /**

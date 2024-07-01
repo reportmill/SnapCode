@@ -5,7 +5,6 @@ package javakit.resolver;
 import snap.util.ArrayUtils;
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * This class updates a JavaClass from resolver.
@@ -189,7 +188,17 @@ public class JavaClassUpdater {
         Method[] methods;
         try { methods = realClass.getDeclaredMethods(); }
         catch (Throwable e) { e.printStackTrace(); return new JavaMethod[0]; }
-        return Stream.of(methods).filter(m -> !m.isSynthetic()).map(m -> new JavaMethod(_resolver, _javaClass, m)).toArray(size -> new JavaMethod[size]);
+        return ArrayUtils.mapNonNull(methods, meth -> getJavaMethodForMethod(meth), JavaMethod.class);
+    }
+
+    /**
+     * Returns a JavaMethod for given Method.
+     */
+    private JavaMethod getJavaMethodForMethod(Method aMethod)
+    {
+        if (aMethod.isSynthetic())
+            return null;
+        return new JavaMethod(_resolver, _javaClass, aMethod);
     }
 
     /**
@@ -201,7 +210,17 @@ public class JavaClassUpdater {
         Constructor<?>[] constrs;
         try { constrs = realClass.getDeclaredConstructors(); }
         catch (Throwable e) { e.printStackTrace(); return new JavaConstructor[0]; }
-        return Stream.of(constrs).filter(c -> !c.isSynthetic()).map(c -> new JavaConstructor(_resolver, _javaClass, c)).toArray(size -> new JavaConstructor[size]);
+        return ArrayUtils.mapNonNull(constrs, constr -> getJavaConstructorForConstructor(constr), JavaConstructor.class);
+    }
+
+    /**
+     * Returns a JavaConstructor for given Constructor.
+     */
+    private JavaConstructor getJavaConstructorForConstructor(Constructor<?> aConstr)
+    {
+        if (aConstr.isSynthetic())
+            return null;
+        return new JavaConstructor(_resolver, _javaClass, aConstr);
     }
 
     /**
@@ -250,7 +269,7 @@ public class JavaClassUpdater {
             JavaMethod newMethod = newMethods[i];
             JavaMethod oldMethod = ArrayUtils.findMatch(oldMethods, method -> method.equals(newMethod));
             if (oldMethod != null) {
-                if (oldMethod.mergeMethod(newMethod))
+                if (mergeMethod(oldMethod, newMethod))
                     didChange = true;
                 newMethods[i] = oldMethod;
             }
@@ -274,7 +293,7 @@ public class JavaClassUpdater {
             JavaConstructor newConstr = newConstructors[i];
             JavaConstructor oldConstr = ArrayUtils.findMatch(oldConstructors, constr -> constr.equals(newConstr));
             if (oldConstr != null) {
-                if (oldConstr.mergeConstructor(newConstr))
+                if (mergeConstructor(oldConstr, newConstr))
                     didChange = true;
                 newConstructors[i] = oldConstr;
             }
@@ -283,5 +302,63 @@ public class JavaClassUpdater {
 
         // Return
         return didChange ? newConstructors : oldConstructors;
+    }
+
+    /**
+     * Merges the given new method into this method.
+     */
+    private static boolean mergeMethod(JavaMethod oldMethod, JavaMethod newMethod)
+    {
+        // Update modifiers
+        boolean didChange = mergeExecutable(oldMethod, newMethod);
+
+        // Update return type
+        String oldMethodReturnTypeName = oldMethod.getGenericReturnType().getName();
+        String newMethodReturnTypeName = newMethod.getGenericReturnType().getName();
+        if (!oldMethodReturnTypeName.equals(newMethodReturnTypeName)) {
+            oldMethod._genericReturnType = newMethod.getGenericReturnType();
+            didChange = true;
+        }
+
+        // Update Method
+        if (newMethod._method != null)
+            oldMethod._method = newMethod._method;
+
+        // Return
+        return didChange;
+    }
+
+    /**
+     * Merges the given new constructor into this constructor.
+     */
+    private static boolean mergeConstructor(JavaConstructor oldConstr, JavaConstructor newConstr)
+    {
+        // Update modifiers
+        boolean didChange = mergeExecutable(oldConstr, newConstr);
+
+        // Update Constructor
+        if (newConstr._constructor != null)
+            oldConstr._constructor = newConstr._constructor;
+
+        // Return
+        return didChange;
+    }
+
+    /**
+     * Merges the given new constructor into this constructor.
+     */
+    private static boolean mergeExecutable(JavaExecutable oldExec, JavaExecutable newExec)
+    {
+        // Update modifiers
+        boolean didChange = false;
+        if (newExec._mods != oldExec._mods) {
+            oldExec._mods = newExec._mods;
+            didChange = true;
+        }
+
+        // Update generic parameter types (these can change as long as base class is same)
+
+        // Return
+        return didChange;
     }
 }

@@ -13,10 +13,10 @@ import java.util.Arrays;
 public class JavaMethod extends JavaExecutable {
 
     // Whether method is Default method
-    private boolean  _default;
+    protected boolean  _default;
 
     // The generic return type
-    private JavaType _genericReturnType;
+    protected JavaType _genericReturnType;
 
     // The super implementation of this method
     protected JavaMethod  _super;
@@ -177,33 +177,6 @@ public class JavaMethod extends JavaExecutable {
 
         // Invoke
         return method.invoke(anObj, theArgs);
-    }
-
-    /**
-     * Merges the given new method into this method.
-     */
-    public boolean mergeMethod(JavaMethod newMethod)
-    {
-        // Update modifiers
-        boolean didChange = false;
-        if (newMethod.getModifiers() != getModifiers()) {
-            _mods = newMethod.getModifiers();
-            didChange = true;
-        }
-
-        // Update return type
-        //if (newMethod.getGenericReturnType() != getGenericReturnType()) { _genericReturnType = newMethod.getGenericReturnType(); didChange = true; }
-
-        // Update Method
-        if (newMethod._method != null) {
-            _method = newMethod._method;
-            _methodDecl = null;
-        }
-        else if (newMethod._methodDecl != null)
-            _methodDecl = newMethod._methodDecl;
-
-        // Return
-        return didChange;
     }
 
     /**

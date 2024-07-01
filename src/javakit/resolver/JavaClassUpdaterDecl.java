@@ -139,11 +139,16 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
      */
     private JavaMethod getJavaMethodForMethodDecl(JMethodDecl methodDecl)
     {
-        if (methodDecl.getName() == null)
+        // Get method - just return if can't be found or created
+        JavaMethod javaMethod = methodDecl.getMethod();
+        if (javaMethod == null)
             return null;
-        JavaMethod javaMethod = new JavaMethod(_javaClass._resolver, _javaClass, null);
-        ExecutableReader execReader = new ExecutableReaderDecl(methodDecl);
-        javaMethod.setReader(execReader);
+
+        // If method not brand new, create new
+        if (getJavaExecutableDecl(javaMethod) != methodDecl)
+            javaMethod = createMethodForDecl(methodDecl);
+
+        // Return
         return javaMethod;
     }
 
@@ -166,9 +171,16 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
      */
     private JavaConstructor getJavaConstructorForConstructorDecl(JConstrDecl constrDecl)
     {
-        JavaConstructor javaConstr = new JavaConstructor(_javaClass._resolver, _javaClass, null);
-        ExecutableReader execReader = new ExecutableReaderDecl(constrDecl);
-        javaConstr.setReader(execReader);
+        // Get constructor - just return if can't be found or created
+        JavaConstructor javaConstr = constrDecl.getConstructor();
+        if (javaConstr == null)
+            return null;
+
+        // If constructor not brand new, create new
+        if (getJavaExecutableDecl(javaConstr) != constrDecl)
+            javaConstr = createConstructorForDecl(constrDecl);
+
+        // Return
         return javaConstr;
     }
 
@@ -184,6 +196,56 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         for (int i = 0; i < fields.length; i++)
             enumConsts[i] = new JavaEnum(_javaClass, fields[i].getName());
         return enumConsts;
+    }
+
+    /**
+     * Returns the method/constructor decl for given JavaExecutable.
+     */
+    private static JExecutableDecl getJavaExecutableDecl(JavaExecutable javaExecutable)
+    {
+        if (javaExecutable._execReader instanceof ExecutableReaderDecl)
+            return ((ExecutableReaderDecl) javaExecutable._execReader)._executableDecl;
+        return null;
+    }
+
+    /**
+     * Creates a JavaMethod for given JMethodDecl.
+     */
+    public static JavaMethod createMethodForDecl(JMethodDecl methodDecl)
+    {
+        // If no method name, just return null
+        if (methodDecl.getName() == null)
+            return null;
+
+        // Get parent class
+        JClassDecl enclosingClassDecl = methodDecl.getEnclosingClassDecl();
+        JavaClass javaClass = enclosingClassDecl != null ? enclosingClassDecl.getJavaClass() : null;
+        if (javaClass == null)
+            return null;
+
+        // Create JavaMethod
+        JavaMethod javaMethod = new JavaMethod(methodDecl.getResolver(), javaClass, null);
+        ExecutableReader execReader = new JavaClassUpdaterDecl.ExecutableReaderDecl(methodDecl);
+        javaMethod.setReader(execReader);
+        return javaMethod;
+    }
+
+    /**
+     * Returns the Constructor.
+     */
+    public static JavaConstructor createConstructorForDecl(JConstrDecl constrDecl)
+    {
+        // Get parent JClassDecl and JavaDecl
+        JClassDecl enclosingClassDecl = constrDecl.getEnclosingClassDecl();
+        JavaClass javaClass = enclosingClassDecl != null ? enclosingClassDecl.getJavaClass() : null;
+        if (javaClass == null)
+            return null;
+
+        // Create JavaMethod
+        JavaConstructor javaConstructor = new JavaConstructor(constrDecl.getResolver(), javaClass, null);
+        ExecutableReader execReader = new JavaClassUpdaterDecl.ExecutableReaderDecl(constrDecl);
+        javaConstructor.setReader(execReader);
+        return javaConstructor;
     }
 
     /**

@@ -61,8 +61,13 @@ public class JConstrDecl extends JExecutableDecl {
             parameterClasses = ArrayUtils.add(parameterClasses, getJavaClassForClass(int.class), 1);
         }
 
-        // Return Constructor for param types
-        return javaClass.getDeclaredConstructorForClasses(parameterClasses);
+        // Get Constructor for param types - just return if found
+        JavaConstructor javaConstructor = javaClass.getDeclaredConstructorForClasses(parameterClasses);
+        if (javaConstructor != null)
+            return javaConstructor;
+
+        // Otherwise just create and return constructor
+        return JavaClassUpdaterDecl.createConstructorForDecl(this);
     }
 
     /**

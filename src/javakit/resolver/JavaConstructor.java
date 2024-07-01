@@ -82,29 +82,6 @@ public class JavaConstructor extends JavaExecutable {
     }
 
     /**
-     * Merges the given new constructor into this constructor.
-     */
-    public boolean mergeConstructor(JavaConstructor newConstr)
-    {
-        // Update modifiers
-        boolean didChange = false;
-        if (newConstr.getModifiers() != getModifiers()) {
-            _mods = newConstr.getModifiers();
-            didChange = true;
-        }
-
-        // Update return type
-        //if (newMethod.getGenericReturnType() != getGenericReturnType()) { _genericReturnType = newMethod.getGenericReturnType(); didChange = true; }
-
-        // Update Method
-        if (newConstr._constructor != null)
-            _constructor = newConstr._constructor;
-
-        // Return
-        return didChange;
-    }
-
-    /**
      * Creates the id: ClassName(param, param, ...)
      */
     @Override
