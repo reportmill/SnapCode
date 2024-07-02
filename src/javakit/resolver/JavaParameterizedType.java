@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.resolver;
-import snap.util.StringUtils;
+import snap.util.ArrayUtils;
 
 /**
  * This class represents a Java ParameterizedType.
@@ -33,8 +33,8 @@ public class JavaParameterizedType extends JavaType {
         // Get/Set SimpleName
         _simpleName = aRawType.getSimpleName();
         if (theTypeArgs.length > 0) {
-            String typeArgsStr = StringUtils.join(getParamTypeSimpleNames(), ",");
-            _simpleName = _simpleName + '<' + typeArgsStr + '>';
+            String typeArgsStr = ArrayUtils.mapToStringsAndJoin(_paramTypes, type -> type.getSimpleName(), ",");
+            _simpleName += '<' + typeArgsStr + '>';
         }
     }
 
@@ -49,28 +49,13 @@ public class JavaParameterizedType extends JavaType {
     public JavaType[] getParamTypes()  { return _paramTypes; }
 
     /**
-     * Returns the parameter type simple names.
-     */
-    public String[] getParamTypeSimpleNames()
-    {
-        String[] names = new String[_paramTypes.length];
-        for (int i = 0; i < names.length; i++) names[i] = _paramTypes[i].getSimpleName();
-        return names;
-    }
-
-    /**
      * Returns whether is Type is explicit (doesn't contain any type variables).
      */
+    @Override
     public boolean isResolvedType()
     {
-        // Types might include TypeVars
         JavaType[] paramTypes = getParamTypes();
-        for (JavaType paramType : paramTypes)
-            if (!paramType.isResolvedType())
-                return false;
-
-        // Return
-        return true;
+        return !ArrayUtils.hasMatch(paramTypes, type -> !type.isResolvedType());
     }
 
     /**
@@ -78,30 +63,6 @@ public class JavaParameterizedType extends JavaType {
      */
     @Override
     public JavaClass getEvalClass()  { return _rawType; }
-
-    /**
-     * Returns a resolved type for given type var, if type var name defined by base class.
-     */
-    public JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
-    {
-        // Get type var name and this parameter type base class and type vars
-        String typeVarName = aTypeVar.getName();
-        JavaClass baseClass = getRawType();
-        JavaTypeVariable[] typeVars = baseClass.getTypeVars();
-
-        // Iterate over type vars - if type var name found, return respective parameter type
-        for (int i = 0, iMax = typeVars.length; i < iMax; i++) {
-            JavaTypeVariable typeVar = typeVars[i];
-            if (typeVar.getName().equals(typeVarName)) {
-                JavaType[] paramTypes = getParamTypes();
-                if (i < paramTypes.length)
-                    return paramTypes[i];
-            }
-        }
-
-        // Return not found
-        return null;
-    }
 
     /**
      * Returns a resolved type for given unresolved type (TypeVar or ParamType<TypeVar>), if this decl can resolve it.
@@ -128,9 +89,9 @@ public class JavaParameterizedType extends JavaType {
     private JavaType getResolvedTypeForClass(String typeVarName, JavaClass javaClass)
     {
         // Check class
-        int ind = javaClass.getTypeVarIndexForName(typeVarName);
-        if (ind >= 0 && ind < _paramTypes.length)
-            return _paramTypes[ind];
+        int typeVarIndex = javaClass.getTypeVarIndexForName(typeVarName);
+        if (typeVarIndex >= 0 && typeVarIndex < _paramTypes.length)
+            return _paramTypes[typeVarIndex];
 
         // Check superclass
         JavaClass superClass = javaClass.getSuperClass();
