@@ -25,21 +25,6 @@ public abstract class JExprLambdaBase extends JExpr {
     }
 
     /**
-     * Override to try to resolve decl from parent.
-     */
-    @Override
-    protected JavaDecl getDeclImpl()
-    {
-        // If parent is variable declaration, return its type
-        JNode parentNode = getParent();
-        if (parentNode instanceof JVarDecl)
-            return parentNode.getEvalType();
-
-        // Return lambda type
-        return getLambdaType();
-    }
-
-    /**
      * Returns the specific method in the lambda class interface that is to be called.
      */
     public JavaMethod getLambdaMethod()
@@ -169,6 +154,15 @@ public abstract class JExprLambdaBase extends JExpr {
 
         // Return not found
         return null;
+    }
+
+    /**
+     * Override to return lambda type.
+     */
+    @Override
+    protected JavaDecl getDeclImpl()
+    {
+        return getLambdaType();
     }
 
     /**
