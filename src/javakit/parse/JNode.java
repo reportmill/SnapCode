@@ -211,11 +211,9 @@ public class JNode {
      */
     protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
     {
-        // Forward to upper resolvables (parent class or method definition)
-        JNode parent = getParent(JClassDecl.class);
+        JNode parent = getParent();
         if (parent != null)
             return parent.getResolvedTypeForTypeVar(aTypeVar);
-
         return aTypeVar;
     }
 

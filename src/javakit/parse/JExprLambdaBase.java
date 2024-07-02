@@ -135,24 +135,26 @@ public abstract class JExprLambdaBase extends JExpr {
         JavaMethod lambdaMethod = getLambdaMethod();
         if (lambdaMethod == null)
             return null;
+
+        // Get parameter types and return resolved types
         JavaType[] paramTypes = lambdaMethod.getGenericParameterTypes();
-        JavaClass[] paramClasses = new JavaClass[paramTypes.length];
+        return ArrayUtils.map(paramTypes, type -> getParameterTypeResolved(type), JavaClass.class);
+    }
 
-        // Get node to resolve any unresolved types
-        JNode resolveNode = getParent(JExprMethodCall.class);
-        if (resolveNode == null)
-            resolveNode = this;
+    /**
+     * Returns the given parameter type resolved.
+     */
+    private JavaClass getParameterTypeResolved(JavaType paramType)
+    {
+        // If already resolved, just return class
+        if (paramType.isResolvedType())
+            return paramType.getEvalClass();
 
-        // Iterate over parameter types
-        for (int i = 0; i < paramTypes.length; i++) {
-            JavaType paramType = paramTypes[i];
-            if (!paramType.isResolvedType())
-                paramType = resolveNode.getResolvedTypeForType(paramType);
-            paramClasses[i] = paramType != null ? paramType.getEvalClass() : null;
-        }
-
-        // Return
-        return paramClasses;
+        // Resolve with parents (JExprMethodCall, JVarDecl, JClassDecl)
+        JNode parent = getParent();
+        JavaType resolvedType = parent.getResolvedTypeForType(paramType);
+        JavaClass resolvedClass = resolvedType != null ? resolvedType.getEvalClass() : null;
+        return resolvedClass;
     }
 
     /**
