@@ -616,7 +616,7 @@ public class JavaParserExpr extends Parser {
                 // Handle [ "." "super" ] and [ "." "this" ]
                 case "super":
                 case "this":
-                    JExpr thisExpr = new JExprId(aNode.getString());
+                    JExpr thisExpr = new JExprId(aNode);
                     if (_part instanceof JExprDot)
                         ((JExprDot) _part).setExpr(thisExpr);
                     else System.err.println("JavaParserExpr.PrimarySuffixHandler.parseOne: Unexpected dot expr: " + _part);
@@ -657,7 +657,7 @@ public class JavaParserExpr extends Parser {
 
                 // Handle "new" from: "::" (Identifier | new):
                 case "new":
-                    JExprId newId = new JExprId("new");
+                    JExprId newId = new JExprId(aNode);
                     ((JExprMethodRef) _part).setMethodId(newId);
                     break;
 
