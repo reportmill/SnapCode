@@ -5,7 +5,6 @@ package javakit.resolver;
 import javakit.parse.JMethodDecl;
 import snap.util.ArrayUtils;
 import java.lang.reflect.*;
-import java.util.Arrays;
 
 /**
  * This class represents a Java Method.
@@ -177,43 +176,6 @@ public class JavaMethod extends JavaExecutable {
 
         // Invoke
         return method.invoke(anObj, theArgs);
-    }
-
-    /**
-     * This method repackages a given array of individual method args into an args array for VarArgs method.
-     */
-    public Object[] repackageArgsForVarArgsMethod(Object[] theArgs)
-    {
-        // Get VarArg class
-        Method aMethod = getMethod();
-        int argCount = aMethod.getParameterCount();
-        int varArgIndex = argCount - 1;
-        Class<?>[] paramClasses = aMethod.getParameterTypes();
-        Class<?> varArgArrayClass = paramClasses[varArgIndex];
-        Class<?> varArgClass = varArgArrayClass.getComponentType();
-
-        // If only one varArg and it is already packaged as VarArgArrayClass, just return
-        if (theArgs.length == argCount) {
-            Object firstVarArg = theArgs[varArgIndex];
-            if (varArgArrayClass.isAssignableFrom(firstVarArg.getClass()))
-                return theArgs;
-        }
-
-        // Create new args array of proper length
-        Object[] args = Arrays.copyOf(theArgs, argCount);
-
-        // Create VarArgs array of proper class and set in new args array
-        int varArgsCount = theArgs.length - varArgIndex;
-        Object varArgArray = args[varArgIndex] = Array.newInstance(varArgClass, varArgsCount);
-
-        // Copy var args over from given args array to new VarArgsArray
-        for (int i = 0; i < varArgsCount; i++) {
-            Object varArg = theArgs[i + varArgIndex];
-            Array.set(varArgArray, i, varArg);
-        }
-
-        // Return
-        return args;
     }
 
     /**

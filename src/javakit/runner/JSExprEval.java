@@ -186,7 +186,7 @@ public class JSExprEval {
 
         // Handle var args packaging
         if (method.isVarArgs())
-            argValues = method.repackageArgsForVarArgsMethod(argValues);
+            argValues = JSExprEvalUtils.repackageArgsForVarArgsMethod(method, argValues);
 
         // Invoke method
         Object value = method.invoke(thisObject, argValues);

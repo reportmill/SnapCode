@@ -1,6 +1,11 @@
 package javakit.runner;
 import javakit.parse.JExprMath;
+import javakit.resolver.JavaMethod;
 import snap.util.Convert;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * Utility methods for JSExprEval.
@@ -336,6 +341,43 @@ public class JSExprEvalUtils {
         if (aClass == char.class)
             return (char) Convert.intValue(aValue);
         return aValue;
+    }
+
+    /**
+     * This method repackages a given array of individual method args into an args array for VarArgs method.
+     */
+    public static Object[] repackageArgsForVarArgsMethod(JavaMethod javaMethod, Object[] theArgs)
+    {
+        // Get VarArg class
+        Method aMethod = javaMethod.getMethod();
+        int argCount = aMethod.getParameterCount();
+        int varArgIndex = argCount - 1;
+        Class<?>[] paramClasses = aMethod.getParameterTypes();
+        Class<?> varArgArrayClass = paramClasses[varArgIndex];
+        Class<?> varArgClass = varArgArrayClass.getComponentType();
+
+        // If only one varArg and it is already packaged as VarArgArrayClass, just return
+        if (theArgs.length == argCount) {
+            Object firstVarArg = theArgs[varArgIndex];
+            if (varArgArrayClass.isAssignableFrom(firstVarArg.getClass()))
+                return theArgs;
+        }
+
+        // Create new args array of proper length
+        Object[] args = Arrays.copyOf(theArgs, argCount);
+
+        // Create VarArgs array of proper class and set in new args array
+        int varArgsCount = theArgs.length - varArgIndex;
+        Object varArgArray = args[varArgIndex] = Array.newInstance(varArgClass, varArgsCount);
+
+        // Copy var args over from given args array to new VarArgsArray
+        for (int i = 0; i < varArgsCount; i++) {
+            Object varArg = theArgs[i + varArgIndex];
+            Array.set(varArgArray, i, varArg);
+        }
+
+        // Return
+        return args;
     }
 
     /**
