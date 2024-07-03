@@ -5,6 +5,7 @@ package javakit.parse;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaExecutable;
+import javakit.resolver.JavaType;
 import snap.util.ArrayUtils;
 import java.util.stream.Stream;
 
@@ -112,6 +113,26 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
      * Returns the actual method or constructor.
      */
     public abstract JavaExecutable getExecutable();
+
+    /**
+     * Returns array of parameter types suitable to resolve method.
+     */
+    public JavaType[] getGenericParameterTypes()
+    {
+        JVarDecl[] parameters = getParameters();
+        return ArrayUtils.map(parameters, this::getGenericParameterTypeForVarDecl, JavaType.class);
+    }
+
+    /**
+     * Return the JavaType for given parameter var decl (or java.lang.Object if null).
+     */
+    private JavaType getGenericParameterTypeForVarDecl(JVarDecl paramDecl)
+    {
+        JavaType javaType = paramDecl.getJavaType();
+        if (javaType != null)
+            return javaType;
+        return getResolver().getJavaClassForName("java.lang.Object");
+    }
 
     /**
      * Returns array of parameter class types suitable to resolve method.

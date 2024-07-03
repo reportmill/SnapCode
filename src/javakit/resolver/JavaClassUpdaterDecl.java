@@ -333,7 +333,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
          * Returns the parameter types.
          */
         @Override
-        public JavaType[] getGenericParameterTypes()  { return _executableDecl.getParameterClasses(); }
+        public JavaType[] getGenericParameterTypes()  { return _executableDecl.getGenericParameterTypes(); }
 
         /**
          * Returns the return type.
@@ -342,8 +342,12 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         public JavaType getGenericReturnType()
         {
             JType returnTypeDecl = ((JMethodDecl) _executableDecl).getReturnType();
-            JavaType returnType = returnTypeDecl != null ? returnTypeDecl.getJavaClass() : null;
-            return returnType != null ? returnType : _javaExecutable._resolver.getJavaClassForName("java.lang.Object");
+            JavaType returnType = returnTypeDecl != null ? returnTypeDecl.getJavaType() : null;
+            if (returnType != null)
+                return returnType;
+
+            // Fallback
+            return _javaExecutable._resolver.getJavaClassForName("java.lang.Object");
         }
 
         /**
