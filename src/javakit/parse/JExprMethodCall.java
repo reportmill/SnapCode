@@ -4,7 +4,6 @@
 package javakit.parse;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
-import snap.util.StringUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -51,9 +50,11 @@ public class JExprMethodCall extends JExpr implements WithId {
      */
     public void setId(JExprId anId)
     {
-        if (_id == null) addChild(_id = anId, 0);
+        if (_id == null)
+            addChild(_id = anId, 0);
         else replaceChild(_id, _id = anId);
-        if (_id != null) setName(_id.getName());
+        if (_id != null)
+            setName(_id.getName());
     }
 
     /**
@@ -107,12 +108,6 @@ public class JExprMethodCall extends JExpr implements WithId {
     }
 
     /**
-     * Override to return method.
-     */
-    @Override
-    protected JavaMethod getDeclImpl()  { return getMethod(); }
-
-    /**
      * Tries to resolve the method declaration for this node.
      */
     public JavaMethod getMethod()
@@ -126,85 +121,33 @@ public class JExprMethodCall extends JExpr implements WithId {
      */
     protected JavaMethod getMethodImpl()
     {
-        // Get scope node class
-        JavaType scopeEvalType = getScopeEvalType();
-        JavaClass scopeClass = scopeEvalType != null ? scopeEvalType.getEvalClass() : null;
-        if (scopeClass == null)
+        // Get compatible methods for name and arg types
+        List<JavaMethod> compatibleMethods = getCompatibleMethods();
+        if (compatibleMethods == null || compatibleMethods.isEmpty())
             return null;
 
-        // Get method name and arg types
-        String name = getName();
-        JExpr[] args = getArgs();
-        int argCount = args.length;
-        JavaClass[] argClasses = new JavaClass[argCount];
-        for (int i = 0; i < argCount; i++) {
-            JExpr arg = args[i];
-            if (arg instanceof JExprLambda || arg instanceof JExprMethodRef)
-                return getMethodForLambdaArgs();
-            JavaClass argClass = arg != null ? arg.getEvalClass() : null;
-            argClasses[i] = argClass;
-        }
+        // Get arg index of lambda expression
+        if (ArrayUtils.hasMatch(getArgs(), arg -> arg instanceof JExprLambdaBase))
+            return getMethodForLambdaArgs(compatibleMethods);
 
-        // Get whether to only search static methods (scope expression is Class)
-        JExpr scopeExpr = getScopeExpr();
-        boolean staticOnly = scopeExpr != null && scopeExpr.isClassNameLiteral();
-
-        // Search for compatible method for name and arg types
-        JavaMethod method = JavaClassUtils.getCompatibleMethod(scopeClass, name, argClasses, staticOnly);
-        if (method != null)
-            return method;
-
-        // If scope expression is present, just return
-        if (scopeExpr != null)
-            return null;
-
-        // Get enclosing class
-        JClassDecl enclosingClass = getEnclosingClassDecl();
-
-        // If scope node is class and not static, go up parent classes
-        while (enclosingClass != null && !scopeClass.isStatic()) {
-
-            // Get enclosing JClassDecl and JavaClass
-            enclosingClass = enclosingClass.getEnclosingClassDecl();
-            scopeClass = enclosingClass != null ? enclosingClass.getEvalClass() : null;
-            if (scopeClass == null)
-                break;
-
-            // If method found, return it
-            method = JavaClassUtils.getCompatibleMethod(scopeClass, name, argClasses, false);
-            if (method != null)
-                return method;
-        }
-
-        // See if method is from static import
-        JFile jfile = getFile();
-        JavaMember importClassMember = jfile.getStaticImportMemberForNameAndParamTypes(name, argClasses);
-        if (importClassMember instanceof JavaMethod)
-            return (JavaMethod) importClassMember;
-
-        // Return not found
-        return null;
+        // Return first method
+        return compatibleMethods.get(0);
     }
 
     /**
      * Tries to resolve the method declaration for this node.
      */
-    protected JavaMethod getMethodForLambdaArgs()
+    protected JavaMethod getMethodForLambdaArgs(List<JavaMethod> compatibleMethods)
     {
-        // Get matching methods
-        List<JavaMethod> methods = getCompatibleMethods();
-        if (methods == null || methods.isEmpty())
-            return null;
-
         // Get arg index of lambda expression
         JExpr[] args = getArgs();
-        int argIndex = ArrayUtils.findMatchIndex(args, arg -> arg instanceof JExprLambda || arg instanceof JExprMethodRef);
-        if (argIndex < 0)
+        int lambdaArgIndex = ArrayUtils.findMatchIndex(args, arg -> arg instanceof JExprLambdaBase);
+        if (lambdaArgIndex < 0)
             return null;
 
         // Iterate over methods and return first that matches arg count
-        for (JavaMethod method : methods) {
-            JavaType paramType = method.getGenericParameterType(argIndex);
+        for (JavaMethod method : compatibleMethods) {
+            JavaType paramType = method.getGenericParameterType(lambdaArgIndex);
             JavaClass paramClass = paramType.getEvalClass();
             JavaMethod lambdaMethod = paramClass.getLambdaMethod();
             if (lambdaMethod != null)
@@ -212,11 +155,7 @@ public class JExprMethodCall extends JExpr implements WithId {
         }
 
         // Otherwise, let's just return first matching method (maybe TeaVM thing)
-        if (!methods.isEmpty())
-            return methods.get(0);
-
-        // Return not found
-        return null;
+        return compatibleMethods.get(0);
     }
 
     /**
@@ -230,15 +169,8 @@ public class JExprMethodCall extends JExpr implements WithId {
         if (scopeClass == null)
             return null;
 
-        // Get method name and arg types
-        JExpr[] args = getArgs();
-        int argCount = args.length;
-        JavaClass[] argClasses = new JavaClass[argCount];
-        for (int i = 0; i < argCount; i++) {
-            JExpr arg = args[i];
-            JavaClass argType = arg instanceof JExprLambda || arg instanceof JExprMethodRef ? null : arg.getEvalClass();
-            argClasses[i] = argType;
-        }
+        // Get arg classes
+        JavaClass[] argClasses = ArrayUtils.map(_args, arg -> arg instanceof JExprLambdaBase ? null : arg.getEvalClass(), JavaClass.class);
 
         // Find compatible methods for class and arg classes
         for (int i = 0; i < 4; i++) {
@@ -248,7 +180,7 @@ public class JExprMethodCall extends JExpr implements WithId {
             if (!compatibleMethods.isEmpty())
                 return compatibleMethods;
 
-            // Try adding a null arg
+            // Try adding a null arg (maybe user is missing or typing args)
             argClasses = ArrayUtils.add(argClasses, null);
         }
 
@@ -261,10 +193,8 @@ public class JExprMethodCall extends JExpr implements WithId {
      */
     private List<JavaMethod> getCompatibleMethodsForScopeClassAndArgClasses(JavaClass scopeClass, JavaClass[] argClasses)
     {
-        // Get method name and arg types
+        // Get method name and whether to only search static methods (scope expression is Class)
         String methodName = getName();
-
-        // Get whether to only search static methods (scope expression is Class)
         JExpr scopeExpr = getScopeExpr();
         boolean staticOnly = scopeExpr != null && scopeExpr.isClassNameLiteral();
 
@@ -273,10 +203,14 @@ public class JExprMethodCall extends JExpr implements WithId {
         if (!compatibleMethods.isEmpty())
             return compatibleMethods;
 
+        // If scope expression is present, just return (can't be method from enclosing class or static import)
+        if (scopeExpr != null)
+            return Collections.EMPTY_LIST;
+
         // If scope node class type is member class and not static, go up parent classes
         while (scopeClass.isMemberClass() && !scopeClass.isStatic()) {
             scopeClass = scopeClass.getDeclaringClass();
-            compatibleMethods = JavaClassUtils.getCompatibleMethods(scopeClass, methodName, argClasses, staticOnly);
+            compatibleMethods = JavaClassUtils.getCompatibleMethods(scopeClass, methodName, argClasses, false);
             if (!compatibleMethods.isEmpty())
                 return compatibleMethods;
         }
@@ -290,6 +224,12 @@ public class JExprMethodCall extends JExpr implements WithId {
         // Return
         return compatibleMethods;
     }
+
+    /**
+     * Override to return method.
+     */
+    @Override
+    protected JavaMethod getDeclImpl()  { return getMethod(); }
 
     /**
      * Returns a resolved type for given type.
@@ -446,7 +386,7 @@ public class JExprMethodCall extends JExpr implements WithId {
         // If missing args, complain
         int paramCount = method.getParameterCount();
         int argCount = getArgCount();
-        if (paramCount > argCount)
+        if (paramCount > argCount && !method.isVarArgs())
             return NodeError.newErrorArray(this, "Missing args, " + paramCount + " expected, " + argCount + " provided");
 
         // Return
@@ -502,16 +442,8 @@ public class JExprMethodCall extends JExpr implements WithId {
      */
     private String getArgTypesString()
     {
-        // Get arg types
         JavaType[] argTypes = getArgEvalTypes();
-        if (argTypes.length == 0)
-            return "()";
-
-        // Get arg type string and join by comma
-        String[] argTypeStrings = ArrayUtils.map(argTypes, type -> type != null ? type.getSimpleName() : "null", String.class);
-        String argTypeString = StringUtils.join(argTypeStrings, ",");
-
-        // Return in parens
+        String argTypeString = ArrayUtils.mapToStringsAndJoin(argTypes, type -> type != null ? type.getSimpleName() : "null", ",");
         return '(' + argTypeString + ')';
     }
 
