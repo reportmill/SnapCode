@@ -150,7 +150,7 @@ public class JExprMethodCall extends JExpr implements WithId {
         boolean staticOnly = scopeExpr != null && scopeExpr.isClassNameLiteral();
 
         // Search for compatible method for name and arg types
-        JavaMethod method = JavaClassUtils.getCompatibleMethodAll(scopeClass, name, argClasses, staticOnly);
+        JavaMethod method = JavaClassUtils.getCompatibleMethod(scopeClass, name, argClasses, staticOnly);
         if (method != null)
             return method;
 
@@ -171,7 +171,7 @@ public class JExprMethodCall extends JExpr implements WithId {
                 break;
 
             // If method found, return it
-            method = JavaClassUtils.getCompatibleMethodAll(scopeClass, name, argClasses, false);
+            method = JavaClassUtils.getCompatibleMethod(scopeClass, name, argClasses, false);
             if (method != null)
                 return method;
         }
@@ -269,14 +269,14 @@ public class JExprMethodCall extends JExpr implements WithId {
         boolean staticOnly = scopeExpr != null && scopeExpr.isClassNameLiteral();
 
         // Get scope node class type and search for compatible method for name and arg types
-        List<JavaMethod> compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, methodName, argClasses, staticOnly);
+        List<JavaMethod> compatibleMethods = JavaClassUtils.getCompatibleMethods(scopeClass, methodName, argClasses, staticOnly);
         if (!compatibleMethods.isEmpty())
             return compatibleMethods;
 
         // If scope node class type is member class and not static, go up parent classes
         while (scopeClass.isMemberClass() && !scopeClass.isStatic()) {
             scopeClass = scopeClass.getDeclaringClass();
-            compatibleMethods = JavaClassUtils.getCompatibleMethodsAll(scopeClass, methodName, argClasses, staticOnly);
+            compatibleMethods = JavaClassUtils.getCompatibleMethods(scopeClass, methodName, argClasses, staticOnly);
             if (!compatibleMethods.isEmpty())
                 return compatibleMethods;
         }
@@ -470,7 +470,7 @@ public class JExprMethodCall extends JExpr implements WithId {
         boolean staticOnly = scopeExpr != null && scopeExpr.isClassNameLiteral();
 
         // Search for compatible method for name and arg types
-        return JavaClassUtils.getCompatibleMethodAll(scopeClass, name, null, staticOnly);
+        return JavaClassUtils.getCompatibleMethod(scopeClass, name, null, staticOnly);
     }
 
     /**

@@ -133,7 +133,7 @@ public class JExprMethodRef extends JExprLambdaBase {
         if (paramTypes.length == 1) {
             JavaClass paramClass = paramTypes[0];
             if (prefixClass.isAssignableFrom(paramClass)) {
-                JavaMethod instanceMethod = JavaClassUtils.getCompatibleMethodAll(prefixClass, methodName, new JavaClass[0], false);
+                JavaMethod instanceMethod = JavaClassUtils.getCompatibleMethod(prefixClass, methodName, new JavaClass[0], false);
                 if (instanceMethod != null && !instanceMethod.isStatic())
                     return instanceMethod;
             }
@@ -148,7 +148,7 @@ public class JExprMethodRef extends JExprLambdaBase {
         boolean staticOnly = prefixExpr.isClassNameLiteral();
 
         // Search for static or helper method for name and arg types
-        JavaMethod helperMethod = JavaClassUtils.getCompatibleMethodAll(prefixClass, methodName, paramTypes, staticOnly);
+        JavaMethod helperMethod = JavaClassUtils.getCompatibleMethod(prefixClass, methodName, paramTypes, staticOnly);
         if (helperMethod != null)
             return helperMethod;
 

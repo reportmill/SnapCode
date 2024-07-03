@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.resolver;
+import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import java.util.*;
 
@@ -16,41 +17,22 @@ public class JavaClassUtils {
     public static JavaConstructor getCompatibleConstructor(JavaClass aClass, JavaClass[] paramTypes)
     {
         JavaConstructor[] declaredConstructors = aClass.getDeclaredConstructors();
-        JavaConstructor compatibleConstructor = null;
-        int rating = 0;
-
-        // Iterate over constructors to find highest rating
-        for (JavaConstructor constr : declaredConstructors) {
-            int rtg = JavaExecutable.getMatchRatingForArgClasses(constr, paramTypes);
-            if (rtg > rating) {
-                compatibleConstructor = constr;
-                rating = rtg;
-            }
-        }
-
-        // Return
-        return compatibleConstructor;
+        return ArrayUtils.getMax(declaredConstructors, (c1,c2) -> compareMethodMatchRatings(c1, c2, paramTypes));
     }
 
     /**
      * Returns a compatible method for given name and param types.
      */
-    public static JavaMethod getCompatibleMethodAll(JavaClass aClass, String aName, JavaClass[] paramTypes, boolean staticOnly)
+    public static JavaMethod getCompatibleMethod(JavaClass aClass, String aName, JavaClass[] paramTypes, boolean staticOnly)
     {
-        List<JavaMethod> compatibleMethods = getCompatibleMethodsAll(aClass, aName, paramTypes, staticOnly);
-        switch (compatibleMethods.size()) {
-            case 0: return null;
-            case 1: return compatibleMethods.get(0);
-            default:
-                compatibleMethods.sort(new MethodCompare(paramTypes));
-                return compatibleMethods.get(0);
-        }
+        List<JavaMethod> compatibleMethods = getCompatibleMethods(aClass, aName, paramTypes, staticOnly);
+        return compatibleMethods.isEmpty() ? null : compatibleMethods.get(0);
     }
 
     /**
      * Returns a compatible method for given name and param types.
      */
-    public static List<JavaMethod> getCompatibleMethodsAll(JavaClass aClass, String aName, JavaClass[] paramTypes, boolean staticOnly)
+    public static List<JavaMethod> getCompatibleMethods(JavaClass aClass, String aName, JavaClass[] paramTypes, boolean staticOnly)
     {
         // Find compatible methods
         List<JavaMethod> compatibleMethods = new ArrayList<>(2);
@@ -69,6 +51,10 @@ public class JavaClassUtils {
                 compatibleMethods.remove(superMethod);
         }
 
+        // Sort the methods
+        if (compatibleMethods.size() > 1)
+            compatibleMethods.sort((m1,m2) -> compareMethodMatchRatings(m1, m2, paramTypes));
+
         // Return
         return compatibleMethods;
     }
@@ -79,16 +65,14 @@ public class JavaClassUtils {
     private static void findCompatibleMethodsAll(JavaClass aClass, String aName, JavaClass[] paramTypes, List<JavaMethod> compatibleMethods, boolean staticOnly)
     {
         // Search this class and superclasses for compatible methods
-        for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
+        for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass())
             findCompatibleMethods(cls, aName, paramTypes, compatibleMethods, staticOnly);
-        }
 
         // Search this class and superclasses for compatible interface
         for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
             JavaClass[] interfaces = cls.getInterfaces();
-            for (JavaClass infc : interfaces) {
+            for (JavaClass infc : interfaces)
                 findCompatibleMethodsAll(infc, aName, paramTypes, compatibleMethods, staticOnly);
-            }
         }
     }
 
@@ -100,34 +84,33 @@ public class JavaClassUtils {
         // Iterate over declared methods to find compatible methods (matching name and args)
         JavaMethod[] declaredMethods = aClass.getDeclaredMethods();
         for (JavaMethod method : declaredMethods) {
-            if (staticOnly && !method.isStatic())
-                continue;
-            if (method.getName().equals(aName)) {
-                int rating = paramTypes != null ? JavaExecutable.getMatchRatingForArgClasses(method, paramTypes) : 1;
-                if (rating > 0)
-                    ListUtils.addUniqueId(compatibleMethods, method);
-            }
+            if (isCompatibleMethod(method, aName, paramTypes, staticOnly))
+                ListUtils.addUniqueId(compatibleMethods, method);
         }
     }
 
     /**
-     * Compares two methods/constructors for compatibility.
+     * Returns whether method is compatible method.
      */
-    private static class MethodCompare implements Comparator<JavaExecutable> {
+    private static boolean isCompatibleMethod(JavaMethod method, String aName, JavaClass[] paramTypes, boolean staticOnly)
+    {
+        if (staticOnly && !method.isStatic())
+            return false;
+        if (!method.getName().equals(aName))
+            return false;
+        int rating = paramTypes != null ? JavaExecutable.getMatchRatingForArgClasses(method, paramTypes) : 1;
+        if (rating <= 0)
+            return false;
+        return true;
+    }
 
-        private JavaClass[] _paramTypes;
-
-        public MethodCompare(JavaClass[] paramTypes)
-        {
-            _paramTypes = paramTypes;
-        }
-
-        @Override
-        public int compare(JavaExecutable method1, JavaExecutable method2)
-        {
-            int val1 = JavaExecutable.getMatchRatingForArgClasses(method1, _paramTypes);
-            int val2 = JavaExecutable.getMatchRatingForArgClasses(method2, _paramTypes);
-            return val2 - val1;
-        }
+    /**
+     * Returns the result of comparing two methods by match rating for given parameter types.
+     */
+    private static int compareMethodMatchRatings(JavaExecutable method1, JavaExecutable method2, JavaClass[] paramTypes)
+    {
+        int val1 = JavaExecutable.getMatchRatingForArgClasses(method1, paramTypes);
+        int val2 = JavaExecutable.getMatchRatingForArgClasses(method2, paramTypes);
+        return Integer.compare(val1, val2);
     }
 }
