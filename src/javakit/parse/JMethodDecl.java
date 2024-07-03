@@ -98,7 +98,7 @@ public class JMethodDecl extends JExecutableDecl {
     {
         // Get errors for type
         JType returnType = getReturnType();
-        if (returnType == null)
+        if (returnType == null && getChildCount() > 0) // Typing "List<" can cause method decl with no children
             return NodeError.newErrorArray(getChild(0), "Missing return type");
 
         // Do normal version
