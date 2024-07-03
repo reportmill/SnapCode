@@ -108,7 +108,7 @@ public class JExprMethodCall extends JExpr implements WithId {
     }
 
     /**
-     * Tries to resolve the method declaration for this node.
+     * Returns the method.
      */
     public JavaMethod getMethod()
     {
@@ -117,9 +117,9 @@ public class JExprMethodCall extends JExpr implements WithId {
     }
 
     /**
-     * Tries to resolve the method declaration for this node.
+     * Returns the method.
      */
-    protected JavaMethod getMethodImpl()
+    private JavaMethod getMethodImpl()
     {
         // Get compatible methods for name and arg types
         List<JavaMethod> compatibleMethods = getCompatibleMethods();
@@ -127,7 +127,7 @@ public class JExprMethodCall extends JExpr implements WithId {
             return null;
 
         // Get arg index of lambda expression
-        if (ArrayUtils.hasMatch(getArgs(), arg -> arg instanceof JExprLambdaBase))
+        if (ArrayUtils.hasMatch(_args, arg -> arg instanceof JExprLambdaBase))
             return getMethodForLambdaArgs(compatibleMethods);
 
         // Return first method
@@ -135,15 +135,12 @@ public class JExprMethodCall extends JExpr implements WithId {
     }
 
     /**
-     * Tries to resolve the method declaration for this node.
+     * Returns the method for method call with lambda arg(s).
      */
-    protected JavaMethod getMethodForLambdaArgs(List<JavaMethod> compatibleMethods)
+    private JavaMethod getMethodForLambdaArgs(List<JavaMethod> compatibleMethods)
     {
         // Get arg index of lambda expression
-        JExpr[] args = getArgs();
-        int lambdaArgIndex = ArrayUtils.findMatchIndex(args, arg -> arg instanceof JExprLambdaBase);
-        if (lambdaArgIndex < 0)
-            return null;
+        int lambdaArgIndex = ArrayUtils.findMatchIndex(_args, arg -> arg instanceof JExprLambdaBase);
 
         // Iterate over methods and return first that matches arg count
         for (JavaMethod method : compatibleMethods) {
@@ -154,12 +151,12 @@ public class JExprMethodCall extends JExpr implements WithId {
                 return method;
         }
 
-        // Otherwise, let's just return first matching method (maybe TeaVM thing)
+        // Return first method
         return compatibleMethods.get(0);
     }
 
     /**
-     * Returns the method decl for the parent method call (assumes this lambda is an arg).
+     * Returns the list of compatible methods for method call target and args.
      */
     private List<JavaMethod> getCompatibleMethods()
     {
