@@ -255,7 +255,7 @@ public class JType extends JNode {
         // Search parents for
         for (JNode parent = _parent; parent != null; parent = parent.getParent()) {
             if (parent instanceof WithTypeVars) {
-                JTypeVar typeVar = ((WithTypeVars) parent).getTypeVar(typeVarName);
+                JTypeVar typeVar = ((WithTypeVars) parent).getTypeVarDeclForName(typeVarName);
                 if (typeVar != null)
                     return typeVar;
             }

@@ -9,14 +9,14 @@ public interface WithTypeVars {
     /**
      * Returns the type variables for this member.
      */
-    JTypeVar[] getTypeVars();
+    JTypeVar[] getTypeVarDecls();
 
     /**
-     * Returns the type variable for this member with given name.
+     * Returns the type variable declaration for this class/method/constructor with given name.
      */
-    default JTypeVar getTypeVar(String aName)
+    default JTypeVar getTypeVarDeclForName(String aName)
     {
-        JTypeVar[] typeVars = getTypeVars();
+        JTypeVar[] typeVars = getTypeVarDecls();
         return ArrayUtils.findMatch(typeVars, tvar -> tvar.getName().equals(aName));
     }
 }

@@ -37,7 +37,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     /**
      * Returns the method type variables.
      */
-    public JTypeVar[] getTypeVars()  { return _typeVars; }
+    public JTypeVar[] getTypeVarDecls()  { return _typeVars; }
 
     /**
      * Sets the method type variables.
@@ -151,9 +151,9 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     {
         // Handle TypeVar name: return typevar decl
         String name = anExprId.getName();
-        JTypeVar typeVar = getTypeVar(name);
+        JTypeVar typeVar = getTypeVarDeclForName(name);
         if (typeVar != null)
-            return typeVar.getDecl();
+            return typeVar.getTypeVariable();
 
         // Do normal version
         return super.getDeclForChildId(anExprId);
@@ -167,7 +167,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     {
         // Handle TypeVar name: return typevar decl
         String name = aJType.getName();
-        JTypeVar typeVar = getTypeVar(name);
+        JTypeVar typeVar = getTypeVarDeclForName(name);
         if (typeVar != null)
             return typeVar.getTypeVariable();
 
@@ -192,7 +192,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
         errors = NodeError.addNodeErrorsForNodes(errors, throwsList);
 
         // Get errors for type vars
-        JTypeVar[] typeVars = getTypeVars();
+        JTypeVar[] typeVars = getTypeVarDecls();
         errors = NodeError.addNodeErrorsForNodes(errors, typeVars);
 
         // Return

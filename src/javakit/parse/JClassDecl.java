@@ -109,7 +109,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     /**
      * Returns the JTypeVar(s).
      */
-    public JTypeVar[] getTypeVars()  { return _typeVars; }
+    public JTypeVar[] getTypeVarDecls()  { return _typeVars; }
 
     /**
      * Sets the JTypeVar(s).
@@ -473,9 +473,9 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
         }
 
         // Look for JTypeVar for given name
-        JTypeVar typeVar = getTypeVar(name);
+        JTypeVar typeVar = getTypeVarDeclForName(name);
         if (typeVar != null)
-            return typeVar.getDecl();
+            return typeVar.getTypeVariable();
 
         // Look for InnerClass of given name
         JavaClass evalClass = getEvalClass();
@@ -538,7 +538,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
         }
 
         // Look for JTypeVar for given name - from old getDeclForChildNode() is this really needed ???
-        JTypeVar typeVar = getTypeVar(name);
+        JTypeVar typeVar = getTypeVarDeclForName(name);
         if (typeVar != null)
             return typeVar.getTypeVariable();
 
@@ -655,7 +655,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
         errors = NodeError.addNodeErrorsForNodes(errors, bodyDecls);
 
         // Get errors for type vars
-        JTypeVar[] typeVars = getTypeVars();
+        JTypeVar[] typeVars = getTypeVarDecls();
         errors = NodeError.addNodeErrorsForNodes(errors, typeVars);
 
         // Get errors for EnumConstants

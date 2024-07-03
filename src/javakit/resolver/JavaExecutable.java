@@ -6,8 +6,6 @@ import snap.util.ArrayUtils;
 import snap.util.StringUtils;
 import java.lang.reflect.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * This class represents a Java Method or Constructor.
@@ -175,7 +173,7 @@ public class JavaExecutable extends JavaMember {
     {
         JavaType[] paramTypes = getGenericParameterTypes();
         Function<JavaDecl,String> namesFunction = simpleNames ? JavaDecl::getSimpleName : JavaDecl::getName;
-        String paramTypesString = Stream.of(paramTypes).map(namesFunction).collect(Collectors.joining(","));
+        String paramTypesString = ArrayUtils.mapToStringsAndJoin(paramTypes, namesFunction, ",");
         return '(' + paramTypesString + ')';
     }
 
