@@ -35,61 +35,16 @@ public class JavaClassUtils {
     /**
      * Returns a compatible method for given name and param types.
      */
-    private static JavaMethod getCompatibleMethod(JavaClass aClass, String aName, JavaClass[] paramTypes, boolean staticOnly)
-    {
-        JavaMethod[] declaredMethods = aClass.getDeclaredMethods();
-        JavaMethod compatibleMethod = null;
-        int rating = 0;
-
-        // Iterate over methods to find highest rating
-        for (JavaMethod method : declaredMethods) {
-            if (staticOnly && !method.isStatic())
-                continue;
-            if (method.getName().equals(aName)) {
-                if (paramTypes == null)
-                    return method;
-                int rtg = JavaExecutable.getMatchRatingForArgClasses(method, paramTypes);
-                if (rtg > rating) {
-                    compatibleMethod = method;
-                    rating = rtg;
-                }
-            }
-        }
-
-        // Return
-        return compatibleMethod;
-    }
-
-    /**
-     * Returns a compatible method for given name and param types.
-     */
     public static JavaMethod getCompatibleMethodAll(JavaClass aClass, String aName, JavaClass[] paramTypes, boolean staticOnly)
     {
-        // Search this class and superclasses for compatible method
-        for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
-            JavaMethod compatibleMethod = getCompatibleMethod(cls, aName, paramTypes, staticOnly);
-            if (compatibleMethod != null)
-                return compatibleMethod;
+        List<JavaMethod> compatibleMethods = getCompatibleMethodsAll(aClass, aName, paramTypes, staticOnly);
+        switch (compatibleMethods.size()) {
+            case 0: return null;
+            case 1: return compatibleMethods.get(0);
+            default:
+                compatibleMethods.sort(new MethodCompare(paramTypes));
+                return compatibleMethods.get(0);
         }
-
-        // Search this class and superclasses for compatible interface
-        for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
-            JavaClass[] interfaces = cls.getInterfaces();
-            for (JavaClass infc : interfaces) {
-                JavaMethod compatibleMethod = getCompatibleMethodAll(infc, aName, paramTypes, staticOnly);
-                if (compatibleMethod != null)
-                    return compatibleMethod;
-            }
-        }
-
-        // If this class is Interface, check Object
-        if (aClass.isInterface()) {
-            JavaClass objClass = aClass.getJavaClassForClass(Object.class);
-            return getCompatibleMethod(objClass, aName, paramTypes, staticOnly);
-        }
-
-        // Return not found
-        return null;
     }
 
     /**
@@ -98,7 +53,7 @@ public class JavaClassUtils {
     public static List<JavaMethod> getCompatibleMethodsAll(JavaClass aClass, String aName, JavaClass[] paramTypes, boolean staticOnly)
     {
         // Find compatible methods
-        List<JavaMethod> compatibleMethods = new ArrayList<>();
+        List<JavaMethod> compatibleMethods = new ArrayList<>(2);
         findCompatibleMethodsAll(aClass, aName, paramTypes, compatibleMethods, staticOnly);
 
         // If given class is Interface, check Object
@@ -152,6 +107,27 @@ public class JavaClassUtils {
                 if (rating > 0)
                     ListUtils.addUniqueId(compatibleMethods, method);
             }
+        }
+    }
+
+    /**
+     * Compares two methods/constructors for compatibility.
+     */
+    private static class MethodCompare implements Comparator<JavaExecutable> {
+
+        private JavaClass[] _paramTypes;
+
+        public MethodCompare(JavaClass[] paramTypes)
+        {
+            _paramTypes = paramTypes;
+        }
+
+        @Override
+        public int compare(JavaExecutable method1, JavaExecutable method2)
+        {
+            int val1 = JavaExecutable.getMatchRatingForArgClasses(method1, _paramTypes);
+            int val2 = JavaExecutable.getMatchRatingForArgClasses(method2, _paramTypes);
+            return val2 - val1;
         }
     }
 }

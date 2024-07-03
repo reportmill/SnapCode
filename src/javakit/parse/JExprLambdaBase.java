@@ -136,8 +136,7 @@ public abstract class JExprLambdaBase extends JExpr {
             return paramType.getEvalClass();
 
         // Resolve with parents (JExprMethodCall, JVarDecl, JClassDecl)
-        JNode parent = getParent();
-        JavaType resolvedType = parent.getResolvedTypeForType(paramType);
+        JavaType resolvedType = getResolvedTypeForType(paramType);
         JavaClass resolvedClass = resolvedType != null ? resolvedType.getEvalClass() : null;
         return resolvedClass;
     }
