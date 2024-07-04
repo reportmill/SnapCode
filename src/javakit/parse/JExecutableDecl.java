@@ -144,32 +144,16 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     }
 
     /**
-     * Override to check formal parameters.
-     */
-    @Override
-    protected JavaDecl getDeclForChildId(JExprId anExprId)
-    {
-        // Handle TypeVar name: return typevar decl
-        String name = anExprId.getName();
-        JTypeVar typeVar = getTypeVarDeclForName(name);
-        if (typeVar != null)
-            return typeVar.getTypeVariable();
-
-        // Do normal version
-        return super.getDeclForChildId(anExprId);
-    }
-
-    /**
-     * Override - from old getDeclForChildNode(). Is it really needed ???
+     * Override to resolve method/constructor type vars.
      */
     @Override
     protected JavaDecl getDeclForChildType(JType aJType)
     {
         // Handle TypeVar name: return typevar decl
-        String name = aJType.getName();
-        JTypeVar typeVar = getTypeVarDeclForName(name);
-        if (typeVar != null)
-            return typeVar.getTypeVariable();
+        String typeName = aJType.getName();
+        JTypeVar typeVarDecl = getTypeVarDeclForName(typeName);
+        if (typeVarDecl != null)
+            return typeVarDecl.getTypeVariable();
 
         // Do normal version
         return super.getDeclForChildType(aJType);

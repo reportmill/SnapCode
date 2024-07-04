@@ -5,6 +5,7 @@ package javakit.parse;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaType;
+import javakit.resolver.JavaTypeVariable;
 import snap.parse.ParseToken;
 import snap.util.ArrayUtils;
 
@@ -157,12 +158,19 @@ public class JType extends JNode {
         if (javaClass != null)
             return javaClass;
 
-        // See if name is type var
-        JTypeVar typeVarDecl = getTypeVarDeclForName(baseName);
-        if (typeVarDecl != null)
-            return typeVarDecl.getTypeVariable();
+        // If parent is type, see if name is nested TypeArg from class extends/implements (e.g.: public class XXX extends List<E>)
+        JNode parent = getParent();
+        if (parent instanceof JType) {
+            JType parentType = (JType) parent;
+            JavaClass baseClass = parentType.getBaseClass();
+            if (baseClass != null) {
+                JavaTypeVariable typeVarType = baseClass.getTypeVarForName(baseName);
+                if (typeVarType != null)
+                    return typeVarType;
+            }
+        }
 
-        // If not primitive, try to resolve class (type might be package name or unresolvable)
+        // Try to resolve from parents (maybe package name, import class, inner class, method/class type arg, etc.)
         JavaDecl packageOrClassDecl = getDeclForChildType(this);
         if (packageOrClassDecl instanceof JavaType)
             javaClass = (JavaType) packageOrClassDecl;
@@ -226,43 +234,24 @@ public class JType extends JNode {
      */
     private JavaClass getBaseClass()
     {
-        // Try to find class directly
+        // Bogus - Look for TypeVar and use BoundsClass. Otherwise getBaseType() below can stack overflow
         String baseName = getName();
-        JavaClass javaClass = getJavaClassForName(baseName);
-        if (javaClass != null)
-            return javaClass;
-
-        // See if name is type var
-        JTypeVar typeVarDecl = getTypeVarDeclForName(baseName);
-        if (typeVarDecl != null)
-            return typeVarDecl.getBoundsClass();
+        for (JNode parent = _parent; parent != null; parent = parent.getParent()) {
+            if (parent instanceof WithTypeVars) {
+                JTypeVar typeVar = ((WithTypeVars) parent).getTypeVarDeclForName(baseName);
+                if (typeVar != null)
+                    return typeVar.getBoundsClass();
+            }
+        }
 
         // Look for normal type
         JavaType javaType = getBaseType();
         if (javaType != null)
             return javaType.getEvalClass();
 
-        // Return not found
-        System.err.println("JType.getBaseClass: Couldn't find class for name: " + baseName);
+        // Return java.lang.Object
+        System.err.println("JType.getBaseClass: Couldn't find class for name: " + getName());
         return getJavaClassForName("java.lang.Object");
-    }
-
-    /**
-     * Searches parent nodes for a TypeVar declaration for given name.
-     */
-    private JTypeVar getTypeVarDeclForName(String typeVarName)
-    {
-        // Search parents for
-        for (JNode parent = _parent; parent != null; parent = parent.getParent()) {
-            if (parent instanceof WithTypeVars) {
-                JTypeVar typeVar = ((WithTypeVars) parent).getTypeVarDeclForName(typeVarName);
-                if (typeVar != null)
-                    return typeVar;
-            }
-        }
-
-        // Return not found
-        return null;
     }
 
     /**
@@ -287,9 +276,9 @@ public class JType extends JNode {
     @Override
     protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
-        // Handle 'var'
-        if (isVarType() && anExprId == _baseExpr)
-            return getDeclForVar();
+        // Handle BaseExpr
+        if (anExprId == _baseExpr)
+            return getBaseType();
 
         // Do normal version
         return super.getDeclForChildId(anExprId);

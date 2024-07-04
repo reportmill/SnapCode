@@ -463,7 +463,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
                 return field;
         }
 
-        // Check interfaces:  Not sure what's going on here
+        // Check interfaces (id could be interface static field)
         List<JType> implementsTypes = getImplementsTypes();
         for (JType implementsType : implementsTypes) {
             JavaClass interf = implementsType.getEvalClass();
@@ -471,11 +471,6 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
             if (field2 != null)
                 return field2;
         }
-
-        // Look for JTypeVar for given name
-        JTypeVar typeVar = getTypeVarDeclForName(name);
-        if (typeVar != null)
-            return typeVar.getTypeVariable();
 
         // Look for InnerClass of given name
         JavaClass evalClass = getEvalClass();
@@ -495,57 +490,16 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     @Override
     protected JavaDecl getDeclForChildType(JType type)
     {
-        // Get parent of nested type
-        JType parentType = type;
-        while (parentType.getParent() instanceof JType)
-            parentType = (JType) parentType.getParent();
-
-        // If parent of nested type is this JClassDecl, either check for TypeVar or forward to file
-        if (parentType.getParent() == this) {
-
-            // Check for TypeVar
-            if (type.getParent() instanceof JType) {
-                JType par = (JType) type.getParent();
-                JavaType baseType = par.getBaseType();
-                if (baseType instanceof JavaClass) {
-                    JavaClass baseClass = (JavaClass) baseType;
-                    String typeName = type.getName();
-                    JavaDecl typeVarType = baseClass.getTypeVarForName(typeName);
-                    if (typeVarType != null)
-                        return typeVarType;
-                }
-            }
-
-            // Forward to file
-            return super.getDeclForChildType(type);
-        }
-
-        // If it's "this", set class and return ClassField - from old getDeclForChildNode() is this really needed ???
-        String name = type.getName();
-        if (name.equals("this"))
-            return getDecl();
-
-        // If it's "super", set class and return ClassField - from old getDeclForChildNode() is this really needed ???
-        if (name.equals("super"))
-            return getSuperClass();
-
-        // See if it's a field reference from superclass - from old getDeclForChildNode() is this really needed ???
-        JavaClass superClass = getSuperClass();
-        if (superClass != null) {
-            JavaField field = superClass.getDeclaredFieldForName(name);
-            if (field != null)
-                return field;
-        }
-
-        // Look for JTypeVar for given name - from old getDeclForChildNode() is this really needed ???
-        JTypeVar typeVar = getTypeVarDeclForName(name);
+        // Look for JTypeVar for given type name
+        String typeName = type.getName();
+        JTypeVar typeVar = getTypeVarDeclForName(typeName);
         if (typeVar != null)
             return typeVar.getTypeVariable();
 
-        // Look for InnerClass of given name - from old getDeclForChildNode() is this really needed ???
+        // Look for InnerClass of given name
         JavaClass evalClass = getEvalClass();
         if (evalClass != null) {
-            JavaClass innerClass = evalClass.getDeclaredClassForName(name);
+            JavaClass innerClass = evalClass.getDeclaredClassForName(typeName);
             if (innerClass != null)
                 return innerClass;
         }
