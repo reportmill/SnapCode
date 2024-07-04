@@ -108,12 +108,12 @@ public class JExprDot extends JExpr {
         }
 
         // Handle inner class
-        JavaClass innerClass = parentClass.getClassDeepForName(name);
+        JavaClass innerClass = parentClass.getClassForName(name);
         if (innerClass != null)
             return innerClass;
 
         // Handle Field
-        JavaField field = parentClass.getFieldDeepForName(name);
+        JavaField field = parentClass.getFieldForName(name);
         if (field != null) // && Modifier.isStatic(field.getModifiers()))
             return field;
 

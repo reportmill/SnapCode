@@ -458,7 +458,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
         // See if it's a field reference from superclass
         JavaClass superClass = getSuperClass();
         if (superClass != null) {
-            JavaField field = superClass.getFieldDeepForName(name);
+            JavaField field = superClass.getFieldForName(name);
             if (field != null)
                 return field;
         }

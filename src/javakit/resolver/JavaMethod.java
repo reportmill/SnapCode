@@ -109,13 +109,13 @@ public class JavaMethod extends JavaExecutable {
         // Get super method
         String name = getName();
         JavaClass[] parameterClasses = getParameterClasses();
-        JavaMethod superMethod = superClass.getMethodDeepForNameAndClasses(name, parameterClasses);
+        JavaMethod superMethod = superClass.getMethodForNameAndClasses(name, parameterClasses);
 
         // If not found, check interfaces
         if (superMethod == null) {
             JavaClass[] interfaces = declaringClass.getInterfaces();
             for (JavaClass inf : interfaces) {
-                superMethod = inf.getMethodDeepForNameAndClasses(name, parameterClasses);
+                superMethod = inf.getMethodForNameAndClasses(name, parameterClasses);
                 if (superMethod != null)
                     break;
             }

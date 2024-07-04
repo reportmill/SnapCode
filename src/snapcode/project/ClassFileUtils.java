@@ -132,7 +132,7 @@ public class ClassFileUtils {
             // Get field for name
             JavaClass javaClass = _resolver.getJavaClassForName(className);
             String fieldName = aConst.getMemberName();
-            return javaClass.getFieldDeepForName(fieldName);
+            return javaClass.getFieldForName(fieldName);
         }
 
         // Handle method reference
@@ -154,7 +154,7 @@ public class ClassFileUtils {
 
             // Get constructor for parameters
             JavaClass javaClass = _resolver.getJavaClassForName(className);
-            return javaClass.getConstructorDeepForClasses(paramClasses);
+            return javaClass.getConstructorForClasses(paramClasses);
         }
 
         // Handle method reference
@@ -177,7 +177,7 @@ public class ClassFileUtils {
 
             // Get method for name and parameters
             JavaClass javaClass = _resolver.getJavaClassForName(className);
-            return javaClass.getMethodDeepForNameAndClasses(methodName, paramClasses);
+            return javaClass.getMethodForNameAndClasses(methodName, paramClasses);
         }
 
         // Return null since unknown Constant reference

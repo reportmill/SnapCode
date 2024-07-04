@@ -419,7 +419,7 @@ public class JavaClass extends JavaType {
     /**
      * Returns a field for field name from this class or any superclass.
      */
-    public JavaField getFieldDeepForName(String aName)
+    public JavaField getFieldForName(String aName)
     {
         // Check for declared field of this class
         JavaField field = getDeclaredFieldForName(aName);
@@ -429,7 +429,7 @@ public class JavaClass extends JavaType {
         // Check superclass
         JavaClass superClass = getSuperClass();
         if (superClass != null)
-            field = superClass.getFieldDeepForName(aName);
+            field = superClass.getFieldForName(aName);
 
         // Return
         return field;
@@ -438,7 +438,7 @@ public class JavaClass extends JavaType {
     /**
      * Returns a constructor for parameter classes from this class or any superclass.
      */
-    public JavaConstructor getConstructorDeepForClasses(JavaClass[] paramClasses)
+    public JavaConstructor getConstructorForClasses(JavaClass[] paramClasses)
     {
         // Check for declared constructor of this class
         JavaConstructor constr = getDeclaredConstructorForClasses(paramClasses);
@@ -448,7 +448,7 @@ public class JavaClass extends JavaType {
         // Check superclass
         JavaClass superClass = getSuperClass();
         if (superClass != null)
-            constr = superClass.getConstructorDeepForClasses(paramClasses);
+            constr = superClass.getConstructorForClasses(paramClasses);
 
         // Return
         return constr;
@@ -457,7 +457,7 @@ public class JavaClass extends JavaType {
     /**
      * Returns a method for method name and parameter classes from this class or any superclass/interface.
      */
-    public JavaMethod getMethodDeepForNameAndClasses(String aName, JavaClass[] paramClasses)
+    public JavaMethod getMethodForNameAndClasses(String aName, JavaClass[] paramClasses)
     {
         // Check for declared method of this class
         JavaMethod method = getDeclaredMethodForNameAndClasses(aName, paramClasses);
@@ -467,7 +467,7 @@ public class JavaClass extends JavaType {
         // Check superclass
         JavaClass superClass = getSuperClass();
         if (superClass != null)
-            method = superClass.getMethodDeepForNameAndClasses(aName, paramClasses);
+            method = superClass.getMethodForNameAndClasses(aName, paramClasses);
 
         // Return
         return method;
@@ -476,7 +476,7 @@ public class JavaClass extends JavaType {
     /**
      * Returns a class for class name from this class or any superclass.
      */
-    public JavaClass getClassDeepForName(String aName)
+    public JavaClass getClassForName(String aName)
     {
         // Check for declared class of this class
         JavaClass cls = getDeclaredClassForName(aName);
@@ -486,7 +486,7 @@ public class JavaClass extends JavaType {
         // Check super classes
         JavaClass superClass = getSuperClass();
         if (superClass != null)
-            cls = superClass.getClassDeepForName(aName);
+            cls = superClass.getClassForName(aName);
 
         // Check interfaces
 
