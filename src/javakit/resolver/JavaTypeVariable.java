@@ -70,4 +70,13 @@ public class JavaTypeVariable extends JavaType {
      */
     @Override
     public boolean isResolvedType()  { return false; }
+
+    /**
+     * Override to return if this type variable matches given type variable.
+     */
+    @Override
+    public boolean hasTypeVar(JavaTypeVariable typeVar)
+    {
+        return getName().equals(typeVar.getName());
+    }
 }

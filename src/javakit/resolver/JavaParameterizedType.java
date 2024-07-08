@@ -65,6 +65,15 @@ public class JavaParameterizedType extends JavaType {
     public JavaClass getEvalClass()  { return _rawType; }
 
     /**
+     * Override to return if this type variable matches given type variable.
+     */
+    @Override
+    public boolean hasTypeVar(JavaTypeVariable typeVar)
+    {
+        return ArrayUtils.hasMatch(_paramTypes, type -> type.hasTypeVar(typeVar));
+    }
+
+    /**
      * Returns a resolved type for given unresolved type (TypeVar or ParamType<TypeVar>), if this decl can resolve it.
      */
     @Override

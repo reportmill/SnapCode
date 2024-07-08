@@ -168,4 +168,9 @@ public class JavaType extends JavaDecl {
         JavaClass otherClass = otherType != null ? otherType.getEvalClass() : null;
         return thisClass.isAssignableFrom(otherClass);
     }
+
+    /**
+     * Returns whether type has given type var.
+     */
+    public boolean hasTypeVar(JavaTypeVariable typeVar)  { return false; }
 }

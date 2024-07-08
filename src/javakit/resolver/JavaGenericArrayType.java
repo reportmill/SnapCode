@@ -54,4 +54,10 @@ public class JavaGenericArrayType extends JavaType {
      */
     @Override
     public boolean isResolvedType()  { return false; }
+
+    /**
+     * Override to return if component type has given type variable.
+     */
+    @Override
+    public boolean hasTypeVar(JavaTypeVariable typeVar)  { return _componentType.hasTypeVar(typeVar); }
 }
