@@ -198,6 +198,56 @@ public class JExprAlloc extends JExpr {
     }
 
     /**
+     * Returns the JavaDecl that this nodes evaluates to (resolved, if TypeVar).
+     */
+    @Override
+    protected JavaType getEvalTypeImpl()
+    {
+        // If constructor alloc
+        if (getDecl() instanceof JavaConstructor)
+            return getResolvedConstructorType();
+
+        // Return
+        return super.getEvalTypeImpl();
+    }
+
+    /**
+     * Returns the constructor resolved type.
+     */
+    private JavaType getResolvedConstructorType()
+    {
+        // Get constructor class type params - just return class if no type params
+        JavaConstructor constructor = getConstructor();
+        JavaClass javaClass = constructor.getEvalClass();
+        JavaTypeVariable[] typeParams = javaClass.getTypeVars();
+        if (typeParams.length == 0)
+            return javaClass;
+
+        // Get parameter types - just return class if no parameters (or all parameters are simple classes)
+        JavaType[] paramTypes = constructor.getGenericParameterTypes();
+        if (paramTypes.length == 0 || !ArrayUtils.hasMatch(paramTypes, type -> !(type instanceof JavaClass)))
+            return javaClass;
+
+        // Get arg types and resolved type parameters - just return class if nothing resolved
+        JavaType[] argTypes = ArrayUtils.map(_args, arg -> arg instanceof JExprLambdaBase ? null : arg.getEvalType(), JavaType.class);
+        JavaType[] resolvedTypeParams = ArrayUtils.map(typeParams, tvar -> getResolvedTypeForTypeVarAndConstructorTypes(tvar, paramTypes, argTypes), JavaType.class);
+        if (ArrayUtils.equalsId(typeParams, resolvedTypeParams))
+            return javaClass;
+
+        // Create parameterized type and return
+        return javaClass.getParameterizedTypeForTypes(resolvedTypeParams);
+    }
+
+    /**
+     * Returns the resolved type for type var.
+     */
+    private JavaType getResolvedTypeForTypeVarAndConstructorTypes(JavaTypeVariable aTypeVar, JavaType[] paramTypes, JavaType[] argTypes)
+    {
+        JavaType resolvedTypeVar = JavaTypeUtils.getResolvedTypeVariableForTypeArrays(aTypeVar, paramTypes, argTypes);
+        return resolvedTypeVar != null ? resolvedTypeVar : aTypeVar;
+    }
+
+    /**
      * Returns the part name.
      */
     public String getNodeString()  { return "Allocation"; }
