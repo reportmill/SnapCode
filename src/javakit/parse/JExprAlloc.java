@@ -68,26 +68,6 @@ public class JExprAlloc extends JExpr {
     }
 
     /**
-     * Returns the arg eval classes.
-     */
-    public JavaClass[] getArgClasses()
-    {
-        JExpr[] args = getArgs();
-        JavaClass[] argClasses = new JavaClass[args.length];
-
-        // Iterate over args and map to eval types
-        for (int i = 0, iMax = args.length; i < iMax; i++) {
-            JExpr arg = args[i];
-            if ((arg instanceof JExprLambda || arg instanceof JExprMethodRef) && arg._decl == null)
-                arg = null;
-            argClasses[i] = arg != null ? arg.getEvalClass() : null;
-        }
-
-        // Return
-        return argClasses;
-    }
-
-    /**
      * Returns the array dimensions (array only).
      */
     public JExpr getArrayDims()  { return _arrayDims; }
@@ -156,19 +136,6 @@ public class JExprAlloc extends JExpr {
     }
 
     /**
-     * Tries to resolve the method declaration for this node.
-     */
-    protected JavaDecl getDeclImpl()
-    {
-        // If array alloc, just return Type decl
-        if (_arrayDims != null || _arrayInit != null)
-            return getJavaType();
-
-        // Return Constructor
-        return getConstructor();
-    }
-
-    /**
      * Returns the constructor.
      */
     public JavaConstructor getConstructor()
@@ -199,7 +166,7 @@ public class JExprAlloc extends JExpr {
         }
 
         // Get arg classes
-        JavaClass[] argClasses = getArgClasses();
+        JavaClass[] argClasses = ArrayUtils.map(_args, arg -> arg instanceof JExprLambdaBase ? null : arg.getEvalClass(), JavaClass.class);
 
         // If inner class and not static, add implied class types to arg types array
         if (javaClass.isMemberClass() && !javaClass.isStatic()) {
@@ -214,6 +181,20 @@ public class JExprAlloc extends JExpr {
 
         // Return not found
         return null;
+    }
+
+    /**
+     * Tries to resolve the method declaration for this node.
+     */
+    @Override
+    protected JavaDecl getDeclImpl()
+    {
+        // If array alloc, just return Type decl
+        if (_arrayDims != null || _arrayInit != null)
+            return getJavaType();
+
+        // Return Constructor
+        return getConstructor();
     }
 
     /**
@@ -267,8 +248,8 @@ public class JExprAlloc extends JExpr {
      */
     private String getArgTypesString()
     {
-        JavaClass[] argClasses = getArgClasses();
-        String argTypeString = ArrayUtils.mapToStringsAndJoin(argClasses, type -> type != null ? type.getSimpleName() : "null", ",");
+        JavaType[] argTypes = ArrayUtils.map(_args, expr -> expr != null ? expr.getDeclEvalType() : null, JavaType.class);
+        String argTypeString = ArrayUtils.mapToStringsAndJoin(argTypes, type -> type != null ? type.getSimpleName() : "null", ",");
         return '(' + argTypeString + ')';
     }
 }

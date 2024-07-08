@@ -97,6 +97,15 @@ public class JNode {
     protected JavaDecl getDeclImpl()  { return null; }
 
     /**
+     * Returns the decl eval type.
+     */
+    public JavaType getDeclEvalType()
+    {
+        JavaDecl decl = getDecl();
+        return decl != null ? decl.getEvalType() : null;
+    }
+
+    /**
      * Returns the JavaDecl most closely associated with given child JExprId node.
      */
     protected JavaDecl getDeclForChildId(JExprId anExprId)
