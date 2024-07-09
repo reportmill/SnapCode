@@ -1,9 +1,23 @@
 package javakit.resolver;
+import snap.util.ArrayUtils;
 
 /**
  * Utility methods for JavaType.
  */
 public class JavaTypeUtils {
+
+    /**
+     * Returns the resolved type for given type variable and array of generic types and array of resolved types.
+     */
+    public static JavaType getResolvedTypeForTypeArrays(JavaType aType, JavaType[] paramTypes, JavaType[] argTypes)
+    {
+        if (aType instanceof JavaTypeVariable)
+            return getResolvedTypeVariableForTypeArrays((JavaTypeVariable) aType, paramTypes, argTypes);
+
+        // Complain and return
+        System.err.println("JavaTypeUtils.getResolvedTypeForTypeArrays: Unsupported type: " + aType);
+        return null;
+    }
 
     /**
      * Returns the resolved type for given type variable and array of generic types and array of resolved types.
@@ -52,7 +66,7 @@ public class JavaTypeUtils {
             JavaParameterizedType paramParamType = (JavaParameterizedType) paramType;
             JavaParameterizedType argParamType = argType instanceof JavaParameterizedType ? (JavaParameterizedType) argType : null;
             if (argParamType == null) {
-                System.err.println("JExprMethodCall.getResolvedTypeVariableForTypes: arg type not parameterized type");
+                System.err.println("JavaTypeUtils.getResolvedTypeVariableForTypes: arg type not parameterized type");
                 return null;
             }
 
@@ -60,7 +74,7 @@ public class JavaTypeUtils {
             JavaType[] paramParamTypes = paramParamType.getParamTypes();
             JavaType[] argParamTypes = argParamType.getParamTypes();
             if (paramParamTypes.length != argParamTypes.length) {
-                System.err.println("JExprMethodCall.getResolvedTypeVariableForTypes: param types length mismatch");
+                System.err.println("JavaTypeUtils.getResolvedTypeVariableForTypes: param types length mismatch");
                 return null;
             }
 
@@ -76,7 +90,52 @@ public class JavaTypeUtils {
         }
 
         // Complain and return
-        System.err.println("JExprMethodCall.getResolvedTypeVariableForTypes: Unsupported type: " + paramType);
+        System.err.println("JavaTypeUtils.getResolvedTypeVariableForTypes: Unsupported type: " + paramType);
+        return null;
+    }
+
+    /**
+     * Translates given parameter types from given class to given subclass.
+     */
+    public static JavaType[] translateParamTypesToSubclass(JavaType[] paramTypes, JavaClass paramsClass, JavaType subtype)
+    {
+        // If other class between paramsClass and subtype class, recurse
+        JavaClass subtypeClass = subtype.getEvalClass();
+        JavaType subtypeGenericSuperInterface = getSuperInterfaceForClass(subtypeClass, paramsClass);
+        JavaClass subtypeSuperInterface = subtypeGenericSuperInterface != null ? subtypeGenericSuperInterface.getEvalClass() : null;
+        if (paramsClass != subtypeSuperInterface) {
+            if (subtypeSuperInterface == null) {
+                System.err.println("JavaTypeUtils.translateParamTypesToSubclass: Subtype not subclass or params class");
+                return paramTypes;
+            }
+            paramTypes = translateParamTypesToSubclass(paramTypes, paramsClass, subtypeGenericSuperInterface);
+            paramsClass = subtypeSuperInterface;
+        }
+
+        // Get params class type variables and subtype types and translate
+        JavaType[] paramsClassTypeVars = paramsClass.getTypeVars();
+        JavaType[] subtypeTypes = ((JavaParameterizedType) subtypeGenericSuperInterface).getParamTypes();
+        return ArrayUtils.map(paramTypes, type -> getResolvedTypeForTypeArrays(type, paramsClassTypeVars, subtypeTypes), JavaType.class);
+    }
+
+    /**
+     * Returns the super interface for given sub-interface, or an intermediate, if classes not direct subclass-superclass.
+     */
+    private static JavaClass getSuperInterfaceForClass(JavaClass subInterface, JavaClass superInterface)
+    {
+        // If sub interface subclasses superInterface, just return superInterface
+        JavaClass[] subtypeSuperInterfaces = subInterface.getInterfaces();
+        if (ArrayUtils.containsId(subtypeSuperInterfaces, superInterface))
+            return superInterface;
+
+        // Search subtype-interfaces for super interface recursively and return first intermediate
+        for (JavaClass subtypeSuperInterface : subtypeSuperInterfaces) {
+            JavaClass superInterfaceForClass = getSuperInterfaceForClass(subtypeSuperInterface, superInterface);
+            if (superInterfaceForClass != null)
+                return subtypeSuperInterface;
+        }
+
+        // Return not found
         return null;
     }
 }

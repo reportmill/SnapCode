@@ -121,8 +121,13 @@ public abstract class JExprLambdaBase extends JExpr {
         if (lambdaMethod == null)
             return null;
 
-        // Get parameter types and return resolved types
+        // Get parameter types - if lambda method from subclass of lambda type, translate types
         JavaType[] paramTypes = lambdaMethod.getGenericParameterTypes();
+        if (lambdaMethod.getDeclaringClass() != getLambdaClass())
+            paramTypes = JavaTypeUtils.translateParamTypesToSubclass(paramTypes, lambdaMethod.getDeclaringClass(), getLambdaType());
+
+
+        // Get parameter types and return resolved types
         return ArrayUtils.map(paramTypes, type -> getParameterTypeResolved(type), JavaClass.class);
     }
 
