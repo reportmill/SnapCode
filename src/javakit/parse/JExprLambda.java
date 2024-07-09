@@ -20,9 +20,6 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
     // The statement Block, if lambda has block
     protected JStmtBlock  _block;
 
-    // The parameter types
-    private JavaType[] _parameterTypes;
-
     /**
      * Constructor.
      */
@@ -78,23 +75,6 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
     public void setBlock(JStmtBlock aBlock)
     {
         replaceChild(_block, _block = aBlock);
-    }
-
-    /**
-     * Returns the resolved lambda method return type.
-     */
-    @Override
-    public JavaType getLambdaMethodReturnTypeResolved()
-    {
-        // If expression is set, return its eval type
-        if (_expr != null) {
-            JavaType exprEvalType = _expr.getEvalType();
-            if (exprEvalType != null)
-                return exprEvalType;
-        }
-
-        // Do normal version
-        return super.getLambdaMethodReturnTypeResolved();
     }
 
     /**

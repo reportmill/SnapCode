@@ -142,20 +142,6 @@ public abstract class JExprLambdaBase extends JExpr {
     }
 
     /**
-     * Returns the resolved lambda method return type.
-     */
-    public JavaType getLambdaMethodReturnTypeResolved()
-    {
-        // Return lambda method eval type - this is a fallback and isn't any help if method return type is type var
-        JavaMethod lambdaMethod = getLambdaMethod();
-        if (lambdaMethod != null)
-            return lambdaMethod.getReturnType();
-
-        // Return not found
-        return null;
-    }
-
-    /**
      * Override to return lambda type.
      */
     @Override
