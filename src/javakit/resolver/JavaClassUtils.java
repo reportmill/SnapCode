@@ -52,7 +52,7 @@ public class JavaClassUtils {
         }
 
         // Sort the methods
-        if (compatibleMethods.size() > 1)
+        if (compatibleMethods.size() > 1 && paramTypes != null)
             compatibleMethods.sort((m1,m2) -> compareMethodMatchRatings(m1, m2, paramTypes));
 
         // Return

@@ -32,11 +32,6 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
     }
 
     /**
-     * Returns the number of parameters.
-     */
-    public int getParameterCount()  { return _params.length; }
-
-    /**
      * Returns the list of formal parameters.
      */
     public JVarDecl[] getParameters()  { return _params; }
@@ -83,38 +78,6 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
     public void setBlock(JStmtBlock aBlock)
     {
         replaceChild(_block, _block = aBlock);
-    }
-
-    /**
-     * Returns the list of parameter classes.
-     */
-    public JavaType[] getParameterTypes()
-    {
-        // If already set, just return
-        if (_parameterTypes != null) return _parameterTypes;
-
-        // Create array
-        int parameterCount = getParameterCount();
-        JavaType[] paramTypes = new JavaType[parameterCount];
-
-        // Get arg type for lambda arg index
-        JavaMethod lambdaMethod = getLambdaMethod();
-        if (lambdaMethod == null)
-            return null;
-        if (lambdaMethod.getParameterCount() != parameterCount)
-            return null;
-
-        // Iterate over parameters and get EvalClass for each
-        for (int i = 0; i < parameterCount; i++) {
-
-            // Get arg type for lambda arg index
-            JavaType argType = lambdaMethod.getGenericParameterType(i);
-            //if (!argType.isResolvedType()) argType = getResolvedTypeForType(argType);
-            paramTypes[i] = argType;
-        }
-
-        // Set and return
-        return _parameterTypes = paramTypes;
     }
 
     /**

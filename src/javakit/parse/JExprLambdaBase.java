@@ -170,14 +170,19 @@ public abstract class JExprLambdaBase extends JExpr {
     @Override
     protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
     {
-        JavaMethod lambdaMethod = getLambdaMethod();
-        JavaType lambdaMethodReturnType = lambdaMethod != null ? lambdaMethod.getGenericReturnType() : null;
+        // If lambda type is parameterized type, try to resolve using lambda parameter types and generic types
+        if (getLambdaType() instanceof JavaParameterizedType) {
 
-        // If type var matches lambda method return type, return resolved version. This needs to be fixed to support param types
-        if (lambdaMethodReturnType instanceof JavaTypeVariable) {
-            JavaTypeVariable lambdaMethodTypeVar = (JavaTypeVariable) lambdaMethodReturnType;
-            if (aTypeVar.getName().equals(lambdaMethodTypeVar.getName()))
-                return getLambdaMethodReturnTypeResolved();
+            // Get lambda type generic and resolved types
+            JavaParameterizedType lambdaType = (JavaParameterizedType) getLambdaType();
+            JavaClass lambdaClass = lambdaType.getRawType();
+            JavaType[] genericTypes = lambdaClass.getTypeVars();
+            JavaType[] resolvedTypes = lambdaType.getParamTypes();
+
+            // Try to resolve type variable from lambda generic and resolved types
+            JavaType resolvedType = JavaTypeUtils.getResolvedTypeVariableForTypeArrays(aTypeVar, genericTypes, resolvedTypes);
+            if (resolvedType != null)
+                return resolvedType;
         }
 
         // Do normal version
@@ -199,8 +204,10 @@ public abstract class JExprLambdaBase extends JExpr {
 
         // Handle missing class
         JavaMethod lambdaMethod = getLambdaMethod();
-        if (lambdaMethod == null)
-            errors = NodeError.addError(errors, this, "Can't resolve lambda method", 0);
+        if (lambdaMethod == null) {
+            if (!(this instanceof JExprMethodRef) || ((JExprMethodRef) this).getConstructor() == null)
+                errors = NodeError.addError(errors, this, "Can't resolve lambda method", 0);
+        }
 
         // Return
         return errors;
