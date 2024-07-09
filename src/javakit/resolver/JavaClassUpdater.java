@@ -130,6 +130,16 @@ public class JavaClassUpdater {
     }
 
     /**
+     * Returns the generic superclass.
+     */
+    protected JavaType getGenericSuperclass()
+    {
+        Class<?> realClass = getRealClassImpl();
+        Type genericSuperClass = realClass.getGenericSuperclass();
+        return _resolver.getJavaTypeForType(genericSuperClass);
+    }
+
+    /**
      * Returns interfaces.
      */
     protected JavaClass[] getInterfaces()
@@ -137,6 +147,16 @@ public class JavaClassUpdater {
         Class<?> realClass = getRealClassImpl();
         Class<?>[] interfaces = realClass.getInterfaces();
         return ArrayUtils.map(interfaces, cls -> _javaClass.getJavaClassForClass(cls), JavaClass.class);
+    }
+
+    /**
+     * Returns interfaces.
+     */
+    protected JavaType[] getGenericInterfaces()
+    {
+        Class<?> realClass = getRealClassImpl();
+        Type[] interfaces = realClass.getGenericInterfaces();
+        return ArrayUtils.map(interfaces, type -> _resolver.getJavaTypeForType(type), JavaType.class);
     }
 
     /**

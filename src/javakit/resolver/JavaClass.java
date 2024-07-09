@@ -19,7 +19,7 @@ public class JavaClass extends JavaType {
     private JavaClass  _declaringClass;
 
     // The super class type (could be ParameterizedType)
-    private JavaType  _superType;
+    private JavaType _genericSuperclass;
 
     // The super class name
     protected String _superClassName;
@@ -223,25 +223,13 @@ public class JavaClass extends JavaType {
     public String getClassName()  { return _name; }
 
     /**
-     * Override to return as Class type.
+     * Returns the generic superclass.
      */
-    public JavaType getSuperType()
+    public JavaType getGenericSuperclass()
     {
-        // If already set or Object.class, just return
-        if (_superType != null) return _superType;
-
-        // Get super class (just return if null)
-        JavaClass superClass = getSuperClass();
-        if (superClass == null)
-            return null;
-
-        // Get GenericSuperClass as JavaType
-        Class<?> realClass = getRealClass();
-        Type superType = realClass.getGenericSuperclass();
-        JavaType javaType = superType != null ? _resolver.getJavaTypeForType(superType) : null;
-
-        // Set, return
-        return _superType = javaType;
+        if (_genericSuperclass != null) return _genericSuperclass;
+        JavaType genericSuperclass = _updater.getGenericSuperclass();
+        return _genericSuperclass = genericSuperclass;
     }
 
     /**
@@ -324,6 +312,14 @@ public class JavaClass extends JavaType {
     {
         if (_interfaces != null) return _interfaces;
         return _interfaces = _updater.getInterfaces();
+    }
+
+    /**
+     * Returns the interfaces this class implements.
+     */
+    public JavaType[] getGenericInterfaces()
+    {
+        return _updater.getGenericInterfaces();
     }
 
     /**
@@ -682,7 +678,7 @@ public class JavaClass extends JavaType {
             return typeVar.getEvalType();
 
         // If SuerType is ParameterizedType, let it try to resolve
-        JavaType superType = getSuperType();
+        JavaType superType = getGenericSuperclass();
         if (superType instanceof JavaParameterizedType)
             return superType.getResolvedTypeForTypeVariable(aTypeVar);
 
