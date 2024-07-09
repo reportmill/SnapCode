@@ -136,7 +136,7 @@ public class JavaClassUpdater {
     {
         Class<?> realClass = getRealClassImpl();
         Type genericSuperClass = realClass.getGenericSuperclass();
-        return _resolver.getJavaTypeForType(genericSuperClass);
+        return genericSuperClass != null ? _resolver.getJavaTypeForType(genericSuperClass) : null;
     }
 
     /**
