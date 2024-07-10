@@ -205,7 +205,8 @@ public class JavaTextAreaKeys extends TextAreaKeys {
      */
     private boolean isEnteringMultilineComment(TextLine aTextLine)
     {
-        TextToken lastToken = aTextLine.getLastToken();
+        int selStartInLine = getSelStart() - aTextLine.getStartCharIndex();
+        TextToken lastToken = getLastTokenBeforeCharIndex(aTextLine, selStartInLine);
         return lastToken != null && lastToken.getName() == Tokenizer.MULTI_LINE_COMMENT;
     }
 
