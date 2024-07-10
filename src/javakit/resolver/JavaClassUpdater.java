@@ -337,6 +337,7 @@ public class JavaClassUpdater {
         String newMethodReturnTypeName = newMethod.getGenericReturnType().getName();
         if (!oldMethodReturnTypeName.equals(newMethodReturnTypeName)) {
             oldMethod._genericReturnType = newMethod.getGenericReturnType();
+            oldMethod._evalType = null;
             didChange = true;
         }
 
