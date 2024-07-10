@@ -100,7 +100,6 @@ public class JavaParserExpr extends Parser {
 
     /**
      * Type Handler: LookAhead(2) ReferenceType | PrimitiveType
-     *   - ReferenceType: PrimitiveType (LookAhead(2) "[" "]")+ | ClassType (LookAhead(2) "[" "]")*
      */
     public static class TypeHandler extends JNodeParseHandler<JType> {
 
@@ -111,9 +110,31 @@ public class JavaParserExpr extends Parser {
         {
             switch (anId) {
 
-                // Handle ClassType, PrimitiveType
-                case "ClassType":
-                case "PrimitiveType":
+                // Handle ReferenceType, PrimitiveType
+                case "ReferenceType": case "PrimitiveType":
+                    _part = aNode.getCustomNode(JType.class);
+                    break;
+            }
+        }
+
+        @Override
+        protected Class<JType> getPartClass()  { return JType.class; }
+    }
+
+    /**
+     * ReferenceType: PrimitiveType (LookAhead(2) "[" "]")+ | ClassType (LookAhead(2) "[" "]")*
+     */
+    public static class ReferenceTypeHandler extends JNodeParseHandler<JType> {
+
+        /**
+         * ParseHandler method.
+         */
+        protected void parsedOne(ParseNode aNode, String anId)
+        {
+            switch (anId) {
+
+                // Handle PrimitiveType, ClassType
+                case "PrimitiveType": case "ClassType":
                     _part = aNode.getCustomNode(JType.class);
                     break;
 
@@ -125,6 +146,7 @@ public class JavaParserExpr extends Parser {
             }
         }
 
+        @Override
         protected Class<JType> getPartClass()  { return JType.class; }
     }
 
@@ -141,22 +163,96 @@ public class JavaParserExpr extends Parser {
             // Get type
             JType type = getPart();
 
-            // Handle Identifier: Add to type
-            if (anId == "Identifier") {
-                JExprId id = aNode.getCustomNode(JExprId.class);
-                type.addId(id);
-            }
+            switch (anId) {
 
-            // Handle TypeArgs (since no TypeArgsHandler, TypeArgHandler or ReferenceTypeHandler, just watch for JType)
-            else {
-                Object customNode = aNode.getCustomNode();
-                if (customNode instanceof JType) {
-                    JType typeArg = (JType) customNode;
-                    type.addTypeArg(typeArg);
-                }
+                // Handle Identifier: Add to type
+                case "Identifier":
+                    JExprId id = aNode.getCustomNode(JExprId.class);
+                    type.addId(id);
+                    break;
+
+                // Handle TypeArgs
+                case "TypeArgs":
+                    JType[] typeArgs = aNode.getCustomNode(JType[].class);
+                    type.setTypeArgs(typeArgs);
+                    break;
             }
         }
 
+        @Override
+        protected Class<JType> getPartClass()  { return JType.class; }
+    }
+
+    /**
+     * TypeArgs Handler: "<" (TypeArg ("," TypeArg)*)? ">"
+     */
+    public static class TypeArgsHandler extends ParseHandler<JType[]> {
+
+        // List of argument expressions
+        private List<JType> _typeArgs = new ArrayList<>();
+
+        /**
+         * ParseHandler method.
+         */
+        protected void parsedOne(ParseNode aNode, String anId)
+        {
+            // Handle TypeArg
+            if (anId == "TypeArg") {
+                JType typeArg = aNode.getCustomNode(JType.class);
+                if (typeArg != null)
+                    _typeArgs.add(typeArg);
+            }
+        }
+
+        /**
+         * Override to return array.
+         */
+        public JType[] parsedAll()  { return _typeArgs.toArray(JType.EMPTY_TYPES_ARRAY); }
+
+        /**
+         * Override to clear FormalParams list.
+         */
+        @Override
+        public void reset()
+        {
+            super.reset();
+            _typeArgs.clear();
+        }
+
+        @Override
+        protected Class getPartClass()  { return JType[].class; }
+    }
+
+    /**
+     * TypeArg Handler: ReferenceType | "?" WildcardBounds?
+     *  - And WildcardBounds { "extends" ReferenceType | "super" ReferenceType }
+     */
+    public static class TypeArgHandler extends JNodeParseHandler<JType> {
+
+        /**
+         * ParseHandler method.
+         */
+        protected void parsedOne(ParseNode aNode, String anId)
+        {
+            switch (anId) {
+
+                // Handle ReferenceType (and WildcardBounds)
+                case "ReferenceType":
+                    JType referenceType = aNode.getCustomNode(JType.class);
+                    if (_part == null)
+                        _part = referenceType;
+                    else _part.setWildcardBounds(referenceType);
+                    break;
+
+                // Handle "?" (Wildcard)
+                case "?":
+                    _part = new JType();
+                    _part.addId(new JExprId(aNode));
+                    break;
+            }
+        }
+
+        @Override
         protected Class<JType> getPartClass()  { return JType.class; }
     }
 
@@ -176,6 +272,7 @@ public class JavaParserExpr extends Parser {
             _part.setPrimitive(true);
         }
 
+        @Override
         protected Class<JType> getPartClass()  { return JType.class; }
     }
 
@@ -206,6 +303,7 @@ public class JavaParserExpr extends Parser {
             }
         }
 
+        @Override
         protected Class<JType> getPartClass()  { return JType.class; }
     }
 

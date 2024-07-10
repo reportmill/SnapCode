@@ -26,6 +26,9 @@ public class JType extends JNode {
     // The generic Types
     private JType[]  _typeArgs = EMPTY_TYPES_ARRAY;
 
+    // The wildcard bounds
+    private JType _wildcardBounds;
+
     // The base type
     private JavaType _baseType;
 
@@ -102,17 +105,18 @@ public class JType extends JNode {
     public void setArrayCount(int aValue)  { _arrayCount = aValue; }
 
     /**
-     * Returns the generic types.
+     * Returns the type args.
      */
     public JType[] getTypeArgs()  { return _typeArgs; }
 
     /**
-     * Adds a type arg.
+     * Sets the type args.
      */
-    public void addTypeArg(JType aType)
+    public void setTypeArgs(JType[] theTypeArgs)
     {
-        _typeArgs = ArrayUtils.add(_typeArgs, aType);
-        addChild(aType);
+        _typeArgs = theTypeArgs;
+        for (JType typeArg : theTypeArgs)
+            addChild(typeArg);
     }
 
     /**
@@ -122,6 +126,29 @@ public class JType extends JNode {
     {
         if (_typeArgs == EMPTY_TYPES_ARRAY) return JavaType.EMPTY_TYPES_ARRAY;
         return ArrayUtils.map(_typeArgs, jtyp -> getJavaTypeForTypeArg(jtyp), JavaType.class);
+    }
+
+    /**
+     * Returns the wildcard bounds.
+     */
+    public JType getWildcardBounds()  { return _wildcardBounds; }
+
+    /**
+     * Sets the wildcard bounds.
+     */
+    public void setWildcardBounds(JType wildcardBounds)
+    {
+        replaceChild(_wildcardBounds, _wildcardBounds = wildcardBounds);
+    }
+
+    /**
+     * Returns the wildcard bounds type.
+     */
+    private JavaType getWildcardBoundsType()
+    {
+        if (_wildcardBounds != null)
+            return _wildcardBounds.getJavaType();
+        return getJavaClassForName("java.lang.Object");
     }
 
     /**
@@ -152,8 +179,12 @@ public class JType extends JNode {
         if (isVarType())
             return getDeclForVar();
 
-        // Try to find class directly
+        // Handle wildcard
         String baseName = getName();
+        if (baseName.equals("?"))
+            return getWildcardBoundsType();
+
+        // Try to find class directly
         JavaType javaClass = getJavaClassForName(baseName);
         if (javaClass != null)
             return javaClass;
