@@ -94,9 +94,9 @@ public class ProjectUtils {
 
         // Return first source file
         WebFile srcDir = aProj.getSourceDir();
-        if (srcDir.getFileCount() > 0) {
-            WebFile srcFile = srcDir.getFiles()[0];
-            return srcFile;
+        for (WebFile file : srcDir.getFiles()) {
+            if (isSourceFile(file))
+                return file;
         }
 
         // Return project root

@@ -146,6 +146,10 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     @Override
     protected JavaMethod[] getDeclaredMethods() throws SecurityException
     {
+        // If first call for JavaClass, init methods to empty to prevent infinite loop
+        if (_javaClass._methods == null) _javaClass._methods = new JavaMethod[0];
+
+        // Get methods from ClassDecl.MethodDecls
         JMethodDecl[] methodDecls = _classDecl.getMethodDecls();
         return ArrayUtils.mapNonNull(methodDecls, mdecl -> getJavaMethodForMethodDecl(mdecl), JavaMethod.class);
     }
@@ -173,7 +177,10 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
      */
     protected JavaConstructor[] getDeclaredConstructors()
     {
-        // Get constructors
+        // If first call for JavaClass, init methods to empty to prevent infinite loop
+        if (_javaClass._constructors == null) _javaClass._constructors = new JavaConstructor[0];
+
+        // Get constructors from ClassDecl.ConstructorDecls
         JConstrDecl[] constrDecls = _classDecl.getConstructorDecls();
         if (constrDecls.length > 0)
             return ArrayUtils.map(constrDecls, this::getJavaConstructorForConstructorDecl, JavaConstructor.class);
