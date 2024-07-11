@@ -115,7 +115,7 @@ public abstract class JExprLambdaBase extends JExpr {
     /**
      * Returns the resolved lambda method parameter types.
      */
-    public JavaClass[] getLambdaMethodParameterTypesResolved()
+    public JavaType[] getLambdaMethodParameterTypes()
     {
         // Get lambda method - just return if not found
         JavaMethod lambdaMethod = getLambdaMethod();
@@ -133,22 +133,40 @@ public abstract class JExprLambdaBase extends JExpr {
         }
 
         // Get parameter types and return resolved types
-        return ArrayUtils.map(paramTypes, type -> getParameterTypeResolved(type), JavaClass.class);
+        return ArrayUtils.map(paramTypes, type -> getLambdaMethodParameterType(type), JavaType.class);
     }
 
     /**
      * Returns the given parameter type resolved.
      */
-    private JavaClass getParameterTypeResolved(JavaType paramType)
+    private JavaType getLambdaMethodParameterType(JavaType paramType)
     {
         // If already resolved, just return class
         if (paramType.isResolvedType())
-            return paramType.getEvalClass();
+            return paramType;
 
-        // Resolve with parents (JExprMethodCall, JVarDecl, JClassDecl)
-        JavaType resolvedType = getResolvedTypeForType(paramType);
-        JavaClass resolvedClass = resolvedType != null ? resolvedType.getEvalClass() : null;
-        return resolvedClass;
+        // If lambda type not parameterized type, just return class
+        if (!(getLambdaType() instanceof JavaParameterizedType))
+            return paramType;
+
+        // Get lambda type generic and resolved types
+        JavaParameterizedType lambdaType = (JavaParameterizedType) getLambdaType();
+        JavaClass lambdaClass = lambdaType.getRawType();
+        JavaType[] genericTypes = lambdaClass.getTypeVars();
+        JavaType[] resolvedTypes = lambdaType.getParamTypes();
+
+        // Try to resolve type from lambda generic and resolved types
+        JavaType resolvedType = JavaTypeUtils.getResolvedTypeForTypeArrays(paramType, genericTypes, resolvedTypes);
+        return resolvedType;
+    }
+
+    /**
+     * Returns the resolved lambda method parameter types.
+     */
+    protected JavaType[] getLambdaMethodParameterTypesResolved()
+    {
+        JavaType[] paramTypes = getLambdaMethodParameterTypes();
+        return paramTypes != null ? ArrayUtils.map(paramTypes, type -> getResolvedTypeForType(type), JavaType.class) : null;
     }
 
     /**
@@ -158,31 +176,6 @@ public abstract class JExprLambdaBase extends JExpr {
     protected JavaDecl getDeclImpl()
     {
         return getLambdaType();
-    }
-
-    /**
-     * Override to try to resolve with lambda type.
-     */
-    @Override
-    protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
-    {
-        // If lambda type is parameterized type, try to resolve using lambda parameter types and generic types
-        if (getLambdaType() instanceof JavaParameterizedType) {
-
-            // Get lambda type generic and resolved types
-            JavaParameterizedType lambdaType = (JavaParameterizedType) getLambdaType();
-            JavaClass lambdaClass = lambdaType.getRawType();
-            JavaType[] genericTypes = lambdaClass.getTypeVars();
-            JavaType[] resolvedTypes = lambdaType.getParamTypes();
-
-            // Try to resolve type variable from lambda generic and resolved types
-            JavaType resolvedType = JavaTypeUtils.getResolvedTypeVariableForTypeArrays(aTypeVar, genericTypes, resolvedTypes);
-            if (resolvedType != null)
-                return resolvedType;
-        }
-
-        // Do normal version
-        return super.getResolvedTypeForTypeVar(aTypeVar);
     }
 
     /**

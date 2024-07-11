@@ -3,6 +3,8 @@
  */
 package javakit.parse;
 import javakit.resolver.*;
+import snap.util.ArrayUtils;
+
 import java.util.Objects;
 
 /**
@@ -125,13 +127,14 @@ public class JExprMethodRef extends JExprLambdaBase {
             return null;
 
         // Get parameter types from lambda method and look for method
-        JavaClass[] paramTypes = getLambdaMethodParameterTypesResolved();
-        if (paramTypes == null)
+        JavaType[] paramTypes = getLambdaMethodParameterTypesResolved();
+        JavaClass[] paramClasses = paramTypes != null ? ArrayUtils.map(paramTypes, type -> type.getEvalClass(), JavaClass.class) : null;
+        if (paramClasses == null)
             return null;
 
         // If one parameter with same class as prefix expression class, search for instance method with no args
-        if (paramTypes.length == 1) {
-            JavaClass paramClass = paramTypes[0];
+        if (paramClasses.length == 1) {
+            JavaClass paramClass = paramClasses[0];
             if (prefixClass.isAssignableFrom(paramClass)) {
                 JavaMethod instanceMethod = JavaClassUtils.getCompatibleMethod(prefixClass, methodName, new JavaClass[0], false);
                 if (instanceMethod != null && !instanceMethod.isStatic())
@@ -148,7 +151,7 @@ public class JExprMethodRef extends JExprLambdaBase {
         boolean staticOnly = prefixExpr.isClassNameLiteral();
 
         // Search for static or helper method for name and arg types
-        JavaMethod helperMethod = JavaClassUtils.getCompatibleMethod(prefixClass, methodName, paramTypes, staticOnly);
+        JavaMethod helperMethod = JavaClassUtils.getCompatibleMethod(prefixClass, methodName, paramClasses, staticOnly);
         if (helperMethod != null)
             return helperMethod;
 
