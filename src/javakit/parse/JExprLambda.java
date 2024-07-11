@@ -82,6 +82,22 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
      */
     protected JType createTypeNodeForLambdaParameterVarDecl(JVarDecl varDecl)
     {
+        // Get parameter type
+        JavaClass parameterType = getJavaClassForLambdaParameterVarDecl(varDecl);
+        if (parameterType == null)
+            return null;
+
+        // Create type for type decl and return
+        JType type = JType.createTypeForTypeAndToken(parameterType, varDecl.getStartToken());
+        type._parent = varDecl;
+        return type;
+    }
+
+    /**
+     * Returns the class for given lambda parameter VarDecl.
+     */
+    private JavaClass getJavaClassForLambdaParameterVarDecl(JVarDecl varDecl)
+    {
         // Get parameter index for var decl
         int parameterIndex = ArrayUtils.indexOf(_params, varDecl);
         if (parameterIndex < 0)
@@ -92,15 +108,8 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
         if (parameterTypes == null || parameterIndex >= parameterTypes.length)
             return null;
 
-        // Get parameter type
-        JavaClass parameterType = parameterTypes[parameterIndex];
-        if (parameterType == null)
-            return null;
-
-        // Create type for type decl and return
-        JType type = JType.createTypeForTypeAndToken(parameterType, varDecl.getStartToken());
-        type._parent = varDecl;
-        return type;
+        // Return parameter type at index
+        return parameterTypes[parameterIndex];
     }
 
     /**
