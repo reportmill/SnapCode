@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 /**
  * This class represents a method call in code.
  */
-public class JExprMethodCall extends JExpr implements WithId {
+public class JExprMethodCall extends JExpr implements WithId, WithArgs {
 
     // The identifier
     private JExprId _id;
@@ -56,16 +56,6 @@ public class JExprMethodCall extends JExpr implements WithId {
         if (_id != null)
             setName(_id.getName());
     }
-
-    /**
-     * Returns the number of arguments.
-     */
-    public int getArgCount()  { return _args.length; }
-
-    /**
-     * Returns the individual argument at index.
-     */
-    public JExpr getArg(int anIndex)  { return _args[anIndex]; }
 
     /**
      * Returns the method arguments.

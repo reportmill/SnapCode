@@ -9,13 +9,21 @@ import snap.util.ArrayUtils;
  * A JStmt subclass to represent an explicit constructor invocation, like: this(x) or super(y).
  * Found in first line of JContrDecl only.
  */
-public class JStmtConstrCall extends JStmt {
+public class JStmtConstrCall extends JStmt implements WithArgs {
 
     // The array of ids
     private JExprId[] _idList = new JExprId[0];
 
     // The args
     private JExpr[] _args = JExpr.EMPTY_EXPR_ARRAY;
+
+    /**
+     * Constructor.
+     */
+    public JStmtConstrCall()
+    {
+        super();
+    }
 
     /**
      * Returns the array of ids.
@@ -34,11 +42,13 @@ public class JStmtConstrCall extends JStmt {
     /**
      * Returns the method arguments.
      */
+    @Override
     public JExpr[] getArgs()  { return _args; }
 
     /**
      * Sets the method arguments.
      */
+    @Override
     public void setArgs(JExpr[] theArgs)
     {
         _args = theArgs;
@@ -51,14 +61,7 @@ public class JStmtConstrCall extends JStmt {
     public JavaClass[] getArgClasses()
     {
         JExpr[] args = getArgs();
-        JavaClass[] argTypes = new JavaClass[args.length];
-
-        for (int i = 0, iMax = args.length; i < iMax; i++) {
-            JExpr arg = args[i];
-            argTypes[i] = arg != null ? arg.getEvalClass() : null;
-        }
-
-        return argTypes;
+        return ArrayUtils.map(args, arg -> arg != null ? arg.getEvalClass() : null, JavaClass.class);
     }
 
     /**

@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 /**
  * A JNode for Enum constants.
  */
-public class JEnumConst extends JMemberDecl {
+public class JEnumConst extends JMemberDecl implements WithArgs {
 
     // The args
     protected JExpr[] _args = JExpr.EMPTY_EXPR_ARRAY;
@@ -26,11 +26,13 @@ public class JEnumConst extends JMemberDecl {
     /**
      * Returns the arguments.
      */
+    @Override
     public JExpr[] getArgs()  { return _args; }
 
     /**
      * Sets the arguments.
      */
+    @Override
     public void setArgs(JExpr[] theArgs)
     {
         _args = theArgs;

@@ -55,41 +55,23 @@ public abstract class JExprLambdaBase extends JExpr {
      */
     private JavaType getLambdaTypeImpl()
     {
-        // Get Parent (just return if null)
+        // Get Parent
         JNode parentNode = getParent();
-        if (parentNode == null)
-            return null;
 
-        // Handle parent is method call: Get lambda interface from method call decl param
-        if (parentNode instanceof JExprMethodCall) {
+        // Handle parent is WithArgs (JExprMethodCall, JExprAlloc): Get lambda interface from executable call decl param
+        if (parentNode instanceof WithArgs) {
 
-            // Get methodCall method
-            JExprMethodCall methodCallExpr = (JExprMethodCall) parentNode;
-            JavaMethod method = methodCallExpr.getMethod();
+            // Get WithArgs node and method/constructor
+            WithArgs withArgsNode = (WithArgs) parentNode;
+            JavaExecutable method = withArgsNode.getExecutable();
             if (method == null)
                 return null;
 
             // Get arg index of this lambda expr
-            JExpr[] args = methodCallExpr.getArgs();
+            JExpr[] args = withArgsNode.getArgs();
             int argIndex = ArrayUtils.indexOfId(args, this);
-            if (argIndex < 0) { System.err.println("JExprLambdaBase.getLambdaTypeImpl: Can't happen 1"); return null; }
+            if (argIndex < 0) { System.err.println("JExprLambdaBase.getLambdaTypeImpl: Can't happen"); return null; }
             return method.getGenericParameterType(argIndex);
-        }
-
-        // Handle parent is alloc expression: Get lambda interface from alloc expression param
-        if (parentNode instanceof JExprAlloc) {
-
-            // Get alloc expr constructor
-            JExprAlloc allocExpr = (JExprAlloc) parentNode;
-            JavaConstructor constructor = allocExpr.getConstructor();
-            if (constructor == null)
-                return null;
-
-            // Get arg index of this lambda expr
-            JExpr[] args = allocExpr.getArgs();
-            int argIndex = ArrayUtils.indexOfId(args, this);
-            if (argIndex < 0) { System.err.println("JExprLambdaBase.getLambdaTypeImpl: Can't happen 2"); return null; }
-            return constructor.getGenericParameterType(argIndex);
         }
 
         // Handle parent is JVarDecl, JExprCast, JExprAssign: Return parent eval type

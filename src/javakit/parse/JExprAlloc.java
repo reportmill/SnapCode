@@ -9,7 +9,7 @@ import snap.util.ArrayUtils;
 /**
  * A JExpr subclass for Allocation expressions.
  */
-public class JExprAlloc extends JExpr {
+public class JExprAlloc extends JExpr implements WithArgs {
 
     // The Allocation type
     protected JType  _type;
@@ -56,11 +56,13 @@ public class JExprAlloc extends JExpr {
     /**
      * Returns the allocation arguments.
      */
+    @Override
     public JExpr[] getArgs()  { return _args; }
 
     /**
      * Sets the allocation arguments.
      */
+    @Override
     public void setArgs(JExpr[] theArgs)
     {
         _args = theArgs;
