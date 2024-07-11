@@ -24,8 +24,10 @@ public class JavaTypeUtils {
      */
     public static JavaType getResolvedTypeVariableForTypeArrays(JavaTypeVariable aTypeVar, JavaType[] paramTypes, JavaType[] argTypes)
     {
+        int arrayLength = Math.min(paramTypes.length, argTypes.length);
+
         // Iterate over method parameter types to see if any can resolve the type var name
-        for (int i = 0; i < paramTypes.length; i++) {
+        for (int i = 0; i < arrayLength; i++) {
 
             // If paramType doesn't reference type var, just continue
             JavaType paramType = paramTypes[i];
