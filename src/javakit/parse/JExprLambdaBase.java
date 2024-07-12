@@ -198,15 +198,13 @@ public abstract class JExprLambdaBase extends JExpr {
      * Override to prevent infinite loop.
      */
     @Override
-    public JavaType getEvalType()
+    public JavaType getEvalTypeImpl()
     {
-        if (_evalType != null) return _evalType;
         if (_resolvingEvalType)
             return null;
 
         // Get eval type
         JavaType evalType = getEvalTypeImpl();
-        _evalType = evalType;
 
         // Try to resolve type variables from Class/Method TypeVars
         if (evalType != null && !evalType.isResolvedType()) {
@@ -216,7 +214,7 @@ public abstract class JExprLambdaBase extends JExpr {
             evalType = resolvedType != null ? resolvedType : evalType.getEvalClass();
         }
 
-        return _evalType = evalType;
+        return evalType;
     }
 
     // Whether resolving eval type

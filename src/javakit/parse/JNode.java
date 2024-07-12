@@ -132,20 +132,8 @@ public class JNode {
      */
     public JavaType getEvalType()
     {
-        // If already set, just return
         if (_evalType != null) return _evalType;
-
-        // Get eval type
-        JavaType evalType = getEvalTypeImpl();
-
-        // Try to resolve type variables from Class/Method TypeVars
-        if (evalType != null && !evalType.isResolvedType()) {
-            JavaType resolvedType = getResolvedTypeForType(evalType);
-            evalType = resolvedType != null ? resolvedType : evalType.getEvalClass();
-        }
-
-        // Set and return
-        return _evalType = evalType;
+        return _evalType = getEvalTypeImpl();
     }
 
     /**
@@ -153,8 +141,17 @@ public class JNode {
      */
     protected JavaType getEvalTypeImpl()
     {
-        JavaDecl decl = getDecl();
-        return decl != null ? decl.getEvalType() : null;
+        // Get decl eval type
+        JavaType evalType = getDeclEvalType();
+
+        // Try to resolve type variables from Class/Method TypeVars
+        if (evalType != null && !evalType.isResolvedType()) {
+            JavaType resolvedType = getResolvedTypeForType(evalType);
+            evalType = resolvedType != null ? resolvedType : evalType.getEvalClass();
+        }
+
+        // Return
+        return evalType;
     }
 
     /**
