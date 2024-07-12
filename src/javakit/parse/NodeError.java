@@ -149,16 +149,6 @@ public class NodeError implements Comparable<NodeError> {
     }
 
     /**
-     * Returns the errors for a list of nodes.
-     */
-    public static NodeError[] addNodeErrorsForNodesList(NodeError[] errors, List<? extends JNode> nodesList)
-    {
-        for (JNode node : nodesList)
-            errors = ArrayUtils.addAll(errors, node.getErrors());
-        return errors;
-    }
-
-    /**
      * Returns the node error for a JFile parse exception.
      */
     public static NodeError[] getNodeErrorForFileParseException(JFile jfile)

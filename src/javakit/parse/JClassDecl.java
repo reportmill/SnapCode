@@ -20,10 +20,10 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     private JTypeVar[] _typeVars = new JTypeVar[0];
 
     // The extends list
-    protected List<JType>  _extendsTypes = new ArrayList<>();
+    protected JType[] _extendsTypes = JType.EMPTY_TYPES_ARRAY;
 
     // The implements list
-    protected List<JType>  _implementsTypes = new ArrayList<>();
+    protected JType[] _implementsTypes = JType.EMPTY_TYPES_ARRAY;
 
     // The list of fields, methods, enums annotations and child classes
     protected ObjectArray<JBodyDecl> _bodyDecls = new ObjectArray<>(JBodyDecl.class);
@@ -127,35 +127,40 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     }
 
     /**
-     * Returns the extends list.
+     * Returns the extends type.
      */
-    public List<JType> getExtendsTypes()  { return _extendsTypes; }
+    public JType getExtendsType()  { return _extendsTypes.length > 0 ? _extendsTypes[0] : null; }
 
     /**
-     * Returns the extends list.
+     * Returns the extends types.
+     */
+    public JType[] getExtendsTypes()  { return _extendsTypes; }
+
+    /**
+     * Adds an extends type.
      */
     public void addExtendsType(JType aType)
     {
-        _extendsTypes.add(aType);
+        _extendsTypes = ArrayUtils.add(_extendsTypes, aType);
         addChild(aType);
     }
 
     /**
-     * Returns the implements list.
+     * Returns the implements types.
      */
-    public List<JType> getImplementsTypes()  { return _implementsTypes; }
+    public JType[] getImplementsTypes()  { return _implementsTypes; }
 
     /**
-     * Returns the implements list.
+     * Adds an implements type.
      */
     public void addImplementsType(JType aType)
     {
-        _implementsTypes.add(aType);
+        _implementsTypes = ArrayUtils.add(_implementsTypes, aType);
         addChild(aType);
     }
 
     /**
-     * Returns the list of enum constants.
+     * Returns the enum constants.
      */
     public JEnumConst[] getEnumConstants()  { return _enumConstants; }
 
@@ -174,8 +179,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     public JavaClass getSuperClass()
     {
         // Get extends class
-        List<JType> extendsTypes = _extendsTypes;
-        JType extendsType = !extendsTypes.isEmpty() ? extendsTypes.get(0) : null;
+        JType extendsType = getExtendsType();
         JavaClass extendsClass = extendsType != null ? extendsType.getEvalClass() : null;
 
         // If no ExtendsClass return Object.class (but complain if it was declared but not found)
@@ -194,15 +198,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      */
     public JavaClass[] getInterfaces()
     {
-        List<JavaClass> interfaceClasses = new ArrayList<>();
-        for (JType interfType : _implementsTypes) {
-            JavaClass interfaceClass = interfType.getEvalClass();
-            if (interfaceClass != null)
-                interfaceClasses.add(interfaceClass);
-        }
-
-        // Return array
-        return interfaceClasses.toArray(new JavaClass[0]);
+        return ArrayUtils.mapNonNull(_implementsTypes, interfType -> interfType.getEvalClass(), JavaClass.class);
     }
 
     /**
@@ -464,7 +460,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
         }
 
         // Check interfaces (id could be interface static field)
-        List<JType> implementsTypes = getImplementsTypes();
+        JType[] implementsTypes = getImplementsTypes();
         for (JType implementsType : implementsTypes) {
             JavaClass interf = implementsType.getEvalClass();
             JavaField field2 = interf != null ? interf.getDeclaredFieldForName(name) : null;
@@ -597,12 +593,12 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
         NodeError[] errors = NodeError.NO_ERRORS;
 
         // Get errors for extends list
-        List<JType> extendsTypes = getExtendsTypes();
-        errors = NodeError.addNodeErrorsForNodesList(errors, extendsTypes);
+        JType[] extendsTypes = getExtendsTypes();
+        errors = NodeError.addNodeErrorsForNodes(errors, extendsTypes);
 
         // Get errors for implements list
-        List<JType> implementsTypes = getImplementsTypes();
-        errors = NodeError.addNodeErrorsForNodesList(errors, implementsTypes);
+        JType[] implementsTypes = getImplementsTypes();
+        errors = NodeError.addNodeErrorsForNodes(errors, implementsTypes);
 
         // Get errors for BodyDecls
         JBodyDecl[] bodyDecls = getBodyDecls();

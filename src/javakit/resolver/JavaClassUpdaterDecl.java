@@ -5,7 +5,6 @@ package javakit.resolver;
 import javakit.parse.*;
 import snap.util.ArrayUtils;
 import java.lang.reflect.*;
-import java.util.List;
 
 /**
  * This class updates a JavaClass from JClassDecl.
@@ -57,8 +56,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     {
         if (_classDecl.isInterface())
             return null;
-        List<JType> extendsTypes = _classDecl.getExtendsTypes();
-        JType extendsType = !extendsTypes.isEmpty() ? extendsTypes.get(0) : null;
+        JType extendsType = _classDecl.getExtendsType();
         JavaType genericSuperClass = extendsType != null ? extendsType.getJavaType() : null;
         if (genericSuperClass != null)
             return genericSuperClass;

@@ -113,7 +113,7 @@ public class JExprAlloc extends JExpr implements WithArgs {
         _classBodyDecls = bodyDecls;
 
         _classDecl = new JClassDecl();
-        _classDecl.getExtendsTypes().add(getType()); // Want to reference type, not steal it
+        _classDecl._extendsTypes = ArrayUtils.add(_classDecl._extendsTypes, getType()); // Want to reference type, not steal it
         _classDecl.setBodyDecls(bodyDecls);
         addChild(_classDecl);
     }

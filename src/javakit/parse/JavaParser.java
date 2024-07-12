@@ -556,12 +556,14 @@ public class JavaParser extends JavaParserStmt {
 
                 // Handle ImplementsList ClassType
                 case "ClassType":
-                    enumDecl.getImplementsTypes().add(aNode.getCustomNode(JType.class));
+                    JType implementsType = aNode.getCustomNode(JType.class);
+                    enumDecl.addImplementsType(implementsType);
                     break;
 
                 // Handle EnumConstant
                 case "EnumConstant":
-                    enumDecl.addEnumConstant(aNode.getCustomNode(JEnumConst.class));
+                    JEnumConst enumConst = aNode.getCustomNode(JEnumConst.class);
+                    enumDecl.addEnumConstant(enumConst);
                     break;
 
                 // Handle ClassBodyDecl

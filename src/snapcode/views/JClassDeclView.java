@@ -31,15 +31,14 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JBlockView<JNODE> 
     protected View[] createRowViews()
     {
         // Create/add node for id
-        JClassDecl cd = getJNode();
-        JExprId id = cd.getId();
-        JNodeView<?> idView = new ClassDeclIdView<>(id);
+        JClassDecl classDecl = getJNode();
+        JExprId classDeclId = classDecl.getId();
+        JNodeView<?> idView = new ClassDeclIdView<>(classDeclId);
         List<View> rowViews = new ArrayList<>();
         rowViews.add(idView);
 
         // Add JNodeView for extnds type
-        List<JType> exts = cd.getExtendsTypes();
-        JType ext = exts.size() > 0 ? exts.get(0) : null;
+        JType ext = classDecl.getExtendsType();
         if (ext != null) {
 
             // Add separator label

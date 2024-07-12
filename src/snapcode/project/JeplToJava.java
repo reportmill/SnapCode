@@ -6,7 +6,6 @@ import snap.util.ListUtils;
 import snapcode.apptools.RunToolUtils;
 import java.lang.reflect.Modifier;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -86,18 +85,18 @@ public class JeplToJava {
         _sb.append(className);
 
         // Append extends
-        List<JType> extendsTypes = classDecl.getExtendsTypes();
-        if (extendsTypes.size() > 0) {
+        JType[] extendsTypes = classDecl.getExtendsTypes();
+        if (extendsTypes.length > 0) {
             _sb.append(" extends ");
-            String extendsTypesStr = extendsTypes.stream().map(JType::getName).collect(Collectors.joining(", "));
+            String extendsTypesStr = ArrayUtils.mapToStringsAndJoin(extendsTypes, JType::getName, ", ");
             _sb.append(extendsTypesStr);
         }
 
         // Append implements
-        List<JType> implementsTypes = classDecl.getImplementsTypes();
-        if (implementsTypes.size() > 0) {
+        JType[] implementsTypes = classDecl.getImplementsTypes();
+        if (implementsTypes.length > 0) {
             _sb.append(" implements ");
-            String extendsTypesStr = extendsTypes.stream().map(JType::getName).collect(Collectors.joining(", "));
+            String extendsTypesStr = ArrayUtils.mapToStringsAndJoin(implementsTypes, JType::getName, ", ");
             _sb.append(extendsTypesStr);
         }
 
@@ -268,7 +267,7 @@ public class JeplToJava {
         List<JNode> children = aNode.getChildren();
 
         // If node is statement with missing semicolon, add it
-        if (aNode instanceof JStmt && children.size() > 0) {
+        if (aNode instanceof JStmt && !children.isEmpty()) {
             JNode lastChild = children.get(children.size() - 1);
             if (!(lastChild instanceof JStmt)) {
                 int lastCharIndex = aNode.getEndCharIndex() - 1 + offset;
