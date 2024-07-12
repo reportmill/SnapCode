@@ -220,6 +220,25 @@ public class Resolver {
     }
 
     /**
+     * Returns a JavaGenericArrayType for java.lang.reflect.GenericArrayType.
+     */
+    protected JavaGenericArrayType getJavaGenericArrayTypeForJavaType(JavaType javaType)
+    {
+        // Check ArrayTypes cache and return if found
+        String id = javaType.getId() + "[]";
+        JavaGenericArrayType genericArrayType = _arrayTypes.get(id);
+        if (genericArrayType != null)
+            return genericArrayType;
+
+        // Create and add to cache
+        genericArrayType = new JavaGenericArrayType(javaType);
+        _arrayTypes.put(id, genericArrayType);
+
+        // Return
+        return genericArrayType;
+    }
+
+    /**
      * Returns a JavaType for given type.
      */
     public JavaType getJavaTypeForType(Type aType)
@@ -238,7 +257,7 @@ public class Resolver {
 
         // Handle GenericArrayType
         if (aType instanceof GenericArrayType)
-            return getGenericArrayTypeDecl((GenericArrayType) aType);
+            return getJavaGenericArrayTypeForType((GenericArrayType) aType);
 
         // Handle WildcardType: Punt for now, focus on lower bound
         if (aType instanceof WildcardType) {
@@ -278,7 +297,7 @@ public class Resolver {
     /**
      * Returns a JavaGenericArrayType for java.lang.reflect.GenericArrayType.
      */
-    private JavaGenericArrayType getGenericArrayTypeDecl(GenericArrayType aGAT)
+    private JavaGenericArrayType getJavaGenericArrayTypeForType(GenericArrayType aGAT)
     {
         // Check ArrayTypes cache and return if found
         String id = ResolverIds.getIdForGenericArrayType(aGAT);

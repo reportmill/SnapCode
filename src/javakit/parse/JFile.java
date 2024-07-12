@@ -406,15 +406,16 @@ public class JFile extends JNode {
         // Handle JType
         if (aNode instanceof JType || aNode instanceof JExprId) {
 
-            // Get JavaClass - just return if not found or primitive
+            // Get JavaClass - just return if not found or primitive or 'java.lang' class
             JavaClass javaClass = aNode.getEvalClass();
             if (javaClass == null || javaClass.isPrimitive())
+                return;
+            JavaPackage javaPackage = javaClass.getPackage();
+            if (javaPackage == null || javaPackage.getName().equals("java.lang"))
                 return;
 
             // Get JavaClass.ClassName - just return if java.lang
             String className = javaClass.getClassName();
-            if (className.startsWith("java.lang."))
-                return;
 
             // Find import for class name
             JImportDecl classImport = ListUtils.findMatch(theImports, id -> className.startsWith(id.getName()));
@@ -425,7 +426,7 @@ public class JFile extends JNode {
         // Recurse for children
         for (JNode child : aNode.getChildren()) {
             resolveClassNames(child, theImports);
-            if (theImports.size() == 0)
+            if (theImports.isEmpty())
                 break;
         }
     }

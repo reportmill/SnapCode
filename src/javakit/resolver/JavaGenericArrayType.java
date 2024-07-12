@@ -39,6 +39,27 @@ public class JavaGenericArrayType extends JavaType {
     }
 
     /**
+     * Constructor.
+     */
+    public JavaGenericArrayType(JavaType componentType)
+    {
+        // Do normal version
+        super(componentType._resolver, DeclType.GenArrayType);
+
+        // Set Id
+        _id = componentType.getId() + "[]";
+
+        // Set Name, SimpleName
+        _name = _simpleName = componentType.getName() + "[]";
+
+        // Set EvalClass: Probably need to do better than this
+        _evalClass = getJavaClassForClass(Object[].class);
+
+        // Set ComponentType
+        _componentType = componentType;
+    }
+
+    /**
      * Returns the Array component type.
      */
     public JavaType getComponentType()  { return _componentType; }
