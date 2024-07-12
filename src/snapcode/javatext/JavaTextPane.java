@@ -124,12 +124,10 @@ public class JavaTextPane extends TextPane {
         while (nodePathBox.getChildCount() > 1)
             nodePathBox.removeChild(1);
 
-        // Get Path node labels
+        // Create and add Path node labels
         Label[] pathNodeLabels = getLabelsForSelNodePath();
-        for (Label pathNodeLabel : pathNodeLabels) {
-            pathNodeLabel.addEventHandler(this::handleNodePathLabelMouseRelease, MouseRelease);
+        for (Label pathNodeLabel : pathNodeLabels)
             nodePathBox.addChild(pathNodeLabel);
-        }
     }
 
     /**
@@ -403,7 +401,7 @@ public class JavaTextPane extends TextPane {
             return getLabelsForSelNodePathForJepl();
 
         // Do normal version
-        return getLabelsForSelNodePath(_textArea, JFile.class);
+        return getLabelsForSelNodePath(JFile.class);
     }
 
     /**
@@ -412,7 +410,7 @@ public class JavaTextPane extends TextPane {
     protected Label[] getLabelsForSelNodePathForJepl()
     {
         // Get JavaTextPane version
-        Label[] pathNodeLabels = JavaTextPane.getLabelsForSelNodePath(_textArea, JClassDecl.class);
+        Label[] pathNodeLabels = getLabelsForSelNodePath(JClassDecl.class);
 
         // If last label is ClassLabel, reconfigure
         Label lastLabel = pathNodeLabels[pathNodeLabels.length - 1];
@@ -433,11 +431,11 @@ public class JavaTextPane extends TextPane {
     /**
      * Returns an array of labels for selected JNode hierarchy.
      */
-    public static Label[] getLabelsForSelNodePath(JavaTextArea javaTextArea, Class<? extends JNode> excludeClass)
+    private Label[] getLabelsForSelNodePath(Class<? extends JNode> excludeClass)
     {
         // Get SelNode and DeepNode
-        JNode selNode = javaTextArea.getSelNode();
-        JNode deepNode = javaTextArea._deepNode;
+        JNode selNode = _textArea.getSelNode();
+        JNode deepNode = _textArea._deepNode;
         Font font = Font.Arial11;
         List<Label> pathLabels = new ArrayList<>();
 
@@ -450,6 +448,7 @@ public class JavaTextPane extends TextPane {
             // Create label for node
             Label label = labelBuilder.name("NodePathLabel").text(jnode.getNodeString()).font(font).build();
             label.setProp("JNode", jnode);
+            label.addEventHandler(this::handleNodePathLabelMouseRelease, MouseRelease);
             if (jnode == selNode)
                 label.setFill(Color.LIGHTGRAY);
             pathLabels.add(0, label);
