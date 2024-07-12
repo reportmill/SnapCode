@@ -301,9 +301,9 @@ public class Resolver {
     {
         // Check ParamTypes cache and return if found
         String id = ResolverIds.getIdForParameterizedType(aPT);
-        JavaParameterizedType decl = _paramTypes.get(id);
-        if (decl != null)
-            return decl;
+        JavaParameterizedType parameterizedType = _paramTypes.get(id);
+        if (parameterizedType != null)
+            return parameterizedType;
 
         // Get RawType and ArgTypes as JavaType
         Class<?> rawType = (Class<?>) aPT.getRawType(); // Java implementation always returns Class
@@ -312,10 +312,10 @@ public class Resolver {
         JavaType[] typeArgDecls = getJavaTypesForTypes(typArgs);
 
         // Create and return JavaParameterizedType
-        decl = getJavaParameterizedTypeForTypes(rawTypeDecl, typeArgDecls);
-        if (!decl.getId().equals(id))
-            _paramTypes.put(id, decl); // Shouldn't need this
-        return decl;
+        parameterizedType = getJavaParameterizedTypeForTypes(rawTypeDecl, typeArgDecls);
+        if (!parameterizedType.getId().equals(id))
+            _paramTypes.put(id, parameterizedType); // Shouldn't need this
+        return parameterizedType;
     }
 
     /**
@@ -323,6 +323,10 @@ public class Resolver {
      */
     protected JavaParameterizedType getJavaParameterizedTypeForTypes(JavaClass aRawType, JavaType[] theTypeArgs)
     {
+        // If any primitive types, promote them to real class
+        if (ArrayUtils.hasMatch(theTypeArgs, type -> type.isPrimitive()))
+            theTypeArgs = ArrayUtils.map(theTypeArgs, type -> type.isPrimitive() ? type.getPrimitiveAlt() : type, JavaType.class);
+
         // Get id and decl for id (just return if found)
         String id = ResolverIds.getIdForParameterizedTypeParts(aRawType, theTypeArgs);
         JavaParameterizedType decl = _paramTypes.get(id);

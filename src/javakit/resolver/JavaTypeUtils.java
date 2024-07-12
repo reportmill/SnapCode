@@ -1,10 +1,38 @@
 package javakit.resolver;
 import snap.util.ArrayUtils;
+import java.util.Arrays;
 
 /**
  * Utility methods for JavaType.
  */
 public class JavaTypeUtils {
+
+    /**
+     * Returns a resolved type for given type variable, method and arg types.
+     */
+    public static JavaType getResolvedTypeForTypeVarAndMethodAndArgTypes(JavaTypeVariable aTypeVar, JavaExecutable method, JavaType[] argTypes)
+    {
+        // Get method parameter types
+        JavaType[] paramTypes = method.getGenericParameterTypes();
+
+        // Handle VarArgs
+        if (method.isVarArgs()) {
+
+            // If no var args provided, trim param types
+            if (argTypes.length < paramTypes.length)
+                paramTypes = Arrays.copyOf(paramTypes, argTypes.length);
+
+            // Otherwise trim and convert trailing arg types to array
+            else {
+                argTypes = Arrays.copyOf(argTypes, paramTypes.length);
+                JavaType compClass = argTypes[paramTypes.length - 1];
+                argTypes[paramTypes.length -1 ] = compClass.getArrayType();
+            }
+        }
+
+        // Forward to getResolvedTypeVariableForTypeArrays()
+        return getResolvedTypeVariableForTypeArrays(aTypeVar, paramTypes, argTypes);
+    }
 
     /**
      * Returns the resolved type for given type variable and array of generic types and array of resolved types.

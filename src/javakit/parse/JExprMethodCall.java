@@ -229,11 +229,10 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
             return aTypeVar;
 
         // Get method parameter types and arg types
-        JavaType[] paramTypes = method.getGenericParameterTypes();
         JavaType[] argTypes = ArrayUtils.map(_args, arg -> arg.getEvalType(), JavaType.class);
 
         // Forward to getResolvedTypeVariableForTypeArrays()
-        return JavaTypeUtils.getResolvedTypeVariableForTypeArrays(aTypeVar, paramTypes, argTypes);
+        return JavaTypeUtils.getResolvedTypeForTypeVarAndMethodAndArgTypes(aTypeVar, method, argTypes);
     }
 
     /**
