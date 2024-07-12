@@ -202,7 +202,7 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
     {
         // Try to resolve from method types
         JavaType methodResolvedType = getResolvedTypeForTypeVarFromMethodTypes(aTypeVar);
-        if (methodResolvedType != null) {
+        if (methodResolvedType != aTypeVar) {
             if (methodResolvedType.isResolvedType())
                 return methodResolvedType;
             return getResolvedTypeForType(methodResolvedType);
@@ -226,7 +226,7 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
         // Get method (just return if not found or doesn't have type var
         JavaMethod method = getMethod();
         if (method == null || method.getTypeVarForName(aTypeVar.getName()) == null)
-            return null;
+            return aTypeVar;
 
         // Get method parameter types and arg types
         JavaType[] paramTypes = method.getGenericParameterTypes();

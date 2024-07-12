@@ -16,7 +16,7 @@ public class JavaTypeUtils {
 
         // Complain and return
         System.err.println("JavaTypeUtils.getResolvedTypeForTypeArrays: Unsupported type: " + aType);
-        return null;
+        return aType;
     }
 
     /**
@@ -38,18 +38,18 @@ public class JavaTypeUtils {
             JavaType argType = argTypes[i];
             if (argType != null) {
                 JavaType resolvedType = getResolvedTypeVariableForTypes(aTypeVar, paramType, argType);
-                if (resolvedType != null)
+                if (resolvedType != aTypeVar)
                     return resolvedType;
             }
         }
 
         // Return not found
-        return null;
+        return aTypeVar;
     }
 
     /**
      * Returns resolved type for given type variable, given a generic type and a resolved type.
-     * Returns null if generic type doesn't reference type variable.
+     * Returns given type variable if generic type doesn't reference type variable.
      */
     public static JavaType getResolvedTypeVariableForTypes(JavaTypeVariable aTypeVar, JavaType paramType, JavaType argType)
     {
@@ -58,7 +58,7 @@ public class JavaTypeUtils {
             JavaTypeVariable paramTypeVar = (JavaTypeVariable) paramType;
             if (paramTypeVar.getName().equals(aTypeVar.getName()))
                 return argType;
-            return null;
+            return aTypeVar;
         }
 
         // Handle Parameterized type
@@ -69,7 +69,7 @@ public class JavaTypeUtils {
             JavaParameterizedType argParamType = argType instanceof JavaParameterizedType ? (JavaParameterizedType) argType : null;
             if (argParamType == null) {
                 System.err.println("JavaTypeUtils.getResolvedTypeVariableForTypes: arg type not parameterized type");
-                return null;
+                return aTypeVar;
             }
 
             // Get arrays of parameter types
@@ -77,7 +77,7 @@ public class JavaTypeUtils {
             JavaType[] argParamTypes = argParamType.getParamTypes();
             if (paramParamTypes.length != argParamTypes.length) {
                 System.err.println("JavaTypeUtils.getResolvedTypeVariableForTypes: param types length mismatch");
-                return null;
+                return aTypeVar;
             }
 
             // Forward to type arrays version
@@ -93,7 +93,7 @@ public class JavaTypeUtils {
 
         // Complain and return
         System.err.println("JavaTypeUtils.getResolvedTypeVariableForTypes: Unsupported type: " + paramType);
-        return null;
+        return aTypeVar;
     }
 
     /**
@@ -136,8 +136,7 @@ public class JavaTypeUtils {
         // Convert paramType from subtype.evalClass to subtype (E.g: (T, T, T) from BinaryOperator<T> to BinaryOperator<Integer>)
         JavaTypeVariable[] subtypeClassTypeParams = subtypeClass.getTypeVars(); // E.g.: <T> from BinaryOperator <T>
         JavaType[] subtypeParamTypes = subtypeParamType.getParamTypes(); // E.g.: <Integer> from BinaryOperator <Integer>
-        JavaType resolvedType = getResolvedTypeForTypeArrays(paramType2, subtypeClassTypeParams, subtypeParamTypes);
-        return resolvedType != null ? resolvedType : paramType2;
+        return getResolvedTypeForTypeArrays(paramType2, subtypeClassTypeParams, subtypeParamTypes);
     }
 
     /**

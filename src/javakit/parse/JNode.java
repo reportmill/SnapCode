@@ -141,17 +141,14 @@ public class JNode {
      */
     protected JavaType getEvalTypeImpl()
     {
-        // Get decl eval type
+        // Get decl eval type - just return if null or fully resolved type
         JavaType evalType = getDeclEvalType();
+        if (evalType == null || evalType.isResolvedType())
+            return evalType;
 
         // Try to resolve type variables from Class/Method TypeVars
-        if (evalType != null && !evalType.isResolvedType()) {
-            JavaType resolvedType = getResolvedTypeForType(evalType);
-            evalType = resolvedType != null ? resolvedType : evalType.getEvalClass();
-        }
-
-        // Return
-        return evalType;
+        JavaType resolvedType = getResolvedTypeForType(evalType);
+        return resolvedType != null ? resolvedType : evalType.getEvalClass();
     }
 
     /**

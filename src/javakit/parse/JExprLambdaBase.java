@@ -155,8 +155,7 @@ public abstract class JExprLambdaBase extends JExpr {
         JavaType[] resolvedTypes = lambdaType.getParamTypes();
 
         // Try to resolve type from lambda generic and resolved types
-        JavaType resolvedType = JavaTypeUtils.getResolvedTypeForTypeArrays(paramType, genericTypes, resolvedTypes);
-        return resolvedType != null ? resolvedType : paramType;
+        return JavaTypeUtils.getResolvedTypeForTypeArrays(paramType, genericTypes, resolvedTypes);
     }
 
     /**
@@ -203,18 +202,16 @@ public abstract class JExprLambdaBase extends JExpr {
         if (_resolvingEvalType)
             return null;
 
-        // Get eval type
-        JavaType evalType = getEvalTypeImpl();
+        // Get decl eval type - just return if null or fully resolved type
+        JavaType evalType = getDeclEvalType();
+        if (evalType == null || evalType.isResolvedType())
+            return evalType;
 
         // Try to resolve type variables from Class/Method TypeVars
-        if (evalType != null && !evalType.isResolvedType()) {
-            _resolvingEvalType = true;
-            JavaType resolvedType = getResolvedTypeForType(evalType);
-            _resolvingEvalType = false;
-            evalType = resolvedType != null ? resolvedType : evalType.getEvalClass();
-        }
-
-        return evalType;
+        _resolvingEvalType = true;
+        JavaType resolvedType = getResolvedTypeForType(evalType);
+        _resolvingEvalType = false;
+        return resolvedType != null ? resolvedType : evalType.getEvalClass();
     }
 
     // Whether resolving eval type
@@ -231,7 +228,7 @@ public abstract class JExprLambdaBase extends JExpr {
             JavaType lambdaMethodReturnType = getLambdaMethodReturnType();
             JavaType lambdaReturnType = getLambdaReturnType();
             JavaType resolvedType = JavaTypeUtils.getResolvedTypeVariableForTypes(aTypeVar, lambdaMethodReturnType, lambdaReturnType);
-            if (resolvedType != null)
+            if (resolvedType != aTypeVar)
                 return resolvedType;
         }
 
