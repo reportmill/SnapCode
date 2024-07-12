@@ -405,8 +405,8 @@ public class JavaParser extends JavaParserStmt {
 
                 // Handle TypeParams
                 case "TypeParams": {
-                    JTypeVar[] typeVars = aNode.getCustomNode(JTypeVar[].class);
-                    classDecl.setTypeVars(typeVars);
+                    JTypeVar[] typeParams = aNode.getCustomNode(JTypeVar[].class);
+                    classDecl.setTypeVars(typeParams);
                     break;
                 }
 

@@ -151,7 +151,7 @@ public abstract class JExprLambdaBase extends JExpr {
         }
 
         // Get lambda type generic and resolved types
-        JavaType[] genericTypes = lambdaClass.getTypeVars();
+        JavaType[] genericTypes = lambdaClass.getTypeParameters();
         JavaType[] resolvedTypes = lambdaType.getParamTypes();
 
         // Try to resolve type from lambda generic and resolved types

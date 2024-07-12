@@ -36,7 +36,7 @@ public class JavaClassUpdater {
     {
         // Get current values
         JavaClass[] oldInterfaces = _javaClass.getInterfaces();
-        JavaTypeVariable[] oldTypeVars = _javaClass.getTypeVars();
+        JavaTypeVariable[] oldTypeParams = _javaClass.getTypeParameters();
         JavaClass[] oldInnerClasses = _javaClass.getDeclaredClasses();
         JavaField[] oldFields = _javaClass.getDeclaredFields();
         JavaMethod[] oldMethods = _javaClass.getDeclaredMethods();
@@ -71,9 +71,9 @@ public class JavaClassUpdater {
         if (!Arrays.equals(oldInterfaces, newInterfaces))
             classChanged = true;
 
-        // Update type variables
-        JavaTypeVariable[] newTypeVars = _javaClass._typeVars = getTypeVariables();
-        if (!Arrays.equals(oldTypeVars, newTypeVars))
+        // Update type parameters
+        JavaTypeVariable[] newTypeParams = _javaClass._typeParameters = getTypeParameters();
+        if (!Arrays.equals(oldTypeParams, newTypeParams))
             classChanged = true;
 
         // Update inner classes
@@ -160,9 +160,9 @@ public class JavaClassUpdater {
     }
 
     /**
-     * Returns JavaTypeVariable array for given class TypeVariables.
+     * Returns JavaTypeVariable array for given class type parameters.
      */
-    protected JavaTypeVariable[] getTypeVariables()
+    protected JavaTypeVariable[] getTypeParameters()
     {
         Class<?> realClass = getRealClassImpl();
         TypeVariable<?>[] typeVariables = realClass.getTypeParameters();

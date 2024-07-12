@@ -354,13 +354,13 @@ public class Resolver {
         if (classOrMethod instanceof Class) {
             Class<?> ownerClass = (Class<?>) classOrMethod;
             JavaClass javaClass = getJavaClassForClass(ownerClass);
-            return javaClass.getTypeVarForName(typeVarName);
+            return javaClass.getTypeParameterForName(typeVarName);
         }
 
         // Handle Method/Constructor: Get JavaMethod and return JavaTypeVariable for name
         Executable methodOrConstr = (Executable) classOrMethod;
         JavaExecutable javaMethod = getJavaExecutableForExecutable(methodOrConstr);
-        return javaMethod.getTypeVarForName(typeVarName);
+        return javaMethod.getTypeParameterForName(typeVarName);
     }
 
     /**

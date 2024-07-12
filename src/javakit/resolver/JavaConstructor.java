@@ -104,7 +104,7 @@ public class JavaConstructor extends JavaExecutable {
         c._genericParameterTypes = JavaType.EMPTY_TYPES_ARRAY;
         c._parameterTypes = new JavaClass[0];
         c._evalType = javaClass;
-        c._typeVars = new JavaTypeVariable[0];
+        c._typeParameters = new JavaTypeVariable[0];
         return c;
     }
 }

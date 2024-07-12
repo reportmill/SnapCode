@@ -98,9 +98,10 @@ public class JavaParameterizedType extends JavaType {
     private JavaType getResolvedTypeForClass(String typeVarName, JavaClass javaClass)
     {
         // Check class
-        int typeVarIndex = javaClass.getTypeVarIndexForName(typeVarName);
-        if (typeVarIndex >= 0 && typeVarIndex < _paramTypes.length)
-            return _paramTypes[typeVarIndex];
+        JavaTypeVariable[] typeParams = javaClass.getTypeParameters();
+        int typeParamIndex = ArrayUtils.findMatchIndex(typeParams, tvar -> tvar.getName().equals(typeVarName));
+        if (typeParamIndex >= 0 && typeParamIndex < _paramTypes.length)
+            return _paramTypes[typeParamIndex];
 
         // Check superclass
         JavaClass superClass = javaClass.getSuperClass();

@@ -11,7 +11,7 @@ import snap.util.ObjectArray;
 /**
  * This class represents a Java class declaration.
  */
-public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVars {
+public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeParameters {
 
     // The type of class (Class, Interface, Enum, Annotation)
     protected ClassType  _classType = ClassType.Class;
@@ -109,7 +109,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     /**
      * Returns the JTypeVar(s).
      */
-    public JTypeVar[] getTypeVarDecls()  { return _typeVars; }
+    public JTypeVar[] getTypeParamDecls()  { return _typeVars; }
 
     /**
      * Sets the JTypeVar(s).
@@ -492,7 +492,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
     {
         // Look for JTypeVar for given type name
         String typeName = type.getName();
-        JTypeVar typeVar = getTypeVarDeclForName(typeName);
+        JTypeVar typeVar = getTypeParamDeclForName(typeName);
         if (typeVar != null)
             return typeVar.getTypeVariable();
 
@@ -609,7 +609,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeVa
         errors = NodeError.addNodeErrorsForNodes(errors, bodyDecls);
 
         // Get errors for type vars
-        JTypeVar[] typeVars = getTypeVarDecls();
+        JTypeVar[] typeVars = getTypeParamDecls();
         errors = NodeError.addNodeErrorsForNodes(errors, typeVars);
 
         // Get errors for EnumConstants

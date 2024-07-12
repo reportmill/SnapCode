@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 /**
  * This JMemberDecl subclass represents Java executables (methods & constructors).
  */
-public abstract class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithVarDecls, WithTypeVars {
+public abstract class JExecutableDecl extends JMemberDecl implements WithBlockStmt, WithVarDecls, WithTypeParameters {
 
     // Type variables
     private JTypeVar[] _typeVars = new JTypeVar[0];
@@ -37,7 +37,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     /**
      * Returns the method type variables.
      */
-    public JTypeVar[] getTypeVarDecls()  { return _typeVars; }
+    public JTypeVar[] getTypeParamDecls()  { return _typeVars; }
 
     /**
      * Sets the method type variables.
@@ -151,7 +151,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     {
         // Handle TypeVar name: return typevar decl
         String typeName = aJType.getName();
-        JTypeVar typeVarDecl = getTypeVarDeclForName(typeName);
+        JTypeVar typeVarDecl = getTypeParamDeclForName(typeName);
         if (typeVarDecl != null)
             return typeVarDecl.getTypeVariable();
 
@@ -176,7 +176,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
         errors = NodeError.addNodeErrorsForNodes(errors, throwsList);
 
         // Get errors for type vars
-        JTypeVar[] typeVars = getTypeVarDecls();
+        JTypeVar[] typeVars = getTypeParamDecls();
         errors = NodeError.addNodeErrorsForNodes(errors, typeVars);
 
         // Return

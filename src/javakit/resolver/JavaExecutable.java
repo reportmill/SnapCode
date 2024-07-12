@@ -15,8 +15,8 @@ public class JavaExecutable extends JavaMember {
     // The reader that provides properties
     protected ExecutableReader _execReader;
 
-    // The JavaDecls for TypeVars for Method/Constructor
-    protected JavaTypeVariable[]  _typeVars;
+    // The Method/Constructor type parameters
+    protected JavaTypeVariable[] _typeParameters;
 
     // The JavaTypes for parameter types for Constructor, Method
     protected JavaType[] _genericParameterTypes;
@@ -62,21 +62,21 @@ public class JavaExecutable extends JavaMember {
     public JavaExecutable getSuper()  { return null; }
 
     /**
-     * Returns the TypeVars.
+     * Returns the type parameters.
      */
-    public JavaTypeVariable[] getTypeVars()
+    public JavaTypeVariable[] getTypeParameters()
     {
-        if (_typeVars != null) return _typeVars;
-        return _typeVars = _execReader.getTypeVars();
+        if (_typeParameters != null) return _typeParameters;
+        return _typeParameters = _execReader.getTypeParameters();
     }
 
     /**
-     * Returns the TypeVar with given name.
+     * Returns the type parameter for given name (null if not found).
      */
-    public JavaTypeVariable getTypeVarForName(String aName)
+    public JavaTypeVariable getTypeParameterForName(String aName)
     {
-        JavaTypeVariable[] typeVars = getTypeVars();
-        return ArrayUtils.findMatch(typeVars, tvar -> tvar.getName().equals(aName));
+        JavaTypeVariable[] typeParams = getTypeParameters();
+        return ArrayUtils.findMatch(typeParams, tvar -> tvar.getName().equals(aName));
     }
 
     /**

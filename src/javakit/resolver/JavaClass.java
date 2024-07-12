@@ -36,8 +36,8 @@ public class JavaClass extends JavaType {
     // The array of interfaces
     protected JavaClass[] _interfaces;
 
-    // The type var decls
-    protected JavaTypeVariable[] _typeVars;
+    // The class type parameters
+    protected JavaTypeVariable[] _typeParameters;
 
     // The field decls
     protected JavaField[] _fields;
@@ -139,7 +139,7 @@ public class JavaClass extends JavaType {
             _methods = new JavaMethod[0];
             _constructors = new JavaConstructor[0];
             _innerClasses = new JavaClass[0];
-            _typeVars = new JavaTypeVariable[0];
+            _typeParameters = new JavaTypeVariable[0];
             return;
         }
 
@@ -150,7 +150,7 @@ public class JavaClass extends JavaType {
         _methods = arrayDecl._methods;
         _constructors = arrayDecl._constructors;
         _innerClasses = arrayDecl._innerClasses;
-        _typeVars = arrayDecl._typeVars;
+        _typeParameters = arrayDecl._typeParameters;
     }
 
     /**
@@ -325,10 +325,10 @@ public class JavaClass extends JavaType {
     /**
      * Returns the type variables.
      */
-    public JavaTypeVariable[] getTypeVars()
+    public JavaTypeVariable[] getTypeParameters()
     {
-        if (_typeVars != null) return _typeVars;
-        return _typeVars = _updater.getTypeVariables();
+        if (_typeParameters != null) return _typeParameters;
+        return _typeParameters = _updater.getTypeParameters();
     }
 
     /**
@@ -491,21 +491,12 @@ public class JavaClass extends JavaType {
     }
 
     /**
-     * Returns a TypeVar decl for inner class name.
+     * Returns type parameter for given name (null if not found).
      */
-    public JavaTypeVariable getTypeVarForName(String aName)
+    public JavaTypeVariable getTypeParameterForName(String aName)
     {
-        JavaTypeVariable[] typeVars = getTypeVars();
-        return ArrayUtils.findMatch(typeVars, tvar -> tvar.getName().equals(aName));
-    }
-
-    /**
-     * Returns a TypeVar decl for inner class name.
-     */
-    public int getTypeVarIndexForName(String aName)
-    {
-        JavaTypeVariable[] typeVars = getTypeVars();
-        return ArrayUtils.findMatchIndex(typeVars, tvar -> tvar.getName().equals(aName));
+        JavaTypeVariable[] typeParams = getTypeParameters();
+        return ArrayUtils.findMatch(typeParams, tvar -> tvar.getName().equals(aName));
     }
 
     /**
@@ -671,11 +662,11 @@ public class JavaClass extends JavaType {
     @Override
     public JavaType getResolvedTypeForTypeVariable(JavaTypeVariable aTypeVar)
     {
-        // If has type var, return bounds type
+        // If has type parameter, return bounds type
         String typeVarName = aTypeVar.getName();
-        JavaDecl typeVar = getTypeVarForName(typeVarName);
-        if (typeVar != null)
-            return typeVar.getEvalType();
+        JavaDecl typeParam = getTypeParameterForName(typeVarName);
+        if (typeParam != null)
+            return typeParam.getEvalType();
 
         // If SuerType is ParameterizedType, let it try to resolve
         JavaType superType = getGenericSuperclass();

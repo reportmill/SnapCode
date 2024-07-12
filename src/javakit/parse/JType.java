@@ -195,7 +195,7 @@ public class JType extends JNode {
             JType parentType = (JType) parent;
             JavaClass baseClass = parentType.getBaseClass();
             if (baseClass != null) {
-                JavaTypeVariable typeVarType = baseClass.getTypeVarForName(baseName);
+                JavaTypeVariable typeVarType = baseClass.getTypeParameterForName(baseName);
                 if (typeVarType != null)
                     return typeVarType;
             }
@@ -268,8 +268,8 @@ public class JType extends JNode {
         // Bogus - Look for TypeVar and use BoundsClass. Otherwise getBaseType() below can stack overflow
         String baseName = getName();
         for (JNode parent = _parent; parent != null; parent = parent.getParent()) {
-            if (parent instanceof WithTypeVars) {
-                JTypeVar typeVar = ((WithTypeVars) parent).getTypeVarDeclForName(baseName);
+            if (parent instanceof WithTypeParameters) {
+                JTypeVar typeVar = ((WithTypeParameters) parent).getTypeParamDeclForName(baseName);
                 if (typeVar != null)
                     return typeVar.getBoundsClass();
             }

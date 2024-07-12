@@ -74,7 +74,7 @@ public class ExecutableReaderImpl implements ExecutableReader {
      * Returns the TypeVars.
      */
     @Override
-    public JavaTypeVariable[] getTypeVars()
+    public JavaTypeVariable[] getTypeParameters()
     {
         TypeVariable<?>[] typeVars = _executable.getTypeParameters();
         return ArrayUtils.map(typeVars, tvar -> new JavaTypeVariable(_resolver, _javaExecutable, tvar), JavaTypeVariable.class);

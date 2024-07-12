@@ -225,7 +225,7 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
     {
         // Get method (just return if not found or doesn't have type var
         JavaMethod method = getMethod();
-        if (method == null || method.getTypeVarForName(aTypeVar.getName()) == null)
+        if (method == null || method.getTypeParameterForName(aTypeVar.getName()) == null)
             return aTypeVar;
 
         // Get method parameter types and arg types

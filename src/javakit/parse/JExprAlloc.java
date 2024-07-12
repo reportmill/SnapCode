@@ -221,7 +221,7 @@ public class JExprAlloc extends JExpr implements WithArgs {
         // Get constructor class type params - just return class if no type params
         JavaConstructor constructor = getConstructor();
         JavaClass javaClass = constructor.getEvalClass();
-        JavaTypeVariable[] typeParams = javaClass.getTypeVars();
+        JavaTypeVariable[] typeParams = javaClass.getTypeParameters();
         if (typeParams.length == 0)
             return javaClass;
 

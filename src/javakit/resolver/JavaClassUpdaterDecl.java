@@ -78,9 +78,9 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
      * Returns JavaTypeVariable array for given class TypeVariables.
      */
     @Override
-    protected JavaTypeVariable[] getTypeVariables()
+    protected JavaTypeVariable[] getTypeParameters()
     {
-        JTypeVar[] typeVars = _classDecl.getTypeVarDecls();
+        JTypeVar[] typeVars = _classDecl.getTypeParamDecls();
         return ArrayUtils.map(typeVars, tvar -> new JavaTypeVariable(_resolver, _javaClass, tvar.getName(), tvar.getBoundsClass()), JavaTypeVariable.class);
     }
 
@@ -335,10 +335,10 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
          * Returns the TypeVars.
          */
         @Override
-        public JavaTypeVariable[] getTypeVars()
+        public JavaTypeVariable[] getTypeParameters()
         {
             // Get TypeVariables
-            JTypeVar[] typeVars = _executableDecl.getTypeVarDecls();
+            JTypeVar[] typeVars = _executableDecl.getTypeParamDecls();
             return ArrayUtils.map(typeVars, tvar -> getJavaTypeVariableForTypeVarDecl(tvar), JavaTypeVariable.class);
         }
 

@@ -38,7 +38,7 @@ public interface ExecutableReader {
     /**
      * Returns the TypeVars.
      */
-    JavaTypeVariable[] getTypeVars();
+    JavaTypeVariable[] getTypeParameters();
 
     /**
      * Returns the parameter types.
