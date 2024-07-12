@@ -51,7 +51,7 @@ public class JavaTypeUtils {
      * Returns resolved type for given type variable, given a generic type and a resolved type.
      * Returns null if generic type doesn't reference type variable.
      */
-    private static JavaType getResolvedTypeVariableForTypes(JavaTypeVariable aTypeVar, JavaType paramType, JavaType argType)
+    public static JavaType getResolvedTypeVariableForTypes(JavaTypeVariable aTypeVar, JavaType paramType, JavaType argType)
     {
         // Handle TypeVar: If name matches, return arg type
         if (paramType instanceof JavaTypeVariable) {
@@ -97,17 +97,17 @@ public class JavaTypeUtils {
     }
 
     /**
-     * Translates given parameter types from given class to given subclass.
+     * Translates given parameter type from given class to given subclass.
      * E.g.: Translate method params from BiFunction.apply(T,U) to subclass BinaryOperator<Integer> where
      *      BinaryOperator<Integer> extends BinaryOperator<T> extends BiFunction<T,T,T> extends BiFunction<T,U,R>.
      */
-    public static JavaType[] translateParamTypesToSubclass(JavaType[] paramTypes, JavaClass paramsClass, JavaType subtype)
+    public static JavaType translateParamTypeToSubclass(JavaType paramType, JavaClass paramsClass, JavaType subtype)
     {
         // Get subtype as parameterized type
         JavaParameterizedType subtypeParamType = subtype instanceof JavaParameterizedType ? (JavaParameterizedType) subtype : null;
         if (subtypeParamType == null) {
             System.err.println("JavaTypeUtils.translateParamTypesToSubclass: subtype not parameterized type");
-            return paramTypes;
+            return paramType;
         }
 
         // If other class between paramsClass and subtype class, recurse
@@ -123,21 +123,21 @@ public class JavaTypeUtils {
 //            paramsClass = subtypeSuperInterface;
 //        }
 
-        // Convert paramTypes from paramsClass to subtype genericSuperclass (E.g: (T, U) from BiFunction<T,U,R> to BiFunction<T,T,T>)
+        // Convert paramType from paramsClass to subtype genericSuperclass (E.g: (T, U) from BiFunction<T,U,R> to BiFunction<T,T,T>)
         JavaTypeVariable[] paramsClassTypeVars = paramsClass.getTypeVars(); // E.g.: <T,U,R> from BiFunction <T,U,R>
         JavaParameterizedType subtypeGenericSuperclass = getGenericSuperclass(subtypeClass);
         if (subtypeGenericSuperclass == null) {
             System.err.println("JavaTypeUtils.translateParamTypesToSubclass: subtype superclass not parameterized type");
-            return paramTypes;
+            return paramType;
         }
         JavaType[] subtypeGenericSuperclassTypes = subtypeGenericSuperclass.getParamTypes(); // E.g.: <T,T,T> from BiFunction <T,T,T>
-        JavaType[] paramTypes2 = ArrayUtils.map(paramTypes, type -> getResolvedTypeForTypeArrays(type, paramsClassTypeVars, subtypeGenericSuperclassTypes), JavaType.class);
+        JavaType paramType2 = getResolvedTypeForTypeArrays(paramType, paramsClassTypeVars, subtypeGenericSuperclassTypes);
 
-        // Convert paramTypes from subtype.evalClass to subtype (E.g: (T, T, T) from BinaryOperator<T> to BinaryOperator<Integer>)
+        // Convert paramType from subtype.evalClass to subtype (E.g: (T, T, T) from BinaryOperator<T> to BinaryOperator<Integer>)
         JavaTypeVariable[] subtypeClassTypeParams = subtypeClass.getTypeVars(); // E.g.: <T> from BinaryOperator <T>
         JavaType[] subtypeParamTypes = subtypeParamType.getParamTypes(); // E.g.: <Integer> from BinaryOperator <Integer>
-        JavaType[] paramTypes3 = ArrayUtils.map(paramTypes2, type -> getResolvedTypeForTypeArrays(type, subtypeClassTypeParams, subtypeParamTypes), JavaType.class);
-        return paramTypes3;
+        JavaType resolvedType = getResolvedTypeForTypeArrays(paramType2, subtypeClassTypeParams, subtypeParamTypes);
+        return resolvedType != null ? resolvedType : paramType2;
     }
 
     /**
