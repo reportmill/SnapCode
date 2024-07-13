@@ -225,11 +225,18 @@ public abstract class JExprLambdaBase extends JExpr {
     {
         // If type var is return type only, try to resolve with lambda expression type or method ref method return type
         if (isTypeVarInReturnTypeOnly(aTypeVar)) {
+
+            // Get generic return type and resolved return type and try to resolve
             JavaType lambdaMethodReturnType = getLambdaMethodReturnType();
             JavaType lambdaReturnType = getLambdaReturnType();
-            JavaType resolvedType = JavaTypeUtils.getResolvedTypeVariableForTypes(aTypeVar, lambdaMethodReturnType, lambdaReturnType);
-            if (resolvedType != aTypeVar)
-                return resolvedType;
+            if (lambdaReturnType != null) {
+                JavaType resolvedType = JavaTypeUtils.getResolvedTypeVariableForTypes(aTypeVar, lambdaMethodReturnType, lambdaReturnType);
+                if (resolvedType != aTypeVar)
+                    return resolvedType;
+            }
+
+            // If resolve failed, return Object
+            return getJavaClassForName("java.lang.Object");
         }
 
         // Do normal version
