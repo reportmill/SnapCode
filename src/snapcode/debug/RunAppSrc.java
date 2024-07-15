@@ -1,14 +1,10 @@
 package snapcode.debug;
-import javakit.runner.JavaShell;
 import snap.view.View;
 import snap.view.ViewUtils;
-import snap.web.WebFile;
 import snap.viewx.Console;
 import snapcode.apptools.RunTool;
-import snapcode.project.JavaAgent;
 import snapcode.project.Project;
 import snapcode.project.RunConfig;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -28,9 +24,6 @@ public class RunAppSrc extends RunApp {
 
     // An input stream for standard in
     private BytesInputStream _standardInInputStream;
-
-    // The JavaShell
-    protected JavaShell _javaShell;
 
     // The real system in/out/err
     private static final InputStream REAL_SYSTEM_IN = System.in;
@@ -122,12 +115,6 @@ public class RunAppSrc extends RunApp {
             return;
         }
 
-        // If JavaShell, send interrupt to shell (soft interrupt)
-        if (_javaShell != null) {
-            terminateJavaShell();
-            return;
-        }
-
         // Otherwise, hard terminate
         hardTerminate();
     }
@@ -210,11 +197,6 @@ public class RunAppSrc extends RunApp {
      */
     private void runMainMethod()
     {
-        if (false) {
-            runJavaShell();
-            return;
-        }
-
         // Get main method and invoke
         try {
             Class<?> mainClass = getMainClass();
@@ -226,31 +208,6 @@ public class RunAppSrc extends RunApp {
             mainMethod.invoke(null, (Object) new String[0]);
         }
         catch (Exception e) { throw new RuntimeException(e); }
-    }
-
-    /**
-     * Runs app via JavaShell.
-     */
-    private void runJavaShell()
-    {
-        // Get JavaAgent
-        WebFile mainClassFile = getMainFile();
-        JavaAgent javaAgent = mainClassFile != null ? JavaAgent.getAgentForFile(mainClassFile) : null;
-
-        // Create JavaShell
-        _javaShell = new JavaShell(this);
-        _javaShell.runJavaCode(javaAgent);
-    }
-
-    /**
-     * Terminates app via JavaShell.
-     */
-    private void terminateJavaShell()
-    {
-        _javaShell.interrupt();
-
-        // Register timeout to check if hard thread interrupt is needed
-        ViewUtils.runDelayed(() -> hardTerminate(), 600);
     }
 
     /**
@@ -269,15 +226,6 @@ public class RunAppSrc extends RunApp {
         catch(ClassNotFoundException e) { return null; }
         catch(NoClassDefFoundError t) { System.err.println("ClassUtils.getClass: " + t); return null; }
         catch(Throwable t) { System.err.println("ClassUtils.getClass: Unknown error: " + t); return null; }
-    }
-
-    /**
-     * Returns the source file for class name.
-     */
-    public WebFile getSourceFileForClassName(String className)
-    {
-        Project project = _runTool.getProject();
-        return project.getProjectFiles().getSourceFileForClassName(className);
     }
 
     /**
