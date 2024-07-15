@@ -62,6 +62,19 @@ public class HomePageView extends MarkDownView {
         RowView rowView = new RowView();
         rowView.addChild(imageView);
         addChild(rowView);
+
+        // Add info
+        View jvmText = new Label("JVM: " + System.getProperty("java.runtime.version")
+                .replace("internal-_", ""));
+        View osVendor = new Label(" Vendor: " + System.getProperty("java.vendor")
+                .replace("Corporation", "Corp").replace("Technologies", "Tech"));
+        View osText = new Label("OS: " + System.getProperty("os.name") + ", " + System.getProperty("os.arch"));
+        View buildText = new Label("Build: " + SnapCodeUtils.getBuildInfo());
+        ColView infoColView = new ColView();
+        infoColView.setPropsString("Margin:10; Spacing:2; Align:TOP_RIGHT; LeanX:RIGHT; LeanY:TOP; Managed:false; Opacity:.5");
+        infoColView.setChildren(jvmText, osVendor, osText, buildText);
+        infoColView.setSizeToBestSize();
+        addChild(infoColView);
     }
 
     /**

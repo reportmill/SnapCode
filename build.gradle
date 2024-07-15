@@ -60,6 +60,7 @@ task buildFullJar(type: Jar) {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     exclude('**/org/**', '**/test/**', '/META-INF/*.SF', '/META-INF/*.RSA') //, '**/sun/**')
+    processResources { finalizedBy ('buildInfo') }
     with jar
     dependsOn build
 }
@@ -75,4 +76,18 @@ task copyCJ(type: Copy) {
     )
     into "build/libs"
     dependsOn buildFullJar
+}
+
+/**
+ * Writes the current build date into BuildInfo.txt, e.g.: Feb-02-23 09:31.
+ */
+tasks.register('buildInfo') {
+    doLast {
+
+        // Create BuildInfo text (date string) and write to file
+        String buildInfoText = new SimpleDateFormat("MMM-dd-yy HH:mm").format(new Date());
+        String buildInfoFilePathStr = buildDir.getAbsolutePath() + '/resources/main/snapcode/BuildInfo.txt';
+        java.nio.file.Path buildInfoFilePath = java.nio.file.Paths.get(buildInfoFilePathStr);
+        java.nio.file.Files.write(buildInfoFilePath, buildInfoText.getBytes());
+    }
 }

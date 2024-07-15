@@ -1,5 +1,6 @@
 package snapcode.app;
 import snap.util.FileUtils;
+import snap.util.SnapUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import java.io.File;
@@ -48,4 +49,12 @@ public class SnapCodeUtils {
         return getSnapCodeDirURL().getPath();
     }
 
+    /**
+     * Returns a build date string (eg, "Jan-26-03") as generated into BuildInfo.txt at build time.
+     */
+    public static String getBuildInfo()
+    {
+        try { return SnapUtils.getText(SnapUtils.class, "/snapcode/BuildInfo.txt").trim(); }
+        catch (Exception e) { return "BuildInfo not found"; }
+    }
 }
