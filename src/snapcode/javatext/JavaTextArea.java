@@ -5,6 +5,7 @@ package snapcode.javatext;
 import java.util.*;
 import javakit.parse.*;
 import snap.util.ArrayUtils;
+import snap.util.SnapUtils;
 import snapcode.project.JavaTextDoc;
 import snap.geom.Rect;
 import snap.gfx.*;
@@ -479,9 +480,12 @@ public class JavaTextArea extends TextArea {
         aPntr.transform(1, 0, -.15, 1, 0, 0);
         aPntr.translate(-errorMidX, -errorMidY);
         aPntr.setColor(ERROR_TEXT_COLOR);
-        aPntr.drawString(errorStr, errorX, errorY);
+        aPntr.drawString(errorStr, errorX, errorY, _bug ? .1 : 0); // Java 8 on Windows/Linux bug
         aPntr.restore();
     }
+
+    // Java 8 on Windows/Linux has problems with arbitrary transforms and text
+    private static boolean _bug = !SnapUtils.isMac && !SnapUtils.isWebVM && !SnapUtils.isTeaVM;
 
     /**
      * Indents the text.
