@@ -111,12 +111,21 @@ public class NewFileTool extends WorkspaceTool {
         FilePanel filePanel = new FilePanel();
         filePanel.setSaving(true);
         filePanel.setDesc("Create New Project");
-
-        // Initialize to SnapCode dir
         filePanel.getUI();
+
+        // Set SelFile to SnapCodeDir
         WebFile snapCodeDir = SnapCodeUtils.getSnapCodeDir();
-        if (snapCodeDir.getExists())
-            filePanel.getSelSitePane().setSelFile(snapCodeDir);
+        filePanel.getSelSitePane().setSelFile(snapCodeDir);
+
+        // Set TargFile to 'NewProjectX' dir
+        for (int i = 0; i < 100; i++) {
+            String newProjName = "NewProject" + (i > 0 ? i : "");
+            WebFile newProjDir = SnapCodeUtils.getSnapCodeProjectDirForName(newProjName);
+            if (!newProjDir.getExists()) {
+                filePanel.getSelSitePane().setTargFile(newProjDir);
+                break;
+            }
+        }
 
         // Show file panel to select new directory file
         WebFile newProjectFile = filePanel.showFilePanel(_workspacePane.getUI());
