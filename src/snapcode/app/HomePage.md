@@ -3,10 +3,10 @@
 
 ## Create New:
 
-* [![](https://reportmill.com/SnapCode/images/JeplFile_64.png) Java Repl ]( NewJavaReplButton )
-* [![](https://reportmill.com/SnapCode/images/JavaFile_64.png) Java Class ]( NewJavaClassButton )
-* [![](https://reportmill.com/SnapCode/images/Project_64.png) Java Project ]( NewProjectButton )
-* [![](https://reportmill.com/SnapCode/images/BlockProject_64.png) Block Project ]( NewBlockProjectButton )
+* [![](https://reportmill.com/SnapCode/images/JeplFile_64.png) New Java Repl ]( NewJavaReplButton )
+* [![](https://reportmill.com/SnapCode/images/JavaFile_64.png) New Java Class ]( NewJavaClassButton )
+* [![](https://reportmill.com/SnapCode/images/Project_64.png) New Project ]( NewProjectButton )
+* [![](https://reportmill.com/SnapCode/images/BlockProject_64.png) New Block Project ]( NewBlockProjectButton )
 
 @[OpenRecent=true]
 
