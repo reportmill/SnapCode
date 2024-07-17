@@ -25,7 +25,7 @@ public interface WithBlockStmt {
     {
         JStmtBlock blockStmt = getBlock();
         List<JStmt> statements = blockStmt != null ? blockStmt.getStatements() : Collections.EMPTY_LIST;
-        if (statements != null && statements.size() > 0)
+        if (statements != null && !statements.isEmpty())
             return statements.toArray(new JStmt[0]);
         return new JStmt[0];
     }
