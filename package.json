@@ -5,10 +5,10 @@
     "main": "index.js",
     "preferGlobal": true,
     "repository": "",
-    "version": "2024.6.22",
+    "version": "2024.7.19",
     "jdeploy": {
-        "jdk": false,
-        "javaVersion": "8",
+        "jdk": true,
+        "javaVersion": "17",
         "documentTypes": [{
             "editor": true,
             "extension": "java",
