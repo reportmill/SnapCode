@@ -207,7 +207,11 @@ public class RunAppSrc extends RunApp {
             Method mainMethod = mainClass.getMethod("main", String[].class);
             mainMethod.invoke(null, (Object) new String[0]);
         }
-        catch (Exception e) { throw new RuntimeException(e); }
+
+        // Handle exception: Just print - goes to RunTool console
+        catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 
     /**
