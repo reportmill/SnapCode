@@ -612,15 +612,15 @@ public class VersionControl {
     /**
      * Returns the VersionControl for the given site.
      */
-    public synchronized static VersionControl getVersionControlForProjectSite(WebSite projectSite)
+    public static VersionControl getVersionControlForProjectSite(WebSite projectSite)
     {
         // Get VersionControl for project site (create if missing)
         VersionControl versionControl = (VersionControl) projectSite.getProp(VersionControl.class.getName());
-        if (versionControl == null)
-            versionControl = createVersionControlForProjectSite(projectSite);
+        if (versionControl != null)
+            return versionControl;
 
         // Return
-        return versionControl;
+        return createVersionControlForProjectSite(projectSite);
     }
 
     /**
@@ -628,6 +628,11 @@ public class VersionControl {
      */
     private static VersionControl createVersionControlForProjectSite(WebSite projectSite)
     {
+        // Try again
+        VersionControl versionControl = (VersionControl) projectSite.getProp(VersionControl.class.getName());
+        if (versionControl != null)
+            return versionControl;
+
         WebURL remoteUrl = VersionControlUtils.getRemoteSiteUrl(projectSite);
 
         // Handle Git
