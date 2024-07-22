@@ -17,6 +17,9 @@ public class SnapCompiler {
     // The Project
     protected Project  _proj;
 
+    // Whether to check errors only
+    private boolean _checkErrorsOnly;
+
     // The shared compiler
     private JavaCompiler  _compiler;
 
@@ -86,7 +89,13 @@ public class SnapCompiler {
         List<String> options = new ArrayList<>();
         options.add("-Xlint:all,-serial,-rawtypes,-unchecked,-fallthrough,-dep-ann");
         //options.add("-warn:-serial,-raw,-unchecked"); options.add("-proceedOnError");
-        options.add("-g");
+
+        // Handle CheckErrorsOnly (either set proc none or add debug)
+        if (_checkErrorsOnly)
+            options.add("-proc:none");
+        else options.add("-g");
+
+        // Set source and target levels to Java 8
         options.add("-source");
         options.add("1.8");
         options.add("-target");
@@ -104,6 +113,11 @@ public class SnapCompiler {
         // Set/return
         return _options = options;
     }
+
+    /**
+     * Tells compiler to check errors only (don't generate classes).
+     */
+    public void checkErrorsOnly()  { _checkErrorsOnly = true; }
 
     /**
      * Returns the compiler file manager.

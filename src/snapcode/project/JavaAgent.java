@@ -253,6 +253,19 @@ public class JavaAgent {
 
         // Set build issues
         setBuildIssues(buildIssues);
+
+        // If no errors, let compiler have a go
+        if (!ArrayUtils.hasMatch(buildIssues, buildIssue -> buildIssue.isError())) {
+
+            // Update text
+            String javaText = _javaTextDoc.getString();
+            _javaFile.setText(javaText);
+
+            // Compile file
+            SnapCompiler compiler = new SnapCompiler(getProject());
+            compiler.checkErrorsOnly();
+            compiler.compileFile(_javaFile);
+        }
     }
 
     /**
