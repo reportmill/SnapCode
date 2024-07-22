@@ -2,8 +2,7 @@ package snapcode.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JavaParser;
 import snap.util.ArrayUtils;
-import snap.view.Clipboard;
-import snap.view.View;
+import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.viewx.FilePanel;
 import snap.viewx.FormBuilder;
@@ -215,7 +214,7 @@ public class NewFileTool extends WorkspaceTool {
         JavaParser javaParser = JavaParser.getShared();
         JFile jfile = javaParser.parseFile(javaString);
         String className = jfile.getName();
-        if (className == null || className.length() == 0) {
+        if (className == null || className.isEmpty()) {
             String title = "New Java File from clipboard";
             String msg = "No class name found";
             DialogBox.showErrorDialog(_workspacePane.getUI(), title, msg);
@@ -246,12 +245,19 @@ public class NewFileTool extends WorkspaceTool {
      */
     public void newJavaFileFromClipboard()
     {
-        // Get Java string from clipboard
-        Clipboard clipboard = Clipboard.get();
-        String javaString = clipboard.getString();
+        // Show dialog box to get and show clipboard text
+        DialogBox pasteTextDialogBox = new DialogBox("New Java File from clipboard");
+        PasteJavaTextPane pasteTextPane = new PasteJavaTextPane();
+        pasteTextDialogBox.setContent(pasteTextPane.getUI());
+        boolean didConfirm = pasteTextDialogBox.showConfirmDialog(_workspacePane.getUI());
+        if (!didConfirm)
+            return;
+
+        // If bogus string, complain
+        String javaString = pasteTextPane.getPasteText();
         if (javaString == null || javaString.length() < 10) {
             String title = "New Java File from clipboard";
-            String msg = "No text found in clibpard";
+            String msg = "No text found in clipboard";
             DialogBox.showErrorDialog(_workspacePane.getUI(), title, msg);
             return;
         }
@@ -337,7 +343,7 @@ public class NewFileTool extends WorkspaceTool {
 
         // Strip spaces from filename (for now) and make sure it has extension
         filename = filename.replace(" ", "");
-        if (!filename.toLowerCase().endsWith('.' + fileType) && fileType.length() > 0)
+        if (!filename.toLowerCase().endsWith('.' + fileType) && !fileType.isEmpty())
             filename = filename + '.' + fileType;
 
         // If file already exists, run option panel for replace
@@ -354,7 +360,67 @@ public class NewFileTool extends WorkspaceTool {
         // Create file and return
         WebSite fileSite = parentDir.getSite();
         String filePath = filename.startsWith("/") ? filename : parentDir.getDirPath() + filename;
-        boolean isDir = fileType.length() == 0 || fileType.equals("dir");
+        boolean isDir = fileType.isEmpty() || fileType.equals("dir");
         return fileSite.createFileForPath(filePath, isDir);
+    }
+
+    /**
+     * A panel to allow user to paste text for new Java file.
+     */
+    private static class PasteJavaTextPane extends ViewOwner {
+
+        // The paste text
+        private String _pasteText;
+
+        /**
+         * Constructor.
+         */
+        public PasteJavaTextPane()
+        {
+            // Initialize text from clipboard
+            Clipboard clipboard = Clipboard.get();
+            _pasteText = clipboard.getString();
+        }
+
+        /**
+         * Returns the text.
+         */
+        public String getPasteText()  { return getViewText("TextView"); }
+
+        @Override
+        protected View createUI()
+        {
+            // Create "Java Text:"
+            Label label = new Label("Pasted Java Text:");
+            label.setPropsString("Font:Arial 24;");
+            Button pasteButton = new Button("Paste");
+            pasteButton.setPropsString("Name:PasteButton; PrefWidth:60; PrefHeight:22; LeanX:RIGHT;");
+            RowView rowView = new RowView();
+            rowView.setPropsString("Margin:0,4,8,2");
+            rowView.setChildren(label, pasteButton);
+
+            // Create TextView
+            TextView textView = new TextView();
+            textView.setPropsString("Name:TextView; GrowWidth:true; GrowHeight:true;");
+            textView.setPrefSize(500, 360);
+            textView.setText(_pasteText);
+
+            // Create ColView
+            ColView colView = new ColView();
+            colView.setChildren(rowView, textView);
+            colView.setPropsString("Margin:10; FillWidth:true;");
+            return colView;
+        }
+
+        @Override
+        protected void respondUI(ViewEvent anEvent)
+        {
+            // Handle PasteButton
+            if (anEvent.equals("PasteButton")) {
+                Clipboard clipboard = Clipboard.get();
+                String javaString = clipboard.getString();
+                setViewText("TextView", javaString);
+            }
+        }
     }
 }
