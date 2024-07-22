@@ -3,7 +3,6 @@
  */
 package javakit.parse;
 import javakit.resolver.*;
-import java.util.List;
 
 /**
  * A Java member for a method declaration.
@@ -104,74 +103,7 @@ public class JMethodDecl extends JExecutableDecl {
             return NodeError.newErrorArray(errorNode, "Missing return type");
         }
 
-        // Check for missing return statement
-        /*if (!returnType.getName().equals("void")) {
-            if (isMissingReturnStatement(this)) {
-                JStmt lastStmt = getLastStatement(this);
-                JNode errorNode = lastStmt != null ? lastStmt : this;
-                return NodeError.newErrorArray(errorNode, "Missing return statement");
-            }
-        }*/
-
         // Do normal version
         return super.getErrorsImpl();
-    }
-
-    /**
-     * Returns whether last statement is return or throw.
-     */
-    private static boolean isMissingReturnStatement(JNode node)
-    {
-        JStmt lastStmt = getLastStatement(node);
-        return !(lastStmt instanceof JStmtReturn) && !(lastStmt instanceof JStmtThrow);
-    }
-
-    /**
-     * Returns the last statement.
-     */
-    private static JStmt getLastStatement(JNode aNode)
-    {
-        // Handle Try statement
-        if (aNode instanceof JStmtTry) {
-            JStmtTry tryStmt = (JStmtTry) aNode;
-            JStmtBlock tryBlock = tryStmt.getBlock();
-            if (isMissingReturnStatement(tryBlock))
-                return null;
-            JStmtTryCatch[] catchBlocks = tryStmt.getCatchBlocks();
-            for (JStmtTryCatch catchBlock : catchBlocks) {
-                if (isMissingReturnStatement(catchBlock))
-                    return null;
-            }
-            JStmtTryCatch lastCatchBlock = catchBlocks.length > 0 ? catchBlocks[0] : null;
-            return getLastStatement(lastCatchBlock);
-        }
-
-        // Handle WithBlockStmt
-        if (aNode instanceof WithBlockStmt) {
-            JStmt[] blockStatements = ((WithBlockStmt) aNode).getBlockStatements();
-            JStmt lastStmt = blockStatements.length > 0 ? blockStatements[blockStatements.length - 1] : null;
-            return getLastStatement(lastStmt);
-        }
-
-        // Handle WithStmts
-        if (aNode instanceof WithStmts) {
-            List<JStmt> statements = ((WithStmts) aNode).getStatements();
-            JStmt lastStmt = !statements.isEmpty() ? statements.get(statements.size() - 1) : null;
-            return getLastStatement(lastStmt);
-        }
-
-        // Handle Switch statement
-        if (aNode instanceof JStmtSwitch) {
-            JStmtSwitch switchStmt = (JStmtSwitch) aNode;
-            List<JStmtSwitchCase> caseStmts = switchStmt.getSwitchCases();
-            for (JStmtSwitchCase caseStmt : caseStmts) {
-                if (isMissingReturnStatement(caseStmt))
-                    return null;
-            }
-            return getLastStatement(switchStmt.getDefaultCase());
-        }
-
-        // Handle any other kind of statement
-        return aNode instanceof JStmt ? (JStmt) aNode : null;
     }
 }
