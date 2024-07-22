@@ -228,13 +228,13 @@ public class ProjectPane extends ViewOwner {
      */
     private void fileSaved(WebFile aFile)
     {
-        // Forward to VersionControl
-        if (_versionControlTool != null)
-            _versionControlTool.fileSaved(aFile);
-
         // If BuildDir file, just return
         if (_project.getBuildDir().containsFile(aFile))
             return;
+
+        // Forward to VersionControl
+        if (_versionControlTool != null)
+            _versionControlTool.fileSaved(aFile);
 
         // Notify saved and build workspace
         _project.fileSaved(aFile);
