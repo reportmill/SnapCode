@@ -406,6 +406,10 @@ public class WorkspacePane extends ViewOwner {
             // Handle ShowDevToolsMenuItem
             case "ShowDevToolsMenuItem": DevPane.setDevPaneShowing(getUI(), true); break;
 
+            // Handle OpenSnapCodePageMenuItem, OpenDownloadPageMenuItem
+            case "OpenSnapCodePageMenuItem": GFXEnv.getEnv().openURL("https://github.com/reportmill/SnapCode"); break;
+            case "OpenDownloadPageMenuItem": GFXEnv.getEnv().openURL("https://jdeploy.com/~snapcodejava"); break;
+
             // Handle ShowJavaHomeMenuItem
             case "ShowJavaHomeMenuItem":
                 String java = System.getProperty("java.home");

@@ -35,8 +35,8 @@
         <MenuItem Name="ShowDevToolsMenuItem" Text="Show Dev Tools" />
       </Menu>
       <Menu Name="HelpMenu" Text="Help">
-        <MenuItem Name="SupportPageMenuItem" Text="Support Page" />
-        <MenuItem Name="JavaDocMenuItem" Text="Tutorial" />
+        <MenuItem Name="OpenSnapCodePageMenuItem" Text="Open SnapCode Page" />
+        <MenuItem Name="OpenDownloadPageMenuItem" Text="Open Download Page" />
         <MenuItem Name="ShowJavaHomeMenuItem" Text="Show Java Home" />
       </Menu>
     </MenuBar>
