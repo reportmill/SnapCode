@@ -12,6 +12,7 @@ import snap.text.TextToken;
 import snap.view.KeyCode;
 import snap.view.TextAreaKeys;
 import snap.view.ViewEvent;
+import snap.view.ViewUtils;
 
 /**
  * This class is a helper for JavaTextArea to handle key processing.
@@ -52,9 +53,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
 
         // Handle newline special
         if (keyCode == KeyCode.ENTER && isSelEmpty()) {
-            if (shiftDown || shortcutDown)
-                _textArea.selectLineEnd();
-            else processNewline();
+            processNewline();
             anEvent.consume();
             return;
         }
@@ -162,6 +161,13 @@ public class JavaTextAreaKeys extends TextAreaKeys {
      */
     protected void processNewline()
     {
+        // If shift or shortcut key down, just select line end and return
+        if (ViewUtils.isShiftDown() || ViewUtils.isShortcutDown()) {
+            int lineEndCharIndex = getSel().getLineEnd();
+            setSel(lineEndCharIndex);
+            return;
+        }
+
         // Get line and its indent
         TextLine textLine = getSel().getStartLine();
 
