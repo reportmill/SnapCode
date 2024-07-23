@@ -32,9 +32,6 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     // The binary name
     private String  _binaryName;
 
-    // The contents of java file
-    private String  _javaTextStr;
-
     /**
      * Constructor for project, file (source or class) and SnapCompiler.
      */
@@ -80,18 +77,15 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     @Override
     public CharSequence getCharContent(boolean ignoreEncodingErrors)
     {
-        // If already set, just return
-        if (_javaTextStr != null) return _javaTextStr;
-
         // Get java text string
         String javaTextStr = getJavaTextString();
 
         // Since compiler just read new file contents, clear buildIssues for file
-        JavaAgent javaAgent = JavaAgent.getAgentForFile(_file);
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(_file);
         javaAgent.clearBuildIssues();
 
-        // Set and return
-        return _javaTextStr = javaTextStr;
+        // Return
+        return javaTextStr;
     }
 
     /**
@@ -101,7 +95,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     {
         // Handle RunWithInterpreter
         if (_file.getFileType().equals("jepl")) {
-            JavaAgent javaAgent = JavaAgent.getAgentForFile(_file);
+            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(_file);
             JFile jFile = javaAgent.getJFile();
             return new JeplToJava(jFile).getJava();
         }
