@@ -236,6 +236,7 @@ PrimaryPrefix
     "(" Expression ")" |
     AllocExpr |
     LookAhead (ResultType "." "class") ResultType "." "class" |
+    LookAhead (ReferenceType "::") ReferenceType |
     Name
 }
 

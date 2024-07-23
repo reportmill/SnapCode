@@ -598,6 +598,7 @@ public class JavaParserExpr extends Parser {
      *     "(" Expression ")" |
      *     AllocExpr |
      *     LookAhead (ResultType "." "class") ResultType "." "class" |
+     *     LookAhead (ReferenceType "::") ReferenceType |
      *     Name
      */
     public static class PrimaryPrefixHandler extends JNodeParseHandler<JExpr> {
@@ -632,9 +633,10 @@ public class JavaParserExpr extends Parser {
                     break;
                 }
 
-                // Handle ClassType.super and ResultType.class
+                // Handle ClassType.super and ResultType.class and ReferenceType::
                 case "ClassType":
                 case "ResultType":
+                case "ReferenceType": // E.g: ReferenceType "::" ...
                     JType classType = aNode.getCustomNode(JType.class);
                     _part = new JExprType(classType);
                     break;

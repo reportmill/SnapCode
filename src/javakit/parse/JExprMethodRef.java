@@ -4,7 +4,6 @@
 package javakit.parse;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
-
 import java.util.Objects;
 
 /**
@@ -29,7 +28,7 @@ public class JExprMethodRef extends JExprLambdaBase {
 
     // A constant to define the types of method refs.
     // See https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html
-    public enum Type { InstanceMethod, StaticMethod, HelperMethod, Constructor, Unknown }
+    public enum Type { InstanceMethod, StaticMethod, HelperMethod, Constructor, ArrayInit, Unknown }
 
     /**
      * Creates a new Method Reference expression for expression and id.
@@ -82,8 +81,15 @@ public class JExprMethodRef extends JExprLambdaBase {
      */
     private Type getTypeImpl()
     {
-        if (Objects.equals(getMethodName(), "new"))
+        // If something::new, return type Constructor or ArrayInit
+        if (Objects.equals(getMethodName(), "new")) {
+            if (_prefixExpr instanceof JExprType) {
+                JType prefixType = ((JExprType) _prefixExpr).getType();
+                if (prefixType != null && prefixType.isArrayType())
+                    return Type.ArrayInit;
+            }
             return Type.Constructor;
+        }
 
         JavaMethod method = getMethod();
         if (method == null)
@@ -179,14 +185,21 @@ public class JExprMethodRef extends JExprLambdaBase {
             return null;
 
         // Get prefix expr eval class
-        JExpr prefixExpr = _prefixExpr;
-        JavaType prefixEvalType = prefixExpr != null ? prefixExpr.getEvalType() : null;
-        JavaClass prefixClass = prefixEvalType != null ? prefixEvalType.getEvalClass() : null;
-        if (prefixClass == null)
+        JavaClass prefixClass = getPrefixExprClass();
+        if (prefixClass == null || prefixClass.isArray())
             return null;
 
         // Return default constructor
         return prefixClass.getDeclaredConstructorForClasses(new JavaClass[0]);
+    }
+
+    /**
+     * Returns the prefix expression eval class.
+     */
+    private JavaClass getPrefixExprClass()
+    {
+        JavaType prefixEvalType = _prefixExpr != null ? _prefixExpr.getEvalType() : null;
+        return prefixEvalType != null ? prefixEvalType.getEvalClass() : null;
     }
 
     /**
@@ -200,13 +213,41 @@ public class JExprMethodRef extends JExprLambdaBase {
     }
 
     /**
+     * Override to get from executable or prefix array class.
+     */
+    @Override
+    protected JavaType getLambdaReturnType()
+    {
+        // If array creation, return prefix expr class
+        if (getType() == Type.ArrayInit)
+            return getPrefixExprClass();
+
+        // Return method return type
+        JavaExecutable methodRefMethod = getExecutable();
+        if (methodRefMethod != null)
+            return methodRefMethod.getEvalType();
+
+        // Return not found
+        return null;
+    }
+
+    /**
      * Returns the JavaDecl most closely associated with given child JExprId node.
      */
     protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // If given id is MethodId, return method
-        if (anExprId == _methodId)
-            return getExecutable();
+        if (anExprId == _methodId) {
+
+            // If array creation, return prefix expr class
+            if (getType() == Type.ArrayInit)
+                return getPrefixExprClass();
+
+            // If method ref is for method or constructor, return it
+            JavaExecutable methodOrConstr = getExecutable();
+            if (methodOrConstr != null)
+                return methodOrConstr;
+        }
 
         // Do normal version
         return super.getDeclForChildId(anExprId);

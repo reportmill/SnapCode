@@ -170,7 +170,7 @@ public abstract class JExprLambdaBase extends JExpr {
     /**
      * Returns the LambdaType return type by evaluating lambda expression or method ref method.
      */
-    private JavaType getLambdaReturnType()
+    protected JavaType getLambdaReturnType()
     {
         // Handle Lambda
         if (this instanceof JExprLambda) {
@@ -178,10 +178,7 @@ public abstract class JExprLambdaBase extends JExpr {
             return expr != null ? expr.getEvalType() : null;
         }
 
-        // Handle MethodRef: Return method return type
-        JExprMethodRef methodRef = (JExprMethodRef) this;
-        JavaExecutable methodRefMethod = methodRef.getExecutable();
-        return methodRefMethod != null ? methodRefMethod.getEvalType() : null;
+        return null;
     }
 
     /**
