@@ -115,8 +115,11 @@ public class JavaTypeUtils {
         // Handle array type: Get component types and recurse
         if (paramType instanceof JavaGenericArrayType) {
             JavaType paramCompType = paramType.getComponentType();
-            JavaType argCompType = argType.getComponentType();
-            return getResolvedTypeVariableForTypes(aTypeVar, paramCompType, argCompType);
+            if (argType.isArray()) {
+                JavaType argCompType = argType.getComponentType();
+                return getResolvedTypeVariableForTypes(aTypeVar, paramCompType, argCompType);
+            }
+            return aTypeVar;
         }
 
         // Complain and return
