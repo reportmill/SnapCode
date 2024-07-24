@@ -1,5 +1,7 @@
 package snapcode.apptools;
 import snap.text.TextBlock;
+import snap.util.ArrayUtils;
+import snap.util.FormatUtils;
 import snapcode.project.*;
 import snapcode.javatext.JavaTextUtils;
 import snap.gfx.Image;
@@ -8,6 +10,8 @@ import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
+import java.util.Date;
+import java.util.stream.Stream;
 
 /**
  * A pane/panel to show current build issues.
@@ -92,6 +96,9 @@ public class BuildTool extends WorkspaceTool {
         // Get BuildLogTextBlock
         TextView buildLogTextView = getView("BuildLogTextView", TextView.class);
         _buildLogTextBlock = buildLogTextView.getTextBlock();
+
+        // Add mouse listener on BuildStatusLabel for hidden check errors feature (on double-click)
+        addViewEventHandler("BuildStatusLabel", this::handleBuildStatusLabelMouseRelease, MouseRelease);
     }
 
     /**
@@ -198,6 +205,35 @@ public class BuildTool extends WorkspaceTool {
         if (_workspace.isBuilding())
             ViewUtils.runLater(() -> _buildLogTextBlock.clear());
         resetLater();
+    }
+
+    /**
+     * Called when BuildStatusLabel gets MouseRelease event to trigger hidden check-syntax feature on double-click.
+     */
+    private void handleBuildStatusLabelMouseRelease(ViewEvent anEvent)
+    {
+        if (anEvent.isMouseClick() && anEvent.getClickCount() == 2)
+            checkSelectedJavaFileForErrors();
+    }
+
+    /**
+     * Checks the current file for errors.
+     */
+    private void checkSelectedJavaFileForErrors()
+    {
+        // Get selected java file and agent (just return if not java file)
+        WebFile selFile = _pagePane.getSelFile();
+        JavaAgent javaAgent = JavaAgent.getAgentForFile(selFile);
+        if (javaAgent == null)
+            return;
+
+        // Check for errors and report
+        _buildLogTextBlock.setString("Check " + selFile.getName() + " for errors (" + FormatUtils.formatDate(new Date()) + ")\n");
+        javaAgent.checkFileForErrors();
+        BuildIssue[] buildIssues = javaAgent.getBuildIssues();
+        BuildIssue[] errorIssues = ArrayUtils.filter(buildIssues, bi -> bi.isError());
+        _buildLogTextBlock.addChars("Found "  + errorIssues.length + " error(s)\n");
+        Stream.of(buildIssues).forEach(bi -> _buildLogTextBlock.addChars(bi.getText()));
     }
 
     /**
