@@ -22,7 +22,7 @@ public class GreenImport {
         // Show dialog box for scenario id
         String title = "Open Greenfoot Scenario";
         String msg = "Enter scenario id:";
-        String scenarioIdStr = DialogBox.showInputDialog(null, title, msg, "192");
+        String scenarioIdStr = DialogBox.showInputDialog(workspacePane.getUI(), title, msg, "192");
         int scenarioId = scenarioIdStr != null ? Convert.intValue(scenarioIdStr) : 0;
         if (scenarioId == 0)
             return;

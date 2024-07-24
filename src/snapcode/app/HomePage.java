@@ -48,6 +48,12 @@ public class HomePage extends WebPage {
         // Removes image temp files
         removeImageTempFiles();
 
+        // Hidden Greenfoot opener
+        if (ViewUtils.isAltDown()) {
+            GreenImport.showGreenfootPanel(_workspacePane);
+            return;
+        }
+
         // Show new project panel
         NewFileTool newFileTool = _workspacePane.getWorkspaceTools().getNewFileTool();
         runLater(newFileTool::showNewProjectPanel);
