@@ -258,17 +258,19 @@ public class GreenImport {
         if (file == null)
             return null;
 
-        // Get file text
+        // Get file lines (just return if null)
         String text = file.getText();
-        if (text != null && !text.isEmpty()) {
-            String[] lines = text.split("\\n");
-            for (String line : lines) {
-                String[] parts = line.split("=");
-                if (parts.length > 1) {
-                    String key = parts[0].trim();
-                    if (key.equals("world.lastInstantiated"))
-                        return parts[1].trim();
-                }
+        String[] lines = text != null ? text.split("\\n") : null;
+        if (lines == null)
+            return null;
+
+        // Iterate over lines and return world name
+        for (String line : lines) {
+            String[] parts = line.split("=");
+            if (parts.length > 1) {
+                String key = parts[0].trim();
+                if (key.equals("world.lastInstantiated"))
+                    return parts[1].trim();
             }
         }
 
