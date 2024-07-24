@@ -416,6 +416,12 @@ public class ProjectFilesTool extends WorkspaceTool {
         if (!dropFile.isLoaded()) {
             dropFile.addLoadListener(this::handleTreeViewDropFile); return; }
 
+        // If no projects, forward to WorkspacePaneDnD
+        if (getSelSiteOrFirst() == null) {
+            _workspacePane.getWorkspacePaneDnD().dropFile(dropFile);
+            return;
+        }
+
         // Get file name and bytes
         String fileName = dropFile.getName();
         byte[] fileBytes = dropFile.getBytes();

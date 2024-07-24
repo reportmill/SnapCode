@@ -38,6 +38,9 @@ public class WorkspacePane extends ViewOwner {
     // The WorkspaceTools
     protected WorkspaceTools _workspaceTools;
 
+    // A Drag-and-drop helper class
+    private WorkspacePaneDnD _workspacePaneDnD;
+
     /**
      * Constructor.
      */
@@ -115,6 +118,11 @@ public class WorkspacePane extends ViewOwner {
      * Returns the WorkspaceTools helper.
      */
     public WorkspaceTools getWorkspaceTools()  { return _workspaceTools; }
+
+    /**
+     * Returns the WorkspaceTools helper.
+     */
+    public WorkspacePaneDnD getWorkspacePaneDnD()  { return _workspacePaneDnD; }
 
     /**
      * Creates the PagePane.
@@ -298,7 +306,7 @@ public class WorkspacePane extends ViewOwner {
         _statusBar.addToView(tabBar);
 
         // Add drag drop support
-        new WorkspacePaneDnD(this);
+        _workspacePaneDnD = new WorkspacePaneDnD(this);
 
         // Hide Browser menu items
         if (!SnapUtils.isWebVM) {

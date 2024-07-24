@@ -65,7 +65,7 @@ public class WorkspacePaneDnD {
     /**
      * Called to handle a file drop on top graphic.
      */
-    private void dropFile(ClipboardData clipboardData)
+    public void dropFile(ClipboardData clipboardData)
     {
         // If clipboard data not loaded, come back when it is
         if (!clipboardData.isLoaded()) {
