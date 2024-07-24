@@ -150,6 +150,16 @@ public class WorkspaceTool extends ViewOwner {
     }
 
     /**
+     * Hides this tool.
+     */
+    public void hideTool()
+    {
+        if (!isShowing()) return;
+        ToolTray toolTray = _workspaceTools.getToolTrayForTool(this);
+        toolTray.setSelTool(null);
+    }
+
+    /**
      * Shows this tool automatically (setting a flag to indicate it should close automatically).
      */
     public void showToolAutomatically()
@@ -165,8 +175,7 @@ public class WorkspaceTool extends ViewOwner {
     public void hideToolAutomatically()
     {
         if (!_wasShownAutomatically) return;
-        ToolTray toolTray = _workspaceTools.getToolTrayForTool(this);
-        toolTray.setSelTool(null);
+        hideTool();
     }
 
     /**
@@ -201,10 +210,7 @@ public class WorkspaceTool extends ViewOwner {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        if (anEvent.equals("HideButton")) {
-            ToolTray toolTray = _workspaceTools.getToolTrayForTool(this);
-            if (toolTray != null)
-                toolTray.setSelTool(null);
-        }
+        if (anEvent.equals("HideButton"))
+            hideTool();
     }
 }

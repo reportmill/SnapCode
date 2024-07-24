@@ -548,20 +548,14 @@ public class WorkspacePane extends ViewOwner {
      */
     private void handleBuildCompleted()
     {
-        // If final error count non-zero, show problems pane
+        // If final error count non-zero, show build tool
         int errorCount = _workspace.getBuildIssues().getErrorCount();
-        if (errorCount > 0) {
-            ToolTray bottomTray = _workspaceTools.getBottomTray();
-            if (!(bottomTray.getSelTool() instanceof BuildTool))
-                bottomTray.showProblemsTool();
-        }
+        if (errorCount > 0)
+            _workspaceTools.getBuildTool().showToolAutomatically();
 
-        // If error count zero and SupportTray showing problems, close
-        else if (errorCount == 0) {
-            ToolTray bottomTray = _workspaceTools.getBottomTray();
-            if (bottomTray.getSelTool() instanceof BuildTool)
-                bottomTray.hideTools();
-        }
+        // If error count zero, hide build tool
+        else if (errorCount == 0)
+            _workspaceTools.getBuildTool().hideTool();
 
         // Make sure there is a final UI reset
         runLater(this::resetLater);
