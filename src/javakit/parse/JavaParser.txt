@@ -85,11 +85,13 @@ FormalParam { ("final" | Annotation)? Type "..."? Identifier ("[" "]")* }
 
 ThrowsList { "throws" Name ("," Name)* }
 
-Type { LookAhead(2) ReferenceType | PrimitiveType }
+Type { ReferenceType | PrimitiveType }
 
 PrimitiveType { "boolean" | "char" | "byte" | "short" | "int" | "long" | "float" | "double" }
 
-ReferenceType { PrimitiveType (LookAhead(2) "[" "]")+ | ClassType (LookAhead(2) "[" "]")* }
+ReferenceType { LookAhead(3) PrimitiveType ("[" "]")+ | ClassType (LookAhead(2) "[" "]")* }
+
+ArrayType { LookAhead(3) PrimitiveType ("[" "]")+ | ClassType ("[" "]")+ }
 
 ClassType { Identifier (LookAhead(2) TypeArgs)? (LookAhead(2) "." Identifier (LookAhead(2) TypeArgs)?)* }
 
@@ -236,7 +238,7 @@ PrimaryPrefix
     "(" Expression ")" |
     AllocExpr |
     LookAhead (ResultType "." "class") ResultType "." "class" |
-    LookAhead (ReferenceType "::") ReferenceType |
+    LookAhead (ArrayType) ReferenceType |
     Name
 }
 
