@@ -125,15 +125,9 @@ public class JavaPage extends WebPage {
      */
     public void reload()
     {
-        super.reload();
-
-        // Create JavaTextDoc
         WebFile javaFile = getFile();
-        JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForFile(javaFile);
-
-        // Set TextArea.TextDoc
-        JavaTextArea javaTextArea = getTextArea();
-        javaTextArea.setSourceText(javaTextDoc);
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
+        javaAgent.reloadFile();
     }
 
     /**

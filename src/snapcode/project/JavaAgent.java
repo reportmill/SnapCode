@@ -60,7 +60,7 @@ public class JavaAgent {
         _javaFile.setProp(JavaAgent.class.getName(), this);
 
         // Start listening for file bytes changed
-        _fileBytesChangedLsnr = this::fileBytesDidChange;
+        _fileBytesChangedLsnr = pc -> reloadFromFile();
         _javaFile.addPropChangeListener(_fileBytesChangedLsnr, WebFile.Bytes_Prop);
 
         // Add to Project
@@ -350,6 +350,15 @@ public class JavaAgent {
     }
 
     /**
+     * Reloads agent from file.
+     */
+    public void reloadFile()
+    {
+        _javaFile.resetAndVerify();
+        reloadFromFile();
+    }
+
+    /**
      * Called when JavaTextDoc does prop change.
      */
     protected void javaTextDocDidPropChange(PropChange aPC)
@@ -385,9 +394,9 @@ public class JavaAgent {
     }
 
     /**
-     * Called when java file changes.
+     * Reloads JavaTextDoc from file.
      */
-    private void fileBytesDidChange(PropChange aPC)
+    protected void reloadFromFile()
     {
         // If JavaFile.Bytes changed externally, reset JavaTextDoc and JFile
         if (_javaTextDoc != null) {
