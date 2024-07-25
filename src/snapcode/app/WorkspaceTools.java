@@ -82,12 +82,13 @@ public class WorkspaceTools {
         RunConfigsTool runConfigsTool = new RunConfigsTool(_workspacePane);
         BreakpointsTool breakpointsTool = new BreakpointsTool(_workspacePane);
         HttpServerTool httpServerTool = new HttpServerTool(_workspacePane);
+        ClassesTool classesTool = new ClassesTool(_workspacePane);
 
         // Create tools array
         _tools = new WorkspaceTool[] {
                 _filesTool, projectFilesTool, newFileTool,
                 runTool, debugTool, buildTool,
-                searchTool, helpTool, blocksTool,
+                searchTool, helpTool, blocksTool, classesTool,
                 runConfigsTool, breakpointsTool,
                 httpServerTool
         };
@@ -97,7 +98,7 @@ public class WorkspaceTools {
         _leftTray = new ToolTray(Side.LEFT, leftTools);
 
         // Create RightTray
-        WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, helpTool, blocksTool };
+        WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, helpTool, blocksTool, classesTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray
