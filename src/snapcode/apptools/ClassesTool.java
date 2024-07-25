@@ -1,11 +1,7 @@
 package snapcode.apptools;
-import snap.geom.Insets;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
-import snap.view.ColView;
-import snap.view.Label;
-import snap.view.ScrollView;
-import snap.view.ViewEvent;
+import snap.view.*;
 import snap.web.WebFile;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
@@ -23,8 +19,8 @@ public class ClassesTool extends WorkspaceTool {
     // The root class node
     private ClassNode _rootClassNode;
 
-    // The ClassesView
-    private ColView _classesView;
+    // The TreeView to show classes
+    private TreeView<ClassNode> _treeView;
 
     /**
      * Constructor.
@@ -58,17 +54,17 @@ public class ClassesTool extends WorkspaceTool {
     }
 
     /**
-     * Rebuild the ClassesView by adding view for all class files.
+     * Resets the Classes tree.
      */
-    protected void rebuildClassesView()
+    protected void resetClassTree()
     {
         // Clear ClassNodes and views
         _rootClassNode = null;
-        _classesView.removeChildren();
 
-        // Get RootClassNode and add node views
+        // Get RootClassNode and reset treeview
         ClassNode rootClassNode = getRootClassNode();
-        rootClassNode.getChildNodes().forEach(classNode -> addViewForClassNode(classNode, 0));
+        _treeView.setItems(new ClassNode[] { rootClassNode });
+        _treeView.expandAll();
     }
 
     /**
@@ -77,16 +73,18 @@ public class ClassesTool extends WorkspaceTool {
     @Override
     protected void initUI()
     {
-        // Create ClassesView
-        _classesView = new ColView();
-        _classesView.setPropsString("Font:Arial 14; Fill:WHITE; Padding:15;");
+        // Calculate TreeView RowHeight
+        Label sampleLabel = createLabelForClassNode(new ClassNode(Object.class, null));
+        int treeViewRowHeight = (int) Math.ceil(sampleLabel.getPrefHeight() + 10);
 
-        // Add to ScrollView
-        ScrollView scrollView = getView("ScrollView", ScrollView.class);
-        scrollView.setContent(_classesView);
+        // Configure TreeView
+        _treeView = getView("TreeView", TreeView.class);
+        _treeView.setRowHeight(treeViewRowHeight);
+        _treeView.setResolver(new ClassTreeResolver());
+        _treeView.setCellConfigure(this::configureClassTreeCell);
 
         // Rebuild classes view
-        rebuildClassesView();
+        resetClassTree();
     }
 
     /**
@@ -97,25 +95,10 @@ public class ClassesTool extends WorkspaceTool {
     {
         // Handle ReloadButton
         if (anEvent.equals("ReloadButton"))
-            rebuildClassesView();
+            resetClassTree();
 
         // Do normal version
         else super.respondUI(anEvent);
-    }
-
-    /**
-     * Add views for ClassNodes.
-     */
-    private void addViewForClassNode(ClassNode classNode, int level)
-    {
-        // Create label for class node and add to view
-        Label label = new Label(classNode.getNodeClass().getSimpleName());
-        label.setPropsString("Fill:#F5CC9B; Border:BLACK 1; MinWidth:60; Margin:8; Padding:4,8,4,8; BorderRadius:4;");
-        label.setMargin(Insets.add(label.getMargin(), 0, 0,0, level * 25));
-        _classesView.addChild(label);
-
-        // Add child nodes
-        classNode.getChildNodes().forEach(childNode -> addViewForClassNode(childNode, level + 1));
     }
 
     /**
@@ -146,14 +129,63 @@ public class ClassesTool extends WorkspaceTool {
     }
 
     /**
+     * Called to configure a ClassTree cell.
+     */
+    private void configureClassTreeCell(ListCell<ClassNode> classTreeCell)
+    {
+        ClassNode classNode = classTreeCell.getItem();
+        if (classNode == null) return;
+
+        Label classNodeLabel = createLabelForClassNode(classNode);
+        classTreeCell.setGraphicAfter(classNodeLabel);
+    }
+
+    /**
+     * Creates a label for class node.
+     */
+    private Label createLabelForClassNode(ClassNode classNode)
+    {
+        Label label = new Label(classNode.getNodeClass().getSimpleName());
+        label.setPropsString("Fill:#F5CC9B; Border:BLACK 1; MinWidth:60; Padding:4,8,4,8; BorderRadius:4;");
+        return label;
+    }
+
+    /**
      * Returns the title.
      */
     public String getTitle()  { return "Classes"; }
 
     /**
+     * A TreeResolver for ClassNode.
+     */
+    private static class ClassTreeResolver extends TreeResolver<ClassNode> {
+
+        @Override
+        public ClassNode getParent(ClassNode anItem)  { return anItem._parentNode; }
+
+        @Override
+        public boolean isParent(ClassNode anItem)
+        {
+            return !anItem.getChildNodes().isEmpty();
+        }
+
+        @Override
+        public ClassNode[] getChildren(ClassNode aParent)
+        {
+            return aParent.getChildNodes().toArray(new ClassNode[0]);
+        }
+
+        @Override
+        public String getText(ClassNode anItem)  { return ""; }
+    }
+
+    /**
      * A class to represent the class hierarchy.
      */
     private static class ClassNode implements Comparable<ClassNode> {
+
+        // The parent node
+        private ClassNode _parentNode;
 
         // The node class
         private Class<?> _nodeClass;
@@ -231,6 +263,7 @@ public class ClassesTool extends WorkspaceTool {
         {
             if (_childNodes.isEmpty()) _childNodes = new ArrayList<>();
             ClassNode classNode = new ClassNode(nodeClass, nodeFile);
+            classNode._parentNode = this;
             int insertIndex = -Collections.binarySearch(_childNodes, classNode) - 1;
             _childNodes.add(insertIndex, classNode);
             return classNode;
