@@ -1,11 +1,15 @@
 package snapcode.apptools;
+import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.*;
 import snap.web.WebFile;
+import snapcode.app.PagePane;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.project.Project;
+import snapcode.project.ProjectUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +25,9 @@ public class ClassesTool extends WorkspaceTool {
 
     // The TreeView to show classes
     private TreeView<ClassNode> _treeView;
+
+    // Listener for PagePane.SelFile
+    private PropChangeListener _pagePaneSelFileLsnr = pc -> handlePagePaneSelFileChanged();
 
     /**
      * Constructor.
@@ -93,12 +100,28 @@ public class ClassesTool extends WorkspaceTool {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle ReloadButton
-        if (anEvent.equals("ReloadButton"))
-            resetClassTree();
+        switch (anEvent.getName()) {
 
-        // Do normal version
-        else super.respondUI(anEvent);
+            // Handle ReloadButton
+            case "ReloadButton": resetClassTree(); break;
+
+            // Handle TreeView
+            case "TreeView": handleTreeViewActionEvent(); break;
+
+            // Do normal version
+            default: super.respondUI(anEvent); break;
+        }
+    }
+
+    /**
+     * Called when TreeView gets Action event.
+     */
+    private void handleTreeViewActionEvent()
+    {
+        ClassNode selClassNode = _treeView.getSelItem();
+        WebFile selFile = selClassNode != null ? selClassNode.getNodeFile() : null;
+        if (selFile != null)
+            _pagePane.setSelFile(selFile);
     }
 
     /**
@@ -148,6 +171,38 @@ public class ClassesTool extends WorkspaceTool {
         Label label = new Label(classNode.getNodeClass().getSimpleName());
         label.setPropsString("Fill:#F5CC9B; Border:BLACK 1; MinWidth:60; Padding:4,8,4,8; BorderRadius:4;");
         return label;
+    }
+
+    /**
+     * Override to start/stop listening to PagePane.SelFile changes.
+     */
+    @Override
+    protected void setShowing(boolean aValue)
+    {
+        if (aValue == isShowing()) return;
+        super.setShowing(aValue);
+
+        // Add remove PagePane.SelFile listener
+        if (aValue) {
+            _pagePane.addPropChangeListener(_pagePaneSelFileLsnr, PagePane.SelFile_Prop);
+            handlePagePaneSelFileChanged();
+        }
+        else _pagePane.removePropChangeListener(_pagePaneSelFileLsnr);
+    }
+
+    /**
+     * Called when PagePane.SelFile changes.
+     */
+    private void handlePagePaneSelFileChanged()
+    {
+        // Get ClassNode for PagePane.SelFile
+        WebFile selFile = _pagePane.getSelFile();
+        Project project = selFile != null && ProjectUtils.isSourceFile(selFile) ? Project.getProjectForFile(selFile) : null;
+        Class<?> selFileClass = project != null ? project.getClassForFile(selFile) : null;
+        ClassNode selFileClassNode = selFileClass != null ? getRootClassNode().getChildNodeForClassDeep(selFileClass) : null;
+
+        // Set TreeView.SelItem
+        _treeView.setSelItem(selFileClassNode);
     }
 
     /**

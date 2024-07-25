@@ -330,7 +330,7 @@ public class WorkspacePaneUtils {
     /**
      * Selects a good default file.
      */
-    private static void selectGoodDefaultFile(WorkspacePane workspacePane, Project project)
+    public static void selectGoodDefaultFile(WorkspacePane workspacePane, Project project)
     {
         // If project, expand source dir
         if (project != null) {

@@ -1,5 +1,6 @@
 package snapcode.app;
 import snap.util.*;
+import snap.view.ViewUtils;
 import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -59,6 +60,9 @@ public class GreenImport {
 
         // Open greenfoot dir
         openGreenfootDir(workspacePane, greenfootDir);
+
+        // Select good file
+        ViewUtils.runDelayed(() -> WorkspacePaneUtils.selectGoodDefaultFile(workspacePane, null), 400);
     }
 
     /**
@@ -66,12 +70,6 @@ public class GreenImport {
      */
     public static void openGreenfootDir(WorkspacePane workspacePane, WebFile greenfootDir)
     {
-        // Make sure workspacePane exists
-        if (workspacePane == null) {
-            workspacePane = new WorkspacePane();
-            workspacePane.show();
-        }
-
         // Get scenario name
         String scenarioName = greenfootDir.getSimpleName().replace(' ', '_');
 
@@ -187,6 +185,10 @@ public class GreenImport {
      */
     private static void copyFileToDir(WebFile aFile, WebFile toDir)
     {
+        // If file should be top level file, copy there instead
+        if (isTopLevelFile(aFile))
+            toDir = toDir.getParent();
+
         // Get ToFile
         String toFilePath = toDir.getDirPath() + aFile.getName();
         WebFile toFile = toDir.getSite().createFileForPath(toFilePath, aFile.isDir());
@@ -285,6 +287,16 @@ public class GreenImport {
     {
         String fileType = aFile.getFileType();
         if (fileType.equals("class") || fileType.equals("ctxt"))
+            return true;
+        return false;
+    }
+
+    /**
+     * Returns whether given file should be in top level.
+     */
+    private static boolean isTopLevelFile(WebFile aFile)
+    {
+        if (StringUtils.equalsIC(aFile.getSimpleName(), "readme"))
             return true;
         return false;
     }

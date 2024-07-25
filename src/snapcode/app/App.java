@@ -118,14 +118,15 @@ public class App {
 
         // Handle 'Sample:'
         if (arg0.startsWith("sample:")) {
-            String sampleName = arg0.substring("sample:".length());
             WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
+            String sampleName = arg0.substring("sample:".length());
             WorkspacePaneUtils.openSampleForName(workspacePane, sampleName);
             return true;
         }
 
         // Handle 'greenfoot:'
         if (arg0.startsWith("greenfoot:")) {
+            WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
             String scenarioIdStr = arg0.substring("greenfoot:".length());
             int scenarioId = Convert.intValue(scenarioIdStr);
             GreenImport.openGreenfootForScenarioId(null, scenarioId);
