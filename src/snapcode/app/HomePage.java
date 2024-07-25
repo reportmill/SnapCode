@@ -151,6 +151,15 @@ public class HomePage extends WebPage {
     }
 
     /**
+     * Override so we don't get plain markdown page.
+     */
+    @Override
+    public void reload()
+    {
+        runLater(_workspacePane._pagePane::showHomePage);
+    }
+
+    /**
      * Removes CJ "imageio23452345.tmp" files.
      */
     private static void removeImageTempFiles()

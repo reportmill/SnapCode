@@ -98,7 +98,7 @@ public class WorkspaceTools {
         _leftTray = new ToolTray(Side.LEFT, leftTools);
 
         // Create RightTray
-        WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, helpTool, blocksTool, classesTool };
+        WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, classesTool, helpTool, blocksTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray

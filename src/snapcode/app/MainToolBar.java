@@ -1,6 +1,5 @@
 package snapcode.app;
 import snap.geom.Insets;
-import snapcode.apptools.BuildTool;
 import snapcode.apptools.RunTool;
 import snapcode.project.Project;
 import snap.gfx.*;
@@ -95,10 +94,11 @@ public class MainToolBar extends WorkspaceTool {
     {
         switch (anEvent.getName()) {
 
-            // Handle HomeButton, BackButton, ForwardButton
+            // Handle HomeButton, BackButton, ForwardButton, ReloadButton
             case "HomeButton": _pagePane.showHomePage(); break;
             case "BackButton": _pagePane.getBrowser().trackBack(); break;
             case "ForwardButton": _pagePane.getBrowser().trackForward(); break;
+            case "ReloadButton": _pagePane.getBrowser().reloadPage(); break;
 
             // Handle RunButton, DebugButton, TerminateButton, BuildButton
             case "RunButton": _workspaceTools.getRunTool().runApp(false); break;
