@@ -73,7 +73,7 @@ public class WorkspacePane extends ViewOwner {
         // Manage projects
         Project[] projects = _workspace.getProjects();
         for (Project proj : projects)
-            workspaceDidAddProject(proj);
+            handleWorkspaceProjectAdded(proj);
     }
 
     /**
@@ -98,7 +98,7 @@ public class WorkspacePane extends ViewOwner {
         // Install
         Project[] projects = _workspace.getProjects();
         for (Project proj : projects)
-            workspaceDidAddProject(proj);
+            handleWorkspaceProjectAdded(proj);
 
         // Install in tools
         _workspaceTools.setWorkspace(_workspace);
@@ -466,7 +466,7 @@ public class WorkspacePane extends ViewOwner {
                 break;
 
             // Handle Projects
-            case Workspace.Projects_Prop: workspaceDidProjectsChange(aPC); break;
+            case Workspace.Projects_Prop: handleWorkspaceProjectsChanged(aPC); break;
         }
 
         // Handle Loading, Building
@@ -474,24 +474,28 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
-     * Called when Workspace does a Projects prop change.
+     * Called when Workspace.Projects changes.
      */
-    private void workspaceDidProjectsChange(PropChange aPC)
+    private void handleWorkspaceProjectsChanged(PropChange aPC)
     {
         Project addedProj = (Project) aPC.getNewValue();
+
+        // Handle project added
         if (addedProj != null)
-            workspaceDidAddProject(addedProj);
+            handleWorkspaceProjectAdded(addedProj);
+
+        // Handle project removed
         else {
             Project removedProj = (Project) aPC.getOldValue();
             if (removedProj != null)
-                workspaceDidRemoveProject(removedProj);
+                handleWorkspaceProjectRemoved(removedProj);
         }
     }
 
     /**
      * Called when Workspace adds a project.
      */
-    private void workspaceDidAddProject(Project aProject)
+    private void handleWorkspaceProjectAdded(Project aProject)
     {
         // Create/add ProjectPane
         ProjectPane projPane = new ProjectPane(this, aProject);
@@ -515,7 +519,7 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Called when Workspace removes a project.
      */
-    private void workspaceDidRemoveProject(Project aProject)
+    private void handleWorkspaceProjectRemoved(Project aProject)
     {
         // Notify tools
         _workspaceTools.projectIsClosing(aProject);

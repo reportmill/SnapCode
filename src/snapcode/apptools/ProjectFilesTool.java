@@ -91,11 +91,10 @@ public class ProjectFilesTool extends WorkspaceTool {
     public void resetRootFiles()
     {
         _rootFiles = null;
+        resetLater();
 
-        if (_filesTree != null && _filesTree.getItemsList().isEmpty()) {
-            resetLater();
+        if (_filesTree != null && _filesTree.getItemsList().isEmpty())
             ViewUtils.runLater(this::showRootProject);
-        }
     }
 
     /**

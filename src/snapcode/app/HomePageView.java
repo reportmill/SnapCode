@@ -83,6 +83,23 @@ public class HomePageView extends MarkDownView {
     @Override
     protected View createViewForHeaderNode(MDNode headerNode)
     {
+        // Handle "Create New": Add ClearWorkspaceButton
+        if (headerNode.getText().equals("Create New:")) {
+
+            // Create normal headerView
+            View headerView = super.createViewForHeaderNode(headerNode);
+
+            // Create ClearWorkspaceButton
+            Button clearWorkspaceButton = new Button("Clear Workspace");
+            clearWorkspaceButton.setPropsString("Name:ClearWorkspaceButton; Font:Arial 13; PrefWidth:120; PrefHeight:24; Margin:0,0,0,20");
+            clearWorkspaceButton.setVisible(_homePage._workspacePane.getProjects().length > 0);
+
+            // Create row, add children and return
+            RowView rowView = new RowView();
+            rowView.setChildren(headerView, clearWorkspaceButton);
+            return rowView;
+        }
+
         // Handle "Open Recent": Add OpenButton
         if (headerNode.getText().equals("Open Recent:")) {
 

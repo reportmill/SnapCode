@@ -5,6 +5,8 @@ import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.apptools.NewFileTool;
+import snapcode.project.Project;
+import snapcode.project.Workspace;
 import snapcode.webbrowser.WebPage;
 import java.io.File;
 
@@ -14,7 +16,7 @@ import java.io.File;
 public class HomePage extends WebPage {
 
     // The WorkspacePane
-    private WorkspacePane _workspacePane;
+    protected WorkspacePane _workspacePane;
 
     // The HomePageView
     private HomePageView _homePageView;
@@ -141,6 +143,9 @@ public class HomePage extends WebPage {
     {
         switch (anEvent.getName()) {
 
+            // Handle ClearWorkspaceButton
+            case "ClearWorkspaceButton": clearWorkspace(); break;
+
             // Handle OpenButton, OpenDesktopFileButton
             case "OpenButton": _workspacePane.getWorkspaceTools().getFilesTool().showOpenFilePanel(); break;
             case "OpenDesktopFileButton": _workspacePane.getWorkspaceTools().getFilesTool().showOpenDesktopFilePanel(); break;
@@ -148,6 +153,18 @@ public class HomePage extends WebPage {
             // Do normal version
             default: super.respondUI(anEvent); break;
         }
+    }
+
+    /**
+     * Removes all projects from workspace.
+     */
+    private void clearWorkspace()
+    {
+        Workspace workspace = _workspacePane.getWorkspace();
+        Project[] projects = workspace.getProjects();
+        for (Project project : projects)
+            workspace.removeProject(project);
+        setViewVisible("ClearWorkspaceButton", false);
     }
 
     /**
