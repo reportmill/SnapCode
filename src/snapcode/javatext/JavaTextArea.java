@@ -4,6 +4,8 @@
 package snapcode.javatext;
 import java.util.*;
 import javakit.parse.*;
+import snap.geom.RoundRect;
+import snap.parse.Tokenizer;
 import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
 import snapcode.project.JavaTextDoc;
@@ -48,6 +50,9 @@ public class JavaTextArea extends TextArea {
     // A PopupList to show code completion stuff
     private JavaPopupList _popup;
 
+    // Whether to draw boxes around scope levels (class, methods, code blocks)
+    private static boolean _showScopeBoxes;
+
     // Constants for properties
     public static final String SelNode_Prop = "SelNode";
 
@@ -83,14 +88,28 @@ public class JavaTextArea extends TextArea {
     protected TextAreaKeys createTextAreaKeys()  { return new JavaTextAreaKeys(this); }
 
     /**
-     * Returns whether to draw line for print margin column.
+     * Returns whether to paint boxes around .
      */
-    public boolean getShowPrintMargin()  { return _showPrintMargin; }
+    public boolean isShowPrintMargin()  { return _showPrintMargin; }
 
     /**
      * Sets whether to draw line for print margin column.
      */
     public void setShowPrintMargin(boolean aValue)  { _showPrintMargin = aValue; }
+
+    /**
+     * Returns whether to draw boxes around scope levels (class, methods, code blocks).
+     */
+    public static boolean isShowScopeBoxes()  { return _showScopeBoxes; }
+
+    /**
+     * Sets whether to draw boxes around scope levels (class, methods, code blocks).
+     */
+    public static void setShowScopeBoxes(boolean aValue)
+    {
+        if (aValue == isShowScopeBoxes()) return;
+        _showScopeBoxes = aValue;
+    }
 
     /**
      * Selects a given line number.
@@ -355,12 +374,16 @@ public class JavaTextArea extends TextArea {
         super.paintBack(aPntr);
 
         // Configure MarginLine
-        if (getShowPrintMargin()) {
+        if (isShowPrintMargin()) {
             double x = getPadding().getLeft() + getFont().charAdvance('X') * 120 + .5;
             aPntr.setColor(Color.LIGHTGRAY);
             aPntr.setStroke(Stroke.Stroke1);
             aPntr.drawLine(x, 0, x, getHeight());
         }
+
+        // Paint scope boxes (boxes around class, method, code blocks, etc.)
+        if (_showScopeBoxes)
+            paintScopeBoxes(aPntr);
 
         // Underline build issues
         paintErrors(aPntr);
@@ -486,6 +509,129 @@ public class JavaTextArea extends TextArea {
 
     // Java 8 on Windows/Linux has problems with arbitrary transforms and text
     private static boolean _bug = !SnapUtils.isMac && !SnapUtils.isWebVM && !SnapUtils.isTeaVM;
+
+    private static final Color METHOD_COLOR = Color.get("#FAFAB4");
+    private static final Color METHOD_STROKE_COLOR = METHOD_COLOR.darker();
+    private static final Color CODE_BLOCK_COLOR = Color.get("#E9E9F8");
+    private static final Color CODE_BLOCK_STROKE_COLOR = CODE_BLOCK_COLOR.darker();
+    private static final Color CLASS_DECL_COLOR = Color.get("#E1F8E1");
+    private static final Color CLASS_DECL_STROKE_COLOR = CLASS_DECL_COLOR.darker();
+
+    /**
+     * Paints scope boxes around methods, code blocks, etc.
+     */
+    private void paintScopeBoxes(Painter aPntr)
+    {
+        // Get method/constructor/initializer decls
+        JFile jFile = getJFile();
+        JClassDecl classDecl = jFile.getClassDecl(); if (classDecl == null) return;
+        JBodyDecl[] bodyDecls = classDecl.getBodyDecls();
+        bodyDecls = ArrayUtils.filter(bodyDecls, bdecl -> bdecl instanceof WithBlockStmt);
+        Rect clipBounds = aPntr.getClipBounds();
+
+        // Paint box for classDecl
+        paintScopeBoxForNodes(aPntr, classDecl, classDecl, 1);
+
+        // Iterate over body decls
+        for (JBodyDecl bodyDecl : bodyDecls) {
+
+            // If body decl not visible, skip it
+            int bodyDeclEndCharIndex = bodyDecl.getEndCharIndex();
+            TextLine bodyDeclEndLine = getLineForCharIndex(bodyDeclEndCharIndex);
+            if (bodyDeclEndLine.getMaxY() < clipBounds.y)
+                continue;
+
+            // Paint method box
+            paintScopeBoxForNodeWithBlock(aPntr, bodyDecl, 2);
+
+            // If body decl end not visible, stop loop
+            if (bodyDeclEndLine.getTextMaxY() >= clipBounds.getMaxY())
+                break;
+        }
+    }
+
+    /**
+     * Paints scope box for given node with block.
+     */
+    private void paintScopeBoxForNodeWithBlock(Painter aPntr, JNode nodeWithBlock, int level)
+    {
+        // Paint outer box
+        paintScopeBoxForNodes(aPntr, nodeWithBlock, nodeWithBlock, level);
+
+        // Paint content box
+        JStmtBlock blockStmt = ((WithBlockStmt) nodeWithBlock).getBlock();
+        List<JStmt> blockStmts = blockStmt != null ? blockStmt.getStatements() : null;
+        if (blockStmts == null || blockStmts.isEmpty())
+            return;
+
+        // Paint inner box (white)
+        JStmt startStmt = blockStmts.get(0);
+        while (blockStmt.getLineIndex() == startStmt.getLineIndex() && startStmt.getNextStmt() != null)
+            startStmt = startStmt.getNextStmt();
+        JStmt endStmt = blockStmts.get(blockStmts.size() - 1);
+        if (blockStmt.getLineIndex() == endStmt.getLineIndex())
+            return;
+        paintScopeBoxForNodes(aPntr, startStmt, endStmt, level + 1);
+
+        // Paint inner blocks
+        for (JStmt stmt : blockStmts) {
+            if (stmt instanceof WithBlockStmt && ((WithBlockStmt) stmt).isBlockSet())
+                paintScopeBoxForNodeWithBlock(aPntr, stmt, level + 2);
+        }
+    }
+
+    /**
+     * Paints scope box.
+     */
+    private void paintScopeBoxForNodes(Painter aPntr, JNode startNode, JNode endNode, int level)
+    {
+        // Get start/end line for nodes
+        TextBlock textBlock = getTextBlock();
+        int startCharIndex = startNode.getStartCharIndex();
+        int endCharIndex = endNode.getEndCharIndex();
+        TextLine startLine = textBlock.getLineForCharIndex(startCharIndex);
+        while (isPreviousLineComment(startLine))
+            startLine = startLine.getPrevious();
+        TextLine endLine = textBlock.getLineForCharIndex(endCharIndex);
+
+        // Get scope rect for start/end lines
+        double strokeX = startLine.getTextXForCharIndex(startLine.getIndentLength()) - 3;
+        double strokeY = startLine.getTextY() - 3;
+        double strokeW = getWidth() - strokeX - 4 * level;
+        double strokeH = endLine.getTextMaxY() + 3 - strokeY;
+        RoundRect methodRoundRect = new RoundRect(strokeX, strokeY, strokeW, strokeH, 4);
+
+        Color fillColor = getScopeColor(startNode, endNode, false);
+        Color strokeColor = getScopeColor(startNode, endNode, true);
+
+        // Paint scope box
+        aPntr.setColor(fillColor);
+        aPntr.fill(methodRoundRect);
+        aPntr.setColor(strokeColor);
+        aPntr.setStrokeWidth(1);
+        aPntr.draw(methodRoundRect);
+    }
+
+    /**
+     * Returns the color to use for scope box for given node.
+     */
+    private static Color getScopeColor(JNode aNode, JNode endNode, boolean isStrokeColor)
+    {
+        // Method/constructor/initializer all paint in yellow
+        if (aNode instanceof JExecutableDecl || aNode instanceof JInitializerDecl)
+            return isStrokeColor ? METHOD_STROKE_COLOR : METHOD_COLOR;
+
+        // Blocks paint purple
+        if (aNode instanceof WithBlockStmt && ((WithBlockStmt) aNode).isBlockSet() && aNode == endNode)
+            return isStrokeColor ? CODE_BLOCK_STROKE_COLOR : CODE_BLOCK_COLOR;
+
+        // Class paints green
+        if (aNode instanceof JClassDecl)
+            return isStrokeColor ? CLASS_DECL_STROKE_COLOR : CLASS_DECL_COLOR;
+
+        // Method body is white
+        return isStrokeColor ? CLASS_DECL_STROKE_COLOR : Color.WHITE;
+    }
 
     /**
      * Indents the text.
@@ -961,5 +1107,21 @@ public class JavaTextArea extends TextArea {
 
         // Return text doc for temp file
         return JavaTextDoc.getJavaTextDocForFile(tempFile);
+    }
+
+    /**
+     * Returns whether previous line is comment.
+     */
+    private static boolean isPreviousLineComment(TextLine aLine)
+    {
+        // Get name of first token in previous line (just return if not found)
+        TextLine prevLine = aLine.getPrevious();
+        TextToken prevLineToken = prevLine != null && prevLine.getTokenCount() > 0 ? prevLine.getToken(0) : null;
+        String tokenName = prevLineToken != null ? prevLineToken.getName() : null;
+        if (tokenName == null)
+            return false;
+
+        // Return true if name is comment
+        return tokenName.equals(Tokenizer.SINGLE_LINE_COMMENT) || tokenName.equals(Tokenizer.MULTI_LINE_COMMENT);
     }
 }

@@ -1,5 +1,6 @@
 package javakit.parse;
 import snap.parse.ParseToken;
+import snap.util.ListUtils;
 import java.util.Collections;
 import java.util.List;
 
@@ -7,6 +8,12 @@ import java.util.List;
  * This interface identifies nodes with a block statement (JExecDecl, JInitDecl, JExprLambda, JStmtTryCatch).
  */
 public interface WithBlockStmt {
+
+    default boolean isBlockSet()
+    {
+        JNode thisNode = (JNode) this;
+        return ListUtils.hasMatch(thisNode.getChildren(), child -> child instanceof JStmtBlock);
+    }
 
     /**
      * Returns the block statement.

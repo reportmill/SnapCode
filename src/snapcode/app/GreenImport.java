@@ -5,6 +5,7 @@ import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import snapcode.javatext.JavaTextArea;
 import snapcode.project.*;
 import java.io.File;
 import java.io.IOException;
@@ -63,6 +64,7 @@ public class GreenImport {
 
         // Select good file
         ViewUtils.runDelayed(() -> WorkspacePaneUtils.selectGoodDefaultFile(workspacePane, null), 400);
+        JavaTextArea.setShowScopeBoxes(true);
     }
 
     /**
