@@ -597,7 +597,7 @@ public class WorkspacePane extends ViewOwner {
      */
     private void checkScreenSize()
     {
-        Rect screenBounds = getEnv().getScreenBoundsInset();
+        Rect screenBounds = GFXEnv.getEnv().getScreenBoundsInset();
         WindowView window = getWindow();
         if (window.getWidth() != screenBounds.width || window.getHeight() != screenBounds.height) {
             window.setBounds(screenBounds);

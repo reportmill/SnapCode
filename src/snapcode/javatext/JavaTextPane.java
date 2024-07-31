@@ -94,6 +94,9 @@ public class JavaTextPane extends TextPane {
         BorderView borderView = getUI(BorderView.class);
         borderView.setCenter(scrollGroup);
         borderView.setRight(_lineFootView);
+
+        // Add listener to initialize settings menu
+        getView("SettingsButton").addEventHandler(this::handleSettingsButtonMousePress, MousePress);
     }
 
     /**
@@ -135,31 +138,34 @@ public class JavaTextPane extends TextPane {
      */
     protected void respondUI(ViewEvent anEvent)
     {
-        // Do normal version
-        super.respondUI(anEvent);
+        String eventName = anEvent.getName();
 
-        // Handle JavaDocButton
-        if (anEvent.equals("JavaDocButton")) {
-            JavaDoc javaDoc = getJavaDoc();
-            if (javaDoc != null)
-                javaDoc.openUrl();
+        switch (eventName) {
+
+            // Handle JavaDocButton
+            case "JavaDocButton":
+                JavaDoc javaDoc = getJavaDoc();
+                if (javaDoc != null)
+                    javaDoc.openUrl();
+                break;
+
+            // Handle FontSizeText, IncreaseFontButton, DecreaseFontButton
+            case "FontSizeText": case "IncreaseFontButton": case "DecreaseFontButton":
+                super.respondUI(anEvent);
+                JavaTextDocUtils.setDefaultJavaFontSize(_textArea.getFont().getSize());
+                break;
+
+            // Handle OpenDeclarationMenuItem, ShowReferencesMenuItem, ShowDeclarationsMenuItem
+            case "OpenDeclarationMenuItem": openDeclaration(_textArea.getSelNode()); break;
+            case "ShowReferencesMenuItem": showReferences(_textArea.getSelNode()); break;
+            case "ShowDeclarationsMenuItem": showDeclarations(_textArea.getSelNode()); break;
+
+            // Handle ShowScopeBoxesMenuItem
+            case "ShowScopeBoxesMenuItem": JavaTextArea.setShowScopeBoxes(!JavaTextArea.isShowScopeBoxes());
+
+            // Do normal version
+            default: super.respondUI(anEvent); break;
         }
-
-        // Handle FontSizeText, IncreaseFontButton, DecreaseFontButton
-        else if (anEvent.equals("FontSizeText") || anEvent.equals("IncreaseFontButton") || anEvent.equals("DecreaseFontButton"))
-            JavaTextDocUtils.setDefaultJavaFontSize(_textArea.getFont().getSize());
-
-        // Handle OpenDeclarationMenuItem
-        else if (anEvent.equals("OpenDeclarationMenuItem"))
-            openDeclaration(_textArea.getSelNode());
-
-        // Handle ShowReferencesMenuItem
-        else if (anEvent.equals("ShowReferencesMenuItem"))
-            showReferences(_textArea.getSelNode());
-
-        // Handle ShowDeclarationsMenuItem
-        else if (anEvent.equals("ShowDeclarationsMenuItem"))
-            showDeclarations(_textArea.getSelNode());
     }
 
     /**
@@ -203,6 +209,23 @@ public class JavaTextPane extends TextPane {
         JNode deepNode = javaTextArea.getDeepNode();
         javaTextArea.setSel(clickedNode.getStartCharIndex(), clickedNode.getEndCharIndex());
         javaTextArea.setDeepNode(deepNode);
+    }
+
+    /**
+     * Called when SettingsButton gets mouse press event.
+     */
+    private void handleSettingsButtonMousePress(ViewEvent anEvent)
+    {
+        // Reset text on ShowScopeBoxesMenuItem
+        MenuButton settingsButton = getView("SettingsButton", MenuButton.class);
+        MenuItem showScopeBoxesMenu = settingsButton.getItemForName("ShowScopeBoxesMenuItem");
+        if (showScopeBoxesMenu != null)
+            showScopeBoxesMenu.setText(JavaTextArea.isShowScopeBoxes() ? "Hide Scope Boxes" : "Show Scope Boxes");
+
+        // Reset text on ShowSnapCodeMenuItem
+        MenuItem showSnapCodeMenu = settingsButton.getItemForName("ShowSnapCodeMenuItem");
+        if (showSnapCodeMenu != null)
+            showSnapCodeMenu.setVisible(!getJavaTextDoc().isJepl());
     }
 
     /**

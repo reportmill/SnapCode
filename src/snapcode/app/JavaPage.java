@@ -89,10 +89,6 @@ public class JavaPage extends WebPage {
 
         // Register for enter action
         addKeyActionFilter("EnterAction", "Shortcut+ENTER");
-
-        // If not java file, hide SnapCodeButton (jepl file)
-        if (!javaFile.getFileType().equals("java"))
-            _javaTextPane.setViewVisible("SnapCodeButton", false);
     }
 
     /**
@@ -447,8 +443,8 @@ public class JavaPage extends WebPage {
         @Override
         public void respondUI(ViewEvent anEvent)
         {
-            // Handle SnapCodeButton
-            if (anEvent.equals("SnapCodeButton"))
+            // Handle ShowSnapCodeMenuItem
+            if (anEvent.equals("SnapCodeButton") || anEvent.equals("ShowSnapCodeMenuItem"))
                 openAsSnapCode();
 
                 // Do normal version

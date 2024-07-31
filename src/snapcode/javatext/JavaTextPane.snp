@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RowView Padding="6,6,6,6" Spacing="5">
+<RowView Padding="4" Spacing="5">
   <Button Name="SaveButton" PrefWidth="22" PrefHeight="22" ToolTip="Save" image="/snap/viewx/pkg.images/File_Save.png" ShowBorder="false" />
   <Separator PrefHeight="18" Vertical="true" />
   <Button Name="CutButton" PrefWidth="22" PrefHeight="22" ToolTip="Cut" image="/snap/viewx/pkg.images/Edit_Cut.png" ShowBorder="false" />
@@ -17,5 +17,8 @@
   <TextField Name="FindText" PrefWidth="172" PrefHeight="22" />
   <CheckBox Name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" text="IC" Selected="true" />
   <Button Name="JavaDocButton" PrefWidth="116" PrefHeight="22" LeanX="RIGHT" text="Documentation" />
-  <Button Name="SnapCodeButton" PrefWidth="75" PrefHeight="22" LeanX="RIGHT" ToolTip="Snap Code" text="SnapCode" />
+  <MenuButton Name="SettingsButton" PrefWidth="24" PrefHeight="24" Margin="0,14,0,0" LeanX="RIGHT" ToolTip="Settings" Image="Settings.png" ShowArea="false" ShowArrow="false">
+    <MenuItem Name="ShowScopeBoxesMenuItem" Text="Show Scope Boxes" />
+    <MenuItem Name="ShowSnapCodeMenuItem" Text="Show SnapCode" />
+  </MenuButton>
 </RowView>
