@@ -158,6 +158,8 @@ public class WorkspacePaneUtils {
             // Handle zip
             case "zip": openProjectForZipUrl(workspacePane, sampleURL); break;
 
+            // Handle gfar
+            case "gfar": GreenImport.openGreenfootForArchiveFileUrl(workspacePane, sampleURL); break;
 
             // Handle git
             case "git": openProjectForRepoURL(workspacePane, sampleURL); break;

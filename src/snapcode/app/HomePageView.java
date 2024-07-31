@@ -1,8 +1,7 @@
 package snapcode.app;
-import snap.gfx.Color;
-import snap.gfx.Effect;
-import snap.gfx.Image;
-import snap.gfx.ShadowEffect;
+import snap.gfx.*;
+import snap.text.TextLink;
+import snap.text.TextStyle;
 import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
 import snap.view.*;
@@ -83,46 +82,73 @@ public class HomePageView extends MarkDownView {
     @Override
     protected View createViewForHeaderNode(MDNode headerNode)
     {
-        // Handle "Create New": Add ClearWorkspaceButton
-        if (headerNode.getText().equals("Create New:")) {
+        switch (headerNode.getText()) {
 
-            // Create normal headerView
-            View headerView = super.createViewForHeaderNode(headerNode);
+            // Handle "Create New": Add ClearWorkspaceButton
+            case "Create New:": {
 
-            // Create ClearWorkspaceButton
-            Button clearWorkspaceButton = new Button("Clear Workspace");
-            clearWorkspaceButton.setPropsString("Name:ClearWorkspaceButton; Font:Arial 13; PrefWidth:120; PrefHeight:24; Margin:0,0,0,20");
-            clearWorkspaceButton.setVisible(_homePage._workspacePane.getProjects().length > 0);
+                // Create normal headerView
+                View headerView = super.createViewForHeaderNode(headerNode);
 
-            // Create row, add children and return
-            RowView rowView = new RowView();
-            rowView.setChildren(headerView, clearWorkspaceButton);
-            return rowView;
-        }
+                // Create ClearWorkspaceButton
+                Button clearWorkspaceButton = new Button("Clear Workspace");
+                clearWorkspaceButton.setPropsString("Name:ClearWorkspaceButton; Font:Arial 13; PrefWidth:120; PrefHeight:24; Margin:0,0,0,20");
+                clearWorkspaceButton.setVisible(_homePage._workspacePane.getProjects().length > 0);
 
-        // Handle "Open Recent": Add OpenButton
-        if (headerNode.getText().equals("Open Recent:")) {
-
-            // Create normal headerView
-            View headerView = super.createViewForHeaderNode(headerNode);
-
-            // Create OpenButton
-            Button openButton = new Button("Open...");
-            openButton.setPropsString("Name:OpenButton; PrefWidth:100; PrefHeight:24; Margin:0,0,0,20");
-            if (SnapUtils.isWebVM) {
-                openButton.setText("Open Browser File...");
-                openButton.setPrefWidth(130);
+                // Create row, add children and return
+                RowView rowView = new RowView();
+                rowView.setChildren(headerView, clearWorkspaceButton);
+                return rowView;
             }
 
-            // Create OpenDesktopFileButton
-            Button openDesktopFileButton = new Button("Open Desktop File...");
-            openDesktopFileButton.setPropsString("Name:OpenDesktopFileButton; PrefWidth:130; PrefHeight:24; Margin:0,0,0,12");
-            openDesktopFileButton.setVisible(SnapUtils.isWebVM);
+            // Handle "Open Recent": Add OpenButton
+            case "Open Recent:": {
 
-            // Create row, add children and return
-            RowView rowView = new RowView();
-            rowView.setChildren(headerView, openButton, openDesktopFileButton);
-            return rowView;
+                // Create normal headerView
+                View headerView = super.createViewForHeaderNode(headerNode);
+
+                // Create OpenButton
+                Button openButton = new Button("Open...");
+                openButton.setPropsString("Name:OpenButton; PrefWidth:100; PrefHeight:24; Margin:0,0,0,20");
+                if (SnapUtils.isWebVM) {
+                    openButton.setText("Open Browser File...");
+                    openButton.setPrefWidth(130);
+                }
+
+                // Create OpenDesktopFileButton
+                Button openDesktopFileButton = new Button("Open Desktop File...");
+                openDesktopFileButton.setPropsString("Name:OpenDesktopFileButton; PrefWidth:130; PrefHeight:24; Margin:0,0,0,12");
+                openDesktopFileButton.setVisible(SnapUtils.isWebVM);
+
+                // Create row, add children and return
+                RowView rowView = new RowView();
+                rowView.setChildren(headerView, openButton, openDesktopFileButton);
+                return rowView;
+            }
+
+            // Handle "Open Samples": Add link to SamplesPage
+            case "Open Samples:": {
+
+                // Create normal headerView
+                View headerView = super.createViewForHeaderNode(headerNode);
+
+                // Create ShowSamplesPageText
+                TextArea showSamplesText = new TextArea();
+                Font font = Font.getFont("Arial Italic", 20);
+                TextStyle textStyle = TextStyle.DEFAULT.copyFor(font);
+                textStyle = textStyle.copyFor(TextStyle.LINK_KEY, new TextLink("show samples"));
+                textStyle = textStyle.copyFor(TextStyle.COLOR_KEY, Color.get("#6666FF"));
+                showSamplesText.setDefaultStyle(textStyle);
+                showSamplesText.setPropsString("Margin:0,0,0,40");
+                showSamplesText.setText("Show all samples ...");
+                showSamplesText.setCursor(Cursor.HAND);
+                showSamplesText.addEventHandler(e -> _homePage.showSamplesPage(), MousePress);
+
+                // Create row, add children and return
+                RowView rowView = new RowView();
+                rowView.setChildren(headerView, showSamplesText);
+                return rowView;
+            }
         }
 
         // Do normal version

@@ -71,6 +71,28 @@ public class HomePage extends WebPage {
     }
 
     /**
+     * Removes all projects from workspace.
+     */
+    private void clearWorkspace()
+    {
+        Workspace workspace = _workspacePane.getWorkspace();
+        Project[] projects = workspace.getProjects();
+        for (Project project : projects)
+            workspace.removeProject(project);
+        setViewVisible("ClearWorkspaceButton", false);
+    }
+
+    /**
+     * Shows the samples page.
+     */
+    public void showSamplesPage()
+    {
+        SamplesPage samplesPage = new SamplesPage(_workspacePane);
+        _workspacePane.getPagePane().setPageForURL(samplesPage.getURL(), samplesPage);
+        _workspacePane.getPagePane().setSelPage(samplesPage);
+    }
+
+    /**
      * Called to resolve links.
      */
     protected void handleLinkClick(String urlAddr)
@@ -153,18 +175,6 @@ public class HomePage extends WebPage {
             // Do normal version
             default: super.respondUI(anEvent); break;
         }
-    }
-
-    /**
-     * Removes all projects from workspace.
-     */
-    private void clearWorkspace()
-    {
-        Workspace workspace = _workspacePane.getWorkspace();
-        Project[] projects = workspace.getProjects();
-        for (Project project : projects)
-            workspace.removeProject(project);
-        setViewVisible("ClearWorkspaceButton", false);
     }
 
     /**
