@@ -1,14 +1,11 @@
 package snapcode.app;
-import snap.gfx.Color;
-import snap.gfx.Effect;
-import snap.gfx.Image;
-import snap.gfx.ShadowEffect;
+import snap.gfx.*;
+import snap.text.TextStyle;
 import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.web.WebURL;
 import snapcode.util.MDNode;
 import snapcode.util.MarkDownView;
-
 import java.util.Arrays;
 
 /**
@@ -54,10 +51,12 @@ public class SamplesPageView extends MarkDownView {
     protected void addHeader()
     {
         // Create label for heading
+        Color HEADER_TEXT_COLOR = Color.get("#CD5652");
         Label samplesLabel = new Label("Samples");
         samplesLabel.setPropsString("Font:Arial Bold 64;");
-        samplesLabel.setTextFill(Color.get("#CD5652"));
-        samplesLabel.setEffect(new ShadowEffect(15, Color.DARKGRAY, 0, 2));
+        samplesLabel.setTextFill(HEADER_TEXT_COLOR);
+        samplesLabel.setTextStyle(samplesLabel.getTextStyle().copyFor(Border.createLineBorder(Color.WHITE, 2)).copyFor(TextStyle.CHAR_SPACING_KEY, 2));
+        samplesLabel.setEffect(new ShadowEffect(12, Color.BLACK, 0, 0));
 
         // Wrap image in row view and add
         RowView rowView = new RowView();
