@@ -15,7 +15,7 @@
 
 @[OpenSamples=true]
 
-## Encode/Create
+## enCode/Create
 
 * Flight
   [](https://reportmill.com/SnapCode/Samples/Flight/Flight.gfar)

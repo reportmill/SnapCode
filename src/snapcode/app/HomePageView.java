@@ -1,7 +1,5 @@
 package snapcode.app;
 import snap.gfx.*;
-import snap.text.TextLink;
-import snap.text.TextStyle;
 import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
 import snap.view.*;
@@ -133,14 +131,9 @@ public class HomePageView extends MarkDownView {
                 View headerView = super.createViewForHeaderNode(headerNode);
 
                 // Create ShowSamplesPageText
-                TextArea showSamplesText = new TextArea();
-                Font font = Font.getFont("Arial Italic", 20);
-                TextStyle textStyle = TextStyle.DEFAULT.copyFor(font);
-                textStyle = textStyle.copyFor(TextStyle.LINK_KEY, new TextLink("show samples"));
-                textStyle = textStyle.copyFor(TextStyle.COLOR_KEY, Color.get("#6666FF"));
-                showSamplesText.setDefaultStyle(textStyle);
-                showSamplesText.setPropsString("Margin:0,0,0,40");
-                showSamplesText.setText("Show all samples ...");
+                Label showSamplesText = new Label("Show all samples ...");
+                showSamplesText.setPropsString("Font:Arial Italic 20; Margin:0,0,0,30; Padding:0,0,2,0;");
+                showSamplesText.setTextStylePropsString("Color:#6666FF; Underline:1;");
                 showSamplesText.setCursor(Cursor.HAND);
                 showSamplesText.addEventHandler(e -> _homePage.showSamplesPage(), MousePress);
 

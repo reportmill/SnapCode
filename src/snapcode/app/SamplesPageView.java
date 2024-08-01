@@ -1,6 +1,5 @@
 package snapcode.app;
 import snap.gfx.*;
-import snap.text.TextStyle;
 import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.web.WebURL;
@@ -51,11 +50,9 @@ public class SamplesPageView extends MarkDownView {
     protected void addHeader()
     {
         // Create label for heading
-        Color HEADER_TEXT_COLOR = Color.get("#CD5652");
         Label samplesLabel = new Label("Samples");
         samplesLabel.setPropsString("Font:Arial Bold 64;");
-        samplesLabel.setTextFill(HEADER_TEXT_COLOR);
-        samplesLabel.setTextStyle(samplesLabel.getTextStyle().copyFor(Border.createLineBorder(Color.WHITE, 2)).copyFor(TextStyle.CHAR_SPACING_KEY, 2));
+        samplesLabel.setTextStylePropsString("Color:#CD5652; Border:WHITE 2; CharSpacing:2;");
         samplesLabel.setEffect(new ShadowEffect(12, Color.BLACK, 0, 0));
 
         // Wrap image in row view and add
@@ -70,6 +67,23 @@ public class SamplesPageView extends MarkDownView {
     @Override
     protected View createViewForHeaderNode(MDNode headerNode)
     {
+        if (headerNode.getText().equals("enCode/Create")) {
+
+            // Create normal headerView
+            View headerView = super.createViewForHeaderNode(headerNode);
+
+            // Create learn to code label
+            Label learnToCodeLabel = new Label("Learn to Code! ...");
+            learnToCodeLabel.setPropsString("Font:Arial Italic 20; Margin:0,0,0,40; Padding:0,0,2,0;");
+            learnToCodeLabel.setTextStylePropsString("Color:#6666FF; Underline:1;");
+            learnToCodeLabel.setCursor(Cursor.HAND);
+            learnToCodeLabel.addEventHandler(e -> GFXEnv.getEnv().openURL("https://www.encodecreate.com"), MousePress);
+
+            // Create row, add children and return
+            RowView rowView = new RowView();
+            rowView.setChildren(headerView, learnToCodeLabel);
+            return rowView;
+        }
 
         // Do normal version
         return super.createViewForHeaderNode(headerNode);
