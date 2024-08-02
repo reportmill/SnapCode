@@ -35,7 +35,7 @@ public class VersionControl {
     private Boolean _isAvailable;
 
     // A map of file to it's status
-    private Map<WebFile, FileStatus> _filesStatusCache = new HashMap<>();
+    private Map<WebFile, FileStatus> _filesStatusCache = Collections.synchronizedMap(new HashMap<>());
 
     // The PropChangeSupport
     private PropChangeSupport _pcs = PropChangeSupport.EMPTY;
@@ -437,7 +437,7 @@ public class VersionControl {
     /**
      * Returns the file VersionControl status.
      */
-    public synchronized FileStatus getFileStatus(WebFile aFile)
+    public FileStatus getFileStatus(WebFile aFile)
     {
         // Get cached status
         FileStatus fileStatus = _filesStatusCache.get(aFile);
@@ -495,7 +495,7 @@ public class VersionControl {
     /**
      * Clears the file status of given file.
      */
-    protected synchronized void clearFileStatus(WebFile aFile)
+    protected void clearFileStatus(WebFile aFile)
     {
         // Clear status, get old
         FileStatus oldStatus = _filesStatusCache.remove(aFile);

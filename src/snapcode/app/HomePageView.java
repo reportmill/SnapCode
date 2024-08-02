@@ -303,28 +303,10 @@ public class HomePageView extends MarkDownView {
         MDNode[] listItemNodes = listNode.getChildNodes();
         View[] listItemViews = ArrayUtils.map(listItemNodes, node -> createViewForOpenSamplesListItem(node), View.class);
 
-        // Calculate rows and create rowView array
-        int colCount = 5;
-        int rowCount = (int) Math.ceil(listItemViews.length / (double) colCount);
-        RowView[] rowViews = new RowView[rowCount];
-
-        // Add items to row views
-        for (int i = 0; i < rowCount; i++) {
-
-            // Get views in row
-            int startIndex = i * colCount;
-            int endIndex = Math.min(startIndex + colCount, listItemViews.length);
-            View[] rowItemViews = Arrays.copyOfRange(listItemViews, startIndex, endIndex);
-
-            // Create rowView and add row item views
-            RowView rowView = rowViews[i] = new RowView();
-            rowView.setChildren(rowItemViews);
-        }
-
-        // Create ColView and add rows
-        ChildView listNodeView = new ColView();
+        // Create ColView and add item views
+        ChildView listNodeView = new RowView();
         listNodeView.setMargin(0, 20, 0, 30);
-        listNodeView.setChildren(rowViews);
+        listNodeView.setChildren(listItemViews);
 
         // Clear directive
         setDirectiveValue("OpenSamples", null);

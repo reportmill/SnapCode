@@ -31,6 +31,3 @@
 * Charting
   [](https://reportmill.com/SnapCode/Samples/Charting/Charting.jepl)
   This sample shows how to generate and manipulate arrays of data and use it to create datasets and charts.
-* Vector Graphics
-  [](https://reportmill.com/SnapCode/Samples/Vector_Graphics/Vector_Graphics.jepl)
-  This Java repl file show how to quickly do drawing programming in the style of conventional 'turtle graphics'.

@@ -127,16 +127,16 @@ public class SamplesPageView extends MarkDownView {
         View[] listItemViews = ArrayUtils.map(listItemNodes, node -> createViewForOpenSamplesListItem(node), View.class);
 
         // Calculate rows and create rowView array
-        int colCount = 5;
-        int rowCount = (int) Math.ceil(listItemViews.length / (double) colCount);
+        int COLUMN_COUNT = 4;
+        int rowCount = (int) Math.ceil(listItemViews.length / (double) COLUMN_COUNT);
         RowView[] rowViews = new RowView[rowCount];
 
         // Add items to row views
         for (int i = 0; i < rowCount; i++) {
 
             // Get views in row
-            int startIndex = i * colCount;
-            int endIndex = Math.min(startIndex + colCount, listItemViews.length);
+            int startIndex = i * COLUMN_COUNT;
+            int endIndex = Math.min(startIndex + COLUMN_COUNT, listItemViews.length);
             View[] rowItemViews = Arrays.copyOfRange(listItemViews, startIndex, endIndex);
 
             // Create rowView and add row item views

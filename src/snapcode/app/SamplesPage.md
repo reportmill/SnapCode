@@ -12,6 +12,9 @@
 * Asteroids
   [](https://reportmill.com/SnapCode/Samples/Asteroids/Asteroids.zip)
   This project is a simple clone of Asteroids.
+* Jewels
+  [](https://reportmill.com/SnapCode/Samples/Jewels/Jewels.zip)
+  This project is a simple clone of a match 3 game.
 
 @[OpenSamples=true]
 
@@ -34,6 +37,9 @@
 * Vector Graphics
   [](https://reportmill.com/SnapCode/Samples/Vector_Graphics/Vector_Graphics.jepl)
   This Java repl file show how to quickly do drawing programming in the style of conventional 'turtle graphics'.
+* 3D Graphics
+  [](https://reportmill.com/SnapCode/Samples/Graphics3D/Graphics3D.jepl)
+  This Java repl file shows an example of simple 3D programming.
 
 @[OpenSamples=true]
 
@@ -45,9 +51,6 @@
 * Scanner Chatbot
   [](https://reportmill.com/SnapCode/Samples/Scanner_Chatbot/Scanner_Chatbot.jepl)
   This Java repl file shows an example of reading user input from System.in.
-* 3D Graphics
-  [](https://reportmill.com/SnapCode/Samples/Graphics3D/Graphics3D.jepl)
-  This Java repl file shows an example of simple 3D programming.
 * UI Builder
   [](https://reportmill.com/SnapCode/Samples/UI_Builder/UI_Builder.zip)
   This project shows some examples of some SnapKit 'snp' files and the integrated UI editor.
