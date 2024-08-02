@@ -21,7 +21,7 @@ public class ExceptionUtil {
         String str = StringUtils.getStackTraceString(anException);
         str = StringUtils.trimEnd(str);
 
-        TextBlock textBlock = new RichText();
+        TextBlock textBlock = new TextBlock(true);
         textBlock.setDefaultStyle(textBlock.getDefaultStyle().copyFor(Font.Arial14));
         appendString(textBlock, str, ERROR_COLOR);
         return textBlock;
