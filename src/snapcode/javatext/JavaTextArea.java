@@ -59,26 +59,19 @@ public class JavaTextArea extends TextArea {
     // Constants
     protected static String INDENT_STRING = "    ";
     protected static int INDENT_LENGTH = INDENT_STRING.length();
-    private static JavaTextDoc DUMMY_TEXT_DOC;
+    private static JavaTextDoc _dummyJavaTextDoc;
     private static final Color ERROR_TEXT_COLOR = Color.RED.brighter().brighter();
     private static final Color PROGRAM_COUNTER_LINE_HIGHLITE_COLOR = new Color(199, 218, 175, 200);
 
     /**
-     * Creates a new JavaTextArea.
+     * Constructor.
      */
     public JavaTextArea()
     {
-        super();
+        super(getDummyTextDoc());
         setFill(Color.WHITE);
         setPadding(5, 5, 5,5);
         setEditable(true);
-
-        // Create shared DUMMY_TEXT_DOC
-        if (DUMMY_TEXT_DOC == null)
-            DUMMY_TEXT_DOC = createDummyTextDoc();
-
-        // Set default TextDoc to JavaTextDoc
-        setSourceText(DUMMY_TEXT_DOC);
     }
 
     /**
@@ -1096,8 +1089,10 @@ public class JavaTextArea extends TextArea {
     /**
      * Creates a dummy Java text doc. I don't like this!
      */
-    private static JavaTextDoc createDummyTextDoc()
+    private static JavaTextDoc getDummyTextDoc()
     {
+        if (_dummyJavaTextDoc != null) return _dummyJavaTextDoc;
+
         // Get/Create dummy java file
         WebFile tempFile = WebFile.createTempFileForName("Dummy.java", false);
         if (!tempFile.getExists()) {
@@ -1106,7 +1101,7 @@ public class JavaTextArea extends TextArea {
         }
 
         // Return text doc for temp file
-        return JavaTextDoc.getJavaTextDocForFile(tempFile);
+        return _dummyJavaTextDoc = JavaTextDoc.getJavaTextDocForFile(tempFile);
     }
 
     /**

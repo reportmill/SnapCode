@@ -90,12 +90,11 @@ public abstract class RunApp {
         _consoleText.setRunTool(_runTool);
 
         // Create ConsoleTextView
-        _consoleTextView = new TextArea();
+        _consoleTextView = new TextArea(_consoleText);
         _consoleTextView.setEditable(true);
         _consoleTextView.setFill(Color.WHITE);
         _consoleTextView.setPadding(8, 8, 8, 8);
         _consoleTextView.setGrowHeight(true);
-        _consoleTextView.setSourceText(_consoleText);
         _consoleView = _consoleTextView;
     }
 

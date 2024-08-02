@@ -26,8 +26,7 @@ public class ConsoleText extends TextBlock {
      */
     public ConsoleText()
     {
-        super();
-        setRichText(true);
+        super(true);
 
         // Set font
         TextStyle textStyle = getDefaultStyle();
