@@ -188,7 +188,7 @@ public class MarkDownView extends ChildView {
             // Add link
             TextArea textArea = (TextArea) linkNodeView;
             TextBlock textBlock = textArea.getTextBlock();
-            textBlock.setStyle(linkTextStyle, 0, textBlock.length());
+            textBlock.setTextStyle(linkTextStyle, 0, textBlock.length());
         }
     }
 

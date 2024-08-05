@@ -52,7 +52,7 @@ public class ConsoleText extends TextBlock {
         Color color = isError ? ERROR_COLOR : Color.BLACK;
 
         // Get default style modified for color
-        TextStyle style = getStyleForCharIndex(length());
+        TextStyle style = getTextStyleForCharIndex(length());
         if (!style.getColor().equals(color))
             style = style.copyFor(color);
 

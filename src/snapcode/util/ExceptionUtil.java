@@ -33,7 +33,7 @@ public class ExceptionUtil {
     private static void appendString(TextBlock textBlock, String aStr, Color aColor)
     {
         // Get default style modified for color
-        TextStyle style = textBlock.getStyleForCharIndex(textBlock.length());
+        TextStyle style = textBlock.getTextStyleForCharIndex(textBlock.length());
         style = style.copyFor(aColor);
 
         // Look for a StackFrame reference: " at java.pkg.Class(Class.java:55)" and add as link if found

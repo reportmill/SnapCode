@@ -77,7 +77,7 @@ public class JavaTextTokenizer extends CodeTokenizer {
     @Override
     public TextToken createTokenForProps(String aName, String aPattern, int startCharIndex, int endCharIndex)
     {
-        TextStyle textStyle = _textLine.getRun(0).getStyle();
+        TextStyle textStyle = _textLine.getRun(0).getTextStyle();
         TextToken textToken = new TextToken(_textLine, startCharIndex, endCharIndex, textStyle);
         textToken.setName(aName);
         textToken.setPattern(aPattern);

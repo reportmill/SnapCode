@@ -256,10 +256,10 @@ public class HttpServerTool extends WorkspaceTool {
         }
 
         // Append text
-        TextArea textArea = _textView.getTextArea();
-        int textLength = textArea.length();
-        TextStyle textStyle = textArea.getStyleForCharIndex(textLength).copyFor(aColor);
-        textArea.replaceChars(aStr, textStyle, textLength, textLength, false);
+        TextBlock textBlock = _textView.getTextBlock();
+        int textLength = textBlock.length();
+        TextStyle textStyle = textBlock.getTextStyleForCharIndex(textLength).copyFor(aColor);
+        textBlock.replaceChars(aStr, textStyle, textLength, textLength);
     }
 
     /**
