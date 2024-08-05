@@ -71,6 +71,7 @@ public class JavaTextArea extends TextArea {
         super(getDummyTextDoc());
         setFill(Color.WHITE);
         setPadding(5, 5, 5,5);
+        setSyncTextFont(false);
         setEditable(true);
     }
 
@@ -769,10 +770,10 @@ public class JavaTextArea extends TextArea {
     /**
      * Override to setTextModified.
      */
-    protected void sourceTextDidPropChange(PropChange anEvent)
+    protected void handleSourceTextPropChange(PropChange anEvent)
     {
         // Do normal version and update TextPane.TextModified
-        super.sourceTextDidPropChange(anEvent);
+        super.handleSourceTextPropChange(anEvent);
 
         // Get PropName
         String propName = anEvent.getPropName();
