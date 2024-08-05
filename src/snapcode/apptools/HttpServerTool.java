@@ -105,12 +105,9 @@ public class HttpServerTool extends WorkspaceTool {
         _textView = getView("LogText", TextView.class);
         _textView.setWrapLines(true);
 
-        // Make font bigger and increase space between lines
-        TextBlock richText = _textView.getTextBlock();
-        richText.setDefaultStyle(richText.getDefaultStyle().copyFor(Font.Arial12));
-        TextLineStyle lstyle = richText.getDefaultLineStyle();
-        TextLineStyle lstyle2 = lstyle.copyFor(TextLineStyle.SPACING_KEY, 2);
-        richText.setDefaultLineStyle(lstyle2);
+        // Make font bigger
+        TextBlock textBlock = _textView.getTextBlock();
+        textBlock.setDefaultFont(Font.Arial12);
     }
 
     /**

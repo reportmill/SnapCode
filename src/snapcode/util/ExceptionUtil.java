@@ -22,7 +22,7 @@ public class ExceptionUtil {
         str = StringUtils.trimEnd(str);
 
         TextBlock textBlock = new TextBlock(true);
-        textBlock.setDefaultStyle(textBlock.getDefaultStyle().copyFor(Font.Arial14));
+        textBlock.setDefaultFont(Font.Arial14);
         appendString(textBlock, str, ERROR_COLOR);
         return textBlock;
     }

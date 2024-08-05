@@ -29,10 +29,8 @@ public class ConsoleText extends TextBlock {
         super(true);
 
         // Set font
-        TextStyle textStyle = getDefaultStyle();
         Font codeFont = JavaTextDocUtils.getDefaultJavaFont();
-        TextStyle codeTextStyle = textStyle.copyFor(codeFont);
-        setDefaultStyle(codeTextStyle);
+        setDefaultFont(codeFont);
     }
 
     /**

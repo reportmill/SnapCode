@@ -120,7 +120,7 @@ public class MarkDownView extends ChildView {
         // Reset style
         TextStyle textStyle = headerNode.getNodeType() == MDNode.NodeType.Header1 ? MDUtils.getHeader1Style() : MDUtils.getHeader2Style();
         TextBlock textBlock = textArea.getTextBlock();
-        textBlock.setDefaultStyle(textStyle);
+        textBlock.setDefaultTextStyle(textStyle);
 
         // Set text
         textBlock.addChars(headerNode.getText());
@@ -141,7 +141,7 @@ public class MarkDownView extends ChildView {
         // Reset style
         TextStyle textStyle = MDUtils.getContentStyle();
         TextBlock textBlock = textArea.getTextBlock();
-        textBlock.setDefaultStyle(textStyle);
+        textBlock.setDefaultTextStyle(textStyle);
 
         // Set text
         textBlock.addChars(contentNode.getText());
@@ -288,7 +288,7 @@ public class MarkDownView extends ChildView {
         // Reset style
         TextStyle textStyle = MDUtils.getCodeStyle();
         TextBlock textBlock = textArea.getTextBlock();
-        textBlock.setDefaultStyle(textStyle);
+        textBlock.setDefaultTextStyle(textStyle);
 
         // Set text
         textBlock.addChars(codeNode.getText());
@@ -406,7 +406,7 @@ public class MarkDownView extends ChildView {
             String urlAddr = aNode.getOtherText();
             TextLink textLink = new TextLink(urlAddr);
             TextBlock textBlock = textArea.getTextBlock();
-            TextStyle textStyle = textBlock.getDefaultStyle();
+            TextStyle textStyle = textBlock.getDefaultTextStyle();
             TextStyle linkTextStyle = textStyle.copyFor(textLink);
 
             // If text already present, add space
