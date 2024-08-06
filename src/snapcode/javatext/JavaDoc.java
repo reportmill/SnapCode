@@ -178,7 +178,7 @@ public class JavaDoc {
 
         // Add suffix
         String classPath = className.replace('.', '/');
-        String suffix = "index.html?" + classPath + ".html";
+        String suffix = classPath + ".html"; // Used to have "index.html?" +
 
         // If method set, add hash
         if (aMethod != null) {
@@ -186,8 +186,7 @@ public class JavaDoc {
             int index = methodString.indexOf(aMethod.getName() + '(');
             if (index > 0) {
                 methodString = methodString.substring(index);
-                methodString = methodString.replace("[]", "");
-                methodString = methodString.replace('(', '-').replace(')', '-');
+                methodString = methodString.replace("[]", ""); // replace('(', '-').replace(')', '-');
                 suffix = classPath + ".html#" + methodString;
             }
         }
