@@ -3,13 +3,13 @@
  */
 package snapcode.javatext;
 import javakit.parse.*;
+import snap.text.TextBlock;
 import snapcode.project.BuildIssue;
 import snapcode.project.JavaAgent;
 import snapcode.project.JavaTextDoc;
 import javakit.resolver.JavaDecl;
 import snap.gfx.*;
 import snap.props.PropChange;
-import snap.text.TextDoc;
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.TextPane;
@@ -364,7 +364,7 @@ public class JavaTextPane extends TextPane {
         String propName = aPC.getPropName();
 
         // Handle TextDoc.CharsChange: If added/removed newline, reset LineNumView, LineFootView
-        if (propName == TextDoc.Chars_Prop) {
+        if (propName == TextBlock.Chars_Prop) {
             CharSequence chars = (CharSequence) (aPC.getNewValue() != null ? aPC.getNewValue() : aPC.getOldValue());
             if (CharSequenceUtils.indexOfNewline(chars, 0) >= 0)
                 _lineNumView.resetAll();

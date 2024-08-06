@@ -7,7 +7,7 @@ import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
-import snap.text.TextDoc;
+import snap.text.TextBlock;
 import snap.text.TextBlockUtils;
 import snap.util.ArrayUtils;
 import snap.web.WebFile;
@@ -367,13 +367,13 @@ public class JavaAgent {
         String propName = aPC.getPropName();
 
         // Handle CharsChange: Try to update JFile with partial parse
-        if (propName == TextDoc.Chars_Prop && _jfile != null) {
+        if (propName == TextBlock.Chars_Prop && _jfile != null) {
             TextBlockUtils.CharsChange charsChange = (TextBlockUtils.CharsChange) aPC;
             updateJFileForChange(charsChange);
         }
 
         // Handle TextModified: Register updater to update JavaFile before save
-        else if (propName == TextDoc.TextModified_Prop) {
+        else if (propName == TextBlock.TextModified_Prop) {
             boolean textDocTextModified = _javaTextDoc.isTextModified();
             WebFile javaFile = getFile();
             WebFile.Updater updater = textDocTextModified ? file -> updateFileFromTextDoc() : null;

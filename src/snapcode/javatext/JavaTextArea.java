@@ -779,7 +779,7 @@ public class JavaTextArea extends TextArea {
         String propName = anEvent.getPropName();
 
         // Handle Chars_Prop: Call didAddChars/didRemoveChars
-        if (propName == TextDoc.Chars_Prop) {
+        if (propName == TextBlock.Chars_Prop) {
 
             // Get CharsChange info
             TextBlockUtils.CharsChange charsChange = (TextBlockUtils.CharsChange) anEvent;
@@ -892,8 +892,8 @@ public class JavaTextArea extends TextArea {
      */
     public WebFile getSourceFile()
     {
-        TextDoc textDoc = (TextDoc) getSourceText();
-        return textDoc.getSourceFile();
+        JavaTextDoc javaTextDoc = (JavaTextDoc) getSourceText();
+        return javaTextDoc.getSourceFile();
     }
 
     /**

@@ -5,7 +5,6 @@ package snapcode.webbrowser;
 import snap.geom.HPos;
 import snap.gfx.Font;
 import snap.text.TextBlock;
-import snap.text.TextDoc;
 import snap.view.Button;
 import snap.view.TextArea;
 import snap.view.View;
@@ -87,7 +86,7 @@ public class TextPage extends WebPage {
 
         // Bind TextDoc.TextModified to JavaPage.TextModified
         TextBlock textDoc = textArea.getSourceText();
-        textDoc.addPropChangeListener(pc -> setTextModified(textDoc.isTextModified()), TextDoc.TextModified_Prop);
+        textDoc.addPropChangeListener(pc -> setTextModified(textDoc.isTextModified()), TextBlock.TextModified_Prop);
     }
 
     /**
