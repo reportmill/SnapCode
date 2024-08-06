@@ -6,15 +6,15 @@
 * Tetris
   [](https://reportmill.com/SnapCode/Samples/Tetris/Tetris.zip)
   This project is a simple clone of Tetris.
+* Jewels
+  [](https://reportmill.com/SnapCode/Samples/Jewels/Jewels.zip)
+  This project is a simple clone of a match 3 game.
 * SnappyBird
   [](https://reportmill.com/SnapCode/Samples/SnappyBird/SnappyBird.zip)
   This project is a simple clone of FlappyBird.
 * Asteroids
   [](https://reportmill.com/SnapCode/Samples/Asteroids/Asteroids.zip)
   This project is a simple clone of Asteroids.
-* Jewels
-  [](https://reportmill.com/SnapCode/Samples/Jewels/Jewels.zip)
-  This project is a simple clone of a match 3 game.
 
 @[OpenSamples=true]
 
