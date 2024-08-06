@@ -354,7 +354,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
 
         // Auto-hide tool
         WorkspaceTool appTool = runApp instanceof DebugApp ? getDebugTool() : this;
-        runLater(appTool::hideToolAutomatically);
+        runDelayed(appTool::hideToolAutomatically, 2500);
     }
 
     /**
@@ -400,6 +400,10 @@ public class RunTool extends WorkspaceTool implements AppListener {
         RunApp selApp = getSelApp();
         if (selApp != null)
             selApp.terminate();
+
+        // Auto-hide tool
+        WorkspaceTool appTool = selApp instanceof DebugApp ? getDebugTool() : this;
+        runLater(appTool::hideToolAutomatically);
     }
 
     /**
