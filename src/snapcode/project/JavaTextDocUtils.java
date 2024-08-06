@@ -13,29 +13,13 @@ import snap.util.Prefs;
  */
 public class JavaTextDocUtils {
 
-    // The recommended default font for code
-    private static Font _defaultJavaFont;
-
     /**
      * Returns the default font used to display Java text.
      */
     public static Font getDefaultJavaFont()
     {
-        if (_defaultJavaFont != null) return _defaultJavaFont;
-
-        // Get font names and size
-        String[] names = { "Monaco", "Consolas", "Lucida Console", "Courier" };
         double fontSize = getDefaultJavaFontSize();
-
-        // Look for font
-        for (String name : names) {
-            _defaultJavaFont = new Font(name, fontSize);
-            if (_defaultJavaFont.getFamily().startsWith(name))
-                break;
-        }
-
-        // Return
-        return _defaultJavaFont;
+        return Font.getCodeFontForSize(fontSize);
     }
 
     /**

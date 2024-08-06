@@ -32,9 +32,6 @@ public class DiffPage extends WebPage {
     // The two texts
     TextArea _leftTextArea, _rightTextArea;
 
-    // The default font
-    static Font _defaultFont;
-
     /**
      * Creates a new DiffPage for given file.
      */
@@ -156,27 +153,9 @@ public class DiffPage extends WebPage {
 
         // Handle normal TextFile
         TextArea diffTextArea = new DiffTextArea();
-        diffTextArea.setFont(getDefaultFont());
+        diffTextArea.setFont(Font.getCodeFontForSize(10));
         diffTextArea.setText(aFile.getText());
         return diffTextArea;
-    }
-
-    /**
-     * Returns the default font.
-     */
-    private Font getDefaultFont()
-    {
-        // If already set, just return
-        if (_defaultFont != null) return _defaultFont;
-
-        // Iterate over fonts
-        String[] devFontNames = new String[] { "Monaco", "Consolas", "Courier" };
-        for (String name : devFontNames) {
-            _defaultFont = new Font(name, 10);
-            if (_defaultFont.getFamily().startsWith(name))
-                return _defaultFont;
-        }
-        return _defaultFont = new Font("Monospaced", 10);
     }
 
     // Stroke and fill colors for diffs

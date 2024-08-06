@@ -73,7 +73,7 @@ public class TextPage extends WebPage {
     {
         // Configure TextPane
         TextArea textArea = getTextArea();
-        textArea.setFont(getDefaultFont());
+        textArea.setFont(Font.getCodeFont());
         textArea.setText(getText());
 
         Button btn = new Button("Reload");
@@ -87,20 +87,6 @@ public class TextPage extends WebPage {
         // Bind TextDoc.TextModified to JavaPage.TextModified
         TextBlock textDoc = textArea.getSourceText();
         textDoc.addPropChangeListener(pc -> setTextModified(textDoc.isTextModified()), TextBlock.TextModified_Prop);
-    }
-
-    /**
-     * Returns the default font.
-     */
-    private Font getDefaultFont()
-    {
-        String[] names = { "Monaco", "Consolas", "Courier" };
-        for (String name : names) {
-            Font font = new Font(name, 12);
-            if (font.getFamily().startsWith(name))
-                return font;
-        }
-        return new Font("Arial", 12);
     }
 
     /**

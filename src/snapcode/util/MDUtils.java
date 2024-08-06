@@ -82,16 +82,8 @@ public class MDUtils {
         // If already set, just return
         if (_codeStyle != null) return _codeStyle;
 
-        // Get code font
-        Font codeFont = null;
-        String[] names = { "Monaco", "Consolas", "Courier" };
-        for (String name : names) {
-            codeFont = new Font(name, 13);
-            if (codeFont.getFamily().startsWith(name))
-                break;
-        }
-
         // Create, configure
+        Font codeFont = Font.getCodeFontForSize(13);
         TextStyle textStyle = TextStyle.DEFAULT;
         Color codeColor = Color.GRAY3;
         TextStyle codeStyle = textStyle.copyFor(codeFont, codeColor);
