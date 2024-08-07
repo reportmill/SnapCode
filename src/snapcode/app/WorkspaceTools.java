@@ -99,6 +99,8 @@ public class WorkspaceTools {
 
         // Create RightTray
         WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, classesTool, helpTool, blocksTool };
+        if (WorkspacePane._embedMode)
+            rightTools = new WorkspaceTool[] { runTool, helpTool };
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray

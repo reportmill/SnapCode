@@ -139,6 +139,12 @@ public class App {
             return false;
         }
 
+        // Handle 'embed'
+        if (arg0.equals("embed")) {
+            WorkspacePaneUtils.openEmbedWorkspace();
+            return true;
+        }
+
         // Return not handled
         return false;
     }

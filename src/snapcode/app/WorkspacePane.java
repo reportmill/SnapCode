@@ -14,6 +14,7 @@ import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.apptools.*;
+import java.util.stream.Stream;
 
 /**
  * This class is the top level controller for an open project.
@@ -40,6 +41,9 @@ public class WorkspacePane extends ViewOwner {
 
     // A Drag-and-drop helper class
     private WorkspacePaneDnD _workspacePaneDnD;
+
+    // Whether in embed mode
+    protected static boolean _embedMode;
 
     /**
      * Constructor.
@@ -313,6 +317,12 @@ public class WorkspacePane extends ViewOwner {
             getView("DownloadFileMenuItem").setVisible(false);
             getView("OpenDesktopFileMenuItem").setVisible(false);
             getView("UploadDownloadMenuItemsSeparator").setVisible(false);
+        }
+
+        // Handle Embed mode
+        if (_embedMode) {
+            Menu[] menus = menuBar.getMenus();
+            Stream.of(menus).forEach(menu -> menu.setVisible(false));
         }
 
         // Add key binding to OpenMenuItem and CloseWindow

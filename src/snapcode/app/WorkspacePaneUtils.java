@@ -1,6 +1,7 @@
 package snapcode.app;
 import snap.util.*;
 import snap.view.ViewUtils;
+import snap.view.WindowView;
 import snap.viewx.DialogBox;
 import snap.web.*;
 import snapcode.apptools.ProjectFilesTool;
@@ -279,6 +280,30 @@ public class WorkspacePaneUtils {
         // Select good default file
         openProjectForProjectFile(workspacePane, projectDir);
         return true;
+    }
+
+    /**
+     * Opens a Workspace in embed mode.
+     */
+    public static void openEmbedWorkspace()
+    {
+        // Increase default font size
+        if (JavaTextDocUtils.getDefaultJavaFontSize() < 15)
+            JavaTextDocUtils.setDefaultJavaFontSize(15);
+
+        // Open Java/Jepl string
+        WorkspacePane._embedMode = true;
+        WorkspacePane workspacePane = new WorkspacePane();
+        workspacePane.getUI();
+        WorkspaceTools workspaceTools = workspacePane.getWorkspaceTools();
+        workspaceTools.setShowLeftTray(false);
+        workspaceTools.setShowBottomTray(false);
+        workspacePane.getWindow().setType(WindowView.TYPE_PLAIN);
+        workspacePane.show();
+
+        // Open Jepl
+        String javaStr = "var name = \"Duke\";\nSystem.out.println(\"Hello, \" + name);\n";
+        WorkspacePaneUtils.openJavaString(workspacePane, javaStr, true);
     }
 
     /**

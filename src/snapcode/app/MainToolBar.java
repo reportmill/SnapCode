@@ -12,6 +12,7 @@ import snap.web.WebURL;
 import snapcode.apptools.SearchTool;
 import snapcode.project.RunConfig;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * ToolBar.
@@ -62,6 +63,17 @@ public class MainToolBar extends WorkspaceTool {
         // Configure RunConfigMenuButton
         MenuButton runConfigMenuButton = getView("RunConfigMenuButton", MenuButton.class);
         runConfigMenuButton.getLabel().setPadding(new Insets(0, 0, 0, 5));
+
+        // Handle EmbedMode
+        if (WorkspacePane._embedMode) {
+            ChildView parentView = getUI(ChildView.class);
+            Label runLabel = new Label("Run"); runLabel.setFont(Font.Arial13);
+            ViewUtils.replaceView(parentView.getChild(0), runLabel);
+            String[] hideNames = { "HomeButton", "BackButton", "ForwardButton", "ReloadButton", "SearchComboBox",
+                "RunConfigMenuButton", "DebugButton", "TerminateButton", "BuildButton" };
+            Stream.of(hideNames).forEach(name -> setViewVisible(name, false));
+            getView("RunButton").setLean(null);
+        }
     }
 
     /**
