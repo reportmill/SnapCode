@@ -64,13 +64,13 @@ public class MainToolBar extends WorkspaceTool {
         MenuButton runConfigMenuButton = getView("RunConfigMenuButton", MenuButton.class);
         runConfigMenuButton.getLabel().setPadding(new Insets(0, 0, 0, 5));
 
-        // Handle EmbedMode
+        // Handle EmbedMode: Hide everything except RunButton and TerminateButton
         if (WorkspacePane._embedMode) {
             ChildView parentView = getUI(ChildView.class);
             Label runLabel = new Label("Run"); runLabel.setFont(Font.Arial13);
             ViewUtils.replaceView(parentView.getChild(0), runLabel);
             String[] hideNames = { "HomeButton", "BackButton", "ForwardButton", "ReloadButton", "SearchComboBox",
-                "RunConfigMenuButton", "DebugButton", "TerminateButton", "BuildButton" };
+                "RunConfigMenuButton", "DebugButton", "BuildButton" };
             Stream.of(hideNames).forEach(name -> setViewVisible(name, false));
             getView("RunButton").setLean(null);
         }
