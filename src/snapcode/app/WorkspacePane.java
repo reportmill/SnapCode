@@ -534,6 +534,9 @@ public class WorkspacePane extends ViewOwner {
         // Notify tools
         _workspaceTools.projectIsClosing(aProject);
 
+        // Close open files
+        _pagePane.removeOpenFilesForProject(aProject);
+
         // Remove ProjectPane
         ProjectPane projPane = getProjectPaneForProject(aProject);
         _projectPanes = ArrayUtils.remove(_projectPanes, projPane);

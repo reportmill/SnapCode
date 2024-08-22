@@ -6,6 +6,7 @@ import snap.gfx.GFXEnv;
 import snapcode.apptools.BuildFileTool;
 import snapcode.javatext.JavaTextArea;
 import snapcode.project.JavaTextDoc;
+import snapcode.project.Project;
 import snapcode.project.Workspace;
 import snap.gfx.Color;
 import snap.gfx.Font;
@@ -22,6 +23,7 @@ import snap.web.WebSite;
 import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * This class manages and displays pages for editing project files.
@@ -111,6 +113,9 @@ public class PagePane extends ViewOwner {
         // Fire prop change
         firePropChange(OpenFiles_Prop, aFile, null, index);
         buildFileTabs();
+
+        // Clear page from browser cache
+        setPageForURL(aFile.getURL(), null);
     }
 
     /**
@@ -207,6 +212,16 @@ public class PagePane extends ViewOwner {
         setSelPage(_homePage);
         _workspacePane.getWorkspaceTools().getRightTray().hideTools();
         _workspacePane.getWorkspaceTools().getRunTool().cancelRun();
+    }
+
+    /**
+     * Removes open files for given project.
+     */
+    protected void removeOpenFilesForProject(Project aProject)
+    {
+        WebFile[] openFiles = getOpenFiles();
+        WebFile[] openProjectFiles = ArrayUtils.filter(openFiles, file -> Project.getProjectForFile(file) == aProject);
+        Stream.of(openProjectFiles).forEach(this::removeOpenFile);
     }
 
     /**
