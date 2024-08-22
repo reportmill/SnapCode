@@ -6,7 +6,6 @@ import snap.viewx.DialogBox;
 import snap.web.*;
 import snapcode.apptools.ProjectFilesTool;
 import snapcode.apptools.NewFileTool;
-import snapcode.apptools.RunTool;
 import snapcode.project.*;
 
 /**
@@ -41,39 +40,28 @@ public class WorkspacePaneUtils {
      */
     public static boolean openFileUrl(WorkspacePane workspacePane, WebURL fileUrl)
     {
-        String fileType = fileUrl.getFileType();
+        switch (fileUrl.getFileType()) {
 
-        // If file type is zip, open Zip file
-        if (fileType.equals("zip"))
-            return openProjectForZipUrl(workspacePane, fileUrl);
+            // Handle java/jepl
+            case "java": case "jepl": return openExternalSourceFile(workspacePane, fileUrl);
 
-        // If file type is git, open repo
-        if (fileType.equals("git")) {
-            openProjectForRepoURL(workspacePane, fileUrl);
-            return true;
+            // Handle zip
+            case "zip": return openProjectForZipUrl(workspacePane, fileUrl);
+
+            // Handle git
+            case "git": openProjectForRepoURL(workspacePane, fileUrl); return true;
+
+            // Handle gfar
+            case "gfar": GreenImport.openGreenfootForArchiveFileUrl(workspacePane, fileUrl); return true;
+
+            // Handle anything else: Open project for given file
+            default:
+                WebFile file = fileUrl.getFile();
+                if (file == null)
+                    return false;
+                openProjectForProjectFile(workspacePane, file);
+                return true;
         }
-
-        // Get file (just return if file doesn't exist)
-        WebFile file = fileUrl.getFile();
-        if (file == null)
-            return false;
-
-        // If file is gfar file, open repo
-        if (fileType.equals("gfar")) {
-            GreenImport.openGreenfootForArchiveFileUrl(workspacePane, fileUrl);
-            return true;
-        }
-
-        // If file is just a source file, open external source file
-        boolean isSourceFile = ArrayUtils.contains(ProjectUtils.FILE_TYPES, fileType);
-        if (isSourceFile) {
-            ViewUtils.runLater(() -> openExternalSourceFile(workspacePane, file));
-            return true;
-        }
-
-        // Open project for given file
-        openProjectForProjectFile(workspacePane, file);
-        return true;
     }
 
     /**
@@ -134,44 +122,23 @@ public class WorkspacePaneUtils {
                 workspace.removeProject(project);
         }
 
-        switch (sampleURL.getFileType()) {
-
-            // Handle java/jepl
-            case "java": case "jepl":
-
-                // Get sample file - complain and return if not found
-                WebFile sampleFile = sampleURL.getFile();
-                if (sampleFile == null) {
-                    String msg = "Couldn't find sample for name: " + sampleURL.getFilename();
-                    DialogBox.showErrorDialog(workspacePane.getUI(), "Unknown Sample", msg);
-                    return;
-                }
-
-                // Open
-                openExternalSourceFile(workspacePane, sampleFile);
-
-                // Kick off run
-                RunTool runTool = workspacePane.getWorkspaceTools().getRunTool();
-                ViewUtils.runLater(() -> runTool.runApp(false));
-                break;
-
-
-            // Handle zip
-            case "zip": openProjectForZipUrl(workspacePane, sampleURL); break;
-
-            // Handle gfar
-            case "gfar": GreenImport.openGreenfootForArchiveFileUrl(workspacePane, sampleURL); break;
-
-            // Handle git
-            case "git": openProjectForRepoURL(workspacePane, sampleURL); break;
-        }
+        // Open sample URL
+        openFileUrl(workspacePane, sampleURL);
     }
 
     /**
      * Opens a source file.
      */
-    public static void openExternalSourceFile(WorkspacePane workspacePane, WebFile sourceFile)
+    public static boolean openExternalSourceFile(WorkspacePane workspacePane, WebURL sourceFileURL)
     {
+        // Get source file - complain and return if not found
+        WebFile sourceFile = sourceFileURL.getFile();
+        if (sourceFile == null) {
+            String msg = "Couldn't find sample for name: " + sourceFileURL.getFilename();
+            DialogBox.showErrorDialog(workspacePane.getUI(), "Unknown Sample", msg);
+            return false;
+        }
+
         // Make sure workspace has temp project
         Workspace workspace = workspacePane.getWorkspace();
         Project tempProj = ProjectUtils.getTempProject(workspace);
@@ -185,7 +152,7 @@ public class WorkspacePaneUtils {
         WebFile newSourceFile = newFileTool.newSourceFileForExternalSourceFile(sourceFile);
         if (newSourceFile == null) {
             System.out.println("WorkspacePane.openSourceFile: Couldn't open source file: " + sourceFile);
-            return;
+            return false;
         }
 
         // Add to RecentFiles
@@ -193,6 +160,7 @@ public class WorkspacePaneUtils {
 
         // Show source file
         ViewUtils.runLater(() -> showFile(workspacePane, newSourceFile));
+        return true;
     }
 
     /**
@@ -375,6 +343,17 @@ public class WorkspacePaneUtils {
 
         // Select it
         showFile(workspacePane, defaultFile);
+    }
+
+    /**
+     * Removes all projects from workspace.
+     */
+    public static void clearWorkspace(WorkspacePane workspacePane)
+    {
+        Workspace workspace = workspacePane.getWorkspace();
+        Project[] projects = workspace.getProjects();
+        for (Project project : projects)
+            workspace.removeProject(project);
     }
 
     /**

@@ -60,7 +60,6 @@ public class FilesTool extends WorkspaceTool {
     {
         String[] fileTypes = { "*" };
         getEnv().showFilePicker(fileTypes, pickedFile -> {
-            System.out.println("OpenFile picked: " + pickedFile);
             WorkspacePaneUtils.openFile(_workspacePane, pickedFile);
         });
     }

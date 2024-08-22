@@ -5,8 +5,6 @@ import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.apptools.NewFileTool;
-import snapcode.project.Project;
-import snapcode.project.Workspace;
 import snapcode.webbrowser.WebPage;
 import java.io.File;
 
@@ -68,18 +66,6 @@ public class HomePage extends WebPage {
     {
         RecentFiles.removeURL(recentFileUrl);
         _workspacePane.getPagePane().showHomePage();
-    }
-
-    /**
-     * Removes all projects from workspace.
-     */
-    private void clearWorkspace()
-    {
-        Workspace workspace = _workspacePane.getWorkspace();
-        Project[] projects = workspace.getProjects();
-        for (Project project : projects)
-            workspace.removeProject(project);
-        setViewVisible("ClearWorkspaceButton", false);
     }
 
     /**
@@ -166,7 +152,10 @@ public class HomePage extends WebPage {
         switch (anEvent.getName()) {
 
             // Handle ClearWorkspaceButton
-            case "ClearWorkspaceButton": clearWorkspace(); break;
+            case "ClearWorkspaceButton":
+                WorkspacePaneUtils.clearWorkspace(_workspacePane);
+                setViewVisible("ClearWorkspaceButton", false);
+                break;
 
             // Handle OpenButton, OpenDesktopFileButton
             case "OpenButton": _workspacePane.getWorkspaceTools().getFilesTool().showOpenFilePanel(); break;
