@@ -95,7 +95,15 @@ public class HomePage extends WebPage {
 
         // Handle any link with "Sample:..."
         if (urlAddr.startsWith("Sample:")) {
+
+            // Get URL address
             String sampleUrlAddr = urlAddr.substring("Sample:".length());
+            if (sampleUrlAddr.endsWith(".git") && sampleUrlAddr.contains("https://reportmill.com/SnapCode/Samples")) {
+                WebURL sampleUrl = WebURL.getURL(sampleUrlAddr); assert (sampleUrl != null);
+                sampleUrlAddr = "https://github.com/reportmill/" + sampleUrl.getFilename();
+            }
+
+            // can go
             if (ViewUtils.isAltDown()) {
                 sampleUrlAddr = "https://github.com/reportmill/SnapDemos.git";
                 WebURL snapCodeDirURL = SnapCodeUtils.getSnapCodeDirURL();
@@ -104,6 +112,8 @@ public class HomePage extends WebPage {
                 if (projDir != null)
                     projDir.delete();
             }
+
+            // Open URL
             WebURL sampleUrl = WebURL.getURL(sampleUrlAddr);
             WorkspacePaneUtils.openSamplesUrl(_workspacePane, sampleUrl);
             return;
