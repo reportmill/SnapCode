@@ -270,7 +270,12 @@ public class WorkspacePaneUtils {
         workspacePane.show();
 
         // Open Jepl
-        String javaStr = "var name = \"Duke\";\nSystem.out.println(\"Hello, \" + name);\n";
+        String javaStr = "var button = new Button(\"Hello World\");\n" +
+                "button.setPropsString(\"Font: Arial Bold 24; Margin:40; Padding:10; Effect:Shadow;\");\n" +
+                "button.setAnimString(\"time: 1000; scale: 2; time: 2000; scale: 1; time: 2000; rotate: 360\");\n" +
+                "button.getAnim(0).setLoopCount(4).play();\n" +
+                "button.addEventHandler(e -> show(new Label(\"Stop that\")), View.Action);\n" +
+                "show(button);\n";
         WorkspacePaneUtils.openJavaString(workspacePane, javaStr, true);
     }
 
