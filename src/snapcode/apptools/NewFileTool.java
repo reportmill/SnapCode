@@ -109,6 +109,7 @@ public class NewFileTool extends WorkspaceTool {
         // Create file panel to select new directory file
         FilePanel filePanel = new FilePanel();
         filePanel.setSaving(true);
+        filePanel.setFileValidator(file -> (!file.getExists()) || ProjectUtils.isProjectDir(file));
         filePanel.setDesc("Create New Project");
         filePanel.getUI();
 

@@ -396,6 +396,6 @@ public class WorkspacePaneUtils {
         WebSite zipSite = zipUrl.getAsSite();
         WebFile zipSiteRootDir = zipSite.getRootDir();
         WebFile[] zipSiteRootFiles = zipSiteRootDir.getFiles();
-        return ArrayUtils.findMatch(zipSiteRootFiles, file -> ProjectUtils.isProjectFile(file));
+        return ArrayUtils.findMatch(zipSiteRootFiles, file -> ProjectUtils.isProjectDir(file));
     }
 }

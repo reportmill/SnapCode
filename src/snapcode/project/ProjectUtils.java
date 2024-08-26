@@ -30,7 +30,9 @@ public class ProjectUtils {
             return true;
         if (aFile.getFileType().equals("gfar"))
             return true;
-        return isProjectFile(aFile);
+        if (isProjectBuildFile(aFile))
+            return true;
+        return isProjectDir(aFile);
     }
 
     /**
@@ -43,15 +45,24 @@ public class ProjectUtils {
     }
 
     /**
-     * Returns whether given file is Java/Jepl.
+     * Returns whether given file is build.snapcode.
      */
-    public static boolean isProjectFile(WebFile aFile)
+    public static boolean isProjectBuildFile(WebFile aFile)
     {
         // If BuildFile, return true
         String BUILD_FILE_NAME = "build.snapcode";
         if (aFile.getName().equals(BUILD_FILE_NAME))
             return true;
 
+        // Return not project file
+        return false;
+    }
+
+    /**
+     * Returns whether given file is an existing project directory.
+     */
+    public static boolean isProjectDir(WebFile aFile)
+    {
         // If is dir with BuildFile or source dir or source file, return true
         if (aFile.isDir()) {
 
