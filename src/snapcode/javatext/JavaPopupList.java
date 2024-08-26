@@ -6,6 +6,8 @@ import java.util.List;
 import javakit.parse.*;
 import javakit.resolver.*;
 import snap.geom.Insets;
+import snap.geom.Point;
+import snap.geom.Pos;
 import snap.gfx.*;
 import snap.parse.ParseToken;
 import snap.props.PropChange;
@@ -528,6 +530,11 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // Do normal version
         super.show(aView, aX, aY);
+
+        // Make sure popup window location isn't auto-adjusted away from correct text area location
+        WindowView popupWindow = getPopup();
+        Point winXY = popupWindow.getScreenLocation(_textArea, Pos.TOP_LEFT, aX, aY);
+        popupWindow.setXY(winXY.x, winXY.y);
 
         // Start listening to TextArea
         _textArea.addPropChangeListener(_textAreaLsnr);
