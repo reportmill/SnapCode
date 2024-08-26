@@ -1,5 +1,6 @@
 package snapcode.app;
 import snap.view.ViewEvent;
+import snap.view.ViewUtils;
 import snapcode.apptools.FilesTool;
 import snapcode.project.Project;
 import snapcode.project.Workspace;
@@ -157,6 +158,7 @@ public class WorkspaceTool extends ViewOwner {
         if (!isShowing()) return;
         ToolTray toolTray = _workspaceTools.getToolTrayForTool(this);
         toolTray.setSelTool(null);
+        _wasShownAutomatically = false;
     }
 
     /**
@@ -176,6 +178,15 @@ public class WorkspaceTool extends ViewOwner {
     {
         if (!_wasShownAutomatically) return;
         hideTool();
+    }
+
+    /**
+     * Closes this tool automatically (if previously shown automatically) after given delay
+     */
+    public void hideToolAutomaticallyAfterDelay(int millisecondDelay)
+    {
+        if (!_wasShownAutomatically) return;
+        ViewUtils.runDelayed(this::hideToolAutomatically, millisecondDelay);
     }
 
     /**
