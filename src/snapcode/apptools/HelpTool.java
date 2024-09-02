@@ -137,8 +137,8 @@ public class HelpTool extends WorkspaceTool {
         HelpSection helpSection = aCell.getItem();
         if (helpSection != null) {
             aCell.setText(helpSection.getHeader());
-            if (aCell.getTextFill() == Color.BLACK)
-                aCell.setTextFill(Color.GRAY3);
+            if (aCell.getTextColor() == Color.BLACK)
+                aCell.setTextColor(Color.GRAY3);
         }
     }
 

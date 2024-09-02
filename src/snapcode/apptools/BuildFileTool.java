@@ -151,7 +151,7 @@ public class BuildFileTool extends ProjectTool {
             String status = mavenDependency.getStatus();
             String error = mavenDependency.getError();
             setViewValue("StatusText", status);
-            getView("StatusText", Label.class).setTextFill(error != null ? Color.RED : Color.BLACK);
+            getView("StatusText", Label.class).setTextColor(error != null ? Color.RED : Color.BLACK);
             setViewVisible("StatusProgressBar", mavenDependency.isLoading());
             setViewVisible("ShowButton", status.equals("Loaded"));
             setViewVisible("ReloadButton", status.equals("Loaded"));

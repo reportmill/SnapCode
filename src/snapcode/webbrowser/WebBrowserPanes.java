@@ -41,7 +41,7 @@ public class WebBrowserPanes {
             plabel.setPrefHeight(42);
             plabel.setMaxWidth(Double.MAX_VALUE);
             plabel.setText(_text);
-            plabel.setTextFill(Color.WHITE);
+            plabel.setTextColor(Color.WHITE);
             plabel.setFont(new Font("Times", 32));
 
             // Attach a LinearGradient style

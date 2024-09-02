@@ -47,7 +47,7 @@ public class JNodeViewUtils {
         Label label = new Label(aString);
         label.setMargin(2, 4, 2, 4);
         label.setFont(JNodeView.LABEL_FONT);
-        label.setTextFill(Color.WHITE);
+        label.setTextColor(Color.WHITE);
         return label;
     }
 

@@ -385,7 +385,7 @@ public class PagePane extends ViewOwner {
 
             // Configure Tab.Button
             ToggleButton tabButton = fileTab.getButton();
-            tabButton.setTextFill(TAB_TEXT_COLOR);
+            tabButton.setTextColor(TAB_TEXT_COLOR);
             tabButton.addEventFilter(e -> tabButtonMousePress(e, file), MousePress);
         }
 

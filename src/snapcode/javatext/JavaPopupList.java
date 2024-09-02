@@ -32,7 +32,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
     // Constants
     private static Color BACKGROUND_COLOR = Color.get("#FC");
-    private static Color CELL_TEXT_FILL = Color.get("#28");
+    private static Color CELL_TEXT_COLOR = Color.get("#28");
 
     /**
      * Creates a new java popup for given JavaTextArea.
@@ -610,7 +610,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         // Get/set cell text
         String cellText = item.getSuggestionString();
         aCell.setText(cellText);
-        aCell.setTextFill(CELL_TEXT_FILL);
+        aCell.setTextColor(CELL_TEXT_COLOR);
 
         // Get/set cell image
         Image cellImage = JavaTextUtils.getImageForJavaDecl(item);

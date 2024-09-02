@@ -252,7 +252,7 @@ public class HomePageView extends MarkDownView {
         if (recentFileUrls.length == 0) {
             Label noRecentFilesLabel = new Label("(No recent files)");
             noRecentFilesLabel.setPropsString("Font:Arial Italic 16; Margin:5");
-            noRecentFilesLabel.setTextFill(Color.GRAY);
+            noRecentFilesLabel.setTextColor(Color.GRAY);
             openRecentListView.addChild(noRecentFilesLabel);
         }
 

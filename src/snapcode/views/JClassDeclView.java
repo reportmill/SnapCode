@@ -44,7 +44,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JBlockView<JNODE> 
             // Add separator label
             Label label = new Label(" extends ");
             label.setFont(Font.Arial14.copyForSize(16));
-            label.setTextFill(Color.WHITE);
+            label.setTextColor(Color.WHITE);
             rowViews.add(label);
 
             // Add TypeView
