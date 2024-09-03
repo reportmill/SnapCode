@@ -44,7 +44,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         // Create ListArea and configure style
         ListArea<JavaDecl> listArea = getListArea();
         listArea.setFill(BACKGROUND_COLOR);
-        listArea.setAltPaint(BACKGROUND_COLOR);
+        listArea.setAltRowColor(BACKGROUND_COLOR);
         listArea.setCellConfigure(listCell -> configureCell(listCell));
 
         // Configure ListArea sizing

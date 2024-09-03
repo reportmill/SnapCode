@@ -194,7 +194,6 @@ public class ProjectFilesTool extends WorkspaceTool {
         // Get FilesList
         _filesList = getView("FilesList", ListView.class);
         _filesList.setRowHeight(24);
-        _filesList.setAltPaint(Color.WHITE);
         _filesList.setCellConfigure(this::configureFilesListCell);
         _filesList.addEventFilter(this::handleTreeViewMouseEvent, MousePress, MouseRelease);
         _filesList.addEventFilter(this::handleTreeViewDragEvent, DragEvents);
