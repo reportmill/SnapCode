@@ -52,9 +52,6 @@ public class App {
         DevPaneExceptions.setAppInfo("SnapCode Version " + version + ", Build Date: " + buildDate);
         DevPaneExceptions.setDefaultUncaughtExceptionHandler();
 
-        // Set UI Theme
-        ViewTheme.setThemeForName("Light");
-
         // If Java string set, open Java string
         if (handleAppArgs())
             return;

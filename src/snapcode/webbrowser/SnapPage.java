@@ -39,7 +39,7 @@ public class SnapPage extends WebPage {
             superUI.setBorder(Color.BLACK, 1);
             superUI.setEffect(new ShadowEffect().copySimple());
             BoxView box = new BoxView(superUI);
-            box.setFill(ViewUtils.getBackDarkFill());
+            box.setFill(ViewTheme.get().getGutterFill());
             if (!(superUI instanceof SpringView))
                 superUI.setMinSize(500, 500);
             superUI = box;
