@@ -32,7 +32,6 @@ public class LineHeadView extends View {
     private double  _mx, _my;
 
     // Constants
-    private static Color BACKGROUND_FILL = new Color(.98);
     private static Color LINE_NUMBERS_COLOR = Color.GRAY6;
 
     // Constant for line markers width
@@ -50,7 +49,7 @@ public class LineHeadView extends View {
         // Config
         enableEvents(MouseMove, MouseRelease);
         setToolTipEnabled(true);
-        setFill(BACKGROUND_FILL);
+        setFill(ViewTheme.get().getBackFill());
 
         // Set PrefSize
         setPrefSizeForText();
@@ -264,5 +263,12 @@ public class LineHeadView extends View {
         LineMarker<?>[] lineMarkers = getLineMarkers();
         LineMarker<?> lineMarker = ArrayUtils.findMatch(lineMarkers, m -> m.contains(_mx, _my));
         return lineMarker != null ? lineMarker.getToolTip() : null;
+    }
+
+    @Override
+    protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
+    {
+        super.themeChanged(oldTheme, newTheme);
+        setFill(ViewTheme.get().getBackFill());
     }
 }

@@ -69,7 +69,7 @@ public class JavaTextArea extends TextArea {
     public JavaTextArea()
     {
         super(getDummyTextDoc());
-        setFill(Color.WHITE);
+        setFill(ViewTheme.get().getContentColor());
         setPadding(5, 5, 5,5);
         setSyncTextFont(false);
         setEditable(true);
@@ -1085,6 +1085,17 @@ public class JavaTextArea extends TextArea {
 
         // Do normal version
         super.replaceCharsWithContent(theContent);
+    }
+
+    /**
+     * Override to update fill.
+     */
+    @Override
+    protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
+    {
+        super.themeChanged(oldTheme, newTheme);
+        setFill(ViewTheme.get().getContentColor());
+        setTextColor(ViewTheme.get().getTextColor());
     }
 
     /**

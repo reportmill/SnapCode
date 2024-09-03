@@ -55,7 +55,6 @@ public class PagePane extends ViewOwner {
     // Constant for file tab attributes
     private static Color TAB_BAR_BORDER_COLOR = Color.GRAY8;
     private static Font TAB_BAR_FONT = new Font("Arial", 12);
-    private static Color TAB_TEXT_COLOR = Color.GRAY2;
 
     /**
      * Constructor.
@@ -385,7 +384,6 @@ public class PagePane extends ViewOwner {
 
             // Configure Tab.Button
             ToggleButton tabButton = fileTab.getButton();
-            tabButton.setTextColor(TAB_TEXT_COLOR);
             tabButton.addEventFilter(e -> tabButtonMousePress(e, file), MousePress);
         }
 
