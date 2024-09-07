@@ -3,8 +3,6 @@ import snap.view.*;
 import snapcode.app.*;
 import snapcode.project.RunConfig;
 import snapcode.project.RunConfigs;
-
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,7 +34,7 @@ public class RunConfigsTool extends WorkspaceTool {
      */
     public RunConfig getSelectedRunConfig()
     {
-        if (_runConfig == null && getRunConfigs().size() > 0)
+        if (_runConfig == null && !getRunConfigs().isEmpty())
             _runConfig = getRunConfigs().get(0);
         return _runConfig;
     }
@@ -129,7 +127,7 @@ public class RunConfigsTool extends WorkspaceTool {
         }
 
         // Handle RemoveButton
-        if (anEvent.equals("RemoveButton") && getRunConfigs().size() > 0) {
+        if (anEvent.equals("RemoveButton") && !getRunConfigs().isEmpty()) {
             getRunConfigs().remove(getSelectedRunConfig());
             setSelectedRunConfig(null);
         }
@@ -153,8 +151,8 @@ public class RunConfigsTool extends WorkspaceTool {
     public void setRunMenuButtonItems()
     {
         MenuButton rmb = getView("RunMenuButton", MenuButton.class);
-        rmb.setItems(Arrays.asList(getRunMenuButtonItems()));
-        for (MenuItem mi : rmb.getItems())
+        rmb.setMenuItems(getRunMenuButtonItems());
+        for (MenuItem mi : rmb.getMenuItems())
             mi.setOwner(this);
     }
 
@@ -173,7 +171,7 @@ public class RunConfigsTool extends WorkspaceTool {
         }
 
         // Add separator
-        if (runConfigs.size() > 0)
+        if (!runConfigs.isEmpty())
             mib.save();
 
         // Add RunConfigsMenuItem

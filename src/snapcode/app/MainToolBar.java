@@ -91,7 +91,7 @@ public class MainToolBar extends WorkspaceTool {
         runConfigMenuButton.setText("Run Config");
         MenuItem[] runConfigMenuItems = getRunConfigMenuItems();
         runConfigMenuButton.setText(runConfigMenuItems[0].getText());
-        runConfigMenuButton.setItems(Arrays.asList(runConfigMenuItems));
+        runConfigMenuButton.setMenuItems(runConfigMenuItems);
 
         // Update TerminateButton
         boolean isRunning = _workspaceTools.getRunTool().isRunning();

@@ -1,6 +1,5 @@
 package snapcode.apptools;
 import snap.util.SnapUtils;
-import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
 import snap.view.*;
@@ -362,13 +361,11 @@ public class ProjectFilesTool extends WorkspaceTool {
         // Handle PopupTrigger
         if (anEvent.isPopupTrigger()) {
             MenuButton menuButton = getView("MenuButton", MenuButton.class);
-            List<MenuItem> menuItems = menuButton.getItems();
+            MenuItem[] menuItems = menuButton.getMenuItems();
             ViewArchiver viewArchiver = new ViewArchiver();
+            MenuItem[] menuItemsCopy = ArrayUtils.map(menuItems, item -> viewArchiver.copy(item), MenuItem.class);
             Menu menu = new Menu();
-            for (MenuItem mi : menuItems) {
-                MenuItem menuItemCopy = viewArchiver.copy(mi);
-                menu.addItem(menuItemCopy);
-            }
+            menu.setMenuItems(menuItemsCopy);
             menu.setOwner(this);
             menu.showMenuAtXY(anEvent.getView(), anEvent.getX(), anEvent.getY());
         }
