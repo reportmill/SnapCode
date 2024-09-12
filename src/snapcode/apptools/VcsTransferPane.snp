@@ -6,7 +6,7 @@
   </Label>
   <SplitView Name="SplitView" Vertical="true" GrowHeight="true">
     <ListView Name="FilesList" GrowHeight="true" />
-    <TextView Name="CommentText" PrefHeight="120" WrapText="true">
+    <TextView Name="CommentText" PrefHeight="120" WrapLines="true">
       <font name="Arial" size="11" />
     </TextView>
   </SplitView>
