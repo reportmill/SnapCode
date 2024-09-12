@@ -52,7 +52,7 @@ public class SamplesPageView extends MarkDownView {
         // Create label for heading
         Label samplesLabel = new Label("Samples");
         samplesLabel.setPropsString("Font:Arial Bold 64;");
-        samplesLabel.setTextStylePropsString("Color:#CD5652; Border:WHITE 2; CharSpacing:2;");
+        samplesLabel.setTextStyleString("Color:#CD5652; Border:WHITE 2; CharSpacing:2;");
         samplesLabel.setEffect(new ShadowEffect(12, Color.BLACK, 0, 0));
 
         // Wrap image in row view and add
@@ -75,7 +75,7 @@ public class SamplesPageView extends MarkDownView {
             // Create learn to code label
             Label learnToCodeLabel = new Label("Learn to Code! ...");
             learnToCodeLabel.setPropsString("Font:Arial Italic 20; Margin:0,0,0,40; Padding:0,0,2,0;");
-            learnToCodeLabel.setTextStylePropsString("Color:#6666FF; Underline:1;");
+            learnToCodeLabel.setTextStyleString("Color:#6666FF; Underline:1;");
             learnToCodeLabel.setCursor(Cursor.HAND);
             learnToCodeLabel.addEventHandler(e -> GFXEnv.getEnv().openURL("https://www.encodecreate.com"), MousePress);
 
