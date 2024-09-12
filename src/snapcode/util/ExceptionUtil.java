@@ -34,7 +34,7 @@ public class ExceptionUtil {
     {
         // Get default style modified for color
         TextStyle style = textBlock.getTextStyleForCharIndex(textBlock.length());
-        style = style.copyFor(aColor);
+        style = style.copyForStyleValue(aColor);
 
         // Look for a StackFrame reference: " at java.pkg.Class(Class.java:55)" and add as link if found
         int start = 0;
@@ -59,7 +59,7 @@ public class ExceptionUtil {
             TextLink textLink = new TextLink(linkAddr);
 
             // Get TextStyle for link and add link chars
-            TextStyle linkStyle = style.copyFor(textLink);
+            TextStyle linkStyle = style.copyForStyleValue(textLink);
             textBlock.addCharsWithStyle(linkText, linkStyle);
 
             // Update start to end of link text and continue

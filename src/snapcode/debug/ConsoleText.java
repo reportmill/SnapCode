@@ -52,7 +52,7 @@ public class ConsoleText extends TextBlock {
         // Get default style modified for color
         TextStyle style = getTextStyleForCharIndex(length());
         if (!style.getColor().equals(color))
-            style = style.copyFor(color);
+            style = style.copyForStyleValue(color);
 
         // Look for a StackFrame reference: " at java.pkg.Class(Class.java:55)" and add as link if found
         int start = 0;
@@ -76,7 +76,7 @@ public class ConsoleText extends TextBlock {
             TextLink textLink = new TextLink(linkAddr);
 
             // Get TextStyle for link and add link chars
-            TextStyle linkStyle = style.copyFor(textLink);
+            TextStyle linkStyle = style.copyForStyleValue(textLink);
             addCharsWithStyle(linkText, linkStyle);
 
             // Update start to end of link text and continue

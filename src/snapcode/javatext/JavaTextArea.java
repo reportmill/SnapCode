@@ -644,7 +644,7 @@ public class JavaTextArea extends TextArea {
 
             // Add indent
             int startCharIndex = startLine.getStartCharIndex();
-            addChars(INDENT_STRING, null, startLine.getStartCharIndex());
+            getTextBlock().addChars(INDENT_STRING, startLine.getStartCharIndex());
 
             // Adjust Sel start/end
             if (startCharIndex <= selStart)
@@ -692,7 +692,7 @@ public class JavaTextArea extends TextArea {
                 endCharIndex += lineStartCharIndex;
 
                 // Remove chars
-                replaceChars("", null, startCharIndex, endCharIndex, false);
+                getTextBlock().removeChars(startCharIndex, endCharIndex);
 
                 // Adjust Sel start/end
                 if (startCharIndex < selStart)
@@ -740,7 +740,7 @@ public class JavaTextArea extends TextArea {
 
             // If adding comment, add comment chars and adjust SelStart/SelEnd
             if (addComments) {
-                addChars("//", null, startLine.getStartCharIndex());
+                getTextBlock().addChars("//", startLine.getStartCharIndex());
                 if (startCharIndex <= selStart)
                     selStart += 2;
                 if (startCharIndex <= selEnd)
@@ -750,7 +750,7 @@ public class JavaTextArea extends TextArea {
             // If removing comment, remove comment chars and adjust SelStart/SelEnd
             else {
                 int commentCharIndex = startCharIndex + startLine.getString().indexOf("//");
-                delete(commentCharIndex, commentCharIndex + 2, false);
+                getTextBlock().removeChars(commentCharIndex, commentCharIndex + 2);
                 if (commentCharIndex <= selStart)
                     selStart -= 2;
                 if (commentCharIndex <= selEnd)

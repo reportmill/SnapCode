@@ -348,7 +348,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
             completionStr = completionDecl.getSimpleName();
 
         // Replace selection with completeString
-        _textArea.replaceChars(completionStr, null, replaceStart, replaceEnd, true);
+        _textArea.replaceCharsWithStyle(completionStr, null, replaceStart, replaceEnd);
 
         // If completion has parens needing content, select inside parens
         int argStart = indexOfParenContent(completionDecl, completionStr);
@@ -384,7 +384,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         completionStr += superStr + '\n' + indentStr + "}\n";
 
         // Replace selection with completeString
-        _textArea.replaceChars(completionStr, null, replaceStart, replaceEnd, false);
+        _textArea.getTextBlock().replaceChars(completionStr, replaceStart, replaceEnd);
         _textArea.setSel(superStrIndex, superStrIndex + superStr.length());
 
         // Add imports for method return type and param types

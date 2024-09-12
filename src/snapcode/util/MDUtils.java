@@ -32,7 +32,7 @@ public class MDUtils {
         TextStyle textStyle = TextStyle.DEFAULT;
         Font headerFont = new Font("Arial Bold", 24);
         Color headerColor = Color.BLACK;
-        TextStyle headerStyle = textStyle.copyFor(headerFont, headerColor);
+        TextStyle headerStyle = textStyle.copyForStyleValues(headerFont, headerColor);
 
         // Set, return
         return _header1Style = headerStyle;
@@ -50,7 +50,7 @@ public class MDUtils {
         TextStyle textStyle = TextStyle.DEFAULT;
         Font headerFont = new Font("Arial Bold", 20);
         Color headerColor = Color.BLACK;
-        TextStyle headerStyle = textStyle.copyFor(headerFont, headerColor);
+        TextStyle headerStyle = textStyle.copyForStyleValues(headerFont, headerColor);
 
         // Set, return
         return _header2Style = headerStyle;
@@ -68,7 +68,7 @@ public class MDUtils {
         TextStyle textStyle = TextStyle.DEFAULT;
         Font contentFont = Font.Arial14;
         Color contentColor = Color.BLACK;
-        TextStyle contentStyle = textStyle.copyFor(contentFont, contentColor);
+        TextStyle contentStyle = textStyle.copyForStyleValues(contentFont, contentColor);
 
         // Set, return
         return _contentStyle = contentStyle;
@@ -86,7 +86,7 @@ public class MDUtils {
         Font codeFont = Font.getCodeFontForSize(13);
         TextStyle textStyle = TextStyle.DEFAULT;
         Color codeColor = Color.GRAY3;
-        TextStyle codeStyle = textStyle.copyFor(codeFont, codeColor);
+        TextStyle codeStyle = textStyle.copyForStyleValues(codeFont, codeColor);
 
         // Set, return
         return _codeStyle = codeStyle;

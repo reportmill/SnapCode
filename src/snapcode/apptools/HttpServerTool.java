@@ -6,7 +6,6 @@ import com.sun.net.httpserver.HttpServer;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.text.TextBlock;
-import snap.text.TextLineStyle;
 import snap.text.TextStyle;
 import snap.util.FilePathUtils;
 import snap.util.ListUtils;
@@ -255,8 +254,8 @@ public class HttpServerTool extends WorkspaceTool {
         // Append text
         TextBlock textBlock = _textView.getTextBlock();
         int textLength = textBlock.length();
-        TextStyle textStyle = textBlock.getTextStyleForCharIndex(textLength).copyFor(aColor);
-        textBlock.replaceChars(aStr, textStyle, textLength, textLength);
+        TextStyle textStyle = textBlock.getTextStyleForCharIndex(textLength).copyForStyleValue(aColor);
+        textBlock.replaceCharsWithStyle(aStr, textStyle, textLength, textLength);
     }
 
     /**

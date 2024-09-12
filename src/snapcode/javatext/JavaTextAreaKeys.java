@@ -69,7 +69,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
                 char nextChar = prevChar != 0 ? charAt(prevCharIndex + 1) : 0;
                 char closeChar = getPairedCharForOpener(prevChar);
                 if (nextChar == closeChar)
-                    _textArea.delete(prevCharIndex + 1, prevCharIndex + 2, false);
+                    _textArea.getTextBlock().removeChars(prevCharIndex + 1, prevCharIndex + 2);
             }
         }
 
@@ -251,7 +251,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         if (isStartOfMultiLineComment) {
             int start = getSelStart();
             String str = sb.substring(0, sb.length() - 1) + "/";
-            _textArea.replaceChars(str, null, start, start, false);
+            _textArea.getTextBlock().addChars(str, start);
             setSel(start);
         }
     }
@@ -313,7 +313,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         TextLine nextLine = aTextLine.getNext();
         TextToken nextToken = nextLine.getTokenCount() > 0 ? nextLine.getToken(0) : null;
         if (nextToken != null && nextToken.getString().equals("}")) {
-            _textArea.replaceChars('\n' + indentStr, null, newSelStart, newSelStart, false);
+            _textArea.getTextBlock().addChars('\n' + indentStr, newSelStart);
             return;
         }
 
@@ -322,7 +322,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         if (isUnbalancedOpenBracketToken(textToken)) {
             String closeBracketStr = '\n' + indentStr + "}";
             int selStart = aTextLine.getNext().getEndCharIndex() - 1;
-            _textArea.replaceChars(closeBracketStr, null, selStart, selStart, false);
+            _textArea.getTextBlock().addChars(closeBracketStr, selStart);
         }
     }
 
@@ -412,7 +412,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         // Add close char after char
         String closeCharStr = String.valueOf(getPairedCharForOpener(aChar));
         int selStart = _textArea.getSelStart();
-        _textArea.replaceChars(closeCharStr, null, selStart, selStart, false);
+        _textArea.getTextBlock().addChars(closeCharStr, selStart);
     }
 
     /**
@@ -449,7 +449,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     {
         int deleteStartCharIndex = textLine.getStartCharIndex();
         int deleteEndCharIndex = deleteStartCharIndex + INDENT_LENGTH;
-        _javaTextArea.delete(deleteStartCharIndex, deleteEndCharIndex, false);
+        _javaTextArea.getTextBlock().removeChars(deleteStartCharIndex, deleteEndCharIndex);
     }
 
     /**
@@ -463,7 +463,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         // If selection, duplicate selected string
         if (selStart != selEnd) {
             String selString = _textArea.getSel().getString();
-            _textArea.addChars(selString, null, selEnd);
+            _textArea.getTextBlock().addChars(selString, selEnd);
             _textArea.setSel(selEnd, selEnd + selString.length());
         }
 
@@ -478,7 +478,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
 
             // Add line string to end of selLine
             int endCharIndex = selLine.getEndCharIndex();
-            _textArea.addChars(lineString, null, endCharIndex);
+            _textArea.getTextBlock().addChars(lineString, endCharIndex);
 
             // Select start char of new line
             TextLine newLine = selLine.getNext();

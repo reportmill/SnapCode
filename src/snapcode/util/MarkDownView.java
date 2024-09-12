@@ -183,7 +183,7 @@ public class MarkDownView extends ChildView {
             // Create link style
             TextLink textLink = new TextLink(urlAddr);
             TextStyle textStyle = MDUtils.getContentStyle();
-            TextStyle linkTextStyle = textStyle.copyFor(textLink);
+            TextStyle linkTextStyle = textStyle.copyForStyleValue(textLink);
 
             // Add link
             TextArea textArea = (TextArea) linkNodeView;
@@ -407,7 +407,7 @@ public class MarkDownView extends ChildView {
             TextLink textLink = new TextLink(urlAddr);
             TextBlock textBlock = textArea.getTextBlock();
             TextStyle textStyle = textBlock.getDefaultTextStyle();
-            TextStyle linkTextStyle = textStyle.copyFor(textLink);
+            TextStyle linkTextStyle = textStyle.copyForStyleValue(textLink);
 
             // If text already present, add space
             if (textBlock.length() > 0)
