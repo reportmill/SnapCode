@@ -7,12 +7,12 @@
       <Font Name="Arial" Size="18" />
       <Label Name="ProjectNameLabel" Text="Project:" />
     </RowView>
-    <TitleView name="LOCTitleView" Padding="5" PrefWidth="120" PrefHeight="22" Title="Show Lines of Code" TitleStyle="Plain" Collapsible="true" Expanded="false">
+    <TitleView name="LOCTitleView" Padding="5" PrefWidth="120" PrefHeight="22" Text="Show Lines of Code" TitleStyle="Plain" Collapsible="true" Expanded="false">
       <TextView name="LOCText" PrefWidth="300" Padding="5">
         <LineBorder Color="#808080" />
       </TextView>
     </TitleView>
-    <TitleView Name="SymbolCheckTitleView" Padding="5" PrefWidth="120" PrefHeight="22" Title="Show Undefined Symbols" TitleStyle="Plain" Collapsible="true" Expanded="false">
+    <TitleView Name="SymbolCheckTitleView" Padding="5" PrefWidth="120" PrefHeight="22" Text="Show Undefined Symbols" TitleStyle="Plain" Collapsible="true" Expanded="false">
       <TextView Name="SymbolCheckText" PrefWidth="800" PrefHeight="350" Padding="5">
         <LineBorder Color="#808080" />
       </TextView>
