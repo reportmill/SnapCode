@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SplitView Name="MainSplit" PrefWidth="958" PrefHeight="684" GrowHeight="true" Vertical="true">
+<SplitView Name="MainSplit" PrefWidth="958" PrefHeight="684" Vertical="true" GrowHeight="true">
   <ColView Name="MainColView" GrowHeight="true" FillWidth="true">
-    <MenuBar Name="MenuBar" MinHeight="36">
+    <MenuBar Name="MenuBar" MinHeight="36" Font="Arial 13">
       <Menu Name="FileMenu" Text="File">
-        <MenuItem Name="NewFileMenuItem" Text="New..." key="Shortcut+N" />
+        <MenuItem Name="NewFileMenuItem" Text="New..." Shortcut="Shortcut+N" />
         <MenuItem />
-        <MenuItem Name="OpenFileMenuItem" Text="Open..." key="Shortcut+O" />
-        <MenuItem Name="SaveFileMenuItem" Text="Save" key="Shortcut+S" />
-        <MenuItem Name="RevertFileMenuItem" Text="Revert to Saved" key="Shortcut+U" />
-        <MenuItem Name="CloseFileMenuItem" Text="Close" key="Shortcut+W" />
+        <MenuItem Name="OpenFileMenuItem" Text="Open..." Shortcut="Shortcut+O" />
+        <MenuItem Name="SaveFileMenuItem" Text="Save" Shortcut="Shortcut+S" />
+        <MenuItem Name="RevertFileMenuItem" Text="Revert to Saved" Shortcut="Shortcut+U" />
+        <MenuItem Name="CloseFileMenuItem" Text="Close" Shortcut="Shortcut+W" />
         <MenuItem />
         <MenuItem Name="DownloadFileMenuItem" Text="Download File/Project..." />
         <MenuItem Name="OpenDesktopFileMenuItem" Text="Open Desktop File..." />
         <MenuItem Name="UploadDownloadMenuItemsSeparator" />
-        <MenuItem Name="QuitMenuItem" Text="Quit" key="Shortcut+Q" />
+        <MenuItem Name="QuitMenuItem" Text="Quit" Shortcut="Shortcut+Q" />
       </Menu>
       <Menu Name="EditMenu" Text="Edit">
-        <MenuItem Name="UndoMenuItem" Text="Undo" key="Shortcut+Z" />
-        <MenuItem Name="RedoMenuItem" Text="Redo" key="Shortcut+Shift+Z" />
+        <MenuItem Name="UndoMenuItem" Text="Undo" Shortcut="Shortcut+Z" />
+        <MenuItem Name="RedoMenuItem" Text="Redo" Shortcut="Shortcut+Shift+Z" />
         <MenuItem />
-        <MenuItem Name="CutMenuItem" Text="Cut" key="Shortcut+X" />
-        <MenuItem Name="CopyMenuItem" Text="Copy" key="Shortcut+C" />
-        <MenuItem Name="PasteMenuItem" Text="Paste" key="Shortcut+V" />
-        <MenuItem Name="SelectAllMenuItem" Text="Select All" key="Shortcut+A" />
+        <MenuItem Name="CutMenuItem" Text="Cut" Shortcut="Shortcut+X" />
+        <MenuItem Name="CopyMenuItem" Text="Copy" Shortcut="Shortcut+C" />
+        <MenuItem Name="PasteMenuItem" Text="Paste" Shortcut="Shortcut+V" />
+        <MenuItem Name="SelectAllMenuItem" Text="Select All" Shortcut="Shortcut+A" />
       </Menu>
       <Menu Name="ToolsMenu" Text="Tools">
         <MenuItem Name="ShowLeftTrayMenuItem" Text="Hide Left Tray" />

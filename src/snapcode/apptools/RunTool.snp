@@ -1,19 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="400" GrowHeight="true" FillWidth="true">
-  <Font name="Arial" size="12" />
+<ColView PrefWidth="400" Font="Arial 12" GrowHeight="true" FillWidth="true">
   <RowView Name="ToolBar" PrefHeight="32" Spacing="4">
-    <Label Margin="0,10,0,8" text="Run:" />
-    <Button Name="SwapConsoleButton" Padding="1,3,1,3" LeanX="CENTER">
-      <Font name="Arial" size="11" />
-    </Button>
-    <Button Name="ClearButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" ToolTip="Clear console" Image="pkg.images/Clear.png" ShowArea="false" />
-    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" Text="–" ShowArea="false" />
+    <Label Margin="0,10,0,8" Text="Run:" />
+    <Button Name="SwapConsoleButton" Padding="1,3,1,3" Font="Arial 11" LeanX="CENTER" />
+    <Button Name="ClearButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" ToolTip="Clear console" ImageName="pkg.images/Clear.png" ShowArea="false" />
+    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" Text="&#8211;" ShowArea="false" />
   </RowView>
-  <RectView PrefHeight="1">
-    <Fill Color="#CC" />
-  </RectView>
-  <ScrollView Name="ScrollView" FillWidth="true" GrowHeight="true" />
-  <TextField Name="InputTextField" Margin="8" Padding="0,10,0,8" PrefHeight="28" PromptText="Program Input" BorderRadius="10">
-    <Font Name="Arial" Size="14" />
-  </TextField>
+  <RectView PrefHeight="1" Fill="#CC" />
+  <ScrollView Name="ScrollView" GrowHeight="true" />
+  <TextField Name="InputTextField" PrefHeight="28" Margin="8" Padding="0,10,0,8" BorderRadius="10" Font="Arial 14" PromptText="Program Input" />
 </ColView>

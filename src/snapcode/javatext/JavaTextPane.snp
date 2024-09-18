@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RowView Padding="4" Spacing="5">
-  <Button Name="SaveButton" PrefWidth="22" PrefHeight="22" ToolTip="Save" image="/snap/viewx/pkg.images/File_Save.png" ShowBorder="false" />
+  <Button Name="SaveButton" PrefWidth="22" PrefHeight="22" ToolTip="Save" ImageName="/snap/viewx/pkg.images/File_Save.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
-  <Button Name="CutButton" PrefWidth="22" PrefHeight="22" ToolTip="Cut" image="/snap/viewx/pkg.images/Edit_Cut.png" ShowBorder="false" />
-  <Button Name="CopyButton" PrefWidth="22" PrefHeight="22" ToolTip="Copy" image="/snap/viewx/pkg.images/Edit_Copy.png" ShowBorder="false" />
-  <Button Name="PasteButton" PrefWidth="22" PrefHeight="22" ToolTip="Paste" image="/snap/viewx/pkg.images/Edit_Paste.png" ShowBorder="false" />
-  <Button Name="DeleteButton" PrefWidth="22" PrefHeight="22" ToolTip="Delete" image="/snap/viewx/pkg.images/Edit_Delete.png" ShowBorder="false" />
+  <Button Name="CutButton" PrefWidth="22" PrefHeight="22" ToolTip="Cut" ImageName="/snap/viewx/pkg.images/Edit_Cut.png" ShowArea="false" />
+  <Button Name="CopyButton" PrefWidth="22" PrefHeight="22" ToolTip="Copy" ImageName="/snap/viewx/pkg.images/Edit_Copy.png" ShowArea="false" />
+  <Button Name="PasteButton" PrefWidth="22" PrefHeight="22" ToolTip="Paste" ImageName="/snap/viewx/pkg.images/Edit_Paste.png" ShowArea="false" />
+  <Button Name="DeleteButton" PrefWidth="22" PrefHeight="22" ToolTip="Delete" ImageName="/snap/viewx/pkg.images/Edit_Delete.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
   <TextField Name="FontSizeText" PrefWidth="32" PrefHeight="22" />
-  <Button Name="IncreaseFontButton" PrefWidth="22" PrefHeight="22" ToolTip="Increase Font Size" image="/snap/viewx/pkg.images/Font_Increase.png" ShowBorder="false" />
-  <Button Name="DecreaseFontButton" PrefWidth="22" PrefHeight="22" ToolTip="Decrease Font Size" image="/snap/viewx/pkg.images/Font_Decrease.png" ShowBorder="false" />
+  <Button Name="IncreaseFontButton" PrefWidth="22" PrefHeight="22" ToolTip="Increase Font Size" ImageName="/snap/viewx/pkg.images/Font_Increase.png" ShowArea="false" />
+  <Button Name="DecreaseFontButton" PrefWidth="22" PrefHeight="22" ToolTip="Decrease Font Size" ImageName="/snap/viewx/pkg.images/Font_Decrease.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
-  <Button Name="UndoButton" PrefWidth="22" PrefHeight="22" ToolTip="Undo" image="/snap/viewx/pkg.images/Edit_Undo.png" ShowBorder="false" />
-  <Button Name="RedoButton" PrefWidth="22" PrefHeight="22" ToolTip="Redo" image="/snap/viewx/pkg.images/Edit_Redo.png" ShowBorder="false" />
+  <Button Name="UndoButton" PrefWidth="22" PrefHeight="22" ToolTip="Undo" ImageName="/snap/viewx/pkg.images/Edit_Undo.png" ShowArea="false" />
+  <Button Name="RedoButton" PrefWidth="22" PrefHeight="22" ToolTip="Redo" ImageName="/snap/viewx/pkg.images/Edit_Redo.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
   <TextField Name="FindText" PrefWidth="172" PrefHeight="22" />
-  <CheckBox Name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" text="IC" Selected="true" />
-  <Button Name="JavaDocButton" PrefWidth="116" PrefHeight="22" LeanX="RIGHT" text="Documentation" />
-  <MenuButton Name="SettingsButton" PrefWidth="24" PrefHeight="24" Margin="0,14,0,0" LeanX="RIGHT" ToolTip="Settings" Image="Settings.png" ShowArea="false" ShowArrow="false">
+  <CheckBox Name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" Text="IC" Selected="true" />
+  <Button Name="JavaDocButton" PrefWidth="116" PrefHeight="22" LeanX="RIGHT" Text="Documentation" />
+  <MenuButton Name="SettingsButton" PrefWidth="24" PrefHeight="24" Margin="0,14,0,0" LeanX="RIGHT" ToolTip="Settings" ImageName="Settings.png" ShowArea="false" ShowArrow="false">
     <MenuItem Name="ShowScopeBoxesMenuItem" Text="Show Scope Boxes" />
     <MenuItem Name="ShowSnapCodeMenuItem" Text="Show SnapCode" />
   </MenuButton>

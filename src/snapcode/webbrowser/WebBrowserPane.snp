@@ -1,20 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SpringView width="500" height="500" PrefWidth="500" PrefHeight="500">
-  <SpringView Name="ToolBar" width="500" height="30" PrefWidth="500" PrefHeight="30" GrowWidth="true">
-    <Button Name="BackButton" x="2" y="2" width="25" height="25" ToolTip="Page Back" />
-    <Button Name="ReloadButton" x="27" y="2" width="25" height="25" image="Reload.png" />
-    <Button Name="NextButton" x="52" y="2" width="25" height="25" ToolTip="Page Forward" />
-    <TextField Name="AddressText" x="77" y="2" width="350" height="25" GrowWidth="true">
-      <font name="Arial" size="12" />
-    </TextField>
-    <Button Name="InfoButton" x="474" y="3" width="22" height="22" LeanX="RIGHT" ToolTip="Get Browser Info" image="Info.png">
-      <font name="Arial Bold Italic" size="9" />
-    </Button>
+<SpringView Width="500" Height="500" PrefWidth="500" PrefHeight="500">
+  <SpringView Name="ToolBar" Width="500" Height="30" PrefWidth="500" PrefHeight="30" GrowWidth="true">
+    <Button Name="BackButton" X="2" Y="2" Width="25" Height="25" ToolTip="Page Back" />
+    <Button Name="ReloadButton" X="27" Y="2" Width="25" Height="25" ImageName="Reload.png" />
+    <Button Name="NextButton" X="52" Y="2" Width="25" Height="25" ToolTip="Page Forward" />
+    <TextField Name="AddressText" X="77" Y="2" Width="350" Height="25" Font="Arial 12" GrowWidth="true" />
+    <Button Name="InfoButton" X="474" Y="3" Width="22" Height="22" Font="Arial Bold Italic 9" LeanX="RIGHT" ToolTip="Get Browser Info" ImageName="Info.png" />
   </SpringView>
-  <View Name="Browser" y="30" width="500" height="450" GrowWidth="true" GrowHeight="true" Class="snap.viewx.WebBrowser" />
-  <SpringView Name="StatusBar" y="480" width="500" height="20" PrefWidth="500" PrefHeight="20" GrowWidth="true">
-    <Label Name="StatusText" x="2" width="227" height="20" GrowWidth="true" LeanY="BOTTOM" />
-    <ProgressBar Name="ProgressBar" x="227" y="2" width="46" height="16" Visible="false" GrowWidth="true" LeanX="CENTER" LeanY="BOTTOM" />
-    <Label Name="ActivityText" x="273" width="225" height="20" Align="CENTER_RIGHT" GrowWidth="true" LeanX="RIGHT" LeanY="BOTTOM" />
+  <View Name="Browser" Y="30" Width="500" Height="450" GrowWidth="true" GrowHeight="true" Class="snap.viewx.WebBrowser" />
+  <SpringView Name="StatusBar" Y="480" Width="500" Height="20" PrefWidth="500" PrefHeight="20" GrowWidth="true">
+    <Label Name="StatusText" X="2" Width="227" Height="20" GrowWidth="true" LeanY="BOTTOM" />
+    <ProgressBar Name="ProgressBar" X="227" Y="2" Width="46" Height="16" GrowWidth="true" LeanX="CENTER" LeanY="BOTTOM" Visible="false" />
+    <Label Name="ActivityText" X="273" Width="225" Height="20" Align="CENTER_RIGHT" GrowWidth="true" LeanX="RIGHT" LeanY="BOTTOM" />
   </SpringView>
 </SpringView>

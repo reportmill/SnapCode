@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="300" GrowHeight="true" FillWidth="true">
-  <Font name="Arial" size="12" />
-  <RowView Padding="4" PrefHeight="34" GrowWidth="true" Align="CENTER_LEFT">
+<ColView PrefWidth="300" Font="Arial 12" GrowHeight="true" FillWidth="true">
+  <RowView PrefHeight="34" Padding="4" GrowWidth="true">
     <Label Margin="4,10,4,10" Text="Blocks:" />
-    <CheckBox Name="ShowBlocksCheckBox" Text="Show Blocks" Margin="4,5,4,40" LeanX="LEFT"/>
-    <Label Name="ClassText" GrowWidth="true" Visible="false"/>
+    <CheckBox Name="ShowBlocksCheckBox" Margin="4,5,4,40" LeanX="LEFT" Text="Show Blocks" />
+    <Label Name="ClassText" GrowWidth="true" Visible="false" />
   </RowView>
-  <RectView PrefHeight="1">
-    <Fill Color="#CC" />
-  </RectView>
-  <ListView Name="DirectoryListView" Margin="5" MinHeight="60"/>
+  <RectView PrefHeight="1" Fill="#CC" />
+  <ListView Name="DirectoryListView" MinHeight="60" Margin="5" />
 </ColView>

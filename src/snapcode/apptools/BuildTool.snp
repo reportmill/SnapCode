@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="400" GrowHeight="true" FillWidth="true">
-  <Font name="Arial" size="12" />
+<ColView PrefWidth="400" Font="Arial 12" GrowHeight="true" FillWidth="true">
   <RowView Name="ToolBar" PrefHeight="32" Spacing="4">
-    <Label Margin="0,10,0,8" text="Build:" />
-    <Button Name="BuildButton" PrefWidth="24" PrefHeight="24" Image="pkg.images/Build.png" ShowArea="false" />
-    <Button Name="StopButton" PrefWidth="24" PrefHeight="24" ToolTip="Clear console" Image="pkg.images/Terminate.gif" ShowArea="false" />
+    <Label Margin="0,10,0,8" Text="Build:" />
+    <Button Name="BuildButton" PrefWidth="24" PrefHeight="24" ImageName="pkg.images/Build.png" ShowArea="false" />
+    <Button Name="StopButton" PrefWidth="24" PrefHeight="24" ToolTip="Clear console" ImageName="pkg.images/Terminate.gif" ShowArea="false" />
     <Label Name="BuildStatusLabel" Margin="0,0,0,40" />
-    <Button Name="CleanButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" ToolTip="Clear console" Image="pkg.images/Clear.png" ShowArea="false" />
-    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Text="–" ShowArea="false" />
+    <Button Name="CleanButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" ToolTip="Clear console" ImageName="pkg.images/Clear.png" ShowArea="false" />
+    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Text="&#8211;" ShowArea="false" />
   </RowView>
-  <RectView PrefHeight="1" GrowWidth="true">
-    <Fill Color="#CC" />
-  </RectView>
+  <RectView PrefHeight="1" Fill="#CC" GrowWidth="true" />
   <SplitView Vertical="true" GrowHeight="true">
     <ColView GrowHeight="true">
-      <Label Margin="8" text="Build Issues:" />
-      <ListView Name="ErrorsList" Margin="0,5,5,5" GrowWidth="true" GrowHeight="true" BorderRadius="5">
-        <font name="Arial" size="14" />
-      </ListView>
+      <Label Margin="8" Text="Build Issues:" />
+      <ListView Name="ErrorsList" Margin="0,5,5,5" BorderRadius="5" Font="Arial 14" GrowWidth="true" GrowHeight="true" />
     </ColView>
     <TextView Name="BuildLogTextView" PrefHeight="250" />
   </SplitView>

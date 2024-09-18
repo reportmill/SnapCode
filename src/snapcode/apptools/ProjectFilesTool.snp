@@ -1,37 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView PrefWidth="220" GrowWidth="true" FillWidth="true">
   <RowView Name="RowView" MinHeight="32">
-    <Button Name="AllFilesButton" PrefWidth="22" PrefHeight="20" Margin="4" ToolTip="Toggle Files Tree/List" ShowArea="false" Image="FilesTree.png" />
-    <Label Name="FilesLabel" Text="Project">
-      <font name="Arial" size="14" />
-    </Label>
+    <Button Name="AllFilesButton" PrefWidth="22" PrefHeight="20" Margin="4" ToolTip="Toggle Files Tree/List" ImageName="FilesTree.png" ShowArea="false" />
+    <Label Name="FilesLabel" Font="Arial 14" Text="Project" />
     <MenuButton Name="MenuButton" PrefWidth="20" PrefHeight="20" Margin="4" ShowArea="false">
-      <MenuItem Name="NewFileMenuItem" text="New File..." />
-      <MenuItem Name="RemoveFileMenuItem" text="Remove File(s)..." />
-      <MenuItem Name="RenameFileMenuItem" text="Rename File..." />
-      <MenuItem Name="DuplicateFileMenuItem" text="Duplicate File..." />
-      <MenuItem Name="RefreshFileMenuItem" text="Refresh File(s)" />
+      <MenuItem Name="NewFileMenuItem" Text="New File..." />
+      <MenuItem Name="RemoveFileMenuItem" Text="Remove File(s)..." />
+      <MenuItem Name="RenameFileMenuItem" Text="Rename File..." />
+      <MenuItem Name="DuplicateFileMenuItem" Text="Duplicate File..." />
+      <MenuItem Name="RefreshFileMenuItem" Text="Refresh File(s)" />
       <MenuItem />
-      <MenuItem Name="OpenInTextEditorMenuItem" text="Open File in Text Editor" />
-      <MenuItem Name="OpenInBrowserMenuItem" text="Open File in Separate Browser" />
-      <MenuItem Name="ShowFileMenuItem" text="Show File in Explorer/Finder" />
+      <MenuItem Name="OpenInTextEditorMenuItem" Text="Open File in Text Editor" />
+      <MenuItem Name="OpenInBrowserMenuItem" Text="Open File in Separate Browser" />
+      <MenuItem Name="ShowFileMenuItem" Text="Show File in Explorer/Finder" />
       <MenuItem />
-      <MenuItem Name="RunFileMenuItem" text="Run File" />
-      <MenuItem Name="DebugFileMenuItem" text="Debug File" />
+      <MenuItem Name="RunFileMenuItem" Text="Run File" />
+      <MenuItem Name="DebugFileMenuItem" Text="Debug File" />
       <MenuItem />
-      <MenuItem Name="UpdateFilesMenuItem" text="Update File(s) from Remote Source" />
-      <MenuItem Name="ReplaceFilesMenuItem" text="Replace File(s) from Remote Source" />
-      <MenuItem Name="CommitFilesMenuItem" text="Commit File(s) to Remote Source" />
-      <MenuItem Name="DiffFilesMenuItem" text="Compare File to Remote File" />
+      <MenuItem Name="UpdateFilesMenuItem" Text="Update File(s) from Remote Source" />
+      <MenuItem Name="ReplaceFilesMenuItem" Text="Replace File(s) from Remote Source" />
+      <MenuItem Name="CommitFilesMenuItem" Text="Commit File(s) to Remote Source" />
+      <MenuItem Name="DiffFilesMenuItem" Text="Compare File to Remote File" />
       <MenuItem />
-      <MenuItem Name="ShowClassInfoMenuItem" text="Show Class File Info" />
+      <MenuItem Name="ShowClassInfoMenuItem" Text="Show Class File Info" />
     </MenuButton>
-    <Button Name="DownloadFileButton" PrefWidth="20" PrefHeight="20" Margin="5" LeanX="RIGHT" ShowArea="false" Image="Download.png" />
-    <Button Name="NewFileButton" PrefWidth="20" PrefHeight="20" Margin="5" LeanX="RIGHT" ShowArea="false" Image="Add.png" />
+    <Button Name="DownloadFileButton" PrefWidth="20" PrefHeight="20" Margin="5" LeanX="RIGHT" ImageName="Download.png" ShowArea="false" />
+    <Button Name="NewFileButton" PrefWidth="20" PrefHeight="20" Margin="5" LeanX="RIGHT" ImageName="Add.png" ShowArea="false" />
   </RowView>
-  <RectView PrefHeight="1">
-    <Fill Color="#CD" />
-  </RectView>
+  <RectView PrefHeight="1" Fill="#CD" />
   <TreeView Name="FilesTree" GrowHeight="true" />
-  <ListView Name="FilesList" GrowHeight="true" ItemKey="Text" Visible="false" />
+  <ListView Name="FilesList" GrowHeight="true" Visible="false" ItemKey="Text" />
 </ColView>

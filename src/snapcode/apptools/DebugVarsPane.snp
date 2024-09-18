@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefHeight="300" GrowHeight="true" FillWidth="true">
-  <font name="Arial" size="12" />
-  <SplitView Vertical="true" Margin="4,5,5,5" GrowHeight="true" BorderRadius="3">
+<ColView PrefHeight="300" Font="Arial 12" GrowHeight="true" FillWidth="true">
+  <SplitView Vertical="true" Margin="4,5,5,5" BorderRadius="3" GrowHeight="true">
     <TreeView Name="TreeView" PrefHeight="100" GrowHeight="true" />
     <TextView Name="TextView" PrefHeight="40" />
   </SplitView>

@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefHeight="220" FillWidth="true">
-  <Font Name="Arial" Size="12" />
+<ColView PrefHeight="220" Font="Arial 12" FillWidth="true">
   <RowView MinHeight="32">
-    <Label Margin="0,8,0,8" text="Run Configs:" />
-    <Button Name="AddButton" PrefWidth="24" PrefHeight="24" Margin="0,0,0,12" ShowArea="false" Image="ExprAdd.png" />
-    <Button Name="RemoveButton" PrefWidth="24" PrefHeight="24" ShowArea="false" Image="ExprRemove.png" />
+    <Label Margin="0,8,0,8" Text="Run Configs:" />
+    <Button Name="AddButton" PrefWidth="24" PrefHeight="24" Margin="0,0,0,12" ImageName="ExprAdd.png" ShowArea="false" />
+    <Button Name="RemoveButton" PrefWidth="24" PrefHeight="24" ImageName="ExprRemove.png" ShowArea="false" />
   </RowView>
-  <RectView PrefHeight="1">
-    <Fill Color="#C0" />
-  </RectView>
-  <RowView Margin="5,5,5,5" Spacing="8" GrowHeight="true" FillHeight="true">
+  <RectView PrefHeight="1" Fill="#C0" />
+  <RowView Margin="5" Spacing="8" GrowHeight="true" FillHeight="true">
     <ListView Name="RunConfigsList" PrefWidth="220" ItemKey="Name" />
     <ColView Padding="5,0,0,0" Spacing="8">
       <RowView Spacing="8">

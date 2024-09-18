@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="300" FillWidth="true">
-  <font name="Arial" size="12" />
+<ColView PrefWidth="300" Font="Arial 12" FillWidth="true">
   <RowView MinHeight="32">
-    <Label Margin="0,8,0,8" text="Search:" />
+    <Label Margin="0,8,0,8" Text="Search:" />
     <TextField Name="SearchText" PrefWidth="300" GrowWidth="true" />
     <Label Name="SearchResultsText" Margin="0,0,0,8" />
   </RowView>

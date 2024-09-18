@@ -1,109 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="500" Padding="16" Spacing="10">
-  <font name="Arial" size="14" />
-  <RowView MinWidth="450" BorderRadius="8" Padding="10">
-    <color value="#f0f0f0" />
-    <LineBorder Color="#E8E8E8" />
-    <font name="Arial" size="22" />
-    <Label text="Build File" />
+<ColView PrefWidth="500" Padding="16" Spacing="10" Font="Arial 14">
+  <RowView MinWidth="450" Padding="10" Fill="#F0" Border="#E8 1" BorderRadius="8" Font="Arial 22">
+    <Label Text="Build File" />
   </RowView>
   <RowView Spacing="5">
-    <Label text="Source Directory:" />
+    <Label Text="Source Directory:" />
     <TextField Name="SourcePathText" PrefWidth="255" />
   </RowView>
   <RowView Spacing="5">
-    <Label text="Build Directory:" />
+    <Label Text="Build Directory:" />
     <TextField Name="BuildPathText" PrefWidth="255" />
   </RowView>
   <RowView Spacing="5">
-    <Label text="Include SnapKit Runtime" />
+    <Label Text="Include SnapKit Runtime" />
     <CheckBox Name="IncludeSnapKitRuntimeCheckBox" />
   </RowView>
   <RowView Spacing="5">
-    <Label text="Include SnapCharts Runtime" />
+    <Label Text="Include SnapCharts Runtime" />
     <CheckBox Name="IncludeSnapChartsRuntimeCheckBox" />
   </RowView>
-  <ColView Name="BuildDependenciesBox" >
-    <RowView PrefWidth="400" Margin="0,0,4,0" >
-      <Label text="Build Dependencies:" />
+  <ColView Name="BuildDependenciesBox">
+    <RowView PrefWidth="400" Margin="0,0,4,0">
+      <Label Text="Build Dependencies:" />
       <Button Name="AddDependencyButton" PrefWidth="22" PrefHeight="22" Margin="0,4,0,40" LeanX="RIGHT" Text="+" />
       <Button Name="RemoveDependencyButton" PrefWidth="22" PrefHeight="22" Margin="0,8,0,0" Text="-" />
     </RowView>
-    <ListView Name="DependenciesListView" PrefWidth="400" PrefHeight="150" Margin="0,0,8,0">
-      <LineBorder Color="#c0c0c0" />
-    </ListView>
-    <ColView Name="DependencyTypeBox" BorderRadius="8" Margin="0,0,0,10" Padding="5,10,5,10">
-      <color value="#f4f4f4" />
-      <LineBorder Color="#E8E8E8" />
-      <font name="Arial" size="12" />
+    <ListView Name="DependenciesListView" PrefWidth="400" PrefHeight="150" Margin="0,0,8,0" />
+    <ColView Name="DependencyTypeBox" Margin="0,0,0,10" Padding="5,10,5,10" Fill="#F4" Border="#E8 1" BorderRadius="8" Font="Arial 12">
       <RowView Padding="4" Spacing="4">
-        <Label PrefWidth="100" text="Dependency Type:" />
-        <ComboBox Name="DependencyTypeComboBox" PrefWidth="250" PrefHeight="24"/>
+        <Label PrefWidth="100" Text="Dependency Type:" />
+        <ComboBox Name="DependencyTypeComboBox" PrefWidth="250" PrefHeight="24" />
       </RowView>
     </ColView>
-    <ColView Name="MavenDependencyBox" BorderRadius="8" Margin="5,0,0,10" Padding="10">
-      <color value="#f4f4f4" />
-      <LineBorder Color="#E8E8E8" />
-      <font name="Arial" size="12" />
+    <ColView Name="MavenDependencyBox" Margin="5,0,0,10" Padding="10" Fill="#F4" Border="#E8 1" BorderRadius="8" Font="Arial 12">
       <RowView Padding="4" Spacing="4">
-        <Label PrefWidth="100" text="Maven Id:" />
+        <Label PrefWidth="100" Text="Maven Id:" />
         <TextField Name="MavenIdText" PrefWidth="250" />
       </RowView>
       <RowView Padding="4" Spacing="4">
-        <Label PrefWidth="100" text="Group id:" />
+        <Label PrefWidth="100" Text="Group id:" />
         <TextField Name="GroupText" PrefWidth="200" />
       </RowView>
       <RowView Padding="4" Spacing="4">
-        <Label PrefWidth="100" text="Package Name:" />
+        <Label PrefWidth="100" Text="Package Name:" />
         <TextField Name="PackageNameText" PrefWidth="150" />
       </RowView>
       <RowView Padding="4" Spacing="4">
-        <Label PrefWidth="100" text="Version:" />
+        <Label PrefWidth="100" Text="Version:" />
         <TextField Name="VersionText" PrefWidth="120" />
       </RowView>
       <RowView Padding="4" Spacing="4">
-        <Label PrefWidth="100" text="Repository URL:" />
+        <Label PrefWidth="100" Text="Repository URL:" />
         <TextField Name="RepositoryURLText" PrefWidth="250" />
       </RowView>
       <RowView Padding="4" Spacing="4">
-        <Label PrefWidth="100" text="Status:" />
-        <Label Name="StatusText" PrefWidth="80" Padding="4" BorderRadius="3">
-          <color value="#fafafa" />
-          <LineBorder Color="#E8E8E8" />
-        </Label>
+        <Label PrefWidth="100" Text="Status:" />
+        <Label Name="StatusText" PrefWidth="80" Padding="4" Fill="#FA" Border="#E8 1" BorderRadius="3" />
         <ProgressBar Name="StatusProgressBar" PrefWidth="40" PrefHeight="16" Indeterminate="true" />
         <Button Name="ShowButton" Margin="0,0,0,30" Text="Show" />
         <Button Name="ReloadButton" Margin="0,0,0,8" Text="Reload" />
       </RowView>
       <ColView Padding="2,4,4,4" Spacing="2">
-        <Label Name="ClassPathsLabel" PrefWidth="100" text="Class path:" />
-        <TextArea Name="ClassPathsText" PrefWidth="354" Padding="4" BorderRadius="3" Editable="false" WrapLines="true">
-          <color value="#fafafa" />
-          <LineBorder Color="#E0E0E0" />
-        </TextArea>
+        <Label Name="ClassPathsLabel" PrefWidth="100" Text="Class path:" />
+        <TextArea Name="ClassPathsText" PrefWidth="354" Padding="4" Fill="#FA" Border="#E0 1" BorderRadius="3" WrapLines="true" />
       </ColView>
     </ColView>
-    <ColView Name="JarFileDependencyBox" BorderRadius="8" Margin="0,0,0,10" Padding="10">
-      <color value="#f4f4f4" />
-      <LineBorder Color="#E8E8E8" />
-      <font name="Arial" size="12" />
+    <ColView Name="JarFileDependencyBox" Margin="0,0,0,10" Padding="10" Fill="#F4" Border="#E8 1" BorderRadius="8" Font="Arial 12">
       <RowView Padding="4" Spacing="4">
-        <Label PrefWidth="80" text="Jar Path:" />
+        <Label PrefWidth="80" Text="Jar Path:" />
         <TextField Name="JarPathText" PrefWidth="250" />
       </RowView>
     </ColView>
-    <ColView Name="ProjectDependencyBox" BorderRadius="8" Margin="0,0,0,10" Padding="10">
-      <color value="#f4f4f4" />
-      <LineBorder Color="#E8E8E8" />
-      <font name="Arial" size="12" />
+    <ColView Name="ProjectDependencyBox" Margin="0,0,0,10" Padding="10" Fill="#F4" Border="#E8 1" BorderRadius="8" Font="Arial 12">
       <RowView Padding="4" Spacing="4">
-        <Label PrefWidth="80" text="Project Name:" />
+        <Label PrefWidth="80" Text="Project Name:" />
         <TextField Name="ProjectNameText" PrefWidth="250" />
       </RowView>
     </ColView>
   </ColView>
   <RowView Spacing="5">
-    <Label text="Main Class Name:" />
+    <Label Text="Main Class Name:" />
     <TextField Name="MainClassNameText" PrefWidth="255" />
   </RowView>
 </ColView>

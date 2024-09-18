@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefHeight="300" GrowHeight="true" FillWidth="true">
-  <font name="Arial" size="12" />
+<ColView PrefHeight="300" Font="Arial 12" GrowHeight="true" FillWidth="true">
   <RowView MinHeight="32">
-    <Label Margin="0,8,0,8" text="Expressions:" />
+    <Label Margin="0,8,0,8" Text="Expressions:" />
     <TextField Name="ExprText" PrefWidth="200" GrowWidth="true" />
-    <Button Name="AddButton" PrefWidth="24" PrefHeight="24" Margin="0,0,0,5" ShowArea="false" Image="ExprAdd.png" />
-    <Button Name="RemoveButton" PrefWidth="24" PrefHeight="24" Margin="0,8,0,0" ShowArea="false" Image="ExprRemove.png" />
+    <Button Name="AddButton" PrefWidth="24" PrefHeight="24" Margin="0,0,0,5" ImageName="ExprAdd.png" ShowArea="false" />
+    <Button Name="RemoveButton" PrefWidth="24" PrefHeight="24" Margin="0,8,0,0" ImageName="ExprRemove.png" ShowArea="false" />
   </RowView>
   <SplitView Vertical="true" Margin="0,5,5,5" GrowHeight="true">
     <TreeView Name="TreeView" PrefHeight="100" GrowHeight="true" />

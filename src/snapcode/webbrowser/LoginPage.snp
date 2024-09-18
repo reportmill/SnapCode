@@ -1,25 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SpringView width="400" height="400" PrefWidth="400" PrefHeight="400">
-  <Label x="56" y="76" width="273" height="25" text="Login Required">
-    <font name="Arial Bold" size="18" />
-  </Label>
-  <Label Name="SiteText" x="56" y="101" width="273" height="22">
-    <font name="Arial" size="12" />
-  </Label>
-  <Label x="56" y="142" width="62" height="22" text="Name:">
-    <font name="Arial" size="14" />
-  </Label>
-  <TextField Name="NameText" x="132" y="142" width="217" height="22">
-    <font name="Arial" size="14" />
-  </TextField>
-  <Label x="56" y="182" width="76" height="22" text="Password:">
-    <font name="Arial" size="14" />
-  </Label>
-  <TextField Name="PasswordText" x="132" y="182" width="217" height="22">
-    <font name="Arial" size="14" />
-  </TextField>
-  <CheckBox Name="RememberLoginCheckBox" x="56" y="220" width="273" height="22" text="Remember this password" Selected="true">
-    <font name="Arial" size="12" />
-  </CheckBox>
-  <Button Name="LoginButton" x="130" y="273" width="157" height="22" text="Login" />
+<SpringView Width="400" Height="400" PrefWidth="400" PrefHeight="400">
+  <Label X="56" Y="76" Width="273" Height="25" Font="Arial Bold 18" Text="Login Required" />
+  <Label Name="SiteText" X="56" Y="101" Width="273" Height="22" Font="Arial 12" />
+  <Label X="56" Y="142" Width="62" Height="22" Font="Arial 14" Text="Name:" />
+  <TextField Name="NameText" X="132" Y="142" Width="217" Height="22" Font="Arial 14" />
+  <Label X="56" Y="182" Width="76" Height="22" Font="Arial 14" Text="Password:" />
+  <TextField Name="PasswordText" X="132" Y="182" Width="217" Height="22" Font="Arial 14" />
+  <CheckBox Name="RememberLoginCheckBox" X="56" Y="220" Width="273" Height="22" Font="Arial 12" Text="Remember this password" Selected="true" />
+  <Button Name="LoginButton" X="130" Y="273" Width="157" Height="22" Text="Login" />
 </SpringView>

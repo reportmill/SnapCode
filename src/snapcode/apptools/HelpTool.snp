@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="400">
-  <Font name="Arial" size="12" />
+<ColView PrefWidth="400" Font="Arial 12">
   <RowView Padding="4" GrowWidth="true">
-    <TextField Name="SearchTextField" Margin="4,12,4,80" PrefWidth="260" PrefHeight="26" LeanX="CENTER" GrowWidth="true" PromptText="Search" BorderRadius="10"/>
+    <TextField Name="SearchTextField" PrefWidth="260" PrefHeight="26" Margin="4,12,4,80" BorderRadius="10" GrowWidth="true" LeanX="CENTER" PromptText="Search" />
     <Button Name="AddCodeButton" Margin="5,12,5,8" Padding="4,10,4,10" LeanX="RIGHT" Text="Add Code" />
   </RowView>
-  <SplitView Name="SplitView" Vertical="true" GrowWidth="true" GrowHeight="true">
-    <Font name="Arial" size="14" />
-    <ListView Name="TopicListView" BorderRadius="4" PrefHeight="160" Margin="4,6,0,6" GrowWidth="true">
-      <Font name="Arial" size="11" />
-      <LineBorder Color="#c0c0c0" />
-    </ListView>
-    <ScrollView Name="HelpTextScrollView" BorderRadius="4" Margin="0,6,6,6" GrowWidth="true" GrowHeight="true" PrefHeight="400" />
+  <SplitView Name="SplitView" Vertical="true" Font="Arial 14" GrowWidth="true" GrowHeight="true">
+    <ListView Name="TopicListView" PrefHeight="160" Margin="4,6,0,6" BorderRadius="4" Font="Arial 11" GrowWidth="true" />
+    <ScrollView Name="HelpTextScrollView" PrefHeight="400" Margin="0,6,6,6" BorderRadius="4" GrowWidth="true" GrowHeight="true" />
   </SplitView>
 </ColView>

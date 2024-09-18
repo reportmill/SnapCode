@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="300" GrowHeight="true" FillWidth="true">
-  <Font name="Arial" size="12" />
+<ColView PrefWidth="300" Font="Arial 12" GrowHeight="true" FillWidth="true">
   <RowView Name="ToolBar" PrefHeight="32" Spacing="4">
-    <Label Margin="0,10,0,8" text="Classes:" />
-    <Button Name="ReloadButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Image="/snap/viewx/pkg.images/Reload.png" ShowArea="false" />
-    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" Text="–" ShowArea="false" />
+    <Label Margin="0,10,0,8" Text="Classes:" />
+    <Button Name="ReloadButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" ImageName="/snap/viewx/pkg.images/Reload.png" ShowArea="false" />
+    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" Text="&#8211;" ShowArea="false" />
   </RowView>
-  <RectView PrefHeight="1">
-    <Fill Color="#CC" />
-  </RectView>
+  <RectView PrefHeight="1" Fill="#CC" />
   <TreeView Name="TreeView" Padding="8" GrowHeight="true" />
 </ColView>
