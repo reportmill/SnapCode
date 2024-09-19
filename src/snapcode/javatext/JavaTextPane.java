@@ -58,9 +58,38 @@ public class JavaTextPane extends TextPane {
      * Creates the JavaTextArea.
      */
     @Override
-    protected JavaTextArea createTextArea()
+    protected JavaTextArea createTextArea()  { return new JavaTextArea(); }
+
+    /**
+     * Override to add views.
+     */
+    @Override
+    protected View createUI()
     {
-        return new JavaTextArea();
+        // Get normal UI
+        BorderView borderView = (BorderView) super.createUI();
+
+        // Get TextArea
+        _textArea = getTextArea();
+
+        // Create/configure LineNumView, LineFootView
+        _lineNumView = new LineHeadView(this);
+        _lineFootView = new LineFootView(this);
+
+        // Create ScrollGroup for JavaTextArea and LineNumView
+        ScrollGroup scrollGroup = new ScrollGroup();
+        scrollGroup.setBorder(Color.GRAY9, 1);
+        scrollGroup.setGrowWidth(true);
+        scrollGroup.setMinWidth(200);
+        scrollGroup.setContent(_textArea);
+        scrollGroup.setLeftView(_lineNumView);
+
+        // Replace TextPane center with scrollGroup
+        borderView.setCenter(scrollGroup);
+        borderView.setRight(_lineFootView);
+
+        // Return
+        return borderView;
     }
 
     /**
@@ -72,28 +101,9 @@ public class JavaTextPane extends TextPane {
         // Do normal version
         super.initUI();
 
-        // Get TextArea and start listening for events (KeyEvents, MouseReleased)
-        _textArea = getTextArea();
-        _textArea.setGrowWidth(true);
+        // Start listening for TextArea mouse/drag events
         _textArea.addEventHandler(this::handleTextAreaMouseEvent, MousePress, MouseRelease);
-        _textArea.addEventHandler(this::textAreaDragEvent, DragEvents);
-
-        // Create/configure LineNumView, LineFootView
-        _lineNumView = new LineHeadView(this);
-        _lineFootView = new LineFootView(this);
-
-        // Create ScrollGroup for JavaTextArea and LineNumView
-        ScrollGroup scrollGroup = new ScrollGroup();
-        scrollGroup.setBorder(Color.GRAY9, 1);
-        scrollGroup.setGrowWidth(true);
-        scrollGroup.setContent(_textArea);
-        scrollGroup.setLeftView(_lineNumView);
-        scrollGroup.setMinWidth(200);
-
-        // Replace TextPane center with scrollGroup
-        BorderView borderView = getUI(BorderView.class);
-        borderView.setCenter(scrollGroup);
-        borderView.setRight(_lineFootView);
+        _textArea.addEventHandler(this::handleTextAreaDragEvent, DragEvents);
 
         // Add listener to initialize settings menu
         getView("SettingsButton").addEventHandler(this::handleSettingsButtonMousePress, MousePress);
@@ -200,6 +210,39 @@ public class JavaTextPane extends TextPane {
     }
 
     /**
+     * Called when text area gets drag events.
+     */
+    private void handleTextAreaDragEvent(ViewEvent anEvent)
+    {
+        Clipboard clipboard = anEvent.getClipboard();
+
+        // Handle drag over: Accept
+        if (anEvent.isDragOver()) {
+            if (clipboard.hasString())
+                anEvent.acceptDrag();
+            return;
+        }
+
+        // Handle drop
+        if (anEvent.isDragDrop()) {
+            anEvent.acceptDrag();
+            handleTextAreaDropString(clipboard);
+            anEvent.dropComplete();
+        }
+    }
+
+    /**
+     * Called to drop string.
+     */
+    private void handleTextAreaDropString(Clipboard clipboard)
+    {
+        if (!clipboard.isLoaded()) {
+            clipboard.addLoadListener(() -> handleTextAreaDropString(clipboard)); return; }
+        String string = clipboard.getString();
+        _textArea.replaceCharsWithContent(string);
+    }
+
+    /**
      * Called when NodePathLabel gets MouseRelease.
      */
     private void handleNodePathLabelMouseRelease(ViewEvent anEvent)
@@ -303,10 +346,10 @@ public class JavaTextPane extends TextPane {
      * Called when JavaTextArea changes.
      */
     @Override
-    protected void textAreaDidPropChange(PropChange aPC)
+    protected void handleTextAreaPropChange(PropChange aPC)
     {
         // Do normal version
-        super.textAreaDidPropChange(aPC);
+        super.handleTextAreaPropChange(aPC);
 
         // Handle SelectedNode change: Reset UI
         String propName = aPC.getPropName();
@@ -323,43 +366,10 @@ public class JavaTextPane extends TextPane {
     }
 
     /**
-     * Called when text area gets drag events.
-     */
-    private void textAreaDragEvent(ViewEvent anEvent)
-    {
-        Clipboard clipboard = anEvent.getClipboard();
-
-        // Handle drag over: Accept
-        if (anEvent.isDragOver()) {
-            if (clipboard.hasString())
-                anEvent.acceptDrag();
-            return;
-        }
-
-        // Handle drop
-        if (anEvent.isDragDrop()) {
-            anEvent.acceptDrag();
-            dropString(clipboard);
-            anEvent.dropComplete();
-        }
-    }
-
-    /**
-     * Called to drop string.
-     */
-    private void dropString(Clipboard clipboard)
-    {
-        if (!clipboard.isLoaded()) {
-            clipboard.addLoadListener(() -> dropString(clipboard)); return; }
-        String string = clipboard.getString();
-        _textArea.replaceCharsWithContent(string);
-    }
-
-    /**
      * Called when TextDoc changes.
      */
     @Override
-    protected void textBlockDidPropChange(PropChange aPC)
+    protected void handleTextBlockPropChange(PropChange aPC)
     {
         String propName = aPC.getPropName();
 
