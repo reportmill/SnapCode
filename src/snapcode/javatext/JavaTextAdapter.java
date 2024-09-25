@@ -7,17 +7,18 @@ import static snapcode.javatext.JavaTextArea.INDENT_STRING;
 import static snapcode.javatext.JavaTextArea.INDENT_LENGTH;
 import snap.parse.ParseToken;
 import snap.parse.Tokenizer;
+import snap.text.TextAdapter;
+import snap.text.TextBlock;
 import snap.text.TextLine;
 import snap.text.TextToken;
 import snap.view.KeyCode;
-import snap.view.TextAreaKeys;
 import snap.view.ViewEvent;
 import snap.view.ViewUtils;
 
 /**
  * This class is a helper for JavaTextArea to handle key processing.
  */
-public class JavaTextAreaKeys extends TextAreaKeys {
+public class JavaTextAdapter extends TextAdapter {
 
     // The JavaTextArea
     private JavaTextArea  _javaTextArea;
@@ -25,17 +26,17 @@ public class JavaTextAreaKeys extends TextAreaKeys {
     /**
      * Constructor.
      */
-    public JavaTextAreaKeys(JavaTextArea aJTA)
+    public JavaTextAdapter(TextBlock textBlock, JavaTextArea javaTextArea)
     {
-        super(aJTA);
-        _javaTextArea = aJTA;
+        super(textBlock);
+        _javaTextArea = javaTextArea;
     }
 
     /**
      * Called when a key is pressed.
      */
     @Override
-    protected void keyPressed(ViewEvent anEvent)
+    public void keyPressed(ViewEvent anEvent)
     {
         // Get event info
         int keyCode = anEvent.getKeyCode();
@@ -69,7 +70,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
                 char nextChar = prevChar != 0 ? charAt(prevCharIndex + 1) : 0;
                 char closeChar = getPairedCharForOpener(prevChar);
                 if (nextChar == closeChar)
-                    _textArea.getTextBlock().removeChars(prevCharIndex + 1, prevCharIndex + 2);
+                    _textBlock.removeChars(prevCharIndex + 1, prevCharIndex + 2);
             }
         }
 
@@ -98,7 +99,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
      * Called when a key is typed.
      */
     @Override
-    protected void keyTyped(ViewEvent anEvent)
+    public void keyTyped(ViewEvent anEvent)
     {
         // Get keyChar - if undefined or control char, just return
         char keyChar = anEvent.getKeyChar();
@@ -203,7 +204,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
             insertChars = indentStr.substring(selStartInLine) + '\n' + indentStr.substring(0, selStartInLine);
 
         // Do normal version
-        _textArea.replaceChars(insertChars);
+        replaceChars(insertChars);
     }
 
     /**
@@ -245,13 +246,13 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         }
 
         // Do normal version
-        _textArea.replaceChars(sb.toString());
+        replaceChars(sb.toString());
 
         // If start of multi-line comment, append terminator
         if (isStartOfMultiLineComment) {
             int start = getSelStart();
             String str = sb.substring(0, sb.length() - 1) + "/";
-            _textArea.getTextBlock().addChars(str, start);
+            _textBlock.addChars(str, start);
             setSel(start);
         }
     }
@@ -306,14 +307,14 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         }
 
         // Do normal version
-        _textArea.replaceChars(insertChars);
-        _textArea.setSel(newSelStart);
+        replaceChars(insertChars);
+        setSel(newSelStart);
 
         // If next token is close bracket, move it to next line and return
         TextLine nextLine = aTextLine.getNext();
         TextToken nextToken = nextLine.getTokenCount() > 0 ? nextLine.getToken(0) : null;
         if (nextToken != null && nextToken.getString().equals("}")) {
-            _textArea.getTextBlock().addChars('\n' + indentStr, newSelStart);
+            _textBlock.addChars('\n' + indentStr, newSelStart);
             return;
         }
 
@@ -322,7 +323,7 @@ public class JavaTextAreaKeys extends TextAreaKeys {
         if (isUnbalancedOpenBracketToken(textToken)) {
             String closeBracketStr = '\n' + indentStr + "}";
             int selStart = aTextLine.getNext().getEndCharIndex() - 1;
-            _textArea.getTextBlock().addChars(closeBracketStr, selStart);
+            _textBlock.addChars(closeBracketStr, selStart);
         }
     }
 
@@ -411,8 +412,8 @@ public class JavaTextAreaKeys extends TextAreaKeys {
 
         // Add close char after char
         String closeCharStr = String.valueOf(getPairedCharForOpener(aChar));
-        int selStart = _textArea.getSelStart();
-        _textArea.getTextBlock().addChars(closeCharStr, selStart);
+        int selStart = getSelStart();
+        _textBlock.addChars(closeCharStr, selStart);
     }
 
     /**
@@ -457,33 +458,33 @@ public class JavaTextAreaKeys extends TextAreaKeys {
      */
     public void duplicate()
     {
-        int selStart = _textArea.getSelStart();
-        int selEnd = _textArea.getSelEnd();
+        int selStart = getSelStart();
+        int selEnd = getSelEnd();
 
         // If selection, duplicate selected string
         if (selStart != selEnd) {
-            String selString = _textArea.getSel().getString();
-            _textArea.getTextBlock().addChars(selString, selEnd);
-            _textArea.setSel(selEnd, selEnd + selString.length());
+            String selString = getSel().getString();
+            _textBlock.addChars(selString, selEnd);
+            setSel(selEnd, selEnd + selString.length());
         }
 
         // If empty selection, duplicate line
         else {
 
             // Get selected line as string (with newline)
-            TextLine selLine = _textArea.getSel().getStartLine();
+            TextLine selLine = getSel().getStartLine();
             String lineString = selLine.getString();
             if (!selLine.isLastCharNewline())
                 lineString = '\n' + lineString;
 
             // Add line string to end of selLine
             int endCharIndex = selLine.getEndCharIndex();
-            _textArea.getTextBlock().addChars(lineString, endCharIndex);
+            _textBlock.addChars(lineString, endCharIndex);
 
             // Select start char of new line
             TextLine newLine = selLine.getNext();
             int selStart2 = newLine.getStartCharIndex() + newLine.getIndentLength();
-            _textArea.setSel(selStart2);
+            setSel(selStart2);
         }
     }
 

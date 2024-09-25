@@ -79,7 +79,7 @@ public class JavaTextArea extends TextArea {
      * Override to create JavaText.
      */
     @Override
-    protected TextAreaKeys createTextAreaKeys()  { return new JavaTextAreaKeys(this); }
+    protected TextAdapter createTextAdapter(TextBlock textBlock)  { return new JavaTextAdapter(textBlock, this); }
 
     /**
      * Returns whether to paint boxes around .
@@ -165,14 +165,11 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
-     * Override to update selected node and tokens.
+     * Called when selection changes.
      */
     @Override
-    public void setSel(int aStart, int anEnd)
+    protected void handleSelectionChanged()
     {
-        // Do normal version
-        super.setSel(aStart, anEnd);
-
         // Get node for selection
         int selStart = getSelStart(), selEnd = getSelEnd();
         JNode node = getNodeForCharRange(selStart, selEnd);
