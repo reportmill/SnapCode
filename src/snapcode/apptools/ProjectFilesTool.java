@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import snap.geom.HPos;
 import snap.util.SnapUtils;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
@@ -505,9 +506,9 @@ public class ProjectFilesTool extends WorkspaceTool {
         aCell.setPadding(2, 6, 2, 4);
         aCell.setGraphic(item.getGraphic());
         aCell.setGrowWidth(true);
-        aCell.getStringView().setGrowWidth(true);
 
         CloseBox closeBox = new CloseBox();
+        closeBox.setLeanX(HPos.RIGHT);
         closeBox.addEventHandler(e -> _filesTool.closeFile(item.getFile()), View.Action);
 
         aCell.setGraphicAfter(closeBox);
