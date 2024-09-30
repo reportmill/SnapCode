@@ -168,8 +168,10 @@ public class JavaTextArea extends TextArea {
      * Called when selection changes.
      */
     @Override
-    protected void handleSelectionChanged()
+    protected void handleSelectionChanged(PropChange aPC)
     {
+        super.handleSelectionChanged(aPC);
+
         // Get node for selection
         int selStart = getSelStart(), selEnd = getSelEnd();
         JNode node = getNodeForCharRange(selStart, selEnd);
