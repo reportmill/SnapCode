@@ -68,7 +68,6 @@ public class DebugVarsPane extends WorkspaceTool {
         // Create VarText TextView and configure in ScrollView
         _varText = getView("TextView", TextView.class);
         _varText.setWrapLines(true);
-        _varText.getScrollView().setBorder(null);
     }
 
     /**

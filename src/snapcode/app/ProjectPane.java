@@ -320,17 +320,16 @@ public class ProjectPane extends ViewOwner {
 
         // Get TextArea
         TextView symbolCheckTextView = getView("SymbolCheckText", TextView.class);
-        TextArea symbolCheckTextArea = symbolCheckTextView.getTextArea();
-        if (symbolCheckTextArea.length() > 0)
+        if (symbolCheckTextView.length() > 0)
             return;
 
         // Initialize
-        symbolCheckTextArea.addChars("Undefined Symbols:\n");
-        symbolCheckTextArea.setSel(0, 0);
+        symbolCheckTextView.addChars("Undefined Symbols:\n");
+        symbolCheckTextView.setSel(0, 0);
 
         // Find callbacks
         WebFile sourceDir = getProject().getSourceDir();
-        Runnable run = () -> new ProjectAnalysisTool().findUndefines(sourceDir, symbolCheckTextArea);
+        Runnable run = () -> new ProjectAnalysisTool().findUndefines(sourceDir, symbolCheckTextView);
         new Thread(run).start();
     }
 

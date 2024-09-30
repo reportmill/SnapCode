@@ -129,10 +129,8 @@ public class HttpServerTool extends WorkspaceTool {
         }
 
         // Handle ClearButton
-        if (anEvent.equals("ClearButton")) {
-            TextArea textArea = _textView.getTextArea();
-            textArea.clear();
-        }
+        if (anEvent.equals("ClearButton"))
+            _textView.clear();
     }
 
     /**

@@ -175,6 +175,8 @@ public class DiffPage extends WebPage {
          */
         public DiffTextArea()
         {
+            super();
+            setPadding(5, 5, 5, 5);
             setFill(Color.WHITE);
             setEditable(true);
         }
