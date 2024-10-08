@@ -12,8 +12,8 @@ public class DebugFramesPane extends WorkspaceTool {
     // The DebugTool
     private DebugTool _debugTool;
 
-    // The frames ListArea
-    private ListArea<DebugFrame>  _framesListArea;
+    // The frames ListView
+    private ListView<DebugFrame> _framesListView;
 
     // Runnable to defer/coalesce ProcTree update
     private Runnable _procTreeUpdater, _procTreeUpdaterImpl = () -> { resetLater(); _procTreeUpdater = null; };
@@ -41,11 +41,10 @@ public class DebugFramesPane extends WorkspaceTool {
      */
     protected void initUI()
     {
-        // Get and configure FramesListArea
-        ListView<DebugFrame> frameListView = getView("FramesListView", ListView.class);
-        _framesListArea = frameListView.getListArea();
-        _framesListArea.setCellPadding(new Insets(5, 5, 5, 8));
-        _framesListArea.setItemTextFunction(DebugFrame::getDescription);
+        // Get and configure FramesListView
+        _framesListView = getView("FramesListView", ListView.class);
+        _framesListView.setCellPadding(new Insets(5, 5, 5, 8));
+        _framesListView.setItemTextFunction(DebugFrame::getDescription);
     }
 
     /**
@@ -57,10 +56,10 @@ public class DebugFramesPane extends WorkspaceTool {
         DebugFrame selFrame = getSelFrame();
         DebugThread debugThread = selFrame != null ? selFrame.getThread() : null;
         DebugFrame[] debugFrames = debugThread != null ? debugThread.getFrames() : null;
-        _framesListArea.setItems(debugFrames);
+        _framesListView.setItems(debugFrames);
 
         // If current proc is Debug with suspended thread, select current frame
-        _framesListArea.setSelItem(selFrame);
+        _framesListView.setSelItem(selFrame);
     }
 
     /**

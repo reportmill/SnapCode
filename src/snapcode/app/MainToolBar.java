@@ -51,7 +51,7 @@ public class MainToolBar extends WorkspaceTool {
         searchPopup.setRowHeight(22);
         searchPopup.setPrefWidth(300);
         searchPopup.setMaxRowCount(15);
-        searchPopup.getListArea().setAltRowColor(Color.get("#F8F8F8"));
+        searchPopup.setAltRowColor(Color.get("#F8F8F8"));
 
         // Get/configure SearchText: radius, prompt, image, animation
         TextField searchText = searchComboBox.getTextField();

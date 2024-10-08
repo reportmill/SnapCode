@@ -24,8 +24,8 @@ public class BuildFileTool extends ProjectTool {
     // A prop change listener for selected dependency
     private PropChangeListener _selDependencyDidPropChangeLsnr = this::selDependencyDidPropChange;
 
-    // Dependencies ListArea
-    private ListArea<BuildDependency> _dependenciesListArea;
+    // Dependencies ListView
+    private ListView<BuildDependency> _dependenciesListView;
 
     /**
      * Constructor.
@@ -64,8 +64,8 @@ public class BuildFileTool extends ProjectTool {
         if (_selDependency != null)
             _selDependency.addPropChangeListener(_selDependencyDidPropChangeLsnr);
 
-        // Update DependenciesListArea.Selection
-        _dependenciesListArea.setSelItem(buildDependency);
+        // Update DependenciesListView.Selection
+        _dependenciesListView.setSelItem(buildDependency);
         resetLater();
     }
 
@@ -75,7 +75,7 @@ public class BuildFileTool extends ProjectTool {
     private void selDependencyDidPropChange(PropChange aPC)
     {
         BuildDependency buildDependency = (BuildDependency) aPC.getSource();
-        _dependenciesListArea.updateItem(buildDependency);
+        _dependenciesListView.updateItem(buildDependency);
         resetLater();
     }
 
@@ -89,18 +89,15 @@ public class BuildFileTool extends ProjectTool {
         addKeyActionHandler("BackSpaceAction", "BACK_SPACE");
 
         // Configure DependenciesListView
-        ListView<BuildDependency> dependenciesListView = getView("DependenciesListView", ListView.class);
-        dependenciesListView.addEventHandler(this::handleDependenciesListDragEvent, DragEvents);
+        _dependenciesListView = getView("DependenciesListView", ListView.class);
+        _dependenciesListView.setRowHeight(26);
+        _dependenciesListView.setCellConfigure(this::configureDependenciesListCell);
+        _dependenciesListView.addEventHandler(this::handleDependenciesListDragEvent, DragEvents);
 
-        // Configure DependenciesListArea
-        _dependenciesListArea = dependenciesListView.getListArea();
-        _dependenciesListArea.setRowHeight(26);
-        _dependenciesListArea.setCellConfigure(this::configureDependenciesListCell);
-
-        // Set DependenciesListArea items
+        // Set DependenciesListView items
         BuildFile buildFile = getBuildFile();
         BuildDependency[] dependencies = buildFile.getDependencies();
-        _dependenciesListArea.setItems(dependencies);
+        _dependenciesListView.setItems(dependencies);
         buildFile.addPropChangeListener(this::buildFileDidChangeDependency, BuildFile.Dependency_Prop);
 
         // Configure DependencyTypeComboBox
@@ -202,7 +199,7 @@ public class BuildFileTool extends ProjectTool {
 
             // Handle DependenciesList
             case "DependenciesListView":
-                BuildDependency buildDependency = _dependenciesListArea.getSelItem();
+                BuildDependency buildDependency = _dependenciesListView.getSelItem();
                 setSelDependency(buildDependency);
                 break;
 
@@ -330,7 +327,7 @@ public class BuildFileTool extends ProjectTool {
     {
         // Remove selected dependency
         BuildFile buildFile = getBuildFile();
-        int index = _dependenciesListArea.getSelIndex();
+        int index = _dependenciesListView.getSelIndex();
         buildFile.removeDependency(index);
 
         // Create new dependency for type and add
@@ -385,15 +382,15 @@ public class BuildFileTool extends ProjectTool {
         // If BuildFile adds dependency, update list
         if (aPC.getNewValue() != null) {
             BuildDependency dependency = (BuildDependency) aPC.getNewValue();
-            _dependenciesListArea.setItems(buildFile.getDependencies());
+            _dependenciesListView.setItems(buildFile.getDependencies());
             setSelDependency(dependency);
         }
 
         // If BuildFile removes dependency, remove from list
         else {
             BuildDependency dependency = (BuildDependency) aPC.getOldValue();
-            _dependenciesListArea.removeItemAndUpdateSel(dependency);
-            setSelDependency(_dependenciesListArea.getSelItem());
+            _dependenciesListView.removeItemAndUpdateSel(dependency);
+            setSelDependency(_dependenciesListView.getSelItem());
         }
     }
 

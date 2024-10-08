@@ -27,8 +27,8 @@ public class HelpTool extends WorkspaceTool {
     // The selected section
     private HelpSection _selSection;
 
-    // The ListArea showing HelpSections
-    private ListArea<HelpSection>  _topicListArea;
+    // The ListView showing HelpSections
+    private ListView<HelpSection> _topicListView;
 
     // The ScrollView showing the help text
     private ScrollView _helpTextScrollView;
@@ -59,12 +59,12 @@ public class HelpTool extends WorkspaceTool {
         _helpFile = aHelpFile;
 
         // If UI is set, update
-        if (_topicListArea != null) {
+        if (_topicListView != null) {
             HelpSection[] sections = _helpFile.getSections();
-            _topicListArea.setItems(sections);
+            _topicListView.setItems(sections);
             HelpSection selSection = sections.length > 0 ? sections[0] : null;
             setSelSection(selSection);
-            _topicListArea.setSelItem(selSection);
+            _topicListView.setSelItem(selSection);
         }
     }
 
@@ -110,29 +110,22 @@ public class HelpTool extends WorkspaceTool {
         splitView.setBorder(null);
         splitView.getDivider().setPaintable(false);
 
-        // Get TopicListArea and configure
-        ListView<HelpSection> topicListView = getView("TopicListView", ListView.class);
-        topicListView.setFocusWhenPressed(false);
-        _topicListArea = topicListView.getListArea();
-        _topicListArea.setName("TopicListArea");
-        _topicListArea.setCellConfigure(cell -> configureTopicListAreaCell(cell));
-        _topicListArea.setCellPadding(new Insets(4, 4, 3, 4));
+        // Get TopicListView and configure
+        _topicListView = getView("TopicListView", ListView.class);
+        _topicListView.setFocusWhenPressed(false);
+        _topicListView.setCellPadding(new Insets(4, 4, 3, 4));
+        _topicListView.setCellConfigure(cell -> configureTopicListViewCell(cell));
 
         // Get HelpTextScrollView
         _helpTextScrollView = getView("HelpTextScrollView", ScrollView.class);
-        _helpTextScrollView.setBarSize(14);
 
-        // Get HelpSections and set in TopicListArea
+        // Get HelpSections and set in TopicListView
         HelpFile helpFile = getHelpFile();
         HelpSection[] sections = helpFile.getSections();
-        _topicListArea.setItems(sections);
-
-        // Set ScrollView BarSize to mini
-        ScrollView topicListScrollView = topicListView.getScrollView();
-        topicListScrollView.setBarSize(14);
+        _topicListView.setItems(sections);
     }
 
-    private void configureTopicListAreaCell(ListCell<HelpSection> aCell)
+    private void configureTopicListViewCell(ListCell<HelpSection> aCell)
     {
         HelpSection helpSection = aCell.getItem();
         if (helpSection != null) {
@@ -157,9 +150,9 @@ public class HelpTool extends WorkspaceTool {
     @Override
     protected void resetUI()
     {
-        // Update TopicListArea
-        if (_topicListArea.getSelItem() != getSelSection())
-            _topicListArea.setSelItem(getSelSection());
+        // Update TopicListView
+        if (_topicListView.getSelItem() != getSelSection())
+            _topicListView.setSelItem(getSelSection());
     }
 
     /**
@@ -168,8 +161,8 @@ public class HelpTool extends WorkspaceTool {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle TopicListArea
-        if (anEvent.equals("TopicListArea")) {
+        // Handle TopicListView
+        if (anEvent.equals("TopicListView")) {
             HelpSection section = (HelpSection) anEvent.getSelItem();
             setSelSection(section);
         }

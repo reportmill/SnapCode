@@ -5,7 +5,9 @@
     <Button Name="AddCodeButton" Margin="5,12,5,8" Padding="4,10,4,10" LeanX="RIGHT" Text="Add Code" />
   </RowView>
   <SplitView Name="SplitView" Vertical="true" Font="Arial 14" GrowWidth="true" GrowHeight="true">
-    <ListView Name="TopicListView" PrefHeight="160" Margin="4,6,0,6" BorderRadius="4" Font="Arial 11" GrowWidth="true" />
-    <ScrollView Name="HelpTextScrollView" PrefHeight="400" Margin="0,6,6,6" BorderRadius="4" GrowWidth="true" GrowHeight="true" />
+    <ScrollView PrefHeight="160" Margin="4,6,0,6" BorderRadius="4" GrowWidth="true" BarSize="14">
+      <ListView Name="TopicListView" BorderRadius="4" Font="Arial 11" GrowWidth="true" />
+    </ScrollView>
+    <ScrollView Name="HelpTextScrollView" PrefHeight="400" Margin="0,6,6,6" BorderRadius="4" GrowWidth="true" GrowHeight="true" BarSize="14" />
   </SplitView>
 </ColView>
