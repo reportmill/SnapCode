@@ -44,7 +44,6 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         // Configure style
         setFill(BACKGROUND_COLOR);
         setAltRowColor(BACKGROUND_COLOR);
-        setCellConfigure(listCell -> configureCell(listCell));
 
         // Configure sizing
         setCellPadding(new Insets(0, 2, 2, 2));
@@ -602,6 +601,9 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     @Override
     protected void configureCell(ListCell<JavaDecl> aCell)
     {
+        // Do normal version
+        super.configureCell(aCell);
+
         // Get cell item
         JavaDecl item = aCell.getItem();
         if (item == null) return;
