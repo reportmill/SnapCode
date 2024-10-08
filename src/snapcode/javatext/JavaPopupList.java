@@ -563,7 +563,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
      * Override to fire action on tab key.
      */
     @Override
-    protected void processPopupListKeyPressEvent(ViewEvent anEvent)
+    protected void handleClientViewKeyPressEvent(ViewEvent anEvent)
     {
         if (anEvent.isTabKey()) {
             fireActionEvent(anEvent);
@@ -571,7 +571,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         }
 
         // Do normal version
-        super.processPopupListKeyPressEvent(anEvent);
+        super.handleClientViewKeyPressEvent(anEvent);
     }
 
     /**
@@ -631,7 +631,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
      */
     private static boolean isJavaIdentifier(String aString)
     {
-        if (aString == null || aString.length() == 0)
+        if (aString == null || aString.isEmpty())
             return false;
         if (!Character.isJavaIdentifierStart(aString.charAt(0)))
             return false;
