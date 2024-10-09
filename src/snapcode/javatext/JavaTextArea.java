@@ -73,6 +73,7 @@ public class JavaTextArea extends TextArea {
         setPadding(5, 5, 5,5);
         setSyncTextFont(false);
         setEditable(true);
+        setUndoActivated(true);
     }
 
     /**
