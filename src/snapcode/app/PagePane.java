@@ -532,6 +532,9 @@ public class PagePane extends ViewOwner {
             // Handle Java / Jepl
             case "java": case "jepl": return JavaPage.class;
 
+            // Handle JMD
+            case "jmd": return JMDPage.class;
+
             // Handle Snap file
             case "snp": return SnapBuilderPage.class;
 

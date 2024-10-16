@@ -307,6 +307,7 @@ public class NewFileTool extends WorkspaceTool {
                 {"Java File", "java"},
                 {"Java File from clipboard", "java-from-clipboard"},
                 {"Java REPL File", "jepl"},
+                {"Java Markdown File", "jmd" },
                 {"SnapKit UI File", "snp"},
                 {"Directory", "dir"},
                 {"Sound File", "wav"},

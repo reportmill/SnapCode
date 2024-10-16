@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView PrefWidth="220" GrowWidth="true" FillWidth="true">
   <RowView Name="RowView" MinHeight="32">
-    <Button Name="AllFilesButton" PrefWidth="22" PrefHeight="20" Margin="4" ToolTip="Toggle Files Tree/List" ImageName="FilesTree.png" ShowArea="false" />
+    <Button Name="AllFilesButton" PrefWidth="24" PrefHeight="24" Margin="4" Padding="0" ToolTip="Toggle Files Tree/List" ImageName="FilesTree.png" ShowArea="false" />
     <Label Name="FilesLabel" Font="Arial 14" Text="Project" />
-    <MenuButton Name="MenuButton" PrefWidth="20" PrefHeight="20" Margin="4" ShowArea="false">
+    <MenuButton Name="MenuButton" PrefWidth="24" PrefHeight="24" Margin="2" Padding="0" ShowArea="false">
       <MenuItem Name="NewFileMenuItem" Text="New File..." />
       <MenuItem Name="RemoveFileMenuItem" Text="Remove File(s)..." />
       <MenuItem Name="RenameFileMenuItem" Text="Rename File..." />
@@ -24,8 +24,8 @@
       <MenuItem />
       <MenuItem Name="ShowClassInfoMenuItem" Text="Show Class File Info" />
     </MenuButton>
-    <Button Name="DownloadFileButton" PrefWidth="20" PrefHeight="20" Margin="5" LeanX="RIGHT" ImageName="Download.png" ShowArea="false" />
-    <Button Name="NewFileButton" PrefWidth="20" PrefHeight="20" Margin="5" LeanX="RIGHT" ImageName="Add.png" ShowArea="false" />
+    <Button Name="DownloadFileButton" PrefWidth="24" PrefHeight="24" Margin="5" Padding="0" LeanX="RIGHT" ImageName="Download.png" ShowArea="false" />
+    <Button Name="NewFileButton" PrefWidth="24" PrefHeight="24" Margin="5" Padding="0" LeanX="RIGHT" ImageName="Add.png" ShowArea="false" />
   </RowView>
   <RectView PrefHeight="1" Fill="#CD" />
   <TreeView Name="FilesTree" GrowHeight="true" />

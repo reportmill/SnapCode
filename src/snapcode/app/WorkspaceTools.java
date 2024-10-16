@@ -348,8 +348,9 @@ public class WorkspaceTools {
         devToolsButton.setImage(Image.getImageForClassResource(getClass(), "pkg.images/DevTools.png"));
         devToolsButton.setPropsString("Margin: 0,8,0,0; Padding: 3; ShowArea: false; Managed: false; LeanX: RIGHT; LeanY: CENTER;");
         devToolsButton.addEventHandler(e -> DevPane.toggleDevPaneShowing(_workspacePane.getUI()), View.Action);
-        devToolsButton.setPrefSize(22, 22);
-        devToolsButton.setSize(22, 22);
+        devToolsButton.setPrefSize(24, 24);
+        devToolsButton.setSize(24, 24);
+        devToolsButton.setPadding(0, 0, 0, 0);
         TabView tabView = (TabView) _bottomTray.getUI();
         ViewUtils.addChild(tabView.getTabBar(), devToolsButton);
     }
