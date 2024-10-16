@@ -369,7 +369,7 @@ public class JavaTextPane extends TextPane {
      * Called when TextDoc changes.
      */
     @Override
-    protected void handleTextBlockPropChange(PropChange aPC)
+    protected void handleSourceTextPropChange(PropChange aPC)
     {
         String propName = aPC.getPropName();
 
