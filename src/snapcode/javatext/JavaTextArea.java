@@ -953,7 +953,7 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
-     * Override to handle SourceText change to init SelNode, DeepNode.
+     * Override to handle TextAdapter changes.
      */
     @Override
     protected void handleTextAdapterPropChange(PropChange aPC)
@@ -961,25 +961,18 @@ public class JavaTextArea extends TextArea {
         // Do normal version
         super.handleTextAdapterPropChange(aPC);
 
-        // Handle SourceText
-        if (aPC.getPropName() == TextAdapter.SourceText_Prop)
-            _selNode = _deepNode = getJFile();
-    }
+        switch (aPC.getPropName()) {
 
-    /**
-     * Called when selection changes.
-     */
-    @Override
-    protected void handleTextAdapterSelectionChanged(PropChange aPC)
-    {
-        super.handleTextAdapterSelectionChanged(aPC);
+            // Handle SourceText change: Init SelNode, DeepNode
+            case TextAdapter.SourceText_Prop: _selNode = _deepNode = getJFile(); break;
 
-        // Get node for selection
-        int selStart = getSelStart(), selEnd = getSelEnd();
-        JNode node = getNodeForCharRange(selStart, selEnd);
-
-        // Select node
-        setSelNode(node);
+            // Handle Selection change: Reset SelNode
+            case TextAdapter.Selection_Prop:
+                int selStart = getSelStart(), selEnd = getSelEnd();
+                JNode node = getNodeForCharRange(selStart, selEnd);
+                setSelNode(node);
+                break;
+        }
     }
 
     /**
