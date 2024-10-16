@@ -152,7 +152,7 @@ public class JavaPage extends WebPage {
         JavaTextArea textArea = getTextArea();
         if (lineNumberString != null) {
             int lineNumber = Convert.intValue(lineNumberString);
-            textArea.selectLine(lineNumber - 1);
+            textArea.getTextAdapter().selectLine(lineNumber - 1);
         }
 
         // Look for Sel (selection)

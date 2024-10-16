@@ -107,16 +107,6 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
-     * Selects a given line number.
-     */
-    public void selectLine(int anIndex)
-    {
-        TextLine textLine = anIndex >= 0 && anIndex < getLineCount() ? getLine(anIndex) : null;
-        if (textLine != null)
-            setSel(textLine.getStartCharIndex(), textLine.getEndCharIndex());
-    }
-
-    /**
      * Returns the JFile (parsed representation of Java file).
      */
     public JFile getJFile()
@@ -163,22 +153,6 @@ public class JavaTextArea extends TextArea {
         if (node instanceof JExprId || node instanceof JType)
             return node;
         return null;
-    }
-
-    /**
-     * Called when selection changes.
-     */
-    @Override
-    protected void handleSelectionChanged(PropChange aPC)
-    {
-        super.handleSelectionChanged(aPC);
-
-        // Get node for selection
-        int selStart = getSelStart(), selEnd = getSelEnd();
-        JNode node = getNodeForCharRange(selStart, selEnd);
-
-        // Select node
-        setSelNode(node);
     }
 
     /**
@@ -976,6 +950,36 @@ public class JavaTextArea extends TextArea {
         if (javaTextPane == null)
             return -1;
         return javaTextPane.getProgramCounterLine();
+    }
+
+    /**
+     * Override to handle SourceText change to init SelNode, DeepNode.
+     */
+    @Override
+    protected void handleTextAdapterPropChange(PropChange aPC)
+    {
+        // Do normal version
+        super.handleTextAdapterPropChange(aPC);
+
+        // Handle SourceText
+        if (aPC.getPropName() == TextAdapter.SourceText_Prop)
+            _selNode = _deepNode = getJFile();
+    }
+
+    /**
+     * Called when selection changes.
+     */
+    @Override
+    protected void handleTextAdapterSelectionChanged(PropChange aPC)
+    {
+        super.handleTextAdapterSelectionChanged(aPC);
+
+        // Get node for selection
+        int selStart = getSelStart(), selEnd = getSelEnd();
+        JNode node = getNodeForCharRange(selStart, selEnd);
+
+        // Select node
+        setSelNode(node);
     }
 
     /**
