@@ -1,8 +1,5 @@
 package snapcode.debug;
-import snap.view.BoxView;
-import snap.view.ParentView;
-import snap.view.View;
-import snap.view.ViewUtils;
+import snap.view.*;
 import snap.viewx.Console;
 import snap.web.WebFile;
 import snapcode.apptools.RunTool;
@@ -118,6 +115,7 @@ public class RunAppSrc extends RunApp {
         WebFile mainFile = getMainFile();
         _markDownView = new MarkDownView();
         _markDownView.setMarkDown(mainFile.getText());
+        _markDownView.setGrowWidth(true);
 
         // Iterate over markdown view runnables and run methods
         View[] children = _markDownView.getChildren();
@@ -150,7 +148,8 @@ public class RunAppSrc extends RunApp {
         }
 
         // Add MarkDownView
-        console.show(_markDownView);
+        //console.show(_markDownView);
+        setAltConsoleView(_markDownView);
     }
 
     /**

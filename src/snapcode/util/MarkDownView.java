@@ -278,7 +278,7 @@ public class MarkDownView extends ChildView {
      */
     protected TextArea createTextAreaViewForCodeBlockNode(MDNode codeNode)
     {
-        TextArea textArea = new TextArea();
+        TextArea textArea = new TextView();
         textArea.setMargin(8, 8, 8, 8);
         textArea.setPadding(16, 16, 16, 16);
         textArea.setBorderRadius(8);
@@ -309,11 +309,18 @@ public class MarkDownView extends ChildView {
         // Wrap in box and return
         BoxView codeBlockBox = new BoxView();
         codeBlockBox.setName("Runnable");
-        codeBlockBox.setMargin(8, 8, 8, 8);
+        codeBlockBox.setMargin(16, 16, 16, 16);
         codeBlockBox.setPadding(16, 16, 16, 16);
         codeBlockBox.setBorderRadius(8);
         codeBlockBox.setFill(new Color(.96, .97, .98));
         codeBlockBox.setAlign(Pos.CENTER_LEFT);
+
+        // Apply style string
+        String styleString = codeNode.getOtherText();
+        if (styleString != null)
+            codeBlockBox.setPropsString(styleString);
+
+        // Return
         return codeBlockBox;
     }
 
@@ -356,7 +363,7 @@ public class MarkDownView extends ChildView {
                 View childNodeView = createViewForMixedNodeChildNode(childNode);
                 childNodeView.setMargin(0, 0, 0, 0);
                 mixedNodeView.addChild(childNodeView);
-                if (childNodeView instanceof TextArea && nodeType != MDNode.NodeType.CodeBlock && nodeType != MDNode.NodeType.Runnable)
+                if (childNodeView instanceof TextArea && nodeType != MDNode.NodeType.CodeBlock)
                     lastTextArea = (TextArea) childNodeView;
                 else lastTextArea = null;
             }
@@ -374,7 +381,7 @@ public class MarkDownView extends ChildView {
         MDNode.NodeType nodeType = childNode.getNodeType();
 
         // Handle CodeBlock special
-        if (nodeType == MDNode.NodeType.CodeBlock || nodeType == MDNode.NodeType.Runnable) {
+        if (nodeType == MDNode.NodeType.CodeBlock) {
             View childNodeView = createTextAreaViewForCodeBlockNode(childNode);
             childNodeView.setMargin(0, 0, 0, 0);
             childNodeView.setPadding(8, 8, 8, 8);

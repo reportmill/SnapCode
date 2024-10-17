@@ -1,6 +1,9 @@
 package snapcode.util;
 import snap.util.ArrayUtils;
 import snap.util.CharSequenceUtils;
+import snap.util.Convert;
+import snap.util.ListUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +27,9 @@ public class MDParser {
     // The char index
     private int _charIndex;
 
+    // The running list of root nodes
+    private List<MDNode> _rootNodes = new ArrayList<>();
+
     // Constants
     public static final String HEADER_MARKER = "#";
     public static final String LIST_ITEM_MARKER = "* ";
@@ -32,6 +38,7 @@ public class MDParser {
     public static final String DIRECTIVE_MARKER = "@[";
     public static final String CODE_BLOCK_MARKER = "```";
     private static final String LINK_END_MARKER = "]";
+    private static final String RUNNABLE_MARKER = "!{";
 
     // Constant for Nodes that are stand-alone
     private static final String[] MIXABLE_NODE_MARKERS = { LINK_MARKER, IMAGE_MARKER, CODE_BLOCK_MARKER };
@@ -56,17 +63,17 @@ public class MDParser {
 
         // Create rootNode and child nodes
         MDNode rootNode = new MDNode(MDNode.NodeType.Root, null);
-        List<MDNode> childNodes = new ArrayList<>();
+        _rootNodes = new ArrayList<>();
 
         // Read nodes
         while (hasChars()) {
             MDNode nextNode = parseNextNode();
             if (nextNode != null)
-                childNodes.add(nextNode);
+                _rootNodes.add(nextNode);
         }
 
         // Set child nodes
-        rootNode.setChildNodes(childNodes.toArray(new MDNode[0]));
+        rootNode.setChildNodes(_rootNodes.toArray(new MDNode[0]));
 
         // Return
         return rootNode;
@@ -173,11 +180,47 @@ public class MDParser {
     private MDNode parseCodeBlockNode()
     {
         eatChars(CODE_BLOCK_MARKER.length());
-        boolean isRunnable = nextCharsStartWith("!{");
-        if (isRunnable)
-            getCharsTillLineEnd();
+        if (nextCharsStartWith(RUNNABLE_MARKER))
+            return parseRunnableNode();
         String charsTillBlockEnd = getCharsTillMatchingTerminator(CODE_BLOCK_MARKER).toString();
-        return new MDNode(isRunnable ? MDNode.NodeType.Runnable : MDNode.NodeType.CodeBlock, charsTillBlockEnd);
+        return new MDNode(MDNode.NodeType.CodeBlock, charsTillBlockEnd);
+    }
+
+    /**
+     * Parses a Runnable node.
+     */
+    private MDNode parseRunnableNode()
+    {
+        // Get string
+        eatChars(RUNNABLE_MARKER.length());
+        String metaData = getCharsTillLineEnd().toString().replace("}", "");
+        String charsTillBlockEnd = getCharsTillMatchingTerminator(CODE_BLOCK_MARKER).toString();
+
+        // Replace occurrences of '$<num>' with CodeBlock at that index
+        for (int dollarIndex = charsTillBlockEnd.indexOf('$'); dollarIndex >= 0; dollarIndex = charsTillBlockEnd.indexOf('$', dollarIndex)) {
+            int endIndex = dollarIndex + 1;
+            while (endIndex < charsTillBlockEnd.length() && Character.isDigit(charsTillBlockEnd.charAt(endIndex)))
+                endIndex++;
+            String codeBlockIndexStr = charsTillBlockEnd.substring(dollarIndex, endIndex);
+            int codeBlockIndex = Convert.intValue(codeBlockIndexStr) - 1;
+            MDNode[] codeBlockNodes = ListUtils.filterToArray(_rootNodes, node -> node.getNodeType() == MDNode.NodeType.CodeBlock, MDNode.class);
+            if (codeBlockIndex >= 0 && codeBlockIndex < codeBlockNodes.length) {
+                MDNode codeBlockNode = codeBlockNodes[codeBlockIndex];
+                String codeBlockText = codeBlockNode.getText();
+                charsTillBlockEnd = charsTillBlockEnd.replace(codeBlockIndexStr, codeBlockText);
+                dollarIndex += codeBlockText.length();
+            }
+            else {
+                System.out.println("MDParser.parseRunnableNode: invalid codeBlockIndex: " + codeBlockIndexStr);
+                dollarIndex = endIndex;
+            }
+        }
+
+        // Return node
+        MDNode runnableNode = new MDNode(MDNode.NodeType.Runnable, charsTillBlockEnd);
+        if (!metaData.isEmpty())
+            runnableNode.setOtherText(metaData);
+        return runnableNode;
     }
 
     /**

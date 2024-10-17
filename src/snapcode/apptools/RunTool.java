@@ -272,6 +272,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         ScrollView scrollView = getView("ScrollView", ScrollView.class);
         if (scrollView.getContent() != consoleView)
             scrollView.setContent(consoleView);
+        scrollView.setFillWidth(consoleView != null && consoleView.isGrowWidth());
 
         resetLater();
     }
