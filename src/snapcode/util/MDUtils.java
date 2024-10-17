@@ -21,6 +21,28 @@ public class MDUtils {
     private static TextStyle  _codeStyle;
 
     /**
+     * Returns a Jepl string for Markdown string.
+     */
+    public static String getJeplForJMD(CharSequence markDown)
+    {
+        MDNode rootMarkdownNode = new MDParser().parseMarkdownChars(markDown);
+        MDNode[] rootNodes = rootMarkdownNode.getChildNodes();
+
+        StringBuilder sb = new StringBuilder();
+        int methodCount = 0;
+        for (MDNode node : rootNodes) {
+            if (node.getNodeType() == MDNode.NodeType.Runnable) {
+                sb.append("public static void method").append(methodCount++).append("()\n{\n");
+                sb.append(node.getText());
+                sb.append("\n}\n\n");
+            }
+        }
+
+        // Return string
+        return sb.toString();
+    }
+
+    /**
      * Returns the header 1 style.
      */
     public static TextStyle getHeader1Style()

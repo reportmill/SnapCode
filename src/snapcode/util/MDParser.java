@@ -173,8 +173,11 @@ public class MDParser {
     private MDNode parseCodeBlockNode()
     {
         eatChars(CODE_BLOCK_MARKER.length());
+        boolean isRunnable = nextCharsStartWith("!{");
+        if (isRunnable)
+            getCharsTillLineEnd();
         String charsTillBlockEnd = getCharsTillMatchingTerminator(CODE_BLOCK_MARKER).toString();
-        return new MDNode(MDNode.NodeType.CodeBlock, charsTillBlockEnd);
+        return new MDNode(isRunnable ? MDNode.NodeType.Runnable : MDNode.NodeType.CodeBlock, charsTillBlockEnd);
     }
 
     /**

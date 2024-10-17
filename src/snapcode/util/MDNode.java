@@ -19,7 +19,7 @@ public class MDNode {
     protected MDNode[] _childNodes;
 
     // Constants for node type
-    public enum NodeType { Root, Header1, Header2, Text, Link, Image, CodeBlock, List, ListItem, Mixed, Directive }
+    public enum NodeType { Root, Header1, Header2, Text, Link, Image, CodeBlock, List, ListItem, Mixed, Directive, Runnable }
 
     /**
      * Constructor.

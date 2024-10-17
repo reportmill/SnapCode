@@ -11,6 +11,8 @@ import snap.text.TextBlock;
 import snap.text.TextBlockUtils;
 import snap.util.ArrayUtils;
 import snap.web.WebFile;
+import snapcode.util.MDUtils;
+
 import java.util.*;
 
 /**
@@ -23,6 +25,9 @@ public class JavaAgent {
 
     // Whether Java file is really Java REPL (.jepl)
     private boolean _isJepl;
+
+    // Whether Java file is really Java Markdown (.jmd)
+    private boolean _isJMD;
 
     // The Project that owns this file
     private Project _project;
@@ -55,6 +60,7 @@ public class JavaAgent {
     {
         _javaFile = aFile;
         _isJepl = aFile.getFileType().equals("jepl");
+        _isJMD = aFile.getFileType().equals("jmd");
 
         // Set File JavaAgent property to this agent
         _javaFile.setProp(JavaAgent.class.getName(), this);
@@ -97,6 +103,11 @@ public class JavaAgent {
      * Returns whether file is really Jepl.
      */
     public boolean isJepl()  { return  _isJepl; }
+
+    /**
+     * Returns whether file is really Java markdown.
+     */
+    public boolean isJMD()  { return  _isJMD; }
 
     /**
      * Returns the WebFile.
@@ -156,14 +167,8 @@ public class JavaAgent {
 
         // Parse file
         JFile jfile;
-        if (_isJepl) {
-            String className = getFile().getSimpleName();
-            String[] importNames = getJeplDefaultImports();
-            if (_project.getBuildFile().isIncludeSnapChartsRuntime())
-                importNames = getJeplDefaultImportsWithCharts();
-            String superClassName = "Object";
-            jfile = javaParser.parseJeplFile(javaStr, className, importNames, superClassName);
-        }
+        if (_isJepl || _isJMD)
+            jfile = parseJepl(javaParser, javaStr);
         else jfile = javaParser.parseFile(javaStr);
 
         // Set SourceFile
@@ -174,6 +179,24 @@ public class JavaAgent {
 
         // Return
         return jfile;
+    }
+
+    /**
+     * Parses a Jepl file.
+     */
+    private JFile parseJepl(JavaParser javaParser, CharSequence javaStr)
+    {
+        String className = getFile().getSimpleName();
+        String[] importNames = getJeplDefaultImports();
+        if (_project.getBuildFile().isIncludeSnapChartsRuntime())
+            importNames = getJeplDefaultImportsWithCharts();
+        String superClassName = "Object";
+
+        if (_isJMD) {
+            javaStr = MDUtils.getJeplForJMD(javaStr);
+            return javaParser.parseJeplFile(javaStr, className, importNames, superClassName);
+        }
+        return javaParser.parseJeplFile(javaStr, className, importNames, superClassName);
     }
 
     /**
@@ -258,7 +281,7 @@ public class JavaAgent {
         if (!ArrayUtils.hasMatch(buildIssues, buildIssue -> buildIssue.isError())) {
 
             // Update text
-            String javaText = _javaTextDoc.getString();
+            String javaText = getJavaTextDoc().getString();
             _javaFile.setText(javaText);
 
             // Compile file
@@ -419,7 +442,7 @@ public class JavaAgent {
     protected void updateJFileForChange(TextBlockUtils.CharsChange charsChange)
     {
         // If partial parse fails, clear JFile for full reparse
-        boolean jfileUpdated = !_isJepl && JavaTextDocUtils.updateJFileForChange(_javaTextDoc, _jfile, charsChange);
+        boolean jfileUpdated = !_isJepl && !_isJMD && JavaTextDocUtils.updateJFileForChange(_javaTextDoc, _jfile, charsChange);
         if (!jfileUpdated)
             _jfile = null;
         _externalRefs = null;
@@ -438,7 +461,7 @@ public class JavaAgent {
 
         // If java file, create and return
         String fileType = aFile.getFileType();
-        if (fileType.equals("java") || fileType.equals("jepl"))
+        if (fileType.equals("java") || fileType.equals("jepl") || fileType.equals("jmd"))
             return new JavaAgent(aFile);
 
         // Return not found

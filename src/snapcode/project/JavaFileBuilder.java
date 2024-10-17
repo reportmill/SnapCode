@@ -49,7 +49,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     public boolean isBuildFile(WebFile aFile)
     {
         String fileType = aFile.getFileType();
-        return fileType.equals("java") || fileType.equals("jepl");
+        return fileType.equals("java") || fileType.equals("jepl") || fileType.equals("jmd");
     }
 
     /**
@@ -181,7 +181,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     protected boolean buildFile(WebFile sourceFile)
     {
         // If Jepl file, check for errors first
-        if (sourceFile.getFileType().equals("jepl")) {
+        if (sourceFile.getFileType().equals("jepl") || sourceFile.getFileType().equals("jmd")) {
             boolean checkErrorsSuccess = buildJeplFile(sourceFile);
             if (!checkErrorsSuccess) {
                 addBuildFile(sourceFile);

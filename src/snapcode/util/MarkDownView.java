@@ -98,6 +98,7 @@ public class MarkDownView extends ChildView {
             case Link: return createViewForLinkNode(markNode);
             case Image: return createViewForImageNode(markNode);
             case CodeBlock: return createViewForCodeBlockNode(markNode);
+            case Runnable: return createViewForRunnableNode(markNode);
             case List: return createViewForListNode(markNode);
             case Mixed: return createViewForMixedNode(markNode);
             case Directive: return createViewForDirectiveNode(markNode);
@@ -301,6 +302,22 @@ public class MarkDownView extends ChildView {
     }
 
     /**
+     * Creates a view for Runnable block.
+     */
+    protected View createViewForRunnableNode(MDNode codeNode)
+    {
+        // Wrap in box and return
+        BoxView codeBlockBox = new BoxView();
+        codeBlockBox.setName("Runnable");
+        codeBlockBox.setMargin(8, 8, 8, 8);
+        codeBlockBox.setPadding(16, 16, 16, 16);
+        codeBlockBox.setBorderRadius(8);
+        codeBlockBox.setFill(new Color(.96, .97, .98));
+        codeBlockBox.setAlign(Pos.CENTER_LEFT);
+        return codeBlockBox;
+    }
+
+    /**
      * Creates a view for directive.
      */
     protected View createViewForDirectiveNode(MDNode directiveNode)
@@ -339,7 +356,7 @@ public class MarkDownView extends ChildView {
                 View childNodeView = createViewForMixedNodeChildNode(childNode);
                 childNodeView.setMargin(0, 0, 0, 0);
                 mixedNodeView.addChild(childNodeView);
-                if (childNodeView instanceof TextArea && nodeType != MDNode.NodeType.CodeBlock)
+                if (childNodeView instanceof TextArea && nodeType != MDNode.NodeType.CodeBlock && nodeType != MDNode.NodeType.Runnable)
                     lastTextArea = (TextArea) childNodeView;
                 else lastTextArea = null;
             }
@@ -357,7 +374,7 @@ public class MarkDownView extends ChildView {
         MDNode.NodeType nodeType = childNode.getNodeType();
 
         // Handle CodeBlock special
-        if (nodeType == MDNode.NodeType.CodeBlock) {
+        if (nodeType == MDNode.NodeType.CodeBlock || nodeType == MDNode.NodeType.Runnable) {
             View childNodeView = createTextAreaViewForCodeBlockNode(childNode);
             childNodeView.setMargin(0, 0, 0, 0);
             childNodeView.setPadding(8, 8, 8, 8);
