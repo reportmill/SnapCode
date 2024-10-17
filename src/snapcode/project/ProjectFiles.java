@@ -123,7 +123,13 @@ public class ProjectFiles {
 
         // Try for Jepl file
         String jeplFilePath = '/' + className.replace('.', '/') + ".jepl";
-        return getSourceFileForPath(jeplFilePath);
+        WebFile jeplFile = getSourceFileForPath(jeplFilePath);
+        if (jeplFile != null)
+            return jeplFile;
+
+        // Try for JMD file
+        String jmdFilePath = '/' + className.replace('.', '/') + ".jmd";
+        return getSourceFileForPath(jmdFilePath);
     }
 
     /**
@@ -164,6 +170,8 @@ public class ProjectFiles {
         String classFilePath = javaFilePath.replace(".java", ".class");
         if (javaFilePath.endsWith("jepl"))
             classFilePath = javaFilePath.replace(".jepl", ".class");
+        else if (javaFilePath.endsWith("jmd"))
+            classFilePath = javaFilePath.replace(".jmd", ".class");
 
         // Return class file for classFilePath
         return getBuildFileForPath(classFilePath);

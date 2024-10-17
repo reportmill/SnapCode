@@ -17,7 +17,7 @@ public class RunToolUtils {
     public static boolean isJavaFileWithMain(WebFile aFile)
     {
         String fileType = aFile.getFileType();
-        if (fileType.equals("jepl"))
+        if (fileType.equals("jepl") || fileType.equals("jmd"))
             return true;
         if (!fileType.equals("java"))
             return false;
@@ -55,6 +55,10 @@ public class RunToolUtils {
      */
     public static boolean isRunLocal(WebFile mainFile)
     {
+        // Run local if jmd file
+        if (mainFile != null && mainFile.getFileType().equals("jmd"))
+            return true;
+
         // Run local if (1) TempProj and (2) jepl file and (3) not swing and (4) not alt-key-down
         if (mainFile == null || !mainFile.getFileType().equals("jepl"))
             return false;

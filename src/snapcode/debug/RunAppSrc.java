@@ -2,9 +2,11 @@ package snapcode.debug;
 import snap.view.View;
 import snap.view.ViewUtils;
 import snap.viewx.Console;
+import snap.web.WebFile;
 import snapcode.apptools.RunTool;
 import snapcode.project.Project;
 import snapcode.project.RunConfig;
+import snapcode.util.MarkDownView;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -76,6 +78,14 @@ public class RunAppSrc extends RunApp {
             // Set console
             Console.setShared(null);
             Console.setConsoleCreatedHandler(this::consoleWasCreated);
+        }
+
+        // If Java Markdown, create markdown view and show
+        WebFile mainFile = getMainFile();
+        if (mainFile.getFileType().equals("jmd")) {
+            MarkDownView markDownView = new MarkDownView();
+            markDownView.setMarkDown(mainFile.getText());
+            Console.getShared().show(markDownView);
         }
 
         // Run code
