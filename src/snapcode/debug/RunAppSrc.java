@@ -1,17 +1,15 @@
 package snapcode.debug;
 import snap.view.*;
 import snap.viewx.Console;
-import snap.web.WebFile;
+import snapcode.app.JMDViewer;
 import snapcode.apptools.RunTool;
 import snapcode.project.Project;
 import snapcode.project.RunConfig;
-import snapcode.util.MarkDownView;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * This RunApp subclass runs an app from source.
@@ -26,9 +24,6 @@ public class RunAppSrc extends RunApp {
 
     // An input stream for standard in
     private BytesInputStream _standardInInputStream;
-
-    // Markdown view
-    private MarkDownView _markDownView;
 
     // The real system in/out/err
     private static final InputStream REAL_SYSTEM_IN = System.in;
@@ -83,12 +78,8 @@ public class RunAppSrc extends RunApp {
             Console.setConsoleCreatedHandler(this::consoleWasCreated);
         }
 
-        // If Java Markdown, create markdown view and show
-        if (getMainFile().getFileType().equals("jmd"))
-            runJavaMarkdown();
-
         // Run code
-        else runMainMethod();
+        runMainMethod();
 
         // Check back after slight delay to terminate if no console was activated
         ViewUtils.runDelayed(this::terminateIfConsoleNotActivated, 200);
@@ -104,52 +95,6 @@ public class RunAppSrc extends RunApp {
 
         // Process terminate
         finalizeTermination();
-    }
-
-    /**
-     * Runs markdown.
-     */
-    private void runJavaMarkdown()
-    {
-        // Create Markdown view
-        WebFile mainFile = getMainFile();
-        _markDownView = new MarkDownView();
-        _markDownView.setMarkDown(mainFile.getText());
-        _markDownView.setGrowWidth(true);
-
-        // Iterate over markdown view runnables and run methods
-        View[] children = _markDownView.getChildren();
-        int runnableCount = 0;
-        for (View child : children) {
-            if (Objects.equals(child.getName(), "Runnable"))
-                runMethod("method" + (runnableCount++));
-        }
-
-        // Come back later when console is loaded
-        ViewUtils.runLater(this::runJavaMarkdownFinished);
-    }
-
-    /**
-     * Runs markdown.
-     */
-    private void runJavaMarkdownFinished()
-    {
-        Console console = Console.getShared();
-        ParentView parentView = (ParentView) console.getConsoleView();
-
-        // Iterate over markdown view runnables and set children
-        View[] children = _markDownView.getChildren();
-        for (View child : children) {
-            if (Objects.equals(child.getName(), "Runnable")) {
-                BoxView boxView = (BoxView) child;
-                View lastChild = parentView.getChildCount() > 0 ? parentView.getChild(0) : null;
-                boxView.setContent(lastChild);
-            }
-        }
-
-        // Add MarkDownView
-        //console.show(_markDownView);
-        setAltConsoleView(_markDownView);
     }
 
     /**
@@ -252,6 +197,12 @@ public class RunAppSrc extends RunApp {
      */
     private void runMainMethod()
     {
+        // If Java Markdown, create markdown view and show
+        if (getMainFile().getFileType().equals("jmd")) {
+            new JMDViewer(getMainClassName(), getMainFile(), getMainClass());
+            return;
+        }
+
         // Get main method and invoke
         try {
             Class<?> mainClass = getMainClass();
@@ -261,28 +212,6 @@ public class RunAppSrc extends RunApp {
             }
             Method mainMethod = mainClass.getMethod("main", String[].class);
             mainMethod.invoke(null, (Object) new String[0]);
-        }
-
-        // Handle exception: Just print - goes to RunTool console
-        catch (Throwable e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Runs the main method.
-     */
-    private void runMethod(String methodName)
-    {
-        // Get main method and invoke
-        try {
-            Class<?> mainClass = getMainClass();
-            if (mainClass == null) {
-                System.out.println("Can't find main class for: " + getMainFile());
-                return;
-            }
-            Method mainMethod = mainClass.getMethod(methodName);
-            mainMethod.invoke(null);
         }
 
         // Handle exception: Just print - goes to RunTool console
