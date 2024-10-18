@@ -268,10 +268,19 @@ public class PagePane extends ViewOwner {
             JavaPage javaPage = (JavaPage) selPage;
             JavaTextArea javaTextArea = javaPage.getTextArea();
             JavaTextDoc javaTextDoc = (JavaTextDoc) javaTextArea.getSourceText();
-            String prefix = javaTextDoc.isJepl() ? "Jepl:" : "Java:";
+            String prefix = javaTextDoc.isJepl() ? "Jepl:" : javaTextDoc.isJMD() ? "JMD:" : "Java:";
             String javaText = javaTextDoc.getString();
             String javaTextLZ = LZString.compressToEncodedURIComponent(javaText);
             return prefix + javaTextLZ;
+        }
+
+        // Handle Java markdown
+        if (selPage instanceof JMDPage) {
+            JMDPage javaPage = (JMDPage) selPage;
+            TextArea textArea = javaPage.getTextArea();
+            String javaText = textArea.getText();
+            String javaTextLZ = LZString.compressToEncodedURIComponent(javaText);
+            return "JMD:" + javaTextLZ;
         }
 
         // Return null

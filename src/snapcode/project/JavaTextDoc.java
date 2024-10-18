@@ -47,6 +47,11 @@ public class JavaTextDoc extends TextDoc {
     public boolean isJepl()  { return getAgent().isJepl(); }
 
     /**
+     * Returns whether JavaTextDoc is really Java markdown.
+     */
+    public boolean isJMD()  { return getAgent().isJMD(); }
+
+    /**
      * Returns the JavaAgent.
      */
     public JavaAgent getAgent()

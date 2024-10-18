@@ -268,7 +268,7 @@ public class JavaTextPane extends TextPane {
         // Reset text on ShowSnapCodeMenuItem
         MenuItem showSnapCodeMenu = settingsButton.getItemForName("ShowSnapCodeMenuItem");
         if (showSnapCodeMenu != null)
-            showSnapCodeMenu.setVisible(!getJavaTextDoc().isJepl());
+            showSnapCodeMenu.setVisible(!getJavaTextDoc().isJepl() && !getJavaTextDoc().isJMD());
     }
 
     /**
@@ -430,7 +430,7 @@ public class JavaTextPane extends TextPane {
     {
         // If Jepl, labels root should be JClassDecl
         JavaTextDoc javaTextDoc = getJavaTextDoc();
-        if (javaTextDoc.isJepl())
+        if (javaTextDoc.isJepl() || javaTextDoc.isJMD())
             return getLabelsForSelNodePathForJepl();
 
         // Do normal version

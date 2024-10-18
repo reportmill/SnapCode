@@ -76,19 +76,19 @@ public class WorkspacePaneUtils {
     /**
      * Opens a Java string file.
      */
-    public static void openJavaString(WorkspacePane workspacePane, String javaString, boolean isJepl)
+    public static void openJavaString(WorkspacePane workspacePane, String javaString, String fileType)
     {
         // Open empty workspace pane with temp project
         Workspace workspace = workspacePane.getWorkspace();
         Project tempProj = ProjectUtils.getTempProject(workspace);
 
         // If new source file has word 'chart', add SnapCharts runtime to tempProj
+        boolean isJepl = fileType.equals("jepl") || fileType.equals("jmd");
         if (isJepl && javaString.contains("chart"))
             tempProj.getBuildFile().setIncludeSnapChartsRuntime(true);
 
         // Show new project panel
         ViewUtils.runLater(() -> {
-            String fileType = isJepl ? "jepl" : "java";
             NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
             newFileTool.newJavaOrJeplFileForNameAndTypeAndString("JavaFiddle", fileType, javaString);
         });
@@ -276,7 +276,7 @@ public class WorkspacePaneUtils {
                 "button.getAnim(0).setLoopCount(3).play();\n" +
                 "button.addEventHandler(e -> show(new Label(\"Stop that\")), View.Action);\n" +
                 "show(button);\n";
-        WorkspacePaneUtils.openJavaString(workspacePane, javaStr, true);
+        WorkspacePaneUtils.openJavaString(workspacePane, javaStr, "jepl");
     }
 
     /**

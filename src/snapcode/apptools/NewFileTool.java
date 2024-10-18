@@ -178,8 +178,8 @@ public class NewFileTool extends WorkspaceTool {
      */
     public WebFile newJavaOrJeplFileForNameAndTypeAndString(String className, String fileType, String javaString)
     {
-        if (fileType.equals("jepl"))
-            return newJeplFileForNameAndString(className, javaString);
+        if (fileType.equals("jepl") || fileType.equals("jmd"))
+            return newJeplFileForNameAndString(className, javaString, fileType);
         return newJavaFileForName(className);
     }
 
@@ -270,7 +270,7 @@ public class NewFileTool extends WorkspaceTool {
     /**
      * Creates a new Jepl file from given string.
      */
-    public WebFile newJeplFileForNameAndString(String jeplName, String jeplString)
+    public WebFile newJeplFileForNameAndString(String jeplName, String jeplString, String fileType)
     {
         // Get source dir
         WebSite selSite = getSelSiteOrFirst();
@@ -278,7 +278,7 @@ public class NewFileTool extends WorkspaceTool {
         WebFile selDir = proj.getSourceDir();
 
         // Create file and save
-        String filePath = selDir.getDirPath() + jeplName + ".jepl";
+        String filePath = selDir.getDirPath() + jeplName + '.' + fileType;
         WebFile newJeplFile = selSite.createFileForPath(filePath, false);
         newJeplFile.setText(jeplString);
         newJeplFile.save();

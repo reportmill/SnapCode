@@ -3,7 +3,6 @@ import snap.gfx.GFXEnv;
 import snap.util.Convert;
 import snap.util.Prefs;
 import snap.util.SnapUtils;
-import snap.view.ViewTheme;
 import snap.view.ViewUtils;
 import snap.view.WindowView;
 import snap.viewx.DevPaneExceptions;
@@ -100,7 +99,7 @@ public class App {
     private boolean handleAppArg(String arg0)
     {
         // Handle 'Java:...' or "Jepl:...': Open Java String
-        if (arg0.startsWith("Java:") || arg0.startsWith("Jepl:")) {
+        if (arg0.startsWith("Java:") || arg0.startsWith("Jepl:") || arg0.startsWith("JMD:")) {
             openJavaString(arg0);
             ViewUtils.runDelayed(() -> autoRunOpenFile(), 2000);
             return true;
@@ -152,13 +151,19 @@ public class App {
     private void openJavaString(String aString)
     {
         // Decompress string
-        boolean isJepl = aString.startsWith("Jepl:");
-        String javaStrLZ = aString.substring("Java:".length());
+        String fileType = aString.startsWith("Jepl:") ? "jepl" : aString.startsWith("JMD:") ? "jmd" : "java";
+        String javaStrLZ = aString.substring(fileType.length() + 1);
         String javaStr = LZString.decompressFromEncodedURIComponent(javaStrLZ);
 
         // Open Java/Jepl string
         WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
-        WorkspacePaneUtils.openJavaString(workspacePane, javaStr, isJepl);
+        WorkspacePaneUtils.openJavaString(workspacePane, javaStr, fileType);
+
+        // If Java markdown, hide project
+        if (fileType.equals("jmd")) {
+            workspacePane.getWorkspaceTools().getRunTool().getUI().setPrefWidth(650);
+            ViewUtils.runLater(workspacePane.getWorkspaceTools().getProjectFilesTool()::hideTool);
+        }
     }
 
     /**
