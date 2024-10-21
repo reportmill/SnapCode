@@ -5,6 +5,7 @@ import snap.view.View;
 import snap.view.ViewUtils;
 import snap.viewx.Console;
 import snap.web.WebFile;
+import snap.web.WebURL;
 import snapcode.util.MarkDownView;
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -13,9 +14,6 @@ import java.util.Objects;
  * This class views a Java markdown file.
  */
 public class JMDViewer {
-
-    // The class name
-    private String _className;
 
     // The main file
     private WebFile _mainFile;
@@ -29,10 +27,8 @@ public class JMDViewer {
     /**
      * Constructor.
      */
-    public JMDViewer(String className, WebFile mainFile, Class<?> mainClass)
+    public JMDViewer(Class<?> mainClass)
     {
-        _className = className;
-        _mainFile = mainFile;
         _mainClass = mainClass;
         runJavaMarkdown();
     }
@@ -40,7 +36,12 @@ public class JMDViewer {
     /**
      * Returns the main file.
      */
-    public WebFile getMainFile()  { return _mainFile; }
+    public WebFile getMainFile()
+    {
+        if (_mainFile != null) return _mainFile;
+        WebURL mainFileUrl = WebURL.getURL(_mainClass, _mainClass.getSimpleName() + ".jmd");
+        return _mainFile = mainFileUrl != null ? mainFileUrl.getFile() : null;
+    }
 
     /**
      * Returns the main class.

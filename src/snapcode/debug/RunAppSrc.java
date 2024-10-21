@@ -197,19 +197,20 @@ public class RunAppSrc extends RunApp {
      */
     private void runMainMethod()
     {
+        Class<?> mainClass = getMainClass();
+        if (mainClass == null) {
+            System.out.println("Can't find main class for: " + getMainFile());
+            return;
+        }
+
         // If Java Markdown, create markdown view and show
         if (getMainFile().getFileType().equals("jmd")) {
-            new JMDViewer(getMainClassName(), getMainFile(), getMainClass());
+            new JMDViewer(mainClass);
             return;
         }
 
         // Get main method and invoke
         try {
-            Class<?> mainClass = getMainClass();
-            if (mainClass == null) {
-                System.out.println("Can't find main class for: " + getMainFile());
-                return;
-            }
             Method mainMethod = mainClass.getMethod("main", String[].class);
             mainMethod.invoke(null, (Object) new String[0]);
         }
@@ -234,8 +235,8 @@ public class RunAppSrc extends RunApp {
 
         // Handle Exceptions
         catch(ClassNotFoundException e) { return null; }
-        catch(NoClassDefFoundError t) { System.err.println("ClassUtils.getClass: " + t); return null; }
-        catch(Throwable t) { System.err.println("ClassUtils.getClass: Unknown error: " + t); return null; }
+        catch(NoClassDefFoundError t) { System.err.println("RunAppSrc.getMainClass: " + t); return null; }
+        catch(Throwable t) { System.err.println("RunAppSrc.getMainClass: Unknown error: " + t); return null; }
     }
 
     /**
