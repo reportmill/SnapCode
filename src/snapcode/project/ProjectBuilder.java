@@ -18,8 +18,8 @@ public class ProjectBuilder {
     // The JavaFileBuilder
     private JavaFileBuilder  _javaFileBuilder;
 
-    // The default file builder
-    private ProjectFileBuilder  _defaultFileBuilder;
+    // The resource file builder
+    private ProjectFileBuilder _resourceFileBuilder;
 
     // The last build date
     private Date  _buildDate;
@@ -32,7 +32,7 @@ public class ProjectBuilder {
         super();
         _proj = aProject;
         _javaFileBuilder = new JavaFileBuilder(aProject);
-        _defaultFileBuilder = new ProjectFileBuilder.DefaultBuilder(aProject);
+        _resourceFileBuilder = new ResourceFileBuilder(aProject);
     }
 
     /**
@@ -45,7 +45,7 @@ public class ProjectBuilder {
      */
     public boolean isNeedsBuild()
     {
-        return _javaFileBuilder.isNeedsBuild() || _defaultFileBuilder.isNeedsBuild();
+        return _javaFileBuilder.isNeedsBuild() || _resourceFileBuilder.isNeedsBuild();
     }
 
     /**
@@ -60,7 +60,7 @@ public class ProjectBuilder {
 
         // Build files
         boolean buildSuccess = _javaFileBuilder.buildFiles(taskMonitor);
-        buildSuccess &= _defaultFileBuilder.buildFiles(taskMonitor);
+        buildSuccess &= _resourceFileBuilder.buildFiles(taskMonitor);
         _buildDate = new Date();
 
         // Return build success
@@ -145,11 +145,11 @@ public class ProjectBuilder {
         if (inBuildPath)
             return null;
 
-        // Return JavaFileBuilder, DefaultFileBuilder or null
+        // Return JavaFileBuilder, ResourceFileBuilder or null
         if (_javaFileBuilder.isBuildFile(aFile))
             return _javaFileBuilder;
-        if (_defaultFileBuilder.isBuildFile(aFile))
-            return _defaultFileBuilder;
+        if (_resourceFileBuilder.isBuildFile(aFile))
+            return _resourceFileBuilder;
 
         // Return null since nothing builds given file
         return null;

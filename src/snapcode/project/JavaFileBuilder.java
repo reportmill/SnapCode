@@ -26,6 +26,9 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     // The SnapCompiler used for last compiles
     private SnapCompiler _compiler;
 
+    // A resource file builder for Java Markdown
+    private ResourceFileBuilder _resourceFileBuilder;
+
     /**
      * Constructor for given Project.
      */
@@ -34,6 +37,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
         super();
         _proj = aProject;
         _compiledFiles = new HashSet<>();
+        _resourceFileBuilder = new ResourceFileBuilder(aProject);
     }
 
     /**
@@ -187,6 +191,10 @@ public class JavaFileBuilder implements ProjectFileBuilder {
                 addBuildFile(sourceFile);
                 return false;
             }
+
+            // If Java Markdown, copy resource file
+            if (sourceFile.getFileType().equals("jmd"))
+                _resourceFileBuilder.buildFile(sourceFile);
         }
 
         // Compile file
