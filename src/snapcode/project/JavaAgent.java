@@ -11,7 +11,7 @@ import snap.text.TextBlock;
 import snap.text.TextBlockUtils;
 import snap.util.ArrayUtils;
 import snap.web.WebFile;
-import snapcode.util.MDUtils;
+import snap.util.MDUtils;
 
 import java.util.*;
 

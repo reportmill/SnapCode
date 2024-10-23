@@ -4,7 +4,7 @@
 package snapcode.webbrowser;
 import snap.view.*;
 import snap.web.WebFile;
-import snapcode.util.MarkDownView;
+import snap.viewx.MarkDownView;
 
 /**
  * A page for mark down.

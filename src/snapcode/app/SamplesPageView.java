@@ -3,8 +3,8 @@ import snap.gfx.*;
 import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.web.WebURL;
-import snapcode.util.MDNode;
-import snapcode.util.MarkDownView;
+import snap.util.MDNode;
+import snap.viewx.MarkDownView;
 import java.util.Arrays;
 
 /**

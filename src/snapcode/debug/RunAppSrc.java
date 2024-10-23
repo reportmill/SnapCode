@@ -1,7 +1,7 @@
 package snapcode.debug;
 import snap.view.*;
 import snap.viewx.Console;
-import snapcode.app.JMDViewer;
+import snap.viewx.JMDViewer;
 import snapcode.apptools.RunTool;
 import snapcode.project.Project;
 import snapcode.project.RunConfig;

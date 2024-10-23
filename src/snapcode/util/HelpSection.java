@@ -3,6 +3,8 @@
  */
 package snapcode.util;
 
+import snap.viewx.MarkDownView;
+
 /**
  * This class represents a section of help from a HelpFile.
  */
