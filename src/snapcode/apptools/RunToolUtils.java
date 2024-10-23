@@ -55,12 +55,11 @@ public class RunToolUtils {
      */
     public static boolean isRunLocal(WebFile mainFile)
     {
-        // Run local if jmd file
-        if (mainFile != null && mainFile.getFileType().equals("jmd"))
-            return true;
-
         // Run local if (1) TempProj and (2) jepl file and (3) not swing and (4) not alt-key-down
-        if (mainFile == null || !mainFile.getFileType().equals("jepl"))
+        if (mainFile == null)
+            return false;
+        String fileType = mainFile.getFileType();
+        if (!fileType.equals("jepl") && !fileType.equals("jmd"))
             return false;
         Project proj = Project.getProjectForFile(mainFile);
         if (!proj.getName().equals("TempProj"))

@@ -193,7 +193,7 @@ public class JavaAgent {
         String superClassName = "Object";
 
         if (_isJMD) {
-            javaStr = MDUtils.getJeplForJMD(javaStr);
+            javaStr = MDUtils.getJeplForJMD(className, javaStr);
             return javaParser.parseJeplFile(javaStr, className, importNames, superClassName);
         }
         return javaParser.parseJeplFile(javaStr, className, importNames, superClassName);

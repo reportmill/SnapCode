@@ -1,7 +1,6 @@
 package snapcode.debug;
 import snap.view.*;
 import snap.viewx.Console;
-import snap.viewx.JMDViewer;
 import snapcode.apptools.RunTool;
 import snapcode.project.Project;
 import snapcode.project.RunConfig;
@@ -200,12 +199,6 @@ public class RunAppSrc extends RunApp {
         Class<?> mainClass = getMainClass();
         if (mainClass == null) {
             System.out.println("Can't find main class for: " + getMainFile());
-            return;
-        }
-
-        // If Java Markdown, create markdown view and show
-        if (getMainFile().getFileType().equals("jmd")) {
-            new JMDViewer(mainClass);
             return;
         }
 
