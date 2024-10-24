@@ -132,7 +132,7 @@ public class JavaAgent {
         _javaTextDoc.readFromSourceURL(_javaFile.getURL());
 
         // Listen for changes
-        _javaTextDoc.addPropChangeListener(pc -> javaTextDocDidPropChange(pc));
+        _javaTextDoc.addPropChangeListener(this::handleJavaTextDocPropChange);
 
         // Set, return
         return _javaTextDoc;
@@ -384,16 +384,14 @@ public class JavaAgent {
     /**
      * Called when JavaTextDoc does prop change.
      */
-    protected void javaTextDocDidPropChange(PropChange aPC)
+    protected void handleJavaTextDocPropChange(PropChange aPC)
     {
         // Get PropName
         String propName = aPC.getPropName();
 
         // Handle CharsChange: Try to update JFile with partial parse
-        if (propName == TextBlock.Chars_Prop && _jfile != null) {
-            TextBlockUtils.CharsChange charsChange = (TextBlockUtils.CharsChange) aPC;
-            updateJFileForChange(charsChange);
-        }
+        if (propName == TextBlock.Chars_Prop && _jfile != null)
+            handleJavaTextDocCharsChange((TextBlockUtils.CharsChange) aPC);
 
         // Handle TextModified: Register updater to update JavaFile before save
         else if (propName == TextBlock.TextModified_Prop) {
@@ -402,6 +400,19 @@ public class JavaAgent {
             WebFile.Updater updater = textDocTextModified ? file -> updateFileFromTextDoc() : null;
             javaFile.setUpdater(updater);
         }
+    }
+
+    /**
+     * Called when JavaTextDoc does chars change to updates JFile incrementally if possible.
+     */
+    private void handleJavaTextDocCharsChange(TextBlockUtils.CharsChange charsChange)
+    {
+        // If partial parse fails, clear JFile for full reparse
+        boolean jfileUpdated = !_isJepl && !_isJMD && JavaTextDocUtils.updateJFileForChange(_javaTextDoc, _jfile, charsChange);
+        if (!jfileUpdated)
+            _jfile = null;
+        _externalRefs = null;
+        _externalClassRefs = null;
     }
 
     /**
@@ -434,19 +445,6 @@ public class JavaAgent {
 
         // Clear JFile and external references
         clearExternalReferences();
-    }
-
-    /**
-     * Updates JFile incrementally if possible.
-     */
-    protected void updateJFileForChange(TextBlockUtils.CharsChange charsChange)
-    {
-        // If partial parse fails, clear JFile for full reparse
-        boolean jfileUpdated = !_isJepl && !_isJMD && JavaTextDocUtils.updateJFileForChange(_javaTextDoc, _jfile, charsChange);
-        if (!jfileUpdated)
-            _jfile = null;
-        _externalRefs = null;
-        _externalClassRefs = null;
     }
 
     /**
