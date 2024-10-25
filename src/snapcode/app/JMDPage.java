@@ -1,9 +1,12 @@
 package snapcode.app;
 import snap.gfx.Font;
+import snap.props.PropChange;
+import snap.text.TextBlock;
 import snap.text.TextDoc;
 import snap.view.TextArea;
 import snap.view.View;
 import snap.view.ViewEvent;
+import snap.viewx.TextPane;
 import snap.web.WebFile;
 import snapcode.apptools.RunTool;
 import snapcode.webbrowser.WebBrowser;
@@ -85,6 +88,53 @@ public class JMDPage extends WebPage {
             WorkspaceTools workspaceTools = workspacePane.getWorkspaceTools();
             RunTool runTool = workspaceTools.getRunTool();
             runTool.runAppForSelFile(false);
+        }
+    }
+
+    /**
+     * Called to update page file before save.
+     */
+    private void updateFileFromTextArea()
+    {
+        WebFile file = getFile();
+        TextArea textArea = getTextArea();
+        String textAreaText = textArea.getText();
+        file.setText(textAreaText);
+    }
+
+    /**
+     * A TextPane subclass to edit Java Markdown.
+     */
+    private class JMDPane extends TextPane {
+
+        /**
+         * Constructor.
+         */
+        public JMDPane()
+        {
+            super();
+        }
+
+        @Override
+        protected TextArea createTextArea()
+        {
+            TextArea textArea = super.createTextArea();
+            textArea.setPadding(5,5, 5,5);
+            textArea.setSyncTextFont(false);
+            return textArea;
+        }
+
+        @Override
+        protected void handleSourceTextPropChange(PropChange aPC)
+        {
+            // Do normal version
+            super.handleSourceTextPropChange(aPC);
+
+            // Update file
+            if (aPC.getPropName() == TextBlock.TextModified_Prop) {
+                WebFile.Updater updater = getTextArea().getTextBlock().isTextModified() ? f -> updateFileFromTextArea() : null;
+                getFile().setUpdater(updater);
+            }
         }
     }
 }
