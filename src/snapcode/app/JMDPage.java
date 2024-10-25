@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.gfx.Font;
 import snap.text.TextDoc;
 import snap.view.TextArea;
 import snap.view.View;
@@ -60,6 +61,7 @@ public class JMDPage extends WebPage {
         // Create TextDoc
         WebFile jmdFile = getFile();
         TextDoc javaTextDoc = new TextDoc();
+        javaTextDoc.setDefaultFont(Font.getCodeFontForSize(14));
         javaTextDoc.readFromSourceURL(jmdFile.getURL());
 
         // Set TextArea.TextDoc and FirstFocus

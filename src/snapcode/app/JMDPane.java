@@ -20,6 +20,7 @@ public class JMDPane extends TextPane {
     {
         TextArea textArea = super.createTextArea();
         textArea.setPadding(5,5, 5,5);
+        textArea.setSyncTextFont(false);
         return textArea;
     }
 }
