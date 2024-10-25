@@ -294,6 +294,12 @@ public class BuildFile extends PropObject {
         PropArchiverJS archiver = createArchiver();
         archiver.setRootObject(this);
         archiver.readPropObjectFromJSONString(jsonStr);
+
+        // Upgrade greenfoot
+        MavenDependency gf = (MavenDependency) ArrayUtils.findMatch(getDependencies(),
+                dep -> dep.getId() != null && dep.getId().contains("com.reportmill:greenfoot:"));
+        if (gf != null && !gf.getId().equals("com.reportmill:greenfoot:2024.10"))
+            gf.setId("com.reportmill:greenfoot:2024.10");
     }
 
     /**
