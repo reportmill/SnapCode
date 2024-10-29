@@ -120,6 +120,7 @@ public class HelpTool extends WorkspaceTool {
 
         // Get HelpTextScrollView
         _helpTextScrollView = getView("HelpTextScrollView", ScrollView.class);
+        _helpTextScrollView.setFillWidth(true);
 
         // Get HelpSections and set in TopicListView
         HelpFile helpFile = getHelpFile();
