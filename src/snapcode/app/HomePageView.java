@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.geom.Insets;
 import snap.gfx.*;
 import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
@@ -95,6 +96,7 @@ public class HomePageView extends MarkDownView {
 
                 // Create row, add children and return
                 RowView rowView = new RowView();
+                rowView.setMargin(headerView.getMargin()); headerView.setMargin(Insets.EMPTY);
                 rowView.setChildren(headerView, clearWorkspaceButton);
                 return rowView;
             }
@@ -120,6 +122,7 @@ public class HomePageView extends MarkDownView {
 
                 // Create row, add children and return
                 RowView rowView = new RowView();
+                rowView.setMargin(headerView.getMargin()); headerView.setMargin(Insets.EMPTY);
                 rowView.setChildren(headerView, openButton, openDesktopFileButton);
                 return rowView;
             }
@@ -139,6 +142,7 @@ public class HomePageView extends MarkDownView {
 
                 // Create row, add children and return
                 RowView rowView = new RowView();
+                rowView.setMargin(headerView.getMargin()); headerView.setMargin(Insets.EMPTY);
                 rowView.setChildren(headerView, showSamplesText);
                 return rowView;
             }

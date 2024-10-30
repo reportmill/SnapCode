@@ -34,3 +34,11 @@
 * Charting
   [](https://reportmill.com/SnapCode/Samples/Charting/Charting.jepl)
   This sample shows how to generate and manipulate arrays of data and use it to create datasets and charts.
+
+@[OpenSamples=true]
+
+## Java Markdown
+
+* Introduction
+  [](https://reportmill.com/SnapCode/Samples/JavaMarkdown/JavaMarkdown.zip)
+  This sample is a basic introduction to Java markdown.

@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.geom.Insets;
 import snap.gfx.*;
 import snap.util.ArrayUtils;
 import snap.view.*;
@@ -81,6 +82,7 @@ public class SamplesPageView extends MarkDownView {
 
             // Create row, add children and return
             RowView rowView = new RowView();
+            rowView.setMargin(headerView.getMargin()); headerView.setMargin(Insets.EMPTY);
             rowView.setChildren(headerView, learnToCodeLabel);
             return rowView;
         }
