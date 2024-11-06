@@ -18,7 +18,7 @@
 
 @[OpenSamples=true]
 
-## enCode/Create
+## Greenfoot projects
 
 * Flight
   [](https://reportmill.com/SnapCode/Samples/Flight/Flight.gfar)
@@ -26,6 +26,8 @@
   [](https://reportmill.com/SnapCode/Samples/Archery/Archery.gfar)
 * AppleCatchers
   [](https://reportmill.com/SnapCode/Samples/AppleCatchers/AppleCatchers.gfar)
+
+Provided by enCode/Create. [Learn to code!](https://www.encodecreate.com)
 
 @[OpenSamples=true]
 

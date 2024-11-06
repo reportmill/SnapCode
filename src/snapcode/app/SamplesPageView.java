@@ -33,7 +33,12 @@ public class SamplesPageView extends MarkDownView {
      * Override to forward to HomePage.
      */
     @Override
-    protected void handleLinkClick(String urlAddr)  { _samplesPage.handleLinkClick(urlAddr); }
+    protected void handleLinkClick(String urlAddr)
+    {
+        if (urlAddr.startsWith("Sample:"))
+            _samplesPage.handleLinkClick(urlAddr);
+        else super.handleLinkClick(urlAddr);
+    }
 
     /**
      * Override to add header.
