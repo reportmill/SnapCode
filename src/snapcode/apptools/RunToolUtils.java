@@ -59,7 +59,9 @@ public class RunToolUtils {
         if (mainFile == null)
             return false;
         String fileType = mainFile.getFileType();
-        if (!fileType.equals("jepl") && !fileType.equals("jmd"))
+        if (fileType.equals("jmd"))
+            return true;
+        if (!fileType.equals("jepl"))
             return false;
         Project proj = Project.getProjectForFile(mainFile);
         if (!proj.getName().equals("TempProj"))
