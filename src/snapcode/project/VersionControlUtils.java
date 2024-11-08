@@ -41,7 +41,7 @@ public class VersionControlUtils {
         // Get file text and return
         String remoteSettingsText = remoteSettingsFile.getText();
         String urlAddress = remoteSettingsText.trim();
-        return urlAddress.length() > 0 ? urlAddress : null;
+        return !urlAddress.isEmpty() ? urlAddress : null;
     }
 
     /**
@@ -62,7 +62,7 @@ public class VersionControlUtils {
         try {
 
             // If empty URL, delete file
-            if (remoteUrlAddress == null || remoteUrlAddress.length() == 0) {
+            if (remoteUrlAddress == null || remoteUrlAddress.isEmpty()) {
                 if (file.getExists())
                     file.delete();
             }
