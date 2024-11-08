@@ -2,10 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.webbrowser;
-import snap.geom.HPos;
 import snap.gfx.Font;
 import snap.text.TextBlock;
-import snap.view.Button;
 import snap.view.TextArea;
 import snap.view.View;
 import snap.viewx.TextPane;
@@ -71,17 +69,10 @@ public class TextPage extends WebPage {
      */
     protected void initUI()
     {
-        // Configure TextPane
+        // Configure TextArea
         TextArea textArea = getTextArea();
-        textArea.setFont(Font.getCodeFont());
+        textArea.getTextBlock().setDefaultFont(Font.getCodeFont());
         textArea.setText(getText());
-
-        Button btn = new Button("Reload");
-        btn.setName("ReloadButton");
-        btn.setPrefSize(80, 22);
-        btn.setLeanX(HPos.RIGHT);
-        btn.addEventHandler(e -> getBrowser().reloadPage(), Action);
-        _textPane.getToolBarPane().addChild(btn);
         setFirstFocus(getTextArea());
 
         // Bind TextDoc.TextModified to JavaPage.TextModified
