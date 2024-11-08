@@ -241,7 +241,7 @@ public class GitDir {
     {
         Git git = getGit();
         MergeCommand merge = git.merge();
-        ObjectId remoteOriginMaster = getResolvedObjectId("refs/remotes/origin/master");
+        ObjectId remoteOriginMaster = getResolvedObjectId("origin/main");
         merge.include(remoteOriginMaster);
         if (aTM != null)
             merge.setProgressMonitor(GitUtils.getProgressMonitor(aTM));
