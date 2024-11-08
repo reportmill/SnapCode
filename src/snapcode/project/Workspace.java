@@ -4,7 +4,6 @@
 package snapcode.project;
 import snap.props.PropObject;
 import snap.util.ArrayUtils;
-import snap.util.SnapUtils;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
 import snap.web.WebFile;
@@ -303,8 +302,8 @@ public class Workspace extends PropObject {
     private boolean addProjectForRepoURLImpl(WebURL repoURL, TaskMonitor taskMonitor)
     {
         // Hack to support github repos in CheerpJ
-        if (repoURL.getFileType().equals("git") && SnapUtils.isWebVM)
-            repoURL = GitHubUtils.downloadGithubZipFile(repoURL);
+        //if (repoURL.getFileType().equals("git") && SnapUtils.isWebVM)
+        //    repoURL = GitHubUtils.downloadGithubZipFile(repoURL);
 
         // Get project name
         String projName = repoURL.getFilenameSimple();

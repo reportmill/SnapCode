@@ -43,25 +43,25 @@ Provided by enCode/Create. [Learn to code!](https://www.encodecreate.com)
   [](https://reportmill.com/SnapCode/Samples/Graphics3D/Graphics3D.jepl)
   This Java repl file shows an example of simple 3D programming.
 
-@[OpenSamples=true]
-
 ## Misc Samples
 
-* Swing Samples
-  [](https://reportmill.com/SnapCode/Samples/SwingSamples/SwingSamples.zip)
+* [Swing Samples](Sample:https://reportmill.com/SnapCode/Samples/SwingSamples/SwingSamples.zip)
   This project contains several small Swing examples.
-* Scanner Chatbot
-  [](https://reportmill.com/SnapCode/Samples/Scanner_Chatbot/Scanner_Chatbot.jepl)
+* [Scanner Chatbot](Sample:https://reportmill.com/SnapCode/Samples/Scanner_Chatbot/Scanner_Chatbot.jepl)
   This Java repl file shows an example of reading user input from System.in.
-* UI Builder
-  [](https://reportmill.com/SnapCode/Samples/UI_Builder/UI_Builder.zip)
+* [UI Builder](Sample:https://reportmill.com/SnapCode/Samples/UI_Builder/UI_Builder.zip)
   This project shows some examples of some SnapKit 'snp' files and the integrated UI editor.
-* Create UI
-  [](https://reportmill.com/SnapCode/Samples/Create_UI/Create_UI.jepl)
+* [Create UI](Sample:https://reportmill.com/SnapCode/Samples/Create_UI/Create_UI.jepl)
   This java repl file shows some examples of creating SnapKit UI programatically.
-* Prime Numbers
-  [](https://reportmill.com/SnapCode/Samples/Prime_Numbers/Prime_Numbers.jepl)
+* [Prime Numbers](Sample:https://reportmill.com/SnapCode/Samples/Prime_Numbers/Prime_Numbers.jepl)
   This java repl file shows an example calculating prime numbers.
-* Snapkit Samples
-  [](https://reportmill.com/SnapCode/Samples/SnapkitSamples/SnapkitSamples.zip)
+* [Snapkit Samples](Sample:https://reportmill.com/SnapCode/Samples/SnapkitSamples/SnapkitSamples.zip)
   This project shows some examples of programming SnapKit.
+
+## Github Samples
+
+* [Snaptris.git](Sample:https://github.com/reportmill/Snaptris.git)
+  This Github project is a simple clone of Tetris.
+* [SnapDemos.git](Sample:https://github.com/reportmill/SnapDemos.git)
+  This Github project contains several game examples (tetris, jewels, snappybird).
+

@@ -2,7 +2,6 @@ package snapcode.app;
 import snap.util.SnapUtils;
 import snap.view.*;
 import snap.web.RecentFiles;
-import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.apptools.NewFileTool;
 import snapcode.webbrowser.WebPage;
@@ -98,19 +97,11 @@ public class HomePage extends WebPage {
 
             // Get URL address
             String sampleUrlAddr = urlAddr.substring("Sample:".length());
+
+            // This would let us have github project with icon at reportmill (not currently used)
             if (sampleUrlAddr.endsWith(".git") && sampleUrlAddr.contains("https://reportmill.com/SnapCode/Samples")) {
                 WebURL sampleUrl = WebURL.getURL(sampleUrlAddr); assert (sampleUrl != null);
                 sampleUrlAddr = "https://github.com/reportmill/" + sampleUrl.getFilename();
-            }
-
-            // can go
-            if (ViewUtils.isAltDown()) {
-                sampleUrlAddr = "https://github.com/reportmill/SnapDemos.git";
-                WebURL snapCodeDirURL = SnapCodeUtils.getSnapCodeDirURL();
-                WebURL projDirURL = snapCodeDirURL.getChild("SnapDemos");
-                WebFile projDir = projDirURL.getFile();
-                if (projDir != null)
-                    projDir.delete();
             }
 
             // Open URL
