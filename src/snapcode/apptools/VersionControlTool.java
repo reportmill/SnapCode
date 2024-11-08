@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import snap.view.BoxView;
 import snapcode.project.WorkspaceBuilder;
 import snap.props.PropChange;
 import snapcode.app.ProjectPane;
@@ -8,7 +9,6 @@ import snapcode.project.VersionControl;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
 import snap.view.ProgressBar;
-import snap.view.SpringView;
 import snap.view.ViewEvent;
 import snap.viewx.DialogBox;
 import snapcode.webbrowser.WebBrowser;
@@ -59,15 +59,12 @@ public class VersionControlTool extends ProjectTool {
     protected void initUI()
     {
         // Get WebBrowser for remote files
-        SpringView pane = getView("RemoteBrowserPane", SpringView.class);
         _remoteBrowser = new WebBrowser();
-        _remoteBrowser.setGrowWidth(true);
-        _remoteBrowser.setGrowHeight(true);
-        _remoteBrowser.setBounds(2, 2, pane.getWidth() - 4, pane.getHeight() - 4);
-        pane.addChild(_remoteBrowser);
+        _remoteBrowser.addPropChangeListener(e -> resetLater(), WebBrowser.Loading_Prop);
 
-        // Makes changes to RemoteBrowser update VerConPane
-        _remoteBrowser.addPropChangeListener(e -> resetLater());
+        // Add to RemoteBrowserBox
+        BoxView remoteBrowserBox = getView("RemoteBrowserBox", BoxView.class);
+        remoteBrowserBox.setContent(_remoteBrowser);
     }
 
     /**
@@ -211,7 +208,7 @@ public class VersionControlTool extends ProjectTool {
 
         // Get root files
         List<WebFile> rootFiles = theFiles != null ? theFiles : getSelFiles();
-        if (rootFiles.size() == 0)
+        if (rootFiles.isEmpty())
             rootFiles = getSiteRootDirAsList();
 
         // Get update files for root files
@@ -272,7 +269,7 @@ public class VersionControlTool extends ProjectTool {
 
         // Get root files
         List<WebFile> rootFiles = theFiles != null ? theFiles : getSelFiles();
-        if (rootFiles.size() == 0)
+        if (rootFiles.isEmpty())
             rootFiles = getSiteRootDirAsList();
 
         // Get replace files for root files
@@ -305,7 +302,7 @@ public class VersionControlTool extends ProjectTool {
 
         // Get root files
         List<WebFile> rootFiles = theFiles != null ? theFiles : getSelFiles();
-        if (rootFiles.size() == 0)
+        if (rootFiles.isEmpty())
             rootFiles = getSiteRootDirAsList();
 
         // Get commit files for root files
