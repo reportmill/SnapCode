@@ -14,7 +14,7 @@
   <Button Name="UndoButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Undo" ImageName="/snap/viewx/pkg.images/Edit_Undo.png" ShowArea="false" />
   <Button Name="RedoButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Redo" ImageName="/snap/viewx/pkg.images/Edit_Redo.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
-  <TextField Name="FindText" PrefWidth="172" PrefHeight="24" Margin="3" />
+  <TextField Name="FindText" PrefWidth="172" PrefHeight="22" Margin="3" BorderRadius="4" GrowWidth="true" Font="Arial 12" />
   <CheckBox Name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" Text="IC" Selected="true" />
   <Button Name="JavaDocButton" PrefWidth="116" PrefHeight="22" LeanX="RIGHT" Text="Documentation" />
   <MenuButton Name="SettingsButton" PrefWidth="26" PrefHeight="26" Margin="0,14,0,0" Padding="0" LeanX="RIGHT" ToolTip="Settings" ImageName="Settings.png" ShowArea="false" ShowArrow="false">
