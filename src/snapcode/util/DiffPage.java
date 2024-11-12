@@ -171,7 +171,7 @@ public class DiffPage extends WebPage {
         List<TextSel> ranges = new ArrayList<>();
 
         /**
-         * Create new DiffTextArea.
+         * Constructor.
          */
         public DiffTextArea()
         {
@@ -204,6 +204,14 @@ public class DiffPage extends WebPage {
 
         // The ranges
         List<TextSel> ranges = new ArrayList<>();
+
+        /**
+         * Constructor.
+         */
+        public DiffJavaTextArea()
+        {
+            super();
+        }
 
         /**
          * Override to add ranges.

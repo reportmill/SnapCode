@@ -378,7 +378,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
         if (_javaClass != null) return _javaClass;
         String className = getClassName();
         JavaClass javaClass = className != null ? getJavaClassForName(className) : null;
-        if (javaClass == null)
+        if (javaClass == null && getResolver() != null)
             javaClass = new JavaClass(getResolver(), this);
         return _javaClass = javaClass;
     }

@@ -190,6 +190,8 @@ public class JVarDecl extends JNode implements WithId {
         JavaType evalType = getJavaType();
         if (evalType == null) // Can happen for Lambdas
             evalType = getJavaClassForClass(Object.class);
+        if (evalType == null) // Can happen when not in project (like diff file)
+            return null;
 
         // Otherwise, return JavaLocalVar for Name/EvalType (UniqueId might help for debugging)
         Resolver resolver = getResolver();
