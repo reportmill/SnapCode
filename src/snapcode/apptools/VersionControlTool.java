@@ -173,6 +173,7 @@ public class VersionControlTool extends ProjectTool {
         // Get checkout task runner and configure
         TaskRunner<?> checkoutRunner = _versionControl.checkout();
         checkoutRunner.setOnSuccess(obj -> checkoutSuccess());
+        checkoutRunner.setOnFailure(exception -> checkoutFailed(exception));
 
         // Show progress dialog
         TaskMonitor taskMonitor = checkoutRunner.getMonitor();
@@ -196,6 +197,14 @@ public class VersionControlTool extends ProjectTool {
         builder.setAutoBuildEnabled(true);
         builder.addAllFilesToBuild();
         builder.buildWorkspaceLater();
+    }
+
+    /**
+     * Called when checkout fails.
+     */
+    private void checkoutFailed(Exception anException)
+    {
+        runLater(() -> DialogBox.showExceptionDialog(_workspacePane.getUI(), "Checkout failed", anException));
     }
 
     /**
@@ -224,6 +233,7 @@ public class VersionControlTool extends ProjectTool {
         // Call real update files method and configure callbacks
         TaskRunner<Boolean> updateRunner = _versionControl.updateFiles(updateFiles);
         updateRunner.setOnSuccess(completed -> updateFilesSuccess(updateFiles));
+        updateRunner.setOnFailure(exception -> updateFilesFailed(exception));
         updateRunner.setOnFinished(() -> updateFilesFinished());
 
         // Show progress dialog
@@ -241,6 +251,14 @@ public class VersionControlTool extends ProjectTool {
         for (WebFile file : theFiles)
             getBrowser().reloadFile(file);
         _workspacePane.resetLater();
+    }
+
+    /**
+     * Called when update files fails.
+     */
+    private void updateFilesFailed(Exception anException)
+    {
+        runLater(() -> DialogBox.showExceptionDialog(_workspacePane.getUI(), "Update files failed", anException));
     }
 
     /**
@@ -285,11 +303,20 @@ public class VersionControlTool extends ProjectTool {
         // Call real replace method and configure callbacks
         TaskRunner<Boolean> replaceRunner = _versionControl.replaceFiles(replaceFiles);
         replaceRunner.setOnSuccess(obj -> updateFilesSuccess(replaceFiles));
+        replaceRunner.setOnFailure(exception -> replaceFilesFailed(exception));
         replaceRunner.setOnFinished(() -> updateFilesFinished());
 
         // Show progress dialog
         TaskMonitor taskMonitor = replaceRunner.getMonitor();
         taskMonitor.showProgressPanel(_workspacePane.getUI());
+    }
+
+    /**
+     * Called when replace files fails.
+     */
+    private void replaceFilesFailed(Exception anException)
+    {
+        runLater(() -> DialogBox.showExceptionDialog(_workspacePane.getUI(), "Replace files failed", anException));
     }
 
     /**
@@ -316,10 +343,19 @@ public class VersionControlTool extends ProjectTool {
         // Do real commit
         String commitMessage = transferPane.getCommitMessage();
         TaskRunner<Boolean> commitRunner =_versionControl.commitFiles(theFiles, commitMessage);
+        commitRunner.setOnFailure(exception -> commitFilesFailed(exception));
 
         // Show progress dialog
         TaskMonitor taskMonitor = commitRunner.getMonitor();
         taskMonitor.showProgressPanel(_workspacePane.getUI());
+    }
+
+    /**
+     * Called when commit files fails.
+     */
+    private void commitFilesFailed(Exception anException)
+    {
+        runLater(() -> DialogBox.showExceptionDialog(_workspacePane.getUI(), "Commit files failed", anException));
     }
 
     /**
