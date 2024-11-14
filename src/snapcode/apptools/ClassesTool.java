@@ -1,6 +1,7 @@
 package snapcode.apptools;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.util.ObjectArray;
 import snap.view.*;
 import snap.web.WebFile;
@@ -10,7 +11,7 @@ import snapcode.app.WorkspaceTool;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -218,7 +219,7 @@ public class ClassesTool extends WorkspaceTool {
         public ClassNode getParent(ClassNode anItem)  { return anItem._parentNode; }
 
         @Override
-        public boolean isParent(ClassNode anItem)  { return anItem.getChildNodes().length > 0; }
+        public boolean isParent(ClassNode anItem)  { return !anItem._childNodes.isEmpty(); }
 
         @Override
         public ClassNode[] getChildren(ClassNode aParent)  { return aParent.getChildNodes(); }
@@ -274,8 +275,7 @@ public class ClassesTool extends WorkspaceTool {
         public ClassNode getChildNodeForClassDeep(Class<?> aClass)
         {
             // Search for child that is superclass, return if not found or exact match
-            ClassNode[] childNodes = getChildNodes();
-            ClassNode childNode = ArrayUtils.findMatch(childNodes, node -> node.getNodeClass().isAssignableFrom(aClass));
+            ClassNode childNode = ListUtils.findMatch(_childNodes, node -> node.getNodeClass().isAssignableFrom(aClass));
             if (childNode == null || childNode._nodeClass == aClass)
                 return childNode;
 
@@ -312,9 +312,8 @@ public class ClassesTool extends WorkspaceTool {
         {
             ClassNode classNode = new ClassNode(nodeClass, nodeFile);
             classNode._parentNode = this;
-            ClassNode[] childNodes = getChildNodes();
-            int insertIndex = -Arrays.binarySearch(childNodes, classNode) - 1;
-            _childNodes.add(classNode, insertIndex);
+            int insertIndex = -Collections.binarySearch(_childNodes, classNode) - 1;
+            _childNodes.add(insertIndex, classNode);
             return classNode;
         }
 
