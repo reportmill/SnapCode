@@ -1,7 +1,7 @@
 package snapcode.apptools;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
-import snap.util.ListUtils;
+import snap.util.ObjectArray;
 import snap.view.*;
 import snap.web.WebFile;
 import snapcode.app.PagePane;
@@ -9,9 +9,8 @@ import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
-
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -219,16 +218,10 @@ public class ClassesTool extends WorkspaceTool {
         public ClassNode getParent(ClassNode anItem)  { return anItem._parentNode; }
 
         @Override
-        public boolean isParent(ClassNode anItem)
-        {
-            return !anItem.getChildNodes().isEmpty();
-        }
+        public boolean isParent(ClassNode anItem)  { return anItem.getChildNodes().length > 0; }
 
         @Override
-        public ClassNode[] getChildren(ClassNode aParent)
-        {
-            return aParent.getChildNodes().toArray(new ClassNode[0]);
-        }
+        public ClassNode[] getChildren(ClassNode aParent)  { return aParent.getChildNodes(); }
 
         @Override
         public String getText(ClassNode anItem)  { return ""; }
@@ -249,7 +242,7 @@ public class ClassesTool extends WorkspaceTool {
         private WebFile _nodeFile;
 
         // The child nodes
-        private List<ClassNode> _childNodes = Collections.EMPTY_LIST;
+        private ObjectArray<ClassNode> _childNodes = new ObjectArray<>(ClassNode.class, 0);
 
         /**
          * Constructor.
@@ -273,7 +266,7 @@ public class ClassesTool extends WorkspaceTool {
         /**
          * Returns the child nodes.
          */
-        public List<ClassNode> getChildNodes()  { return _childNodes; }
+        public ClassNode[] getChildNodes()  { return _childNodes.getArray(); }
 
         /**
          * Returns a child node for given class.
@@ -281,7 +274,8 @@ public class ClassesTool extends WorkspaceTool {
         public ClassNode getChildNodeForClassDeep(Class<?> aClass)
         {
             // Search for child that is superclass, return if not found or exact match
-            ClassNode childNode = ListUtils.findMatch(_childNodes, node -> node.getNodeClass().isAssignableFrom(aClass));
+            ClassNode[] childNodes = getChildNodes();
+            ClassNode childNode = ArrayUtils.findMatch(childNodes, node -> node.getNodeClass().isAssignableFrom(aClass));
             if (childNode == null || childNode._nodeClass == aClass)
                 return childNode;
 
@@ -316,11 +310,11 @@ public class ClassesTool extends WorkspaceTool {
          */
         private ClassNode addChildNodeForClassAndFileImpl(Class<?> nodeClass, WebFile nodeFile)
         {
-            if (_childNodes.isEmpty()) _childNodes = new ArrayList<>();
             ClassNode classNode = new ClassNode(nodeClass, nodeFile);
             classNode._parentNode = this;
-            int insertIndex = -Collections.binarySearch(_childNodes, classNode) - 1;
-            _childNodes.add(insertIndex, classNode);
+            ClassNode[] childNodes = getChildNodes();
+            int insertIndex = -Arrays.binarySearch(childNodes, classNode) - 1;
+            _childNodes.add(classNode, insertIndex);
             return classNode;
         }
 
