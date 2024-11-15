@@ -298,8 +298,8 @@ public class BuildFile extends PropObject {
         // Upgrade greenfoot
         MavenDependency gf = (MavenDependency) ArrayUtils.findMatch(getDependencies(),
                 dep -> dep.getId() != null && dep.getId().contains("com.reportmill:greenfoot:"));
-        if (gf != null && !gf.getId().equals("com.reportmill:greenfoot:2024.10"))
-            gf.setId("com.reportmill:greenfoot:2024.10");
+        if (gf != null && !gf.getId().equals("com.reportmill:greenfoot:2024.11"))
+            gf.setId("com.reportmill:greenfoot:2024.11");
     }
 
     /**

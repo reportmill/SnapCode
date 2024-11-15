@@ -140,7 +140,7 @@ public class GreenImport {
 
         // Get build file and configure
         BuildFile buildFile = tempProj.getBuildFile();
-        buildFile.addDependency(new MavenDependency("com.reportmill:greenfoot:2024.10"));
+        buildFile.addDependency(new MavenDependency("com.reportmill:greenfoot:2024.11"));
         buildFile.setMainClassName("Main");
         buildFile.writeFile();
 
