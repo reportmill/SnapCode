@@ -88,6 +88,7 @@ public class HelpTool extends WorkspaceTool {
 
         // Update SectionTextArea
         MarkDownView sectionText = aSection.getMarkDownView();
+        sectionText.setBorderRadius(4);
         _helpTextScrollView.setContent(sectionText);
     }
 
