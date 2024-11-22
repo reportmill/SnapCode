@@ -32,7 +32,7 @@ public class JavaTextDoc extends TextDoc {
 
         // Reset default LineStyle for code
         TextLineStyle lineStyle = getDefaultLineStyle();
-        TextLineStyle lineStyleSpaced = lineStyle.copyFor(TextLineStyle.SPACING_KEY, 4);
+        TextLineStyle lineStyleSpaced = lineStyle.copyForPropKeyValue(TextLineStyle.Spacing_Prop, 4);
         //double tabW = codeTextStyle.getCharAdvance(' ') * 4;
         //lineStyleSpaced.setTabs(new double[] { tabW, tabW, tabW, tabW, tabW, tabW, tabW, tabW, tabW, tabW });
         setDefaultLineStyle(lineStyleSpaced);
