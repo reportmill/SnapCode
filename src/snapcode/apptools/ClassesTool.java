@@ -1,10 +1,12 @@
 package snapcode.apptools;
+import snap.gfx.Image;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.util.ObjectArray;
 import snap.view.*;
 import snap.web.WebFile;
+import snapcode.app.GreenfootProject;
 import snapcode.app.PagePane;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
@@ -22,6 +24,9 @@ public class ClassesTool extends WorkspaceTool {
 
     // The root class node
     private ClassNode _rootClassNode;
+
+    // The current greenfoot project (if available)
+    private GreenfootProject _greenfootProject;
 
     // The TreeView to show classes
     private TreeView<ClassNode> _treeView;
@@ -56,6 +61,15 @@ public class ClassesTool extends WorkspaceTool {
                 _rootClassNode.addChildNodeForClassAndFile(sourceFileClass, sourceFile);
         }
 
+        // Handle Greenfoot stuff
+        List<ClassNode> childNodes = _rootClassNode._childNodes;
+        ClassNode actorClassNode = ListUtils.findMatch(childNodes, clsNode -> clsNode.getNodeClass().getName().equals("greenfoot.Actor"));
+        if (actorClassNode != null)
+            ListUtils.moveToFront(childNodes, actorClassNode);
+        ClassNode worldClassNode = ListUtils.findMatch(childNodes, clsNode -> clsNode.getNodeClass().getName().equals("greenfoot.World"));
+        if (worldClassNode != null)
+            ListUtils.moveToFront(childNodes, worldClassNode);
+
         // Return
         return _rootClassNode;
     }
@@ -67,6 +81,14 @@ public class ClassesTool extends WorkspaceTool {
     {
         // Clear ClassNodes and views
         _rootClassNode = null;
+
+        // Find first (any) greenfoot project in workspace
+        Project[] projects = _workspace.getProjects();
+        for (Project project : projects) {
+            _greenfootProject = GreenfootProject.getGreenfootProjectForProject(project);
+            if (_greenfootProject != null)
+                break;
+        }
 
         // Get RootClassNode and reset treeview
         ClassNode rootClassNode = getRootClassNode();
@@ -81,8 +103,8 @@ public class ClassesTool extends WorkspaceTool {
     protected void initUI()
     {
         // Calculate TreeView RowHeight
-        Label sampleLabel = createLabelForClassNode(new ClassNode(Object.class, null));
-        int treeViewRowHeight = (int) Math.ceil(sampleLabel.getPrefHeight() + 10);
+        //Label sampleLabel = createLabelForClassNode(new ClassNode(Object.class, null));
+        int treeViewRowHeight = 32; //(int) Math.ceil(sampleLabel.getPrefHeight() + 10);
 
         // Configure TreeView
         _treeView = getView("TreeView", TreeView.class);
@@ -168,8 +190,23 @@ public class ClassesTool extends WorkspaceTool {
      */
     private Label createLabelForClassNode(ClassNode classNode)
     {
-        Label label = new Label(classNode.getNodeClass().getSimpleName());
-        label.setPropsString("Fill:#F5CC9B; Border:BLACK 1; MinWidth:60; Padding:4,8,4,8; BorderRadius:4;");
+        // Create label for node class
+        Class<?> nodeClass = classNode.getNodeClass();
+        Label label = new Label(nodeClass.getSimpleName());
+        label.setPropsString("Fill:#F5CC9B; Border:#66 1; MinWidth:60; MinHeight:26; Padding:2,4,2,8; BorderRadius:4;");
+
+        // If Greenfoot Project is set, check for image
+        if (_greenfootProject != null) {
+            Image classImage = _greenfootProject.getImageForClass(nodeClass);
+            if (classImage != null) {
+                ImageView classImageView = new ImageView(classImage);
+                classImageView.setKeepAspect(true);
+                classImageView.setPrefSize(48, 22);
+                label.setGraphicAfter(classImageView);
+            }
+        }
+
+        // Return
         return label;
     }
 
