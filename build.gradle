@@ -38,6 +38,9 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.30'
     implementation 'org.slf4j:slf4j-simple:1.7.30'
 
+    // Greenfoot
+    implementation project(':Greenfoot')
+
     // So we can get jars
     testImplementation project(':CJDom')
     testImplementation project(':SnapCJ')
@@ -72,7 +75,7 @@ task copyCJ(type: Copy) {
             "../SnapCJ/build/libs/SnapCJ-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar",
             "../SnapKit/build/libs/SnapKit-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar",
             "../SnapBuilder/build/libs/SnapBuilder-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar",
-            "../SnapCharts/build/libs/SnapCharts-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar"
+            "../Greenfoot/build/libs/Greenfoot-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar"
     )
     into "build/libs"
     dependsOn buildFullJar

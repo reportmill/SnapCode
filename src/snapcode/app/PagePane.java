@@ -553,6 +553,9 @@ public class PagePane extends ViewOwner {
             // Handle build file (build.snapcode)
             case "snapcode": return BuildFileTool.BuildFilePage.class;
 
+            // Handle project.greenfoot file
+            case "greenfoot": return GreenfootPage.class;
+
             // Handle class file
             case "class": return ClassInfoPage.class;
         }
