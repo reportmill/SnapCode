@@ -88,8 +88,13 @@ public class ProjectUtils {
      */
     public static WebFile getGoodDefaultFile(Project aProj)
     {
-        // Look for read me
-        WebFile projRootDir = aProj.getSite().getRootDir();
+        // Look for project.greenfoot file
+        WebFile greenfootFile = aProj.getFileForPath("/src/project.greenfoot");
+        if (greenfootFile != null)
+            return greenfootFile;
+
+        // Look for 'readme' file
+        WebFile projRootDir = aProj.getRootDir();
         WebFile[] projRootFiles = projRootDir.getFiles();
         WebFile readMeFile = ArrayUtils.findMatch(projRootFiles, file -> file.getSimpleName().equalsIgnoreCase("readme"));
         if (readMeFile != null)
@@ -111,7 +116,7 @@ public class ProjectUtils {
         }
 
         // Return project root
-        return aProj.getSite().getRootDir();
+        return aProj.getRootDir();
     }
 
     /**

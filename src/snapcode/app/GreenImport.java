@@ -59,18 +59,18 @@ public class GreenImport {
         // Return greenfoot dir for archive URL
         WebFile greenfootDir = getGreenfootDirForArchiveUrl(archiveUrl);
 
-        // Open greenfoot dir
-        openGreenfootDir(workspacePane, greenfootDir);
+        // Open greenfoot project for greenfoot dir
+        Project greenfootProject = openGreenfootDir(workspacePane, greenfootDir);
 
         // Select good file
-        ViewUtils.runDelayed(() -> WorkspacePaneUtils.selectGoodDefaultFile(workspacePane, null), 400);
+        ViewUtils.runDelayed(() -> WorkspacePaneUtils.selectGoodDefaultFile(workspacePane, greenfootProject), 400);
         JavaTextArea.setShowScopeBoxes(true);
     }
 
     /**
      * Opens a new project for Greenfoot scenario id.
      */
-    public static void openGreenfootDir(WorkspacePane workspacePane, WebFile greenfootDir)
+    public static Project openGreenfootDir(WorkspacePane workspacePane, WebFile greenfootDir)
     {
         // Get scenario name
         String scenarioName = greenfootDir.getSimpleName().replace(' ', '_');
@@ -85,6 +85,9 @@ public class GreenImport {
 
         // Create Main class that launches world.lastInstantiated prop
         createMainClassForGreenfootProject(project);
+
+        // Return
+        return project;
     }
 
     /**

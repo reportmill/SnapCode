@@ -361,6 +361,11 @@ public class Project extends PropObject {
     public WebFile getBuildDir()  { return _projFiles.getBuildDir(); }
 
     /**
+     * Returns the root directory.
+     */
+    public WebFile getRootDir()  { return _site.getRootDir(); }
+
+    /**
      * Returns a file for given path.
      */
     public WebFile getFileForPath(String aPath)  { return _site.getFileForPath(aPath); }

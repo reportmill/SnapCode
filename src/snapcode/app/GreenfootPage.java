@@ -171,7 +171,7 @@ public class GreenfootPage extends WebPage {
      */
     private static GreenfootProject getGreenfootProjectForProject(Project aProject)
     {
-        WebFile projDir = aProject.getSite().getRootDir();
+        WebFile projDir = aProject.getRootDir();
         return GreenfootProject.getGreenfootProjectForDir(projDir);
     }
 }
