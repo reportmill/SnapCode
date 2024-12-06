@@ -142,8 +142,11 @@ public class GreenfootPage extends WebPage {
         return _playerPane.getUI();
     }
 
+    /**
+     * Initialize UI.
+     */
     @Override
-    protected void initShowing()
+    protected void initUI()
     {
         resetRootClassNode();
     }
