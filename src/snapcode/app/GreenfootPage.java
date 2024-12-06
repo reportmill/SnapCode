@@ -97,19 +97,24 @@ public class GreenfootPage extends WebPage {
     }
 
     /**
-     * Resets the root class node.
+     * Resets the greenfoot env.
      */
-    private void resetRootClassNode()
+    private void resetGreenfootEnv()
     {
         GreenfootProject greenfootProject = getGreenfootProject();
         if (greenfootProject == null)
             return;
 
+        // Reset project
         Greenfoot.env().setGreenfootProject(greenfootProject);
 
         // Set ClassNodes
         ClassNode rootClassNode = getRootClassNode();
         greenfootProject.setRootClassNode(rootClassNode);
+
+        // Set world for default class
+        Greenfoot.env().resetWorld();
+        Greenfoot.env().getPlayerPane().setShowClasses(!rootClassNode.getChildNodes().isEmpty());
     }
 
     /**
@@ -128,15 +133,9 @@ public class GreenfootPage extends WebPage {
     @Override
     protected View createUI()
     {
+        // Set Greenfoot project
         GreenfootProject greenfootProject = getGreenfootProject();
         Greenfoot.env().setGreenfootProject(greenfootProject);
-
-        String worldClassName = greenfootProject.getProperty("world.lastInstantiated");
-        if (worldClassName != null) {
-            WebFile worldClassFile = _project.getJavaFileForClassName(worldClassName);
-            Class<? extends World> worldClass = (Class<? extends World>) _project.getClassForFile(worldClassFile);
-            Greenfoot.env().setWorldForClass(worldClass);
-        }
 
         _playerPane = Greenfoot.env().getPlayerPane();
         return _playerPane.getUI();
@@ -148,7 +147,7 @@ public class GreenfootPage extends WebPage {
     @Override
     protected void initUI()
     {
-        resetRootClassNode();
+        resetGreenfootEnv();
     }
 
     /**
