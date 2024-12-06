@@ -1,6 +1,7 @@
 package snapcode.app;
 import greenfoot.*;
 import greenfoot.GreenfootProject;
+import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.view.View;
 import snap.web.WebFile;
@@ -25,6 +26,9 @@ public class GreenfootPage extends WebPage {
 
     // The greenfoot project
     private GreenfootProject _greenfootProject;
+
+    // A listener for Workspace.Building
+    private PropChangeListener _workspaceBuildingLsnr = pc -> handleWorkspaceBuildingChanged();
 
     /**
      * Constructor.
@@ -148,6 +152,30 @@ public class GreenfootPage extends WebPage {
     protected void initUI()
     {
         resetGreenfootEnv();
+    }
+
+    /**
+     * Override to reset greenfoot when build is done.
+     */
+    @Override
+    protected void setShowing(boolean aValue)
+    {
+        if (aValue == isShowing()) return;
+        super.setShowing(aValue);
+
+        // Start/stop listening to Workspace.Building
+        if (aValue)
+            getWorkspace().addPropChangeListener(_workspaceBuildingLsnr, Workspace.Building_Prop);
+        else getWorkspace().removePropChangeListener(_workspaceBuildingLsnr);
+    }
+
+    /**
+     * Called when Workspace.Building changes.
+     */
+    private void handleWorkspaceBuildingChanged()
+    {
+        if (!getWorkspace().isBuilding())
+            runLater(this::resetGreenfootEnv); // Shouldn't need run-later
     }
 
     /**
