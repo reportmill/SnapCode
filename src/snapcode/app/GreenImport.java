@@ -86,6 +86,9 @@ public class GreenImport {
         // Create Main class that launches world.lastInstantiated prop
         createMainClassForGreenfootProject(project);
 
+        // Show greenfoot button
+        workspacePane.getToolBar().showGreenfootButton();
+
         // Return
         return project;
     }

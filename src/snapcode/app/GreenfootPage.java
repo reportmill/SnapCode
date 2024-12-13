@@ -221,7 +221,15 @@ public class GreenfootPage extends WebPage {
     }
 
     /**
-     * Returns the greenfoot project for given project dir.
+     * Returns whether given project is greenfoot.
+     */
+    public static boolean isGreenfootProject(Project aProject)
+    {
+        return getGreenfootProjectForProject(aProject) != null;
+    }
+
+    /**
+     * Returns the greenfoot project for given project.
      */
     private static GreenfootProject getGreenfootProjectForProject(Project aProject)
     {

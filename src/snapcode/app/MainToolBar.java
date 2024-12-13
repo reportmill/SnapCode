@@ -36,6 +36,23 @@ public class MainToolBar extends WorkspaceTool {
     }
 
     /**
+     * Shows the greenfoot button.
+     */
+    public void showGreenfootButton()
+    {
+        if (getView("GreenfootButton") != null)
+            return;
+        Button greenfootButton = new Button();
+        greenfootButton.setName("GreenfootButton");
+        greenfootButton.setPrefSize(28, 28);
+        greenfootButton.setMargin(0, 2, 0, 2);
+        greenfootButton.setShowArea(false);
+        greenfootButton.setImage(Image.getImageForClassResource(getClass(), "pkg.images/Greenfoot.png"));
+        getUI(ChildView.class).addChild(greenfootButton, getView("HomeButton").indexInParent() + 1);
+        greenfootButton.setOwner(this);
+    }
+
+    /**
      * Override to set PickOnBounds.
      */
     protected void initUI()
@@ -122,6 +139,9 @@ public class MainToolBar extends WorkspaceTool {
 
             // Handle SearchComboBox
             case "SearchComboBox": handleSearchComboBox(anEvent); break;
+
+            // Handle GreenfootButton
+            case "GreenfootButton": WorkspacePaneUtils.selectGoodDefaultFile(_workspacePane, getSelProject()); break;
         }
     }
 
