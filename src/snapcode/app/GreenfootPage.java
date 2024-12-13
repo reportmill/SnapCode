@@ -4,6 +4,7 @@ import greenfoot.GreenfootProject;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.view.View;
+import snap.view.ViewEvent;
 import snap.web.WebFile;
 import snapcode.project.Project;
 import snapcode.project.Workspace;
@@ -112,13 +113,12 @@ public class GreenfootPage extends WebPage {
         // Reset project
         Greenfoot.env().setGreenfootProject(greenfootProject);
 
-        // Set ClassNodes
+        // Reset RootClassNodes
         ClassNode rootClassNode = getRootClassNode();
         greenfootProject.setRootClassNode(rootClassNode);
 
-        // Set world for default class
+        // ResetSet world for default class
         Greenfoot.env().resetWorld();
-        Greenfoot.env().getPlayerPane().setShowClasses(!rootClassNode.getChildNodes().isEmpty());
     }
 
     /**
@@ -152,6 +152,10 @@ public class GreenfootPage extends WebPage {
     protected void initUI()
     {
         resetGreenfootEnv();
+
+        // Register for callback when ClassPane gets mouse click
+        ClassesPane classesPane = _playerPane.getClassesPane();
+        classesPane.getUI().addEventFilter(this::handleClassesPaneMousePress, MousePress);
     }
 
     /**
@@ -176,6 +180,29 @@ public class GreenfootPage extends WebPage {
     {
         if (!getWorkspace().isBuilding())
             runLater(this::resetGreenfootEnv); // Shouldn't need run-later
+    }
+
+    /**
+     * Called when PlayerPane.ClassesPane gets mouse press event.
+     */
+    private void handleClassesPaneMousePress(ViewEvent anEvent)
+    {
+        // If not double-click, just return
+        if (anEvent.getClickCount() != 2)
+            return;
+
+        // Get selected class
+        ClassesPane classesPane = _playerPane.getClassesPane();
+        Class<?> selClass = classesPane.getSelClass();
+        if (selClass == null)
+            return;
+
+        // Get selected java file and select
+        WebFile javaFile = _project.getJavaFileForClassName(selClass.getName());
+        if (javaFile != null) {
+            WorkspacePane workspacePane = getWorkspacePane();
+            workspacePane.setSelFile(javaFile);
+        }
     }
 
     /**
