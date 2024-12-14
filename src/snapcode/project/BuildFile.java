@@ -251,6 +251,27 @@ public class BuildFile extends PropObject {
     }
 
     /**
+     * Returns whether to include built-in greenfoot runtime.
+     */
+    public boolean isIncludeGreenfootRuntime()
+    {
+        if (_includeGreenfoot != null) return _includeGreenfoot;
+        WebFile greenfootFile = _proj.getFileForPath("/src/project.greenfoot");
+        return _includeGreenfoot = greenfootFile != null;
+    }
+    private Boolean _includeGreenfoot;
+
+    /**
+     * Sets whether to include built-in greenfoot runtime.
+     */
+    public void setIncludeGreenfootRuntime(boolean aValue)
+    {
+        if (aValue == _includeGreenfoot) return;
+        //buildFile.addDependency(new MavenDependency("com.reportmill:greenfoot:2024.11"));
+        _includeGreenfoot = aValue;
+    }
+
+    /**
      * Returns the dependent project names.
      */
     public String[] getProjectDependenciesNames()
@@ -298,8 +319,8 @@ public class BuildFile extends PropObject {
         // Upgrade greenfoot
         MavenDependency gf = (MavenDependency) ArrayUtils.findMatch(getDependencies(),
                 dep -> dep.getId() != null && dep.getId().contains("com.reportmill:greenfoot:"));
-        if (gf != null && !gf.getId().equals("com.reportmill:greenfoot:2024.11"))
-            gf.setId("com.reportmill:greenfoot:2024.11");
+        if (gf != null) // && !gf.getId().equals("com.reportmill:greenfoot:2024.11")) gf.setId("com.reportmill:greenfoot:2024.11");
+            removeDependency(gf);
     }
 
     /**

@@ -1,5 +1,6 @@
 package snapcode.app;
 import snap.gfx.Image;
+import snap.util.SnapUtils;
 import snap.viewx.DevPane;
 import snapcode.javatext.JavaTextPane;
 import snapcode.project.*;
@@ -104,8 +105,12 @@ public class WorkspaceTools {
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray
-        WorkspaceTool[] bottomTools = { runConfigsTool, breakpointsTool, httpServerTool };
+        WorkspaceTool[] bottomTools = { runConfigsTool, breakpointsTool };
+        if (SnapUtils.isWebVM)
+            bottomTools = new WorkspaceTool[0];
         _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
+        if (SnapUtils.isWebVM)
+            _bottomTray.getUI(TabView.class).getTabBar().setMinHeight(30);
 
         // Add DevToolsButton
         addDevToolsButton();

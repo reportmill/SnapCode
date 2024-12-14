@@ -285,8 +285,6 @@ public class WorkspacePane extends ViewOwner {
         ToolTray bottomTray = _workspaceTools.getBottomTray();
         TabView bottomTrayUI = (TabView) bottomTray.getUI();
         mainSplit.addItem(bottomTrayUI);
-        if (SnapUtils.isWebVM)
-            bottomTrayUI.setVisible(false);
 
         // Configure CutMenuItem, CopyMenuItem, PasteMenuItem, SelectAllMenuItem, UndoMenuItem, RedoMenuItem
         getView("CutMenuItem", MenuItem.class).setSharedAction(SharedAction.Cut_Action);
@@ -528,7 +526,7 @@ public class WorkspacePane extends ViewOwner {
             buildWorkspaceAllLater();
 
         // Handle show greenfoot
-        if (GreenfootPage.isGreenfootProject(aProject))
+        if (aProject.getBuildFile().isIncludeGreenfootRuntime())
             _toolBar.showGreenfootButton();
     }
 

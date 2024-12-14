@@ -302,11 +302,18 @@ public class ProjectUtils {
     /**
      * Returns SnapKit and SnapCharts class paths.
      */
-    public static String[] getSnapKitAndSnapChartsClassPaths()
+    public static String[] getSnapKitAndSnapChartsClassPaths(boolean includeGreenfoot)
     {
         // Get SnapKit class path
         String snapKitClassPath = getClassPathForClass(snap.view.View.class);
         String[] snapClassPaths = new String[] { snapKitClassPath };
+
+        // Get Greenfoot class path (different if running from project build dir)
+        if (includeGreenfoot) {
+            String greenfootClassPath = getClassPathForClass(greenfoot.Greenfoot.class);
+            assert (greenfootClassPath != null);
+            snapClassPaths = ArrayUtils.add(snapClassPaths, greenfootClassPath);
+        }
 
         // Iterate over paths and add "/resources" if "/classes" found
         for (String snapClassPath : snapClassPaths) {
