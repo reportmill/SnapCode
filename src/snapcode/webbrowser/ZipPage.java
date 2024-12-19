@@ -8,6 +8,9 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.util.FileIcons;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * A WebPage subclass for Zip/Jar files.
  */
@@ -91,9 +94,9 @@ public class ZipPage extends WebPage {
         }
 
         // Return child files
-        public WebFile[] getChildren(WebFile aParent)
+        public List<WebFile> getChildren(WebFile aParent)
         {
-            return aParent.getFiles();
+            return Arrays.asList(aParent.getFiles());
         }
 
         // Return child file name

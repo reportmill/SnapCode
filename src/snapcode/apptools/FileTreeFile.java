@@ -272,9 +272,9 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
         /**
          * Returns the children.
          */
-        public FileTreeFile[] getChildren(FileTreeFile aParent)
+        public List<FileTreeFile> getChildren(FileTreeFile aParent)
         {
-            return aParent.getChildren();
+            return Arrays.asList(aParent.getChildren());
         }
 
         /**

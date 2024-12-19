@@ -5,6 +5,7 @@ import snapcode.debug.DebugApp;
 import snap.gfx.Font;
 import snap.view.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -347,9 +348,9 @@ public class DebugVarsPane extends WorkspaceTool {
         /**
          * Returns the children.
          */
-        public VarTreeItem[] getChildren(VarTreeItem aParent)
+        public List<VarTreeItem> getChildren(VarTreeItem aParent)
         {
-            return aParent.getChildren();
+            return Arrays.asList(aParent.getChildren());
         }
 
         /**

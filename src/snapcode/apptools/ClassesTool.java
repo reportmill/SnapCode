@@ -11,6 +11,7 @@ import snapcode.app.WorkspaceTool;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -226,7 +227,7 @@ public class ClassesTool extends WorkspaceTool {
         public boolean isParent(ClassNode anItem)  { return !anItem._childNodes.isEmpty(); }
 
         @Override
-        public ClassNode[] getChildren(ClassNode aParent)  { return aParent.getChildNodes(); }
+        public List<ClassNode> getChildren(ClassNode aParent)  { return Arrays.asList(aParent.getChildNodes()); }
 
         @Override
         public String getText(ClassNode anItem)  { return ""; }

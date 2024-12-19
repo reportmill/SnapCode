@@ -7,6 +7,9 @@ import snap.view.*;
 import snap.web.WebFile;
 import snapcode.util.FileIcons;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * A WebPage subclass for directories.
  */
@@ -100,9 +103,9 @@ public class DirFilePage extends WebPage {
         }
 
         // Return child files
-        public WebFile[] getChildren(WebFile aParent)
+        public List<WebFile> getChildren(WebFile aParent)
         {
-            return aParent.getFiles();
+            return Arrays.asList(aParent.getFiles());
         }
 
         // Return child file name
