@@ -4,6 +4,7 @@
 package snapcode.util;
 import snap.web.WebURL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -12,10 +13,10 @@ import java.util.List;
 public class HelpFile {
 
     // The source URL
-    private WebURL  _sourceURL;
+    private WebURL _sourceURL;
 
     // The sections
-    private HelpSection[]  _sections = new HelpSection[0];
+    private List<HelpSection> _sections = Collections.emptyList();
 
     /**
      * Constructor.
@@ -53,12 +54,12 @@ public class HelpFile {
     /**
      * Returns the sections.
      */
-    public HelpSection[] getSections()  { return _sections; }
+    public List<HelpSection> getSections()  { return _sections; }
 
     /**
      * Sets the sections.
      */
-    public void setSections(HelpSection[] theSections)
+    public void setSections(List<HelpSection> theSections)
     {
         _sections = theSections;
     }
@@ -81,7 +82,7 @@ public class HelpFile {
 
             // Get trimmed - just skip if empty
             sectionText = sectionText.trim();
-            if (sectionText.length() == 0) continue;
+            if (sectionText.isEmpty()) continue;
             sectionText = sectionText.replace("<H2>", "##");
 
             // Create/add section
@@ -90,6 +91,6 @@ public class HelpFile {
         }
 
         // Set sections and return
-        setSections(sections.toArray(new HelpSection[0]));
+        setSections(sections);
     }
 }

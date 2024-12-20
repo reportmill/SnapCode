@@ -17,6 +17,7 @@ import snap.web.WebURL;
 import snapcode.app.JavaPage;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
+import java.util.List;
 
 /**
  * This class shows a help file for the app.
@@ -34,6 +35,9 @@ public class HelpTool extends WorkspaceTool {
 
     // The ScrollView showing the help text
     private ScrollView _helpTextScrollView;
+
+    // The HelpFile URL
+    private static WebURL _defaultHelpFileUrl;
 
     /**
      * Constructor.
@@ -62,9 +66,9 @@ public class HelpTool extends WorkspaceTool {
 
         // If UI is set, update
         if (_topicListView != null) {
-            HelpSection[] sections = _helpFile.getSections();
-            _topicListView.setItems(sections);
-            HelpSection selSection = sections.length > 0 ? sections[0] : null;
+            List<HelpSection> sections = _helpFile.getSections();
+            _topicListView.setItemsList(sections);
+            HelpSection selSection = !sections.isEmpty() ? sections.get(0) : null;
             setSelSection(selSection);
             _topicListView.setSelItem(selSection);
         }
@@ -125,8 +129,8 @@ public class HelpTool extends WorkspaceTool {
 
         // Get HelpSections and set in TopicListView
         HelpFile helpFile = getHelpFile();
-        HelpSection[] sections = helpFile.getSections();
-        _topicListView.setItems(sections);
+        List<HelpSection> sections = helpFile.getSections();
+        _topicListView.setItemsList(sections);
     }
 
     private void configureTopicListViewCell(ListCell<HelpSection> aCell)
@@ -210,11 +214,11 @@ public class HelpTool extends WorkspaceTool {
      */
     private void loadRealHelpFile()
     {
-        if (_helpFile.getSections().length > 0) return;
+        if (!_helpFile.getSections().isEmpty()) return;
 
         // Create run to load real HelpFile and set
         Runnable loadHelpFileRun = () -> {
-            WebURL helpFileURL = WebURL.getURL(HelpFile.class, "HelpFile.md");
+            WebURL helpFileURL = getDefaultHelpFileUrl();
             HelpFile helpFile = new HelpFile(helpFileURL);
             runLater(() -> setHelpFile(helpFile));
         };
@@ -258,4 +262,25 @@ public class HelpTool extends WorkspaceTool {
      */
     @Override
     public String getTitle()  { return "Help"; }
+
+    /**
+     * Returns the help file url.
+     */
+    public static WebURL getDefaultHelpFileUrl()
+    {
+        if (_defaultHelpFileUrl != null) return _defaultHelpFileUrl;
+        WebURL helpFileURL = WebURL.getURL(HelpFile.class, "HelpFile.md");
+        //WebURL helpFileURL = WebURL.getURL("/Users/jeff/Lessons/BalloonRide/BalloonRide.md");
+        return _defaultHelpFileUrl = helpFileURL;
+    }
+
+    /**
+     * Sets the default help file url.
+     */
+    public static void setDefaultHelpFileUrl(WebURL helpFileURL)  { _defaultHelpFileUrl = helpFileURL; }
+
+    /**
+     * Sets the default help file url.
+     */
+    public static void setDefaultHelpFileSource(Object aSource)  { _defaultHelpFileUrl = WebURL.getURL(aSource); }
 }

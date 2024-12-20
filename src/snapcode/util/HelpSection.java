@@ -89,6 +89,7 @@ public class HelpSection {
 
         // Create and configure
         MarkDownView markDownView = new MarkDownView();
+        markDownView.setSourceUrl(_helpFile.getSourceURL());
         markDownView.setMarkDown("# " + _sectionText);
 
         // Set and return
