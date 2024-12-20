@@ -102,6 +102,8 @@ public class WorkspaceTools {
         WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, classesTool, helpTool, blocksTool };
         if (WorkspacePane._embedMode)
             rightTools = new WorkspaceTool[] { runTool, helpTool };
+        if (helpTool.isLesson())
+            rightTools = ArrayUtils.moveToFront(rightTools, helpTool);
         _rightTray = new ToolTray(Side.RIGHT, rightTools);
 
         // Create BottomTray
@@ -175,6 +177,11 @@ public class WorkspaceTools {
      * Returns the BuildTool.
      */
     public BuildTool getBuildTool()  { return getToolForClass(BuildTool.class); }
+
+    /**
+     * Returns the HelpTool.
+     */
+    public HelpTool getHelpTool()  { return getToolForClass(HelpTool.class); }
 
     /**
      * Returns the left side tray.

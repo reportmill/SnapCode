@@ -343,6 +343,10 @@ public class WorkspacePane extends ViewOwner {
         if (getProjects().length > 0)
             buildWorkspaceAllLater();
 
+        // IF lesson is set, show help tool
+        if (_workspaceTools.getHelpTool().isLesson())
+            _workspaceTools.getHelpTool().showTool();
+
         // Hack when running in browser in Swing to always fill available screen size
         if (SnapUtils.isWebVM && getEnv().getClass().getSimpleName().startsWith("Swing"))
             new ViewTimer(this::checkScreenSize, 1000).start();

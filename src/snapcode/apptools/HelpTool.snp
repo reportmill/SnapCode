@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView PrefWidth="400" Font="Arial 12">
-  <RowView Padding="4" GrowWidth="true">
+  <RowView Margin="4" GrowWidth="true">
     <TextField Name="SearchTextField" PrefWidth="260" PrefHeight="26" Margin="4,12,4,80" BorderRadius="10" GrowWidth="true" LeanX="CENTER" PromptText="Search" />
     <Button Name="AddCodeButton" Margin="5,12,5,8" Padding="4,10,4,10" LeanX="RIGHT" Text="Add Code" />
   </RowView>
   <SplitView Name="SplitView" Vertical="true" Font="Arial 14" GrowWidth="true" GrowHeight="true">
-    <ListView Name="TopicListView" PrefHeight="160" Margin="4,6,0,6" BorderRadius="4" Font="Arial 11" GrowWidth="true" />
+    <ColView FillWidth="true">
+      <ListView Name="TopicListView" PrefHeight="140" Margin="4,6,4,6" BorderRadius="4" Font="Arial 11" GrowHeight="true" />
+      <RowView Name="ProgressToolsView" Margin="6,4,0,4" Spacing="4">
+        <Button Name="PrevButton" PrefHeight="24" ImageName="/snapcode/app/pkg.images/LeftArrow.png" />
+        <ProgressBar Name="ProgressBar" PrefHeight="24" GrowWidth="true" />
+        <Button Name="NextButton" PrefHeight="24" Font="Arial 11" Text="Next" />
+      </RowView>
+    </ColView>
     <ScrollView Name="HelpTextScrollView" PrefHeight="400" Margin="0,6,6,6" BorderRadius="4" GrowWidth="true" GrowHeight="true" BarSize="12" />
   </SplitView>
 </ColView>

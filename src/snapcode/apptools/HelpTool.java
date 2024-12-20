@@ -37,7 +37,7 @@ public class HelpTool extends WorkspaceTool {
     private ScrollView _helpTextScrollView;
 
     // The HelpFile URL
-    private static WebURL _defaultHelpFileUrl;
+    private static WebURL _defaultHelpFileUrl = WebURL.getURL("/Users/jeff/Lessons/BalloonRide/BalloonRide.md");
 
     /**
      * Constructor.
@@ -72,6 +72,8 @@ public class HelpTool extends WorkspaceTool {
             setSelSection(selSection);
             _topicListView.setSelItem(selSection);
         }
+
+        resetLater();
     }
 
     /**
@@ -131,8 +133,16 @@ public class HelpTool extends WorkspaceTool {
         HelpFile helpFile = getHelpFile();
         List<HelpSection> sections = helpFile.getSections();
         _topicListView.setItemsList(sections);
+
+        // If not lesson, hide ProgressTools
+        if (!isLesson())
+            setViewVisible("ProgressToolsView", false);
+        getView("NextButton", Button.class).setImageAfter(Image.getImageForClassResource(getClass(), "/snapcode/app/pkg.images/RightArrow.png"));
     }
 
+    /**
+     * Called to configure TopicListView list cells.
+     */
     private void configureTopicListViewCell(ListCell<HelpSection> aCell)
     {
         HelpSection helpSection = aCell.getItem();
@@ -161,6 +171,12 @@ public class HelpTool extends WorkspaceTool {
         // Update TopicListView
         if (_topicListView.getSelItem() != getSelSection())
             _topicListView.setSelItem(getSelSection());
+
+        // Update PrevButton, NextButton, ProgressBar
+        setViewEnabled("PrevButton", getPrevSection() != null);
+        setViewEnabled("NextButton", getNextSection() != null);
+        double progress = (_helpFile.getSections().indexOf(getSelSection()) + 1d) / _helpFile.getSections().size();
+        setViewValue("ProgressBar", progress);
     }
 
     /**
@@ -169,15 +185,41 @@ public class HelpTool extends WorkspaceTool {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle TopicListView
-        if (anEvent.equals("TopicListView")) {
-            HelpSection section = (HelpSection) anEvent.getSelItem();
-            setSelSection(section);
-        }
+        switch (anEvent.getName()) {
 
-        // Handle AddCodeButton
-        if (anEvent.equals("AddCodeButton"))
-            addHelpCodeToDoc();
+            // Handle TopicListView
+            case "TopicListView":
+                HelpSection section = (HelpSection) anEvent.getSelItem();
+                setSelSection(section);
+                break;
+
+            // Handle AddCodeButton
+            case "AddCodeButton": addHelpCodeToDoc(); break;
+
+            // Handle PrevButton, NextButton
+            case "PrevButton": setSelSection(getPrevSection()); break;
+            case "NextButton": setSelSection(getNextSection()); break;
+        }
+    }
+
+    /**
+     * Returns the previous section.
+     */
+    private HelpSection getPrevSection()
+    {
+        HelpSection selSection = getSelSection();
+        int prevIndex = _helpFile.getSections().indexOf(selSection) - 1;
+        return prevIndex >= 0 ? _helpFile.getSections().get(prevIndex) : null;
+    }
+
+    /**
+     * Returns the next section.
+     */
+    private HelpSection getNextSection()
+    {
+        HelpSection selSection = getSelSection();
+        int nextIndex = _helpFile.getSections().indexOf(selSection) + 1;
+        return nextIndex > 0 && nextIndex < _helpFile.getSections().size() ? _helpFile.getSections().get(nextIndex) : null;
     }
 
     /**
@@ -261,17 +303,22 @@ public class HelpTool extends WorkspaceTool {
      * Returns the tool title.
      */
     @Override
-    public String getTitle()  { return "Help"; }
+    public String getTitle()  { return isLesson() ? "Lesson" : "Help"; }
+
+    /**
+     * Returns whether help is really a lesson.
+     */
+    public boolean isLesson()  { return _defaultHelpFileUrl != null; }
 
     /**
      * Returns the help file url.
      */
     public static WebURL getDefaultHelpFileUrl()
     {
-        if (_defaultHelpFileUrl != null) return _defaultHelpFileUrl;
-        WebURL helpFileURL = WebURL.getURL(HelpFile.class, "HelpFile.md");
-        //WebURL helpFileURL = WebURL.getURL("/Users/jeff/Lessons/BalloonRide/BalloonRide.md");
-        return _defaultHelpFileUrl = helpFileURL;
+        if (_defaultHelpFileUrl != null)
+            return _defaultHelpFileUrl;
+        return WebURL.getURL(HelpFile.class, "HelpFile.md");
+        //return WebURL.getURL("/Users/jeff/Lessons/BalloonRide/BalloonRide.md");
     }
 
     /**

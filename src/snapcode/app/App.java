@@ -7,6 +7,8 @@ import snap.view.ViewUtils;
 import snap.view.WindowView;
 import snap.viewx.DevPaneExceptions;
 import snap.web.WebFile;
+import snap.web.WebURL;
+import snapcode.apptools.HelpTool;
 import snapcode.apptools.RunTool;
 import snapcode.util.LZString;
 
@@ -112,6 +114,17 @@ public class App {
             return true;
         }
 
+        // Handle 'open:'
+        if (arg0.startsWith("open:")) {
+            WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
+            String openUrlAddr = arg0.substring("open:".length());
+            WebURL openUrl = WebURL.getURL(openUrlAddr);
+            if (openUrl != null) {
+                WorkspacePaneUtils.openFileUrl(workspacePane, openUrl);
+                return true;
+            }
+        }
+
         // Handle 'Sample:'
         if (arg0.startsWith("sample:")) {
             WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
@@ -132,6 +145,13 @@ public class App {
         // Handle 'Play'
         if (arg0.equals("autorun")) {
             ViewUtils.runDelayed(() -> autoRunOpenFile(), 800);
+            return false;
+        }
+
+        // Handle 'lesson'
+        if (arg0.startsWith("lesson:")) {
+            System.out.println("Open Lesson: " + arg0.substring("lesson:".length()));
+            HelpTool.setDefaultHelpFileSource(arg0.substring("lesson:".length()));
             return false;
         }
 
