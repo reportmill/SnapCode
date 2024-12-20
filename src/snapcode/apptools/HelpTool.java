@@ -37,7 +37,7 @@ public class HelpTool extends WorkspaceTool {
     private ScrollView _helpTextScrollView;
 
     // The HelpFile URL
-    private static WebURL _defaultHelpFileUrl = WebURL.getURL("/Users/jeff/Lessons/BalloonRide/BalloonRide.md");
+    private static WebURL _defaultHelpFileUrl; // = WebURL.getURL("/Users/jeff/Lessons/BalloonRide/BalloonRide.md");
 
     /**
      * Constructor.
