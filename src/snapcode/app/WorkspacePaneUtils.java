@@ -4,6 +4,7 @@ import snap.view.ViewUtils;
 import snap.view.WindowView;
 import snap.viewx.DialogBox;
 import snap.web.*;
+import snapcode.apptools.HelpTool;
 import snapcode.apptools.ProjectFilesTool;
 import snapcode.apptools.NewFileTool;
 import snapcode.project.*;
@@ -53,6 +54,9 @@ public class WorkspacePaneUtils {
 
             // Handle gfar
             case "gfar": GreenImport.openGreenfootForArchiveFileUrl(workspacePane, fileUrl); return true;
+
+            // Handle lesson
+            case "md": openLesson(workspacePane, fileUrl); return true;
 
             // Handle anything else: Open project for given file
             default:
@@ -124,6 +128,15 @@ public class WorkspacePaneUtils {
 
         // Open sample URL
         openFileUrl(workspacePane, sampleURL);
+    }
+
+    /**
+     * Opens a lesson.
+     */
+    public static void openLesson(WorkspacePane workspacePane, WebURL lessonURL)
+    {
+        HelpTool.setDefaultHelpFileUrl(lessonURL);
+        workspacePane.getWorkspaceTools().getHelpTool().showTool();
     }
 
     /**

@@ -73,17 +73,18 @@ public class SamplesPageView extends MarkDownView {
     @Override
     protected View createViewForHeaderNode(MDNode headerNode)
     {
-        if (headerNode.getText().equals("enCode/Create")) {
+        // Add "Open Greenfoot Scenario Could Id..." to Greefoot Projects header
+        if (headerNode.getText().equals("Greenfoot projects")) {
 
             // Create normal headerView
             View headerView = super.createViewForHeaderNode(headerNode);
 
             // Create learn to code label
-            Label learnToCodeLabel = new Label("Learn to Code! ...");
-            learnToCodeLabel.setPropsString("Font:Arial Italic 20; Margin:0,0,0,40; Padding:0,0,2,0;");
+            Label learnToCodeLabel = new Label("Open Scenario Id ...");
+            learnToCodeLabel.setPropsString("Font:Arial Italic 18; Margin:0,0,0,30; Padding:0,0,2,0;");
             learnToCodeLabel.setTextStyleString("Color:#6666FF; Underline:1;");
             learnToCodeLabel.setCursor(Cursor.HAND);
-            learnToCodeLabel.addEventHandler(e -> GFXEnv.getEnv().openURL("https://www.encodecreate.com"), MousePress);
+            learnToCodeLabel.addEventHandler(e -> GreenImport.showGreenfootPanel(_samplesPage._workspacePane), MousePress);
 
             // Create row, add children and return
             RowView rowView = new RowView();

@@ -37,8 +37,11 @@
 
 @[OpenSamples=true]
 
-## Java Markdown
+## Java Markdown and Coding Lessons
 
-* Introduction
+* Java Markdown
   [](https://reportmill.com/SnapCode/Samples/JavaMarkdown/JavaMarkdown.zip)
   This sample is a basic introduction to Java markdown.
+* Encode Lesson 1
+  [](https://reportmill.com/SnapCode/lessons/BalloonRide/BalloonRide.md)
+  This lesson is a basic introduction to Java coding.
