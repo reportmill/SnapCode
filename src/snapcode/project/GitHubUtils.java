@@ -1,6 +1,7 @@
 package snapcode.project;
 import snap.web.WebFile;
 import snap.web.WebURL;
+import snap.web.WebUtils;
 
 /**
  * Utilities for GitHub API.
@@ -12,11 +13,13 @@ public class GitHubUtils {
      */
     public static WebURL downloadGithubZipFile(WebURL repoURL)
     {
-        // Get Zip bytes
-        String PROXY_URL = "https://corsproxy.io/?";
+        // Get zip url address
         String repoUrlAddr = repoURL.getString().replace(".git", "");
-        String zipUrlAddr = PROXY_URL + repoUrlAddr.replace("github.com", "codeload.github.com") + "/zip/refs/heads/master";
+        String zipUrlAddr = repoUrlAddr.replace("github.com", "codeload.github.com") + "/zip/refs/heads/master";
         zipUrlAddr += "?vers=" + (System.currentTimeMillis() % 3600000); // Defeat caching
+        zipUrlAddr = WebUtils.getCorsProxyAddress(zipUrlAddr); // Get
+
+        // Get Zip url bytes
         WebURL zipUrl = WebURL.getURL(zipUrlAddr); assert (zipUrl != null);
         byte[] zipBytes = zipUrl.getBytes();
         if (zipBytes == null)

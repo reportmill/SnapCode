@@ -117,7 +117,8 @@ public class GreenImport {
         // Get URL address for scenario
         String scenarioUrlAddr = "https://www.greenfoot.org/scenarios/" + gfId + "/get_gfar";
         if (SnapUtils.isWebVM) {
-            String CORS_PROXY_SERVER = "https://corsproxy.io/?";
+            //String CORS_PROXY_SERVER = "https://corsproxy.io/?url=";
+            String CORS_PROXY_SERVER = "https://snap-proxy-4b.jeff-b76.workers.dev/?url=";
             scenarioUrlAddr = CORS_PROXY_SERVER + scenarioUrlAddr;
         }
 

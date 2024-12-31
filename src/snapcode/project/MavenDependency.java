@@ -7,6 +7,8 @@ import snap.util.SnapUtils;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebURL;
+import snap.web.WebUtils;
+
 import java.io.IOException;
 import java.util.Objects;
 
@@ -55,9 +57,6 @@ public class MavenDependency extends BuildDependency {
 
     // Constant for Maven central URL
     public static final String MAVEN_CENTRAL_URL = "https://repo1.maven.org/maven2";
-
-    // Constant for proxy server for CORS access found by googling for 'free cors proxy server'
-    private static final String CORS_PROXY_SERVER = "https://corsproxy.io/?";
 
     /**
      * Constructor.
@@ -311,7 +310,7 @@ public class MavenDependency extends BuildDependency {
                 return "https://reportmill.com/maven";
         }
         if (SnapUtils.isWebVM)
-            return CORS_PROXY_SERVER + MAVEN_CENTRAL_URL;
+            return WebUtils.getCorsProxyAddress(MAVEN_CENTRAL_URL);
         return MAVEN_CENTRAL_URL;
     }
 
