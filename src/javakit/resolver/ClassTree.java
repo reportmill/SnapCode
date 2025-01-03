@@ -267,13 +267,11 @@ public class ClassTree {
         if (aPath.startsWith("/java/lang/model")) return true;
         if (aPath.startsWith("/java/lang/management")) return true;
         if (aPath.startsWith("/java/nio/channels")) return true;
-        if (aPath.startsWith("/java/nio/file/attribute")) return true;
         if (aPath.startsWith("/java/rmi")) return true;
         if (aPath.startsWith("/java/security")) return true;
         if (aPath.startsWith("/java/sql")) return true;
         if (aPath.startsWith("/java/time/chrono")) return true;
         if (aPath.startsWith("/java/time/temporal")) return true;
-        if (aPath.startsWith("/java/util/concurrent")) return true;
         if (aPath.startsWith("/java/util/spi")) return true;
         if (aPath.startsWith("/java/util/Spliterators")) return true;
         if (aPath.startsWith("/javax/crypto")) return true;

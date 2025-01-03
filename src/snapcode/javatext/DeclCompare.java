@@ -98,10 +98,6 @@ class DeclCompare implements Comparator<JavaDecl> {
             rating += 5;
         }
 
-        // Additional chars make us less happy
-        int additionalCharsCount = declName.length() - _prefix.length();
-        rating -= additionalCharsCount;
-
         // Return
         return rating;
     }
@@ -118,7 +114,7 @@ class DeclCompare implements Comparator<JavaDecl> {
         String packageName = pkg != null ? pkg.getName() : "";
 
         // If root or common package, add bonus
-        if (packageName.length() == 0 || ArrayUtils.contains(DeclMatcher.COMMON_PACKAGES, packageName))
+        if (packageName.isEmpty() || ArrayUtils.contains(DeclMatcher.COMMON_PACKAGES, packageName))
             rating += 5;
         else if (packageName.startsWith("java.util.") || packageName.startsWith("java.lang."))
             rating += 2;
