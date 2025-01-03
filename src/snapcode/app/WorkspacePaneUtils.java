@@ -53,7 +53,7 @@ public class WorkspacePaneUtils {
             case "git": openProjectForRepoURL(workspacePane, fileUrl); return true;
 
             // Handle gfar
-            case "gfar": GreenImport.openGreenfootForArchiveFileUrl(workspacePane, fileUrl); return true;
+            case "gfar": openGreenfootForArchiveFileUrl(workspacePane, fileUrl); return true;
 
             // Handle lesson
             case "md": openLesson(workspacePane, fileUrl); return true;
@@ -341,6 +341,15 @@ public class WorkspacePaneUtils {
     }
 
     /**
+     * Open greenfoot archive file.
+     */
+    private static void openGreenfootForArchiveFileUrl(WorkspacePane workspacePane, WebURL fileUrl)
+    {
+        GreenImport.openGreenfootForArchiveFileUrl(workspacePane, fileUrl);
+        addRecentFileUrl(fileUrl);
+    }
+
+    /**
      * Selects a good default file.
      */
     public static void selectGoodDefaultFile(WorkspacePane workspacePane, Project project)
@@ -380,7 +389,7 @@ public class WorkspacePaneUtils {
     private static boolean addRecentFileUrl(WebURL fileUrl)
     {
         String filePath = fileUrl.getPath();
-        if (filePath.contains("TempProj") || filePath.contains("/SnapCode/Samples/"))
+        if (filePath.contains("TempProj")) // || filePath.contains("/SnapCode/Samples/"))
             return false;
 
         // If URL is from temp dir, just return
