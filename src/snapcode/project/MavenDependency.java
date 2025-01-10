@@ -44,9 +44,6 @@ public class MavenDependency extends BuildDependency {
     // The error string
     private String _error;
 
-    // Whether a thread is waiting for dependency to load
-    private boolean _waitingForLoad;
-
     // Constants for properties
     public static final String Group_Prop = "Group";
     public static final String Name_Prop = "Name";
@@ -239,10 +236,6 @@ public class MavenDependency extends BuildDependency {
             for (Runnable loadLsnr : _loadLsnrs)
                 loadLsnr.run();
             _loadLsnrs = new Runnable[0];
-
-            // If another thread is waiting for image load, wake thread
-            if (_waitingForLoad)
-                wakeForLoad();
         }
     }
 
@@ -254,30 +247,6 @@ public class MavenDependency extends BuildDependency {
         if (isLoaded())
             aRunnable.run();
         else _loadLsnrs = ArrayUtils.add(_loadLsnrs, aRunnable);
-    }
-
-    /**
-     * Waits for dependency to load.
-     */
-    public synchronized void waitForLoad()
-    {
-        if (!isLoaded()) {
-            loadPackageFiles();
-            try {
-                _waitingForLoad = true;
-                wait();
-                _waitingForLoad = false;
-            }
-            catch (Exception e) { System.out.println("MavenDependency.waitForLoad: Failure: " + e.getMessage()); }
-        }
-    }
-
-    /**
-     * Stop wait.
-     */
-    private synchronized void wakeForLoad()
-    {
-        notify();
     }
 
     /**
@@ -427,10 +396,6 @@ public class MavenDependency extends BuildDependency {
         if (isLoading())
             return;
 
-        // Set loading
-        setLoaded(false);
-        setLoading(true);
-
         // Set Loading true and start thread
         new Thread(() -> loadPackageFilesImpl()).start();
     }
@@ -438,16 +403,21 @@ public class MavenDependency extends BuildDependency {
     /**
      * Loads package files.
      */
-    private void loadPackageFilesImpl()
+    private synchronized void loadPackageFilesImpl()
     {
-        // Get remote and local jar file urls - if either is null, just return
-        WebURL remoteJarURL = getRemoteJarURL();
-        WebFile localJarFile = getLocalJarFile();
-        if (remoteJarURL == null || localJarFile == null)
-            return;
-
-        // Fetch file
         try {
+
+            // Set loading
+            setLoaded(false);
+            setLoading(true);
+
+            // Get remote and local jar file urls - if either is null, just return
+            WebURL remoteJarURL = getRemoteJarURL();
+            WebFile localJarFile = getLocalJarFile();
+            if (remoteJarURL == null || localJarFile == null)
+                return;
+
+            // Fetch file
             copyUrlToFile(remoteJarURL, localJarFile);
             setLoaded(true);
         }
@@ -458,8 +428,23 @@ public class MavenDependency extends BuildDependency {
             _error = e.getMessage();
         }
 
-        // Reset loaded
-        setLoading(false);
+        // Reset Loading and wake waitForLoad thread(s)
+        finally {
+            setLoading(false);
+            notifyAll();
+        }
+    }
+
+    /**
+     * Waits for dependency to load.
+     */
+    public synchronized void waitForLoad()
+    {
+        if (!isLoaded() || isLoading()) {
+            loadPackageFiles();
+            try { wait(); }
+            catch (Exception e) { System.out.println("MavenDependency.waitForLoad: Failure: " + e.getMessage()); }
+        }
     }
 
     /**

@@ -67,6 +67,23 @@ public abstract class BuildDependency extends PropObject {
     }
 
     /**
+     * Standard equals implementation.
+     */
+    @Override
+    public boolean equals(Object anObj)
+    {
+        if (this == anObj) return true;
+        BuildDependency other = anObj instanceof BuildDependency ? (BuildDependency) anObj : null; if (other == null) return false;
+        return Objects.equals(getId(), other.getId());
+    }
+
+    /**
+     * Standard equals implementation.
+     */
+    @Override
+    public int hashCode()  { return Objects.hash(getId()); }
+
+    /**
      * Returns a dependency for given path.
      */
     public static BuildDependency.JarFileDependency getJarFileDependencyForPath(Project aProject, String aPath)

@@ -111,7 +111,7 @@ public class Project extends PropObject {
         BuildFile buildFile = getBuildFileImpl();
 
         // Add PropChangeListener to save changes to file and clear ClassPathInfo
-        buildFile.addPropChangeListener(pc -> buildFileDidChange());
+        buildFile.addPropChangeListener(pc -> handleBuildFileChange());
 
         // Set, return
         return _buildFile = buildFile;
@@ -435,7 +435,7 @@ public class Project extends PropObject {
     /**
      * Watches Project.BuildFile for dependency change to reset ClassPathInfo.
      */
-    private void buildFileDidChange()
+    private void handleBuildFileChange()
     {
         // Save build file
         BuildFile buildFile = getBuildFile();
