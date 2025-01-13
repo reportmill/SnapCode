@@ -265,6 +265,9 @@ public class JavaAgent {
             errors = NodeError.getAllNodeErrors(jFile);
         }
 
+        // Check for DEPS
+        JavaDeps.resolveDependenciesForFile(null, _javaFile);
+
         // Convert to BuildIssues and set in agent
         WebFile javaFile = getFile();
         BuildIssue[] buildIssues = ArrayUtils.map(errors, error -> BuildIssue.createIssueForNodeError(error, javaFile), BuildIssue.class);

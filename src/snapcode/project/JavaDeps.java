@@ -42,15 +42,19 @@ public class JavaDeps {
             if (dependency instanceof MavenDependency) {
                 MavenDependency mavenDependency = (MavenDependency) dependency;
                 if (!mavenDependency.isLoaded()) {
-                    taskMonitor.beginTask("Loading dependency: " + mavenDependency.getName(), 1);
+                    if (taskMonitor != null)
+                        taskMonitor.beginTask("Loading dependency: " + mavenDependency.getName(), 1);
                     mavenDependency.waitForLoad();
-                    taskMonitor.endTask();
+                    if (taskMonitor != null)
+                        taskMonitor.endTask();
                     if (!mavenDependency.isLoaded())
                         continue;
                 }
             }
 
+            // Add dependency
             buildFile.addDependency(dependency);
+            System.out.println("JavaDeps: Added build dependency: " + dependency.getId());
         }
     }
 

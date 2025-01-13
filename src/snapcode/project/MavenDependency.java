@@ -424,7 +424,7 @@ public class MavenDependency extends BuildDependency {
 
         // Handle errors
         catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             _error = e.getMessage();
         }
 
