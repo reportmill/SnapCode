@@ -16,7 +16,7 @@ public class JavaPackage extends JavaDecl {
     protected JavaDecl[] _children;
 
     // The child packages
-    private JavaPackage[] _packages;
+    protected JavaPackage[] _packages;
 
     // The child classes
     protected JavaClass[] _classes;

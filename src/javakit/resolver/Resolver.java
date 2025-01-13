@@ -295,6 +295,28 @@ public class Resolver {
     }
 
     /**
+     * Called when dependency changes.
+     */
+    public void handleProjectDependenciesChanged()
+    {
+        _classTree = null;
+        JavaPackage rootPackage = getJavaPackageForName("");
+        resetPackage(rootPackage);
+    }
+
+    /**
+     * Resets given package children so it will reload from ClassTree.
+     */
+    private static void resetPackage(JavaPackage aPackage)
+    {
+        JavaPackage[] childPackages = aPackage.getPackages();
+        aPackage._children = null;
+        aPackage._packages = null;
+        for (JavaPackage childPackage : childPackages)
+            resetPackage(childPackage);
+    }
+
+    /**
      * Returns a JavaGenericArrayType for java.lang.reflect.GenericArrayType.
      */
     private JavaGenericArrayType getJavaGenericArrayTypeForType(GenericArrayType aGAT)

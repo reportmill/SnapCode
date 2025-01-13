@@ -4,6 +4,7 @@
 package snapcode.project;
 import javakit.resolver.JavaClass;
 import javakit.resolver.Resolver;
+import snap.props.PropChange;
 import snap.props.PropObject;
 import snap.util.*;
 import snap.web.*;
@@ -111,7 +112,7 @@ public class Project extends PropObject {
         BuildFile buildFile = getBuildFileImpl();
 
         // Add PropChangeListener to save changes to file and clear ClassPathInfo
-        buildFile.addPropChangeListener(pc -> handleBuildFileChange());
+        buildFile.addPropChangeListener(this::handleBuildFileChange);
 
         // Set, return
         return _buildFile = buildFile;
@@ -435,7 +436,7 @@ public class Project extends PropObject {
     /**
      * Watches Project.BuildFile for dependency change to reset ClassPathInfo.
      */
-    private void handleBuildFileChange()
+    private void handleBuildFileChange(PropChange propChange)
     {
         // Save build file
         BuildFile buildFile = getBuildFile();
@@ -443,6 +444,10 @@ public class Project extends PropObject {
 
         // Clear classloader
         clearClassLoader();
+
+        // If Dependency changed, update resolver for changed class paths
+        if (propChange.getPropName() == BuildFile.Dependency_Prop)
+            getResolver().handleProjectDependenciesChanged();
     }
 
     /**
