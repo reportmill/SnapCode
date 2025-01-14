@@ -309,6 +309,8 @@ public class Resolver {
      */
     private static void resetPackage(JavaPackage aPackage)
     {
+        if (aPackage._children == null)
+            return;
         JavaPackage[] childPackages = aPackage.getPackages();
         aPackage._children = null;
         aPackage._packages = null;
