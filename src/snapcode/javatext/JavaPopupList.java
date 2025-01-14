@@ -507,8 +507,12 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         TextArea textArea = getTextArea();
         TextBlock textBlock = textArea.getTextBlock();
 
-        // Add import to Java text
+        // Get text line (skip any //DEPS or similar comments)
         TextLine textLine = textBlock.getLine(importLineIndex);
+        while (textLine.startsWith("//") && textLine.length() > 2 && Character.isLetter(textLine.charAt(2)) && textLine.getNext() != null)
+            textLine = textLine.getNext();
+
+        // Add import to Java text
         textBlock.addChars(importStr, textLine.getStartCharIndex());
 
         // Update selection
