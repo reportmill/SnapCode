@@ -48,6 +48,7 @@ public class SamplesPage extends WebPage {
     {
         _samplesPageView = new SamplesPageView(this);
         ScrollView scrollView = new ScrollView(_samplesPageView);
+        scrollView.setBorder(null);
         return scrollView;
     }
 
