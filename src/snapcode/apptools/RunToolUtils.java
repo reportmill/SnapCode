@@ -77,8 +77,8 @@ public class RunToolUtils {
     public static void runConfigForName(RunTool runTool, String configName, boolean withDebug)
     {
         WebSite rootSite = runTool.getRootSite();
-        RunConfigs runConfigs = RunConfigs.get(rootSite);
-        RunConfig runConfig = runConfigs.getRunConfig(configName);
+        RunConfigs runConfigs = RunConfigs.getRunConfigsForProjectSite(rootSite);
+        RunConfig runConfig = runConfigs.getRunConfigForName(configName);
         if (runConfig != null) {
             runConfigs.getRunConfigs().remove(runConfig);
             runConfigs.getRunConfigs().add(0, runConfig);

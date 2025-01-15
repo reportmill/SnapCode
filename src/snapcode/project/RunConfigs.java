@@ -1,4 +1,5 @@
 package snapcode.project;
+import snap.util.ListUtils;
 import snapcode.util.Settings;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -13,13 +14,13 @@ import java.util.Map;
 public class RunConfigs {
 
     // The site
-    WebSite _site;
+    private WebSite _site;
 
     // The list of Run Configurations
-    List<RunConfig> _runConfigs;
+    private List<RunConfig> _runConfigs;
 
     /**
-     * Creates a new RunConfigs for given site.
+     * Constructor for given site.
      */
     public RunConfigs(WebSite aSite)
     {
@@ -31,8 +32,8 @@ public class RunConfigs {
      */
     public RunConfig getRunConfig()
     {
-        List<RunConfig> cfs = getRunConfigs();
-        return cfs.size() > 0 ? cfs.get(0) : null;
+        List<RunConfig> runConfigs = getRunConfigs();
+        return !runConfigs.isEmpty() ? runConfigs.get(0) : null;
     }
 
     /**
@@ -40,18 +41,16 @@ public class RunConfigs {
      */
     public List<RunConfig> getRunConfigs()
     {
-        return _runConfigs != null ? _runConfigs : (_runConfigs = readFile());
+        if (_runConfigs != null) return _runConfigs;
+        return _runConfigs = readFile();
     }
 
     /**
      * Returns the RunConfig for given name.
      */
-    public RunConfig getRunConfig(String aString)
+    public RunConfig getRunConfigForName(String aString)
     {
-        for (RunConfig rc : getRunConfigs())
-            if (rc.getName().equals(aString))
-                return rc;
-        return null;
+        return ListUtils.findMatch(getRunConfigs(), runConfig -> runConfig.getName().equals(aString));
     }
 
     /**
@@ -60,11 +59,11 @@ public class RunConfigs {
     public List<RunConfig> readFile()
     {
         List<RunConfig> runConfigs = new ArrayList<>();
-        List<Map<String,Object>> rconfMaps = getSettings().getList("RunConfigs");
+        List<Map<String,Object>> runConfigMaps = getSettings().getList("RunConfigs");
 
         // If existing RunConfig maps found, create RunConfigs
-        if (rconfMaps != null) {
-            for (Map<String,Object> map : rconfMaps) {
+        if (runConfigMaps != null) {
+            for (Map<String,Object> map : runConfigMaps) {
                 String name = (String) map.get("Name");
                 String cname = (String) map.get("MainClassName");
                 String appArgs = (String) map.get("AppArgs");
@@ -82,18 +81,19 @@ public class RunConfigs {
      */
     public void writeFile()
     {
-        List<RunConfig> rconfs = getRunConfigs();
-        Settings.SettingsList<Map> rconfMaps = getSettings().getList("RunConfigs", true);
+        List<RunConfig> runConfigs = getRunConfigs();
+        Settings.SettingsList<Map<String,String>> runConfigMaps = getSettings().getList("RunConfigs", true);
 
-        for (int i = 0, iMax = rconfs.size(); i < iMax; i++) {
-            RunConfig rconf = rconfs.get(i);
-            Settings rcSetting = rconfMaps.getSettings(i, true);
-            rcSetting.put("Name", rconf.getName());
-            rcSetting.put("MainClassName", rconf.getMainClassName());
-            rcSetting.put("AppArgs", rconf.getAppArgs());
-            rcSetting.put("VMArgs", rconf.getVMArgs());
+        for (int i = 0, iMax = runConfigs.size(); i < iMax; i++) {
+            RunConfig runConfig = runConfigs.get(i);
+            Settings runConfigSetting = runConfigMaps.getSettings(i, true);
+            runConfigSetting.put("Name", runConfig.getName());
+            runConfigSetting.put("MainClassName", runConfig.getMainClassName());
+            runConfigSetting.put("AppArgs", runConfig.getAppArgs());
+            runConfigSetting.put("VMArgs", runConfig.getVMArgs());
         }
-        while (rconfMaps.size() > rconfs.size()) rconfMaps.remove(rconfMaps.size() - 1);
+        while (runConfigMaps.size() > runConfigs.size())
+            runConfigMaps.remove(runConfigMaps.size() - 1);
 
         // Save file
         if (getFile().isUpdateSet())
@@ -113,19 +113,18 @@ public class RunConfigs {
      */
     protected WebFile getFile()
     {
-        WebFile file = _site.getSandboxSite().getFileForPath("/settings/run_configs");
-        if (file == null) file = _site.getSandboxSite().createFileForPath("/settings/run_configs", false);
-        return file;
+        WebSite sandboxSite = _site.getSandboxSite();
+        return sandboxSite.createFileForPath("/settings/run_configs", false);
     }
 
     /**
      * Returns the RunConfigs for a given site.
      */
-    public static synchronized RunConfigs get(WebSite aSite)
+    public static synchronized RunConfigs getRunConfigsForProjectSite(WebSite aSite)
     {
-        RunConfigs rcs = (RunConfigs) aSite.getProp(RunConfigs.class.getName());
-        if (rcs == null) aSite.setProp(RunConfigs.class.getName(), rcs = new RunConfigs(aSite));
-        return rcs;
+        RunConfigs runConfigs = (RunConfigs) aSite.getProp(RunConfigs.class.getName());
+        if (runConfigs == null)
+            aSite.setProp(RunConfigs.class.getName(), runConfigs = new RunConfigs(aSite));
+        return runConfigs;
     }
-
 }

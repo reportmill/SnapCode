@@ -1,8 +1,10 @@
 package snapcode.apptools;
 import snap.view.*;
+import snap.web.WebSite;
 import snapcode.app.*;
 import snapcode.project.RunConfig;
 import snapcode.project.RunConfigs;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -11,7 +13,7 @@ import java.util.List;
 public class RunConfigsTool extends WorkspaceTool {
 
     // The selected RunConfig
-    private RunConfig _runConfig;
+    private RunConfig _selRunConfig;
 
     /**
      * Constructor.
@@ -26,25 +28,27 @@ public class RunConfigsTool extends WorkspaceTool {
      */
     public List<RunConfig> getRunConfigs()
     {
-        return RunConfigs.get(getRootSite()).getRunConfigs();
+        WebSite rootSite = getRootSite();
+        return rootSite != null ? RunConfigs.getRunConfigsForProjectSite(rootSite).getRunConfigs() : Collections.emptyList();
     }
 
     /**
      * Returns the selected run config.
      */
-    public RunConfig getSelectedRunConfig()
+    public RunConfig getSelRunConfig()
     {
-        if (_runConfig == null && !getRunConfigs().isEmpty())
-            _runConfig = getRunConfigs().get(0);
-        return _runConfig;
+        List<RunConfig> runConfigs = getRunConfigs();
+        if (_selRunConfig == null && !runConfigs.isEmpty())
+            _selRunConfig = runConfigs.get(0);
+        return _selRunConfig;
     }
 
     /**
      * Sets the selected run config.
      */
-    public void setSelectedRunConfig(RunConfig aConfig)
+    public void setSelRunConfig(RunConfig aConfig)
     {
-        _runConfig = aConfig;
+        _selRunConfig = aConfig;
     }
 
 //    /**
@@ -72,7 +76,7 @@ public class RunConfigsTool extends WorkspaceTool {
     protected void resetUI()
     {
         // Update NameText
-        RunConfig selRunConfig = getSelectedRunConfig();
+        RunConfig selRunConfig = getSelRunConfig();
         setViewText("NameText", selRunConfig != null ? selRunConfig.getName() : "");
         setViewEnabled("NameText", selRunConfig != null);
 
@@ -104,12 +108,12 @@ public class RunConfigsTool extends WorkspaceTool {
             Object selItem = anEvent.getSelItem();
             if (selItem instanceof RunConfig) {
                 RunConfig runConfig = (RunConfig) selItem;
-                setSelectedRunConfig(runConfig);
+                setSelRunConfig(runConfig);
             }
         }
 
         // Handle NameText, MainClassText, AppArgsText, VMArgsText
-        RunConfig selRunConfig = getSelectedRunConfig();
+        RunConfig selRunConfig = getSelRunConfig();
         if (anEvent.equals("NameText") && selRunConfig != null)
             selRunConfig.setName(anEvent.getStringValue());
         if (anEvent.equals("MainClassText") && selRunConfig != null)
@@ -121,15 +125,15 @@ public class RunConfigsTool extends WorkspaceTool {
 
         // Handle AddButton
         if (anEvent.equals("AddButton")) {
-            RunConfig rc = new RunConfig().setName("Untitled");
-            getRunConfigs().add(rc);
-            setSelectedRunConfig(rc);
+            RunConfig runConfig = new RunConfig().setName("Untitled");
+            getRunConfigs().add(runConfig);
+            setSelRunConfig(runConfig);
         }
 
         // Handle RemoveButton
         if (anEvent.equals("RemoveButton") && !getRunConfigs().isEmpty()) {
-            getRunConfigs().remove(getSelectedRunConfig());
-            setSelectedRunConfig(null);
+            getRunConfigs().remove(getSelRunConfig());
+            setSelRunConfig(null);
         }
 
 //        // Handle RunConfigMenuItems
@@ -141,7 +145,7 @@ public class RunConfigsTool extends WorkspaceTool {
 //        }
 
         // Save RunConfigs
-        RunConfigs.get(getRootSite()).writeFile();
+        RunConfigs.getRunConfigsForProjectSite(getRootSite()).writeFile();
         // getToolBar().setRunMenuButtonItems();
     }
 
