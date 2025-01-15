@@ -255,6 +255,9 @@ public class JavaAgent {
      */
     public void checkFileForErrors()
     {
+        // Check for DEPS
+        JavaDeps.resolveDependenciesForFile(null, _javaFile);
+
         // Get errors for body declarations
         JFile jFile = getJFile();
         NodeError[] errors = jFile.getDeclarationErrors();
@@ -264,9 +267,6 @@ public class JavaAgent {
             reloadClassFromClassDecl();
             errors = NodeError.getAllNodeErrors(jFile);
         }
-
-        // Check for DEPS
-        JavaDeps.resolveDependenciesForFile(null, _javaFile);
 
         // Convert to BuildIssues and set in agent
         WebFile javaFile = getFile();

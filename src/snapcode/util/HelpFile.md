@@ -321,3 +321,34 @@ frame.pack();
 frame.setLocationRelativeTo(null);
 frame.setVisible(true);
 ```
+
+# External Libraries
+
+## JFiglet
+
+```
+//DEPS com.github.lalyos:jfiglet:0.0.8
+import com.github.lalyos.jfiglet.FigletFont;
+
+var str = FigletFont.convertOneLine("Hello World");
+System.out.println(str);
+```
+
+## ReportMill
+
+```
+//DEPS com.reportmill:ReportMill16:2025.01
+import com.reportmill.base.*;
+import com.reportmill.shape.RMDocument;
+import java.io.File;
+
+// Get template and dataset
+RMDocument template = new RMDocument(RMExtras.getMoviesURL());
+Object dataSet = new RMXMLReader().readObject(RMExtras.getHollywoodURL());
+
+// Generate report, write PDF and open file
+RMDocument report = template.generateReport(dataSet);
+String filePath = System.getProperty("java.io.tmpdir") + File.separator + "Report.pdf";
+report.writePDF(filePath);
+GFXEnv.getEnv().openFile(filePath);
+```
