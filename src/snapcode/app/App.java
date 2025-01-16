@@ -49,7 +49,7 @@ public class App {
 
         // Install Exception reporter
         DevPaneExceptions.setAppName("SnapCode");
-        String version = "2024.04", buildDate = "Apr 24, 2024";
+        String version = "2025.01", buildDate = "Jan 16, 2025";
         DevPaneExceptions.setAppInfo("SnapCode Version " + version + ", Build Date: " + buildDate);
         DevPaneExceptions.setDefaultUncaughtExceptionHandler();
 

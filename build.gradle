@@ -2,6 +2,7 @@ import java.text.SimpleDateFormat
 
 plugins {
     id 'application'
+    id 'maven-publish'
 }
 
 group 'com.reportmill'
@@ -81,6 +82,14 @@ task copyCJ(type: Copy) {
     dependsOn buildFullJar
 }
 
+task copyGT(type: Copy) {
+    from (
+            "../SnapCode/build/classes/java/main/GitTest.class"
+    )
+    into "build/libs"
+    dependsOn build
+}
+
 /**
  * Writes the current build date into BuildInfo.txt, e.g.: Feb-02-23 09:31.
  */
@@ -92,5 +101,18 @@ tasks.register('buildInfo') {
         String buildInfoFilePathStr = buildDir.getAbsolutePath() + '/resources/main/snapcode/BuildInfo.txt';
         java.nio.file.Path buildInfoFilePath = java.nio.file.Paths.get(buildInfoFilePathStr);
         java.nio.file.Files.write(buildInfoFilePath, buildInfoText.getBytes());
+    }
+}
+
+publishing {
+
+    publications {
+        gpr(MavenPublication) {
+            artifactId 'SnapCodeAll'
+            artifact buildFullJar // from(components.java)
+            pom.withXml {
+                asNode().dependencies.dependency.each { dep -> dep.parent().remove(dep) }
+            }
+        }
     }
 }
