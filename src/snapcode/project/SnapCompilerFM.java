@@ -133,7 +133,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     @Override
     public JavaFileObject getJavaFileForInput(Location aLoc, String aClassName, Kind aKind)
     {
-        System.err.println("getJavaFileForInput: " + aClassName + ", kind: " + aKind);
+        //System.err.println("getJavaFileForInput: " + aClassName + ", kind: " + aKind);
         String sourceDirPath = _proj.getSourceDir().getDirPath();
         String javaFilePath = sourceDirPath + aClassName.replace('.', '/') + ".java";
         WebFile javaFile = _proj.getFileForPath(javaFilePath);

@@ -27,6 +27,9 @@ public class BuildFileTool extends ProjectTool {
     // Dependencies ListView
     private ListView<BuildDependency> _dependenciesListView;
 
+    // The Java versions
+    private static final Integer[] JAVA_VERSIONS = new Integer[] { 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+
     /**
      * Constructor.
      */
@@ -88,6 +91,10 @@ public class BuildFileTool extends ProjectTool {
         addKeyActionHandler("DeleteAction", "DELETE");
         addKeyActionHandler("BackSpaceAction", "BACK_SPACE");
 
+        // Configure SourceCompatibilityComboBox, TargetCompatibilityComboBox
+        getView("SourceCompatibilityComboBox", ComboBox.class).setItems(JAVA_VERSIONS);
+        getView("TargetCompatibilityComboBox", ComboBox.class).setItems(JAVA_VERSIONS);
+
         // Configure DependenciesListView
         _dependenciesListView = getView("DependenciesListView", ListView.class);
         _dependenciesListView.setRowHeight(26);
@@ -113,9 +120,15 @@ public class BuildFileTool extends ProjectTool {
     {
         BuildFile buildFile = getBuildFile();
 
-        // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox
+        // Update SourcePathText, BuildPathText
         setViewValue("SourcePathText", buildFile.getSourcePath());
         setViewValue("BuildPathText", buildFile.getBuildPath());
+
+        // Update SourceCompatibilityComboBox, TargetCompatibilityComboBox
+        setViewValue("SourceCompatibilityComboBox", buildFile.getSourceCompatibility());
+        setViewValue("TargetCompatibilityComboBox", buildFile.getTargetCompatibility());
+
+        // Update IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox
         setViewValue("IncludeSnapKitRuntimeCheckBox", buildFile.isIncludeSnapKitRuntime());
         setViewValue("IncludeSnapChartsRuntimeCheckBox", buildFile.isIncludeSnapChartsRuntime());
 
@@ -187,9 +200,15 @@ public class BuildFileTool extends ProjectTool {
 
         switch (anEvent.getName()) {
 
-            // Update SourcePathText, BuildPathText, IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox
+            // Update SourcePathText, BuildPathText
             case "SourcePathText": buildFile.setSourcePath(anEvent.getStringValue()); break;
             case "BuildPathText": buildFile.setBuildPath(anEvent.getStringValue()); break;
+
+            // Update SourceCompatibilityComboBox, TargetCompatibilityComboBox
+            case "SourceCompatibilityComboBox": buildFile.setSourceCompatibility(anEvent.getIntValue()); break;
+            case "TargetCompatibilityComboBox": buildFile.setTargetCompatibility(anEvent.getIntValue()); break;
+
+            // Update IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox
             case "IncludeSnapKitRuntimeCheckBox": buildFile.setIncludeSnapKitRuntime(anEvent.getBoolValue()); break;
             case "IncludeSnapChartsRuntimeCheckBox": buildFile.setIncludeSnapChartsRuntime(anEvent.getBoolValue()); break;
 

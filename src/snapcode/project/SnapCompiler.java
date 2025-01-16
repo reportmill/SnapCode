@@ -95,11 +95,14 @@ public class SnapCompiler {
             options.add("-proc:none");
         else options.add("-g");
 
-        // Set source and target levels to Java 8
+        // Set source and target compatibility levels
+        BuildFile buildFile = _proj.getBuildFile();
+        String sourceCompatibility = Integer.toString(buildFile.getSourceCompatibility());
+        String targetCompatibility = Integer.toString(buildFile.getTargetCompatibility());
         options.add("-source");
-        options.add("1.8");
+        options.add(sourceCompatibility);
         options.add("-target");
-        options.add("1.8");
+        options.add(targetCompatibility);
 
         // Add class paths for project dependencies (libraries and child projects)
         String[] compilerClassPaths = _proj.getCompileClassPaths();
