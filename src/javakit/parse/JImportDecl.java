@@ -3,7 +3,6 @@
  */
 package javakit.parse;
 import javakit.resolver.*;
-
 import java.util.*;
 
 /**
@@ -146,29 +145,30 @@ public class JImportDecl extends JNode {
     @Override
     protected String getNameImpl()
     {
-        return _nameExpr != null ? _nameExpr.getName() : null;
+        return _nameExpr != null ? _nameExpr.getName() : "";
     }
 
     /**
      * Returns class or package declaration.
      */
+    @Override
     protected JavaDecl getDeclImpl()
     {
-        String name = getName();
-        if (name == null)
+        String importName = getName();
+        if (importName.isEmpty())
             return null;
 
         // If package name, return package
-        if (_inclusive && isKnownPackageName(name))
-            return getJavaPackageForName(name);
+        if (_inclusive && isKnownPackageName(importName))
+            return getJavaPackageForName(importName);
 
         // If full import name contains class, return it
-        JavaClass importClass = getJavaClassForFullImportName(name);
+        JavaClass importClass = getJavaClassForFullImportName(importName);
         if (importClass != null)
             return importClass;
 
         // If class not found, return as package decl anyway
-        return getJavaPackageForName(name);
+        return getJavaPackageForName(importName);
     }
 
     /**
@@ -208,16 +208,39 @@ public class JImportDecl extends JNode {
     }
 
     /**
+     * Override to return errors for import.
+     */
+    @Override
+    protected NodeError[] getErrorsImpl()
+    {
+        // Handle missing package or class name
+        if (getName().isEmpty())
+            return NodeError.newErrorArray(this, "Import needs package or class name");
+
+        // Handle super errors
+        NodeError[] superErrors = super.getErrorsImpl();
+        if (superErrors.length > 0)
+            return superErrors;
+
+        // Handle missing wildcard
+        if (getDecl() instanceof JavaPackage && !isInclusive())
+            return NodeError.newErrorArray(this, "Import needs to end with class name or wildcard (*)");
+
+        // Return no errors
+        return NodeError.NO_ERRORS;
+    }
+
+    /**
      * Returns the class name for a given name.
      */
     public String getImportClassName(String aName)
     {
-        String cname = isClassName() ? getEvalClassName() : getName();
+        String className = isClassName() ? getEvalClassName() : getName();
         if (_inclusive) {
-            if (!isStatic() || !cname.endsWith(aName))
-                cname += (isClassName() ? '$' : '.') + aName;
+            if (!isStatic() || !className.endsWith(aName))
+                className += (isClassName() ? '$' : '.') + aName;
         }
-        return cname;
+        return className;
     }
 
     /**
@@ -225,16 +248,16 @@ public class JImportDecl extends JNode {
      */
     public JavaMember getImportMemberForNameAndParamTypes(String aName, JavaClass[] paramTypes)
     {
-        JavaClass cls = (JavaClass) getEvalType();
-        if (cls == null)
+        JavaClass importClass = (JavaClass) getEvalType();
+        if (importClass == null)
             return null;
 
         // If no params, try for field
         if (paramTypes == null)
-            return cls.getDeclaredFieldForName(aName);
+            return importClass.getDeclaredFieldForName(aName);
 
         // Otherwise, look for method
-        return JavaClassUtils.getCompatibleMethod(cls, aName, paramTypes, true);
+        return JavaClassUtils.getCompatibleMethod(importClass, aName, paramTypes, true);
     }
 
     /**
