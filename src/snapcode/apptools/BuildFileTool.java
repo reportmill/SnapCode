@@ -91,9 +91,8 @@ public class BuildFileTool extends ProjectTool {
         addKeyActionHandler("DeleteAction", "DELETE");
         addKeyActionHandler("BackSpaceAction", "BACK_SPACE");
 
-        // Configure SourceCompatibilityComboBox, TargetCompatibilityComboBox
-        getView("SourceCompatibilityComboBox", ComboBox.class).setItems(JAVA_VERSIONS);
-        getView("TargetCompatibilityComboBox", ComboBox.class).setItems(JAVA_VERSIONS);
+        // Configure CompileReleaseComboBox
+        getView("CompileReleaseComboBox", ComboBox.class).setItems(JAVA_VERSIONS);
 
         // Configure DependenciesListView
         _dependenciesListView = getView("DependenciesListView", ListView.class);
@@ -124,9 +123,8 @@ public class BuildFileTool extends ProjectTool {
         setViewValue("SourcePathText", buildFile.getSourcePath());
         setViewValue("BuildPathText", buildFile.getBuildPath());
 
-        // Update SourceCompatibilityComboBox, TargetCompatibilityComboBox
-        setViewValue("SourceCompatibilityComboBox", buildFile.getSourceCompatibility());
-        setViewValue("TargetCompatibilityComboBox", buildFile.getTargetCompatibility());
+        // Update CompileReleaseComboBox
+        setViewValue("CompileReleaseComboBox", buildFile.getCompileRelease());
 
         // Update IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox
         setViewValue("IncludeSnapKitRuntimeCheckBox", buildFile.isIncludeSnapKitRuntime());
@@ -204,9 +202,8 @@ public class BuildFileTool extends ProjectTool {
             case "SourcePathText": buildFile.setSourcePath(anEvent.getStringValue()); break;
             case "BuildPathText": buildFile.setBuildPath(anEvent.getStringValue()); break;
 
-            // Update SourceCompatibilityComboBox, TargetCompatibilityComboBox
-            case "SourceCompatibilityComboBox": buildFile.setSourceCompatibility(anEvent.getIntValue()); break;
-            case "TargetCompatibilityComboBox": buildFile.setTargetCompatibility(anEvent.getIntValue()); break;
+            // Update CompileReleaseComboBox
+            case "CompileReleaseComboBox": buildFile.setCompileRelease(anEvent.getIntValue()); break;
 
             // Update IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox
             case "IncludeSnapKitRuntimeCheckBox": buildFile.setIncludeSnapKitRuntime(anEvent.getBoolValue()); break;

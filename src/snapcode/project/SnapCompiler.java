@@ -3,6 +3,7 @@
  */
 package snapcode.project;
 import snap.util.FilePathUtils;
+import snap.util.SnapUtils;
 import snap.web.WebFile;
 import javax.tools.*;
 import javax.tools.JavaCompiler.CompilationTask;
@@ -95,14 +96,16 @@ public class SnapCompiler {
             options.add("-proc:none");
         else options.add("-g");
 
-        // Set source and target compatibility levels
-        BuildFile buildFile = _proj.getBuildFile();
-        String sourceCompatibility = Integer.toString(buildFile.getSourceCompatibility());
-        String targetCompatibility = Integer.toString(buildFile.getTargetCompatibility());
-        options.add("-source");
-        options.add(sourceCompatibility);
-        options.add("-target");
-        options.add(targetCompatibility);
+        // Set release version
+        if (SnapUtils.getJavaVersionInt() > 8) {
+            BuildFile buildFile = _proj.getBuildFile();
+            int compileRelease = buildFile.getCompileRelease();
+            options.add("--release");
+            options.add(Integer.toString(compileRelease));
+        }
+
+        // Probably not necessary
+        else Collections.addAll(options, "-source", "8", "-target", "8");
 
         // Add class paths for project dependencies (libraries and child projects)
         String[] compilerClassPaths = _proj.getCompileClassPaths();
@@ -226,7 +229,7 @@ public class SnapCompiler {
     {
         Object diagnosticSource = aDiagnostic.getSource();
         if (!(diagnosticSource instanceof SnapCompilerJFO)) {
-            /*System.err.println("SnapCompiler: Unknown Issue: " + aDiagnostic); */
+            System.err.println("SnapCompiler: Unknown Issue: " + aDiagnostic);
             return null;
         }
 

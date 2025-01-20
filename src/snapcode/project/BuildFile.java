@@ -1,9 +1,6 @@
 package snapcode.project;
 import snap.props.*;
-import snap.util.ArrayUtils;
-import snap.util.Convert;
-import snap.util.FilePathUtils;
-import snap.util.JSObject;
+import snap.util.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import java.util.Arrays;
@@ -23,11 +20,8 @@ public class BuildFile extends PropObject {
     // The project build path
     private String  _buildPath;
 
-    // The source compatibility version
-    private int _sourceCompatibility;
-
-    // The target compatibility version
-    private int _targetCompatibility;
+    // The compile release version
+    private int _compileRelease;
 
     // The dependencies
     private BuildDependency[] _dependencies;
@@ -50,8 +44,7 @@ public class BuildFile extends PropObject {
     // Constants for BuildFile properties
     public static final String SourcePath_Prop = "SourcePath";
     public static final String BuildPath_Prop = "BuildPath";
-    public static final String SourceCompatibility_Prop = "SourceCompatibility";
-    public static final String TargetCompatibility_Prop = "TargetCompatibility";
+    public static final String CompileRelease_Prop = "CompileRelease";
     public static final String Dependency_Prop = "Dependency";
     public static final String Dependencies_Prop = "Dependencies";
     public static final String MainClassName_Prop = "MainClassName";
@@ -60,7 +53,7 @@ public class BuildFile extends PropObject {
     // Constants for defaults
     private static final String DEFAULT_SOURCE_PATH = "src";
     private static final String DEFAULT_BUILD_PATH = "bin";
-    private static final int DEFAULT_JAVA_VERSION = getJavaRuntimeVersion();
+    private static final int DEFAULT_JAVA_VERSION = SnapUtils.getJavaVersionInt();
 
     /**
      * Constructor.
@@ -73,8 +66,7 @@ public class BuildFile extends PropObject {
         _srcPath = DEFAULT_SOURCE_PATH;
         _buildPath = DEFAULT_BUILD_PATH;
         _dependencies = new BuildDependency[0];
-        _sourceCompatibility = DEFAULT_JAVA_VERSION;
-        _targetCompatibility = DEFAULT_JAVA_VERSION;
+        _compileRelease = DEFAULT_JAVA_VERSION;
     }
 
     /**
@@ -135,31 +127,17 @@ public class BuildFile extends PropObject {
     }
 
     /**
-     * Returns the source compatibility version.
+     * Returns the compile release version.
      */
-    public int getSourceCompatibility()  { return Math.min(_sourceCompatibility, DEFAULT_JAVA_VERSION); }
+    public int getCompileRelease()  { return Math.min(_compileRelease, DEFAULT_JAVA_VERSION); }
 
     /**
-     * Sets the source compatibility version.
+     * Sets the compile release version.
      */
-    public void setSourceCompatibility(int aValue)
+    public void setCompileRelease(int aValue)
     {
-        if (aValue == _sourceCompatibility) return;
-        firePropChange(SourceCompatibility_Prop, _sourceCompatibility, _sourceCompatibility = aValue);
-    }
-
-    /**
-     * Returns the target compatibility version.
-     */
-    public int getTargetCompatibility()  { return Math.min(_targetCompatibility, DEFAULT_JAVA_VERSION); }
-
-    /**
-     * Sets the target compatibility version.
-     */
-    public void setTargetCompatibility(int aValue)
-    {
-        if (aValue == _targetCompatibility) return;
-        firePropChange(TargetCompatibility_Prop, _targetCompatibility, _targetCompatibility = aValue);
+        if (aValue == _compileRelease) return;
+        firePropChange(CompileRelease_Prop, _compileRelease, _compileRelease = aValue);
     }
 
     /**
@@ -416,11 +394,10 @@ public class BuildFile extends PropObject {
         // Do normal version
         super.initProps(aPropSet);
 
-        // SourcePath, BuildPath, SourceCompatibility, TargetCompatibility
+        // SourcePath, BuildPath, CompileRelease
         aPropSet.addPropNamed(SourcePath_Prop, String.class);
         aPropSet.addPropNamed(BuildPath_Prop, String.class);
-        aPropSet.addPropNamed(SourceCompatibility_Prop, int.class);
-        aPropSet.addPropNamed(TargetCompatibility_Prop, int.class);
+        aPropSet.addPropNamed(CompileRelease_Prop, int.class);
 
         // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime
         aPropSet.addPropNamed(Dependencies_Prop, BuildDependency[].class);
@@ -438,11 +415,10 @@ public class BuildFile extends PropObject {
         // Handle properties
         switch (aPropName) {
 
-            // SourcePath, BuildPath, SourceCompatibility, TargetCompatibility
+            // SourcePath, BuildPath, CompileRelease
             case SourcePath_Prop: return getSourcePath();
             case BuildPath_Prop: return getBuildPath();
-            case SourceCompatibility_Prop: return getSourceCompatibility();
-            case TargetCompatibility_Prop: return getTargetCompatibility();
+            case CompileRelease_Prop: return getCompileRelease();
 
             // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime
             case Dependencies_Prop: return getDependencies();
@@ -464,11 +440,10 @@ public class BuildFile extends PropObject {
         // Handle properties
         switch (aPropName) {
 
-            // SourcePath, BuildPath, SourceCompatibility, TargetCompatibility
+            // SourcePath, BuildPath, CompileRelease
             case SourcePath_Prop: setSourcePath(Convert.stringValue(aValue)); break;
             case BuildPath_Prop: setBuildPath(Convert.stringValue(aValue)); break;
-            case SourceCompatibility_Prop: setSourceCompatibility(Convert.intValue(aValue)); break;
-            case TargetCompatibility_Prop: setTargetCompatibility(Convert.intValue(aValue)); break;
+            case CompileRelease_Prop: setCompileRelease(Convert.intValue(aValue)); break;
 
             // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime
             case Dependencies_Prop: setDependencies((BuildDependency[]) aValue); break;
@@ -491,16 +466,5 @@ public class BuildFile extends PropObject {
         archiver.addClassMapClass(BuildDependency.ProjectDependency.class);
         archiver.addClassMapClass(MavenDependency.class);
         return archiver;
-    }
-
-    /**
-     * Returns the default java version.
-     */
-    private static int getJavaRuntimeVersion()
-    {
-        String javaVersion = System.getProperty("java.version");
-        if (javaVersion.startsWith("1."))
-            javaVersion = javaVersion.substring(2);
-        return Convert.intValue(javaVersion);
     }
 }

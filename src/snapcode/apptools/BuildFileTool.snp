@@ -12,12 +12,8 @@
     <TextField Name="BuildPathText" PrefWidth="255" />
   </RowView>
   <RowView Spacing="5">
-    <Label Text="Source compatibility:" />
-    <ComboBox Name="SourceCompatibilityComboBox" MinWidth="80" MinHeight="22" Align="CENTER" />
-  </RowView>
-  <RowView Spacing="5">
-    <Label Text="Target compatibility:" />
-    <ComboBox Name="TargetCompatibilityComboBox" MinWidth="80" MinHeight="22" Align="CENTER" />
+    <Label Text="Compile release version:" />
+    <ComboBox Name="CompileReleaseComboBox" MinWidth="80" MinHeight="22" Align="CENTER" />
   </RowView>
   <RowView Spacing="5">
     <Label Text="Include SnapKit Runtime" />
