@@ -137,7 +137,7 @@ public class JFile extends JNode {
     {
         // Get index to insert after last import (JeplParser can add extra imports after Class decl added)
         int index = getChildCount();
-        if (_importDecls.size() > 0 && _classDecls.size() > 0) {
+        if (!_importDecls.isEmpty() && !_classDecls.isEmpty()) {
             JImportDecl lastImportDecl = _importDecls.get(_importDecls.size() - 1);
             index = _children.indexOf(lastImportDecl) + 1;
         }
@@ -149,10 +149,7 @@ public class JFile extends JNode {
     /**
      * Returns the JClassDecl for the file.
      */
-    public JClassDecl getClassDecl()
-    {
-        return _classDecls.size() > 0 ? _classDecls.get(0) : null;
-    }
+    public JClassDecl getClassDecl()  { return !_classDecls.isEmpty() ? _classDecls.get(0) : null; }
 
     /**
      * Returns the JClassDecls for the file.
@@ -210,23 +207,21 @@ public class JFile extends JNode {
     @Override
     protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
-        // Get node info
-        String name = anExprId.getName();
-
         // See if it's a known class name using imports
-        String className = getImportClassName(name);
+        String idName = anExprId.getName();
+        String className = getImportClassName(idName);
         JavaClass javaClass = className != null ? getJavaClassForName(className) : null;
         if (javaClass != null)
             return javaClass;
 
         // See if it's a known static import class member
-        JavaDecl field = getStaticImportMemberForNameAndParamTypes(name, null);
+        JavaDecl field = getStaticImportMemberForNameAndParamTypes(idName, null);
         if (field != null)
             return field;
 
         // If name is known package name, return package
-        if (isKnownPackageName(name))
-            return getJavaPackageForName(name);
+        if (isKnownPackageName(idName))
+            return getJavaPackageForName(idName);
 
         // Do normal version
         return super.getDeclForChildId(anExprId);
@@ -238,21 +233,19 @@ public class JFile extends JNode {
     @Override
     protected JavaDecl getDeclForChildType(JType aJType)
     {
-        // Get node info
-        String name = aJType.getName();
-
         // If it's in JPackageDecl, it's a Package
-        if (isKnownPackageName(name))
-            return getJavaPackageForName(name);
+        String typeName = aJType.getName();
+        if (isKnownPackageName(typeName))
+            return getJavaPackageForName(typeName);
 
         // See if it's a known class name using imports
-        String className = getImportClassName(name);
+        String className = getImportClassName(typeName);
         JavaClass javaClass = className != null ? getJavaClassForName(className) : null;
         if (javaClass != null)
             return javaClass;
 
         // See if it's a known static import class member
-        JavaDecl field = getStaticImportMemberForNameAndParamTypes(name, null);
+        JavaDecl field = getStaticImportMemberForNameAndParamTypes(typeName, null);
         if (field != null)
             return field;
 
@@ -320,7 +313,7 @@ public class JFile extends JNode {
 
         // If file declares package, see if it's in package
         String packageName = getPackageName();
-        if (packageName != null && packageName.length() > 0) {
+        if (packageName != null && !packageName.isEmpty()) {
             String className = packageName + '.' + aName;
             if (isKnownClassName(className))
                 return className;
