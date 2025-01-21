@@ -28,7 +28,8 @@ TypeDecl { ";" | Modifiers (ClassDecl | EnumDecl | AnnotationDecl) }
 
 ClassDecl
 {
-    ("class" | "interface") Identifier TypeParams? ExtendsList? ImplementsList? ClassBody
+    (("class" | "interface") Identifier TypeParams? ExtendsList? ImplementsList? ClassBody) |
+    (("record" Identifier TypeParams? FormalParams ImplementsList? ClassBody))
 }
 
 ExtendsList { "extends" ClassType ("," ClassType)* }
@@ -56,7 +57,7 @@ MemberDecl
 {
     ClassDecl |
     EnumDecl |
-    LookAhead (TypeParams? Identifier "(") ConstrDecl |
+    LookAhead (TypeParams? Identifier ("(" | "{") ) ConstrDecl |
     LookAhead (Type Identifier ("[" "]")* ("," | "=" | ";")) FieldDecl |
     MethodDecl |
     AnnotationDecl
@@ -66,7 +67,7 @@ FieldDecl { Type VarDecl ("," VarDecl)* ";" }
 
 ConstrDecl
 {
-    TypeParams? Identifier FormalParams ThrowsList? "{" (LookAhead (ConstrCall) ConstrCall)? BlockStatement* "}"
+    TypeParams? Identifier FormalParams? ThrowsList? "{" (LookAhead (ConstrCall) ConstrCall)? BlockStatement* "}"
 }
 
 ConstrCall

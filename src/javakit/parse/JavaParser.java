@@ -323,8 +323,7 @@ public class JavaParser extends JavaParserStmt {
             switch (anId) {
 
                 // Handle static
-                case "static": importDecl.setStatic(true);
-                    break;
+                case "static": importDecl.setStatic(true); break;
 
                 // Handle Name
                 case "Name":
@@ -333,8 +332,7 @@ public class JavaParser extends JavaParserStmt {
                     break;
 
                 // Handle '*'
-                case "*": importDecl.setInclusive(true);
-                    break;
+                case "*": importDecl.setInclusive(true); break;
             }
         }
 
@@ -393,8 +391,9 @@ public class JavaParser extends JavaParserStmt {
                     classDecl.setBodyDecls(bodyDecls);
                     break;
 
-                // Handle "class" or "interface"
+                // Handle "class", "interface", "record"
                 case "interface": classDecl.setClassType(JClassDecl.ClassType.Interface); break;
+                case "record": classDecl.setClassType(JClassDecl.ClassType.Record); break;
 
                 // Handle Identifier
                 case "Identifier": {
@@ -419,9 +418,27 @@ public class JavaParser extends JavaParserStmt {
                         classDecl.addExtendsType(type);
                     else classDecl.addImplementsType(type);
                     break;
+
+                // Handle FormalParams
+                case "FormalParams":
+                    JVarDecl[] formalParams = aNode.getCustomNode(JVarDecl[].class);
+                    classDecl.setParameters(formalParams);
+                    break;
+
             }
         }
 
+        /**
+         * Override to clear Extending.
+         */
+        @Override
+        public void reset()
+        {
+            super.reset();
+            _extending = false;
+        }
+
+        @Override
         protected Class<JClassDecl> getPartClass()  { return JClassDecl.class; }
     }
 

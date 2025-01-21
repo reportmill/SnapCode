@@ -13,11 +13,14 @@ import snap.util.ObjectArray;
  */
 public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeParameters {
 
-    // The type of class (Class, Interface, Enum, Annotation)
+    // The type of class (Class, Interface, Enum, Annotation, Record)
     protected ClassType  _classType = ClassType.Class;
 
     // TypeVars
     private JTypeVar[] _typeVars = new JTypeVar[0];
+
+    // The formal parameters (for records)
+    protected JVarDecl[] _params;
 
     // The extends list
     protected JType[] _extendsTypes = JType.EMPTY_TYPES_ARRAY;
@@ -56,7 +59,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     private JVarDecl[] _varDecls;
 
     // The class type
-    public enum ClassType { Class, Interface, Enum, Annotation }
+    public enum ClassType { Class, Interface, Enum, Annotation, Record }
 
     /**
      * Constructor.
@@ -124,6 +127,22 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
 
         // Add new type vars
         Stream.of(_typeVars).forEach(tvar -> addChild(tvar));
+    }
+
+    /**
+     * Returns the list of formal parameters.
+     */
+    public JVarDecl[] getParameters()  { return _params; }
+
+    /**
+     * Returns the list of formal parameters.
+     */
+    public void setParameters(JVarDecl[] varDecls)
+    {
+        if (_params != null)
+            Stream.of(_params).forEach(vdecl -> removeChild(vdecl));
+        _params = varDecls;
+        Stream.of(_params).forEach(vdecl -> addChild(vdecl));
     }
 
     /**
@@ -225,6 +244,11 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      * Returns whether class type is Enum.
      */
     public boolean isEnum()  { return _classType == ClassType.Enum; }
+
+    /**
+     * Returns whether class type is Record.
+     */
+    public boolean isRecord()  { return _classType == ClassType.Record; }
 
     /**
      * Returns whether class is anonymous class.
@@ -625,6 +649,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
             case Interface: return "InterfaceDecl";
             case Enum: return "EnumDecl";
             case Annotation: return "AnnotationDecl";
+            case Record: return "RecordDecl";
             default: return "ClassDecl";
         }
     }
