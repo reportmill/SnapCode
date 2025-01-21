@@ -119,11 +119,11 @@ public class JNode {
     /**
      * Returns the JavaDecl most closely associated with given child JType node.
      */
-    protected JavaDecl getDeclForChildType(JType aJType)
+    protected JavaType getJavaTypeForChildType(JType aJType)
     {
         // Forward to parent
         if (_parent != null)
-            return _parent.getDeclForChildType(aJType);
+            return _parent.getJavaTypeForChildType(aJType);
         return null;
     }
 

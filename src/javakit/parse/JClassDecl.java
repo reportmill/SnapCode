@@ -508,7 +508,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      * Returns the JavaDecl most closely associated with given child JType node.
      */
     @Override
-    protected JavaDecl getDeclForChildType(JType type)
+    protected JavaType getJavaTypeForChildType(JType type)
     {
         // Look for JTypeVar for given type name
         String typeName = type.getName();
@@ -525,7 +525,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
         }
 
         // Do normal version
-        return super.getDeclForChildType(type);
+        return super.getJavaTypeForChildType(type);
     }
 
     /**

@@ -215,7 +215,7 @@ public class JFile extends JNode {
             return javaClass;
 
         // See if it's a known static import class member
-        JavaDecl field = getStaticImportMemberForNameAndParamTypes(idName, null);
+        JavaMember field = getStaticImportMemberForNameAndParamTypes(idName, null);
         if (field != null)
             return field;
 
@@ -231,26 +231,24 @@ public class JFile extends JNode {
      * Override - from old getDeclForChildNode(). Is it really needed ???
      */
     @Override
-    protected JavaDecl getDeclForChildType(JType aJType)
+    protected JavaType getJavaTypeForChildType(JType aJType)
     {
-        // If it's in JPackageDecl, it's a Package
-        String typeName = aJType.getName();
-        if (isKnownPackageName(typeName))
-            return getJavaPackageForName(typeName);
-
         // See if it's a known class name using imports
+        String typeName = aJType.getName();
         String className = getImportClassName(typeName);
         JavaClass javaClass = className != null ? getJavaClassForName(className) : null;
         if (javaClass != null)
             return javaClass;
 
-        // See if it's a known static import class member
-        JavaDecl field = getStaticImportMemberForNameAndParamTypes(typeName, null);
-        if (field != null)
-            return field;
+        // These were from legacy getDeclForChildIdOrType() - I think they are bogus and should go
+        if (isKnownPackageName(typeName)) //return getJavaPackageForName(typeName);
+            System.err.println("JFile.getJavaTypeForChildType: Shouldn't find package: " + typeName);
+        JavaMember field = getStaticImportMemberForNameAndParamTypes(typeName, null);
+        if (field != null) //return field;
+            System.err.println("JFile.getJavaTypeForChildType: Shouldn't find member: " + typeName);
 
         // Do normal version
-        return super.getDeclForChildType(aJType);
+        return super.getJavaTypeForChildType(aJType);
     }
 
     /**

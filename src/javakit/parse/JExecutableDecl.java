@@ -3,7 +3,6 @@
  */
 package javakit.parse;
 import javakit.resolver.JavaClass;
-import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaExecutable;
 import javakit.resolver.JavaType;
 import snap.util.ArrayUtils;
@@ -147,7 +146,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
      * Override to resolve method/constructor type vars.
      */
     @Override
-    protected JavaDecl getDeclForChildType(JType aJType)
+    protected JavaType getJavaTypeForChildType(JType aJType)
     {
         // Handle TypeVar name: return typevar decl
         String typeName = aJType.getName();
@@ -156,7 +155,7 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
             return typeVarDecl.getTypeVariable();
 
         // Do normal version
-        return super.getDeclForChildType(aJType);
+        return super.getJavaTypeForChildType(aJType);
     }
 
     /**

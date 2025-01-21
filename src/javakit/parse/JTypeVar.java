@@ -142,13 +142,13 @@ public class JTypeVar extends JNode implements WithId {
      * Override - from old getDeclForChildNode(). Is it really needed ???
      */
     @Override
-    protected JavaDecl getDeclForChildType(JType aJType)
+    protected JavaType getJavaTypeForChildType(JType aJType)
     {
         // Handle nested case, e.g.: T extends Class <? super T>
         if (aJType.getName().equals(getName()))
             return getJavaClassForClass(Object.class);
 
         // Do normal version
-        return super.getDeclForChildType(aJType);
+        return super.getJavaTypeForChildType(aJType);
     }
 }
