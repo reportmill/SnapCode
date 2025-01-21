@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
+import javakit.resolver.JavaClass;
+import javakit.resolver.JavaDecl;
 import java.util.*;
 
 /**
@@ -44,7 +46,22 @@ public class JStmtBlock extends JStmt implements WithStmts, WithVarDeclsX {
     public JVarDecl[] getVarDecls()
     {
         if (_varDecls != null) return _varDecls;
-        JVarDecl[] varDecls = WithStmts.getWithStmtsVarDecls(this);
+        JVarDecl[] varDecls = WithStmts.getVarDecls(this);
         return _varDecls = varDecls;
+    }
+
+    /**
+     * Override to try to resolve given type from statements.
+     */
+    @Override
+    protected JavaDecl getDeclForChildType(JType aJType)
+    {
+        // If any previous statements are class decl statements that declare type, return class
+        JavaClass javaClass = WithStmts.getJavaClassForChildType(this, aJType);
+        if (javaClass != null)
+            return javaClass;
+
+        // Do normal version
+        return super.getDeclForChildType(aJType);
     }
 }

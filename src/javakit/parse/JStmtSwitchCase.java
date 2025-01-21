@@ -76,7 +76,7 @@ public class JStmtSwitchCase extends JNode implements WithStmts, WithVarDeclsX {
     public JVarDecl[] getVarDecls()
     {
         if (_varDecls != null) return _varDecls;
-        JVarDecl[] varDecls = WithStmts.getWithStmtsVarDecls(this);
+        JVarDecl[] varDecls = WithStmts.getVarDecls(this);
         return _varDecls = varDecls;
     }
 
@@ -117,5 +117,20 @@ public class JStmtSwitchCase extends JNode implements WithStmts, WithVarDeclsX {
 
         // Return switch expr decl
         return switchExprType;
+    }
+
+    /**
+     * Override to try to resolve given type from statements.
+     */
+    @Override
+    protected JavaDecl getDeclForChildType(JType aJType)
+    {
+        // If any previous statements are class decl statements that declare type, return class
+        JavaClass javaClass = WithStmts.getJavaClassForChildType(this, aJType);
+        if (javaClass != null)
+            return javaClass;
+
+        // Do normal version
+        return super.getDeclForChildType(aJType);
     }
 }

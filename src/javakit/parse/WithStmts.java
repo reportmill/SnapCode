@@ -1,5 +1,8 @@
 package javakit.parse;
+import javakit.resolver.JavaClass;
+
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -12,7 +15,34 @@ public interface WithStmts {
     /**
      * Returns VarDecls encapsulated by WithStmts (JStmtVarDecl.VarDecls).
      */
-    static JVarDecl[] getWithStmtsVarDecls(WithStmts withStmts)
+    static JavaClass getJavaClassForChildType(WithStmts withStmts, JType aJType)
+    {
+        List<JStmt> statements = withStmts.getStatements();
+        String typeName = aJType.getName();
+
+        for (JStmt stmt : statements) {
+
+            // If statement decl beyond type decl, just return
+            if (stmt.getStartCharIndex() >= aJType.getStartCharIndex())
+                break;
+
+            // If statement is class decl, return class if match
+            if (stmt instanceof JStmtClassDecl) {
+                JStmtClassDecl classDeclStmt = (JStmtClassDecl) stmt;
+                JClassDecl classDecl = classDeclStmt.getClassDecl();
+                if (Objects.equals(typeName, classDecl.getName()))
+                    return classDecl.getJavaClass();
+            }
+        }
+
+        // Return not found
+        return null;
+    }
+
+    /**
+     * Returns VarDecls encapsulated by WithStmts (JStmtVarDecl.VarDecls).
+     */
+    static JVarDecl[] getVarDecls(WithStmts withStmts)
     {
         // Get Statement.VarDecls
         List<JStmt> statements = withStmts.getStatements();
