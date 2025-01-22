@@ -22,6 +22,9 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     // The formal parameters (for records)
     protected JVarDecl[] _params;
 
+    // The formal parameters as fields (for records)
+    protected JFieldDecl[] _paramFieldDecls;
+
     // The extends list
     protected JType[] _extendsTypes = JType.EMPTY_TYPES_ARRAY;
 
@@ -139,10 +142,21 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      */
     public void setParameters(JVarDecl[] varDecls)
     {
-        if (_params != null)
-            Stream.of(_params).forEach(vdecl -> removeChild(vdecl));
+        if (_paramFieldDecls != null)
+            Stream.of(_paramFieldDecls).forEach(vdecl -> removeChild(vdecl));
         _params = varDecls;
-        Stream.of(_params).forEach(vdecl -> addChild(vdecl));
+        _paramFieldDecls = ArrayUtils.map(_params, varDecl -> createFieldDeclForParam(varDecl), JFieldDecl.class);
+        Stream.of(_paramFieldDecls).forEach(vdecl -> addChild(vdecl));
+    }
+
+    /**
+     * Creates a field decl for a record param.
+     */
+    private JFieldDecl createFieldDeclForParam(JVarDecl varDecl)
+    {
+        JFieldDecl fieldDecl = new JFieldDecl();
+        fieldDecl.addVarDecl(varDecl);
+        return fieldDecl;
     }
 
     /**
@@ -296,7 +310,14 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     public JFieldDecl[] getFieldDecls()
     {
         if (_fieldDecls != null) return _fieldDecls;
-        return _fieldDecls = ArrayUtils.filterByClass(getBodyDecls(), JFieldDecl.class);
+
+        JFieldDecl[] fieldDecls = ArrayUtils.filterByClass(getBodyDecls(), JFieldDecl.class);
+
+        // If Record, prepend record params as fields
+        if (isRecord() && _paramFieldDecls != null)
+            fieldDecls = ArrayUtils.addAll(_paramFieldDecls, fieldDecls);
+
+        return _fieldDecls = fieldDecls;
     }
 
     /**

@@ -47,6 +47,8 @@ public class JFieldDecl extends JMemberDecl implements WithVarDecls {
      */
     public void addVarDecl(JVarDecl aVarDecl)
     {
+        if (_type == null)
+            _type = aVarDecl.getType();
         _vars = ArrayUtils.add(_vars, aVarDecl);
         addChild(aVarDecl);
     }
