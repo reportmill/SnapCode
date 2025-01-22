@@ -25,6 +25,9 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     // The formal parameters as fields (for records)
     protected JFieldDecl[] _paramFieldDecls;
 
+    // The formal parameters as methods (for records)
+    protected JMethodDecl[] _paramMethodDecls;
+
     // The extends list
     protected JType[] _extendsTypes = JType.EMPTY_TYPES_ARRAY;
 
@@ -144,9 +147,16 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     {
         if (_paramFieldDecls != null)
             Stream.of(_paramFieldDecls).forEach(vdecl -> removeChild(vdecl));
+        if (_paramMethodDecls != null)
+            Stream.of(_paramMethodDecls).forEach(vdecl -> removeChild(vdecl));
+
         _params = varDecls;
+
         _paramFieldDecls = ArrayUtils.map(_params, varDecl -> createFieldDeclForParam(varDecl), JFieldDecl.class);
         Stream.of(_paramFieldDecls).forEach(vdecl -> addChild(vdecl));
+
+        _paramMethodDecls = ArrayUtils.map(_params, varDecl -> createMethodDeclForParam(varDecl), JMethodDecl.class);
+        Stream.of(_paramMethodDecls).forEach(vdecl -> addChild(vdecl));
     }
 
     /**
@@ -157,6 +167,17 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
         JFieldDecl fieldDecl = new JFieldDecl();
         fieldDecl.addVarDecl(varDecl);
         return fieldDecl;
+    }
+
+    /**
+     * Creates a method decl for a record param.
+     */
+    private JMethodDecl createMethodDeclForParam(JVarDecl varDecl)
+    {
+        JMethodDecl methodDecl = new JMethodDecl();
+        methodDecl.setReturnType(varDecl.getType());
+        methodDecl.setId(varDecl.getId());
+        return methodDecl;
     }
 
     /**
@@ -349,7 +370,13 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     public JMethodDecl[] getMethodDecls()
     {
         if (_methodDecls != null) return _methodDecls;
-        return _methodDecls = ArrayUtils.filterByClass(getBodyDecls(), JMethodDecl.class);
+
+        JMethodDecl[] methodDecls = ArrayUtils.filterByClass(getBodyDecls(), JMethodDecl.class);
+
+        if (isRecord() && _paramMethodDecls != null)
+            methodDecls = ArrayUtils.addAll(_paramMethodDecls, methodDecls);
+
+        return _methodDecls = methodDecls;
     }
 
     /**
