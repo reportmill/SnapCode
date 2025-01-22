@@ -232,7 +232,7 @@ UnaryExpr { ("+" | "-") UnaryExpr | PreIncrementExpr | UnaryExprNotPlusMinus }
 
 PreIncrementExpr { ("++" | "--") PrimaryExpr }
 
-UnaryExprNotPlusMinus { ("~" | "!") UnaryExpr | LookAhead (CastLook) CastExpr | PostfixExpr }
+UnaryExprNotPlusMinus { ("~" | "!") UnaryExpr | CastExpr | PostfixExpr }
 
 PostfixExpr { PrimaryExpr ("++" | "--")? }
 
@@ -280,15 +280,8 @@ ArrayDimsAndInits
 
 CastExpr
 {
-    LookAhead ("(" PrimitiveType) "(" Type ")" UnaryExpr |
-    "(" Type ")" UnaryExprNotPlusMinus
-}
-
-CastLook
-{
-    LookAhead(2) "(" PrimitiveType |
-    LookAhead ("(" Type "[") "(" Type "[" "]" |
-    "(" Type ")" ("~" | "!" | "(" | Identifier | "this" | "super" | "new" | Literal)
+    LookAhead ("(" PrimitiveType) "(" PrimitiveType ")" UnaryExpr |
+    LookAhead (99) "(" ReferenceType ")" UnaryExprNotPlusMinus
 }
 
 LambdaExpr

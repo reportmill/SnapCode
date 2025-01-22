@@ -522,13 +522,20 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle Type node
-            if (anId == "Type")
-                getPart().setType(aNode.getCustomNode(JType.class));
+            switch (anId) {
 
-            // Handle UnaryExpr
-            else if (aNode.getCustomNode() != null)
-                getPart().setExpr(aNode.getCustomNode(JExpr.class));
+                // Handle PrimitiveType, ReferenceType
+                case "PrimitiveType": case "ReferenceType":
+                    JType type = aNode.getCustomNode(JType.class);
+                    getPart().setType(type);
+                    break;
+
+                // Handle UnaryExpr
+                case "UnaryExpr": case "UnaryExprNotPlusMinus":
+                    JExpr expr = aNode.getCustomNode(JExpr.class);
+                    getPart().setExpr(expr);
+                    break;
+            }
         }
 
         protected Class<JExprCast> getPartClass()  { return JExprCast.class; }
