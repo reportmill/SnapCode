@@ -15,15 +15,15 @@ public interface WithStmts {
     /**
      * Returns VarDecls encapsulated by WithStmts (JStmtVarDecl.VarDecls).
      */
-    static JavaClass getJavaClassForChildType(WithStmts withStmts, JType aJType)
+    static JavaClass getJavaClassForChildTypeOrId(WithStmts withStmts, JNode typeOrIdNode)
     {
         List<JStmt> statements = withStmts.getStatements();
-        String typeName = aJType.getName();
+        String typeName = typeOrIdNode.getName();
 
         for (JStmt stmt : statements) {
 
             // If statement decl beyond type decl, just return
-            if (stmt.getStartCharIndex() >= aJType.getStartCharIndex())
+            if (stmt.getStartCharIndex() >= typeOrIdNode.getStartCharIndex())
                 break;
 
             // If statement is class decl, return class if match

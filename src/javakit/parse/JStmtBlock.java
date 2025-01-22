@@ -3,8 +3,8 @@
  */
 package javakit.parse;
 import javakit.resolver.JavaClass;
+import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaType;
-
 import java.util.*;
 
 /**
@@ -52,13 +52,28 @@ public class JStmtBlock extends JStmt implements WithStmts, WithVarDeclsX {
     }
 
     /**
-     * Override to try to resolve given type from statements.
+     * Override to try to resolve given id name from any preceding ClassDecl statements.
+     */
+    @Override
+    protected JavaDecl getDeclForChildId(JExprId anExprId)
+    {
+        // If any previous statements are class decl statements that declare type, return class
+        JavaClass javaClass = WithStmts.getJavaClassForChildTypeOrId(this, anExprId);
+        if (javaClass != null)
+            return javaClass;
+
+        // Do normal version
+        return super.getDeclForChildId(anExprId);
+    }
+
+    /**
+     * Override to try to resolve given type name from any preceding ClassDecl statements.
      */
     @Override
     protected JavaType getJavaTypeForChildType(JType aJType)
     {
         // If any previous statements are class decl statements that declare type, return class
-        JavaClass javaClass = WithStmts.getJavaClassForChildType(this, aJType);
+        JavaClass javaClass = WithStmts.getJavaClassForChildTypeOrId(this, aJType);
         if (javaClass != null)
             return javaClass;
 
