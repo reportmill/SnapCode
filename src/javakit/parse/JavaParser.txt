@@ -57,16 +57,21 @@ MemberDecl
 {
     ClassDecl |
     EnumDecl |
-    LookAhead (TypeParams? Identifier ("(" | "{") ) ConstrDecl |
-    LookAhead (Type Identifier ("[" "]")* ("," | "=" | ";")) FieldDecl |
+    ConstrDecl |
+    FieldDecl |
     MethodDecl |
     AnnotationDecl
 }
 
-FieldDecl { Type VarDecl ("," VarDecl)* ";" }
+FieldDecl
+{
+    LookAhead (Type Identifier ("[" "]")* ("," | "=" | ";"))
+    Type VarDecl ("," VarDecl)* ";"
+}
 
 ConstrDecl
 {
+    LookAhead (TypeParams? Identifier ("(" | "{") )
     TypeParams? Identifier FormalParams? ThrowsList? "{" (LookAhead (ConstrCall) ConstrCall)? BlockStatement* "}"
 }
 
@@ -122,7 +127,7 @@ Statement
     BreakStatement | ContinueStatement | ReturnStatement |
     SwitchStatement | AssertStatement | EmptyStatement |
     ThrowStatement | SynchronizedStatement | TryStatement |
-    LookAhead(2) LabeledStatement |
+    LabeledStatement |
     ExprStatement ";"
 }
 
@@ -181,7 +186,11 @@ Resource
     PrimaryExpr
 }
 
-LabeledStatement { Identifier ":" Statement }
+LabeledStatement
+{
+    LookAhead(2)
+    Identifier ":" Statement
+}
 
 ExprStatement
 {
