@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Stream;
 import javakit.resolver.*;
@@ -165,6 +166,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     private JFieldDecl createFieldDeclForParam(JVarDecl varDecl)
     {
         JFieldDecl fieldDecl = new JFieldDecl();
+        fieldDecl.setModifiers(new JModifiers(Modifier.PRIVATE));
         fieldDecl.addVarDecl(varDecl);
         return fieldDecl;
     }
@@ -175,6 +177,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     private JMethodDecl createMethodDeclForParam(JVarDecl varDecl)
     {
         JMethodDecl methodDecl = new JMethodDecl();
+        methodDecl.setModifiers(new JModifiers(Modifier.PUBLIC));
         methodDecl.setReturnType(varDecl.getType());
         methodDecl.setId(varDecl.getId());
         return methodDecl;
