@@ -156,6 +156,7 @@ public class GreenfootPage extends WebPage {
         // Register for callback when ClassPane gets mouse click
         ClassesPane classesPane = _playerPane.getClassesPane();
         classesPane.getUI().addEventFilter(this::handleClassesPaneMousePress, MousePress);
+        classesPane.setActionListener(this::handleClassesPaneActionEvent);
     }
 
     /**
@@ -203,6 +204,27 @@ public class GreenfootPage extends WebPage {
             WorkspacePane workspacePane = getWorkspacePane();
             workspacePane.setSelFile(javaFile);
         }
+    }
+
+    /**
+     * Called when PlayerPane.ClassesPane gets action event.
+     */
+    private void handleClassesPaneActionEvent(ViewEvent anEvent)
+    {
+        if (anEvent.getName().equals("NewSubclassMenuItem"))
+            handleClassesPaneNewSubclassMenuItem();
+    }
+
+    /**
+     * Called when PlayerPane.ClassesPane requests new subclass.
+     */
+    private void handleClassesPaneNewSubclassMenuItem()
+    {
+        // Get NewClassString and create java file
+        ClassesPane classesPane = _playerPane.getClassesPane();
+        String newClassString = classesPane.getNewClassString();
+        WorkspacePane workspacePane = getWorkspacePane();
+        workspacePane.getWorkspaceTools().getNewFileTool().newJavaFileForString(newClassString);
     }
 
     /**
