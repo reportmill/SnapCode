@@ -77,7 +77,7 @@ public class JExprCast extends JExpr {
         if (_type == null)
             return NodeError.newErrorArray(this, "Missing or incomplete cast type");
         if (_expr == null)
-            return NodeError.newErrorArray(this, "Missing or incomplete expression");
+            return NodeError.newErrorArray(this, "Missing or incomplete cast expression");
 
         // Maybe add an "isCastable()" check? If common superclass is Object and expression class isn't Object, return false?
 

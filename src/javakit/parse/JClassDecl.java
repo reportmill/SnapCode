@@ -6,6 +6,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Stream;
 import javakit.resolver.*;
+import snap.parse.ParseToken;
 import snap.util.ArrayUtils;
 import snap.util.ObjectArray;
 
@@ -165,8 +166,16 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      */
     private JFieldDecl createFieldDeclForParam(JVarDecl varDecl)
     {
+        // Create field modifiers
+        int startCharIndex = varDecl.getStartCharIndex();
+        ParseToken emptyToken = new ParseToken.Builder().name("").pattern("").text("")
+                .startCharIndex(startCharIndex).endCharIndex(startCharIndex).build();
+        JModifiers modifiers = new JModifiers(Modifier.PRIVATE);
+        modifiers.setStartToken(emptyToken);
+        modifiers.setEndToken(emptyToken);
+
         JFieldDecl fieldDecl = new JFieldDecl();
-        fieldDecl.setModifiers(new JModifiers(Modifier.PRIVATE));
+        fieldDecl.setModifiers(modifiers);
         fieldDecl.addVarDecl(varDecl);
         return fieldDecl;
     }
@@ -176,10 +185,22 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      */
     private JMethodDecl createMethodDeclForParam(JVarDecl varDecl)
     {
+        // Create method modifiers
+        int startCharIndex = varDecl.getStartCharIndex();
+        ParseToken emptyToken = new ParseToken.Builder().name("").pattern("").text("")
+                .startCharIndex(startCharIndex).endCharIndex(startCharIndex).build();
+        JModifiers modifiers = new JModifiers(Modifier.PUBLIC);
+        modifiers.setStartToken(emptyToken);
+        modifiers.setEndToken(emptyToken);
+
         JMethodDecl methodDecl = new JMethodDecl();
-        methodDecl.setModifiers(new JModifiers(Modifier.PUBLIC));
+        methodDecl.setModifiers(modifiers);
         methodDecl.setReturnType(varDecl.getType());
+        varDecl.getType().setParent(varDecl);
         methodDecl.setId(varDecl.getId());
+        varDecl.getId().setParent(varDecl);
+        methodDecl.setStartToken(emptyToken);
+        methodDecl.setEndToken(emptyToken);
         return methodDecl;
     }
 

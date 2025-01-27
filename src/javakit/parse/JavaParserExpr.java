@@ -530,10 +530,12 @@ public class JavaParserExpr extends Parser {
                     getPart().setType(type);
                     break;
 
-                // Handle UnaryExpr
-                case "UnaryExpr": case "UnaryExprNotPlusMinus":
-                    JExpr expr = aNode.getCustomNode(JExpr.class);
-                    getPart().setExpr(expr);
+                // Handle UnaryExpr, UnaryExprNotPlusMinus
+                default:
+                    if (aNode.getCustomNode() instanceof JExpr) {
+                        JExpr expr = aNode.getCustomNode(JExpr.class);
+                        getPart().setExpr(expr);
+                    }
                     break;
             }
         }
