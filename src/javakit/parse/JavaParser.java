@@ -40,16 +40,9 @@ public class JavaParser extends JavaParserStmt {
      */
     protected ParseRule createRule()
     {
-        // Create rule
-        ParseRule rule = ParseUtils.loadRule(JavaParser.class, null);
-        assert (rule != null);
-
-        // Install handlers from list
-        for (Class<? extends ParseHandler<?>> handlerClass : _handlerClasses)
-            ParseUtils.installHandlerForClass(handlerClass, rule);
-
-        // Return
-        return rule;
+        Grammar grammar = Grammar.createGrammarForParserClass(getClass());
+        grammar.installHandlerForClasses(_handlerClasses);
+        return grammar.getPrimaryRule();
     }
 
     /**
