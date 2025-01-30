@@ -35,7 +35,7 @@ public class JavaTextTokenizer extends CodeTokenizer {
         super();
         setReadSingleLineComments(true);
         setReadMultiLineComments(true);
-        ParseRule rule = JavaParser.getShared().getRule();
+        ParseRule rule = JavaParser.getShared().getPrimaryRule();
         setRegexesForPatternRulesInRule(rule);
     }
 

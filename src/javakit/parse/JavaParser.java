@@ -36,13 +36,13 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * Override so subclasses will find grammar file.
+     * Override to install handlers.
      */
-    protected ParseRule createRule()
+    @Override
+    protected void initGrammar()
     {
-        Grammar grammar = Grammar.createGrammarForParserClass(getClass());
+        Grammar grammar = getGrammar();
         grammar.installHandlerForClasses(_handlerClasses);
-        return grammar.getPrimaryRule();
     }
 
     /**
@@ -50,7 +50,7 @@ public class JavaParser extends JavaParserStmt {
      */
     public synchronized JFile parseFile(CharSequence anInput)
     {
-        ParseRule javaRule = getRule();
+        ParseRule javaRule = getPrimaryRule();
         return parseFileWithRule(anInput, javaRule);
     }
 
@@ -126,7 +126,7 @@ public class JavaParser extends JavaParserStmt {
     public synchronized JFile parseJeplFile(CharSequence anInput, String className, String[] importNames, String superClassName)
     {
         // Get JeplRule
-        ParseRule jeplRule = getRule("JeplFile");
+        ParseRule jeplRule = getRuleForName("JeplFile");
         jeplRule.setHandler(new JeplFileHandler(className, importNames, superClassName));
 
         // Do normal version
@@ -139,7 +139,7 @@ public class JavaParser extends JavaParserStmt {
     public synchronized JStmt parseStatement(CharSequence charInput, int charIndex)
     {
         _exception = null;
-        ParseRule stmtRule = getRule("Statement");
+        ParseRule stmtRule = getRuleForName("Statement");
         setInput(charInput);
         setCharIndex(charIndex);
         return parseCustom(stmtRule, JStmt.class);
@@ -166,7 +166,7 @@ public class JavaParser extends JavaParserStmt {
     public synchronized JExpr parseExpression(CharSequence charInput)
     {
         _exception = null;
-        ParseRule exprRule = getRule("Expression");
+        ParseRule exprRule = getRuleForName("Expression");
         setInput(charInput);
         return parseCustom(exprRule, JExpr.class);
     }
@@ -177,7 +177,7 @@ public class JavaParser extends JavaParserStmt {
     public synchronized JFile parseFileImports(CharSequence charInput)
     {
         _exception = null;
-        ParseRule importsRule = getRule("JavaFileImports");
+        ParseRule importsRule = getRuleForName("JavaFileImports");
         setInput(charInput);
         return parseCustom(importsRule, JFile.class);
     }
