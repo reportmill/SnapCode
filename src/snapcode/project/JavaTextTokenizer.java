@@ -1,10 +1,7 @@
 package snapcode.project;
 import javakit.parse.JavaParser;
 import snap.gfx.Color;
-import snap.parse.CodeTokenizer;
-import snap.parse.ParseRule;
-import snap.parse.ParseToken;
-import snap.parse.Tokenizer;
+import snap.parse.*;
 import snap.text.TextLine;
 import snap.text.TextStyle;
 import snap.text.TextToken;
@@ -35,8 +32,11 @@ public class JavaTextTokenizer extends CodeTokenizer {
         super();
         setReadSingleLineComments(true);
         setReadMultiLineComments(true);
-        ParseRule rule = JavaParser.getShared().getPrimaryRule();
-        setRegexesForPatternRulesInRule(rule);
+
+        // Set regexes from grammar
+        Grammar grammar = JavaParser.getShared().getGrammar();
+        Regex[] regexes = grammar.getAllRegexes();
+        setRegexes(regexes);
     }
 
     /**
