@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * A Tokenizer subclass to return TextToken.
  */
-public class JavaTextTokenizer extends CodeTokenizer {
+public class JavaTextTokenizer extends Tokenizer {
 
     // The current text line
     private TextLine _textLine;
@@ -30,8 +30,7 @@ public class JavaTextTokenizer extends CodeTokenizer {
     public JavaTextTokenizer()
     {
         super();
-        setReadSingleLineComments(true);
-        setReadMultiLineComments(true);
+        enableCodeComments();
 
         // Set regexes from grammar
         Grammar grammar = JavaParser.getShared().getGrammar();

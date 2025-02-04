@@ -199,9 +199,8 @@ public class JavaParser extends JavaParserStmt {
     @Override
     protected Tokenizer createTokenizer()
     {
-        CodeTokenizer tokenizer = new CodeTokenizer();
-        tokenizer.setReadSingleLineComments(true);
-        tokenizer.setReadMultiLineComments(true);
+        Tokenizer tokenizer = super.createTokenizer();
+        tokenizer.enableCodeComments();
         return tokenizer;
     }
 
