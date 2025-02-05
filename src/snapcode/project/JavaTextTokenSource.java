@@ -49,26 +49,23 @@ public class JavaTextTokenSource extends Tokenizer {
      * Override to get next token from JavaText TextLines.
      */
     @Override
-    public ParseToken getNextToken()
+    protected ParseToken getNextTokenImpl()
     {
         // If no more lines, return null
         if (_textLine == null)
             return null;
 
-        // If more line tokens, return next
-        if (_tokenIndex < _textLine.getTokenCount()) {
-            TextToken textToken = _textLine.getToken(_tokenIndex++);
-            if (textToken.getName() == Tokenizer.SINGLE_LINE_COMMENT || textToken.getName() == Tokenizer.MULTI_LINE_COMMENT)
-                return getNextToken();
-
-            _charIndex = textToken.getEndCharIndex();
-            return textToken;
+        // If no more line tokens, reset to next line
+        while (_tokenIndex >= _textLine.getTokenCount()) {
+            _tokenIndex = 0;
+            _textLine = _textLine.getNext();
+            if (_textLine == null)
+                return null;
         }
 
-        // Set next text line
-        _charIndex = _textLine.getEndCharIndex();
-        _textLine = _textLine.getNext();
-        _tokenIndex = 0;
-        return getNextToken();
+        // Return next token
+        TextToken nextToken = _textLine.getToken(_tokenIndex++);
+        _charIndex = nextToken.getEndCharIndex();
+        return nextToken;
     }
 }

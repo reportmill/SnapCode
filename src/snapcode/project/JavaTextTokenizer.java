@@ -31,6 +31,7 @@ public class JavaTextTokenizer extends Tokenizer {
     {
         super();
         enableCodeComments();
+        enableSpecialTokens();
 
         // Set regexes from grammar
         Grammar grammar = JavaParser.getShared().getGrammar();
@@ -53,7 +54,7 @@ public class JavaTextTokenizer extends Tokenizer {
             TextToken textToken = getFirstToken(aTextLine);
             while (textToken != null) {
                 textTokens.add(textToken);
-                textToken = (TextToken) getNextSpecialTokenOrToken();
+                textToken = (TextToken) getNextToken();
             }
         }
 
@@ -108,7 +109,7 @@ public class JavaTextTokenizer extends Tokenizer {
             return (TextToken) getMultiLineCommentTokenMore();
 
         // Return next token
-        return (TextToken) getNextSpecialTokenOrToken();
+        return (TextToken) getNextToken();
     }
 
     /**
