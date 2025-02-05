@@ -35,8 +35,7 @@ public class JavaTextTokenizer extends Tokenizer {
 
         // Set regexes from grammar
         Grammar grammar = JavaParser.getShared().getGrammar();
-        Regex[] regexes = grammar.getAllRegexes();
-        setRegexes(regexes);
+        setRegexesForGrammar(grammar);
     }
 
     /**
