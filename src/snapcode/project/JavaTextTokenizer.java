@@ -89,42 +89,22 @@ public class JavaTextTokenizer extends Tokenizer {
         // Return
         return textToken;
     }
+
     /**
      * Returns the first token for tokenizer and text line.
      */
     private TextToken getFirstToken(TextLine aTextLine)
     {
-        // If this line is InMultilineComment (do this first, since it may require use of Text.Tokenizer)
-        TextLine prevTextLine = aTextLine.getPrevious();
-        TextToken prevTextLineLastToken = prevTextLine != null ? prevTextLine.getLastToken() : null;
-        boolean inUnterminatedComment = isTextTokenUnterminatedMultilineComment(prevTextLineLastToken);
+        // Get previous token to pickup MultilineComments/TextBlocks (do this first, since it may require use of Text.Tokenizer)
+        TextToken prevToken = getPreviousTokenForTextLine(aTextLine);
 
         // Reset input for Tokenizer
         setInput(aTextLine);
         _textLine = aTextLine;
-
-        // Get first line token: Handle if already in Multi-line
-        if (inUnterminatedComment)
-            return (TextToken) getMultiLineCommentTokenMore();
+        setLastToken(prevToken);
 
         // Return next token
         return (TextToken) getNextToken();
-    }
-
-    /**
-     * Returns whether given TextToken is an unterminated comment.
-     */
-    private static boolean isTextTokenUnterminatedMultilineComment(TextToken aTextToken)
-    {
-        if (aTextToken == null)
-            return false;
-        String name = aTextToken.getName();
-        if (name != Tokenizer.MULTI_LINE_COMMENT)
-            return false;
-        String tokenStr = aTextToken.getString();
-        if (tokenStr.endsWith("*/"))
-            return false;
-        return true;
     }
 
     /**
@@ -148,5 +128,22 @@ public class JavaTextTokenizer extends Tokenizer {
 
         // Return none
         return null;
+    }
+
+    /**
+     * Returns the previous token for given text line.
+     */
+    private static TextToken getPreviousTokenForTextLine(TextLine aTextLine)
+    {
+        TextLine prevLine = aTextLine.getPrevious();
+        TextToken prevToken = prevLine != null ? prevLine.getLastToken() : null;
+
+        // If previous line was empty, iterate over available previous lines till previous token found
+        while (prevToken == null && prevLine != null) {
+            prevLine = prevLine.getPrevious();
+            prevToken = prevLine != null ? prevLine.getLastToken() : null;
+        }
+
+        return prevToken;
     }
 }
