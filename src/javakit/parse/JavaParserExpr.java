@@ -2,10 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import snap.parse.ParseHandler;
-import snap.parse.ParseNode;
-import snap.parse.Parser;
-import snap.parse.ParseToken;
+import snap.parse.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1012,8 +1009,11 @@ public class JavaParserExpr extends Parser {
                 // Handle TextBlock
                 case "TextBlock":
                     literalExpr.setLiteralType(JExprLiteral.LiteralType.String);
-                    if (aNode.getPattern().length() == 3)
-                        valueStr = null;
+                    valueStr = null;
+                    break;
+                case "TextBlockMore":
+                    if (literalExpr._valueStr != null && !valueStr.equals(Tokenizer.TEXT_BLOCK_PATTERN))
+                        valueStr = literalExpr._valueStr + valueStr;
                     break;
             }
 

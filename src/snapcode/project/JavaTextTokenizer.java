@@ -112,19 +112,27 @@ public class JavaTextTokenizer extends Tokenizer {
      */
     public static Color getColorForParseToken(ParseToken aToken)
     {
-        // Handle comments
         String tokenName = aToken.getName();
-        if (tokenName == Tokenizer.SINGLE_LINE_COMMENT || tokenName == Tokenizer.MULTI_LINE_COMMENT)
-            return COMMENT_COLOR;
+
+        if (tokenName != null) {
+            switch (tokenName) {
+
+                // Handle comments
+                case Tokenizer.SINGLE_LINE_COMMENT:
+                case Tokenizer.MULTI_LINE_COMMENT: return COMMENT_COLOR;
+
+                // Handle string literals
+                case "StringLiteral":
+                case "CharacterLiteral":
+                case Tokenizer.TEXT_BLOCK:
+                case Tokenizer.TEXT_BLOCK_MORE: return STRING_LITERAL_COLOR;
+            }
+        }
 
         // Handle reserved words
         char firstPatternChar = aToken.getPattern().charAt(0);
         if (Character.isLetter(firstPatternChar))
             return RESERVED_WORD_COLOR;
-
-        // Handle string literals
-        if (tokenName == "StringLiteral" || tokenName == "CharacterLiteral")
-            return STRING_LITERAL_COLOR;
 
         // Return none
         return null;

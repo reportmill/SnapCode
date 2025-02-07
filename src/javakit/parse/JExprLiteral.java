@@ -4,6 +4,8 @@
 package javakit.parse;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
+import snap.util.ArrayUtils;
+import snap.util.CharSequenceUtils;
 
 /**
  * A JExpr subclass for literals.
@@ -11,21 +13,19 @@ import javakit.resolver.JavaDecl;
 public class JExprLiteral extends JExpr {
 
     // The string used to represent literal
-    String _valueStr;
+    protected String _valueStr;
 
     // The literal value
-    Object _value;
+    private Object _value;
 
     // The literal type
-    LiteralType _literalType = LiteralType.Null;
+    private LiteralType _literalType = LiteralType.Null;
 
     // Constants for Literal type
     public enum LiteralType { Boolean, Integer, Long, Float, Double, Character, String, Null }
 
-    ;
-
     /**
-     * Creates a new literal.
+     * Constructor.
      */
     public JExprLiteral()
     {
@@ -50,26 +50,17 @@ public class JExprLiteral extends JExpr {
     /**
      * Returns the Literal type (String, Number, Boolean, Null).
      */
-    public LiteralType getLiteralType()
-    {
-        return _literalType;
-    }
+    public LiteralType getLiteralType()  { return _literalType; }
 
     /**
      * Sets the literal type.
      */
-    public void setLiteralType(LiteralType aType)
-    {
-        _literalType = aType;
-    }
+    public void setLiteralType(LiteralType aType)  { _literalType = aType; }
 
     /**
      * Returns whether this is null literal.
      */
-    public boolean isNull()
-    {
-        return getLiteralType() == LiteralType.Null;
-    }
+    public boolean isNull()  { return getLiteralType() == LiteralType.Null; }
 
     /**
      * Returns the value.
@@ -113,15 +104,13 @@ public class JExprLiteral extends JExpr {
             // Char
             case Character: {
                 String str = getStringForStringLiteral(valueStr);
-                if (str.length() > 0)
+                if (!str.isEmpty())
                     _value = str.charAt(0);
                 break;
             }
 
             // String
-            case String:
-                _value = getStringForStringLiteral(valueStr);
-                break;
+            case String: _value = getStringForStringLiteral(valueStr); break;
 
             // Dunno
             default: return null;
@@ -235,11 +224,47 @@ public class JExprLiteral extends JExpr {
      */
     private static String getStringForStringLiteral(String stringLiteral)
     {
+        if (!stringLiteral.isEmpty() && stringLiteral.charAt(0) == '"')
+            return getStringForTextBlock(stringLiteral);
+
         String str = stringLiteral.substring(1, stringLiteral.length() - 1);
         str = str.replace("\\n", "\n");
         str = str.replace("\\t", "\t");
         str = str.replace("\\r", "\r");
         str = str.replace("\\\\", "\\");
+        str = str.replace("\\\"", "\"");
         return str;
+    }
+
+    /**
+     * Processes raw text block into string the way Java compiler would.
+     */
+    private static String getStringForTextBlock(String textBlock)
+    {
+        // Split into lines
+        String[] lines = textBlock.split("\n", -1);
+
+        // Determine common leading whitespace (ignoring empty lines)
+        ArrayUtils.getMin(lines, (line1,line2) -> CharSequenceUtils.getIndentLength(line2) - CharSequenceUtils.getIndentLength(line1));
+        int minIndent = Integer.MAX_VALUE;
+        for (String line : lines) {
+            int leadingSpaces = CharSequenceUtils.getIndentLength(line);
+            if (leadingSpaces > 0 && leadingSpaces < line.length())
+                minIndent = Math.min(minIndent, leadingSpaces);
+        }
+
+        // Remove common leading whitespace and handle escape sequences
+        StringBuilder result = new StringBuilder();
+        for (String line : lines) {
+            String trimmedLine = line.length() >= minIndent ? line.substring(minIndent) : line;
+            trimmedLine = trimmedLine.replace("\\s", " ");
+            result.append(trimmedLine).append("\n");
+        }
+
+        // Remove the final newline
+        if (result.length() > 0)
+            result.setLength(result.length() - 1);
+
+        return result.toString();
     }
 }

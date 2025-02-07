@@ -311,9 +311,11 @@ CharacterLiteral { "'(([^'\\\n\r])|(\\([ntbrf\\'\"]|[0-7][0-7]?|[0-3][0-7][0-7]|
 
 StringLiteral { "\"(([^\"\\\n\r])|(\\([ntbrf\\'\"]|[0-7][0-7]?|[0-3][0-7][0-7]|u[\da-fA-F]{4})))*\"" }
 
-TextBlockLiteral { TextBlock+ }
+TextBlockLiteral { TextBlock TextBlockMore+ }
 
-TextBlock { "qqq" }
+TextBlock { "zzz" }
+
+TextBlockMore { "zzz" }
 
 NullLiteral { "null" }
 
