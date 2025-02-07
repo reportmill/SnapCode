@@ -257,7 +257,7 @@ public class BuildFile extends PropObject {
 
         // Handle Add SnapCharts
         if (aValue)
-            addDependency(new MavenDependency("com.reportmill:snapcharts:2025.01"));
+            addDependency(new MavenDependency("com.reportmill:snapcharts:2025.02"));
 
         // Handle Remove SnapCharts
         else {
