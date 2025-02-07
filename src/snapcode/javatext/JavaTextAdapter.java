@@ -410,6 +410,13 @@ public class JavaTextAdapter extends TextAdapter {
                 return;
         }
 
+        // If quote, just bail if prev char is quote
+        if (aChar == '"') {
+            int selStart = getSelStart() - 2;
+            if (selStart > 0 && charAt(selStart) == '"')
+                return;
+        }
+
         // Add close char after char
         String closeCharStr = String.valueOf(getPairedCharForOpener(aChar));
         int selStart = getSelStart();
