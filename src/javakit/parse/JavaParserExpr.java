@@ -1008,10 +1008,18 @@ public class JavaParserExpr extends Parser {
                 case "StringLiteral":
                     literalExpr.setLiteralType(JExprLiteral.LiteralType.String);
                     break;
+
+                // Handle TextBlock
+                case "TextBlock":
+                    literalExpr.setLiteralType(JExprLiteral.LiteralType.String);
+                    if (aNode.getPattern().length() == 3)
+                        valueStr = null;
+                    break;
             }
 
             // Set value string
-            literalExpr.setValueString(valueStr);
+            if (valueStr != null)
+                literalExpr.setValueString(valueStr);
         }
 
         protected Class<JExprLiteral> getPartClass()  { return JExprLiteral.class; }

@@ -295,7 +295,7 @@ Name { Identifier (LookAhead(2) "." Identifier)* }
 
 Identifier { "[$_a-zA-Z][$\w]*" }
 
-Literal { IntegerLiteral | FloatLiteral | CharacterLiteral | StringLiteral | BooleanLiteral | NullLiteral }
+Literal { IntegerLiteral | FloatLiteral | CharacterLiteral | TextBlockLiteral | StringLiteral | BooleanLiteral | NullLiteral }
 
 IntegerLiteral { IntLiteral | HexLiteral | OctalLiteral }
 
@@ -310,6 +310,10 @@ FloatLiteral { "(([\d]+\.[\d]*)|(\.[\d]+)|([\d]+))([eE][\+\-]?[\d]+)?[fFdD]?" }
 CharacterLiteral { "'(([^'\\\n\r])|(\\([ntbrf\\'\"]|[0-7][0-7]?|[0-3][0-7][0-7]|u[\da-fA-F]{4})))'" }
 
 StringLiteral { "\"(([^\"\\\n\r])|(\\([ntbrf\\'\"]|[0-7][0-7]?|[0-3][0-7][0-7]|u[\da-fA-F]{4})))*\"" }
+
+TextBlockLiteral { TextBlock+ }
+
+TextBlock { "qqq" }
 
 NullLiteral { "null" }
 
