@@ -8,5 +8,5 @@
   </RowView>
   <RectView PrefHeight="1" Fill="#CC" />
   <ScrollView Name="ScrollView" GrowHeight="true" />
-  <TextField Name="InputTextField" PrefHeight="28" Margin="8" Padding="0,10,0,8" BorderRadius="10" Font="Arial 14" PromptText="Program Input" />
+  <TextField Name="InputTextField" PrefHeight="28" Margin="8" BorderRadius="10" Font="Arial 14" PromptText="Program Input" />
 </ColView>
