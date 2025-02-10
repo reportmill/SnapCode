@@ -62,6 +62,7 @@ public class JavaTextArea extends TextArea {
     private static JavaTextDoc _dummyJavaTextDoc;
     private static final Color ERROR_TEXT_COLOR = Color.RED.brighter().brighter();
     private static final Color PROGRAM_COUNTER_LINE_HIGHLITE_COLOR = new Color(199, 218, 175, 200);
+    private static final Color PRINT_MARGIN_COLOR = Color.GRAY9;
 
     /**
      * Constructor.
@@ -344,7 +345,7 @@ public class JavaTextArea extends TextArea {
         // Configure MarginLine
         if (isShowPrintMargin()) {
             double x = getPadding().getLeft() + getFont().charAdvance('X') * 120 + .5;
-            aPntr.setColor(Color.LIGHTGRAY);
+            aPntr.setColor(PRINT_MARGIN_COLOR);
             aPntr.setStroke(Stroke.Stroke1);
             aPntr.drawLine(x, 0, x, getHeight());
         }

@@ -32,7 +32,7 @@ public class LineHeadView extends View {
     private double  _mx, _my;
 
     // Constants
-    private static Color LINE_NUMBERS_COLOR = Color.GRAY6;
+    private static Color LINE_NUMBERS_COLOR = Color.GRAY8;
 
     // Constant for line markers width
     public static final int LINE_MARKERS_WIDTH = 12;
@@ -49,14 +49,15 @@ public class LineHeadView extends View {
         // Config
         enableEvents(MouseMove, MouseRelease);
         setToolTipEnabled(true);
-        setFill(ViewTheme.get().getBackFill());
+        setFill(ViewTheme.get().getContentColor());
 
         // Set PrefSize
         setPrefSizeForText();
 
         // Set Padding
         Insets padding = _textArea.getPadding().clone();
-        padding.left = padding.right = 6;
+        padding.left = 6;
+        padding.right = 12;
         setPadding(padding);
     }
 
