@@ -142,6 +142,11 @@ public class MainToolBar extends WorkspaceTool {
 
             // Handle GreenfootButton
             case "GreenfootButton": WorkspacePaneUtils.selectGoodDefaultFile(_workspacePane, getSelProject()); break;
+
+            // Handle DarkModeButton
+            case "DarkModeButton":
+                ViewTheme theme = ViewTheme.get() == ViewTheme.getLight() ? ViewThemes.getThemeForName("Dark") : ViewTheme.getLight();
+                ViewTheme.setTheme(theme);
         }
     }
 
