@@ -351,17 +351,22 @@ public class JavaTextPane extends TextPane {
         // Do normal version
         super.handleTextAreaPropChange(aPC);
 
-        // Handle SelectedNode change: Reset UI
-        String propName = aPC.getPropName();
-        if (propName == JavaTextArea.SelNode_Prop) {
-            resetLater();
-            _lineFootView.resetAll();
-        }
+        switch ( aPC.getPropName()) {
 
-        // Handle TextDoc
-        if (propName == TextArea.SourceText_Prop) {
-            _lineNumView.resetAll();
-            _lineFootView.resetAll();
+            // Handle SelectedNode change: Reset UI
+            case JavaTextArea.SelNode_Prop:
+                resetLater();
+                _lineFootView.resetAll();
+                break;
+
+            // Handle TextDoc
+            case TextArea.SourceText_Prop:
+                _lineNumView.resetAll();
+                _lineFootView.resetAll();
+                break;
+
+            // Handle Selection
+            case TextArea.Selection_Prop: _lineNumView.repaint(); break;
         }
     }
 

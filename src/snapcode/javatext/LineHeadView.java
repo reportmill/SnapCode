@@ -33,6 +33,7 @@ public class LineHeadView extends View {
 
     // Constants
     private static Color LINE_NUMBERS_COLOR = Color.GRAY8;
+    private static Color LINE_NUMBERS_COLOR_SEL = Color.GRAY2;
 
     // Constant for line markers width
     public static final int LINE_MARKERS_WIDTH = 12;
@@ -236,6 +237,8 @@ public class LineHeadView extends View {
         int startLineIndex = startLine.getLineIndex();
         int lineCount = _textArea.getLineCount();
         double maxX = getWidth() - getPadding().right;
+        int selStartLineIndex = _textArea.getSel().getStartLine().getLineIndex();
+        int selEndLineIndex = _textArea.getSel().getEndLine().getLineIndex();
 
         // Iterate over lines and paint line number for each
         for (int i = startLineIndex; i < lineCount; i++) {
@@ -244,11 +247,19 @@ public class LineHeadView extends View {
             TextLine textLine = _textArea.getLine(i);
             double lineY = textLine.getTextY() + textLine.getMetrics().getAscent();
 
+            // If entering sel text range, set line number color for selected
+            if (i == selStartLineIndex)
+                aPntr.setColor(LINE_NUMBERS_COLOR_SEL);
+
             // Get String, Width and X
             String str = String.valueOf(i + 1);
             double strW = font.getStringAdvance(str);
             double strX = maxX - strW;
             aPntr.drawString(String.valueOf(i+1), strX, lineY);
+
+            // If leaving sel text range, reset line number color
+            if (i == selEndLineIndex)
+                aPntr.setColor(LINE_NUMBERS_COLOR);
 
             // If below clip, just return
             if (lineY > clipMaxY)
@@ -270,6 +281,8 @@ public class LineHeadView extends View {
     protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
     {
         super.themeChanged(oldTheme, newTheme);
-        setFill(ViewTheme.get().getBackFill());
+        setFill(ViewTheme.get().getContentColor());
+        LINE_NUMBERS_COLOR = newTheme == ViewTheme.getLight() ? Color.GRAY8 : Color.GRAY3;
+        LINE_NUMBERS_COLOR_SEL = newTheme == ViewTheme.getLight() ? Color.GRAY4 : Color.GRAY7;
     }
 }
