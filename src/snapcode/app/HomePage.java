@@ -2,6 +2,7 @@ package snapcode.app;
 import snap.util.SnapUtils;
 import snap.view.*;
 import snap.web.RecentFiles;
+import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.apptools.NewFileTool;
 import snapcode.webbrowser.WebPage;
@@ -69,6 +70,18 @@ public class HomePage extends WebPage {
         SamplesPage samplesPage = new SamplesPage(_workspacePane);
         _workspacePane.getPagePane().setPageForURL(samplesPage.getURL(), samplesPage);
         _workspacePane.getPagePane().setSelPage(samplesPage);
+    }
+
+    /**
+     * Shows the release notes.
+     */
+    public void showReleaseNotes()
+    {
+        //WebURL releaseNotesURL = WebURL.getURL("/Users/jeff/Markdown/ReleaseNotes.md");
+        WebURL releaseNotesURL = WebURL.getURL("https://reportmill.com/SnapCode/ReleaseNotes.md");
+        assert releaseNotesURL != null;
+        WebFile releaseNotesFile = releaseNotesURL.getFile();
+        _workspacePane.getPagePane().setSelFile(releaseNotesFile);
     }
 
     /**
