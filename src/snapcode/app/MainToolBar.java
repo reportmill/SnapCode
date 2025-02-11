@@ -147,6 +147,8 @@ public class MainToolBar extends WorkspaceTool {
             case "DarkModeButton":
                 ViewTheme theme = ViewTheme.get() == ViewTheme.getLight() ? ViewThemes.getThemeForName("Dark") : ViewTheme.getLight();
                 ViewTheme.setTheme(theme);
+                if (!(_pagePane.getSelPage() instanceof JavaPage))
+                    _pagePane.getBrowser().reloadPage();
         }
     }
 
