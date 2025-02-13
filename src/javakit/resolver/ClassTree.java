@@ -271,7 +271,6 @@ public class ClassTree {
         if (aPath.startsWith("/java/sql")) return true;
         if (aPath.startsWith("/java/util/spi")) return true;
         if (aPath.startsWith("/java/util/Spliterators")) return true;
-        if (aPath.startsWith("/javax/crypto")) return true;
         if (aPath.startsWith("/javax/jws")) return true;
         if (aPath.startsWith("/javax/lang")) return true;
         if (aPath.startsWith("/javax/naming")) return true;
