@@ -171,7 +171,10 @@ public class JavaTextPane extends TextPane {
             case "ShowDeclarationsMenuItem": showDeclarations(_textArea.getSelNode()); break;
 
             // Handle ShowScopeBoxesMenuItem
-            case "ShowScopeBoxesMenuItem": JavaTextArea.setShowScopeBoxes(!JavaTextArea.isShowScopeBoxes());
+            case "ShowScopeBoxesMenuItem":
+                JavaTextArea.setShowScopeBoxes(!JavaTextArea.isShowScopeBoxes());
+                _textArea.repaint();
+                break;
 
             // Do normal version
             default: super.respondUI(anEvent); break;
