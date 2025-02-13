@@ -533,6 +533,9 @@ public class JavaClass extends JavaType {
      */
     public boolean isAssignableFrom(JavaClass otherClass)
     {
+        if (otherClass == this)
+            return true;
+
         // If this class is primitive, forward to primitive version
         if (isPrimitive())
             return isAssignablePrimitive(otherClass);
@@ -547,14 +550,20 @@ public class JavaClass extends JavaType {
         if (otherClass.isPrimitive())
             otherClass = otherClass.getPrimitiveAlt();
 
-        // If one is array and other isn't, return false
-        if (isArray() != otherClass.isArray())
-            return false;
-
         // If both classes are array, check component types instead
         if (isArray()) {
+
+            // If other isn't array, return false
+            if (!otherClass.isArray())
+                return false;
+
+            // If either component type is primitive, return false (would only be true for this == otherClass)
             JavaClass compType = getComponentType();
             JavaClass otherCompType = otherClass.getComponentType();
+            if (compType.isPrimitive() || otherCompType.isPrimitive())
+                return false;
+
+            // Check component types
             return compType.isAssignableFrom(otherCompType);
         }
 
