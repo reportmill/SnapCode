@@ -208,7 +208,7 @@ public class HomePageView extends MarkDownView {
         newListView.setMargin(listNodeView.getMargin());
         newListView.setPadding(0, 0, 0, 20);
         newListView.setSpacing(20);
-        newListView.setChildren(listNodeView.getChildren());
+        newListView.setChildren(listNodeView.getChildrenArray());
         return newListView;
     }
 

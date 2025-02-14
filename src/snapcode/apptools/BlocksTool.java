@@ -355,7 +355,7 @@ public class BlocksTool extends WorkspaceTool {
      */
     protected static JNodeView<?> getNodeViewForViewAndXY(ParentView aParentView, double anX, double aY)
     {
-        View[] childView = aParentView.getChildren();
+        ViewList childView = aParentView.getChildren();
 
         // Iterate over children
         for (View child : childView) {
