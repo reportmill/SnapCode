@@ -293,6 +293,7 @@ public class WorkspacePane extends ViewOwner {
         getView("SelectAllMenuItem", MenuItem.class).setSharedAction(SharedAction.SelectAll_Action);
         getView("UndoMenuItem", MenuItem.class).setSharedAction(SharedAction.Undo_Action);
         getView("RedoMenuItem", MenuItem.class).setSharedAction(SharedAction.Redo_Action);
+        addKeyActionHandler("RedoMenuItem", "Shortcut+Y");
 
         // Configure Left/Right/BottomTrayMenuItem.Text to update with Left/Right/BottomTrayUI.Visible
         View showLeftTrayMenuItem = getView("ShowLeftTrayMenuItem");
