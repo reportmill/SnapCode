@@ -668,16 +668,14 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     @Override
     protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
     {
-        // Just resolve typeVar to bounds
+        // If this class is subclass of parameterized type with given type var, return resolved type
         JavaClass javaClass = getJavaClass();
         JavaType resolvedType = javaClass.getResolvedTypeForTypeVariable(aTypeVar);
+        if (resolvedType != null)
+            return resolvedType;
 
         // Do normal version
-        if (!resolvedType.isResolvedType() && resolvedType instanceof JavaTypeVariable)
-            resolvedType = super.getResolvedTypeForTypeVar((JavaTypeVariable) resolvedType);
-
-        // Return
-        return resolvedType;
+        return super.getResolvedTypeForTypeVar(aTypeVar);
     }
 
     /**

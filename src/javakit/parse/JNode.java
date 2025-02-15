@@ -208,10 +208,15 @@ public class JNode {
      */
     protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
     {
+        // Get parent to resolve type (skip method calls - since args aren't defined in those terms)
         JNode parent = getParent();
+        while (parent instanceof JExprMethodCall)
+            parent = parent.getParent();
         if (parent != null)
             return parent.getResolvedTypeForTypeVar(aTypeVar);
-        return aTypeVar;
+
+        // Since type var not resolved, return bounds type
+        return aTypeVar.getEvalType();
     }
 
     /**

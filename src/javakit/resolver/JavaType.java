@@ -124,7 +124,7 @@ public class JavaType extends JavaDecl {
      */
     public JavaType getResolvedTypeForTypeVariable(JavaTypeVariable aTypeVar)
     {
-        return aTypeVar.getEvalType();
+        return null; //aTypeVar.getEvalType();
     }
 
     /**

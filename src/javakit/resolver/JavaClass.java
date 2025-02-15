@@ -671,19 +671,13 @@ public class JavaClass extends JavaType {
     @Override
     public JavaType getResolvedTypeForTypeVariable(JavaTypeVariable aTypeVar)
     {
-        // If has type parameter, return bounds type
-        String typeVarName = aTypeVar.getName();
-        JavaDecl typeParam = getTypeParameterForName(typeVarName);
-        if (typeParam != null)
-            return typeParam.getEvalType();
-
         // If SuerType is ParameterizedType, let it try to resolve
         JavaType superType = getGenericSuperclass();
         if (superType instanceof JavaParameterizedType)
             return superType.getResolvedTypeForTypeVariable(aTypeVar);
 
-        // Otherwise just return EvalClass
-        return aTypeVar.getEvalClass();
+        // Otherwise just return null
+        return null; //aTypeVar.getEvalClass();
     }
 
     /**

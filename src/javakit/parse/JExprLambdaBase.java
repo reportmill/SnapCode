@@ -233,7 +233,7 @@ public abstract class JExprLambdaBase extends JExpr {
             }
 
             // If resolve failed, return Object
-            return getJavaClassForName("java.lang.Object");
+            return aTypeVar.getEvalType(); //getJavaClassForName("java.lang.Object");
         }
 
         // Do normal version

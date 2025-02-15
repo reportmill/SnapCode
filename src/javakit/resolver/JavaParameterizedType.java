@@ -89,7 +89,7 @@ public class JavaParameterizedType extends JavaType {
             return resolvedType;
 
         // Do normal version
-        return super.getResolvedTypeForTypeVariable(aTypeVar);
+        return null; //super.getResolvedTypeForTypeVariable(aTypeVar);
     }
 
     /**
