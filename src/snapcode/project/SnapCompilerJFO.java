@@ -97,7 +97,8 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
         if (_file.getFileType().equals("jepl") || _file.getFileType().equals("jmd")) {
             JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(_file);
             JFile jFile = javaAgent.getJFile();
-            return new JeplToJava(jFile).getJava();
+            int javaVersion = _proj.getBuildFile().getCompileRelease();
+            return new JeplToJava(jFile, javaVersion).getJava();
         }
 
         // Get string

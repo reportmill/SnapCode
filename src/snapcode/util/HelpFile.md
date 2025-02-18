@@ -111,7 +111,7 @@ var y = DoubleArray.of(x).map(d -> Math.sin(d));
 var x = new double[] { 1, 2, 3, 4 };
 var y = new double[] { 1, 4, 9, 16 };
 var dataSet = dataSet(x, y);
-show(dataSet)
+show(dataSet);
 ```
 
 ## DataSet from 3D data

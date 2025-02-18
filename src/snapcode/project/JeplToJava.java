@@ -16,6 +16,9 @@ public class JeplToJava {
     // The JFile
     private JFile _jfile;
 
+    // The Java version
+    private int _javaVersion;
+
     // The StringBuilder
     private StringBuilder _sb;
 
@@ -25,10 +28,11 @@ public class JeplToJava {
     /**
      * Constructor.
      */
-    public JeplToJava(JFile jFile)
+    public JeplToJava(JFile jFile, int javaVersion)
     {
         _jfile = jFile;
         _sb = new StringBuilder();
+        _javaVersion = javaVersion;
     }
 
     /**
@@ -48,7 +52,7 @@ public class JeplToJava {
         List<JImportDecl> importDecls = _jfile.getImportDecls();
         String importDeclsStr = ListUtils.mapToStringsAndJoin(importDecls, JImportDecl::getString, "\n");
         _sb.append(importDeclsStr);
-        if (importDeclsStr.length() > 0)
+        if (!importDeclsStr.isEmpty())
             _sb.append('\n');
         _sb.append('\n');
 
@@ -214,27 +218,25 @@ public class JeplToJava {
      */
     private void appendInitializerDecl(JInitializerDecl initializerDecl)
     {
+        _sb.append('\n');
+
         // If run local, just make main method
         boolean runLocal = RunToolUtils.isRunLocal(_jfile.getSourceFile());
-        if (runLocal) {
-            _sb.append('\n');
+        if (runLocal)
             _sb.append(_indent).append("public static void main(String[] args) throws Exception\n");
-            _sb.append(_indent).append("{\n");
-        }
 
         // Make main method with runLater call
         else {
-            _sb.append('\n');
             _sb.append(_indent).append("public static void main(String[] args) throws Exception { ViewUtils.runLater(() -> main2(args)); }\n");
             _sb.append(_indent).append("public static void main2(String[] args) { try { main3(args); } catch(Exception e) { e.printStackTrace(); } }\n");
 
             // Handle Jepl file - convert initializer to main method
             _sb.append('\n');
             _sb.append(_indent).append("public static void main3(String[] args) throws Exception\n");
-            _sb.append(_indent).append("{\n");
         }
 
-        // Append body
+        // Append { body }
+        _sb.append(_indent).append("{\n");
         appendMethodBody(initializerDecl);
         _sb.append(_indent).append("}\n");
     }
@@ -250,10 +252,12 @@ public class JeplToJava {
         _sb.append(blockStmtStr);
 
         // Fix var decls and statements with missing semicolons
-        int sbStart = _sb.length() - blockStmtStr.length();
-        int blockStart = blockStmt.getStartCharIndex();
-        int offset = sbStart - blockStart;
-        fixVarDeclsAndSemicolons(blockStmt, offset);
+        if (_javaVersion < 9) {
+            int sbStart = _sb.length() - blockStmtStr.length();
+            int blockStart = blockStmt.getStartCharIndex();
+            int offset = sbStart - blockStart;
+            fixVarDecls(blockStmt, offset);
+        }
 
         // Append trailing newline
         _sb.append('\n');
@@ -262,35 +266,26 @@ public class JeplToJava {
     /**
      * This method converts 'var' declarations to actual and adds missing semicolons.
      */
-    private void fixVarDeclsAndSemicolons(JNode aNode, int offset)
+    private void fixVarDecls(JNode aNode, int offset)
     {
-        List<JNode> children = aNode.getChildren();
-
-        // If node is statement with missing semicolon, add it
-        if (aNode instanceof JStmt && !children.isEmpty()) {
-            JNode lastChild = children.get(children.size() - 1);
-            if (!(lastChild instanceof JStmt)) {
-                int lastCharIndex = aNode.getEndCharIndex() - 1 + offset;
-                if (_sb.charAt(lastCharIndex) != ';')
-                    _sb.insert(lastCharIndex + 1, ';');
-            }
-        }
-
-        // Recurse into children
-        for (int i = children.size() - 1; i >= 0; i--) {
-            JNode child = children.get(i);
-            fixVarDeclsAndSemicolons(child, offset);
-        }
-
-        // Fix var decl with 'var'
+        // If var decl, check for 'var' and replace with type if found
         if (aNode instanceof JVarDecl) {
             JVarDecl varDecl = (JVarDecl) aNode;
             JType varDeclType = varDecl.getType();
             if (varDeclType.isVarType()) {
                 JavaType type = varDeclType.getEvalType();
-                String typeName = type.getFullName();
+                String typeName = type.getFullName().replace('$', '.');
                 int typeStart = varDeclType.getStartCharIndex() + offset;
                 _sb.replace(typeStart, typeStart + 3, typeName);
+            }
+        }
+
+        // Otherwise Recurse into children
+        else {
+            List<JNode> children = aNode.getChildren();
+            for (int i = children.size() - 1; i >= 0; i--) {
+                JNode child = children.get(i);
+                fixVarDecls(child, offset);
             }
         }
     }
