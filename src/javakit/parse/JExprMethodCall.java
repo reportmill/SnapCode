@@ -195,6 +195,25 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
     protected JavaMethod getDeclImpl()  { return getMethod(); }
 
     /**
+     * Override to prevent infinite loop.
+     */
+    @Override
+    public JavaType getEvalTypeImpl()
+    {
+        if (_resolvingEvalType)
+            return null;
+
+        // Do normal version without reentry for args
+        _resolvingEvalType = true;
+        JavaType evalType = super.getEvalTypeImpl();
+        _resolvingEvalType = false;
+        return evalType;
+    }
+
+    // Whether resolving eval type
+    private boolean _resolvingEvalType;
+
+    /**
      * Returns a resolved type for given type.
      */
     @Override

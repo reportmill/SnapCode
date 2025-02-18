@@ -670,9 +670,11 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     {
         // If this class is subclass of parameterized type with given type var, return resolved type
         JavaClass javaClass = getJavaClass();
-        JavaType resolvedType = javaClass.getResolvedTypeForTypeVariable(aTypeVar);
-        if (resolvedType != null)
-            return resolvedType;
+        if (javaClass != null) {
+            JavaType resolvedType = javaClass.getResolvedTypeForTypeVariable(aTypeVar);
+            if (resolvedType != null)
+                return resolvedType;
+        }
 
         // Do normal version
         return super.getResolvedTypeForTypeVar(aTypeVar);

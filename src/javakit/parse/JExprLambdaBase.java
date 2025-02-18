@@ -199,16 +199,11 @@ public abstract class JExprLambdaBase extends JExpr {
         if (_resolvingEvalType)
             return null;
 
-        // Get decl eval type - just return if null or fully resolved type
-        JavaType evalType = getDeclEvalType();
-        if (evalType == null || evalType.isResolvedType())
-            return evalType;
-
-        // Try to resolve type variables from Class/Method TypeVars
+        // Do normal version without reentry for args
         _resolvingEvalType = true;
-        JavaType resolvedType = getResolvedTypeForType(evalType);
+        JavaType evalType = super.getEvalTypeImpl();
         _resolvingEvalType = false;
-        return resolvedType != null ? resolvedType : evalType.getEvalClass();
+        return evalType;
     }
 
     // Whether resolving eval type
