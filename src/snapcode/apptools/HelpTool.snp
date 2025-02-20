@@ -2,7 +2,8 @@
 <ColView PrefWidth="400" Font="Arial 12">
   <RowView Margin="4" GrowWidth="true">
     <TextField Name="SearchTextField" PrefWidth="260" PrefHeight="26" Margin="4,12,4,80" BorderRadius="10" GrowWidth="true" LeanX="CENTER" PromptText="Search" />
-    <Button Name="AddCodeButton" Margin="5,12,5,8" Padding="4,10,4,10" LeanX="RIGHT" Text="Add Code" />
+    <Button Name="CopyCodeButton" Margin="5,5,5,8" Padding="4" LeanX="RIGHT" Text="Copy Code" />
+    <Button Name="AddCodeButton" Margin="5,8,5,5" Padding="2" ImageName="Add.png" ToolTip="Add Code" />
   </RowView>
   <SplitView Name="SplitView" Vertical="true" Font="Arial 14" GrowWidth="true" GrowHeight="true">
     <ColView FillWidth="true">

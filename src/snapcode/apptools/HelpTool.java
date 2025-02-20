@@ -193,7 +193,8 @@ public class HelpTool extends WorkspaceTool {
                 setSelSection(section);
                 break;
 
-            // Handle AddCodeButton
+            // Handle CopyCodeButton, AddCodeButton
+            case "CopyCodeButton": copyHelpCode(); break;
             case "AddCodeButton": addHelpCodeToDoc(); break;
 
             // Handle PrevButton, NextButton
@@ -223,7 +224,25 @@ public class HelpTool extends WorkspaceTool {
     }
 
     /**
-     * Finds help code in current help file and sends to DocPane.Doc.
+     * Finds help code in current help file and copies to clipboard.
+     */
+    private void copyHelpCode()
+    {
+        // Get Help String
+        String helpCode = getHelpCode();
+        if (helpCode == null)
+            return;
+
+        // Add SnapCharts if needed
+        addSnapChartsToProjectIfNeeded();
+
+        // Set help code in text area
+        Clipboard clipboard = Clipboard.get();
+        clipboard.addData(helpCode);
+    }
+
+    /**
+     * Finds help code in current help file and adds to current JavaPage.
      */
     private void addHelpCodeToDoc()
     {
@@ -243,7 +262,8 @@ public class HelpTool extends WorkspaceTool {
 
         // Set help code in text area
         JavaTextArea javaTextArea = javaPage.getTextArea();
-        javaTextArea.setSel(0, javaTextArea.length());
+        if (javaTextArea.getJFile().isRepl())
+            javaTextArea.setSel(0, javaTextArea.length());
         javaTextArea.replaceCharsWithContent(helpCode);
         hideTool();
 
