@@ -113,7 +113,7 @@ public class DeclMatcher {
     {
         // If not common or root package, check package classes
         String packageName = aPackageNode.getName();
-        if (!ArrayUtils.contains(COMMON_PACKAGES, packageName) && packageName.length() > 0) {
+        if (!ArrayUtils.contains(COMMON_PACKAGES, packageName) && !packageName.isEmpty()) {
             findClassesForPackage(aPackageNode, matchingClasses, limit);
             if (matchingClasses.size() >= limit)
                 return;
@@ -480,7 +480,7 @@ public class DeclMatcher {
      */
     private static Matcher getSkipCharsMatcherForLiteralString(String aStr)
     {
-        String regexStr = aStr.length() > 0 ? getSkipCharsRegexForLiteralString(aStr) : "";
+        String regexStr = !aStr.isEmpty() ? getSkipCharsRegexForLiteralString(aStr) : "";
         int flags = regexStr.length() > aStr.length() ? 0 : Pattern.CASE_INSENSITIVE;
         Pattern pattern = Pattern.compile(regexStr, flags);
         Matcher matcher = pattern.matcher("");

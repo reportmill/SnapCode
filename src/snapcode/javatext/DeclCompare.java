@@ -1,8 +1,8 @@
 package snapcode.javatext;
 import javakit.resolver.*;
-import snap.util.ArrayUtils;
-
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A Comparator to sort JavaDecls.
@@ -98,6 +98,10 @@ class DeclCompare implements Comparator<JavaDecl> {
             rating += 5;
         }
 
+        // Additional chars make us less happy
+        int additionalCharsCount = declName.length() - _prefix.length();
+        rating -= additionalCharsCount;
+
         // Return
         return rating;
     }
@@ -107,17 +111,12 @@ class DeclCompare implements Comparator<JavaDecl> {
      */
     private int getMatchRatingForClass(JavaClass javaClass)
     {
-        int rating = 0;
-
         // Get package
         JavaPackage pkg = javaClass.getPackage();
         String packageName = pkg != null ? pkg.getName() : "";
 
         // If root or common package, add bonus
-        if (packageName.isEmpty() || ArrayUtils.contains(DeclMatcher.COMMON_PACKAGES, packageName))
-            rating += 5;
-        else if (packageName.startsWith("java.util.") || packageName.startsWith("java.lang."))
-            rating += 2;
+        int rating = getPackageBonus(packageName);
 
         // If class is ReceivingClass, user might want cast
         if (javaClass == _receivingClass)
@@ -129,5 +128,39 @@ class DeclCompare implements Comparator<JavaDecl> {
 
         // Return
         return rating;
+    }
+
+    /**
+     * Returns a bonus for common packages.
+     */
+    private static int getPackageBonus(String packageName)
+    {
+        Integer packageBonus = _packageBonusMap.get(packageName);
+        if (packageBonus != null)
+            return packageBonus;
+
+        // Return no bonus
+        return 0;
+    }
+
+    /**
+     * A map of package bonuses.
+     */
+    private static Map<String,Integer> _packageBonusMap = getPackageBonusMapImpl();
+    private static Map<String,Integer> getPackageBonusMapImpl()
+    {
+        // "java.util", "java.lang", "java.io", "snap.view", "snap.gfx", "snap.geom", "snap.util"
+        Map<String,Integer> map = new HashMap<>();
+        map.put("", 6);
+        map.put("java.lang", 6);
+        map.put("java.util", 5);
+        map.put("java.util.function", 4);
+        map.put("java.util.stream", 5);
+        map.put("java.io", 4);
+        map.put("snap.view", 2);
+        map.put("snap.gfx", 2);
+        map.put("snap.geom", 2);
+        map.put("snap.util", 2);
+        return map;
     }
 }
