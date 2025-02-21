@@ -168,8 +168,8 @@ public class JavaParserStmt extends JavaParserExpr {
                 // Handle Statement
                 case "Statement": _part = aNode.getCustomNode(JStmt.class); break;
 
-                // Handle ClassDecl
-                case "ClassDecl": {
+                // Handle ClassDecl, EnumDecl
+                case "ClassDecl": case "EnumDecl": {
                     JStmtClassDecl scd = new JStmtClassDecl();
                     scd.setClassDecl(aNode.getCustomNode(JClassDecl.class));
                     _part = scd;

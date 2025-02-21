@@ -109,7 +109,7 @@ BlockStatement
 {
     LookAhead (VarDeclExpr) VarDeclExpr ";" |
     Statement |
-    ClassDecl
+    ClassDecl | EnumDecl
 }
 
 VarDeclExpr { Modifiers Type VarDecl ("," VarDecl)* }
