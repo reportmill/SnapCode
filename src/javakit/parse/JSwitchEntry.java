@@ -81,6 +81,29 @@ public class JSwitchEntry extends JNode implements WithStmts, WithVarDeclsX {
     }
 
     /**
+     * Returns the eval type.
+     */
+    public JavaType getReturnType()
+    {
+        JStmt lastStmt = !_stmts.isEmpty() ? _stmts.get(_stmts.size() - 1) : null;
+
+        // If last statement is expression statement, return expression type
+        if (lastStmt instanceof JStmtExpr) {
+            JExpr expr = ((JStmtExpr) lastStmt).getExpr();
+            return expr.getEvalType();
+        }
+
+        // If last statement is return statement, return expression type
+        if (lastStmt instanceof JStmtReturn) {
+            JExpr expr = ((JStmtReturn) lastStmt).getExpr();
+            return expr.getEvalType();
+        }
+
+        // Return not defined
+        return null;
+    }
+
+    /**
      * Override to check inner variable declaration statements.
      * Override to try to resolve given id name from any preceding ClassDecl statements.
      */

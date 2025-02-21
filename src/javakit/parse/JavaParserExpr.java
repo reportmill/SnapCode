@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A parser for java statements.
+ * A parser for java expressions.
  */
 @SuppressWarnings({"unused", "StringEquality"})
 public class JavaParserExpr extends Parser {
@@ -953,6 +953,149 @@ public class JavaParserExpr extends Parser {
         }
 
         protected Class<JExprLambda> getPartClass()  { return JExprLambda.class; }
+    }
+
+    /**
+     * SwitchExpr Handler: "switch" "(" Expression ")" "{" SwitchEntry* "}"
+     */
+    public static class SwitchExprHandler extends JNodeParseHandler<JExprSwitch> {
+
+        /**
+         * ParseHandler method.
+         */
+        protected void parsedOne(ParseNode aNode, String anId)
+        {
+            JExprSwitch switchExpr = getPart();
+
+            switch (anId) {
+
+                // Handle Expression
+                case "Expression":
+                    JExpr selectorExpr = aNode.getCustomNode(JExpr.class);
+                    switchExpr.setSelector(selectorExpr);
+                    break;
+
+                // Handle SwitchEntry
+                case "SwitchEntry":
+                    JSwitchEntry switchEntry = aNode.getCustomNode(JSwitchEntry.class);
+                    switchExpr.addSwitchEntry(switchEntry);
+                    break;
+            }
+        }
+
+        protected Class<JExprSwitch> getPartClass()  { return JExprSwitch.class; }
+    }
+
+    /**
+     * SwitchEntry Handler:
+     *     (
+     *         "case" (
+     *             LookAhead(3) NullLiteral "," "default" |
+     *             LookAhead (PatternExpr) PatternExpr ("when" ConditionalExpr)? |
+     *             ConditionalExpr ("," ConditionalExpr)*
+     *         ) |
+     *         "default"
+     *     )
+     *     (
+     *         ":" BlockStatement* |
+     *         "->" ( (Expression ";") | Block | ThrowStatement )
+     *     )
+     */
+    public static class SwitchEntryHandler extends JNodeParseHandler<JSwitchEntry> {
+
+        /**
+         * ParseHandler method.
+         */
+        protected void parsedOne(ParseNode aNode, String anId)
+        {
+            JSwitchEntry switchEntry = getPart();
+
+            switch (anId) {
+
+                // Handle NullLiteral
+                case "NullLiteral": System.err.println("SwitchEntryHandler: NullLiteral support not implemented"); break;
+
+                // Handle default
+                case "default": switchEntry.setDefault(true); break;
+
+                // Handle PatternExpr
+                case "PatternExpr":
+                    JExprPattern patternExpr = aNode.getCustomNode(JExprPattern.class);
+                    switchEntry.setExpr(patternExpr);
+                    break;
+
+                // Handle ConditionalExpr
+                case "ConditionalExpr":
+                    JExpr expr = aNode.getCustomNode(JExpr.class);
+                    switchEntry.setExpr(expr);
+                    break;
+
+                // Handle BlockStatement, Block, ThrowStatement
+                case "BlockStatement": case "Block": case "ThrowStatement":
+                    JStmt stmt = aNode.getCustomNode(JStmt.class);
+                    switchEntry.addStatement(stmt);
+                    break;
+
+                // Handle Expression
+                case "Expression":
+                    JExpr entryExpr = aNode.getCustomNode(JExpr.class);
+                    JStmtExpr exprStmt = new JStmtExpr();
+                    exprStmt.setExpr(entryExpr);
+                    switchEntry.addStatement(exprStmt);
+                    break;
+            }
+        }
+
+        protected Class<JSwitchEntry> getPartClass()  { return JSwitchEntry.class; }
+    }
+
+    /**
+     * PatternExpr Handler:
+     *     LookAhead (TypePatternExpr) TypePatternExpr |
+     *     RecordPatternExpr
+     *  Where:
+     *    TypePatternExpr { Modifiers Type Identifier }
+     *    RecordPatternExpr {	Modifiers ReferenceType PatternList }
+     *    PatternList { "(" PatternExpr ("," PatternExpr)* ")" }
+     */
+    public static class PatternExprHandler extends JNodeParseHandler<JExprPattern> {
+
+        /**
+         * ParseHandler method.
+         */
+        protected void parsedOne(ParseNode aNode, String anId)
+        {
+            JExprPattern patternExpr = getPart();
+
+            switch (anId) {
+
+                // Handle Modifiers
+                case "Modifiers":
+                    JModifiers modifiers = aNode.getCustomNode(JModifiers.class);
+                    patternExpr.setModifiers(modifiers);
+                    break;
+
+                // Handle Type, ReferenceType
+                case "Type": case "ReferenceType":
+                    JType type = aNode.getCustomNode(JType.class);
+                    patternExpr.setType(type);
+                    break;
+
+                // Handle Identifier
+                case "Identifier":
+                    JExprId idExpr = aNode.getCustomNode(JExprId.class);
+                    patternExpr.setId(idExpr);
+                    break;
+
+                // Handle PatternExpr
+                case "PatternExpr":
+                    JExprPattern exprPattern = aNode.getCustomNode(JExprPattern.class);
+                    patternExpr.addPatternExpr(exprPattern);
+                    break;
+            }
+        }
+
+        protected Class<JExprPattern> getPartClass()  { return JExprPattern.class; }
     }
 
     /**

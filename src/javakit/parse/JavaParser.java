@@ -940,6 +940,7 @@ public class JavaParser extends JavaParserStmt {
      */
     private Class<? extends ParseHandler<?>>[]  _handlerClasses = new Class[] {
         AnnotationDeclHandler.class, LiteralHandler.class, LambdaExprHandler.class,
+        SwitchExprHandler.class, SwitchEntryHandler.class, PatternExprHandler.class,
         ArrayInitHandler.class, AllocExprHandler.class, ArgumentsHandler.class,
         PrimarySuffixHandler.class, PrimaryPrefixHandler.class, PrimaryExprHandler.class,
         InstanceOfExprHandler.class, CastExprHandler.class,

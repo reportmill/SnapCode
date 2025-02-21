@@ -232,7 +232,7 @@ UnaryExpr { ("+" | "-") UnaryExpr | PreIncrementExpr | UnaryExprNotPlusMinus }
 
 PreIncrementExpr { ("++" | "--") PrimaryExpr }
 
-UnaryExprNotPlusMinus { ("~" | "!") UnaryExpr | CastExpr | PostfixExpr }
+UnaryExprNotPlusMinus { ("~" | "!") UnaryExpr | CastExpr | PostfixExpr | SwitchExpr }
 
 PostfixExpr { PrimaryExpr ("++" | "--")? }
 
@@ -307,7 +307,7 @@ SwitchEntry
         "default"
     )
     (
-        ":" Statements |
+        ":" BlockStatement* |
         "->" (
             (Expression ";") |
             Block |

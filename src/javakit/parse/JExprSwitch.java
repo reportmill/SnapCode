@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
+import javakit.resolver.JavaDecl;
+import javakit.resolver.JavaType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,6 +64,29 @@ public class JExprSwitch extends JExpr {
      * Returns the default entry.
      */
     public JSwitchEntry getDefaultEntry()  { return _defaultEntry; }
+
+    /**
+     * Returns the expression type.
+     */
+    public JavaDecl getExprType()
+    {
+        JavaType exprType = null;
+
+        // Get return type
+        for (JSwitchEntry switchEntry : _switchCases) {
+            exprType = switchEntry.getReturnType();
+            if (exprType != null)
+                break;
+        }
+
+        // Return
+        return exprType;
+    }
+
+    /**
+     * Override to return declaration of type.
+     */
+    protected JavaDecl getDeclImpl()  { return getExprType(); }
 
     /**
      * Returns the node name.

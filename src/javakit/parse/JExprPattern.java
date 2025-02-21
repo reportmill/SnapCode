@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A JExpr subclass for pattern expressions.
@@ -16,6 +18,9 @@ public class JExprPattern extends JExpr {
 
     // The type/return-type
     protected JType  _type;
+
+    // The pattern expressions
+    private List<JExprPattern> _patternList;
 
     /**
      * Constructor.
@@ -71,6 +76,22 @@ public class JExprPattern extends JExpr {
     public void setType(JType aType)
     {
         replaceChild(_type, _type = aType);
+    }
+
+    /**
+     * Returns the pattern list.
+     */
+    public List<JExprPattern> getPatternList()  { return _patternList; }
+
+    /**
+     * Adds a pattern expression.
+     */
+    public void addPatternExpr(JExprPattern patternExpr)
+    {
+        if (_patternList == null)
+            _patternList = new ArrayList<>();
+        _patternList.add(patternExpr);
+        addChild(patternExpr);
     }
 
     /**
