@@ -15,8 +15,8 @@ public class JExprSwitch extends JExpr {
     // The switch selector
     private JExpr _selector;
 
-    // The list of SwitchLabels
-    protected List<JSwitchEntry> _switchCases = new ArrayList<>();
+    // The list of switch entries
+    protected List<JSwitchEntry> _entries = new ArrayList<>();
 
     // The default entry
     private JSwitchEntry _defaultEntry;
@@ -45,14 +45,14 @@ public class JExprSwitch extends JExpr {
     /**
      * Returns the switch entries.
      */
-    public List<JSwitchEntry> getEntries()  { return _switchCases; }
+    public List<JSwitchEntry> getEntries()  { return _entries; }
 
     /**
      * Adds a switch entry.
      */
-    public void addSwitchEntry(JSwitchEntry aSwitchCase)
+    public void addEntry(JSwitchEntry aSwitchCase)
     {
-        _switchCases.add(aSwitchCase);
+        _entries.add(aSwitchCase);
         addChild(aSwitchCase);
 
         // If given case is default case, set it
@@ -73,7 +73,7 @@ public class JExprSwitch extends JExpr {
         JavaType exprType = null;
 
         // Get return type
-        for (JSwitchEntry switchEntry : _switchCases) {
+        for (JSwitchEntry switchEntry : _entries) {
             exprType = switchEntry.getReturnType();
             if (exprType != null)
                 break;

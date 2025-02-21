@@ -9,11 +9,11 @@ import java.util.*;
  */
 public class JStmtSwitch extends JStmt {
 
-    // The expression
-    protected JExpr  _expr;
+    // The selector expression
+    protected JExpr _selector;
 
-    // The list of SwitchLabels
-    protected List<JSwitchEntry>  _switchCases = new ArrayList<>();
+    // The list of switch entries
+    protected List<JSwitchEntry> _entries = new ArrayList<>();
 
     // The default case
     private JSwitchEntry _defaultCase;
@@ -27,34 +27,34 @@ public class JStmtSwitch extends JStmt {
     }
 
     /**
-     * Returns the expression.
+     * Returns the selector expression.
      */
-    public JExpr getExpr()  { return _expr; }
+    public JExpr getSelector()  { return _selector; }
 
     /**
-     * Sets the expression.
+     * Sets the selector expression.
      */
-    public void setExpr(JExpr anExpr)
+    public void setSelector(JExpr anExpr)
     {
-        replaceChild(_expr, _expr = anExpr);
+        replaceChild(_selector, _selector = anExpr);
     }
 
     /**
-     * Returns the switch labels.
+     * Returns the switch entries.
      */
-    public List<JSwitchEntry> getSwitchCases()  { return _switchCases; }
+    public List<JSwitchEntry> getEntries()  { return _entries; }
 
     /**
-     * Adds a switch case.
+     * Adds a switch entry.
      */
-    public void addSwitchCase(JSwitchEntry aSwitchCase)
+    public void addEntry(JSwitchEntry switchEntry)
     {
-        _switchCases.add(aSwitchCase);
-        addChild(aSwitchCase);
+        _entries.add(switchEntry);
+        addChild(switchEntry);
 
         // If given case is default case, set it
-        if (aSwitchCase.isDefault())
-            _defaultCase = aSwitchCase;
+        if (switchEntry.isDefault())
+            _defaultCase = switchEntry;
     }
 
     /**

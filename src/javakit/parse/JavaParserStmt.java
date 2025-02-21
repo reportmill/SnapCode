@@ -427,17 +427,17 @@ public class JavaParserStmt extends JavaParserExpr {
 
                 // Handle Expression
                 case "Expression":
-                    switchStmt.setExpr(aNode.getCustomNode(JExpr.class));
+                    switchStmt.setSelector(aNode.getCustomNode(JExpr.class));
                     break;
 
                 // Handle SwitchLabel
                 case "SwitchLabel":
-                    switchStmt.addSwitchCase(aNode.getCustomNode(JSwitchEntry.class));
+                    switchStmt.addEntry(aNode.getCustomNode(JSwitchEntry.class));
                     break;
 
                 // Handle BlockStatement
                 case "BlockStatement":
-                    List<JSwitchEntry> switchCases = switchStmt.getSwitchCases();
+                    List<JSwitchEntry> switchCases = switchStmt.getEntries();
                     JSwitchEntry switchCase = switchCases.get(switchCases.size() - 1);
                     JStmt blockStmt = aNode.getCustomNode(JStmt.class);
                     if (blockStmt != null) // Can be null when parse fails
@@ -467,7 +467,7 @@ public class JavaParserStmt extends JavaParserExpr {
                 // Handle Expression
                 case "Expression":
                     JExpr caseExpr = aNode.getCustomNode(JExpr.class);
-                    switchCase.setExpr(caseExpr);
+                    switchCase.addLabel(caseExpr);
                     break;
 
                 // Handle "default"

@@ -3,7 +3,6 @@ import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaField;
 import javakit.resolver.JavaType;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,14 +11,14 @@ import java.util.List;
  */
 public class JSwitchEntry extends JNode implements WithStmts, WithVarDeclsX {
 
-    // The case expression
-    private JExpr  _expr;
+    // The case label expression(s)
+    private List<JExpr> _labels = new ArrayList<>(1);
 
     // Whether case is default
-    private boolean  _default;
+    private boolean _default;
 
     // The body statements
-    private List<JStmt>  _stmts = new ArrayList<>();
+    private List<JStmt> _stmts = new ArrayList<>();
 
     // An array of VarDecls held by JStmtVarDecls
     private JVarDecl[] _varDecls;
@@ -33,16 +32,22 @@ public class JSwitchEntry extends JNode implements WithStmts, WithVarDeclsX {
     }
 
     /**
-     * Returns the expression.
+     * Returns the label expression.
      */
-    public JExpr getExpr()  { return _expr; }
+    public JExpr getLabel()  { return !_labels.isEmpty() ? _labels.get(0) : null; }
 
     /**
-     * Sets the expression.
+     * Returns the label expressions.
      */
-    public void setExpr(JExpr anExpr)
+    public List<JExpr> getLabels()  { return _labels; }
+
+    /**
+     * Adds a label expression.
+     */
+    public void addLabel(JExpr anExpr)
     {
-        replaceChild(_expr, _expr = anExpr);
+        _labels.add(anExpr);
+        addChild(anExpr);
     }
 
     /**
@@ -111,8 +116,8 @@ public class JSwitchEntry extends JNode implements WithStmts, WithVarDeclsX {
     protected JavaDecl getDeclForChildId(JExprId anExprId)
     {
         // If node is case label id, try to evaluate against Switch expression enum type
-        if (anExprId == _expr)
-            return getDeclForCaseExpr();
+        if (_labels.contains(anExprId))
+            return getDeclForCaseLabel(anExprId);
 
         // If any previous statements are class decl statements that declare type, return class
         JavaClass javaClass = WithStmts.getJavaClassForChildTypeOrId(this, anExprId);
@@ -126,11 +131,16 @@ public class JSwitchEntry extends JNode implements WithStmts, WithVarDeclsX {
     /**
      * Returns the decl for the case expression.
      */
-    private JavaDecl getDeclForCaseExpr()
+    private JavaDecl getDeclForCaseLabel(JExpr caseLabel)
     {
+        JNode switchStmt = getParent();
+        JExpr switchExpr = null;
+        if (switchStmt instanceof JStmtSwitch)
+            switchExpr = ((JStmtSwitch) switchStmt).getSelector();
+        else if (switchStmt instanceof JExprSwitch)
+            switchExpr = ((JExprSwitch) switchStmt).getSelector();
+
         // Get Switch expression type
-        JStmtSwitch switchStmt = getParent(JStmtSwitch.class);
-        JExpr switchExpr = switchStmt.getExpr();
         JavaType switchExprType = switchExpr != null ? switchExpr.getEvalType() : null;
         if (switchExprType == null)
             return null;
@@ -138,7 +148,7 @@ public class JSwitchEntry extends JNode implements WithStmts, WithVarDeclsX {
         // Handle enum switch
         if (switchExprType.isEnum()) {
             JavaClass enumClass = (JavaClass) switchExprType;
-            String enumName = _expr.getName();
+            String enumName = caseLabel.getName();
             JavaField enumConst = enumClass.getDeclaredFieldForName(enumName);
             if (enumConst != null)
                 return enumConst;

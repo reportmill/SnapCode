@@ -978,7 +978,7 @@ public class JavaParserExpr extends Parser {
                 // Handle SwitchEntry
                 case "SwitchEntry":
                     JSwitchEntry switchEntry = aNode.getCustomNode(JSwitchEntry.class);
-                    switchExpr.addSwitchEntry(switchEntry);
+                    switchExpr.addEntry(switchEntry);
                     break;
             }
         }
@@ -1021,13 +1021,13 @@ public class JavaParserExpr extends Parser {
                 // Handle PatternExpr
                 case "PatternExpr":
                     JExprPattern patternExpr = aNode.getCustomNode(JExprPattern.class);
-                    switchEntry.setExpr(patternExpr);
+                    switchEntry.addLabel(patternExpr);
                     break;
 
                 // Handle ConditionalExpr
                 case "ConditionalExpr":
                     JExpr expr = aNode.getCustomNode(JExpr.class);
-                    switchEntry.setExpr(expr);
+                    switchEntry.addLabel(expr);
                     break;
 
                 // Handle BlockStatement, Block, ThrowStatement
