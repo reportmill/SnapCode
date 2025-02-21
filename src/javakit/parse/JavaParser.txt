@@ -291,6 +291,43 @@ LambdaExpr
     LookAhead (FormalParams "->") FormalParams "->" (Expression | Block)
 }
 
+SwitchExpr
+{
+    "switch" "(" Expression ")" "{" SwitchEntry* "}"
+}
+
+SwitchEntry
+{
+    (
+        "case" (
+            LookAhead(3) NullLiteral "," "default" |
+            LookAhead (PatternExpr) PatternExpr ("when" ConditionalExpr)? |
+            ConditionalExpr ("," ConditionalExpr)*
+        ) |
+        "default"
+    )
+    (
+        ":" Statements |
+        "->" (
+            (Expression ";") |
+            Block |
+            ThrowStatement
+        )
+    )
+}
+
+PatternExpr
+{
+    LookAhead (TypePatternExpr) TypePatternExpr |
+	RecordPatternExpr
+}
+
+TypePatternExpr { Modifiers Type Identifier }
+
+RecordPatternExpr {	Modifiers ReferenceType PatternList }
+
+PatternList { "(" PatternExpr ("," PatternExpr)* ")" }
+
 Name { Identifier (LookAhead(2) "." Identifier)* }
 
 Identifier { "[$_a-zA-Z][$\w]*" }

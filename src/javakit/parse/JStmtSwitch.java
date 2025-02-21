@@ -13,10 +13,10 @@ public class JStmtSwitch extends JStmt {
     protected JExpr  _expr;
 
     // The list of SwitchLabels
-    protected List<JStmtSwitchCase>  _switchCases = new ArrayList<>();
+    protected List<JSwitchEntry>  _switchCases = new ArrayList<>();
 
     // The default case
-    private JStmtSwitchCase _defaultCase;
+    private JSwitchEntry _defaultCase;
 
     /**
      * Constructor.
@@ -42,12 +42,12 @@ public class JStmtSwitch extends JStmt {
     /**
      * Returns the switch labels.
      */
-    public List<JStmtSwitchCase> getSwitchCases()  { return _switchCases; }
+    public List<JSwitchEntry> getSwitchCases()  { return _switchCases; }
 
     /**
      * Adds a switch case.
      */
-    public void addSwitchCase(JStmtSwitchCase aSwitchCase)
+    public void addSwitchCase(JSwitchEntry aSwitchCase)
     {
         _switchCases.add(aSwitchCase);
         addChild(aSwitchCase);
@@ -60,5 +60,5 @@ public class JStmtSwitch extends JStmt {
     /**
      * Returns the default case.
      */
-    public JStmtSwitchCase getDefaultCase()  { return _defaultCase; }
+    public JSwitchEntry getDefaultCase()  { return _defaultCase; }
 }

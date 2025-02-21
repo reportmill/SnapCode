@@ -432,13 +432,13 @@ public class JavaParserStmt extends JavaParserExpr {
 
                 // Handle SwitchLabel
                 case "SwitchLabel":
-                    switchStmt.addSwitchCase(aNode.getCustomNode(JStmtSwitchCase.class));
+                    switchStmt.addSwitchCase(aNode.getCustomNode(JSwitchEntry.class));
                     break;
 
                 // Handle BlockStatement
                 case "BlockStatement":
-                    List<JStmtSwitchCase> switchCases = switchStmt.getSwitchCases();
-                    JStmtSwitchCase switchCase = switchCases.get(switchCases.size() - 1);
+                    List<JSwitchEntry> switchCases = switchStmt.getSwitchCases();
+                    JSwitchEntry switchCase = switchCases.get(switchCases.size() - 1);
                     JStmt blockStmt = aNode.getCustomNode(JStmt.class);
                     if (blockStmt != null) // Can be null when parse fails
                         switchCase.addStatement(blockStmt);
@@ -452,7 +452,7 @@ public class JavaParserStmt extends JavaParserExpr {
     /**
      * SwitchLabel Handler.
      */
-    public static class SwitchLabelHandler extends JNodeParseHandler<JStmtSwitchCase> {
+    public static class SwitchLabelHandler extends JNodeParseHandler<JSwitchEntry> {
 
         /**
          * ParseHandler method.
@@ -460,7 +460,7 @@ public class JavaParserStmt extends JavaParserExpr {
         protected void parsedOne(ParseNode aNode, String anId)
         {
             // Get Switch case
-            JStmtSwitchCase switchCase = getPart();
+            JSwitchEntry switchCase = getPart();
 
             switch (anId) {
 
@@ -477,7 +477,7 @@ public class JavaParserStmt extends JavaParserExpr {
             }
         }
 
-        protected Class<JStmtSwitchCase> getPartClass()  { return JStmtSwitchCase.class; }
+        protected Class<JSwitchEntry> getPartClass()  { return JSwitchEntry.class; }
     }
 
     /**

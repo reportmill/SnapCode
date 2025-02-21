@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A class to represent individual cases in a switch statement.
+ * A class to represent individual case entries in a switch statement.
  */
-public class JStmtSwitchCase extends JNode implements WithStmts, WithVarDeclsX {
+public class JSwitchEntry extends JNode implements WithStmts, WithVarDeclsX {
 
     // The case expression
     private JExpr  _expr;
@@ -27,7 +27,7 @@ public class JStmtSwitchCase extends JNode implements WithStmts, WithVarDeclsX {
     /**
      * Constructor.
      */
-    public JStmtSwitchCase()
+    public JSwitchEntry()
     {
         super();
     }
