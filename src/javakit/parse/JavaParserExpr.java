@@ -13,7 +13,7 @@ import java.util.List;
 public class JavaParserExpr extends Parser {
 
     /**
-     * Expression Handler: ConditionalExpr (AssignOp Expression)?
+     * Expression Handler: LambdaExpr | ConditionalExpr (AssignOp Expression)?
      */
     public static class ExpressionHandler extends JNodeParseHandler<JExpr> {
 
@@ -24,8 +24,9 @@ public class JavaParserExpr extends Parser {
         {
             switch (anId) {
 
-                // Handle ConditionalExpr
+                // Handle ConditionalExpr, LambdaExpr
                 case "ConditionalExpr":
+                case "LambdaExpr":
                     _part = aNode.getCustomNode(JExpr.class);
                     break;
 
@@ -600,7 +601,6 @@ public class JavaParserExpr extends Parser {
      *     LookAhead ((Identifier ".")* "this") (Identifier ".")* "this" |
      *     "super" "." Identifier |
      *     LookAhead (ClassType "." "super" "." Identifier) ClassType "." "super" "." Identifier |
-     *     LambdaExpr |
      *     "(" Expression ")" |
      *     AllocExpr |
      *     LookAhead (ResultType "." "class") ResultType "." "class" |
@@ -645,11 +645,6 @@ public class JavaParserExpr extends Parser {
                 case "ReferenceType": // E.g: ReferenceType "::" ...
                     JType classType = aNode.getCustomNode(JType.class);
                     _part = new JExprType(classType);
-                    break;
-
-                // Handle LambdaExpr
-                case "LambdaExpr":
-                    _part = aNode.getCustomNode(JExprLambda.class);
                     break;
 
                 // Handle '('

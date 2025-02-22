@@ -198,7 +198,11 @@ ExprStatement
     PrimaryExpr ("++" | "--" | AssignOp Expression)?
 }
 
-Expression { ConditionalExpr (AssignOp Expression)? }  // Was LookAhead(2)
+Expression
+{
+    LambdaExpr |
+    ConditionalExpr (AssignOp Expression)?
+}
 
 ConditionalExpr { ConditionalOrExpr ("?" Expression ":" Expression)? }
 
@@ -244,7 +248,6 @@ PrimaryPrefix
     LookAhead ((Identifier ".")* "this") (Identifier ".")* "this" |
     "super" "." Identifier |
     LookAhead (ClassType "." "super" "." Identifier) ClassType "." "super" "." Identifier |
-    LambdaExpr |
     "(" Expression ")" |
     AllocExpr |
     LookAhead (ResultType "." "class") ResultType "." "class" |
