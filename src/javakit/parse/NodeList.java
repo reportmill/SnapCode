@@ -14,17 +14,30 @@ public class NodeList extends AbstractList<JNode> {
     // The array length
     protected int _size;
 
+    // Shared empty node list
+    public static NodeList EMPTY_NODES = new NodeList();
+
     // Shared empty nodes array
     private static JNode[] EMPTY_NODES_ARRAY = new JNode[0];
 
     /**
+     * Constructor.
+     */
+    public NodeList()
+    {
+        super();
+    }
+
+    /**
      * Returns the number of node in this list.
      */
-    public int size()  { return _nodes.length; }
+    @Override
+    public int size()  { return _size; }
 
     /**
      * Returns the node at the given index.
      */
+    @Override
     public JNode get(int anIndex)  { return _nodes[anIndex]; }
 
     /**
@@ -60,6 +73,7 @@ public class NodeList extends AbstractList<JNode> {
     /**
      * Removes the item at index.
      */
+    @Override
     public JNode remove(int anIndex)
     {
         JNode oldValue = _nodes[anIndex];
@@ -75,6 +89,7 @@ public class NodeList extends AbstractList<JNode> {
     /**
      * Returns whether array is empty.
      */
+    @Override
     public boolean isEmpty()  { return _size == 0; }
 
     /**
@@ -95,10 +110,10 @@ public class NodeList extends AbstractList<JNode> {
     /**
      * Returns the last node of this list.
      */
-    public JNode getFirst()  { return size() > 0 ? get(0) : null; }
+    public JNode getFirst()  { return _size > 0 ? get(0) : null; }
 
     /**
      * Returns the last node of this list.
      */
-    public JNode getLast()  { return size() > 0 ? get(size()-1) : null; }
+    public JNode getLast()  { return _size > 0 ? get(_size - 1) : null; }
 }

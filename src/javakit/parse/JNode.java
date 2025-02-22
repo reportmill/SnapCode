@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import java.util.*;
 import javakit.resolver.*;
 import snap.parse.ParseToken;
 import snap.util.*;
@@ -22,7 +21,7 @@ public class JNode {
     protected JNode  _parent;
 
     // The list of child nodes
-    protected List<JNode> _children = Collections.EMPTY_LIST;
+    protected NodeList _children = NodeList.EMPTY_NODES;
 
     // The declaration most closely associated with this node
     protected JavaDecl  _decl;
@@ -47,22 +46,15 @@ public class JNode {
     /**
      * Returns the parent file node (root).
      */
-    public JFile getFile()
-    {
-        return getParent(JFile.class);
-    }
+    public JFile getFile()  { return getParent(JFile.class); }
 
     /**
      * Returns the node name, if it has one.
      */
     public String getName()
     {
-        // If already set, just return
         if (_name != null) return _name;
-
-        // Get, set, return
-        String name = getNameImpl();
-        return _name = name;
+        return _name = getNameImpl();
     }
 
     /**
@@ -83,12 +75,8 @@ public class JNode {
      */
     public JavaDecl getDecl()
     {
-        // If already set, just return
         if (_decl != null) return _decl;
-
-        // Get, set, return
-        JavaDecl decl = getDeclImpl();
-        return _decl = decl;
+        return _decl = getDeclImpl();
     }
 
     /**
@@ -321,7 +309,7 @@ public class JNode {
     /**
      * Returns the array of child nodes.
      */
-    public List<JNode> getChildren()  { return _children; }
+    public NodeList getChildren()  { return _children; }
 
     /**
      * Returns the number of child nodes.
@@ -350,8 +338,8 @@ public class JNode {
         if (aNode == null) return;
 
         // Make sure Children array is real
-        if (_children == Collections.EMPTY_LIST)
-            _children = new ArrayList<>();
+        if (_children == NodeList.EMPTY_NODES)
+            _children = new NodeList();
 
         // Add child and set Parent
         _children.add(anIndex, aNode);
@@ -377,7 +365,7 @@ public class JNode {
         if (aNode == null) return -1;
 
         // Get index and remove
-        int index = ListUtils.indexOfId(_children, aNode);
+        int index = _children.indexOf(aNode);
         if (index >= 0)
             _children.remove(index);
         return index;
@@ -397,7 +385,7 @@ public class JNode {
     /**
      * Returns the last child.
      */
-    public JNode getLastChild()  { return ListUtils.getLast(_children); }
+    public JNode getLastChild()  { return _children.getLast(); }
 
     /**
      * Returns whether given node is ancestor of this node.
@@ -577,10 +565,6 @@ public class JNode {
      */
     protected NodeError[] getErrorsImpl()
     {
-        // If no children, return no errors
-        if (_children == Collections.EMPTY_LIST)
-            return NodeError.NO_ERRORS;
-
         NodeError[] errors = NodeError.NO_ERRORS;
 
         // Iterate over children and add any errors for each

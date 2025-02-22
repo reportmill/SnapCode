@@ -185,7 +185,7 @@ public class NodeError implements Comparable<NodeError> {
     {
         JNode lastNode = aNode;
         while (lastNode.getChildCount() > 0)
-            lastNode = lastNode.getChild(lastNode.getChildCount() - 1);
+            lastNode = lastNode.getLastChild();
         return lastNode;
     }
 }
