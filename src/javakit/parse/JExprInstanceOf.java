@@ -15,6 +15,9 @@ public class JExprInstanceOf extends JExpr {
     // The target type
     private JType _type;
 
+    // The pattern
+    private JExprPattern _pattern;
+
     /**
      * Constructor.
      */
@@ -47,6 +50,20 @@ public class JExprInstanceOf extends JExpr {
     public void setType(JType aType)
     {
         replaceChild(_type, _type = aType);
+    }
+
+    /**
+     * Returns the pattern.
+     */
+    public JExprPattern getPattern()  { return _pattern; }
+
+    /**
+     * Sets the pattern.
+     */
+    public void setPattern(JExprPattern aPattern)
+    {
+        replaceChild(_pattern, _pattern = aPattern);
+        _type = _pattern.getType();
     }
 
     /**

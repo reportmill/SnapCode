@@ -542,7 +542,7 @@ public class JavaParserExpr extends Parser {
     }
 
     /**
-     * InstanceOfExpr Handler.
+     * InstanceOfExpr Handler: RelationalExpr ("instanceof" (PatternExpr | Type))?
      */
     public static class InstanceOfExprHandler extends JNodeParseHandler<JExpr> {
 
@@ -551,16 +551,33 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle expression
-            if (aNode.getCustomNode() instanceof JExpr)
-                _part = aNode.getCustomNode(JExpr.class);
+            switch (anId) {
 
-            // Handle Type node
-            if (anId == "Type") {
-                JExprInstanceOf ie = new JExprInstanceOf();
-                ie.setExpr(_part);
-                ie.setType(aNode.getCustomNode(JType.class));
-                _part = ie;
+                // Handle Type node
+                case "Type": {
+                    JType type = aNode.getCustomNode(JType.class);
+                    JExprInstanceOf instanceOfExpr = new JExprInstanceOf();
+                    instanceOfExpr.setExpr(_part);
+                    instanceOfExpr.setType(type);
+                    _part = instanceOfExpr;
+                    break;
+                }
+
+                // Handle PatternExpr
+                case "PatternExpr": {
+                    JExprPattern patternExpr = aNode.getCustomNode(JExprPattern.class);
+                    JExprInstanceOf instanceOfExpr = new JExprInstanceOf();
+                    instanceOfExpr.setExpr(_part);
+                    instanceOfExpr.setPattern(patternExpr);
+                    _part = instanceOfExpr;
+                    break;
+                }
+
+                // Handle nested expression
+                default:
+                    if (aNode.getCustomNode() instanceof JExpr)
+                        _part = aNode.getCustomNode(JExpr.class);
+                    break;
             }
         }
 

@@ -110,7 +110,7 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
     public JVarDecl getVarDeclForId(JExprId anId)
     {
         // Do normal version - just return if null
-        JVarDecl varDecl = WithVarDecls.super.getVarDeclForId(anId);
+        JVarDecl varDecl = super.getVarDeclForId(anId);
         if (varDecl == null)
             return null;
 

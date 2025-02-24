@@ -6,7 +6,7 @@ package javakit.parse;
 /**
  * A Java statement for conditional/nested statements (while, do, if, for).
  */
-public class JStmtConditional extends JStmt implements WithBodyStmt, WithBlockStmt {
+public class JStmtConditional extends JStmt implements WithBodyStmt, WithBlockStmt, WithVarDecls {
 
     // The conditional expression
     protected JExpr  _cond;
@@ -64,6 +64,26 @@ public class JStmtConditional extends JStmt implements WithBodyStmt, WithBlockSt
     public void setBlock(JStmtBlock aBlock)
     {
         setStatement(aBlock);
+    }
+
+    /**
+     * Override to handle Pattern expression in conditional.
+     */
+    @Override
+    public JVarDecl[] getVarDecls()
+    {
+        // If condition has InstanceOf expression with type pattern, return its var decl
+        if (_cond instanceof JExprInstanceOf) {
+            JExprInstanceOf instanceOfExpr = (JExprInstanceOf) _cond;
+            JExprPattern patternExpr = instanceOfExpr.getPattern();
+            if (patternExpr != null) {
+                JVarDecl patternVarDecl = patternExpr.getVarDecl();
+                if (patternVarDecl != null)
+                    return new JVarDecl[] { patternExpr.getVarDecl() };
+            }
+        }
+
+        return new JVarDecl[0];
     }
 
     /**

@@ -216,7 +216,7 @@ AndExpr { EqualityExpr ("&" EqualityExpr)* }
 
 EqualityExpr { InstanceOfExpr (("==" | "!=") InstanceOfExpr)* }
 
-InstanceOfExpr { RelationalExpr ("instanceof" Type)? }
+InstanceOfExpr { RelationalExpr ("instanceof" (PatternExpr | Type))? }
 
 RelationalExpr { ShiftExpr (("<=" | ">=" | "<" | ">") ShiftExpr)* }
 
@@ -302,7 +302,7 @@ SwitchEntry
     (
         "case" (
             LookAhead(3) NullLiteral "," "default" |
-            LookAhead (PatternExpr) PatternExpr ("when" ConditionalExpr)? |
+            PatternExpr ("when" ConditionalExpr)? |
             ConditionalExpr ("," ConditionalExpr)*
         ) |
         "default"
@@ -320,7 +320,7 @@ SwitchEntry
 PatternExpr
 {
     LookAhead (TypePatternExpr) TypePatternExpr |
-	RecordPatternExpr
+	LookAhead (RecordPatternExpr) RecordPatternExpr
 }
 
 TypePatternExpr { Modifiers Type Identifier }
