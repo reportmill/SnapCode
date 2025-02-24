@@ -2,13 +2,14 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
+import javakit.resolver.JavaDecl;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * A JExpr subclass for pattern expressions.
  */
-public class JExprPattern extends JExpr {
+public class JExprPattern extends JExpr implements WithId {
 
     // The modifiers
     protected JModifiers _modifiers;
@@ -21,6 +22,9 @@ public class JExprPattern extends JExpr {
 
     // The pattern expressions
     private List<JExprPattern> _patternList;
+
+    // The VarDecl, if Type pattern
+    private JVarDecl _varDecl;
 
     /**
      * Constructor.
@@ -53,16 +57,24 @@ public class JExprPattern extends JExpr {
     /**
      * Returns the identifier.
      */
+    @Override
     public JExprId getId()  { return _id; }
 
     /**
      * Sets the identifier.
      */
+    @Override
     public void setId(JExprId anId)
     {
         replaceChild(_id, _id = anId);
         if (_id != null)
             setName(_id.getName());
+
+        // Create phantom VarDecl for type + id
+        JVarDecl varDecl = new JVarDecl();
+        varDecl.setType(_type);
+        varDecl.setId(_id);
+        replaceChild(_varDecl, _varDecl = varDecl);
     }
 
     /**
@@ -92,6 +104,22 @@ public class JExprPattern extends JExpr {
             _patternList = new ArrayList<>();
         _patternList.add(patternExpr);
         addChild(patternExpr);
+    }
+
+    /**
+     * Returns the var decl, if type pattern.
+     */
+    public JVarDecl getVarDecl()  { return _varDecl; }
+
+    /**
+     * Override to return var decl if typed pattern.
+     */
+    @Override
+    protected JavaDecl getDeclImpl()
+    {
+        if (_varDecl != null)
+            return _varDecl.getDecl();
+        return null;
     }
 
     /**

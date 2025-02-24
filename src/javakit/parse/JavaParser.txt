@@ -159,9 +159,7 @@ ContinueStatement { "continue" Identifier? ";" }
 
 ReturnStatement { "return" Expression? ";" }
 
-SwitchStatement { "switch" "(" Expression ")" "{" (SwitchLabel BlockStatement*)* "}" }
-
-SwitchLabel { "case" Expression ":" | "default" ":" }
+SwitchStatement { SwitchExpr AssertStatement? }
 
 AssertStatement { "assert" Expression (":" Expression)? ";" }
 

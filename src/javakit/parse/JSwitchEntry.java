@@ -3,6 +3,8 @@ import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaField;
 import javakit.resolver.JavaType;
+import snap.util.ArrayUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,7 +83,21 @@ public class JSwitchEntry extends JNode implements WithStmts, WithVarDeclsX {
     public JVarDecl[] getVarDecls()
     {
         if (_varDecls != null) return _varDecls;
+
+        // Add var decls for statements (conventional switch entry)
         JVarDecl[] varDecls = WithStmts.getVarDecls(this);
+
+        // If label is typed pattern, add var decl
+        for (JExpr label : _labels) {
+            if (label instanceof JExprPattern) {
+                JExprPattern pattern = (JExprPattern) label;
+                JVarDecl patternVarDecl = pattern.getVarDecl();
+                if (patternVarDecl != null)
+                    varDecls = ArrayUtils.add(varDecls, patternVarDecl, 0);
+            }
+        }
+
+        // Return
         return _varDecls = varDecls;
     }
 

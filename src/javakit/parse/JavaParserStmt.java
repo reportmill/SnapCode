@@ -411,7 +411,7 @@ public class JavaParserStmt extends JavaParserExpr {
     }
 
     /**
-     * SwitchStatement Handler: { "switch" "(" Expression ")" "{" (SwitchLabel BlockStatement*)* "}" }
+     * SwitchStatement Handler: SwitchExpr
      */
     public static class SwitchStatementHandler extends JNodeParseHandler<JStmtSwitch> {
 
@@ -423,61 +423,14 @@ public class JavaParserStmt extends JavaParserExpr {
             // Get Switch statement
             JStmtSwitch switchStmt = getPart();
 
-            switch (anId) {
-
-                // Handle Expression
-                case "Expression":
-                    switchStmt.setSelector(aNode.getCustomNode(JExpr.class));
-                    break;
-
-                // Handle SwitchLabel
-                case "SwitchLabel":
-                    switchStmt.addEntry(aNode.getCustomNode(JSwitchEntry.class));
-                    break;
-
-                // Handle BlockStatement
-                case "BlockStatement":
-                    List<JSwitchEntry> switchCases = switchStmt.getEntries();
-                    JSwitchEntry switchCase = switchCases.get(switchCases.size() - 1);
-                    JStmt blockStmt = aNode.getCustomNode(JStmt.class);
-                    if (blockStmt != null) // Can be null when parse fails
-                        switchCase.addStatement(blockStmt);
-                    break;
+            // Handle SwitchExpr
+            if (anId == "SwitchExpr") {
+                JExprSwitch switchExpr = aNode.getCustomNode(JExprSwitch.class);
+                switchStmt.setSwitchExpr(switchExpr);
             }
         }
 
         protected Class<JStmtSwitch> getPartClass()  { return JStmtSwitch.class; }
-    }
-
-    /**
-     * SwitchLabel Handler.
-     */
-    public static class SwitchLabelHandler extends JNodeParseHandler<JSwitchEntry> {
-
-        /**
-         * ParseHandler method.
-         */
-        protected void parsedOne(ParseNode aNode, String anId)
-        {
-            // Get Switch case
-            JSwitchEntry switchCase = getPart();
-
-            switch (anId) {
-
-                // Handle Expression
-                case "Expression":
-                    JExpr caseExpr = aNode.getCustomNode(JExpr.class);
-                    switchCase.addLabel(caseExpr);
-                    break;
-
-                // Handle "default"
-                case "default":
-                    switchCase.setDefault(true);
-                    break;
-            }
-        }
-
-        protected Class<JSwitchEntry> getPartClass()  { return JSwitchEntry.class; }
     }
 
     /**
