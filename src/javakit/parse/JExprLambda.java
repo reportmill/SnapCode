@@ -96,7 +96,7 @@ public class JExprLambda extends JExprLambdaBase implements WithVarDecls, WithBl
     /**
      * Returns the java type for given lambda parameter VarDecl.
      */
-    private JavaType getJavaTypeForLambdaParameterVarDecl(JVarDecl varDecl)
+    protected JavaType getJavaTypeForLambdaParameterVarDecl(JVarDecl varDecl)
     {
         // Get parameter index for var decl
         int parameterIndex = ArrayUtils.indexOf(_params, varDecl);

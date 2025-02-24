@@ -198,7 +198,7 @@ public class JNode {
     {
         // Get parent to resolve type (skip method calls - since args aren't defined in those terms)
         JNode parent = getParent();
-        while (parent instanceof JExprMethodCall)
+        while (parent instanceof JExprMethodCall && !(this instanceof JExprLambda))
             parent = parent.getParent();
         if (parent != null)
             return parent.getResolvedTypeForTypeVar(aTypeVar);

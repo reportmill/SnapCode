@@ -315,17 +315,16 @@ public class JType extends JNode {
      */
     private JavaType getDeclForVar()
     {
-        // Get parent StmtVarDecl: 'var' is only allowed as statement (can't be field or formal param)
-        JNode parentNode = getParent();
-        JExprVarDecl varDeclExpr = parentNode instanceof JExprVarDecl ? (JExprVarDecl) parentNode : null;
-        if (varDeclExpr == null)
-            return null;
-
         // Get StmtVarDecl.VarDecl
-        JVarDecl[] varDecls = varDeclExpr.getVarDecls();
-        JVarDecl varDecl = varDecls.length > 0 ? varDecls[0] : null;
+        JVarDecl varDecl = getParentVarDecl();
         if (varDecl == null)
             return null;
+
+        // If parent.parent is Lambda expression, get type for var decl
+        JNode parentNode = getParent();
+        JNode grandparentNode = parentNode.getParent();
+        if (grandparentNode instanceof JExprLambda)
+            return ((JExprLambda) grandparentNode).getJavaTypeForLambdaParameterVarDecl(varDecl);
 
         // If initializer expression set, return its EvalType
         JExpr initExpr = varDecl.getInitExpr();
@@ -340,9 +339,29 @@ public class JType extends JNode {
         }
 
         // If parentNode.parent is ForEachStmt, get iterable type
-        JNode grandparentNode = parentNode.getParent();
         if (grandparentNode instanceof JStmtFor)
             return ((JStmtFor) grandparentNode).getForEachIterationType();
+
+        // Return not found
+        return null;
+    }
+
+    /**
+     * Return parent var decl for type.
+     */
+    private JVarDecl getParentVarDecl()
+    {
+        // If parent is var decl, return it (probably Lambda expression)
+        JNode parentNode = getParent();
+        if (parentNode instanceof JVarDecl)
+            return (JVarDecl) parentNode;
+
+        // If parent is var decl expression, return first var decl
+        if (parentNode instanceof JExprVarDecl) {
+            JExprVarDecl varDeclExpr = (JExprVarDecl) parentNode;
+            JVarDecl[] varDecls = varDeclExpr.getVarDecls();
+            return varDecls.length > 0 ? varDecls[0] : null;
+        }
 
         // Return not found
         return null;
