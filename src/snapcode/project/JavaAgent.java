@@ -255,12 +255,19 @@ public class JavaAgent {
      */
     public void checkFileForErrors()
     {
+        NodeError[] errors = NodeError.NO_ERRORS;
+
         // Check for DEPS
         JavaDeps.resolveDependenciesForFile(null, _javaFile);
 
-        // Get errors for body declarations
+        // Get parse errors
         JFile jFile = getJFile();
-        NodeError[] errors = jFile.getDeclarationErrors();
+        if (jFile.getException() != null)
+            errors = NodeError.getNodeErrorForFileParseException(jFile);
+
+        // Get errors for body declarations
+        if (errors.length == 0)
+            errors = jFile.getDeclarationErrors();
 
         // If no declaration errors, reload class and do full error check
         if (errors.length == 0) {

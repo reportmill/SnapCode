@@ -459,7 +459,7 @@ public class JavaTextArea extends TextArea {
     {
         // Get error string and X, Y, W, H, MidX, MidY
         String errorStr = issue.getText();
-        double errorX = textLine.getMaxX() + 40;
+        double errorX = textLine.getMaxX() + 25;
         double errorY = textLine.getTextBaseline() + 1;
         double errorW = errorFont.getStringAdvance(errorStr);
         double errorH = errorFont.getAscent();

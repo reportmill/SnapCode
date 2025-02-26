@@ -1,5 +1,5 @@
 
-JavaFile { PackageDecl? ImportDecl* TypeDecl+ JavaFileImports* JeplFile? }
+JavaFile { PackageDecl? ImportDecl* TypeDecl+ }
 
 JavaFileImports { PackageDecl? ImportDecl* }
 

@@ -111,9 +111,11 @@ public class JavaParser extends JavaParserStmt {
 
         // If parse failed make sure that class extends to end
         if (_exception != null) {
+            ParseToken lastToken = getLastProcessedToken();
             JNode lastClass = jfile.getLastChild();
-            if (lastClass != null)
-                lastClass.setEndToken(jfile.getEndToken());
+            if (lastClass == null)
+                lastClass = jfile;
+            lastClass.setEndToken(lastToken);
         }
 
         // Return

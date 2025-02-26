@@ -171,8 +171,6 @@ public class NodeError implements Comparable<NodeError> {
 
         // Get message
         String msg = exception.getMessage();
-        if (jfile.isRepl() && msg.contains("Expecting: \";"))
-            return null;
 
         // Return error
         return newErrorArray(lastNode, msg);
