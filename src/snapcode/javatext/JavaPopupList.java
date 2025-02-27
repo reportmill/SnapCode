@@ -345,6 +345,11 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         if (selNode.getParent() instanceof JExprMethodRef)
             completionStr = completionDecl.getSimpleName();
 
+        // If completion has args and next char is args, strip args from string
+        int parenStart = completionStr.indexOf('(');
+        if (replaceEnd < _textArea.length() && _textArea.charAt(replaceEnd) == '(')
+            completionStr = completionStr.substring(0, parenStart);
+
         // Replace selection with completeString
         _textArea.replaceCharsWithStyle(completionStr, null, replaceStart, replaceEnd);
 
@@ -399,7 +404,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Returns whether suggestion has parens that want content.
      */
-    private int indexOfParenContent(JavaDecl javaDecl, String completionStr)
+    private int indexOfParenContent(JavaDecl completionDecl, String completionStr)
     {
         // If no open paren, just return
         int argStart = completionStr.indexOf('(');
@@ -407,11 +412,11 @@ public class JavaPopupList extends PopupList<JavaDecl> {
             return -1;
 
         // If not executable, just return paren index (probably is "if (...)" or "for (...)" )
-        if (!(javaDecl instanceof JavaExecutable))
+        if (!(completionDecl instanceof JavaExecutable))
             return argStart;
 
         // If method/constructor with non-zero params, return paren index
-        JavaExecutable exec = (JavaExecutable) javaDecl;
+        JavaExecutable exec = (JavaExecutable) completionDecl;
         if (exec.getParameterCount() > 0)
             return argStart;
 
