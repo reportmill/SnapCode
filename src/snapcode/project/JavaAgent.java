@@ -504,7 +504,7 @@ public class JavaAgent {
         imports.add("snap.viewx.Quick3D");
         imports.add("snap.viewx.QuickDraw");
         imports.add("snap.viewx.QuickDrawPen");
-        imports.add("static snap.viewx.ConsoleX.*");
+        imports.add("static snap.viewx.ConsoleIO.*");
 
         // Set array and return
         return _jeplImports = imports.toArray(new String[0]);

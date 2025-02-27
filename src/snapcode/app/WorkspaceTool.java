@@ -159,6 +159,7 @@ public class WorkspaceTool extends ViewOwner {
         ToolTray toolTray = _workspaceTools.getToolTrayForTool(this);
         toolTray.setSelTool(null);
         _wasShownAutomatically = false;
+        _hideToolAutomaticallyInstance = 0;
     }
 
     /**
@@ -166,6 +167,7 @@ public class WorkspaceTool extends ViewOwner {
      */
     public void showToolAutomatically()
     {
+        _hideToolAutomaticallyInstance = 0;
         if (isShowing()) return;
         _workspaceTools.showTool(this);
         _wasShownAutomatically = true;
@@ -186,8 +188,19 @@ public class WorkspaceTool extends ViewOwner {
     public void hideToolAutomaticallyAfterDelay(int millisecondDelay)
     {
         if (!_wasShownAutomatically) return;
-        ViewUtils.runDelayed(this::hideToolAutomatically, millisecondDelay);
+        double instanceValue = _hideToolAutomaticallyInstance = Math.random();
+        ViewUtils.runDelayed(() -> hideToolAutomaticallyAfterDelayImpl(instanceValue), millisecondDelay);
     }
+
+    /**
+     * Called to handle hideToolAutomaticallyAfterDelay() if no other showToolAutomatically has been called.
+     */
+    private void hideToolAutomaticallyAfterDelayImpl(double instanceValue)
+    {
+        if (instanceValue == _hideToolAutomaticallyInstance)
+            hideToolAutomatically();
+    }
+    private double _hideToolAutomaticallyInstance;
 
     /**
      * Override to clear WasShownAutomatically.
