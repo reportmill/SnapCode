@@ -101,6 +101,24 @@ public class Project extends PropObject {
     }
 
     /**
+     * Returns the source URL.
+     */
+    public WebURL getSourceURL()
+    {
+        // If VersionControl set, return remote URL
+        WebSite projSite = getSite();
+        VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
+        if (versionControl != null) {
+            WebURL remoteURL = versionControl.getRemoteSiteUrl();
+            if (remoteURL != null)
+                return remoteURL;
+        }
+
+        // Return site URL
+        return projSite.getURL();
+    }
+
+    /**
      * Returns the BuildFile that manages project properties.
      */
     public BuildFile getBuildFile()

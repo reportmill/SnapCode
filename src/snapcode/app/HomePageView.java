@@ -91,11 +91,16 @@ public class HomePageView extends MarkDownView {
     {
         switch (headerNode.getText()) {
 
-            // Handle "Create New": Add ClearWorkspaceButton
+            // Handle "Create New": Add RestoreWorkspaceButton, ClearWorkspaceButton
             case "Create New:": {
 
                 // Create normal headerView
                 View headerView = super.createViewForHeaderNode(headerNode);
+
+                // Create RestoreWorkspaceButton
+                Button restoreWorkspaceButton = new Button("Restore Workspace");
+                restoreWorkspaceButton.setPropsString("Name:RestoreWorkspaceButton; Font:Arial 13; PrefWidth:140; PrefHeight:24; Margin:0,0,0,20");
+                restoreWorkspaceButton.setVisible(_homePage._workspacePane.getProjects().length == 0);
 
                 // Create ClearWorkspaceButton
                 Button clearWorkspaceButton = new Button("Clear Workspace");
@@ -105,7 +110,7 @@ public class HomePageView extends MarkDownView {
                 // Create row, add children and return
                 RowView rowView = new RowView();
                 rowView.setMargin(headerView.getMargin()); headerView.setMargin(Insets.EMPTY);
-                rowView.setChildren(headerView, clearWorkspaceButton);
+                rowView.setChildren(headerView, restoreWorkspaceButton, clearWorkspaceButton);
                 return rowView;
             }
 

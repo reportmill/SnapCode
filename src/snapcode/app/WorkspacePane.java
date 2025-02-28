@@ -1,8 +1,10 @@
 package snapcode.app;
 import snap.geom.Rect;
 import snap.gfx.GFXEnv;
+import snap.util.Prefs;
 import snap.view.SharedAction;
 import snap.viewx.DevPane;
+import snap.web.WebURL;
 import snapcode.project.*;
 import snap.props.PropChange;
 import snap.util.ArrayUtils;
@@ -14,6 +16,9 @@ import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.apptools.*;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -44,6 +49,15 @@ public class WorkspacePane extends ViewOwner {
 
     // Whether in embed mode
     protected static boolean _embedMode;
+
+    // Whether currently restoring workspace
+    protected static boolean _restoringWorkspace;
+
+    // Runnable for update open projects prefs
+    private Runnable _updateOpenProjectsPrefsRunnable;
+
+    // Constant for open projects urls
+    private static final String OPEN_PROJECTS_PREFS_KEY = "OpenProjects";
 
     /**
      * Constructor.
@@ -241,6 +255,24 @@ public class WorkspacePane extends ViewOwner {
     {
         Project proj = getRootProject();
         return proj != null ? proj.getBuildDir() : null;
+    }
+
+    /**
+     * Restores workspace to last open projects/files.
+     */
+    public void restoreWorkspace()
+    {
+        _restoringWorkspace = true;
+
+        // Open projects
+        List<String> openProjectStrings = Prefs.getDefaultPrefs().getStringsForKey(OPEN_PROJECTS_PREFS_KEY);
+        for (String projString : openProjectStrings) {
+            WebURL projUrl = WebURL.getURL(projString);
+            if (projUrl != null)
+                WorkspacePaneUtils.openFileUrl(this, projUrl);
+        }
+
+        _restoringWorkspace = false;
     }
 
     /**
@@ -530,6 +562,12 @@ public class WorkspacePane extends ViewOwner {
         if (isShowing())
             buildWorkspaceAllLater();
 
+        // Update Open Projects prefs
+        if (!_restoringWorkspace && _updateOpenProjectsPrefsRunnable == null) {
+            _updateOpenProjectsPrefsRunnable = () -> saveOpenProjectsListToPrefs();
+            ViewUtils.runDelayedCancelPrevious(_updateOpenProjectsPrefsRunnable, 400);
+        }
+
         // Handle show greenfoot
         if (aProject.getBuildFile().isIncludeGreenfootRuntime())
             _toolBar.showGreenfootButton();
@@ -612,6 +650,16 @@ public class WorkspacePane extends ViewOwner {
     {
         String string = "https://reportmill.com/SnapCode/app/#" + _pagePane.getWindowLocationHash();
         GFXEnv.getEnv().openURL(string);
+    }
+
+    /**
+     * Saves open projects URLs to preferences for restoreWorkspace.
+     */
+    private void saveOpenProjectsListToPrefs()
+    {
+        List<String> projectUrlStrings = ArrayUtils.mapToList(_workspace.getProjects(), proj -> proj.getSourceURL().getString());
+        Prefs.getDefaultPrefs().setStringsForKey(projectUrlStrings, OPEN_PROJECTS_PREFS_KEY);
+        _updateOpenProjectsPrefsRunnable = null;
     }
 
     /**

@@ -41,6 +41,26 @@ public class HomePage extends WebPage {
     }
 
     /**
+     * Clears the workspace.
+     */
+    private void clearWorkspace()
+    {
+        WorkspacePaneUtils.clearWorkspace(_workspacePane);
+        setViewVisible("ClearWorkspaceButton", false);
+        setViewVisible("RestoreWorkspaceButton", true);
+    }
+
+    /**
+     * Restores the workspace.
+     */
+    private void restoreWorkspace()
+    {
+        _workspacePane.restoreWorkspace();
+        setViewVisible("ClearWorkspaceButton", true);
+        setViewVisible("RestoreWorkspaceButton", false);
+    }
+
+    /**
      * Creates a new project.
      */
     private void createNewProject()
@@ -160,11 +180,9 @@ public class HomePage extends WebPage {
     {
         switch (anEvent.getName()) {
 
-            // Handle ClearWorkspaceButton
-            case "ClearWorkspaceButton":
-                WorkspacePaneUtils.clearWorkspace(_workspacePane);
-                setViewVisible("ClearWorkspaceButton", false);
-                break;
+            // Handle ClearWorkspaceButton, RestoreWorkspaceButton
+            case "ClearWorkspaceButton": clearWorkspace(); break;
+            case "RestoreWorkspaceButton": restoreWorkspace(); break;
 
             // Handle OpenButton, OpenDesktopFileButton
             case "OpenButton": _workspacePane.getWorkspaceTools().getFilesTool().showOpenFilePanel(); break;
