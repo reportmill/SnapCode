@@ -202,7 +202,7 @@ public class GreenfootPage extends WebPage {
         WebFile javaFile = _project.getJavaFileForClassName(selClass.getName());
         if (javaFile != null) {
             WorkspacePane workspacePane = getWorkspacePane();
-            workspacePane.setSelFile(javaFile);
+            workspacePane.openFile(javaFile);
         }
     }
 

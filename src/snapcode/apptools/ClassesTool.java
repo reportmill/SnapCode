@@ -122,7 +122,7 @@ public class ClassesTool extends WorkspaceTool {
         ClassNode selClassNode = _treeView.getSelItem();
         WebFile selFile = selClassNode != null ? selClassNode.getNodeFile() : null;
         if (selFile != null)
-            _pagePane.setSelFile(selFile);
+            _workspacePane.openFile(selFile);
     }
 
     /**

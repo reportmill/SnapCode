@@ -5,7 +5,6 @@ import snap.view.WindowView;
 import snap.viewx.DialogBox;
 import snap.web.*;
 import snapcode.apptools.HelpTool;
-import snapcode.apptools.ProjectFilesTool;
 import snapcode.apptools.NewFileTool;
 import snapcode.project.*;
 
@@ -172,7 +171,7 @@ public class WorkspacePaneUtils {
         addRecentFileUrl(sourceFile.getURL());
 
         // Show source file
-        ViewUtils.runLater(() -> showFile(workspacePane, newSourceFile));
+        ViewUtils.runLater(() -> workspacePane.openFile(newSourceFile));
         return true;
     }
 
@@ -354,22 +353,18 @@ public class WorkspacePaneUtils {
      */
     public static void selectGoodDefaultFile(WorkspacePane workspacePane, Project project)
     {
-        // If project, expand source dir
+        // If project was given, show source dir
         if (project != null) {
-            ProjectFilesTool projectFilesTool = workspacePane.getWorkspaceTools().getProjectFilesTool();
             WebFile sourceDir = project.getSourceDir();
-            projectFilesTool.showDir(sourceDir);
+            workspacePane.openFile(sourceDir);
         }
 
-        // Get good default file
+        // Get good default file and open it
         Workspace workspace = workspacePane.getWorkspace();
         WebFile defaultFile = project != null ? ProjectUtils.getGoodDefaultFile(project) :
                 WorkspaceUtils.getGoodDefaultFile(workspace);
-        if (defaultFile == null)
-            return;
-
-        // Select it
-        showFile(workspacePane, defaultFile);
+        if (defaultFile != null)
+            workspacePane.openFile(defaultFile);
     }
 
     /**
@@ -399,15 +394,6 @@ public class WorkspacePaneUtils {
         // Add URL
         RecentFiles.addURL(fileUrl);
         return true;
-    }
-
-    /**
-     * Show file.
-     */
-    private static void showFile(WorkspacePane workspacePane, WebFile aFile)
-    {
-        ProjectFilesTool projectFilesTool = workspacePane.getWorkspaceTools().getProjectFilesTool();
-        projectFilesTool.showFile(aFile);
     }
 
     /**

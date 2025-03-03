@@ -101,7 +101,7 @@ public class HomePage extends WebPage {
         WebURL releaseNotesURL = WebURL.getURL("https://reportmill.com/SnapCode/ReleaseNotes.md");
         assert releaseNotesURL != null;
         WebFile releaseNotesFile = releaseNotesURL.getFile();
-        _workspacePane.getPagePane().setSelFile(releaseNotesFile);
+        _workspacePane.openFile(releaseNotesFile);
     }
 
     /**

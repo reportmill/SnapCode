@@ -16,8 +16,6 @@ import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.apptools.*;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -198,17 +196,28 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
+     * Opens the given file in workspace.
+     */
+    public void openFile(WebFile aFile)  { _pagePane.openFile(aFile); }
+
+    /**
+     * Closes the given file in workspace.
+     */
+    public void closeFile(WebFile aFile)  { _pagePane.closeFile(aFile); }
+
+    /**
+     * Closes the selected file.
+     */
+    public void closeSelFile()
+    {
+        WebFile selFile = getSelFile();
+        closeFile(selFile);
+    }
+
+    /**
      * Returns the selected file.
      */
     public WebFile getSelFile()  { return _pagePane.getSelFile(); }
-
-    /**
-     * Sets the selected site file.
-     */
-    public void setSelFile(WebFile aFile)
-    {
-        _pagePane.setSelFile(aFile);
-    }
 
     /**
      * Returns the selected site.
@@ -439,8 +448,7 @@ public class WorkspacePane extends ViewOwner {
             case "RevertFileMenuItem": _workspaceTools.getFilesTool().revertSelFiles(); anEvent.consume(); break;
 
             // Handle CloseFileMenuItem, CloseFileAction
-            case "CloseFileMenuItem": case "CloseFileAction":
-                _workspaceTools.getFilesTool().closeSelFile(); anEvent.consume(); break;
+            case "CloseFileMenuItem": case "CloseFileAction": closeSelFile(); anEvent.consume(); break;
 
             // Handle DownloadFileMenuItem, OpenDesktopFileMenuItem
             case "DownloadFileMenuItem": _workspaceTools.getFilesTool().downloadFile(); anEvent.consume(); break;

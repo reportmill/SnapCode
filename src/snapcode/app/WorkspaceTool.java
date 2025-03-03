@@ -74,14 +74,6 @@ public class WorkspaceTool extends ViewOwner {
     public WebFile getSelFile()  { return _workspacePane.getSelFile(); }
 
     /**
-     * Sets the selected site file.
-     */
-    public void setSelFile(WebFile aFile)
-    {
-        _workspacePane.setSelFile(aFile);
-    }
-
-    /**
      * Returns the list of selected files.
      */
     public List<WebFile> getSelFiles()

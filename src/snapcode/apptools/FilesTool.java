@@ -84,24 +84,6 @@ public class FilesTool extends WorkspaceTool {
     }
 
     /**
-     * Closes the selected file.
-     */
-    public void closeSelFile()
-    {
-        WebFile selFile = getSelFile();
-        closeFile(selFile);
-    }
-
-    /**
-     * Closes the given file.
-     */
-    public void closeFile(WebFile buttonFile)
-    {
-        _pagePane.removeOpenFile(buttonFile);
-        resetLater();
-    }
-
-    /**
      * Renames currently selected file.
      */
     public void renameSelFile()
@@ -255,7 +237,7 @@ public class FilesTool extends WorkspaceTool {
         // Get file (force this time), set bytes, save and select file
         byte[] fileBytes = sourceFile.getBytes();
         newFile = addFileToDirectoryForNameAndBytes(aDirectory, fileName, fileBytes);
-        setSelFile(newFile);
+        _workspacePane.openFile(newFile);
         return true;
     }
 
@@ -329,7 +311,7 @@ public class FilesTool extends WorkspaceTool {
     {
         try { aFile.delete(); }
         catch (Exception e) { throw new RuntimeException(e); }
-        _pagePane.removeOpenFile(aFile);
+        _workspacePane.closeFile(aFile);
     }
 
     /**
@@ -368,7 +350,7 @@ public class FilesTool extends WorkspaceTool {
         removeFile(aFile);
 
         // Select new file pane
-        setSelFile(newFile);
+        _workspacePane.openFile(newFile);
 
         // Return true
         return true;
@@ -402,7 +384,7 @@ public class FilesTool extends WorkspaceTool {
         removeFiles(files);
 
         // Update tree again
-        setSelFile(parent);
+        _workspacePane.openFile(parent);
     }
 
     /**

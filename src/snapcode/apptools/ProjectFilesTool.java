@@ -66,27 +66,6 @@ public class ProjectFilesTool extends WorkspaceTool {
     }
 
     /**
-     * Shows the given file.
-     */
-    public void showFile(WebFile aFile)
-    {
-        if (_filesTree != null)
-            showDir(aFile.getParent());
-        setSelFile(aFile);
-    }
-
-    /**
-     * Shows the given directory (but doesn't select it).
-     */
-    public void showDir(WebFile aFile)
-    {
-        if (_filesTree == null) return;
-        FileTreeFile treeFile = getTreeFile(aFile);
-        if (treeFile != null)
-            _filesTree.expandItem(treeFile);
-    }
-
-    /**
      * Resets root files.
      */
     public void resetRootFiles()
@@ -208,7 +187,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         addKeyActionHandler("PasteAction", "Shortcut+V");
 
         // Register for PagePane.SelFile change to reset UI
-        _pagePane.addPropChangeListener(pc -> resetLater(), PagePane.SelFile_Prop);
+        _pagePane.addPropChangeListener(pc -> handlePagePaneSelFileChange(), PagePane.SelFile_Prop);
 
         // Register for Window.Focused change
         _workspacePane.getWindow().addPropChangeListener(pc -> windowFocusChanged(), View.Focused_Prop);
@@ -253,7 +232,7 @@ public class ProjectFilesTool extends WorkspaceTool {
             case "FilesTree": case "FilesList": {
                 FileTreeFile item = (FileTreeFile) anEvent.getSelItem();
                 WebFile file = item != null ? item.getFile() : null;
-                setSelFile(file);
+                _workspacePane.openFile(file);
                 break;
             }
 
@@ -353,6 +332,24 @@ public class ProjectFilesTool extends WorkspaceTool {
             case "CopyAction": _filesTool.copySelFiles(); break;
             case "PasteAction": _filesTool.pasteFiles(); break;
         }
+    }
+
+    /**
+     * Called when PagePane changes SelFile.
+     */
+    private void handlePagePaneSelFileChange()
+    {
+        if (_filesTree == null) return;
+
+        // If directory was selected, show all tree items for it
+        WebFile selFile = getSelFile();
+        if (selFile != null && selFile.isDir()) {
+            FileTreeFile treeFile = getTreeFile(selFile);
+            if (treeFile != null)
+                _filesTree.expandItem(treeFile);
+        }
+
+        resetLater();
     }
 
     /**
@@ -510,7 +507,7 @@ public class ProjectFilesTool extends WorkspaceTool {
 
         CloseBox closeBox = new CloseBox();
         closeBox.setLeanX(HPos.RIGHT);
-        closeBox.addEventHandler(e -> _filesTool.closeFile(item.getFile()), View.Action);
+        closeBox.addEventHandler(e -> _workspacePane.closeFile(item.getFile()), View.Action);
 
         aCell.setGraphicAfter(closeBox);
     }

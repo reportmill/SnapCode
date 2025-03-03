@@ -70,30 +70,35 @@ public class PagePane extends ViewOwner {
     public List<WebFile> getOpenFiles()  { return _openFiles; }
 
     /**
-     * Adds a file to OpenFiles list.
+     * Opens given file.
      */
-    protected void addOpenFile(WebFile aFile)
+    public void openFile(WebFile aFile)
     {
-        // If already open, just return
-        if (_openFiles.contains(aFile))
+        // If file already set, just return
+        if (aFile == null || aFile == getSelFile()) return;
+
+        // If file already open, just select it
+        if (_openFiles.contains(aFile)){
+            getBrowser().setTransition(WebBrowser.Instant);
+            setSelFile(aFile);
             return;
+        }
 
-        // If not project file, just return (not sure about this anymore)
-        if (!shouldHaveFileTab(aFile))
-            return;
+        // If project file, add to open files and rebuild tabs
+        if (shouldHaveFileTab(aFile)) {
+            _openFiles.add(aFile);
+            firePropChange(OpenFiles_Prop, null, aFile, _openFiles.size() - 1);
+            buildFileTabs();
+        }
 
-        // Add file
-        _openFiles.add(aFile);
-
-        // Fire prop change
-        firePropChange(OpenFiles_Prop, null, aFile, _openFiles.size() - 1);
-        buildFileTabs();
+        // Select file
+        setSelFile(aFile);
     }
 
     /**
-     * Removes a file from OpenFiles list.
+     * Closes the given file.
      */
-    public void removeOpenFile(WebFile aFile)
+    public void closeFile(WebFile aFile)
     {
         // Remove file from list (just return if not available)
         int index = ListUtils.indexOfId(_openFiles, aFile);
@@ -119,17 +124,6 @@ public class PagePane extends ViewOwner {
     }
 
     /**
-     * Removes a file from OpenFiles list.
-     */
-    public void removeAllOpenFilesExcept(WebFile aFile)
-    {
-        WebFile[] openFilesCopy = _openFiles.toArray(new WebFile[0]);
-        for (WebFile openFile : openFilesCopy)
-            if (openFile != aFile)
-                removeOpenFile(openFile);
-    }
-
-    /**
      * Returns the selected file.
      */
     public WebFile getSelFile()  { return _selFile; }
@@ -137,7 +131,7 @@ public class PagePane extends ViewOwner {
     /**
      * Sets the selected site file.
      */
-    public void setSelFile(WebFile aFile)
+    protected void setSelFile(WebFile aFile)
     {
         // If file already set, just return
         if (aFile == null || aFile == getSelFile()) return;
@@ -149,9 +143,6 @@ public class PagePane extends ViewOwner {
         // Set selected file and update tree
         if (isPageAvailableForFile(_selFile))
             getBrowser().setSelFile(_selFile);
-
-        // Add to OpenFiles
-        addOpenFile(aFile);
 
         // Fire prop change
         firePropChange(SelFile_Prop, oldSelFile, _selFile);
@@ -216,13 +207,22 @@ public class PagePane extends ViewOwner {
     }
 
     /**
+     * Removes a file from OpenFiles list.
+     */
+    public void removeAllOpenFilesExcept(WebFile aFile)
+    {
+        List<WebFile> openFilesCopy = ListUtils.filter(_openFiles, file -> file != aFile);
+        openFilesCopy.forEach(this::closeFile);
+    }
+
+    /**
      * Removes open files for given project.
      */
     protected void removeOpenFilesForProject(Project aProject)
     {
         List<WebFile> openFiles = getOpenFiles();
         List<WebFile> openProjectFiles = ListUtils.filter(openFiles, file -> Project.getProjectForFile(file) == aProject);
-        openProjectFiles.forEach(this::removeOpenFile);
+        openProjectFiles.forEach(this::closeFile);
     }
 
     /**
@@ -361,11 +361,10 @@ public class PagePane extends ViewOwner {
     {
         // Handle TabBar
         if (anEvent.getView() == _tabBar) {
-            int selIndex = _tabBar.getSelIndex();
             List<WebFile> openFiles = getOpenFiles();
+            int selIndex = _tabBar.getSelIndex();
             WebFile openFile = selIndex >= 0 ? openFiles.get(selIndex) : null;
-            getBrowser().setTransition(WebBrowser.Instant);
-            setSelFile(openFile);
+            openFile(openFile);
         }
     }
 
@@ -433,10 +432,10 @@ public class PagePane extends ViewOwner {
      */
     private void handleTabCloseAction(Tab aTab)
     {
-        int index = ListUtils.indexOfId(_tabBar.getTabs(), aTab);
+        int index = _tabBar.getTabs().indexOf(aTab);
         if (index >= 0) {
             WebFile tabFile = getOpenFiles().get(index);
-            removeOpenFile(tabFile);
+            closeFile(tabFile);
         }
     }
 
@@ -470,11 +469,11 @@ public class PagePane extends ViewOwner {
     public void revertFile(WebFile aFile)
     {
         boolean isSelFile = aFile == getSelFile();
-        removeOpenFile(aFile);
+        closeFile(aFile);
         aFile.resetAndVerify();
         setPageForURL(aFile.getURL(), null);
         if (isSelFile)
-            setSelFile(aFile);
+            openFile(aFile);
     }
 
     /**
@@ -522,7 +521,7 @@ public class PagePane extends ViewOwner {
         switch (aPC.getPropName()) {
 
             // Handle SelPage
-            case WebBrowser.SelPage_Prop: setSelFile(_browser.getSelFile()); break;
+            case WebBrowser.SelPage_Prop: openFile(_browser.getSelFile()); break;
 
             // Handle Activity, Status, Loading
             case WebBrowser.Activity_Prop: workspace.setActivity(_browser.getActivity()); break;

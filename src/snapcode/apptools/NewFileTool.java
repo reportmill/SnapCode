@@ -97,7 +97,7 @@ public class NewFileTool extends WorkspaceTool {
         }
 
         // Select file and hide right tray
-        setSelFile(newFile);
+        _workspacePane.openFile(newFile);
         _workspaceTools.getRightTray().setSelTool(null);
     }
 
@@ -232,7 +232,7 @@ public class NewFileTool extends WorkspaceTool {
         WebFile newJavaFile = selSite.createFileForPath(filePath, false);
         newJavaFile.setText(javaString);
         newJavaFile.save();
-        setSelFile(newJavaFile);
+        _workspacePane.openFile(newJavaFile);
 
         // Start build?
         _workspace.getBuilder().buildWorkspaceLater();
@@ -282,7 +282,7 @@ public class NewFileTool extends WorkspaceTool {
         WebFile newJeplFile = selSite.createFileForPath(filePath, false);
         newJeplFile.setText(jeplString);
         newJeplFile.save();
-        setSelFile(newJeplFile);
+        _workspacePane.openFile(newJeplFile);
 
         // Start build?
         _workspace.getBuilder().buildWorkspaceLater();
