@@ -72,12 +72,14 @@ public class PagePane extends ViewOwner {
     /**
      * Adds a file to OpenFiles list.
      */
-    public void addOpenFile(WebFile aFile)
+    protected void addOpenFile(WebFile aFile)
     {
-        // If already open file, just return
-        if (aFile == null || !shouldHaveFileTab(aFile))
+        // If already open, just return
+        if (_openFiles.contains(aFile))
             return;
-        if (ListUtils.containsId(_openFiles, aFile))
+
+        // If not project file, just return (not sure about this anymore)
+        if (!shouldHaveFileTab(aFile))
             return;
 
         // Add file
@@ -392,7 +394,7 @@ public class PagePane extends ViewOwner {
 
             // Configure Tab.Button
             ToggleButton tabButton = fileTab.getButton();
-            tabButton.addEventFilter(e -> tabButtonMousePress(e, file), MousePress);
+            tabButton.addEventFilter(e -> handleTabButtonMousePress(e, file), MousePress);
         }
 
         // Reset UI
@@ -441,7 +443,7 @@ public class PagePane extends ViewOwner {
     /**
      * Called when tab button gets mouse press.
      */
-    private void tabButtonMousePress(ViewEvent anEvent, WebFile aFile)
+    private void handleTabButtonMousePress(ViewEvent anEvent, WebFile aFile)
     {
         if (anEvent.isPopupTrigger()) {
             Menu contextMenu = createFileContextMenu(aFile);
