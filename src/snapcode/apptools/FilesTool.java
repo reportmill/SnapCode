@@ -59,9 +59,7 @@ public class FilesTool extends WorkspaceTool {
     public void showOpenDesktopFilePanel()
     {
         String[] fileTypes = { "*" };
-        getEnv().showFilePicker(fileTypes, pickedFile -> {
-            WorkspacePaneUtils.openFile(_workspacePane, pickedFile);
-        });
+        getEnv().showFilePicker(fileTypes, pickedFile -> WorkspacePaneUtils.openFile(_workspacePane, pickedFile));
     }
 
     /**
@@ -112,13 +110,11 @@ public class FilesTool extends WorkspaceTool {
         if (selFile == null || !ArrayUtils.containsId(_workspacePane.getSites(), selFile.getSite()))
             return;
 
-        DialogBox dbox = new DialogBox("Rename File");
-        dbox.setMessage("Enter new name for " + selFile.getName());
-        String newName = dbox.showInputDialog(_workspacePane.getUI(), selFile.getName());
-        if (newName != null) {
-            FilesTool filesTool = _workspaceTools.getFilesTool();
-            filesTool.renameFile(selFile, newName);
-        }
+        DialogBox dialogBox = new DialogBox("Rename File");
+        dialogBox.setMessage("Enter new name for " + selFile.getName());
+        String newName = dialogBox.showInputDialog(_workspacePane.getUI(), selFile.getName());
+        if (newName != null)
+            renameFile(selFile, newName);
     }
 
     /**
@@ -144,9 +140,8 @@ public class FilesTool extends WorkspaceTool {
     {
         Clipboard clipboard = Clipboard.get();
         if (clipboard.hasFiles()) {
-            FilesTool filesTool = _workspaceTools.getFilesTool();
             List<File> files = clipboard.getJavaFiles();
-            filesTool.addFiles(files);
+            addFiles(files);
         }
     }
 

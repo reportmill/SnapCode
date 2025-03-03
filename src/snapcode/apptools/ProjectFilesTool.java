@@ -1,5 +1,6 @@
 package snapcode.apptools;
 import snap.geom.HPos;
+import snap.util.ListUtils;
 import snap.util.SnapUtils;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
@@ -235,9 +236,9 @@ public class ProjectFilesTool extends WorkspaceTool {
         _filesTree.setSelItem(selTreeFile);
 
         // Update FilesList
-        WebFile[] openFiles = _pagePane.getOpenFiles();
-        FileTreeFile[] treeFiles = ArrayUtils.map(openFiles, openFile -> getTreeFile(openFile), FileTreeFile.class);
-        _filesList.setItems(treeFiles);
+        List<WebFile> openFiles = _pagePane.getOpenFiles();
+        List<FileTreeFile> treeFiles = ListUtils.map(openFiles, openFile -> getTreeFile(openFile));
+        _filesList.setItemsList(treeFiles);
         _filesList.setSelItem(selTreeFile);
     }
 

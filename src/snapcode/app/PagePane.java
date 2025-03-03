@@ -23,7 +23,6 @@ import snap.web.WebSite;
 import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * This class manages and displays pages for editing project files.
@@ -68,7 +67,7 @@ public class PagePane extends ViewOwner {
     /**
      * Returns the open files.
      */
-    public WebFile[] getOpenFiles()  { return _openFiles.toArray(new WebFile[0]); }
+    public List<WebFile> getOpenFiles()  { return _openFiles; }
 
     /**
      * Adds a file to OpenFiles list.
@@ -219,9 +218,9 @@ public class PagePane extends ViewOwner {
      */
     protected void removeOpenFilesForProject(Project aProject)
     {
-        WebFile[] openFiles = getOpenFiles();
-        WebFile[] openProjectFiles = ArrayUtils.filter(openFiles, file -> Project.getProjectForFile(file) == aProject);
-        Stream.of(openProjectFiles).forEach(this::removeOpenFile);
+        List<WebFile> openFiles = getOpenFiles();
+        List<WebFile> openProjectFiles = ListUtils.filter(openFiles, file -> Project.getProjectForFile(file) == aProject);
+        openProjectFiles.forEach(this::removeOpenFile);
     }
 
     /**
@@ -317,7 +316,7 @@ public class PagePane extends ViewOwner {
         _browser = new WebBrowser();
         _browser.setGrowHeight(true);
         _browser.setPageClassResolver(this::getPageClassForResponse);
-        _browser.addPropChangeListener(this::browserDidPropChange,
+        _browser.addPropChangeListener(this::handleBrowserPropChange,
                 WebBrowser.SelPage_Prop, WebBrowser.Activity_Prop, WebBrowser.Status_Prop, WebBrowser.Loading_Prop);
 
         // Create ColView to hold TabsBox and Browser
@@ -339,13 +338,13 @@ public class PagePane extends ViewOwner {
     {
         // Update TabBar.SelIndex
         WebFile selFile = getSelFile();
-        WebFile[] openFiles = getOpenFiles();
-        int selIndex = ArrayUtils.indexOfId(openFiles, selFile);
+        List<WebFile> openFiles = getOpenFiles();
+        int selIndex = openFiles.indexOf(selFile);
         _tabBar.setSelIndex(selIndex);
 
         // Update TabBar Visible
-        boolean showTabBar = getOpenFiles().length > 0;
-        if (showTabBar && getOpenFiles().length == 1 && selFile != null) {
+        boolean showTabBar = !getOpenFiles().isEmpty();
+        if (showTabBar && getOpenFiles().size() == 1 && selFile != null) {
              if ("jepl".equals(selFile.getFileType()) || selFile.getName().contains("JavaFiddle"))
                 showTabBar = false;
         }
@@ -361,8 +360,8 @@ public class PagePane extends ViewOwner {
         // Handle TabBar
         if (anEvent.getView() == _tabBar) {
             int selIndex = _tabBar.getSelIndex();
-            WebFile[] openFiles = getOpenFiles();
-            WebFile openFile = selIndex >= 0 ? openFiles[selIndex] : null;
+            List<WebFile> openFiles = getOpenFiles();
+            WebFile openFile = selIndex >= 0 ? openFiles.get(selIndex) : null;
             getBrowser().setTransition(WebBrowser.Instant);
             setSelFile(openFile);
         }
@@ -383,8 +382,7 @@ public class PagePane extends ViewOwner {
         _tabBar.removeTabs();
 
         // Iterate over OpenFiles, create FileTabs, init and add
-        WebFile[] openFiles = getOpenFiles();
-        for (WebFile file : openFiles) {
+        for (WebFile file : getOpenFiles()) {
 
             // Create/config/add Tab
             Tab fileTab = new Tab();
@@ -435,7 +433,7 @@ public class PagePane extends ViewOwner {
     {
         int index = ListUtils.indexOfId(_tabBar.getTabs(), aTab);
         if (index >= 0) {
-            WebFile tabFile = getOpenFiles()[index];
+            WebFile tabFile = getOpenFiles().get(index);
             removeOpenFile(tabFile);
         }
     }
@@ -515,20 +513,20 @@ public class PagePane extends ViewOwner {
     /**
      * Called when Browser does prop change.
      */
-    private void browserDidPropChange(PropChange aPC)
+    private void handleBrowserPropChange(PropChange aPC)
     {
-        String propName = aPC.getPropName();
         Workspace workspace = _workspacePane.getWorkspace();
 
-        // Handle SelPage, Activity, Status, Loading
-        if (propName == WebBrowser.SelPage_Prop)
-            setSelFile(_browser.getSelFile());
-        if (propName == WebBrowser.Status_Prop)
-            workspace.setStatus(_browser.getStatus());
-        else if (propName == WebBrowser.Activity_Prop)
-            workspace.setActivity(_browser.getActivity());
-        else if (propName == WebBrowser.Loading_Prop)
-            workspace.setLoading(_browser.isLoading());
+        switch (aPC.getPropName()) {
+
+            // Handle SelPage
+            case WebBrowser.SelPage_Prop: setSelFile(_browser.getSelFile()); break;
+
+            // Handle Activity, Status, Loading
+            case WebBrowser.Activity_Prop: workspace.setActivity(_browser.getActivity()); break;
+            case WebBrowser.Status_Prop: workspace.setStatus(_browser.getStatus()); break;
+            case WebBrowser.Loading_Prop: workspace.setLoading(_browser.isLoading()); break;
+        }
     }
 
     /**
