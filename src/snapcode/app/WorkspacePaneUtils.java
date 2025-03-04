@@ -55,22 +55,7 @@ public class WorkspacePaneUtils {
     }
 
     /**
-     * Opens empty workspace and opens given sample name.
-     */
-    public static void openSampleForName(WorkspacePane workspacePane, String sampleName)
-    {
-        // Get sample url
-        String SAMPLES_ROOT = "https://reportmill.com/SnapCode/Samples/";
-        String samplePath = FilePathUtils.getFilenameSimple(sampleName) + '/' + sampleName;
-        WebURL sampleURL = WebURL.getURL(SAMPLES_ROOT + samplePath);
-        assert (sampleURL != null);
-
-        // Open sample URL
-        openSamplesUrl(workspacePane, sampleURL);
-    }
-
-    /**
-     * Opens a samples URL.
+     * Opens the given samples URL.
      */
     public static void openSamplesUrl(WorkspacePane workspacePane, WebURL sampleURL)
     {
@@ -87,9 +72,24 @@ public class WorkspacePaneUtils {
     }
 
     /**
+     * Opens known sample for given name.
+     */
+    public static void openSampleForName(WorkspacePane workspacePane, String sampleName)
+    {
+        // Get sample url
+        String SAMPLES_ROOT = "https://reportmill.com/SnapCode/Samples/";
+        String samplePath = FilePathUtils.getFilenameSimple(sampleName) + '/' + sampleName;
+        WebURL sampleURL = WebURL.getURL(SAMPLES_ROOT + samplePath);
+        assert (sampleURL != null);
+
+        // Open sample URL
+        openSamplesUrl(workspacePane, sampleURL);
+    }
+
+    /**
      * Opens a lesson.
      */
-    public static void openLesson(WorkspacePane workspacePane, WebURL lessonURL)
+    private static void openLesson(WorkspacePane workspacePane, WebURL lessonURL)
     {
         HelpTool.setDefaultHelpFileUrl(lessonURL);
         workspacePane.getWorkspaceTools().getHelpTool().showTool();
@@ -98,7 +98,7 @@ public class WorkspacePaneUtils {
     /**
      * Opens a source file.
      */
-    public static boolean openExternalSourceFile(WorkspacePane workspacePane, WebURL sourceFileURL)
+    private static boolean openExternalSourceFile(WorkspacePane workspacePane, WebURL sourceFileURL)
     {
         // Get source file - complain and return if not found
         WebFile sourceFile = sourceFileURL.getFile();
@@ -274,13 +274,7 @@ public class WorkspacePaneUtils {
         ViewUtils.runDelayed(() -> selectGoodDefaultFile(workspacePane, project), 400);
 
         // Add repoURL to recent files
-        if (!addRecentFileUrl(repoURL)) {
-
-            // If repo URL wasn't added, add project URL
-            String filePath = repoURL.getPath();
-            if (!filePath.contains("/SnapCode/Samples"))
-                addRecentFileUrl(project.getSite().getURL());
-        }
+        addRecentFileUrl(repoURL);
     }
 
     /**
@@ -356,19 +350,15 @@ public class WorkspacePaneUtils {
     /**
      * Adds a recent file URL.
      */
-    private static boolean addRecentFileUrl(WebURL fileUrl)
+    private static void addRecentFileUrl(WebURL fileUrl)
     {
+        // If URL to TempProj or Temp dir, just return
         String filePath = fileUrl.getPath();
-        if (filePath.contains("TempProj")) // || filePath.contains("/SnapCode/Samples/"))
-            return false;
-
-        // If URL is from temp dir, just return
-        if (filePath.startsWith(SnapUtils.getTempDir()))
-            return false;
+        if (filePath.contains("TempProj") || filePath.startsWith(SnapUtils.getTempDir()))
+            return;
 
         // Add URL
         RecentFiles.addURL(fileUrl);
-        return true;
     }
 
     /**
