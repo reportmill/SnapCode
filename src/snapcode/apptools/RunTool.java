@@ -55,7 +55,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
     private RunConfig findRunConfig()
     {
         // Search all projects for first that defines a main class name
-        Project[] projects = _workspace.getProjects();
+        List<Project> projects = _workspace.getProjects();
         for (Project project : projects) {
             String mainClassName = project.getBuildFile().getMainClassName();
             if (mainClassName != null)

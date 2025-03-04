@@ -2,7 +2,7 @@ package snapcode.app;
 import greenfoot.*;
 import greenfoot.GreenfootProject;
 import snap.props.PropChangeListener;
-import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.view.View;
 import snap.view.ViewEvent;
 import snap.web.WebFile;
@@ -12,7 +12,6 @@ import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * This class is a page to show greenfoot.project files.
@@ -66,7 +65,7 @@ public class GreenfootPage extends WebPage {
 
         // Find first (any) greenfoot project in workspace
         Workspace workspace = getWorkspace();
-        Project[] projects = workspace.getProjects();
+        List<Project> projects = workspace.getProjects();
 
         // Find project
         for (Project project : projects) {
@@ -127,10 +126,10 @@ public class GreenfootPage extends WebPage {
     private WebFile[] getAllSourceFiles()
     {
         Workspace workspace = getWorkspace();
-        Project[] projects = workspace.getProjects();
-        WebFile[] sourceDirs = ArrayUtils.map(projects, Project::getSourceDir, WebFile.class);
+        List<Project> projects = workspace.getProjects();
+        List<WebFile> sourceDirs = ListUtils.map(projects, Project::getSourceDir);
         List<WebFile> sourceFiles = new ArrayList<>();
-        Stream.of(sourceDirs).forEach(dir -> findSourceFilesForDir(dir, sourceFiles));
+        sourceDirs.forEach(dir -> findSourceFilesForDir(dir, sourceFiles));
         return sourceFiles.toArray(new WebFile[0]);
     }
 

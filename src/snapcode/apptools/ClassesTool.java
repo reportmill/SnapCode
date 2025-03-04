@@ -1,6 +1,5 @@
 package snapcode.apptools;
 import snap.props.PropChangeListener;
-import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.util.ObjectArray;
 import snap.view.*;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * This tool class shows the project source files in class hierarchy.
@@ -131,9 +129,9 @@ public class ClassesTool extends WorkspaceTool {
     public WebFile[] getAllSourceFiles()
     {
         List<WebFile> sourceFiles = new ArrayList<>();
-        Project[] projects = _workspace.getProjects();
-        WebFile[] sourceDirs = ArrayUtils.map(projects, Project::getSourceDir, WebFile.class);
-        Stream.of(sourceDirs).forEach(dir -> findSourceFiles(dir, sourceFiles));
+        List<Project> projects = _workspace.getProjects();
+        List<WebFile> sourceDirs = ListUtils.map(projects, Project::getSourceDir);
+        sourceDirs.forEach(dir -> findSourceFiles(dir, sourceFiles));
         return sourceFiles.toArray(new WebFile[0]);
     }
 

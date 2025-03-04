@@ -100,12 +100,12 @@ public class HomePageView extends MarkDownView {
                 // Create RestoreWorkspaceButton
                 Button restoreWorkspaceButton = new Button("Restore Workspace");
                 restoreWorkspaceButton.setPropsString("Name:RestoreWorkspaceButton; Font:Arial 13; PrefWidth:140; PrefHeight:24; Margin:0,0,0,20");
-                restoreWorkspaceButton.setVisible(_homePage._workspacePane.getProjects().length == 0);
+                restoreWorkspaceButton.setVisible(_homePage._workspacePane.getProjects().isEmpty());
 
                 // Create ClearWorkspaceButton
                 Button clearWorkspaceButton = new Button("Clear Workspace");
                 clearWorkspaceButton.setPropsString("Name:ClearWorkspaceButton; Font:Arial 13; PrefWidth:120; PrefHeight:24; Margin:0,0,0,20");
-                clearWorkspaceButton.setVisible(_homePage._workspacePane.getProjects().length > 0);
+                clearWorkspaceButton.setVisible(!_homePage._workspacePane.getProjects().isEmpty());
 
                 // Create row, add children and return
                 RowView rowView = new RowView();

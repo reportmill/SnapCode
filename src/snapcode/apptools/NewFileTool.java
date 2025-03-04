@@ -49,7 +49,7 @@ public class NewFileTool extends WorkspaceTool {
     public void createFileForType(String fileType)
     {
         // If no projects, create starter file
-        if (_workspace.getProjects().length == 0) {
+        if (_workspace.getProjects().isEmpty()) {
             createStarterFileForType(fileType);
             return;
         }

@@ -89,7 +89,7 @@ public class FilesTool extends WorkspaceTool {
     public void renameSelFile()
     {
         WebFile selFile = getSelFile();
-        if (selFile == null || !ArrayUtils.containsId(_workspacePane.getSites(), selFile.getSite()))
+        if (selFile == null || !_workspacePane.getSites().contains(selFile.getSite()))
             return;
 
         DialogBox dialogBox = new DialogBox("Rename File");

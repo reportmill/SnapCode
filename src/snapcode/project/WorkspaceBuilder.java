@@ -1,10 +1,8 @@
 package snapcode.project;
-import snap.util.ArrayUtils;
-import snap.util.FormatUtils;
-import snap.util.TaskMonitor;
-import snap.util.TaskRunner;
+import snap.util.*;
 import snap.view.ViewUtils;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This class handles building a Workspace.
@@ -77,8 +75,8 @@ public class WorkspaceBuilder {
     {
         if (_addAllFilesToBuild)
             return true;
-        Project[] projects = _workspace.getProjects();
-        return ArrayUtils.hasMatch(projects, proj -> proj.getBuilder().isNeedsBuild());
+        List<Project> projects = _workspace.getProjects();
+        return ListUtils.hasMatch(projects, proj -> proj.getBuilder().isNeedsBuild());
     }
 
     /**
@@ -150,7 +148,7 @@ public class WorkspaceBuilder {
     public void cleanWorkspace()
     {
         boolean old = setAutoBuildEnabled(false);
-        Project[] projects = _workspace.getProjects();
+        List<Project> projects = _workspace.getProjects();
         for (Project project : projects)
             project.getBuilder().cleanProject();
         setAutoBuildEnabled(old);
@@ -185,7 +183,7 @@ public class WorkspaceBuilder {
         long buildStartTime = System.currentTimeMillis();
 
         // Get all projects and declare var for buildSuccess
-        Project[] projects = _workspace.getProjects();
+        List<Project> projects = _workspace.getProjects();
         boolean buildSuccess = true;
 
         // Build child projects - need to recurse!!!
@@ -250,7 +248,7 @@ public class WorkspaceBuilder {
     private void addAllFilesToBuildImpl()
     {
         // Make RootProject.Projects addBuildFiles
-        Project[] projects = _workspace.getProjects();
+        List<Project> projects = _workspace.getProjects();
         for (Project proj : projects) {
             ProjectBuilder projBuilder = proj.getBuilder();
             projBuilder.addBuildFilesAll();

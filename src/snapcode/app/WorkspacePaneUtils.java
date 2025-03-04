@@ -8,6 +8,8 @@ import snapcode.apptools.HelpTool;
 import snapcode.apptools.NewFileTool;
 import snapcode.project.*;
 
+import java.util.List;
+
 /**
  * Utilities for WorkspacePane.
  */
@@ -119,7 +121,7 @@ public class WorkspacePaneUtils {
     {
         // This isn't great, but remove any non-TempProj projects
         Workspace workspace = workspacePane.getWorkspace();
-        Project[] projects = workspace.getProjects();
+        List<Project> projects = workspace.getProjects();
         for (Project project : projects) {
             if (!project.getName().equals("TempProj"))
                 workspace.removeProject(project);

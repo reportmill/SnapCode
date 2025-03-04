@@ -8,6 +8,7 @@ import snap.util.SnapUtils;
 import snap.util.StringUtils;
 import snap.web.*;
 import java.io.File;
+import java.util.List;
 
 /**
  * Utility methods for Project.
@@ -219,7 +220,7 @@ public class ProjectUtils {
             return file.getUrlAddress();
 
         // Look in child projects
-        Project[] projects = aProject.getProjects();
+        List<Project> projects = aProject.getProjects();
         for (Project proj : projects) {
             file = proj.getSourceFileForPath(classPath);
             if (file != null)

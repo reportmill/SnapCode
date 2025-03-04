@@ -92,7 +92,7 @@ public class WorkspacePane extends ViewOwner {
         _statusBar = new StatusBar(this);
 
         // Manage projects
-        Project[] projects = _workspace.getProjects();
+        List<Project> projects = _workspace.getProjects();
         for (Project proj : projects)
             handleWorkspaceProjectAdded(proj);
     }
@@ -117,7 +117,7 @@ public class WorkspacePane extends ViewOwner {
         _workspace = aWorkspace;
 
         // Install
-        Project[] projects = _workspace.getProjects();
+        List<Project> projects = _workspace.getProjects();
         for (Project proj : projects)
             handleWorkspaceProjectAdded(proj);
 
@@ -153,7 +153,7 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Returns the projects.
      */
-    public Project[] getProjects()  { return _workspace.getProjects(); }
+    public List<Project> getProjects()  { return _workspace.getProjects(); }
 
     /**
      * Returns the project panes.
@@ -171,7 +171,7 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Returns the array of sites.
      */
-    public WebSite[] getSites()  { return _workspace.getSites(); }
+    public List<WebSite> getSites()  { return _workspace.getSites(); }
 
     /**
      * Returns the selected project.
@@ -221,9 +221,9 @@ public class WorkspacePane extends ViewOwner {
         WebSite selSite = selFile != null ? selFile.getSite() : null;
 
         // If file not in Workspace.Sites, use first site
-        WebSite[] workspaceSites = getSites();
-        if (!ArrayUtils.containsId(workspaceSites, selSite))
-            selSite = workspaceSites.length > 0 ? workspaceSites[0] : null;
+        List<WebSite> workspaceSites = getSites();
+        if (!workspaceSites.contains(selSite))
+            selSite = !workspaceSites.isEmpty() ? workspaceSites.get(0) : null;
 
         // Return
         return selSite;
@@ -266,7 +266,7 @@ public class WorkspacePane extends ViewOwner {
     public void clearWorkspace()
     {
         Workspace workspace = getWorkspace();
-        Project[] projects = workspace.getProjects();
+        List<Project> projects = workspace.getProjects();
 
         _clearingWorkspace = true;
         for (Project project : projects)
@@ -381,7 +381,7 @@ public class WorkspacePane extends ViewOwner {
         runLater(_workspaceTools.getProjectFilesTool()::showTool);
 
         // Do AutoBuild
-        if (getProjects().length > 0)
+        if (!getProjects().isEmpty())
             buildWorkspaceAllLater();
 
         // IF lesson is set, show help tool
@@ -417,7 +417,7 @@ public class WorkspacePane extends ViewOwner {
     @Override
     public void resetUI()
     {
-        if (getProjects().length == 0) return;
+        if (getProjects().isEmpty()) return;
 
         // Reset window title
         WebPage page = _pagePane.getSelPage();
@@ -687,7 +687,7 @@ public class WorkspacePane extends ViewOwner {
      */
     private void saveOpenProjectsListToPrefs()
     {
-        List<String> projectUrlStrings = ArrayUtils.mapToList(_workspace.getProjects(), proj -> proj.getSourceURL().getString());
+        List<String> projectUrlStrings = ListUtils.map(_workspace.getProjects(), proj -> proj.getSourceURL().getString());
         Prefs.getDefaultPrefs().setStringsForKey(projectUrlStrings, OPEN_PROJECTS_PREFS_KEY);
         _updateOpenProjectsPrefsRunnable = null;
     }

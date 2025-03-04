@@ -11,7 +11,6 @@ import snapcode.project.Workspace;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.props.PropChange;
-import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.*;
 import snapcode.util.ClassInfoPage;
@@ -406,9 +405,9 @@ public class PagePane extends ViewOwner {
     protected boolean isProjectFile(WebFile aFile)
     {
         if (aFile == null) return false;
-        WebSite[] projSites = _workspacePane.getSites();
+        List<WebSite> projSites = _workspacePane.getSites();
         WebSite fileSite = aFile.getSite();
-        return ArrayUtils.containsId(projSites, fileSite);
+        return projSites.contains(fileSite);
     }
 
     /**

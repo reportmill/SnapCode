@@ -54,14 +54,8 @@ public class ProjectFilesTool extends WorkspaceTool {
         if (_rootFiles != null) return _rootFiles;
 
         // Create RootFiles for Workspace.Sites
-        WebSite[] workspaceSites = _workspace.getSites();
-        List<FileTreeFile> rootFiles = new ArrayList<>(workspaceSites.length);
-        for (WebSite site : workspaceSites) {
-            FileTreeFile fileTreeFile = new FileTreeFile(null, site.getRootDir());
-            rootFiles.add(fileTreeFile);
-        }
-
-        // Set array and Return
+        List<WebSite> workspaceSites = _workspace.getSites();
+        List<FileTreeFile> rootFiles = ListUtils.map(workspaceSites, site -> new FileTreeFile(null, site.getRootDir()));
         return _rootFiles = rootFiles.toArray(new FileTreeFile[0]);
     }
 

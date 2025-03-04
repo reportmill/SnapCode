@@ -40,10 +40,10 @@ public class WorkspaceUtils {
     {
         List<Project> dependentProjects = new ArrayList<>();
         Workspace workspace = aProject.getWorkspace();
-        Project[] projects = workspace.getProjects();
+        List<Project> projects = workspace.getProjects();
 
         for (Project project : projects) {
-            if (project == aProject || ArrayUtils.contains(project.getProjects(), aProject))
+            if (project == aProject || project.getProjects().contains(aProject))
                 dependentProjects.add(project);
         }
 
@@ -76,8 +76,8 @@ public class WorkspaceUtils {
     public static WebFile getGoodDefaultFile(Workspace aWorkspace)
     {
         // Get projects
-        Project[] projects = aWorkspace.getProjects();
-        if (projects.length == 0)
+        List<Project> projects = aWorkspace.getProjects();
+        if (projects.isEmpty())
             return null;
 
         // Look for read me
@@ -109,6 +109,6 @@ public class WorkspaceUtils {
         }
 
         // Return first project root dir
-        return projects[0].getSite().getRootDir();
+        return projects.get(0).getSite().getRootDir();
     }
 }

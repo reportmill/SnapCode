@@ -26,7 +26,7 @@ public class Project extends PropObject {
     protected WebSite  _site;
 
     // The child projects this project depends on
-    private Project[]  _projects;
+    private List<Project>  _projects;
 
     // BuildFile
     protected BuildFile _buildFile;
@@ -147,7 +147,7 @@ public class Project extends PropObject {
     /**
      * Returns an array of projects that this project depends on.
      */
-    public Project[] getProjects()  { return _projects; }
+    public List<Project> getProjects()  { return _projects; }
 
     /**
      * Adds a project.
@@ -155,13 +155,14 @@ public class Project extends PropObject {
     public void addProject(Project aProj)
     {
         // If already set, just return
-        if (ArrayUtils.containsId(_projects, aProj)) return;
+        if (_projects.contains(aProj)) return;
 
         // Add project
-        _projects = ArrayUtils.add(_projects, aProj);
+        _projects = new ArrayList<>(_projects);
+        _projects.add(aProj);
 
         // Fire prop change
-        int index = _projects.length - 1;
+        int index = _projects.size() - 1;
         firePropChange(Projects_Prop, null, aProj, index);
     }
 
@@ -171,7 +172,7 @@ public class Project extends PropObject {
     public Project getProjectForName(String aName)
     {
         String name = aName.startsWith("/") ? aName.substring(1) : aName;
-        return ArrayUtils.findMatch(_projects, proj -> proj.getName().equals(name));
+        return ListUtils.findMatch(_projects, proj -> proj.getName().equals(name));
     }
 
     /**
@@ -217,7 +218,7 @@ public class Project extends PropObject {
     /**
      * Returns the projects this project depends on.
      */
-    private Project[] getProjectsFromBuildFile()
+    private List<Project> getProjectsFromBuildFile()
     {
         // Create list of projects from BuildFile.ProjectPaths
         BuildFile buildFile = getBuildFile();
@@ -231,13 +232,13 @@ public class Project extends PropObject {
             Project proj = getProjectForPath(projPath);
 
             // Add to list
-            Project[] childProjects = proj.getProjects();
-            ListUtils.addAllUnique(projs, childProjects);
+            List<Project> childProjects = proj.getProjects();
+            childProjects.forEach(childProj -> ListUtils.addUnique(projs, childProj));
             ListUtils.addUnique(projs, proj);
         }
 
-        // Return array
-        return projs.toArray(new Project[0]);
+        // Return
+        return projs;
     }
 
     /**
@@ -439,7 +440,7 @@ public class Project extends PropObject {
             return file;
 
         // Check child projects
-        Project[] projects = getProjects();
+        List<Project> projects = getProjects();
         for (Project proj : projects) {
             projFiles = proj.getProjectFiles();
             file = projFiles.getSourceFileForClassName(aClassName);

@@ -2,7 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
+import snap.util.ListUtils;
 import snap.web.WebFile;
+
+import java.util.List;
 
 /**
  * A class to represent a RunConfiguration.
@@ -135,15 +138,8 @@ public class RunConfig {
     {
         // Search workspace projects for java file
         String mainClassName = getMainClassName();
-        Project[] projects = _workspace.getProjects();
-        for (Project project : projects) {
-            WebFile javaFile = project.getJavaFileForClassName(mainClassName);
-            if (javaFile != null)
-                return javaFile;
-        }
-
-        // Return not found
-        return null;
+        List<Project> projects = _workspace.getProjects();
+        return ListUtils.findNonNull(projects, proj -> proj.getJavaFileForClassName(mainClassName));
     }
 
     /**

@@ -3,13 +3,15 @@
  */
 package snapcode.project;
 import snap.props.PropObject;
-import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.app.SnapCodeUtils;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -18,10 +20,10 @@ import java.util.Objects;
 public class Workspace extends PropObject {
 
     // The projects in the workspace
-    private Project[]  _projects = new Project[0];
+    private List<Project> _projects = new ArrayList<>(1);
 
     // The project sites
-    private WebSite[]  _sites;
+    private List<WebSite> _sites;
 
     // The status of the Workspace
     private String  _status;
@@ -67,7 +69,7 @@ public class Workspace extends PropObject {
     public void closeWorkspace()
     {
         // Remove all projects
-        Project[] projects = getProjects();
+        List<Project> projects = getProjects();
         for (Project project : projects)
             removeProject(project);
     }
@@ -75,7 +77,7 @@ public class Workspace extends PropObject {
     /**
      * Returns the projects that this workspace manages.
      */
-    public Project[] getProjects()  { return _projects; }
+    public List<Project> getProjects()  { return _projects; }
 
     /**
      * Adds a project.
@@ -83,18 +85,19 @@ public class Workspace extends PropObject {
     public void addProject(Project aProj)
     {
         // If already present, just return
-        if (ArrayUtils.containsId(_projects, aProj)) return;
+        if (_projects.contains(aProj)) return;
 
         // Add project
-        _projects = ArrayUtils.addId(_projects, aProj);
+        _projects = new ArrayList<>(_projects);
+        _projects.add(aProj);
         _sites = null;
 
         // Fire prop change
-        int index = ArrayUtils.indexOfId(_projects, aProj);
+        int index = _projects.indexOf(aProj);
         firePropChange(Projects_Prop, null, aProj, index);
 
         // Add dependent projects
-        Project[] childProjects = aProj.getProjects();
+        List<Project> childProjects = aProj.getProjects();
         for (Project proj : childProjects)
             addProject(proj);
     }
@@ -104,12 +107,13 @@ public class Workspace extends PropObject {
      */
     public void removeProject(Project aProj)
     {
-        int index = ArrayUtils.indexOfId(_projects, aProj);
+        int index = _projects.indexOf(aProj);
         if (index < 0)
             return;
 
         // Remove project
-        _projects = ArrayUtils.remove(_projects, index);
+        _projects = new ArrayList<>(_projects);
+        _projects.remove(index);
         _sites = null;
 
         // Fire prop change
@@ -121,21 +125,21 @@ public class Workspace extends PropObject {
      */
     public Project getProjectForName(String aName)
     {
-        return ArrayUtils.findMatch(_projects, proj -> proj.getName().equals(aName));
+        return ListUtils.findMatch(_projects, proj -> proj.getName().equals(aName));
     }
 
     /**
      * Returns the root project.
      */
-    public Project getRootProject()  { return _projects.length > 0 ? _projects[0] : null; }
+    public Project getRootProject()  { return !_projects.isEmpty() ? _projects.get(0) : null; }
 
     /**
      * Returns the sites.
      */
-    public WebSite[] getSites()
+    public List<WebSite> getSites()
     {
         if (_sites != null) return _sites;
-        return _sites = ArrayUtils.map(_projects, proj -> proj.getSite(), WebSite.class);
+        return _sites = ListUtils.map(_projects, proj -> proj.getSite());
     }
 
     /**
@@ -251,7 +255,7 @@ public class Workspace extends PropObject {
      */
     public void saveAllFiles()
     {
-        Project[] projects = getProjects();
+        List<Project> projects = getProjects();
         for (Project project : projects) {
             WebSite projSite = project.getSite();
             WebFile rootDir = projSite.getRootDir();

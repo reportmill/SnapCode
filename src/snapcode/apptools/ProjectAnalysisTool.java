@@ -7,10 +7,8 @@ import snapcode.project.Project;
 import snap.view.TextArea;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,7 +40,7 @@ public class ProjectAnalysisTool {
         // Get projects
         List<Project> projects = new ArrayList<>();
         projects.add(aProject);
-        Collections.addAll(projects, aProject.getProjects());
+        projects.addAll(aProject.getProjects());
 
         // Iterate over projects and add: ProjName: xxx
         for (Project prj : projects) {
