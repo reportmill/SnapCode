@@ -110,7 +110,7 @@ public class App {
         // Handle 'New'
         if (arg0.equalsIgnoreCase("new")) {
             WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
-            WorkspacePaneUtils.openNewFileOfType(workspacePane, "jepl");
+            ViewUtils.runLater(() -> workspacePane.getWorkspaceTools().getNewFileTool().createFileForType("jepl"));
             return true;
         }
 
@@ -138,7 +138,7 @@ public class App {
             WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
             String scenarioIdStr = arg0.substring("greenfoot:".length());
             int scenarioId = Convert.intValue(scenarioIdStr);
-            GreenImport.openGreenfootForScenarioId(null, scenarioId);
+            GreenImport.openProjectForGreenfootScenarioId(null, scenarioId);
             return true;
         }
 
@@ -177,7 +177,7 @@ public class App {
 
         // Open Java/Jepl string
         WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
-        WorkspacePaneUtils.openJavaString(workspacePane, javaStr, fileType);
+        workspacePane.getWorkspaceTools().getNewFileTool().newJavaFileForStringAndType(javaStr, fileType);
 
         // If Java markdown, hide project
         if (fileType.equals("jmd")) {

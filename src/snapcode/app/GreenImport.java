@@ -30,13 +30,13 @@ public class GreenImport {
             return;
 
         // Open new project for scenario id
-        openGreenfootForScenarioId(workspacePane, scenarioId);
+        openProjectForGreenfootScenarioId(workspacePane, scenarioId);
     }
 
     /**
      * Opens a new project for Greenfoot scenario id.
      */
-    public static void openGreenfootForScenarioId(WorkspacePane workspacePane, int scenarioId)
+    public static void openProjectForGreenfootScenarioId(WorkspacePane workspacePane, int scenarioId)
     {
         // Get greenfoot archive file for scenario id
         File greenfootArchiveFile;
@@ -48,19 +48,19 @@ public class GreenImport {
 
         // Get URL for archive file and open
         WebURL gfarFileUrl = WebURL.getURL(greenfootArchiveFile);
-        openGreenfootForArchiveFileUrl(workspacePane, gfarFileUrl);
+        openProjectForGreenfootArchiveUrl(workspacePane, gfarFileUrl);
     }
 
     /**
      * Opens a new project for Greenfoot archive file URL.
      */
-    public static void openGreenfootForArchiveFileUrl(WorkspacePane workspacePane, WebURL archiveUrl)
+    public static void openProjectForGreenfootArchiveUrl(WorkspacePane workspacePane, WebURL archiveUrl)
     {
         // Return greenfoot dir for archive URL
         WebFile greenfootDir = getGreenfootDirForArchiveUrl(archiveUrl);
 
         // Open greenfoot project for greenfoot dir
-        Project greenfootProject = openGreenfootDir(workspacePane, greenfootDir);
+        Project greenfootProject = openProjectForGreenfootDir(workspacePane, greenfootDir);
 
         // Select good file
         ViewUtils.runDelayed(() -> WorkspacePaneUtils.selectGoodDefaultFile(workspacePane, greenfootProject), 400);
@@ -70,7 +70,7 @@ public class GreenImport {
     /**
      * Opens a new project for Greenfoot scenario id.
      */
-    public static Project openGreenfootDir(WorkspacePane workspacePane, WebFile greenfootDir)
+    public static Project openProjectForGreenfootDir(WorkspacePane workspacePane, WebFile greenfootDir)
     {
         // Get scenario name
         String scenarioName = greenfootDir.getSimpleName().replace(' ', '_');

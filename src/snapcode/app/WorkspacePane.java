@@ -678,7 +678,7 @@ public class WorkspacePane extends ViewOwner {
         for (String projString : openProjectStrings) {
             WebURL projUrl = WebURL.getURL(projString);
             if (projUrl != null)
-                WorkspacePaneUtils.openFileUrl(this, projUrl);
+                WorkspacePaneUtils.openProjectUrl(this, projUrl);
         }
     }
 

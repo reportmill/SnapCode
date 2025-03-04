@@ -7,7 +7,6 @@ import snap.web.*;
 import snapcode.apptools.HelpTool;
 import snapcode.apptools.NewFileTool;
 import snapcode.project.*;
-
 import java.util.List;
 
 /**
@@ -47,56 +46,12 @@ public class WorkspacePaneUtils {
             // Handle java/jepl
             case "java": case "jepl": return openExternalSourceFile(workspacePane, fileUrl);
 
-            // Handle zip
-            case "zip": return openProjectForZipUrl(workspacePane, fileUrl);
-
-            // Handle git
-            case "git": openProjectForRepoURL(workspacePane, fileUrl); return true;
-
-            // Handle gfar
-            case "gfar": openGreenfootForArchiveFileUrl(workspacePane, fileUrl); return true;
-
             // Handle lesson
             case "md": openLesson(workspacePane, fileUrl); return true;
 
-            // Handle anything else: Open project for given file
-            default:
-                WebFile file = fileUrl.getFile();
-                if (file == null)
-                    return false;
-                openProjectForProjectFile(workspacePane, file);
-                return true;
+            // Handle anything else: Try to open as project (zip, git, gfar, project dir)
+            default: return openProjectUrl(workspacePane, fileUrl);
         }
-    }
-
-    /**
-     * Creates a new file.
-     */
-    public static void openNewFileOfType(WorkspacePane workspacePane, String fileType)
-    {
-        NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
-        ViewUtils.runLater(() -> newFileTool.createFileForType(fileType));
-    }
-
-    /**
-     * Opens a Java string file.
-     */
-    public static void openJavaString(WorkspacePane workspacePane, String javaString, String fileType)
-    {
-        // Open empty workspace pane with temp project
-        Workspace workspace = workspacePane.getWorkspace();
-        Project tempProj = ProjectUtils.getTempProject(workspace);
-
-        // If new source file has word 'chart', add SnapCharts runtime to tempProj
-        boolean isJepl = fileType.equals("jepl") || fileType.equals("jmd");
-        if (isJepl && javaString.contains("chart"))
-            tempProj.getBuildFile().setIncludeSnapChartsRuntime(true);
-
-        // Show new project panel
-        ViewUtils.runLater(() -> {
-            NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
-            newFileTool.newJavaOrJeplFileForNameAndTypeAndString("JavaFiddle", fileType, javaString);
-        });
     }
 
     /**
@@ -175,6 +130,32 @@ public class WorkspacePaneUtils {
         // Show source file
         ViewUtils.runLater(() -> workspacePane.openFile(newSourceFile));
         return true;
+    }
+
+    /**
+     * Opens a project URL (zip, git, gfar or project dir).
+     */
+    public static boolean openProjectUrl(WorkspacePane workspacePane, WebURL projectUrl)
+    {
+        switch (projectUrl.getFileType()) {
+
+            // Handle zip
+            case "zip": return openProjectForZipUrl(workspacePane, projectUrl);
+
+            // Handle git
+            case "git": openProjectForRepoURL(workspacePane, projectUrl); return true;
+
+            // Handle gfar
+            case "gfar": openProjectForGreenfootArchiveUrl(workspacePane, projectUrl); return true;
+
+            // Handle anything else: Open project for given file
+            default:
+                WebFile file = projectUrl.getFile();
+                if (file == null)
+                    return false;
+                openProjectForProjectFile(workspacePane, file);
+                return true;
+        }
     }
 
     /**
@@ -265,6 +246,63 @@ public class WorkspacePaneUtils {
     }
 
     /**
+     * Adds a project to given workspace pane for repo URL.
+     */
+    public static void openProjectForRepoURL(WorkspacePane workspacePane, WebURL repoURL)
+    {
+        // Add project for repo URL
+        Workspace workspace = workspacePane.getWorkspace();
+        TaskRunner<Boolean> checkoutRunner = workspace.addProjectForRepoURL(repoURL);
+
+        // After add project, trigger build and show files
+        checkoutRunner.setOnSuccess(val -> openProjectForRepoUrlFinished(workspacePane, repoURL));
+        checkoutRunner.setOnFailure(e -> openProjectForRepoUrlFailed(workspacePane, repoURL, e));
+
+        // Show check progress panel
+        checkoutRunner.getMonitor().showProgressPanel(workspacePane.getUI());
+    }
+
+    /**
+     * Called when openProjectForRepoURL finished.
+     */
+    private static void openProjectForRepoUrlFinished(WorkspacePane workspacePane, WebURL repoURL)
+    {
+        // Select good default file
+        String projName = repoURL.getFilenameSimple();
+        Workspace workspace = workspacePane.getWorkspace();
+        Project project = workspace.getProjectForName(projName);
+        ViewUtils.runDelayed(() -> selectGoodDefaultFile(workspacePane, project), 400);
+
+        // Add repoURL to recent files
+        if (!addRecentFileUrl(repoURL)) {
+
+            // If repo URL wasn't added, add project URL
+            String filePath = repoURL.getPath();
+            if (!filePath.contains("/SnapCode/Samples"))
+                addRecentFileUrl(project.getSite().getURL());
+        }
+    }
+
+    /**
+     * Called if openProjectForRepoURL fails.
+     */
+    private static void openProjectForRepoUrlFailed(WorkspacePane workspacePane, WebURL repoURL, Exception anException)
+    {
+        DialogBox dialogBox = new DialogBox("Checkout failed");
+        dialogBox.setErrorMessage("Failed checkout: " + repoURL.getString() + '\n' + "Error: " + anException.getMessage());
+        dialogBox.showMessageDialog(workspacePane.getUI());
+    }
+
+    /**
+     * Open greenfoot archive file.
+     */
+    private static void openProjectForGreenfootArchiveUrl(WorkspacePane workspacePane, WebURL fileUrl)
+    {
+        GreenImport.openProjectForGreenfootArchiveUrl(workspacePane, fileUrl);
+        addRecentFileUrl(fileUrl);
+    }
+
+    /**
      * Opens a Workspace in embed mode.
      */
     public static void openEmbedWorkspace()
@@ -290,64 +328,10 @@ public class WorkspacePaneUtils {
                 "button.getAnim(0).setLoopCount(3).play();\n" +
                 "button.addEventHandler(e -> show(new Label(\"Stop that\")), View.Action);\n" +
                 "show(button);\n";
-        WorkspacePaneUtils.openJavaString(workspacePane, javaStr, "jepl");
-    }
 
-    /**
-     * Adds a project to given workspace pane for repo URL.
-     */
-    public static void openProjectForRepoURL(WorkspacePane workspacePane, WebURL repoURL)
-    {
-        // Add project for repo URL
-        Workspace workspace = workspacePane.getWorkspace();
-        TaskRunner<Boolean> checkoutRunner = workspace.addProjectForRepoURL(repoURL);
-
-        // After add project, trigger build and show files
-        checkoutRunner.setOnSuccess(val -> openWorkspaceForRepoUrlFinished(workspacePane, repoURL));
-        checkoutRunner.setOnFailure(e -> checkoutFailed(workspacePane, repoURL, e));
-
-        // Show check progress panel
-        checkoutRunner.getMonitor().showProgressPanel(workspacePane.getUI());
-    }
-
-    /**
-     * Called if checkout fails.
-     */
-    private static void checkoutFailed(WorkspacePane workspacePane, WebURL repoURL, Exception anException)
-    {
-        DialogBox dialogBox = new DialogBox("Checkout failed");
-        dialogBox.setErrorMessage("Failed checkout: " + repoURL.getString() + '\n' + "Error: " + anException.getMessage());
-        dialogBox.showMessageDialog(workspacePane.getUI());
-    }
-
-    /**
-     * Called when openWorkspaceForRepoURL finished.
-     */
-    private static void openWorkspaceForRepoUrlFinished(WorkspacePane workspacePane, WebURL repoURL)
-    {
-        // Select good default file
-        String projName = repoURL.getFilenameSimple();
-        Workspace workspace = workspacePane.getWorkspace();
-        Project project = workspace.getProjectForName(projName);
-        ViewUtils.runDelayed(() -> selectGoodDefaultFile(workspacePane, project), 400);
-
-        // Add repoURL to recent files
-        if (!addRecentFileUrl(repoURL)) {
-
-            // If repo URL wasn't added, add project URL
-            String filePath = repoURL.getPath();
-            if (!filePath.contains("/SnapCode/Samples"))
-                addRecentFileUrl(project.getSite().getURL());
-        }
-    }
-
-    /**
-     * Open greenfoot archive file.
-     */
-    private static void openGreenfootForArchiveFileUrl(WorkspacePane workspacePane, WebURL fileUrl)
-    {
-        GreenImport.openGreenfootForArchiveFileUrl(workspacePane, fileUrl);
-        addRecentFileUrl(fileUrl);
+        // Create and open new Jepl file
+        NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
+        newFileTool.newJavaFileForStringAndType(javaStr, "jepl");
     }
 
     /**

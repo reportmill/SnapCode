@@ -15,6 +15,7 @@ import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
+import snapcode.project.Workspace;
 
 /**
  * This class is a WorkspaceTool to manage creating new files.
@@ -171,6 +172,24 @@ public class NewFileTool extends WorkspaceTool {
 
         // Create file
         newJavaOrJeplFileForNameAndTypeAndString("JavaFiddle", fileType, "");
+    }
+
+    /**
+     * Creates a new Java or Jepl file for string and type.
+     */
+    public void newJavaFileForStringAndType(String javaString, String fileType)
+    {
+        // Open empty workspace pane with temp project
+        Workspace workspace = _workspacePane.getWorkspace();
+        Project tempProj = ProjectUtils.getTempProject(workspace);
+
+        // If new source file has word 'chart', add SnapCharts runtime to tempProj
+        boolean isJepl = fileType.equals("jepl") || fileType.equals("jmd");
+        if (isJepl && javaString.contains("chart"))
+            tempProj.getBuildFile().setIncludeSnapChartsRuntime(true);
+
+        // Show new project panel
+        ViewUtils.runLater(() -> newJavaOrJeplFileForNameAndTypeAndString("JavaFiddle", fileType, javaString));
     }
 
     /**
