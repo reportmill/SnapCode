@@ -45,7 +45,7 @@ public class HomePage extends WebPage {
      */
     private void clearWorkspace()
     {
-        WorkspacePaneUtils.clearWorkspace(_workspacePane);
+        _workspacePane.clearWorkspace();
         setViewVisible("ClearWorkspaceButton", false);
         setViewVisible("RestoreWorkspaceButton", true);
     }

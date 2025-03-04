@@ -1,15 +1,12 @@
 package snapcode.app;
 import snap.geom.Rect;
 import snap.gfx.GFXEnv;
-import snap.util.Prefs;
+import snap.util.*;
 import snap.view.SharedAction;
 import snap.viewx.DevPane;
 import snap.web.WebURL;
 import snapcode.project.*;
 import snap.props.PropChange;
-import snap.util.ArrayUtils;
-import snap.util.FileUtils;
-import snap.util.SnapUtils;
 import snap.view.*;
 import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
@@ -51,11 +48,18 @@ public class WorkspacePane extends ViewOwner {
     // Whether currently restoring workspace
     protected static boolean _restoringWorkspace;
 
+    // Whether currently clearing workspace
+    protected static boolean _clearingWorkspace;
+
     // Runnable for update open projects prefs
     private Runnable _updateOpenProjectsPrefsRunnable;
 
+    // Runnable for update open files prefs
+    private Runnable _updateOpenFilesPrefsRunnable;
+
     // Constant for open projects urls
     private static final String OPEN_PROJECTS_PREFS_KEY = "OpenProjects";
+    private static final String OPEN_FILES_PREFS_KEY = "OpenFiles";
 
     /**
      * Constructor.
@@ -74,10 +78,11 @@ public class WorkspacePane extends ViewOwner {
 
         // Create workspace
         _workspace = workspace;
-        _workspace.addPropChangeListener(pc -> workspaceDidPropChange(pc));
+        _workspace.addPropChangeListener(pc -> handleWorkspacePropChange(pc));
 
         // Create PagePane
         _pagePane = createPagePane();
+        _pagePane.addPropChangeListener(pc -> handlePagePaneOpenFilesChanged(), PagePane.OpenFiles_Prop);
 
         // Create WorkspaceTools
         _workspaceTools = createWorkspaceTools();
@@ -248,7 +253,7 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Close this WorkspacePane.
      */
-    public void hide()
+    public void closeWorkspacePane()
     {
         // Close workspace
         _workspace.closeWorkspace();
@@ -258,30 +263,37 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
+     * Restores workspace to last open projects/files.
+     */
+    public void restoreWorkspace()
+    {
+        _restoringWorkspace = true;
+        restoreOpenProjects();
+        restoreOpenFiles();
+        _restoringWorkspace = false;
+    }
+
+    /**
+     * Removes all projects from workspace.
+     */
+    public void clearWorkspace()
+    {
+        Workspace workspace = getWorkspace();
+        Project[] projects = workspace.getProjects();
+
+        _clearingWorkspace = true;
+        for (Project project : projects)
+            workspace.removeProject(project);
+        _clearingWorkspace = false;
+    }
+
+    /**
      * Returns the build directory.
      */
     public WebFile getBuildDir()
     {
         Project proj = getRootProject();
         return proj != null ? proj.getBuildDir() : null;
-    }
-
-    /**
-     * Restores workspace to last open projects/files.
-     */
-    public void restoreWorkspace()
-    {
-        _restoringWorkspace = true;
-
-        // Open projects
-        List<String> openProjectStrings = Prefs.getDefaultPrefs().getStringsForKey(OPEN_PROJECTS_PREFS_KEY);
-        for (String projString : openProjectStrings) {
-            WebURL projUrl = WebURL.getURL(projString);
-            if (projUrl != null)
-                WorkspacePaneUtils.openFileUrl(this, projUrl);
-        }
-
-        _restoringWorkspace = false;
     }
 
     /**
@@ -486,7 +498,7 @@ public class WorkspacePane extends ViewOwner {
      */
     private void handleWinClose(ViewEvent anEvent)
     {
-        hide(); //WorkspacePaneUtils.openDefaultWorkspace();
+        closeWorkspacePane(); //WorkspacePaneUtils.openDefaultWorkspace();
     }
 
     /**
@@ -506,7 +518,7 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Called when Workspace does a property change.
      */
-    private void workspaceDidPropChange(PropChange aPC)
+    private void handleWorkspacePropChange(PropChange aPC)
     {
         switch (aPC.getPropName()) {
 
@@ -571,10 +583,8 @@ public class WorkspacePane extends ViewOwner {
             buildWorkspaceAllLater();
 
         // Update Open Projects prefs
-        if (!_restoringWorkspace && _updateOpenProjectsPrefsRunnable == null) {
-            _updateOpenProjectsPrefsRunnable = () -> saveOpenProjectsListToPrefs();
-            ViewUtils.runDelayedCancelPrevious(_updateOpenProjectsPrefsRunnable, 400);
-        }
+        if (!_restoringWorkspace && _updateOpenProjectsPrefsRunnable == null)
+            runLater(_updateOpenProjectsPrefsRunnable = this::saveOpenProjectsListToPrefs);
 
         // Handle show greenfoot
         if (aProject.getBuildFile().isIncludeGreenfootRuntime())
@@ -642,6 +652,16 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
+     * Called when PagePane.OpenFiles changes.
+     */
+    private void handlePagePaneOpenFilesChanged()
+    {
+        // Update Open Projects prefs
+        if (!_restoringWorkspace && !_clearingWorkspace && _updateOpenFilesPrefsRunnable == null)
+            runLater(_updateOpenFilesPrefsRunnable = this::saveOpenFilesListToPrefs);
+    }
+
+    /**
      * Copies web link to clipboard.
      */
     private void copyWebLink()
@@ -661,6 +681,21 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
+     * Restores the open projects list.
+     */
+    private void restoreOpenProjects()
+    {
+        List<String> openProjectStrings = Prefs.getDefaultPrefs().getStringsForKey(OPEN_PROJECTS_PREFS_KEY);
+
+        // Open projects
+        for (String projString : openProjectStrings) {
+            WebURL projUrl = WebURL.getURL(projString);
+            if (projUrl != null)
+                WorkspacePaneUtils.openFileUrl(this, projUrl);
+        }
+    }
+
+    /**
      * Saves open projects URLs to preferences for restoreWorkspace.
      */
     private void saveOpenProjectsListToPrefs()
@@ -668,6 +703,33 @@ public class WorkspacePane extends ViewOwner {
         List<String> projectUrlStrings = ArrayUtils.mapToList(_workspace.getProjects(), proj -> proj.getSourceURL().getString());
         Prefs.getDefaultPrefs().setStringsForKey(projectUrlStrings, OPEN_PROJECTS_PREFS_KEY);
         _updateOpenProjectsPrefsRunnable = null;
+    }
+
+    /**
+     * Restores open files.
+     */
+    private void restoreOpenFiles()
+    {
+        List<String> openFilesStrings = Prefs.getDefaultPrefs().getStringsForKey(OPEN_FILES_PREFS_KEY);
+
+        for (String openFileString : openFilesStrings) {
+            WebURL openFileUrl = WebURL.getURL(openFileString);
+            if (openFileUrl != null) {
+                WebFile openFile = openFileUrl.getFile();
+                if (openFile != null)
+                    openFile(openFile);
+            }
+        }
+    }
+
+    /**
+     * Saves open file URLs to preferences for restoreWorkspace.
+     */
+    protected void saveOpenFilesListToPrefs()
+    {
+        List<String> openFileUrlStrings = ListUtils.map(_pagePane.getOpenFiles(), file -> file.getURL().getString());
+        Prefs.getDefaultPrefs().setStringsForKey(openFileUrlStrings, OPEN_FILES_PREFS_KEY);
+        _updateOpenFilesPrefsRunnable = null;
     }
 
     /**

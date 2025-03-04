@@ -368,17 +368,6 @@ public class WorkspacePaneUtils {
     }
 
     /**
-     * Removes all projects from workspace.
-     */
-    public static void clearWorkspace(WorkspacePane workspacePane)
-    {
-        Workspace workspace = workspacePane.getWorkspace();
-        Project[] projects = workspace.getProjects();
-        for (Project project : projects)
-            workspace.removeProject(project);
-    }
-
-    /**
      * Adds a recent file URL.
      */
     private static boolean addRecentFileUrl(WebURL fileUrl)

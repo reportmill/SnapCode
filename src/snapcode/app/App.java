@@ -72,7 +72,7 @@ public class App {
         // Hide open WorkspacePane
         WorkspacePane workspacePane = WindowView.getOpenWindowOwner(WorkspacePane.class);
         if (workspacePane != null)
-            workspacePane.hide();
+            workspacePane.closeWorkspacePane();
 
         // Flush prefs and exit
         Prefs.getDefaultPrefs().flush();
