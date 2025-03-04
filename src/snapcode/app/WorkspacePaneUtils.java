@@ -202,7 +202,7 @@ public class WorkspacePaneUtils {
             String msg = "A project with the same name already exists.\nDo you want to replace it?";
             dialogBox.setQuestionMessage(msg);
             int answer = dialogBox.showOptionDialog(workspacePane.getUI(), null);
-            if (answer == 1)
+            if (answer == DialogBox.NO_OPTION)
                 return true;
 
             // Otherwise, delete files
@@ -213,32 +213,33 @@ public class WorkspacePaneUtils {
             }
         }
 
+        // Get project dir
+        WebFile projectDir = SnapCodeUtils.getSnapCodeProjectDirForName(zipDirFile.getName());
+
         // If project directory already exists, ask to replace it
-        WebFile snapCodeDir = SnapCodeUtils.getSnapCodeDir();
-        WebFile projectDir = snapCodeDir.getFileForName(zipDirFile.getName());
-        if (projectDir != null) {
+        if (projectDir.getExists()) {
 
             // Ask to replace directory - just open directory project if denied
             DialogBox dialogBox = new DialogBox("Open Zip Url");
             String msg = "A project directory with the same name already exists.\nDo you want to replace it?";
             dialogBox.setQuestionMessage(msg);
             int answer = dialogBox.showOptionDialog(workspacePane.getUI(), null);
-            if (answer == 1) {
-                openProjectForProjectFile(workspacePane, projectDir);
-                return true;
-            }
+            if (answer == DialogBox.CANCEL_OPTION)
+                return false;
 
-            // Otherwise, delete files
-            try { projectDir.delete(); }
-            catch (Exception e) {
-                DialogBox.showExceptionDialog(workspacePane.getUI(), "Error Deleting Directory", e);
-                return true;
+            // If replace, delete project dir
+            if (answer == DialogBox.YES_OPTION) {
+                try { projectDir.delete(); }
+                catch (Exception e) {
+                    DialogBox.showExceptionDialog(workspacePane.getUI(), "Error Deleting Directory", e);
+                    return false;
+                }
             }
         }
 
         // Copy to SnapCode dir
-        WebUtils.copyFile(zipDirFile, snapCodeDir);
-        projectDir = snapCodeDir.getFileForName(zipDirFile.getName());
+        if (!projectDir.getExists())
+            WebUtils.copyFile(zipDirFile, SnapCodeUtils.getSnapCodeDir());
 
         // Select good default file
         openProjectForProjectFile(workspacePane, projectDir);
