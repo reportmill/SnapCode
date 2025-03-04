@@ -14,13 +14,13 @@ public class WorkspaceUtils {
     /**
      * Returns the dependent files for given class.
      */
-    public static WebFile[] getJavaFilesDependentOnJavaFile(WebFile javaFile)
+    public static List<WebFile> getJavaFilesDependentOnJavaFile(WebFile javaFile)
     {
         Project javaFileProject = Project.getProjectForFile(javaFile);
         JavaClass javaClass = javaFileProject.getJavaClassForFile(javaFile);
 
         // Get projects dependent on this project
-        Project[] dependentProjects = getProjectsDependentOnProject(javaFileProject);
+        List<Project> dependentProjects = getProjectsDependentOnProject(javaFileProject);
         List<WebFile> dependentJavaFiles = new ArrayList<>();
 
         // Iterate over projects and add files
@@ -30,13 +30,13 @@ public class WorkspaceUtils {
         }
 
         // Return
-        return dependentJavaFiles.toArray(new WebFile[0]);
+        return dependentJavaFiles;
     }
 
     /**
      * Returns the workspace projects that are dependent on given project.
      */
-    private static Project[] getProjectsDependentOnProject(Project aProject)
+    private static List<Project> getProjectsDependentOnProject(Project aProject)
     {
         List<Project> dependentProjects = new ArrayList<>();
         Workspace workspace = aProject.getWorkspace();
@@ -48,7 +48,7 @@ public class WorkspaceUtils {
         }
 
         // Return
-        return dependentProjects.toArray(new Project[0]);
+        return dependentProjects;
     }
 
     /**

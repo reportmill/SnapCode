@@ -233,7 +233,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
                 continue;
 
             // Get Java files dependent on JavaFile and rebuild to account for any member changes
-            WebFile[] dependentJavaFiles = WorkspaceUtils.getJavaFilesDependentOnJavaFile(modifiedJavaFile);
+            List<WebFile> dependentJavaFiles = WorkspaceUtils.getJavaFilesDependentOnJavaFile(modifiedJavaFile);
             for (WebFile dependentJavaFile : dependentJavaFiles)
                 rebuildDependentJavaFileToAccountForMemberChanges(dependentJavaFile, sourceFiles);
         }
