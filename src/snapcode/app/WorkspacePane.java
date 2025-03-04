@@ -78,14 +78,14 @@ public class WorkspacePane extends ViewOwner {
 
         // Create workspace
         _workspace = workspace;
-        _workspace.addPropChangeListener(pc -> handleWorkspacePropChange(pc));
+        _workspace.addPropChangeListener(this::handleWorkspacePropChange);
 
         // Create PagePane
-        _pagePane = createPagePane();
+        _pagePane = new PagePane(this);
         _pagePane.addPropChangeListener(pc -> handlePagePaneOpenFilesChanged(), PagePane.OpenFiles_Prop);
 
         // Create WorkspaceTools
-        _workspaceTools = createWorkspaceTools();
+        _workspaceTools = new WorkspaceTools(this);
 
         // Create MainToolBar, StatusBar
         _toolBar = new MainToolBar(this);
@@ -144,19 +144,6 @@ public class WorkspacePane extends ViewOwner {
      * Returns the WorkspaceTools helper.
      */
     public WorkspacePaneDnD getWorkspacePaneDnD()  { return _workspacePaneDnD; }
-
-    /**
-     * Creates the PagePane.
-     */
-    protected PagePane createPagePane()  { return new PagePane(this); }
-
-    /**
-     * Creates the WorkspaceTools.
-     */
-    protected WorkspaceTools createWorkspaceTools()
-    {
-        return new WorkspaceTools(this);
-    }
 
     /**
      * Returns the toolbar.
@@ -502,20 +489,6 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
-     * Called to build workspace.
-     */
-    private void buildWorkspaceAllLater()
-    {
-        // Do AutoBuild
-        Workspace workspace = getWorkspace();
-        WorkspaceBuilder builder = workspace.getBuilder();
-        if (builder.isAutoBuildEnabled()) {
-            builder.addAllFilesToBuild();
-            builder.buildWorkspaceAfterDelay(800);
-        }
-    }
-
-    /**
      * Called when Workspace does a property change.
      */
     private void handleWorkspacePropChange(PropChange aPC)
@@ -620,7 +593,7 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Called when site file changes with File PropChange.
      */
-    protected void siteFileChanged(PropChange aPC)
+    protected void handleSiteFileChange(PropChange aPC)
     {
         // Get file/prop
         String propName = aPC.getPropName();
@@ -659,6 +632,20 @@ public class WorkspacePane extends ViewOwner {
         // Update Open Projects prefs
         if (!_restoringWorkspace && !_clearingWorkspace && _updateOpenFilesPrefsRunnable == null)
             runLater(_updateOpenFilesPrefsRunnable = this::saveOpenFilesListToPrefs);
+    }
+
+    /**
+     * Called to build workspace.
+     */
+    private void buildWorkspaceAllLater()
+    {
+        // Do AutoBuild
+        Workspace workspace = getWorkspace();
+        WorkspaceBuilder builder = workspace.getBuilder();
+        if (builder.isAutoBuildEnabled()) {
+            builder.addAllFilesToBuild();
+            builder.buildWorkspaceAfterDelay(800);
+        }
     }
 
     /**

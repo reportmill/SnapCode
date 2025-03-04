@@ -30,7 +30,7 @@ public class ProjectPane extends ViewOwner {
     private VersionControlTool _versionControlTool;
 
     // A PropChangeListener for Site file changes
-    private PropChangeListener _siteFileLsnr = pc -> siteFileChanged(pc);
+    private PropChangeListener _siteFileLsnr = this::handleSiteFileChange;
 
     /**
      * Constructor.
@@ -170,7 +170,7 @@ public class ProjectPane extends ViewOwner {
     /**
      * Called when a site file changes.
      */
-    private void siteFileChanged(PropChange aPC)
+    private void handleSiteFileChange(PropChange aPC)
     {
         // Get source and property name
         WebFile file = (WebFile) aPC.getSource();
@@ -188,7 +188,7 @@ public class ProjectPane extends ViewOwner {
             fileSaved(file);
 
         // Forward to WorkspacePane
-        _workspacePane.siteFileChanged(aPC);
+        _workspacePane.handleSiteFileChange(aPC);
     }
 
     /**
