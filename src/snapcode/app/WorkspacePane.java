@@ -105,6 +105,26 @@ public class WorkspacePane extends ViewOwner {
     public WorkspaceTools getWorkspaceTools()  { return _workspaceTools; }
 
     /**
+     * Returns the files tool.
+     */
+    public FilesTool getFilesTool()  { return _workspaceTools.getFilesTool(); }
+
+    /**
+     * Returns the files tool.
+     */
+    public NewFileTool getNewFileTool()  { return _workspaceTools.getNewFileTool(); }
+
+    /**
+     * Returns the RunTool.
+     */
+    public RunTool getRunTool()  { return _workspaceTools.getRunTool(); }
+
+    /**
+     * Returns the ProjectFilesTool.
+     */
+    public ProjectFilesTool getProjectFilesTool()  { return _workspaceTools.getProjectFilesTool(); }
+
+    /**
      * Returns the WorkspaceTools helper.
      */
     public WorkspacePaneDnD getWorkspacePaneDnD()  { return _workspacePaneDnD; }
@@ -342,7 +362,7 @@ public class WorkspacePane extends ViewOwner {
     protected void initShowing()
     {
         // Show project tool
-        runLater(_workspaceTools.getProjectFilesTool()::showTool);
+        runLater(getProjectFilesTool()::showTool);
 
         // Do AutoBuild
         if (!getProjects().isEmpty())
@@ -401,21 +421,21 @@ public class WorkspacePane extends ViewOwner {
         switch (anEvent.getName()) {
 
             // Handle NewFileMenuItem, OpenFileMenuItem
-            case "NewFileMenuItem": _workspaceTools.getNewFileTool().showNewFilePanel(); anEvent.consume(); break;
-            case "OpenFileMenuItem": _workspaceTools.getFilesTool().showOpenFilePanel(); anEvent.consume(); break;
+            case "NewFileMenuItem": getNewFileTool().showNewFilePanel(); anEvent.consume(); break;
+            case "OpenFileMenuItem": getFilesTool().showOpenFilePanel(); anEvent.consume(); break;
 
             // Handle SaveFileMenuItem
-            case "SaveFileMenuItem": _workspaceTools.getFilesTool().saveSelFile(); anEvent.consume(); break;
+            case "SaveFileMenuItem": getFilesTool().saveSelFile(); anEvent.consume(); break;
 
             // Handle RevertFileMenuItem
-            case "RevertFileMenuItem": _workspaceTools.getFilesTool().revertSelFiles(); anEvent.consume(); break;
+            case "RevertFileMenuItem": getFilesTool().revertSelFiles(); anEvent.consume(); break;
 
             // Handle CloseFileMenuItem, CloseFileAction
             case "CloseFileMenuItem": case "CloseFileAction": closeSelFile(); anEvent.consume(); break;
 
             // Handle DownloadFileMenuItem, OpenDesktopFileMenuItem
-            case "DownloadFileMenuItem": _workspaceTools.getFilesTool().downloadFile(); anEvent.consume(); break;
-            case "OpenDesktopFileMenuItem": _workspaceTools.getFilesTool().showOpenDesktopFilePanel(); anEvent.consume(); break;
+            case "DownloadFileMenuItem": getFilesTool().downloadFile(); anEvent.consume(); break;
+            case "OpenDesktopFileMenuItem": getFilesTool().showOpenDesktopFilePanel(); anEvent.consume(); break;
 
             // Handle QuitMenuItem
             case "QuitMenuItem": App.getShared().quitApp(); anEvent.consume(); break;
@@ -509,7 +529,7 @@ public class WorkspacePane extends ViewOwner {
         projPane.openProjectPane();
 
         // Clear root files
-        ProjectFilesTool projectFilesTool = _workspaceTools.getProjectFilesTool();
+        ProjectFilesTool projectFilesTool = getProjectFilesTool();
         projectFilesTool.resetRootFiles();
 
         // Reset UI
@@ -553,8 +573,7 @@ public class WorkspacePane extends ViewOwner {
         projPane.closeProjectPane();
 
         // Clear root files
-        ProjectFilesTool projectFilesTool = _workspaceTools.getProjectFilesTool();
-        projectFilesTool.resetRootFiles();
+        getProjectFilesTool().resetRootFiles();
 
         // Reset UI
         resetLater();
@@ -570,10 +589,8 @@ public class WorkspacePane extends ViewOwner {
         WebFile file = (WebFile) aPC.getSource();
 
         // Handle LastModTime, Modified: Update file in ProjectFilesTool
-        if (propName == WebFile.LastModTime_Prop || propName == WebFile.Modified_Prop) {
-            ProjectFilesTool projectFilesTool = _workspaceTools.getProjectFilesTool();
-            projectFilesTool.updateChangedFile(file);
-        }
+        if (propName == WebFile.LastModTime_Prop || propName == WebFile.Modified_Prop)
+            getProjectFilesTool().updateChangedFile(file);
     }
 
     /**

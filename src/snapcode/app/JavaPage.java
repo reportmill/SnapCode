@@ -112,8 +112,7 @@ public class JavaPage extends WebPage {
         // Handle EnterAction (Shortcut+Enter): Run app
         if (anEvent.equals("EnterAction")) {
             WorkspacePane workspacePane = getWorkspacePane();
-            WorkspaceTools workspaceTools = workspacePane.getWorkspaceTools();
-            RunTool runTool = workspaceTools.getRunTool();
+            RunTool runTool = workspacePane.getRunTool();
             runTool.runAppForSelFile(false);
         }
     }

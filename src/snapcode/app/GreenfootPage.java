@@ -223,7 +223,7 @@ public class GreenfootPage extends WebPage {
         ClassesPane classesPane = _playerPane.getClassesPane();
         String newClassString = classesPane.getNewClassString();
         WorkspacePane workspacePane = getWorkspacePane();
-        workspacePane.getWorkspaceTools().getNewFileTool().newJavaFileForString(newClassString);
+        workspacePane.getNewFileTool().newJavaFileForString(newClassString);
     }
 
     /**

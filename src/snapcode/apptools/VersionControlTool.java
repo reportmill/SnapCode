@@ -388,8 +388,7 @@ public class VersionControlTool extends ProjectTool {
     private void versionControlFileStatusChanged(PropChange aPC)
     {
         WebFile file = (WebFile) aPC.getSource();
-        WorkspaceTools workspaceTools = getWorkspaceTools();
-        ProjectFilesTool projectFilesTool = workspaceTools.getProjectFilesTool();
+        ProjectFilesTool projectFilesTool = _workspacePane.getProjectFilesTool();
         projectFilesTool.updateChangedFile(file);
     }
 

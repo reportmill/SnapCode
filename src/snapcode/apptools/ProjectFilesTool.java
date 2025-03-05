@@ -42,7 +42,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     public ProjectFilesTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
-        _filesTool = _workspaceTools.getFilesTool();
+        _filesTool = getFilesTool();
     }
 
     /**
@@ -239,7 +239,7 @@ public class ProjectFilesTool extends WorkspaceTool {
                 break;
 
             // Handle NewFileMenuItem, NewFileButton
-            case "NewFileMenuItem": case "NewFileButton": _workspaceTools.getNewFileTool().showNewFilePanel(); break;
+            case "NewFileMenuItem": case "NewFileButton": _workspacePane.getNewFileTool().showNewFilePanel(); break;
 
             // Handle DownloadFileButton
             case "DownloadFileButton": _filesTool.downloadFile(); break;

@@ -110,7 +110,7 @@ public class App {
         // Handle 'New'
         if (arg0.equalsIgnoreCase("new")) {
             WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
-            ViewUtils.runLater(() -> workspacePane.getWorkspaceTools().getNewFileTool().createFileForType("jepl"));
+            ViewUtils.runLater(() -> workspacePane.getNewFileTool().createFileForType("jepl"));
             return true;
         }
 
@@ -177,12 +177,12 @@ public class App {
 
         // Open Java/Jepl string
         WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
-        workspacePane.getWorkspaceTools().getNewFileTool().newJavaFileForStringAndType(javaStr, fileType);
+        workspacePane.getNewFileTool().newJavaFileForStringAndType(javaStr, fileType);
 
         // If Java markdown, hide project
         if (fileType.equals("jmd")) {
-            workspacePane.getWorkspaceTools().getRunTool().getUI().setPrefWidth(650);
-            ViewUtils.runLater(workspacePane.getWorkspaceTools().getProjectFilesTool()::hideTool);
+            workspacePane.getRunTool().getUI().setPrefWidth(650);
+            ViewUtils.runLater(workspacePane.getProjectFilesTool()::hideTool);
         }
     }
 
@@ -193,7 +193,7 @@ public class App {
     {
         WorkspacePane workspacePane = WindowView.getOpenWindowOwner(WorkspacePane.class);
         if (workspacePane != null) {
-            RunTool runTool = workspacePane.getWorkspaceTools().getRunTool();
+            RunTool runTool = workspacePane.getRunTool();
             runTool.runAppForSelFile(false);
         }
     }

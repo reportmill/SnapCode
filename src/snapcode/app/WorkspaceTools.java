@@ -343,8 +343,7 @@ public class WorkspaceTools {
         }
 
         // Update ProjectFilesTool
-        ProjectFilesTool projectFilesTool = getProjectFilesTool();
-        projectFilesTool.updateChangedFile(issueFile);
+        getProjectFilesTool().updateChangedFile(issueFile);
 
         // Update BuildTool
         getBuildTool().resetLater();

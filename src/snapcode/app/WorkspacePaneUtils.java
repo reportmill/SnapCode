@@ -117,7 +117,7 @@ public class WorkspacePaneUtils {
             tempProj.getBuildFile().setIncludeSnapChartsRuntime(true);
 
         // Create new source file for given external source file
-        NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
+        NewFileTool newFileTool = workspacePane.getNewFileTool();
         WebFile newSourceFile = newFileTool.newSourceFileForExternalSourceFile(sourceFile);
         if (newSourceFile == null) {
             System.out.println("WorkspacePane.openSourceFile: Couldn't open source file: " + sourceFile);
@@ -299,7 +299,7 @@ public class WorkspacePaneUtils {
                 "show(button);\n";
 
         // Create and open new Jepl file
-        NewFileTool newFileTool = workspacePane.getWorkspaceTools().getNewFileTool();
+        NewFileTool newFileTool = workspacePane.getNewFileTool();
         newFileTool.newJavaFileForStringAndType(javaStr, "jepl");
     }
 

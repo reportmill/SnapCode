@@ -202,7 +202,7 @@ public class PagePane extends ViewOwner {
         setSelPage(_homePage);
         if (!_workspacePane._workspaceTools.getHelpTool().isLesson())
             _workspacePane.getWorkspaceTools().getRightTray().hideTools();
-        _workspacePane.getWorkspaceTools().getRunTool().cancelRun();
+        _workspacePane.getRunTool().cancelRun();
     }
 
     /**

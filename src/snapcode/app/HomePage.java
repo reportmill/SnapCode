@@ -36,7 +36,7 @@ public class HomePage extends WebPage {
      */
     private void createNewFileForType(String fileType)
     {
-        NewFileTool newFileTool = _workspacePane.getWorkspaceTools().getNewFileTool();
+        NewFileTool newFileTool = _workspacePane.getNewFileTool();
         runLater(() -> newFileTool.createFileForType(fileType));
     }
 
@@ -69,7 +69,7 @@ public class HomePage extends WebPage {
         removeImageTempFiles();
 
         // Show new project panel
-        NewFileTool newFileTool = _workspacePane.getWorkspaceTools().getNewFileTool();
+        NewFileTool newFileTool = _workspacePane.getNewFileTool();
         runLater(newFileTool::showNewProjectPanel);
     }
 
@@ -200,8 +200,8 @@ public class HomePage extends WebPage {
             case "RestoreWorkspaceButton": restoreWorkspace(); break;
 
             // Handle OpenButton, OpenDesktopFileButton
-            case "OpenButton": _workspacePane.getWorkspaceTools().getFilesTool().showOpenFilePanel(); break;
-            case "OpenDesktopFileButton": _workspacePane.getWorkspaceTools().getFilesTool().showOpenDesktopFilePanel(); break;
+            case "OpenButton": _workspacePane.getFilesTool().showOpenFilePanel(); break;
+            case "OpenDesktopFileButton": _workspacePane.getFilesTool().showOpenDesktopFilePanel(); break;
 
             // Do normal version
             default: super.respondUI(anEvent); break;
