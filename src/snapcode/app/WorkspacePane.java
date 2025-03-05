@@ -66,18 +66,10 @@ public class WorkspacePane extends ViewOwner {
      */
     public WorkspacePane()
     {
-        this(new Workspace());
-    }
-
-    /**
-     * Constructor.
-     */
-    public WorkspacePane(Workspace workspace)
-    {
         super();
 
         // Create workspace
-        _workspace = workspace;
+        _workspace = new Workspace();
         _workspace.addPropChangeListener(this::handleWorkspacePropChange);
 
         // Create PagePane
@@ -90,40 +82,12 @@ public class WorkspacePane extends ViewOwner {
         // Create MainToolBar, StatusBar
         _toolBar = new MainToolBar(this);
         _statusBar = new StatusBar(this);
-
-        // Manage projects
-        List<Project> projects = _workspace.getProjects();
-        for (Project proj : projects)
-            handleWorkspaceProjectAdded(proj);
     }
 
     /**
      * Returns the workspace.
      */
     public Workspace getWorkspace()  { return _workspace; }
-
-    /**
-     * Sets the workspace.
-     */
-    public void setWorkspace(Workspace aWorkspace)
-    {
-        if (aWorkspace == _workspace) return;
-
-        // Close old workspace
-        if (_workspace != null)
-            _workspace.closeWorkspace();
-
-        // Set
-        _workspace = aWorkspace;
-
-        // Install
-        List<Project> projects = _workspace.getProjects();
-        for (Project proj : projects)
-            handleWorkspaceProjectAdded(proj);
-
-        // Install in tools
-        _workspaceTools.setWorkspace(_workspace);
-    }
 
     /**
      * Returns the PagePane.
@@ -554,6 +518,12 @@ public class WorkspacePane extends ViewOwner {
         // If showing, build workspace
         if (isShowing())
             buildWorkspaceAllLater();
+
+        // If not restoring, select good file and add to recent projects
+        if (!_restoringWorkspace) {
+            ViewUtils.runDelayed(() -> WorkspacePaneUtils.selectGoodDefaultFile(this, aProject), 400);
+            WorkspacePaneUtils.addRecentProject(aProject);
+        }
 
         // Update Open Projects prefs
         if (!_restoringWorkspace && _updateOpenProjectsPrefsRunnable == null)

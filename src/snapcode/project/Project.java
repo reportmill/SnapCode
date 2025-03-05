@@ -22,6 +22,9 @@ public class Project extends PropObject {
     // The Workspace that owns this project
     private Workspace  _workspace;
 
+    // The source for project
+    private WebURL _sourceURL;
+
     // The encapsulated data site
     protected WebSite  _site;
 
@@ -105,6 +108,8 @@ public class Project extends PropObject {
      */
     public WebURL getSourceURL()
     {
+        if (_sourceURL != null) return _sourceURL;
+
         // If VersionControl set, return remote URL
         WebSite projSite = getSite();
         VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
@@ -116,6 +121,14 @@ public class Project extends PropObject {
 
         // Return site URL
         return projSite.getURL();
+    }
+
+    /**
+     * Sets the Source URL.
+     */
+    public void setSourceURL(WebURL sourceURL)
+    {
+        _sourceURL = sourceURL;
     }
 
     /**

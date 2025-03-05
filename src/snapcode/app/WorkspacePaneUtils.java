@@ -124,9 +124,6 @@ public class WorkspacePaneUtils {
             return false;
         }
 
-        // Add to RecentFiles
-        addRecentFileUrl(sourceFile.getURL());
-
         // Show source file
         ViewUtils.runLater(() -> workspacePane.openFile(newSourceFile));
         return true;
@@ -146,7 +143,7 @@ public class WorkspacePaneUtils {
             case "git": openProjectForRepoURL(workspacePane, projectUrl); return true;
 
             // Handle gfar
-            case "gfar": openProjectForGreenfootArchiveUrl(workspacePane, projectUrl); return true;
+            case "gfar": GreenImport.openProjectForGreenfootArchiveUrl(workspacePane, projectUrl); return true;
 
             // Handle anything else: Open project for given file
             default:
@@ -169,13 +166,7 @@ public class WorkspacePaneUtils {
 
         // Open project: Get project site and add to workspace
         Workspace workspace = workspacePane.getWorkspace();
-        Project project = workspace.addProjectForSite(projectSite);
-
-        // Select good file
-        ViewUtils.runDelayed(() -> selectGoodDefaultFile(workspacePane, project), 400);
-
-        // Add recent file
-        addRecentFileUrl(projectDir.getURL());
+        workspace.addProjectForSite(projectSite);
     }
 
     /**
@@ -256,7 +247,7 @@ public class WorkspacePaneUtils {
         TaskRunner<Boolean> checkoutRunner = workspace.addProjectForRepoURL(repoURL);
 
         // After add project, trigger build and show files
-        checkoutRunner.setOnSuccess(val -> openProjectForRepoUrlFinished(workspacePane, repoURL));
+        //checkoutRunner.setOnSuccess(val -> openProjectForRepoUrlFinished(workspacePane, repoURL));
         checkoutRunner.setOnFailure(e -> openProjectForRepoUrlFailed(workspacePane, repoURL, e));
 
         // Show check progress panel
@@ -266,17 +257,7 @@ public class WorkspacePaneUtils {
     /**
      * Called when openProjectForRepoURL finished.
      */
-    private static void openProjectForRepoUrlFinished(WorkspacePane workspacePane, WebURL repoURL)
-    {
-        // Select good default file
-        String projName = repoURL.getFilenameSimple();
-        Workspace workspace = workspacePane.getWorkspace();
-        Project project = workspace.getProjectForName(projName);
-        ViewUtils.runDelayed(() -> selectGoodDefaultFile(workspacePane, project), 400);
-
-        // Add repoURL to recent files
-        addRecentFileUrl(repoURL);
-    }
+    //private static void openProjectForRepoUrlFinished(WorkspacePane workspacePane, WebURL repoURL)  { }
 
     /**
      * Called if openProjectForRepoURL fails.
@@ -286,15 +267,6 @@ public class WorkspacePaneUtils {
         DialogBox dialogBox = new DialogBox("Checkout failed");
         dialogBox.setErrorMessage("Failed checkout: " + repoURL.getString() + '\n' + "Error: " + anException.getMessage());
         dialogBox.showMessageDialog(workspacePane.getUI());
-    }
-
-    /**
-     * Open greenfoot archive file.
-     */
-    private static void openProjectForGreenfootArchiveUrl(WorkspacePane workspacePane, WebURL fileUrl)
-    {
-        GreenImport.openProjectForGreenfootArchiveUrl(workspacePane, fileUrl);
-        addRecentFileUrl(fileUrl);
     }
 
     /**
@@ -349,17 +321,19 @@ public class WorkspacePaneUtils {
     }
 
     /**
-     * Adds a recent file URL.
+     * Adds a recent project to recent files.
      */
-    private static void addRecentFileUrl(WebURL fileUrl)
+    protected static void addRecentProject(Project aProject)
     {
+        WebURL projectURL = aProject.getSourceURL();
+
         // If URL to TempProj or Temp dir, just return
-        String filePath = fileUrl.getPath();
+        String filePath = projectURL.getPath();
         if (filePath.contains("TempProj") || filePath.startsWith(SnapUtils.getTempDir()))
             return;
 
         // Add URL
-        RecentFiles.addURL(fileUrl);
+        RecentFiles.addURL(projectURL);
     }
 
     /**

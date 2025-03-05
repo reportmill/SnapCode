@@ -1,6 +1,5 @@
 package snapcode.app;
 import snap.util.*;
-import snap.view.ViewUtils;
 import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -60,10 +59,10 @@ public class GreenImport {
         WebFile greenfootDir = getGreenfootDirForArchiveUrl(archiveUrl);
 
         // Open greenfoot project for greenfoot dir
-        Project greenfootProject = openProjectForGreenfootDir(workspacePane, greenfootDir);
+        Project project = openProjectForGreenfootDir(workspacePane, greenfootDir);
+        project.setSourceURL(archiveUrl);
 
-        // Select good file
-        ViewUtils.runDelayed(() -> WorkspacePaneUtils.selectGoodDefaultFile(workspacePane, greenfootProject), 400);
+        // Enable Greenfoot Scope boxes
         JavaTextArea.setShowScopeBoxes(true);
     }
 
