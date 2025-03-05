@@ -236,23 +236,16 @@ public class ProjectUtils {
      */
     public static Project getTempProject(Workspace workspace)
     {
-        return getTempProject(workspace, "TempProj");
+        return getTempProjectForName(workspace, "TempProj");
     }
 
     /**
      * Returns a temp project for given workspace.
      */
-    public static Project getTempProject(Workspace workspace, String projectName)
+    public static Project getTempProjectForName(Workspace workspace, String projectName)
     {
-        // Get path to temp dir named TempProj
-        String tempProjPath = FileUtils.getTempFile(projectName).getAbsolutePath();
-        if (SnapUtils.isMac)
-            tempProjPath = "/tmp/" + projectName;
-
         // Get URL and Site for TempProjPath
-        WebURL tempProjURL = WebURL.getURL(tempProjPath);
-        assert (tempProjURL != null);
-        WebSite tempProjSite = tempProjURL.getAsSite();
+        WebSite tempProjSite = getTempProjectSiteForProjectName(projectName);
 
         // Get project for site - create if missing
         Project tempProj = Project.getProjectForSite(tempProjSite);
@@ -271,6 +264,22 @@ public class ProjectUtils {
 
         // Return
         return tempProj;
+    }
+
+    /**
+     * Returns a temp project site for given workspace and project name.
+     */
+    public static WebSite getTempProjectSiteForProjectName(String projectName)
+    {
+        // Get path to temp dir named TempProj
+        String tempProjPath = FileUtils.getTempFile(projectName).getAbsolutePath();
+        if (SnapUtils.isMac)
+            tempProjPath = "/tmp/" + projectName;
+
+        // Get URL and Site for TempProjPath
+        WebURL tempProjURL = WebURL.getURL(tempProjPath);
+        assert (tempProjURL != null);
+        return tempProjURL.getAsSite();
     }
 
     /**

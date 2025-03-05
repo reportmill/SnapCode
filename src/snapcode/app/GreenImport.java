@@ -55,41 +55,36 @@ public class GreenImport {
      */
     public static void openProjectForGreenfootArchiveUrl(WorkspacePane workspacePane, WebURL archiveUrl)
     {
-        // Return greenfoot dir for archive URL
+        // Get greenfoot dir for archive URL
         WebFile greenfootDir = getGreenfootDirForArchiveUrl(archiveUrl);
 
-        // Open greenfoot project for greenfoot dir
-        Project project = openProjectForGreenfootDir(workspacePane, greenfootDir);
-        project.setSourceURL(archiveUrl);
-
-        // Enable Greenfoot Scope boxes
-        JavaTextArea.setShowScopeBoxes(true);
-    }
-
-    /**
-     * Opens a new project for Greenfoot scenario id.
-     */
-    public static Project openProjectForGreenfootDir(WorkspacePane workspacePane, WebFile greenfootDir)
-    {
         // Get scenario name
         String scenarioName = greenfootDir.getSimpleName().replace(' ', '_');
 
+        // Register remote source
+        WebSite projectSite = ProjectUtils.getTempProjectSiteForProjectName(scenarioName);
+        VersionControlUtils.setRemoteSiteUrl(projectSite, archiveUrl);
+
         // Create new project and get src dir
         Workspace workspace = workspacePane.getWorkspace();
-        Project project = getTempGreenfootProject(workspace, scenarioName);
-        WebFile projectSourceDir = project.getSourceDir();
+        Project project = ProjectUtils.getTempProjectForName(workspace, scenarioName);
+
+        // Get build file and configure
+        BuildFile buildFile = project.getBuildFile();
+        buildFile.setIncludeGreenfootRuntime(true);
+        buildFile.setMainClassName("Main");
+        buildFile.writeFile();
 
         // Copy all non-class files from greenfoot project dir to new project src dir
+        WebFile projectSourceDir = project.getSourceDir();
         copyDirFileFilesToDir(greenfootDir, projectSourceDir);
 
         // Create Main class that launches world.lastInstantiated prop
         createMainClassForGreenfootProject(project);
 
-        // Show greenfoot button
+        // Show greenfoot button and enable Greenfoot scope boxes
         workspacePane.getToolBar().showGreenfootButton();
-
-        // Return
-        return project;
+        JavaTextArea.setShowScopeBoxes(true);
     }
 
     /**
@@ -134,24 +129,6 @@ public class GreenImport {
 
         // Return
         return greenfootArchiveFile;
-    }
-
-    /**
-     * Returns a temp greenfoot project for given workspace.
-     */
-    private static Project getTempGreenfootProject(Workspace workspace, String projectName)
-    {
-        // Create new temp project
-        Project tempProj = ProjectUtils.getTempProject(workspace, projectName);
-
-        // Get build file and configure
-        BuildFile buildFile = tempProj.getBuildFile();
-        buildFile.setIncludeGreenfootRuntime(true);
-        buildFile.setMainClassName("Main");
-        buildFile.writeFile();
-
-        // Return
-        return tempProj;
     }
 
     /**
