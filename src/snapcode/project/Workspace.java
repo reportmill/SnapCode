@@ -280,25 +280,12 @@ public class Workspace extends PropObject {
     }
 
     /**
-     * Adds a project with given repo URL.
+     * Opens a project with given repo URL.
      */
-    public TaskRunner<Boolean> openProjectForRepoURL(WebURL repoURL)
-    {
-        TaskMonitor taskMonitor = new TaskMonitor("Checkout " + repoURL.getString());
-        TaskRunner<Boolean> taskRunner = new TaskRunner<>(() -> openProjectForRepoURLImpl(repoURL, taskMonitor));
-        taskRunner.setMonitor(taskMonitor);
-        taskRunner.start();
-        return taskRunner;
-    }
-
-    /**
-     * Adds a project with given repo URL.
-     */
-    private boolean openProjectForRepoURLImpl(WebURL repoURL, TaskMonitor taskMonitor)
+    public boolean openProjectForRepoUrl(WebURL repoURL, TaskMonitor taskMonitor)
     {
         // Hack to support github repos in CheerpJ
-        //if (repoURL.getFileType().equals("git") && SnapUtils.isWebVM)
-        //    repoURL = GitHubUtils.downloadGithubZipFile(repoURL);
+        //if (repoURL.getFileType().equals("git") && SnapUtils.isWebVM) repoURL = GitHubUtils.downloadGithubZipFile(repoURL);
 
         // Get project name
         String projName = repoURL.getFilenameSimple();
@@ -326,16 +313,26 @@ public class Workspace extends PropObject {
         VersionControlUtils.setRemoteSiteUrl(projSite, repoURL);
         VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
         TaskRunner<Boolean> checkoutRunner = versionControl.checkout();
-        checkoutRunner.setOnSuccess(obj -> openProjectForSite(projSite));
+        checkoutRunner.setOnSuccess(obj -> openProjectForRepoUrlFinished(projSite));
         checkoutRunner.setOnFailure(e -> e.printStackTrace());
 
         // Attach checkout task monitor to given task monitor
         taskMonitor.setMonitor(checkoutRunner.getMonitor());
 
-        // Wait till done and return result
+        // Wait till done
         boolean result = checkoutRunner.awaitResult();
         if (checkoutRunner.getException() != null)
             throw new RuntimeException(checkoutRunner.getException().getMessage(), checkoutRunner.getException());
+
+        // Return
         return result;
+    }
+
+    /**
+     * Called when openProjectForRepoURL() finishes.
+     */
+    private void openProjectForRepoUrlFinished(WebSite projSite)
+    {
+        openProjectForSite(projSite);
     }
 }

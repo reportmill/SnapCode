@@ -140,7 +140,7 @@ public class WorkspacePaneUtils {
             case "zip": return openProjectForZipUrl(workspacePane, projectUrl);
 
             // Handle git
-            case "git": openProjectForRepoURL(workspacePane, projectUrl); return true;
+            case "git": openProjectForRepoUrl(workspacePane, projectUrl); return true;
 
             // Handle gfar
             case "gfar": GreenImport.openProjectForGreenfootArchiveUrl(workspacePane, projectUrl); return true;
@@ -240,11 +240,15 @@ public class WorkspacePaneUtils {
     /**
      * Adds a project to given workspace pane for repo URL.
      */
-    public static void openProjectForRepoURL(WorkspacePane workspacePane, WebURL repoURL)
+    public static void openProjectForRepoUrl(WorkspacePane workspacePane, WebURL repoURL)
     {
-        // Add project for repo URL
         Workspace workspace = workspacePane.getWorkspace();
-        TaskRunner<Boolean> checkoutRunner = workspace.openProjectForRepoURL(repoURL);
+
+        // Open project for repo URL
+        TaskMonitor taskMonitor = new TaskMonitor("Checkout " + repoURL.getString());
+        TaskRunner<Boolean> checkoutRunner = new TaskRunner<>(() -> workspace.openProjectForRepoUrl(repoURL, taskMonitor));
+        checkoutRunner.setMonitor(taskMonitor);
+        checkoutRunner.start();
 
         // After add project, trigger build and show files
         //checkoutRunner.setOnSuccess(val -> openProjectForRepoUrlFinished(workspacePane, repoURL));
@@ -253,11 +257,6 @@ public class WorkspacePaneUtils {
         // Show check progress panel
         checkoutRunner.getMonitor().showProgressPanel(workspacePane.getUI());
     }
-
-    /**
-     * Called when openProjectForRepoURL finished.
-     */
-    //private static void openProjectForRepoUrlFinished(WorkspacePane workspacePane, WebURL repoURL)  { }
 
     /**
      * Called if openProjectForRepoURL fails.
