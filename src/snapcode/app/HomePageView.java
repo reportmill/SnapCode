@@ -298,7 +298,7 @@ public class HomePageView extends MarkDownView {
         // Create close box
         CloseBox closeBox = new CloseBox();
         closeBox.setMargin(5, 5, 5, 5);
-        closeBox.addEventHandler(e -> _homePage.removeRecentFileUrl(recentFileUrl), Action);
+        closeBox.addEventHandler(e -> _homePage.removeRecentProjectUrl(recentFileUrl), Action);
 
         // Create recent file view and add children
         RowView recentFileView = new RowView();

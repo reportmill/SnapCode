@@ -39,18 +39,18 @@ public class WorkspacePaneUtils {
     /**
      * Opens any file URL.
      */
-    public static boolean openFileUrl(WorkspacePane workspacePane, WebURL fileUrl)
+    public static void openFileUrl(WorkspacePane workspacePane, WebURL fileUrl)
     {
         switch (fileUrl.getFileType()) {
 
             // Handle java/jepl
-            case "java": case "jepl": return openExternalSourceFile(workspacePane, fileUrl);
+            case "java": case "jepl": openExternalSourceFile(workspacePane, fileUrl); return;
 
             // Handle lesson
-            case "md": openLesson(workspacePane, fileUrl); return true;
+            case "md": openLesson(workspacePane, fileUrl); return;
 
             // Handle anything else: Try to open as project (zip, git, gfar, project dir)
-            default: return openProjectUrl(workspacePane, fileUrl);
+            default: openProjectUrl(workspacePane, fileUrl);
         }
     }
 
@@ -98,14 +98,14 @@ public class WorkspacePaneUtils {
     /**
      * Opens a source file.
      */
-    private static boolean openExternalSourceFile(WorkspacePane workspacePane, WebURL sourceFileURL)
+    private static void openExternalSourceFile(WorkspacePane workspacePane, WebURL sourceFileURL)
     {
         // Get source file - complain and return if not found
         WebFile sourceFile = sourceFileURL.getFile();
         if (sourceFile == null) {
             String msg = "Couldn't find sample for name: " + sourceFileURL.getFilename();
             DialogBox.showErrorDialog(workspacePane.getUI(), "Unknown Sample", msg);
-            return false;
+            return;
         }
 
         // Make sure workspace has temp project
@@ -121,12 +121,11 @@ public class WorkspacePaneUtils {
         WebFile newSourceFile = newFileTool.newSourceFileForExternalSourceFile(sourceFile);
         if (newSourceFile == null) {
             System.out.println("WorkspacePane.openSourceFile: Couldn't open source file: " + sourceFile);
-            return false;
+            return;
         }
 
         // Show source file
         ViewUtils.runLater(() -> workspacePane.openFile(newSourceFile));
-        return true;
     }
 
     /**

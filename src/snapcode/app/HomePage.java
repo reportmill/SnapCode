@@ -74,11 +74,11 @@ public class HomePage extends WebPage {
     }
 
     /**
-     * Removes recent file for given url.
+     * Removes recent project for given url.
      */
-    public void removeRecentFileUrl(WebURL recentFileUrl)
+    public void removeRecentProjectUrl(WebURL recentProjectUrl)
     {
-        RecentFiles.removeURL(recentFileUrl);
+        RecentFiles.removeURL(recentProjectUrl);
         _workspacePane.getPagePane().showHomePage();
     }
 
@@ -105,35 +105,50 @@ public class HomePage extends WebPage {
     }
 
     /**
+     * Opens project for given recent project URL address.
+     */
+    private void openProjectForRecentProjectUrlAddress(String urlAddr)
+    {
+        // Get recent project URL
+        WebURL recentProjectUrl = WebURL.getURL(urlAddr);
+        if (recentProjectUrl == null)
+            return;
+
+        // Open project URL
+        if (!WorkspacePaneUtils.openProjectUrl(_workspacePane, recentProjectUrl))
+            removeRecentProjectUrl(recentProjectUrl);
+    }
+
+    /**
+     * Opens project for given sample project URL address.
+     */
+    private void openProjectForSampleUrlAddress(String sampleUrlAddr)
+    {
+        // This would let us have github project with icon at reportmill (not currently used)
+        if (sampleUrlAddr.endsWith(".git") && sampleUrlAddr.contains("https://reportmill.com/SnapCode/Samples")) {
+            WebURL sampleUrl = WebURL.getURL(sampleUrlAddr); assert (sampleUrl != null);
+            sampleUrlAddr = "https://github.com/reportmill/" + sampleUrl.getFilename();
+        }
+
+        // Open URL
+        WebURL sampleUrl = WebURL.getURL(sampleUrlAddr);
+        WorkspacePaneUtils.openSamplesUrl(_workspacePane, sampleUrl);
+    }
+
+    /**
      * Called to resolve links.
      */
     protected void handleLinkClick(String urlAddr)
     {
         // Handle any link with "OpenRecent:..."
         if (urlAddr.startsWith("OpenRecent:")) {
-            String recentFileUrlAddr = urlAddr.substring("OpenRecent:".length());
-            WebURL recentFileUrl = WebURL.getURL(recentFileUrlAddr);
-            boolean didOpen = recentFileUrl != null && WorkspacePaneUtils.openFileUrl(_workspacePane, recentFileUrl);
-            if (!didOpen)
-                removeRecentFileUrl(recentFileUrl);
+            openProjectForRecentProjectUrlAddress(urlAddr.substring("OpenRecent:".length()));
             return;
         }
 
         // Handle any link with "Sample:..."
         if (urlAddr.startsWith("Sample:")) {
-
-            // Get URL address
-            String sampleUrlAddr = urlAddr.substring("Sample:".length());
-
-            // This would let us have github project with icon at reportmill (not currently used)
-            if (sampleUrlAddr.endsWith(".git") && sampleUrlAddr.contains("https://reportmill.com/SnapCode/Samples")) {
-                WebURL sampleUrl = WebURL.getURL(sampleUrlAddr); assert (sampleUrl != null);
-                sampleUrlAddr = "https://github.com/reportmill/" + sampleUrl.getFilename();
-            }
-
-            // Open URL
-            WebURL sampleUrl = WebURL.getURL(sampleUrlAddr);
-            WorkspacePaneUtils.openSamplesUrl(_workspacePane, sampleUrl);
+            openProjectForSampleUrlAddress(urlAddr.substring("Sample:".length()));
             return;
         }
 
