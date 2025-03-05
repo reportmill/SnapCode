@@ -232,6 +232,10 @@ public class WorkspacePaneUtils {
         if (!projectDir.getExists())
             WebUtils.copyFile(zipDirFile, SnapCodeUtils.getSnapCodeDir());
 
+        // Set remote Zip address
+        WebSite projectSite = projectDir.getURL().getAsSite();
+        VersionControlUtils.setRemoteSiteUrl(projectSite, zipURL);
+
         // Select good default file
         openProjectForProjectFile(workspacePane, projectDir);
         return true;
