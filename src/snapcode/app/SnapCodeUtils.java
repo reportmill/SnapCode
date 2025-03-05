@@ -2,6 +2,7 @@ package snapcode.app;
 import snap.util.FileUtils;
 import snap.util.SnapUtils;
 import snap.web.WebFile;
+import snap.web.WebSite;
 import snap.web.WebURL;
 import java.io.File;
 
@@ -39,6 +40,20 @@ public class SnapCodeUtils {
         WebURL projectDirUrl = snapCodeDirUrl.getChild(projectName);
         assert (projectDirUrl != null);
         return projectDirUrl.createFile(true);
+    }
+
+    /**
+     * Returns a SnapCode project site for given path.
+     */
+    public static WebSite getSnapCodeProjectSiteForNameOrPath(String projectPath)
+    {
+        // Get parent site
+        WebURL parentSiteURL = getSnapCodeDirURL();
+        WebSite parentSite = parentSiteURL.getSite();
+
+        // Get URL and site for project path
+        WebURL projURL = parentSite.getUrlForPath(projectPath);
+        return projURL.getAsSite();
     }
 
     /**

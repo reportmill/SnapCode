@@ -12,6 +12,7 @@ import java.io.Closeable;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -53,12 +54,13 @@ public class Project extends PropObject {
     private static final String Projects_Prop = "Projects";
 
     /**
-     * Creates a new Project for WebSite.
+     * Constructor for WebSite.
      */
     public Project(Workspace aWorkspace, WebSite aSite)
     {
         super();
         _workspace = aWorkspace;
+        _projects = Collections.emptyList();
 
         // Set Site
         setSite(aSite);
@@ -67,8 +69,9 @@ public class Project extends PropObject {
         _projFiles = new ProjectFiles(this);
         _projBuilder = new ProjectBuilder(this);
 
-        // Get child projects
-        _projects = getProjectsFromBuildFile();
+        // Open build file projects and add
+        List<Project> buildFileProjects = openBuildFileProjects();
+        buildFileProjects.forEach(this::addProject);
     }
 
     /**
@@ -165,7 +168,7 @@ public class Project extends PropObject {
     /**
      * Adds a project.
      */
-    public void addProject(Project aProj)
+    protected void addProject(Project aProj)
     {
         // If already set, just return
         if (_projects.contains(aProj)) return;
@@ -189,69 +192,14 @@ public class Project extends PropObject {
     }
 
     /**
-     * Returns a project for given path.
-     */
-    public Project getProjectForPath(String projectPath)
-    {
-        // Get parent site
-        WebSite projectSite = getSite();
-        WebURL parentSiteURL = projectSite.getURL();
-        WebSite parentSite = parentSiteURL.getSite();
-
-        // Get URL and site for project path
-        WebURL projURL = parentSite.getUrlForPath(projectPath);
-        WebSite projSite = projURL.getAsSite();
-
-        // Get Project
-        Workspace workspace = getWorkspace();
-        return workspace.getProjectForSite(projSite);
-    }
-
-    /**
-     * Adds a dependent project.
-     */
-    public void addProjectForPath(String aPath)
-    {
-        // Get project path
-        String projPath = aPath;
-        if (!projPath.startsWith("/"))
-            projPath = '/' + projPath;
-
-        // Get project
-        Project proj = getProjectForPath(aPath);
-        if (proj == null)
-            return;
-        addProject(proj);
-
-        // Add to BuildFile
-        BuildFile buildFile = getBuildFile();
-        buildFile.addProjectDependencyForProjectPath(projPath);
-    }
-
-    /**
      * Returns the projects this project depends on.
      */
-    private List<Project> getProjectsFromBuildFile()
+    private List<Project> openBuildFileProjects()
     {
-        // Create list of projects from BuildFile.ProjectPaths
+        Workspace workspace = getWorkspace();
         BuildFile buildFile = getBuildFile();
         String[] projPaths = buildFile.getProjectDependenciesNames();
-        List<Project> projs = new ArrayList<>();
-
-        // Iterate over project paths
-        for (String projPath : projPaths) {
-
-            // Get Project
-            Project proj = getProjectForPath(projPath);
-
-            // Add to list
-            List<Project> childProjects = proj.getProjects();
-            childProjects.forEach(childProj -> ListUtils.addUnique(projs, childProj));
-            ListUtils.addUnique(projs, proj);
-        }
-
-        // Return
-        return projs;
+        return ArrayUtils.mapToList(projPaths, projPath -> workspace.openProjectForPath(projPath));
     }
 
     /**

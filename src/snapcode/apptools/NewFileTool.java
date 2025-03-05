@@ -6,7 +6,6 @@ import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.viewx.FilePanel;
 import snap.viewx.FormBuilder;
-import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.app.JavaPage;
@@ -150,16 +149,10 @@ public class NewFileTool extends WorkspaceTool {
     {
         // Create new project
         WebSite projectSite = newProjectFile.getURL().getAsSite();
-        Project newProject = _workspace.getProjectForSite(projectSite);
+        Project newProject = _workspace.openProjectForSite(projectSite);
 
         // Configure to include SnapKit
         newProject.getBuildFile().setIncludeSnapKitRuntime(true);
-
-        // Add project
-        _workspace.addProject(newProject);
-
-        // Add project to recent files
-        RecentFiles.addURL(newProjectFile.getURL());
     }
 
     /**

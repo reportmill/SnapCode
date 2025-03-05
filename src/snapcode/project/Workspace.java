@@ -71,7 +71,7 @@ public class Workspace extends PropObject {
         // Remove all projects
         List<Project> projects = getProjects();
         for (Project project : projects)
-            removeProject(project);
+            closeProject(project);
     }
 
     /**
@@ -80,9 +80,9 @@ public class Workspace extends PropObject {
     public List<Project> getProjects()  { return _projects; }
 
     /**
-     * Adds a project.
+     * Opens given project in this workspace.
      */
-    public void addProject(Project aProj)
+    public void openProject(Project aProj)
     {
         // If already present, just return
         if (_projects.contains(aProj)) return;
@@ -98,14 +98,34 @@ public class Workspace extends PropObject {
 
         // Add dependent projects
         List<Project> childProjects = aProj.getProjects();
-        for (Project proj : childProjects)
-            addProject(proj);
+        childProjects.forEach(this::openProject);
+    }
+
+    /**
+     * Opens a project for given site.
+     */
+    public Project openProjectForSite(WebSite aSite)
+    {
+        Project proj = Project.getProjectForSite(aSite);
+        if (proj == null)
+            proj = new Project(this, aSite);
+        openProject(proj);
+        return proj;
+    }
+
+    /**
+     * Opens a project for given project path.
+     */
+    public Project openProjectForPath(String projectPath)
+    {
+        WebSite projSite = SnapCodeUtils.getSnapCodeProjectSiteForNameOrPath(projectPath);
+        return openProjectForSite(projSite);
     }
 
     /**
      * Removes a project.
      */
-    public void removeProject(Project aProj)
+    public void closeProject(Project aProj)
     {
         int index = _projects.indexOf(aProj);
         if (index < 0)
@@ -222,35 +242,6 @@ public class Workspace extends PropObject {
     }
 
     /**
-     * Returns a project for given site.
-     */
-    public Project getProjectForSite(WebSite aSite)
-    {
-        Project proj = Project.getProjectForSite(aSite);
-        if (proj == null)
-            proj = createProjectForSite(aSite);
-        return proj;
-    }
-
-    /**
-     * Adds a project for given site.
-     */
-    public Project addProjectForSite(WebSite aSite)
-    {
-        Project proj = getProjectForSite(aSite);
-        addProject(proj);
-        return proj;
-    }
-
-    /**
-     * Creates a project for given site.
-     */
-    protected Project createProjectForSite(WebSite aSite)
-    {
-        return new Project(this, aSite);
-    }
-
-    /**
      * Saves all unsaved files.
      */
     public void saveAllFiles()
@@ -291,10 +282,10 @@ public class Workspace extends PropObject {
     /**
      * Adds a project with given repo URL.
      */
-    public TaskRunner<Boolean> addProjectForRepoURL(WebURL repoURL)
+    public TaskRunner<Boolean> openProjectForRepoURL(WebURL repoURL)
     {
         TaskMonitor taskMonitor = new TaskMonitor("Checkout " + repoURL.getString());
-        TaskRunner<Boolean> taskRunner = new TaskRunner<>(() -> addProjectForRepoURLImpl(repoURL, taskMonitor));
+        TaskRunner<Boolean> taskRunner = new TaskRunner<>(() -> openProjectForRepoURLImpl(repoURL, taskMonitor));
         taskRunner.setMonitor(taskMonitor);
         taskRunner.start();
         return taskRunner;
@@ -303,7 +294,7 @@ public class Workspace extends PropObject {
     /**
      * Adds a project with given repo URL.
      */
-    private boolean addProjectForRepoURLImpl(WebURL repoURL, TaskMonitor taskMonitor)
+    private boolean openProjectForRepoURLImpl(WebURL repoURL, TaskMonitor taskMonitor)
     {
         // Hack to support github repos in CheerpJ
         //if (repoURL.getFileType().equals("git") && SnapUtils.isWebVM)
@@ -326,7 +317,7 @@ public class Workspace extends PropObject {
         if (projSite.getExists()) {
             WebFile projRootDir = projSite.getRootDir();
             if (projRootDir.getFileCount() > 0) {
-                addProjectForSite(projSite);
+                openProjectForSite(projSite);
                 return true;
             }
         }
@@ -335,7 +326,7 @@ public class Workspace extends PropObject {
         VersionControlUtils.setRemoteSiteUrl(projSite, repoURL);
         VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
         TaskRunner<Boolean> checkoutRunner = versionControl.checkout();
-        checkoutRunner.setOnSuccess(obj -> addProjectForSite(projSite));
+        checkoutRunner.setOnSuccess(obj -> openProjectForSite(projSite));
         checkoutRunner.setOnFailure(e -> e.printStackTrace());
 
         // Attach checkout task monitor to given task monitor

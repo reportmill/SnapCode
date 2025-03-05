@@ -64,7 +64,7 @@ public class WorkspacePaneUtils {
         List<Project> projects = workspace.getProjects();
         for (Project project : projects) {
             if (!project.getName().equals("TempProj"))
-                workspace.removeProject(project);
+                workspace.closeProject(project);
         }
 
         // Open sample URL
@@ -164,9 +164,9 @@ public class WorkspacePaneUtils {
         WebFile projectDir = projectFile.isDir() ? projectFile : projectFile.getParent();
         WebSite projectSite = projectDir.getURL().getAsSite();
 
-        // Open project: Get project site and add to workspace
+        // Open project: Get project site and open in workspace
         Workspace workspace = workspacePane.getWorkspace();
-        workspace.addProjectForSite(projectSite);
+        workspace.openProjectForSite(projectSite);
     }
 
     /**
@@ -244,7 +244,7 @@ public class WorkspacePaneUtils {
     {
         // Add project for repo URL
         Workspace workspace = workspacePane.getWorkspace();
-        TaskRunner<Boolean> checkoutRunner = workspace.addProjectForRepoURL(repoURL);
+        TaskRunner<Boolean> checkoutRunner = workspace.openProjectForRepoURL(repoURL);
 
         // After add project, trigger build and show files
         //checkoutRunner.setOnSuccess(val -> openProjectForRepoUrlFinished(workspacePane, repoURL));

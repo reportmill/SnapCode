@@ -234,7 +234,7 @@ public class WorkspacePane extends ViewOwner {
 
         _clearingWorkspace = true;
         for (Project project : projects)
-            workspace.removeProject(project);
+            workspace.closeProject(project);
         _clearingWorkspace = false;
     }
 

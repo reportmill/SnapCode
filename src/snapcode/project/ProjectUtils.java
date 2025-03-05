@@ -265,7 +265,7 @@ public class ProjectUtils {
             tempProjRootDir.delete();
 
         // Create new temp project
-        tempProj = workspace.addProjectForSite(tempProjSite);
+        tempProj = workspace.openProjectForSite(tempProjSite);
         tempProj.getBuildFile().setIncludeSnapKitRuntime(true);
         tempProj.getBuildFile().writeFile();
 
