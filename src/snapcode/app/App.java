@@ -129,7 +129,7 @@ public class App {
         if (arg0.startsWith("sample:")) {
             WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
             String sampleName = arg0.substring("sample:".length());
-            WorkspacePaneUtils.openSampleForName(workspacePane, sampleName);
+            ViewUtils.runLater(() -> WorkspacePaneUtils.openSampleForName(workspacePane, sampleName));
             return true;
         }
 
