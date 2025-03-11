@@ -5,7 +5,6 @@ package snapcode.project;
 import snap.props.PropObject;
 import snap.util.ListUtils;
 import snap.util.TaskMonitor;
-import snap.util.TaskRunner;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
@@ -282,7 +281,7 @@ public class Workspace extends PropObject {
     /**
      * Opens a project with given repo URL.
      */
-    public boolean openProjectForRepoUrl(WebURL repoURL, TaskMonitor taskMonitor)
+    public boolean openProjectForRepoUrl(WebURL repoURL, TaskMonitor taskMonitor) throws Exception
     {
         // Hack to support github repos in CheerpJ
         //if (repoURL.getFileType().equals("git") && SnapUtils.isWebVM) repoURL = GitHubUtils.downloadGithubZipFile(repoURL);
@@ -309,30 +308,19 @@ public class Workspace extends PropObject {
             }
         }
 
-        // Checkout project for URL
+        // Get version control
         VersionControlUtils.setRemoteSiteUrl(projSite, repoURL);
         VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
-        TaskRunner<Boolean> checkoutRunner = versionControl.checkout();
-        checkoutRunner.setOnSuccess(obj -> openProjectForRepoUrlFinished(projSite));
-        checkoutRunner.setOnFailure(e -> e.printStackTrace());
 
-        // Attach checkout task monitor to given task monitor
-        taskMonitor.setMonitor(checkoutRunner.getMonitor());
+        // Checkout project
+        boolean checkoutResult = versionControl.checkout(taskMonitor);
+        if (!checkoutResult)
+            throw new RuntimeException("Checkout failed");
 
-        // Wait till done
-        boolean result = checkoutRunner.awaitResult();
-        if (checkoutRunner.getException() != null)
-            throw new RuntimeException(checkoutRunner.getException().getMessage(), checkoutRunner.getException());
+        // Open project
+        openProjectForSite(projSite);
 
         // Return
-        return result;
-    }
-
-    /**
-     * Called when openProjectForRepoURL() finishes.
-     */
-    private void openProjectForRepoUrlFinished(WebSite projSite)
-    {
-        openProjectForSite(projSite);
+        return checkoutResult;
     }
 }

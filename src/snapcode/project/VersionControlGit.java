@@ -86,7 +86,7 @@ public class VersionControlGit extends VersionControl {
      * Load all remote files into project directory.
      */
     @Override
-    protected boolean checkoutImpl(TaskMonitor aTM) throws Exception
+    public boolean checkout(TaskMonitor taskMonitor) throws Exception
     {
         // Make sure local site exists
         WebSite localSite = getLocalSite();
@@ -108,8 +108,9 @@ public class VersionControlGit extends VersionControl {
         cloneCmd.setCredentialsProvider(GitUtils.getCredentialsProvider());
 
         // Wrap TaskMonitor in ProgressMonitor
-        if (aTM != null)
-            cloneCmd.setProgressMonitor(GitUtils.getProgressMonitor(new TaskMonitor(System.out)));
+        if (taskMonitor == null)
+            taskMonitor = new TaskMonitor(System.out);
+        cloneCmd.setProgressMonitor(GitUtils.getProgressMonitor(taskMonitor));
 
         // Run clone and move files to site directory
         try {
@@ -141,11 +142,11 @@ public class VersionControlGit extends VersionControl {
      * Override to do commit.
      */
     @Override
-    protected boolean commitFilesImpl(List<WebFile> theFiles, String aMessage, TaskMonitor aTM) throws Exception
+    public boolean commitFiles(List<WebFile> theFiles, String aMessage, TaskMonitor taskMonitor) throws Exception
     {
         GitDir gitDir = getGitDir();
         gitDir.commitFiles(theFiles, aMessage);
-        gitDir.push(aTM);
+        gitDir.push(taskMonitor);
 
         // Clear file status
         theFiles.forEach(this::clearFileStatus);
@@ -173,10 +174,10 @@ public class VersionControlGit extends VersionControl {
      * Override to merge.
      */
     @Override
-    protected boolean updateFilesImpl(List<WebFile> theLocalFiles, TaskMonitor aTM) throws Exception
+    public boolean updateFiles(List<WebFile> theLocalFiles, TaskMonitor taskMonitor) throws Exception
     {
         GitDir gitDir = getGitDir();
-        gitDir.merge(aTM);
+        gitDir.merge(taskMonitor);
         return true;
     }
 
@@ -210,7 +211,7 @@ public class VersionControlGit extends VersionControl {
      * Delete VCS support files from project directory.
      */
     @Override
-    public void disconnect(TaskMonitor aTM) throws Exception
+    public void disconnect(TaskMonitor taskMonitor) throws Exception
     {
         GitDir gitDir = getGitDir();
         gitDir.deleteDir();
