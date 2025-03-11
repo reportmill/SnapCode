@@ -417,7 +417,7 @@ public class Project extends PropObject {
     /**
      * Called when file added.
      */
-    public void fileAdded(WebFile aFile)
+    public void handleSiteFileAdded(WebFile aFile)
     {
         // Add build file
         _projBuilder.addBuildFile(aFile, false);
@@ -426,7 +426,7 @@ public class Project extends PropObject {
     /**
      * Called when file removed.
      */
-    public void fileRemoved(WebFile aFile)
+    public void handleSiteFileRemoved(WebFile aFile)
     {
         // Remove build files
         _projBuilder.removeBuildFile(aFile);
@@ -442,7 +442,7 @@ public class Project extends PropObject {
     /**
      * Called when file saved.
      */
-    public void fileSaved(WebFile aFile)
+    public void handleSiteFileSaved(WebFile aFile)
     {
         // If plain file, add as BuildFile
         if (aFile.isFile())

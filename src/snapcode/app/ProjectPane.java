@@ -179,13 +179,13 @@ public class ProjectPane extends ViewOwner {
         // Handle Saved property: Call fileAdded or fileSaved
         if (propName == WebFile.Exists_Prop) {
             if ((Boolean) aPC.getNewValue())
-                fileAdded(file);
-            else fileRemoved(file);
+                handleSiteFileAdded(file);
+            else handleSiteFileRemoved(file);
         }
 
         // Handle LastModTime property: Call file saved
         if (propName == WebFile.LastModTime_Prop && file.getExists())
-            fileSaved(file);
+            handleSiteFileSaved(file);
 
         // Forward to WorkspacePane
         _workspacePane.handleSiteFileChange(aPC);
@@ -194,7 +194,7 @@ public class ProjectPane extends ViewOwner {
     /**
      * Called when file added to project.
      */
-    private void fileAdded(WebFile aFile)
+    private void handleSiteFileAdded(WebFile aFile)
     {
         // Forward to VersionControl
         if (_versionControlTool != null)
@@ -204,13 +204,13 @@ public class ProjectPane extends ViewOwner {
         if (_project.getBuildDir().containsFile(aFile)) return;
 
         // Add file to project
-        _project.fileAdded(aFile);
+        _project.handleSiteFileAdded(aFile);
     }
 
     /**
      * Called when file removed from project.
      */
-    private void fileRemoved(WebFile aFile)
+    private void handleSiteFileRemoved(WebFile aFile)
     {
         // Forward to VersionControl
         if (_versionControlTool != null)
@@ -220,13 +220,13 @@ public class ProjectPane extends ViewOwner {
         if (_project.getBuildDir().containsFile(aFile)) return;
 
         // Remove from project
-        _project.fileRemoved(aFile);
+        _project.handleSiteFileRemoved(aFile);
     }
 
     /**
      * Called when file saved in project.
      */
-    private void fileSaved(WebFile aFile)
+    private void handleSiteFileSaved(WebFile aFile)
     {
         // If BuildDir file, just return
         if (_project.getBuildDir().containsFile(aFile))
@@ -237,7 +237,7 @@ public class ProjectPane extends ViewOwner {
             _versionControlTool.fileSaved(aFile);
 
         // Notify saved and build workspace
-        _project.fileSaved(aFile);
+        _project.handleSiteFileSaved(aFile);
     }
 
     /**
