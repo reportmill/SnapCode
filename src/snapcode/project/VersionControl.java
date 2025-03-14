@@ -339,7 +339,7 @@ public class VersionControl {
         }
 
         // Handle directory: Recurse for child files
-        WebFile[] childFiles = aFile.getFiles();
+        List<WebFile> childFiles = aFile.getFiles();
         for (WebFile childFile : childFiles)
             findModifiedFiles(childFile, otherSite, modifiedFiles);
 
@@ -358,7 +358,7 @@ public class VersionControl {
             return;
 
         // Iterate over child files and recurse for missing files
-        WebFile[] otherDirChildFiles = otherDir.getFiles();
+        List<WebFile> otherDirChildFiles = otherDir.getFiles();
         WebSite fileSite = dirFile.getSite();
 
         // Iterate over child files and recurse for missing files
@@ -413,8 +413,8 @@ public class VersionControl {
 
         // If directory, iterate over child files and if any ChangedLocal, return ChangedLocal, otherwise return Identical
         if (aFile.isDir()) {
-            WebFile[] childFiles = aFile.getFiles();
-            if (ArrayUtils.hasMatch(childFiles, file -> isFileModified(file)))
+            List<WebFile> childFiles = aFile.getFiles();
+            if (ListUtils.hasMatch(childFiles, file -> isFileModified(file)))
                 return FileStatus.Modified;
             return FileStatus.Identical;
         }

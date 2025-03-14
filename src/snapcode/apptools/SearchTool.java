@@ -117,7 +117,7 @@ public class SearchTool extends WorkspaceTool {
         // Handle SearchText
         if (anEvent.equals("SearchText")) {
             String string = anEvent.getStringValue();
-            if (string != null && string.length() > 0)
+            if (string != null && !string.isEmpty())
                 search(string);
             else _search = null;
         }
@@ -259,7 +259,7 @@ public class SearchTool extends WorkspaceTool {
         if (aFile.isDir()) {
             if (aFile == _workspacePane.getBuildDir())
                 return;
-            WebFile[] dirFiles = aFile.getFiles();
+            List<WebFile> dirFiles = aFile.getFiles();
             for (WebFile file : dirFiles)
                 searchReference(file, theResults, aDecl);
         }
@@ -333,7 +333,7 @@ public class SearchTool extends WorkspaceTool {
             if (aFile == _workspacePane.getBuildDir())
                 return;
 
-            WebFile[] dirFiles = aFile.getFiles();
+            List<WebFile> dirFiles = aFile.getFiles();
             for (WebFile file : dirFiles)
                 searchDeclaration(file, theResults, aDecl);
         }

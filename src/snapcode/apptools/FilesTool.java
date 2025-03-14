@@ -175,7 +175,7 @@ public class FilesTool extends WorkspaceTool {
             WebFile newDir = dirSite.createFileForPath(dirPath, true);
 
             // Recurse for source dir files
-            WebFile[] dirFiles = sourceFile.getFiles();
+            List<WebFile> dirFiles = sourceFile.getFiles();
             for (WebFile file : dirFiles)
                 if (!addFileToDirectory(newDir, file))
                     return false;

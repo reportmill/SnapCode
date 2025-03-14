@@ -9,6 +9,7 @@ import snapcode.project.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 /**
  * This class imports a greenfoot gfar file.
@@ -97,10 +98,10 @@ public class GreenImport {
 
         // Get greenfoot archive file site root dir files for greenfoot archive
         WebFile gfarRootDir = gfarSite.getRootDir();
-        WebFile[] gfarRootFiles = gfarRootDir.getFiles();
+        List<WebFile> gfarRootFiles = gfarRootDir.getFiles();
 
         // Return the first file in top level of greenfoot archive zip file that starts with letter
-        return ArrayUtils.findMatch(gfarRootFiles, file -> Character.isLetter(file.getName().charAt(0)));
+        return ListUtils.findMatch(gfarRootFiles, file -> Character.isLetter(file.getName().charAt(0)));
     }
 
     /**
@@ -159,8 +160,8 @@ public class GreenImport {
      */
     private static void copyDirFileFilesToDir(WebFile dirFile, WebFile toDir)
     {
-        WebFile[] dirFiles = dirFile.getFiles();
-        WebFile[] nonClassFiles = ArrayUtils.filter(dirFiles, file -> !isIgnoreFile(file));
+        List<WebFile> dirFiles = dirFile.getFiles();
+        List<WebFile> nonClassFiles = ListUtils.filter(dirFiles, file -> !isIgnoreFile(file));
         for (WebFile file : nonClassFiles)
             copyFileToDir(file, toDir);
     }

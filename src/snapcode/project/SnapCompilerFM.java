@@ -224,7 +224,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         if (dirFile == null)
             return;
 
-        WebFile[] dirFiles = dirFile.getFiles();
+        List<WebFile> dirFiles = dirFile.getFiles();
         for (WebFile file : dirFiles) {
             if (file.getFileType().equals(fileType)) {
                 JavaFileObject javaFileObject = getJavaFileObject(file);

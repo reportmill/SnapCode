@@ -183,7 +183,7 @@ public class BuildIssues extends PropObject {
         }
 
         // Handle directory
-        WebFile[] dirFiles = aFile.getFiles();
+        List<WebFile> dirFiles = aFile.getFiles();
         boolean isPackage = isPackage(aFile);
         BuildIssue.Kind buildStatus = null;
 

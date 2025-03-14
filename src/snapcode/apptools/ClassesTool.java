@@ -140,7 +140,7 @@ public class ClassesTool extends WorkspaceTool {
      */
     private void findSourceFiles(WebFile aDir, List<WebFile> theFiles)
     {
-        WebFile[] dirFiles = aDir.getFiles();
+        List<WebFile> dirFiles = aDir.getFiles();
 
         for (WebFile file : dirFiles) {
             if (file.getFileType().equals("java"))

@@ -89,7 +89,7 @@ public class ClassTree {
     private void findChildNodesForDirFile(WebFile dirFile, List<ClassTreeNode> classTreeNodes)
     {
         // Get directory files
-        WebFile[] dirFiles = dirFile.getFiles();
+        List<WebFile> dirFiles = dirFile.getFiles();
 
         // Iterate over dir files and add to ClassFiles or PackageDirs
         for (WebFile file : dirFiles) {

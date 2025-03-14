@@ -231,7 +231,7 @@ public class GreenfootPage extends WebPage {
      */
     private static void findSourceFilesForDir(WebFile aDir, List<WebFile> theFiles)
     {
-        WebFile[] dirFiles = aDir.getFiles();
+        List<WebFile> dirFiles = aDir.getFiles();
 
         for (WebFile file : dirFiles) {
             if (file.getFileType().equals("java"))

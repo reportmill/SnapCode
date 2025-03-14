@@ -135,7 +135,7 @@ public class FileTreeFile implements Comparable<FileTreeFile> {
     {
         if (_type == FileType.SOURCE_DIR)
             return getSourceDirChildFiles();
-        return _file.getFiles();
+        return _file.getFilesArray();
     }
 
     /**

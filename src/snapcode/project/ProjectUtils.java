@@ -2,10 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import snap.util.ArrayUtils;
-import snap.util.FileUtils;
-import snap.util.SnapUtils;
-import snap.util.StringUtils;
+import snap.util.*;
 import snap.web.*;
 import java.io.File;
 import java.util.List;
@@ -72,7 +69,7 @@ public class ProjectUtils {
                 return false;
 
             // If dir contains build file, src dir, or src file, return true
-            WebFile[] dirFiles = aFile.getFiles();
+            List<WebFile> dirFiles = aFile.getFiles();
             String[] projectFileNames = { "build.snapcode", "src" };
             for (WebFile file : dirFiles) {
                 if (ArrayUtils.contains(projectFileNames, file.getName()) || isSourceFile(file))
@@ -96,8 +93,8 @@ public class ProjectUtils {
 
         // Look for 'readme' file
         WebFile projRootDir = aProj.getRootDir();
-        WebFile[] projRootFiles = projRootDir.getFiles();
-        WebFile readMeFile = ArrayUtils.findMatch(projRootFiles, file -> file.getSimpleName().equalsIgnoreCase("readme"));
+        List<WebFile> projRootFiles = projRootDir.getFiles();
+        WebFile readMeFile = ListUtils.findMatch(projRootFiles, file -> file.getSimpleName().equalsIgnoreCase("readme"));
         if (readMeFile != null)
             return readMeFile;
 

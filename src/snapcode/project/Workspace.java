@@ -266,7 +266,7 @@ public class Workspace extends PropObject {
                 return;
 
             // Iterate over child files and recurse
-            WebFile[] dirFiles = aFile.getFiles();
+            List<WebFile> dirFiles = aFile.getFiles();
             for (WebFile file : dirFiles)
                 saveAllFilesImpl(project, file);
         }

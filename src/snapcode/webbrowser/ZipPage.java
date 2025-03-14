@@ -7,8 +7,6 @@ import snap.view.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.util.FileIcons;
-
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,7 +34,7 @@ public class ZipPage extends WebPage {
     public WebFile[] getFiles()
     {
         WebSite site = getFile().getURL().getAsSite();
-        return site.getRootDir().getFiles();
+        return site.getRootDir().getFilesArray();
     }
 
     /**
@@ -79,36 +77,19 @@ public class ZipPage extends WebPage {
      */
     public static class FileTreeResolver extends TreeResolver<WebFile> {
 
-        /**
-         * Returns the parent of given item.
-         */
-        public WebFile getParent(WebFile anItem)
-        {
-            return anItem.getParent();
-        }
+        // Returns the parent of given item.
+        public WebFile getParent(WebFile anItem)  { return anItem.getParent(); }
 
         // Return whether file is directory
-        public boolean isParent(WebFile anObj)
-        {
-            return anObj.isDir();
-        }
+        public boolean isParent(WebFile anObj)  { return anObj.isDir(); }
 
         // Return child files
-        public List<WebFile> getChildren(WebFile aParent)
-        {
-            return Arrays.asList(aParent.getFiles());
-        }
+        public List<WebFile> getChildren(WebFile aParent)  { return aParent.getFiles(); }
 
         // Return child file name
-        public String getText(WebFile aFile)
-        {
-            return aFile.getName();
-        }
+        public String getText(WebFile aFile)  { return aFile.getName(); }
 
         // Return child file icon
-        public Image getImage(WebFile aFile)
-        {
-            return FileIcons.getFileIconImage(aFile);
-        }
+        public Image getImage(WebFile aFile)  { return FileIcons.getFileIconImage(aFile); }
     }
 }

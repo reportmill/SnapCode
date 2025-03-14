@@ -6,6 +6,7 @@ import snap.util.ArrayUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This class handles building for a project.
@@ -99,13 +100,13 @@ public class ProjectBuilder {
     private void removeBuildFiles(WebFile aDir)
     {
         // Get directory files
-        WebFile[] dirFiles = aDir.getFiles();
+        List<WebFile> dirFiles = aDir.getFiles();
 
         // Iterate over files and remove class files
-        for (int i = dirFiles.length - 1; i >= 0; i--) {
+        for (int i = dirFiles.size() - 1; i >= 0; i--) {
 
             // Handle Class file
-            WebFile file = dirFiles[i];
+            WebFile file = dirFiles.get(i);
             if (file.getFileType().equals("class")) {
                 try { file.delete(); }
                 catch (Exception e) { throw new RuntimeException(e); }

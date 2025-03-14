@@ -208,7 +208,7 @@ public class ProjectFiles {
 
         // Get Package files
         WebFile pkgDir = classFile.getParent();
-        WebFile[] pkgFiles = pkgDir.getFiles();
+        WebFile[] pkgFiles = pkgDir.getFilesArray();
 
         // Return inner class files (start with 'class_name$' and end with '.class')
         String classNamePrefix = classFile.getSimpleName() + '$';

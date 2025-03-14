@@ -1,10 +1,9 @@
 package snapcode.project;
 import javakit.resolver.JavaClass;
-import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.web.WebFile;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Some utility methods for Workspace.
@@ -58,8 +57,8 @@ public class WorkspaceUtils {
     {
         // Handle dir: Recurse
         if (searchFile.isDir()) {
-            WebFile[] dirFiles = searchFile.getFiles();
-            Stream.of(dirFiles).forEach(file -> findJavaFilesDependentOnClass(javaClass, file, dependentFiles));
+            List<WebFile> dirFiles = searchFile.getFiles();
+            dirFiles.forEach(file -> findJavaFilesDependentOnClass(javaClass, file, dependentFiles));
         }
 
         // Handle Java file: If isDependentOnClass() add to list
@@ -83,8 +82,8 @@ public class WorkspaceUtils {
         // Look for read me
         for (Project project : projects) {
             WebFile projRootDir = project.getSite().getRootDir();
-            WebFile[] projRootFiles = projRootDir.getFiles();
-            WebFile readMeFile = ArrayUtils.findMatch(projRootFiles, file -> file.getSimpleName().equalsIgnoreCase("readme"));
+            List<WebFile> projRootFiles = projRootDir.getFiles();
+            WebFile readMeFile = ListUtils.findMatch(projRootFiles, file -> file.getSimpleName().equalsIgnoreCase("readme"));
             if (readMeFile != null)
                 return readMeFile;
         }
@@ -103,7 +102,7 @@ public class WorkspaceUtils {
         for (Project project : projects) {
             WebFile srcDir = project.getSourceDir();
             if (srcDir.getFileCount() > 0) {
-                WebFile srcFile = srcDir.getFiles()[0];
+                WebFile srcFile = srcDir.getFiles().get(0);
                 return srcFile;
             }
         }
