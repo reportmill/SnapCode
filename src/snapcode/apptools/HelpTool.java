@@ -67,7 +67,7 @@ public class HelpTool extends WorkspaceTool {
         // If UI is set, update
         if (_topicListView != null) {
             List<HelpSection> sections = _helpFile.getSections();
-            _topicListView.setItemsList(sections);
+            _topicListView.setItems(sections);
             HelpSection selSection = !sections.isEmpty() ? sections.get(0) : null;
             setSelSection(selSection);
             _topicListView.setSelItem(selSection);
@@ -132,7 +132,7 @@ public class HelpTool extends WorkspaceTool {
         // Get HelpSections and set in TopicListView
         HelpFile helpFile = getHelpFile();
         List<HelpSection> sections = helpFile.getSections();
-        _topicListView.setItemsList(sections);
+        _topicListView.setItems(sections);
 
         // If not lesson, hide ProgressTools
         if (!isLesson())

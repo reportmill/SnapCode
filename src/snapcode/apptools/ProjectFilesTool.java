@@ -67,7 +67,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         _rootFiles = null;
         resetLater();
 
-        if (_filesTree != null && _filesTree.getItemsList().isEmpty())
+        if (_filesTree != null && _filesTree.getItems().isEmpty())
             ViewUtils.runLater(this::showRootProject);
     }
 
@@ -79,7 +79,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         FileTreeFile[] rootFiles = getRootFiles();
         if (rootFiles.length > 0)
             _filesTree.expandItem(rootFiles[0]);
-        List<FileTreeFile> filesTreeFiles = _filesTree.getItemsList();
+        List<FileTreeFile> filesTreeFiles = _filesTree.getItems();
         if (filesTreeFiles.size() > 1)
             _filesTree.expandItem(filesTreeFiles.get(1));
     }
@@ -211,7 +211,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         // Update FilesList
         List<WebFile> openFiles = _pagePane.getOpenFiles();
         List<FileTreeFile> treeFiles = ListUtils.map(openFiles, openFile -> getTreeFile(openFile));
-        _filesList.setItemsList(treeFiles);
+        _filesList.setItems(treeFiles);
         _filesList.setSelItem(selTreeFile);
     }
 

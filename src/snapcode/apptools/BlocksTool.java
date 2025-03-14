@@ -9,6 +9,7 @@ import snap.geom.Rect;
 import snap.gfx.Image;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.view.*;
 import snapcode.app.JavaPage;
 import snapcode.app.PagePane;
@@ -171,7 +172,7 @@ public class BlocksTool extends WorkspaceTool {
         // Get DirectoryListView and configure
         ListView<String> directoryListView = getView("DirectoryListView", ListView.class);
         directoryListView.setFocusWhenPressed(false);
-        directoryListView.setItems(new String[] { "Methods", "Conditionals" });
+        directoryListView.setItems(ListUtils.of("Methods", "Conditionals"));
         directoryListView.setSelIndex(0);
 
         // Create conditional statement block views and add to ConditionalBlocksColView

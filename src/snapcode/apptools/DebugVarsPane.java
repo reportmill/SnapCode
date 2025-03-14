@@ -80,7 +80,7 @@ public class DebugVarsPane extends WorkspaceTool {
         if (_resetVarTable) {
             _resetVarTable = false;
             List vitems = createVarItems();
-            _varTree.setItemsList(vitems);
+            _varTree.setItems(vitems);
         }
 
         // Update VarText
