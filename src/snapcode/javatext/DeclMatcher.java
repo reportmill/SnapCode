@@ -29,8 +29,6 @@ public class DeclMatcher {
     public static final String[] COMMON_PACKAGES = {"java.util", "java.lang", "java.io", "snap.view", "snap.gfx", "snap.geom", "snap.util"};
 
     // Constant for empty members
-    private static final JavaField[] EMPTY_FIELDS_ARRAY = new JavaField[0];
-    private static final JavaMember[] EMPTY_MEMBERS_ARRAY = new JavaMember[0];
     private static int LIMIT = 2;
 
     /**
@@ -137,36 +135,16 @@ public class DeclMatcher {
      */
     public JavaMember[] getMembersForClass(JavaClass aClass, boolean staticOnly)
     {
-        JavaMember[] matchingMembers = EMPTY_MEMBERS_ARRAY;
-
-        // Look for matching fields
-        JavaField[] matchingFields = getFieldsForClass(aClass, staticOnly);
-        if (matchingFields.length > 0)
-            matchingMembers = ArrayUtils.addAll(matchingMembers, matchingFields);
-
-        // Add matching methods
-        JavaMember[] matchingMethods = getMethodsForClass(aClass, staticOnly);
-        if (matchingMethods.length > 0)
-            matchingMembers = ArrayUtils.addAll(matchingMembers, matchingMethods);
-
-        // Return
-        return matchingMembers;
+        Set<JavaMember> matchingMembers = new HashSet<>();
+        findFieldsForClass(aClass, staticOnly, matchingMembers);
+        findMethodsForClass(aClass, staticOnly, matchingMembers);
+        return matchingMembers.toArray(new JavaMember[0]);
     }
 
     /**
      * Returns matching fields for given class (with option for static only).
      */
-    public JavaField[] getFieldsForClass(JavaClass aClass, boolean staticOnly)
-    {
-        Set<JavaField> matchingFields = new HashSet<>();
-        findFieldsForClass(aClass, staticOnly, matchingFields);
-        return matchingFields.toArray(new JavaField[0]);
-    }
-
-    /**
-     * Returns matching fields for given class (with option for static only).
-     */
-    private void findFieldsForClass(JavaClass aClass, boolean staticOnly, Set<JavaField> matchingFields)
+    private void findFieldsForClass(JavaClass aClass, boolean staticOnly, Set<JavaMember> matchingFields)
     {
         // Add declared fields for class
         JavaField[] fields = aClass.getDeclaredFields();
@@ -189,35 +167,26 @@ public class DeclMatcher {
     /**
      * Returns methods that match given matcher.
      */
-    public JavaMethod[] getMethodsForClass(JavaClass aClass, boolean staticOnly)
+    private void findMethodsForClass(JavaClass aClass, boolean staticOnly, Set<JavaMember> matchingMethods)
     {
-        Set<JavaMethod> matchingMethods = new HashSet<>();
-        findMethodsForClass(aClass, staticOnly, matchingMethods);
-        return matchingMethods.toArray(new JavaMethod[0]);
-    }
-
-    /**
-     * Returns methods that match given matcher.
-     */
-    private void findMethodsForClass(JavaClass aClass, boolean staticOnly, Set<JavaMethod> matchingMethods)
-    {
-        // Iterate over super classes
-        for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
-
-            // Iterate over class methods and add if matches and super version not already present
-            JavaMethod[] methods = cls.getDeclaredMethods();
-            for (JavaMethod method : methods) {
-                if (matchesMethod(method, staticOnly)) {
-                    if (!isOverrideAlreadyAdded(matchingMethods, method))
-                        matchingMethods.add(method);
-                }
+        // Add declared methods for class
+        JavaMethod[] methods = aClass.getDeclaredMethods();
+        for (JavaMethod method : methods) {
+            if (matchesMethod(method, staticOnly)) {
+                if (!isOverrideAlreadyAdded(matchingMethods, method))
+                    matchingMethods.add(method);
             }
-
-            // Iterate over class interfaces and recurse
-            JavaClass[] interfaces = cls.getInterfaces();
-            for (JavaClass interf : interfaces)
-                findMethodsForClass(interf, staticOnly, matchingMethods);
         }
+
+        // Add methods for super classes
+        JavaClass superClass = aClass.getSuperClass();
+        if (superClass != null)
+            findMethodsForClass(superClass, staticOnly, matchingMethods);
+
+        // Iterate over class interfaces and recurse
+        JavaClass[] interfaces = aClass.getInterfaces();
+        for (JavaClass interf : interfaces)
+            findMethodsForClass(interf, staticOnly, matchingMethods);
     }
 
     /**
@@ -448,13 +417,16 @@ public class DeclMatcher {
     /**
      * Returns whether an override method has already been added to given list.
      */
-    private static boolean isOverrideAlreadyAdded(Set<JavaMethod> methodSet, JavaMethod newMethod)
+    private static boolean isOverrideAlreadyAdded(Set<JavaMember> memberSet, JavaMethod newMethod)
     {
         // Iterate over methods in set and return true if any method overrides given method
-        for (JavaMethod method : methodSet) {
-            for (JavaMethod superMethod = method.getSuper(); superMethod != null; superMethod = superMethod.getSuper()) {
-                if (newMethod == superMethod)
-                    return true;
+        for (JavaMember member : memberSet) {
+            if (member instanceof JavaMethod) {
+                JavaMethod method = (JavaMethod) member;
+                for (JavaMethod superMethod = method.getSuper(); superMethod != null; superMethod = superMethod.getSuper()) {
+                    if (newMethod == superMethod)
+                        return true;
+                }
             }
         }
 
