@@ -427,6 +427,13 @@ public class JavaClass extends JavaType {
         if (superClass != null)
             field = superClass.getFieldForName(aName);
 
+        // Check interfaces
+        JavaClass[] interfaces = getInterfaces();
+        for (JavaClass iface : interfaces) {
+            if ((field = iface.getFieldForName(aName)) != null)
+                return field;
+        }
+
         // Return
         return field;
     }

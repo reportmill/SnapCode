@@ -284,7 +284,6 @@ public class ClassTree {
         if (aPath.startsWith("/javax/sql")) return true;
         if (aPath.startsWith("/javax/swing/b")) return true;
         if (aPath.startsWith("/javax/swing/colorchooser")) return true;
-        if (aPath.startsWith("/javax/swing/event")) return true;
         if (aPath.startsWith("/javax/swing/filechooser")) return true;
         if (aPath.startsWith("/javax/swing/plaf")) return true;
         if (aPath.startsWith("/javax/swing/tree")) return true;

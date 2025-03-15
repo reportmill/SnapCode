@@ -158,22 +158,32 @@ public class DeclMatcher {
      */
     public JavaField[] getFieldsForClass(JavaClass aClass, boolean staticOnly)
     {
-        // Create return list of prefix fields
-        JavaField[] matchingFields = EMPTY_FIELDS_ARRAY;
+        Set<JavaField> matchingFields = new HashSet<>();
+        findFieldsForClass(aClass, staticOnly, matchingFields);
+        return matchingFields.toArray(new JavaField[0]);
+    }
 
-        // Iterate over classes
-        for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
-
-            // Get Class fields
-            JavaField[] fields = cls.getDeclaredFields();
-            for (JavaField field : fields) {
-                if (matchesField(field, staticOnly))
-                    matchingFields = ArrayUtils.add(matchingFields, field);
-            }
+    /**
+     * Returns matching fields for given class (with option for static only).
+     */
+    private void findFieldsForClass(JavaClass aClass, boolean staticOnly, Set<JavaField> matchingFields)
+    {
+        // Add declared fields for class
+        JavaField[] fields = aClass.getDeclaredFields();
+        for (JavaField field : fields) {
+            if (matchesField(field, staticOnly))
+                matchingFields.add(field);
         }
 
-        // Return
-        return matchingFields;
+        // Add fields for super classes
+        JavaClass superClass = aClass.getSuperClass();
+        if (superClass != null)
+            findFieldsForClass(superClass, staticOnly, matchingFields);
+
+        // Add fields for interfaces
+        JavaClass[] interfaces = aClass.getInterfaces();
+        for (JavaClass intf : interfaces)
+            findFieldsForClass(intf, staticOnly, matchingFields);
     }
 
     /**
