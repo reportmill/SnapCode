@@ -163,8 +163,15 @@ public class NewFileTool extends WorkspaceTool {
         // Get Temp project
         ProjectUtils.getTempProject(_workspace);
 
-        // Create file
-        newJavaOrJeplFileForNameAndTypeAndString("JavaFiddle", fileType, "");
+        // Handle Jepl/JMD
+        if (fileType.equals("jepl") || fileType.equals("jmd"))
+            newJeplFileForNameAndString("JavaFiddle", fileType, "");
+
+        // Handle Java
+        else {
+            String javaString = JavaPage.getJavaContentStringForPackageAndClassName(null, "JavaFiddle");
+            newJavaFileForString(javaString);
+        }
     }
 
     /**
@@ -190,17 +197,11 @@ public class NewFileTool extends WorkspaceTool {
      */
     public WebFile newJavaOrJeplFileForNameAndTypeAndString(String className, String fileType, String javaString)
     {
+        // Handle Jepl/JMD
         if (fileType.equals("jepl") || fileType.equals("jmd"))
-            return newJeplFileForNameAndString(className, javaString, fileType);
-        return newJavaFileForName(className);
-    }
+            return newJeplFileForNameAndString(className, fileType, javaString);
 
-    /**
-     * Creates a new Java file for given class name.
-     */
-    public WebFile newJavaFileForName(String className)
-    {
-        String javaString = JavaPage.getJavaContentStringForPackageAndClassName(null, className);
+        // Handle Java
         return newJavaFileForString(javaString);
     }
 
@@ -282,7 +283,7 @@ public class NewFileTool extends WorkspaceTool {
     /**
      * Creates a new Jepl file from given string.
      */
-    public WebFile newJeplFileForNameAndString(String jeplName, String jeplString, String fileType)
+    public WebFile newJeplFileForNameAndString(String jeplName, String fileType, String jeplString)
     {
         // Get source dir
         WebSite selSite = getSelSiteOrFirst();
