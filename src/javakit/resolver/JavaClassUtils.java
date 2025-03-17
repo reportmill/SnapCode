@@ -36,7 +36,7 @@ public class JavaClassUtils {
     {
         // Find compatible methods
         List<JavaMethod> compatibleMethods = new ArrayList<>(2);
-        findCompatibleMethodsAll(aClass, aName, paramTypes, compatibleMethods, staticOnly);
+        findCompatibleMethods(aClass, aName, paramTypes, compatibleMethods, staticOnly);
 
         // If given class is Interface, check Object
         if (aClass.isInterface()) {
@@ -62,31 +62,24 @@ public class JavaClassUtils {
     /**
      * Returns a compatible method for given name and param types.
      */
-    private static void findCompatibleMethodsAll(JavaClass aClass, String aName, JavaClass[] paramTypes, List<JavaMethod> compatibleMethods, boolean staticOnly)
-    {
-        // Search this class and superclasses for compatible methods
-        for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass())
-            findCompatibleMethods(cls, aName, paramTypes, compatibleMethods, staticOnly);
-
-        // Search this class and superclasses for compatible interface
-        for (JavaClass cls = aClass; cls != null; cls = cls.getSuperClass()) {
-            JavaClass[] interfaces = cls.getInterfaces();
-            for (JavaClass infc : interfaces)
-                findCompatibleMethodsAll(infc, aName, paramTypes, compatibleMethods, staticOnly);
-        }
-    }
-
-    /**
-     * Find the compatible methods for given class, name and param types.
-     */
     private static void findCompatibleMethods(JavaClass aClass, String aName, JavaClass[] paramTypes, List<JavaMethod> compatibleMethods, boolean staticOnly)
     {
-        // Iterate over declared methods to find compatible methods (matching name and args)
+        // Search class declared methods
         JavaMethod[] declaredMethods = aClass.getDeclaredMethods();
         for (JavaMethod method : declaredMethods) {
             if (isCompatibleMethod(method, aName, paramTypes, staticOnly))
                 ListUtils.addUniqueId(compatibleMethods, method);
         }
+
+        // Search superclass
+        JavaClass superClass = aClass.getSuperClass();
+        if (superClass != null)
+            findCompatibleMethods(superClass, aName, paramTypes, compatibleMethods, staticOnly);
+
+        // Search interfaces
+        JavaClass[] interfaces = aClass.getInterfaces();
+        for (JavaClass infc : interfaces)
+            findCompatibleMethods(infc, aName, paramTypes, compatibleMethods, staticOnly);
     }
 
     /**
