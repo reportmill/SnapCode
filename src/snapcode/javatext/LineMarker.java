@@ -77,7 +77,8 @@ public abstract class LineMarker<T> extends Rect {
         TextArea textArea = new TextArea();
         textArea.setDefaultTextStyleString("Font:Arial 14");
         textArea.setMargin(new Insets(6));
-        textArea.setMaxWidth(300);
+        textArea.setMaxWidth(500);
+        textArea.setWrapLines(true);
         textArea.setText(getMarkerText());
         PopupWindow popupWindow = new PopupWindow();
         popupWindow.setContent(textArea);
