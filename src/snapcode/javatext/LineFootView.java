@@ -3,8 +3,8 @@
  */
 package snapcode.javatext;
 import java.util.*;
+import snap.util.ArrayUtils;
 import snapcode.project.BuildIssue;
-import snap.geom.*;
 import snap.gfx.*;
 import snap.text.*;
 import snap.view.*;
@@ -21,28 +21,24 @@ public class LineFootView extends View {
     private JavaTextArea _textArea;
 
     // The list of markers
-    private Marker<?>[]  _markers;
+    private LineFootMarker<?>[]  _markers;
 
-    // The last mouse point
-    private double  _mx, _my;
-
-    // Colors
-    private static final Color _error = new Color(236, 175, 205), _errorBorder = new Color(248, 50, 147);
-    private static final Color _warning = new Color(252, 240, 203), _warningBorder = new Color(246, 209, 95);
+    // The marker under the mouse
+    private LineFootMarker<?> _hoverMarker;
 
     /**
-     * Creates a new OverviewPane.
+     * Constructor.
      */
-    public LineFootView(JavaTextPane aJTP)
+    public LineFootView(JavaTextPane textPane)
     {
         // Set vars
-        _textPane = aJTP;
-        _textArea = aJTP.getTextArea();
+        _textPane = textPane;
+        _textArea = textPane.getTextArea();
 
         // Configure
-        enableEvents(MouseMove, MouseRelease);
-        setToolTipEnabled(true);
         setPrefWidth(14);
+        setCursor(Cursor.HAND);
+        enableEvents(MouseMove, MouseRelease, MouseExit);
     }
 
     /**
@@ -64,36 +60,44 @@ public class LineFootView extends View {
     /**
      * Returns the list of markers.
      */
-    public Marker<?>[] getMarkers()
+    public LineFootMarker<?>[] getMarkers()
     {
         // If already set, just return
         if (_markers != null) return _markers;
 
         // Get, set, return
-        Marker<?>[] markers = createMarkers();
+        LineFootMarker<?>[] markers = createMarkers();
         return _markers = markers;
     }
 
     /**
      * Returns the list of markers.
      */
-    protected Marker<?>[] createMarkers()
+    protected LineFootMarker<?>[] createMarkers()
     {
         // Create list
-        List<Marker<?>> markers = new ArrayList<>();
+        List<LineFootMarker<?>> markers = new ArrayList<>();
 
         // Add markers for TextArea.JavaSource.BuildIssues
         BuildIssue[] buildIssues = _textArea.getBuildIssues();
         for (BuildIssue issue : buildIssues)
-            markers.add(new BuildIssueMarker(issue));
+            markers.add(new LineFootMarker.BuildIssueMarker(_textPane, issue));
 
         // Add markers for TextArea.SelectedTokens
         TextToken[] selTokens = _textArea.getSelTokens();
         for (TextToken token : selTokens)
-            markers.add(new TokenMarker(token));
+            markers.add(new LineFootMarker.TokenMarker(_textPane, token));
 
         // Return markers
-        return markers.toArray(new Marker<?>[0]);
+        return markers.toArray(new LineFootMarker<?>[0]);
+    }
+
+    /**
+     * Returns the marker at given point XY.
+     */
+    private LineFootMarker<?> getMarkerAtXY(double aX, double aY)
+    {
+        return ArrayUtils.findMatch(getMarkers(), marker -> marker.contains(aX, aY));
     }
 
     /**
@@ -111,31 +115,54 @@ public class LineFootView extends View {
     protected void processEvent(ViewEvent anEvent)
     {
         // Handle MouseClicked
-        if (anEvent.isMouseClick()) {
-            for (Marker<?> marker : getMarkers()) {
-                if (marker.contains(anEvent.getX(), anEvent.getY())) {
-                    setTextSel(marker.getSelStart(), marker.getSelEnd());
-                    return;
-                }
-            }
-
-            TextBlock textBlock = _textArea.getTextBlock();
-            TextLine line = textBlock.getLineForY(anEvent.getY() / getHeight() * _textArea.getHeight());
-            setTextSel(line.getStartCharIndex(), line.getEndCharIndex());
-        }
+        if (anEvent.isMouseClick())
+            handleMouseClick(anEvent);
 
         // Handle MouseMoved
-        if (anEvent.isMouseMove()) {
-            _mx = anEvent.getX();
-            _my = anEvent.getY();
-            for (Marker<?> marker : getMarkers()) {
-                if (marker.contains(_mx, _my)) {
-                    setCursor(Cursor.HAND);
-                    return;
-                }
-            }
-            setCursor(Cursor.DEFAULT);
+        else if (anEvent.isMouseMove() || anEvent.isMouseExit())
+            handleMouseMove(anEvent);
+    }
+
+    /**
+     * Called on Mouse click event.
+     */
+    private void handleMouseClick(ViewEvent anEvent)
+    {
+        double mouseX = anEvent.getX();
+        double mouseY = anEvent.getY();
+
+        // If marker found at event point, select chars and return
+        LineFootMarker<?> markerAtPoint = getMarkerAtXY(mouseX, mouseY);
+        if (markerAtPoint != null) {
+            setTextSel(markerAtPoint.getSelStart(), markerAtPoint.getSelEnd());
+            return;
         }
+
+        TextBlock textBlock = _textArea.getTextBlock();
+        TextLine line = textBlock.getLineForY(mouseY / getHeight() * _textArea.getHeight());
+        setTextSel(line.getStartCharIndex(), line.getEndCharIndex());
+    }
+
+    /**
+     * Called on MouseMove event.
+     */
+    private void handleMouseMove(ViewEvent anEvent)
+    {
+        double mouseX = anEvent.getX();
+        double mouseY = anEvent.getY();
+
+        // If marker was under mouse, either return or hide
+        if (_hoverMarker != null) {
+            if (_hoverMarker.contains(mouseX, mouseY))
+                return;
+            _hoverMarker.hidePopup();
+            _hoverMarker = null;
+        }
+
+        // If marker found at event point, show popup and return
+        _hoverMarker = getMarkerAtXY(mouseX, mouseY);
+        if (_hoverMarker != null)
+            _hoverMarker.showPopup(this);
     }
 
     /**
@@ -148,156 +175,12 @@ public class LineFootView extends View {
 
         aPntr.setStroke(Stroke.Stroke1);
 
-        for (Marker<?> marker : getMarkers()) {
+        for (LineFootMarker<?> marker : getMarkers()) {
             marker.setY(marker._y / textH * markerH);
             aPntr.setPaint(marker.getColor());
             aPntr.fill(marker);
             aPntr.setPaint(marker.getStrokeColor());
             aPntr.draw(marker);
         }
-    }
-
-    /**
-     * Override to return tool tip text.
-     */
-    public String getToolTip(ViewEvent anEvent)
-    {
-        for (Marker<?> marker : getMarkers()) {
-            if (marker.contains(_mx, _my))
-                return marker.getToolTip();
-        }
-
-        TextBlock textBlock = _textArea.getTextBlock();
-        TextLine line = textBlock.getLineForY(_my / getHeight() * _textArea.getHeight());
-        return "Line: " + (line.getLineIndex() + 1);
-    }
-
-    /**
-     * The class that describes a overview marker.
-     */
-    public abstract static class Marker<T> extends Rect {
-
-        /**
-         * The object that is being marked.
-         */
-        T _target;
-        double _y;
-
-        /**
-         * Creates a new marker for target.
-         */
-        public Marker(T aTarget)
-        {
-            _target = aTarget;
-            setRect(2, 0, 9, 5);
-        }
-
-        /**
-         * Returns the color.
-         */
-        public abstract Color getColor();
-
-        /**
-         * Returns the stroke color.
-         */
-        public abstract Color getStrokeColor();
-
-        /**
-         * Returns the selection start.
-         */
-        public abstract int getSelStart();
-
-        /**
-         * Returns the selection start.
-         */
-        public abstract int getSelEnd();
-
-        /**
-         * Returns a tooltip.
-         */
-        public abstract String getToolTip();
-    }
-
-    /**
-     * The class that describes an overview marker.
-     */
-    public class BuildIssueMarker extends Marker<BuildIssue> {
-
-        /**
-         * Creates a new marker for target.
-         */
-        public BuildIssueMarker(BuildIssue anIssue)
-        {
-            super(anIssue);
-            int charIndex = Math.min(anIssue.getEnd(), _textArea.length());
-            TextLine line = _textArea.getLineForCharIndex(charIndex);
-            _y = line.getTextY() + line.getHeight() / 2;
-        }
-
-        /**
-         * Returns the color.
-         */
-        public Color getColor()  { return _target.isError() ? _error : _warning; }
-
-        /**
-         * Returns the stroke color.
-         */
-        public Color getStrokeColor()  { return _target.isError() ? _errorBorder : _warningBorder; }
-
-        /**
-         * Returns the selection start.
-         */
-        public int getSelStart()  { return _target.getStart(); }
-
-        /**
-         * Returns the selection start.
-         */
-        public int getSelEnd()  { return _target.getEnd(); }
-
-        /**
-         * Returns a tooltip.
-         */
-        public String getToolTip()  { return _target.getText(); }
-    }
-
-    /**
-     * The class that describes a overview marker.
-     */
-    public static class TokenMarker extends Marker<TextToken> {
-
-        /**
-         * Creates a new TokenMarker.
-         */
-        public TokenMarker(TextToken aToken)
-        {
-            super(aToken);
-            TextLine line = aToken.getTextLine();
-            _y = line.getTextY() + line.getHeight() / 2;
-        }
-
-        /**
-         * Returns the color.
-         */
-        public Color getColor()  { return _warning; }
-
-        /**
-         * Returns the stroke color.
-         */
-        public Color getStrokeColor()  { return _warningBorder; }
-
-        /**
-         * Returns the selection start.
-         */
-        public int getSelStart()  { return _target.getStartCharIndex(); }
-
-        /**
-         * Returns the selection start.
-         */
-        public int getSelEnd()  { return _target.getEndCharIndex(); }
-
-        /**
-         * Returns a tooltip.
-         */
-        public String getToolTip()  { return "Occurrence of '" + _target.getString() + "'"; }
     }
 }

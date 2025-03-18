@@ -1,21 +1,12 @@
 package snapcode.javatext;
-import javakit.parse.*;
-import javakit.resolver.JavaClass;
-import javakit.resolver.JavaConstructor;
-import javakit.resolver.JavaMethod;
-import snap.view.TextArea;
-import snapcode.project.Breakpoint;
-import snapcode.project.BuildIssue;
-import javakit.resolver.JavaExecutable;
+import snap.geom.Insets;
 import snap.geom.Rect;
-import snap.gfx.Image;
-import snap.text.TextLine;
-import snap.view.ViewEvent;
-import java.util.ArrayList;
-import java.util.List;
+import snap.view.PopupWindow;
+import snap.view.TextArea;
+import snap.view.View;
 
 /**
- * The class that describes a overview marker.
+ * The class that describes a marker in LineHeadView or LineFootView.
  */
 public abstract class LineMarker<T> extends Rect {
 
@@ -28,224 +19,77 @@ public abstract class LineMarker<T> extends Rect {
     // The object that is being marked.
     protected T  _target;
 
-    // The image
-    protected Image  _image;
-
-    // The marker images for Error, Warning, Breakpoint, Implements, Override
-    private static Image ERROR_IMAGE = Image.getImageForClassResource(LineMarker.class, "ErrorMarker.png");
-    private static Image WARNING_IMAGE = Image.getImageForClassResource(LineMarker.class, "WarningMarker.png");
-    private static Image BREAKPOINT_IMAGE = Image.getImageForClassResource(LineMarker.class, "Breakpoint.png");
-    private static Image IMPLEMENTS_IMAGE = Image.getImageForClassResource(LineMarker.class, "ImplementsMarker.png");
-    private static Image OVERRIDE_IMAGE = Image.getImageForClassResource(LineMarker.class, "OverrideMarker.png");
+    // The Popup window
+    private PopupWindow _popupWindow;
 
     /**
-     * Creates a new marker for target.
+     * Constructor.
      */
     public LineMarker(JavaTextPane aJavaTextPane, T aTarget)
     {
+        super();
         _textPane = aJavaTextPane;
         _textArea = aJavaTextPane.getTextArea();
         _target = aTarget;
-        setRect(2, 0, LineHeadView.LINE_MARKERS_WIDTH, LineHeadView.LINE_MARKERS_WIDTH);
     }
 
     /**
-     * Returns a tooltip.
+     * Returns the marker text.
      */
-    public abstract String getToolTip();
+    public abstract String getMarkerText();
 
     /**
-     * Handles MouseClick.
+     * Shows the popup.
      */
-    public abstract void mouseClicked(ViewEvent anEvent);
-
-    /**
-     * Returns the list of markers.
-     */
-    public static LineMarker<?>[] getMarkersForJavaTextPane(JavaTextPane textPane)
+    public void showPopup(View aView)
     {
-        JavaTextArea javaTextArea = textPane.getTextArea();
+        PopupWindow popupWindow = getPopupWindow();
+        if (popupWindow.isShowing())
+            return;
+        popupWindow.setSizeToBestSize();
 
-        // Create list
-        List<LineMarker<?>> markers = new ArrayList<>();
+        // Get popup location
+        int MARGIN_OFFSET = 15;
+        double popupX = -MARGIN_OFFSET - popupWindow.getWidth();
+        if (aView instanceof LineHeadView)
+            popupX = 30;
+        double popupY = getMidY() - Math.round(popupWindow.getHeight() / 2);
 
-        // Add markers for member Overrides/Implements
-        JClassDecl classDecl = javaTextArea.getJFile().getClassDecl();
-        if (classDecl != null)
-            LineMarker.findMarkersForMethodAndConstructorOverrides(classDecl, textPane, markers);
-
-        // Add markers for BuildIssues
-        BuildIssue[] buildIssues = javaTextArea.getBuildIssues();
-        for (BuildIssue issue : buildIssues)
-            if (issue.getEnd() <= javaTextArea.length())
-                markers.add(new BuildIssueMarker(textPane, issue));
-
-        // Add markers for breakpoints
-        Breakpoint[] breakpoints = javaTextArea.getBreakpoints();
-        if (breakpoints != null) {
-            for (Breakpoint bp : breakpoints) {
-                if (bp.getLine() < javaTextArea.getLineCount())
-                    markers.add(new BreakpointMarker(textPane, bp));
-                else javaTextArea.removeBreakpoint(bp);
-            }
-        }
-
-        // Return markers
-        return markers.toArray(new LineMarker[0]);
+        // Show popup
+        popupWindow.show(aView, popupX, popupY);
     }
 
     /**
-     * Loads a list of SuperMemberMarkers for a class declaration (recursing for inner classes).
+     * Hides the popup.
      */
-    private static void findMarkersForMethodAndConstructorOverrides(JClassDecl aClassDecl, JavaTextPane textPane, List<LineMarker<?>> theMarkers)
+    public void hidePopup()
     {
-        TextArea textArea = textPane.getTextArea();
-
-        // Check constructors
-        JConstrDecl[] constrDecls = aClassDecl.getConstructorDecls();
-        for (JConstrDecl constrDecl : constrDecls) {
-            JavaConstructor constr  = constrDecl.getConstructor();
-            if (constr != null && constr.getSuper() != null && constrDecl.getEndCharIndex() < textArea.length())
-                theMarkers.add(new SuperMemberMarker(textPane, constrDecl));
-        }
-
-        // Check methods
-        JMethodDecl[] methodDecls = aClassDecl.getMethodDecls();
-        for (JMethodDecl methodDecl : methodDecls) {
-            JavaMethod method  = methodDecl.getMethod();
-            if (method != null && method.getSuper() != null && methodDecl.getEndCharIndex() < textArea.length())
-                theMarkers.add(new SuperMemberMarker(textPane, methodDecl));
-        }
-
-        // Recurse into inner classes. What about anonymous inner classes?
-        JClassDecl[] innerClasses = aClassDecl.getEnclosedClassDecls();
-        for (JClassDecl classDecl : innerClasses)
-            findMarkersForMethodAndConstructorOverrides(classDecl, textPane, theMarkers);
+        if (_popupWindow != null && _popupWindow.isShowing())
+            _popupWindow.hide();
     }
 
     /**
-     * A Marker for super members.
+     * Returns the popup window.
      */
-    public static class SuperMemberMarker extends LineMarker<JExecutableDecl> {
-
-        // Ivars
-        private JavaExecutable _superMethodOrConstr;
-        private boolean  _interface;
-
-        /**
-         * Creates a new marker for target.
-         */
-        public SuperMemberMarker(JavaTextPane aJTP, JExecutableDecl aTarget)
-        {
-            super(aJTP, aTarget);
-            JavaExecutable methodOrConstr = aTarget.getExecutable();
-            _superMethodOrConstr = methodOrConstr.getSuper();
-            JavaClass declaringClass = _superMethodOrConstr.getDeclaringClass();
-            _interface = declaringClass.isInterface();
-            _image = _interface ? IMPLEMENTS_IMAGE : OVERRIDE_IMAGE;
-
-            // Set Y to center image in line
-            int lineIndex = aTarget.getLineIndex();
-            TextLine textLine = _textArea.getLine(lineIndex);
-            y = getYForTextLineAndImage(textLine, _image);
-        }
-
-        /**
-         * Returns a tooltip.
-         */
-        public String getToolTip()
-        {
-            String className = _superMethodOrConstr.getDeclaringClassName();
-            return (_interface ? "Implements " : "Overrides ") + className + '.' + _target.getName();
-        }
-
-        /**
-         * Handles MouseClick.
-         */
-        public void mouseClicked(ViewEvent anEvent)
-        {
-            _textPane.openSuperDeclaration(_target);
-        }
-    }
-
-    /**
-     * A Marker subclass for BuildIssues.
-     */
-    public static class BuildIssueMarker extends LineMarker<BuildIssue> {
-
-        // Whether issue is error
-        private boolean  _isError;
-
-        /**
-         * Creates a new marker for target.
-         */
-        public BuildIssueMarker(JavaTextPane aJTP, BuildIssue aTarget)
-        {
-            super(aJTP, aTarget);
-            _isError = aTarget.isError();
-            _image = _isError ? ERROR_IMAGE : WARNING_IMAGE;
-
-            // Set Y to center image in line
-            int charIndex = aTarget.getEnd();
-            TextLine textLine = _textArea.getLineForCharIndex(charIndex);
-            y = getYForTextLineAndImage(textLine, _image);
-        }
-
-        /**
-         * Returns a tooltip.
-         */
-        public String getToolTip()  { return _target.getText(); }
-
-        /**
-         * Handles MouseClick.
-         */
-        public void mouseClicked(ViewEvent anEvent)
-        {
-            _textArea.setSel(_target.getStart(), _target.getEnd());
-        }
-    }
-
-    /**
-     * A Marker subclass for Breakpoints.
-     */
-    public static class BreakpointMarker extends LineMarker<Breakpoint> {
-
-        /**
-         * Creates a BreakpointMarker.
-         */
-        public BreakpointMarker(JavaTextPane aJTP, Breakpoint aBP)
-        {
-            super(aJTP, aBP);
-            _image = BREAKPOINT_IMAGE;
-
-            // Set Y to center image in line
-            TextLine textLine = _textArea.getLine(aBP.getLine());
-            y = getYForTextLineAndImage(textLine, _image);
-        }
-
-        /**
-         * Returns a tooltip.
-         */
-        public String getToolTip()  { return _target.toString(); }
-
-        /**
-         * Handles MouseClick.
-         */
-        public void mouseClicked(ViewEvent anEvent)
-        {
-            _textArea.removeBreakpoint(_target);
-            _textPane._lineNumView.resetAll();
-        }
-    }
-
-    /**
-     * Returns the Y value to center given image in given line.
-     */
-    private static double getYForTextLineAndImage(TextLine textLine, Image image)
+    private PopupWindow getPopupWindow()
     {
-        double lineY = textLine.getTextY();
-        double lineH = textLine.getHeight();
-        double imageH = image.getHeight();
-        return Math.round(lineY + (lineH - imageH) / 2);
+        if (_popupWindow != null) return _popupWindow;
+        TextArea textArea = new TextArea();
+        textArea.setDefaultTextStyleString("Font:Arial 14");
+        textArea.setMargin(new Insets(6));
+        textArea.setMaxWidth(300);
+        textArea.setText(getMarkerText());
+        PopupWindow popupWindow = new PopupWindow();
+        popupWindow.setContent(textArea);
+        return _popupWindow = popupWindow;
+    }
+
+    /**
+     * Override to expand hit area.
+     */
+    @Override
+    public boolean contains(double aX, double aY)
+    {
+        return (x - 2 <= aX) && (aX <= x + width + 4) && (y - 1 <= aY) && (aY <= y + height + 2);
     }
 }
