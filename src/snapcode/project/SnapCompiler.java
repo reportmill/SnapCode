@@ -100,8 +100,10 @@ public class SnapCompiler {
         if (SnapUtils.getJavaVersionInt() > 8) {
             BuildFile buildFile = _proj.getBuildFile();
             int compileRelease = buildFile.getCompileRelease();
-            options.add("--release");
-            options.add(Integer.toString(compileRelease));
+            if (compileRelease != SnapUtils.getJavaVersionInt()) {
+                options.add("--release");
+                options.add(Integer.toString(compileRelease));
+            }
         }
 
         // Probably not necessary
@@ -206,7 +208,7 @@ public class SnapCompiler {
         }
 
         // If there were modified files, clear Project.ClassLoader
-        if (_modifiedJavaFiles.size() > 0)
+        if (!_modifiedJavaFiles.isEmpty())
             _proj.clearClassLoader();
     }
 
@@ -229,7 +231,8 @@ public class SnapCompiler {
     {
         Object diagnosticSource = aDiagnostic.getSource();
         if (!(diagnosticSource instanceof SnapCompilerJFO)) {
-            System.err.println("SnapCompiler: Unknown Issue: " + aDiagnostic);
+            if (_unknownDiagnosticSourceErrorCount++ < 2)
+                System.err.println("SnapCompiler: Unknown Issue: " + aDiagnostic);
             return null;
         }
 
@@ -269,6 +272,8 @@ public class SnapCompiler {
         BuildIssue issue = new BuildIssue().init(file, kind, msg, line - 1, col - 1, start, end);
         return issue;
     }
+
+    private static int _unknownDiagnosticSourceErrorCount = 0;
 
     /**
      * Report Diagnostic.

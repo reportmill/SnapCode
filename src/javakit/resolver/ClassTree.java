@@ -4,6 +4,7 @@
 package javakit.resolver;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
+import snap.util.SnapUtils;
 import snap.util.StringUtils;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -173,7 +174,7 @@ public class ClassTree {
         Class<?> swingClass = null;
         try { swingClass = Class.forName("javax.swing.JFrame"); }
         catch (Exception ignore) { }
-        if (swingClass != null) {
+        if (swingClass != null && !SnapUtils.isWebVM) {
             WebURL swingURL = WebURL.getURL(swingClass);
             assert (swingURL != null);
             WebSite swingSite = swingURL.getSite();
@@ -253,6 +254,7 @@ public class ClassTree {
      */
     private static boolean isIgnorePath(String aPath)
     {
+        if (aPath.startsWith("/module")) return true;
         if (aPath.startsWith("/sun")) return true;
         if (aPath.startsWith("/apple")) return true;
         if (aPath.startsWith("/com/sun")) return true;
