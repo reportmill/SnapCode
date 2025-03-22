@@ -231,7 +231,7 @@ public class SnapCompiler {
     {
         Object diagnosticSource = aDiagnostic.getSource();
         if (!(diagnosticSource instanceof SnapCompilerJFO)) {
-            if (_unknownDiagnosticSourceErrorCount++ < 2)
+            if (_unknownDiagnosticSourceErrorCount++ < 5)
                 System.err.println("SnapCompiler: Unknown Issue: " + aDiagnostic);
             return null;
         }
@@ -273,7 +273,7 @@ public class SnapCompiler {
         return issue;
     }
 
-    private static int _unknownDiagnosticSourceErrorCount = 0;
+    private int _unknownDiagnosticSourceErrorCount = 0;
 
     /**
      * Report Diagnostic.
