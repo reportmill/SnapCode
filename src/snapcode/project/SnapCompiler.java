@@ -100,10 +100,8 @@ public class SnapCompiler {
         if (SnapUtils.getJavaVersionInt() > 8) {
             BuildFile buildFile = _proj.getBuildFile();
             int compileRelease = buildFile.getCompileRelease();
-            if (compileRelease != SnapUtils.getJavaVersionInt()) {
-                options.add("--release");
-                options.add(Integer.toString(compileRelease));
-            }
+            options.add("--release");
+            options.add(Integer.toString(compileRelease));
         }
 
         // Probably not necessary
