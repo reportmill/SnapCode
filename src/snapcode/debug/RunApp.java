@@ -2,7 +2,7 @@ package snapcode.debug;
 import snap.gfx.Color;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import snap.view.TextArea;
 import snap.view.View;
 import snap.view.ViewEnv;
@@ -14,7 +14,6 @@ import snapcode.project.Breakpoint;
 import snap.web.WebURL;
 import snapcode.project.Project;
 import snapcode.project.RunConfig;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -460,7 +459,7 @@ public abstract class RunApp {
 
         // Add Java command path
         String javaCmdPath = getJavaCmdPath();
-        if (SnapUtils.isWebVM) {
+        if (SnapEnv.isWebVM) {
             boolean isSnapKit = project.getBuildFile().isIncludeSnapKitRuntime();
             boolean isSnapKitDom = isSnapKit && !ViewUtils.isAltDown() && !_runConfig.isSwing();
             if (isSnapKitDom)
@@ -493,7 +492,7 @@ public abstract class RunApp {
      */
     private static String getJavaCmdPath()
     {
-        if (SnapUtils.isWebVM) return "java";
+        if (SnapEnv.isWebVM) return "java";
         return System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
     }
 }

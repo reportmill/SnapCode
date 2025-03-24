@@ -338,7 +338,7 @@ public class WorkspacePane extends ViewOwner {
         _workspacePaneDnD = new WorkspacePaneDnD(this);
 
         // Hide Browser menu items
-        if (!SnapUtils.isWebVM) {
+        if (!SnapEnv.isWebVM) {
             getView("DownloadFileMenuItem").setVisible(false);
             getView("OpenDesktopFileMenuItem").setVisible(false);
             getView("UploadDownloadMenuItemsSeparator").setVisible(false);
@@ -373,7 +373,7 @@ public class WorkspacePane extends ViewOwner {
             _workspaceTools.getHelpTool().showTool();
 
         // Hack when running in browser in Swing to always fill available screen size
-        if (SnapUtils.isWebVM && getEnv().getClass().getSimpleName().startsWith("Swing"))
+        if (SnapEnv.isWebVM && getEnv().getClass().getSimpleName().startsWith("Swing"))
             new ViewTimer(this::checkScreenSize, 1000).start();
     }
 
@@ -388,7 +388,7 @@ public class WorkspacePane extends ViewOwner {
         aWindow.setSaveSize(true);
 
         // If browser, maximize window
-        if (SnapUtils.isWebVM)
+        if (SnapEnv.isWebVM)
             aWindow.setMaximized(true);
 
         // Register for handleWinClose on window close

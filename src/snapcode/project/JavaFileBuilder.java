@@ -4,7 +4,7 @@
 package snapcode.project;
 import javakit.resolver.JavaClass;
 import snap.util.ListUtils;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
 import java.util.*;
@@ -157,7 +157,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
             String className = _proj.getProjectFiles().getClassNameForFile(sourceFile);
             String msg = String.format("Compiling %s (%d of %d)", className, i + 1, sourceFiles.size());
             taskMonitor.beginTask(msg, -1);
-            if (SnapUtils.isWebVM)
+            if (SnapEnv.isWebVM)
                 Thread.yield();
 
             // Build file

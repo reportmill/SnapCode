@@ -1,5 +1,5 @@
 package snapcode.app;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import snap.view.*;
 import snap.web.RecentFiles;
 import snap.web.WebFile;
@@ -222,7 +222,7 @@ public class HomePage extends WebPage {
      */
     private static void removeImageTempFiles()
     {
-        if (!SnapUtils.isWebVM) return;
+        if (!SnapEnv.isWebVM) return;
         try {
             File rootFile = new File("/files");
             File[] rootFiles = rootFile.listFiles(); assert (rootFiles != null);

@@ -2,7 +2,7 @@ package snapcode.app;
 import snap.geom.Insets;
 import snap.gfx.*;
 import snap.util.ArrayUtils;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import snap.view.*;
 import snap.web.RecentFiles;
 import snap.web.WebURL;
@@ -123,7 +123,7 @@ public class HomePageView extends MarkDownView {
                 // Create OpenButton
                 Button openButton = new Button("Open...");
                 openButton.setPropsString("Name:OpenButton; PrefWidth:100; PrefHeight:24; Margin:0,0,0,20");
-                if (SnapUtils.isWebVM) {
+                if (SnapEnv.isWebVM) {
                     openButton.setText("Open Browser File...");
                     openButton.setPrefWidth(130);
                 }
@@ -131,7 +131,7 @@ public class HomePageView extends MarkDownView {
                 // Create OpenDesktopFileButton
                 Button openDesktopFileButton = new Button("Open Desktop File...");
                 openDesktopFileButton.setPropsString("Name:OpenDesktopFileButton; PrefWidth:130; PrefHeight:24; Margin:0,0,0,12");
-                openDesktopFileButton.setVisible(SnapUtils.isWebVM);
+                openDesktopFileButton.setVisible(SnapEnv.isWebVM);
 
                 // Create row, add children and return
                 RowView rowView = new RowView();

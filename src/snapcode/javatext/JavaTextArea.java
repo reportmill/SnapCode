@@ -7,7 +7,7 @@ import javakit.parse.*;
 import snap.geom.RoundRect;
 import snap.parse.Tokenizer;
 import snap.util.ArrayUtils;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import snapcode.project.JavaTextDoc;
 import snap.geom.Rect;
 import snap.gfx.*;
@@ -477,7 +477,7 @@ public class JavaTextArea extends TextArea {
     }
 
     // Java 8 on Windows/Linux has problems with arbitrary transforms and text
-    private static boolean _bug = !SnapUtils.isMac && !SnapUtils.isWebVM && !SnapUtils.isTeaVM;
+    private static boolean _bug = !SnapEnv.isMac && !SnapEnv.isWebVM && !SnapEnv.isTeaVM;
 
     private static final Color METHOD_COLOR = Color.get("#FAFAB4");
     private static final Color METHOD_STROKE_COLOR = METHOD_COLOR.darker();

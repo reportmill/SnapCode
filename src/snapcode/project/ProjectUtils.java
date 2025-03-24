@@ -270,7 +270,7 @@ public class ProjectUtils {
     {
         // Get path to temp dir named TempProj
         String tempProjPath = FileUtils.getTempFile(projectName).getAbsolutePath();
-        if (SnapUtils.isMac)
+        if (SnapEnv.isMac)
             tempProjPath = "/tmp/" + projectName;
 
         // Get URL and Site for TempProjPath

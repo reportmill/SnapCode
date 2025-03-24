@@ -2,10 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.resolver;
-import snap.util.ArrayUtils;
-import snap.util.ListUtils;
-import snap.util.SnapUtils;
-import snap.util.StringUtils;
+import snap.util.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
@@ -174,7 +171,7 @@ public class ClassTree {
         Class<?> swingClass = null;
         try { swingClass = Class.forName("javax.swing.JFrame"); }
         catch (Exception ignore) { }
-        if (swingClass != null && !SnapUtils.isWebVM) {
+        if (swingClass != null && !SnapEnv.isWebVM) {
             WebURL swingURL = WebURL.getURL(swingClass);
             assert (swingURL != null);
             WebSite swingSite = swingURL.getSite();

@@ -2,6 +2,7 @@ package snapcode.app;
 import snap.gfx.GFXEnv;
 import snap.util.Convert;
 import snap.util.Prefs;
+import snap.util.SnapEnv;
 import snap.util.SnapUtils;
 import snap.view.ViewUtils;
 import snap.view.WindowView;
@@ -203,7 +204,7 @@ public class App {
      */
     private static void deleteTempFiles()
     {
-        if (!SnapUtils.isWebVM) return;
+        if (!SnapEnv.isWebVM) return;
 
         // Delete temp files (that are more than 10 seconds old)
         WebFile tempDir = WebFile.getFileForPath(SnapUtils.getTempDir());

@@ -1,5 +1,5 @@
 package snapcode.apptools;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -43,7 +43,7 @@ public class RunToolUtils {
             return new RunAppSrc(runTool, runConfig);
 
         // Handle web: Create and return RunAppWeb for browser launch
-        if (SnapUtils.isWebVM)
+        if (SnapEnv.isWebVM)
             return new RunAppWeb(runTool, runConfig);
 
         // Create and return RunAppBin for desktop

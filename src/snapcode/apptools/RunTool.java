@@ -1,7 +1,7 @@
 package snapcode.apptools;
 import snap.props.PropChange;
 import snap.util.ListUtils;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import snap.util.TaskRunner;
 import snap.viewx.DialogBox;
 import snap.web.WebFile;
@@ -190,7 +190,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         _workspace.saveAllFiles();
 
         // If isDebug in browser, complain and run normal
-        if (isDebug && SnapUtils.isWebVM) {
+        if (isDebug && SnapEnv.isWebVM) {
             String msg = "Debug support for browser is not currently\n available,but is coming soon.\nExecuting normal run instead";
             DialogBox.showWarningDialog(_workspacePane.getUI(), "Debug Support Coming Soon", msg);
             isDebug = false;

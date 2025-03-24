@@ -1,9 +1,6 @@
 package snapcode.project;
 import snap.props.PropSet;
-import snap.util.ArrayUtils;
-import snap.util.Convert;
-import snap.util.FilePathUtils;
-import snap.util.SnapUtils;
+import snap.util.*;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebURL;
@@ -278,7 +275,7 @@ public class MavenDependency extends BuildDependency {
             if (group.contains("reportmill"))
                 return "https://reportmill.com/maven";
         }
-        if (SnapUtils.isWebVM)
+        if (SnapEnv.isWebVM)
             return WebUtils.getCorsProxyAddress(MAVEN_CENTRAL_URL);
         return MAVEN_CENTRAL_URL;
     }
@@ -354,7 +351,7 @@ public class MavenDependency extends BuildDependency {
     {
         // Get local maven cache path
         String homeDir = System.getProperty("user.home");
-        String MAVEN_REPO_PATH = SnapUtils.isWebVM ? "maven_cache" : ".m2/repository";
+        String MAVEN_REPO_PATH = SnapEnv.isWebVM ? "maven_cache" : ".m2/repository";
         String localMavenCachePath = FilePathUtils.getChildPath(homeDir, MAVEN_REPO_PATH);
 
         // Get relative jar path

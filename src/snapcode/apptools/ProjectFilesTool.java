@@ -1,7 +1,7 @@
 package snapcode.apptools;
 import snap.geom.HPos;
 import snap.util.ListUtils;
-import snap.util.SnapUtils;
+import snap.util.SnapEnv;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
 import snap.view.*;
@@ -454,7 +454,7 @@ public class ProjectFilesTool extends WorkspaceTool {
 
         // If window focus gained, check for external file mods
         if (isWindowFocused) {
-            if (!SnapUtils.isWebVM) { // No reason to do this for WebVM ?
+            if (!SnapEnv.isWebVM) { // No reason to do this for WebVM ?
                 for (FileTreeFile file : getRootFiles())
                     checkForExternalMods(file.getFile());
             }
