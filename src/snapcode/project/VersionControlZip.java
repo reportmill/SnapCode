@@ -20,76 +20,59 @@ public class VersionControlZip extends VersionControl {
     }
 
     /**
-     * Override to check ZipFile for nested top level directory and use that site instead.
+     * Override to return project site in remote ZipFile.
      */
     @Override
     protected WebSite getRemoteSiteImpl()
     {
-        // Get normal ZipFile site
         WebSite zipSite = _remoteSiteUrl.getAsSite();
-        WebFile rootDir = zipSite.getRootDir();
-        List<WebFile> rootFiles = rootDir.getFiles();
-
-        // Look for nested top level directory and use that nested dir site instead
-        WebFile dirFile = ListUtils.findMatch(rootFiles, file -> ProjectUtils.isProjectDir(file));
-        if (dirFile != null) {
-            WebURL dirFileUrl = dirFile.getURL();
-            return dirFileUrl.getAsSite();
-        }
-
-        // Return
-        return zipSite;
+        return getProjectSiteForZipFileSite(zipSite);
     }
 
     /**
-     * Override to return clone file cached ZipFileSite.
+     * Override to return project site in local ZipFile.
      */
     @Override
     protected WebSite getCloneSiteImpl()
     {
-        WebFile cloneFileCached = getCloneFileCached();
-        WebURL cloneFileUrl = cloneFileCached.getURL();
-        return cloneFileUrl.getAsSite();
+        WebFile localZipFile = getLocalZipFile();
+        WebSite localZipFileSite = localZipFile.getURL().getAsSite();
+        return getProjectSiteForZipFileSite(localZipFileSite);
     }
 
     /**
-     * Returns a local file for given file (with option to cache for future use).
+     * Returns the local copy of zip file.
      */
-    public WebFile getCloneFileCached()
+    public WebFile getLocalZipFile()
     {
         WebFile remoteFile = getRemoteSiteUrl().getFile();
-        WebFile cloneFileCached = getCloneFile();
+        WebFile localZipFile = createLocalZipFile();
 
         // If clone file exists and is newer than remote file, just return
-        if (cloneFileCached.getExists() && cloneFileCached.getLastModTime() >= remoteFile.getLastModTime())
-            return cloneFileCached;
+        if (localZipFile.getExists() && localZipFile.getLastModTime() >= remoteFile.getLastModTime())
+            return localZipFile;
 
         // Update clone file
-        cloneFileCached.setBytes(remoteFile.getBytes());
-        cloneFileCached.save();
+        localZipFile.setBytes(remoteFile.getBytes());
+        localZipFile.save();
 
         // Return
-        return cloneFileCached;
+        return localZipFile;
     }
 
     /**
-     * Returns a cache file for path.
+     * Creates the file for local copy of zip file.
      */
-    private WebFile getCloneFile()
+    private WebFile createLocalZipFile()
     {
-        // Get RemoteSite sandbox site and clone file path
-        WebURL remoteSiteUrl = getRemoteSiteUrl();
-        WebSite remoteSite = remoteSiteUrl.getAsSite();
-        WebSite sandboxSite = remoteSite.getSandboxSite();
-        String cloneFilePath = '/' + remoteSiteUrl.getFilename();
+        // Get sandbox site for remote zip file
+        WebURL remoteZipFileUrl = getRemoteSiteUrl();
+        WebSite remoteZipFileSite = remoteZipFileUrl.getAsSite();
+        WebSite sandboxSite = remoteZipFileSite.getSandboxSite();
 
-        // Get or create clone file
-        WebFile sandboxCloneFile = sandboxSite.getFileForPath(cloneFilePath);
-        if (sandboxCloneFile == null)
-            sandboxCloneFile = sandboxSite.createFileForPath(cloneFilePath, false);
-
-        // Return
-        return sandboxCloneFile;
+        // Create local file for zip file in sandbox site
+        String localZipFilePath = '/' + remoteZipFileUrl.getFilename();
+        return sandboxSite.createFileForPath(localZipFilePath, false);
     }
 
     /**
@@ -99,7 +82,7 @@ public class VersionControlZip extends VersionControl {
     public boolean isAvailable()
     {
         // If clone file exists and is newer than remote file, just return
-        WebFile cloneFileCached = getCloneFile();
+        WebFile cloneFileCached = createLocalZipFile();
         if (cloneFileCached.getExists())
             return true;
         return false;
@@ -129,9 +112,29 @@ public class VersionControlZip extends VersionControl {
     public List<WebFile> getUpdateFilesForRootFiles(List<WebFile> theFiles)
     {
         // Make sure latest version is in clone site
-        getCloneFileCached();
+        getLocalZipFile();
 
         // Do normal version
         return super.getUpdateFilesForRootFiles(theFiles);
+    }
+
+    /**
+     * Returns the site for project dir in zip site.
+     */
+    private static WebSite getProjectSiteForZipFileSite(WebSite zipFileSite)
+    {
+        WebFile rootDir = zipFileSite.getRootDir();
+        List<WebFile> rootFiles = rootDir.getFiles();
+
+        // Look for nested top level directory and use that nested dir site instead
+        WebFile dirFile = ListUtils.findMatch(rootFiles, file -> ProjectUtils.isProjectDir(file));
+        if (dirFile != null) {
+            WebURL dirFileUrl = dirFile.getURL();
+            return dirFileUrl.getAsSite();
+        }
+
+        // This can't be good
+        System.err.println("VersionControlZip.getProjectSiteForZipFileSite: Couldn't find project in zip file: " + zipFileSite);
+        return zipFileSite;
     }
 }

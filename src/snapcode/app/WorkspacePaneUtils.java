@@ -135,10 +135,8 @@ public class WorkspacePaneUtils {
     {
         switch (projectUrl.getFileType()) {
 
-            // Handle zip
-            case "zip": return openProjectForZipUrl(workspacePane, projectUrl);
-
-            // Handle git
+            // Handle zip, git: Open project for repo URL
+            case "zip": //return openProjectForZipUrl(workspacePane, projectUrl);
             case "git": openProjectForRepoUrl(workspacePane, projectUrl); return true;
 
             // Handle gfar
