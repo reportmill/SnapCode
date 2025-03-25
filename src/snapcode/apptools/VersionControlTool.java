@@ -39,7 +39,7 @@ public class VersionControlTool extends ProjectTool {
         _versionControl = VersionControl.getVersionControlForProjectSite(projectSite);
 
         // Add listener to update FilesPane.FilesTree when file status changed
-        _versionControl.addPropChangeListener(pc -> versionControlFileStatusChanged(pc));
+        _versionControl.addPropChangeListener(pc -> handleVersionControlFileStatusChange(pc));
     }
 
     /**
@@ -236,11 +236,11 @@ public class VersionControlTool extends ProjectTool {
 
         // Call real update files method and configure callbacks
         TaskMonitor taskMonitor = new TaskMonitor("Update files from remote site");
-        TaskRunner<Boolean> updateRunner = new TaskRunner<>(() -> _versionControl.updateFiles(theFiles, taskMonitor));
+        TaskRunner<Boolean> updateRunner = new TaskRunner<>(() -> _versionControl.updateFiles(updateFiles, taskMonitor));
         updateRunner.setMonitor(taskMonitor);
         updateRunner.setOnSuccess(completed -> updateFilesSuccess(updateFiles));
-        updateRunner.setOnFailure(exception -> updateFilesFailed(exception));
         updateRunner.setOnFinished(() -> updateFilesFinished());
+        updateRunner.setOnFailure(exception -> updateFilesFailed(exception));
         updateRunner.start();
 
         // Show progress dialog
@@ -252,19 +252,7 @@ public class VersionControlTool extends ProjectTool {
      */
     private void updateFilesSuccess(List<WebFile> theFiles)
     {
-        for (WebFile file : theFiles)
-            file.resetAndVerify();
-        for (WebFile file : theFiles)
-            getBrowser().reloadFile(file);
-        _workspacePane.resetLater();
-    }
-
-    /**
-     * Called when update files fails.
-     */
-    private void updateFilesFailed(Exception anException)
-    {
-        runLater(() -> DialogBox.showExceptionDialog(_workspacePane.getUI(), "Update files failed", anException));
+        resetAndReloadFiles(theFiles);
     }
 
     /**
@@ -281,6 +269,14 @@ public class VersionControlTool extends ProjectTool {
         // Connect to remote site
         if (isUISet())
             connectToRemoteSite();
+    }
+
+    /**
+     * Called when update files fails.
+     */
+    private void updateFilesFailed(Exception anException)
+    {
+        runLater(() -> DialogBox.showExceptionDialog(_workspacePane.getUI(), "Update files failed", anException));
     }
 
     /**
@@ -308,15 +304,39 @@ public class VersionControlTool extends ProjectTool {
 
         // Call real replace method and configure callbacks
         TaskMonitor taskMonitor = new TaskMonitor("Replace files from remote site");
-        TaskRunner<Boolean> replaceRunner = new TaskRunner<>(() -> _versionControl.replaceFiles(theFiles, taskMonitor));
+        TaskRunner<Boolean> replaceRunner = new TaskRunner<>(() -> _versionControl.replaceFiles(replaceFiles, taskMonitor));
         replaceRunner.setMonitor(taskMonitor);
-        replaceRunner.setOnSuccess(obj -> updateFilesSuccess(replaceFiles));
+        replaceRunner.setOnSuccess(obj -> replaceFilesSuccess(replaceFiles));
+        replaceRunner.setOnFinished(() -> replaceFilesFinished());
         replaceRunner.setOnFailure(exception -> replaceFilesFailed(exception));
-        replaceRunner.setOnFinished(() -> updateFilesFinished());
         replaceRunner.start();
 
         // Show progress dialog
         taskMonitor.showProgressPanel(_workspacePane.getUI());
+    }
+
+    /**
+     * Called when replace files succeeds.
+     */
+    private void replaceFilesSuccess(List<WebFile> theFiles)
+    {
+        runLater(() -> resetAndReloadFiles(theFiles));
+    }
+
+    /**
+     * Called when replace files finishes.
+     */
+    private void replaceFilesFinished()
+    {
+        // Reset AutoBuildEnabled and build Project
+        WorkspaceBuilder builder = _workspace.getBuilder();
+        builder.setAutoBuildEnabled(true);
+        if (builder.isAutoBuild())
+            builder.buildWorkspaceLater();
+
+        // Connect to remote site
+        if (isUISet())
+            connectToRemoteSite();
     }
 
     /**
@@ -351,7 +371,7 @@ public class VersionControlTool extends ProjectTool {
         // Do real commit
         String commitMessage = transferPane.getCommitMessage();
         TaskMonitor taskMonitor = new TaskMonitor("Commit files to remote site");
-        TaskRunner<Boolean> commitRunner = new TaskRunner<>(() -> _versionControl.commitFiles(theFiles, commitMessage, taskMonitor));
+        TaskRunner<Boolean> commitRunner = new TaskRunner<>(() -> _versionControl.commitFiles(commitFiles, commitMessage, taskMonitor));
         commitRunner.setMonitor(taskMonitor);
         commitRunner.setOnFailure(exception -> commitFilesFailed(exception));
         commitRunner.start();
@@ -371,35 +391,47 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called when file added to project.
      */
-    public void fileAdded(WebFile aFile)
+    public void handleProjectFileAdded(WebFile aFile)
     {
-        _versionControl.fileAdded(aFile);
+        _versionControl.handleProjectFileAdded(aFile);
     }
 
     /**
      * Called when file removed from project.
      */
-    public void fileRemoved(WebFile aFile)
+    public void handleProjectFileRemoved(WebFile aFile)
     {
-        _versionControl.fileRemoved(aFile);
+        _versionControl.handleProjectFileRemoved(aFile);
     }
 
     /**
-     * Called when file saved in project.
+     * Called when project file saved.
      */
-    public void fileSaved(WebFile aFile)
+    public void handleProjectFileSaved(WebFile aFile)
     {
-        _versionControl.fileSaved(aFile);
+        _versionControl.handleProjectFileSaved(aFile);
     }
 
     /**
      * Called when VersionControl changes a file status.
      */
-    private void versionControlFileStatusChanged(PropChange aPC)
+    private void handleVersionControlFileStatusChange(PropChange aPC)
     {
         WebFile file = (WebFile) aPC.getSource();
         ProjectFilesTool projectFilesTool = _workspacePane.getProjectFilesTool();
         projectFilesTool.updateChangedFile(file);
+    }
+
+    /**
+     * Resets the given files and reloads.
+     */
+    private void resetAndReloadFiles(List<WebFile> theFiles)
+    {
+        for (WebFile file : theFiles)
+            file.resetAndVerify();
+        for (WebFile file : theFiles)
+            getBrowser().reloadFile(file);
+        _workspacePane.resetLater();
     }
 
     /**

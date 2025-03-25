@@ -525,22 +525,22 @@ public class VersionControl {
     }
 
     /**
-     * Called when file added.
+     * Called when file added to project.
      */
-    public void fileAdded(WebFile aFile)  { }
+    public void handleProjectFileAdded(WebFile aFile)  { }
 
     /**
-     * Called when file removed.
+     * Called when file removed from project.
      */
-    public void fileRemoved(WebFile aFile)
+    public void handleProjectFileRemoved(WebFile aFile)
     {
         clearFileStatus(aFile);
     }
 
     /**
-     * Called when file saved.
+     * Called when project file saved.
      */
-    public void fileSaved(WebFile aFile)
+    public void handleProjectFileSaved(WebFile aFile)
     {
         clearFileStatus(aFile);
     }
