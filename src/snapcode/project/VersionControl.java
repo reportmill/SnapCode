@@ -136,7 +136,7 @@ public class VersionControl {
         // Find all files to update
         WebSite localSite = getLocalSite();
         WebFile localSiteRootDir = localSite.getRootDir();
-        List<WebFile> updateFiles = getUpdateFilesForRootFiles(Collections.singletonList(localSiteRootDir));
+        List<WebFile> updateFiles = getUpdateFilesForLocalFiles(ListUtils.of(localSiteRootDir));
 
         // Update files
         return updateFiles(updateFiles, taskMonitor);
@@ -297,38 +297,39 @@ public class VersionControl {
     }
 
     /**
-     * Returns the local files that need to be updated from remote for given root files.
+     * Returns the local files that need to be updated from remote for given local files.
+     * Files need to be updated if local version is different from remote.
      */
-    public List<WebFile> getUpdateFilesForRootFiles(List<WebFile> rootFiles)
+    public List<WebFile> getUpdateFilesForLocalFiles(List<WebFile> localFiles)
     {
-        // Map root files to remote files
-        List<WebFile> remoteRootFiles = ListUtils.map(rootFiles, file -> createRemoteFile(file));
-
-        // Get remote modified files
-        WebSite otherSite = getCloneSite();
-        Set<WebFile> modifiedFilesSet = new TreeSet<>();
-        remoteRootFiles.forEach(rootFile -> findModifiedFiles(rootFile, otherSite, modifiedFilesSet));
-        List<WebFile> modifiedFiles = new ArrayList<>(modifiedFilesSet);
-
-        // map remote modified files to local
-        return ListUtils.map(modifiedFiles, file -> createLocalFile(file));
+        WebSite remoteSite = getRemoteSite();
+        return getModifiedFilesForFilesInOtherSite(localFiles, remoteSite);
     }
 
     /**
-     * Returns the local files that have been modified from remote for given root files.
+     * Returns the local files that have been modified from clone for given local files.
+     * Files is modified if local version is different from clone.
      */
-    public List<WebFile> getModifiedFilesForRootFiles(List<WebFile> rootFiles)
+    public List<WebFile> getModifiedFilesForLocalFiles(List<WebFile> localFiles)
     {
-        WebSite remoteSite = getCloneSite();
-        Set<WebFile> modifiedFiles = new TreeSet<>();
-        rootFiles.forEach(rootFile -> findModifiedFiles(rootFile, remoteSite, modifiedFiles));
-        return new ArrayList<>(modifiedFiles);
+        WebSite cloneSite = getCloneSite();
+        return getModifiedFilesForFilesInOtherSite(localFiles, cloneSite);
     }
 
     /**
-     * Finds the local files that have been modified from remote for given root files.
+     * Returns the files that have been modified from given other site for given files.
      */
-    private void findModifiedFiles(WebFile aFile, WebSite otherSite, Set<WebFile> modifiedFiles)
+    private List<WebFile> getModifiedFilesForFilesInOtherSite(List<WebFile> theFiles, WebSite otherSite)
+    {
+        List<WebFile> modifiedFiles = new ArrayList<>();
+        theFiles.forEach(rootFile -> findModifiedFilesForFileInOtherSite(rootFile, otherSite, modifiedFiles));
+        return modifiedFiles;
+    }
+
+    /**
+     * If given file is modified in given other site, it is added to given list. If file is directory, then recurse.
+     */
+    private void findModifiedFilesForFileInOtherSite(WebFile aFile, WebSite otherSite, List<WebFile> modifiedFiles)
     {
         // If ignored file, just return
         if (isIgnoreFile(aFile))
@@ -336,7 +337,7 @@ public class VersionControl {
 
         // Handle file: If file status is Added/Updated/Removed, add file
         if (aFile.isFile()) {
-            FileStatus fileStatus = calcFileStatusForOtherSite(aFile, otherSite);
+            FileStatus fileStatus = getFileStatusForFileFileInOtherSite(aFile, otherSite);
             if (fileStatus != FileStatus.Identical)
                 modifiedFiles.add(aFile);
             return;
@@ -345,7 +346,7 @@ public class VersionControl {
         // Handle directory: Recurse for child files
         List<WebFile> childFiles = aFile.getFiles();
         for (WebFile childFile : childFiles)
-            findModifiedFiles(childFile, otherSite, modifiedFiles);
+            findModifiedFilesForFileInOtherSite(childFile, otherSite, modifiedFiles);
 
         // Find files that exist in other site that are missing from given file site
         findMissingFiles(aFile, otherSite, modifiedFiles);
@@ -354,7 +355,7 @@ public class VersionControl {
     /**
      * Looks for given directory file in other site, and looks for files in other site that are missing in dir file site.
      */
-    private void findMissingFiles(WebFile dirFile, WebSite otherSite, Set<WebFile> modifiedFiles)
+    private void findMissingFiles(WebFile dirFile, WebSite otherSite, List<WebFile> modifiedFiles)
     {
         // Get other dir file - just return if missing
         WebFile otherDir = otherSite.getFileForPath(dirFile.getPath());
@@ -375,7 +376,7 @@ public class VersionControl {
 
             // Create dir child file and recurse into findModifiedFiles
             dirChildFile = fileSite.createFileForPath(otherChildFile.getPath(), otherChildFile.isDir());
-            findModifiedFiles(dirChildFile, otherSite, modifiedFiles);
+            findModifiedFilesForFileInOtherSite(dirChildFile, otherSite, modifiedFiles);
         }
     }
 
@@ -389,36 +390,39 @@ public class VersionControl {
     }
 
     /**
-     * Returns the file VersionControl status.
+     * Returns the file status of given local file versus clone site.
      */
-    public FileStatus getFileStatus(WebFile aFile)
+    public FileStatus getFileStatus(WebFile localFile)
     {
         // Get cached status
-        FileStatus fileStatus = _filesStatusCache.get(aFile);
+        FileStatus fileStatus = _filesStatusCache.get(localFile);
         if (fileStatus != null)
             return fileStatus;
 
-        // Determine status, cache and return
-        fileStatus = calcFileStatusForOtherSite(aFile, getCloneSite());
-        _filesStatusCache.put(aFile, fileStatus);
+        // Get status of local file in clone site and cache
+        WebSite cloneSite = getCloneSite();
+        fileStatus = getFileStatusForFileFileInOtherSite(localFile, cloneSite);
+        _filesStatusCache.put(localFile, fileStatus);
+
+        // Return
         return fileStatus;
     }
 
     /**
      * Returns the status for a given remote file info.
      */
-    protected FileStatus calcFileStatusForOtherSite(WebFile aFile, WebSite otherSite)
+    protected FileStatus getFileStatusForFileFileInOtherSite(WebFile aFile, WebSite otherSite)
     {
-        // If no remote site or is ignore file, just return
+        // If vc not available or if ignore file, just return
         if (!isAvailable())
             return FileStatus.Identical;
         if (isIgnoreFile(aFile))
             return FileStatus.Identical;
 
-        // If directory, iterate over child files and if any ChangedLocal, return ChangedLocal, otherwise return Identical
+        // If directory, return modified if any child modified, otherwise return Identical
         if (aFile.isDir()) {
             List<WebFile> childFiles = aFile.getFiles();
-            if (ListUtils.hasMatch(childFiles, file -> isFileModified(file)))
+            if (ListUtils.hasMatch(childFiles, file -> getFileStatusForFileFileInOtherSite(file, otherSite) != FileStatus.Identical))
                 return FileStatus.Modified;
             return FileStatus.Identical;
         }

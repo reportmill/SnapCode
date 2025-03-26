@@ -106,19 +106,6 @@ public class VersionControlZip extends VersionControl {
     }
 
     /**
-     * Override to do fetch first.
-     */
-    @Override
-    public List<WebFile> getUpdateFilesForRootFiles(List<WebFile> theFiles)
-    {
-        // Make sure latest version is in clone site
-        getLocalZipFile();
-
-        // Do normal version
-        return super.getUpdateFilesForRootFiles(theFiles);
-    }
-
-    /**
      * Returns the site for project dir in zip site.
      */
     private static WebSite getProjectSiteForZipFileSite(WebSite zipFileSite)

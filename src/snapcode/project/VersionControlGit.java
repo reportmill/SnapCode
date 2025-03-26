@@ -157,7 +157,7 @@ public class VersionControlGit extends VersionControl {
      * Override to do fetch first.
      */
     @Override
-    public List<WebFile> getUpdateFilesForRootFiles(List<WebFile> theFiles)
+    public List<WebFile> getUpdateFilesForLocalFiles(List<WebFile> localFiles)
     {
         // Do git fetch to bring repo up to date
         try {
@@ -167,7 +167,7 @@ public class VersionControlGit extends VersionControl {
         catch (Exception e) { throw new RuntimeException(e); }
 
         // Do normal version
-        return super.getUpdateFilesForRootFiles(theFiles);
+        return super.getUpdateFilesForLocalFiles(localFiles);
     }
 
     /**

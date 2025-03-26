@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import snap.util.ListUtils;
 import snap.view.BoxView;
 import snapcode.project.WorkspaceBuilder;
 import snap.props.PropChange;
@@ -13,7 +14,6 @@ import snap.viewx.DialogBox;
 import snapcode.webbrowser.WebBrowser;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,7 +39,7 @@ public class VersionControlTool extends ProjectTool {
         _versionControl = VersionControl.getVersionControlForProjectSite(projectSite);
 
         // Add listener to update FilesPane.FilesTree when file status changed
-        _versionControl.addPropChangeListener(pc -> handleVersionControlFileStatusChange(pc));
+        _versionControl.addPropChangeListener(this::handleVersionControlFileStatusChange);
     }
 
     /**
@@ -208,7 +208,7 @@ public class VersionControlTool extends ProjectTool {
      */
     private void checkoutFailed(Exception anException)
     {
-        runLater(() -> DialogBox.showExceptionDialog(_workspacePane.getUI(), "Checkout failed", anException));
+        DialogBox.showExceptionDialog(_workspacePane.getUI(), "Checkout failed", anException);
     }
 
     /**
@@ -225,7 +225,7 @@ public class VersionControlTool extends ProjectTool {
             rootFiles = getSiteRootDirAsList();
 
         // Get update files for root files
-        List<WebFile> updateFiles = _versionControl.getUpdateFilesForRootFiles(rootFiles);
+        List<WebFile> updateFiles = _versionControl.getUpdateFilesForLocalFiles(rootFiles);
 
         // Run VcsTransferPane for files and op to confirm
         if (!new VcsTransferPane().showPanel(this, updateFiles, VcsTransferPane.Op.Update))
@@ -276,7 +276,7 @@ public class VersionControlTool extends ProjectTool {
      */
     private void updateFilesFailed(Exception anException)
     {
-        runLater(() -> DialogBox.showExceptionDialog(_workspacePane.getUI(), "Update files failed", anException));
+        DialogBox.showExceptionDialog(_workspacePane.getUI(), "Update files failed", anException);
     }
 
     /**
@@ -293,7 +293,7 @@ public class VersionControlTool extends ProjectTool {
             rootFiles = getSiteRootDirAsList();
 
         // Get replace files for root files
-        List<WebFile> replaceFiles = _versionControl.getModifiedFilesForRootFiles(rootFiles);
+        List<WebFile> replaceFiles = _versionControl.getModifiedFilesForLocalFiles(rootFiles);
 
         // Run VcsTransferPane for files and op
         if (!new VcsTransferPane().showPanel(this, replaceFiles, VcsTransferPane.Op.Replace))
@@ -320,7 +320,7 @@ public class VersionControlTool extends ProjectTool {
      */
     private void replaceFilesSuccess(List<WebFile> theFiles)
     {
-        runLater(() -> resetAndReloadFiles(theFiles));
+        resetAndReloadFiles(theFiles);
     }
 
     /**
@@ -344,7 +344,7 @@ public class VersionControlTool extends ProjectTool {
      */
     private void replaceFilesFailed(Exception anException)
     {
-        runLater(() -> DialogBox.showExceptionDialog(_workspacePane.getUI(), "Replace files failed", anException));
+        DialogBox.showExceptionDialog(_workspacePane.getUI(), "Replace files failed", anException);
     }
 
     /**
@@ -361,7 +361,7 @@ public class VersionControlTool extends ProjectTool {
             rootFiles = getSiteRootDirAsList();
 
         // Get commit files for root files
-        List<WebFile> commitFiles = _versionControl.getModifiedFilesForRootFiles(rootFiles);
+        List<WebFile> commitFiles = _versionControl.getModifiedFilesForLocalFiles(rootFiles);
 
         // Run VersionControlFilesPane for files and op
         VcsTransferPane transferPane = new VcsTransferPane();
@@ -385,7 +385,7 @@ public class VersionControlTool extends ProjectTool {
      */
     private void commitFilesFailed(Exception anException)
     {
-        runLater(() -> DialogBox.showExceptionDialog(_workspacePane.getUI(), "Commit files failed", anException));
+        DialogBox.showExceptionDialog(_workspacePane.getUI(), "Commit files failed", anException);
     }
 
     /**
@@ -440,6 +440,6 @@ public class VersionControlTool extends ProjectTool {
     private List<WebFile> getSiteRootDirAsList()
     {
         WebFile rootDir = getProjectSite().getRootDir();
-        return Collections.singletonList(rootDir);
+        return ListUtils.of(rootDir);
     }
 }
