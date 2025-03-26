@@ -10,6 +10,7 @@ import snap.props.PropChangeListener;
 import snap.text.TextBlock;
 import snap.text.TextBlockUtils;
 import snap.util.ArrayUtils;
+import snap.view.ViewUtils;
 import snap.web.WebFile;
 import snap.util.MDUtils;
 
@@ -66,7 +67,7 @@ public class JavaAgent {
         _javaFile.setProp(JavaAgent.class.getName(), this);
 
         // Start listening for file bytes changed
-        _fileBytesChangedLsnr = pc -> reloadFromFile();
+        _fileBytesChangedLsnr = pc -> handleJavaFileBytesChange();
         _javaFile.addPropChangeListener(_fileBytesChangedLsnr, WebFile.Bytes_Prop);
 
         // Add to Project
@@ -423,6 +424,14 @@ public class JavaAgent {
             _jfile = null;
         _externalRefs = null;
         _externalClassRefs = null;
+    }
+
+    /**
+     * Called when JavaFile bytes changes.
+     */
+    private void handleJavaFileBytesChange()
+    {
+        ViewUtils.runLater(this::reloadFromFile);
     }
 
     /**
