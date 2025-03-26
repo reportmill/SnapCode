@@ -127,7 +127,11 @@ public class VersionControl {
      */
     public boolean checkout(TaskMonitor taskMonitor) throws Exception
     {
-        if (!isAvailable()) { System.err.println("VersionControl.checkout: Remote not available"); return false; }
+        WebSite remoteSite = getRemoteSite();
+        if (remoteSite == null) {
+            System.err.println("VersionControl.checkout: Remote not available: " + getRemoteSiteUrlAddress());
+            return false;
+        }
 
         // Find all files to update
         WebSite localSite = getLocalSite();
