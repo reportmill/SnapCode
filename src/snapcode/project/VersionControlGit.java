@@ -139,6 +139,17 @@ public class VersionControlGit extends VersionControl {
     }
 
     /**
+     * Override to merge.
+     */
+    @Override
+    public boolean updateFiles(List<WebFile> theLocalFiles, TaskMonitor taskMonitor) throws Exception
+    {
+        GitDir gitDir = getGitDir();
+        gitDir.merge(taskMonitor);
+        return true;
+    }
+
+    /**
      * Override to do commit.
      */
     @Override
@@ -168,43 +179,6 @@ public class VersionControlGit extends VersionControl {
 
         // Do normal version
         return super.getUpdateFilesForLocalFiles(localFiles);
-    }
-
-    /**
-     * Override to merge.
-     */
-    @Override
-    public boolean updateFiles(List<WebFile> theLocalFiles, TaskMonitor taskMonitor) throws Exception
-    {
-        GitDir gitDir = getGitDir();
-        gitDir.merge(taskMonitor);
-        return true;
-    }
-
-    /**
-     * Override for bogus implementation that copies clone back to local file.
-     */
-    @Override
-    protected void replaceFile(WebFile aLocalFile) throws Exception
-    {
-        // Get CloneFile
-        WebSite cloneSite = getCloneSite();
-        WebFile cloneFile = cloneSite.getFileForPath(aLocalFile.getPath());
-
-        // Set new file bytes and save
-        if (cloneFile.getExists()) { //_project.removeBuildFile(aLocalFile);
-            if (aLocalFile.isFile())
-                aLocalFile.setBytes(cloneFile.getBytes());
-            aLocalFile.save();
-            aLocalFile.saveLastModTime(cloneFile.getLastModTime());
-        }
-
-        // Otherwise delete LocalFile and CloneFile
-        else if (aLocalFile.getExists())
-            aLocalFile.delete();
-
-        // Clear file status
-        clearFileStatus(aLocalFile);
     }
 
     /**

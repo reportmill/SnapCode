@@ -73,6 +73,17 @@ public class VersionControl {
     public String getRemoteSiteUrlAddress()  { return _remoteSiteUrl != null ? _remoteSiteUrl.getString() : null; }
 
     /**
+     * Returns whether existing VCS artifacts are detected for site.
+     */
+    public boolean isAvailable()
+    {
+        if (_isAvailable != null) return _isAvailable;
+        WebSite remoteSite = getRemoteSite();
+        boolean remoteAvailable = remoteSite != null && remoteSite.getExists();
+        return _isAvailable = remoteAvailable;
+    }
+
+    /**
      * Returns the remote site (e.g. Git repository site, Zip file site, etc.).
      */
     public WebSite getRemoteSite()
@@ -109,17 +120,6 @@ public class VersionControl {
         WebFile cloneDir = sandboxSite.createFileForPath("Remote.clone", true);
         WebURL cloneUrl = cloneDir.getURL();
         return cloneUrl.getAsSite();
-    }
-
-    /**
-     * Returns whether existing VCS artifacts are detected for site.
-     */
-    public boolean isAvailable()
-    {
-        if (_isAvailable != null) return _isAvailable;
-        WebSite remoteSite = getRemoteSite();
-        boolean remoteAvailable = remoteSite != null && remoteSite.getExists();
-        return _isAvailable = remoteAvailable;
     }
 
     /**
