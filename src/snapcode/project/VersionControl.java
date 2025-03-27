@@ -170,31 +170,18 @@ public class VersionControl {
     {
         // Get RemoteFile
         WebFile remoteFile = createRemoteFile(localFile);
-        WebFile cloneFile = createCloneFile(localFile);
 
-        // Set new file bytes and save
+        // If remote file exists, copy to local file
         if (remoteFile.getExists()) {
-
-            // Update local file and save
             if (localFile.isFile())
                 localFile.setBytes(remoteFile.getBytes());
             localFile.save();
             localFile.saveLastModTime(remoteFile.getLastModTime());
-
-            // Update clone file
-            if (cloneFile.isFile())
-                cloneFile.setBytes(remoteFile.getBytes());
-            cloneFile.save();
-            cloneFile.saveLastModTime(remoteFile.getLastModTime());
         }
 
-        // Otherwise delete LocalFile and CloneFile
-        else {
-            if (localFile.getExists())
-                localFile.delete();
-            if (cloneFile.getExists())
-                cloneFile.delete();
-        }
+        // Otherwise delete local file
+        else if (localFile.getExists())
+            localFile.delete();
 
         // Clear file status
         clearFileStatus(localFile);
@@ -227,18 +214,17 @@ public class VersionControl {
     protected void replaceFile(WebFile localFile) throws Exception
     {
         // Get RemoteFile
-        String filePath = localFile.getPath();
-        WebFile cloneFile = getCloneFile(filePath);
+        WebFile cloneFile = createCloneFile(localFile);
 
-        // Set new file bytes and save
-        if (cloneFile != null) {
+        // If clone file exists, copy to local file bytes and save
+        if (cloneFile.getExists()) {
             if (localFile.isFile())
                 localFile.setBytes(cloneFile.getBytes());
             localFile.save();
             localFile.saveLastModTime(cloneFile.getLastModTime());
         }
 
-        // Otherwise delete LocalFile
+        // Otherwise delete local file
         else if (localFile.getExists())
             localFile.delete();
 
@@ -497,30 +483,12 @@ public class VersionControl {
     }
 
     /**
-     * Returns the remote file for path.
-     */
-    private WebFile getRemoteFile(String filePath)
-    {
-        WebSite remoteSite = getRemoteSite(); if (remoteSite == null) return null;
-        return remoteSite.getFileForPath(filePath);
-    }
-
-    /**
      * Returns the remote file for file.
      */
     private WebFile createRemoteFile(WebFile aFile)
     {
         WebSite remoteSite = getRemoteSite();
         return remoteSite.createFileForPath(aFile.getPath(), aFile.isDir());
-    }
-
-    /**
-     * Returns the clone file for path.
-     */
-    private WebFile getCloneFile(String filePath)
-    {
-        WebSite cloneSite = getCloneSite();
-        return cloneSite.getFileForPath(filePath);
     }
 
     /**

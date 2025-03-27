@@ -51,6 +51,33 @@ public class VersionControlZip extends VersionControl {
     }
 
     /**
+     * Load all remote files into project directory.
+     */
+    @Override
+    public boolean checkout(TaskMonitor taskMonitor) throws Exception
+    {
+        // Make sure local site exists
+        WebSite localSite = getLocalSite();
+        if (!localSite.getExists()) {
+            WebFile rootDir = localSite.getRootDir();
+            rootDir.save();
+        }
+
+        // Do normal version
+        return super.checkout(taskMonitor);
+    }
+
+    /**
+     * Override to update clone file first.
+     */
+    @Override
+    public List<WebFile> getUpdateFilesForLocalFiles(List<WebFile> localFiles)
+    {
+        getCloneZipFile();
+        return super.getUpdateFilesForLocalFiles(localFiles);
+    }
+
+    /**
      * Returns the file for clone of remote zip file.
      */
     private WebFile getCloneZipFile()
@@ -83,26 +110,6 @@ public class VersionControlZip extends VersionControl {
         // Create clone file for zip file in sandbox site
         String cloneZipFilePath = '/' + remoteZipFileUrl.getFilename();
         return sandboxSite.createFileForPath(cloneZipFilePath, false);
-    }
-
-    /**
-     * Load all remote files into project directory.
-     */
-    @Override
-    public boolean checkout(TaskMonitor taskMonitor) throws Exception
-    {
-        // Make sure local site exists
-        WebSite localSite = getLocalSite();
-        if (!localSite.getExists()) {
-            WebFile rootDir = localSite.getRootDir();
-            rootDir.save();
-        }
-
-        // Get clone of remote zip file
-        getCloneZipFile();
-
-        // Do normal version
-        return super.checkout(taskMonitor);
     }
 
     /**
