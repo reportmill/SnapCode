@@ -329,40 +329,36 @@ public class VersionControl {
             return;
         }
 
-        // Handle directory: Recurse for child files
-        List<WebFile> childFiles = aFile.getFiles();
-        for (WebFile childFile : childFiles)
-            findModifiedFilesForFileInOtherSite(childFile, otherSite, modifiedFiles);
+        // Recurse for child files
+        if (aFile.getExists()) {
+            List<WebFile> childFiles = aFile.getFiles();
+            for (WebFile childFile : childFiles)
+                findModifiedFilesForFileInOtherSite(childFile, otherSite, modifiedFiles);
+        }
 
-        // Find files that exist in other site that are missing from given file site
-        findMissingFiles(aFile, otherSite, modifiedFiles);
+        // Recurse for other site child files
+        findMissingFilesForDirFileInOtherSite(aFile, otherSite, modifiedFiles);
     }
 
     /**
-     * Looks for given directory file in other site, and looks for files in other site that are missing in dir file site.
+     * Looks for given directory file in other site, and creates/adds missing child files.
      */
-    private void findMissingFiles(WebFile dirFile, WebSite otherSite, List<WebFile> modifiedFiles)
+    private void findMissingFilesForDirFileInOtherSite(WebFile dirFile, WebSite otherSite, List<WebFile> modifiedFiles)
     {
-        // Get other dir file - just return if missing
+        // Get other dir file - just return if also missing
         WebFile otherDir = otherSite.getFileForPath(dirFile.getPath());
         if (otherDir == null)
             return;
 
-        // Iterate over child files and recurse for missing files
-        List<WebFile> otherDirChildFiles = otherDir.getFiles();
+        // Get file site and other site child files
         WebSite fileSite = dirFile.getSite();
+        List<WebFile> otherDirChildFiles = otherDir.getFiles();
 
-        // Iterate over child files and recurse for missing files
-        for (WebFile otherChildFile : otherDirChildFiles) {
-
-            // If matching dir child file exists, just skip
-            WebFile dirChildFile = fileSite.getFileForPath(otherChildFile.getPath());
-            if (dirChildFile != null)
-                continue;
-
-            // Create dir child file and recurse into findModifiedFiles
-            dirChildFile = fileSite.createFileForPath(otherChildFile.getPath(), otherChildFile.isDir());
-            findModifiedFilesForFileInOtherSite(dirChildFile, otherSite, modifiedFiles);
+        // Iterate over other dir child files and find missing child files
+        for (WebFile otherDirChild : otherDirChildFiles) {
+            WebFile dirFileChild = fileSite.createFileForPath(otherDirChild.getPath(), otherDirChild.isDir());
+            if (!dirFileChild.getExists())
+                findModifiedFilesForFileInOtherSite(dirFileChild, otherSite, modifiedFiles);
         }
     }
 
