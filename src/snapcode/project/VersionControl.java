@@ -117,7 +117,7 @@ public class VersionControl {
         // Get clone site (via clone dir and url)
         WebSite localSite = getLocalSite();
         WebSite sandboxSite = localSite.getSandboxSite();
-        WebFile cloneDir = sandboxSite.createFileForPath("Remote.clone", true);
+        WebFile cloneDir = sandboxSite.createFileForPath("/Clone", true);
         WebURL cloneUrl = cloneDir.getURL();
         return cloneUrl.getAsSite();
     }
@@ -135,8 +135,8 @@ public class VersionControl {
 
         // Find all files to update
         WebSite localSite = getLocalSite();
-        WebFile localSiteRootDir = localSite.getRootDir();
-        List<WebFile> updateFiles = getUpdateFilesForLocalFiles(ListUtils.of(localSiteRootDir));
+        WebFile localSiteDir = localSite.getRootDir();
+        List<WebFile> updateFiles = getUpdateFilesForLocalFiles(ListUtils.of(localSiteDir));
 
         // Update files
         return updateFiles(updateFiles, taskMonitor);
@@ -164,27 +164,17 @@ public class VersionControl {
     }
 
     /**
-     * Updates (merges) local site files from remote site.
+     * Updates (merges) local and clone file from remote site.
      */
     protected void updateFile(WebFile localFile)
     {
         // Get RemoteFile
         WebFile remoteFile = createRemoteFile(localFile);
+        WebFile cloneFile = createCloneFile(localFile);
 
-        // If remote file exists, copy to local file
-        if (remoteFile.getExists()) {
-            if (localFile.isFile())
-                localFile.setBytes(remoteFile.getBytes());
-            localFile.save();
-            localFile.saveLastModTime(remoteFile.getLastModTime());
-        }
-
-        // Otherwise delete local file
-        else if (localFile.getExists())
-            localFile.delete();
-
-        // Clear file status
-        clearFileStatus(localFile);
+        // Update clone and local file from remote
+        updateFileFromFile(cloneFile, remoteFile);
+        updateFileFromFile(localFile, remoteFile);
     }
 
     /**
@@ -209,27 +199,12 @@ public class VersionControl {
     }
 
     /**
-     * Replaces (overwrites) local site files from remote site.
+     * Replaces (overwrites) local file from clone site.
      */
-    protected void replaceFile(WebFile localFile) throws Exception
+    private void replaceFile(WebFile localFile)
     {
-        // Get RemoteFile
         WebFile cloneFile = createCloneFile(localFile);
-
-        // If clone file exists, copy to local file bytes and save
-        if (cloneFile.getExists()) {
-            if (localFile.isFile())
-                localFile.setBytes(cloneFile.getBytes());
-            localFile.save();
-            localFile.saveLastModTime(cloneFile.getLastModTime());
-        }
-
-        // Otherwise delete local file
-        else if (localFile.getExists())
-            localFile.delete();
-
-        // Clear file status
-        clearFileStatus(localFile);
+        updateFileFromFile(localFile, cloneFile);
     }
 
     /**
@@ -254,7 +229,7 @@ public class VersionControl {
     }
 
     /**
-     * Commits (copies) local site file to remote site.
+     * Commits (copies) local file to clone and remote site.
      */
     protected void commitFile(WebFile localFile)
     {
@@ -263,20 +238,8 @@ public class VersionControl {
         WebFile cloneFile = createCloneFile(localFile);
 
         // If LocalFile exists, save LocalFile bytes to RemoteFile
-        if (localFile.getExists()) {
-            if (localFile.isFile())
-                remoteFile.setBytes(localFile.getBytes());
-            remoteFile.save();
-            localFile.saveLastModTime(remoteFile.getLastModTime());
-            if (localFile.isFile())
-                cloneFile.setBytes(localFile.getBytes());
-            cloneFile.save();
-            cloneFile.saveLastModTime(remoteFile.getLastModTime());
-        }
-
-        // Otherwise if LocalFile was deleted, delete RemoteFile
-        else if (remoteFile.getExists())
-            remoteFile.delete();
+        updateFileFromFile(cloneFile, localFile);
+        updateFileFromFile(remoteFile, localFile);
 
         // Clear file status
         clearFileStatus(localFile);
@@ -284,12 +247,14 @@ public class VersionControl {
 
     /**
      * Returns the local files that need to be updated from remote for given local files.
-     * Files need to be updated if local version is different from remote.
+     * Files need to be updated if clone version is different from remote.
      */
     public List<WebFile> getUpdateFilesForLocalFiles(List<WebFile> localFiles)
     {
+        List<WebFile> cloneFiles = ListUtils.map(localFiles, localFile -> createCloneFile(localFile));
         WebSite remoteSite = getRemoteSite();
-        return getModifiedFilesForFilesInOtherSite(localFiles, remoteSite);
+        List<WebFile> modifiedCloneFiles = getModifiedFilesForFilesInOtherSite(cloneFiles, remoteSite);
+        return ListUtils.map(modifiedCloneFiles, cloneFile -> createLocalFile(cloneFile));
     }
 
     /**
@@ -381,6 +346,10 @@ public class VersionControl {
         if (fileStatus != null)
             return fileStatus;
 
+        // If VCS not available, return identical
+        if (!isAvailable())
+            return FileStatus.Identical;
+
         // Get status of local file in clone site and cache
         WebSite cloneSite = getCloneSite();
         fileStatus = getFileStatusForFileFileInOtherSite(localFile, cloneSite);
@@ -395,9 +364,7 @@ public class VersionControl {
      */
     protected FileStatus getFileStatusForFileFileInOtherSite(WebFile aFile, WebSite otherSite)
     {
-        // If vc not available or if ignore file, just return
-        if (!isAvailable())
-            return FileStatus.Identical;
+        // If ignore file, just return
         if (isIgnoreFile(aFile))
             return FileStatus.Identical;
 
@@ -530,6 +497,24 @@ public class VersionControl {
      * Fires a given property change.
      */
     protected void firePropChange(PropChange aPC)  { _pcs.firePropChange(aPC); }
+
+    /**
+     * Updates given file from other file.
+     */
+    private static void updateFileFromFile(WebFile localFile, WebFile otherFile)
+    {
+        // If other file exists, copy to local file
+        if (otherFile.getExists()) {
+            if (localFile.isFile())
+                localFile.setBytes(otherFile.getBytes());
+            localFile.save();
+            localFile.saveLastModTime(otherFile.getLastModTime());
+        }
+
+        // Otherwise delete local file
+        else if (localFile.getExists())
+            localFile.delete();
+    }
 
     /**
      * Returns the VersionControl for the given site.

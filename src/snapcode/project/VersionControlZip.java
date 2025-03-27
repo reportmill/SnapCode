@@ -1,6 +1,5 @@
 package snapcode.project;
 import snap.util.ListUtils;
-import snap.util.TaskMonitor;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
@@ -25,8 +24,8 @@ public class VersionControlZip extends VersionControl {
     @Override
     public boolean isAvailable()
     {
-        WebFile cloneFileCached = createCloneZipFile();
-        return cloneFileCached.getExists();
+        WebSite cloneSite = getCloneSite();
+        return cloneSite.getExists();
     }
 
     /**
@@ -37,79 +36,6 @@ public class VersionControlZip extends VersionControl {
     {
         WebSite zipSite = _remoteSiteUrl.getAsSite();
         return getProjectSiteForZipFileSite(zipSite);
-    }
-
-    /**
-     * Override to return project site in clone ZipFile.
-     */
-    @Override
-    protected WebSite getCloneSiteImpl()
-    {
-        WebFile cloneZipFile = getCloneZipFile();
-        WebSite cloneZipFileSite = cloneZipFile.getURL().getAsSite();
-        return getProjectSiteForZipFileSite(cloneZipFileSite);
-    }
-
-    /**
-     * Load all remote files into project directory.
-     */
-    @Override
-    public boolean checkout(TaskMonitor taskMonitor) throws Exception
-    {
-        // Make sure local site exists
-        WebSite localSite = getLocalSite();
-        if (!localSite.getExists()) {
-            WebFile rootDir = localSite.getRootDir();
-            rootDir.save();
-        }
-
-        // Do normal version
-        return super.checkout(taskMonitor);
-    }
-
-    /**
-     * Override to update clone file first.
-     */
-    @Override
-    public List<WebFile> getUpdateFilesForLocalFiles(List<WebFile> localFiles)
-    {
-        getCloneZipFile();
-        return super.getUpdateFilesForLocalFiles(localFiles);
-    }
-
-    /**
-     * Returns the file for clone of remote zip file.
-     */
-    private WebFile getCloneZipFile()
-    {
-        WebFile remoteFile = getRemoteSiteUrl().getFile();
-        WebFile cloneZipFile = createCloneZipFile();
-
-        // If clone file exists and is newer than remote file, just return
-        if (cloneZipFile.getExists() && cloneZipFile.getLastModTime() >= remoteFile.getLastModTime())
-            return cloneZipFile;
-
-        // Update clone file
-        cloneZipFile.setBytes(remoteFile.getBytes());
-        cloneZipFile.save();
-
-        // Return
-        return cloneZipFile;
-    }
-
-    /**
-     * Creates the file for clone of remote zip file.
-     */
-    private WebFile createCloneZipFile()
-    {
-        // Get sandbox site for remote zip file
-        WebURL remoteZipFileUrl = getRemoteSiteUrl();
-        WebSite remoteZipFileSite = remoteZipFileUrl.getAsSite();
-        WebSite sandboxSite = remoteZipFileSite.getSandboxSite();
-
-        // Create clone file for zip file in sandbox site
-        String cloneZipFilePath = '/' + remoteZipFileUrl.getFilename();
-        return sandboxSite.createFileForPath(cloneZipFilePath, false);
     }
 
     /**
