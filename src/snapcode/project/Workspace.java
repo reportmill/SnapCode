@@ -302,7 +302,7 @@ public class Workspace extends PropObject {
         // If exists, just add and return
         if (projSite.getExists()) {
             WebFile projRootDir = projSite.getRootDir();
-            if (projRootDir.getFileCount() > 0) {
+            if (ProjectUtils.isProjectDir(projRootDir)) {
                 openProjectForSite(projSite);
                 return true;
             }

@@ -20,6 +20,16 @@ public class VersionControlZip extends VersionControl {
     }
 
     /**
+     * Override to return whether local clone of zip file is present.
+     */
+    @Override
+    public boolean isAvailable()
+    {
+        WebFile cloneFileCached = createCloneZipFile();
+        return cloneFileCached.getExists();
+    }
+
+    /**
      * Override to return project site in remote ZipFile.
      */
     @Override
@@ -30,62 +40,49 @@ public class VersionControlZip extends VersionControl {
     }
 
     /**
-     * Override to return project site in local ZipFile.
+     * Override to return project site in clone ZipFile.
      */
     @Override
     protected WebSite getCloneSiteImpl()
     {
-        WebFile localZipFile = getLocalZipFile();
-        WebSite localZipFileSite = localZipFile.getURL().getAsSite();
-        return getProjectSiteForZipFileSite(localZipFileSite);
+        WebFile cloneZipFile = getCloneZipFile();
+        WebSite cloneZipFileSite = cloneZipFile.getURL().getAsSite();
+        return getProjectSiteForZipFileSite(cloneZipFileSite);
     }
 
     /**
-     * Returns the local copy of zip file.
+     * Returns the file for clone of remote zip file.
      */
-    public WebFile getLocalZipFile()
+    private WebFile getCloneZipFile()
     {
         WebFile remoteFile = getRemoteSiteUrl().getFile();
-        WebFile localZipFile = createLocalZipFile();
+        WebFile cloneZipFile = createCloneZipFile();
 
         // If clone file exists and is newer than remote file, just return
-        if (localZipFile.getExists() && localZipFile.getLastModTime() >= remoteFile.getLastModTime())
-            return localZipFile;
+        if (cloneZipFile.getExists() && cloneZipFile.getLastModTime() >= remoteFile.getLastModTime())
+            return cloneZipFile;
 
         // Update clone file
-        localZipFile.setBytes(remoteFile.getBytes());
-        localZipFile.save();
+        cloneZipFile.setBytes(remoteFile.getBytes());
+        cloneZipFile.save();
 
         // Return
-        return localZipFile;
+        return cloneZipFile;
     }
 
     /**
-     * Creates the file for local copy of zip file.
+     * Creates the file for clone of remote zip file.
      */
-    private WebFile createLocalZipFile()
+    private WebFile createCloneZipFile()
     {
         // Get sandbox site for remote zip file
         WebURL remoteZipFileUrl = getRemoteSiteUrl();
         WebSite remoteZipFileSite = remoteZipFileUrl.getAsSite();
         WebSite sandboxSite = remoteZipFileSite.getSandboxSite();
 
-        // Create local file for zip file in sandbox site
-        String localZipFilePath = '/' + remoteZipFileUrl.getFilename();
-        return sandboxSite.createFileForPath(localZipFilePath, false);
-    }
-
-    /**
-     * Returns whether existing VCS artifacts are detected for project.
-     */
-    @Override
-    public boolean isAvailable()
-    {
-        // If clone file exists and is newer than remote file, just return
-        WebFile cloneFileCached = createLocalZipFile();
-        if (cloneFileCached.getExists())
-            return true;
-        return false;
+        // Create clone file for zip file in sandbox site
+        String cloneZipFilePath = '/' + remoteZipFileUrl.getFilename();
+        return sandboxSite.createFileForPath(cloneZipFilePath, false);
     }
 
     /**
@@ -100,6 +97,9 @@ public class VersionControlZip extends VersionControl {
             WebFile rootDir = localSite.getRootDir();
             rootDir.save();
         }
+
+        // Get clone of remote zip file
+        getCloneZipFile();
 
         // Do normal version
         return super.checkout(taskMonitor);
