@@ -9,6 +9,7 @@ import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
+import snap.web.WebResponse;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import java.util.*;
@@ -507,7 +508,9 @@ public class VersionControl {
         if (otherFile.getExists()) {
             if (localFile.isFile())
                 localFile.setBytes(otherFile.getBytes());
-            localFile.save();
+            WebResponse resp = localFile.save();
+            if (resp.getException() != null)
+                throw new RuntimeException(resp.getException());
             localFile.saveLastModTime(otherFile.getLastModTime());
         }
 
