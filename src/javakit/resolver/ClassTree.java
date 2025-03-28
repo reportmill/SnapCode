@@ -161,23 +161,8 @@ public class ClassTree {
         // Create sites
         List<WebSite> classFileSites = new ArrayList<>();
 
-        // Add JRE jar file site
-        WebURL jreURL = WebURL.getURL(List.class);
-        assert (jreURL != null);
-        WebSite jreSite = jreURL.getSite();
-        classFileSites.add(jreSite);
-
-        // Try again for Swing (different site for Java 9+: jrt:/java.desktop/javax/swing/JFrame.class)
-        Class<?> swingClass = null;
-        try { swingClass = Class.forName("javax.swing.JFrame"); }
-        catch (Exception ignore) { }
-        if (swingClass != null && !SnapEnv.isWebVM) {
-            WebURL swingURL = WebURL.getURL(swingClass);
-            assert (swingURL != null);
-            WebSite swingSite = swingURL.getSite();
-            if (swingSite != jreSite)
-                classFileSites.add(swingSite);
-        }
+        // Add JRT sites
+        findJrtSites(classFileSites);
 
         // Add project class path sites (build dirs, jar files)
         for (String classPath : classPaths) {
@@ -196,6 +181,35 @@ public class ClassTree {
 
         // Return array
         return classFileSites.toArray(new WebSite[0]);
+    }
+
+    /**
+     * Finds the JRT sites and adds to given list.
+     */
+    private static void findJrtSites(List<WebSite> classFileSites)
+    {
+        // Handle Java 9+: Add standard jrt sites
+        if (SnapUtils.getJavaVersionInt() > 8) {
+            List<String> moduleNames = ListUtils.of("java.base", "java.prefs", "java.desktop");
+            List<WebSite> jrtSites = ListUtils.map(moduleNames, moduleName -> getSiteForModuleName(moduleName));
+            classFileSites.addAll(jrtSites);
+        }
+
+        // Handle Java 8: Add rt.jar
+        else {
+            WebURL jreURL = WebURL.getURL(List.class); assert jreURL != null;
+            WebSite jreSite = jreURL.getSite();
+            classFileSites.add(jreSite);
+        }
+    }
+
+    /**
+     * Returns the JRT site for module name.
+     */
+    private static WebSite getSiteForModuleName(String moduleName)
+    {
+        WebURL moduleUrl = WebURL.getURL("jrt:/" + moduleName); assert moduleUrl != null;
+        return moduleUrl.getSite();
     }
 
     /**
