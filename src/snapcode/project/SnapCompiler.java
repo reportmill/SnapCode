@@ -65,17 +65,22 @@ public class SnapCompiler {
 
         // Get System Java compiler - just return if found
         _compiler = ToolProvider.getSystemJavaCompiler();
-        if (_compiler != null)
-            return _compiler;
+        if (_compiler == null)
+            System.err.println("ToolProvider.getSystemJavaCompiler failed");
 
         // Get compiler class and instance and return
-        try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            Class<?> compilerClass = Class.forName("com.sun.tools.javac.api.JavacTool", true, classLoader);
-            return _compiler = (JavaCompiler) compilerClass.newInstance();
+        if (_compiler == null) {
+            try {
+                ClassLoader classLoader = getClass().getClassLoader();
+                Class<?> compilerClass = Class.forName("com.sun.tools.javac.api.JavacTool", true, classLoader);
+                _compiler = (JavaCompiler) compilerClass.newInstance();
+            }
+
+            catch (Exception e) { throw new RuntimeException(e); }
         }
 
-        catch (Exception e) { throw new RuntimeException(e); }
+        // Return
+        return _compiler;
     }
 
     /**
@@ -97,7 +102,7 @@ public class SnapCompiler {
         else options.add("-g");
 
         // Set release version
-        if (SnapUtils.getJavaVersionInt() > 8) {
+        if (SnapUtils.getJavaVersionInt() > 11) {
             BuildFile buildFile = _proj.getBuildFile();
             int compileRelease = buildFile.getCompileRelease();
             options.add("--release");
@@ -105,7 +110,7 @@ public class SnapCompiler {
         }
 
         // Probably not necessary
-        else Collections.addAll(options, "-source", "8", "-target", "8");
+        else Collections.addAll(options, "-source", "11", "-target", "11");
 
         // Add class paths for project dependencies (libraries and child projects)
         String[] compilerClassPaths = _proj.getCompileClassPaths();

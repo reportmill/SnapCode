@@ -60,6 +60,10 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     @Override
     public Iterable<JavaFileObject> list(Location aLoc, String aPkgName, Set<Kind> kinds, boolean doRcrs) throws IOException
     {
+        // Ignore non base modules
+        if (aLoc.toString().startsWith("SYSTEM_MODULES") && !aLoc.toString().startsWith("SYSTEM_MODULES[java.base"))
+            return Collections.emptyList();
+
         // Do normal version
         Iterable<JavaFileObject> iterable = super.list(aLoc, aPkgName, kinds, doRcrs);
 

@@ -12,8 +12,8 @@ sourceSets.main.java.srcDirs = ['src']
 sourceSets.main.resources.srcDirs = ['src']
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 repositories {
@@ -32,7 +32,8 @@ dependencies {
     implementation project(':SnapBuilder')
 
     // Tools jar
-    implementation files('lib/tools.jar')
+    //implementation files('lib/tools.jar')
+    implementation files('lib/jdk.compiler.jar')
 
     // JGit
     implementation 'org.eclipse.jgit:org.eclipse.jgit:5.13.3.202401111512-r'
