@@ -59,14 +59,7 @@ public class Resolver {
         ClassTree classTree = getClassTree();
         String packageName = parentPackage.getName();
         ClassTree.ClassTreeNode[] childNodes = classTree.getClassTreeNodesForPackageName(packageName);
-        JavaDecl[] children = ArrayUtils.map(childNodes, classTreeNode -> getJavaDeclForClassTreeNode(classTreeNode), JavaDecl.class);
-
-        // Filter out null
-        if (ArrayUtils.hasMatch(children, child -> child == null))
-            children = ArrayUtils.filter(children, child -> child != null);
-
-        // Return
-        return children;
+        return ArrayUtils.mapNonNull(childNodes, childNode -> getJavaDeclForClassTreeNode(childNode), JavaDecl.class);
     }
 
     /**
