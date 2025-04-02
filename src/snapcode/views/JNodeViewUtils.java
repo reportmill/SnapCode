@@ -2,6 +2,7 @@ package snapcode.views;
 import javakit.parse.JNode;
 import snap.geom.Pos;
 import snap.gfx.Color;
+import snap.util.ClassUtils;
 import snap.view.Label;
 import snap.view.TextField;
 import java.util.HashMap;
@@ -104,7 +105,7 @@ public class JNodeViewUtils {
         for (Class<?> cls = nodeClass; cls != null; cls = cls.getSuperclass()) {
 
             // Construct name from "snapcode.views.<node_class_name>View"
-            String pkgName = JNodeView.class.getPackage().getName();
+            String pkgName = ClassUtils.getPackageName(JNodeView.class);
             String simpleName = cls.getSimpleName();
             String className = pkgName + '.' + simpleName + "View";
             try { return (Class<JNodeView<?>>) Class.forName(className); }

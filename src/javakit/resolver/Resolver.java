@@ -5,6 +5,7 @@ package javakit.resolver;
 import java.lang.reflect.*;
 import java.util.*;
 import snap.util.ArrayUtils;
+import snap.util.ClassUtils;
 import snapcode.project.Project;
 
 /**
@@ -431,8 +432,7 @@ public class Resolver {
             return getJavaClassForClass(parentClass);
 
         // Get parent package
-        Package pkg = aClass.getPackage();
-        String pkgName = pkg != null ? pkg.getName() : "";
+        String pkgName = ClassUtils.getPackageName(aClass);
         return getJavaPackageForName(pkgName);
     }
 
