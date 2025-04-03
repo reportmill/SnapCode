@@ -2,7 +2,11 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.resolver;
+import snap.view.ViewUtils;
+
 import java.lang.reflect.*;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Utility methods for JavaParse package.
@@ -162,5 +166,29 @@ public class ResolverUtils {
 
         // Complain about anything else
         throw new RuntimeException("ResolverUtils.getClassForType: Can't get class from type: " + aType);
+    }
+
+    /**
+     * Primes the resolver.
+     */
+    public static void primeResolver(Resolver aResolver)
+    {
+        if (pkgIndex < pkgNames.size())
+            primeResolver(aResolver, pkgNames.get(pkgIndex++));
+        if (pkgIndex < pkgNames.size())
+            ViewUtils.runDelayed(() -> primeResolver(aResolver), 300);
+    }
+
+    static List<String> pkgNames = List.of("java.lang", "java.util", "java.io", "java.awt", "javax.swing", "java", "javax");
+    static int pkgIndex;
+
+    /**
+     * Primes the resolver.
+     */
+    private static void primeResolver(Resolver aResolver, String pkgName)
+    {
+        JavaPackage pkg = aResolver.getJavaPackageForName(pkgName);
+        pkg.getClasses();
+        Stream.of(pkg.getPackages()).forEach(p -> primeResolver(aResolver, p.getName()));
     }
 }

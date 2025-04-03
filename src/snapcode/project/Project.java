@@ -4,6 +4,7 @@
 package snapcode.project;
 import javakit.resolver.JavaClass;
 import javakit.resolver.Resolver;
+import javakit.resolver.ResolverUtils;
 import snap.props.PropChange;
 import snap.props.PropObject;
 import snap.util.*;
@@ -292,7 +293,9 @@ public class Project extends PropObject {
     public Resolver getResolver()
     {
         if (_resolver != null) return _resolver;
-        return _resolver = new Resolver(this);
+        _resolver = new Resolver(this);
+        ResolverUtils.primeResolver(_resolver);
+        return _resolver;
     }
 
     /**
