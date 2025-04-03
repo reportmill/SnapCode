@@ -1,6 +1,5 @@
 package snapcode.project;
 import javakit.parse.*;
-import javakit.resolver.JavaType;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snapcode.apptools.RunToolUtils;
@@ -16,9 +15,6 @@ public class JeplToJava {
     // The JFile
     private JFile _jfile;
 
-    // The Java version
-    private int _javaVersion;
-
     // The StringBuilder
     private StringBuilder _sb;
 
@@ -28,11 +24,10 @@ public class JeplToJava {
     /**
      * Constructor.
      */
-    public JeplToJava(JFile jFile, int javaVersion)
+    public JeplToJava(JFile jFile)
     {
         _jfile = jFile;
         _sb = new StringBuilder();
-        _javaVersion = javaVersion;
     }
 
     /**
@@ -251,43 +246,8 @@ public class JeplToJava {
         String blockStmtStr = blockStmt.getString();
         _sb.append(blockStmtStr);
 
-        // Fix var decls and statements with missing semicolons
-        if (_javaVersion < 9) {
-            int sbStart = _sb.length() - blockStmtStr.length();
-            int blockStart = blockStmt.getStartCharIndex();
-            int offset = sbStart - blockStart;
-            fixVarDecls(blockStmt, offset);
-        }
-
         // Append trailing newline
         _sb.append('\n');
-    }
-
-    /**
-     * This method converts 'var' declarations to actual and adds missing semicolons.
-     */
-    private void fixVarDecls(JNode aNode, int offset)
-    {
-        // If var decl, check for 'var' and replace with type if found
-        if (aNode instanceof JVarDecl) {
-            JVarDecl varDecl = (JVarDecl) aNode;
-            JType varDeclType = varDecl.getType();
-            if (varDeclType.isVarType()) {
-                JavaType type = varDeclType.getEvalType();
-                String typeName = type.getFullName().replace('$', '.');
-                int typeStart = varDeclType.getStartCharIndex() + offset;
-                _sb.replace(typeStart, typeStart + 3, typeName);
-            }
-        }
-
-        // Otherwise Recurse into children
-        else {
-            List<JNode> children = aNode.getChildren();
-            for (int i = children.size() - 1; i >= 0; i--) {
-                JNode child = children.get(i);
-                fixVarDecls(child, offset);
-            }
-        }
     }
 
     /**
