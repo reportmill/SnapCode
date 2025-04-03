@@ -188,17 +188,16 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     protected boolean buildFile(WebFile sourceFile)
     {
         // If Jepl file, check for errors first
-        if (sourceFile.getFileType().equals("jepl") || sourceFile.getFileType().equals("jmd")) {
-            boolean checkErrorsSuccess = buildJeplFile(sourceFile);
-            if (!checkErrorsSuccess) {
-                addBuildFile(sourceFile);
-                return false;
-            }
+//        if (sourceFile.getFileType().equals("jepl") || sourceFile.getFileType().equals("jmd")) {
+//            if (!buildJeplFile(sourceFile)) {
+//                addBuildFile(sourceFile);
+//                return false;
+//            }
+//        }
 
-            // If Java Markdown, copy resource file
-            if (sourceFile.getFileType().equals("jmd"))
-                _resourceFileBuilder.buildFile(sourceFile);
-        }
+        // If Java Markdown, copy resource file
+        if (sourceFile.getFileType().equals("jmd"))
+            _resourceFileBuilder.buildFile(sourceFile);
 
         // Compile file
         boolean compileSuccess = _compiler.compileFile(sourceFile);

@@ -66,7 +66,7 @@ public class SnapCompiler {
         // Get System Java compiler - just return if found
         _compiler = ToolProvider.getSystemJavaCompiler();
         if (_compiler == null)
-            System.err.println("ToolProvider.getSystemJavaCompiler failed");
+            System.out.println("ToolProvider.getSystemJavaCompiler not found");
 
         // Get compiler class and instance and return
         if (_compiler == null) {
