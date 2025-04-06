@@ -83,6 +83,11 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         if (!packageName.isEmpty() && iterable.iterator().hasNext())
             return iterable;
 
+        // If known system path (java., javax., etc.), just return
+        if (packageName.startsWith("java.") || packageName.startsWith("javax") || packageName.startsWith("javafx") ||
+                packageName.startsWith("com.sun") || packageName.startsWith("sun.") || packageName.startsWith("org.xml"))
+            return iterable;
+
         // Find source and class files
         List<JavaFileObject> filesList = new ArrayList<>();
         if (kinds.contains(Kind.SOURCE))
