@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
+import snap.util.ListUtils;
 import snap.web.WebFile;
 import javax.tools.*;
 import javax.tools.JavaFileObject.Kind;
@@ -24,6 +25,15 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
 
     // The class loader to find project lib classes
     private ClassLoader  _classLoader;
+
+    // The base modules
+    private List<String> BASE_MODULE_NAMES = List.of("java.base", "java.prefs", "java.datatransfer", "java.desktop");
+
+    // Cache of module JavaFileObjects
+    private static Map<String,List<JavaFileObject>> _moduleFileObjects = new HashMap<>();
+
+    // Cache of package JavaFileObjects
+    private static Map<String,List<JavaFileObject>> _packageFileObjects = new HashMap<>();
 
     /**
      * Constructor.
@@ -58,44 +68,64 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
      * Override to return project src/bin files.
      */
     @Override
-    public Iterable<JavaFileObject> list(Location aLoc, String aPkgName, Set<Kind> kinds, boolean doRcrs) throws IOException
+    public Iterable<JavaFileObject> list(Location aLoc, String packageName, Set<Kind> kinds, boolean doRcrs) throws IOException
     {
-        // Ignore non base modules
-        String locStr = aLoc.toString();
-        if (locStr.startsWith("SYSTEM_MODULES")) {
-            if (!locStr.startsWith("SYSTEM_MODULES[java.base")) { // &&
-                //!locStr.startsWith("SYSTEM_MODULES[java.desktop") &&
-                //!locStr.startsWith("SYSTEM_MODULES[java.prefs")) {
-                //System.out.println("Ignoring: " + locStr);
-                return Collections.emptyList();
-            }
-        }
+        // Handle modules
+        if (aLoc.toString().startsWith("SYSTEM_MODULES["))
+            return listModuleFiles(aLoc, packageName, kinds, doRcrs);
 
-        // Do normal version
-        Iterable<JavaFileObject> iterable = super.list(aLoc, aPkgName, kinds, doRcrs);
-
-        // If not CLASS_PATH or SOURCE_PATH, just return
+        // If not CLASS_PATH or SOURCE_PATH, just return normal version
         if (aLoc != StandardLocation.CLASS_PATH && aLoc != StandardLocation.SOURCE_PATH)
-            return iterable;
+            return super.list(aLoc, packageName, kinds, doRcrs);
 
         // If system path (package files were found), just return
-        if (!aPkgName.isEmpty() && iterable.iterator().hasNext())
-            return iterable;
-
-        // If known system path (java., javax., etc.), just return
-        if (aPkgName.startsWith("java.") || aPkgName.startsWith("javax") || aPkgName.startsWith("javafx") ||
-                aPkgName.startsWith("com.sun") || aPkgName.startsWith("sun.") || aPkgName.startsWith("org.xml"))
+        Iterable<JavaFileObject> iterable = super.list(aLoc, packageName, kinds, doRcrs);
+        if (!packageName.isEmpty() && iterable.iterator().hasNext())
             return iterable;
 
         // Find source and class files
         List<JavaFileObject> filesList = new ArrayList<>();
         if (kinds.contains(Kind.SOURCE))
-            findSourceFilesForPackageName(aPkgName, filesList);
+            findSourceFilesForPackageName(packageName, filesList);
         if (kinds.contains(Kind.CLASS))
-            findClassFilesForPackageName(aPkgName, filesList);
+            findClassFilesForPackageName(packageName, filesList);
 
         // Return
         return filesList;
+    }
+
+    /**
+     * Return JavaFileObjects for module location and package.
+     */
+    private List<JavaFileObject> listModuleFiles(Location aLoc, String packageName, Set<Kind> kinds, boolean doRcrs) throws IOException
+    {
+        String locStr = aLoc.toString();
+        String moduleName = locStr.substring("SYSTEM_MODULES[".length(), locStr.length() - "]".length());
+
+        // Ignore non base modules
+        if (!BASE_MODULE_NAMES.contains(moduleName))
+            return Collections.emptyList();
+
+        // If already cached, just return
+        String cacheKey = packageName.isEmpty() ? moduleName : packageName;
+        Map<String,List<JavaFileObject>> cacheMap = doRcrs ? _moduleFileObjects : _packageFileObjects;
+        List<JavaFileObject> moduleFiles = cacheMap.get(cacheKey);
+        if (moduleFiles != null)
+            return moduleFiles;
+
+        // Do normal version
+        Iterable<JavaFileObject> superFiles = super.list(aLoc, packageName, kinds, doRcrs);
+        moduleFiles = new ArrayList<>(); superFiles.forEach(moduleFiles::add);
+
+        // If root package, remove module-info.class
+        if (packageName.isEmpty() && doRcrs) {
+            Iterable<JavaFileObject> moduleObject = super.list(aLoc, packageName, kinds, false);
+            moduleObject.forEach(moduleFiles::remove);
+        }
+
+        // Cache and return
+        cacheMap.put(packageName, moduleFiles);
+        return moduleFiles;
     }
 
     /**
@@ -174,6 +204,11 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     {
         if (aLoc == StandardLocation.SOURCE_PATH)
             return true;
+
+        String locStr = aLoc.toString();
+        if (!ListUtils.hasMatch(BASE_MODULE_NAMES, modName -> locStr.contains(modName)))
+            return false;
+
         return super.hasLocation(aLoc);
     }
 

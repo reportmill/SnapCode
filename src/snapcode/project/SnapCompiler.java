@@ -65,8 +65,8 @@ public class SnapCompiler {
 
         // Get System Java compiler - just return if found
         _compiler = ToolProvider.getSystemJavaCompiler();
-        if (_compiler == null)
-            System.out.println("ToolProvider.getSystemJavaCompiler not found");
+        //if (_compiler == null)
+        //    System.out.println("ToolProvider.getSystemJavaCompiler not found");
 
         // Get compiler class and instance and return
         if (_compiler == null) {
@@ -234,8 +234,11 @@ public class SnapCompiler {
     {
         Object diagnosticSource = aDiagnostic.getSource();
         if (!(diagnosticSource instanceof SnapCompilerJFO)) {
-            if (_unknownDiagnosticSourceErrorCount++ < 5)
-                System.err.println("SnapCompiler: Unknown Issue: " + aDiagnostic);
+            if (aDiagnostic.getKind() == Diagnostic.Kind.ERROR) {
+                if (_unknownDiagnosticSourceErrorCount++ < 5)
+                    System.err.println("SnapCompiler: Unknown Error: " + aDiagnostic);
+            }
+            else System.out.println("SnapCompiler: Unknown warning: " + aDiagnostic);
             return null;
         }
 
