@@ -109,9 +109,6 @@ public class SnapCompiler {
             options.add(Integer.toString(compileRelease));
         }
 
-        // Probably not necessary
-        else Collections.addAll(options, "-source", "11", "-target", "11");
-
         // Add class paths for project dependencies (libraries and child projects)
         String[] compilerClassPaths = _proj.getCompileClassPaths();
         if (compilerClassPaths.length > 0) {

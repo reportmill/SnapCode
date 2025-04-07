@@ -2,12 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import snap.util.ListUtils;
 import snap.web.WebFile;
 import javax.tools.*;
 import javax.tools.JavaFileObject.Kind;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A JavaFileManager subclass for SnapCompiler which forwards to standard fileManager for source and to classLoader for classes.
@@ -27,7 +27,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     private ClassLoader  _classLoader;
 
     // The base modules
-    private List<String> BASE_MODULE_NAMES = List.of("java.base", "java.prefs", "java.datatransfer", "java.desktop");
+    private static List<String> BASE_MODULE_NAMES = List.of("java.base", "java.prefs", "java.datatransfer", "java.desktop");
 
     // Cache of module JavaFileObjects
     private static Map<String,List<JavaFileObject>> _moduleFileObjects = new HashMap<>();
@@ -104,16 +104,17 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
      */
     private List<JavaFileObject> listModuleFiles(Location aLoc, String packageName, Set<Kind> kinds, boolean doRcrs) throws IOException
     {
-        String locStr = aLoc.toString();
-        String moduleName = locStr.substring("SYSTEM_MODULES[".length(), locStr.length() - "]".length());
-
         // Ignore non base modules
-        if (!BASE_MODULE_NAMES.contains(moduleName))
+        if (!isBasicModule(aLoc))
             return Collections.emptyList();
 
-        // If already cached, just return
+        // Get cache key and cache map for location
+        String locStr = aLoc.toString();
+        String moduleName = locStr.substring("SYSTEM_MODULES[".length(), locStr.length() - "]".length());
         String cacheKey = packageName.isEmpty() ? moduleName : packageName;
         Map<String,List<JavaFileObject>> cacheMap = doRcrs ? _moduleFileObjects : _packageFileObjects;
+
+        // If already cached, just return
         List<JavaFileObject> moduleFiles = cacheMap.get(cacheKey);
         if (moduleFiles != null)
             return moduleFiles;
@@ -131,6 +132,28 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         // Cache and return
         cacheMap.put(packageName, moduleFiles);
         return moduleFiles;
+    }
+
+    /**
+     * Override to filter uncommon modules.
+     */
+    @Override
+    public Iterable<Set<Location>> listLocationsForModules(Location location) throws IOException
+    {
+        // If normal verion returns empty, just return
+        Iterable<Set<Location>> superLocs = super.listLocationsForModules(location);
+        if (!superLocs.iterator().hasNext())
+            return superLocs;
+
+        // Filter locations for modules to basic modules
+        List<Set<Location>> locationsForModules = new ArrayList<>();
+        for (Set<Location> set : superLocs) {
+            Set<Location> set2 = set.stream().filter(SnapCompilerFM::isBasicModule).collect(Collectors.toSet());
+            locationsForModules.add(set2);
+        }
+
+        // Return
+        return locationsForModules;
     }
 
     /**
@@ -207,13 +230,10 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     @Override
     public boolean hasLocation(Location aLoc)
     {
-        if (aLoc == StandardLocation.SOURCE_PATH)
+        if (aLoc == StandardLocation.SOURCE_PATH || aLoc == StandardLocation.CLASS_PATH)
             return true;
-
-        String locStr = aLoc.toString();
-        if (!ListUtils.hasMatch(BASE_MODULE_NAMES, modName -> locStr.contains(modName)))
+        if (isSystemModule(aLoc) && !isBasicModule(aLoc))
             return false;
-
         return super.hasLocation(aLoc);
     }
 
@@ -282,5 +302,22 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
                 filesList.add(javaFileObject);
             }
         }
+    }
+
+    /**
+     * Returns whether given location is system module.
+     */
+    private static boolean isSystemModule(Location aLoc)  { return aLoc.toString().startsWith("SYSTEM_MODULES["); }
+
+    /**
+     * Returns whether given location is basic module.
+     */
+    private static boolean isBasicModule(Location location)
+    {
+        String locStr = location.toString();
+        if (!locStr.startsWith("SYSTEM_MODULES["))
+            return false;
+        String moduleName = locStr.substring("SYSTEM_MODULES[".length(), locStr.length() - "]".length());
+        return BASE_MODULE_NAMES.contains(moduleName);
     }
 }
