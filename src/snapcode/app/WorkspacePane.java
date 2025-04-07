@@ -605,7 +605,7 @@ public class WorkspacePane extends ViewOwner {
 
         // If error count zero, hide build tool
         else if (errorCount == 0)
-            _workspaceTools.getBuildTool().hideTool();
+            _workspaceTools.getBuildTool().hideToolAutomatically();
 
         // Make sure there is a final UI reset
         runLater(this::resetLater);
