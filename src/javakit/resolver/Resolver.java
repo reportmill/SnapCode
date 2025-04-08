@@ -172,7 +172,7 @@ public class Resolver {
         if (pkg != null)
             return pkg;
 
-        // If package doesn't exist, just return null
+        // If package exists in class tree, return known package (create it)
         ClassTree classTree = getClassTree();
         if (classTree.isKnownPackageName(packageName))
             return getKnownJavaPackageForName(packageName);
@@ -192,7 +192,7 @@ public class Resolver {
             return pkg;
 
         // Create JavaPackage and add to Packages cache
-        pkg = createJavaPackageForName(packageName);
+        pkg = createKnownJavaPackageForName(packageName);
         _packages.put(packageName, pkg);
 
         // Return
@@ -200,9 +200,9 @@ public class Resolver {
     }
 
     /**
-     * Creates a java package.
+     * Creates a known java package.
      */
-    private JavaPackage createJavaPackageForName(String packageName)
+    private JavaPackage createKnownJavaPackageForName(String packageName)
     {
         // If root package, just create/return
         if (packageName.isEmpty())
@@ -211,9 +211,9 @@ public class Resolver {
         // Get parent package
         int lastSeperatorIndex = packageName.lastIndexOf('.');
         String parentPackageName = lastSeperatorIndex > 0 ? packageName.substring(0, lastSeperatorIndex) : "";
-        JavaPackage parentPackage = getJavaPackageForName(parentPackageName);
+        JavaPackage parentPackage = getKnownJavaPackageForName(parentPackageName);
         if (parentPackage == null) // Should never happen
-            System.out.println("Resolver.getJavaPackageForNameImpl: Can't find parent package: " + parentPackageName);
+            System.out.println("Resolver.createJavaPackageForName: Can't find parent package: " + parentPackageName);
 
         // Return new package
         return new JavaPackage(this, parentPackage, packageName);

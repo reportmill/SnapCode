@@ -179,16 +179,19 @@ public class ResolverUtils {
             ViewUtils.runDelayed(() -> primeResolver(aResolver), 300);
     }
 
-    static List<String> pkgNames = List.of("java.lang", "java.util", "java.io", "java.awt", "javax.swing", "java", "javax");
+    // Common packages to preload
+    static List<String> pkgNames = List.of("java", "java.lang", "java.util", "java.io", "java.awt", "javax", "javax.swing");
     static int pkgIndex;
 
     /**
      * Primes the resolver.
      */
-    private static void primeResolver(Resolver aResolver, String pkgName)
+    private static void primeResolver(Resolver aResolver, String packageName)
     {
-        JavaPackage pkg = aResolver.getJavaPackageForName(pkgName);
+        JavaPackage pkg = aResolver.getKnownJavaPackageForName(packageName);
         pkg.getClasses();
-        Stream.of(pkg.getPackages()).forEach(p -> primeResolver(aResolver, p.getName()));
+        JavaPackage[] childPackages = pkg.getPackages();
+        if (!packageName.equals("java") && !packageName.equals("javax"))
+            Stream.of(childPackages).forEach(childPackage -> primeResolver(aResolver, childPackage.getName()));
     }
 }

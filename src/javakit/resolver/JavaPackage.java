@@ -24,21 +24,21 @@ public class JavaPackage extends JavaDecl {
     /**
      * Constructor.
      */
-    public JavaPackage(Resolver aResolver, JavaPackage aParent, String aPackageName)
+    public JavaPackage(Resolver aResolver, JavaPackage parentPackage, String packageName)
     {
         super(aResolver, DeclType.Package);
 
         // Set parent package
-        _package = aParent;
+        _package = parentPackage;
 
         // Set Name, SimpleName
-        _id = _name = aPackageName;
-        _simpleName = getSimpleName(aPackageName);
+        _id = _name = packageName;
+        _simpleName = getSimpleName(packageName);
 
         // If not child of parent package, add
-        if (aParent != null && aParent._children != null) {
-            aParent._children = ArrayUtils.add(aParent._children, this);
-            aParent._packages = null;
+        if (parentPackage != null && parentPackage._children != null) {
+            parentPackage._children = ArrayUtils.add(parentPackage._children, this);
+            parentPackage._packages = null;
         }
     }
 
