@@ -26,10 +26,10 @@ public class DeclMatcher {
     private Matcher _matcher;
 
     // Constant for preferred packages
-    public static final String[] COMMON_PACKAGES = {"java.util", "java.lang", "java.io", "snap.view", "snap.gfx", "snap.geom", "snap.util"};
+    public static final String[] COMMON_PACKAGES = { "java.lang", "java.util", "java.io", "snap.view", "snap.geom", "snap.gfx" };
 
     // Constant for empty members
-    private static int LIMIT = 2;
+    private static final int MATCH_LIMIT = 20;
 
     /**
      * Constructor.
@@ -57,28 +57,23 @@ public class DeclMatcher {
      */
     public JavaClass[] getClassesForResolver(Resolver aResolver)
     {
-        // Ease the limit up
-        if (LIMIT < 20) LIMIT += 6;
-
         // Create list
-        List<JavaClass> matchingClasses = new ArrayList<>(LIMIT);
+        List<JavaClass> matchingClasses = new ArrayList<>(MATCH_LIMIT);
 
         // Search root package
         JavaPackage rootPackage = aResolver.getJavaPackageForName("");
-        findClassesForPackage(rootPackage, matchingClasses, LIMIT);
+        findClassesForPackage(rootPackage, matchingClasses, MATCH_LIMIT);
 
         // Search COMMON_PACKAGES
         for (String commonPackageName : COMMON_PACKAGES) {
             JavaPackage commonPackage = aResolver.getJavaPackageForName(commonPackageName);
-            if (commonPackage == null) // WebVM
-                continue;
-            findClassesForPackage(commonPackage, matchingClasses, LIMIT);
-            if (matchingClasses.size() >= LIMIT)
+            findClassesForPackage(commonPackage, matchingClasses, MATCH_LIMIT);
+            if (matchingClasses.size() >= MATCH_LIMIT)
                 return matchingClasses.toArray(new JavaClass[0]);
         }
 
         // Search all packages
-        findClassesForPackageDeep(rootPackage, matchingClasses, LIMIT);
+        findClassesForPackageDeep(rootPackage, matchingClasses, MATCH_LIMIT);
 
         // Return
         return matchingClasses.toArray(new JavaClass[0]);
