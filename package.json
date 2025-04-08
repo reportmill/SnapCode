@@ -5,16 +5,21 @@
     "main": "index.js",
     "preferGlobal": true,
     "repository": "",
-    "version": "2025.3.15",
+    "version": "2025.4.7",
     "jdeploy": {
         "jdk": true,
+        "publishTargets": [{
+            "name": "npm: snapcodejava",
+            "type": "NPM",
+            "url": "snapcodejava"
+        }],
         "javaVersion": "21",
         "documentTypes": [{
             "editor": true,
             "extension": "java",
             "mimetype": "text/java"
         }],
-        "jar": "build/libs/SnapCodeAll-2025.03.jar",
+        "jar": "build/libs/SnapCodeAll-2025.04.jar",
         "javafx": false,
         "title": "SnapCode"
     },
