@@ -165,29 +165,35 @@ public class Resolver {
     /**
      * Returns a java package.
      */
-    public JavaPackage getJavaPackageForName(String pkgName)
-    {
-        return getJavaPackageForName(pkgName, false);
-    }
-
-    /**
-     * Returns a java package, with option to force.
-     */
-    protected JavaPackage getJavaPackageForName(String pkgName, boolean doForce)
+    public JavaPackage getJavaPackageForName(String packageName)
     {
         // Get from Packages cache and just return if found
-        JavaPackage pkg = _packages.get(pkgName);
+        JavaPackage pkg = _packages.get(packageName);
         if (pkg != null)
             return pkg;
 
         // If package doesn't exist, just return null
         ClassTree classTree = getClassTree();
-        if (!doForce && !pkgName.isEmpty() && !classTree.isKnownPackageName(pkgName))
-            return null;
+        if (classTree.isKnownPackageName(packageName))
+            return getKnownJavaPackageForName(packageName);
+
+        // Return not found
+        return null;
+    }
+
+    /**
+     * Returns a known java package (creates if missing).
+     */
+    protected synchronized JavaPackage getKnownJavaPackageForName(String packageName)
+    {
+        // Get from Packages cache and just return if found
+        JavaPackage pkg = _packages.get(packageName);
+        if (pkg != null)
+            return pkg;
 
         // Create JavaPackage and add to Packages cache
-        pkg = getJavaPackageForNameImpl(pkgName);
-        _packages.put(pkgName, pkg);
+        pkg = createJavaPackageForName(packageName);
+        _packages.put(packageName, pkg);
 
         // Return
         return pkg;
@@ -196,21 +202,21 @@ public class Resolver {
     /**
      * Creates a java package.
      */
-    private JavaPackage getJavaPackageForNameImpl(String aName)
+    private JavaPackage createJavaPackageForName(String packageName)
     {
         // If root package, just create/return
-        if (aName.isEmpty())
+        if (packageName.isEmpty())
             return new JavaPackage(this, null, "");
 
         // Get parent package
-        int lastSeperatorIndex = aName.lastIndexOf('.');
-        String parentPackageName = lastSeperatorIndex > 0 ? aName.substring(0, lastSeperatorIndex) : "";
+        int lastSeperatorIndex = packageName.lastIndexOf('.');
+        String parentPackageName = lastSeperatorIndex > 0 ? packageName.substring(0, lastSeperatorIndex) : "";
         JavaPackage parentPackage = getJavaPackageForName(parentPackageName);
         if (parentPackage == null) // Should never happen
             System.out.println("Resolver.getJavaPackageForNameImpl: Can't find parent package: " + parentPackageName);
 
         // Return new package
-        return new JavaPackage(this, parentPackage, aName);
+        return new JavaPackage(this, parentPackage, packageName);
     }
 
     /**

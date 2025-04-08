@@ -177,7 +177,7 @@ public class JavaClass extends JavaType {
             JFile jFile = aClassDecl.getFile();
             String pkgName = jFile.getPackageName();
             if (pkgName == null) pkgName = "";
-            _package = aResolver.getJavaPackageForName(pkgName, true);
+            _package = aResolver.getKnownJavaPackageForName(pkgName);
             _package._children = ArrayUtils.add(_package.getChildren(), this);
             _package._classes = null;
         }

@@ -115,6 +115,8 @@ public class ClassTree {
      */
     public boolean isKnownPackageName(String packageName)
     {
+        if (packageName.isEmpty()) return true;
+
         // Get path for package name
         String filePath = '/' + packageName.replace(".", "/");
 
