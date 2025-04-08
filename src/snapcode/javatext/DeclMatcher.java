@@ -26,7 +26,7 @@ public class DeclMatcher {
     private Matcher _matcher;
 
     // Constant for preferred packages
-    public static final String[] COMMON_PACKAGES = { "java.lang", "java.util", "java.io", "snap.view", "snap.geom", "snap.gfx" };
+    public static final String[] COMMON_PACKAGES = { "", "java.lang", "java.util", "java.io", "snap.view", "snap.geom", "snap.gfx" };
 
     // Constant for empty members
     private static final int MATCH_LIMIT = 20;
@@ -60,10 +60,6 @@ public class DeclMatcher {
         // Create list
         List<JavaClass> matchingClasses = new ArrayList<>(MATCH_LIMIT);
 
-        // Search root package
-        JavaPackage rootPackage = aResolver.getJavaPackageForName("");
-        findClassesForPackage(rootPackage, matchingClasses, MATCH_LIMIT);
-
         // Search COMMON_PACKAGES
         for (String commonPackageName : COMMON_PACKAGES) {
             JavaPackage commonPackage = aResolver.getJavaPackageForName(commonPackageName);
@@ -73,6 +69,7 @@ public class DeclMatcher {
         }
 
         // Search all packages
+        JavaPackage rootPackage = aResolver.getJavaPackageForName("");
         findClassesForPackageDeep(rootPackage, matchingClasses, MATCH_LIMIT);
 
         // Return
@@ -82,15 +79,13 @@ public class DeclMatcher {
     /**
      * Find classes in package.
      */
-    private void findClassesForPackage(JavaPackage packageNode, List<JavaClass> matchingClasses, int limit)
+    private void findClassesForPackage(JavaPackage javaPackage, List<JavaClass> matchingClasses, int limit)
     {
         // Get all package classes
-        JavaClass[] classes = packageNode.getClasses();
+        JavaClass[] classes = javaPackage.getClasses();
 
-        // Iterate over classes and add matching public classes to list
+        // Iterate over classes and add matching public classes to list (return if limit hit)
         for (JavaClass cls : classes) {
-
-            // If class matches, add to list
             if (matchesClass(cls)) {
                 matchingClasses.add(cls);
                 if (matchingClasses.size() >= limit)
@@ -102,23 +97,21 @@ public class DeclMatcher {
     /**
      * Find classes in package.
      */
-    private void findClassesForPackageDeep(JavaPackage aPackageNode, List<JavaClass> matchingClasses, int limit)
+    private void findClassesForPackageDeep(JavaPackage javaPackage, List<JavaClass> matchingClasses, int limit)
     {
-        // If not common or root package, check package classes
-        String packageName = aPackageNode.getName();
-        if (!ArrayUtils.contains(COMMON_PACKAGES, packageName) && !packageName.isEmpty()) {
-            findClassesForPackage(aPackageNode, matchingClasses, limit);
+        // If not common package, search package classes
+        String packageName = javaPackage.getName();
+        if (!ArrayUtils.contains(COMMON_PACKAGES, packageName)) {
+            findClassesForPackage(javaPackage, matchingClasses, limit);
             if (matchingClasses.size() >= limit)
                 return;
         }
 
         // Get child packages
-        JavaPackage[] childPackages = aPackageNode.getPackages();
+        JavaPackage[] childPackages = javaPackage.getPackages();
 
-        // Iterate over child packages and look for matches
+        // Iterate over child packages and look for matches (return if limit hit)
         for (JavaPackage childPackage : childPackages) {
-
-            // Recurse (return if limit was hit)
             findClassesForPackageDeep(childPackage, matchingClasses, limit);
             if (matchingClasses.size() >= limit)
                 return;
