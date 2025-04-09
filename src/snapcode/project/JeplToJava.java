@@ -62,7 +62,7 @@ public class JeplToJava {
 
         // Return string
         String javaString = _sb.toString();
-        //snap.util.SnapUtils.writeBytes(javaString.getBytes(), "/tmp/" + _jfile.getName() + ".java");
+        snap.util.SnapUtils.writeBytes(javaString.getBytes(), "/tmp/" + _jfile.getName() + ".java");
         return javaString;
     }
 
@@ -75,6 +75,8 @@ public class JeplToJava {
 
         // Append class modifiers
         JModifiers mods = classDecl.getModifiers();
+        if (classDecl.getEnclosingClassDecl() != null)
+            mods = new JModifiers(Modifier.PUBLIC | Modifier.STATIC);
         appendModifiers(mods);
 
         // Append class name
@@ -103,14 +105,20 @@ public class JeplToJava {
         _sb.append(" {\n");
         indent();
 
+        // Handle enum: append constants
+        if (classDecl.isEnum()) {
+            JEnumConst[] enumConsts = classDecl.getEnumConstants();
+            String enumStr = ArrayUtils.mapToStringsAndJoin(enumConsts, JEnumConst::getName, ", ");
+            _sb.append(_indent).append(enumStr);
+        }
+
         // Append all class members
         JBodyDecl[] bodyDecls = classDecl.getBodyDecls();
         Stream.of(bodyDecls).forEach(this::appendBodyDecl);
 
         // Outdent
         outdent();
-        _sb.append(_indent);
-        _sb.append("}\n");
+        _sb.append(_indent).append("}\n");
     }
 
     /**
@@ -126,6 +134,8 @@ public class JeplToJava {
             appendConstructorDecl((JConstrDecl) bodyDecl);
         else if (bodyDecl instanceof JInitializerDecl)
             appendInitializerDecl((JInitializerDecl) bodyDecl);
+        else if (bodyDecl instanceof JClassDecl)
+            appendClassDecl((JClassDecl) bodyDecl);
     }
 
     /**

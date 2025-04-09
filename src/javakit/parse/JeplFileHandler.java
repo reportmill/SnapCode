@@ -103,12 +103,13 @@ public class JeplFileHandler extends JavaParserExpr.JNodeParseHandler<JFile> {
                 break;
             }
 
-            // Handle EnumDecl
+            // Handle ClassDecl, EnumDecl
+            case "ClassDecl":
             case "EnumDecl": {
-                JClassDecl enumDecl = aNode.getCustomNode(JClassDecl.class);
-                enumDecl.setModifiers(_mods);
+                JClassDecl innerClassDecl = aNode.getCustomNode(JClassDecl.class);
+                innerClassDecl.setModifiers(_mods);
                 _mods = null;
-                classDecl.addBodyDecl(enumDecl);
+                classDecl.addBodyDecl(innerClassDecl);
                 jfile.setEndToken(endToken);
                 _initDecl = null;
                 break;
