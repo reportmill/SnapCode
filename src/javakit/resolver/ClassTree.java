@@ -100,7 +100,7 @@ public class ClassTree {
             }
 
             // Handle package
-            if (isPackageDir(file)) {
+            else if (isPackageDir(file)) {
                 String packageName = getPackageNameForPackageDirFile(file);
                 if (!ListUtils.hasMatch(classTreeNodes, classTreeNode -> classTreeNode.fullName.equals(packageName))) {
                     ClassTreeNode packageNode = new ClassTreeNode(packageName, true);
