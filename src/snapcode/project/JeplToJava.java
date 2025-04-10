@@ -173,8 +173,10 @@ public class JeplToJava {
         _sb.append('\n');
         _sb.append(_indent);
 
-        // Append modifiers - make all Jepl methods 'public static'
-        JModifiers mods = new JModifiers(Modifier.PUBLIC | Modifier.STATIC); // methodDecl.getMods()
+        // Append modifiers - make top level Jepl methods 'public static'
+        JModifiers mods = methodDecl.getModifiers();
+        if (methodDecl.getEnclosingClassDecl().getEnclosingClassDecl() == null)
+            mods = new JModifiers(Modifier.PUBLIC | Modifier.STATIC); // methodDecl.getMods()
         appendModifiers(mods);
 
         // Append return type
