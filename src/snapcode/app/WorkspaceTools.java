@@ -94,22 +94,22 @@ public class WorkspaceTools {
                 httpServerTool
         };
 
-        // Create LeftTray
-        WorkspaceTool[] leftTools = {projectFilesTool};
-        _leftTray = new ToolTray(Side.LEFT, leftTools);
-
-        // Create RightTray
-        WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, classesTool, helpTool, blocksTool };
-        if (WorkspacePane._embedMode)
-            rightTools = new WorkspaceTool[] { runTool, helpTool };
-        if (helpTool.isLesson())
-            rightTools = ArrayUtils.moveToFront(rightTools, helpTool);
-        _rightTray = new ToolTray(Side.RIGHT, rightTools);
-
-        // Create BottomTray
+        // Configure tray tool lists
+        WorkspaceTool[] leftTools = { helpTool, projectFilesTool };
+        WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, classesTool, blocksTool };
         WorkspaceTool[] bottomTools = { runConfigsTool, breakpointsTool };
+        if (WorkspacePane._embedMode) {
+            leftTools = new WorkspaceTool[] { projectFilesTool };
+            rightTools = new WorkspaceTool[] { runTool, helpTool };
+        }
         if (SnapEnv.isWebVM)
             bottomTools = new WorkspaceTool[0];
+        if (helpTool.isLesson())
+            rightTools = ArrayUtils.moveToFront(rightTools, helpTool);
+
+        // Create LeftTray, RightTray, BottomTray
+        _leftTray = new ToolTray(Side.LEFT, leftTools);
+        _rightTray = new ToolTray(Side.RIGHT, rightTools);
         _bottomTray = new ToolTray(Side.BOTTOM, bottomTools);
         if (SnapEnv.isWebVM)
             _bottomTray.getUI(TabView.class).getTabBar().setMinHeight(30);

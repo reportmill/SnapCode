@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="400" Font="Arial 12">
-  <RowView Margin="4" GrowWidth="true">
-    <TextField Name="SearchTextField" PrefWidth="260" PrefHeight="26" Margin="4,12,4,80" BorderRadius="10" GrowWidth="true" LeanX="CENTER" PromptText="Search" />
-    <Button Name="CopyCodeButton" Margin="5,5,5,8" Padding="4" LeanX="RIGHT" Text="Copy Code" />
+<ColView PrefWidth="400" Font="Arial 12" FillWidth="true">
+  <RowView Name="ToolBar" PrefHeight="32" Spacing="4">
+    <Label Margin="0,10,0,8" Font="Arial 14" Text="Help:" />
+    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Text="&#8211;" ShowArea="false" />
+  </RowView>
+  <RectView PrefHeight="1" Fill="#CC" GrowWidth="true" />
+  <RowView Margin="4,4,0,4" GrowWidth="true">
+    <TextField Name="SearchTextField" PrefWidth="260" PrefHeight="24" Margin="4,32,4,4" BorderRadius="10" GrowWidth="true" PromptText="Search" />
+    <Button Name="CopyCodeButton" Margin="5,8,5,8" Padding="2,4,2,4" LeanX="RIGHT" Text="Copy" />
     <Button Name="AddCodeButton" Margin="5,8,5,5" Padding="2" ImageName="Add.png" ToolTip="Add Code" />
   </RowView>
   <SplitView Name="SplitView" Vertical="true" Font="Arial 14" GrowWidth="true" GrowHeight="true">

@@ -100,6 +100,7 @@ public class ToolTray extends ViewOwner {
         _tabView.setTabSide(_side);
         _tabView.getTabBar().setTabMinWidth(70);
         _tabView.getTabBar().setAllowEmptySelection(true);
+        _tabView.getTabBar().getTabsBox().setSpacing(5);
         _tabView.setAnimateTabChange(true);
 
         // Have to reset tabView.PrefSize when TabView selection changes, so

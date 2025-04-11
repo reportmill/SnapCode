@@ -106,7 +106,7 @@ public class HelpTool extends WorkspaceTool {
     {
         // Set background
         View ui = getUI();
-        ui.setFill(Color.WHITE);
+        ui.setFill(ViewTheme.get().getContentColor());
 
         // Get/configure SearchText: radius, prompt, image, animation
         TextField searchText = getView("SearchTextField", TextField.class);
@@ -254,6 +254,13 @@ public class HelpTool extends WorkspaceTool {
         // Add SnapCharts if needed
         addSnapChartsToProjectIfNeeded();
 
+        // If no project, open temp proj
+        if (getSelSite() == null) {
+            NewFileTool newFileTool = _workspacePane.getNewFileTool();
+            runLater(() -> newFileTool.createFileForType("jepl"));
+            runLater(this::addHelpCodeToDoc);
+        }
+
         // Get JavaPage (just return if not found)
         WebPage selPage = _pagePane.getSelPage();
         JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
@@ -265,7 +272,7 @@ public class HelpTool extends WorkspaceTool {
         if (javaTextArea.getJFile().isRepl())
             javaTextArea.setSel(0, javaTextArea.length());
         javaTextArea.replaceCharsWithContent(helpCode);
-        hideTool();
+        //hideTool();
 
         // Focus on text area
         javaTextArea.requestFocus();

@@ -9,7 +9,7 @@
     <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Text="&#8211;" ShowArea="false" />
   </RowView>
   <RectView PrefHeight="1" Fill="#CC" GrowWidth="true" />
-  <SplitView Vertical="true" GrowHeight="true">
+  <SplitView Vertical="true" GrowHeight="true" Border="null">
     <ColView GrowHeight="true">
       <Label Margin="8" Text="Build Issues:" />
       <ListView Name="ErrorsList" Margin="0,5,5,5" BorderRadius="5" Font="Arial 14" GrowWidth="true" GrowHeight="true" />

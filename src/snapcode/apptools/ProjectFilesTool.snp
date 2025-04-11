@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView PrefWidth="220" GrowWidth="true" FillWidth="true">
   <RowView Name="RowView" MinHeight="32">
-    <Button Name="AllFilesButton" PrefWidth="24" PrefHeight="24" Margin="4" Padding="0" ToolTip="Toggle Files Tree/List" ImageName="FilesTree.png" ShowArea="false" />
-    <Label Name="FilesLabel" Font="Arial 14" Text="Project" />
+    <Label Name="FilesLabel" Margin="0,10,0,8" Font="Arial 14" Text="Project:" />
     <MenuButton Name="MenuButton" PrefWidth="24" PrefHeight="24" Margin="2" Padding="0" ShowArea="false">
       <MenuItem Name="NewFileMenuItem" Text="New File..." />
       <MenuItem Name="RemoveFileMenuItem" Text="Remove File(s)..." />
