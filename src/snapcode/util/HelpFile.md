@@ -197,7 +197,7 @@ show(drawView);
 
 ```
 var drawView = QuickDraw.createDrawView();
-var drawView.moveTo(200, 200);
+drawView.moveTo(200, 200);
 for (int i = 0; i < 1080; i++) {
     drawView.forward(i / 360d);
     drawView.turn(1);
