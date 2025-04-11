@@ -191,7 +191,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
 
         // If isDebug in browser, complain and run normal
         if (isDebug && SnapEnv.isWebVM) {
-            String msg = "Debug support for browser is not currently\n available,but is coming soon.\nExecuting normal run instead";
+            String msg = "Debug only currently available on desktop.\nBrowser support coming soon.\nExecuting normal run instead";
             DialogBox.showWarningDialog(_workspacePane.getUI(), "Debug Support Coming Soon", msg);
             isDebug = false;
         }

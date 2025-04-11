@@ -102,8 +102,10 @@ public class WorkspaceTools {
             leftTools = new WorkspaceTool[] { projectFilesTool };
             rightTools = new WorkspaceTool[] { runTool, helpTool };
         }
-        if (SnapEnv.isWebVM)
+        if (SnapEnv.isWebVM) {
+            rightTools = ArrayUtils.remove(rightTools, debugTool);
             bottomTools = new WorkspaceTool[0];
+        }
         if (helpTool.isLesson())
             rightTools = ArrayUtils.moveToFront(rightTools, helpTool);
 
