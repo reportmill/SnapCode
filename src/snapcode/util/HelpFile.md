@@ -72,11 +72,13 @@ show(namesStr);
 ## Lambda
 
 ```
-// Create button that prints any mouse events it receives
+// Create button and show
 Button button = new Button("Hello World");
 button.setPrefSize(120, 30);
-button.addEventFilter(e -> show(e), View.MouseEvents);
 show(button);
+
+// Add event listener to print any mouse events it receives
+button.addEventFilter(e -> println(e), View.MouseEvents);
 ```
 
 # Define datasets
@@ -108,8 +110,11 @@ var y = DoubleArray.of(x).map(d -> Math.sin(d));
 ## DataSet from data arrays
 
 ```
+// Create XY data arrays
 var x = new double[] { 1, 2, 3, 4 };
 var y = new double[] { 1, 4, 9, 16 };
+
+// Create dataset and show
 var dataSet = dataSet(x, y);
 show(dataSet);
 ```
@@ -117,9 +122,12 @@ show(dataSet);
 ## DataSet from 3D data
 
 ```
+// Create XYZ data arrays
 var x = DoubleArray.fromMinMax(-3, 3);
 var y = DoubleArray.fromMinMax(-4, 4);
 var z = mapXY(x, y, (a,b) -> Math.sin(a) + Math.cos(b));
+
+// Create dataset and show
 var dataSet = dataSet(x, y, z);
 show(dataSet);
 ```
@@ -129,8 +137,11 @@ show(dataSet);
 ## From data arrays
 
 ```
+// Create XY data arrays
 var x = new double[] { 1, 2, 3, 4 };
 var y = new double[] { 1, 4, 9, 16 };
+
+// Create chart and show
 var chart = chart(x,y);
 show(chart);
 ```
@@ -138,20 +149,28 @@ show(chart);
 ## From data set
 
 ```
+// Create XY data arrays and dataset
 var x = new double[] { 1, 2, 3, 4 };
 var y = new double[] { 1, 4, 9, 16 };
+
+// Create dataset and show
 var dataSet = dataSet(x, y);
-var chart = chart(dataSet);
 show(dataSet);
+
+// Create chart and show
+var chart = chart(dataSet);
 show(chart);
 ```
 
 ## From 3D data
 
 ```
+// Create XYZ data arrays
 var x = DoubleArray.fromMinMax(-3, 3);
 var y = DoubleArray.fromMinMax(-4, 4);
 var z = mapXY(x, y, (a,b) -> Math.sin(a) + Math.cos(b));
+
+// Create and show chart
 var chart = chart(x, y, z);
 show(chart);
 ```
@@ -161,9 +180,12 @@ show(chart);
 ## From data arrays
 
 ```
+// Create XYZ data arrays
 var x = DoubleArray.fromMinMax(-3, 3);
 var y = DoubleArray.fromMinMax(-4, 4);
 var z = mapXY(x, y, (a,b) -> Math.sin(a) + Math.cos(b));
+
+// Create and show 3D chart
 var chart = chart3D(x, y, z);
 show(chart);
 ```
@@ -171,10 +193,13 @@ show(chart);
 ## From data set
 
 ```
+// Create XYZ data arrays and dataset
 var x = DoubleArray.fromMinMax(-3, 3);
 var y = DoubleArray.fromMinMax(-4, 4);
 var z = mapXY(x, y, (a,b) -> Math.sin(a) + Math.cos(b));
 var dataSet = dataSet(x, y, z);
+
+// Create and show 3D chart
 var chart = chart3D(dataSet);
 show(chart);
 ```
@@ -184,25 +209,31 @@ show(chart);
 ## Draw box
 
 ```
+// Create draw view and show
 var drawView = QuickDraw.createDrawView();
+show(drawView);
+
+// Set start point and make four move-forward/turn calls
 drawView.moveTo(100, 100);
 for (int i = 0; i < 4; i++) {
     drawView.forward(200);
     drawView.turn(90);
 }
-show(drawView);
 ```
 
 ## Draw Spiral
 
 ```
+// Create draw view and show
 var drawView = QuickDraw.createDrawView();
+show(drawView);
+
+// Set start point and make a thousand move-forward/turn calls
 drawView.moveTo(200, 200);
 for (int i = 0; i < 1080; i++) {
     drawView.forward(i / 360d);
     drawView.turn(1);
 }
-show(drawView);
 ```
 
 # Fetch remote data / images
@@ -226,6 +257,7 @@ show(image);
 ## Create Button
 
 ```
+// Create button, configure and show
 var button = new Button("Hello World");
 button.setPrefSize(100, 25);
 button.setMargin(20,20,20,20);
@@ -235,6 +267,7 @@ show(button);
 ## Create Slider
 
 ```
+// Create slider, configure and show
 var slider = new Slider();
 slider.setPrefSize(300, 25);
 slider.setMargin(20,20,20,20);
@@ -244,6 +277,7 @@ show(slider);
 ## Create TextField
 
 ```
+// Create textfield, configure and show
 var textField = new TextField();
 textField.setPrefSize(300, 25);
 textField.setMargin(20,20,20,20);
@@ -253,8 +287,11 @@ show(textField);
 ## Create Window
 
 ```
+// Create button and configure
 var button = new Button("Hello World");
 button.setPrefSize(400, 400);
+
+// Create controller for button and show window
 ViewOwner viewOwner = new ViewOwner(button);
 viewOwner.setWindowVisible(true);
 ```
@@ -264,24 +301,30 @@ viewOwner.setWindowVisible(true);
 ## Animate Button - shorthand
 
 ```
+// Create button, configure and show
 var button = new Button("Hello World");
 button.setMargin(50,50,50,50);
+show(button);
+
+// Add animation frames, set loop count and play
 button.setAnimString("time: 1000; scale: 3; time: 2000; scale: 1");
 button.setAnimString("time: 2000; rotate: 360");
 button.getAnim(0).setLoopCount(4).play();
-show(button);
 ```
 
 ## Animate Button - traditional
 
 ```
+// Create button, configure and show
 var button = new Button("Hello World");
 button.setMargin(50,50,50,50);
+show(button);
+
+// Add animation frames, set loop count and play
 var anim = button.getAnim(0);
 anim.getAnim(1000).setScale(3).getAnim(2000).setScale(1);
 anim.getAnim(2000).setRotate(360);
 anim.setLoopCount(4).play();
-show(button);
 ```
 
 # Create 3D
@@ -289,6 +332,7 @@ show(button);
 ## 3D cube
 
 ```
+// Create cube and show
 var cube = Quick3D.createCube();
 show(cube);
 ```
@@ -296,6 +340,7 @@ show(cube);
 ## 3D image
 
 ```
+// Get image, create image 3D and show
 var image = getImageForSource("https://reportmill.com/examples/Weird.jpg");
 var image3D = Quick3D.createImage3D(image);
 show(image3D);
@@ -313,7 +358,7 @@ import javax.swing.JFrame;
 // Create button
 JButton button = new JButton("Hello World");
 
-// Create frame and show
+// Create frame, add button and show
 JFrame frame = new JFrame("Hello World");
 frame.setPreferredSize(new Dimension(300, 300));
 frame.setContentPane(button);
