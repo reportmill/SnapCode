@@ -251,15 +251,16 @@ public class HelpTool extends WorkspaceTool {
         if (helpCode == null)
             return;
 
-        // Add SnapCharts if needed
-        addSnapChartsToProjectIfNeeded();
-
         // If no project, open temp proj
         if (getSelSite() == null) {
             NewFileTool newFileTool = _workspacePane.getNewFileTool();
             runLater(() -> newFileTool.createFileForType("jepl"));
             runLater(this::addHelpCodeToDoc);
+            return;
         }
+
+        // Add SnapCharts if needed
+        addSnapChartsToProjectIfNeeded();
 
         // Get JavaPage (just return if not found)
         WebPage selPage = _pagePane.getSelPage();
