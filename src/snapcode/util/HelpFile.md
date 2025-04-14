@@ -58,18 +58,39 @@ public int factorial(int aValue)
 }
 ```
 
-# Advanced Java
+# File manipulation
 
-## Streams
+## List files in home directory
 
 ```
-var names = Stream.of("John", "Paul", "George", "Ringo");
-var names2 = names.map(str -> str.toUpperCase());
+// Get home directory
+String homeDir = System.getProperty("user.home");
+Path homePath = Paths.get(homeDir);
+
+// Get files and print
+try (Stream<Path> files = Files.list(homePath)) {
+    System.out.println("Files in home directory: " + homeDir);
+    files.forEach(System.out::println);
+}
+
+// Catch exceptions
+catch (IOException e) { System.err.println("Error listing files: " + e.getMessage()); }
+```
+# Streams
+
+## Map names in list to upper case
+
+```
+// Create list of names, map to upper case, join and print
+var names = List.of("John", "Paul", "George", "Ringo");
+var names2 = names.stream().map(str -> str.toUpperCase());
 var namesStr = names2.collect(Collectors.joining(", "));
-show(namesStr);
+println(namesStr);
 ```
 
-## Lambda
+# Lambdas
+
+## Create button with simple lambda defined action
 
 ```
 // Create button and show

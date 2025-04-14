@@ -272,8 +272,7 @@ public class HelpTool extends WorkspaceTool {
         JavaTextArea javaTextArea = javaPage.getTextArea();
         if (javaTextArea.getJFile().isRepl())
             javaTextArea.setSel(0, javaTextArea.length());
-        javaTextArea.replaceCharsWithContent(helpCode);
-        //hideTool();
+        javaTextArea.replaceCharsWithContent("\n" + helpCode);
 
         // Focus on text area
         javaTextArea.requestFocus();

@@ -507,6 +507,8 @@ public class JavaAgent {
         imports.add("java.util.*");
         imports.add("java.util.function.*");
         imports.add("java.util.stream.*");
+        imports.add("java.io.*");
+        imports.add("java.nio.file.*");
         imports.add("snap.view.*");
         imports.add("snap.gfx.*");
         imports.add("snap.geom.*");
