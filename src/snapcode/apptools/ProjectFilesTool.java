@@ -20,6 +20,9 @@ import java.util.List;
  */
 public class ProjectFilesTool extends WorkspaceTool {
 
+    // The display mode
+    private DisplayMode _displayMode;
+
     // The FilesTool
     private FilesTool _filesTool;
 
@@ -36,13 +39,61 @@ public class ProjectFilesTool extends WorkspaceTool {
     private static Image FILES_TREE_ICON = Image.getImageForClassResource(ProjectFilesTool.class, "FilesTree.png");
     private static Image FILES_LIST_ICON = Image.getImageForClassResource(ProjectFilesTool.class, "FilesList.png");
 
+    // Constants for display type
+    public enum DisplayMode { FilesTree, FilesList }
+
+    // Constants for properties
+    public static final String DisplayMode_Prop = "DisplayMode";
+
     /**
      * Constructor.
      */
     public ProjectFilesTool(WorkspacePane workspacePane)
     {
         super(workspacePane);
+        _displayMode = DisplayMode.FilesTree;
         _filesTool = getFilesTool();
+    }
+
+    /**
+     * Returns the display mode.
+     */
+    public Object getDisplayMode()  { return _displayMode; }
+
+    /**
+     * Sets the display mode.
+     */
+    public void setDisplayMode(DisplayMode displayMode)
+    {
+        if (displayMode == getDisplayMode()) return;
+
+        // Set new mode
+        firePropChange(DisplayMode_Prop, _displayMode, _displayMode = displayMode);
+
+        // Update UI
+        boolean treeMode = displayMode == DisplayMode.FilesTree;
+        boolean listMode = displayMode == DisplayMode.FilesList;
+
+        // Set FilesTree, FilesList visible for display mode
+        _filesTree.setVisible(treeMode);
+        if (_filesTree.getParent().getParent() instanceof ScrollView)
+            _filesTree.getParent().getParent().setVisible(treeMode);
+        _filesList.setVisible(listMode);
+        if (_filesList.getParent().getParent() instanceof ScrollView)
+            _filesList.getParent().getParent().setVisible(listMode);
+        getView("DisplayModeButton", ButtonBase.class).setImage(treeMode ? FILES_TREE_ICON : FILES_LIST_ICON);
+    }
+
+    /**
+     * Returns the next display mode.
+     */
+    public DisplayMode getNextDisplayMode()
+    {
+        switch (_displayMode) {
+            case FilesTree: return DisplayMode.FilesList;
+            case FilesList: return DisplayMode.FilesTree;
+            default: return DisplayMode.FilesTree;
+        }
     }
 
     /**
@@ -230,13 +281,12 @@ public class ProjectFilesTool extends WorkspaceTool {
                 break;
             }
 
-            // Handle AllFilesButton
-            case "AllFilesButton":
-                boolean flip = !_filesTree.isVisible(), flop = !flip;
-                _filesTree.setVisible(flip); _filesTree.setPickable(flip);
-                _filesList.setVisible(flop); _filesList.setPickable(flop);
-                getView("AllFilesButton", ButtonBase.class).setImage(flip ? FILES_TREE_ICON : FILES_LIST_ICON);
-                break;
+            // Handle DisplayModeButton
+            case "DisplayModeButton": setDisplayMode(getNextDisplayMode()); break;
+
+            // Handle ShowFilesTreeMenuItem, ShowFilesListMenuItem
+            case "ShowFilesTreeMenuItem": setDisplayMode(DisplayMode.FilesTree); break;
+            case "ShowFilesListMenuItem": setDisplayMode(DisplayMode.FilesList); break;
 
             // Handle NewFileMenuItem, NewFileButton
             case "NewFileMenuItem": case "NewFileButton": _workspacePane.getNewFileTool().showNewFilePanel(); break;
