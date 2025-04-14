@@ -99,7 +99,7 @@ button.setPrefSize(120, 30);
 show(button);
 
 // Add event listener to print any mouse events it receives
-button.addEventFilter(e -> println(e), View.MouseEvents);
+button.addEventFilter(e -> show(e), View.MouseEvents);
 ```
 
 # Define datasets
