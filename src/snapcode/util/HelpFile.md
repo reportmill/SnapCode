@@ -58,7 +58,7 @@ public int factorial(int aValue)
 }
 ```
 
-# File manipulation
+# Files
 
 ## List files in home directory
 
