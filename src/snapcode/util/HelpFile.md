@@ -78,7 +78,7 @@ catch (IOException e) { System.err.println("Error listing files: " + e.getMessag
 ```
 # Streams
 
-## Map names in list to upper case
+## Map names list to uppercase
 
 ```
 // Create list of names, map to upper case, join and print
