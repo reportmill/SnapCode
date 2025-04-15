@@ -27,13 +27,13 @@ public class ProjectFilesTool extends WorkspaceTool {
     private FilesTool _filesTool;
 
     // The file tree
-    private TreeView<FileTreeFile>  _filesTree;
+    private TreeView<ProjectFile>  _filesTree;
 
     // The file list
-    private ListView<FileTreeFile>  _filesList;
+    private ListView<ProjectFile>  _filesList;
 
-    // The root AppFiles (for TreeView)
-    protected FileTreeFile[] _rootFiles;
+    // The root project files (for TreeView)
+    protected List<ProjectFile> _rootFiles;
 
     // Images for files tree/list
     private static Image FILES_TREE_ICON = Image.getImageForClassResource(ProjectFilesTool.class, "FilesTree.png");
@@ -99,15 +99,15 @@ public class ProjectFilesTool extends WorkspaceTool {
     /**
      * Returns the root files.
      */
-    public FileTreeFile[] getRootFiles()
+    public List<ProjectFile> getRootFiles()
     {
         // If already set, just return
         if (_rootFiles != null) return _rootFiles;
 
         // Create RootFiles for Workspace.Sites
         List<WebSite> workspaceSites = _workspace.getSites();
-        List<FileTreeFile> rootFiles = ListUtils.map(workspaceSites, site -> new FileTreeFile(null, site.getRootDir()));
-        return _rootFiles = rootFiles.toArray(new FileTreeFile[0]);
+        List<ProjectFile> rootFiles = ListUtils.map(workspaceSites, site -> new ProjectFile(null, site.getRootDir()));
+        return _rootFiles = rootFiles;
     }
 
     /**
@@ -127,35 +127,35 @@ public class ProjectFilesTool extends WorkspaceTool {
      */
     private void showRootProject()
     {
-        FileTreeFile[] rootFiles = getRootFiles();
-        if (rootFiles.length > 0)
-            _filesTree.expandItem(rootFiles[0]);
-        List<FileTreeFile> filesTreeFiles = _filesTree.getItems();
+        List<ProjectFile> rootFiles = getRootFiles();
+        if (!rootFiles.isEmpty())
+            _filesTree.expandItem(rootFiles.get(0));
+        List<ProjectFile> filesTreeFiles = _filesTree.getItems();
         if (filesTreeFiles.size() > 1)
             _filesTree.expandItem(filesTreeFiles.get(1));
     }
 
     /**
-     * Returns an AppFile for given WebFile.
+     * Returns a project file for given WebFile.
      */
-    private FileTreeFile getTreeFile(WebFile aFile)
+    private ProjectFile getProjectFile(WebFile aFile)
     {
         // Handle null
         if (aFile == null) return null;
 
         // If root, search for file in RootFiles
         if (aFile.isRoot()) {
-            FileTreeFile[] rootFiles = getRootFiles();
-            return ArrayUtils.findMatch(rootFiles, treeFile -> treeFile.getFile() == aFile);
+            List<ProjectFile> rootFiles = getRootFiles();
+            return ListUtils.findMatch(rootFiles, file -> file.getFile() == aFile);
         }
 
-        // Otherwise, getTreeFile for sucessive parents and search them for this file
+        // Otherwise, getProjectFile for successive parents and search them for this file
         for (WebFile parentFile = aFile.getParent(); parentFile != null; parentFile = parentFile.getParent()) {
-            FileTreeFile parentTreeFile = getTreeFile(parentFile);
-            if (parentTreeFile != null) {
-                for (FileTreeFile treeFile : parentTreeFile.getChildren())
-                    if (aFile == treeFile.getFile())
-                        return treeFile;
+            ProjectFile parentProjectFile = getProjectFile(parentFile);
+            if (parentProjectFile != null) {
+                for (ProjectFile projectFile : parentProjectFile.getFiles())
+                    if (aFile == projectFile.getFile())
+                        return projectFile;
             }
         }
 
@@ -164,25 +164,25 @@ public class ProjectFilesTool extends WorkspaceTool {
     }
 
     /**
-     * Returns the array of FileTreeFiles for a given file and its parents.
+     * Returns the project files for a given file and its parents.
      */
-    private FileTreeFile[] getTreeFileAndParentsForFile(WebFile aFile)
+    private List<ProjectFile> getProjectFileAndParentsForFile(WebFile aFile)
     {
         // Create list for changed file and parents
-        List<FileTreeFile> treeFiles = new ArrayList<>();
+        List<ProjectFile> projectFiles = new ArrayList<>();
 
         // Iterate up parent files and add FileTreeFile for each
         for (WebFile parentFile = aFile; parentFile != null; parentFile = parentFile.getParent()) {
-            FileTreeFile parentTreeFile = getTreeFile(parentFile);
+            ProjectFile parentTreeFile = getProjectFile(parentFile);
             if (parentTreeFile != null) {
-                treeFiles.add(parentTreeFile);
+                projectFiles.add(parentTreeFile);
                 if (parentFile == aFile) // Clear children in case they have changed
                     parentTreeFile._children = null;
             }
         }
 
-        // Return array
-        return treeFiles.toArray(new FileTreeFile[0]);
+        // Return
+        return projectFiles;
     }
 
     /**
@@ -194,9 +194,9 @@ public class ProjectFilesTool extends WorkspaceTool {
         if (_filesTree == null) return;
 
         // Update items in FilesTree/FilesList
-        FileTreeFile[] fileTreeFiles = getTreeFileAndParentsForFile(aFile);
-        _filesTree.updateItems(fileTreeFiles);
-        _filesList.updateItems(fileTreeFiles);
+        ProjectFile[] projectFiles = getProjectFileAndParentsForFile(aFile).toArray(new ProjectFile[0]);
+        _filesTree.updateItems(projectFiles);
+        _filesList.updateItems(projectFiles);
 
         // Reset UI
         if (aFile.isDir())
@@ -210,7 +210,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     {
         // Get and configure FilesTree
         _filesTree = getView("FilesTree", TreeView.class);
-        _filesTree.setResolver(new FileTreeFile.AppFileTreeResolver());
+        _filesTree.setResolver(new ProjectFile.ProjectFileTreeResolver());
         _filesTree.setRowHeight(20);
         _filesTree.addEventFilter(this::handleTreeViewMouseEvent, MousePress, MouseRelease);
         _filesTree.addEventFilter(this::handleTreeViewDragEvent, DragEvents);
@@ -224,7 +224,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         _filesList.addEventFilter(this::handleTreeViewDragEvent, DragEvents);
 
         // Set TreeView items
-        FileTreeFile[] rootFiles = getRootFiles();
+        List<ProjectFile> rootFiles = getRootFiles();
         _filesTree.setItems(rootFiles);
 
         // Register for copy/paste
@@ -254,16 +254,16 @@ public class ProjectFilesTool extends WorkspaceTool {
     {
         // Repaint tree
         WebFile selFile = getSelFile();
-        FileTreeFile selTreeFile = getTreeFile(selFile);
-        FileTreeFile[] rootTreeFiles = getRootFiles();
-        _filesTree.setItems(rootTreeFiles);
-        _filesTree.setSelItem(selTreeFile);
+        ProjectFile selProjectFile = getProjectFile(selFile);
+        List<ProjectFile> rootFiles = getRootFiles();
+        _filesTree.setItems(rootFiles);
+        _filesTree.setSelItem(selProjectFile);
 
         // Update FilesList
         List<WebFile> openFiles = _pagePane.getOpenFiles();
-        List<FileTreeFile> treeFiles = ListUtils.map(openFiles, openFile -> getTreeFile(openFile));
-        _filesList.setItems(treeFiles);
-        _filesList.setSelItem(selTreeFile);
+        List<ProjectFile> openProjectFiles = ListUtils.map(openFiles, openFile -> getProjectFile(openFile));
+        _filesList.setItems(openProjectFiles);
+        _filesList.setSelItem(selProjectFile);
     }
 
     /**
@@ -275,7 +275,7 @@ public class ProjectFilesTool extends WorkspaceTool {
 
             // Handle FilesTree
             case "FilesTree": case "FilesList": {
-                FileTreeFile item = (FileTreeFile) anEvent.getSelItem();
+                ProjectFile item = (ProjectFile) anEvent.getSelItem();
                 WebFile file = item != null ? item.getFile() : null;
                 _workspacePane.openFile(file);
                 break;
@@ -388,9 +388,9 @@ public class ProjectFilesTool extends WorkspaceTool {
         // If directory was selected, show all tree items for it
         WebFile selFile = getSelFile();
         if (selFile != null && selFile.isDir()) {
-            FileTreeFile treeFile = getTreeFile(selFile);
-            if (treeFile != null)
-                _filesTree.expandItem(treeFile);
+            ProjectFile projectFile = getProjectFile(selFile);
+            if (projectFile != null)
+                _filesTree.expandItem(projectFile);
         }
 
         resetLater();
@@ -505,7 +505,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         // If window focus gained, check for external file mods
         if (isWindowFocused) {
             if (!SnapEnv.isWebVM) { // No reason to do this for WebVM ?
-                for (FileTreeFile file : getRootFiles())
+                for (ProjectFile file : getRootFiles())
                     checkForExternalMods(file.getFile());
             }
         }
@@ -537,10 +537,10 @@ public class ProjectFilesTool extends WorkspaceTool {
     /**
      * Called to configure FilesList cell.
      */
-    private void configureFilesListCell(ListCell<FileTreeFile> aCell)
+    private void configureFilesListCell(ListCell<ProjectFile> aCell)
     {
         // Get item
-        FileTreeFile item = aCell.getItem();
+        ProjectFile item = aCell.getItem();
         if (item == null)
             return;
 
