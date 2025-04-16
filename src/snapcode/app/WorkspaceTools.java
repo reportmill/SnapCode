@@ -40,10 +40,10 @@ public class WorkspaceTools {
     protected ToolTray  _bottomTray;
 
     // PropChangeListener for breakpoints
-    private PropChangeListener  _breakpointsLsnr = pc -> breakpointsDidChange(pc);
+    private PropChangeListener  _breakpointsLsnr = this::handleBreakpointsChange;
 
     // PropChangeListener for BuildIssues
-    private PropChangeListener  _buildIssueLsnr = pc -> buildIssuesDidChange(pc);
+    private PropChangeListener  _buildIssueLsnr = this::handleBuildIssuesChange;
 
     /**
      * Constructor.
@@ -318,16 +318,16 @@ public class WorkspaceTools {
     /**
      * Called when Workspace.BreakPoints change.
      */
-    protected void breakpointsDidChange(PropChange pc)
+    protected void handleBreakpointsChange(PropChange pc)
     {
         RunTool runTool = getRunTool();
-        runTool.breakpointsDidChange(pc);
+        runTool.handleBreakpointsChange(pc);
     }
 
     /**
      * Called when Project.BuildIssues change.
      */
-    protected void buildIssuesDidChange(PropChange pc)
+    protected void handleBuildIssuesChange(PropChange pc)
     {
         if (pc.getPropertyName() != Breakpoints.ITEMS_PROP) return;
 
@@ -341,7 +341,7 @@ public class WorkspaceTools {
         WebPage page = _workspacePane.getBrowser().getPageForURL(issueFile.getURL());
         if (page instanceof JavaPage) {
             JavaTextPane javaTextPane = ((JavaPage) page).getTextPane();
-            javaTextPane.buildIssueOrBreakPointMarkerChanged();
+            javaTextPane.handleBuildIssueOrBreakPointMarkerChange();
         }
 
         // Update ProjectFilesTool

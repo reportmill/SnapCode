@@ -27,7 +27,7 @@ public class ProjectFile implements Comparable<ProjectFile> {
     protected WebFile _file;
 
     // The child files
-    protected List<ProjectFile> _children;
+    protected List<ProjectFile> _childFiles;
 
     // The file type
     protected FileType _type = FileType.PLAIN;
@@ -81,8 +81,8 @@ public class ProjectFile implements Comparable<ProjectFile> {
      */
     public List<ProjectFile> getFiles()
     {
-        if (_children != null) return _children;
-        return _children = _fileSystem.getChildFilesForFile(this);
+        if (_childFiles != null) return _childFiles;
+        return _childFiles = _fileSystem.getChildFilesForFile(this);
     }
 
     /**

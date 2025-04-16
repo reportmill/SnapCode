@@ -280,7 +280,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
     /**
      * Called when Workspace.BreakPoints change.
      */
-    public void breakpointsDidChange(PropChange pc)
+    public void handleBreakpointsChange(PropChange pc)
     {
         if (pc.getPropName() != Breakpoints.ITEMS_PROP) return;
 
@@ -304,7 +304,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
             // Make current JavaPage.TextArea resetLater
             WebPage page = getBrowser().getPageForURL(removedBreakpoint.getFile().getURL());
             if (page instanceof JavaPage)
-                ((JavaPage) page).getTextPane().buildIssueOrBreakPointMarkerChanged();
+                ((JavaPage) page).getTextPane().handleBuildIssueOrBreakPointMarkerChange();
 
             // Tell active processes about breakpoint change
             for (RunApp rp : processes)
@@ -361,9 +361,9 @@ public class RunTool extends WorkspaceTool implements AppListener {
     /**
      * Called when run app console view changes.
      */
-    public void consoleViewDidChange(RunApp runApp)
+    public void handleConsoleViewChange(RunApp runApp)
     {
-        runLater(() -> resetConsoleView());
+        runLater(this::resetConsoleView);
     }
 
     /**

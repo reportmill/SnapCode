@@ -279,7 +279,7 @@ public abstract class RunApp {
     {
         if (aView == _consoleView) return;
         _consoleView = aView;
-        _runTool.consoleViewDidChange(this);
+        _runTool.handleConsoleViewChange(this);
     }
 
     /**

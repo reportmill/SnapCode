@@ -392,6 +392,16 @@ public class JavaTextPane extends TextPane {
     }
 
     /**
+     * Called when a build/break-point marker changes.
+     */
+    public void handleBuildIssueOrBreakPointMarkerChange()
+    {
+        _lineNumView.resetAll();
+        _lineFootView.resetAll();
+        _textArea.repaint();
+    }
+
+    /**
      * Register to check file for errors after slight delay.
      */
     protected void checkFileForErrorsAfterDelay()
@@ -419,16 +429,6 @@ public class JavaTextPane extends TextPane {
         JavaTextDoc javaTextDoc = getJavaTextDoc();
         JavaAgent javaAgent = javaTextDoc.getAgent();
         javaAgent.checkFileForErrors();
-    }
-
-    /**
-     * Called when a build/break-point marker changes.
-     */
-    public void buildIssueOrBreakPointMarkerChanged()
-    {
-        _lineNumView.resetAll();
-        _lineFootView.resetAll();
-        _textArea.repaint();
     }
 
     /**
