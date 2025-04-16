@@ -143,7 +143,15 @@ public class ProjectFilesTool extends WorkspaceTool {
     /**
      * Returns a project file for given WebFile.
      */
-    private ProjectFile getProjectFile(WebFile aFile)  { return _defaultFileSystem.getProjectFileForFile(aFile); }
+    private ProjectFile getProjectFile(WebFile aFile)
+    {
+        // If file not in workspace, just return null
+        if (aFile == null || !_workspacePane.getSites().contains(aFile.getSite()))
+            return null;
+
+        // Get project file
+        return _defaultFileSystem.getProjectFileForFile(aFile);
+    }
 
     /**
      * Called to update a file when it has changed (Modified, Exists, ModTime, BuildIssues, child Files (dir)).
@@ -222,17 +230,19 @@ public class ProjectFilesTool extends WorkspaceTool {
      */
     public void resetUI()
     {
-        // Repaint tree
-        WebFile selFile = getSelFile();
-        ProjectFile selProjectFile = getProjectFile(selFile);
+        // Reset FilesTree items
         List<ProjectFile> rootFiles = getRootFiles();
         _filesTree.setItems(rootFiles);
-        _filesTree.setSelItem(selProjectFile);
 
-        // Update FilesList
+        // Reset FilesList items
         List<WebFile> openFiles = _pagePane.getOpenFiles();
-        List<ProjectFile> openProjectFiles = ListUtils.map(openFiles, openFile -> getProjectFile(openFile));
+        List<ProjectFile> openProjectFiles = ListUtils.map(openFiles, file -> getProjectFile(file));
         _filesList.setItems(openProjectFiles);
+
+        // Reset selected file
+        WebFile selFile = getSelFile();
+        ProjectFile selProjectFile = getProjectFile(selFile);
+        _filesTree.setSelItem(selProjectFile);
         _filesList.setSelItem(selProjectFile);
     }
 

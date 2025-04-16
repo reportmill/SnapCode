@@ -11,6 +11,15 @@ public class FileIcons {
     private static Image RootFile, DirFile, ClassFile, JavaFile, TableFile, PlainFile;
 
     /**
+     * Returns the Dir image.
+     */
+    public static Image getDirImage()
+    {
+        if (DirFile == null) loadFileIconImages();
+        return DirFile;
+    }
+
+    /**
      * Returns the image for a file.
      */
     public static Image getFileIconImage(WebFile aFile)

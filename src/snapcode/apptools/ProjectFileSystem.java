@@ -13,7 +13,7 @@ public abstract class ProjectFileSystem {
     private List<ProjectFile> _rootFiles;
 
     // The shared project file system
-    private static ProjectFileSystem _shared = new ProjectFileSystem.Default();
+    private static ProjectFileSystem _shared;
 
     /**
      * Constructor.
@@ -102,7 +102,11 @@ public abstract class ProjectFileSystem {
     /**
      * Returns the default project file system.
      */
-    public static ProjectFileSystem getDefaultProjectFileSystem()  { return _shared; }
+    public static ProjectFileSystem getDefaultProjectFileSystem()
+    {
+        if (_shared != null) return _shared;
+        return _shared = new ProjectFileSystem.Default();
+    }
 
     /**
      * This class is the default ProjectFileSystem implementation.
@@ -215,29 +219,6 @@ public abstract class ProjectFileSystem {
 
             // Return
             return projectFile;
-        }
-    }
-
-    /**
-     * This class is a ProjectFileSystem that shows files separated by LastModifiedTime.
-     */
-    private static class LastModTimeFileSystem extends ProjectFileSystem {
-
-        /**
-         * Constructor.
-         */
-        public LastModTimeFileSystem()
-        {
-            super();
-        }
-
-        /**
-         * Returns the list of child files for given file.
-         */
-        @Override
-        public List<ProjectFile> getChildFilesForFile(ProjectFile projectFile)
-        {
-            return null;
         }
     }
 }

@@ -11,6 +11,7 @@ import snap.view.*;
 import snap.web.WebFile;
 import snapcode.util.FileIcons;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A class to represent a project file in ProjectFilesTool.
@@ -26,8 +27,14 @@ public class ProjectFile implements Comparable<ProjectFile> {
     // The WebFile
     protected WebFile _file;
 
+    // Whether file is directory
+    protected boolean _isDir;
+
     // The child files
     protected List<ProjectFile> _childFiles;
+
+    // The text
+    protected String _text;
 
     // The file type
     protected FileType _type = FileType.PLAIN;
@@ -57,8 +64,11 @@ public class ProjectFile implements Comparable<ProjectFile> {
         _fileSystem = aPar != null ? aPar._fileSystem : ProjectFileSystem.getDefaultProjectFileSystem();
         _parent = aPar;
         _file = aFile;
-        _proj = Project.getProjectForSite(aFile.getSite());
-        _vc = VersionControl.getVersionControlForProjectSite(_file.getSite());
+        if (_file != null) {
+            _isDir = _file.isDir();
+            _proj = Project.getProjectForSite(aFile.getSite());
+            _vc = VersionControl.getVersionControlForProjectSite(_file.getSite());
+        }
     }
 
     /**
@@ -74,7 +84,7 @@ public class ProjectFile implements Comparable<ProjectFile> {
     /**
      * Returns whether file is directory.
      */
-    public boolean isDir()  { return _file.isDir(); }
+    public boolean isDir()  { return _isDir; }
 
     /**
      * Returns the child files.
@@ -90,6 +100,8 @@ public class ProjectFile implements Comparable<ProjectFile> {
      */
     public String getText()
     {
+        if (_text != null) return _text;
+
         // Get base name: Class/Package Name or site name or file name
         String base = _type == FileType.PACKAGE_DIR ? _proj.getClassNameForFile(_file) :
                 _file.isRoot() ? _file.getSite().getName() : _file.getName();
@@ -107,6 +119,14 @@ public class ProjectFile implements Comparable<ProjectFile> {
      */
     public View getGraphic()
     {
+        // If no file, return directory icon
+        if (_file == null) {
+            Image dirImage = FileIcons.getDirImage();
+            View fileIconView = new ImageView(dirImage);
+            fileIconView.setPrefSize(18, 18);
+            return fileIconView;
+        }
+
         // Get image for file
         Image fileImage = _type == FileType.PACKAGE_DIR ? Package : FileIcons.getFileIconImage(_file);
         View fileIconView = new ImageView(fileImage);
@@ -143,10 +163,7 @@ public class ProjectFile implements Comparable<ProjectFile> {
     /**
      * Standard hashCode implementation.
      */
-    public int hashCode()
-    {
-        return _file.hashCode();
-    }
+    public int hashCode()  { return Objects.hash(_file, _text); }
 
     /**
      * Standard equals implementation.
