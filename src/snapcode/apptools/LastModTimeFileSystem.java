@@ -28,6 +28,31 @@ public class LastModTimeFileSystem extends ProjectFileSystem {
     }
 
     /**
+     * Override to search all root file bucket files for given web file.
+     */
+    @Override
+    public ProjectFile getProjectFileForFile(WebFile aFile)
+    {
+        if (aFile == null) return null;
+        if (aFile.isRoot())
+            return getProjectFileForRootFile(aFile);
+
+        // Get root file bucket files
+        ProjectFile rootFile = getProjectFileForRootFile(aFile.getSite().getRootDir());
+        List<ProjectFile> bucketFiles = rootFile.getFiles();
+
+        // Search all bucket directories for project file with matching web file
+        for (ProjectFile bucketFile : bucketFiles) {
+            ProjectFile projectFile = ListUtils.findMatch(bucketFile.getFiles(), file -> file.getFile() == aFile);
+            if (projectFile != null)
+                return projectFile;
+        }
+
+        // Return not found
+        return null;
+    }
+
+    /**
      * Returns the list of child files for given file.
      */
     @Override

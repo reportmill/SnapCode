@@ -123,21 +123,8 @@ public class ProjectFilesTool extends WorkspaceTool {
         _defaultFileSystem.resetRootFiles();
         resetLater();
 
-        if (_filesTree != null && _filesTree.getItems().isEmpty())
-            ViewUtils.runLater(this::showRootProject);
-    }
-
-    /**
-     * Shows the root project.
-     */
-    private void showRootProject()
-    {
-        List<ProjectFile> rootFiles = getRootFiles();
-        if (!rootFiles.isEmpty())
-            _filesTree.expandItem(rootFiles.get(0));
-        List<ProjectFile> filesTreeFiles = _filesTree.getItems();
-        if (filesTreeFiles.size() > 1)
-            _filesTree.expandItem(filesTreeFiles.get(1));
+        if (_filesTree != null)
+            ViewUtils.runLater(this::resetFilesTree);
     }
 
     /**
@@ -222,7 +209,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     @Override
     protected void initShowing()
     {
-        runLater(() -> showRootProject());
+        runLater(this::resetFilesTree);
     }
 
     /**
@@ -230,10 +217,6 @@ public class ProjectFilesTool extends WorkspaceTool {
      */
     public void resetUI()
     {
-        // Reset FilesTree items
-        List<ProjectFile> rootFiles = getRootFiles();
-        _filesTree.setItems(rootFiles);
-
         // Reset FilesList items
         List<WebFile> openFiles = _pagePane.getOpenFiles();
         List<ProjectFile> openProjectFiles = ListUtils.map(openFiles, file -> getProjectFile(file));
@@ -244,6 +227,31 @@ public class ProjectFilesTool extends WorkspaceTool {
         ProjectFile selProjectFile = getProjectFile(selFile);
         _filesTree.setSelItem(selProjectFile);
         _filesList.setSelItem(selProjectFile);
+    }
+
+    /**
+     * Resets the FilesTree when root files have changed.
+     */
+    private void resetFilesTree()
+    {
+        // Get whether files tree has yet to load
+        boolean firstTreeLoad = _filesTree.getItems().isEmpty();
+
+        // Reset FilesTree items
+        List<ProjectFile> rootFiles = getRootFiles();
+        _filesTree.setItems(rootFiles);
+
+        // Show first project root dir
+        if (firstTreeLoad) {
+            if (!rootFiles.isEmpty())
+                _filesTree.expandItem(rootFiles.get(0));
+            List<ProjectFile> filesTreeFiles = _filesTree.getItems();
+            if (filesTreeFiles.size() > 1)
+                _filesTree.expandItem(filesTreeFiles.get(1));
+        }
+
+        // Reset
+        resetLater();
     }
 
     /**
