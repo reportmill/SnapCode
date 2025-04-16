@@ -12,7 +12,7 @@ import snapcode.project.Project;
 import snapcode.util.DiffPage;
 import snapcode.util.FileIcons;
 import snapcode.webbrowser.*;
-import java.util.ArrayList;
+
 import java.util.List;
 
 /**
@@ -22,6 +22,9 @@ public class ProjectFilesTool extends WorkspaceTool {
 
     // The display mode
     private DisplayMode _displayMode;
+
+    // The default project file system
+    private ProjectFileSystem _defaultFileSystem;
 
     // The FilesTool
     private FilesTool _filesTool;
@@ -52,6 +55,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     {
         super(workspacePane);
         _displayMode = DisplayMode.FilesTree;
+        _defaultFileSystem = ProjectFileSystem.getDefaultProjectFileSystem();
         _filesTool = getFilesTool();
     }
 
@@ -106,7 +110,7 @@ public class ProjectFilesTool extends WorkspaceTool {
 
         // Create RootFiles for Workspace.Sites
         List<WebSite> workspaceSites = _workspace.getSites();
-        List<ProjectFile> rootFiles = ListUtils.map(workspaceSites, site -> new ProjectFile(null, site.getRootDir()));
+        List<ProjectFile> rootFiles = ListUtils.map(workspaceSites, site -> _defaultFileSystem.getProjectFileForRootFile(site.getRootDir()));
         return _rootFiles = rootFiles;
     }
 
@@ -116,6 +120,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     public void resetRootFiles()
     {
         _rootFiles = null;
+        _defaultFileSystem.resetRootFiles();
         resetLater();
 
         if (_filesTree != null && _filesTree.getItems().isEmpty())
@@ -138,52 +143,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     /**
      * Returns a project file for given WebFile.
      */
-    private ProjectFile getProjectFile(WebFile aFile)
-    {
-        // Handle null
-        if (aFile == null) return null;
-
-        // If root, search for file in RootFiles
-        if (aFile.isRoot()) {
-            List<ProjectFile> rootFiles = getRootFiles();
-            return ListUtils.findMatch(rootFiles, file -> file.getFile() == aFile);
-        }
-
-        // Otherwise, getProjectFile for successive parents and search them for this file
-        for (WebFile parentFile = aFile.getParent(); parentFile != null; parentFile = parentFile.getParent()) {
-            ProjectFile parentProjectFile = getProjectFile(parentFile);
-            if (parentProjectFile != null) {
-                for (ProjectFile projectFile : parentProjectFile.getFiles())
-                    if (aFile == projectFile.getFile())
-                        return projectFile;
-            }
-        }
-
-        // Return not found
-        return null;
-    }
-
-    /**
-     * Returns the project files for a given file and its parents.
-     */
-    private List<ProjectFile> getProjectFileAndParentsForFile(WebFile aFile)
-    {
-        // Create list for changed file and parents
-        List<ProjectFile> projectFiles = new ArrayList<>();
-
-        // Iterate up parent files and add FileTreeFile for each
-        for (WebFile parentFile = aFile; parentFile != null; parentFile = parentFile.getParent()) {
-            ProjectFile parentTreeFile = getProjectFile(parentFile);
-            if (parentTreeFile != null) {
-                projectFiles.add(parentTreeFile);
-                if (parentFile == aFile) // Clear children in case they have changed
-                    parentTreeFile._children = null;
-            }
-        }
-
-        // Return
-        return projectFiles;
-    }
+    private ProjectFile getProjectFile(WebFile aFile)  { return _defaultFileSystem.getProjectFileForFile(aFile); }
 
     /**
      * Called to update a file when it has changed (Modified, Exists, ModTime, BuildIssues, child Files (dir)).
@@ -193,10 +153,20 @@ public class ProjectFilesTool extends WorkspaceTool {
         // If UI not set, just return
         if (_filesTree == null) return;
 
-        // Update items in FilesTree/FilesList
-        ProjectFile[] projectFiles = getProjectFileAndParentsForFile(aFile).toArray(new ProjectFile[0]);
-        _filesTree.updateItems(projectFiles);
-        _filesList.updateItems(projectFiles);
+        // Iterate up parent files and updateProjectFile for each
+        for (WebFile parentFile = aFile; parentFile != null; parentFile = parentFile.getParent()) {
+
+            // Get project file (skip if missing)
+            ProjectFile projectFile = getProjectFile(parentFile);
+            if (projectFile == null)
+                continue;
+
+            // Update project file
+            _filesTree.updateItem(projectFile);
+            _filesList.updateItem(projectFile);
+            if (parentFile == aFile) // Clear children in case they have changed
+                projectFile._childFiles = null;
+        }
 
         // Reset UI
         if (aFile.isDir())

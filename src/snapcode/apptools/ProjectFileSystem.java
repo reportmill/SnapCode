@@ -7,114 +7,237 @@ import java.util.List;
 /**
  * This class manages project files.
  */
-public class ProjectFileSystem {
+public abstract class ProjectFileSystem {
+
+    // The RootFiles
+    private List<ProjectFile> _rootFiles;
 
     // The shared project file system
-    private static ProjectFileSystem _shared = new ProjectFileSystem();
+    private static ProjectFileSystem _shared = new ProjectFileSystem.Default();
 
     /**
      * Constructor.
      */
-    public ProjectFileSystem()
+    protected ProjectFileSystem()
     {
         super();
+        _rootFiles = new ArrayList<>();
     }
+
+    /**
+     * Returns the root files.
+     */
+    public List<ProjectFile> getRootFiles()  { return _rootFiles; }
+
+    /**
+     * Resets the root files.
+     */
+    public void resetRootFiles()  { _rootFiles.clear(); }
 
     /**
      * Returns the list of child files for given file.
      */
-    public List<ProjectFile> getChildFilesForFile(ProjectFile projectFile)
-    {
-        List<WebFile> childFiles = getRawChildFiles(projectFile);
-        List<ProjectFile> projectFiles = ListUtils.mapNonNull(childFiles, file -> createProjectFile(projectFile, file));
-        projectFiles.sort(ProjectFile::compareTo);
-        return projectFiles;
-    }
+    public abstract List<ProjectFile> getChildFilesForFile(ProjectFile projectFile);
 
     /**
-     * Returns the list of child files.
+     * Returns a project file for given WebFile.
      */
-    protected List<WebFile> getRawChildFiles(ProjectFile projectFile)
+    public ProjectFile getProjectFileForFile(WebFile aFile)
     {
-        if (projectFile._type == ProjectFile.FileType.SOURCE_DIR)
-            return getChildFilesForSourceDir(projectFile);
-        return projectFile._file.getFiles();
-    }
+        // Handle null
+        if (aFile == null) return null;
 
-    /**
-     * Creates children list from Project files.
-     */
-    private List<WebFile> getChildFilesForSourceDir(ProjectFile projectFile)
-    {
-        List<WebFile> childFiles = new ArrayList<>();
+        // If root, search for file in RootFiles
+        if (aFile.isRoot())
+            return getProjectFileForRootFile(aFile);
 
-        // Iterate over source dir and add child packages and files
-        for (WebFile child : projectFile._file.getFiles()) {
-            if (child.isDir() && child.getFileType().isEmpty())
-                findChildFilesForSourceDir(child, childFiles);
-            else childFiles.add(child);
+        // Otherwise, getProjectFile for successive parents and search them for this file
+        for (WebFile parentFile = aFile.getParent(); parentFile != null; parentFile = parentFile.getParent()) {
+
+            // Get project file (just skip if not found)
+            ProjectFile parentProjectFile = getProjectFileForFile(parentFile);
+            if (parentProjectFile == null)
+                continue;
+
+            // Search parent file child files
+            for (ProjectFile projectFile : parentProjectFile.getFiles())
+                 if (aFile == projectFile.getFile())
+                     return projectFile;
         }
 
-        // Return
-        return childFiles;
+        // Return not found
+        return null;
     }
 
     /**
-     * Searches given package dir for files and adds to list.
+     * Returns a project file for given root WebFile.
      */
-    private void findChildFilesForSourceDir(WebFile parentDir, List<WebFile> childFiles)
+    public ProjectFile getProjectFileForRootFile(WebFile aFile)
     {
-        boolean hasNonPkgFile = false;
+        // If file is known root file, just return
+        List<ProjectFile> rootFiles = getRootFiles();
+        ProjectFile rootFile = ListUtils.findMatch(rootFiles, file -> file.getFile() == aFile);
+        if (rootFile != null)
+            return rootFile;
 
-        // Iterate over package dir files
-        for (WebFile child : parentDir.getFiles()) {
-            if (child.isDir() && child.getFileType().isEmpty())
-                findChildFilesForSourceDir(child, childFiles);
-            else hasNonPkgFile = true;
-        }
-
-        if (hasNonPkgFile || parentDir.getFileCount() == 0)
-            childFiles.add(parentDir);
+        // Create project file, add to list and return
+        rootFile = createProjectFile(null, aFile);
+        _rootFiles.add(rootFile);
+        return rootFile;
     }
 
     /**
-     * Creates a project file for real file.
+     * Creates a project file for web file.
      */
-    private ProjectFile createProjectFile(ProjectFile parentFile, WebFile aFile)
+    protected ProjectFile createProjectFile(ProjectFile parentFile, WebFile aFile)
     {
-        // Get basic file info
-        String name = aFile.getName();
-        boolean dir = aFile.isDir();
-        String type = aFile.getFileType();
-        int typeLen = type.length();
-
-        // Skip hidden files, child packages
-        if (name.startsWith("."))
-            return null;
-        if (parentFile._type == ProjectFile.FileType.PACKAGE_DIR && dir && typeLen == 0)
+        // Skip hidden files
+        if (aFile.getName().startsWith("."))
             return null;
 
         // Create project file
-        ProjectFile projectFile = new ProjectFile(parentFile, aFile);
-        if (dir && parentFile._proj != null && aFile == parentFile._proj.getSourceDir() && !aFile.isRoot()) {
-            projectFile._type = ProjectFile.FileType.SOURCE_DIR;
-            projectFile._priority = 1;
-        }
-        else if (parentFile._type == ProjectFile.FileType.SOURCE_DIR && dir && typeLen == 0) {
-            projectFile._type = ProjectFile.FileType.PACKAGE_DIR;
-            projectFile._priority = -1;
-        }
-
-        // Set priorities for special files
-        if (type.equals("java") || type.equals("snp"))
-            projectFile._priority = 1;
-
-        // Return
-        return projectFile;
+        return new ProjectFile(parentFile, aFile);
     }
 
     /**
      * Returns the default project file system.
      */
     public static ProjectFileSystem getDefaultProjectFileSystem()  { return _shared; }
+
+    /**
+     * This class is the default ProjectFileSystem implementation.
+     */
+    private static class Default extends ProjectFileSystem {
+
+        /**
+         * Constructor.
+         */
+        public Default()
+        {
+            super();
+        }
+
+        /**
+         * Returns the list of child files for given file.
+         */
+        @Override
+        public List<ProjectFile> getChildFilesForFile(ProjectFile projectFile)
+        {
+            List<WebFile> childFiles = getRawChildFiles(projectFile);
+            List<ProjectFile> projectFiles = ListUtils.mapNonNull(childFiles, file -> createProjectFile(projectFile, file));
+            projectFiles.sort(ProjectFile::compareTo);
+            return projectFiles;
+        }
+
+        /**
+         * Returns the list of child files.
+         */
+        protected List<WebFile> getRawChildFiles(ProjectFile projectFile)
+        {
+            if (projectFile._type == ProjectFile.FileType.SOURCE_DIR)
+                return getChildFilesForSourceDir(projectFile);
+            return projectFile._file.getFiles();
+        }
+
+        /**
+         * Creates children list from Project files.
+         */
+        private List<WebFile> getChildFilesForSourceDir(ProjectFile projectFile)
+        {
+            List<WebFile> childFiles = new ArrayList<>();
+
+            // Iterate over source dir and add child packages and files
+            for (WebFile child : projectFile._file.getFiles()) {
+                if (child.isDir() && child.getFileType().isEmpty())
+                    findChildFilesForSourceDir(child, childFiles);
+                else childFiles.add(child);
+            }
+
+            // Return
+            return childFiles;
+        }
+
+        /**
+         * Searches given package dir for files and adds to list.
+         */
+        private void findChildFilesForSourceDir(WebFile parentDir, List<WebFile> childFiles)
+        {
+            boolean hasNonPkgFile = false;
+
+            // Iterate over package dir files
+            for (WebFile child : parentDir.getFiles()) {
+                if (child.isDir() && child.getFileType().isEmpty())
+                    findChildFilesForSourceDir(child, childFiles);
+                else hasNonPkgFile = true;
+            }
+
+            if (hasNonPkgFile || parentDir.getFileCount() == 0)
+                childFiles.add(parentDir);
+        }
+
+        /**
+         * Creates a project file for real file.
+         */
+        @Override
+        protected ProjectFile createProjectFile(ProjectFile parentFile, WebFile aFile)
+        {
+            // Do normal version
+            ProjectFile projectFile = super.createProjectFile(parentFile, aFile);
+            if (projectFile == null)
+                return null;
+
+            // If root file, just return project file
+            if (parentFile == null)
+                return projectFile;
+
+            // Get basic file info
+            boolean dir = aFile.isDir();
+            String type = aFile.getFileType();
+            int typeLen = type.length();
+
+            // Skip hidden files, child packages
+            if (parentFile._type == ProjectFile.FileType.PACKAGE_DIR && dir && typeLen == 0)
+                return null;
+
+            // Create project file
+            if (dir && parentFile._proj != null && aFile == parentFile._proj.getSourceDir() && !aFile.isRoot()) {
+                projectFile._type = ProjectFile.FileType.SOURCE_DIR;
+                projectFile._priority = 1;
+            }
+            else if (parentFile._type == ProjectFile.FileType.SOURCE_DIR && dir && typeLen == 0) {
+                projectFile._type = ProjectFile.FileType.PACKAGE_DIR;
+                projectFile._priority = -1;
+            }
+
+            // Set priorities for special files
+            if (type.equals("java") || type.equals("snp"))
+                projectFile._priority = 1;
+
+            // Return
+            return projectFile;
+        }
+    }
+
+    /**
+     * This class is a ProjectFileSystem that shows files separated by LastModifiedTime.
+     */
+    private static class LastModTimeFileSystem extends ProjectFileSystem {
+
+        /**
+         * Constructor.
+         */
+        public LastModTimeFileSystem()
+        {
+            super();
+        }
+
+        /**
+         * Returns the list of child files for given file.
+         */
+        @Override
+        public List<ProjectFile> getChildFilesForFile(ProjectFile projectFile)
+        {
+            return null;
+        }
+    }
 }
