@@ -4,6 +4,7 @@ import snap.util.ListUtils;
 import snap.util.SnapEnv;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
+import snap.util.StringUtils;
 import snap.view.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -42,9 +43,10 @@ public class ProjectFilesTool extends WorkspaceTool {
     // Images for files tree/list
     private static Image FILES_TREE_ICON = Image.getImageForClassResource(ProjectFilesTool.class, "FilesTree.png");
     private static Image FILES_LIST_ICON = Image.getImageForClassResource(ProjectFilesTool.class, "FilesList.png");
+    private static Image FILES_HISTORY_ICON = Image.getImageForClassResource(ProjectFilesTool.class, "FilesHistory.png");
 
     // Constants for display type
-    public enum DisplayMode { FilesTree, FilesList, HistoryMode }
+    public enum DisplayMode { FilesTree, FilesList, History}
 
     // Constants for properties
     public static final String DisplayMode_Prop = "DisplayMode";
@@ -76,7 +78,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         firePropChange(DisplayMode_Prop, _displayMode, _displayMode = displayMode);
 
         // Update UI
-        boolean historyMode = displayMode == DisplayMode.HistoryMode;
+        boolean historyMode = displayMode == DisplayMode.History;
         boolean treeMode = displayMode == DisplayMode.FilesTree || historyMode;
         boolean listMode = displayMode == DisplayMode.FilesList;
 
@@ -94,7 +96,9 @@ public class ProjectFilesTool extends WorkspaceTool {
             _filesList.getParent().getParent().setVisible(listMode);
 
         // Reset DisplayModeButton image
-        getView("DisplayModeButton", ButtonBase.class).setImage(treeMode ? FILES_TREE_ICON : FILES_LIST_ICON);
+        ButtonBase displayModeButton = getView("DisplayModeButton", ButtonBase.class);
+        displayModeButton.setImage(getDisplayModeImage(displayMode));
+        displayModeButton.setToolTip("File display mode: " + StringUtils.fromCamelCase(displayMode.toString()));
     }
 
     /**
@@ -104,8 +108,8 @@ public class ProjectFilesTool extends WorkspaceTool {
     {
         switch (_displayMode) {
             case FilesTree: return DisplayMode.FilesList;
-            case FilesList: return DisplayMode.HistoryMode;
-            case HistoryMode: return DisplayMode.FilesTree;
+            case FilesList: return DisplayMode.History;
+            case History: return DisplayMode.FilesTree;
             default: return DisplayMode.FilesTree;
         }
     }
@@ -185,7 +189,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         // Get and configure FilesTree
         _filesTree = getView("FilesTree", TreeView.class);
         _filesTree.setResolver(new ProjectFile.ProjectFileTreeResolver());
-        _filesTree.setRowHeight(20);
+        _filesTree.setRowHeight(24);
         _filesTree.addEventFilter(this::handleTreeViewMouseEvent, MousePress, MouseRelease);
         _filesTree.addEventFilter(this::handleTreeViewDragEvent, DragEvents);
         _filesTree.addEventFilter(this::handleDragGestureEvent, DragGesture);
@@ -571,4 +575,16 @@ public class ProjectFilesTool extends WorkspaceTool {
      */
     @Override
     public String getTitle()  { return "Project"; }
+
+    /**
+     * Returns an image for given display mode.
+     */
+    private static Image getDisplayModeImage(DisplayMode displayMode)
+    {
+        switch (displayMode) {
+            case FilesTree: return FILES_TREE_ICON;
+            case FilesList: return FILES_LIST_ICON;
+            default: return FILES_HISTORY_ICON;
+        }
+    }
 }
