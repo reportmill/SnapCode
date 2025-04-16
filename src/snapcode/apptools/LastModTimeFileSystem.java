@@ -13,6 +13,9 @@ public class LastModTimeFileSystem extends ProjectFileSystem {
     // Map of date buckets to files
     private Map<DateBucket, List<WebFile>> _bucketFiles = new HashMap<>();
 
+    // Shared instance
+    private static LastModTimeFileSystem _shared;
+
     // Constants for date buckets
     public enum DateBucket { Today, Yesterday, PreviousWeek, PreviousMonth, PreviousYear, PreviousEon }
 
@@ -83,7 +86,7 @@ public class LastModTimeFileSystem extends ProjectFileSystem {
         bucketFiles.sort((f1,f2) -> Long.compare(f1.getLastModTime(), f2.getLastModTime()));
 
         // Create bucket project file and create/add child files to it
-        ProjectFile projectFile = new ProjectFile(parentFile, null);
+        ProjectFile projectFile = new ProjectFile(this, parentFile, null);
         projectFile._isDir = true;
         projectFile._text = StringUtils.fromCamelCase(dateBucket.name());
         projectFile._childFiles = ListUtils.map(bucketFiles, file -> createProjectFile(projectFile, file));
@@ -191,5 +194,14 @@ public class LastModTimeFileSystem extends ProjectFileSystem {
         start.set(Calendar.SECOND, 0);
         start.set(Calendar.MILLISECOND, 0);
         return start;
+    }
+
+    /**
+     * Returns a shared instance.
+     */
+    public static LastModTimeFileSystem getShared()
+    {
+        if (_shared != null) return _shared;
+        return _shared = new LastModTimeFileSystem();
     }
 }

@@ -96,7 +96,7 @@ public abstract class ProjectFileSystem {
             return null;
 
         // Create project file
-        return new ProjectFile(parentFile, aFile);
+        return new ProjectFile(this, parentFile, aFile);
     }
 
     /**

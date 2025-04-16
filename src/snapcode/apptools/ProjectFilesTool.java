@@ -13,6 +13,7 @@ import snapcode.util.DiffPage;
 import snapcode.util.FileIcons;
 import snapcode.webbrowser.*;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,8 +24,8 @@ public class ProjectFilesTool extends WorkspaceTool {
     // The display mode
     private DisplayMode _displayMode;
 
-    // The default project file system
-    private ProjectFileSystem _defaultFileSystem;
+    // The project file system
+    private ProjectFileSystem _fileSystem;
 
     // The FilesTool
     private FilesTool _filesTool;
@@ -43,7 +44,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     private static Image FILES_LIST_ICON = Image.getImageForClassResource(ProjectFilesTool.class, "FilesList.png");
 
     // Constants for display type
-    public enum DisplayMode { FilesTree, FilesList }
+    public enum DisplayMode { FilesTree, FilesList, HistoryMode }
 
     // Constants for properties
     public static final String DisplayMode_Prop = "DisplayMode";
@@ -55,7 +56,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     {
         super(workspacePane);
         _displayMode = DisplayMode.FilesTree;
-        _defaultFileSystem = ProjectFileSystem.getDefaultProjectFileSystem();
+        _fileSystem = ProjectFileSystem.getDefaultProjectFileSystem();
         _filesTool = getFilesTool();
     }
 
@@ -75,16 +76,24 @@ public class ProjectFilesTool extends WorkspaceTool {
         firePropChange(DisplayMode_Prop, _displayMode, _displayMode = displayMode);
 
         // Update UI
-        boolean treeMode = displayMode == DisplayMode.FilesTree;
+        boolean historyMode = displayMode == DisplayMode.HistoryMode;
+        boolean treeMode = displayMode == DisplayMode.FilesTree || historyMode;
         boolean listMode = displayMode == DisplayMode.FilesList;
 
-        // Set FilesTree, FilesList visible for display mode
+        // Set FilesTree, visible for display mode
         _filesTree.setVisible(treeMode);
         if (_filesTree.getParent().getParent() instanceof ScrollView)
             _filesTree.getParent().getParent().setVisible(treeMode);
+        _fileSystem = historyMode ? LastModTimeFileSystem.getShared() : ProjectFileSystem.getDefaultProjectFileSystem();
+        _filesTree.setItems(Collections.emptyList());
+        resetRootFiles();
+
+        // Set FilesList visible for display mode
         _filesList.setVisible(listMode);
         if (_filesList.getParent().getParent() instanceof ScrollView)
             _filesList.getParent().getParent().setVisible(listMode);
+
+        // Reset DisplayModeButton image
         getView("DisplayModeButton", ButtonBase.class).setImage(treeMode ? FILES_TREE_ICON : FILES_LIST_ICON);
     }
 
@@ -95,7 +104,8 @@ public class ProjectFilesTool extends WorkspaceTool {
     {
         switch (_displayMode) {
             case FilesTree: return DisplayMode.FilesList;
-            case FilesList: return DisplayMode.FilesTree;
+            case FilesList: return DisplayMode.HistoryMode;
+            case HistoryMode: return DisplayMode.FilesTree;
             default: return DisplayMode.FilesTree;
         }
     }
@@ -110,7 +120,7 @@ public class ProjectFilesTool extends WorkspaceTool {
 
         // Create RootFiles for Workspace.Sites
         List<WebSite> workspaceSites = _workspace.getSites();
-        List<ProjectFile> rootFiles = ListUtils.map(workspaceSites, site -> _defaultFileSystem.getProjectFileForRootFile(site.getRootDir()));
+        List<ProjectFile> rootFiles = ListUtils.map(workspaceSites, site -> _fileSystem.getProjectFileForRootFile(site.getRootDir()));
         return _rootFiles = rootFiles;
     }
 
@@ -120,8 +130,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     public void resetRootFiles()
     {
         _rootFiles = null;
-        _defaultFileSystem.resetRootFiles();
-        resetLater();
+        _fileSystem.resetRootFiles();
 
         if (_filesTree != null)
             ViewUtils.runLater(this::resetFilesTree);
@@ -137,7 +146,7 @@ public class ProjectFilesTool extends WorkspaceTool {
             return null;
 
         // Get project file
-        return _defaultFileSystem.getProjectFileForFile(aFile);
+        return _fileSystem.getProjectFileForFile(aFile);
     }
 
     /**
@@ -241,8 +250,12 @@ public class ProjectFilesTool extends WorkspaceTool {
         List<ProjectFile> rootFiles = getRootFiles();
         _filesTree.setItems(rootFiles);
 
+        // If LastModTime file system, show all
+        if (_fileSystem instanceof LastModTimeFileSystem)
+            _filesTree.expandAll();
+
         // Show first project root dir
-        if (firstTreeLoad) {
+        else if (firstTreeLoad) {
             if (!rootFiles.isEmpty())
                 _filesTree.expandItem(rootFiles.get(0));
             List<ProjectFile> filesTreeFiles = _filesTree.getItems();

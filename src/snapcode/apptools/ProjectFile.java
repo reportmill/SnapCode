@@ -59,9 +59,9 @@ public class ProjectFile implements Comparable<ProjectFile> {
     /**
      * Constructor.
      */
-    public ProjectFile(ProjectFile aPar, WebFile aFile)
+    public ProjectFile(ProjectFileSystem fileSystem, ProjectFile aPar, WebFile aFile)
     {
-        _fileSystem = aPar != null ? aPar._fileSystem : ProjectFileSystem.getDefaultProjectFileSystem();
+        _fileSystem = fileSystem;
         _parent = aPar;
         _file = aFile;
         if (_file != null) {
@@ -120,12 +120,8 @@ public class ProjectFile implements Comparable<ProjectFile> {
     public View getGraphic()
     {
         // If no file, return directory icon
-        if (_file == null) {
-            Image dirImage = FileIcons.getDirImage();
-            View fileIconView = new ImageView(dirImage);
-            fileIconView.setPrefSize(18, 18);
-            return fileIconView;
-        }
+        if (_file == null)
+            return null;
 
         // Get image for file
         Image fileImage = _type == FileType.PACKAGE_DIR ? Package : FileIcons.getFileIconImage(_file);
