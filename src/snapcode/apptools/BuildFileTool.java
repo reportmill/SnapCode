@@ -184,8 +184,9 @@ public class BuildFileTool extends ProjectTool {
             setViewValue("ProjectNameText", projectDependency.getProjectName());
         }
 
-        // Update MainClassNameText
+        // Update MainClassNameText, EnableCompilePreviewCheckBox
         setViewValue("MainClassNameText", buildFile.getMainClassName());
+        setViewValue("EnableCompilePreviewCheckBox", buildFile.isEnableCompilePreview());
     }
 
     /**
@@ -230,8 +231,9 @@ public class BuildFileTool extends ProjectTool {
             // Handle DependencyTypeComboBox
             case "DependencyTypeComboBox": changeSelectedDependencyType(); break;
 
-            // Handle MainClassNameText
+            // Handle MainClassNameText, EnableCompilePreviewCheckBox
             case "MainClassNameText": buildFile.setMainClassName(anEvent.getStringValue()); break;
+            case "EnableCompilePreviewCheckBox": buildFile.setEnableCompilePreview(anEvent.getBoolValue()); break;
 
             // Handle dependency
             default: respondDependencyUI(anEvent); break;

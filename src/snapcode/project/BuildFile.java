@@ -23,6 +23,9 @@ public class BuildFile extends PropObject {
     // The compile release version
     private int _compileRelease;
 
+    // Whether to enable compiler preview language features
+    private boolean _enableCompilePreview;
+
     // The dependencies
     private BuildDependency[] _dependencies;
 
@@ -45,6 +48,7 @@ public class BuildFile extends PropObject {
     public static final String SourcePath_Prop = "SourcePath";
     public static final String BuildPath_Prop = "BuildPath";
     public static final String CompileRelease_Prop = "CompileRelease";
+    public static final String EnableCompilePreview_Prop = "EnableCompilerPreview";
     public static final String Dependency_Prop = "Dependency";
     public static final String Dependencies_Prop = "Dependencies";
     public static final String MainClassName_Prop = "MainClassName";
@@ -54,6 +58,7 @@ public class BuildFile extends PropObject {
     private static final String DEFAULT_SOURCE_PATH = "src";
     private static final String DEFAULT_BUILD_PATH = "bin";
     private static final int DEFAULT_JAVA_VERSION = SnapUtils.getJavaVersionInt();
+    private static final boolean DEFAULT_ENABLE_COMPILE_PREVIEW = false;
 
     /**
      * Constructor.
@@ -67,6 +72,7 @@ public class BuildFile extends PropObject {
         _buildPath = DEFAULT_BUILD_PATH;
         _dependencies = new BuildDependency[0];
         _compileRelease = DEFAULT_JAVA_VERSION;
+        _enableCompilePreview = DEFAULT_ENABLE_COMPILE_PREVIEW;
     }
 
     /**
@@ -138,6 +144,20 @@ public class BuildFile extends PropObject {
     {
         if (aValue == _compileRelease) return;
         firePropChange(CompileRelease_Prop, _compileRelease, _compileRelease = aValue);
+    }
+
+    /**
+     * Returns whether to enable compiler preview language features.
+     */
+    public boolean isEnableCompilePreview()  { return _enableCompilePreview; }
+
+    /**
+     * Sets whether to enable compiler preview language features.
+     */
+    public void setEnableCompilePreview(boolean aValue)
+    {
+        if (aValue == _enableCompilePreview) return;
+        firePropChange(EnableCompilePreview_Prop, _enableCompilePreview, _enableCompilePreview = aValue);
     }
 
     /**
@@ -394,10 +414,11 @@ public class BuildFile extends PropObject {
         // Do normal version
         super.initProps(aPropSet);
 
-        // SourcePath, BuildPath, CompileRelease
+        // SourcePath, BuildPath, CompileRelease, EnableCompilePreview
         aPropSet.addPropNamed(SourcePath_Prop, String.class);
         aPropSet.addPropNamed(BuildPath_Prop, String.class);
         aPropSet.addPropNamed(CompileRelease_Prop, int.class);
+        aPropSet.addPropNamed(EnableCompilePreview_Prop, boolean.class);
 
         // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime
         aPropSet.addPropNamed(Dependencies_Prop, BuildDependency[].class);
@@ -415,10 +436,11 @@ public class BuildFile extends PropObject {
         // Handle properties
         switch (aPropName) {
 
-            // SourcePath, BuildPath, CompileRelease
+            // SourcePath, BuildPath, CompileRelease, EnableCompilePreview
             case SourcePath_Prop: return getSourcePath();
             case BuildPath_Prop: return getBuildPath();
             case CompileRelease_Prop: return getCompileRelease();
+            case EnableCompilePreview_Prop: return isEnableCompilePreview();
 
             // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime
             case Dependencies_Prop: return getDependencies();
@@ -440,10 +462,11 @@ public class BuildFile extends PropObject {
         // Handle properties
         switch (aPropName) {
 
-            // SourcePath, BuildPath, CompileRelease
+            // SourcePath, BuildPath, CompileRelease, EnableCompilePreview
             case SourcePath_Prop: setSourcePath(Convert.stringValue(aValue)); break;
             case BuildPath_Prop: setBuildPath(Convert.stringValue(aValue)); break;
             case CompileRelease_Prop: setCompileRelease(Convert.intValue(aValue)); break;
+            case EnableCompilePreview_Prop: setEnableCompilePreview(Convert.booleanValue(aValue)); break;
 
             // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime
             case Dependencies_Prop: setDependencies((BuildDependency[]) aValue); break;

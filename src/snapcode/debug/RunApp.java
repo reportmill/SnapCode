@@ -12,6 +12,7 @@ import snap.viewx.Console;
 import snapcode.apptools.RunTool;
 import snapcode.project.Breakpoint;
 import snap.web.WebURL;
+import snapcode.project.BuildFile;
 import snapcode.project.Project;
 import snapcode.project.RunConfig;
 import java.io.*;
@@ -441,7 +442,6 @@ public abstract class RunApp {
         System.out.println(aString);
     }
 
-
     /**
      * Returns an array of args for given run config.
      */
@@ -466,6 +466,11 @@ public abstract class RunApp {
                 javaCmdPath = "java-dom";
         }
         commands.add(javaCmdPath);
+
+        // Handle BuildFile.EnableCompilePreview
+        BuildFile buildFile = project.getBuildFile();
+        if (buildFile.isEnableCompilePreview())
+            commands.add("--enable-preview");
 
         // Get Class path and add to list
         String[] classPaths = project.getRuntimeClassPaths();

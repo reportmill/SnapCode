@@ -109,6 +109,11 @@ public class SnapCompiler {
             options.add(Integer.toString(compileRelease));
         }
 
+        // Handle BuildFile.EnableCompilePreview -enable-preview
+        BuildFile buildFile = _proj.getBuildFile();
+        if (buildFile.isEnableCompilePreview())
+            options.add("--enable-preview");
+
         // Add class paths for project dependencies (libraries and child projects)
         String[] compilerClassPaths = _proj.getCompileClassPaths();
         if (compilerClassPaths.length > 0) {

@@ -67,6 +67,11 @@ public class RunToolUtils {
         if (!proj.getName().equals("TempProj"))
             return false;
 
+        // If BuildFile.EnableCompilePreview, return false
+        BuildFile buildFile = proj.getBuildFile();
+        if (buildFile.isEnableCompilePreview())
+            return false;
+
         boolean isSwing = mainFile.getText().contains("javax.swing");
         return !isSwing && !ViewUtils.isControlDown() && proj.getBuildFile().getDependencies().length == 0;
     }

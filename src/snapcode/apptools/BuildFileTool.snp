@@ -86,4 +86,8 @@
     <Label Text="Main Class Name:" />
     <TextField Name="MainClassNameText" PrefWidth="255" />
   </RowView>
+  <RowView Spacing="5">
+    <Label Text="Enable Compiler Preview Language Features" />
+    <CheckBox Name="EnableCompilePreviewCheckBox" />
+  </RowView>
 </ColView>
