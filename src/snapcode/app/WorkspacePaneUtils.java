@@ -6,6 +6,7 @@ import snap.viewx.DialogBox;
 import snap.web.*;
 import snapcode.apptools.HelpTool;
 import snapcode.apptools.NewFileTool;
+import snapcode.apptools.ProjectFilesTool;
 import snapcode.project.*;
 import java.util.List;
 
@@ -267,6 +268,28 @@ public class WorkspacePaneUtils {
         DialogBox dialogBox = new DialogBox("Checkout failed");
         dialogBox.setErrorMessage("Failed checkout: " + repoURL.getString() + '\n' + "Error: " + anException.getMessage());
         dialogBox.showMessageDialog(workspacePane.getUI());
+    }
+
+    /**
+     * Opens the scratch project.
+     */
+    public static void openScratchProject(WorkspacePane workspacePane)
+    {
+        WebFile projectDir = SnapCodeUtils.getSnapCodeProjectDirForName("ScratchProject");
+        boolean projectDirExists = projectDir.getExists();
+
+        // Change ProjectFilesTool display mode to history
+        workspacePane.getProjectFilesTool().setDisplayMode(ProjectFilesTool.DisplayMode.History);
+
+        // Open project
+        openProjectForProjectFile(workspacePane, projectDir);
+
+        // If project didn't exist, configure build file
+        if (!projectDirExists) {
+            Project scratchProj = workspacePane.getWorkspace().getProjectForName("ScratchProject");
+            scratchProj.getBuildFile().setIncludeSnapKitRuntime(true);
+            scratchProj.getBuildFile().writeFile();
+        }
     }
 
     /**

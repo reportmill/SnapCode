@@ -188,6 +188,16 @@ public class HomePage extends WebPage {
     }
 
     /**
+     * Resets the UI.
+     */
+    @Override
+    protected void resetUI()
+    {
+        // Update OpenScratchProjectButton
+        setViewVisible("OpenScratchProjectButton", _workspacePane.getWorkspace().getProjectForName("ScratchProject") == null);
+    }
+
+    /**
      * Respond to UI.
      */
     @Override
@@ -199,9 +209,10 @@ public class HomePage extends WebPage {
             case "ClearWorkspaceButton": clearWorkspace(); break;
             case "RestoreWorkspaceButton": restoreWorkspace(); break;
 
-            // Handle OpenButton, OpenDesktopFileButton
+            // Handle OpenButton, OpenDesktopFileButton, OpenScratchProjectButton
             case "OpenButton": _workspacePane.getFilesTool().showOpenFilePanel(); break;
             case "OpenDesktopFileButton": _workspacePane.getFilesTool().showOpenDesktopFilePanel(); break;
+            case "OpenScratchProjectButton": WorkspacePaneUtils.openScratchProject(_workspacePane); break;
 
             // Do normal version
             default: super.respondUI(anEvent); break;
