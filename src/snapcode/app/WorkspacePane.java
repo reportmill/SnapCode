@@ -256,6 +256,9 @@ public class WorkspacePane extends ViewOwner {
         for (Project project : projects)
             workspace.closeProject(project);
         _clearingWorkspace = false;
+
+        // Reset ProjectFilesTool DisplayMode
+        getProjectFilesTool().setDisplayMode(ProjectFilesTool.DisplayMode.FilesTree);
     }
 
     /**
