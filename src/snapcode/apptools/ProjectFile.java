@@ -56,18 +56,25 @@ public class ProjectFile implements Comparable<ProjectFile> {
     private static Image WarningBadge = Image.getImageForClassResource(ProjectFile.class, "WarningBadge.png");
     private static Image Package = JavaTextUtils.PackageImage;
 
+    // Priority file types
+    private static List<String> PRIORITY_FILE_TYPES = List.of("java", "jepl", "jmd", "snp");
+
     /**
      * Constructor.
      */
     public ProjectFile(ProjectFileSystem fileSystem, ProjectFile aPar, WebFile aFile)
     {
+        super();
         _fileSystem = fileSystem;
         _parent = aPar;
         _file = aFile;
+
         if (_file != null) {
             _isDir = _file.isDir();
             _proj = Project.getProjectForSite(aFile.getSite());
             _vc = VersionControl.getVersionControlForProjectSite(_file.getSite());
+            if (PRIORITY_FILE_TYPES.contains(_file.getFileType()))
+                _priority = 1;
         }
     }
 

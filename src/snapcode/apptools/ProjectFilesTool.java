@@ -161,6 +161,12 @@ public class ProjectFilesTool extends WorkspaceTool {
         // If UI not set, just return
         if (_filesTree == null) return;
 
+        // If LastModTimeFileSystem, just reset all
+        if (_fileSystem instanceof LastModTimeFileSystem) {
+            resetRootFiles();
+            return;
+        }
+
         // Iterate up parent files and updateProjectFile for each
         for (WebFile parentFile = aFile; parentFile != null; parentFile = parentFile.getParent()) {
 

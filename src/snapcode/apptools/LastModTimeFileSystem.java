@@ -17,10 +17,10 @@ public class LastModTimeFileSystem extends ProjectFileSystem {
     private static LastModTimeFileSystem _shared;
 
     // Constants for date buckets
-    public enum DateBucket { Today, Yesterday, PreviousWeek, PreviousMonth, PreviousYear, PreviousEon }
+    public enum DateBucket { Today, Yesterday, PreviousWeek, PreviousMonth, PreviousYear, PreviousEon, OtherFiles}
 
-    // Whitelist
-    private static final List<String> BLACKLIST_TYPES = List.of("bin", "class");
+    // List of source file types
+    private static final List<String> SOURCE_FILE_TYPES = List.of("java", "jepl", "jmd", "snp");
 
     /**
      * Constructor.
@@ -107,18 +107,19 @@ public class LastModTimeFileSystem extends ProjectFileSystem {
             return;
         }
 
-        // If file type is blacklisted, just return
+        // Skip hidden files
         String name = webFile.getName();
         if (name.startsWith("."))
             return;
-        String fileType = webFile.getFileType();
-        if (BLACKLIST_TYPES.contains(fileType))
-            return;
 
-        // Handle file
+        // Get DateBucket for file
         DateBucket dateBucket = getDateBucketForDate(webFile.getLastModDate());
-        List<WebFile> webFiles = getDateBucketList(dateBucket);
-        webFiles.add(webFile);
+        if (!SOURCE_FILE_TYPES.contains(webFile.getFileType()))
+            dateBucket = DateBucket.OtherFiles;
+
+        // Get bucket list and add file
+        List<WebFile> bucketList = getDateBucketList(dateBucket);
+        bucketList.add(webFile);
     }
 
     /**

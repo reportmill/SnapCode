@@ -20,6 +20,7 @@ public class ConsoleText extends TextBlock {
 
     // Constants
     private static Color ERROR_COLOR = new Color("CC0000");
+    private static Color BANNER_COLOR = new Color("#C08080");
 
     /**
      * Constructor.
@@ -48,6 +49,8 @@ public class ConsoleText extends TextBlock {
 
         // Get color
         Color color = isError ? ERROR_COLOR : Color.BLACK;
+        if (length() == 0)
+            color = BANNER_COLOR;
 
         // Get default style modified for color
         TextStyle style = getTextStyleForCharIndex(length());

@@ -183,39 +183,36 @@ public abstract class ProjectFileSystem {
          * Creates a project file for real file.
          */
         @Override
-        protected ProjectFile createProjectFile(ProjectFile parentFile, WebFile aFile)
+        protected ProjectFile createProjectFile(ProjectFile parentFile, WebFile webFile)
         {
             // Do normal version
-            ProjectFile projectFile = super.createProjectFile(parentFile, aFile);
+            ProjectFile projectFile = super.createProjectFile(parentFile, webFile);
             if (projectFile == null)
                 return null;
 
-            // If root file, just return project file
+            // If root file, just return file
             if (parentFile == null)
                 return projectFile;
 
-            // Get basic file info
-            boolean dir = aFile.isDir();
-            String type = aFile.getFileType();
-            int typeLen = type.length();
+            // If not dir (or dir with extension), just return file
+            if (webFile.isFile() && !webFile.getFileType().isEmpty())
+                return projectFile;
 
-            // Skip hidden files, child packages
-            if (parentFile._type == ProjectFile.FileType.PACKAGE_DIR && dir && typeLen == 0)
+            // If nested child package, just skip
+            if (parentFile._type == ProjectFile.FileType.PACKAGE_DIR)
                 return null;
 
-            // Create project file
-            if (dir && parentFile._proj != null && aFile == parentFile._proj.getSourceDir() && !aFile.isRoot()) {
-                projectFile._type = ProjectFile.FileType.SOURCE_DIR;
-                projectFile._priority = 1;
-            }
-            else if (parentFile._type == ProjectFile.FileType.SOURCE_DIR && dir && typeLen == 0) {
+            // If top level package, set type and priority
+            if (parentFile._type == ProjectFile.FileType.SOURCE_DIR) {
                 projectFile._type = ProjectFile.FileType.PACKAGE_DIR;
                 projectFile._priority = -1;
             }
 
-            // Set priorities for special files
-            if (type.equals("java") || type.equals("snp"))
+            // If source dir, set type and priority
+            else if (parentFile._proj != null && webFile == parentFile._proj.getSourceDir() && !webFile.isRoot()) {
+                projectFile._type = ProjectFile.FileType.SOURCE_DIR;
                 projectFile._priority = 1;
+            }
 
             // Return
             return projectFile;
