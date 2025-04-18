@@ -591,8 +591,8 @@ public class WorkspacePane extends ViewOwner {
         String propName = aPC.getPropName();
         WebFile file = (WebFile) aPC.getSource();
 
-        // Handle LastModTime, Modified: Update file in ProjectFilesTool
-        if (propName == WebFile.LastModTime_Prop || propName == WebFile.Modified_Prop)
+        // Handle LastModTime, Modified, Updater: Update file in ProjectFilesTool
+        if (propName == WebFile.LastModTime_Prop || propName == WebFile.Modified_Prop || propName == WebFile.Updater_Prop)
             getProjectFilesTool().handleFileChange(file);
     }
 
