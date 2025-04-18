@@ -2,6 +2,8 @@ package snapcode.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JavaParser;
 import snap.util.ArrayUtils;
+import snap.util.FilePathUtils;
+import snap.util.ListUtils;
 import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.viewx.FilePanel;
@@ -15,11 +17,15 @@ import snapcode.app.WorkspaceTool;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
+import java.util.List;
 
 /**
  * This class is a WorkspaceTool to manage creating new files.
  */
 public class NewFileTool extends WorkspaceTool {
+
+    // Constants for Java file types
+    private static final List<String> JAVA_FILE_TYPES = List.of("java", "jepl", "jmd");
 
     /**
      * Constructor.
@@ -371,6 +377,18 @@ public class NewFileTool extends WorkspaceTool {
             if (!replaceFilePanel.showConfirmDialog(aView))
                 return showNewFilePanelForDirAndType(aView, parentDir, fileType);
             return newFile;
+        }
+
+        // If Java file type (java, jepl or jmd) and other JavaFileType already exists, complain and return
+        if (JAVA_FILE_TYPES.contains(fileType)) {
+            String javaFileName = filename;
+            List<String> javaFileNames = ListUtils.map(JAVA_FILE_TYPES, ftype -> FilePathUtils.getSisterPath(javaFileName, ftype));
+            String otherJavaFileName = ListUtils.findMatch(javaFileNames, fname -> parentDir.getFileForName(fname) != null);
+            if (otherJavaFileName != null) {
+                String replaceMessage = "Another Java-like file named " + otherJavaFileName + " already exists.";
+                DialogBox.showWarningDialog(aView, newFilePanelTitle + ": Java-like file collision", replaceMessage);
+                return showNewFilePanelForDirAndType(aView, parentDir, fileType);
+            }
         }
 
         // Create file and return
