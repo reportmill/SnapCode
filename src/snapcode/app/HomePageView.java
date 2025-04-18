@@ -133,14 +133,14 @@ public class HomePageView extends MarkDownView {
                 openDesktopFileButton.setPropsString("Name:OpenDesktopFileButton; PrefWidth:130; PrefHeight:24; Margin:0,0,0,12");
                 openDesktopFileButton.setVisible(SnapEnv.isWebVM);
 
-                // Create OpenScratchProjectButton
-                Button openScratchProjectButton = new Button("Open Scratch Project");
-                openScratchProjectButton.setPropsString("Name:OpenScratchProjectButton; PrefWidth:130; PrefHeight:24; Margin:0,0,0,20");
+                // Create OpenScratchPadButton
+                Button openScratchPadButton = new Button("Open Scratch Pad");
+                openScratchPadButton.setPropsString("Name:OpenScratchPadButton; PrefWidth:120; PrefHeight:24; Margin:0,0,0,20");
 
                 // Create row, add children and return
                 RowView rowView = new RowView();
                 rowView.setMargin(headerView.getMargin()); headerView.setMargin(Insets.EMPTY);
-                rowView.setChildren(headerView, openButton, openDesktopFileButton, openScratchProjectButton);
+                rowView.setChildren(headerView, openButton, openDesktopFileButton, openScratchPadButton);
                 return rowView;
             }
 

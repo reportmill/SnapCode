@@ -2,6 +2,7 @@ package snapcode.debug;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.text.TextBlock;
+import snap.text.TextLineStyle;
 import snap.text.TextLink;
 import snap.text.TextStyle;
 import snap.util.Convert;
@@ -32,6 +33,7 @@ public class ConsoleText extends TextBlock {
         // Set font
         Font codeFont = JavaTextDocUtils.getDefaultJavaFont();
         setDefaultFont(codeFont);
+        setDefaultLineStyle(getDefaultLineStyle().copyForPropKeyValue(TextLineStyle.Spacing_Prop, 2));
     }
 
     /**

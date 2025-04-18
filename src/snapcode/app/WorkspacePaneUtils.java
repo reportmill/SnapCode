@@ -15,6 +15,9 @@ import java.util.List;
  */
 public class WorkspacePaneUtils {
 
+    // Constant for Scratch pad project name
+    public static final String SCRATCH_PAD = "ScratchPad";
+
     /**
      * Opens default workspace and triggers home page.
      */
@@ -271,11 +274,11 @@ public class WorkspacePaneUtils {
     }
 
     /**
-     * Opens the scratch project.
+     * Opens the scratch pad project.
      */
-    public static void openScratchProject(WorkspacePane workspacePane)
+    public static void openScratchPad(WorkspacePane workspacePane)
     {
-        WebFile projectDir = SnapCodeUtils.getSnapCodeProjectDirForName("ScratchProject");
+        WebFile projectDir = SnapCodeUtils.getSnapCodeProjectDirForName(SCRATCH_PAD);
         boolean projectDirExists = projectDir.getExists();
 
         // Change ProjectFilesTool display mode to history
@@ -286,7 +289,7 @@ public class WorkspacePaneUtils {
 
         // If project didn't exist, configure build file
         if (!projectDirExists) {
-            Project scratchProj = workspacePane.getWorkspace().getProjectForName("ScratchProject");
+            Project scratchProj = workspacePane.getWorkspace().getProjectForName(SCRATCH_PAD);
             scratchProj.getBuildFile().setIncludeSnapKitRuntime(true);
             scratchProj.getBuildFile().writeFile();
         }
