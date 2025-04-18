@@ -419,7 +419,7 @@ public class VersionControlTool extends ProjectTool {
     {
         WebFile file = (WebFile) aPC.getSource();
         ProjectFilesTool projectFilesTool = _workspacePane.getProjectFilesTool();
-        projectFilesTool.updateChangedFile(file);
+        projectFilesTool.handleFileChange(file);
     }
 
     /**

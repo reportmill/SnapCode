@@ -154,40 +154,6 @@ public class ProjectFilesTool extends WorkspaceTool {
     }
 
     /**
-     * Called to update a file when it has changed (Modified, Exists, ModTime, BuildIssues, child Files (dir)).
-     */
-    public void updateChangedFile(WebFile aFile)
-    {
-        // If UI not set, just return
-        if (_filesTree == null) return;
-
-        // If LastModTimeFileSystem, just reset all
-        if (_fileSystem instanceof LastModTimeFileSystem) {
-            resetRootFiles();
-            return;
-        }
-
-        // Iterate up parent files and updateProjectFile for each
-        for (WebFile parentFile = aFile; parentFile != null; parentFile = parentFile.getParent()) {
-
-            // Get project file (skip if missing)
-            ProjectFile projectFile = getProjectFile(parentFile);
-            if (projectFile == null)
-                continue;
-
-            // Update project file
-            _filesTree.updateItem(projectFile);
-            _filesList.updateItem(projectFile);
-            if (parentFile == aFile) // Clear children in case they have changed
-                projectFile._childFiles = null;
-        }
-
-        // Reset UI
-        if (aFile.isDir())
-            resetLater();
-    }
-
-    /**
      * Initializes UI panel.
      */
     protected void initUI()
@@ -246,35 +212,6 @@ public class ProjectFilesTool extends WorkspaceTool {
         ProjectFile selProjectFile = getProjectFile(selFile);
         _filesTree.setSelItem(selProjectFile);
         _filesList.setSelItem(selProjectFile);
-    }
-
-    /**
-     * Resets the FilesTree when root files have changed.
-     */
-    private void resetFilesTree()
-    {
-        // Get whether files tree has yet to load
-        boolean firstTreeLoad = _filesTree.getItems().isEmpty();
-
-        // Reset FilesTree items
-        List<ProjectFile> rootFiles = getRootFiles();
-        _filesTree.setItems(rootFiles);
-
-        // If LastModTime file system, show all
-        if (_fileSystem instanceof LastModTimeFileSystem)
-            _filesTree.expandAll();
-
-        // Show first project root dir
-        else if (firstTreeLoad) {
-            if (!rootFiles.isEmpty())
-                _filesTree.expandItem(rootFiles.get(0));
-            List<ProjectFile> filesTreeFiles = _filesTree.getItems();
-            if (filesTreeFiles.size() > 1)
-                _filesTree.expandItem(filesTreeFiles.get(1));
-        }
-
-        // Reset
-        resetLater();
     }
 
     /**
@@ -390,6 +327,50 @@ public class ProjectFilesTool extends WorkspaceTool {
     }
 
     /**
+     * Resets the FilesTree when root files have changed.
+     */
+    private void resetFilesTree()
+    {
+        // Get whether files tree has yet to load
+        boolean firstTreeLoad = _filesTree.getItems().isEmpty();
+
+        // Reset FilesTree items
+        List<ProjectFile> rootFiles = getRootFiles();
+        _filesTree.setItems(rootFiles);
+
+        // If LastModTime file system, show all
+        if (_fileSystem instanceof LastModTimeFileSystem)
+            _filesTree.expandAll();
+
+            // Show first project root dir
+        else if (firstTreeLoad) {
+            if (!rootFiles.isEmpty())
+                _filesTree.expandItem(rootFiles.get(0));
+            List<ProjectFile> filesTreeFiles = _filesTree.getItems();
+            if (filesTreeFiles.size() > 1)
+                _filesTree.expandItem(filesTreeFiles.get(1));
+        }
+
+        // Reset
+        resetLater();
+    }
+
+    /**
+     * Called to update files tree for given project file when real file has changed.
+     */
+    private void resetFilesTreeForProjectFile(ProjectFile projectFile)
+    {
+        // If project file has parent, update it too
+        ProjectFile parentFile = projectFile.getParent();
+        if (parentFile != null)
+            resetFilesTreeForProjectFile(parentFile);
+
+        // Update FilesTree
+        _filesTree.updateItem(projectFile);
+        _filesList.updateItem(projectFile);
+    }
+
+    /**
      * Called when PagePane changes SelFile.
      */
     private void handlePagePaneSelFileChange()
@@ -405,6 +386,35 @@ public class ProjectFilesTool extends WorkspaceTool {
         }
 
         resetLater();
+    }
+
+    /**
+     * Called when workspace file has changed to update files tree.
+     * Changes include: Modified, Exists, ModTime, BuildIssues, child Files (dir), version control status.
+     */
+    public void handleFileChange(WebFile aFile)
+    {
+        // If UI not set, just return
+        if (_filesTree == null) return;
+
+        // Get project file
+        ProjectFile projectFile = getProjectFile(aFile);
+
+        // If no project file
+        if (projectFile == null) {
+            WebFile parentFile = aFile.getParent();
+            handleFileChange(parentFile);
+            return;
+        }
+
+        // Update project file
+        resetFilesTreeForProjectFile(projectFile);
+
+        // If directory, reload children
+        if (aFile.isDir()) {
+            projectFile._childFiles = null;
+            ViewUtils.runLater(this::resetFilesTree);
+        }
     }
 
     /**

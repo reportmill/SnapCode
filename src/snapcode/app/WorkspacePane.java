@@ -593,7 +593,7 @@ public class WorkspacePane extends ViewOwner {
 
         // Handle LastModTime, Modified: Update file in ProjectFilesTool
         if (propName == WebFile.LastModTime_Prop || propName == WebFile.Modified_Prop)
-            getProjectFilesTool().updateChangedFile(file);
+            getProjectFilesTool().handleFileChange(file);
     }
 
     /**

@@ -59,17 +59,17 @@ public class LastModTimeFileSystem extends ProjectFileSystem {
      * Returns the list of child files for given file.
      */
     @Override
-    public List<ProjectFile> getChildFilesForFile(ProjectFile projectFile)
+    public synchronized List<ProjectFile> getChildFilesForFile(ProjectFile projectFile)
     {
+        // Get web file - complain if not root
         WebFile webFile = projectFile.getFile();
-        if (webFile.isRoot()) {
-            _bucketFiles.clear();
-            addWebFileToBucket(webFile);
-            return ArrayUtils.mapNonNullToList(DateBucket.values(), db -> createProjectFileForDateBucket(projectFile, db));
-        }
+        if (!webFile.isRoot())
+            throw new RuntimeException("getChildFilesForFile called for unexpected file: " + webFile);
 
-        // Can't happen
-        throw new RuntimeException("getChildFilesForFile called for unexpected file: " + webFile);
+        // Reload bucket files, map buckets to bucket files and return
+        _bucketFiles.clear();
+        addWebFileToBucket(webFile);
+        return ArrayUtils.mapNonNullToList(DateBucket.values(), db -> createProjectFileForDateBucket(projectFile, db));
     }
 
     /**
@@ -83,7 +83,7 @@ public class LastModTimeFileSystem extends ProjectFileSystem {
             return null;
 
         // Sort files by LastModTime
-        bucketFiles.sort((f1,f2) -> Long.compare(f1.getLastModTime(), f2.getLastModTime()));
+        bucketFiles.sort(Comparator.comparingLong(WebFile::getLastModTime));
 
         // Create bucket project file and create/add child files to it
         ProjectFile projectFile = new ProjectFile(this, parentFile, null);
