@@ -287,11 +287,17 @@ public class WorkspacePaneUtils {
         // Open project
         openProjectForProjectFile(workspacePane, projectDir);
 
-        // If project didn't exist, configure build file
+        // If project didn't exist, configure project
         if (!projectDirExists) {
+
+            // Add SnapKit dependency
             Project scratchProj = workspacePane.getWorkspace().getProjectForName(SCRATCH_PAD);
             scratchProj.getBuildFile().setIncludeSnapKitRuntime(true);
             scratchProj.getBuildFile().writeFile();
+
+            // Add starter file
+            NewFileTool newFileTool = workspacePane.getNewFileTool();
+            ViewUtils.runLater(() -> newFileTool.newJeplFileForNameAndString("ScratchPad1", "jepl", ""));
         }
     }
 
