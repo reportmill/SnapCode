@@ -352,7 +352,8 @@ public class NewFileTool extends WorkspaceTool {
         String newFilePanelTitle = "New " + fileType + " File";
         DialogBox newFilePanel = new DialogBox(newFilePanelTitle);
         newFilePanel.setQuestionMessage("Enter " + fileType + " file name");
-        String filename = newFilePanel.showInputDialog(aView, "Untitled");
+        newFilePanel.setInputPromptText("Name");
+        String filename = newFilePanel.showInputDialog(aView, null);
         if (filename == null)
             return null;
 
