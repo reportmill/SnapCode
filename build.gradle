@@ -36,8 +36,8 @@ dependencies {
     implementation files('lib/jdk.compiler.jar')
 
     // JGit
-    implementation 'org.eclipse.jgit:org.eclipse.jgit:7.2.0.202503040940-r'
-    implementation 'org.slf4j:slf4j-api:1.7.30'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:6.10.0.202406032230-r'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
     implementation 'org.slf4j:slf4j-simple:1.7.30'
 
     // Greenfoot
@@ -68,6 +68,7 @@ task buildFullJar(type: Jar) {
     processResources { finalizedBy ('buildInfo') }
     with jar
     dependsOn build
+    duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
 task copyCJ(type: Copy) {
@@ -116,4 +117,9 @@ publishing {
             }
         }
     }
+}
+
+task copyDependencies(type: Copy) {
+    from configurations.runtimeClasspath
+    into 'build/libs-all'
 }
