@@ -2,8 +2,8 @@ package snapcode.project;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheEntry;
 import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.Repository;
 import snap.util.FilePathUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +40,7 @@ public class GitIndex {
     /**
      * Returns an index entry for given path.
      */
-    public Entry getEntry(String aPath)
+    protected Entry getEntry(String aPath)
     {
         if (_gitDir.getRepo() == null)
             return null;
@@ -131,15 +131,15 @@ public class GitIndex {
         /**
          * Returns the last modified time.
          */
-        public long getLastModified()  { return _entry != null ? _entry.getLastModified() : 0; }
+        public long getLastModified()  { return _entry != null ? _entry.getLastModifiedInstant().toEpochMilli() : 0; }
 
         /**
          * Returns the bytes for entry.
          */
         public byte[] getBytes()
         {
-            try {
-                ObjectReader objectReader = _gitDir.getRepo().newObjectReader();
+            Repository repo = _gitDir.getRepo();
+            try (ObjectReader objectReader = repo.newObjectReader()) {
                 return objectReader.open(_entry.getObjectId()).getBytes();
             }
             catch (Exception e) { throw new RuntimeException(e); }
@@ -156,9 +156,6 @@ public class GitIndex {
         /**
          * Standard toString implementation.
          */
-        public String toString()
-        {
-            return "Entry: " + _path + ", " + _entry;
-        }
+        public String toString()  { return "Entry: " + _path + ", " + _entry; }
     }
 }

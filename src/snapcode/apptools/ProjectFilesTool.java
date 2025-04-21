@@ -403,7 +403,8 @@ public class ProjectFilesTool extends WorkspaceTool {
         // If no project file
         if (projectFile == null) {
             WebFile parentFile = aFile.getParent();
-            handleFileChange(parentFile);
+            if (parentFile != null)
+                handleFileChange(parentFile);
             return;
         }
 

@@ -44,6 +44,7 @@ public class GitUtils {
             public boolean isCancelled()  { return aTM.isCancelled(); }
             public void endTask()  { aTM.endTask(); }
             public void beginTask(String arg0, int arg1)  { aTM.beginTask(arg0, arg1); }
+            public void showDuration(boolean b)  { }
         };
     }
 }
