@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView Padding="20,20,20,20" PrefHeight="220" Font="Arial 14" FillWidth="true">
+  <RowView MinHeight="32">
+    <Label Margin="0,8,0,8" LeanX="CENTER" Font="Arial 24" Text="Account Settings" />
+  </RowView>
+  <Separator PrefHeight="40" />
+  <RowView Margin="10,0,0,0">
+    <Label Margin="0,8,0,8" Text="Email:" />
+    <TextField Name="EmailText" Margin="5,20,5,5" GrowWidth="true" />
+  </RowView>
+  <RowView Margin="20,0,0,0">
+    <Label Margin="0,8,0,8" Text="Display Mode:" />
+    <ToggleButton Name="LightModeButton" MinWidth="100" Position="CENTER_LEFT" Text="Light Mode" />
+    <ToggleButton Name="DarkModeButton" MinWidth="100" Position="CENTER_RIGHT" Text="Dark Mode" />
+    <Label PrefWidth="28" PrefHeight="28" Margin="0,0,0,10" ImageName="pkg.images/DarkMode.png" />
+  </RowView>
+  <Button Name="CloseButton" LeanX="RIGHT" LeanY="TOP" Font="Arial 18" PrefWidth="32" PrefHeight="32" Margin="10,10,0,0" Padding="4" Text="X" ShowArea="false" />
+</ColView>

@@ -1,5 +1,6 @@
 package snapcode.app;
 import snap.geom.Insets;
+import snapcode.apptools.AccountTool;
 import snapcode.apptools.RunTool;
 import snapcode.project.Project;
 import snap.gfx.*;
@@ -143,12 +144,8 @@ public class MainToolBar extends WorkspaceTool {
             // Handle GreenfootButton
             case "GreenfootButton": WorkspacePaneUtils.selectGoodDefaultFile(_workspacePane, getSelProject()); break;
 
-            // Handle DarkModeButton
-            case "DarkModeButton":
-                ViewTheme theme = ViewTheme.get() == ViewTheme.getLight() ? ViewThemes.getThemeForName("Dark") : ViewTheme.getLight();
-                ViewTheme.setTheme(theme);
-                if (!(_pagePane.getSelPage() instanceof JavaPage))
-                    _pagePane.getBrowser().reloadPage();
+            // Handle AccountButton
+            case "AccountButton": new AccountTool(_workspacePane).showAccountTool(); break;
         }
     }
 
