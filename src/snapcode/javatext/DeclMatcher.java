@@ -26,7 +26,7 @@ public class DeclMatcher {
     private Matcher _matcher;
 
     // Constant for preferred packages
-    public static final String[] COMMON_PACKAGES = { "", "java.lang", "java.util", "java.io", "snap.view", "snap.geom", "snap.gfx" };
+    public static final String[] COMMON_PACKAGES = { "", "java.lang", "java.util", "java.io", "java.nio.file" };
 
     // Constant for empty members
     private static final int MATCH_LIMIT = 20;

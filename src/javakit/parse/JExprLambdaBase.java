@@ -254,23 +254,4 @@ public abstract class JExprLambdaBase extends JExpr {
      * Returns the node name.
      */
     public String getNodeString()  { return "LambdaExpr"; }
-
-    /**
-     * Returns the node errors.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        NodeError[] errors = super.getErrorsImpl();
-
-        // Handle missing class
-        JavaMethod lambdaMethod = getLambdaMethod();
-        if (lambdaMethod == null) {
-            if (!(this instanceof JExprMethodRef) || ((JExprMethodRef) this).getConstructor() == null)
-                errors = NodeError.addError(errors, this, "Can't resolve lambda method", 0);
-        }
-
-        // Return
-        return errors;
-    }
 }
