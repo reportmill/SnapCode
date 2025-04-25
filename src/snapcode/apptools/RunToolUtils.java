@@ -64,7 +64,7 @@ public class RunToolUtils {
         if (!fileType.equals("jepl"))
             return false;
         Project proj = Project.getProjectForFile(mainFile);
-        if (!proj.getName().equals("TempProj"))
+        if (!proj.getName().equals("TempProj") && !proj.getName().equals("ScratchPad"))
             return false;
 
         // If BuildFile.EnableCompilePreview, return false

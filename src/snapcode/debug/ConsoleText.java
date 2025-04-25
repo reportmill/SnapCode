@@ -51,7 +51,7 @@ public class ConsoleText extends TextBlock {
 
         // Get color
         Color color = isError ? ERROR_COLOR : Color.BLACK;
-        if (length() == 0)
+        if (length() == 0 && aStr.contains("java "))
             color = BANNER_COLOR;
 
         // Get default style modified for color
