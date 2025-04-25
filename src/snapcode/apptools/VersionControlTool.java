@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import snap.props.PropChangeListener;
 import snap.util.ListUtils;
 import snap.view.BoxView;
 import snapcode.project.WorkspaceBuilder;
@@ -27,6 +28,9 @@ public class VersionControlTool extends ProjectTool {
     // The WebBrowser for remote files
     private WebBrowser _remoteBrowser;
 
+    // The VersionControl prop change listener
+    private PropChangeListener _versionControlPropChangeLsnr = this::handleVersionControlFileStatusChange;
+
     /**
      * Constructor.
      */
@@ -34,18 +38,37 @@ public class VersionControlTool extends ProjectTool {
     {
         super(projectPane);
 
-        // Get VersionControl for project site
+        // Get VersionControl for project site and set listener
         WebSite projectSite = getProjectSite();
         _versionControl = VersionControl.getVersionControlForProjectSite(projectSite);
-
-        // Add listener to update FilesPane.FilesTree when file status changed
-        _versionControl.addPropChangeListener(this::handleVersionControlFileStatusChange);
+        _versionControl.addPropChangeListener(_versionControlPropChangeLsnr);
     }
 
     /**
      * Returns the VersionControl.
      */
     public VersionControl getVC()  { return _versionControl; }
+
+    /**
+     * Returns the remote URL.
+     */
+    public String getRemoteUrl()  { return _versionControl.getRemoteSiteUrlAddress(); }
+
+    /**
+     * Sets the Remote URL.
+     */
+    private void setRemoteUrl(String urlAddress)
+    {
+        _projPane.setRemoteUrlAddress(urlAddress);
+
+        //if (_versionControl != null)
+        //    _versionControl.removePropChangeLsnr(_versionControlPropChangeLsnr);
+
+        // Get VersionControl for project site and set listener
+        WebSite projectSite = getProjectSite();
+        _versionControl = VersionControl.getVersionControlForProjectSite(projectSite);
+        _versionControl.addPropChangeListener(_versionControlPropChangeLsnr);
+    }
 
     /**
      * Returns the remote site.
@@ -72,7 +95,7 @@ public class VersionControlTool extends ProjectTool {
     public void resetUI()
     {
         // Update RemoteURLText
-        setViewValue("RemoteURLText", _versionControl.getRemoteSiteUrlAddress());
+        setViewValue("RemoteURLText", getRemoteUrl());
 
         // Update ProgressBar
         ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
@@ -86,29 +109,24 @@ public class VersionControlTool extends ProjectTool {
      */
     public void respondUI(ViewEvent anEvent)
     {
-        // Handle RemoteURLText
-        if (anEvent.equals("RemoteURLText"))
-            _projPane.setRemoteUrlAddress(anEvent.getStringValue());
+        switch (anEvent.getName()) {
 
-        // Handle ConnectButton
-        if (anEvent.equals("ConnectButton")) {
-            WebSite remoteSite = getRemoteSite();
-            if (remoteSite != null)
-                remoteSite.getRootDir().resetAndVerify();
-            connectToRemoteSite();
+            // Handle RemoteURLText
+            case "RemoteURLText": setRemoteUrl(anEvent.getStringValue()); break;
+
+            // Handle ConnectButton
+            case "ConnectButton":
+                WebSite remoteSite = getRemoteSite();
+                if (remoteSite != null)
+                    remoteSite.getRootDir().resetAndVerify();
+                connectToRemoteSite();
+                break;
+
+            // Handle UpdateFilesButton, ReplaceFilesButton, CommitFilesButton
+            case "UpdateFilesButton": updateFiles(getSiteRootDirAsList()); break;
+            case "ReplaceFilesButton": replaceFiles(getSiteRootDirAsList()); break;
+            case "CommitFilesButton": commitFiles(getSiteRootDirAsList()); break;
         }
-
-        // Handle UpdateFilesButton
-        if (anEvent.equals("UpdateFilesButton"))
-            updateFiles(getSiteRootDirAsList());
-
-        // Handle ReplaceFilesButton
-        if (anEvent.equals("ReplaceFilesButton"))
-            replaceFiles(getSiteRootDirAsList());
-
-        // Handle CommitFilesButton
-        if (anEvent.equals("CommitFilesButton"))
-            commitFiles(getSiteRootDirAsList());
     }
 
     /**

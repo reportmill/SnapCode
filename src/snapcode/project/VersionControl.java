@@ -543,15 +543,22 @@ public class VersionControl {
         if (versionControl != null)
             return versionControl;
 
+        // Get remote URL - just return if null
         WebURL remoteUrl = VersionControlUtils.getRemoteSiteUrl(projectSite);
+        if (remoteUrl == null)
+            return new VersionControl(projectSite, null);
 
         // Handle Git
-        if (remoteUrl != null && (remoteUrl.getScheme().equals("git") || remoteUrl.getFileType().equals("git")))
+        if (remoteUrl.getScheme().equals("git") || remoteUrl.getFileType().equals("git"))
             return new VersionControlGit(projectSite, remoteUrl);
 
         // Handle Zip file
-        if (remoteUrl != null && remoteUrl.getFileType().equals("zip"))
+        if (remoteUrl.getFileType().equals("zip"))
             return new VersionControlZip(projectSite, remoteUrl);
+
+        // Handle Dropbox site
+        if (remoteUrl.getScheme().equals("dropbox"))
+            return new VersionControlDropbox(projectSite, remoteUrl);
 
         // Handle plain
         return new VersionControl(projectSite, remoteUrl);
