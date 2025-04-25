@@ -40,6 +40,7 @@ public class AccountTool extends ViewOwner {
     public void showAccountTool()
     {
         _popupWindow = new PopupWindow();
+        _popupWindow.setFocusable(true);
         _popupWindow.setContent(getUI());
         View workspacePaneUI = _workspacePane.getUI();
         _popupWindow.setPrefSize(PREF_WIDTH, workspacePaneUI.getHeight() - TOP_MARGIN - BOTTOM_MARGIN);
