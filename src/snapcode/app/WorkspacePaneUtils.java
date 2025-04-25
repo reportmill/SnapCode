@@ -161,6 +161,10 @@ public class WorkspacePaneUtils {
      */
     public static void openProjectForProjectFile(WorkspacePane workspacePane, WebFile projectFile)
     {
+        // If ScratchPad, set ProjectFilesTool.DisplayMode to history (shouldn't need this twice)
+        if (projectFile.getName().equals("ScratchPad"))
+            workspacePane.getProjectFilesTool().setDisplayMode(ProjectFilesTool.DisplayMode.History);
+
         // Get project dir and project site
         WebFile projectDir = projectFile.isDir() ? projectFile : projectFile.getParent();
         WebSite projectSite = projectDir.getURL().getAsSite();
