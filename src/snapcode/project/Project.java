@@ -112,8 +112,12 @@ public class Project extends PropObject {
         // If remote source set, return remote URL
         WebSite projSite = getSite();
         WebURL remoteSiteUrl = VersionControlUtils.getRemoteSiteUrl(projSite);
-        if (remoteSiteUrl != null)
-            return remoteSiteUrl;
+        if (remoteSiteUrl != null) {
+
+            // Remote URL must have same filename, or we can't find local project from RecentURLs - this is bogus
+            if (remoteSiteUrl.getFilenameSimple().equals(getName()))
+                return remoteSiteUrl;
+        }
 
         // Return site URL
         return projSite.getURL();
