@@ -31,9 +31,6 @@ public class VersionControl {
     // The clone site
     private WebSite _cloneSite;
 
-    // Whether this version control is available
-    private Boolean _isAvailable;
-
     // A map of file to it's status
     private Map<WebFile, FileStatus> _filesStatusCache = Collections.synchronizedMap(new HashMap<>());
 
@@ -74,14 +71,12 @@ public class VersionControl {
     public String getRemoteSiteUrlAddress()  { return _remoteSiteUrl != null ? _remoteSiteUrl.getString() : null; }
 
     /**
-     * Returns whether existing VCS artifacts are detected for site.
+     * Returns whether project has been checked out or cloned from remote.
      */
-    public boolean isAvailable()
+    public boolean isCheckedOut()
     {
-        if (_isAvailable != null) return _isAvailable;
-        WebSite remoteSite = getRemoteSite();
-        boolean remoteAvailable = remoteSite != null && remoteSite.getExists();
-        return _isAvailable = remoteAvailable;
+        WebSite cloneSite = getCloneSite();
+        return cloneSite != null && cloneSite.getExists();
     }
 
     /**
@@ -348,7 +343,7 @@ public class VersionControl {
             return fileStatus;
 
         // If VCS not available, return identical
-        if (!isAvailable())
+        if (!isCheckedOut())
             return FileStatus.Identical;
 
         // Get status of local file in clone site and cache

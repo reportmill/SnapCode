@@ -148,7 +148,7 @@ public class VersionControlTool extends ProjectTool {
     public void projectDidOpen()
     {
         // If project already checked out, or no remote site, or project not empty, just return
-        if (_versionControl.isAvailable())
+        if (_versionControl.isCheckedOut())
             return;
         if (_versionControl.getRemoteSiteUrl() == null)
             return;
@@ -239,7 +239,7 @@ public class VersionControlTool extends ProjectTool {
     public void updateFiles(List<WebFile> theFiles)
     {
         // Sanity check
-        if (!_versionControl.isAvailable()) { beep(); return; }
+        if (!_versionControl.isCheckedOut()) { beep(); return; }
 
         // Get root files
         List<WebFile> rootFiles = theFiles != null ? theFiles : getSelFiles();
@@ -307,7 +307,7 @@ public class VersionControlTool extends ProjectTool {
     public void replaceFiles(List<WebFile> theFiles)
     {
         // Sanity check
-        if (!_versionControl.isAvailable()) { beep(); return; }
+        if (!_versionControl.isCheckedOut()) { beep(); return; }
 
         // Get root files
         List<WebFile> rootFiles = theFiles != null ? theFiles : getSelFiles();
@@ -375,7 +375,7 @@ public class VersionControlTool extends ProjectTool {
     public void commitFiles(List<WebFile> theFiles)
     {
         // Sanity check
-        if (!_versionControl.isAvailable()) { beep(); return; }
+        if (!_versionControl.isCheckedOut()) { beep(); return; }
 
         // Get root files
         List<WebFile> rootFiles = theFiles != null ? theFiles : getSelFiles();

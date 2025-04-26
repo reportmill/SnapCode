@@ -21,16 +21,6 @@ public class VersionControlDropbox extends VersionControl {
     }
 
     /**
-     * Override to return whether local clone of zip file is present.
-     */
-    @Override
-    public boolean isAvailable()
-    {
-        WebSite cloneSite = getCloneSite();
-        return cloneSite.getExists();
-    }
-
-    /**
      * Override to return project site in remote ZipFile.
      */
     @Override

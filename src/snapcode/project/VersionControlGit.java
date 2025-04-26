@@ -56,7 +56,7 @@ public class VersionControlGit extends VersionControl {
      * Returns whether existing VCS artifacts are detected for project.
      */
     @Override
-    public boolean isAvailable()
+    public boolean isCheckedOut()
     {
         WebFile gitDirFile = getGitDirFile();
         return gitDirFile.getExists();
