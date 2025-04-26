@@ -52,12 +52,12 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Returns the remote URL.
      */
-    public String getRemoteUrl()  { return _versionControl.getRemoteSiteUrlAddress(); }
+    public String getRemoteUrlAddress()  { return _versionControl.getRemoteSiteUrlAddress(); }
 
     /**
      * Sets the Remote URL.
      */
-    private void setRemoteUrl(String urlAddress)
+    private void setRemoteUrlAddress(String urlAddress)
     {
         _projPane.setRemoteUrlAddress(urlAddress);
 
@@ -95,7 +95,17 @@ public class VersionControlTool extends ProjectTool {
     public void resetUI()
     {
         // Update RemoteURLText
-        setViewValue("RemoteURLText", getRemoteUrl());
+        setViewValue("RemoteURLText", getRemoteUrlAddress());
+
+        // Update ConnectButton
+        setViewVisible("ConnectButton", getRemoteSite() != null);
+
+        // Update CheckoutButton, UpdateFilesButton, ReplaceFilesButton, CommitFilesButton
+        boolean isCheckedOut = _versionControl.isCheckedOut();
+        setViewVisible("CheckoutButton", !isCheckedOut);
+        setViewVisible("UpdateFilesButton", isCheckedOut);
+        setViewVisible("ReplaceFilesButton", isCheckedOut);
+        setViewVisible("CommitFilesButton", isCheckedOut);
 
         // Update ProgressBar
         ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
@@ -112,15 +122,11 @@ public class VersionControlTool extends ProjectTool {
         switch (anEvent.getName()) {
 
             // Handle RemoteURLText
-            case "RemoteURLText": setRemoteUrl(anEvent.getStringValue()); break;
+            case "RemoteURLText": setRemoteUrlAddress(anEvent.getStringValue()); break;
 
-            // Handle ConnectButton
-            case "ConnectButton":
-                WebSite remoteSite = getRemoteSite();
-                if (remoteSite != null)
-                    remoteSite.getRootDir().resetAndVerify();
-                connectToRemoteSite();
-                break;
+            // Handle ConnectButton, CheckoutButton
+            case "ConnectButton": connectToRemoteSite(); break;
+            case "CheckoutButton": checkout(); break;
 
             // Handle UpdateFilesButton, ReplaceFilesButton, CommitFilesButton
             case "UpdateFilesButton": updateFiles(getSiteRootDirAsList()); break;
@@ -134,12 +140,19 @@ public class VersionControlTool extends ProjectTool {
      */
     public void connectToRemoteSite()
     {
+        // Get remote site
         WebSite remoteSite = getRemoteSite();
-        if (remoteSite != null) {
-            String remoteUrlAddr = remoteSite.getUrlAddress() + "!/";
-            _remoteBrowser.setSelUrlForUrlAddress(remoteUrlAddr);
+        if (remoteSite == null) {
+            _remoteBrowser.setSelFile(null);
+            return;
         }
-        else _remoteBrowser.setSelFile(null);
+
+        // Reset remote site root dir
+        WebFile rootDir = remoteSite.getRootDir();
+        rootDir.resetAndVerify();
+
+        // Set root dir in remote browser
+        _remoteBrowser.setSelFile(rootDir);
     }
 
     /**

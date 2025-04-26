@@ -8,6 +8,7 @@
   <RowView Spacing="5" GrowWidth="true">
     <Label Margin="5,5,5,8" Font="Arial 16" Text="Remote Files:" />
     <Button Name="ConnectButton" PrefWidth="90" Text="Connect" />
+    <Button Name="CheckoutButton" PrefWidth="120" Text="Checkout Project" />
     <Button Name="UpdateFilesButton" PrefWidth="90" Text="Update Files" />
     <Button Name="CommitFilesButton" PrefWidth="90" Text="Commit Files" />
     <Button Name="ReplaceFilesButton" PrefWidth="90" Text="Replace Files" />
