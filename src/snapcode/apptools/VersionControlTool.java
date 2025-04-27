@@ -98,11 +98,11 @@ public class VersionControlTool extends ProjectTool {
         setViewValue("RemoteURLText", getRemoteUrlAddress());
 
         // Update ConnectButton
-        setViewVisible("ConnectButton", getRemoteSite() != null);
+        setViewEnabled("ConnectButton", getRemoteSite() != null);
 
         // Update CheckoutButton, UpdateFilesButton, ReplaceFilesButton, CommitFilesButton
         boolean isCheckedOut = _versionControl.isCheckedOut();
-        setViewVisible("CheckoutButton", !isCheckedOut);
+        setViewVisible("CheckoutButton", !isCheckedOut && getRemoteSite() != null);
         setViewVisible("UpdateFilesButton", isCheckedOut);
         setViewVisible("ReplaceFilesButton", isCheckedOut);
         setViewVisible("CommitFilesButton", isCheckedOut);
