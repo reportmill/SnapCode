@@ -3,6 +3,7 @@ import snap.util.Prefs;
 import snap.web.DropBoxSite;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import snapcode.util.DropboxSite;
 
 /**
  * This version control class uses drop box.
@@ -26,12 +27,15 @@ public class VersionControlDropbox extends VersionControl {
     @Override
     protected WebSite getRemoteSiteImpl()
     {
-        String userEmail = Prefs.getDefaultPrefs().getString(USER_EMAIL_KEY);
-        if (userEmail == null || userEmail.isEmpty())
-            return null;
+//        String userEmail = Prefs.getDefaultPrefs().getString(USER_EMAIL_KEY);
+//        if (userEmail == null || userEmail.isEmpty())
+//            return null;
 
-        WebSite dropboxSite = DropBoxSite.getSiteForEmail(userEmail);
-        WebURL remoteProjectUrl = dropboxSite.getUrlForPath('/' + getLocalSite().getName());
-        return remoteProjectUrl.getAsSite();
+//        WebSite dropboxSite = DropBoxSite.getSiteForEmail(userEmail);
+//        WebURL remoteProjectUrl = dropboxSite.getUrlForPath('/' + getLocalSite().getName());
+//        return remoteProjectUrl.getAsSite();
+
+        WebURL remoteUrl = getRemoteSiteUrl();
+        return DropboxSite.getSiteForUrl(remoteUrl);
     }
 }

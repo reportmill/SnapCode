@@ -552,7 +552,7 @@ public class VersionControl {
             return new VersionControlZip(projectSite, remoteUrl);
 
         // Handle Dropbox site
-        if (remoteUrl.getScheme().equals("dropbox"))
+        if (remoteUrl.getScheme().equals("dropbox") || remoteUrl.getScheme().equals("dbox"))
             return new VersionControlDropbox(projectSite, remoteUrl);
 
         // Handle plain
