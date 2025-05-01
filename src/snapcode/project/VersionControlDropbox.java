@@ -36,6 +36,6 @@ public class VersionControlDropbox extends VersionControl {
 //        return remoteProjectUrl.getAsSite();
 
         WebURL remoteUrl = getRemoteSiteUrl();
-        return DropboxSite.getSiteForUrl(remoteUrl);
+        return DropBoxSite.getSiteForUrl(remoteUrl);
     }
 }

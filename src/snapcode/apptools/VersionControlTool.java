@@ -16,6 +16,7 @@ import snapcode.webbrowser.WebBrowser;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This ProjectTool subclass manages version control for project.
@@ -59,6 +60,8 @@ public class VersionControlTool extends ProjectTool {
      */
     private void setRemoteUrlAddress(String urlAddress)
     {
+        if (Objects.equals(urlAddress, getRemoteUrlAddress())) return;
+
         _projPane.setRemoteUrlAddress(urlAddress);
 
         //if (_versionControl != null)

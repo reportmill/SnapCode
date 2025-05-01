@@ -216,7 +216,7 @@ public class App {
         }
 
         // Delete common demos
-        String[] deleteDirnames = { "Sandboxes", "Tetris", "SnappyBird", "Asteroids", "Jewels" };
+        String[] deleteDirnames = { "Tetris", "SnappyBird", "Asteroids", "Jewels" };
         for (String deleteDirname : deleteDirnames) {
             WebFile deleteDir = WebFile.getFileForPath("/files/SnapCode/" + deleteDirname);
             if (deleteDir != null)
