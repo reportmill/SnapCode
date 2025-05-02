@@ -137,6 +137,10 @@ public class WorkspacePaneUtils {
      */
     public static boolean openProjectUrl(WorkspacePane workspacePane, WebURL projectUrl)
     {
+        // If Dropbox, replace project URL with local
+        if (projectUrl.getScheme().equals("dbox"))
+            projectUrl = SnapCodeUtils.getSnapCodeDirURL().getChild(projectUrl.getFilename());
+
         switch (projectUrl.getFileType()) {
 
             // Handle zip, git: Open project for repo URL
