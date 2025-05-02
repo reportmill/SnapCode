@@ -1,9 +1,6 @@
 package snapcode.app;
 import snap.gfx.GFXEnv;
-import snap.util.Convert;
-import snap.util.Prefs;
-import snap.util.SnapEnv;
-import snap.util.SnapUtils;
+import snap.util.*;
 import snap.view.ViewUtils;
 import snap.view.WindowView;
 import snap.viewx.DevPaneExceptions;
@@ -12,6 +9,7 @@ import snap.web.WebURL;
 import snapcode.apptools.HelpTool;
 import snapcode.apptools.RunTool;
 import snapcode.util.LZString;
+import java.io.File;
 
 /**
  * Main App class for SnapCode.
@@ -61,7 +59,7 @@ public class App {
         // Show default workspace - Was WelcomePanel.getShared().showPanel();
         WorkspacePaneUtils.openDefaultWorkspace();
 
-        // Hack - delete temp files (and some demo sandboxes for now)
+        // Hack - delete temp files
         ViewUtils.runDelayed(App::deleteTempFiles, 1000);
     }
 
@@ -215,18 +213,12 @@ public class App {
             }
         }
 
-        // Delete common demos
-        String[] deleteDirnames = { "Tetris", "SnappyBird", "Asteroids", "Jewels" };
-        for (String deleteDirname : deleteDirnames) {
-            WebFile deleteDir = WebFile.getFileForPath("/files/SnapCode/" + deleteDirname);
-            if (deleteDir != null)
-                deleteDir.delete();
-        }
-
-        // Delete old temp dir (this can go soon)
-        WebFile oldTempDir = WebFile.getFileForPath("/files/snaptmp");
-        if (oldTempDir != null)
-            oldTempDir.delete();
+        // Delete weird CJ 'imageio23452345.tmp' files
+        File rootFile = new File("/files");
+        File[] rootFiles = rootFile.listFiles(); if (rootFiles == null) return;
+        for (File file : rootFiles)
+            if (file.getName().startsWith("imageio"))
+                if (!file.delete()) return;
     }
 
     /**

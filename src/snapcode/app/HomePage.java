@@ -1,12 +1,10 @@
 package snapcode.app;
-import snap.util.SnapEnv;
 import snap.view.*;
 import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.apptools.NewFileTool;
 import snapcode.webbrowser.WebPage;
-import java.io.File;
 
 /**
  * This page class is a useful hub for common project functions.
@@ -65,10 +63,6 @@ public class HomePage extends WebPage {
      */
     private void createNewProject()
     {
-        // Removes image temp files
-        removeImageTempFiles();
-
-        // Show new project panel
         NewFileTool newFileTool = _workspacePane.getNewFileTool();
         runLater(newFileTool::showNewProjectPanel);
     }
@@ -226,23 +220,5 @@ public class HomePage extends WebPage {
     public void reload()
     {
         runLater(_workspacePane._pagePane::showHomePage);
-    }
-
-    /**
-     * Removes CJ "imageio23452345.tmp" files.
-     */
-    private static void removeImageTempFiles()
-    {
-        if (!SnapEnv.isWebVM) return;
-        try {
-            File rootFile = new File("/files");
-            File[] rootFiles = rootFile.listFiles(); assert (rootFiles != null);
-            for (File file : rootFiles) {
-                if (file.getName().startsWith("imageio"))
-                    if (!file.delete())
-                        System.out.println("HomePage.removeImageTempFiles: Failed to delete: " + file);
-            }
-        }
-        catch (Exception ignore) { }
     }
 }
