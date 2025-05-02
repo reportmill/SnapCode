@@ -107,37 +107,6 @@ public class ProjectPane extends ViewOwner {
         // Recreate VC and set in tab
         //_vcp = VersionControl.get(_site) instanceof VersionControlGit ? new VcsPaneGit(this) : new VcsPane(this);
         _versionControlTool = new VersionControlTool(this);
-
-        // Reopen site
-        _versionControlTool.projectDidOpen();
-    }
-
-    /**
-     * Called when project is opened.
-     */
-    public void openProjectPane()
-    {
-        // Activate VersionControlPane
-        if (_versionControlTool != null)
-            _versionControlTool.projectDidOpen();
-    }
-
-    /**
-     * Called to close project.
-     */
-    public void closeProjectPane()
-    {
-        // If already close, just return
-        if (_workspacePane == null) return;
-
-        // Stop listening to project site and unregister Project.Site.ProjectPane
-        WebSite projSite = _project.getSite();
-        projSite.removeFileChangeListener(_siteFileLsnr);
-        projSite.setProp(ProjectPane.class.getName(), null);
-
-        // Close project and clear workspace pane
-        _project.closeProject();
-        _workspacePane = null;
     }
 
     /**
@@ -189,6 +158,34 @@ public class ProjectPane extends ViewOwner {
 
         // Forward to WorkspacePane
         _workspacePane.handleSiteFileChange(aPC);
+    }
+
+    /**
+     * Called when project added to workspace pane.
+     */
+    protected void handleProjectAddedToWorkspacePane()
+    {
+        // Activate VersionControlPane
+        if (_versionControlTool != null)
+            _versionControlTool.handleProjectAddedToWorkspacePane();
+    }
+
+    /**
+     * Called when project removed from workspace pane.
+     */
+    protected void handleProjectRemovedFromWorkspacePane()
+    {
+        // If already close, just return
+        if (_workspacePane == null) return;
+
+        // Stop listening to project site and unregister Project.Site.ProjectPane
+        WebSite projSite = _project.getSite();
+        projSite.removeFileChangeListener(_siteFileLsnr);
+        projSite.setProp(ProjectPane.class.getName(), null);
+
+        // Close project and clear workspace pane
+        _project.closeProject();
+        _workspacePane = null;
     }
 
     /**

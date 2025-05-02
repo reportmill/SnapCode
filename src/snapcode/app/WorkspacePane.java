@@ -529,7 +529,7 @@ public class WorkspacePane extends ViewOwner {
         _projectPanes = ArrayUtils.addId(_projectPanes, projPane);
 
         // Open project pane
-        projPane.openProjectPane();
+        projPane.handleProjectAddedToWorkspacePane();
 
         // Clear root files
         ProjectFilesTool projectFilesTool = getProjectFilesTool();
@@ -573,7 +573,7 @@ public class WorkspacePane extends ViewOwner {
         _projectPanes = ArrayUtils.remove(_projectPanes, projPane);
 
         // Close ProjectPane
-        projPane.closeProjectPane();
+        projPane.handleProjectRemovedFromWorkspacePane();
 
         // Clear root files
         getProjectFilesTool().resetRootFiles();
