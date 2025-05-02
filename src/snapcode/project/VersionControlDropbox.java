@@ -1,9 +1,7 @@
 package snapcode.project;
-import snap.util.Prefs;
 import snap.web.DropBoxSite;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.util.DropboxSite;
 
 /**
  * This version control class uses drop box.
