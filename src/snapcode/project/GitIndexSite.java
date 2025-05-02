@@ -1,6 +1,7 @@
 package snapcode.project;
 import snap.util.ArrayUtils;
 import snap.web.*;
+import java.util.List;
 
 /**
  * A WebSite implementation for GitDirIndex.
@@ -63,7 +64,7 @@ public class GitIndexSite extends WebSite {
         // Handle directory: Walk RevTree and get files for children
         else {
             GitIndex.Entry[] gitIndexEntries = entry.getEntries();
-            FileHeader[] fileHeaders = ArrayUtils.map(gitIndexEntries, indexEntry -> getFileHeader(indexEntry.getPath()), FileHeader.class);
+            List<FileHeader> fileHeaders = ArrayUtils.mapToList(gitIndexEntries, indexEntry -> getFileHeader(indexEntry.getPath()));
             aResp.setFileHeaders(fileHeaders);
         }
     }

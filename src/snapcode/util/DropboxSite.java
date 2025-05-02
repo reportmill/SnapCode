@@ -119,7 +119,7 @@ public class DropboxSite extends WebSite {
 
             // Convert to FileHeaders and add to response
             List<FileHeader> fileHeaders = ListUtils.map(fileMetadatas, DropboxSite::createFileHeaderForDropboxMetadata);
-            aResp.setFileHeaders(fileHeaders.toArray(new FileHeader[0]));
+            aResp.setFileHeaders(fileHeaders);
         }
 
         // Catch exceptions

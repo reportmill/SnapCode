@@ -1,6 +1,7 @@
 package snapcode.project;
 import snap.util.ArrayUtils;
 import snap.web.*;
+import java.util.List;
 
 /**
  * A WebSite implementation for a GitCommit.
@@ -70,7 +71,7 @@ public class GitFileSite extends WebSite {
         // Handle directory: Walk RevTree and get files for children
         else {
             GitFile<?>[] dirFiles = gitFile.getFiles();
-            FileHeader[] dirFileHeaders = ArrayUtils.map(dirFiles, file -> getFileHeader(file.getPath()), FileHeader.class);
+            List<FileHeader> dirFileHeaders = ArrayUtils.mapToList(dirFiles, file -> getFileHeader(file.getPath()));
             aResp.setFileHeaders(dirFileHeaders);
         }
     }
