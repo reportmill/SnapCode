@@ -105,7 +105,7 @@ public class VersionControlTool extends ProjectTool {
         boolean isCloneExists = _versionControl.isCloneExists();
         setViewVisible("CreateRemoteButton", !isRemoteExists && _versionControl.canCreateRemote());
         setViewVisible("CreateCloneButton", !isCloneExists && _versionControl.canCreateRemote());
-        setViewEnabled("ConnectButton", isRemoteExists);
+        setViewVisible("ConnectButton", isRemoteExists);
 
         // Update CheckoutButton, UpdateFilesButton, ReplaceFilesButton, CommitFilesButton
         boolean isCheckedOut = _versionControl.isCheckedOut();
@@ -266,6 +266,7 @@ public class VersionControlTool extends ProjectTool {
 
         // Reset UI
         _workspacePane.resetLater();
+        resetLater();
 
         // Reset AutoBuildEnabled and trigger auto build
         WorkspaceBuilder builder = _workspace.getBuilder();
