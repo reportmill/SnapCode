@@ -403,30 +403,6 @@ public class VersionControlTool extends ProjectTool {
     }
 
     /**
-     * Called when project is opened to activate version control for project.
-     */
-    public void handleProjectAddedToWorkspacePane()
-    {
-        // If project already checked out, or no remote site, or project not empty, just return
-        if (_versionControl.isCheckedOut())
-            return;
-        if (_versionControl.getRemoteSiteUrl() == null)
-            return;
-        if (!_proj.getSourceDir().getExists() || _proj.getSourceDir().getFileCount() > 0)
-            return;
-
-        // Ask user if they want to do checkout
-        String msg = "Do you want to checkout remote files into project directory?";
-        DialogBox dialogBox = new DialogBox("Checkout Project Files");
-        dialogBox.setMessage(msg);
-        if (!dialogBox.showConfirmDialog(_workspacePane.getUI()))
-            return;
-
-        // Perform checkout
-        checkout();
-    }
-
-    /**
      * Called when file added to project.
      */
     public void handleProjectFileAdded(WebFile aFile)

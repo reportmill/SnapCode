@@ -163,12 +163,7 @@ public class ProjectPane extends ViewOwner {
     /**
      * Called when project added to workspace pane.
      */
-    protected void handleProjectAddedToWorkspacePane()
-    {
-        // Activate VersionControlPane
-        if (_versionControlTool != null)
-            _versionControlTool.handleProjectAddedToWorkspacePane();
-    }
+    protected void handleProjectAddedToWorkspacePane()  { } //_versionControlTool.handleProjectAddedToWorkspacePane();
 
     /**
      * Called when project removed from workspace pane.
