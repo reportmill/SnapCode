@@ -367,6 +367,18 @@ public class WorkspacePaneUtils {
     {
         WebURL projectURL = aProject.getSourceURL();
 
+        // If source URL is a repo URL, make sure we can use it to find project
+        if (!projectURL.equals(aProject.getSite().getURL())) {
+
+            // If project not in default dir, use project site URL
+            WebFile projectDefaultDir = SnapCodeUtils.getSnapCodeProjectDirForName(projectURL.getFilenameSimple());
+            if (!projectDefaultDir.getPath().equals(aProject.getSite().getPath()))
+                projectURL = aProject.getSite().getURL();
+
+            // Otherwise, remove project site URL (in case it was previously used prior to setting repo)
+            else RecentFiles.removeURL(aProject.getSite().getURL());
+        }
+
         // If URL to TempProj or Temp dir, just return
         String filePath = projectURL.getPath();
         if (filePath.contains("TempProj") || filePath.startsWith(SnapUtils.getTempDir()))
