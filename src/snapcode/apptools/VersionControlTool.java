@@ -100,12 +100,16 @@ public class VersionControlTool extends ProjectTool {
         // Update RemoteURLText
         setViewValue("RemoteURLText", getRemoteUrlAddress());
 
-        // Update ConnectButton
-        setViewEnabled("ConnectButton", getRemoteSite() != null);
+        // Update CreateRemoteButton, CreateCloneButton, ConnectButton
+        boolean isRemoteExists = _versionControl.isRemoteExists();
+        boolean isCloneExists = _versionControl.isCloneExists();
+        setViewVisible("CreateRemoteButton", !isRemoteExists && _versionControl.canCreateRemote());
+        setViewVisible("CreateCloneButton", !isCloneExists && _versionControl.canCreateRemote());
+        setViewEnabled("ConnectButton", isRemoteExists);
 
         // Update CheckoutButton, UpdateFilesButton, ReplaceFilesButton, CommitFilesButton
         boolean isCheckedOut = _versionControl.isCheckedOut();
-        setViewVisible("CheckoutButton", !isCheckedOut && getRemoteSite() != null);
+        setViewVisible("CheckoutButton", !isCheckedOut && isRemoteExists);
         setViewVisible("UpdateFilesButton", isCheckedOut);
         setViewVisible("ReplaceFilesButton", isCheckedOut);
         setViewVisible("CommitFilesButton", isCheckedOut);
@@ -127,7 +131,9 @@ public class VersionControlTool extends ProjectTool {
             // Handle RemoteURLText
             case "RemoteURLText": setRemoteUrlAddress(anEvent.getStringValue()); break;
 
-            // Handle ConnectButton, CheckoutButton
+            // Handle ConnectButton, CreateCloneButton, CheckoutButton
+            case "CreateRemoteButton": createRemoteSite(); break;
+            case "CreateCloneButton": createCloneSite(); break;
             case "ConnectButton": connectToRemoteSite(); break;
             case "CheckoutButton": checkout(); break;
 
@@ -136,6 +142,57 @@ public class VersionControlTool extends ProjectTool {
             case "ReplaceFilesButton": replaceFiles(getSiteRootDirAsList()); break;
             case "CommitFilesButton": commitFiles(getSiteRootDirAsList()); break;
         }
+    }
+
+    /**
+     * Create remote site.
+     */
+    private void createRemoteSite()
+    {
+        // Create TaskMonitor for create remote site
+        String title = "Create remote site " + _versionControl.getRemoteSiteUrlAddress();
+        TaskMonitor taskMonitor = new TaskMonitor(title);
+        TaskRunner<Boolean> checkoutRunner = new TaskRunner<>(() -> _versionControl.createRemoteSite(taskMonitor));
+        checkoutRunner.setMonitor(taskMonitor);
+
+        // Configure callbacks and start
+        checkoutRunner.setOnSuccess(obj -> handleCreateRemoteSuccess());
+        checkoutRunner.setOnFailure(this::handleCreateRemoteFailed);
+        checkoutRunner.start();
+    }
+
+    /**
+     * Called when create remote succeeds.
+     */
+    private void handleCreateRemoteSuccess()
+    {
+        connectToRemoteSite();
+        resetLater();
+    }
+
+    /**
+     * Called when create remote fails.
+     */
+    private void handleCreateRemoteFailed(Exception exception)
+    {
+        DialogBox.showExceptionDialog(_workspacePane.getUI(), "Create remote failed", exception);
+    }
+
+    /**
+     * Create clone site.
+     */
+    private void createCloneSite()
+    {
+        // Create TaskMonitor for create clone site
+        String title = "Create clone site " + _versionControl.getRemoteSiteUrlAddress();
+        TaskMonitor taskMonitor = new TaskMonitor(title);
+        TaskRunner<Boolean> checkoutRunner = new TaskRunner<>(() -> _versionControl.createCloneSite(taskMonitor));
+        checkoutRunner.setMonitor(taskMonitor);
+
+        // Configure callbacks and start
+        checkoutRunner.setOnSuccess(obj -> handleCreateRemoteSuccess());
+        checkoutRunner.setOnFailure(this::handleCreateRemoteFailed);
+        checkoutRunner.start();
     }
 
     /**

@@ -71,15 +71,6 @@ public class VersionControl {
     public String getRemoteSiteUrlAddress()  { return _remoteSiteUrl != null ? _remoteSiteUrl.getString() : null; }
 
     /**
-     * Returns whether project has been checked out or cloned from remote.
-     */
-    public boolean isCheckedOut()
-    {
-        WebSite cloneSite = getCloneSite();
-        return cloneSite != null && cloneSite.getExists();
-    }
-
-    /**
      * Returns the remote site (e.g. Git repository site, Zip file site, etc.).
      */
     public WebSite getRemoteSite()
@@ -116,6 +107,82 @@ public class VersionControl {
         WebFile cloneDir = sandboxSite.createFileForPath("/Clone", true);
         WebURL cloneUrl = cloneDir.getURL();
         return cloneUrl.getAsSite();
+    }
+
+    /**
+     * Returns whether remote site exists.
+     */
+    public boolean isRemoteExists()
+    {
+        WebSite remoteSite = getRemoteSite();
+        return remoteSite != null && remoteSite.getExists();
+    }
+
+    /**
+     * Returns whether remote site can be created.
+     */
+    public boolean canCreateRemote()  { return false; }
+
+    /**
+     * Creates the remote site.
+     */
+    public boolean createRemoteSite(TaskMonitor taskMonitor)
+    {
+        // If remote site not available, return false
+        WebSite remoteSite = getRemoteSite();
+        if (remoteSite == null)
+            return false;
+
+        // If remote already exists, return true
+        if (remoteSite.getExists())
+            return true;
+
+        // Get remote dir and save
+        WebFile remoteRootDir = remoteSite.getRootDir();
+        WebResponse remoteRootDirSaveResp = remoteRootDir.save();
+        if (remoteRootDirSaveResp.getCode() != WebResponse.OK)
+            return false;
+
+        // Create clone site
+        return createCloneSite(taskMonitor);
+    }
+
+    /**
+     * Returns whether clone site exists.
+     */
+    public boolean isCloneExists()
+    {
+        WebSite cloneSite = getCloneSite();
+        return cloneSite != null && cloneSite.getExists();
+    }
+
+    /**
+     * Creates the clone site.
+     */
+    public boolean createCloneSite(TaskMonitor taskMonitor)
+    {
+        // Create clone
+        WebSite cloneSite = getCloneSite();
+        if (cloneSite == null)
+            return false;
+
+        // If clone already exists, return true
+        if (cloneSite.getExists())
+            return true;
+
+        // Get remote dir and save
+        WebFile cloneRootDir = cloneSite.getRootDir();
+        WebResponse cloneRootDirSaveResp = cloneRootDir.save();
+        return cloneRootDirSaveResp.getCode() == WebResponse.OK;
+    }
+
+    /**
+     * Returns whether project has been checked out or cloned from remote.
+     */
+    public boolean isCheckedOut()
+    {
+        WebSite cloneSite = getCloneSite();
+        return cloneSite != null && cloneSite.getExists();
     }
 
     /**

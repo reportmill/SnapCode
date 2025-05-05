@@ -7,6 +7,8 @@
   </RowView>
   <RowView Spacing="5" GrowWidth="true">
     <Label Margin="5,5,5,8" Font="Arial 16" Text="Remote Files:" />
+    <Button Name="CreateRemoteButton" PrefWidth="120" Text="Create Remote" />
+    <Button Name="CreateCloneButton" PrefWidth="120" Text="Create Clone" />
     <Button Name="ConnectButton" PrefWidth="90" Text="Connect" />
     <Button Name="CheckoutButton" PrefWidth="120" Text="Checkout Project" />
     <Button Name="UpdateFilesButton" PrefWidth="90" Text="Update Files" />

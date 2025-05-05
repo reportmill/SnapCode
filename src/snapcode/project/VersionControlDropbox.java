@@ -17,4 +17,10 @@ public class VersionControlDropbox extends VersionControl {
     {
         super(projectSite, remoteUrl);
     }
+
+    /**
+     * Override to allow.
+     */
+    @Override
+    public boolean canCreateRemote()  { return true; }
 }
