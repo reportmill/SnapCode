@@ -5,6 +5,7 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.apptools.AccountTool;
+import snapcode.webbrowser.DirFilePage;
 import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
 
@@ -12,6 +13,9 @@ import snapcode.webbrowser.WebPage;
  * This page helps manage default cloud storage.
  */
 public class SnapCloudPage extends WebPage {
+
+    // The WorkspacePane
+    private WorkspacePane _workspacePane;
 
     // The WebBrowser for remote files
     private WebBrowser _remoteBrowser;
@@ -22,6 +26,7 @@ public class SnapCloudPage extends WebPage {
     public SnapCloudPage(WorkspacePane workspacePane)
     {
         super();
+        _workspacePane = workspacePane;
     }
 
     /**
@@ -42,6 +47,10 @@ public class SnapCloudPage extends WebPage {
 
         // Set root dir in remote browser
         _remoteBrowser.setSelFile(rootDir);
+
+        DirFilePage dirFilePage = (DirFilePage) _remoteBrowser.getSelPage();
+        if (dirFilePage != null)
+            dirFilePage.getFileBrowser().addEventFilter(e -> resetLater(), Action);
     }
 
     /**
@@ -96,6 +105,12 @@ public class SnapCloudPage extends WebPage {
         // Update RemoteBrowserToolsBox, BoxRemoteBrowserBox
         setViewVisible("RemoteBrowserToolsBox", userEmail != null && !userEmail.isEmpty());
         setViewVisible("RemoteBrowserBox", userEmail != null && !userEmail.isEmpty());
+
+        // Update OpenProjectButton
+        WebURL selProjectUrl = getSelectedProjectUrl();
+        setViewVisible("OpenProjectButton", selProjectUrl != null);
+        if (selProjectUrl != null)
+            setViewText("OpenProjectButton", "Open " + selProjectUrl.getFilename());
     }
 
     /**
@@ -111,7 +126,42 @@ public class SnapCloudPage extends WebPage {
                 AccountTool.setUserEmail(anEvent.getStringValue());
                 runLater(this::connectToSnapCloudUserSite);
                 break;
+
+            // Handle OpenProjectButton
+            case "OpenProjectButton": handleOpenProjectButtonActionEvent(); break;
         }
+    }
+
+    /**
+     * Called when OpenProjectButton gets action event.
+     */
+    private void handleOpenProjectButtonActionEvent()
+    {
+        WebURL snapCloudUserUrl = getSelectedProjectUrl();
+        if (snapCloudUserUrl == null)
+            return;
+
+        WorkspacePaneUtils.openProjectForRepoUrl(_workspacePane, snapCloudUserUrl);
+    }
+
+    /**
+     * Returns the selected project name.
+     */
+    private WebURL getSelectedProjectUrl()
+    {
+        DirFilePage dirFilePage = (DirFilePage) _remoteBrowser.getSelPage();
+        if (dirFilePage == null)
+            return null;
+
+        WebFile selFile = dirFilePage.getSelFile();
+        if (selFile == null || selFile.isRoot())
+            return null;
+
+        while (selFile.getParent() != null && !selFile.getParent().isRoot())
+            selFile = selFile.getParent();
+
+        String urlAddr = selFile.getUrlAddress();
+        return WebURL.getURL(urlAddr);
     }
 
     /**

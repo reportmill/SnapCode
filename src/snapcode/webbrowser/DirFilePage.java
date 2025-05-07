@@ -28,6 +28,19 @@ public class DirFilePage extends WebPage {
     }
 
     /**
+     * Returns the selected file.
+     */
+    public WebFile getSelFile()
+    {
+        return _fileBrowser != null ? _fileBrowser.getSelItem() : null;
+    }
+
+    /**
+     * Returns the file browser.
+     */
+    public BrowserView<WebFile> getFileBrowser() { return _fileBrowser; }
+
+    /**
      * Creates a file pane for the given file in the requested mode.
      */
     protected View createUI()

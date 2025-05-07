@@ -11,6 +11,7 @@
   </RowView>
   <RowView Name="RemoteBrowserToolsBox" Spacing="5" GrowWidth="true">
     <Label Margin="5,5,5,8" Font="Arial 16" Text="Remote Files:" />
+    <Button Name="OpenProjectButton" Padding="3,5,3,5" />
     <ProgressBar Name="ProgressBar" PrefWidth="100" PrefHeight="16" />
   </RowView>
   <BoxView Name="RemoteBrowserBox" Margin="3,5,5,5" Border="#88 1" GrowWidth="true" GrowHeight="true" FillWidth="true" FillHeight="true" />
