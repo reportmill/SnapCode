@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView Padding="20,20,20,20" PrefHeight="220" Font="Arial 14" FillWidth="true">
-  <RowView MinHeight="32">
+  <RowView>
     <Label Name="SnapCloudLabel" Margin="0,8,0,8" />
-    <Label Margin="0,0,0,30" ImageName="pkg.images/Cloud.png" />
+    <Label Margin="0,0,20,10" ImageName="pkg.images/Cloud.png" />
   </RowView>
-  <Separator PrefHeight="40" />
+  <Separator PrefHeight="30" />
   <RowView Name="EmailBox" Margin="10,0,0,0">
-    <Label Margin="0,8,0,8" Text="Email:" />
-    <TextField Name="EmailText" Margin="5,20,5,5" GrowWidth="true" />
+    <Label Margin="0,8,0,8" Text="Account User Email:" />
+    <TextField Name="EmailText" Margin="5,20,5,5" PrefWidth="300" />
   </RowView>
+  <RowView Spacing="5" GrowWidth="true">
+    <Label Margin="5,5,5,8" Font="Arial 16" Text="Remote Files:" />
+    <ProgressBar Name="ProgressBar" PrefWidth="100" PrefHeight="16" />
+  </RowView>
+  <BoxView Name="RemoteBrowserBox" Margin="3,5,5,5" Border="#88 1" GrowWidth="true" GrowHeight="true" FillWidth="true" FillHeight="true" />
 </ColView>
