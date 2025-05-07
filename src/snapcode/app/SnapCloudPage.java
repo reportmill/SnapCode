@@ -25,9 +25,9 @@ public class SnapCloudPage extends WebPage {
     }
 
     /**
-     * Connect to remote site.
+     * Connect to snap cloud user site.
      */
-    public void connectToRemoteSite()
+    public void connectToSnapCloudUserSite()
     {
         // Get remote site
         WebSite snapCloudUserSite = getSnapCloudUserSite();
@@ -73,7 +73,7 @@ public class SnapCloudPage extends WebPage {
     @Override
     protected void initShowing()
     {
-        runDelayed(this::connectToRemoteSite, 1000);
+        runDelayed(this::connectToSnapCloudUserSite, 1000);
     }
 
     /**
@@ -92,6 +92,10 @@ public class SnapCloudPage extends WebPage {
         System.out.println("Remote browser loaded: " + loading);
         progressBar.setVisible(loading);
         progressBar.setProgress(loading ? -1 : 0);
+
+        // Update RemoteBrowserToolsBox, BoxRemoteBrowserBox
+        setViewVisible("RemoteBrowserToolsBox", userEmail != null && !userEmail.isEmpty());
+        setViewVisible("RemoteBrowserBox", userEmail != null && !userEmail.isEmpty());
     }
 
     /**
@@ -100,7 +104,14 @@ public class SnapCloudPage extends WebPage {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        super.respondUI(anEvent);
+        switch (anEvent.getName()) {
+
+            // Handle EmailText
+            case "EmailText":
+                AccountTool.setUserEmail(anEvent.getStringValue());
+                runLater(this::connectToSnapCloudUserSite);
+                break;
+        }
     }
 
     /**

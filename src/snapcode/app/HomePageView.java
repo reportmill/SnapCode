@@ -63,7 +63,7 @@ public class HomePageView extends MarkDownView {
         cloudButton.setImage(Image.getImageForClassResource(HomePageView.class, "pkg.images/Cloud.png"));
         cloudButton.setShowArea(false);
         cloudButton.setMaxSize(70, 50);
-        cloudButton.setMargin(0, 0, 25, 50);
+        cloudButton.setMargin(0, 0, 25, 40);
         cloudButton.setLeanX(HPos.CENTER);
 
         // Wrap image in row view and add

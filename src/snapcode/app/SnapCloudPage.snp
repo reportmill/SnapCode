@@ -6,10 +6,10 @@
   </RowView>
   <Separator PrefHeight="30" />
   <RowView Name="EmailBox" Margin="10,0,0,0">
-    <Label Margin="0,8,0,8" Text="Account User Email:" />
+    <Label Margin="0,8,0,8" Text="Cloud User Email:" />
     <TextField Name="EmailText" Margin="5,20,5,5" PrefWidth="300" />
   </RowView>
-  <RowView Spacing="5" GrowWidth="true">
+  <RowView Name="RemoteBrowserToolsBox" Spacing="5" GrowWidth="true">
     <Label Margin="5,5,5,8" Font="Arial 16" Text="Remote Files:" />
     <ProgressBar Name="ProgressBar" PrefWidth="100" PrefHeight="16" />
   </RowView>
