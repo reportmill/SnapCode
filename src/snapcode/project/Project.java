@@ -500,10 +500,7 @@ public class Project extends PropObject {
         clearClassLoader();
 
         // Delete SandBox, Site
-        WebSite projSite = getSite();
-        WebSite projSiteSandbox = projSite.getSandboxSite();
-        projSiteSandbox.deleteSite();
-        projSite.deleteSite();
+        ProjectUtils.deleteProjectFilesForSite(getSite());
 
         // Finish TaskMonitor
         taskMonitor.endTask();

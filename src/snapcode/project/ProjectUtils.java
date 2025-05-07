@@ -331,4 +331,14 @@ public class ProjectUtils {
         // Return
         return snapClassPaths;
     }
+
+    /**
+     * Deletes project files for site.
+     */
+    public static void deleteProjectFilesForSite(WebSite projectSite) throws Exception
+    {
+        WebSite projSiteSandbox = projectSite.getSandboxSite();
+        projSiteSandbox.deleteSite();
+        projectSite.deleteSite();
+    }
 }

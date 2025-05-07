@@ -1,9 +1,13 @@
 package snapcode.app;
 import snap.view.*;
+import snap.viewx.DialogBox;
 import snap.web.RecentFiles;
 import snap.web.WebFile;
+import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.apptools.NewFileTool;
+import snapcode.project.Project;
+import snapcode.project.ProjectUtils;
 import snapcode.webbrowser.WebPage;
 
 /**
@@ -72,7 +76,31 @@ public class HomePage extends WebPage {
      */
     public void removeRecentProjectUrl(WebURL recentProjectUrl)
     {
+        // Remove URL
         RecentFiles.removeURL(recentProjectUrl);
+
+        // If project open, close it
+        String projectName = recentProjectUrl.getFilename();
+        Project project = _workspacePane.getWorkspace().getProjectForName(projectName);
+        if (project != null)
+            _workspacePane.getWorkspace().closeProject(project);
+
+        // Get project site
+        WebSite projectSite = SnapCodeUtils.getSnapCodeProjectSiteForNameOrPath(projectName);
+
+        // If project files exist, ask to remove files
+        if (projectSite.getExists()) {
+
+            // Ask to remove project
+            boolean removeProjectFiles = DialogBox.showConfirmDialog(getUI(), "Remove Recent File",
+                    "Remove project files for project: " + projectName + "?");
+            if (removeProjectFiles) {
+                try { ProjectUtils.deleteProjectFilesForSite(projectSite); }
+                catch (Exception e) { DialogBox.showExceptionDialog(getUI(), "Delete failed", e); }
+            }
+        }
+
+        // Reshow home page
         _workspacePane.getPagePane().showHomePage();
     }
 

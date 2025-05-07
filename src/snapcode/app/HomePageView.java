@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.geom.HPos;
 import snap.geom.Insets;
 import snap.gfx.*;
 import snap.util.ArrayUtils;
@@ -301,7 +302,9 @@ public class HomePageView extends MarkDownView {
 
         // Create close box
         CloseBox closeBox = new CloseBox();
-        closeBox.setMargin(5, 5, 5, 5);
+        closeBox.setMargin(5, 8, 5, 5);
+        closeBox.setLeanX(HPos.RIGHT);
+        closeBox.setVisible(false);
         closeBox.addEventHandler(e -> _homePage.removeRecentProjectUrl(recentFileUrl), Action);
 
         // Create recent file view and add children
@@ -309,10 +312,27 @@ public class HomePageView extends MarkDownView {
         recentFileView.setPropsString("Fill:#F8; BorderRadius:5; Margin:5; Padding:5;");
         recentFileView.setMinWidth(500);
         recentFileView.setChildren(nameLabel, separator, addressLabel, closeBox);
-        addLinkToLinkView(recentFileView, "OpenRecent:" + recentFileUrl.getString());
+
+        //addLinkToLinkView(recentFileView, "OpenRecent:" + recentFileUrl.getString());
+        super.addLinkToLinkView(recentFileView, "OpenRecent:" + recentFileUrl.getString());
+        recentFileView.setFill(BUTTON_BACKGROUND_COLOR);
+        recentFileView.addEventFilter(this::handleRecentFileViewMouseEnterAndExitEvents, MouseEnter, MouseExit);
 
         // Return
         return recentFileView;
+    }
+
+    /**
+     * Called when recent file view has mouse enter/exit.
+     */
+    private void handleRecentFileViewMouseEnterAndExitEvents(ViewEvent anEvent)
+    {
+        // Do normal version
+        handleLinkViewMouseEnterAndExitEvents(anEvent);
+
+        // Set close box visible on mouse enter
+        RowView recentFileView = anEvent.getView(RowView.class);
+        recentFileView.getChild(3).setVisible(anEvent.isMouseEnter());
     }
 
     /**
