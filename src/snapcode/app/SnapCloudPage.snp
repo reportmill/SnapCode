@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView Padding="20,20,20,20" PrefHeight="220" Font="Arial 14" FillWidth="true">
+  <RowView MinHeight="32">
+    <Label Name="SnapCloudLabel" Margin="0,8,0,8" />
+    <Label Margin="0,0,0,30" ImageName="pkg.images/Cloud.png" />
+  </RowView>
+  <Separator PrefHeight="40" />
+  <RowView Name="EmailBox" Margin="10,0,0,0">
+    <Label Margin="0,8,0,8" Text="Email:" />
+    <TextField Name="EmailText" Margin="5,20,5,5" GrowWidth="true" />
+  </RowView>
+</ColView>

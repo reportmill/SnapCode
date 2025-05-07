@@ -115,6 +115,16 @@ public class HomePage extends WebPage {
     }
 
     /**
+     * Shows the SnapCloud page.
+     */
+    public void showSnapCloudPage()
+    {
+        SnapCloudPage samplesPage = new SnapCloudPage(_workspacePane);
+        _workspacePane.getPagePane().setPageForURL(samplesPage.getURL(), samplesPage);
+        _workspacePane.getPagePane().setSelPage(samplesPage);
+    }
+
+    /**
      * Shows the release notes.
      */
     public void showReleaseNotes()
@@ -226,6 +236,9 @@ public class HomePage extends WebPage {
     protected void respondUI(ViewEvent anEvent)
     {
         switch (anEvent.getName()) {
+
+            // Handle CloudButton
+            case "CloudButton": showSnapCloudPage(); break;
 
             // Handle ClearWorkspaceButton, RestoreWorkspaceButton
             case "ClearWorkspaceButton": clearWorkspace(); break;
