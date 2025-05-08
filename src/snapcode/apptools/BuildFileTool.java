@@ -102,7 +102,7 @@ public class BuildFileTool extends ProjectTool {
 
         // Set DependenciesListView items
         BuildFile buildFile = getBuildFile();
-        BuildDependency[] dependencies = buildFile.getDependencies();
+        List<BuildDependency> dependencies = buildFile.getDependencies();
         _dependenciesListView.setItems(dependencies);
         buildFile.addPropChangeListener(this::buildFileDidChangeDependency, BuildFile.Dependency_Prop);
 

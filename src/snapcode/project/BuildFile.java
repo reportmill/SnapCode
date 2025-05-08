@@ -3,9 +3,8 @@ import snap.props.*;
 import snap.util.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+
+import java.util.*;
 
 /**
  * This class manages project properties.
@@ -28,7 +27,7 @@ public class BuildFile extends PropObject {
     private boolean _enableCompilePreview;
 
     // The dependencies
-    private BuildDependency[] _dependencies;
+    private List<BuildDependency> _dependencies;
 
     // The main class name
     private String _mainClassName;
@@ -71,7 +70,7 @@ public class BuildFile extends PropObject {
         // Set defaults
         _srcPath = DEFAULT_SOURCE_PATH;
         _buildPath = DEFAULT_BUILD_PATH;
-        _dependencies = new BuildDependency[0];
+        _dependencies = Collections.emptyList();
         _compileRelease = DEFAULT_JAVA_VERSION;
         _enableCompilePreview = DEFAULT_ENABLE_COMPILE_PREVIEW;
     }
@@ -164,22 +163,21 @@ public class BuildFile extends PropObject {
     /**
      * Returns the dependencies.
      */
-    public BuildDependency[] getDependencies()  { return _dependencies; }
+    public List<BuildDependency> getDependencies()  { return _dependencies; }
 
     /**
      * Sets the dependencies.
      */
-    public void setDependencies(BuildDependency[] theDependencies)
+    public void setDependencies(List<BuildDependency> theDependencies)
     {
-        if (Arrays.equals(theDependencies, _dependencies)) return;
+        if (ListUtils.equalsId(theDependencies, _dependencies)) return;
 
         // Reset old
-        BuildDependency[] oldDependencies = _dependencies;
-        for (BuildDependency dependency : oldDependencies )
-            dependency.removePropChangeListener(_dependencyDidChangeLsnr);
+        List<BuildDependency> oldDependencies = _dependencies;
+        _dependencies.forEach(dep -> dep.removePropChangeListener(_dependencyDidChangeLsnr));
 
         // Set new
-        _dependencies = theDependencies;
+        _dependencies = List.copyOf(theDependencies);
         for (BuildDependency dependency : theDependencies) {
             dependency._buildFile = this;
             dependency.addPropChangeListener(_dependencyDidChangeLsnr);
@@ -194,7 +192,7 @@ public class BuildFile extends PropObject {
      */
     public void addDependency(BuildDependency aDependency)
     {
-        addDependency(aDependency, getDependencies().length);
+        addDependency(aDependency, _dependencies.size());
     }
 
     /**
@@ -202,8 +200,9 @@ public class BuildFile extends PropObject {
      */
     public void addDependency(BuildDependency aDependency, int anIndex)
     {
-        if (ArrayUtils.contains(_dependencies, aDependency)) return;
-        BuildDependency[] newDependencies = ArrayUtils.add(_dependencies, aDependency, anIndex);
+        if (_dependencies.contains(aDependency)) return;
+        List<BuildDependency> newDependencies = new ArrayList<>(_dependencies);
+        newDependencies.add(anIndex, aDependency);
         setDependencies(newDependencies);
         firePropChange(Dependency_Prop, null, aDependency);
     }
@@ -213,8 +212,9 @@ public class BuildFile extends PropObject {
      */
     public void removeDependency(int anIndex)
     {
-        BuildDependency dependency = _dependencies[anIndex];
-        BuildDependency[] newDependencies = ArrayUtils.remove(_dependencies, anIndex);
+        BuildDependency dependency = _dependencies.get(anIndex);
+        List<BuildDependency> newDependencies = new ArrayList<>(_dependencies);
+        _dependencies.remove(anIndex);
         setDependencies(newDependencies);
         firePropChange(Dependency_Prop, dependency, null);
     }
@@ -224,7 +224,7 @@ public class BuildFile extends PropObject {
      */
     public void removeDependency(BuildDependency aDependency)
     {
-        int index = ArrayUtils.indexOf(_dependencies, aDependency);
+        int index = _dependencies.indexOf(aDependency);
         if (index >= 0)
             removeDependency(index);
     }
@@ -265,8 +265,8 @@ public class BuildFile extends PropObject {
      */
     public boolean isIncludeSnapChartsRuntime()
     {
-        BuildDependency[] dependencies = getDependencies();
-        return ArrayUtils.hasMatch(dependencies, dep -> dep.getId() != null && dep.getId().contains("snapcharts"));
+        List<BuildDependency> dependencies = getDependencies();
+        return ListUtils.hasMatch(dependencies, dep -> dep.getId() != null && dep.getId().contains("snapcharts"));
     }
 
     /**
@@ -282,8 +282,8 @@ public class BuildFile extends PropObject {
 
         // Handle Remove SnapCharts
         else {
-            BuildDependency[] dependencies = getDependencies();
-            BuildDependency dependency = ArrayUtils.findMatch(dependencies, dep -> dep.getId() != null && dep.getId().contains("snapcharts"));
+            List<BuildDependency> dependencies = getDependencies();
+            BuildDependency dependency = ListUtils.findMatch(dependencies, dep -> dep.getId() != null && dep.getId().contains("snapcharts"));
             removeDependency(dependency);
         }
     }
@@ -314,9 +314,9 @@ public class BuildFile extends PropObject {
      */
     public List<String> getProjectDependenciesNames()
     {
-        BuildDependency[] dependencies = getDependencies();
-        BuildDependency[] projectDependencies = ArrayUtils.filterByClass(dependencies, BuildDependency.ProjectDependency.class);
-        return ArrayUtils.mapToList(projectDependencies, dependency -> dependency.getId());
+        List<BuildDependency> dependencies = getDependencies();
+        List<BuildDependency.ProjectDependency> projectDependencies = ListUtils.filterByClass(dependencies, BuildDependency.ProjectDependency.class);
+        return ListUtils.map(projectDependencies, dependency -> dependency.getId());
     }
 
     /**
@@ -354,7 +354,7 @@ public class BuildFile extends PropObject {
         archiver.readPropObjectFromJSONString(jsonStr);
 
         // Upgrade greenfoot
-        MavenDependency gf = (MavenDependency) ArrayUtils.findMatch(getDependencies(),
+        MavenDependency gf = (MavenDependency) ListUtils.findMatch(getDependencies(),
                 dep -> dep.getId() != null && dep.getId().contains("com.reportmill:greenfoot:"));
         if (gf != null) // && !gf.getId().equals("com.reportmill:greenfoot:2024.11")) gf.setId("com.reportmill:greenfoot:2024.11");
             removeDependency(gf);
@@ -421,7 +421,7 @@ public class BuildFile extends PropObject {
         aPropSet.addPropNamed(EnableCompilePreview_Prop, boolean.class);
 
         // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime
-        aPropSet.addPropNamed(Dependencies_Prop, BuildDependency[].class);
+        aPropSet.addPropNamed(Dependencies_Prop, List.class);
         aPropSet.addPropNamed(MainClassName_Prop, String.class);
         aPropSet.addPropNamed(IncludeSnapKitRuntime_Prop, boolean.class);
         //aPropSet.addPropNamed(IncludeSnapChartsRuntime_Prop, boolean.class);
@@ -469,7 +469,7 @@ public class BuildFile extends PropObject {
             case EnableCompilePreview_Prop: setEnableCompilePreview(Convert.booleanValue(aValue)); break;
 
             // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime
-            case Dependencies_Prop: setDependencies((BuildDependency[]) aValue); break;
+            case Dependencies_Prop: setDependencies((List<BuildDependency>) aValue); break;
             case MainClassName_Prop: setMainClassName(Convert.stringValue(aValue)); break;
             case IncludeSnapKitRuntime_Prop: setIncludeSnapKitRuntime(Convert.boolValue(aValue)); break;
             //case IncludeSnapChartsRuntime_Prop: setIncludeSnapChartsRuntime(Convert.boolValue(aValue)); break;

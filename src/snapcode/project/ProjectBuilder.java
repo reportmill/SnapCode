@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
 import java.util.Date;
@@ -225,8 +225,8 @@ public class ProjectBuilder {
     public boolean checkBuildDependencies(TaskMonitor taskMonitor)
     {
         // Get maven dependencies
-        BuildDependency[] buildDependencies = _proj.getBuildFile().getDependencies();
-        MavenDependency[] mavenDependencies = ArrayUtils.filterByClass(buildDependencies, MavenDependency.class);
+        List<BuildDependency> buildDependencies = _proj.getBuildFile().getDependencies();
+        List<MavenDependency> mavenDependencies = ListUtils.filterByClass(buildDependencies, MavenDependency.class);
 
         // Iterate over each and load if needed
         for (MavenDependency mavenDependency : mavenDependencies) {

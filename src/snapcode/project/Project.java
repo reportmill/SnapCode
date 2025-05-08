@@ -203,7 +203,7 @@ public class Project extends PropObject {
     {
         // Get build file dependencies
         BuildFile buildFile = getBuildFile();
-        BuildDependency[] dependencies = buildFile.getDependencies();
+        List<BuildDependency> dependencies = buildFile.getDependencies();
         String[] compileClassPaths = new String[0];
 
         // If BuildFile.IncludeSnapKitRuntime, add SnapKit jar path

@@ -73,7 +73,7 @@ public class RunToolUtils {
             return false;
 
         boolean isSwing = mainFile.getText().contains("javax.swing");
-        return !isSwing && !ViewUtils.isControlDown() && proj.getBuildFile().getDependencies().length == 0;
+        return !isSwing && !ViewUtils.isControlDown() && proj.getBuildFile().getDependencies().isEmpty();
     }
 
     /**

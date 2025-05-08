@@ -35,7 +35,7 @@ public class JavaDeps {
         for (BuildDependency dependency : dependencies) {
 
             // If already in list, skip
-            if (ArrayUtils.contains(buildFile.getDependencies(), dependency))
+            if (buildFile.getDependencies().contains(dependency))
                 continue;
 
             // If maven dependency, load first to see if valid
