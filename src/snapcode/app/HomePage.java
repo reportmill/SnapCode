@@ -86,7 +86,7 @@ public class HomePage extends WebPage {
             _workspacePane.getWorkspace().closeProject(project);
 
         // Get project site
-        WebSite projectSite = SnapCodeUtils.getSnapCodeProjectSiteForNameOrPath(projectName);
+        WebSite projectSite = SnapCodeUtils.getSnapCodeProjectSiteForName(projectName);
 
         // If project files exist, ask to remove files
         if (projectSite.getExists()) {

@@ -43,17 +43,13 @@ public class SnapCodeUtils {
     }
 
     /**
-     * Returns a SnapCode project site for given path.
+     * Returns a SnapCode project site for given name.
      */
-    public static WebSite getSnapCodeProjectSiteForNameOrPath(String projectPath)
+    public static WebSite getSnapCodeProjectSiteForName(String projectName)
     {
-        // Get parent site
-        WebURL parentSiteURL = getSnapCodeDirURL();
-        WebSite parentSite = parentSiteURL.getSite();
-
-        // Get URL and site for project path
-        WebURL projURL = parentSite.getUrlForPath(projectPath);
-        return projURL.getAsSite();
+        WebURL snapCodeDirURL = getSnapCodeDirURL();
+        WebURL projectUrl = snapCodeDirURL.getChild(projectName);
+        return projectUrl.getAsSite();
     }
 
     /**

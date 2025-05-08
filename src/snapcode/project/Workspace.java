@@ -115,9 +115,9 @@ public class Workspace extends PropObject {
     /**
      * Opens a project for given project path.
      */
-    public Project openProjectForPath(String projectPath)
+    public Project openProjectForName(String projectName)
     {
-        WebSite projSite = SnapCodeUtils.getSnapCodeProjectSiteForNameOrPath(projectPath);
+        WebSite projSite = SnapCodeUtils.getSnapCodeProjectSiteForName(projectName);
         return openProjectForSite(projSite);
     }
 

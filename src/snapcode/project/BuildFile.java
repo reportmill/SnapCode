@@ -4,6 +4,7 @@ import snap.util.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -311,12 +312,11 @@ public class BuildFile extends PropObject {
     /**
      * Returns the dependent project names.
      */
-    public String[] getProjectDependenciesNames()
+    public List<String> getProjectDependenciesNames()
     {
         BuildDependency[] dependencies = getDependencies();
-        BuildDependency[] projectDependencies = ArrayUtils.filter(dependencies, dependency -> dependency instanceof BuildDependency.ProjectDependency);
-        String[] projectNames = ArrayUtils.map(projectDependencies, dependency -> dependency.getId(), String.class);
-        return projectNames;
+        BuildDependency[] projectDependencies = ArrayUtils.filterByClass(dependencies, BuildDependency.ProjectDependency.class);
+        return ArrayUtils.mapToList(projectDependencies, dependency -> dependency.getId());
     }
 
     /**

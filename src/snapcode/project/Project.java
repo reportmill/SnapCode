@@ -187,8 +187,8 @@ public class Project extends PropObject {
     {
         Workspace workspace = getWorkspace();
         BuildFile buildFile = getBuildFile();
-        String[] projPaths = buildFile.getProjectDependenciesNames();
-        return ArrayUtils.mapToList(projPaths, projPath -> workspace.openProjectForPath(projPath));
+        List<String> projectNames = buildFile.getProjectDependenciesNames();
+        return ListUtils.map(projectNames, projName -> workspace.openProjectForName(projName));
     }
 
     /**
