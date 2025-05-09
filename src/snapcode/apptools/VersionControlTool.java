@@ -169,13 +169,13 @@ public class VersionControlTool extends ProjectTool {
         // Create TaskMonitor for create remote site
         String title = "Create remote site " + _versionControl.getRemoteSiteUrlAddress();
         TaskMonitor taskMonitor = new TaskMonitor(title);
-        TaskRunner<Boolean> checkoutRunner = new TaskRunner<>(() -> _versionControl.createRemoteSite(taskMonitor));
-        checkoutRunner.setMonitor(taskMonitor);
+        TaskRunner<Boolean> createRemoteSiteRunner = new TaskRunner<>(() -> _versionControl.createRemoteSite(taskMonitor));
+        createRemoteSiteRunner.setMonitor(taskMonitor);
 
         // Configure callbacks and start
-        checkoutRunner.setOnSuccess(obj -> handleCreateRemoteSuccess());
-        checkoutRunner.setOnFailure(this::handleCreateRemoteFailed);
-        checkoutRunner.start();
+        createRemoteSiteRunner.setOnSuccess(obj -> handleCreateRemoteSuccess());
+        createRemoteSiteRunner.setOnFailure(this::handleCreateRemoteFailed);
+        createRemoteSiteRunner.start();
     }
 
     /**
