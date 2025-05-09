@@ -77,7 +77,7 @@ public class VersionControlUtils {
         // Rethrow exceptions
         catch (Exception e) { throw new RuntimeException(e); }
 
-        // Set VersionControl
+        // Clear VersionControl
         projectSite.setProp(VersionControl.class.getName(), null);
     }
 }

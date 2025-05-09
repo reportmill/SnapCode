@@ -497,7 +497,13 @@ public class VersionControl {
     /**
      * Delete VCS support files from site directory.
      */
-    public void disconnect(TaskMonitor taskMonitor) throws Exception  { }
+    public void disconnect(TaskMonitor taskMonitor) throws Exception
+    {
+        // Delete clone site
+        WebSite cloneSite = getCloneSite();
+        if (cloneSite != null && cloneSite.getExists())
+            cloneSite.deleteSite();
+    }
 
     /**
      * Returns the site file for file.

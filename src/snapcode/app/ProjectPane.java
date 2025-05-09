@@ -49,9 +49,7 @@ public class ProjectPane extends ViewOwner {
         projSite.addFileChangeListener(_siteFileLsnr);
         projSite.setProp(ProjectPane.class.getName(), this);
 
-        // Set VersionControlPane
-        //String urlAddr = getRemoteUrlAddress();
-        //_vcp = VersionControl.get(_site) instanceof VersionControlGit ? new VcsPaneGit(this) : new VcsPane(this);
+        // Create VersionControlTool
         _versionControlTool = new VersionControlTool(this);
     }
 
@@ -106,7 +104,7 @@ public class ProjectPane extends ViewOwner {
 
         // Recreate VC and set in tab
         //_vcp = VersionControl.get(_site) instanceof VersionControlGit ? new VcsPaneGit(this) : new VcsPane(this);
-        _versionControlTool = new VersionControlTool(this);
+        //_versionControlTool = new VersionControlTool(this);
     }
 
     /**
@@ -189,8 +187,7 @@ public class ProjectPane extends ViewOwner {
     private void handleProjectFileAdded(WebFile aFile)
     {
         // Forward to VersionControl
-        if (_versionControlTool != null)
-            _versionControlTool.handleProjectFileAdded(aFile);
+        _versionControlTool.handleProjectFileAdded(aFile);
 
         // If BuildDir file, just return
         if (_project.getBuildDir().containsFile(aFile)) return;
@@ -205,8 +202,7 @@ public class ProjectPane extends ViewOwner {
     private void handleProjectFileRemoved(WebFile aFile)
     {
         // Forward to VersionControl
-        if (_versionControlTool != null)
-            _versionControlTool.handleProjectFileRemoved(aFile);
+        _versionControlTool.handleProjectFileRemoved(aFile);
 
         // If BuildDir file, just return
         if (_project.getBuildDir().containsFile(aFile)) return;
@@ -225,8 +221,7 @@ public class ProjectPane extends ViewOwner {
             return;
 
         // Forward to VersionControl
-        if (_versionControlTool != null)
-            _versionControlTool.handleProjectFileSaved(aFile);
+        _versionControlTool.handleProjectFileSaved(aFile);
 
         // Notify saved and build workspace
         _project.handleSiteFileSaved(aFile);

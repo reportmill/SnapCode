@@ -4,6 +4,7 @@ import snap.util.ListUtils;
 import snap.view.BoxView;
 import snap.web.WebURL;
 import snapcode.app.SnapCloudPage;
+import snapcode.project.VersionControlUtils;
 import snapcode.project.WorkspaceBuilder;
 import snap.props.PropChange;
 import snapcode.app.ProjectPane;
@@ -65,13 +66,12 @@ public class VersionControlTool extends ProjectTool {
     {
         if (Objects.equals(urlAddress, getRemoteUrlAddress())) return;
 
-        _projPane.setRemoteUrlAddress(urlAddress);
-
-        //if (_versionControl != null)
-        //    _versionControl.removePropChangeLsnr(_versionControlPropChangeLsnr);
+        // Deactivate Version control and re-open site
+        deactivate();
+        WebSite projectSite = getProjectSite();
+        VersionControlUtils.setRemoteSiteUrlAddress(projectSite, urlAddress);
 
         // Get VersionControl for project site and set listener
-        WebSite projectSite = getProjectSite();
         _versionControl = VersionControl.getVersionControlForProjectSite(projectSite);
         _versionControl.addPropChangeListener(_versionControlPropChangeLsnr);
     }
@@ -106,9 +106,9 @@ public class VersionControlTool extends ProjectTool {
 
         // Get remote exists in non-blocking way
         WebSite remoteSite = getRemoteSite();
-        WebFile rootDir = remoteSite.getRootDir();
-        boolean isRemoteExists = rootDir.isVerified() && rootDir.getExists();
-        if (!rootDir.isVerified())
+        WebFile rootDir = remoteSite != null ? remoteSite.getRootDir() : null;
+        boolean isRemoteExists = rootDir != null && rootDir.isVerified() && rootDir.getExists();
+        if (rootDir != null && !rootDir.isVerified())
             CompletableFuture.runAsync(() -> { rootDir.getExists(); resetLater(); });
 
         // Update CreateRemoteButton, CreateCloneButton, ConnectButton
