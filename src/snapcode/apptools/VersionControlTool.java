@@ -124,6 +124,9 @@ public class VersionControlTool extends ProjectTool {
         setViewVisible("ReplaceFilesButton", isCheckedOut);
         setViewVisible("CommitFilesButton", isCheckedOut);
 
+        // Update DisconnectButton
+        setViewVisible("DisconnectButton", isCloneExists);
+
         // Update SnapCloudButton
         setViewVisible("SnapCloudButton", (remoteUrlAddress == null || remoteUrlAddress.isEmpty()) &&
                 SnapCloudPage.getSnapCloudUserUrl() != null);
@@ -156,8 +159,11 @@ public class VersionControlTool extends ProjectTool {
             case "ReplaceFilesButton": replaceFiles(getSiteRootDirAsList()); break;
             case "CommitFilesButton": commitFiles(getSiteRootDirAsList(), true); break;
 
+            // Handle DisconnectButton
+            case "DisconnectButton": setRemoteUrlAddress(null); break;
+
             // Handle SnapCloudButton
-            case "SnapCloudButton": handleSaveToSnapCloudButton(); break;
+            case "SnapCloudButton": saveToSnapCloud(); break;
         }
     }
 
@@ -512,9 +518,9 @@ public class VersionControlTool extends ProjectTool {
     }
 
     /**
-     * Called when SnapCloudButton is pressed.
+     * Save files to Snap cloud in background.
      */
-    private void handleSaveToSnapCloudButton()
+    private void saveToSnapCloud()
     {
         // Reset RemoteUrl to snap cloud
         WebURL snapCloudUserUrl = SnapCloudPage.getSnapCloudUserUrl();
@@ -522,15 +528,6 @@ public class VersionControlTool extends ProjectTool {
         WebURL snapCloudProjectUrl = snapCloudUserUrl.getChild(_proj.getName());
         setRemoteUrlAddress(snapCloudProjectUrl.getString());
 
-        // Save to Snap cloud
-        saveToSnapCloud();
-    }
-
-    /**
-     * Save files to Snap cloud in background.
-     */
-    private void saveToSnapCloud()
-    {
         // Create TaskMonitor for save to snap cloud
         String title = "Save to Snap Cloud " + _versionControl.getRemoteSiteUrlAddress();
         TaskMonitor taskMonitor = new TaskMonitor(title);

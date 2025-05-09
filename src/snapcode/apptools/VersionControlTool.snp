@@ -15,7 +15,8 @@
     <Button Name="UpdateFilesButton" PrefWidth="90" Text="Update Files" />
     <Button Name="CommitFilesButton" PrefWidth="90" Text="Commit Files" />
     <Button Name="ReplaceFilesButton" PrefWidth="90" Text="Replace Files" />
-    <Button Name="CreateCloneButton" PrefWidth="120" Text="Create Clone" />
+    <Button Name="CreateCloneButton" PrefWidth="90" Text="Create Clone" />
+    <Button Name="DisconnectButton" PrefWidth="90" Text="Disconnect" />
     <Button Name="SnapCloudButton" PrefWidth="140" Text="Save to SnapCloud" />
     <ProgressBar Name="ProgressBar" PrefWidth="100" PrefHeight="16" Visible="false" />
   </RowView>
