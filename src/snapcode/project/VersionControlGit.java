@@ -192,6 +192,12 @@ public class VersionControlGit extends VersionControl {
     }
 
     /**
+     * Whether Version control supports commit messages.
+     */
+    @Override
+    public boolean supportsCommitMessages()  { return true; }
+
+    /**
      * Returns whether (local) file should be ignored.
      */
     @Override

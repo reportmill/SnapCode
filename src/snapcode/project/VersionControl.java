@@ -534,6 +534,11 @@ public class VersionControl {
     }
 
     /**
+     * Whether Version control supports commit messages.
+     */
+    public boolean supportsCommitMessages()  { return false; }
+
+    /**
      * Called when file added to project.
      */
     public void handleProjectFileAdded(WebFile aFile)  { }

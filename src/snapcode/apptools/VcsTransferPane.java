@@ -76,9 +76,10 @@ public class VcsTransferPane extends ViewOwner {
             return false;
 
         // If commit, get message
-        if (anOp == Op.Commit) {
+        if (anOp == Op.Commit && _versionControlTool.getVC().supportsCommitMessages()) {
             _commitMsg = getViewText("CommentText");
-            if (_commitMsg != null) _commitMsg = _commitMsg.trim();
+            if (_commitMsg != null)
+                _commitMsg = _commitMsg.trim();
             if (_commitMsg == null || _commitMsg.isEmpty()) {
                 DialogBox dbox = new DialogBox("Commit Files Message Panel");
                 dbox.setMessage("Enter Commit Message");
@@ -115,7 +116,7 @@ public class VcsTransferPane extends ViewOwner {
         ListView<WebFile> filesList = getView("FilesList", ListView.class);
         filesList.setRowHeight(22);
         filesList.setCellConfigure(this::configureFilesListCell);
-        if (getOp() != Op.Commit) {
+        if (getOp() != Op.Commit || !_versionControlTool.getVC().supportsCommitMessages()) {
             TextView commentText = getView("CommentText", TextView.class);
             getView("SplitView", SplitView.class).removeItem(commentText);
         }
