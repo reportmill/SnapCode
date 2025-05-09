@@ -47,10 +47,7 @@ public class SnapCloudPage extends WebPage {
 
         // Set root dir in remote browser
         _remoteBrowser.setSelFile(rootDir);
-
-        DirFilePage dirFilePage = (DirFilePage) _remoteBrowser.getSelPage();
-        if (dirFilePage != null)
-            dirFilePage.getFileBrowser().addEventFilter(e -> resetLater(), Action);
+        _remoteBrowser.addEventFilter(e -> resetLater(), MouseRelease);
     }
 
     /**
@@ -82,7 +79,7 @@ public class SnapCloudPage extends WebPage {
     @Override
     protected void initShowing()
     {
-        runDelayed(this::connectToSnapCloudUserSite, 1000);
+        runLater(this::connectToSnapCloudUserSite);
     }
 
     /**

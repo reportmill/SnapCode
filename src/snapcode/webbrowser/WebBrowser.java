@@ -77,10 +77,12 @@ public class WebBrowser extends TransitionPane {
     }
 
     /**
-     * Sets a URL in browser immediately. This is usually called by setLoaderURL instead.
+     * Sets the browser to page for given URL.
      */
     public void setSelUrl(WebURL aURL)
     {
+        if (Objects.equals(aURL, getSelUrl())) return;
+
         // If url is null, clear page
         if (aURL == null) {
             setSelPage(null);
@@ -119,29 +121,12 @@ public class WebBrowser extends TransitionPane {
     }
 
     /**
-     * Sets the browser to a page for given WebFile.
+     * Sets the browser to page for given file.
      */
     public void setSelFile(WebFile aFile)
     {
-        // Handle null
-        if (aFile == null) {
-            setSelPage(null);
-            return;
-        }
-
-        // If already set, just return
-        if (aFile == getSelFile()) return;
-
-        // Get cached page for URL - create if missing
-        WebURL url = aFile.getURL();
-        WebPage page = getPageForURL(url);
-        if (page == null) {
-            page = createPageForURL(url);
-            setPageForURL(page.getURL(), page);
-        }
-
-        // Set page
-        setSelPage(page);
+        WebURL url = aFile != null ? aFile.getURL() : null;
+        setSelUrl(url);
     }
 
     /**
