@@ -58,8 +58,8 @@ public class DirFilePage extends WebPage {
         // Create/configure FileBrowser
         _fileBrowser = new BrowserView<>();
         _fileBrowser.setName("FileBrowser");
-        _fileBrowser.setPrefWidth(320);
-        _fileBrowser.setPrefColCount(2);
+        _fileBrowser.setPrefWidth(600);
+        _fileBrowser.setPrefColCount(3);
         _fileBrowser.setResolver(new FileTreeResolver());
         _fileBrowser.setItems(getFile().getFiles());
         _fileBrowser.addEventHandler(this::handleFileBrowserMouseRelease, MouseRelease);

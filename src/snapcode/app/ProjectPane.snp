@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<TabView Name="TabView">
-  <ColView PrefWidth="500" PrefHeight="500" Padding="16" Spacing="10" Font="Arial 14" title="Project Info">
-    <RowView MinWidth="400" Padding="10" Fill="#F8" BorderRadius="8" Font="Arial 18">
-      <Label Name="ProjectNameLabel" Text="Project:" />
-    </RowView>
+<ColView Name="ColView" GrowHeight="true" Fill="#FF">
+  <RowView MinWidth="500" Margin="8" Padding="8,8,8,12" Fill="#F6" Border="#E8 1" BorderRadius="8" Font="Arial 20">
+    <Label Text="Project Info" />
+  </RowView>
+  <ColView PrefWidth="500" Margin="8,8,8,20" Spacing="8" Font="Arial 14" title="Project Info">
+    <Label Name="ProjectNameLabel" Padding="4" Text="Project:" />
     <TitleView Name="LOCTitleView" PrefWidth="120" PrefHeight="22" Padding="5" Text="Show Lines of Code" TitleStyle="Plain" Collapsible="true" Expanded="false">
       <TextView Name="LOCText" PrefWidth="300" Padding="5" Border="#80 1" />
     </TitleView>
@@ -12,4 +13,4 @@
     </TitleView>
     <CheckBox Name="AutoBuildCheckBox" Text="Auto Build Project" />
   </ColView>
-</TabView>
+</ColView>

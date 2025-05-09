@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView>
-  <RowView Margin="10,0,30,0" GrowWidth="true">
-    <Label Margin="5,5,5,8" Font="Arial 18" Text="Remote Server:" />
-    <TextField Name="RemoteURLText" Margin="5" Padding="4" Font="Arial 16" PrefWidth="600" />
+<ColView GrowWidth="true" GrowHeight="true">
+  <RowView MinWidth="500" Margin="8,8,8,12" Padding="8" Fill="#F6" Border="#E8 1" BorderRadius="8" Font="Arial 20">
+    <Label Text="Version Control" />
   </RowView>
-  <RowView Spacing="5" GrowWidth="true">
+  <RowView Margin="10,10,30,10" GrowWidth="true" Font="Arial 16">
+    <Label Margin="5,5,5,8" Text="Remote Server:" />
+    <TextField Name="RemoteURLText" Margin="5" Padding="4" PrefWidth="600" />
+  </RowView>
+  <RowView Margin="10" Spacing="5" GrowWidth="true">
     <Label Margin="5,5,5,8" Font="Arial 16" Text="Remote Files:" />
     <Button Name="CreateRemoteButton" PrefWidth="120" Text="Create Remote" />
     <Button Name="ConnectButton" PrefWidth="90" Text="Connect" />
