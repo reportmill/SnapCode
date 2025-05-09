@@ -125,8 +125,22 @@ public class WebBrowser extends TransitionPane {
      */
     public void setSelFile(WebFile aFile)
     {
+        if (aFile == getSelFile()) return;
+
+        // If file not verified, forward to setSelUrl()
         WebURL url = aFile != null ? aFile.getURL() : null;
-        setSelUrl(url);
+        if (aFile == null || !aFile.isVerified()) {
+            setSelUrl(url);
+            return;
+        }
+
+        // Get page for URL - create if missing
+        WebPage page = getPageForURL(url);
+        if (page == null)
+            page = createPageForURL(url);
+
+        // Set page
+        setSelPage(page);
     }
 
     /**
@@ -216,10 +230,17 @@ public class WebBrowser extends TransitionPane {
      */
     public WebPage createPageForURL(WebURL aURL)
     {
+        // Create bogus response for URL
         WebRequest req = new WebRequest(aURL);
         WebResponse resp = new WebResponse(req);
         resp.setCode(WebResponse.OK);
-        return createPageForResponse(resp);
+
+        // Create page
+        WebPage pageForUrl = createPageForResponse(resp);
+        setPageForURL(aURL, pageForUrl);
+
+        // Return
+        return pageForUrl;
     }
 
     /**

@@ -76,6 +76,20 @@ try (Stream<Path> files = Files.list(homePath)) {
 // Catch exceptions
 catch (IOException e) { System.err.println("Error listing files: " + e.getMessage()); }
 ```
+
+## Read and Write to file
+
+```
+// Get path to temp file and write text
+Path filePath = Paths.get(System.getProperty("java.io.tmpdir"), "hello.txt");
+Files.write(filePath, "Hello World".getBytes());
+
+// Read lines from file and print
+List<String> lines = Files.readAllLines(filePath);
+System.out.println("Contents of the file:");
+lines.forEach(System.out::println);
+```
+
 # Streams
 
 ## Map names list to uppercase
