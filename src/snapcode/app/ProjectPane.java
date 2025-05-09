@@ -84,30 +84,6 @@ public class ProjectPane extends ViewOwner {
     public VersionControlTool getVersionControlTool()  { return _versionControlTool; }
 
     /**
-     * Returns the Remote URL address string.
-     */
-    public String getRemoteUrlAddress()
-    {
-        WebSite projectSite = getProjectSite();
-        return VersionControlUtils.getRemoteSiteUrlAddress(projectSite);
-    }
-
-    /**
-     * Sets the Remote URL address string.
-     */
-    public void setRemoteUrlAddress(String urlAddress)
-    {
-        // Deactivate Version control pane and re-open site
-        _versionControlTool.deactivate();
-        WebSite projectSite = getProjectSite();
-        VersionControlUtils.setRemoteSiteUrlAddress(projectSite, urlAddress);
-
-        // Recreate VC and set in tab
-        //_vcp = VersionControl.get(_site) instanceof VersionControlGit ? new VcsPaneGit(this) : new VcsPane(this);
-        //_versionControlTool = new VersionControlTool(this);
-    }
-
-    /**
      * Deletes a site.
      */
     public void deleteSite(View aView)
