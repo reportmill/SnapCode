@@ -28,6 +28,11 @@ public class DirFilePage extends WebPage {
     }
 
     /**
+     * Returns the file browser.
+     */
+    public BrowserView<WebFile> getFileBrowser() { return _fileBrowser; }
+
+    /**
      * Returns the selected file.
      */
     public WebFile getSelFile()
@@ -36,9 +41,14 @@ public class DirFilePage extends WebPage {
     }
 
     /**
-     * Returns the file browser.
+     * Sets the selected file.
      */
-    public BrowserView<WebFile> getFileBrowser() { return _fileBrowser; }
+    public void setSelFile(WebFile aFile)
+    {
+        if (_fileBrowser == null) return;
+        _fileBrowser.setSelItem(aFile);
+        _pageBrowser.setSelFile(aFile.isFile() ? aFile : null);
+    }
 
     /**
      * Creates a file pane for the given file in the requested mode.
@@ -48,8 +58,8 @@ public class DirFilePage extends WebPage {
         // Create/configure FileBrowser
         _fileBrowser = new BrowserView<>();
         _fileBrowser.setName("FileBrowser");
-        _fileBrowser.setPrefWidth(400);
-        _fileBrowser.setGrowWidth(true);
+        _fileBrowser.setPrefWidth(320);
+        _fileBrowser.setPrefColCount(2);
         _fileBrowser.setResolver(new FileTreeResolver());
         _fileBrowser.setItems(getFile().getFiles());
         _fileBrowser.addEventHandler(this::handleFileBrowserMouseRelease, MouseRelease);

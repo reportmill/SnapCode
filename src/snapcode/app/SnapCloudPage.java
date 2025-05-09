@@ -1,6 +1,7 @@
 package snapcode.app;
 import snap.gfx.Image;
 import snap.view.*;
+import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
@@ -107,6 +108,9 @@ public class SnapCloudPage extends WebPage {
         setViewVisible("OpenProjectButton", selProjectUrl != null);
         if (selProjectUrl != null)
             setViewText("OpenProjectButton", "Open " + selProjectUrl.getFilename());
+
+        // Update DeleteFileButton
+        setViewVisible("DeleteFileButton", selProjectUrl != null);
     }
 
     /**
@@ -125,6 +129,9 @@ public class SnapCloudPage extends WebPage {
 
             // Handle OpenProjectButton
             case "OpenProjectButton": handleOpenProjectButtonActionEvent(); break;
+
+            // Handle DeleteFileButton
+            case "DeleteFileButton": handleDeleteFileButton(); break;
         }
     }
 
@@ -141,15 +148,49 @@ public class SnapCloudPage extends WebPage {
     }
 
     /**
+     * Called when DeleteFileButtonDeleteFileButton gets action event.
+     */
+    private void handleDeleteFileButton()
+    {
+        // Ask user if they really want to do this
+        WebFile selFile = getSelFile();
+        String title = "Delete file: " + selFile.getName();
+        String msg = "Are you sure you want to delete SnapCloud file: " + selFile.getName() + "?";
+        if (!DialogBox.showConfirmDialog(getUI(), title, msg))
+            return;
+
+        // Delete file and set parent
+        WebFile parent = selFile.getParent();
+        selFile.delete();
+        parent.resetAndVerify();
+        setSelFile(parent);
+    }
+
+    /**
+     * Returns the selected file.
+     */
+    private WebFile getSelFile()
+    {
+        DirFilePage dirFilePage = (DirFilePage) _remoteBrowser.getSelPage();
+        return dirFilePage != null ? dirFilePage.getSelFile() : null;
+    }
+
+    /**
+     * Sets the selected file.
+     */
+    private void setSelFile(WebFile aFile)
+    {
+        DirFilePage dirFilePage = (DirFilePage) _remoteBrowser.getSelPage();
+        if (dirFilePage != null)
+            dirFilePage.setSelFile(aFile);
+    }
+
+    /**
      * Returns the selected project name.
      */
     private WebURL getSelectedProjectUrl()
     {
-        DirFilePage dirFilePage = (DirFilePage) _remoteBrowser.getSelPage();
-        if (dirFilePage == null)
-            return null;
-
-        WebFile selFile = dirFilePage.getSelFile();
+        WebFile selFile = getSelFile();
         if (selFile == null || selFile.isRoot())
             return null;
 
