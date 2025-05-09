@@ -154,10 +154,10 @@ public class VersionControlTool extends ProjectTool {
             // Handle UpdateFilesButton, ReplaceFilesButton, CommitFilesButton
             case "UpdateFilesButton": updateFiles(getSiteRootDirAsList()); break;
             case "ReplaceFilesButton": replaceFiles(getSiteRootDirAsList()); break;
-            case "CommitFilesButton": commitFiles(getSiteRootDirAsList()); break;
+            case "CommitFilesButton": commitFiles(getSiteRootDirAsList(), true); break;
 
             // Handle SnapCloudButton
-            case "SnapCloudButton": handleSnapCloudButton(); break;
+            case "SnapCloudButton": handleSaveToSnapCloudButton(); break;
         }
     }
 
@@ -439,7 +439,7 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called to commit files.
      */
-    public void commitFiles(List<WebFile> theFiles)
+    public void commitFiles(List<WebFile> theFiles, boolean showPanel)
     {
         // Sanity check
         if (!_versionControl.isCheckedOut()) { beep(); return; }
@@ -454,7 +454,7 @@ public class VersionControlTool extends ProjectTool {
 
         // Run VersionControlFilesPane for files and op
         VcsTransferPane transferPane = new VcsTransferPane();
-        if (!transferPane.showPanel(this, commitFiles, VcsTransferPane.Op.Commit))
+        if (showPanel && !transferPane.showPanel(this, commitFiles, VcsTransferPane.Op.Commit))
             return;
 
         // Do real commit
@@ -462,7 +462,7 @@ public class VersionControlTool extends ProjectTool {
         TaskMonitor taskMonitor = new TaskMonitor("Commit files to remote site");
         TaskRunner<Boolean> commitRunner = new TaskRunner<>(() -> _versionControl.commitFiles(commitFiles, commitMessage, taskMonitor));
         commitRunner.setMonitor(taskMonitor);
-        commitRunner.setOnFailure(exception -> commitFilesFailed(exception));
+        commitRunner.setOnFailure(exception -> handleCommitFilesFailed(exception));
         commitRunner.start();
 
         // Show progress dialog
@@ -472,7 +472,7 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called when commit files fails.
      */
-    private void commitFilesFailed(Exception anException)
+    private void handleCommitFilesFailed(Exception anException)
     {
         DialogBox.showExceptionDialog(_workspacePane.getUI(), "Commit files failed", anException);
     }
@@ -514,12 +514,43 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called when SnapCloudButton is pressed.
      */
-    private void handleSnapCloudButton()
+    private void handleSaveToSnapCloudButton()
     {
+        // Reset RemoteUrl to snap cloud
         WebURL snapCloudUserUrl = SnapCloudPage.getSnapCloudUserUrl();
         assert snapCloudUserUrl != null;
         WebURL snapCloudProjectUrl = snapCloudUserUrl.getChild(_proj.getName());
         setRemoteUrlAddress(snapCloudProjectUrl.getString());
+
+        // Save to Snap cloud
+        saveToSnapCloud();
+    }
+
+    /**
+     * Save files to Snap cloud in background.
+     */
+    private void saveToSnapCloud()
+    {
+        // Create TaskMonitor for save to snap cloud
+        String title = "Save to Snap Cloud " + _versionControl.getRemoteSiteUrlAddress();
+        TaskMonitor taskMonitor = new TaskMonitor(title);
+        TaskRunner<Boolean> saveToSnapCloudRunner = new TaskRunner<>(() -> saveToSnapCloudImpl(taskMonitor));
+        saveToSnapCloudRunner.setMonitor(taskMonitor);
+
+        // Configure callbacks and start
+        saveToSnapCloudRunner.setOnSuccess(obj -> resetLater());
+        saveToSnapCloudRunner.setOnFailure(this::handleCommitFilesFailed);
+        saveToSnapCloudRunner.start();
+    }
+
+    /**
+     * Save files to Snap cloud in background.
+     */
+    private boolean saveToSnapCloudImpl(TaskMonitor taskMonitor) throws Exception
+    {
+        _versionControl.createRemoteSite(taskMonitor);
+        List<WebFile> commitFiles = _versionControl.getModifiedFilesForLocalFiles(getSiteRootDirAsList());
+        return _versionControl.commitFiles(commitFiles, "", taskMonitor);
     }
 
     /**

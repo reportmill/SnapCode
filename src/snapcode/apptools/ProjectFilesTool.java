@@ -297,7 +297,7 @@ public class ProjectFilesTool extends WorkspaceTool {
             case "CommitFilesMenuItem": {
                 ProjectPane projectPane = getSelProjectPane();
                 VersionControlTool versionControlTool = projectPane.getVersionControlTool();
-                versionControlTool.commitFiles(null);
+                versionControlTool.commitFiles(null, true);
                 break;
             }
 
