@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView>
-  <RowView Margin="5,0,35,0" GrowWidth="true">
+  <RowView Margin="10,0,30,0" GrowWidth="true">
     <Label Margin="5,5,5,8" Font="Arial 18" Text="Remote Server:" />
-    <TextField Name="RemoteURLText" Margin="5" Padding="4" Font="Arial 16" GrowWidth="true" />
+    <TextField Name="RemoteURLText" Margin="5" Padding="4" Font="Arial 16" PrefWidth="600" />
   </RowView>
   <RowView Spacing="5" GrowWidth="true">
     <Label Margin="5,5,5,8" Font="Arial 16" Text="Remote Files:" />
@@ -13,6 +13,7 @@
     <Button Name="CommitFilesButton" PrefWidth="90" Text="Commit Files" />
     <Button Name="ReplaceFilesButton" PrefWidth="90" Text="Replace Files" />
     <Button Name="CreateCloneButton" PrefWidth="120" Text="Create Clone" />
+    <Button Name="SnapCloudButton" PrefWidth="120" Text="Use SnapCloud" />
     <ProgressBar Name="ProgressBar" PrefWidth="100" PrefHeight="16" Visible="false" />
   </RowView>
   <BoxView Name="RemoteBrowserBox" Margin="3,5,5,5" Border="#88 1" GrowWidth="true" GrowHeight="true" FillWidth="true" FillHeight="true" />

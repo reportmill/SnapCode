@@ -2,6 +2,8 @@ package snapcode.apptools;
 import snap.props.PropChangeListener;
 import snap.util.ListUtils;
 import snap.view.BoxView;
+import snap.web.WebURL;
+import snapcode.app.SnapCloudPage;
 import snapcode.project.WorkspaceBuilder;
 import snap.props.PropChange;
 import snapcode.app.ProjectPane;
@@ -98,7 +100,8 @@ public class VersionControlTool extends ProjectTool {
     public void resetUI()
     {
         // Update RemoteURLText
-        setViewValue("RemoteURLText", getRemoteUrlAddress());
+        String remoteUrlAddress = getRemoteUrlAddress();
+        setViewValue("RemoteURLText", remoteUrlAddress);
 
         // Update CreateRemoteButton, CreateCloneButton, ConnectButton
         boolean isRemoteExists = _versionControl.isRemoteExists();
@@ -113,6 +116,10 @@ public class VersionControlTool extends ProjectTool {
         setViewVisible("UpdateFilesButton", isCheckedOut);
         setViewVisible("ReplaceFilesButton", isCheckedOut);
         setViewVisible("CommitFilesButton", isCheckedOut);
+
+        // Update SnapCloudButton
+        setViewVisible("SnapCloudButton", (remoteUrlAddress == null || remoteUrlAddress.isEmpty()) &&
+                SnapCloudPage.getSnapCloudUserUrl() != null);
 
         // Update ProgressBar
         ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
@@ -141,6 +148,9 @@ public class VersionControlTool extends ProjectTool {
             case "UpdateFilesButton": updateFiles(getSiteRootDirAsList()); break;
             case "ReplaceFilesButton": replaceFiles(getSiteRootDirAsList()); break;
             case "CommitFilesButton": commitFiles(getSiteRootDirAsList()); break;
+
+            // Handle SnapCloudButton
+            case "SnapCloudButton": handleSnapCloudButton(); break;
         }
     }
 
@@ -492,6 +502,17 @@ public class VersionControlTool extends ProjectTool {
         WebFile file = (WebFile) aPC.getSource();
         ProjectFilesTool projectFilesTool = _workspacePane.getProjectFilesTool();
         projectFilesTool.handleFileChange(file);
+    }
+
+    /**
+     * Called when SnapCloudButton is pressed.
+     */
+    private void handleSnapCloudButton()
+    {
+        WebURL snapCloudUserUrl = SnapCloudPage.getSnapCloudUserUrl();
+        assert snapCloudUserUrl != null;
+        WebURL snapCloudProjectUrl = snapCloudUserUrl.getChild(_proj.getName());
+        setRemoteUrlAddress(snapCloudProjectUrl.getString());
     }
 
     /**
