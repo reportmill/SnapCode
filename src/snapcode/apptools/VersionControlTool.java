@@ -19,6 +19,7 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This ProjectTool subclass manages version control for project.
@@ -103,8 +104,14 @@ public class VersionControlTool extends ProjectTool {
         String remoteUrlAddress = getRemoteUrlAddress();
         setViewValue("RemoteURLText", remoteUrlAddress);
 
+        // Get remote exists in non-blocking way
+        WebSite remoteSite = getRemoteSite();
+        WebFile rootDir = remoteSite.getRootDir();
+        boolean isRemoteExists = rootDir.isVerified() && rootDir.getExists();
+        if (!rootDir.isVerified())
+            CompletableFuture.runAsync(() -> { rootDir.getExists(); resetLater(); });
+
         // Update CreateRemoteButton, CreateCloneButton, ConnectButton
-        boolean isRemoteExists = _versionControl.isRemoteExists();
         boolean isCloneExists = _versionControl.isCloneExists();
         setViewVisible("CreateRemoteButton", !isRemoteExists && _versionControl.canCreateRemote());
         setViewVisible("CreateCloneButton", !isCloneExists && _versionControl.canCreateRemote());

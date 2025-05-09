@@ -246,9 +246,6 @@ public class ProjectPane extends ViewOwner {
     @Override
     protected void initUI()
     {
-        Project project = getProject();
-        setViewText("ProjectNameLabel", "Name: " + project.getName());
-
         // Add VersionControl UI
         ColView tabView = getView("ColView", ColView.class);
         tabView.addChild(_versionControlTool.getUI());
