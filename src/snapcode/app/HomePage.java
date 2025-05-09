@@ -80,7 +80,7 @@ public class HomePage extends WebPage {
         RecentFiles.removeURL(recentProjectUrl);
 
         // If project open, close it
-        String projectName = recentProjectUrl.getFilename();
+        String projectName = recentProjectUrl.getFilenameSimple();
         Project project = _workspacePane.getWorkspace().getProjectForName(projectName);
         if (project != null)
             _workspacePane.getWorkspace().closeProject(project);

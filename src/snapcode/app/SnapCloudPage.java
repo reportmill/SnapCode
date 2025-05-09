@@ -95,7 +95,6 @@ public class SnapCloudPage extends WebPage {
         // Update ProgressBar
         ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
         boolean loading = _remoteBrowser.isLoading();
-        System.out.println("Remote browser loaded: " + loading);
         progressBar.setVisible(loading);
         progressBar.setProgress(loading ? -1 : 0);
 

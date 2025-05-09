@@ -320,7 +320,7 @@ public class HomePageView extends MarkDownView {
         // Create recent file view and add children
         RowView recentFileView = new RowView();
         recentFileView.setPropsString("Fill:#F8; BorderRadius:5; Margin:5; Padding:5;");
-        recentFileView.setMinWidth(500);
+        recentFileView.setMinWidth(550);
         recentFileView.setChildren(nameLabel, separator, addressLabel, closeBox);
 
         //addLinkToLinkView(recentFileView, "OpenRecent:" + recentFileUrl.getString());
