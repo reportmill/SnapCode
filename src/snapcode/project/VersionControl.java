@@ -374,8 +374,8 @@ public class VersionControl {
     private void findMissingFilesForDirFileInOtherSite(WebFile dirFile, WebSite otherSite, List<WebFile> modifiedFiles)
     {
         // Get other dir file - just return if also missing
-        WebFile otherDir = otherSite.getFileForPath(dirFile.getPath());
-        if (otherDir == null)
+        WebFile otherDir = otherSite.createFileForPath(dirFile.getPath(), true);
+        if (!otherDir.getExists())
             return;
 
         // Get file site and other site child files
@@ -444,8 +444,8 @@ public class VersionControl {
             return FileStatus.Removed;
 
         // Get file from other site
-        WebFile otherFile = otherSite.getFileForPath(aFile.getPath());
-        if (otherFile == null)
+        WebFile otherFile = otherSite.createFileForPath(aFile.getPath(), aFile.isDir());
+        if (!otherFile.getExists())
             return FileStatus.Added;
 
         // If modified times match, return identical
@@ -484,15 +484,16 @@ public class VersionControl {
      */
     protected boolean isIgnoreFile(WebFile aFile)
     {
-        String name = aFile.getName();
-        if (name.equals("bin"))
+        String filename = aFile.getName();
+        if (ArrayUtils.contains(IGNORE_FILENAMES, filename))
             return true;
-        if (name.equals("CVS"))
+        if (filename.startsWith("__"))
             return true;
-        if (name.startsWith("__"))
-            return true;
-        return name.equals(".git");
+        return false;
     }
+
+    // Ignore filenames
+    private static String[] IGNORE_FILENAMES = { "bin", ".git", "CVS", ".DS_Store" };
 
     /**
      * Delete VCS support files from site directory.

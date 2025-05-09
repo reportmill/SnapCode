@@ -50,10 +50,7 @@ public class VcsTransferPane extends ViewOwner {
      */
     public boolean showPanel(VersionControlTool versionControlTool, List<WebFile> theFiles, Op anOp)
     {
-        // Set component and data source
         _versionControlTool = versionControlTool;
-
-        // Set transfer files and transfer op
         _files = theFiles;
         _op = anOp;
 
@@ -61,30 +58,31 @@ public class VcsTransferPane extends ViewOwner {
         View parentView = versionControlTool.getWorkspacePane().getUI();
 
         // If no transfer files, just tell user and return
-        if (_files.size() == 0) {
+        if (_files.isEmpty()) {
             String msg = "No " + getOp() + " files to transfer.", title = "Synchronize Files";
-            DialogBox dbox = new DialogBox(title);
-            dbox.setWarningMessage(msg);
-            dbox.showMessageDialog(parentView);
+            DialogBox dialogBox = new DialogBox(title);
+            dialogBox.setWarningMessage(msg);
+            dialogBox.showMessageDialog(parentView);
             return false;
         }
 
         // Show confirmation dialog with files to transfer
         String mode = getOp().toString();
         String[] options = new String[]{mode, "Cancel"};
-        DialogBox dbox = new DialogBox(mode + " Files Panel");
-        dbox.setContent(getUI());
-        dbox.setOptions(options);
-        if (dbox.showOptionDialog(parentView, mode) != 0) return false;
+        DialogBox dialogBox = new DialogBox(mode + " Files Panel");
+        dialogBox.setContent(getUI());
+        dialogBox.setOptions(options);
+        if (dialogBox.showOptionDialog(parentView, mode) != 0)
+            return false;
 
         // If commit, get message
         if (anOp == Op.Commit) {
             _commitMsg = getViewText("CommentText");
             if (_commitMsg != null) _commitMsg = _commitMsg.trim();
-            if (_commitMsg == null || _commitMsg.length() == 0) {
-                DialogBox db = new DialogBox("Commit Files Message Panel");
-                db.setMessage("Enter Commit Message");
-                db.showMessageDialog(parentView);
+            if (_commitMsg == null || _commitMsg.isEmpty()) {
+                DialogBox dbox = new DialogBox("Commit Files Message Panel");
+                dbox.setMessage("Enter Commit Message");
+                dbox.showMessageDialog(parentView);
                 return showPanel(versionControlTool, theFiles, anOp);
             }
         }
@@ -140,37 +138,51 @@ public class VcsTransferPane extends ViewOwner {
     private void configureFilesListCell(ListCell<WebFile> aCell)
     {
         WebFile file = aCell.getItem();
-        if (file == null) return;
+        if (file == null)
+            return;
+
         aCell.setText(file.getPath());
-        aCell.setGraphic(getFileGraphic(file));
+        aCell.setGraphic(getFileGraphicView(file));
+    }
+
+    /**
+     * Returns the file graphic view to use for file icon.
+     */
+    protected View getFileGraphicView(WebFile aFile)
+    {
+        VersionControl versionControl = _versionControlTool.getVC();
+        WebSite remoteSite = versionControl.getRemoteSite();
+        WebFile remoteFile = remoteSite.createFileForPath(aFile.getPath(), aFile.isDir());
+
+        // Create file image view
+        Image fileImage = FileIcons.getFileIconImage(aFile);
+        ImageView fileImageView = new ImageView(fileImage);
+
+        // Create badge image view
+        Image badge = getFileBadge(aFile, remoteFile);
+        ImageView badgeImageView = new ImageView(badge);
+        badgeImageView.setLean(Pos.CENTER_RIGHT);
+
+        // Composite file and badge view
+        StackView fileGraphicView = new StackView();
+        fileGraphicView.setAlign(Pos.TOP_LEFT);
+        fileGraphicView.setChildren(fileImageView, badgeImageView);
+        fileGraphicView.setPrefSize(16 + 6, 16);
+
+        // Return
+        return fileGraphicView;
     }
 
     /**
      * Returns the icon to use list item.
      */
-    protected View getFileGraphic(WebFile aFile)
+    protected Image getFileBadge(WebFile aFile, WebFile remoteFile)
     {
-        VersionControl versionControl = _versionControlTool.getVC();
-        WebSite remoteSite = versionControl.getRemoteSite();
-        WebFile remoteFile = remoteSite.getFileForPath(aFile.getPath());
-        Image badge = null;
-
-        // Handle missing LocalFile, missing RemoteFile or Update
         boolean isCommit = getOp() == Op.Commit;
         if (!aFile.getExists())
-            badge = isCommit ? RemovedLocalBadge : AddedRemoteBadge;
-        else if (remoteFile == null)
-            badge = isCommit ? AddedLocalBadge : RemovedRemoteBadge;
-        else badge = isCommit ? UpdatedLocalBadge : UpdatedRemoteBadge;
-
-        // Composite file and return
-        Image image = FileIcons.getFileIconImage(aFile);
-        ImageView imageView = new ImageView(image), bview = new ImageView(badge);
-        StackView stackView = new StackView();
-        stackView.setAlign(Pos.TOP_LEFT);
-        stackView.setChildren(imageView, bview);
-        stackView.setPrefSize(16 + 6, 16);
-        bview.setLean(Pos.CENTER_RIGHT);
-        return stackView;
+            return isCommit ? RemovedLocalBadge : AddedRemoteBadge;
+        if (!remoteFile.getExists())
+            return isCommit ? AddedLocalBadge : RemovedRemoteBadge;
+        return isCommit ? UpdatedLocalBadge : UpdatedRemoteBadge;
     }
 }
