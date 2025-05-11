@@ -538,6 +538,9 @@ public class VersionControlTool extends ProjectTool {
         saveToSnapCloudRunner.setOnSuccess(obj -> resetLater());
         saveToSnapCloudRunner.setOnFailure(this::handleCommitFilesFailed);
         saveToSnapCloudRunner.start();
+
+        // Show progress dialog
+        taskMonitor.showProgressPanel(_workspacePane.getUI());
     }
 
     /**
