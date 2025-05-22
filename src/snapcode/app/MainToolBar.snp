@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RowView PrefHeight="32" Padding="0,0,0,8" Spacing="2" Font="Arial 12">
-  <Separator PrefHeight="18" Vertical="true" Margin="0,0,0,81" />
+  <Separator PrefHeight="18" Vertical="true" Margin="0,0,0,100" />
   <Button Name="HomeButton" PrefWidth="28" PrefHeight="28" Margin="0,0,0,8" ImageName="pkg.images/Home.png" ShowArea="false" />
   <Button Name="BackButton" PrefWidth="28" PrefHeight="28" ImageName="pkg.images/LeftArrow.png" ShowArea="false" />
   <Button Name="ForwardButton" PrefWidth="28" PrefHeight="28" ImageName="pkg.images/RightArrow.png" ShowArea="false" />
