@@ -39,12 +39,12 @@ public class GitUtils {
     public static ProgressMonitor getProgressMonitor(final TaskMonitor aTM)
     {
         return new ProgressMonitor() {
-            public void update(int arg0)  { aTM.updateTask(arg0); }
-            public void start(int arg0)  { aTM.startTasks(arg0); }
-            public boolean isCancelled()  { return aTM.isCancelled(); }
-            public void endTask()  { aTM.endTask(); }
+            public void start(int arg0)  { aTM.startForTaskCount(arg0); }
             public void beginTask(String arg0, int arg1)  { aTM.beginTask(arg0, arg1); }
+            public void update(int arg0)  { aTM.updateTask(arg0); }
+            public void endTask()  { aTM.endTask(); }
             public void showDuration(boolean b)  { }
+            public boolean isCancelled()  { return aTM.isCancelled(); }
         };
     }
 }

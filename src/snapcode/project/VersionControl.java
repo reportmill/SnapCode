@@ -211,7 +211,7 @@ public class VersionControl {
     public boolean updateFiles(List<WebFile> localFiles, TaskMonitor taskMonitor) throws Exception
     {
         // Call TaskMonitor.startTasks
-        taskMonitor.startTasks(localFiles.size());
+        taskMonitor.startForTaskCount(localFiles.size());
 
         // Iterate over files and update each
         for (WebFile localFile : localFiles) {
@@ -246,7 +246,7 @@ public class VersionControl {
     public boolean replaceFiles(List<WebFile> localFiles, TaskMonitor taskMonitor) throws Exception
     {
         // Call TaskMonitor.startTasks
-        taskMonitor.startTasks(localFiles.size());
+        taskMonitor.startForTaskCount(localFiles.size());
 
         // Iterate over files and replace each
         for (WebFile file : localFiles) {
@@ -276,7 +276,7 @@ public class VersionControl {
     public boolean commitFiles(List<WebFile> localFiles, String aMessage, TaskMonitor taskMonitor) throws Exception
     {
         // Call TaskMonitor.startTasks
-        taskMonitor.startTasks(localFiles.size());
+        taskMonitor.startForTaskCount(localFiles.size());
 
         // Iterate over files and commit each
         for (WebFile localFile : localFiles) {

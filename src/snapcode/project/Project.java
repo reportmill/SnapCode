@@ -493,7 +493,7 @@ public class Project extends PropObject {
     public void deleteProject(TaskMonitor taskMonitor) throws Exception
     {
         // Start TaskMonitor
-        taskMonitor.startTasks(1);
+        taskMonitor.startForTaskCount(1);
         taskMonitor.beginTask("Deleting files", -1);
 
         // Clear ClassLoader
