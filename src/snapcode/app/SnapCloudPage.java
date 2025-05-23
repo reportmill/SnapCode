@@ -52,6 +52,56 @@ public class SnapCloudPage extends WebPage {
     }
 
     /**
+     * Returns the selected file.
+     */
+    private WebFile getSelFile()
+    {
+        DirFilePage dirFilePage = (DirFilePage) _remoteBrowser.getSelPage();
+        return dirFilePage != null ? dirFilePage.getSelFile() : null;
+    }
+
+    /**
+     * Sets the selected file.
+     */
+    private void setSelFile(WebFile aFile)
+    {
+        DirFilePage dirFilePage = (DirFilePage) _remoteBrowser.getSelPage();
+        if (dirFilePage != null)
+            dirFilePage.setSelFile(aFile);
+    }
+
+    /**
+     * Opens project for selected file.
+     */
+    private void openProjectForSelFile()
+    {
+        WebURL snapCloudUserUrl = getSelectedProjectUrl();
+        if (snapCloudUserUrl == null)
+            return;
+
+        WorkspacePaneUtils.openProjectForRepoUrl(_workspacePane, snapCloudUserUrl);
+    }
+
+    /**
+     * Deletes remote file.
+     */
+    private void deleteSelFile()
+    {
+        // Ask user if they really want to do this
+        WebFile selFile = getSelFile();
+        String title = "Delete file: " + selFile.getName();
+        String msg = "Are you sure you want to delete SnapCloud file: " + selFile.getName() + "?";
+        if (!DialogBox.showConfirmDialog(getUI(), title, msg))
+            return;
+
+        // Delete file and set parent
+        WebFile parent = selFile.getParent();
+        selFile.delete();
+        parent.resetAndVerify();
+        setSelFile(parent);
+    }
+
+    /**
      * Initialize UI.
      */
     @Override
@@ -128,61 +178,11 @@ public class SnapCloudPage extends WebPage {
                 break;
 
             // Handle OpenProjectButton
-            case "OpenProjectButton": handleOpenProjectButtonActionEvent(); break;
+            case "OpenProjectButton": openProjectForSelFile(); break;
 
             // Handle DeleteFileButton
-            case "DeleteFileButton": handleDeleteFileButton(); break;
+            case "DeleteFileButton": deleteSelFile(); break;
         }
-    }
-
-    /**
-     * Called when OpenProjectButton gets action event.
-     */
-    private void handleOpenProjectButtonActionEvent()
-    {
-        WebURL snapCloudUserUrl = getSelectedProjectUrl();
-        if (snapCloudUserUrl == null)
-            return;
-
-        WorkspacePaneUtils.openProjectForRepoUrl(_workspacePane, snapCloudUserUrl);
-    }
-
-    /**
-     * Called when DeleteFileButtonDeleteFileButton gets action event.
-     */
-    private void handleDeleteFileButton()
-    {
-        // Ask user if they really want to do this
-        WebFile selFile = getSelFile();
-        String title = "Delete file: " + selFile.getName();
-        String msg = "Are you sure you want to delete SnapCloud file: " + selFile.getName() + "?";
-        if (!DialogBox.showConfirmDialog(getUI(), title, msg))
-            return;
-
-        // Delete file and set parent
-        WebFile parent = selFile.getParent();
-        selFile.delete();
-        parent.resetAndVerify();
-        setSelFile(parent);
-    }
-
-    /**
-     * Returns the selected file.
-     */
-    private WebFile getSelFile()
-    {
-        DirFilePage dirFilePage = (DirFilePage) _remoteBrowser.getSelPage();
-        return dirFilePage != null ? dirFilePage.getSelFile() : null;
-    }
-
-    /**
-     * Sets the selected file.
-     */
-    private void setSelFile(WebFile aFile)
-    {
-        DirFilePage dirFilePage = (DirFilePage) _remoteBrowser.getSelPage();
-        if (dirFilePage != null)
-            dirFilePage.setSelFile(aFile);
     }
 
     /**
