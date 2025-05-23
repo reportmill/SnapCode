@@ -46,7 +46,17 @@ public class DirFilePage extends WebPage {
     public void setSelFile(WebFile aFile)
     {
         if (_fileBrowser == null) return;
+
+        // If root file, reset files and page and return
+        if (aFile == getFile()) {
+            _fileBrowser.setItems(aFile.getFiles());
+            _pageBrowser.setSelFile(null);
+            return;
+        }
+
+        // Set file, update it and set page
         _fileBrowser.setSelItem(aFile);
+        _fileBrowser.updateItem(aFile);
         _pageBrowser.setSelFile(aFile.isFile() ? aFile : null);
     }
 
