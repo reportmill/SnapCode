@@ -148,17 +148,17 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     public void setParameters(JVarDecl[] varDecls)
     {
         if (_paramFieldDecls != null)
-            Stream.of(_paramFieldDecls).forEach(vdecl -> removeChild(vdecl));
+            Stream.of(_paramFieldDecls).forEach(this::removeChild);
         if (_paramMethodDecls != null)
-            Stream.of(_paramMethodDecls).forEach(vdecl -> removeChild(vdecl));
+            Stream.of(_paramMethodDecls).forEach(this::removeChild);
 
         _params = varDecls;
 
-        _paramFieldDecls = ArrayUtils.map(_params, varDecl -> createFieldDeclForParam(varDecl), JFieldDecl.class);
-        Stream.of(_paramFieldDecls).forEach(vdecl -> addChild(vdecl));
+        _paramFieldDecls = ArrayUtils.mapNonNull(_params, this::createFieldDeclForParam, JFieldDecl.class);
+        Stream.of(_paramFieldDecls).forEach(this::addChild);
 
-        _paramMethodDecls = ArrayUtils.map(_params, varDecl -> createMethodDeclForParam(varDecl), JMethodDecl.class);
-        Stream.of(_paramMethodDecls).forEach(vdecl -> addChild(vdecl));
+        _paramMethodDecls = ArrayUtils.mapNonNull(_params, this::createMethodDeclForParam, JMethodDecl.class);
+        Stream.of(_paramMethodDecls).forEach(this::addChild);
     }
 
     /**
@@ -185,6 +185,10 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      */
     private JMethodDecl createMethodDeclForParam(JVarDecl varDecl)
     {
+        JExprId varDeclId = varDecl.getId();
+        if (varDeclId == null)
+            return null;
+
         // Create method modifiers
         int startCharIndex = varDecl.getStartCharIndex();
         ParseToken emptyToken = new ParseToken.Builder().name("").pattern("").text("")
@@ -197,8 +201,8 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
         methodDecl.setModifiers(modifiers);
         methodDecl.setReturnType(varDecl.getType());
         varDecl.getType().setParent(varDecl);
-        methodDecl.setId(varDecl.getId());
-        varDecl.getId().setParent(varDecl);
+        methodDecl.setId(varDeclId);
+        varDeclId.setParent(varDecl);
         methodDecl.setStartToken(emptyToken);
         methodDecl.setEndToken(emptyToken);
         return methodDecl;
