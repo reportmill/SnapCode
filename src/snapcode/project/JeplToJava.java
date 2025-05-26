@@ -80,10 +80,15 @@ public class JeplToJava {
         appendModifiers(mods);
 
         // Append class name
-        String classTypeString = classDecl.isClass() ? "class" : classDecl.isInterface() ? "interface" : "enum";
+        String classTypeString = classDecl.isClass() ? "class" : classDecl.isInterface() ? "interface" :
+                classDecl.isEnum() ? "enum" : "record";
         _sb.append(classTypeString).append(' ');
         String className = classDecl.getName();
         _sb.append(className);
+
+        // If record, append parameters
+        if (classDecl.isRecord())
+            appendParameters(classDecl.getParameters());
 
         // Append extends
         JType[] extendsTypes = classDecl.getExtendsTypes();
@@ -190,7 +195,7 @@ public class JeplToJava {
         _sb.append(methodName);
 
         // Append parameters
-        appendParameters(methodDecl);
+        appendParameters(methodDecl.getParameters());
 
         // Append method body
         appendMethodBody(methodDecl);
@@ -214,7 +219,7 @@ public class JeplToJava {
         _sb.append(className);
 
         // Append parameters
-        appendParameters(constrDecl);
+        appendParameters(constrDecl.getParameters());
 
         // Append method body
         appendMethodBody(constrDecl);
@@ -275,11 +280,10 @@ public class JeplToJava {
     /**
      * Appends parameters.
      */
-    private void appendParameters(JExecutableDecl methodDecl)
+    private void appendParameters(JVarDecl[] varDecls)
     {
         // Append parameters
         _sb.append('(');
-        JVarDecl[] varDecls = methodDecl.getParameters();
         String varDeclsStr = ArrayUtils.mapToStringsAndJoin(varDecls, JVarDecl::getString, ", ");
         _sb.append(varDeclsStr);
         _sb.append(")\n");
