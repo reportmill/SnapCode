@@ -102,7 +102,7 @@ public class SnapCompiler {
         else options.add("-g");
 
         // Set release version
-        if (SnapUtils.getJavaVersionInt() > 11) {
+        if (SnapUtils.getJavaVersionInt() > 11 && !SnapUtils.isWebVM) {
             BuildFile buildFile = _proj.getBuildFile();
             int compileRelease = buildFile.getCompileRelease();
             options.add("--release");
