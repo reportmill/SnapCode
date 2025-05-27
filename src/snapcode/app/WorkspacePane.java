@@ -33,6 +33,9 @@ public class WorkspacePane extends ViewOwner {
     // The PagePane to display project files for editing
     protected PagePane _pagePane;
 
+    // The TaskManager
+    protected TaskManager _taskManager;
+
     // The StatusBar
     protected StatusBar _statusBar;
 
@@ -82,6 +85,7 @@ public class WorkspacePane extends ViewOwner {
         // Create MainToolBar, StatusBar
         _toolBar = new MainToolBar(this);
         _statusBar = new StatusBar(this);
+        _taskManager = new TaskManager();
     }
 
     /**
@@ -133,6 +137,11 @@ public class WorkspacePane extends ViewOwner {
      * Returns the toolbar.
      */
     public MainToolBar getToolBar()  { return _toolBar; }
+
+    /**
+     * Returns the task manager.
+     */
+    public TaskManager getTaskManager()  { return _taskManager; }
 
     /**
      * Returns the projects.
@@ -335,6 +344,7 @@ public class WorkspacePane extends ViewOwner {
 
         // Add StatusBar
         TabBar tabBar = bottomTrayUI.getTabBar();
+        ViewUtils.addChild(tabBar, _taskManager.getUI());
         _statusBar.addToView(tabBar);
 
         // Add drag drop support

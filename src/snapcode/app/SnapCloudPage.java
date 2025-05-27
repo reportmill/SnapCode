@@ -1,5 +1,6 @@
 package snapcode.app;
 import snap.gfx.Image;
+import snap.util.TaskMonitor;
 import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.web.WebFile;
@@ -88,17 +89,32 @@ public class SnapCloudPage extends WebPage {
     private void deleteSelFile()
     {
         // Ask user if they really want to do this
-        WebFile selFile = getSelFile();
+        WebFile selFile = getSelFile(); if (selFile == null) return;
         String title = "Delete file: " + selFile.getName();
         String msg = "Are you sure you want to delete SnapCloud file: " + selFile.getName() + "?";
         if (!DialogBox.showConfirmDialog(getUI(), title, msg))
             return;
 
-        // Delete file and set parent
+        // Create task for delete and start
+        TaskManagerTask<?> deleteSelFileTask = _workspacePane.getTaskManager().createTask();
+        deleteSelFileTask.setTaskFunction(() -> { deleteSelFileImpl(deleteSelFileTask.getTaskMonitor()); return null; });
+        deleteSelFileTask.start();
+    }
+
+    /**
+     * Deletes remote file.
+     */
+    private void deleteSelFileImpl(TaskMonitor taskMonitor)
+    {
+        WebFile selFile = getSelFile(); if (selFile == null) return;
         WebFile parent = selFile.getParent();
+
+        taskMonitor.startForTaskCount(1);
+        taskMonitor.beginTask("Delete file: " + selFile.getName(), -1);
         selFile.delete();
         parent.resetAndVerify();
         setSelFile(parent);
+        taskMonitor.endTask();
     }
 
     /**
