@@ -82,11 +82,7 @@ public class WorkspaceBuilder {
     /**
      * Returns whether workspace is building.
      */
-    public boolean isBuilding()
-    {
-        TaskRunner<Boolean> buildRunner = _buildWorkspaceRunner;
-        return buildRunner != null && buildRunner.isActive();
-    }
+    public boolean isBuilding()  { return _buildWorkspaceRunner != null; }
 
     /**
      * Build workspace.
@@ -207,13 +203,13 @@ public class WorkspaceBuilder {
             _buildLogBuffer.append("Build Failed - " + errorCount + " error(s)");
         }
 
-        // Stop building
-        _workspace.setActivity(null);
-        _workspace.setBuilding(false);
-
         // Handle BuildAgain
         if (_buildAgain)
-            buildSuccess = buildWorkspaceImpl(taskMonitor);
+            return buildWorkspaceImpl(taskMonitor);
+
+        // Notify workspace building done
+        _workspace.setActivity(null);
+        _workspace.setBuilding(false);
 
         // Return
         return buildSuccess;

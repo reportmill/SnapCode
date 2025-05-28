@@ -109,7 +109,7 @@ public class BuildTool extends WorkspaceTool {
     {
         // Start listening to  workspace prop changes
         _workspace.addPropChangeListener(pc -> resetLater(), Workspace.Activity_Prop);
-        _workspace.addPropChangeListener(pc -> workspaceBuildingChanged(), Workspace.Building_Prop);
+        _workspace.addPropChangeListener(pc -> handleWorkspaceBuildingPropChange(), Workspace.Building_Prop);
     }
 
     /**
@@ -200,10 +200,10 @@ public class BuildTool extends WorkspaceTool {
     /**
      * Called when Workspace Building property changes.
      */
-    private void workspaceBuildingChanged()
+    private void handleWorkspaceBuildingPropChange()
     {
         if (_workspace.isBuilding())
-            ViewUtils.runLater(() -> _buildLogTextBlock.clear());
+            ViewUtils.runLater(_buildLogTextBlock::clear);
         resetLater();
     }
 
