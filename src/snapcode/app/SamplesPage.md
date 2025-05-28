@@ -44,6 +44,9 @@ Provided by enCode/Create. [Learn to code!](https://www.encodecreate.com)
 * 3D Graphics
   [](https://reportmill.com/SnapCode/Samples/Graphics3D/Graphics3D.jepl)
   This Java repl file shows an example of simple 3D programming.
+* Calculator
+  [](https://reportmill.com/SnapCode/Samples/Calculator/Calculator.zip)
+  This is a sample of a simple calculator.
 
 ## Misc Samples
 
