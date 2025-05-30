@@ -5,6 +5,8 @@ package javakit.parse;
 import javakit.resolver.*;
 import snap.parse.ParseToken;
 import snap.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The base class for all nodes of a JFile.
@@ -432,6 +434,29 @@ public class JNode {
 
         // Return
         return this;
+    }
+
+    /**
+     * Returns the children for class.
+     */
+    public <T> List<T> getChildrenForClassDeep(Class<T> aClass)
+    {
+        List<T> list = new ArrayList<T>();
+        findChildrenForClassDeep(aClass, list);
+        return list;
+    }
+
+    /**
+     * Finds the children for class and add to list.
+     */
+    private <T> void findChildrenForClassDeep(Class<T> aClass, List<T> aList)
+    {
+        for (JNode child : getChildren()) {
+            if (aClass.isInstance(child))
+                aList.add(aClass.cast(child));
+            else if (child.getChildCount() > 0)
+                child.findChildrenForClassDeep(aClass, aList);
+        }
     }
 
     /**

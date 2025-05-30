@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
+import snap.util.ListUtils;
+import java.util.List;
 
 /**
  * A Java statement for conditional/nested statements (while, do, if, for).
@@ -75,12 +77,14 @@ public class JStmtConditional extends JStmt implements WithBodyStmt, WithBlockSt
         // If condition has InstanceOf expression with type pattern, return its var decl
         if (_cond instanceof JExprInstanceOf) {
             JExprInstanceOf instanceOfExpr = (JExprInstanceOf) _cond;
-            JExprPattern patternExpr = instanceOfExpr.getPattern();
-            if (patternExpr != null) {
-                JVarDecl patternVarDecl = patternExpr.getVarDecl();
-                if (patternVarDecl != null)
-                    return new JVarDecl[] { patternExpr.getVarDecl() };
-            }
+            JVarDecl patternVarDecl = instanceOfExpr.getPatternVarDecl();
+            return patternVarDecl != null ? new JVarDecl[] { patternVarDecl } : new JVarDecl[0];
+        }
+
+        // Look for condition InstanceOf expressions and return pattern vardecls
+        if (_cond != null) {
+            List<JExprInstanceOf> varDecls = _cond.getChildrenForClassDeep(JExprInstanceOf.class);
+            return ListUtils.mapNonNullToArray(varDecls, instanceOfExpr -> instanceOfExpr.getPatternVarDecl(), JVarDecl.class);
         }
 
         return new JVarDecl[0];

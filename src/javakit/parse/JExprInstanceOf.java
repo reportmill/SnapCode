@@ -67,6 +67,11 @@ public class JExprInstanceOf extends JExpr {
     }
 
     /**
+     * Returns the pattern Var decl.
+     */
+    public JVarDecl getPatternVarDecl()  { return _pattern != null ? _pattern.getVarDecl() : null; }
+
+    /**
      * Returns the node name.
      */
     public String getNodeString()  { return "InstanceOf"; }
