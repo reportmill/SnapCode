@@ -449,28 +449,22 @@ public class JavaPopupList extends PopupList<JavaDecl> {
      */
     protected void addImportForNodeAndDecl(JNode aNode, JavaDecl aDecl)
     {
-        // Handle JavaClass: Add import for class (unless in import decl)
-        if (aDecl instanceof JavaClass) {
+        // Get JavaClass for class or constructor (just return if not found)
+        JavaClass javaClass = aDecl instanceof JavaClass ? (JavaClass) aDecl :
+            aDecl instanceof JavaConstructor ? ((JavaConstructor) aDecl).getDeclaringClass() : null;
+        if (javaClass == null)
+            return;
 
-            // If in source, just return
-            JavaClass javaClass = (JavaClass) aDecl;
-            if (javaClass.isFromSource())
-                return;
+        // If in source, just return
+        if (javaClass.isFromSource())
+            return;
 
-            // If in import statement, just return
-            if (aNode.getParent(JImportDecl.class) != null)
-                return;
+        // If in import statement, just return
+        if (aNode.getParent(JImportDecl.class) != null)
+            return;
 
-            // Add import
-            addImportForNodeAndClass(aNode, javaClass);
-        }
-
-        // Handle JavaConstructor
-        if (aDecl instanceof JavaConstructor) {
-            JavaClass javaClass = ((JavaConstructor) aDecl).getDeclaringClass();
-            if (javaClass != null)
-                addImportForNodeAndClass(aNode, javaClass);
-        }
+        // Add import
+        addImportForNodeAndClass(aNode, javaClass);
     }
 
     /**

@@ -24,6 +24,9 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     // The formal parameters (for records)
     protected JVarDecl[] _params;
 
+    // The constructor decl for a record
+    private JConstrDecl _recordConstrDecl;
+
     // The formal parameters as fields (for records)
     protected JFieldDecl[] _paramFieldDecls;
 
@@ -154,17 +157,50 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
 
         _params = varDecls;
 
-        _paramFieldDecls = ArrayUtils.mapNonNull(_params, this::createFieldDeclForParam, JFieldDecl.class);
+        // Create constructor decl
+        _recordConstrDecl = createConstructorDeclForParams(this, varDecls);
+        addChild(_recordConstrDecl);
+
+        // Create field parameters
+        _paramFieldDecls = ArrayUtils.mapNonNull(_params, JClassDecl::createFieldDeclForParam, JFieldDecl.class);
         Stream.of(_paramFieldDecls).forEach(this::addChild);
 
-        _paramMethodDecls = ArrayUtils.mapNonNull(_params, this::createMethodDeclForParam, JMethodDecl.class);
+        // Create method
+        _paramMethodDecls = ArrayUtils.mapNonNull(_params, JClassDecl::createMethodDeclForParam, JMethodDecl.class);
         Stream.of(_paramMethodDecls).forEach(this::addChild);
+    }
+
+    /**
+     * Creates a constructor decl for given parameters.
+     */
+    private static JConstrDecl createConstructorDeclForParams(JClassDecl classDecl, JVarDecl[] varDecls)
+    {
+        JExprId classDeclId = classDecl.getId();
+
+        // Create method modifiers
+        int startCharIndex = varDecls.length > 0 ? varDecls[0].getStartCharIndex() : classDeclId.getStartCharIndex();
+        ParseToken emptyToken = new ParseToken.Builder().name("").pattern("").text("")
+                .startCharIndex(startCharIndex).endCharIndex(startCharIndex).build();
+        JModifiers modifiers = new JModifiers(Modifier.PUBLIC);
+        modifiers.setStartToken(emptyToken);
+        modifiers.setEndToken(emptyToken);
+
+        // Create constructor
+        JConstrDecl constrDecl = new JConstrDecl();
+        constrDecl.setModifiers(modifiers);
+        constrDecl.setId(classDeclId);
+        constrDecl.setParameters(varDecls);
+        constrDecl.setStartToken(emptyToken);
+        constrDecl.setEndToken(emptyToken);
+
+        // Return
+        return constrDecl;
     }
 
     /**
      * Creates a field decl for a record param.
      */
-    private JFieldDecl createFieldDeclForParam(JVarDecl varDecl)
+    private static JFieldDecl createFieldDeclForParam(JVarDecl varDecl)
     {
         // Create field modifiers
         int startCharIndex = varDecl.getStartCharIndex();
@@ -183,7 +219,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     /**
      * Creates a method decl for a record param.
      */
-    private JMethodDecl createMethodDeclForParam(JVarDecl varDecl)
+    private static JMethodDecl createMethodDeclForParam(JVarDecl varDecl)
     {
         JExprId varDeclId = varDecl.getId();
         if (varDeclId == null)
@@ -375,7 +411,15 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     public JConstrDecl[] getConstructorDecls()
     {
         if (_constrDecls != null) return _constrDecls;
-        return _constrDecls = ArrayUtils.filterByClass(getBodyDecls(), JConstrDecl.class);
+
+        // Get parsed constructor decls
+        JConstrDecl[] constrDecls = ArrayUtils.filterByClass(getBodyDecls(), JConstrDecl.class);
+
+        // Add implicit record decl
+        if (isRecord() && _recordConstrDecl != null)
+            constrDecls = ArrayUtils.add(constrDecls, _recordConstrDecl, 0);
+
+        return _constrDecls = constrDecls;
     }
 
     /**
