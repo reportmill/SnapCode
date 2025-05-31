@@ -735,10 +735,13 @@ public class JavaClass extends JavaType {
         _updater = new JavaClassUpdaterDecl(this, classDecl);
         reloadClass();
         _updater = new JavaClassUpdater(this);
-    }
 
-    /**
-     * Returns whether this class was loaded from source. Lame.
-     */
-    public boolean isFromSource()  { return _updater instanceof JavaClassUpdaterDecl; }
+        // Reload inner classes
+        JClassDecl[] enclosedClasses = classDecl.getEnclosedClassDecls();
+        for (JClassDecl enclosedClass : enclosedClasses) {
+            JavaClass javaClass = enclosedClass.getJavaClass();
+            if (javaClass != null)
+                javaClass.reloadClassFromClassDecl(enclosedClass);
+        }
+    }
 }

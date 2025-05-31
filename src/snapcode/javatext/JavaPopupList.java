@@ -35,7 +35,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     private static Color CELL_TEXT_COLOR = Color.get("#28");
 
     /**
-     * Creates a new java popup for given JavaTextArea.
+     * Constructor.
      */
     public JavaPopupList(JavaTextArea aJavaTextArea)
     {
@@ -455,9 +455,19 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         if (javaClass == null)
             return;
 
-        // If in source, just return
-        if (javaClass.isFromSource())
-            return;
+        // If class defined in current source file, just return
+        JFile jFile = aNode.getFile();
+        JClassDecl classDecl = jFile != null ? jFile.getClassDecl() : null;
+        JavaClass sourceClass = classDecl != null ? classDecl.getJavaClass() : null;
+        for (JavaClass cls = javaClass; cls != null; cls = cls.getDeclaringClass())
+            if (cls == sourceClass)
+                return;
+
+        // If top level class in current package, just return
+        if (javaClass.getDeclaringClass() == null && sourceClass != null) {
+            if (javaClass.getPackage() == sourceClass.getPackage())
+                return;
+        }
 
         // If in import statement, just return
         if (aNode.getParent(JImportDecl.class) != null)
