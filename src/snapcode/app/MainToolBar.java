@@ -88,7 +88,7 @@ public class MainToolBar extends WorkspaceTool {
             Label runLabel = new Label("Run"); runLabel.setFont(Font.Arial13);
             ViewUtils.replaceView(parentView.getChild(0), runLabel);
             String[] hideNames = { "HomeButton", "BackButton", "ForwardButton", "ReloadButton", "SearchComboBox",
-                "RunConfigMenuButton", "DebugButton", "BuildButton" };
+                "RunConfigMenuButton", "DebugButton", "BuildButton", "AccountButton" };
             Stream.of(hideNames).forEach(name -> setViewVisible(name, false));
             getView("RunButton").setLean(null);
         }

@@ -1,4 +1,5 @@
 package snapcode.app;
+import snap.gfx.Color;
 import snap.util.*;
 import snap.view.ViewUtils;
 import snap.view.WindowView;
@@ -326,6 +327,7 @@ public class WorkspacePaneUtils {
         workspaceTools.setShowLeftTray(false);
         workspaceTools.setShowBottomTray(false);
         workspacePane.getWindow().setType(WindowView.TYPE_PLAIN);
+        workspacePane.getWindow().getRootView().setBorder(Color.GRAY, 1);
         workspacePane.show();
 
         // Open Jepl
