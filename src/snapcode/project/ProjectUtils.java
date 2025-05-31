@@ -15,7 +15,8 @@ public class ProjectUtils {
     // Constants
     public static final String JAVA_FILE_EXT = "java";
     public static final String JEPL_FILE_EXT = "jepl";
-    public static final String[] FILE_TYPES = { JAVA_FILE_EXT, JEPL_FILE_EXT };
+    public static final String JMD_FILE_EXT = "jmd";
+    public static final List<String> FILE_TYPES = List.of(JAVA_FILE_EXT, JEPL_FILE_EXT, JMD_FILE_EXT);
 
     /**
      * Returns whether given file can be opened by app (java, jepl, project).
@@ -39,7 +40,7 @@ public class ProjectUtils {
     public static boolean isSourceFile(WebFile aFile)
     {
         String fileType = aFile.getFileType();
-        return ArrayUtils.contains(FILE_TYPES, fileType);
+        return FILE_TYPES.contains(fileType);
     }
 
     /**
