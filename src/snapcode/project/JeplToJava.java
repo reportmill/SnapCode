@@ -33,7 +33,7 @@ public class JeplToJava {
     /**
      * Returns the java text.
      */
-    public String getJava()
+    public CharSequence getJava()
     {
         // Append package
         JPackageDecl pkgDecl = _jfile.getPackageDecl();
@@ -60,10 +60,11 @@ public class JeplToJava {
             catch (Exception e) { e.printStackTrace(); }
         }
 
-        // Return string
-        String javaString = _sb.toString();
-        //snap.util.SnapUtils.writeBytes(javaString.getBytes(), "/tmp/" + _jfile.getName() + ".java");
-        return javaString;
+        // Debug: Write to file
+        //snap.util.SnapUtils.writeBytes(_sb.toString().getBytes(), "/tmp/" + _jfile.getName() + ".java");
+
+        // Return
+        return _sb;
     }
 
     /**
