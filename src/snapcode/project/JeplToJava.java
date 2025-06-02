@@ -1,6 +1,5 @@
 package snapcode.project;
 import javakit.parse.*;
-import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snapcode.apptools.RunToolUtils;
 import java.lang.reflect.Modifier;
@@ -38,18 +37,16 @@ public class JeplToJava {
         // Append package
         JPackageDecl pkgDecl = _jfile.getPackageDecl();
         if (pkgDecl != null) {
-            String pkgDeclStr = pkgDecl.getString();
-            _sb.append(pkgDeclStr);
-            _sb.append(";\n");
+            appendNodeString(pkgDecl);
+            appendString(";\n");
         }
 
         // Append imports
         List<JImportDecl> importDecls = _jfile.getImportDecls();
-        String importDeclsStr = ListUtils.mapToStringsAndJoin(importDecls, JImportDecl::getString, "\n");
-        _sb.append(importDeclsStr);
-        if (!importDeclsStr.isEmpty())
-            _sb.append('\n');
-        _sb.append('\n');
+        appendNodeStrings(importDecls, "\n");
+        if (!importDecls.isEmpty())
+            appendChar('\n');
+        appendChar('\n');
 
         // Append class
         JClassDecl classDecl = _jfile.getClassDecl();
@@ -61,7 +58,7 @@ public class JeplToJava {
         }
 
         // Debug: Write to file
-        //snap.util.SnapUtils.writeBytes(_sb.toString().getBytes(), "/tmp/" + _jfile.getName() + ".java");
+        snap.util.SnapUtils.writeBytes(_sb.toString().getBytes(), "/tmp/" + _jfile.getName() + ".java");
 
         // Return
         return _sb;
@@ -72,7 +69,7 @@ public class JeplToJava {
      */
     private void appendClassDecl(JClassDecl classDecl)
     {
-        _sb.append(_indent);
+        appendIndent();
 
         // Append class modifiers
         JModifiers mods = classDecl.getModifiers();
@@ -83,39 +80,37 @@ public class JeplToJava {
         // Append class name
         String classTypeString = classDecl.isClass() ? "class" : classDecl.isInterface() ? "interface" :
                 classDecl.isEnum() ? "enum" : "record";
-        _sb.append(classTypeString).append(' ');
-        String className = classDecl.getName();
-        _sb.append(className);
+        appendString(classTypeString);
+        appendChar(' ');
+        appendNodeName(classDecl);
 
         // If record, append parameters
         if (classDecl.isRecord())
             appendParameters(classDecl.getParameters());
 
         // Append extends
-        JType[] extendsTypes = classDecl.getExtendsTypes();
-        if (extendsTypes.length > 0) {
-            _sb.append(" extends ");
-            String extendsTypesStr = ArrayUtils.mapToStringsAndJoin(extendsTypes, JType::getName, ", ");
-            _sb.append(extendsTypesStr);
+        List<JType> extendsTypes = List.of(classDecl.getExtendsTypes());
+        if (!extendsTypes.isEmpty()) {
+            appendString(" extends ");
+            appendNodeNames(extendsTypes, ", ");
         }
 
         // Append implements
-        JType[] implementsTypes = classDecl.getImplementsTypes();
-        if (implementsTypes.length > 0) {
-            _sb.append(" implements ");
-            String extendsTypesStr = ArrayUtils.mapToStringsAndJoin(implementsTypes, JType::getName, ", ");
-            _sb.append(extendsTypesStr);
+        List<JType> implementsTypes = List.of(classDecl.getImplementsTypes());
+        if (!implementsTypes.isEmpty()) {
+            appendString(" implements ");
+            appendNodeNames(implementsTypes, ", ");
         }
 
         // Append class decl body
-        _sb.append(" {\n");
+        appendString(" {\n");
         indent();
 
         // Handle enum: append constants
         if (classDecl.isEnum()) {
-            JEnumConst[] enumConsts = classDecl.getEnumConstants();
-            String enumStr = ArrayUtils.mapToStringsAndJoin(enumConsts, JEnumConst::getName, ", ");
-            _sb.append(_indent).append(enumStr);
+            appendIndent();
+            List<JEnumConst> enumConsts = List.of(classDecl.getEnumConstants());
+            appendNodeNames(enumConsts, ", ");
         }
 
         // Append all class members
@@ -124,7 +119,8 @@ public class JeplToJava {
 
         // Outdent
         outdent();
-        _sb.append(_indent).append("}\n");
+        appendIndent();
+        appendString("}\n");
     }
 
     /**
@@ -150,8 +146,8 @@ public class JeplToJava {
     private void appendFieldDecl(JFieldDecl fieldDecl)
     {
         // Append indent
-        _sb.append('\n');
-        _sb.append(_indent);
+        appendChar('\n');
+        appendIndent();
 
         // Append modifiers
         JModifiers mods = fieldDecl.getModifiers();
@@ -159,15 +155,13 @@ public class JeplToJava {
 
         // Append field type
         JType fieldType = fieldDecl.getType();
-        String fieldTypeStr = fieldType.getString();
-        _sb.append(fieldTypeStr);
-        _sb.append(' ');
+        appendNodeString(fieldType);
+        appendChar(' ');
 
         // Append field vars
-        JVarDecl[] varDecls = fieldDecl.getVarDecls();
-        String varDeclsStr = ArrayUtils.mapToStringsAndJoin(varDecls, JVarDecl::getString, ", ");
-        _sb.append(varDeclsStr);
-        _sb.append(";\n");
+        List<JVarDecl> varDecls = List.of(fieldDecl.getVarDecls());
+        appendNodeStrings(varDecls, ", ");
+        appendString(";\n");
     }
 
     /**
@@ -176,8 +170,8 @@ public class JeplToJava {
     private void appendMethodDecl(JMethodDecl methodDecl)
     {
         // Append indent
-        _sb.append('\n');
-        _sb.append(_indent);
+        appendChar('\n');
+        appendIndent();
 
         // Append modifiers - make top level Jepl methods 'public static'
         JModifiers mods = methodDecl.getModifiers();
@@ -187,13 +181,12 @@ public class JeplToJava {
 
         // Append return type
         JType returnType = methodDecl.getReturnType();
-        String returnTypeStr = returnType != null ? returnType.getString() : "";
-        _sb.append(returnTypeStr);
-        _sb.append(' ');
+        if (returnType != null)
+            appendNodeString(returnType);
+        appendChar(' ');
 
         // Append name
-        String methodName = methodDecl.getName();
-        _sb.append(methodName);
+        appendNodeName(methodDecl);
 
         // Append parameters
         appendParameters(methodDecl.getParameters());
@@ -208,16 +201,15 @@ public class JeplToJava {
     private void appendConstructorDecl(JConstrDecl constrDecl)
     {
         // Append indent
-        _sb.append('\n');
-        _sb.append(_indent);
+        appendChar('\n');
+        appendIndent();
 
         // Append modifiers - make all Jepl constructors public
         JModifiers mods = new JModifiers(Modifier.PUBLIC); // constrDecl.getMods()
         appendModifiers(mods);
 
         // Append class name
-        String className = constrDecl.getName();
-        _sb.append(className);
+        appendNodeName(constrDecl);
 
         // Append parameters
         appendParameters(constrDecl.getParameters());
@@ -231,27 +223,34 @@ public class JeplToJava {
      */
     private void appendInitializerDecl(JInitializerDecl initializerDecl)
     {
-        _sb.append('\n');
+        appendChar('\n');
 
         // If run local, just make main method
         boolean runLocal = RunToolUtils.isRunLocal(_jfile.getSourceFile());
-        if (runLocal)
-            _sb.append(_indent).append("public static void main(String[] args) throws Exception\n");
+        if (runLocal) {
+            appendIndent();
+            appendString("public static void main(String[] args) throws Exception\n");
+        }
 
         // Make main method with runLater call
         else {
-            _sb.append(_indent).append("public static void main(String[] args) throws Exception { ViewUtils.runLater(() -> main2(args)); }\n");
-            _sb.append(_indent).append("public static void main2(String[] args) { try { main3(args); } catch(Exception e) { e.printStackTrace(); } }\n");
+            appendIndent();
+            appendString("public static void main(String[] args) throws Exception { ViewUtils.runLater(() -> main2(args)); }\n");
+            appendIndent();
+            appendString("public static void main2(String[] args) { try { main3(args); } catch(Exception e) { e.printStackTrace(); } }\n");
 
             // Handle Jepl file - convert initializer to main method
-            _sb.append('\n');
-            _sb.append(_indent).append("public static void main3(String[] args) throws Exception\n");
+            appendChar('\n');
+            appendIndent();
+            appendString("public static void main3(String[] args) throws Exception\n");
         }
 
         // Append { body }
-        _sb.append(_indent).append("{\n");
+        appendIndent();
+        appendString("{\n");
         appendMethodBody(initializerDecl);
-        _sb.append(_indent).append("}\n");
+        appendIndent();
+        appendString("}\n");
     }
 
     /**
@@ -261,11 +260,10 @@ public class JeplToJava {
     {
         // Get the block statement as string and add
         JStmtBlock blockStmt = ((WithBlockStmt) memberDecl).getBlock();
-        String blockStmtStr = blockStmt.getString();
-        _sb.append(blockStmtStr);
+        appendNodeString(blockStmt);
 
         // Append trailing newline
-        _sb.append('\n');
+        appendChar('\n');
     }
 
     /**
@@ -273,9 +271,8 @@ public class JeplToJava {
      */
     private void appendModifiers(JModifiers modifiers)
     {
-        String modsString = modifiers.getString();
-        _sb.append(modsString);
-        _sb.append(' ');
+        appendNodeString(modifiers);
+        appendChar(' ');
     }
 
     /**
@@ -284,10 +281,9 @@ public class JeplToJava {
     private void appendParameters(JVarDecl[] varDecls)
     {
         // Append parameters
-        _sb.append('(');
-        String varDeclsStr = ArrayUtils.mapToStringsAndJoin(varDecls, JVarDecl::getString, ", ");
-        _sb.append(varDeclsStr);
-        _sb.append(")\n");
+        appendChar('(');
+        appendNodeStrings(List.of(varDecls), ", ");
+        appendString(")\n");
     }
 
     /**
@@ -299,4 +295,52 @@ public class JeplToJava {
      * Outdent.
      */
     private void outdent()  { _indent = _indent.substring(0, _indent.length() - 4); }
+
+    /**
+     * Appends indent.
+     */
+    private void appendIndent()  { appendString(_indent); }
+
+    /**
+     * Append char.
+     */
+    public void appendChar(char aChar)  { _sb.append(aChar); }
+
+    /**
+     * Append String.
+     */
+    public void appendString(String aString)  { _sb.append(aString); }
+
+    /**
+     * Append Node name.
+     */
+    public void appendNodeName(JNode aNode)  { _sb.append(aNode.getName()); }
+
+    /**
+     * Append Node string.
+     */
+    public void appendNodeString(JNode aNode)  { _sb.append(aNode.getString()); }
+
+    /**
+     * Append Node names.
+     */
+    public void appendNodeNames(List<? extends JNode> nodeList, String aDelimiter)
+    {
+        String nodeNamesStr = ListUtils.mapToStringsAndJoin(nodeList, JNode::getName, aDelimiter);
+        appendString(nodeNamesStr);
+    }
+
+    /**
+     * Append Node strings.
+     */
+    public void appendNodeStrings(List<? extends JNode> nodeList, String aDelimiter)
+    {
+        String nodeStringsStr = ListUtils.mapToStringsAndJoin(nodeList, JNode::getString, aDelimiter);
+        appendString(nodeStringsStr);
+    }
+
+    /**
+     * Append Node with string.
+     */
+    //public void appendNodeWithString(JNode aNode, String aString)  { _sb.append(aString); }
 }
