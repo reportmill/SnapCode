@@ -19,7 +19,7 @@
             "extension": "java",
             "mimetype": "text/java"
         }],
-        "jar": "build/libs/SnapCodeAll-2025.05.jar",
+        "jar": "build/libs/SnapCodeAll-2025.06.jar",
         "javafx": false,
         "title": "SnapCode"
     },

@@ -417,7 +417,7 @@ System.out.println(str);
 ## ReportMill
 
 ```
-//DEPS com.reportmill:ReportMill16:2025.05
+//DEPS com.reportmill:ReportMill16:2025.06
 import com.reportmill.base.*;
 import com.reportmill.shape.RMDocument;
 import java.io.File;
