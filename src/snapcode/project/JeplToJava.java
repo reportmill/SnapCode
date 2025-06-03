@@ -62,7 +62,7 @@ public class JeplToJava {
         _javaText.closeText();
 
         // Debug: Write to file
-        snap.util.SnapUtils.writeBytes(_javaText.toString().getBytes(), "/tmp/" + _jfile.getName() + ".java");
+        //snap.util.SnapUtils.writeBytes(_javaText.toString().getBytes(), "/tmp/" + _jfile.getName() + ".java");
 
         // Return
         return _javaText;
