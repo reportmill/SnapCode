@@ -3,6 +3,7 @@ import javakit.parse.*;
 import snap.util.ListUtils;
 import snapcode.apptools.RunToolUtils;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -14,11 +15,11 @@ public class JeplToJava {
     // The JFile
     private JFile _jfile;
 
-    // The StringBuilder
-    private StringBuilder _sb;
-
     // The current indent
     private String _indent = "";
+
+    // The snippet text
+    private SnippetText _snippetText;
 
     /**
      * Constructor.
@@ -26,7 +27,7 @@ public class JeplToJava {
     public JeplToJava(JFile jFile)
     {
         _jfile = jFile;
-        _sb = new StringBuilder();
+        _snippetText = new SnippetText();
     }
 
     /**
@@ -34,6 +35,9 @@ public class JeplToJava {
      */
     public CharSequence getJava()
     {
+        // Start snippet text
+        _snippetText.addSnippetForNode(_jfile);
+
         // Append package
         JPackageDecl pkgDecl = _jfile.getPackageDecl();
         if (pkgDecl != null) {
@@ -50,18 +54,18 @@ public class JeplToJava {
 
         // Append class
         JClassDecl classDecl = _jfile.getClassDecl();
-        if (classDecl != null) {
-            try {
-                appendClassDecl(classDecl);
-            }
+        if (classDecl != null)
+            try { appendClassDecl(classDecl); }
             catch (Exception e) { e.printStackTrace(); }
-        }
+
+        // Close snippet text
+        _snippetText.closeText();
 
         // Debug: Write to file
-        snap.util.SnapUtils.writeBytes(_sb.toString().getBytes(), "/tmp/" + _jfile.getName() + ".java");
+        snap.util.SnapUtils.writeBytes(_snippetText.toString().getBytes(), "/tmp/" + _jfile.getName() + ".java");
 
         // Return
-        return _sb;
+        return _snippetText;
     }
 
     /**
@@ -304,28 +308,38 @@ public class JeplToJava {
     /**
      * Append char.
      */
-    public void appendChar(char aChar)  { _sb.append(aChar); }
+    public void appendChar(char aChar)  { _snippetText._sb.append(aChar); }
 
     /**
      * Append String.
      */
-    public void appendString(String aString)  { _sb.append(aString); }
+    public void appendString(String aString)  { _snippetText._sb.append(aString); }
 
     /**
      * Append Node name.
      */
-    public void appendNodeName(JNode aNode)  { _sb.append(aNode.getName()); }
+    public void appendNodeName(JNode aNode)
+    {
+        _snippetText.addSnippetForNode(aNode);
+        _snippetText._sb.append(aNode.getName());
+    }
 
     /**
      * Append Node string.
      */
-    public void appendNodeString(JNode aNode)  { _sb.append(aNode.getString()); }
+    public void appendNodeString(JNode aNode)
+    {
+        _snippetText.addSnippetForNode(aNode);
+        _snippetText._sb.append(aNode.getString());
+    }
 
     /**
      * Append Node names.
      */
     public void appendNodeNames(List<? extends JNode> nodeList, String aDelimiter)
     {
+        if (!nodeList.isEmpty())
+            _snippetText.addSnippetForNode(nodeList.get(0));
         String nodeNamesStr = ListUtils.mapToStringsAndJoin(nodeList, JNode::getName, aDelimiter);
         appendString(nodeNamesStr);
     }
@@ -335,6 +349,8 @@ public class JeplToJava {
      */
     public void appendNodeStrings(List<? extends JNode> nodeList, String aDelimiter)
     {
+        if (!nodeList.isEmpty())
+            _snippetText.addSnippetForNode(nodeList.get(0));
         String nodeStringsStr = ListUtils.mapToStringsAndJoin(nodeList, JNode::getString, aDelimiter);
         appendString(nodeStringsStr);
     }
@@ -343,4 +359,153 @@ public class JeplToJava {
      * Append Node with string.
      */
     //public void appendNodeWithString(JNode aNode, String aString)  { _sb.append(aString); }
+
+    /**
+     * This class holds a node and a snippet of code.
+     */
+    public static class Snippet {
+
+        // The node
+        private JNode _jnode;
+
+        // The start char index in SnippetText
+        protected int _startCharIndex;
+
+        // The string builder
+        protected StringBuilder _sb;
+
+        /**
+         * Constructor.
+         */
+        public Snippet(JNode jnode, int startCharIndex)
+        {
+            _jnode = jnode;
+            _startCharIndex = startCharIndex;
+            _sb = new StringBuilder();
+        }
+
+        public JNode node()  { return _jnode; }
+
+        public int length()  { return _sb.length(); }
+
+        public int startCharIndex()  { return _startCharIndex; }
+
+        public int endCharIndex()  { return _startCharIndex + length(); }
+
+        public char charAt(int i)  { return _sb.charAt(i); }
+    }
+
+    /**
+     * This class holds a list of snippets.
+     */
+    public static class SnippetText implements CharSequence {
+
+        // The list of snippets
+        private List<Snippet> _snippets = new ArrayList<>();
+
+        // The current length
+        private int _length;
+
+        // The current string builder
+        private StringBuilder _sb;
+
+        // The string
+        private String _string = "";
+
+        /**
+         * Constructor.
+         */
+        public SnippetText()
+        {
+            super();
+            _sb = new StringBuilder();
+        }
+
+        /**
+         * CharSequence method.
+         */
+        @Override
+        public int length()  { return _length; }
+
+        /**
+         * CharSequence method.
+         */
+        @Override
+        public char charAt(int i)
+        {
+            Snippet snippet = getSnippetForCharIndex(i);
+            return snippet.charAt(i - snippet._startCharIndex);
+        }
+
+        /**
+         * CharSequence method.
+         */
+        @Override
+        public CharSequence subSequence(int startCharIndex, int endCharIndex)
+        {
+            // If indexes out of range, complain
+            if (startCharIndex > length() || endCharIndex > length())
+                throw new IndexOutOfBoundsException();
+
+            // Get string buffer for return chars
+            int length = endCharIndex - startCharIndex;
+            StringBuilder subSequence = new StringBuilder(length);
+
+            // Get successive snippets and fill string builder to get chars
+            while (subSequence.length() < length) {
+                Snippet snippet = getSnippetForCharIndex(startCharIndex);
+                int copyLength = Math.min(endCharIndex - snippet.startCharIndex(), snippet.length());
+                subSequence.append(snippet._sb.subSequence(0, copyLength));
+                startCharIndex += copyLength;
+            }
+
+            // Return
+            return subSequence;
+        }
+
+        /**
+         * Returns the snippet for given index.
+         */
+        private Snippet getSnippetForCharIndex(int charIndex)
+        {
+            for (Snippet snippet : _snippets) {
+                if (charIndex < snippet.endCharIndex())
+                    return snippet;
+            }
+
+            // If index at end, return last
+            if (charIndex == length())
+                return _snippets.get(_snippets.size() - 1);
+
+            // Throw index out of bounds exception
+            throw new IndexOutOfBoundsException();
+        }
+
+        /**
+         * Adds a snippet for given node.
+         */
+        private void addSnippetForNode(JNode jnode)
+        {
+            _length += _sb.length();
+            Snippet snippet = new Snippet(jnode, _length);
+            _snippets.add(snippet);
+            _sb = snippet._sb;
+        }
+
+        /**
+         * Makes sure the last snippet is processed.
+         */
+        private void closeText()
+        {
+            _length += _sb.length();
+            _sb = null;
+            _string = subSequence(0, length()).toString();
+        }
+
+        /**
+         * Standard to string.
+         */
+        @Override
+        public String toString()  { return _string; }
+    }
 }
