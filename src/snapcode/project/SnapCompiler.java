@@ -276,6 +276,15 @@ public class SnapCompiler {
         if (msg.contains("overrides equals, but"))
             return null;
 
+        // If Jepl, convert locations from Java back to Jepl
+        if (file.getFileType().equals("jepl")) {
+            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(file);
+            JeplToJava.JavaText javaText = javaAgent.getJeplJavaText();
+            start = javaText.getJeplCharIndexForJavaCharIndex(start);
+            end = javaText.getJeplCharIndexForJavaCharIndex(end);
+            line = javaText.getJeplLineIndexForJeplCharIndex(start);
+        }
+
         // Create and configure BuildIssue and return
         BuildIssue issue = new BuildIssue().init(file, kind, msg, line - 1, col - 1, start, end);
         return issue;

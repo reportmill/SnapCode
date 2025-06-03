@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import javakit.parse.JFile;
 import snap.web.WebFile;
 import javax.tools.SimpleJavaFileObject;
 import java.io.ByteArrayOutputStream;
@@ -96,8 +95,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
         // Handle Jepl and Java markdown
         if (_file.getFileType().equals("jepl") || _file.getFileType().equals("jmd")) {
             JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(_file);
-            JFile jFile = javaAgent.getJFile();
-            return new JeplToJava(jFile).getJava();
+            return javaAgent.getJeplJavaText();
         }
 
         // Get string

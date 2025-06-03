@@ -19,7 +19,7 @@ public class JeplToJava {
     private String _indent = "";
 
     // The snippet text
-    private SnippetText _snippetText;
+    private JavaText _javaText;
 
     /**
      * Constructor.
@@ -27,16 +27,16 @@ public class JeplToJava {
     public JeplToJava(JFile jFile)
     {
         _jfile = jFile;
-        _snippetText = new SnippetText();
+        _javaText = new JavaText();
     }
 
     /**
      * Returns the java text.
      */
-    public CharSequence getJava()
+    public JavaText getJavaText()
     {
         // Start snippet text
-        _snippetText.addSnippetForNode(_jfile);
+        _javaText.addSnippetForNode(_jfile);
 
         // Append package
         JPackageDecl pkgDecl = _jfile.getPackageDecl();
@@ -59,13 +59,13 @@ public class JeplToJava {
             catch (Exception e) { e.printStackTrace(); }
 
         // Close snippet text
-        _snippetText.closeText();
+        _javaText.closeText();
 
         // Debug: Write to file
-        snap.util.SnapUtils.writeBytes(_snippetText.toString().getBytes(), "/tmp/" + _jfile.getName() + ".java");
+        snap.util.SnapUtils.writeBytes(_javaText.toString().getBytes(), "/tmp/" + _jfile.getName() + ".java");
 
         // Return
-        return _snippetText;
+        return _javaText;
     }
 
     /**
@@ -308,20 +308,20 @@ public class JeplToJava {
     /**
      * Append char.
      */
-    public void appendChar(char aChar)  { _snippetText._sb.append(aChar); }
+    public void appendChar(char aChar)  { _javaText._sb.append(aChar); }
 
     /**
      * Append String.
      */
-    public void appendString(String aString)  { _snippetText._sb.append(aString); }
+    public void appendString(String aString)  { _javaText._sb.append(aString); }
 
     /**
      * Append Node name.
      */
     public void appendNodeName(JNode aNode)
     {
-        _snippetText.addSnippetForNode(aNode);
-        _snippetText._sb.append(aNode.getName());
+        _javaText.addSnippetForNode(aNode);
+        _javaText._sb.append(aNode.getName());
     }
 
     /**
@@ -329,8 +329,8 @@ public class JeplToJava {
      */
     public void appendNodeString(JNode aNode)
     {
-        _snippetText.addSnippetForNode(aNode);
-        _snippetText._sb.append(aNode.getString());
+        _javaText.addSnippetForNode(aNode);
+        _javaText._sb.append(aNode.getString());
     }
 
     /**
@@ -339,7 +339,7 @@ public class JeplToJava {
     public void appendNodeNames(List<? extends JNode> nodeList, String aDelimiter)
     {
         if (!nodeList.isEmpty())
-            _snippetText.addSnippetForNode(nodeList.get(0));
+            _javaText.addSnippetForNode(nodeList.get(0));
         String nodeNamesStr = ListUtils.mapToStringsAndJoin(nodeList, JNode::getName, aDelimiter);
         appendString(nodeNamesStr);
     }
@@ -350,7 +350,7 @@ public class JeplToJava {
     public void appendNodeStrings(List<? extends JNode> nodeList, String aDelimiter)
     {
         if (!nodeList.isEmpty())
-            _snippetText.addSnippetForNode(nodeList.get(0));
+            _javaText.addSnippetForNode(nodeList.get(0));
         String nodeStringsStr = ListUtils.mapToStringsAndJoin(nodeList, JNode::getString, aDelimiter);
         appendString(nodeStringsStr);
     }
@@ -363,7 +363,7 @@ public class JeplToJava {
     /**
      * This class holds a node and a snippet of code.
      */
-    public static class Snippet {
+    private static class Snippet {
 
         // The node
         private JNode _jnode;
@@ -396,9 +396,9 @@ public class JeplToJava {
     }
 
     /**
-     * This class holds a list of snippets.
+     * This class holds the Java text for a Jepl file in a form that can map char indexes from Java back to Jepl.
      */
-    public static class SnippetText implements CharSequence {
+    public static class JavaText implements CharSequence {
 
         // The list of snippets
         private List<Snippet> _snippets = new ArrayList<>();
@@ -415,10 +415,31 @@ public class JeplToJava {
         /**
          * Constructor.
          */
-        public SnippetText()
+        public JavaText()
         {
             super();
             _sb = new StringBuilder();
+        }
+
+        /**
+         * Returns the Jepl char index for given Java char index.
+         */
+        public int getJeplCharIndexForJavaCharIndex(int charIndex)
+        {
+            Snippet snippet = getSnippetForCharIndex(charIndex);
+            int snippetCharIndex = charIndex - snippet.startCharIndex();
+            return snippet._jnode.getStartCharIndex() + snippetCharIndex;
+        }
+
+        /**
+         * Returns the Jepl line index for given Jepl char index.
+         */
+        public int getJeplLineIndexForJeplCharIndex(int jeplCharIndex)
+        {
+            Snippet snippet = _snippets.get(0);
+            JFile jFile = snippet._jnode.getFile();
+            JNode jNode = jFile.getNodeForCharIndex(jeplCharIndex);
+            return jNode != null ? jNode.getLineIndex() : 0;
         }
 
         /**

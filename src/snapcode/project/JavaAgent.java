@@ -39,6 +39,9 @@ public class JavaAgent {
     // The parsed version of this JavaFile
     protected JFile _jfile;
 
+    // The Java text generated from Jepl, if Jepl
+    private JeplToJava.JavaText _jeplJavaText;
+
     // The external references in Java file
     private JavaDecl[] _externalRefs;
 
@@ -95,6 +98,7 @@ public class JavaAgent {
         _javaFile = null;
         _project = null;
         _jfile = null;
+        _jeplJavaText = null;
         _javaTextDoc = null;
         _externalRefs = null;
         _externalClassRefs = null;
@@ -198,6 +202,15 @@ public class JavaAgent {
             return javaParser.parseJeplFile(javaStr, className, importNames, superClassName);
         }
         return javaParser.parseJeplFile(javaStr, className, importNames, superClassName);
+    }
+
+    /**
+     * Returns the Jepl Java text.
+     */
+    public JeplToJava.JavaText getJeplJavaText()
+    {
+        if (_jeplJavaText != null) return _jeplJavaText;
+        return _jeplJavaText = new JeplToJava(getJFile()).getJavaText();
     }
 
     /**
@@ -370,6 +383,7 @@ public class JavaAgent {
         _externalRefs = null;
         _externalClassRefs = null;
         _jfile = null;
+        _jeplJavaText = null;
     }
 
     /**
@@ -422,6 +436,7 @@ public class JavaAgent {
         boolean jfileUpdated = !_isJepl && !_isJMD && JavaTextDocUtils.updateJFileForChange(_javaTextDoc, _jfile, charsChange);
         if (!jfileUpdated)
             _jfile = null;
+        _jeplJavaText = null;
         _externalRefs = null;
         _externalClassRefs = null;
     }
