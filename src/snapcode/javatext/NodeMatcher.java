@@ -40,10 +40,8 @@ public class NodeMatcher {
         if (decl instanceof JavaLocalVar) {
             JVarDecl varDecl = idExpr.getVarDecl();
             JNode declBlock = (JNode) varDecl.getParent(WithVarDecls.class);
-            if (declBlock instanceof JExprVarDecl)
+            while (declBlock instanceof JExpr)
                 declBlock = (JNode) declBlock.getParent(WithVarDecls.class);
-            if (declBlock instanceof JExprPattern)
-                declBlock = (JNode) declBlock.getParent().getParent(WithVarDecls.class);
             if (declBlock != null) // Probably not possible that this is null
                 return declBlock;
         }
