@@ -116,6 +116,58 @@ show(button);
 button.addEventFilter(e -> show(e), View.MouseEvents);
 ```
 
+# Records
+
+## Simple Record
+
+```
+// Simple record
+record Player(String last, String first, int level) {}
+var jane = new Player("Doe", "Jane", 42);
+System.out.println(jane);
+```
+
+## Composing
+
+```
+// Composing
+record Population(int population) {}
+record City(String name, Population population) {
+    // static methods are allowed in records
+    public static City of(String name, int p) {
+        var population = new Population(p);
+        return new City(name, population);
+    }
+}
+
+var paris = City.of("Paris", 2161);
+System.out.println(paris);
+```
+
+## Method Overriding
+
+```
+// Method overriding
+record City(String name) {
+
+    public boolean equals(Object other) {
+        return other instanceof City city &&
+                this.name.equalsIgnoreCase(city.name);
+    }
+
+    public int hashCode() {
+        return name != null ? name.toUpperCase().hashCode() : 0;
+    }
+}
+
+var paris1 = new City("Paris");
+var paris2 = new City("paris");
+var paris3 = new City("PARIS");
+System.out.println("1 == 2 ? " + paris1.equals(paris2));
+System.out.println("2 == 3 ? " + paris2.equals(paris3));
+System.out.println("1 == 3 ? " + paris1.equals(paris3));
+```
+
 # Define datasets
 
 ## Simple array
