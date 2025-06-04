@@ -140,7 +140,7 @@ record City(String name, Population population) {
     }
 }
 
-var paris = City.of("Paris", 2161);
+var paris = City.of("Paris", 2_161);
 System.out.println(paris);
 ```
 

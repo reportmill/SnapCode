@@ -338,13 +338,13 @@ Literal { IntegerLiteral | FloatLiteral | CharacterLiteral | TextBlockLiteral | 
 
 IntegerLiteral { IntLiteral | HexLiteral | OctalLiteral }
 
-IntLiteral { "[1-9][0-9]*[lL]?" }
+IntLiteral { "[1-9][_0-9]*[lL]?" }
 
-HexLiteral { "0[xX][0-9a-fA-F]+[lL]?" }
+HexLiteral { "0[xX][_0-9a-fA-F]+[lL]?" }
 
-OctalLiteral { "0[0-7]*[lL]?" }
+OctalLiteral { "0[_0-7]*[lL]?" }
 
-FloatLiteral { "(([\d]+\.[\d]*)|(\.[\d]+)|([\d]+))([eE][\+\-]?[\d]+)?[fFdD]?" }
+FloatLiteral { "(([_\d]+\.[_\d]*)|(\.[_\d]+)|([_\d]+))([eE][\+\-]?[_\d]+)?[fFdD]?" }
 
 CharacterLiteral { "'(([^'\\\n\r])|(\\([ntbrf\\'\"]|[0-7][0-7]?|[0-3][0-7][0-7]|u[\da-fA-F]{4})))'" }
 
