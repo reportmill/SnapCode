@@ -3,11 +3,16 @@
  */
 package javakit.parse;
 import javakit.resolver.*;
+import snap.util.ListUtils;
+import java.util.List;
 
 /**
  * The JNode base class for Java expressions.
  */
-public abstract class JExpr extends JNode {
+public abstract class JExpr extends JNode implements WithVarDecls {
+
+    // Var decls cached
+    private JVarDecl[] _varDecls;
 
     // Constant for empty expressions
     public static final JExpr[] EMPTY_EXPR_ARRAY = new JExpr[0];
@@ -93,6 +98,27 @@ public abstract class JExpr extends JNode {
 
         String exprStr = exprId.getName();
         return exprStr.equals(className);
+    }
+
+    /**
+     * WithVarDecl method: Override to handle nested expressions with VarDecls (JExprInstanceOf with pattern).
+     */
+    @Override
+    public JVarDecl[] getVarDecls()
+    {
+        if (_varDecls != null) return _varDecls;
+        return _varDecls = getVarDeclsImpl();
+    }
+
+    /**
+     * WithVarDecl method: Override to handle nested expressions with VarDecls (JExprInstanceOf with pattern).
+     */
+    protected JVarDecl[] getVarDeclsImpl()
+    {
+        List<JExprInstanceOf> varDecls = getChildrenForClassDeep(JExprInstanceOf.class);
+        if (varDecls.isEmpty())
+            return new JVarDecl[0];
+        return ListUtils.mapNonNullToArray(varDecls, instanceOfExpr -> instanceOfExpr.getPatternVarDecl(), JVarDecl.class);
     }
 
     /**

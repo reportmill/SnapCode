@@ -83,4 +83,14 @@ public class JExprInstanceOf extends JExpr {
     {
         return getJavaClassForClass(boolean.class);
     }
+
+    /**
+     * Override to return pattern var decl, if set.
+     */
+    @Override
+    protected JVarDecl[] getVarDeclsImpl()
+    {
+        JVarDecl patternVarDecl = getPatternVarDecl();
+        return patternVarDecl != null ? new JVarDecl[] { patternVarDecl } : new JVarDecl[0];
+    }
 }

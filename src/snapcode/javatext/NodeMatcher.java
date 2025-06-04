@@ -42,6 +42,8 @@ public class NodeMatcher {
             JNode declBlock = (JNode) varDecl.getParent(WithVarDecls.class);
             if (declBlock instanceof JExprVarDecl)
                 declBlock = (JNode) declBlock.getParent(WithVarDecls.class);
+            if (declBlock instanceof JExprPattern)
+                declBlock = (JNode) declBlock.getParent().getParent(WithVarDecls.class);
             if (declBlock != null) // Probably not possible that this is null
                 return declBlock;
         }
