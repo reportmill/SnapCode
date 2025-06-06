@@ -1,4 +1,4 @@
-package snapcode.app;
+package snapcode.project;
 import snap.geom.Pos;
 import snap.props.PropChange;
 import snap.util.TaskMonitor;
@@ -56,6 +56,10 @@ public class TaskManager extends ViewOwner {
     {
         if (aValue == isRunningTasks()) return;
         firePropChange(RunningTasks_Prop, _runningTasks, _runningTasks = aValue);
+        if (aValue)
+            _progress = 0;
+        if (_progressBar != null)
+            _progressBar.setProgress(0);
         resetLater();
     }
 
@@ -97,6 +101,7 @@ public class TaskManager extends ViewOwner {
     {
         // Create ActivityLabel
         _activityLabel = new Label();
+        _activityLabel.setMargin(0, 8, 0, 0);
 
         // Create ProgressBar
         _progressBar = new ProgressBar();
@@ -126,15 +131,18 @@ public class TaskManager extends ViewOwner {
         if (!isRunningTasks)
             return;
 
+        // Update ActivityLabel
+        setViewValue(_activityLabel, getActivityText());
+
+        // Update ProgressBar
+        double progress = getProgress();
+        if (progress > 0)
+            _progressBar.getAnimCleared(500).setValue(ProgressBar.Progress_Prop, progress).play();
+        else _progressBar.setProgress(progress);
+
+        // Resize and relayout
         getUI().setSizeToPrefSize();
         getUI().getParent().relayout();
-
-        // Update ActivityLabel, ProgressBar
-        setViewValue(_activityLabel, getActivityText());
-        double progress = getProgress();
-        _progressBar.setIndeterminate(progress >= 0);
-        if (progress >= 0)
-            _progressBar.setProgress(progress);
     }
 
     /**
@@ -151,6 +159,7 @@ public class TaskManager extends ViewOwner {
 
             // Handle TaskMonitor TaskTitle or TaskWorkUnitIndex change
             case TaskMonitor.TaskTitle_Prop: setActivityText(task.getTaskMonitor().getTaskTitle()); break;
+            case TaskMonitor.TaskIndex_Prop:
             case TaskMonitor.TaskWorkUnitIndex_Prop: setProgress(task.getTaskMonitor().getTaskProgress()); break;
         }
     }

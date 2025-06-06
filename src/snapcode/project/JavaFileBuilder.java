@@ -138,13 +138,11 @@ public class JavaFileBuilder implements ProjectFileBuilder {
         _compiler = new SnapCompiler(_proj);
         boolean buildFilesSuccess = true;
 
+        // Init task monitor for file count
+        taskMonitor.startForTaskCount(sourceFiles.size());
+
         // Iterate over build files and compile
         for (int i = 0; i < sourceFiles.size(); i++) {
-
-            // Get next source file - if already built, just skip
-            WebFile sourceFile = sourceFiles.get(i);
-            if (_compiledFiles.contains(sourceFile))
-                continue;
 
             // If interrupted, add remaining build files and return
             if (taskMonitor.isCancelled()) {
@@ -153,12 +151,20 @@ public class JavaFileBuilder implements ProjectFileBuilder {
                 return false;
             }
 
-            // Add task manager task with message: "Compiling MyClass (X of MaxX)"
+            // Begin task manager task with message: "Compiling MyClass (X of MaxX)"
+            WebFile sourceFile = sourceFiles.get(i);
             String className = _proj.getProjectFiles().getClassNameForFile(sourceFile);
             String msg = String.format("Compiling %s (%d of %d)", className, i + 1, sourceFiles.size());
-            taskMonitor.beginTask(msg, -1);
-            if (SnapEnv.isWebVM)
-                Thread.yield();
+            taskMonitor.beginTask(msg, 10);
+
+            // If file already built, just skip
+            if (_compiledFiles.contains(sourceFile)) {
+                taskMonitor.endTask();
+                continue;
+            }
+
+            // In browser, yield thread for each file
+            if (SnapEnv.isWebVM) Thread.yield();
 
             // Build file
             boolean buildFileSuccess = buildFile(sourceFile);

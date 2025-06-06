@@ -36,9 +36,6 @@ public class WorkspacePane extends ViewOwner {
     // The TaskManager
     protected TaskManager _taskManager;
 
-    // The StatusBar
-    protected StatusBar _statusBar;
-
     // The WorkspaceTools
     protected WorkspaceTools _workspaceTools;
 
@@ -82,10 +79,9 @@ public class WorkspacePane extends ViewOwner {
         // Create WorkspaceTools
         _workspaceTools = new WorkspaceTools(this);
 
-        // Create MainToolBar, StatusBar
+        // Create MainToolBar, TaskManager
         _toolBar = new MainToolBar(this);
-        _statusBar = new StatusBar(this);
-        _taskManager = new TaskManager();
+        _taskManager = _workspace.getTaskManager();
     }
 
     /**
@@ -342,10 +338,9 @@ public class WorkspacePane extends ViewOwner {
         String showBottomTrayKey = "Visible ? \"Hide Bottom Tray\" : \"Show Bottom Tray\"";
         ViewUtils.bindExpr(bottomTrayUI, View.Visible_Prop, showBottomTrayMenuItem, View.Text_Prop, showBottomTrayKey);
 
-        // Add StatusBar
+        // Add TaskManager
         TabBar tabBar = bottomTrayUI.getTabBar();
         ViewUtils.addChild(tabBar, _taskManager.getUI());
-        _statusBar.addToView(tabBar);
 
         // Add drag drop support
         _workspacePaneDnD = new WorkspacePaneDnD(this);
@@ -424,7 +419,6 @@ public class WorkspacePane extends ViewOwner {
         // Reset FilesPane and SupportTray
         _workspaceTools.resetLater();
         _toolBar.resetLater();
-        _statusBar.resetLater();
     }
 
     /**
@@ -506,9 +500,6 @@ public class WorkspacePane extends ViewOwner {
             // Handle Projects
             case Workspace.Projects_Prop: handleWorkspaceProjectsChanged(aPC); break;
         }
-
-        // Handle Loading, Building
-        _statusBar.resetLater();
     }
 
     /**

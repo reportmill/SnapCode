@@ -1,4 +1,4 @@
-package snapcode.app;
+package snapcode.project;
 import snap.props.PropChange;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;

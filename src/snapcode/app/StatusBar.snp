@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<StackView Name="StatusBar" PrefHeight="20" Padding="0,4,0,4">
-  <Label Name="StatusText" LeanX="LEFT" />
-  <ProgressBar Name="ProgressBar" PrefWidth="80" PrefHeight="16" LeanX="CENTER" Visible="false" />
-  <Label Name="ActivityText" LeanX="RIGHT" />
-</StackView>

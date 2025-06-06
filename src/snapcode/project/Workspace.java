@@ -45,6 +45,9 @@ public class Workspace extends PropObject {
     // A list of build issues
     private BuildIssues  _buildIssues;
 
+    // The TaskManager
+    protected TaskManager _taskManager;
+
     // Constants for properties
     public static final String Status_Prop = "Status";
     public static final String Activity_Prop = "Activity";
@@ -60,6 +63,7 @@ public class Workspace extends PropObject {
         super();
 
         _builder = new WorkspaceBuilder(this);
+        _taskManager = new TaskManager();
     }
 
     /**
@@ -221,6 +225,11 @@ public class Workspace extends PropObject {
      * Returns the builder.
      */
     public WorkspaceBuilder getBuilder()  { return _builder; }
+
+    /**
+     * Returns the task manager.
+     */
+    public TaskManager getTaskManager()  { return _taskManager; }
 
     /**
      * Returns the breakpoints.
