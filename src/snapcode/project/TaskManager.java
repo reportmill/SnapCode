@@ -52,7 +52,7 @@ public class TaskManager extends ViewOwner {
     /**
      * Sets whether task manager is running tasks.
      */
-    public void setRunningTasks(boolean aValue)
+    protected void setRunningTasks(boolean aValue)
     {
         if (aValue == isRunningTasks()) return;
         firePropChange(RunningTasks_Prop, _runningTasks, _runningTasks = aValue);
@@ -86,7 +86,7 @@ public class TaskManager extends ViewOwner {
     /**
      * Sets the progress.
      */
-    public void setProgress(double aValue)
+    protected void setProgress(double aValue)
     {
         if (aValue == getProgress()) return;
         firePropChange(Progress_Prop, _progress, _progress = aValue);
@@ -146,21 +146,32 @@ public class TaskManager extends ViewOwner {
     }
 
     /**
-     * Called when task monitor has prop change.
+     * Called when task has prop change.
      */
     protected void handleTaskPropChange(TaskManagerTask<?> task, PropChange propChange)
     {
         switch (propChange.getPropName()) {
 
             // Handle TaskRunner Status change
-            case TaskRunner.Status_Prop:
-                setRunningTasks(task.getTaskRunner().getStatus() == TaskRunner.Status.Running);
-                break;
+            case TaskRunner.Status_Prop -> handleTaskStatusChange(task);
 
-            // Handle TaskMonitor TaskTitle or TaskWorkUnitIndex change
-            case TaskMonitor.TaskTitle_Prop: setActivityText(task.getTaskMonitor().getTaskTitle()); break;
-            case TaskMonitor.TaskIndex_Prop:
-            case TaskMonitor.TaskWorkUnitIndex_Prop: setProgress(task.getTaskMonitor().getTaskProgress()); break;
+            // Handle TaskMonitor TaskTitle, TaskWorkUnitIndex change
+            case TaskMonitor.TaskTitle_Prop -> setActivityText(task.getTaskMonitor().getTaskTitle());
+            case TaskMonitor.TaskIndex_Prop,
+                 TaskMonitor.TaskWorkUnitIndex_Prop -> setProgress(task.getTaskMonitor().getTaskProgress());
+        }
+    }
+
+    /**
+     * Called when task has status change to update RunningTasks property.
+     */
+    private void handleTaskStatusChange(TaskManagerTask<?> task)
+    {
+        TaskRunner.Status taskStatus = task.getTaskRunner().getStatus();
+        switch (taskStatus) {
+            case Running -> setRunningTasks(true);
+            case Finished -> { setProgress(1); runDelayed(() -> setRunningTasks(false), 500); }
+            default -> setRunningTasks(false);
         }
     }
 }

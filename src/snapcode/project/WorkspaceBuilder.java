@@ -147,6 +147,7 @@ public class WorkspaceBuilder {
             project.getBuilder().cleanProject();
         setAutoBuildEnabled(old);
         _buildLogBuffer.setLength(0);
+        _buildLogBuffer.append("Clean workspace - all build files removed");
     }
 
     /**
