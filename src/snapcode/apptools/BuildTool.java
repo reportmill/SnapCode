@@ -49,6 +49,16 @@ public class BuildTool extends WorkspaceTool {
     }
 
     /**
+     * Cleans the workspace.
+     */
+    public void cleanWorkspace()
+    {
+        WorkspaceBuilder workspaceBuilder = _workspace.getBuilder();
+        workspaceBuilder.cleanWorkspace();
+        workspaceBuilder.addAllFilesToBuild();
+    }
+
+    /**
      * Returns the array of current build issues.
      */
     public BuildIssue[] getIssues()
@@ -107,9 +117,9 @@ public class BuildTool extends WorkspaceTool {
     @Override
     protected void initShowing()
     {
-        // Start listening to  workspace prop changes
-        _workspace.addPropChangeListener(pc -> resetLater(), Workspace.Activity_Prop);
-        _workspace.addPropChangeListener(pc -> handleWorkspaceBuildingPropChange(), Workspace.Building_Prop);
+        // Start listening to workspace prop changes
+        _workspace.addPropChangeListener(pc -> handleWorkspaceBuildingChange(), Workspace.Building_Prop);
+        _workspace.getTaskManager().addPropChangeListener(pc -> resetLater(), TaskManager.ActivityText_Prop);
     }
 
     /**
@@ -126,6 +136,7 @@ public class BuildTool extends WorkspaceTool {
         // Update BuildStatusLabel
         setViewText("BuildStatusLabel", getBuildStatusText());
 
+        // Update ErrorsList
         setViewItems("ErrorsList", getIssues());
         setViewSelItem("ErrorsList", getSelIssue());
 
@@ -135,6 +146,10 @@ public class BuildTool extends WorkspaceTool {
             CharSequence appendStr = buildLogBuffer.subSequence(_buildLogTextBlock.length(), buildLogBuffer.length());
             _buildLogTextBlock.addChars(appendStr);
         }
+        else if (buildLogBuffer.length() < _buildLogTextBlock.length()) {
+            _buildLogTextBlock.clear();
+            _buildLogTextBlock.addChars(buildLogBuffer);
+        }
     }
 
     /**
@@ -142,37 +157,19 @@ public class BuildTool extends WorkspaceTool {
      */
     public void respondUI(ViewEvent anEvent)
     {
-        // Handle BuildButton, Handle StopButton
-        if (anEvent.equals("BuildButton"))
-            buildWorkspace();
-        else if (anEvent.equals("StopButton"))
-            _workspace.getBuilder().stopBuild();
+        switch (anEvent.getName()) {
 
-        // Handle ErrorsList
-        else if (anEvent.equals("ErrorsList")) {
+            // Handle BuildButton, StopButton, CleanButton
+            case "BuildButton" -> buildWorkspace();
+            case "StopButton" -> _workspace.getBuilder().stopBuild();
+            case "CleanButton" -> cleanWorkspace();
 
-            // Set issue
-            BuildIssue issue = (BuildIssue) anEvent.getSelItem();
-            setSelIssue(issue);
+            // Handle ErrorsList
+            case "ErrorsList" -> handleErrorListActionEvent(anEvent);
 
-            // Open File
-            if (issue != null) {
-                WebFile file = issue.getFile();
-                WebURL fileURL = file.getURL();
-                String urls = fileURL.getString() + "#LineNumber=" + issue.getLineNumber();
-                getBrowser().setSelUrlForUrlAddress(urls);
-            }
+            // Do normal version
+            default -> super.respondUI(anEvent);
         }
-
-        // Handle CleanButton
-        if (anEvent.equals("CleanButton")) {
-            WorkspaceBuilder workspaceBuilder = _workspace.getBuilder();
-            workspaceBuilder.cleanWorkspace();
-            workspaceBuilder.addAllFilesToBuild();
-        }
-
-        // Do normal version
-        else super.respondUI(anEvent);
     }
 
     /**
@@ -198,9 +195,27 @@ public class BuildTool extends WorkspaceTool {
     }
 
     /**
+     * Called when ErrorList is clicked.
+     */
+    private void handleErrorListActionEvent(ViewEvent anEvent)
+    {
+        // Set issue
+        BuildIssue issue = (BuildIssue) anEvent.getSelItem();
+        setSelIssue(issue);
+
+        // Open File
+        if (issue != null) {
+            WebFile file = issue.getFile();
+            WebURL fileURL = file.getURL();
+            String urls = fileURL.getString() + "#LineNumber=" + issue.getLineNumber();
+            getBrowser().setSelUrlForUrlAddress(urls);
+        }
+    }
+
+    /**
      * Called when Workspace Building property changes.
      */
-    private void handleWorkspaceBuildingPropChange()
+    private void handleWorkspaceBuildingChange()
     {
         if (_workspace.isBuilding())
             ViewUtils.runLater(_buildLogTextBlock::clear);

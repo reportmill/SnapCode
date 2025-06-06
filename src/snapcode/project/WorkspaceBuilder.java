@@ -102,6 +102,9 @@ public class WorkspaceBuilder {
         _buildWorkspaceTask.getTaskMonitor().addPropChangeListener(this::handleBuildTaskTitleChange, TaskMonitor.TaskTitle_Prop);
         _buildWorkspaceTask.start();
 
+        // Register building
+        _workspace.setBuilding(true);
+
         // Return
         return _buildWorkspaceTask;
     }
@@ -143,6 +146,7 @@ public class WorkspaceBuilder {
         for (Project project : projects)
             project.getBuilder().cleanProject();
         setAutoBuildEnabled(old);
+        _buildLogBuffer.setLength(0);
     }
 
     /**
@@ -170,7 +174,6 @@ public class WorkspaceBuilder {
         _buildLogBuffer.setLength(0);
         String dateString = FormatUtils.formatDate(new Date(), "MMM dd, HH:mm:ss");
         _buildLogBuffer.append("Build Started - ").append(dateString).append('\n');
-        _workspace.setBuilding(true);
         long buildStartTime = System.currentTimeMillis();
 
         // Get all projects and declare var for buildSuccess
@@ -202,10 +205,6 @@ public class WorkspaceBuilder {
         if (_buildAgain)
             return buildWorkspaceImpl(taskMonitor);
 
-        // Notify workspace building done
-        _workspace.setActivity(null);
-        _workspace.setBuilding(false);
-
         // Return
         return buildSuccess;
     }
@@ -221,6 +220,9 @@ public class WorkspaceBuilder {
 
         // Clear runner
         _buildWorkspaceTask = null;
+
+        // Set workspace building done
+        _workspace.setBuilding(false);
     }
 
     /**

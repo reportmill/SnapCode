@@ -11,7 +11,6 @@ import snap.web.WebURL;
 import snapcode.app.SnapCodeUtils;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * This class manages working with a set of one or more projects.
@@ -24,35 +23,23 @@ public class Workspace extends PropObject {
     // The project sites
     private List<WebSite> _sites;
 
-    // The status of the Workspace
-    private String  _status;
-
-    // The activity of the Workspace
-    private String  _activity;
-
     // Whether Workspace is building
-    private boolean  _building;
-
-    // Whether Workspace is loading
-    private boolean  _loading;
+    private boolean _building;
 
     // A helper class to do workspace builds
-    private WorkspaceBuilder  _builder;
+    private WorkspaceBuilder _builder;
 
     // The list of Breakpoints
-    private Breakpoints  _breakpoints;
+    private Breakpoints _breakpoints;
 
     // A list of build issues
-    private BuildIssues  _buildIssues;
+    private BuildIssues _buildIssues;
 
     // The TaskManager
     protected TaskManager _taskManager;
 
     // Constants for properties
-    public static final String Status_Prop = "Status";
-    public static final String Activity_Prop = "Activity";
     public static final String Building_Prop = "Building";
-    public static final String Loading_Prop = "Loading";
     public static final String Projects_Prop = "Projects";
 
     /**
@@ -64,17 +51,6 @@ public class Workspace extends PropObject {
 
         _builder = new WorkspaceBuilder(this);
         _taskManager = new TaskManager();
-    }
-
-    /**
-     * Close workspace.
-     */
-    public void closeWorkspace()
-    {
-        // Remove all projects
-        List<Project> projects = getProjects();
-        for (Project project : projects)
-            closeProject(project);
     }
 
     /**
@@ -166,34 +142,6 @@ public class Workspace extends PropObject {
     }
 
     /**
-     * Returns the status text.
-     */
-    public String getStatus()  { return _status; }
-
-    /**
-     * Sets the status text.
-     */
-    public void setStatus(String aString)
-    {
-        if (Objects.equals(aString, _status)) return;
-        firePropChange(Status_Prop, _status, _status = aString);
-    }
-
-    /**
-     * Returns the activity text.
-     */
-    public String getActivity()  { return _activity; }
-
-    /**
-     * Sets the activity text.
-     */
-    public void setActivity(String aString)
-    {
-        if (Objects.equals(aString, _activity)) return;
-        firePropChange(Activity_Prop, _activity, _activity = aString);
-    }
-
-    /**
      * Returns whether workspace is currently building anything.
      */
     public boolean isBuilding()  { return _building; }
@@ -201,24 +149,10 @@ public class Workspace extends PropObject {
     /**
      * Sets whether workspace is currently building anything.
      */
-    public void setBuilding(boolean aValue)
+    protected void setBuilding(boolean aValue)
     {
         if (aValue == _building) return;
         firePropChange(Building_Prop, _building, _building = aValue);
-    }
-
-    /**
-     * Returns whether workspace is currently loading anything.
-     */
-    public boolean isLoading()  { return _loading; }
-
-    /**
-     * Sets whether workspace is currently loading anything.
-     */
-    public void setLoading(boolean aValue)
-    {
-        if (aValue == _loading) return;
-        firePropChange(Loading_Prop, _loading, _loading = aValue);
     }
 
     /**
@@ -331,5 +265,16 @@ public class Workspace extends PropObject {
 
         // Return
         return checkoutResult;
+    }
+
+    /**
+     * Close workspace.
+     */
+    public void closeWorkspace()
+    {
+        // Remove all projects
+        List<Project> projects = getProjects();
+        for (Project project : projects)
+            closeProject(project);
     }
 }

@@ -27,9 +27,9 @@ public class TaskManager extends ViewOwner {
     private ProgressBar _progressBar;
 
     // Constants for properties
-    private static final String RunningTasks_Prop = "RunningTasks";
-    private static final String ActivityText_Prop = "ActivityText";
-    private static final String Progress_Prop = "Progress";
+    public static final String RunningTasks_Prop = "RunningTasks";
+    public static final String ActivityText_Prop = "ActivityText";
+    public static final String Progress_Prop = "Progress";
 
     /**
      * Constructor.

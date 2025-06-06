@@ -487,10 +487,6 @@ public class WorkspacePane extends ViewOwner {
     {
         switch (aPC.getPropName()) {
 
-            // Handle Status, Activity
-            case Workspace.Status_Prop: getBrowser().setStatus(_workspace.getStatus()); break;
-            case Workspace.Activity_Prop: getBrowser().setActivity(_workspace.getActivity()); break;
-
             // Handle Building
             case Workspace.Building_Prop:
                 if (!_workspace.isBuilding())

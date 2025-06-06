@@ -7,7 +7,6 @@ import snapcode.apptools.BuildFileTool;
 import snapcode.javatext.JavaTextArea;
 import snapcode.project.JavaTextDoc;
 import snapcode.project.Project;
-import snapcode.project.Workspace;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.props.PropChange;
@@ -317,8 +316,7 @@ public class PagePane extends ViewOwner {
         _browser = new WebBrowser();
         _browser.setGrowHeight(true);
         _browser.setPageClassResolver(this::getPageClassForResponse);
-        _browser.addPropChangeListener(this::handleBrowserPropChange,
-                WebBrowser.SelPage_Prop, WebBrowser.Activity_Prop, WebBrowser.Status_Prop, WebBrowser.Loading_Prop);
+        _browser.addPropChangeListener(this::handleBrowserSelPageChange, WebBrowser.SelPage_Prop);
 
         // Create ColView to hold TabsBox and Browser
         ColView colView = new ColView();
@@ -513,20 +511,11 @@ public class PagePane extends ViewOwner {
     /**
      * Called when Browser does prop change.
      */
-    private void handleBrowserPropChange(PropChange aPC)
+    private void handleBrowserSelPageChange(PropChange aPC)
     {
-        Workspace workspace = _workspacePane.getWorkspace();
-
-        switch (aPC.getPropName()) {
-
-            // Handle SelPage
-            case WebBrowser.SelPage_Prop: openFile(_browser.getSelFile()); break;
-
-            // Handle Activity, Status, Loading
-            case WebBrowser.Activity_Prop: workspace.setActivity(_browser.getActivity()); break;
-            case WebBrowser.Status_Prop: workspace.setStatus(_browser.getStatus()); break;
-            case WebBrowser.Loading_Prop: workspace.setLoading(_browser.isLoading()); break;
-        }
+        // Handle SelPage
+        if (aPC.getPropName() == WebBrowser.SelPage_Prop)
+            openFile(_browser.getSelFile());
     }
 
     /**
