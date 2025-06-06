@@ -268,7 +268,7 @@ public class SnapCompiler {
         int start = (int) aDiagnostic.getStartPosition();
         if (start < 0)
             start = 0;
-        int end = (int) aDiagnostic.getEndPosition();
+        int end = Math.max((int) aDiagnostic.getEndPosition(), start);
 
         // Bogus trim of "unchecked" warnings and "overrides equals
         if (line < 0 && msg.contains("unchecked"))

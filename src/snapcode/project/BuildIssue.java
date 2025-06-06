@@ -48,7 +48,7 @@ public class BuildIssue implements Comparable<BuildIssue> {
         _line = aLine;
         _column = aColumn;
         _start = aStart;
-        _end = anEnd;
+        _end = Math.max(anEnd, _start);
         return this;
     }
 
