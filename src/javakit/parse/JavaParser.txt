@@ -344,7 +344,7 @@ HexLiteral { "0[xX][_0-9a-fA-F]+[lL]?" }
 
 OctalLiteral { "0[_0-7]*[lL]?" }
 
-FloatLiteral { "(([_\d]+\.[_\d]*)|(\.[_\d]+)|([_\d]+))([eE][\+\-]?[_\d]+)?[fFdD]?" }
+FloatLiteral { "((\d[_\d]*\.[_\d]*)|(\.\d[_\d]*)|(\d[_\d]*))([eE][\+\-]?\d[_\d]*)?[fFdD]?" }
 
 CharacterLiteral { "'(([^'\\\n\r])|(\\([ntbrf\\'\"]|[0-7][0-7]?|[0-3][0-7][0-7]|u[\da-fA-F]{4})))'" }
 
