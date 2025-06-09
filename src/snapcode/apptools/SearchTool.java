@@ -41,6 +41,194 @@ public class SearchTool extends WorkspaceTool {
     }
 
     /**
+     * Search for given term.
+     */
+    public void search(String aString)
+    {
+        _search = new Search();
+        _search._string = aString;
+        for (WebSite site : _workspacePane.getProjectSites())
+            searchFileForString(site.getRootDir(), aString.toLowerCase(), _search._results);
+        resetLater();
+    }
+
+    /**
+     * Search for given string in given file with list for results.
+     */
+    private void searchFileForString(WebFile aFile, String aString, List<Result> theResults)
+    {
+        // If hidden file, just return
+        Project proj = Project.getProjectForFile(aFile);
+        ProjectPane projectPane = _workspacePane.getProjectPaneForProject(proj);
+        if (projectPane != null && projectPane.isHiddenFile(aFile))
+            return;
+
+        // Handle directory
+        if (aFile.isDir()) {
+            if (aFile == _workspacePane.getBuildDir())
+                return;
+            for (WebFile file : aFile.getFiles())
+                searchFileForString(file, aString, theResults);
+        }
+
+        // Handle JavaFile
+        else if (isSearchTextFile(aFile)) {
+            String text = aFile.getText().toLowerCase();
+            Result result = null;
+            int len = aString.length();
+            for (int start = text.indexOf(aString); start >= 0; start = text.indexOf(aString, start + len)) {
+                if (result == null)
+                    theResults.add(result = new Result(aFile));
+                else result._count++;
+            }
+        }
+    }
+
+    /**
+     * Search for given node references.
+     */
+    public void searchReference(JNode aNode)
+    {
+        // Get JavaDecl for node
+        JavaDecl decl = aNode.getDecl();
+        if (decl == null) {
+            beep();
+            return;
+        }
+
+        // If method, get root method
+        if (decl instanceof JavaMethod) {
+            JavaMethod method = (JavaMethod) decl;
+            while (method.getSuper() != null)
+                method = method.getSuper();
+            decl = method;
+        }
+
+        // If param class
+        if (decl instanceof JavaParameterizedType)
+            decl = decl.getEvalClass();
+
+        // Configure search
+        _search = new Search();
+        _search._string = decl.getFullNameWithParameterTypes();
+        _search._kind = Search.Kind.Reference;
+
+        // Iterate over all project sites
+        for (WebSite site : _workspacePane.getProjectSites())
+            findDeclReferencesInFile(decl, site.getRootDir(), _search._results);
+
+        // Update UI
+        resetLater();
+    }
+
+    /**
+     * Search for given node references in given file and add to results list.
+     */
+    private void findDeclReferencesInFile(JavaDecl aDecl, WebFile aFile, List<Result> resultsList)
+    {
+        // If hidden file, just return
+        Project proj = Project.getProjectForFile(aFile);
+        ProjectPane projectPane = _workspacePane.getProjectPaneForProject(proj);
+        if (projectPane != null && projectPane.isHiddenFile(aFile))
+            return;
+
+        // Handle directory
+        if (aFile.isDir()) {
+            if (aFile == _workspacePane.getBuildDir())
+                return;
+            List<WebFile> dirFiles = aFile.getFiles();
+            for (WebFile file : dirFiles)
+                findDeclReferencesInFile(aDecl, file, resultsList);
+        }
+
+        // Handle JavaFile
+        else if (aFile.getFileType().equals("java")) {
+
+            // Get JavaAgent, JavaData and references
+            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(aFile);
+            JavaDecl[] externalRefs = javaAgent.getExternalReferences();
+
+            // Iterate over references
+            for (JavaDecl externalRef : externalRefs) {
+                if (aDecl.matches(externalRef)) {
+                    JFile jfile = javaAgent.getJFile();
+                    JNode[] referenceNodes = NodeMatcher.getReferenceNodesForDecl(jfile, aDecl);
+                    for (JNode node : referenceNodes)
+                        resultsList.add(new Result(node));
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * Search for given element reference.
+     */
+    public void searchDeclaration(JNode aNode)
+    {
+        // Get JavaDecl for node
+        JavaDecl decl = aNode.getDecl();
+        if (decl == null) {
+            beep();
+            return;
+        }
+
+        // If method, get root method
+        if (decl instanceof JavaMethod) {
+            JavaMethod method = (JavaMethod) decl;
+            while (method.getSuper() != null)
+                method = method.getSuper();
+            decl = method;
+        }
+
+        // Configure search
+        _search = new Search();
+        _search._string = decl.getFullNameWithParameterTypes();
+        _search._kind = Search.Kind.Declaration;
+
+        // Iterate over all project sites
+        for (WebSite site : _workspacePane.getProjectSites())
+            findDeclDeclarationsInFile(decl, site.getRootDir(), _search._results);
+
+        // Update UI
+        resetLater();
+    }
+
+    /**
+     * Search for given element reference.
+     */
+    private void findDeclDeclarationsInFile(JavaDecl aDecl, WebFile aFile, List<Result> resultsList)
+    {
+        // If hidden file, just return
+        Project proj = Project.getProjectForFile(aFile);
+        ProjectPane projectPane = _workspacePane.getProjectPaneForProject(proj);
+        if (projectPane != null && projectPane.isHiddenFile(aFile))
+            return;
+
+        // Handle directory
+        if (aFile.isDir()) {
+            if (aFile == _workspacePane.getBuildDir())
+                return;
+
+            List<WebFile> dirFiles = aFile.getFiles();
+            for (WebFile file : dirFiles)
+                findDeclDeclarationsInFile(aDecl, file, resultsList);
+        }
+
+        // Handle JavaFile: If file class contains matching decl, return node(s)
+        else if (aFile.getFileType().equals("java")) {
+            JavaClass javaClass = proj.getJavaClassForFile(aFile);
+            if (javaClassContainsMatchingDecl(javaClass, aDecl)) {
+                JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
+                JFile jfile = javaAgent.getJFile();
+                JNode[] declarationNodes = NodeMatcher.getDeclarationNodesForDecl(jfile, aDecl);
+                for (JNode node : declarationNodes)
+                    resultsList.add(new Result(node));
+            }
+        }
+    }
+
+    /**
      * Returns the current search.
      */
     public Search getSearch()  { return _search; }
@@ -64,6 +252,16 @@ public class SearchTool extends WorkspaceTool {
     public void setSelResult(Result aResult)
     {
         _selResult = aResult;
+    }
+
+    /**
+     * Clears the search.
+     */
+    public void clearSearch()
+    {
+        setViewValue("SearchText", null);
+        _search = null;
+        resetLater();
     }
 
     /**
@@ -138,64 +336,10 @@ public class SearchTool extends WorkspaceTool {
     }
 
     /**
-     * Clears the search.
-     */
-    public void clearSearch()
-    {
-        setViewValue("SearchText", null);
-        _search = null;
-        resetLater();
-    }
-
-    /**
      * Override for title.
      */
     @Override
     public String getTitle()  { return "Search"; }
-
-    /**
-     * Search for given term.
-     */
-    public void search(String aString)
-    {
-        _search = new Search();
-        _search._string = aString;
-        for (WebSite site : _workspacePane.getSites())
-            searchFileForString(site.getRootDir(), aString.toLowerCase(), _search._results);
-        resetLater();
-    }
-
-    /**
-     * Search for given string in given file with list for results.
-     */
-    protected void searchFileForString(WebFile aFile, String aString, List<Result> theResults)
-    {
-        // If hidden file, just return
-        Project proj = Project.getProjectForFile(aFile);
-        ProjectPane projectPane = _workspacePane.getProjectPaneForProject(proj);
-        if (projectPane != null && projectPane.isHiddenFile(aFile))
-            return;
-
-        // Handle directory
-        if (aFile.isDir()) {
-            if (aFile == _workspacePane.getBuildDir())
-                return;
-            for (WebFile file : aFile.getFiles())
-                searchFileForString(file, aString, theResults);
-        }
-
-        // Handle JavaFile
-        else if (isSearchTextFile(aFile)) {
-            String text = aFile.getText().toLowerCase();
-            Result result = null;
-            int len = aString.length();
-            for (int start = text.indexOf(aString); start >= 0; start = text.indexOf(aString, start + len)) {
-                if (result == null)
-                    theResults.add(result = new Result(aFile));
-                else result._count++;
-            }
-        }
-    }
 
     /**
      * Returns whether file is to be included in search text.
@@ -205,150 +349,6 @@ public class SearchTool extends WorkspaceTool {
         String type = aFile.getFileType();
         String[] types = { "java", "snp", "txt", "js" };
         return ArrayUtils.contains(types, type);
-    }
-
-    /**
-     * Search for given element reference.
-     */
-    public void searchReference(JNode aNode)
-    {
-        // Get JavaDecl for node
-        JavaDecl decl = aNode.getDecl();
-        if (decl == null) {
-            beep();
-            return;
-        }
-
-        // If method, get root method
-        if (decl instanceof JavaMethod) {
-            JavaMethod method = (JavaMethod) decl;
-            while (method.getSuper() != null)
-                method = method.getSuper();
-            decl = method;
-        }
-
-        // If param class
-        if (decl instanceof JavaParameterizedType)
-            decl = decl.getEvalClass();
-
-        // Configure search
-        _search = new Search();
-        _search._string = decl.getFullNameWithParameterTypes();
-        _search._kind = Search.Kind.Reference;
-
-        // Iterate over all project sites
-        for (WebSite site : _workspacePane.getSites())
-            searchReference(site.getRootDir(), _search._results, decl);
-
-        // Update UI
-        resetLater();
-    }
-
-    /**
-     * Search for given element reference.
-     */
-    public void searchReference(WebFile aFile, List<Result> theResults, JavaDecl aDecl)
-    {
-        // If hidden file, just return
-        Project proj = Project.getProjectForFile(aFile);
-        ProjectPane projectPane = _workspacePane.getProjectPaneForProject(proj);
-        if (projectPane != null && projectPane.isHiddenFile(aFile))
-            return;
-
-        // Handle directory
-        if (aFile.isDir()) {
-            if (aFile == _workspacePane.getBuildDir())
-                return;
-            List<WebFile> dirFiles = aFile.getFiles();
-            for (WebFile file : dirFiles)
-                searchReference(file, theResults, aDecl);
-        }
-
-        // Handle JavaFile
-        else if (aFile.getFileType().equals("java")) {
-
-            // Get JavaAgent, JavaData and references
-            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(aFile);
-            JavaDecl[] externalRefs = javaAgent.getExternalReferences();
-
-            // Iterate over references
-            for (JavaDecl externalRef : externalRefs) {
-                if (aDecl.matches(externalRef)) {
-                    JFile jfile = javaAgent.getJFile();
-                    JNode[] referenceNodes = NodeMatcher.getReferenceNodesForDecl(jfile, aDecl);
-                    for (JNode node : referenceNodes)
-                        theResults.add(new Result(node));
-                    return;
-                }
-            }
-        }
-    }
-
-    /**
-     * Search for given element reference.
-     */
-    public void searchDeclaration(JNode aNode)
-    {
-        // Get JavaDecl for node
-        JavaDecl decl = aNode.getDecl();
-        if (decl == null) {
-            beep();
-            return;
-        }
-
-        // If method, get root method
-        if (decl instanceof JavaMethod) {
-            JavaMethod method = (JavaMethod) decl;
-            while (method.getSuper() != null)
-                method = method.getSuper();
-            decl = method;
-        }
-
-        // Configure search
-        _search = new Search();
-        _search._string = decl.getFullNameWithParameterTypes();
-        _search._kind = Search.Kind.Declaration;
-
-        // Iterate over all project sites
-        for (WebSite site : _workspacePane.getSites())
-            searchDeclaration(site.getRootDir(), _search._results, decl);
-
-        // Update UI
-        resetLater();
-    }
-
-    /**
-     * Search for given element reference.
-     */
-    public void searchDeclaration(WebFile aFile, List<Result> theResults, JavaDecl aDecl)
-    {
-        // If hidden file, just return
-        Project proj = Project.getProjectForFile(aFile);
-        ProjectPane projectPane = _workspacePane.getProjectPaneForProject(proj);
-        if (projectPane != null && projectPane.isHiddenFile(aFile))
-            return;
-
-        // Handle directory
-        if (aFile.isDir()) {
-            if (aFile == _workspacePane.getBuildDir())
-                return;
-
-            List<WebFile> dirFiles = aFile.getFiles();
-            for (WebFile file : dirFiles)
-                searchDeclaration(file, theResults, aDecl);
-        }
-
-        // Handle JavaFile: If file class contains matching decl, return node(s)
-        else if (aFile.getFileType().equals("java")) {
-            JavaClass javaClass = proj.getJavaClassForFile(aFile);
-            if (javaClassContainsMatchingDecl(javaClass, aDecl)) {
-                JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
-                JFile jfile = javaAgent.getJFile();
-                JNode[] declarationNodes = NodeMatcher.getDeclarationNodesForDecl(jfile, aDecl);
-                for (JNode node : declarationNodes)
-                    theResults.add(new Result(node));
-            }
-        }
     }
 
     /**

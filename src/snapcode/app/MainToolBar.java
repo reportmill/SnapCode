@@ -188,7 +188,7 @@ public class MainToolBar extends WorkspaceTool {
         if (aPrefix.isEmpty()) return Collections.EMPTY_LIST;
         List<WebFile> files = new ArrayList<>();
 
-        for (WebSite site : _workspacePane.getSites())
+        for (WebSite site : _workspacePane.getProjectSites())
             findFilesForPrefix(aPrefix, site.getRootDir(), files);
         files.sort(_fileComparator);
         return files;

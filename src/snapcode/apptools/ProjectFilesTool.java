@@ -123,7 +123,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         if (_rootFiles != null) return _rootFiles;
 
         // Create RootFiles for Workspace.Sites
-        List<WebSite> workspaceSites = _workspace.getSites();
+        List<WebSite> workspaceSites = _workspace.getProjectSites();
         List<ProjectFile> rootFiles = ListUtils.map(workspaceSites, site -> _fileSystem.getProjectFileForRootFile(site.getRootDir()));
         return _rootFiles = rootFiles;
     }
@@ -146,7 +146,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     private ProjectFile getProjectFile(WebFile aFile)
     {
         // If file not in workspace, just return null
-        if (aFile == null || !_workspacePane.getSites().contains(aFile.getSite()))
+        if (aFile == null || !_workspacePane.getProjectSites().contains(aFile.getSite()))
             return null;
 
         // Get project file

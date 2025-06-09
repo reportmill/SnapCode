@@ -403,7 +403,7 @@ public class PagePane extends ViewOwner {
     protected boolean isProjectFile(WebFile aFile)
     {
         if (aFile == null) return false;
-        List<WebSite> projSites = _workspacePane.getSites();
+        List<WebSite> projSites = _workspacePane.getProjectSites();
         WebSite fileSite = aFile.getSite();
         return projSites.contains(fileSite);
     }

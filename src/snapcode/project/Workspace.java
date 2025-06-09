@@ -133,9 +133,9 @@ public class Workspace extends PropObject {
     public Project getRootProject()  { return !_projects.isEmpty() ? _projects.get(0) : null; }
 
     /**
-     * Returns the sites.
+     * Returns the list of workspace project sites.
      */
-    public List<WebSite> getSites()
+    public List<WebSite> getProjectSites()
     {
         if (_sites != null) return _sites;
         return _sites = ListUtils.map(_projects, proj -> proj.getSite());

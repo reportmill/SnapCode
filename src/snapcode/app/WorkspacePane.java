@@ -158,9 +158,9 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
-     * Returns the array of sites.
+     * Returns the list of workspace project sites.
      */
-    public List<WebSite> getSites()  { return _workspace.getSites(); }
+    public List<WebSite> getProjectSites()  { return _workspace.getProjectSites(); }
 
     /**
      * Returns the selected project.
@@ -210,7 +210,7 @@ public class WorkspacePane extends ViewOwner {
         WebSite selSite = selFile != null ? selFile.getSite() : null;
 
         // If file not in Workspace.Sites, use first site
-        List<WebSite> workspaceSites = getSites();
+        List<WebSite> workspaceSites = getProjectSites();
         if (!workspaceSites.contains(selSite))
             selSite = !workspaceSites.isEmpty() ? workspaceSites.get(0) : null;
 
