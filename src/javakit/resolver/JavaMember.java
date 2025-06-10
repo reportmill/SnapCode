@@ -58,4 +58,9 @@ public class JavaMember extends JavaDecl {
      * Returns whether member is static.
      */
     public boolean isStatic()  { return Modifier.isStatic(_mods); }
+
+    /**
+     * Returns whether member is final.
+     */
+    public boolean isFinal()  { return Modifier.isFinal(_mods); }
 }

@@ -139,26 +139,30 @@ public class SearchTool extends WorkspaceTool {
             List<WebFile> dirFiles = aFile.getFiles();
             for (WebFile file : dirFiles)
                 findDeclReferencesInFile(aDecl, file, resultsList);
+            return;
         }
 
         // Handle JavaFile
-        else if (aFile.getFileType().equals("java")) {
+        if (!aFile.getFileType().equals("java"))
+            return;
 
-            // Get JavaAgent, JavaData and references
-            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(aFile);
-            JavaDecl[] externalRefs = javaAgent.getExternalReferences();
+        // Get file external references
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(aFile);
+        JavaDecl[] externalRefs = javaAgent.getExternalReferences();
 
-            // Iterate over references
-            for (JavaDecl externalRef : externalRefs) {
-                if (aDecl.matches(externalRef)) {
-                    JFile jfile = javaAgent.getJFile();
-                    JNode[] referenceNodes = NodeMatcher.getReferenceNodesForDecl(jfile, aDecl);
-                    for (JNode node : referenceNodes)
-                        resultsList.add(new Result(node));
-                    return;
-                }
-            }
-        }
+        // Get whether file should be searched: If contains matching external ref or if decl is primitive static final
+        boolean isDeclStaticFinalPrimitive = aDecl instanceof JavaField field && field.isStatic() && field.isFinal() &&
+                (field.getEvalType().isPrimitive() || field.getEvalType().getName().equals("java.lang.String"));
+
+        // If file needs search
+        if (!isDeclStaticFinalPrimitive && !ArrayUtils.hasMatch(externalRefs, aDecl::matches))
+            return;
+
+        // Search file for references
+        JFile jfile = javaAgent.getJFile();
+        JNode[] referenceNodes = NodeMatcher.getReferenceNodesForDecl(jfile, aDecl);
+        for (JNode node : referenceNodes)
+            resultsList.add(new Result(node));
     }
 
     /**
