@@ -259,12 +259,12 @@ public class ClassFileUtils {
     /**
      * Returns external references in given class files.
      */
-    public static JavaDecl[] getExternalReferencesForClassFiles(WebFile[] classFiles)
+    public static Set<JavaDecl> getExternalReferencesForClassFiles(WebFile[] classFiles)
     {
         Set<JavaDecl> externalReferencesSet = new HashSet<>();
         for (WebFile classFile : classFiles)
             ClassFileUtils.findExternalReferencesForClassFile(classFile, externalReferencesSet);
-        return externalReferencesSet.toArray(new JavaDecl[0]);
+        return externalReferencesSet;
     }
 
     /**

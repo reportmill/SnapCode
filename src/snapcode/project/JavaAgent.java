@@ -10,6 +10,7 @@ import snap.props.PropChangeListener;
 import snap.text.TextBlock;
 import snap.text.TextBlockUtils;
 import snap.util.ArrayUtils;
+import snap.util.SetUtils;
 import snap.view.ViewUtils;
 import snap.web.WebFile;
 import snap.util.MDUtils;
@@ -43,7 +44,7 @@ public class JavaAgent {
     private JeplToJava.JavaText _jeplJavaText;
 
     // The external references in Java file
-    private JavaDecl[] _externalRefs;
+    private Set<JavaDecl> _externalRefs;
 
     // The external class references in Java file
     private Set<JavaClass> _externalClassRefs;
@@ -368,7 +369,7 @@ public class JavaAgent {
     /**
      * Returns the external references.
      */
-    public JavaDecl[] getExternalReferences()
+    public Set<JavaDecl> getExternalReferences()
     {
         if (_externalRefs != null) return _externalRefs;
         WebFile[] classFiles = _project.getProjectFiles().getClassFilesForJavaFile(_javaFile);
@@ -392,9 +393,8 @@ public class JavaAgent {
     private Set<JavaClass> getExternalClassReferences()
     {
         if (_externalClassRefs != null) return _externalClassRefs;
-        JavaDecl[] externalReferences = getExternalReferences();
-        JavaClass[] externalClassReferences = ArrayUtils.filterByClass(externalReferences, JavaClass.class);
-        return _externalClassRefs = new HashSet<>(Arrays.asList(externalClassReferences));
+        Set<JavaDecl> externalReferences = getExternalReferences();
+        return _externalClassRefs = SetUtils.filterByClass(externalReferences, JavaClass.class);
     }
 
     /**

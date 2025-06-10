@@ -171,7 +171,7 @@ public class MainToolBar extends WorkspaceTool {
             }
             else {
                 SearchTool searchTool = _workspaceTools.getToolForClass(SearchTool.class);
-                searchTool.search(text);
+                searchTool.searchForString(text);
                 _workspaceTools.showToolForClass(SearchTool.class);
             }
         }

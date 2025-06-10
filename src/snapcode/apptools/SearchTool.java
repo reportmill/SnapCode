@@ -4,6 +4,7 @@
 package snapcode.apptools;
 import javakit.parse.*;
 import javakit.resolver.*;
+import snap.util.SetUtils;
 import snapcode.project.JavaAgent;
 import snapcode.project.Project;
 import snapcode.javatext.NodeMatcher;
@@ -20,6 +21,7 @@ import snap.web.WebSite;
 import snapcode.util.FileIcons;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class manages project search.
@@ -32,6 +34,9 @@ public class SearchTool extends WorkspaceTool {
     // The current selected result
     private Result  _selResult;
 
+    // Constant for search file types
+    private static final List<String> SEARCH_FILE_TYPES = List.of("java", "snp", "txt", "js");
+
     /**
      * Constructor.
      */
@@ -41,21 +46,21 @@ public class SearchTool extends WorkspaceTool {
     }
 
     /**
-     * Search for given term.
+     * Search for given string.
      */
-    public void search(String aString)
+    public void searchForString(String aString)
     {
         _search = new Search();
         _search._string = aString;
         for (WebSite site : _workspacePane.getProjectSites())
-            searchFileForString(site.getRootDir(), aString.toLowerCase(), _search._results);
+            findResultsForStringAndFile(aString.toLowerCase(), site.getRootDir(), _search._results);
         resetLater();
     }
 
     /**
-     * Search for given string in given file with list for results.
+     * Search for given string in given file and adds results to given list.
      */
-    private void searchFileForString(WebFile aFile, String aString, List<Result> theResults)
+    private void findResultsForStringAndFile(String aString, WebFile aFile, List<Result> resultsList)
     {
         // If hidden file, just return
         Project proj = Project.getProjectForFile(aFile);
@@ -68,19 +73,22 @@ public class SearchTool extends WorkspaceTool {
             if (aFile == _workspacePane.getBuildDir())
                 return;
             for (WebFile file : aFile.getFiles())
-                searchFileForString(file, aString, theResults);
+                findResultsForStringAndFile(aString, file, resultsList);
+            return;
         }
 
-        // Handle JavaFile
-        else if (isSearchTextFile(aFile)) {
-            String text = aFile.getText().toLowerCase();
-            Result result = null;
-            int len = aString.length();
-            for (int start = text.indexOf(aString); start >= 0; start = text.indexOf(aString, start + len)) {
-                if (result == null)
-                    theResults.add(result = new Result(aFile));
-                else result._count++;
-            }
+        // If not search file type, just return
+        if (!SEARCH_FILE_TYPES.contains(aFile.getFileType()))
+            return;
+
+        // Handle search file types
+        String text = aFile.getText().toLowerCase();
+        Result result = null;
+        int len = aString.length();
+        for (int start = text.indexOf(aString); start >= 0; start = text.indexOf(aString, start + len)) {
+            if (result == null)
+                resultsList.add(result = new Result(aFile));
+            else result._count++;
         }
     }
 
@@ -97,8 +105,7 @@ public class SearchTool extends WorkspaceTool {
         }
 
         // If method, get root method
-        if (decl instanceof JavaMethod) {
-            JavaMethod method = (JavaMethod) decl;
+        if (decl instanceof JavaMethod method) {
             while (method.getSuper() != null)
                 method = method.getSuper();
             decl = method;
@@ -115,7 +122,7 @@ public class SearchTool extends WorkspaceTool {
 
         // Iterate over all project sites
         for (WebSite site : _workspacePane.getProjectSites())
-            findDeclReferencesInFile(decl, site.getRootDir(), _search._results);
+            findReferencesForDeclAndFile(decl, site.getRootDir(), _search._results);
 
         // Update UI
         resetLater();
@@ -124,7 +131,7 @@ public class SearchTool extends WorkspaceTool {
     /**
      * Search for given node references in given file and add to results list.
      */
-    private void findDeclReferencesInFile(JavaDecl aDecl, WebFile aFile, List<Result> resultsList)
+    private void findReferencesForDeclAndFile(JavaDecl aDecl, WebFile aFile, List<Result> resultsList)
     {
         // If hidden file, just return
         Project proj = Project.getProjectForFile(aFile);
@@ -138,31 +145,30 @@ public class SearchTool extends WorkspaceTool {
                 return;
             List<WebFile> dirFiles = aFile.getFiles();
             for (WebFile file : dirFiles)
-                findDeclReferencesInFile(aDecl, file, resultsList);
+                findReferencesForDeclAndFile(aDecl, file, resultsList);
             return;
         }
 
-        // Handle JavaFile
+        // If not Java file, just return
         if (!aFile.getFileType().equals("java"))
             return;
 
         // Get file external references
         JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(aFile);
-        JavaDecl[] externalRefs = javaAgent.getExternalReferences();
+        Set<JavaDecl> externalRefs = javaAgent.getExternalReferences();
 
         // Get whether file should be searched: If contains matching external ref or if decl is primitive static final
         boolean isDeclStaticFinalPrimitive = aDecl instanceof JavaField field && field.isStatic() && field.isFinal() &&
                 (field.getEvalType().isPrimitive() || field.getEvalType().getName().equals("java.lang.String"));
 
         // If file needs search
-        if (!isDeclStaticFinalPrimitive && !ArrayUtils.hasMatch(externalRefs, aDecl::matches))
+        if (!isDeclStaticFinalPrimitive && !SetUtils.hasMatch(externalRefs, aDecl::matches))
             return;
 
         // Search file for references
         JFile jfile = javaAgent.getJFile();
-        JNode[] referenceNodes = NodeMatcher.getReferenceNodesForDecl(jfile, aDecl);
-        for (JNode node : referenceNodes)
-            resultsList.add(new Result(node));
+        List<JExprId> referenceNodes = NodeMatcher.getReferenceNodesForDecl(jfile, aDecl);
+        referenceNodes.forEach(node -> resultsList.add(new Result(node)));
     }
 
     /**
@@ -178,8 +184,7 @@ public class SearchTool extends WorkspaceTool {
         }
 
         // If method, get root method
-        if (decl instanceof JavaMethod) {
-            JavaMethod method = (JavaMethod) decl;
+        if (decl instanceof JavaMethod method) {
             while (method.getSuper() != null)
                 method = method.getSuper();
             decl = method;
@@ -192,7 +197,7 @@ public class SearchTool extends WorkspaceTool {
 
         // Iterate over all project sites
         for (WebSite site : _workspacePane.getProjectSites())
-            findDeclDeclarationsInFile(decl, site.getRootDir(), _search._results);
+            findDeclarationsForDeclAndFile(decl, site.getRootDir(), _search._results);
 
         // Update UI
         resetLater();
@@ -201,7 +206,7 @@ public class SearchTool extends WorkspaceTool {
     /**
      * Search for given element reference.
      */
-    private void findDeclDeclarationsInFile(JavaDecl aDecl, WebFile aFile, List<Result> resultsList)
+    private void findDeclarationsForDeclAndFile(JavaDecl aDecl, WebFile aFile, List<Result> resultsList)
     {
         // If hidden file, just return
         Project proj = Project.getProjectForFile(aFile);
@@ -216,19 +221,21 @@ public class SearchTool extends WorkspaceTool {
 
             List<WebFile> dirFiles = aFile.getFiles();
             for (WebFile file : dirFiles)
-                findDeclDeclarationsInFile(aDecl, file, resultsList);
+                findDeclarationsForDeclAndFile(aDecl, file, resultsList);
+            return;
         }
 
+        // If not Java file, just return
+        if (!aFile.getFileType().equals("java"))
+            return;
+
         // Handle JavaFile: If file class contains matching decl, return node(s)
-        else if (aFile.getFileType().equals("java")) {
-            JavaClass javaClass = proj.getJavaClassForFile(aFile);
-            if (javaClassContainsMatchingDecl(javaClass, aDecl)) {
-                JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
-                JFile jfile = javaAgent.getJFile();
-                JNode[] declarationNodes = NodeMatcher.getDeclarationNodesForDecl(jfile, aDecl);
-                for (JNode node : declarationNodes)
-                    resultsList.add(new Result(node));
-            }
+        JavaClass javaClass = proj.getJavaClassForFile(aFile);
+        if (javaClassContainsMatchingDecl(javaClass, aDecl)) {
+            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(aFile);
+            JFile jfile = javaAgent.getJFile();
+            List<JExprId> declarationNodes = NodeMatcher.getDeclarationNodesForDecl(jfile, aDecl);
+            declarationNodes.forEach(node -> resultsList.add(new Result(node)));
         }
     }
 
@@ -240,10 +247,7 @@ public class SearchTool extends WorkspaceTool {
     /**
      * Returns the current search results.
      */
-    public List<Result> getResults()
-    {
-        return _search != null ? _search._results : null;
-    }
+    public List<Result> getResults()  { return _search != null ? _search._results : null; }
 
     /**
      * Returns the current selected search result.
@@ -320,7 +324,7 @@ public class SearchTool extends WorkspaceTool {
         if (anEvent.equals("SearchText")) {
             String string = anEvent.getStringValue();
             if (string != null && !string.isEmpty())
-                search(string);
+                searchForString(string);
             else _search = null;
         }
 
@@ -344,16 +348,6 @@ public class SearchTool extends WorkspaceTool {
      */
     @Override
     public String getTitle()  { return "Search"; }
-
-    /**
-     * Returns whether file is to be included in search text.
-     */
-    protected boolean isSearchTextFile(WebFile aFile)
-    {
-        String type = aFile.getFileType();
-        String[] types = { "java", "snp", "txt", "js" };
-        return ArrayUtils.contains(types, type);
-    }
 
     /**
      * Returns whether given JavaDecl contains matching decl.
