@@ -159,7 +159,7 @@ public class GreenfootPage extends WebPage {
     }
 
     /**
-     * Override to reset greenfoot when build is done.
+     * Override to reset greenfoot when build is done and trigger build when shown.
      */
     @Override
     protected void setShowing(boolean aValue)
@@ -167,9 +167,14 @@ public class GreenfootPage extends WebPage {
         if (aValue == isShowing()) return;
         super.setShowing(aValue);
 
-        // Start/stop listening to Workspace.Building
-        if (aValue)
+        // If showing, start listening to Workspace.Building and trigger build
+        if (aValue) {
             getWorkspace().addPropChangeListener(_workspaceBuildingLsnr, Workspace.Building_Prop);
+            if (!getWorkspace().isBuilding())
+                getWorkspace().getBuilder().buildWorkspaceLater();
+        }
+
+        // If hiding, stop listening to Workspace.Building
         else getWorkspace().removePropChangeListener(_workspaceBuildingLsnr);
     }
 
