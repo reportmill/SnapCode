@@ -149,7 +149,7 @@ public class WorkspacePaneUtils {
             case "git": openProjectForRepoUrl(workspacePane, projectUrl); return true;
 
             // Handle gfar
-            case "gfar": openProjectForGreenfootArchiveUrl(workspacePane, projectUrl); return true;
+            case "gfar": GreenImport.openProjectForGreenfootArchiveUrl(workspacePane, projectUrl); return true;
 
             // Handle anything else: Open project for given file
             default:
@@ -341,30 +341,6 @@ public class WorkspacePaneUtils {
         // Create and open new Jepl file
         NewFileTool newFileTool = workspacePane.getNewFileTool();
         newFileTool.newJavaFileForStringAndType(javaStr, "jepl");
-    }
-
-    /**
-     * Open greenfoot project.
-     */
-    private static void openProjectForGreenfootArchiveUrl(WorkspacePane workspacePane, WebURL projectUrl)
-    {
-        Workspace workspace = workspacePane.getWorkspace();
-        TaskManagerTask<Boolean> openGreenfootTask = (TaskManagerTask<Boolean>) workspace.getTaskManager().createTask();
-        openGreenfootTask.setTaskFunction(() -> openProjectForGreenfootArchiveUrlImpl(workspacePane, projectUrl, openGreenfootTask.getTaskMonitor()));
-        openGreenfootTask.start();
-    }
-
-    /**
-     * Open greenfoot project.
-     */
-    private static Boolean openProjectForGreenfootArchiveUrlImpl(WorkspacePane workspacePane, WebURL projectUrl, TaskMonitor taskMonitor)
-    {
-        taskMonitor.startForTaskCount(1);
-        taskMonitor.beginTask("Download project", 2);
-        taskMonitor.updateTask(1);
-        GreenImport.openProjectForGreenfootArchiveUrl(workspacePane, projectUrl);
-        taskMonitor.endTask();
-        return true;
     }
 
     /**
