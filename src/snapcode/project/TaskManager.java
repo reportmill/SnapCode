@@ -136,8 +136,11 @@ public class TaskManager extends ViewOwner {
 
         // Update ProgressBar
         double progress = getProgress();
-        if (progress > 0)
+        if (progress > 0) {
+             if (progress < _progressBar.getProgress())
+                 _progressBar.setProgress(0);
             _progressBar.getAnimCleared(500).setValue(ProgressBar.Progress_Prop, progress).play();
+        }
         else _progressBar.setProgress(progress);
 
         // Resize and relayout
@@ -169,7 +172,7 @@ public class TaskManager extends ViewOwner {
     {
         TaskRunner.Status taskStatus = task.getTaskRunner().getStatus();
         switch (taskStatus) {
-            case Running -> setRunningTasks(true);
+            case Running -> { setProgress(0); setRunningTasks(true); }
             case Finished -> { setProgress(1); runDelayed(() -> setRunningTasks(false), 500); }
             default -> setRunningTasks(false);
         }
