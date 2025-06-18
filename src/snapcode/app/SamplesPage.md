@@ -52,6 +52,8 @@ Provided by enCode/Create. [Learn to code!](https://www.encodecreate.com)
 
 * [Swing Samples](Sample:https://reportmill.com/SnapCode/Samples/SwingSamples/SwingSamples.zip)
   This project contains several small Swing examples.
+* [DOM Samples](Sample:https://reportmill.com/SnapCode/Samples/DOMTests/DOMTests.zip)
+  This project contains several samples of programming the browser DOM directly.
 * [Scanner Chatbot](Sample:https://reportmill.com/SnapCode/Samples/Scanner_Chatbot/Scanner_Chatbot.jepl)
   This Java repl file shows an example of reading user input from System.in.
 * [UI Builder](Sample:https://reportmill.com/SnapCode/Samples/UI_Builder/UI_Builder.zip)
