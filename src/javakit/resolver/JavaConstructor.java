@@ -101,10 +101,11 @@ public class JavaConstructor extends JavaExecutable {
         JavaConstructor c = new JavaConstructor(javaClass._resolver, javaClass, null);
         c._mods = Modifier.PUBLIC;
         c._name = c._simpleName = javaClass.getSimpleName();
-        c._genericParameterTypes = JavaType.EMPTY_TYPES_ARRAY;
-        c._parameterTypes = new JavaClass[0];
         c._evalType = javaClass;
         c._typeParameters = new JavaTypeVariable[0];
+        c._genericParameterTypes = JavaType.EMPTY_TYPES_ARRAY;
+        c._parameterTypes = new JavaClass[0];
+        c._parameterNames = new String[0];
         return c;
     }
 }

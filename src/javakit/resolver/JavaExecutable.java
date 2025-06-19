@@ -25,7 +25,7 @@ public class JavaExecutable extends JavaMember {
     protected JavaClass[] _parameterTypes;
 
     // The parameter names
-    private String[] _parameterNames;
+    protected String[] _parameterNames;
 
     // Whether method has VarArgs
     protected boolean  _varArgs;
