@@ -56,13 +56,23 @@ public class JavaTextArea extends TextArea {
     // Constants for properties
     public static final String SelNode_Prop = "SelNode";
 
-    // Constants
+    // Constants for indent
     protected static String INDENT_STRING = "    ";
     protected static int INDENT_LENGTH = INDENT_STRING.length();
-    private static JavaTextDoc _dummyJavaTextDoc;
+
+    // Constants for colors
     private static final Color ERROR_TEXT_COLOR = Color.RED.brighter().brighter();
     private static final Color PROGRAM_COUNTER_LINE_HIGHLITE_COLOR = new Color(199, 218, 175, 200);
     private static final Color PRINT_MARGIN_COLOR = Color.GRAY9;
+    private static final Color METHOD_COLOR = Color.get("#FAFAB4");
+    private static final Color METHOD_STROKE_COLOR = METHOD_COLOR.darker();
+    private static final Color CODE_BLOCK_COLOR = Color.get("#E9E9F8");
+    private static final Color CODE_BLOCK_STROKE_COLOR = CODE_BLOCK_COLOR.darker();
+    private static final Color CLASS_DECL_COLOR = Color.get("#E1F8E1");
+    private static final Color CLASS_DECL_STROKE_COLOR = CLASS_DECL_COLOR.darker();
+
+    // Temporary stand-in for text area init until real java text is assigned
+    private static JavaTextDoc _dummyJavaTextDoc;
 
     /**
      * Constructor.
@@ -472,19 +482,9 @@ public class JavaTextArea extends TextArea {
         aPntr.transform(1, 0, -.15, 1, 0, 0);
         aPntr.translate(-errorMidX, -errorMidY);
         aPntr.setColor(ERROR_TEXT_COLOR);
-        aPntr.drawString(errorStr, errorX, errorY, _bug ? .1 : 0); // Java 8 on Windows/Linux bug
+        aPntr.drawString(errorStr, errorX, errorY, 0);
         aPntr.restore();
     }
-
-    // Java 8 on Windows/Linux has problems with arbitrary transforms and text
-    private static boolean _bug = !SnapEnv.isMac && !SnapEnv.isWebVM && !SnapEnv.isTeaVM;
-
-    private static final Color METHOD_COLOR = Color.get("#FAFAB4");
-    private static final Color METHOD_STROKE_COLOR = METHOD_COLOR.darker();
-    private static final Color CODE_BLOCK_COLOR = Color.get("#E9E9F8");
-    private static final Color CODE_BLOCK_STROKE_COLOR = CODE_BLOCK_COLOR.darker();
-    private static final Color CLASS_DECL_COLOR = Color.get("#E1F8E1");
-    private static final Color CLASS_DECL_STROKE_COLOR = CLASS_DECL_COLOR.darker();
 
     /**
      * Paints scope boxes around methods, code blocks, etc.
