@@ -19,7 +19,7 @@ public class SnapCompiler {
     protected Project  _proj;
 
     // Whether to check errors only
-    private boolean _checkErrorsOnly;
+    protected boolean _checkErrorsOnly;
 
     // The shared compiler
     private JavaCompiler  _compiler;
