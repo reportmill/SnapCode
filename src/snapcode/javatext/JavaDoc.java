@@ -6,9 +6,11 @@ import javakit.parse.JNode;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMethod;
+import snap.util.ListUtils;
 import snap.util.URLUtils;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,10 +28,18 @@ public class JavaDoc {
     private String  _urlString;
 
     // A cache Map of classes to JavaDoc
-    private static Map<Class<?>,JavaDoc>  _javaDocs = new HashMap<>();
+    private static Map<Class<?>,JavaDoc> _javaDocs = new HashMap<>();
 
     // Constant for missing JavaDoc
-    private static final JavaDoc  NULL_JAVA_DOC = new JavaDoc(null);
+    private static final JavaDoc NULL_JAVA_DOC = new JavaDoc(null);
+
+    // Constants for Javadoc roots
+    private static final String JAVADOC_ROOT = "https://docs.oracle.com/en/java/javase/21/docs/api/";
+    private static final String SNAPKIT_JAVADOC_ROOT =  "http://reportmill.com/snap1/javadoc/";
+    private static final String REPORTMILL_JAVADOC_ROOT =  "http://reportmill.com/rm14/javadoc/";
+
+    // Constant for known Javadoc roots for package prefixes
+    private static final List<String> KNOWN_PACKAGE_PREFIXES = List.of("java.", "javax.", "snap.", "com.reportmill.");
 
     /**
      * Constructor.
@@ -157,12 +167,7 @@ public class JavaDoc {
      */
     private static boolean isJavaDocClassName(String className)
     {
-        if (className.startsWith("snap.") ||
-                className.startsWith("com.reportmill.") ||
-                className.startsWith("java.") ||
-                className.startsWith("javax."))
-            return true;
-        return false;
+        return ListUtils.hasMatch(KNOWN_PACKAGE_PREFIXES, prefix -> className.startsWith(prefix));
     }
 
     /**
@@ -177,8 +182,9 @@ public class JavaDoc {
             return null;
 
         // Add suffix
+        String moduleName = aClass.getModule().getName();
         String classPath = className.replace('.', '/');
-        String suffix = classPath + ".html"; // Used to have "index.html?" +
+        String suffix = moduleName + '/' + classPath + ".html"; // Used to have "index.html?" +
 
         // If method set, add hash
         if (aMethod != null) {
@@ -187,7 +193,7 @@ public class JavaDoc {
             if (index > 0) {
                 methodString = methodString.substring(index);
                 methodString = methodString.replace("[]", ""); // replace('(', '-').replace(')', '-');
-                suffix = classPath + ".html#" + methodString;
+                suffix += '#' + methodString;
             }
         }
 
@@ -200,17 +206,17 @@ public class JavaDoc {
      */
     private static String getJavaDocBaseUrlForJavaDocClassName(String className)
     {
+        // Handle standard java classes
+        if (className.startsWith("java.") || className.startsWith("javax."))
+            return JAVADOC_ROOT;
+
         // Handle snap classes
         if (className.startsWith("snap."))
-            return "http://reportmill.com/snap1/javadoc/";
+            return SNAPKIT_JAVADOC_ROOT;
 
         // Handle ReportMill classes
         if (className.startsWith("com.reportmill."))
-            return "http://reportmill.com/rm14/javadoc/";
-
-        // Handle standard java classes
-        if (className.startsWith("java.") || className.startsWith("javax."))
-            return "http://docs.oracle.com/javase/8/docs/api/";
+            return REPORTMILL_JAVADOC_ROOT;
 
         // Return not found
         return null;
