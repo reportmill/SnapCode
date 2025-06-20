@@ -304,7 +304,7 @@ public class BuildFile extends PropObject {
      */
     public void setIncludeGreenfootRuntime(boolean aValue)
     {
-        if (aValue == _includeGreenfoot) return;
+        if (_includeGreenfoot != null && aValue == _includeGreenfoot) return;
         //buildFile.addDependency(new MavenDependency("com.reportmill:greenfoot:2024.11"));
         _includeGreenfoot = aValue;
     }
