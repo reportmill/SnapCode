@@ -466,6 +466,19 @@ var str = FigletFont.convertOneLine("Hello World");
 System.out.println(str);
 ```
 
+## DOM Manipulation (CJDOM)
+
+```
+//DEPS com.reportmill:cjdom:2025.06
+import cjdom.*;
+
+var doc = Window.getDocument();
+var button = doc.createElement("button");
+button.getStyle().setCssText("position:fixed; top:20px; left:20px; padding:20px");
+button.setTextContent("Hello World!");
+doc.getBody().appendChild(button);
+```
+
 ## ReportMill
 
 ```
