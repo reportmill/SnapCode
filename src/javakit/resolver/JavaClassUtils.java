@@ -104,6 +104,6 @@ public class JavaClassUtils {
     {
         int val1 = JavaExecutable.getMatchRatingForArgClasses(method1, paramTypes);
         int val2 = JavaExecutable.getMatchRatingForArgClasses(method2, paramTypes);
-        return Integer.compare(val1, val2);
+        return Integer.compare(val2, val1); // Swap order so it returns best first (descending order)
     }
 }
