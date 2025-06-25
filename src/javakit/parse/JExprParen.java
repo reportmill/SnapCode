@@ -52,7 +52,7 @@ public class JExprParen extends JExpr {
     {
         if (_expr == null)
             return null;
-        return _expr.getDecl();
+        return _expr.getEvalType();
     }
 
     /**
