@@ -40,10 +40,10 @@ public class JavaParserExpr extends Parser {
                 // Handle Expression: Add to end of Math or Assign expression
                 case "Expression":
                     JExpr expr = aNode.getCustomNode(JExpr.class);
-                    if (_part instanceof JExprMath)
-                        ((JExprMath) _part).setOperand(expr, 1);
-                    else if (_part instanceof JExprAssign)
-                        ((JExprAssign) _part).setValueExpr(expr);
+                    if (_part instanceof JExprMath mathExpr)
+                        mathExpr.setOperand(expr, 1);
+                    else if (_part instanceof JExprAssign assignExpr)
+                        assignExpr.setValueExpr(expr);
                     break;
             }
         }
@@ -407,11 +407,10 @@ public class JavaParserExpr extends Parser {
         protected void parsedOne(ParseNode aNode, String anId)
         {
             // Handle KeyChain
-            if (aNode.getCustomNode() instanceof JExpr) {
-                JExpr part = aNode.getCustomNode(JExpr.class);
+            if (aNode.getCustomNode() instanceof JExpr expr) {
                 if (_part instanceof JExprMath)
-                    ((JExprMath) _part).addOperand(part);
-                else _part = part;
+                    ((JExprMath) _part).addOperand(expr);
+                else _part = expr;
             }
 
             // Handle Ops
@@ -466,11 +465,10 @@ public class JavaParserExpr extends Parser {
         protected void parsedOne(ParseNode aNode, String anId)
         {
             // Handle any expression rule: UnaryExpr, PreIncrementExpr, UnaryExprNotPlusMinus
-            if (aNode.getCustomNode() instanceof JExpr) {
-                JExpr part = aNode.getCustomNode(JExpr.class);
+            if (aNode.getCustomNode() instanceof JExpr expr) {
                 if (_part instanceof JExprMath)
-                    ((JExprMath) _part).addOperand(part);
-                else _part = part;
+                    ((JExprMath) _part).addOperand(expr);
+                else _part = expr;
             }
 
             // Handle unary ops (ignore '+')
@@ -540,10 +538,8 @@ public class JavaParserExpr extends Parser {
 
                 // Handle UnaryExpr, UnaryExprNotPlusMinus
                 default:
-                    if (aNode.getCustomNode() instanceof JExpr) {
-                        JExpr expr = aNode.getCustomNode(JExpr.class);
+                    if (aNode.getCustomNode() instanceof JExpr expr)
                         getPart().setExpr(expr);
-                    }
                     break;
             }
         }
@@ -585,8 +581,8 @@ public class JavaParserExpr extends Parser {
 
                 // Handle nested expression
                 default:
-                    if (aNode.getCustomNode() instanceof JExpr)
-                        _part = aNode.getCustomNode(JExpr.class);
+                    if (aNode.getCustomNode() instanceof JExpr expr)
+                        _part = expr;
                     break;
             }
         }
@@ -710,8 +706,7 @@ public class JavaParserExpr extends Parser {
         {
             if (_part == null)
                 _part = anExpr;
-            else if (_part instanceof JExprDot) {
-                JExprDot dotExpr = (JExprDot) _part;
+            else if (_part instanceof JExprDot dotExpr) {
                 if (dotExpr.getExpr() == null)
                     dotExpr.setExpr(anExpr);
                 else System.err.println("JavaParserExpr.PrimaryPrefixHandler.addExpr: Can't add to full dot expr: " + dotExpr.getString() + " + " + anExpr.getString());
@@ -745,8 +740,8 @@ public class JavaParserExpr extends Parser {
                 case "super":
                 case "this":
                     JExpr thisExpr = new JExprId(aNode);
-                    if (_part instanceof JExprDot)
-                        ((JExprDot) _part).setExpr(thisExpr);
+                    if (_part instanceof JExprDot dotExpr)
+                        dotExpr.setExpr(thisExpr);
                     else System.err.println("JavaParserExpr.PrimarySuffixHandler.parseOne: Unexpected dot expr: " + _part);
                     break;
 
@@ -770,10 +765,10 @@ public class JavaParserExpr extends Parser {
                 // Handle ("." | "::") Identifier
                 case "Identifier":
                     JExprId id = aNode.getCustomNode(JExprId.class);
-                    if (_part instanceof JExprDot)
-                        ((JExprDot) _part).setExpr(id);
-                    else if (_part instanceof JExprMethodRef)
-                        ((JExprMethodRef) _part).setMethodId(id);
+                    if (_part instanceof JExprDot dotExpr)
+                        dotExpr.setExpr(id);
+                    else if (_part instanceof JExprMethodRef methodRefExpr)
+                        methodRefExpr.setMethodId(id);
                     else _part = id;
                     break;
 

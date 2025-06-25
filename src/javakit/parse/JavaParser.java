@@ -63,14 +63,14 @@ public class JavaParser extends JavaParserStmt {
         _exception = null;
 
         // If no input, just return
-        if (anInput.length() == 0)
+        if (anInput.isEmpty())
             return new JFile();
 
         // If JavaTextDoc, swap in tokenizer that uses JavaText tokens
         Tokenizer oldTokenizer = null;
-        if (anInput instanceof JavaTextDoc) {
+        if (anInput instanceof JavaTextDoc javaTextDoc) {
             oldTokenizer = getTokenizer();
-            setTokenizer(((JavaTextDoc) anInput).getTokenSource());
+            setTokenizer(javaTextDoc.getTokenSource());
         }
 
         // Set input
