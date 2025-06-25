@@ -55,8 +55,8 @@ public class JExprId extends JExpr {
         for (JNode parentNode = getParent(); parentNode != null; parentNode = parentNode.getParent()) {
 
             // If parent is var decl and this is its id, return it
-            if (parentNode instanceof JVarDecl && ((JVarDecl) parentNode).getId() == this)
-                return (JVarDecl) parentNode;
+            if (parentNode instanceof JVarDecl varDecl && varDecl.getId() == this)
+                return varDecl;
 
             // If parent has var decls, and has one that defines this id name, return it
             if (parentNode instanceof WithVarDecls) {
@@ -97,7 +97,7 @@ public class JExprId extends JExpr {
     {
         // If parent is MethodRef, forward on - I don't like this, but don't want to confuse id with vars of same name
         JNode parent = getParent();
-        if (parent instanceof JExprMethodRef && ((JExprMethodRef) parent).getMethodId() == this)
+        if (parent instanceof JExprMethodRef methodRefExpr && methodRefExpr.getMethodId() == this)
             return getDeclForChildId(this);
 
         // Look for a master node, if this id is just part of another node or a var reference
@@ -131,18 +131,12 @@ public class JExprId extends JExpr {
     {
         // Handle parent WithId (method/class/field decl id, method call/ref id, local var decl id, etc.)
         JNode parent = getParent();
-        if (parent instanceof WithId) {
-            JExprId parentId = ((WithId) parent).getId();
-            if (this == parentId)
-                return parent;
-        }
+        if (parent instanceof WithId withId && withId.getId() == this)
+            return parent;
 
         // Handle parent is dot expression: Return dot expression
-        if (parent instanceof JExprDot) {
-            JExprDot dotExpr = (JExprDot) parent;
-            if (dotExpr.getExpr() == this)
-                return dotExpr;
-        }
+        if (parent instanceof JExprDot dotExpr && dotExpr.getExpr() == this)
+            return dotExpr;
 
         // Look for VarDecl that defines this id (if this id is var reference)
         JVarDecl varDecl = getVarDecl();

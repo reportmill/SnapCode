@@ -32,22 +32,19 @@ public abstract class JExpr extends JNode implements WithVarDecls {
     {
         // If parent is JExprDot and this is DotExpr.Expr, return DotExpr.PrefixExpr
         JNode parent = getParent();
-        if (parent instanceof JExprDot) {
-            JExprDot dotExpr = (JExprDot) parent;
+        if (parent instanceof JExprDot dotExpr) {
             if (dotExpr.getExpr() == this)
                 return dotExpr.getPrefixExpr();
         }
 
         // If parent is method call and this node is name, get parent for method call
-        if (parent instanceof JExprMethodCall) {
-            JExprMethodCall methodCallExpr = (JExprMethodCall) parent;
+        if (parent instanceof JExprMethodCall methodCallExpr) {
             if (methodCallExpr.getId() == this)
                 return methodCallExpr.getScopeExpr();
         }
 
         // If parent is method ref and this is MethodRef.Id, return MethodRef.PrefixExpr
-        if (parent instanceof JExprMethodRef) {
-            JExprMethodRef methodRef = (JExprMethodRef) parent;
+        if (parent instanceof JExprMethodRef methodRef) {
             if (methodRef.getMethodId() == this)
                 return methodRef.getPrefixExpr();
         }
@@ -127,8 +124,7 @@ public abstract class JExpr extends JNode implements WithVarDecls {
     protected static JExpr joinPrimaryPrefixAndSuffixExpressions(JExpr prefixExpr, JExpr suffixExpr)
     {
         // Handle DotExpr
-        if (suffixExpr instanceof JExprDot) {
-            JExprDot dotExpr = (JExprDot) suffixExpr;
+        if (suffixExpr instanceof JExprDot dotExpr) {
             if (dotExpr.getPrefixExpr() != null)
                 System.err.println("JExpr.joinExpression: Unexpected dot expression prefix: " + dotExpr.getPrefixExpr());
             dotExpr.setPrefixExpr(prefixExpr);
@@ -136,19 +132,16 @@ public abstract class JExpr extends JNode implements WithVarDecls {
         }
 
         // Handle MethodCall: Set prefix expression
-        if (suffixExpr instanceof JExprMethodCall) {
+        if (suffixExpr instanceof JExprMethodCall methodCall) {
 
             // Get method call and check that id is null (should not be possible)
-            JExprMethodCall methodCall = (JExprMethodCall) suffixExpr;
             if (methodCall.getId() != null)
                 System.err.println("JExpr.joinExpression: Unexpected method call with id: " + methodCall.getId().getName());
 
             // If prefix is dot expression, replace dotExpr.Expr with method call
-            if (prefixExpr instanceof JExprDot) {
-                JExprDot dotExpr = (JExprDot) prefixExpr;
+            if (prefixExpr instanceof JExprDot dotExpr) {
                 JExpr dotExprExpr = dotExpr.getExpr();
-                if (dotExprExpr instanceof JExprId) {
-                    JExprId idExpr = (JExprId) dotExprExpr;
+                if (dotExprExpr instanceof JExprId idExpr) {
                     dotExpr.setExpr(methodCall);
                     methodCall.setId(idExpr);
                 }
@@ -156,25 +149,22 @@ public abstract class JExpr extends JNode implements WithVarDecls {
             }
 
             // If suffix not id, just return prefix - shouldn't happen unless parse is really whacked
-            if (!(prefixExpr instanceof JExprId))
+            if (!(prefixExpr instanceof JExprId idExpr))
                 return prefixExpr;
 
             // Otherwise set id and return method call
-            JExprId idExpr = (JExprId) prefixExpr;
             methodCall.setId(idExpr);
             return suffixExpr;
         }
 
         // Handle MethodRef: Set prefix expression
-        if (suffixExpr instanceof JExprMethodRef) {
-            JExprMethodRef methodRef = (JExprMethodRef) suffixExpr;
+        if (suffixExpr instanceof JExprMethodRef methodRef) {
             methodRef.setPrefixExpr(prefixExpr);
             return methodRef;
         }
 
         // If ArrayIndex with missing ArrayExpr, set and return
-        if (suffixExpr instanceof JExprArrayIndex) {
-            JExprArrayIndex arrayIndexExpr = (JExprArrayIndex) suffixExpr;
+        if (suffixExpr instanceof JExprArrayIndex arrayIndexExpr) {
             if (arrayIndexExpr.getArrayExpr() != null)
                 System.err.println("JExpr.join: ArrayIndex.ArrayExpr not null");
             arrayIndexExpr.setArrayExpr(prefixExpr);

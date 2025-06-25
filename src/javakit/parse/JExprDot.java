@@ -87,10 +87,8 @@ public class JExprDot extends JExpr {
         }
 
         // Handle prefix is Package: Return child class or package for name
-        if (prefixDecl instanceof JavaPackage) {
-            JavaPackage javaPkg = (JavaPackage) prefixDecl;
+        if (prefixDecl instanceof JavaPackage javaPkg)
             return javaPkg.getChildForName(name);
-        }
 
         // Get eval class
         JavaClass parentClass = prefixExpr.getEvalClass();
