@@ -374,7 +374,17 @@ public class JavaParserExpr extends Parser {
     /**
      * ShiftExpr Handler.
      */
-    public static class ShiftExprHandler extends BinaryExprHandler { }
+    public static class ShiftExprHandler extends BinaryExprHandler {
+
+        @Override
+        protected void parsedOne(ParseNode aNode, String anId)
+        {
+            // Eat ">" tokens
+            if (anId == ">")
+                return;
+            super.parsedOne(aNode, anId);
+        }
+    }
 
     /**
      * AdditiveExpr Handler.
