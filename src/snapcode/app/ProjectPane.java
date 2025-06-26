@@ -91,7 +91,7 @@ public class ProjectPane extends ViewOwner {
         // Disable AutoBuild
         Workspace workspace = getWorkspace();
         WorkspaceBuilder builder = workspace.getBuilder();
-        builder.setAutoBuild(false);
+        builder.setAutoBuildEnabled(false);
 
         // Delete project
         Project project = getProject();
@@ -226,24 +226,13 @@ public class ProjectPane extends ViewOwner {
      * Reset UI.
      */
     @Override
-    protected void resetUI()
-    {
-        // Update AutoBuildCheckBox
-        Workspace workspace = getWorkspace();
-        setViewValue("AutoBuildCheckBox", workspace.getBuilder().isAutoBuild());
-    }
+    protected void resetUI()  { }
 
     /**
      * Respond to UI changes.
      */
     public void respondUI(ViewEvent anEvent)
     {
-        // Handle AutoBuildCheckBox
-        if (anEvent.equals("AutoBuildCheckBox")) {
-            Workspace workspace = getWorkspace();
-            workspace.getBuilder().setAutoBuild(anEvent.getBoolValue());
-        }
-
         // Handle LOCTitleView (Lines of Code) click
         if (anEvent.equals("LOCTitleView"))
             showLinesOfCode();

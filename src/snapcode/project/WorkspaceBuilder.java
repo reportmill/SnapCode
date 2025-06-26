@@ -13,10 +13,7 @@ public class WorkspaceBuilder {
     // The Workspace
     private Workspace _workspace;
 
-    // Whether to auto build project when files change
-    private boolean _autoBuild = true;
-
-    // Whether to auto build project feature is enabled
+    // Whether to auto build project is enabled
     private boolean _autoBuildEnabled = true;
 
     // Whether to add all files to next build
@@ -42,28 +39,17 @@ public class WorkspaceBuilder {
     }
 
     /**
-     * Returns whether to automatically build files when changes are detected.
+     * Returns whether project AutoBuild has been disabled (possibly for batch processing).
      */
-    public boolean isAutoBuild()  { return _autoBuild; }
+    public boolean isAutoBuildEnabled()  { return _autoBuildEnabled; }
 
     /**
-     * Sets whether to automatically build files when changes are detected.
+     * Sets whether project AutoBuild has been disabled (possibly for batch processing).
      */
-    public void setAutoBuild(boolean aValue)  { _autoBuild = aValue; }
-
-    /**
-     * Returns whether to project AutoBuild has been disabled (possibly for batch processing).
-     */
-    public boolean isAutoBuildEnabled()  { return isAutoBuild() && _autoBuildEnabled; }
-
-    /**
-     * Sets whether to project AutoBuild has been disabled (possibly for batch processing).
-     */
-    public boolean setAutoBuildEnabled(boolean aFlag)
+    public void setAutoBuildEnabled(boolean aValue)
     {
-        boolean o = _autoBuildEnabled;
-        _autoBuildEnabled = aFlag;
-        return o;
+        if (aValue == _autoBuildEnabled) return;
+        _autoBuildEnabled = aValue;
     }
 
     /**
@@ -144,11 +130,10 @@ public class WorkspaceBuilder {
      */
     public void cleanWorkspace()
     {
-        boolean old = setAutoBuildEnabled(false);
+        setAutoBuildEnabled(false);
         List<Project> projects = _workspace.getProjects();
-        for (Project project : projects)
-            project.getBuilder().cleanProject();
-        setAutoBuildEnabled(old);
+        projects.forEach(project -> project.getBuilder().cleanProject());
+        setAutoBuildEnabled(true);
         _buildLogBuffer.setLength(0);
         _buildLogBuffer.append("Clean workspace - all build files removed");
     }
@@ -202,7 +187,7 @@ public class WorkspaceBuilder {
             _buildLogBuffer.append("Build Completed (").append(elapsedTimeString).append(" seconds)");
         else {
             int errorCount = _workspace.getBuildIssues().getErrorCount();
-            _buildLogBuffer.append("Build Failed - " + errorCount + " error(s)");
+            _buildLogBuffer.append("Build Failed - ").append(errorCount).append(" error(s)");
         }
 
         // Handle BuildAgain
