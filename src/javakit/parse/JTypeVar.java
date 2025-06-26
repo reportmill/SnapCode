@@ -102,16 +102,12 @@ public class JTypeVar extends JNode implements WithId {
 
         // Handle Class
         String typeVarName = getName();
-        if (parentDecl instanceof JavaClass) {
-            JavaClass parentClass = (JavaClass) parentDecl;
+        if (parentDecl instanceof JavaClass parentClass)
             return parentClass.getTypeParameterForName(typeVarName);
-        }
 
         // Handle Executable (Method/Constructor)
-        if (parentDecl instanceof JavaExecutable) {
-            JavaExecutable parentMethod = (JavaExecutable) parentDecl;
+        if (parentDecl instanceof JavaExecutable parentMethod)
             return parentMethod.getTypeParameterForName(typeVarName);
-        }
 
         // Return
         System.out.println("JTypeVar.getJavaTypeVariable: Unsupported parent type: " + parentDecl);

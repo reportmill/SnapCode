@@ -59,10 +59,9 @@ public abstract class JExprLambdaBase extends JExpr {
         JNode parentNode = getParent();
 
         // Handle parent is WithArgs (JExprMethodCall, JExprAlloc): Get lambda interface from executable call decl param
-        if (parentNode instanceof WithArgs) {
+        if (parentNode instanceof WithArgs withArgsNode) {
 
             // Get WithArgs node and method/constructor
-            WithArgs withArgsNode = (WithArgs) parentNode;
             JavaExecutable method = withArgsNode.getExecutable();
             if (method == null)
                 return null;
@@ -134,11 +133,10 @@ public abstract class JExprLambdaBase extends JExpr {
             return paramType;
 
         // If lambda type not parameterized type, just return type
-        if (!(getLambdaType() instanceof JavaParameterizedType))
+        if (!(getLambdaType() instanceof JavaParameterizedType lambdaType))
             return paramType;
 
         // Get types
-        JavaParameterizedType lambdaType = (JavaParameterizedType) getLambdaType();
         JavaClass lambdaClass = lambdaType.getRawType();
         JavaMethod lambdaMethod = getLambdaMethod();
 

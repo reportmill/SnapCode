@@ -83,8 +83,8 @@ public class JExprMethodRef extends JExprLambdaBase {
     {
         // If something::new, return type Constructor or ArrayInit
         if (Objects.equals(getMethodName(), "new")) {
-            if (_prefixExpr instanceof JExprType) {
-                JType prefixType = ((JExprType) _prefixExpr).getType();
+            if (_prefixExpr instanceof JExprType typeExpr) {
+                JType prefixType = typeExpr.getType();
                 if (prefixType != null && prefixType.isArrayType())
                     return Type.ArrayInit;
             }

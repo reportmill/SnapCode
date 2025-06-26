@@ -191,8 +191,7 @@ public class JType extends JNode {
 
         // If parent is type, see if name is nested TypeArg from class extends/implements (e.g.: public class XXX extends List<E>)
         JNode parent = getParent();
-        if (parent instanceof JType) {
-            JType parentType = (JType) parent;
+        if (parent instanceof JType parentType) {
             JavaClass baseClass = parentType.getBaseClass();
             if (baseClass != null) {
                 JavaTypeVariable typeVarType = baseClass.getTypeParameterForName(baseName);
@@ -357,8 +356,7 @@ public class JType extends JNode {
             return (JVarDecl) parentNode;
 
         // If parent is var decl expression, return first var decl
-        if (parentNode instanceof JExprVarDecl) {
-            JExprVarDecl varDeclExpr = (JExprVarDecl) parentNode;
+        if (parentNode instanceof JExprVarDecl varDeclExpr) {
             JVarDecl[] varDecls = varDeclExpr.getVarDecls();
             return varDecls.length > 0 ? varDecls[0] : null;
         }
