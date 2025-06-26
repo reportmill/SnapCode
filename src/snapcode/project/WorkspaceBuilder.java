@@ -122,8 +122,11 @@ public class WorkspaceBuilder {
      */
     public void buildWorkspaceAfterDelay(int aDelay)
     {
-        ViewUtils.runDelayedCancelPrevious(this::buildWorkspace, aDelay);
+        ViewUtils.runDelayedCancelPrevious(_buildWorkspaceRunnable, aDelay);
     }
+
+    // Runnable for above to make sure there is only one
+    private Runnable _buildWorkspaceRunnable = this::buildWorkspace;
 
     /**
      * Stops any build in progress.
