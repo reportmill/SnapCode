@@ -18,14 +18,15 @@ public class WorkspaceUtils {
         Project javaFileProject = Project.getProjectForFile(javaFile);
         JavaClass javaClass = javaFileProject.getJavaClassForFile(javaFile);
 
-        // Get projects dependent on this project
-        List<Project> dependentProjects = getProjectsDependentOnProject(javaFileProject);
-        List<WebFile> dependentJavaFiles = new ArrayList<>();
+        // Get list of project and projects dependent on project
+        List<Project> dependentProjects = new ArrayList<>(javaFileProject.getProjects());
+        dependentProjects.add(0, javaFileProject);
 
-        // Iterate over projects and add files
+        // Find files in dependent projects that depend on class
+        List<WebFile> dependentJavaFiles = new ArrayList<>();
         for (Project project : dependentProjects) {
             WebFile srcDir = project.getSourceDir();
-            findJavaFilesDependentOnClass(javaClass, srcDir, dependentJavaFiles);
+            findJavaFilesDependentOnClass(srcDir, javaClass, dependentJavaFiles);
         }
 
         // Return
@@ -33,32 +34,14 @@ public class WorkspaceUtils {
     }
 
     /**
-     * Returns the workspace projects that are dependent on given project.
+     * Searches given directory for files dependent on given class and adds to list.
      */
-    private static List<Project> getProjectsDependentOnProject(Project aProject)
-    {
-        List<Project> dependentProjects = new ArrayList<>();
-        Workspace workspace = aProject.getWorkspace();
-        List<Project> projects = workspace.getProjects();
-
-        for (Project project : projects) {
-            if (project == aProject || project.getProjects().contains(aProject))
-                dependentProjects.add(project);
-        }
-
-        // Return
-        return dependentProjects;
-    }
-
-    /**
-     * Returns the dependent files for given class.
-     */
-    private static void findJavaFilesDependentOnClass(JavaClass javaClass, WebFile searchFile, List<WebFile> dependentFiles)
+    private static void findJavaFilesDependentOnClass(WebFile searchFile, JavaClass javaClass, List<WebFile> dependentFiles)
     {
         // Handle dir: Recurse
         if (searchFile.isDir()) {
             List<WebFile> dirFiles = searchFile.getFiles();
-            dirFiles.forEach(file -> findJavaFilesDependentOnClass(javaClass, file, dependentFiles));
+            dirFiles.forEach(file -> findJavaFilesDependentOnClass(file, javaClass, dependentFiles));
         }
 
         // Handle Java file: If isDependentOnClass() add to list
@@ -101,10 +84,8 @@ public class WorkspaceUtils {
         // Return first source file
         for (Project project : projects) {
             WebFile srcDir = project.getSourceDir();
-            if (srcDir.getFileCount() > 0) {
-                WebFile srcFile = srcDir.getFiles().get(0);
-                return srcFile;
-            }
+            if (srcDir.getFileCount() > 0)
+                return srcDir.getFiles().get(0);
         }
 
         // Return first project root dir
