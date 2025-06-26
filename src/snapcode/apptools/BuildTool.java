@@ -41,10 +41,7 @@ public class BuildTool extends WorkspaceTool {
      */
     public void buildWorkspace()
     {
-        if (ViewUtils.isAltDown())
-            _workspace.getBuilder().addAllFilesToBuild();
         _workspace.getBuilder().buildWorkspaceLater();
-
         _workspaceTools.showTool(this);
     }
 
@@ -55,7 +52,6 @@ public class BuildTool extends WorkspaceTool {
     {
         WorkspaceBuilder workspaceBuilder = _workspace.getBuilder();
         workspaceBuilder.cleanWorkspace();
-        workspaceBuilder.addAllFilesToBuild();
     }
 
     /**

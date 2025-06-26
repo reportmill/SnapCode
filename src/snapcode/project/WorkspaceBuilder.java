@@ -108,6 +108,11 @@ public class WorkspaceBuilder {
      */
     public void buildWorkspaceAfterDelay(int aDelay)
     {
+        // If no projects, just return
+        if (_workspace.getProjects().isEmpty())
+            return;
+
+        // Register for build
         ViewUtils.runDelayedCancelPrevious(_buildWorkspaceRunnable, aDelay);
     }
 
@@ -134,6 +139,11 @@ public class WorkspaceBuilder {
         List<Project> projects = _workspace.getProjects();
         projects.forEach(project -> project.getBuilder().cleanProject());
         setAutoBuildEnabled(true);
+
+        // Next build should add all files
+        addAllFilesToBuild();
+
+        // Clear build log
         _buildLogBuffer.setLength(0);
         _buildLogBuffer.append("Clean workspace - all build files removed");
     }

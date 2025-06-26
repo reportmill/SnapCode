@@ -373,8 +373,7 @@ public class WorkspacePane extends ViewOwner {
         runLater(getProjectFilesTool()::showTool);
 
         // Do AutoBuild
-        if (!getProjects().isEmpty())
-            buildWorkspaceAllLater();
+        buildWorkspaceAllLater();
 
         // IF lesson is set, show help tool
         if (_workspaceTools.getHelpTool().isLesson())
@@ -627,13 +626,10 @@ public class WorkspacePane extends ViewOwner {
      */
     private void buildWorkspaceAllLater()
     {
-        // Do AutoBuild
-        Workspace workspace = getWorkspace();
-        WorkspaceBuilder builder = workspace.getBuilder();
-        if (builder.isAutoBuildEnabled()) {
-            builder.addAllFilesToBuild();
+        WorkspaceBuilder builder = _workspace.getBuilder();
+        builder.addAllFilesToBuild();
+        if (builder.isAutoBuildEnabled())
             builder.buildWorkspaceAfterDelay(800);
-        }
     }
 
     /**
