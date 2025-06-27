@@ -56,22 +56,56 @@ public class GreenImport {
      */
     public static void openProjectForGreenfootArchiveUrl(WorkspacePane workspacePane, WebURL archiveUrl)
     {
+        // Create download archive and open project task
+        Workspace workspace = workspacePane.getWorkspace();
+        TaskManagerTask<Project> openProjectTask = (TaskManagerTask<Project>) workspace.getTaskManager().createTask();
+        TaskMonitor taskMonitor = openProjectTask.getTaskMonitor();
+        taskMonitor.setTitle("Opening Greenfoot");
+
+        // Configure function
+        openProjectTask.setTaskFunction(() -> openProjectForGreenfootArchiveUrlImpl(workspacePane, archiveUrl, taskMonitor));
+
+        // Start task
+        workspace.getBuilder().setAutoBuildEnabled(false);
+        openProjectTask.setOnSuccess(proj -> handleOpenProjectForGreenfootArchiveUrlSuccess(workspacePane, proj));
+        openProjectTask.setOnFinished(() -> handleOpenProjectForGreenfootArchiveUrlFinished(workspacePane));
+        openProjectTask.start();
+    }
+
+    /**
+     * Opens a new project for Greenfoot archive file URL.
+     */
+    private static Project openProjectForGreenfootArchiveUrlImpl(WorkspacePane workspacePane, WebURL archiveUrl, TaskMonitor taskMonitor)
+    {
+        // Init task monitor
+        taskMonitor.startForTaskCount(1);
+        taskMonitor.beginTask("Download project", 2);
+        taskMonitor.updateTask(1);
+
         // Get greenfoot dir for archive URL
         WebFile greenfootDir = getGreenfootDirForArchiveUrl(archiveUrl);
 
         // Get scenario name
         String scenarioName = greenfootDir.getSimpleName().replace(' ', '_');
 
+        // Get project site - if already exists and is project, open and return
+        Workspace workspace = workspacePane.getWorkspace();
+        WebSite projectSite = SnapCodeUtils.getSnapCodeProjectSiteForName(scenarioName);
+        if (projectSite.getExists() && ProjectUtils.isProjectDir(projectSite.getRootDir())) {
+            Project project = workspace.openProjectForSite(projectSite);
+            taskMonitor.endTask();
+            return project;
+        }
+
         // Register remote source
-        WebSite projectSite = ProjectUtils.getTempProjectSiteForProjectName(scenarioName);
         VersionControlUtils.setRemoteSiteUrl(projectSite, archiveUrl);
 
         // Create new project and get src dir
-        Workspace workspace = workspacePane.getWorkspace();
-        Project project = ProjectUtils.getTempProjectForName(workspace, scenarioName);
+        Project project = new Project(workspace, projectSite);
 
         // Get build file and configure
         BuildFile buildFile = project.getBuildFile();
+        buildFile.setIncludeSnapKitRuntime(true);
         buildFile.setIncludeGreenfootRuntime(true);
         buildFile.setMainClassName("Main");
         buildFile.writeFile();
@@ -83,9 +117,36 @@ public class GreenImport {
         // Create Main class that launches world.lastInstantiated prop
         createMainClassForGreenfootProject(project);
 
+        // End task
+        taskMonitor.endTask();
+
+        // Return
+        return project;
+    }
+
+    /**
+     * Called when open greenfoot project has success.
+     */
+    private static void handleOpenProjectForGreenfootArchiveUrlSuccess(WorkspacePane workspacePane, Project project)
+    {
+        // Open project
+        Workspace workspace = workspacePane.getWorkspace();
+        workspace.openProject(project);
+
         // Show greenfoot button and enable Greenfoot scope boxes
         workspacePane.getToolBar().showGreenfootButton();
         JavaTextArea.setShowScopeBoxes(true);
+    }
+
+    /**
+     * Called when open greenfoot project has finished.
+     */
+    private static void handleOpenProjectForGreenfootArchiveUrlFinished(WorkspacePane workspacePane)
+    {
+        Workspace workspace = workspacePane.getWorkspace();
+        WorkspaceBuilder workspaceBuilder = workspace.getBuilder();
+        workspaceBuilder.setAutoBuildEnabled(true);
+        workspaceBuilder.buildWorkspaceLater();
     }
 
     /**

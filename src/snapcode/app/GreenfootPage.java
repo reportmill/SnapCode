@@ -150,7 +150,8 @@ public class GreenfootPage extends WebPage {
     @Override
     protected void initUI()
     {
-        resetGreenfootEnv();
+        if (!getWorkspace().isBuilding())
+            resetGreenfootEnv();
 
         // Register for callback when ClassPane gets mouse click
         ClassesPane classesPane = _playerPane.getClassesPane();
