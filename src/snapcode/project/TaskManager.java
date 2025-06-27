@@ -134,12 +134,15 @@ public class TaskManager extends ViewOwner {
         // Update ActivityLabel
         setViewValue(_activityLabel, getActivityText());
 
+        // Clear any previous animation
+        _progressBar.getAnimCleared(0);
+
         // Update ProgressBar
         double progress = getProgress();
         if (progress > 0) {
              if (progress < _progressBar.getProgress())
                  _progressBar.setProgress(0);
-            _progressBar.getAnimCleared(500).setValue(ProgressBar.Progress_Prop, progress).play();
+            _progressBar.getAnim(500).setValue(ProgressBar.Progress_Prop, progress).play();
         }
         else _progressBar.setProgress(progress);
 
@@ -173,7 +176,7 @@ public class TaskManager extends ViewOwner {
         TaskRunner.Status taskStatus = task.getTaskRunner().getStatus();
         switch (taskStatus) {
             case Running -> { setProgress(0); setRunningTasks(true); }
-            case Finished -> { setProgress(1); runDelayed(() -> setRunningTasks(false), 500); }
+            case Finished -> { setProgress(1); runDelayed(() -> setRunningTasks(getProgress() < 1), 500); }
             default -> setRunningTasks(false);
         }
     }
