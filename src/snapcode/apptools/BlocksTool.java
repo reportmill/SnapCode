@@ -43,7 +43,7 @@ public class BlocksTool extends WorkspaceTool {
     private JavaClass _selClass;
 
     // Listener for JavaTextArea prop change
-    private PropChangeListener _textAreaPropChangeLsnr = pc -> javaTextAreaSelNodeChanged();
+    private PropChangeListener _textAreaPropChangeLsnr = pc -> handleJavaTextAreaSelNodeChange();
 
     // Listener for JavaTextArea drag events
     private EventListener _textAreaDragEventLsnr = e -> handleJavaTextAreaDragEvent(e);
@@ -115,22 +115,6 @@ public class BlocksTool extends WorkspaceTool {
     }
 
     /**
-     * Sets CodeBlocks for current TextArea.SelectedNode.
-     */
-    public void resetSelClassFromJavaTextArea()
-    {
-        // Get selected node
-        JNode selNode = _javaTextArea != null ? _javaTextArea.getSelNode() : null;
-        JClassDecl classDecl = selNode != null ? selNode.getParent(JClassDecl.class) : null;
-        if (classDecl == null && _javaTextArea != null)
-            classDecl = _javaTextArea.getJFile().getClassDecl();
-
-        // Get eval class for class decl
-        JavaClass selNodeEvalClass = classDecl != null ? classDecl.getEvalClass() : null;
-        setSelClass(selNodeEvalClass);
-    }
-
-    /**
      * Create UI.
      */
     protected View createUI()
@@ -196,8 +180,8 @@ public class BlocksTool extends WorkspaceTool {
     protected void initShowing()
     {
         // Start listening to PagePane.SelFile prop change
-        _pagePane.addPropChangeListener(pc -> pagePaneSelFileChanged(), PagePane.SelFile_Prop);
-        pagePaneSelFileChanged();
+        _pagePane.addPropChangeListener(pc -> handlePagePaneSelFileChange(), PagePane.SelFile_Prop);
+        handlePagePaneSelFileChange();
     }
 
     /**
@@ -224,17 +208,22 @@ public class BlocksTool extends WorkspaceTool {
         switch (anEvent.getName()) {
 
             // Handle DirectoryListView
-            case "DirectoryListView":
-                int selIndex = anEvent.getSelIndex();
-                View selView = _allBlocksColView.getChild(selIndex);
-                Rect selRect = selView.getBoundsLocal();
-                selRect.height = selView.getParent(Scroller.class).getHeight();
-                selView.scrollToVisible(selRect);
-                break;
+            case "DirectoryListView" -> showBlocksforDirectoryIndex(anEvent.getSelIndex());
 
             // Handle ShowBlocksCheckBox
-            case "ShowBlocksCheckBox": setShowBlocks(anEvent.getBoolValue()); break;
+            case "ShowBlocksCheckBox" -> setShowBlocks(anEvent.getBoolValue());
         }
+    }
+
+    /**
+     * Shows the blocks for given DirectoryListView entry index.
+     */
+    private void showBlocksforDirectoryIndex(int directoryIndex)
+    {
+        View selView = _allBlocksColView.getChild(directoryIndex);
+        Rect selRect = selView.getBoundsLocal();
+        selRect.height = selView.getParent(Scroller.class).getHeight();
+        selView.scrollToVisible(selRect);
     }
 
     /**
@@ -274,7 +263,7 @@ public class BlocksTool extends WorkspaceTool {
     /**
      * Called when PagePane.SelFile property changes
      */
-    private void pagePaneSelFileChanged()
+    private void handlePagePaneSelFileChange()
     {
         // Get PagePane JavaPage
         WebPage selPage = _pagePane.getSelPage();
@@ -286,6 +275,27 @@ public class BlocksTool extends WorkspaceTool {
         JavaTextArea javaTextArea = javaPage != null ? javaPage.getTextArea() : null;
         setJavaTextArea(javaTextArea);
     }
+
+    /**
+     * Called when JavaTextArea.SelNode changes to reset SelClass.
+     */
+    private void handleJavaTextAreaSelNodeChange()
+    {
+        // Get selected node
+        JNode selNode = _javaTextArea != null ? _javaTextArea.getSelNode() : null;
+        JClassDecl classDecl = selNode != null ? selNode.getParent(JClassDecl.class) : null;
+        if (classDecl == null && _javaTextArea != null)
+            classDecl = _javaTextArea.getJFile().getClassDecl();
+
+        // Get eval class for class decl
+        JavaClass selNodeEvalClass = classDecl != null ? classDecl.getEvalClass() : null;
+        setSelClass(selNodeEvalClass);
+    }
+
+    /**
+     * Called when JavaTextArea gets drag events.
+     */
+    private void handleJavaTextAreaDragEvent(ViewEvent anEvent)  { }
 
     /**
      * Sets the JavaTextArea associated with text pane.
@@ -307,22 +317,9 @@ public class BlocksTool extends WorkspaceTool {
         if (_javaTextArea != null) {
             _javaTextArea.addPropChangeListener(_textAreaPropChangeLsnr, JavaTextArea.SelNode_Prop);
             _javaTextArea.addEventHandler(_textAreaDragEventLsnr, View.DragEvents);
-            javaTextAreaSelNodeChanged();
+            handleJavaTextAreaSelNodeChange();
         }
     }
-
-    /**
-     * Called when JavaTextArea.SelNode changes.
-     */
-    protected void javaTextAreaSelNodeChanged()
-    {
-        resetSelClassFromJavaTextArea();
-    }
-
-    /**
-     * Called when JavaTextArea gets drag events.
-     */
-    protected void handleJavaTextAreaDragEvent(ViewEvent anEvent)  { }
 
     /**
      * Returns the BlockViews for method invocations for given class.
@@ -375,8 +372,7 @@ public class BlocksTool extends WorkspaceTool {
             }
 
             // If view is parent, recurse
-            if (child instanceof ParentView) {
-                ParentView parView = (ParentView) child;
+            if (child instanceof ParentView parView) {
                 JNodeView<?> nodeView = getNodeViewForViewAndXY(parView, pointInChildCoords.x, pointInChildCoords.y);
                 if (nodeView != null)
                     return nodeView;
@@ -416,12 +412,12 @@ public class BlocksTool extends WorkspaceTool {
     private static String[] getStatementStringsForClassImpl(JavaClass javaClass)
     {
         String simpleName = javaClass.getSimpleName();
-        switch (simpleName) {
-            case "GameActor": return GameActorPieces;
-            case "GamePen": return GamePenPieces;
-            case "GameView": return GameViewPieces;
-            default: return new String[0];
-        }
+        return switch (simpleName) {
+            case "GameActor" -> GameActorPieces;
+            case "GamePen" -> GamePenPieces;
+            case "GameView" -> GameViewPieces;
+            default -> new String[0];
+        };
         //else try { strings = (String[])ClassUtils.getMethod(aClass, "getSnapPieces").invoke(null); } catch(Exception e){ }
     }
 

@@ -390,7 +390,7 @@ public class JavaPage extends WebPage {
         page.setFile(file);
         WebBrowser browser = getBrowser();
         browser.setPageForURL(url, page);
-        browser.setSelUrl(file.getURL());
+        browser.setSelPage(page);
     }
 
     /**
