@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.webbrowser;
-import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import java.util.ArrayList;
@@ -69,7 +69,7 @@ public class WebBrowserHistory {
         if (!isEnabled() || Objects.equals(aURL, _url)) return;
 
         // If first URL to be added, just set and return
-        if (_url == null && _lastURLs.size() == 0 && _nextURLs.size() == 0) {
+        if (_url == null && _lastURLs.isEmpty() && _nextURLs.isEmpty()) {
             _url = aURL;
             return;
         }
@@ -116,7 +116,7 @@ public class WebBrowserHistory {
      */
     public WebURL getLastURL()
     {
-        return _lastURLs.size() > 0 ? _lastURLs.get(_lastURLs.size() - 1) : null;
+        return !_lastURLs.isEmpty() ? _lastURLs.get(_lastURLs.size() - 1) : null;
     }
 
     /**
@@ -139,19 +139,14 @@ public class WebBrowserHistory {
     /**
      * Returns the list of last URLs.
      */
-    public WebURL[] getLastURLs()
-    {
-        WebURL[] urls = _lastURLs.toArray(new WebURL[0]);
-        ArrayUtils.reverse(urls);
-        return urls;
-    }
+    public List<WebURL> getLastUrls()  { return ListUtils.getReverse(_lastURLs); }
 
     /**
      * Returns the next URL (forward tracking).
      */
     public WebURL getNextURL()
     {
-        return _nextURLs.size() > 0 ? _nextURLs.get(_nextURLs.size() - 1) : null;
+        return !_nextURLs.isEmpty() ? _nextURLs.get(_nextURLs.size() - 1) : null;
     }
 
     /**
@@ -174,12 +169,7 @@ public class WebBrowserHistory {
     /**
      * Returns the list of next URLs.
      */
-    public WebURL[] getNextURLs()
-    {
-        WebURL[] urls = _nextURLs.toArray(new WebURL[0]);
-        ArrayUtils.reverse(urls);
-        return urls;
-    }
+    public List<WebURL> getNextUrls()  { return ListUtils.getReverse(_nextURLs); }
 
     /**
      * Removes a URL from history.

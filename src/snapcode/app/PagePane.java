@@ -7,8 +7,6 @@ import snapcode.apptools.BuildFileTool;
 import snapcode.javatext.JavaTextArea;
 import snapcode.project.JavaTextDoc;
 import snapcode.project.Project;
-import snap.gfx.Color;
-import snap.gfx.Font;
 import snap.props.PropChange;
 import snap.util.ListUtils;
 import snap.view.*;
@@ -40,7 +38,7 @@ public class PagePane extends ViewOwner {
     private WebFile _selFile;
 
     // The TabBar
-    private TabBar _tabBar;
+    private PagePaneTabBar _tabBar;
 
     // The WebBrowser for displaying editors
     private WebBrowser _browser;
@@ -48,10 +46,6 @@ public class PagePane extends ViewOwner {
     // Constants for properties
     public static final String OpenFiles_Prop = "OpenFiles";
     public static final String SelFile_Prop = "SelFile";
-
-    // Constant for file tab attributes
-    private static Color TAB_BAR_BORDER_COLOR = Color.GRAY8;
-    private static Font TAB_BAR_FONT = new Font("Arial", 12);
 
     /**
      * Constructor.
@@ -85,11 +79,7 @@ public class PagePane extends ViewOwner {
             getBrowser().setTransition(WebBrowser.Instant);
 
         // If project file, add to open files and rebuild tabs
-        else if (shouldHaveFileTab(aFile)) {
-            _openFiles.add(aFile);
-            firePropChange(OpenFiles_Prop, null, aFile, _openFiles.size() - 1);
-            buildFileTabs();
-        }
+        else addOpenFile(aFile);
 
         // Set SelFile
         WebFile oldSelFile = _selFile;
@@ -131,6 +121,19 @@ public class PagePane extends ViewOwner {
     public List<WebFile> getOpenFiles()  { return _openFiles; }
 
     /**
+     * Adds an open file.
+     */
+    private void addOpenFile(WebFile aFile)
+    {
+        if (!_tabBar.shouldHaveFileTab(aFile))
+            return;
+
+        _openFiles.add(aFile);
+        firePropChange(OpenFiles_Prop, null, aFile, _openFiles.size() - 1);
+        _tabBar.buildFileTabs();
+    }
+
+    /**
      * Closes the given file.
      */
     public void closeFile(WebFile aFile)
@@ -143,16 +146,16 @@ public class PagePane extends ViewOwner {
         // Remove file
         _openFiles.remove(index);
 
-        // If removed file is selected file, set browser file to last file (that is still in OpenFiles list)
-        if (aFile == _selFile) {
-            WebURL url = getFallbackURL();
-            getBrowser().setTransition(WebBrowser.Instant);
-            getBrowser().setSelUrl(url);
-        }
-
         // Fire prop change
         firePropChange(OpenFiles_Prop, aFile, null, index);
-        buildFileTabs();
+        _tabBar.buildFileTabs();
+
+        // If removed file is selected file, set browser file to last file (that is still in OpenFiles list)
+        if (aFile == _selFile) {
+            WebURL fallbackUrl = getFallbackUrl();
+            getBrowser().setTransition(WebBrowser.Instant);
+            getBrowser().setSelUrl(fallbackUrl);
+        }
 
         // Clear page from browser cache
         setPageForURL(aFile.getURL(), null);
@@ -219,23 +222,21 @@ public class PagePane extends ViewOwner {
     /**
      * Returns the URL to fallback on when open file is closed.
      */
-    private WebURL getFallbackURL()
+    private WebURL getFallbackUrl()
     {
-        // Return the most recently opened of the remaining OpenFiles, or the Project.HomePageURL
         WebBrowser browser = getBrowser();
-        WebURL[] urls = browser.getHistory().getNextURLs();
-        for (WebURL url : urls) {
-            WebFile file = url.getFile();
-            if (_openFiles.contains(file))
-                return url.getFileURL();
-        }
 
-        urls = browser.getHistory().getLastURLs();
-        for (WebURL url : urls) {
-            WebFile file = url.getFile();
-            if (_openFiles.contains(file))
-                return url.getFileURL();
-        }
+        // Return the most recently opened of the remaining OpenFiles, or the Project.HomePageURL
+        List<WebURL> nextUrls = browser.getHistory().getNextUrls();
+        WebURL nextOpenUrl = ListUtils.findMatch(nextUrls, url -> _openFiles.contains(url.getFile()));
+        if (nextOpenUrl != null)
+            return nextOpenUrl;
+
+        //
+        List<WebURL> lastUrls = browser.getHistory().getLastUrls();
+        WebURL lastOpenUrl = ListUtils.findMatch(lastUrls, url -> _openFiles.contains(url.getFile()));
+        if (lastOpenUrl != null)
+            return lastOpenUrl;
 
         // Return
         return null;
@@ -249,8 +250,7 @@ public class PagePane extends ViewOwner {
         WebPage selPage = getSelPage();
 
         // Handle JavaPage: Return 'Java:...' or 'Jepl:...'
-        if (selPage instanceof JavaPage) {
-            JavaPage javaPage = (JavaPage) selPage;
+        if (selPage instanceof JavaPage javaPage) {
             JavaTextArea javaTextArea = javaPage.getTextArea();
             JavaTextDoc javaTextDoc = (JavaTextDoc) javaTextArea.getSourceText();
             String prefix = javaTextDoc.isJepl() ? "Jepl:" : javaTextDoc.isJMD() ? "JMD:" : "Java:";
@@ -260,8 +260,7 @@ public class PagePane extends ViewOwner {
         }
 
         // Handle Java markdown
-        if (selPage instanceof JMDPage) {
-            JMDPage javaPage = (JMDPage) selPage;
+        if (selPage instanceof JMDPage javaPage) {
             TextArea textArea = javaPage.getTextArea();
             String javaText = textArea.getText();
             String javaTextLZ = LZString.compressToEncodedURIComponent(javaText);
@@ -279,23 +278,7 @@ public class PagePane extends ViewOwner {
     protected View createUI()
     {
         // Create TabBar for open file buttons
-        _tabBar = new TabBar();
-        _tabBar.setFont(TAB_BAR_FONT);
-        _tabBar.setGrowWidth(true);
-        _tabBar.setTabCloseActionHandler((e,tab) -> handleTabCloseAction(tab));
-
-        // Create separator
-        RectView separator = new RectView();
-        separator.setFill(TAB_BAR_BORDER_COLOR);
-        separator.setPrefHeight(1);
-        ViewUtils.bind(_tabBar, View.Visible_Prop, separator, false);
-
-        // Set PrefHeight so it will show when empty
-        Tab sampleTab = new Tab();
-        sampleTab.setTitle("XXX");
-        _tabBar.addTab(sampleTab);
-        _tabBar.setPrefHeight(_tabBar.getPrefHeight() + 2);
-        _tabBar.removeTab(0);
+        _tabBar = new PagePaneTabBar(this);
 
         // Create browser
         _browser = new WebBrowser();
@@ -308,7 +291,7 @@ public class PagePane extends ViewOwner {
         colView.setGrowWidth(true);
         colView.setGrowHeight(true);
         colView.setFillWidth(true);
-        colView.setChildren(_tabBar, separator, _browser);
+        colView.setChildren(_tabBar, _tabBar.getSeparator(), _browser);
 
         // Return
         return colView;
@@ -320,19 +303,8 @@ public class PagePane extends ViewOwner {
     @Override
     protected void resetUI()
     {
-        // Update TabBar.SelIndex
-        WebFile selFile = getSelFile();
-        List<WebFile> openFiles = getOpenFiles();
-        int selIndex = openFiles.indexOf(selFile);
-        _tabBar.setSelIndex(selIndex);
-
-        // Update TabBar Visible
-        boolean showTabBar = !getOpenFiles().isEmpty();
-        if (showTabBar && getOpenFiles().size() == 1 && selFile != null) {
-             if ("jepl".equals(selFile.getFileType()) || selFile.getName().contains("JavaFiddle"))
-                showTabBar = false;
-        }
-        _tabBar.setVisible(showTabBar);
+        // Update TabBar
+        _tabBar.resetUI();
     }
 
     /**
@@ -342,44 +314,8 @@ public class PagePane extends ViewOwner {
     protected void respondUI(ViewEvent anEvent)
     {
         // Handle TabBar
-        if (anEvent.getView() == _tabBar) {
-            List<WebFile> openFiles = getOpenFiles();
-            int selIndex = _tabBar.getSelIndex();
-            WebFile openFile = selIndex >= 0 ? openFiles.get(selIndex) : null;
-            setSelFile(openFile);
-        }
-    }
-
-    /**
-     * Builds the file tabs.
-     */
-    private void buildFileTabs()
-    {
-        // If not on event thread, come back on that
-        if (!isEventThread()) {
-            runLater(() -> buildFileTabs());
-            return;
-        }
-
-        // Remove tabs
-        _tabBar.removeTabs();
-
-        // Iterate over OpenFiles, create FileTabs, init and add
-        for (WebFile file : getOpenFiles()) {
-
-            // Create/config/add Tab
-            Tab fileTab = new Tab();
-            fileTab.setTitle(file.getName());
-            fileTab.setClosable(true);
-            _tabBar.addTab(fileTab);
-
-            // Configure Tab.Button
-            ToggleButton tabButton = fileTab.getButton();
-            tabButton.addEventFilter(e -> handleTabButtonMousePress(e, file), MousePress);
-        }
-
-        // Reset UI
-        resetLater();
+        if (anEvent.getView() == _tabBar)
+            _tabBar.handleTabBarActionEvent(anEvent);
     }
 
     /**
@@ -391,58 +327,6 @@ public class PagePane extends ViewOwner {
         List<WebSite> projSites = _workspacePane.getProjectSites();
         WebSite fileSite = aFile.getSite();
         return projSites.contains(fileSite);
-    }
-
-    /**
-     * Returns whether a file is an "OpenFile" (whether it needs a file tab).
-     */
-    protected boolean shouldHaveFileTab(WebFile aFile)
-    {
-        // If directory, return false
-        if (aFile.isDir()) return false;
-
-        // Accept all Java files
-        if (aFile.getFileType().equals("java"))
-            return true;
-
-        // Accept all project files
-        return isProjectFile(aFile);
-    }
-
-    /**
-     * Called when TabBar Tab button close box is triggered.
-     */
-    private void handleTabCloseAction(Tab aTab)
-    {
-        int index = _tabBar.getTabs().indexOf(aTab);
-        if (index >= 0) {
-            WebFile tabFile = getOpenFiles().get(index);
-            closeFile(tabFile);
-        }
-    }
-
-    /**
-     * Called when tab button gets mouse press.
-     */
-    private void handleTabButtonMousePress(ViewEvent anEvent, WebFile aFile)
-    {
-        if (anEvent.isPopupTrigger()) {
-            Menu contextMenu = createFileContextMenu(aFile);
-            contextMenu.showMenuAtXY(anEvent.getView(), anEvent.getX(), anEvent.getY());
-            anEvent.consume();
-        }
-    }
-
-    /**
-     * Creates popup menu for tab button.
-     */
-    private Menu createFileContextMenu(WebFile aFile)
-    {
-        ViewBuilder<MenuItem> mb = new ViewBuilder<>(MenuItem.class);
-        mb.text("Revert File").save().addEventHandler(e -> revertFile(aFile), Action);
-        mb.text("Show file in Finder/Explorer").save().addEventHandler(e -> showFileInFinder(aFile), Action);
-        mb.text("Show file in Text Editor").save().addEventHandler(e -> showFileInTextEditor(aFile), Action);
-        return mb.buildMenu("ContextMenu", null);
     }
 
     /**
