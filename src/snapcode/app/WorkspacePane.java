@@ -179,7 +179,7 @@ public class WorkspacePane extends ViewOwner {
     /**
      * Opens the given file in workspace.
      */
-    public void openFile(WebFile aFile)  { _pagePane.openFile(aFile); }
+    public void openFile(WebFile aFile)  { _pagePane.setSelFile(aFile); }
 
     /**
      * Closes the given file in workspace.

@@ -28,22 +28,22 @@ import java.util.List;
 public class PagePane extends ViewOwner {
 
     // The WorkspacePane
-    protected WorkspacePane  _workspacePane;
+    protected WorkspacePane _workspacePane;
 
     // The HomePage
     private HomePage _homePage;
 
     // A list of open files
-    List<WebFile>  _openFiles = new ArrayList<>();
+    List<WebFile> _openFiles = new ArrayList<>();
 
     // The currently selected file
-    private WebFile  _selFile;
+    private WebFile _selFile;
 
     // The TabBar
-    private TabBar  _tabBar;
+    private TabBar _tabBar;
 
     // The WebBrowser for displaying editors
-    private WebBrowser  _browser;
+    private WebBrowser _browser;
 
     // Constants for properties
     public static final String OpenFiles_Prop = "OpenFiles";
@@ -68,65 +68,6 @@ public class PagePane extends ViewOwner {
     public WebBrowser getBrowser()  { if (_browser == null) getUI(); return _browser; }
 
     /**
-     * Returns the open files.
-     */
-    public List<WebFile> getOpenFiles()  { return _openFiles; }
-
-    /**
-     * Opens given file.
-     */
-    public void openFile(WebFile aFile)
-    {
-        // If file already set, just return
-        if (aFile == null || aFile == getSelFile()) return;
-
-        // If file already open, just select it
-        if (_openFiles.contains(aFile)){
-            getBrowser().setTransition(WebBrowser.Instant);
-            setSelFile(aFile);
-            return;
-        }
-
-        // If project file, add to open files and rebuild tabs
-        if (shouldHaveFileTab(aFile)) {
-            _openFiles.add(aFile);
-            firePropChange(OpenFiles_Prop, null, aFile, _openFiles.size() - 1);
-            buildFileTabs();
-        }
-
-        // Select file
-        setSelFile(aFile);
-    }
-
-    /**
-     * Closes the given file.
-     */
-    public void closeFile(WebFile aFile)
-    {
-        // Remove file from list (just return if not available)
-        int index = ListUtils.indexOfId(_openFiles, aFile);
-        if (index < 0)
-            return;
-
-        // Remove file
-        _openFiles.remove(index);
-
-        // If removed file is selected file, set browser file to last file (that is still in OpenFiles list)
-        if (aFile == _selFile) {
-            WebURL url = getFallbackURL();
-            getBrowser().setTransition(WebBrowser.Instant);
-            getBrowser().setSelUrl(url);
-        }
-
-        // Fire prop change
-        firePropChange(OpenFiles_Prop, aFile, null, index);
-        buildFileTabs();
-
-        // Clear page from browser cache
-        setPageForURL(aFile.getURL(), null);
-    }
-
-    /**
      * Returns the selected file.
      */
     public WebFile getSelFile()  { return _selFile; }
@@ -138,6 +79,17 @@ public class PagePane extends ViewOwner {
     {
         // If file already set, just return
         if (aFile == null || aFile == getSelFile()) return;
+
+        // If file already open, make it show instantly
+        if (_openFiles.contains(aFile))
+            getBrowser().setTransition(WebBrowser.Instant);
+
+        // If project file, add to open files and rebuild tabs
+        else if (shouldHaveFileTab(aFile)) {
+            _openFiles.add(aFile);
+            firePropChange(OpenFiles_Prop, null, aFile, _openFiles.size() - 1);
+            buildFileTabs();
+        }
 
         // Set SelFile
         WebFile oldSelFile = _selFile;
@@ -174,9 +126,55 @@ public class PagePane extends ViewOwner {
     public void setPageForURL(WebURL aURL, WebPage aPage)  { _browser.setPageForURL(aURL, aPage); }
 
     /**
+     * Returns the open files.
+     */
+    public List<WebFile> getOpenFiles()  { return _openFiles; }
+
+    /**
+     * Closes the given file.
+     */
+    public void closeFile(WebFile aFile)
+    {
+        // Remove file from list (just return if not available)
+        int index = ListUtils.indexOfId(_openFiles, aFile);
+        if (index < 0)
+            return;
+
+        // Remove file
+        _openFiles.remove(index);
+
+        // If removed file is selected file, set browser file to last file (that is still in OpenFiles list)
+        if (aFile == _selFile) {
+            WebURL url = getFallbackURL();
+            getBrowser().setTransition(WebBrowser.Instant);
+            getBrowser().setSelUrl(url);
+        }
+
+        // Fire prop change
+        firePropChange(OpenFiles_Prop, aFile, null, index);
+        buildFileTabs();
+
+        // Clear page from browser cache
+        setPageForURL(aFile.getURL(), null);
+    }
+
+    /**
      * Reloads a file.
      */
     public void reloadFile(WebFile aFile)  { _browser.reloadFile(aFile); }
+
+    /**
+     * Reverts a file.
+     */
+    public void revertFile(WebFile aFile)
+    {
+        boolean isSelFile = aFile == getSelFile();
+        closeFile(aFile);
+        aFile.resetAndVerify();
+        setPageForURL(aFile.getURL(), null);
+        if (isSelFile)
+            setSelFile(aFile);
+    }
 
     /**
      * Removes a file from OpenFiles list.
@@ -348,7 +346,7 @@ public class PagePane extends ViewOwner {
             List<WebFile> openFiles = getOpenFiles();
             int selIndex = _tabBar.getSelIndex();
             WebFile openFile = selIndex >= 0 ? openFiles.get(selIndex) : null;
-            openFile(openFile);
+            setSelFile(openFile);
         }
     }
 
@@ -448,19 +446,6 @@ public class PagePane extends ViewOwner {
     }
 
     /**
-     * Reverts a file.
-     */
-    public void revertFile(WebFile aFile)
-    {
-        boolean isSelFile = aFile == getSelFile();
-        closeFile(aFile);
-        aFile.resetAndVerify();
-        setPageForURL(aFile.getURL(), null);
-        if (isSelFile)
-            openFile(aFile);
-    }
-
-    /**
      * Shows a file in finder.
      */
     public void showFileInFinder(WebFile aFile)
@@ -502,7 +487,7 @@ public class PagePane extends ViewOwner {
     {
         // Handle SelPage
         if (aPC.getPropName() == WebBrowser.SelPage_Prop)
-            openFile(_browser.getSelFile());
+            setSelFile(_browser.getSelFile());
     }
 
     /**
