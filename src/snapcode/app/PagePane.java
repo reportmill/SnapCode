@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class manages and displays pages for editing project files.
+ * This class manages and displays pages for project files.
  */
 public class PagePane extends ViewOwner {
 
@@ -61,6 +61,11 @@ public class PagePane extends ViewOwner {
         super();
         _workspacePane = workspacePane;
     }
+
+    /**
+     * Returns the browser.
+     */
+    public WebBrowser getBrowser()  { if (_browser == null) getUI(); return _browser; }
 
     /**
      * Returns the open files.
@@ -129,7 +134,7 @@ public class PagePane extends ViewOwner {
     /**
      * Sets the selected site file.
      */
-    protected void setSelFile(WebFile aFile)
+    public void setSelFile(WebFile aFile)
     {
         // If file already set, just return
         if (aFile == null || aFile == getSelFile()) return;
@@ -149,24 +154,19 @@ public class PagePane extends ViewOwner {
     }
 
     /**
-     * Returns the browser.
-     */
-    public WebBrowser getBrowser()
-    {
-        if (_browser != null) return _browser;
-        getUI();
-        return _browser;
-    }
-
-    /**
      * Sets the browser URL.
      */
-    public void setBrowserURL(WebURL aURL)  { _browser.setSelUrl(aURL); }
+    public void setSelURL(WebURL aURL)  { _browser.setSelUrl(aURL); }
 
     /**
-     * Sets the browser URL.
+     * Returns the selected page.
      */
-    public void setBrowserFile(WebFile aFile)  { _browser.setSelFile(aFile); }
+    public WebPage getSelPage()  { return _browser.getSelPage(); }
+
+    /**
+     * Sets the selected page.
+     */
+    public void setSelPage(WebPage aPage)  { _browser.setSelPage(aPage); }
 
     /**
      * Sets the browser URL.
@@ -177,32 +177,6 @@ public class PagePane extends ViewOwner {
      * Reloads a file.
      */
     public void reloadFile(WebFile aFile)  { _browser.reloadFile(aFile); }
-
-    /**
-     * Returns the selected page.
-     */
-    public WebPage getSelPage()  { return _browser.getSelPage(); }
-
-    /**
-     * Sets the selected page.
-     */
-    public void setSelPage(WebPage aPage)
-    {
-        _browser.setSelPage(aPage);
-    }
-
-    /**
-     * Shows the home page.
-     */
-    public void showHomePage()
-    {
-        _homePage = new HomePage(_workspacePane);
-        setPageForURL(_homePage.getURL(), _homePage);
-        setSelPage(_homePage);
-        if (!_workspacePane._workspaceTools.getHelpTool().isLesson())
-            _workspacePane.getWorkspaceTools().getRightTray().hideTools();
-        _workspacePane.getRunTool().cancelRun();
-    }
 
     /**
      * Removes a file from OpenFiles list.
@@ -221,6 +195,19 @@ public class PagePane extends ViewOwner {
         List<WebFile> openFiles = getOpenFiles();
         List<WebFile> openProjectFiles = ListUtils.filter(openFiles, file -> Project.getProjectForFile(file) == aProject);
         openProjectFiles.forEach(this::closeFile);
+    }
+
+    /**
+     * Shows the home page.
+     */
+    public void showHomePage()
+    {
+        _homePage = new HomePage(_workspacePane);
+        setPageForURL(_homePage.getURL(), _homePage);
+        setSelPage(_homePage);
+        if (!_workspacePane._workspaceTools.getHelpTool().isLesson())
+            _workspacePane.getWorkspaceTools().getRightTray().hideTools();
+        _workspacePane.getRunTool().cancelRun();
     }
 
     /**
@@ -491,7 +478,7 @@ public class PagePane extends ViewOwner {
         WebPage page = new TextPage();
         page.setURL(url);
         setPageForURL(page.getURL(), page);
-        setBrowserURL(url);
+        setSelURL(url);
     }
 
     /**

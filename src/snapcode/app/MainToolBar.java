@@ -160,14 +160,14 @@ public class MainToolBar extends WorkspaceTool {
 
         // If file available, open file
         if (file != null)
-            _pagePane.setBrowserFile(file);
+            _pagePane.setSelFile(file);
 
             // If text available, either open URL or search for string
         else if (text != null && !text.isEmpty()) {
             int colon = text.indexOf(':');
             if (colon > 0 && colon < 6) {
                 WebURL url = WebURL.getURL(text);
-                _pagePane.setBrowserURL(url);
+                _pagePane.setSelURL(url);
             }
             else {
                 SearchTool searchTool = _workspaceTools.getToolForClass(SearchTool.class);

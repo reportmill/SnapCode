@@ -306,7 +306,7 @@ public class ProjectFilesTool extends WorkspaceTool {
                 WebFile selFile = getSelFile();
                 DiffPage diffPage = new DiffPage(selFile);
                 _pagePane.setPageForURL(diffPage.getURL(), diffPage);
-                _pagePane.setBrowserURL(diffPage.getURL());
+                _pagePane.setSelURL(diffPage.getURL());
                 break;
             }
 
@@ -316,7 +316,7 @@ public class ProjectFilesTool extends WorkspaceTool {
                 Project selProj = getSelProject();
                 WebFile classFile = selProj.getProjectFiles().getClassFileForJavaFile(selFile);
                 if (classFile != null)
-                    _pagePane.setBrowserFile(classFile);
+                    _pagePane.setSelFile(classFile);
                 break;
             }
 
