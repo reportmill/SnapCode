@@ -16,13 +16,11 @@
       <MenuItem Name="RunFileMenuItem" Text="Run File" />
       <MenuItem Name="DebugFileMenuItem" Text="Debug File" />
       <MenuItem />
-      <MenuItem Name="UpdateFilesMenuItem" Text="Update File(s) from Remote Source" />
-      <MenuItem Name="ReplaceFilesMenuItem" Text="Replace File(s) from Remote Source" />
-      <MenuItem Name="CommitFilesMenuItem" Text="Commit File(s) to Remote Source" />
-      <MenuItem Name="DiffFilesMenuItem" Text="Compare File to Remote File" />
+      <MenuItem Name="CommitFilesMenuItem" Text="Commit File(s)..." />
+      <MenuItem Name="RollbackFilesMenuItem" Text="Rollback File(s)..." />
+      <MenuItem Name="UpdateFilesMenuItem" Text="Update File(s)..." />
       <MenuItem />
-      <MenuItem Name="ShowFilesTreeMenuItem" Text="Show Files Tree" />
-      <MenuItem Name="ShowFilesListMenuItem" Text="Show Files List" />
+      <MenuItem Name="ShowDiffMenuItem" Text="Show Diff" />
       <MenuItem />
       <MenuItem Name="ShowClassInfoMenuItem" Text="Show Class File Info" />
     </MenuButton>

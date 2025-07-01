@@ -3,7 +3,6 @@
  */
 package snapcode.webbrowser;
 import snap.util.ListUtils;
-import snap.web.WebFile;
 import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,16 +17,16 @@ public class WebBrowserHistory {
     private WebBrowser _browser;
 
     // The current browser URL
-    private WebURL  _url;
+    private WebURL _url;
 
     // Whether history is currently tracking browser
-    private boolean  _enabled = true;
+    private boolean _enabled = true;
 
     // A list of back-tracking URLs
-    private List<WebURL>  _lastURLs = new ArrayList<>();
+    private List<WebURL> _lastUrls = new ArrayList<>();
 
     // A list of forward-tracking URLs
-    private List<WebURL>  _nextURLs = new ArrayList<>();
+    private List<WebURL> _nextUrls = new ArrayList<>();
 
     /**
      * Constructor.
@@ -69,14 +68,15 @@ public class WebBrowserHistory {
         if (!isEnabled() || Objects.equals(aURL, _url)) return;
 
         // If first URL to be added, just set and return
-        if (_url == null && _lastURLs.isEmpty() && _nextURLs.isEmpty()) {
+        if (_url == null && _lastUrls.isEmpty() && _nextUrls.isEmpty()) {
             _url = aURL;
             return;
         }
 
         // Add to LastURLs, clear NextURLs and set URL
-        if (!Objects.equals(_url, getLastURL())) addLastURL(_url);
-        _nextURLs.clear();
+        if (!Objects.equals(_url, getLastUrl()))
+            addLastUrl(_url);
+        _nextUrls.clear();
 
         // Set URL
         _url = aURL;
@@ -87,13 +87,15 @@ public class WebBrowserHistory {
      */
     public void trackBack()
     {
-        WebURL lastURL = removeLastURL();
-        if (lastURL == null) return;
+        WebURL lastURL = removeLastUrl();
+        if (lastURL == null)
+            return;
+
         getBrowser().setTransition(WebBrowser.MoveUp);
         setEnabled(false);
         getBrowser().setSelUrl(lastURL);
         setEnabled(true);
-        addNextURL(_url);
+        addNextUrl(_url);
         _url = lastURL;
     }
 
@@ -102,97 +104,81 @@ public class WebBrowserHistory {
      */
     public void trackForward()
     {
-        WebURL nextURL = removeNextURL();
-        if (nextURL == null) return;
+        WebURL nextURL = removeNextUrl();
+        if (nextURL == null)
+            return;
+
         setEnabled(false);
         getBrowser().setSelUrl(nextURL);
         setEnabled(true);
-        addLastURL(_url);
+        addLastUrl(_url);
         _url = nextURL;
     }
 
     /**
      * Returns the last URL (backtracking).
      */
-    public WebURL getLastURL()
-    {
-        return !_lastURLs.isEmpty() ? _lastURLs.get(_lastURLs.size() - 1) : null;
-    }
+    public WebURL getLastUrl()  { return !_lastUrls.isEmpty() ? _lastUrls.get(_lastUrls.size() - 1) : null; }
 
     /**
      * Adds a last URL.
      */
-    public void addLastURL(WebURL aURL)
+    public void addLastUrl(WebURL aURL)
     {
-        _lastURLs.add(aURL);
+        _lastUrls.add(aURL);
     }
 
     /**
      * Removes the last URL.
      */
-    public WebURL removeLastURL()
+    public WebURL removeLastUrl()
     {
-        int index = _lastURLs.size() - 1;
-        return index >= 0 ? _lastURLs.remove(index) : null;
+        int index = _lastUrls.size() - 1;
+        return index >= 0 ? _lastUrls.remove(index) : null;
     }
 
     /**
      * Returns the list of last URLs.
      */
-    public List<WebURL> getLastUrls()  { return ListUtils.getReverse(_lastURLs); }
+    public List<WebURL> getLastUrls()  { return ListUtils.getReverse(_lastUrls); }
 
     /**
      * Returns the next URL (forward tracking).
      */
-    public WebURL getNextURL()
-    {
-        return !_nextURLs.isEmpty() ? _nextURLs.get(_nextURLs.size() - 1) : null;
-    }
+    public WebURL getNextUrl()  { return !_nextUrls.isEmpty() ? _nextUrls.get(_nextUrls.size() - 1) : null; }
 
     /**
      * Adds a next URL.
      */
-    public void addNextURL(WebURL aURL)
+    public void addNextUrl(WebURL aURL)
     {
-        _nextURLs.add(aURL);
+        _nextUrls.add(aURL);
     }
 
     /**
      * Removes the next URL.
      */
-    public WebURL removeNextURL()
+    public WebURL removeNextUrl()
     {
-        int index = _nextURLs.size() - 1;
-        return index >= 0 ? _nextURLs.remove(index) : null;
+        int index = _nextUrls.size() - 1;
+        return index >= 0 ? _nextUrls.remove(index) : null;
     }
 
     /**
      * Returns the list of next URLs.
      */
-    public List<WebURL> getNextUrls()  { return ListUtils.getReverse(_nextURLs); }
+    public List<WebURL> getNextUrls()  { return ListUtils.getReverse(_nextUrls); }
 
     /**
      * Removes a URL from history.
      */
-    public void removeURL(WebURL aURL)
+    public void removeUrl(WebURL aURL)
     {
-        _lastURLs.remove(aURL);
-        _nextURLs.remove(aURL);
-        if (getBrowser().getSelUrl() == aURL) getBrowser().setSelUrl(null);
+        _lastUrls.remove(aURL);
+        _nextUrls.remove(aURL);
+        if (getBrowser().getSelUrl() == aURL)
+            getBrowser().setSelUrl(null);
         getBrowser().setPageForURL(aURL, null);
-    }
-
-    /**
-     * Removes a file from history.
-     */
-    public void removeFile(WebFile aFile)
-    {
-        WebURL[] lastURLs = _lastURLs.toArray(new WebURL[0]);
-        WebURL[] nextURLs = _nextURLs.toArray(new WebURL[0]);
-        for (WebURL url : lastURLs) if (url.getFile() == aFile) _lastURLs.remove(url);
-        for (WebURL url : nextURLs) if (url.getFile() == aFile) _lastURLs.remove(url);
-        if (getBrowser().getSelFile() == aFile) getBrowser().setSelUrl(null);
-        getBrowser().setPageForURL(aFile.getURL(), null);
     }
 
     /**
@@ -202,7 +188,7 @@ public class WebBrowserHistory {
     {
         getBrowser().setSelUrl(null);
         getBrowser()._allPages.clear();
-        _lastURLs.clear();
-        _nextURLs.clear();
+        _lastUrls.clear();
+        _nextUrls.clear();
     }
 }

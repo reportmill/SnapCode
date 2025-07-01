@@ -232,10 +232,6 @@ public class ProjectFilesTool extends WorkspaceTool {
             // Handle DisplayModeButton
             case "DisplayModeButton": setDisplayMode(getNextDisplayMode()); break;
 
-            // Handle ShowFilesTreeMenuItem, ShowFilesListMenuItem
-            case "ShowFilesTreeMenuItem": setDisplayMode(DisplayMode.FilesTree); break;
-            case "ShowFilesListMenuItem": setDisplayMode(DisplayMode.FilesList); break;
-
             // Handle NewFileMenuItem, NewFileButton
             case "NewFileMenuItem": case "NewFileButton": _workspacePane.getNewFileTool().showNewFilePanel(); break;
 
@@ -277,22 +273,6 @@ public class ProjectFilesTool extends WorkspaceTool {
             case "RunFileMenuItem": runAppForSelFile(false); break;
             case "DebugFileMenuItem": runAppForSelFile(true); break;
 
-            // Handle UpdateFilesMenuItem
-            case "UpdateFilesMenuItem": {
-                ProjectPane projectPane = getSelProjectPane();
-                VersionControlTool versionControlTool = projectPane.getVersionControlTool();
-                versionControlTool.updateFiles(null);
-                break;
-            }
-
-            // Handle ReplaceFileMenuItem
-            case "ReplaceFilesMenuItem": {
-                ProjectPane projectPane = getSelProjectPane();
-                VersionControlTool versionControlTool = projectPane.getVersionControlTool();
-                versionControlTool.replaceFiles(null);
-                break;
-            }
-
             // Handle CommitFileMenuItem
             case "CommitFilesMenuItem": {
                 ProjectPane projectPane = getSelProjectPane();
@@ -301,12 +281,28 @@ public class ProjectFilesTool extends WorkspaceTool {
                 break;
             }
 
-            // Handle DiffFilesMenuItem
-            case "DiffFilesMenuItem": {
+            // Handle RollbackFilesMenuItem
+            case "RollbackFilesMenuItem": {
+                ProjectPane projectPane = getSelProjectPane();
+                VersionControlTool versionControlTool = projectPane.getVersionControlTool();
+                versionControlTool.replaceFiles(null);
+                break;
+            }
+
+            // Handle UpdateFilesMenuItem
+            case "UpdateFilesMenuItem": {
+                ProjectPane projectPane = getSelProjectPane();
+                VersionControlTool versionControlTool = projectPane.getVersionControlTool();
+                versionControlTool.updateFiles(null);
+                break;
+            }
+
+            // Handle ShowDiffMenuItem
+            case "ShowDiffMenuItem": {
                 WebFile selFile = getSelFile();
                 DiffPage diffPage = new DiffPage(selFile);
                 _pagePane.setPageForURL(diffPage.getURL(), diffPage);
-                _pagePane.setSelURL(diffPage.getURL());
+                _pagePane.setSelPage(diffPage);
                 break;
             }
 

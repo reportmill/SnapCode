@@ -145,14 +145,16 @@ public class WebBrowser extends TransitionPane {
         if (aPage == getSelPage()) return;
 
         // Notify current page of imminent removal
-        if (_selPage != null) _selPage.notifyPageRemoved(this);
+        if (_selPage != null)
+            _selPage.notifyPageRemoved(this);
 
         // Set page
         _selPage = aPage;
 
         // Get page UI - if already set, just return
         View pageUI = _selPage != null ? _selPage.getUI() : null;
-        if (pageUI == getContent()) return;
+        if (pageUI == getContent())
+            return;
 
         // Set component
         setContent(pageUI);
@@ -321,12 +323,12 @@ public class WebBrowser extends TransitionPane {
     /**
      * Returns the previous URL.
      */
-    public WebURL getLastURL()  { return _history.getLastURL(); }
+    public WebURL getLastURL()  { return _history.getLastUrl(); }
 
     /**
      * Returns the next URL (if browser has backtracked).
      */
-    public WebURL getNextURL()  { return _history.getNextURL(); }
+    public WebURL getNextURL()  { return _history.getNextUrl(); }
 
     /**
      * Sets the browser URL to the last URL (backtracking).

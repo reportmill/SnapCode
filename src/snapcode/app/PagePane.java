@@ -288,10 +288,10 @@ public class PagePane extends WebBrowserPane {
     public void showFileInTextEditor(WebFile aFile)
     {
         WebURL url = aFile.getURL();
-        WebPage page = new TextPage();
-        page.setURL(url);
-        setPageForURL(page.getURL(), page);
-        setSelURL(url);
+        WebPage textPage = new TextPage();
+        textPage.setURL(url);
+        setPageForURL(textPage.getURL(), textPage);
+        setSelPage(textPage);
     }
 
     /**
