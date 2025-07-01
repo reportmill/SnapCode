@@ -181,8 +181,8 @@ public class ProjectFilesTool extends WorkspaceTool {
         addKeyActionHandler("CopyAction", "Shortcut+C");
         addKeyActionHandler("PasteAction", "Shortcut+V");
 
-        // Register for PagePane.SelFile change to reset UI
-        _pagePane.addPropChangeListener(pc -> handlePagePaneSelFileChange(), PagePane.SelFile_Prop);
+        // Register for WorkspacePane.SelFileTool.SelFile change to reset UI
+        _workspacePane.getSelFileTool().addPropChangeListener(pc -> handleSelFileChange(), SelFileTool.SelFile_Prop);
 
         // Register for Window.Focused change
         _workspacePane.getWindow().addPropChangeListener(pc -> windowFocusChanged(), View.Focused_Prop);
@@ -316,7 +316,7 @@ public class ProjectFilesTool extends WorkspaceTool {
                 Project selProj = getSelProject();
                 WebFile classFile = selProj.getProjectFiles().getClassFileForJavaFile(selFile);
                 if (classFile != null)
-                    _pagePane.setSelFile(classFile);
+                    _workspacePane.openFile(classFile);
                 break;
             }
 
@@ -371,9 +371,9 @@ public class ProjectFilesTool extends WorkspaceTool {
     }
 
     /**
-     * Called when PagePane changes SelFile.
+     * Called when WorkspacePane.SelFileTool.SelFile changes.
      */
-    private void handlePagePaneSelFileChange()
+    private void handleSelFileChange()
     {
         if (_filesTree == null) return;
 

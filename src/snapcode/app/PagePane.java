@@ -3,18 +3,15 @@
  */
 package snapcode.app;
 import snap.gfx.GFXEnv;
-import snapcode.apptools.BuildFileTool;
 import snapcode.javatext.JavaTextArea;
 import snapcode.project.JavaTextDoc;
 import snapcode.project.Project;
 import snap.props.PropChange;
 import snap.util.ListUtils;
 import snap.view.*;
-import snapcode.util.ClassInfoPage;
 import snapcode.util.LZString;
 import snapcode.webbrowser.*;
 import snap.web.WebFile;
-import snap.web.WebResponse;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import java.util.ArrayList;
@@ -34,9 +31,6 @@ public class PagePane extends ViewOwner {
     // A list of open files
     List<WebFile> _openFiles = new ArrayList<>();
 
-    // The currently selected file
-    private WebFile _selFile;
-
     // The TabBar
     private PagePaneTabBar _tabBar;
 
@@ -45,7 +39,6 @@ public class PagePane extends ViewOwner {
 
     // Constants for properties
     public static final String OpenFiles_Prop = "OpenFiles";
-    public static final String SelFile_Prop = "SelFile";
 
     /**
      * Constructor.
@@ -54,46 +47,27 @@ public class PagePane extends ViewOwner {
     {
         super();
         _workspacePane = workspacePane;
+
+        // Create browser
+        _browser = new PagePaneBrowser(this);
+        _browser.setGrowHeight(true);
+        _browser.addPropChangeListener(this::handleBrowserSelPageChange, WebBrowser.SelPage_Prop);
     }
 
     /**
      * Returns the browser.
      */
-    public WebBrowser getBrowser()  { if (_browser == null) getUI(); return _browser; }
+    public WebBrowser getBrowser()  { return _browser; }
 
     /**
      * Returns the selected file.
      */
-    public WebFile getSelFile()  { return _selFile; }
+    public WebFile getSelFile()  { return _browser.getSelFile(); }
 
     /**
-     * Sets the selected site file.
+     * Sets the selected file.
      */
-    public void setSelFile(WebFile aFile)
-    {
-        // If file already set, just return
-        if (aFile == null || aFile == getSelFile()) return;
-
-        // If file already open, make it show instantly
-        if (_openFiles.contains(aFile))
-            getBrowser().setTransition(WebBrowser.Instant);
-
-        // If project file, add to open files and rebuild tabs
-        else addOpenFile(aFile);
-
-        // Set SelFile
-        WebFile oldSelFile = _selFile;
-        _selFile = aFile;
-
-        // Set selected file and update tree
-        if (isPageAvailableForFile(_selFile))
-            getBrowser().setSelFile(_selFile);
-
-        // Fire prop change
-        firePropChange(SelFile_Prop, oldSelFile, _selFile);
-        resetLater();
-        _workspacePane.resetLater();
-    }
+    public void setSelFile(WebFile aFile)  { _browser.setSelFile(aFile); }
 
     /**
      * Sets the browser URL.
@@ -125,6 +99,8 @@ public class PagePane extends ViewOwner {
      */
     private void addOpenFile(WebFile aFile)
     {
+        if (_openFiles.contains(aFile))
+            return;
         if (!_tabBar.shouldHaveFileTab(aFile))
             return;
 
@@ -151,7 +127,7 @@ public class PagePane extends ViewOwner {
         _tabBar.buildFileTabs();
 
         // If removed file is selected file, set browser file to last file (that is still in OpenFiles list)
-        if (aFile == _selFile) {
+        if (aFile == getSelFile()) {
             WebURL fallbackUrl = getFallbackUrl();
             getBrowser().setTransition(WebBrowser.Instant);
             getBrowser().setSelUrl(fallbackUrl);
@@ -280,12 +256,6 @@ public class PagePane extends ViewOwner {
         // Create TabBar for open file buttons
         _tabBar = new PagePaneTabBar(this);
 
-        // Create browser
-        _browser = new WebBrowser();
-        _browser.setGrowHeight(true);
-        _browser.setPageClassResolver(this::getPageClassForResponse);
-        _browser.addPropChangeListener(this::handleBrowserSelPageChange, WebBrowser.SelPage_Prop);
-
         // Create ColView to hold TabsBox and Browser
         ColView colView = new ColView();
         colView.setGrowWidth(true);
@@ -355,9 +325,9 @@ public class PagePane extends ViewOwner {
      */
     protected boolean isPageAvailableForFile(WebFile aFile)
     {
-        if (_selFile.isFile())
+        if (aFile.isFile())
             return true;
-        if (_selFile.isRoot())
+        if (aFile.isRoot())
             return true;
         if (aFile == _workspacePane.getBuildDir())
             return true;
@@ -370,50 +340,12 @@ public class PagePane extends ViewOwner {
     private void handleBrowserSelPageChange(PropChange aPC)
     {
         // Handle SelPage
-        if (aPC.getPropName() == WebBrowser.SelPage_Prop)
-            setSelFile(_browser.getSelFile());
-    }
-
-    /**
-     * Returns WebPage class for given response.
-     */
-    private Class<? extends WebPage> getPageClassForResponse(WebResponse aResp)
-    {
-        // Handle common types
-        switch (aResp.getFileType()) {
-
-            // Handle Java / Jepl
-            case "java": case "jepl": return JavaPage.class;
-
-            // Handle JMD
-            case "jmd": return JMDPage.class;
-
-            // Handle Snap file
-            case "snp": return SnapBuilderPage.class;
-
-            // Handle mark down file
-            case "md": return MarkDownPage.class;
-
-            // Handle build file (build.snapcode)
-            case "snapcode": return BuildFileTool.BuildFilePage.class;
-
-            // Handle project.greenfoot file
-            case "greenfoot": return GreenfootPage.class;
-
-            // Handle class file
-            case "class": return ClassInfoPage.class;
+        if (aPC.getPropName() == WebBrowser.SelPage_Prop) {
+            WebFile selFile = getSelFile();
+            _workspacePane.getSelFileTool().setSelFile(selFile);
+            if (selFile != null)
+                addOpenFile(selFile);
+            resetLater();
         }
-
-        // Handle Project Root directory
-        WebFile file = aResp.getFile();
-        if (file != null && file.isRoot() && isProjectFile(file))
-            return ProjectPane.ProjectPanePage.class;
-
-        // Handle BuildDir
-        if (file == _workspacePane.getBuildDir())
-            return BuildDirPage.class;
-
-        // Return no page class
-        return null;
     }
 }

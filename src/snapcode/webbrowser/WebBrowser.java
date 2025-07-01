@@ -14,7 +14,6 @@ import snap.web.WebURL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
  * A browser to show content for WebURLs.
@@ -23,9 +22,6 @@ public class WebBrowser extends TransitionPane {
 
     // The current WebPage
     private WebPage _selPage;
-
-    // A helper function to resolve web response to a page class
-    private Function<WebResponse,Class<? extends WebPage>> _pageClassResolver;
 
     // A cache of WebPages for WebURLs
     protected Map<WebURL, WebPage> _allPages = new HashMap<>();
@@ -57,14 +53,6 @@ public class WebBrowser extends TransitionPane {
     public WebBrowser()
     {
         super();
-    }
-
-    /**
-     * Sets the Page class resolver.
-     */
-    public void setPageClassResolver(Function<WebResponse,Class<? extends WebPage>> pageClassResolver)
-    {
-        _pageClassResolver = pageClassResolver;
     }
 
     /**
@@ -260,7 +248,7 @@ public class WebBrowser extends TransitionPane {
         // Create WebPage in handler
         else {
             try {
-                Class<? extends WebPage> cls = getPageClass(aResp);
+                Class<? extends WebPage> cls = getPageClassForResponse(aResp);
                 page = ClassUtils.newInstance(cls);
             }
 
@@ -278,15 +266,10 @@ public class WebBrowser extends TransitionPane {
     }
 
     /**
-     * Returns the specified WebPage subclass for given WebFile.
+     * Returns the specified WebPage subclass for given WebResponse.
      */
-    protected Class<? extends WebPage> getPageClass(WebResponse aResp)
+    protected Class<? extends WebPage> getPageClassForResponse(WebResponse aResp)
     {
-        // If Page class resolver is set, see if it returns page class
-        Class<? extends WebPage> pageClass = _pageClassResolver != null ? _pageClassResolver.apply(aResp) : null;
-        if (pageClass != null)
-            return pageClass;
-
         // Handle some common types
         switch (aResp.getFileType()) {
 

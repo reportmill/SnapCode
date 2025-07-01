@@ -11,10 +11,7 @@ import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.*;
-import snapcode.app.JavaPage;
-import snapcode.app.PagePane;
-import snapcode.app.WorkspacePane;
-import snapcode.app.WorkspaceTool;
+import snapcode.app.*;
 import snapcode.javatext.JavaTextArea;
 import snapcode.views.JBlockView;
 import snapcode.views.JNodeView;
@@ -180,8 +177,8 @@ public class BlocksTool extends WorkspaceTool {
     protected void initShowing()
     {
         // Start listening to PagePane.SelFile prop change
-        _pagePane.addPropChangeListener(pc -> handlePagePaneSelFileChange(), PagePane.SelFile_Prop);
-        handlePagePaneSelFileChange();
+        _workspacePane.getSelFileTool().addPropChangeListener(pc -> handleSelFileChange(), SelFileTool.SelFile_Prop);
+        handleSelFileChange();
     }
 
     /**
@@ -261,12 +258,12 @@ public class BlocksTool extends WorkspaceTool {
     }
 
     /**
-     * Called when PagePane.SelFile property changes
+     * Called when WorkspacePane.SelFileTool.SelFile property changes
      */
-    private void handlePagePaneSelFileChange()
+    private void handleSelFileChange()
     {
         // Get PagePane JavaPage
-        WebPage selPage = _pagePane.getSelPage();
+        WebPage selPage = _workspacePane.getBrowser().getSelPage();
         JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
         if (selPage instanceof SnapEditorPage)
             javaPage = ((SnapEditorPage) selPage).getJavaPage();

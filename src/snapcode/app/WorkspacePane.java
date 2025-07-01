@@ -42,6 +42,9 @@ public class WorkspacePane extends ViewOwner {
     // A Drag-and-drop helper class
     private WorkspacePaneDnD _workspacePaneDnD;
 
+    // The SelFileTool
+    private SelFileTool _selFileTool;
+
     // Whether in embed mode
     protected static boolean _embedMode;
 
@@ -82,6 +85,9 @@ public class WorkspacePane extends ViewOwner {
         // Create MainToolBar, TaskManager
         _toolBar = new MainToolBar(this);
         _taskManager = _workspace.getTaskManager();
+
+        // Create SelFileTool
+        _selFileTool = new SelFileTool(this);
     }
 
     /**
@@ -177,9 +183,19 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
+     * Returns the SelFileTool.
+     */
+    public SelFileTool getSelFileTool()  { return _selFileTool; }
+
+    /**
+     * Returns the selected file.
+     */
+    public WebFile getSelFile()  { return _selFileTool.getSelFile(); }
+
+    /**
      * Opens the given file in workspace.
      */
-    public void openFile(WebFile aFile)  { _pagePane.setSelFile(aFile); }
+    public void openFile(WebFile aFile)  { _selFileTool.setSelFile(aFile); }
 
     /**
      * Closes the given file in workspace.
@@ -194,11 +210,6 @@ public class WorkspacePane extends ViewOwner {
         WebFile selFile = getSelFile();
         closeFile(selFile);
     }
-
-    /**
-     * Returns the selected file.
-     */
-    public WebFile getSelFile()  { return _pagePane.getSelFile(); }
 
     /**
      * Returns the selected site.

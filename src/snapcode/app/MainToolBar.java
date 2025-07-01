@@ -160,7 +160,7 @@ public class MainToolBar extends WorkspaceTool {
 
         // If file available, open file
         if (file != null)
-            _pagePane.setSelFile(file);
+            _workspacePane.openFile(file);
 
             // If text available, either open URL or search for string
         else if (text != null && !text.isEmpty()) {

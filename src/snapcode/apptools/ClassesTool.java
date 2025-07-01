@@ -4,7 +4,7 @@ import snap.util.ListUtils;
 import snap.util.ObjectArray;
 import snap.view.*;
 import snap.web.WebFile;
-import snapcode.app.PagePane;
+import snapcode.app.SelFileTool;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.project.Project;
@@ -26,7 +26,7 @@ public class ClassesTool extends WorkspaceTool {
     private TreeView<ClassNode> _treeView;
 
     // Listener for PagePane.SelFile
-    private PropChangeListener _pagePaneSelFileLsnr = pc -> handlePagePaneSelFileChanged();
+    private PropChangeListener _pagePaneSelFileLsnr = pc -> handleSelFileChanged();
 
     /**
      * Constructor.
@@ -187,19 +187,19 @@ public class ClassesTool extends WorkspaceTool {
 
         // Add remove PagePane.SelFile listener
         if (aValue) {
-            _pagePane.addPropChangeListener(_pagePaneSelFileLsnr, PagePane.SelFile_Prop);
-            handlePagePaneSelFileChanged();
+            _workspacePane.getSelFileTool().addPropChangeListener(_pagePaneSelFileLsnr, SelFileTool.SelFile_Prop);
+            handleSelFileChanged();
         }
         else _pagePane.removePropChangeListener(_pagePaneSelFileLsnr);
     }
 
     /**
-     * Called when PagePane.SelFile changes.
+     * Called when WorkspacePane.SelFileTool.SelFile changes.
      */
-    private void handlePagePaneSelFileChanged()
+    private void handleSelFileChanged()
     {
         // Get ClassNode for PagePane.SelFile
-        WebFile selFile = _pagePane.getSelFile();
+        WebFile selFile = _workspacePane.getSelFile();
         Project project = selFile != null && ProjectUtils.isSourceFile(selFile) ? Project.getProjectForFile(selFile) : null;
         Class<?> selFileClass = project != null ? project.getClassForFile(selFile) : null;
         ClassNode selFileClassNode = selFileClass != null ? getRootClassNode().getChildNodeForClassDeep(selFileClass) : null;
