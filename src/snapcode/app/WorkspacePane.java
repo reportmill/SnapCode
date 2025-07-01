@@ -648,7 +648,7 @@ public class WorkspacePane extends ViewOwner {
      */
     private void copyWebLink()
     {
-        String string = "https://reportmill.com/SnapCode/app/#" + _pagePane.getWindowLocationHash();
+        String string = "https://reportmill.com/SnapCode/app/#" + _selFileTool.getWindowLocationHash();
         Clipboard clipboard = Clipboard.get();
         clipboard.addData(string);
     }
@@ -658,7 +658,7 @@ public class WorkspacePane extends ViewOwner {
      */
     private void openWebLink()
     {
-        String string = "https://reportmill.com/SnapCode/app/#" + _pagePane.getWindowLocationHash();
+        String string = "https://reportmill.com/SnapCode/app/#" + _selFileTool.getWindowLocationHash();
         GFXEnv.getEnv().openURL(string);
     }
 

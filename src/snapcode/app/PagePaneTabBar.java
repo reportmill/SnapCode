@@ -147,7 +147,7 @@ public class PagePaneTabBar extends TabBar {
     private Menu createFileContextMenu(WebFile aFile)
     {
         ViewBuilder<MenuItem> mb = new ViewBuilder<>(MenuItem.class);
-        mb.text("Revert File").save().addEventHandler(e -> _pagePane.revertFile(aFile), Action);
+        mb.text("Revert File").save().addEventHandler(e -> _pagePane._workspacePane.getFilesTool().revertFile(aFile), Action);
         mb.text("Show file in Finder/Explorer").save().addEventHandler(e -> _pagePane.showFileInFinder(aFile), Action);
         mb.text("Show file in Text Editor").save().addEventHandler(e -> _pagePane.showFileInTextEditor(aFile), Action);
         return mb.buildMenu("ContextMenu", null);

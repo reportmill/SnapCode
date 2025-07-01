@@ -75,12 +75,25 @@ public class FilesTool extends WorkspaceTool {
     }
 
     /**
+     * Reverts a file.
+     */
+    public void revertFile(WebFile aFile)
+    {
+        boolean isSelFile = aFile == getSelFile();
+        _workspacePane.closeFile(aFile);
+        aFile.resetAndVerify();
+        _pagePane.setPageForURL(aFile.getURL(), null);
+        if (isSelFile)
+            _pagePane.setSelFile(aFile);
+    }
+
+    /**
      * Reverts the selected file.
      */
     public void revertSelFiles()
     {
         WebFile selFile = getSelFile();
-        _pagePane.revertFile(selFile);
+        revertFile(selFile);
     }
 
     /**

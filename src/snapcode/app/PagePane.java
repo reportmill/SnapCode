@@ -3,13 +3,10 @@
  */
 package snapcode.app;
 import snap.gfx.GFXEnv;
-import snapcode.javatext.JavaTextArea;
-import snapcode.project.JavaTextDoc;
 import snapcode.project.Project;
 import snap.props.PropChange;
 import snap.util.ListUtils;
 import snap.view.*;
-import snapcode.util.LZString;
 import snapcode.webbrowser.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -111,19 +108,6 @@ public class PagePane extends WebBrowserPane {
     public void reloadFile(WebFile aFile)  { _browser.reloadFile(aFile); }
 
     /**
-     * Reverts a file.
-     */
-    public void revertFile(WebFile aFile)
-    {
-        boolean isSelFile = aFile == getSelFile();
-        closeFile(aFile);
-        aFile.resetAndVerify();
-        setPageForURL(aFile.getURL(), null);
-        if (isSelFile)
-            setSelFile(aFile);
-    }
-
-    /**
      * Removes a file from OpenFiles list.
      */
     public void removeAllOpenFilesExcept(WebFile aFile)
@@ -183,35 +167,6 @@ public class PagePane extends WebBrowserPane {
             return lastOpenUrl;
 
         // Return
-        return null;
-    }
-
-    /**
-     * Returns the Window.location.hash for current Workspace selected page.
-     */
-    public String getWindowLocationHash()
-    {
-        WebPage selPage = getSelPage();
-
-        // Handle JavaPage: Return 'Java:...' or 'Jepl:...'
-        if (selPage instanceof JavaPage javaPage) {
-            JavaTextArea javaTextArea = javaPage.getTextArea();
-            JavaTextDoc javaTextDoc = (JavaTextDoc) javaTextArea.getSourceText();
-            String prefix = javaTextDoc.isJepl() ? "Jepl:" : javaTextDoc.isJMD() ? "JMD:" : "Java:";
-            String javaText = javaTextDoc.getString();
-            String javaTextLZ = LZString.compressToEncodedURIComponent(javaText);
-            return prefix + javaTextLZ;
-        }
-
-        // Handle Java markdown
-        if (selPage instanceof JMDPage javaPage) {
-            TextArea textArea = javaPage.getTextArea();
-            String javaText = textArea.getText();
-            String javaTextLZ = LZString.compressToEncodedURIComponent(javaText);
-            return "JMD:" + javaTextLZ;
-        }
-
-        // Return null
         return null;
     }
 
