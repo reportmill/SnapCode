@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * This class manages and displays pages for project files.
  */
-public class PagePane extends ViewOwner {
+public class PagePane extends WebBrowserPane {
 
     // The WorkspacePane
     protected WorkspacePane _workspacePane;
@@ -34,9 +34,6 @@ public class PagePane extends ViewOwner {
     // The TabBar
     private PagePaneTabBar _tabBar;
 
-    // The WebBrowser for displaying editors
-    private WebBrowser _browser;
-
     // Constants for properties
     public static final String OpenFiles_Prop = "OpenFiles";
 
@@ -47,47 +44,18 @@ public class PagePane extends ViewOwner {
     {
         super();
         _workspacePane = workspacePane;
-
-        // Create browser
-        _browser = new PagePaneBrowser(this);
-        _browser.setGrowHeight(true);
-        _browser.addPropChangeListener(this::handleBrowserSelPageChange, WebBrowser.SelPage_Prop);
     }
 
     /**
-     * Returns the browser.
+     * Override to use PagePaneBrowser.
      */
-    public WebBrowser getBrowser()  { return _browser; }
-
-    /**
-     * Returns the selected file.
-     */
-    public WebFile getSelFile()  { return _browser.getSelFile(); }
-
-    /**
-     * Sets the selected file.
-     */
-    public void setSelFile(WebFile aFile)  { _browser.setSelFile(aFile); }
-
-    /**
-     * Sets the browser URL.
-     */
-    public void setSelURL(WebURL aURL)  { _browser.setSelUrl(aURL); }
-
-    /**
-     * Returns the selected page.
-     */
-    public WebPage getSelPage()  { return _browser.getSelPage(); }
-
-    /**
-     * Sets the selected page.
-     */
-    public void setSelPage(WebPage aPage)  { _browser.setSelPage(aPage); }
-
-    /**
-     * Sets the browser URL.
-     */
-    public void setPageForURL(WebURL aURL, WebPage aPage)  { _browser.setPageForURL(aURL, aPage); }
+    @Override
+    protected WebBrowser createBrowser()
+    {
+        WebBrowser browser = new PagePaneBrowser(this);
+        browser.addPropChangeListener(this::handleBrowserSelPageChange, WebBrowser.SelPage_Prop);
+        return browser;
+    }
 
     /**
      * Returns the open files.
@@ -266,6 +234,12 @@ public class PagePane extends ViewOwner {
         // Return
         return colView;
     }
+
+    /**
+     * Initialize UI.
+     */
+    @Override
+    protected void initUI()  { }
 
     /**
      * ResetUI.

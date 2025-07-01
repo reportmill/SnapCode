@@ -20,6 +20,7 @@ public class PagePaneBrowser extends WebBrowser {
     {
         super();
         _pagePane = aPagePane;
+        setGrowHeight(true);
     }
 
     /**

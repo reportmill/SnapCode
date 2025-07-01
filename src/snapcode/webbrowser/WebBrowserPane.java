@@ -7,6 +7,7 @@ import snap.gfx.Color;
 import snap.util.SnapUtils;
 import snap.view.*;
 import snap.viewx.DialogBox;
+import snap.web.WebFile;
 import snap.web.WebURL;
 
 /**
@@ -15,49 +16,76 @@ import snap.web.WebURL;
 public class WebBrowserPane extends ViewOwner {
 
     // The browser
-    private WebBrowser _browser;
+    protected WebBrowser _browser;
+
+    /**
+     * Constructor.
+     */
+    public WebBrowserPane()
+    {
+        super();
+        _browser = createBrowser();
+    }
 
     /**
      * Returns the WebBrowser.
      */
-    public WebBrowser getBrowser()
+    public WebBrowser getBrowser()  { return _browser; }
+
+    /**
+     * Creates the browser.
+     */
+    protected WebBrowser createBrowser()
     {
-        getUI();
-        return _browser;
+        WebBrowser browser = new WebBrowser();
+        browser.setGrowWidth(true);
+        browser.setGrowHeight(true);
+        browser.setPrefSize(500, 450);
+        return browser;
     }
 
     /**
-     * Override to reinstall in BorderView.
+     * Returns the selected file.
      */
-    protected View createUI()
-    {
-        ParentView superUI = (ParentView) super.createUI();
-        View top = superUI.getChild(0);
-        View center = superUI.getChild(1);
-        View btm = superUI.getChild(2);
-        BorderView borderView = new BorderView();
-        borderView.setTop(top);
-        borderView.setCenter(center);
-        borderView.setBottom(btm);
-        return borderView;
-    }
+    public WebFile getSelFile()  { return _browser.getSelFile(); }
+
+    /**
+     * Sets the selected file.
+     */
+    public void setSelFile(WebFile aFile)  { _browser.setSelFile(aFile); }
+
+    /**
+     * Sets the browser URL.
+     */
+    public void setSelURL(WebURL aURL)  { _browser.setSelUrl(aURL); }
+
+    /**
+     * Returns the selected page.
+     */
+    public WebPage getSelPage()  { return _browser.getSelPage(); }
+
+    /**
+     * Sets the selected page.
+     */
+    public void setSelPage(WebPage aPage)  { _browser.setSelPage(aPage); }
+
+    /**
+     * Sets the browser URL.
+     */
+    public void setPageForURL(WebURL aURL, WebPage aPage)  { _browser.setPageForURL(aURL, aPage); }
 
     /**
      * Override to init UI.
      */
+    @Override
     protected void initUI()
     {
-        // Get Browser
-        _browser = getView("Browser", WebBrowser.class);
+        // Get top level ColView and add Browser
+        ColView topColView = getUI(ColView.class);
+        topColView.addChild(_browser, 2);
+
+        // Register for updates
         _browser.addPropChangeListener(pc -> resetLater());
-
-        // Get ToolBar
-        View toolBar = getView("ToolBar");
-        toolBar.setPrefSize(toolBar.getWidth(), toolBar.getHeight());
-
-        // Get StatusBar
-        View statusBar = getView("StatusBar");
-        statusBar.setPrefSize(statusBar.getWidth(), statusBar.getHeight());
 
         // Set left arrow in BackButton
         ShapeView s2 = new ShapeView(new Polygon(13, 3, 5, 10, 13, 17));
@@ -76,7 +104,8 @@ public class WebBrowserPane extends ViewOwner {
     /**
      * Reset the UI.
      */
-    public void resetUI()
+    @Override
+    protected void resetUI()
     {
         // Get URL
         WebBrowser browser = getBrowser();
@@ -110,31 +139,35 @@ public class WebBrowserPane extends ViewOwner {
     /**
      * Respond to UI changes.
      */
-    public void respondUI(ViewEvent anEvent)
+    @Override
+    protected void respondUI(ViewEvent anEvent)
     {
-        // Handle BackButton, NextButton, ReloadButton
-        if (anEvent.equals("BackButton")) getBrowser().trackBack();
-        if (anEvent.equals("NextButton")) getBrowser().trackForward();
-        if (anEvent.equals("ReloadButton")) getBrowser().reloadPage();
+        switch (anEvent.getName()) {
 
-        // Handle AddressText
-        if (anEvent.equals("AddressText"))
-            getBrowser().setSelUrlForUrlAddress(anEvent.getStringValue());
+            // Handle BackButton, NextButton, ReloadButton
+            case "BackButton" -> getBrowser().trackBack();
+            case "NextButton" -> getBrowser().trackForward();
+            case "ReloadButton" -> getBrowser().reloadPage();
 
-        // Handle AddressTextAction
-        if (anEvent.equals("AddressTextAction")) {
-            requestFocus("AddressText");
-            getView("AddressText", TextField.class).selectAll();
-        }
 
-        // Handle InfoButton
-        if (anEvent.equals("InfoButton")) {
-            String msg = "Snap Browser\nA browser for viewing Snap files, pages and applications\n" +
-                    "Build Date: " + SnapUtils.getBuildInfo() + "\nJVM: " + System.getProperty("java.version");
-            DialogBox dbox = new DialogBox("Browser Info");
-            dbox.setMessage(msg);
-            dbox.showMessageDialog(getUI());
+            // Handle AddressText
+            case "AddressText" -> getBrowser().setSelUrlForUrlAddress(anEvent.getStringValue());
+
+
+            // Handle AddressTextAction
+            case "AddressTextAction" -> {
+                requestFocus("AddressText");
+                getView("AddressText", TextField.class).selectAll();
+            }
+
+            // Handle InfoButton
+            case "InfoButton" -> {
+                String msg = "Snap Browser\nA browser for viewing Snap files, pages and applications\n" +
+                        "Build Date: " + SnapUtils.getBuildInfo() + "\nJVM: " + System.getProperty("java.version");
+                DialogBox dbox = new DialogBox("Browser Info");
+                dbox.setMessage(msg);
+                dbox.showMessageDialog(getUI());
+            }
         }
     }
-
 }
