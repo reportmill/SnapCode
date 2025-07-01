@@ -4,25 +4,21 @@
     <Label Name="FilesLabel" Margin="0,10,0,8" Font="Arial 14" Text="Project:" />
     <MenuButton Name="MenuButton" PrefWidth="24" PrefHeight="24" Margin="2" Padding="0" ShowArea="false">
       <MenuItem Name="NewFileMenuItem" Text="New File..." />
-      <MenuItem Name="RemoveFileMenuItem" Text="Remove File(s)..." />
+      <MenuItem Name="RemoveFileMenuItem" Text="Remove Files..." />
+      <MenuItem />
       <MenuItem Name="RenameFileMenuItem" Text="Rename File..." />
       <MenuItem Name="DuplicateFileMenuItem" Text="Duplicate File..." />
-      <MenuItem Name="RefreshFileMenuItem" Text="Refresh File(s)" />
+      <MenuItem Name="RefreshFileMenuItem" Text="Refresh Files" />
       <MenuItem />
-      <MenuItem Name="OpenInTextEditorMenuItem" Text="Open File in Text Editor" />
-      <MenuItem Name="OpenInBrowserMenuItem" Text="Open File in Separate Browser" />
-      <MenuItem Name="ShowFileMenuItem" Text="Show File in Explorer/Finder" />
-      <MenuItem />
-      <MenuItem Name="RunFileMenuItem" Text="Run File" />
-      <MenuItem Name="DebugFileMenuItem" Text="Debug File" />
-      <MenuItem />
-      <MenuItem Name="CommitFilesMenuItem" Text="Commit File(s)..." />
-      <MenuItem Name="RollbackFilesMenuItem" Text="Rollback File(s)..." />
-      <MenuItem Name="UpdateFilesMenuItem" Text="Update File(s)..." />
-      <MenuItem />
+      <MenuItem Name="CommitFilesMenuItem" Text="Commit Files..." />
+      <MenuItem Name="RollbackFilesMenuItem" Text="Rollback Files..." />
+      <MenuItem Name="UpdateFilesMenuItem" Text="Update Files..." />
       <MenuItem Name="ShowDiffMenuItem" Text="Show Diff" />
       <MenuItem />
-      <MenuItem Name="ShowClassInfoMenuItem" Text="Show Class File Info" />
+      <MenuItem Name="RunFileMenuItem" Text="Run File" />
+      <MenuItem Name="ShowFileMenuItem" Text="Open File in Explorer/Finder" />
+      <MenuItem Name="OpenInTextEditorMenuItem" Text="Open File in text editor" />
+      <MenuItem Name="OpenInBrowserMenuItem" Text="Open File in new window" />
     </MenuButton>
     <Button Name="DisplayModeButton" PrefWidth="24" PrefHeight="24" Margin="4" Padding="0" LeanX="RIGHT" ToolTip="File display mode: File Tree" ImageName="FilesTree.png" ShowArea="false" />
     <Button Name="DownloadFileButton" PrefWidth="24" PrefHeight="24" Margin="4" Padding="0" ImageName="Download.png" ShowArea="false" />

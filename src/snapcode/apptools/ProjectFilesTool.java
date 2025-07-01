@@ -9,11 +9,9 @@ import snap.view.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.app.*;
-import snapcode.project.Project;
 import snapcode.util.DiffPage;
 import snapcode.util.FileIcons;
 import snapcode.webbrowser.*;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -104,14 +102,13 @@ public class ProjectFilesTool extends WorkspaceTool {
     /**
      * Returns the next display mode.
      */
-    public DisplayMode getNextDisplayMode()
+    private DisplayMode getNextDisplayMode()
     {
-        switch (_displayMode) {
-            case FilesTree: return DisplayMode.FilesList;
-            case FilesList: return DisplayMode.History;
-            case History: return DisplayMode.FilesTree;
-            default: return DisplayMode.FilesTree;
-        }
+        return switch (_displayMode) {
+            case FilesTree -> DisplayMode.FilesList;
+            case FilesList -> DisplayMode.History;
+            case History -> DisplayMode.FilesTree;
+        };
     }
 
     /**
@@ -269,10 +266,6 @@ public class ProjectFilesTool extends WorkspaceTool {
                 break;
             }
 
-            // Handle RunFileMenuItem, DebugFileMenuItem
-            case "RunFileMenuItem": runAppForSelFile(false); break;
-            case "DebugFileMenuItem": runAppForSelFile(true); break;
-
             // Handle CommitFileMenuItem
             case "CommitFilesMenuItem": {
                 ProjectPane projectPane = getSelProjectPane();
@@ -306,15 +299,8 @@ public class ProjectFilesTool extends WorkspaceTool {
                 break;
             }
 
-            // Handle ShowClassInfoMenuItem
-            case "ShowClassInfoMenuItem": {
-                WebFile selFile = getSelFile();
-                Project selProj = getSelProject();
-                WebFile classFile = selProj.getProjectFiles().getClassFileForJavaFile(selFile);
-                if (classFile != null)
-                    _workspacePane.openFile(classFile);
-                break;
-            }
+            // Handle RunFileMenuItem
+            case "RunFileMenuItem": runAppForSelFile(); break;
 
             // Handle CopyAction, PasteAction
             case "CopyAction": _filesTool.copySelFiles(); break;
@@ -434,7 +420,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         // Handle MouseClick (double-click): RunSelectedFile
         if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
             if (getSelFile().isFile())
-                runAppForSelFile(false);
+                runAppForSelFile();
         }
     }
 
@@ -577,11 +563,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     /**
      * Runs the given file.
      */
-    private void runAppForSelFile(boolean isDebug)
-    {
-        RunTool runTool = _workspaceTools.getRunTool();
-        runTool.runAppForSelFile(isDebug);
-    }
+    private void runAppForSelFile()  { _workspaceTools.getRunTool().runAppForSelFile(false); }
 
     /**
      * Override for title.
@@ -594,10 +576,10 @@ public class ProjectFilesTool extends WorkspaceTool {
      */
     private static Image getDisplayModeImage(DisplayMode displayMode)
     {
-        switch (displayMode) {
-            case FilesTree: return FILES_TREE_ICON;
-            case FilesList: return FILES_LIST_ICON;
-            default: return FILES_HISTORY_ICON;
-        }
+        return switch (displayMode) {
+            case FilesTree -> FILES_TREE_ICON;
+            case FilesList -> FILES_LIST_ICON;
+            default -> FILES_HISTORY_ICON;
+        };
     }
 }
