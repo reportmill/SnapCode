@@ -110,8 +110,12 @@ public class SnapCloudPage extends WebPage {
         WebFile selFile = getSelFile(); if (selFile == null) return;
         WebFile parent = selFile.getParent();
 
+        // Init task monitor - add bogus work unit to add progress
         taskMonitor.startForTaskCount(1);
-        taskMonitor.beginTask("Delete file: " + selFile.getName(), -1);
+        taskMonitor.beginTask("Delete file: " + selFile.getName(), 2);
+        taskMonitor.updateTask(1);
+
+        // Delete file, reset and select parent
         selFile.delete();
         parent.resetAndVerify();
         setSelFile(parent);
