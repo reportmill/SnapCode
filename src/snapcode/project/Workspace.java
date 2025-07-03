@@ -239,7 +239,7 @@ public class Workspace extends PropObject {
 
         // Get project site
         WebURL snapCodeDirURL = SnapCodeUtils.getSnapCodeDirURL();
-        WebURL projDirURL = snapCodeDirURL.getChild(projName);
+        WebURL projDirURL = snapCodeDirURL.getChildUrlForPath(projName);
         WebSite projSite = projDirURL.getAsSite();
 
         // If exists, just add and return

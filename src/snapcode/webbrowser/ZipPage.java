@@ -33,7 +33,7 @@ public class ZipPage extends WebPage {
      */
     public WebFile[] getFiles()
     {
-        WebSite site = getFile().getURL().getAsSite();
+        WebSite site = getFile().getUrl().getAsSite();
         return site.getRootDir().getFilesArray();
     }
 

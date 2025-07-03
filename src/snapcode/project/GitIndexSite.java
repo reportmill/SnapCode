@@ -20,9 +20,9 @@ public class GitIndexSite extends WebSite {
         _gitDir = gitDir;
 
         // Get/set site URL
-        String gitDirPath = _gitDir.getDir().getURL().getString();
+        String gitDirPath = _gitDir.getDir().getUrl().getString();
         String sitePath = gitDirPath + ".index";
-        WebURL siteUrl = WebURL.getURL(sitePath);
+        WebURL siteUrl = WebURL.getUrl(sitePath);
         setURL(siteUrl);
     }
 

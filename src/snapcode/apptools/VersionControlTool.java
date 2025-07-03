@@ -523,7 +523,7 @@ public class VersionControlTool extends ProjectTool {
         // Reset RemoteUrl to snap cloud
         WebURL snapCloudUserUrl = SnapCloudPage.getSnapCloudUserUrl();
         assert snapCloudUserUrl != null;
-        WebURL snapCloudProjectUrl = snapCloudUserUrl.getChild(_proj.getName());
+        WebURL snapCloudProjectUrl = snapCloudUserUrl.getChildUrlForPath(_proj.getName());
         setRemoteUrlAddress(snapCloudProjectUrl.getString());
 
         // Create TaskMonitor for save to snap cloud

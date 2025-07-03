@@ -338,7 +338,7 @@ public class WorkspaceTools {
 
         // Make current JavaPage.TextArea resetLater
         WebFile issueFile = issue.getFile();
-        WebPage page = _workspacePane.getBrowser().getPageForURL(issueFile.getURL());
+        WebPage page = _workspacePane.getBrowser().getPageForURL(issueFile.getUrl());
         if (page instanceof JavaPage) {
             JavaTextPane javaTextPane = ((JavaPage) page).getTextPane();
             javaTextPane.handleBuildIssueOrBreakPointMarkerChange();

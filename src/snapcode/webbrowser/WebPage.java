@@ -61,7 +61,7 @@ public class WebPage extends ViewOwner {
     {
         // If file, return from that
         if (_file != null)
-            return _file.getURL();
+            return _file.getUrl();
 
         // If Response, return from that
         if (_response != null)
@@ -70,7 +70,7 @@ public class WebPage extends ViewOwner {
         // If subclass of WebPage, use Class file URL
         Class<? extends WebPage> pageClass = getClass();
         if (pageClass != WebPage.class)
-            return WebURL.getURL(pageClass);
+            return WebURL.getUrl(pageClass);
 
         // Return null
         System.err.println("WebPage.getURL: No page URL");

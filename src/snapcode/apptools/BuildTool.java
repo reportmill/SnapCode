@@ -202,7 +202,7 @@ public class BuildTool extends WorkspaceTool {
         // Open File
         if (issue != null) {
             WebFile file = issue.getFile();
-            WebURL fileURL = file.getURL();
+            WebURL fileURL = file.getUrl();
             String urls = fileURL.getString() + "#LineNumber=" + issue.getLineNumber();
             getBrowser().setSelUrlForUrlAddress(urls);
         }

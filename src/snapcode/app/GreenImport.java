@@ -47,7 +47,7 @@ public class GreenImport {
         }
 
         // Get URL for archive file and open
-        WebURL gfarFileUrl = WebURL.getURL(greenfootArchiveFile);
+        WebURL gfarFileUrl = WebURL.getUrl(greenfootArchiveFile);
         openProjectForGreenfootArchiveUrl(workspacePane, gfarFileUrl);
     }
 

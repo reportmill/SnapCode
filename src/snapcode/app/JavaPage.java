@@ -315,7 +315,7 @@ public class JavaPage extends WebPage {
         JNode declarationNode = NodeMatcher.getDeclarationNodeForDecl(jfile, aDecl);
 
         // Get URL
-        String urlString = file.getURL().getString();
+        String urlString = file.getUrl().getString();
         if (declarationNode != null)
             urlString += String.format("#Sel=%d-%d", declarationNode.getStartCharIndex(), declarationNode.getEndCharIndex());
 
@@ -336,7 +336,7 @@ public class JavaPage extends WebPage {
         String javaPath = '/' + className.replace('.', '/') + ".java";
 
         // Get URL
-        WebURL javaURL = WebURL.getURL("https://reportmill.com/jars/8u05/src.zip!" + javaPath);
+        WebURL javaURL = WebURL.getUrl("https://reportmill.com/jars/8u05/src.zip!" + javaPath);
         assert (javaURL != null);
         String urlString = javaURL.getString() + "#Member=" + aDecl.getSimpleName();
 
@@ -385,7 +385,7 @@ public class JavaPage extends WebPage {
     public void openAsSnapCode()
     {
         WebFile file = getFile();
-        WebURL url = file.getURL();
+        WebURL url = file.getUrl();
         WebPage page = new SnapEditorPage(this);
         page.setFile(file);
         WebBrowser browser = getBrowser();

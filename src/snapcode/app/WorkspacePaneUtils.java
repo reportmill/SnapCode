@@ -37,7 +37,7 @@ public class WorkspacePaneUtils {
      */
     public static void openFile(WorkspacePane workspacePane, WebFile aFile)
     {
-        WebURL fileUrl = aFile.getURL();
+        WebURL fileUrl = aFile.getUrl();
         openFileUrl(workspacePane, fileUrl);
     }
 
@@ -84,7 +84,7 @@ public class WorkspacePaneUtils {
         // Get sample url
         String SAMPLES_ROOT = "https://reportmill.com/SnapCode/Samples/";
         String samplePath = FilePathUtils.getFilenameSimple(sampleName) + '/' + sampleName;
-        WebURL sampleURL = WebURL.getURL(SAMPLES_ROOT + samplePath);
+        WebURL sampleURL = WebURL.getUrl(SAMPLES_ROOT + samplePath);
         assert (sampleURL != null);
 
         // Open sample URL
@@ -140,7 +140,7 @@ public class WorkspacePaneUtils {
     {
         // If Dropbox, replace project URL with local
         if (projectUrl.getScheme().equals("dbox"))
-            projectUrl = SnapCodeUtils.getSnapCodeDirURL().getChild(projectUrl.getFilename());
+            projectUrl = SnapCodeUtils.getSnapCodeDirURL().getChildUrlForPath(projectUrl.getFilename());
 
         switch (projectUrl.getFileType()) {
 
@@ -172,7 +172,7 @@ public class WorkspacePaneUtils {
 
         // Get project dir and project site
         WebFile projectDir = projectFile.isDir() ? projectFile : projectFile.getParent();
-        WebSite projectSite = projectDir.getURL().getAsSite();
+        WebSite projectSite = projectDir.getUrl().getAsSite();
 
         // Open project: Get project site and open in workspace
         Workspace workspace = workspacePane.getWorkspace();
@@ -243,7 +243,7 @@ public class WorkspacePaneUtils {
             WebUtils.copyFile(zipDirFile, SnapCodeUtils.getSnapCodeDir());
 
         // Set remote Zip address
-        WebSite projectSite = projectDir.getURL().getAsSite();
+        WebSite projectSite = projectDir.getUrl().getAsSite();
         VersionControlUtils.setRemoteSiteUrl(projectSite, zipURL);
 
         // Select good default file

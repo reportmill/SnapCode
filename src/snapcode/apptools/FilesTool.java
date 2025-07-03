@@ -82,7 +82,7 @@ public class FilesTool extends WorkspaceTool {
         boolean isSelFile = aFile == getSelFile();
         _workspacePane.closeFile(aFile);
         aFile.resetAndVerify();
-        _pagePane.setPageForURL(aFile.getURL(), null);
+        _pagePane.setPageForURL(aFile.getUrl(), null);
         if (isSelFile)
             _pagePane.setSelFile(aFile);
     }

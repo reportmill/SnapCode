@@ -214,7 +214,7 @@ public abstract class RunApp {
         if (aDir instanceof File)
             _workDir = (File) aDir;
         else {
-            WebURL url = WebURL.getURL(aDir);
+            WebURL url = WebURL.getUrl(aDir);
             _workDir = url != null ? url.getJavaFile() : null;
         }
     }

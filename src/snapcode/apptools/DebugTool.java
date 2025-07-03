@@ -86,10 +86,10 @@ public class DebugTool extends WorkspaceTool {
         _progCounterLine = aLine;
 
         // Reset JavaPage.TextArea for old/new files
-        WebPage page = oldPCF != null ? getBrowser().getPageForURL(oldPCF.getURL()) : null;
+        WebPage page = oldPCF != null ? getBrowser().getPageForURL(oldPCF.getUrl()) : null;
         if (page instanceof JavaPage)
             ((JavaPage) page).getTextArea().repaint();
-        page = _progCounterFile != null ? getBrowser().getPageForURL(_progCounterFile.getURL()) : null;
+        page = _progCounterFile != null ? getBrowser().getPageForURL(_progCounterFile.getUrl()) : null;
         if (page instanceof JavaPage)
             ((JavaPage) page).getTextArea().repaint();
     }
@@ -384,7 +384,7 @@ public class DebugTool extends WorkspaceTool {
             sourceCodeFilePath += "#SelLine=" + lineNum;
 
         // Set ProgramCounter file and line
-        WebURL url = WebURL.getURL(sourceCodeFilePath);
+        WebURL url = WebURL.getUrl(sourceCodeFilePath);
         WebFile file = url.getFile();
         setProgramCounter(file, lineNum - 1);
         getBrowser().setSelUrl(url);

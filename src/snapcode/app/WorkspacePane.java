@@ -671,7 +671,7 @@ public class WorkspacePane extends ViewOwner {
 
         // Open projects
         for (String projString : openProjectStrings) {
-            WebURL projUrl = WebURL.getURL(projString);
+            WebURL projUrl = WebURL.getUrl(projString);
             if (projUrl != null)
                 WorkspacePaneUtils.openProjectUrl(this, projUrl);
         }
@@ -695,7 +695,7 @@ public class WorkspacePane extends ViewOwner {
         List<String> openFilesStrings = Prefs.getDefaultPrefs().getStringsForKey(OPEN_FILES_PREFS_KEY);
 
         for (String openFileString : openFilesStrings) {
-            WebURL openFileUrl = WebURL.getURL(openFileString);
+            WebURL openFileUrl = WebURL.getUrl(openFileString);
             if (openFileUrl != null) {
                 WebFile openFile = openFileUrl.getFile();
                 if (openFile != null)
@@ -709,7 +709,7 @@ public class WorkspacePane extends ViewOwner {
      */
     protected void saveOpenFilesListToPrefs()
     {
-        List<String> openFileUrlStrings = ListUtils.map(_pagePane.getOpenFiles(), file -> file.getURL().getString());
+        List<String> openFileUrlStrings = ListUtils.map(_pagePane.getOpenFiles(), file -> file.getUrl().getString());
         Prefs.getDefaultPrefs().setStringsForKey(openFileUrlStrings, OPEN_FILES_PREFS_KEY);
         _updateOpenFilesPrefsRunnable = null;
     }

@@ -95,7 +95,7 @@ public class WebBrowser extends TransitionPane {
     public void setSelUrlForUrlAddress(String urlAddress)
     {
         WebFile selFile = getSelFile();
-        WebURL nextUrl = selFile != null ? selFile.getURL(urlAddress) : WebURL.getURL(urlAddress);
+        WebURL nextUrl = selFile != null ? selFile.getUrlForPath(urlAddress) : WebURL.getUrl(urlAddress);
         setSelUrl(nextUrl);
     }
 
@@ -116,7 +116,7 @@ public class WebBrowser extends TransitionPane {
         if (aFile == getSelFile()) return;
 
         // If file not verified, forward to setSelUrl()
-        WebURL url = aFile != null ? aFile.getURL() : null;
+        WebURL url = aFile != null ? aFile.getUrl() : null;
         if (aFile == null || !aFile.isVerified()) {
             setSelUrl(url);
             return;
@@ -198,7 +198,7 @@ public class WebBrowser extends TransitionPane {
      */
     public WebPage getPageForURL(WebURL aURL)
     {
-        WebURL baseUrl = aURL.getQueryURL();
+        WebURL baseUrl = aURL.getQueryUrl();
         return _allPages.get(baseUrl);
     }
 
@@ -207,7 +207,7 @@ public class WebBrowser extends TransitionPane {
      */
     public void setPageForURL(WebURL aURL, WebPage aPage)
     {
-        WebURL baseUrl = aURL.getQueryURL();
+        WebURL baseUrl = aURL.getQueryUrl();
         if (aPage != null) {
             _allPages.put(baseUrl, aPage);
             aPage.setBrowser(this);
@@ -355,7 +355,7 @@ public class WebBrowser extends TransitionPane {
      */
     public void reloadFile(WebFile aFile)
     {
-        WebPage page = getPageForURL(aFile.getURL());
+        WebPage page = getPageForURL(aFile.getUrl());
         if (page != null)
             page.reload();
     }

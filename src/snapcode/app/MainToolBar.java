@@ -166,7 +166,7 @@ public class MainToolBar extends WorkspaceTool {
         else if (text != null && !text.isEmpty()) {
             int colon = text.indexOf(':');
             if (colon > 0 && colon < 6) {
-                WebURL url = WebURL.getURL(text);
+                WebURL url = WebURL.getUrl(text);
                 _pagePane.setSelURL(url);
             }
             else {

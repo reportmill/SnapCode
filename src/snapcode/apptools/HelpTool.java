@@ -344,7 +344,7 @@ public class HelpTool extends WorkspaceTool {
     {
         if (_defaultHelpFileUrl != null)
             return _defaultHelpFileUrl;
-        return WebURL.getURL(HelpFile.class, "HelpFile.md");
+        return WebURL.getResourceUrl(HelpFile.class, "HelpFile.md");
         //return WebURL.getURL("/Users/jeff/Lessons/BalloonRide/BalloonRide.md");
     }
 
@@ -356,5 +356,5 @@ public class HelpTool extends WorkspaceTool {
     /**
      * Sets the default help file url.
      */
-    public static void setDefaultHelpFileSource(Object aSource)  { _defaultHelpFileUrl = WebURL.getURL(aSource); }
+    public static void setDefaultHelpFileSource(Object aSource)  { _defaultHelpFileUrl = WebURL.getUrl(aSource); }
 }

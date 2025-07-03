@@ -302,7 +302,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
             Breakpoint removedBreakpoint = (Breakpoint) pc.getOldValue();
 
             // Make current JavaPage.TextArea resetLater
-            WebPage page = getBrowser().getPageForURL(removedBreakpoint.getFile().getURL());
+            WebPage page = getBrowser().getPageForURL(removedBreakpoint.getFile().getUrl());
             if (page instanceof JavaPage)
                 ((JavaPage) page).getTextPane().handleBuildIssueOrBreakPointMarkerChange();
 

@@ -254,7 +254,7 @@ public class ProjectFilesTool extends WorkspaceTool {
             case "OpenInBrowserMenuItem": {
                 WebFile selFile = getSelFile();
                 WebBrowserPane browserPane = new WebBrowserPane();
-                browserPane.getBrowser().setSelUrl(selFile.getURL());
+                browserPane.getBrowser().setSelUrl(selFile.getUrl());
                 browserPane.getWindow().setVisible(true);
                 break;
             }

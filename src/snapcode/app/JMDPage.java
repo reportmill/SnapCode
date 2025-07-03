@@ -65,7 +65,7 @@ public class JMDPage extends WebPage {
         WebFile jmdFile = getFile();
         TextDoc javaTextDoc = new TextDoc();
         javaTextDoc.setDefaultFont(Font.getCodeFontForSize(14));
-        javaTextDoc.readFromSourceURL(jmdFile.getURL());
+        javaTextDoc.readFromSourceURL(jmdFile.getUrl());
 
         // Set TextArea.TextDoc and FirstFocus
         TextArea textArea = getTextArea();

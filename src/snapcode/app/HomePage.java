@@ -29,7 +29,7 @@ public class HomePage extends WebPage {
         super();
         _workspacePane = workspacePane;
 
-        WebURL homePageUrl = WebURL.getURL(getClass(), "HomePage.md"); assert (homePageUrl != null);
+        WebURL homePageUrl = WebURL.getResourceUrl(getClass(), "HomePage.md"); assert (homePageUrl != null);
         setURL(homePageUrl);
     }
 
@@ -130,7 +130,7 @@ public class HomePage extends WebPage {
     public void showReleaseNotes()
     {
         //WebURL releaseNotesURL = WebURL.getURL("/Users/jeff/Markdown/ReleaseNotes.md");
-        WebURL releaseNotesURL = WebURL.getURL("https://reportmill.com/SnapCode/ReleaseNotes.md");
+        WebURL releaseNotesURL = WebURL.getUrl("https://reportmill.com/SnapCode/ReleaseNotes.md");
         assert releaseNotesURL != null;
         WebFile releaseNotesFile = releaseNotesURL.getFile();
         _workspacePane.openFile(releaseNotesFile);
@@ -142,7 +142,7 @@ public class HomePage extends WebPage {
     private void openProjectForRecentProjectUrlAddress(String urlAddr)
     {
         // Get recent project URL
-        WebURL recentProjectUrl = WebURL.getURL(urlAddr);
+        WebURL recentProjectUrl = WebURL.getUrl(urlAddr);
         if (recentProjectUrl == null)
             return;
 
@@ -158,12 +158,12 @@ public class HomePage extends WebPage {
     {
         // This would let us have github project with icon at reportmill (not currently used)
         if (sampleUrlAddr.endsWith(".git") && sampleUrlAddr.contains("https://reportmill.com/SnapCode/Samples")) {
-            WebURL sampleUrl = WebURL.getURL(sampleUrlAddr); assert (sampleUrl != null);
+            WebURL sampleUrl = WebURL.getUrl(sampleUrlAddr); assert (sampleUrl != null);
             sampleUrlAddr = "https://github.com/reportmill/" + sampleUrl.getFilename();
         }
 
         // Open URL
-        WebURL sampleUrl = WebURL.getURL(sampleUrlAddr);
+        WebURL sampleUrl = WebURL.getUrl(sampleUrlAddr);
         WorkspacePaneUtils.openSamplesUrl(_workspacePane, sampleUrl);
     }
 

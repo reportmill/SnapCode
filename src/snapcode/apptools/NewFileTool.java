@@ -98,7 +98,7 @@ public class NewFileTool extends WorkspaceTool {
         // Save file
         try { newFile.save(); }
         catch (Exception e) {
-            _pagePane.showException(newFile.getURL(), e);
+            _pagePane.showException(newFile.getUrl(), e);
             return;
         }
 
@@ -154,7 +154,7 @@ public class NewFileTool extends WorkspaceTool {
     public void createNewProjectForProjectDir(WebFile newProjectFile)
     {
         // Create new project
-        WebSite projectSite = newProjectFile.getURL().getAsSite();
+        WebSite projectSite = newProjectFile.getUrl().getAsSite();
         Project newProject = _workspace.openProjectForSite(projectSite);
 
         // Configure to include SnapKit

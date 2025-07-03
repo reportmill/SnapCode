@@ -178,11 +178,11 @@ public class SamplesPageView extends MarkDownView {
         // Get link node
         MDNode linkNode = listNodeChildren[1];
         String linkUrlAddr = linkNode.getOtherText();
-        WebURL linkUrl = WebURL.getURL(linkUrlAddr); assert (linkUrl != null);
+        WebURL linkUrl = WebURL.getUrl(linkUrlAddr); assert (linkUrl != null);
         WebURL parentUrl = linkUrl.getParent();
 
         // Get image node and create image view
-        WebURL imageUrl = parentUrl.getChild(parentUrl.getFilename() + ".png");
+        WebURL imageUrl = parentUrl.getChildUrlForPath(parentUrl.getFilename() + ".png");
         Image image = Image.getImageForSource(imageUrl);
         ImageView imageView = new ImageView(image);
         imageView.setMargin(5, 0, 5, 5);

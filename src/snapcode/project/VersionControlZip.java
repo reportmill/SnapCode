@@ -39,7 +39,7 @@ public class VersionControlZip extends VersionControl {
         // Look for nested top level directory and use that nested dir site instead
         WebFile dirFile = ListUtils.findMatch(rootFiles, file -> ProjectUtils.isProjectDir(file));
         if (dirFile != null) {
-            WebURL dirFileUrl = dirFile.getURL();
+            WebURL dirFileUrl = dirFile.getUrl();
             return dirFileUrl.getAsSite();
         }
 

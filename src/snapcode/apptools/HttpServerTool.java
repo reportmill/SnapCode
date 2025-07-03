@@ -10,7 +10,6 @@ import snap.text.TextStyle;
 import snap.util.FilePathUtils;
 import snap.util.ListUtils;
 import snap.util.StringUtils;
-import snap.view.TextArea;
 import snap.view.TextView;
 import snap.view.ViewEvent;
 import snap.viewx.DialogBox;
@@ -92,7 +91,7 @@ public class HttpServerTool extends WorkspaceTool {
     {
         String sitePath = getSitePath();
         String path = FilePathUtils.getChildPath(sitePath, aPath);
-        return WebURL.getURL(path);
+        return WebURL.getUrl(path);
     }
 
     /**

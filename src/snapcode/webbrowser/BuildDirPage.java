@@ -85,7 +85,7 @@ public class BuildDirPage extends WebPage {
         if (anEvent.equals("FileBrowser")) {
             WebFile file = _fileBrowser.getSelItem();
             if (file != null && !file.isDir())
-                _pageBrowser.setSelUrl(file.getURL());
+                _pageBrowser.setSelUrl(file.getUrl());
         }
     }
 }

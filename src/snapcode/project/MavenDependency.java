@@ -312,7 +312,7 @@ public class MavenDependency extends BuildDependency {
     public WebURL getRemoteJarURL()
     {
         String urlString = getRemoteJarUrlString();
-        return WebURL.getURL(urlString);
+        return WebURL.getUrl(urlString);
     }
 
     /**

@@ -55,7 +55,7 @@ public class ClientUtils {
         File file = new File(dir, "SnapUserLocal.settings");
 
         // Get URL and web file
-        WebURL settingsFileURL = WebURL.getURL(file);
+        WebURL settingsFileURL = WebURL.getUrl(file);
         WebFile settingsFile = settingsFileURL.getFile();
         if (settingsFile == null)
             settingsFile = settingsFileURL.createFile(false);

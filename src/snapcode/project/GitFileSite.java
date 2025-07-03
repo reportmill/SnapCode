@@ -24,9 +24,9 @@ public class GitFileSite extends WebSite {
         _commit = aGC;
 
         // Get URL for site and set
-        String gitDirPath = _gitDir.getDir().getURL().getString();
+        String gitDirPath = _gitDir.getDir().getUrl().getString();
         String sitePath = gitDirPath + "!/" + _commit._rev.getId().getName();
-        WebURL siteUrl = WebURL.getURL(sitePath);
+        WebURL siteUrl = WebURL.getUrl(sitePath);
         setURL(siteUrl);
     }
 

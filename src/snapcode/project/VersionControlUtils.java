@@ -15,7 +15,7 @@ public class VersionControlUtils {
     public static WebURL getRemoteSiteUrl(WebSite projectSite)
     {
         String urlAddr = getRemoteSiteUrlAddress(projectSite);
-        return WebURL.getURL(urlAddr);
+        return WebURL.getUrl(urlAddr);
     }
 
     /**

@@ -29,7 +29,7 @@ public class JarBuilder {
      */
     public void setJarURL(Object aDest)
     {
-        _jarURL = WebURL.getURL(aDest);
+        _jarURL = WebURL.getUrl(aDest);
     }
 
     /**
@@ -58,9 +58,9 @@ public class JarBuilder {
      */
     public void addFile(Object aFile, Object aDir)
     {
-        WebURL fileUrl = WebURL.getURL(aFile);
+        WebURL fileUrl = WebURL.getUrl(aFile);
         File file = fileUrl.getJavaFile();
-        WebURL dirUrl = WebURL.getURL(aDir);
+        WebURL dirUrl = WebURL.getUrl(aDir);
         File dir = dirUrl.getJavaFile();
         if (file != null) {
             _files.add(file);
@@ -73,12 +73,12 @@ public class JarBuilder {
      */
     public void addFiles(Object aTopDir)
     {
-        WebURL url = WebURL.getURL(aTopDir);
+        WebURL url = WebURL.getUrl(aTopDir);
         File file = url.getJavaFile();
 
         if (file.isDirectory()) {
             for (File nestedFile : file.listFiles()) {
-                WebURL url2 = WebURL.getURL(nestedFile);
+                WebURL url2 = WebURL.getUrl(nestedFile);
                 if (nestedFile.isDirectory())
                     addFile(url2, file);
                 else {

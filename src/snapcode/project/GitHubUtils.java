@@ -20,7 +20,7 @@ public class GitHubUtils {
         zipUrlAddr = WebUtils.getCorsProxyAddress(zipUrlAddr); // Get
 
         // Get Zip url bytes
-        WebURL zipUrl = WebURL.getURL(zipUrlAddr); assert (zipUrl != null);
+        WebURL zipUrl = WebURL.getUrl(zipUrlAddr); assert (zipUrl != null);
         byte[] zipBytes = zipUrl.getBytes();
         if (zipBytes == null)
             throw new RuntimeException("Can't download git zip file");
@@ -28,7 +28,7 @@ public class GitHubUtils {
         // Get zip
         String zipName = repoURL.getFilename().replace(".git", ".zip");
         String zipPath = "/files/ZipFiles/" + zipName;
-        WebURL zipUrl2 = WebURL.getURL(zipPath); assert (zipUrl2 != null);
+        WebURL zipUrl2 = WebURL.getUrl(zipPath); assert (zipUrl2 != null);
         WebFile zipFile = zipUrl2.createFile(false);
         zipFile.setBytes(zipBytes);
         zipFile.save();
@@ -49,7 +49,7 @@ public class GitHubUtils {
         String apiUrlAddr = repoUrlAddr.replace("github.com/", "api.github.com/repos/");
         String zipUrlAddr = apiUrlAddr + "/zipball";
         System.out.println("Download: " + zipUrlAddr);
-        WebURL zipUrl = WebURL.getURL(zipUrlAddr); assert (zipUrl != null);
+        WebURL zipUrl = WebURL.getUrl(zipUrlAddr); assert (zipUrl != null);
         byte[] zipBytes = zipUrl.getBytes();
         if (zipBytes == null)
             throw new RuntimeException("Can't download git zip file");

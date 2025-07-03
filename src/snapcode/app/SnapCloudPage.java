@@ -132,7 +132,7 @@ public class SnapCloudPage extends WebPage {
 
         // Configure label
         Label snapCloudLabel = getView("SnapCloudLabel", Label.class);
-        WebURL snapCloudImageUrl = WebURL.getURL("https://reportmill.com/SnapCode/images/SnapCloud.png");
+        WebURL snapCloudImageUrl = WebURL.getUrl("https://reportmill.com/SnapCode/images/SnapCloud.png");
         Image snapCloudImage = Image.getImageForUrl(snapCloudImageUrl);
         snapCloudLabel.setImage(snapCloudImage);
 
@@ -219,7 +219,7 @@ public class SnapCloudPage extends WebPage {
             selFile = selFile.getParent();
 
         String urlAddr = selFile.getUrlAddress();
-        return WebURL.getURL(urlAddr);
+        return WebURL.getUrl(urlAddr);
     }
 
     /**
@@ -252,6 +252,6 @@ public class SnapCloudPage extends WebPage {
 
         // Return
         String snapCloudUrlAddress  = "dbox://dbox.com/" + domain + "/" + userName;
-        return WebURL.getURL(snapCloudUrlAddress);
+        return WebURL.getUrl(snapCloudUrlAddress);
     }
 }

@@ -17,7 +17,7 @@ public class SnapCodeUtils {
     public static WebURL getSnapCodeDirURL()
     {
         File file = FileUtils.getUserHomeDir("SnapCode", false);
-        return WebURL.getURL(file);
+        return WebURL.getUrl(file);
     }
 
     /**
@@ -37,7 +37,7 @@ public class SnapCodeUtils {
     {
         WebURL snapCodeDirUrl = getSnapCodeDirURL();
         assert (snapCodeDirUrl != null);
-        WebURL projectDirUrl = snapCodeDirUrl.getChild(projectName);
+        WebURL projectDirUrl = snapCodeDirUrl.getChildUrlForPath(projectName);
         assert (projectDirUrl != null);
         return projectDirUrl.createFile(true);
     }
@@ -48,7 +48,7 @@ public class SnapCodeUtils {
     public static WebSite getSnapCodeProjectSiteForName(String projectName)
     {
         WebURL snapCodeDirURL = getSnapCodeDirURL();
-        WebURL projectUrl = snapCodeDirURL.getChild(projectName);
+        WebURL projectUrl = snapCodeDirURL.getChildUrlForPath(projectName);
         return projectUrl.getAsSite();
     }
 

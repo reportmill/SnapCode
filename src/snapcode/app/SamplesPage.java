@@ -23,7 +23,7 @@ public class SamplesPage extends WebPage {
         super();
         _workspacePane = workspacePane;
 
-        WebURL samplesPageUrl = WebURL.getURL(getClass(), "SamplesPage.md"); assert (samplesPageUrl != null);
+        WebURL samplesPageUrl = WebURL.getResourceUrl(getClass(), "SamplesPage.md"); assert (samplesPageUrl != null);
         setURL(samplesPageUrl);
     }
 
@@ -35,7 +35,7 @@ public class SamplesPage extends WebPage {
         // Handle any link with "Sample:..."
         if (urlAddr.startsWith("Sample:")) {
             String sampleUrlAddr = urlAddr.substring("Sample:".length());
-            WebURL sampleUrl = WebURL.getURL(sampleUrlAddr);
+            WebURL sampleUrl = WebURL.getUrl(sampleUrlAddr);
             WorkspacePaneUtils.openSamplesUrl(_workspacePane, sampleUrl);
         }
     }

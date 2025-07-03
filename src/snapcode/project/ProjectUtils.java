@@ -275,7 +275,7 @@ public class ProjectUtils {
             tempProjPath = "/tmp/" + projectName;
 
         // Get URL and Site for TempProjPath
-        WebURL tempProjURL = WebURL.getURL(tempProjPath);
+        WebURL tempProjURL = WebURL.getUrl(tempProjPath);
         assert (tempProjURL != null);
         return tempProjURL.getAsSite();
     }
@@ -286,7 +286,7 @@ public class ProjectUtils {
     public static String getClassPathForClass(Class<?> aClass)
     {
         // Get URL and Site
-        WebURL url = WebURL.getURL(aClass);
+        WebURL url = WebURL.getUrl(aClass);
 
         // If URL string has separator, use site
         assert (url != null);

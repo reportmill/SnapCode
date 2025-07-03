@@ -170,7 +170,7 @@ public class ClassTree {
         for (String classPath : classPaths) {
 
             // Get URL for class path
-            WebURL classPathURL = WebURL.getURL(classPath);
+            WebURL classPathURL = WebURL.getUrl(classPath);
             if (classPathURL == null) {
                 System.err.println("ClassTree.getClassFileSitesForResolver: Can't resolve class path entry: " + classPath);
                 continue;
@@ -199,7 +199,7 @@ public class ClassTree {
 
         // Handle Java 8: Add rt.jar
         else {
-            WebURL jreURL = WebURL.getURL(List.class); assert jreURL != null;
+            WebURL jreURL = WebURL.getUrl(List.class); assert jreURL != null;
             WebSite jreSite = jreURL.getSite();
             classFileSites.add(jreSite);
         }
@@ -210,7 +210,7 @@ public class ClassTree {
      */
     private static WebSite getSiteForModuleName(String moduleName)
     {
-        WebURL moduleUrl = WebURL.getURL("jrt:/" + moduleName); assert moduleUrl != null;
+        WebURL moduleUrl = WebURL.getUrl("jrt:/" + moduleName); assert moduleUrl != null;
         return moduleUrl.getSite();
     }
 

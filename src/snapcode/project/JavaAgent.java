@@ -135,7 +135,7 @@ public class JavaAgent {
         // Create/load JavaTextDoc
         _javaTextDoc = createJavaTextDoc();
         _jfile = null;
-        _javaTextDoc.readFromSourceURL(_javaFile.getURL());
+        _javaTextDoc.readFromSourceURL(_javaFile.getUrl());
 
         // Listen for changes
         _javaTextDoc.addPropChangeListener(this::handleJavaTextDocPropChange);

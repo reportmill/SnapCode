@@ -117,7 +117,7 @@ public class App {
         if (arg0.startsWith("open:")) {
             WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
             String openUrlAddr = arg0.substring("open:".length());
-            WebURL openUrl = WebURL.getURL(openUrlAddr);
+            WebURL openUrl = WebURL.getUrl(openUrlAddr);
             if (openUrl != null) {
                 WorkspacePaneUtils.openFileUrl(workspacePane, openUrl);
                 return true;

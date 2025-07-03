@@ -99,7 +99,7 @@ public class PagePane extends WebBrowserPane {
         }
 
         // Clear page from browser cache
-        setPageForURL(aFile.getURL(), null);
+        setPageForURL(aFile.getUrl(), null);
     }
 
     /**
@@ -242,7 +242,7 @@ public class PagePane extends WebBrowserPane {
      */
     public void showFileInTextEditor(WebFile aFile)
     {
-        WebURL url = aFile.getURL();
+        WebURL url = aFile.getUrl();
         WebPage textPage = new TextPage();
         textPage.setURL(url);
         setPageForURL(textPage.getURL(), textPage);
