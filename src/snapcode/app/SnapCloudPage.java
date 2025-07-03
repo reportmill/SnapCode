@@ -46,7 +46,7 @@ public class SnapCloudPage extends WebPage {
 
         // Reset remote site root dir
         WebFile rootDir = snapCloudUserSite.getRootDir();
-        rootDir.resetAndVerify();
+        rootDir.reset();
 
         // Set root dir in remote browser
         _remoteBrowser.setSelFile(rootDir);
@@ -117,7 +117,6 @@ public class SnapCloudPage extends WebPage {
 
         // Delete file, reset and select parent
         selFile.delete();
-        parent.resetAndVerify();
         setSelFile(parent);
         taskMonitor.endTask();
     }

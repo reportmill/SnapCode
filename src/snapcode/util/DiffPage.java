@@ -68,9 +68,9 @@ public class DiffPage extends WebPage {
         // Get texts, initialize and install
         WebFile localFile = getLocalFile();
         WebFile remoteFile = getRemoteFile();
-        _leftTextArea = getText(localFile);
+        _leftTextArea = getTextAreaForFile(localFile);
         _leftTextArea.setGrowWidth(true);
-        _rightTextArea = getText(remoteFile);
+        _rightTextArea = getTextAreaForFile(remoteFile);
         _rightTextArea.setGrowWidth(true);
 
         // Get DiffPane and install texts
@@ -132,9 +132,9 @@ public class DiffPage extends WebPage {
     }
 
     /**
-     * Returns the text for file.
+     * Returns the text area for file.
      */
-    TextArea getText(WebFile aFile)
+    private TextArea getTextAreaForFile(WebFile aFile)
     {
         // Refresh file to get latest version
         aFile.resetAndVerify();

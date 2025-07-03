@@ -232,7 +232,7 @@ public class VersionControlTool extends ProjectTool {
 
         // Reset remote site root dir
         WebFile rootDir = remoteSite.getRootDir();
-        rootDir.resetAndVerify();
+        rootDir.reset();
 
         // Set root dir in remote browser
         _remoteBrowser.setSelFile(rootDir);
