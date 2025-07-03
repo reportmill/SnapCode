@@ -33,9 +33,9 @@ public class VersionControlUtils {
     public static String getRemoteSiteUrlAddress(WebSite projectSite)
     {
         // Get remote settings file
-        WebSite sandboxSite = projectSite.getSandboxSite();
-        WebFile remoteSettingsFile = sandboxSite.getFileForPath("/settings/remote");
-        if (remoteSettingsFile == null)
+        WebFile sandboxDir = projectSite.getSandboxDir();
+        WebFile remoteSettingsFile = sandboxDir.createChildFileForPath("/settings/remote", false);
+        if (!remoteSettingsFile.getExists())
             return null;
 
         // Get file text and return
@@ -53,24 +53,22 @@ public class VersionControlUtils {
         if (Objects.equals(remoteUrlAddress, getRemoteSiteUrlAddress(projectSite))) return;
 
         // Get remote settings file
-        WebSite sandboxSite = projectSite.getSandboxSite();
-        WebFile file = sandboxSite.getFileForPath("/settings/remote");
-        if (file == null)
-            file = sandboxSite.createFileForPath("/settings/remote", false);
+        WebFile sandboxDir = projectSite.getSandboxDir();
+        WebFile remoteSettingsFile = sandboxDir.createChildFileForPath("/settings/remote", false);
 
         // Save URL to remote settings file
         try {
 
             // If empty URL, delete file
             if (remoteUrlAddress == null || remoteUrlAddress.isEmpty()) {
-                if (file.getExists())
-                    file.delete();
+                if (remoteSettingsFile.getExists())
+                    remoteSettingsFile.delete();
             }
 
             // Set file text and save
             else {
-                file.setText(remoteUrlAddress);
-                file.save();
+                remoteSettingsFile.setText(remoteUrlAddress);
+                remoteSettingsFile.save();
             }
         }
 

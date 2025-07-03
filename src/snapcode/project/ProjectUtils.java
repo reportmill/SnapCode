@@ -338,8 +338,11 @@ public class ProjectUtils {
      */
     public static void deleteProjectFilesForSite(WebSite projectSite) throws Exception
     {
-        WebSite projSiteSandbox = projectSite.getSandboxSite();
-        projSiteSandbox.deleteSite();
         projectSite.deleteSite();
+
+        // Delete project sandbox dir
+        WebFile projectSandboxDir = projectSite.getSandboxDir();
+        if (projectSandboxDir.getExists())
+            projectSandboxDir.delete();
     }
 }

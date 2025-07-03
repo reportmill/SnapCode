@@ -103,10 +103,9 @@ public class VersionControl {
     {
         // Get clone site (via clone dir and url)
         WebSite localSite = getLocalSite();
-        WebSite sandboxSite = localSite.getSandboxSite();
-        WebFile cloneDir = sandboxSite.createFileForPath("/Clone", true);
-        WebURL cloneUrl = cloneDir.getURL();
-        return cloneUrl.getAsSite();
+        WebFile sandboxDir = localSite.getSandboxDir();
+        WebFile cloneDir = sandboxDir.createChildFileForPath("/Clone", true);
+        return cloneDir.getAsSite();
     }
 
     /**

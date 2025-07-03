@@ -185,14 +185,7 @@ public class Breakpoints extends PropObject {
     {
         Project rootProj = _workspace.getRootProject();
         WebSite projSite = rootProj.getSite();
-        WebSite sandboxSite = projSite.getSandboxSite();
-
-        // Get Sandbox breakpoints file
-        WebFile breakpointsFile = sandboxSite.getFileForPath("/settings/breakpoints");
-        if (breakpointsFile == null)
-            breakpointsFile = sandboxSite.createFileForPath("/settings/breakpoints", false);
-
-        // Return
-        return breakpointsFile;
+        WebFile sandboxDir = projSite.getSandboxDir();
+        return sandboxDir.createChildFileForPath("/settings/breakpoints", false);
     }
 }
