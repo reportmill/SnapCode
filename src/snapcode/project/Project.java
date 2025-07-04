@@ -422,9 +422,30 @@ public class Project extends PropObject {
     }
 
     /**
+     * Called when a project site file changes.
+     */
+    public void handleProjectSiteFileChange(PropChange aPC)
+    {
+        // Get source and property name
+        WebFile file = (WebFile) aPC.getSource();
+        String propName = aPC.getPropName();
+
+        // Handle Saved property: Call fileAdded or fileSaved
+        if (propName == WebFile.Exists_Prop) {
+            if ((Boolean) aPC.getNewValue())
+                handleSiteFileAdded(file);
+            else handleSiteFileRemoved(file);
+        }
+
+        // Handle LastModTime property: Call file saved
+        if (propName == WebFile.LastModTime_Prop && file.getExists())
+            handleSiteFileSaved(file);
+    }
+
+    /**
      * Called when file added.
      */
-    public void handleSiteFileAdded(WebFile aFile)
+    private void handleSiteFileAdded(WebFile aFile)
     {
         // Add build file
         _projBuilder.addBuildFile(aFile, false);
@@ -433,7 +454,7 @@ public class Project extends PropObject {
     /**
      * Called when file removed.
      */
-    public void handleSiteFileRemoved(WebFile aFile)
+    private void handleSiteFileRemoved(WebFile aFile)
     {
         // Remove build files
         _projBuilder.removeBuildFile(aFile);
@@ -449,7 +470,7 @@ public class Project extends PropObject {
     /**
      * Called when file saved.
      */
-    public void handleSiteFileSaved(WebFile aFile)
+    private void handleSiteFileSaved(WebFile aFile)
     {
         // If plain file, add as BuildFile
         if (aFile.isFile())

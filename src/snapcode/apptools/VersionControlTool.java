@@ -482,30 +482,6 @@ public class VersionControlTool extends ProjectTool {
     }
 
     /**
-     * Called when file added to project.
-     */
-    public void handleProjectFileAdded(WebFile aFile)
-    {
-        _versionControl.handleProjectFileAdded(aFile);
-    }
-
-    /**
-     * Called when file removed from project.
-     */
-    public void handleProjectFileRemoved(WebFile aFile)
-    {
-        _versionControl.handleProjectFileRemoved(aFile);
-    }
-
-    /**
-     * Called when project file saved.
-     */
-    public void handleProjectFileSaved(WebFile aFile)
-    {
-        _versionControl.handleProjectFileSaved(aFile);
-    }
-
-    /**
      * Called when VersionControl changes a file status.
      */
     private void handleVersionControlFileStatusChange(PropChange aPC)

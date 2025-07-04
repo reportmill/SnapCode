@@ -115,20 +115,16 @@ public class ProjectPane extends ViewOwner {
      */
     private void handleProjectSiteFileChange(PropChange aPC)
     {
-        // Get source and property name
+        // If BuildDir file, just return
         WebFile file = (WebFile) aPC.getSource();
-        String propName = aPC.getPropName();
+        if (_project.getBuildDir().containsFile(file))
+            return;
 
-        // Handle Saved property: Call fileAdded or fileSaved
-        if (propName == WebFile.Exists_Prop) {
-            if ((Boolean) aPC.getNewValue())
-                handleProjectFileAdded(file);
-            else handleProjectFileRemoved(file);
-        }
+        // Forward to version control
+        _versionControlTool.getVC().handleProjectFileChange(aPC);
 
-        // Handle LastModTime property: Call file saved
-        if (propName == WebFile.LastModTime_Prop && file.getExists())
-            handleProjectFileSaved(file);
+        // Forward to project
+        _project.handleProjectSiteFileChange(aPC);
 
         // Forward to WorkspacePane
         _workspacePane.handleSiteFileChange(aPC);
@@ -155,52 +151,6 @@ public class ProjectPane extends ViewOwner {
         // Close project and clear workspace pane
         _project.closeProject();
         _workspacePane = null;
-    }
-
-    /**
-     * Called when file added to project.
-     */
-    private void handleProjectFileAdded(WebFile aFile)
-    {
-        // Forward to VersionControl
-        _versionControlTool.handleProjectFileAdded(aFile);
-
-        // If BuildDir file, just return
-        if (_project.getBuildDir().containsFile(aFile)) return;
-
-        // Add file to project
-        _project.handleSiteFileAdded(aFile);
-    }
-
-    /**
-     * Called when file removed from project.
-     */
-    private void handleProjectFileRemoved(WebFile aFile)
-    {
-        // Forward to VersionControl
-        _versionControlTool.handleProjectFileRemoved(aFile);
-
-        // If BuildDir file, just return
-        if (_project.getBuildDir().containsFile(aFile)) return;
-
-        // Remove from project
-        _project.handleSiteFileRemoved(aFile);
-    }
-
-    /**
-     * Called when file saved in project.
-     */
-    private void handleProjectFileSaved(WebFile aFile)
-    {
-        // If BuildDir file, just return
-        if (_project.getBuildDir().containsFile(aFile))
-            return;
-
-        // Forward to VersionControl
-        _versionControlTool.handleProjectFileSaved(aFile);
-
-        // Notify saved and build workspace
-        _project.handleSiteFileSaved(aFile);
     }
 
     /**

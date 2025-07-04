@@ -538,24 +538,23 @@ public class VersionControl {
     public boolean supportsCommitMessages()  { return false; }
 
     /**
-     * Called when file added to project.
+     * Called when a project file changes.
      */
-    public void handleProjectFileAdded(WebFile aFile)  { }
-
-    /**
-     * Called when file removed from project.
-     */
-    public void handleProjectFileRemoved(WebFile aFile)
+    public void handleProjectFileChange(PropChange aPC)
     {
-        clearFileStatus(aFile);
-    }
+        // Get source and property name
+        WebFile file = (WebFile) aPC.getSource();
+        String propName = aPC.getPropName();
 
-    /**
-     * Called when project file saved.
-     */
-    public void handleProjectFileSaved(WebFile aFile)
-    {
-        clearFileStatus(aFile);
+        // Handle Saved property: Call fileAdded or fileSaved
+        if (propName == WebFile.Exists_Prop) {
+            if ((Boolean) aPC.getOldValue())
+                clearFileStatus(file);
+        }
+
+        // Handle LastModTime property: Call file saved
+        else if (propName == WebFile.LastModTime_Prop)
+            clearFileStatus(file);
     }
 
     /**
