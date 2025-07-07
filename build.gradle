@@ -64,7 +64,7 @@ task buildFullJar(type: Jar) {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    exclude('**/org/**', '**/test/**', '/META-INF/*.SF', '/META-INF/*.RSA') //, '**/sun/**')
+    exclude('**/test/**', '/META-INF/*.SF', '/META-INF/*.RSA') //, '**/org/**', '**/sun/**')
     processResources { finalizedBy ('buildInfo') }
     with jar
     dependsOn build
