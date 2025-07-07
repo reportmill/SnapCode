@@ -24,6 +24,8 @@ public class AccountTool extends ViewOwner {
 
     // Constants
     private static final String USER_EMAIL_KEY = "SnapUserEmail";
+    private static final String GITHUB_USER_KEY = "GithubUser";
+    private static final String GITHUB_PAC_KEY = "GithubPAC";
 
     /**
      * Constructor.
@@ -71,6 +73,10 @@ public class AccountTool extends ViewOwner {
         // Update LightModeButton, DarkModeButton
         setViewValue("LightModeButton", ViewTheme.get() == ViewTheme.getLight());
         setViewValue("DarkModeButton", ViewTheme.get() == ViewTheme.getDark());
+
+        // Update GithubUserText, GithubPacText
+        setViewValue("GithubUserText", getGithubUser());
+        setViewValue("GithubPacText", getGithubPac());
     }
 
     /**
@@ -82,14 +88,18 @@ public class AccountTool extends ViewOwner {
         switch (anEvent.getName()) {
 
             // Handle CloseButton
-            case "CloseButton": _popupWindow.hide(); break;
+            case "CloseButton" -> _popupWindow.hide();
 
             // Handle EmailText
-            case "EmailText": setUserEmail(anEvent.getStringValue()); break;
+            case "EmailText" -> setUserEmail(anEvent.getStringValue());
 
             // Handle LightModeButton, DarkModeButton
-            case "LightModeButton": setTheme(ViewTheme.getLight()); break;
-            case "DarkModeButton": setTheme(ViewTheme.getDark()); break;
+            case "LightModeButton" -> setTheme(ViewTheme.getLight());
+            case "DarkModeButton" -> setTheme(ViewTheme.getDark());
+
+            // Handle GithubUserText, GithubPacText
+            case "GithubUserText" -> setGithubUser(anEvent.getStringValue());
+            case "GithubPacText" -> setGithubPac(anEvent.getStringValue());
         }
     }
 
@@ -117,5 +127,37 @@ public class AccountTool extends ViewOwner {
         ViewTheme.setTheme(theme);
         if (!(_workspacePane.getPagePane().getSelPage() instanceof JavaPage))
             _workspacePane.getPagePane().getBrowser().reloadPage();
+    }
+
+    /**
+     * Returns the github user name.
+     */
+    public static String getGithubUser()
+    {
+        return Prefs.getDefaultPrefs().getString(GITHUB_USER_KEY, "");
+    }
+
+    /**
+     * Sets the github user name.
+     */
+    public static void setGithubUser(String aValue)
+    {
+        Prefs.getDefaultPrefs().setValue(GITHUB_USER_KEY, aValue);
+    }
+
+    /**
+     * Returns the github personal access token.
+     */
+    public static String getGithubPac()
+    {
+        return Prefs.getDefaultPrefs().getString(GITHUB_PAC_KEY, "");
+    }
+
+    /**
+     * Sets the github personal access token.
+     */
+    public static void setGithubPac(String aValue)
+    {
+        Prefs.getDefaultPrefs().setValue(GITHUB_PAC_KEY, aValue);
     }
 }

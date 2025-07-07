@@ -3,6 +3,7 @@ import org.eclipse.jgit.lib.ProgressMonitor;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import snap.util.TaskMonitor;
+import snapcode.apptools.AccountTool;
 
 /**
  * Utilities for git.
@@ -24,9 +25,9 @@ public class GitUtils {
      */
     public static CredentialsProvider getCredentialsProvider()
     {
-        String userName = getGitUserName();
-        String password = getGitPassword();
-        if (userName == null || password == null)
+        String userName = AccountTool.getGithubUser();
+        String password = AccountTool.getGithubPac();
+        if (userName == null || userName.isEmpty() || password == null || password.isEmpty())
             return null;
 
         // Return

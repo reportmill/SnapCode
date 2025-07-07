@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView Padding="20,20,20,20" PrefHeight="220" Font="Arial 14" FillWidth="true">
+<ColView Padding="20" Font="Arial 14" FillWidth="true">
   <RowView MinHeight="32">
-    <Label Margin="0,8,0,8" LeanX="CENTER" Font="Arial 24" Text="Account Settings" />
+    <Label Margin="0,8,0,8" Font="Arial 24" LeanX="CENTER" Text="Account Settings" />
   </RowView>
   <Separator PrefHeight="40" />
   <RowView Margin="10,0,0,0">
@@ -10,9 +10,21 @@
   </RowView>
   <RowView Margin="20,0,0,0">
     <Label Margin="0,8,0,8" Text="Display Mode:" />
-    <ToggleButton Name="LightModeButton" MinWidth="100" Position="CENTER_LEFT" Text="Light Mode" />
-    <ToggleButton Name="DarkModeButton" MinWidth="100" Position="CENTER_RIGHT" Text="Dark Mode" />
-    <Label PrefWidth="28" PrefHeight="28" Margin="0,0,0,10" ImageName="pkg.images/DarkMode.png" />
+    <ToggleButton Name="LightModeButton" MinWidth="100" Text="Light Mode" Position="CENTER_LEFT" />
+    <ToggleButton Name="DarkModeButton" MinWidth="100" Text="Dark Mode" Position="CENTER_RIGHT" />
+    <Label PrefWidth="28" PrefHeight="28" Margin="0,0,0,10" TextColor="null" ImageName="pkg.images/DarkMode.png" />
   </RowView>
-  <Button Name="CloseButton" LeanX="RIGHT" LeanY="TOP" Font="Arial 18" PrefWidth="32" PrefHeight="32" Margin="10,10,0,0" Padding="4" Text="X" ShowArea="false" />
+  <Separator PrefHeight="40" />
+  <ColView GrowHeight="true">
+    <Label Margin="0,0,10,0" Font="Arial Bold 14" Text="GitHub credentials" />
+    <RowView Margin="4" GrowWidth="true">
+      <Label Text="User:" />
+      <TextField Name="GithubUserText" Margin="5,20,5,4" GrowWidth="true" />
+    </RowView>
+    <RowView Margin="4" GrowWidth="true">
+      <Label Text="Access Token:" />
+      <TextField Name="GithubPacText" Margin="5,20,5,4" GrowWidth="true" />
+    </RowView>
+  </ColView>
+  <Button Name="CloseButton" PrefWidth="32" PrefHeight="32" Margin="10,10,0,0" Padding="4" Font="Arial 18" LeanX="RIGHT" LeanY="TOP" Text="X" ShowArea="false" />
 </ColView>
