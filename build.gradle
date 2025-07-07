@@ -36,7 +36,7 @@ dependencies {
     implementation files('lib/jdk.compiler.jar')
 
     // JGit
-    implementation 'org.eclipse.jgit:org.eclipse.jgit:6.10.0.202406032230-r'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:7.3.0.202506031305-r'
     implementation 'org.slf4j:slf4j-api:1.7.36'
     implementation 'org.slf4j:slf4j-simple:1.7.36'
 
