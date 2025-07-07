@@ -419,7 +419,8 @@ public class ProjectFilesTool extends WorkspaceTool {
 
         // Handle MouseClick (double-click): RunSelectedFile
         if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
-            if (getSelFile().isFile())
+            WebFile selFile = getSelFile();
+            if (selFile != null && selFile.isFile())
                 runAppForSelFile();
         }
     }
