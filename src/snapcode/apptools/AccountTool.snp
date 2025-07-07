@@ -12,7 +12,7 @@
     <Label Margin="0,8,0,8" Text="Display Mode:" />
     <ToggleButton Name="LightModeButton" MinWidth="100" Text="Light Mode" Position="CENTER_LEFT" />
     <ToggleButton Name="DarkModeButton" MinWidth="100" Text="Dark Mode" Position="CENTER_RIGHT" />
-    <Label PrefWidth="28" PrefHeight="28" Margin="0,0,0,10" TextColor="null" ImageName="pkg.images/DarkMode.png" />
+    <Label PrefWidth="28" PrefHeight="28" Margin="0,0,0,10" ImageName="pkg.images/DarkMode.png" />
   </RowView>
   <Separator PrefHeight="40" />
   <ColView GrowHeight="true">
