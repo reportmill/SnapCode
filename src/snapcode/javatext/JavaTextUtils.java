@@ -4,6 +4,7 @@
 package snapcode.javatext;
 import javakit.resolver.JavaDecl;
 import snap.gfx.Image;
+import snap.util.CharSequenceUtils;
 
 /**
  * This class contains utility support for Java text.
@@ -17,26 +18,23 @@ public class JavaTextUtils {
     public static Image ClassImage = Image.getImageForClassResource(JavaTextUtils.class, "PublicClass.png");
     public static Image PackageImage = Image.getImageForClassResource(JavaTextUtils.class, "Package.png");
     public static Image WordImage = Image.getImageForClassResource(JavaTextUtils.class, "Breakpoint.png");
-    public static Image CodeImage = Image.getImageForClassResource(JavaTextUtils.class, "Code.png");
-    public static Image DefaultImage;
+    //public static Image CodeImage = Image.getImageForClassResource(JavaTextUtils.class, "Code.png");
+    public static Image DefaultImage = Image.getImageForSize(16, 16, true);
 
     /**
      * Returns an icon image for given JavaDecl.
      */
     public static Image getImageForJavaDecl(JavaDecl aDecl)
     {
-        switch (aDecl.getType()) {
-            case VarDecl: return LVarImage;
-            case Field: return FieldImage;
-            case Method: return MethodImage;
-            case Class: return ClassImage;
-            case Package: return PackageImage;
-            case Word: return WordImage;
-            default:
-                if (DefaultImage == null)
-                    DefaultImage = Image.getImageForSize(16, 16, true);
-                return DefaultImage;
-        }
+        return switch (aDecl.getType()) {
+            case VarDecl -> LVarImage;
+            case Field -> FieldImage;
+            case Method -> MethodImage;
+            case Class -> ClassImage;
+            case Package -> PackageImage;
+            case Word -> WordImage;
+            default -> DefaultImage;
+        };
     }
 
     /**
@@ -50,7 +48,7 @@ public class JavaTextUtils {
 
         // Get minimum indent for given lines
         for (String line : lines) {
-            if (line.trim().length() == 0)
+            if (CharSequenceUtils.isWhiteSpace(line))
                 continue;
             int indent = 0;
             for (int i = 0; i < line.length(); i++) {
