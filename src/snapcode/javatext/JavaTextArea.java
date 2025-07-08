@@ -1052,23 +1052,6 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
-     * Override to get string first.
-     */
-    @Override
-    protected Object getClipboardContent(Clipboard clipboard)
-    {
-        // Try String first
-        if (clipboard.hasString()) {
-            String str = clipboard.getString();
-            if (str != null && !str.isEmpty())
-                return str;
-        }
-
-        // Do normal version
-        return super.getClipboardContent(clipboard);
-    }
-
-    /**
      * Override to remove extra indent from pasted strings.
      */
     @Override
