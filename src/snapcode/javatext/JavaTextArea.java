@@ -1052,23 +1052,6 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
-     * Override to remove extra indent from pasted strings.
-     */
-    @Override
-    public void replaceCharsWithContent(Object theContent)
-    {
-        // If String, trim extra indent
-        if (theContent instanceof String) {
-            JavaTextDoc javaTextDoc = (JavaTextDoc) getSourceText();
-            if (javaTextDoc.isJepl())
-                theContent = JavaTextUtils.removeExtraIndentFromString((String) theContent);
-        }
-
-        // Do normal version
-        super.replaceCharsWithContent(theContent);
-    }
-
-    /**
      * Override to update fill.
      */
     @Override

@@ -14,6 +14,7 @@ import snap.text.TextToken;
 import snap.view.KeyCode;
 import snap.view.ViewEvent;
 import snap.view.ViewUtils;
+import snapcode.project.JavaTextDoc;
 
 /**
  * This class is a helper for JavaTextArea to handle key processing.
@@ -493,6 +494,23 @@ public class JavaTextAdapter extends TextAdapter {
             int selStart2 = newLine.getStartCharIndex() + newLine.getIndentLength();
             setSel(selStart2);
         }
+    }
+
+    /**
+     * Override to remove extra indent from pasted strings.
+     */
+    @Override
+    public void replaceCharsWithContent(Object theContent)
+    {
+        // If String, trim extra indent
+        if (theContent instanceof String) {
+            JavaTextDoc javaTextDoc = (JavaTextDoc) getSourceText();
+            if (javaTextDoc.isJepl())
+                theContent = JavaTextUtils.removeExtraIndentFromString((String) theContent);
+        }
+
+        // Do normal version
+        super.replaceCharsWithContent(theContent);
     }
 
     /**
