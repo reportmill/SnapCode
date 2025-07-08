@@ -458,7 +458,6 @@ public class JavaAgent {
         String javaText = _javaTextDoc.getString();
         javaFile.setText(javaText);
         _javaTextDoc.setTextModified(false);
-        _javaTextDoc.getUndoer().reset();
     }
 
     /**
@@ -473,7 +472,6 @@ public class JavaAgent {
             if (!fileText.equals(textDocText)) {
                 _javaTextDoc.setString(fileText);
                 _javaTextDoc.setTextModified(false);
-                _javaTextDoc.getUndoer().reset();
             }
         }
 
