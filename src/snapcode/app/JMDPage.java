@@ -1,7 +1,7 @@
 package snapcode.app;
 import snap.gfx.Font;
 import snap.props.PropChange;
-import snap.text.TextBlock;
+import snap.text.TextModel;
 import snap.text.TextDoc;
 import snap.view.TextArea;
 import snap.view.View;
@@ -130,8 +130,8 @@ public class JMDPage extends WebPage {
             super.handleSourceTextPropChange(aPC);
 
             // Update file
-            if (aPC.getPropName() == TextBlock.TextModified_Prop) {
-                WebFile.Updater updater = getTextArea().getTextBlock().isTextModified() ? f -> updateFileFromTextArea() : null;
+            if (aPC.getPropName() == TextModel.TextModified_Prop) {
+                WebFile.Updater updater = getTextArea().getTextModel().isTextModified() ? f -> updateFileFromTextArea() : null;
                 getFile().setUpdater(updater);
             }
         }

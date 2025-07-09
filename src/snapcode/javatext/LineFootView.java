@@ -138,8 +138,8 @@ public class LineFootView extends View {
             return;
         }
 
-        TextBlock textBlock = _textArea.getTextBlock();
-        TextLine line = textBlock.getLineForY(mouseY / getHeight() * _textArea.getHeight());
+        TextModel textModel = _textArea.getTextModel();
+        TextLine line = textModel.getLineForY(mouseY / getHeight() * _textArea.getHeight());
         setTextSel(line.getStartCharIndex(), line.getEndCharIndex());
     }
 

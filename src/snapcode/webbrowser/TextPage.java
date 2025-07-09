@@ -4,7 +4,7 @@
 package snapcode.webbrowser;
 import snap.gfx.Font;
 import snap.props.PropChange;
-import snap.text.TextBlock;
+import snap.text.TextModel;
 import snap.util.Convert;
 import snap.view.TextArea;
 import snap.view.View;
@@ -73,13 +73,13 @@ public class TextPage extends WebPage {
     {
         // Configure TextArea
         TextArea textArea = getTextArea();
-        textArea.getTextBlock().setDefaultFont(Font.getCodeFont());
+        textArea.getTextModel().setDefaultFont(Font.getCodeFont());
         textArea.setText(getText());
         setFirstFocus(getTextArea());
 
         // Bind TextModel.TextModified to JavaPage.TextModified
-        TextBlock textModel = textArea.getTextBlock();
-        textModel.addPropChangeListener(this::handleTextModelTextModifiedChange, TextBlock.TextModified_Prop);
+        TextModel textModel = textArea.getTextModel();
+        textModel.addPropChangeListener(this::handleTextModelTextModifiedChange, TextModel.TextModified_Prop);
     }
 
     /**

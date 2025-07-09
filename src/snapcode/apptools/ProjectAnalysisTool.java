@@ -127,7 +127,7 @@ public class ProjectAnalysisTool {
 
     private void showSymText(String aStr, TextArea aTextArea)
     {
-        ViewUtils.runLater(() -> aTextArea.getTextBlock().addChars(aStr));
+        ViewUtils.runLater(() -> aTextArea.getTextModel().addChars(aStr));
 
         // Sleep
         try { Thread.sleep(80); }

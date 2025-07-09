@@ -1,5 +1,5 @@
 package snapcode.apptools;
-import snap.text.TextBlock;
+import snap.text.TextModel;
 import snap.util.ArrayUtils;
 import snap.util.FormatUtils;
 import snapcode.project.*;
@@ -22,7 +22,7 @@ public class BuildTool extends WorkspaceTool {
     private BuildIssue  _selIssue;
 
     // The build log text
-    private TextBlock _buildLogTextBlock;
+    private TextModel _buildLogTextModel;
 
     // Constants
     private static Image ErrorImage = Image.getImageForClassResource(JavaTextUtils.class, "ErrorMarker.png");
@@ -101,7 +101,7 @@ public class BuildTool extends WorkspaceTool {
 
         // Get BuildLogTextBlock
         TextView buildLogTextView = getView("BuildLogTextView", TextView.class);
-        _buildLogTextBlock = buildLogTextView.getTextBlock();
+        _buildLogTextModel = buildLogTextView.getTextModel();
 
         // Add mouse listener on BuildStatusLabel for hidden check errors feature (on double-click)
         addViewEventHandler("BuildStatusLabel", this::handleBuildStatusLabelMouseRelease, MouseRelease);
@@ -138,13 +138,13 @@ public class BuildTool extends WorkspaceTool {
 
         // Update BuildLogTextBlock: If Workspace.Builder.BuildLogBuffer is longer, append to BuildLogTextView
         StringBuffer buildLogBuffer = _workspace.getBuilder().getBuildLogBuffer();
-        if (buildLogBuffer.length() > _buildLogTextBlock.length()) {
-            CharSequence appendStr = buildLogBuffer.subSequence(_buildLogTextBlock.length(), buildLogBuffer.length());
-            _buildLogTextBlock.addChars(appendStr);
+        if (buildLogBuffer.length() > _buildLogTextModel.length()) {
+            CharSequence appendStr = buildLogBuffer.subSequence(_buildLogTextModel.length(), buildLogBuffer.length());
+            _buildLogTextModel.addChars(appendStr);
         }
-        else if (buildLogBuffer.length() < _buildLogTextBlock.length()) {
-            _buildLogTextBlock.clear();
-            _buildLogTextBlock.addChars(buildLogBuffer);
+        else if (buildLogBuffer.length() < _buildLogTextModel.length()) {
+            _buildLogTextModel.clear();
+            _buildLogTextModel.addChars(buildLogBuffer);
         }
     }
 
@@ -214,7 +214,7 @@ public class BuildTool extends WorkspaceTool {
     private void handleWorkspaceBuildingChange()
     {
         if (_workspace.isBuilding())
-            ViewUtils.runLater(_buildLogTextBlock::clear);
+            ViewUtils.runLater(_buildLogTextModel::clear);
         resetLater();
     }
 
@@ -239,12 +239,12 @@ public class BuildTool extends WorkspaceTool {
             return;
 
         // Check for errors and report
-        _buildLogTextBlock.setString("Check " + selFile.getName() + " for errors (" + FormatUtils.formatDate(new Date()) + ")\n");
+        _buildLogTextModel.setString("Check " + selFile.getName() + " for errors (" + FormatUtils.formatDate(new Date()) + ")\n");
         javaAgent.checkFileForErrors();
         BuildIssue[] buildIssues = javaAgent.getBuildIssues();
         BuildIssue[] errorIssues = ArrayUtils.filter(buildIssues, bi -> bi.isError());
-        _buildLogTextBlock.addChars("Found "  + errorIssues.length + " error(s)\n");
-        Stream.of(buildIssues).forEach(bi -> _buildLogTextBlock.addChars(bi.getText()));
+        _buildLogTextModel.addChars("Found "  + errorIssues.length + " error(s)\n");
+        Stream.of(buildIssues).forEach(bi -> _buildLogTextModel.addChars(bi.getText()));
     }
 
     /**

@@ -14,26 +14,26 @@ public class ExceptionUtil {
     private static Color ERROR_COLOR = Color.get("#CC0000");
 
     /**
-     * Returns a TextBlock for given exception.
+     * Returns a TextModel for given exception.
      */
-    public static TextBlock getTextBlockForException(Exception anException)
+    public static TextModel getTextModelForException(Exception anException)
     {
         String str = StringUtils.getStackTraceString(anException);
         str = StringUtils.trimEnd(str);
 
-        TextBlock textBlock = new TextBlock(true);
-        textBlock.setDefaultFont(Font.Arial14);
-        appendString(textBlock, str, ERROR_COLOR);
-        return textBlock;
+        TextModel textModel = new TextModel(true);
+        textModel.setDefaultFont(Font.Arial14);
+        appendString(textModel, str, ERROR_COLOR);
+        return textModel;
     }
 
     /**
      * Appends text with given color.
      */
-    private static void appendString(TextBlock textBlock, String aStr, Color aColor)
+    private static void appendString(TextModel textModel, String aStr, Color aColor)
     {
         // Get default style modified for color
-        TextStyle style = textBlock.getTextStyleForCharIndex(textBlock.length());
+        TextStyle style = textModel.getTextStyleForCharIndex(textModel.length());
         style = style.copyForStyleValue(aColor);
 
         // Look for a StackFrame reference: " at java.pkg.Class(Class.java:55)" and add as link if found
@@ -45,13 +45,13 @@ public class ExceptionUtil {
             int e = aStr.indexOf(")", i);
             if (s < start || e < 0) {
                 String str = aStr.substring(start, start = i + 6);
-                textBlock.addCharsWithStyle(str, style);
+                textModel.addCharsWithStyle(str, style);
                 continue;
             }
 
             // Get chars before parens and add
             String prefix = aStr.substring(start, s + 1);
-            textBlock.addCharsWithStyle(prefix, style);
+            textModel.addCharsWithStyle(prefix, style);
 
             // Get link text, link address, TextLink
             String linkText = aStr.substring(s + 1, e);
@@ -60,7 +60,7 @@ public class ExceptionUtil {
 
             // Get TextStyle for link and add link chars
             TextStyle linkStyle = style.copyForStyleValue(textLink);
-            textBlock.addCharsWithStyle(linkText, linkStyle);
+            textModel.addCharsWithStyle(linkText, linkStyle);
 
             // Update start to end of link text and continue
             start = e;
@@ -68,7 +68,7 @@ public class ExceptionUtil {
 
         // Add remainder normally
         String remainderStr = aStr.substring(start);
-        textBlock.addCharsWithStyle(remainderStr, style);
+        textModel.addCharsWithStyle(remainderStr, style);
     }
 
     /**

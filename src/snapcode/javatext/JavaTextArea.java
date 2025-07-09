@@ -7,7 +7,6 @@ import javakit.parse.*;
 import snap.geom.RoundRect;
 import snap.parse.Tokenizer;
 import snap.util.ArrayUtils;
-import snap.util.SnapEnv;
 import snapcode.project.JavaTextDoc;
 import snap.geom.Rect;
 import snap.gfx.*;
@@ -91,7 +90,7 @@ public class JavaTextArea extends TextArea {
      * Override to create JavaText.
      */
     @Override
-    protected TextAdapter createTextAdapter(TextBlock textBlock)  { return new JavaTextAdapter(textBlock, this); }
+    protected TextAdapter createTextAdapter(TextModel textModel)  { return new JavaTextAdapter(textModel, this); }
 
     /**
      * Returns whether to paint boxes around .
@@ -123,7 +122,7 @@ public class JavaTextArea extends TextArea {
     public JFile getJFile()
     {
         // Get JavaTextDoc and forward
-        JavaTextDoc javaTextDoc = (JavaTextDoc) getTextBlock();
+        JavaTextDoc javaTextDoc = (JavaTextDoc) getTextModel();
         return javaTextDoc.getJFile();
     }
 
@@ -244,8 +243,8 @@ public class JavaTextArea extends TextArea {
             return null;
 
         // Get node line, then token from line (faster than having to find line by node startCharIndex)
-        TextBlock textBlock = getTextBlock();
-        TextLine textLine = textBlock.getLine(lineIndex);
+        TextModel textModel = getTextModel();
+        TextLine textLine = textModel.getLine(lineIndex);
         int textLineStartCharIndex = textLine.getStartCharIndex();
         int nodeStartCharIndex = idExpr.getStartCharIndex();
         int tokenStartCharIndexInLine = nodeStartCharIndex - textLineStartCharIndex;
@@ -555,13 +554,13 @@ public class JavaTextArea extends TextArea {
     private void paintScopeBoxForNodes(Painter aPntr, JNode startNode, JNode endNode, int level)
     {
         // Get start/end line for nodes
-        TextBlock textBlock = getTextBlock();
+        TextModel textModel = getTextModel();
         int startCharIndex = startNode.getStartCharIndex();
         int endCharIndex = endNode.getEndCharIndex();
-        TextLine startLine = textBlock.getLineForCharIndex(startCharIndex);
+        TextLine startLine = textModel.getLineForCharIndex(startCharIndex);
         while (isPreviousLineComment(startLine))
             startLine = startLine.getPrevious();
-        TextLine endLine = textBlock.getLineForCharIndex(endCharIndex);
+        TextLine endLine = textModel.getLineForCharIndex(endCharIndex);
 
         // Get scope rect for start/end lines
         double strokeX = startLine.getTextXForCharIndex(startLine.getIndentLength()) - 3;
@@ -619,7 +618,7 @@ public class JavaTextArea extends TextArea {
 
             // Add indent
             int startCharIndex = startLine.getStartCharIndex();
-            getTextBlock().addChars(INDENT_STRING, startLine.getStartCharIndex());
+            getTextModel().addChars(INDENT_STRING, startLine.getStartCharIndex());
 
             // Adjust Sel start/end
             if (startCharIndex <= selStart)
@@ -667,7 +666,7 @@ public class JavaTextArea extends TextArea {
                 endCharIndex += lineStartCharIndex;
 
                 // Remove chars
-                getTextBlock().removeChars(startCharIndex, endCharIndex);
+                getTextModel().removeChars(startCharIndex, endCharIndex);
 
                 // Adjust Sel start/end
                 if (startCharIndex < selStart)
@@ -715,7 +714,7 @@ public class JavaTextArea extends TextArea {
 
             // If adding comment, add comment chars and adjust SelStart/SelEnd
             if (addComments) {
-                getTextBlock().addChars("//", startLine.getStartCharIndex());
+                getTextModel().addChars("//", startLine.getStartCharIndex());
                 if (startCharIndex <= selStart)
                     selStart += 2;
                 if (startCharIndex <= selEnd)
@@ -725,7 +724,7 @@ public class JavaTextArea extends TextArea {
             // If removing comment, remove comment chars and adjust SelStart/SelEnd
             else {
                 int commentCharIndex = startCharIndex + startLine.getString().indexOf("//");
-                getTextBlock().removeChars(commentCharIndex, commentCharIndex + 2);
+                getTextModel().removeChars(commentCharIndex, commentCharIndex + 2);
                 if (commentCharIndex <= selStart)
                     selStart -= 2;
                 if (commentCharIndex <= selEnd)
@@ -754,10 +753,10 @@ public class JavaTextArea extends TextArea {
         String propName = anEvent.getPropName();
 
         // Handle Chars_Prop: Call didAddChars/didRemoveChars
-        if (propName == TextBlock.Chars_Prop) {
+        if (propName == TextModel.Chars_Prop) {
 
             // Get CharsChange info
-            TextBlockUtils.CharsChange charsChange = (TextBlockUtils.CharsChange) anEvent;
+            TextModelUtils.CharsChange charsChange = (TextModelUtils.CharsChange) anEvent;
             int charIndex = anEvent.getIndex();
             CharSequence addChars = charsChange.getNewValue();
             CharSequence removeChars = charsChange.getOldValue();
@@ -867,7 +866,7 @@ public class JavaTextArea extends TextArea {
      */
     public WebFile getSourceFile()
     {
-        JavaTextDoc javaTextDoc = (JavaTextDoc) getTextBlock();
+        JavaTextDoc javaTextDoc = (JavaTextDoc) getTextModel();
         return javaTextDoc.getSourceFile();
     }
 

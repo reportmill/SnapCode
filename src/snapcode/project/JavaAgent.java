@@ -7,8 +7,8 @@ import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
-import snap.text.TextBlock;
-import snap.text.TextBlockUtils;
+import snap.text.TextModel;
+import snap.text.TextModelUtils;
 import snap.util.ArrayUtils;
 import snap.util.SetUtils;
 import snap.view.ViewUtils;
@@ -415,11 +415,11 @@ public class JavaAgent {
         String propName = aPC.getPropName();
 
         // Handle CharsChange: Try to update JFile with partial parse
-        if (propName == TextBlock.Chars_Prop && _jfile != null)
-            handleJavaTextDocCharsChange((TextBlockUtils.CharsChange) aPC);
+        if (propName == TextModel.Chars_Prop && _jfile != null)
+            handleJavaTextDocCharsChange((TextModelUtils.CharsChange) aPC);
 
         // Handle TextModified: Register updater to update JavaFile before save
-        else if (propName == TextBlock.TextModified_Prop) {
+        else if (propName == TextModel.TextModified_Prop) {
             boolean textDocTextModified = _javaTextDoc.isTextModified();
             WebFile javaFile = getFile();
             WebFile.Updater updater = textDocTextModified ? file -> updateFileFromTextDoc() : null;
@@ -430,7 +430,7 @@ public class JavaAgent {
     /**
      * Called when JavaTextDoc does chars change to updates JFile incrementally if possible.
      */
-    private void handleJavaTextDocCharsChange(TextBlockUtils.CharsChange charsChange)
+    private void handleJavaTextDocCharsChange(TextModelUtils.CharsChange charsChange)
     {
         // If partial parse fails, clear JFile for full reparse
         boolean jfileUpdated = !_isJepl && !_isJMD && JavaTextDocUtils.updateJFileForChange(_javaTextDoc, _jfile, charsChange);

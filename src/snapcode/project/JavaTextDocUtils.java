@@ -4,7 +4,7 @@
 package snapcode.project;
 import javakit.parse.*;
 import snap.gfx.Font;
-import snap.text.TextBlockUtils;
+import snap.text.TextModelUtils;
 import snap.util.CharSequenceUtils;
 import snap.util.Prefs;
 
@@ -43,7 +43,7 @@ public class JavaTextDocUtils {
     /**
      * Updates JFile for given range change.
      */
-    public static boolean updateJFileForChange(JavaTextDoc javaTextDoc, JFile aJFile, TextBlockUtils.CharsChange aCharsChange)
+    public static boolean updateJFileForChange(JavaTextDoc javaTextDoc, JFile aJFile, TextModelUtils.CharsChange aCharsChange)
     {
         // If no JFile, just bail
         if (aJFile == null) return true;

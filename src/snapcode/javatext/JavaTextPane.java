@@ -3,7 +3,7 @@
  */
 package snapcode.javatext;
 import javakit.parse.*;
-import snap.text.TextBlock;
+import snap.text.TextModel;
 import snapcode.project.BuildIssue;
 import snapcode.project.JavaAgent;
 import snapcode.project.JavaTextDoc;
@@ -52,7 +52,7 @@ public class JavaTextPane extends TextPane {
     /**
      * Returns the JavaTextDoc.
      */
-    public JavaTextDoc getJavaTextDoc()  { return (JavaTextDoc) _textArea.getTextBlock(); }
+    public JavaTextDoc getJavaTextDoc()  { return (JavaTextDoc) _textArea.getTextModel(); }
 
     /**
      * Creates the JavaTextArea.
@@ -382,7 +382,7 @@ public class JavaTextPane extends TextPane {
         String propName = aPC.getPropName();
 
         // Handle TextDoc.CharsChange: If added/removed newline, reset LineNumView, LineFootView
-        if (propName == TextBlock.Chars_Prop) {
+        if (propName == TextModel.Chars_Prop) {
             CharSequence chars = (CharSequence) (aPC.getNewValue() != null ? aPC.getNewValue() : aPC.getOldValue());
             if (CharSequenceUtils.indexOfNewline(chars, 0) >= 0)
                 _lineNumView.resetAll();

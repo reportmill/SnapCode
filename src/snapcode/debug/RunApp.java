@@ -85,7 +85,7 @@ public abstract class RunApp {
         String[] args = getDefaultRunArgs();
         setArgs(args);
 
-        // Create TextBlock to hold system console output
+        // Create TextModel to hold system console output
         _consoleText = new ConsoleText();
         _consoleText.setRunTool(_runTool);
 

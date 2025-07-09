@@ -1,7 +1,7 @@
 package snapcode.views;
 import javakit.parse.*;
 import snap.props.PropChangeListener;
-import snap.text.TextBlock;
+import snap.text.TextModel;
 import snap.view.*;
 import snap.viewx.Explode;
 import snapcode.javatext.JavaTextArea;
@@ -33,8 +33,8 @@ public class SnapEditor extends StackView {
     // A run to rebuild all blocks after delay
     private Runnable _rebuildAllBlocksRun, REBUILD_ALL_BLOCKS_RUN = this::rebuildAllBlockViews;
 
-    // A listener to handle JavaTextArea.TextBlock.Chars changes
-    private PropChangeListener _javaTextAreaTextBlockCharsChangeLsnr = pc -> rebuildAllBlockViewsLater();
+    // A listener to handle JavaTextArea.TextModel.Chars changes
+    private PropChangeListener _javaTextAreaTextModelCharsChangeLsnr = pc -> rebuildAllBlockViewsLater();
 
     /**
      * Constructor.
@@ -49,7 +49,7 @@ public class SnapEditor extends StackView {
 
         // Set JavaTextArea and start listening to changes
         _javaTextArea = javaTextArea;
-        _javaTextArea.getTextBlock().addPropChangeListener(_javaTextAreaTextBlockCharsChangeLsnr, TextBlock.Chars_Prop);
+        _javaTextArea.getTextModel().addPropChangeListener(_javaTextAreaTextModelCharsChangeLsnr, TextModel.Chars_Prop);
         _nodeHpr = _javaTextArea.getNodeHpr();
 
         // Create FileView and add to editor
@@ -68,7 +68,7 @@ public class SnapEditor extends StackView {
      */
     protected void closeEditor()
     {
-        _javaTextArea.getTextBlock().removePropChangeListener(_javaTextAreaTextBlockCharsChangeLsnr);
+        _javaTextArea.getTextModel().removePropChangeListener(_javaTextAreaTextModelCharsChangeLsnr);
     }
 
     /**

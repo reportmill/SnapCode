@@ -1,7 +1,7 @@
 package snapcode.debug;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.text.TextBlock;
+import snap.text.TextModel;
 import snap.text.TextLineStyle;
 import snap.text.TextLink;
 import snap.text.TextStyle;
@@ -12,9 +12,9 @@ import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
 
 /**
- * A TextBlock to hold system console output.
+ * A TextModel to hold system console output.
  */
-public class ConsoleText extends TextBlock {
+public class ConsoleText extends TextModel {
 
     // The RunTool
     private RunTool _runTool;

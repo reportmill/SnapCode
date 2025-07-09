@@ -53,8 +53,8 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         setPrefRowCount(12);
 
         // Set font
-        TextBlock textBlock = aJavaTextArea.getTextBlock();
-        Font font = textBlock.getDefaultFont();
+        TextModel textModel = aJavaTextArea.getTextModel();
+        Font font = textModel.getDefaultFont();
         setFont(font);
     }
 
@@ -213,11 +213,11 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     private JExprId getVirtualIdExprForDot()
     {
         // If previous char not dot or ::, just return
-        TextBlock textBlock = _textArea.getTextBlock();
+        TextModel textModel = _textArea.getTextModel();
         int prevCharIndex = _textArea.getSelStart() - 1;
-        char prevChar = prevCharIndex > 1 ? textBlock.charAt(prevCharIndex) : 0;
+        char prevChar = prevCharIndex > 1 ? textModel.charAt(prevCharIndex) : 0;
         if (prevChar == ':')
-            prevChar = textBlock.charAt(--prevCharIndex);
+            prevChar = textModel.charAt(--prevCharIndex);
         if (prevChar != '.' && prevChar != ':')
             return null;
 
@@ -249,9 +249,9 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     private JExprId getVirtualIdExprForTextTokenAtCursor()
     {
         // Get token for SelStart - just return if none
-        TextBlock textBlock = _textArea.getTextBlock();
+        TextModel textModel = _textArea.getTextModel();
         int selStart = _textArea.getSelStart();
-        TextToken textToken = selStart > 0 ? textBlock.getTokenForCharIndex(selStart - 1) : null;
+        TextToken textToken = selStart > 0 ? textModel.getTokenForCharIndex(selStart - 1) : null;
         if (textToken == null)
             return null;
 
@@ -387,7 +387,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         completionStr += superStr + '\n' + indentStr + "}\n";
 
         // Replace selection with completeString
-        _textArea.getTextBlock().replaceChars(completionStr, replaceStart, replaceEnd);
+        _textArea.getTextModel().replaceChars(completionStr, replaceStart, replaceEnd);
         _textArea.setSel(superStrIndex, superStrIndex + superStr.length());
 
         // Add imports for method return type and param types
@@ -514,15 +514,15 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // Get Java text
         TextArea textArea = getTextArea();
-        TextBlock textBlock = textArea.getTextBlock();
+        TextModel textModel = textArea.getTextModel();
 
         // Get text line (skip any //DEPS or similar comments)
-        TextLine textLine = textBlock.getLine(importLineIndex);
+        TextLine textLine = textModel.getLine(importLineIndex);
         while (textLine.startsWith("//") && textLine.length() > 2 && Character.isLetter(textLine.charAt(2)) && textLine.getNext() != null)
             textLine = textLine.getNext();
 
         // Add import to Java text
-        textBlock.addChars(importStr, textLine.getStartCharIndex());
+        textModel.addChars(importStr, textLine.getStartCharIndex());
 
         // Update selection
         int selStart = textArea.getSelStart();

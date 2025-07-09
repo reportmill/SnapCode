@@ -8,7 +8,7 @@ import static snapcode.javatext.JavaTextArea.INDENT_LENGTH;
 import snap.parse.ParseToken;
 import snap.parse.Tokenizer;
 import snap.text.TextAdapter;
-import snap.text.TextBlock;
+import snap.text.TextModel;
 import snap.text.TextLine;
 import snap.text.TextToken;
 import snap.view.KeyCode;
@@ -27,9 +27,9 @@ public class JavaTextAdapter extends TextAdapter {
     /**
      * Constructor.
      */
-    public JavaTextAdapter(TextBlock textBlock, JavaTextArea javaTextArea)
+    public JavaTextAdapter(TextModel textModel, JavaTextArea javaTextArea)
     {
-        super(textBlock);
+        super(textModel);
         _javaTextArea = javaTextArea;
     }
 
@@ -71,7 +71,7 @@ public class JavaTextAdapter extends TextAdapter {
                 char nextChar = prevChar != 0 ? charAt(prevCharIndex + 1) : 0;
                 char closeChar = getPairedCharForOpener(prevChar);
                 if (nextChar == closeChar)
-                    _textBlock.removeChars(prevCharIndex + 1, prevCharIndex + 2);
+                    _textModel.removeChars(prevCharIndex + 1, prevCharIndex + 2);
             }
         }
 
@@ -253,7 +253,7 @@ public class JavaTextAdapter extends TextAdapter {
         if (isStartOfMultiLineComment) {
             int start = getSelStart();
             String str = sb.substring(0, sb.length() - 1) + "/";
-            _textBlock.addChars(str, start);
+            _textModel.addChars(str, start);
             setSel(start);
         }
     }
@@ -315,7 +315,7 @@ public class JavaTextAdapter extends TextAdapter {
         TextLine nextLine = aTextLine.getNext();
         TextToken nextToken = nextLine.getTokenCount() > 0 ? nextLine.getToken(0) : null;
         if (nextToken != null && nextToken.getString().equals("}")) {
-            _textBlock.addChars('\n' + indentStr, newSelStart);
+            _textModel.addChars('\n' + indentStr, newSelStart);
             return;
         }
 
@@ -324,7 +324,7 @@ public class JavaTextAdapter extends TextAdapter {
         if (isUnbalancedOpenBracketToken(textToken)) {
             String closeBracketStr = '\n' + indentStr + "}";
             int selStart = aTextLine.getNext().getEndCharIndex() - 1;
-            _textBlock.addChars(closeBracketStr, selStart);
+            _textModel.addChars(closeBracketStr, selStart);
         }
     }
 
@@ -421,7 +421,7 @@ public class JavaTextAdapter extends TextAdapter {
         // Add close char after char
         String closeCharStr = String.valueOf(getPairedCharForOpener(aChar));
         int selStart = getSelStart();
-        _textBlock.addChars(closeCharStr, selStart);
+        _textModel.addChars(closeCharStr, selStart);
     }
 
     /**
@@ -458,7 +458,7 @@ public class JavaTextAdapter extends TextAdapter {
     {
         int deleteStartCharIndex = textLine.getStartCharIndex();
         int deleteEndCharIndex = deleteStartCharIndex + INDENT_LENGTH;
-        _javaTextArea.getTextBlock().removeChars(deleteStartCharIndex, deleteEndCharIndex);
+        _javaTextArea.getTextModel().removeChars(deleteStartCharIndex, deleteEndCharIndex);
     }
 
     /**
@@ -472,7 +472,7 @@ public class JavaTextAdapter extends TextAdapter {
         // If selection, duplicate selected string
         if (selStart != selEnd) {
             String selString = getSel().getString();
-            _textBlock.addChars(selString, selEnd);
+            _textModel.addChars(selString, selEnd);
             setSel(selEnd, selEnd + selString.length());
         }
 
@@ -487,7 +487,7 @@ public class JavaTextAdapter extends TextAdapter {
 
             // Add line string to end of selLine
             int endCharIndex = selLine.getEndCharIndex();
-            _textBlock.addChars(lineString, endCharIndex);
+            _textModel.addChars(lineString, endCharIndex);
 
             // Select start char of new line
             TextLine newLine = selLine.getNext();
@@ -504,7 +504,7 @@ public class JavaTextAdapter extends TextAdapter {
     {
         // If String, trim extra indent
         if (theContent instanceof String) {
-            JavaTextDoc javaTextDoc = (JavaTextDoc) getTextBlock();
+            JavaTextDoc javaTextDoc = (JavaTextDoc) getTextModel();
             if (javaTextDoc.isJepl())
                 theContent = JavaTextUtils.removeExtraIndentFromString((String) theContent);
         }

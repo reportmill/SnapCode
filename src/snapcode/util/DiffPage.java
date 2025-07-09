@@ -1,5 +1,5 @@
 package snapcode.util;
-import snap.text.TextBlock;
+import snap.text.TextModel;
 import snap.web.WebSite;
 import snapcode.project.JavaTextDoc;
 import snapcode.javatext.JavaTextArea;
@@ -94,15 +94,15 @@ public class DiffPage extends WebPage {
 
             // Handle insert
             if (insert) {
-                TextBlock textBlock = _leftTextArea.getTextBlock();
-                lranges.add(new TextSel(textBlock, localIndex, localIndex + length));
+                TextModel textModel = _leftTextArea.getTextModel();
+                lranges.add(new TextSel(textModel, localIndex, localIndex + length));
                 localIndex += length;
             }
 
             // Handle delete
             else if (delete) {
-                TextBlock textBlock = _rightTextArea.getTextBlock();
-                rranges.add(new TextSel(textBlock, remoteIndex, remoteIndex + length));
+                TextModel textModel = _rightTextArea.getTextModel();
+                rranges.add(new TextSel(textModel, remoteIndex, remoteIndex + length));
                 remoteIndex += length;
             }
 
@@ -297,8 +297,8 @@ public class DiffPage extends WebPage {
                     }
                 }
 
-                TextBlock textBlock = _leftTextArea.getTextBlock();
-                TextLine line = textBlock.getLineForY(anEvent.getY() / getHeight() * _leftTextArea.getHeight());
+                TextModel textModel = _leftTextArea.getTextModel();
+                TextLine line = textModel.getLineForY(anEvent.getY() / getHeight() * _leftTextArea.getHeight());
                 setTextSel(line.getStartCharIndex(), line.getEndCharIndex());
             }
 
@@ -347,8 +347,8 @@ public class DiffPage extends WebPage {
             }
 
             // Otherwise, just return line
-            TextBlock textBlock = _leftTextArea.getTextBlock();
-            TextLine line = textBlock.getLineForY(_my / getHeight() * _leftTextArea.getHeight());
+            TextModel textModel = _leftTextArea.getTextModel();
+            TextLine line = textModel.getLineForY(_my / getHeight() * _leftTextArea.getHeight());
             return "Line: " + (line.getLineIndex() + 1);
         }
     }
