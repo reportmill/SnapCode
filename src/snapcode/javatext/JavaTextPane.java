@@ -52,7 +52,7 @@ public class JavaTextPane extends TextPane {
     /**
      * Returns the JavaTextDoc.
      */
-    public JavaTextDoc getJavaTextDoc()  { return (JavaTextDoc) _textArea.getSourceText(); }
+    public JavaTextDoc getJavaTextDoc()  { return (JavaTextDoc) _textArea.getTextBlock(); }
 
     /**
      * Creates the JavaTextArea.

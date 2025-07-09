@@ -504,7 +504,7 @@ public class JavaTextAdapter extends TextAdapter {
     {
         // If String, trim extra indent
         if (theContent instanceof String) {
-            JavaTextDoc javaTextDoc = (JavaTextDoc) getSourceText();
+            JavaTextDoc javaTextDoc = (JavaTextDoc) getTextBlock();
             if (javaTextDoc.isJepl())
                 theContent = JavaTextUtils.removeExtraIndentFromString((String) theContent);
         }

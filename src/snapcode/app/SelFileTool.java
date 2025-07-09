@@ -78,7 +78,7 @@ public class SelFileTool extends PropObject {
         // Handle JavaPage: Return 'Java:...' or 'Jepl:...'
         if (selPage instanceof JavaPage javaPage) {
             JavaTextArea javaTextArea = javaPage.getTextArea();
-            JavaTextDoc javaTextDoc = (JavaTextDoc) javaTextArea.getSourceText();
+            JavaTextDoc javaTextDoc = (JavaTextDoc) javaTextArea.getTextBlock();
             String prefix = javaTextDoc.isJepl() ? "Jepl:" : javaTextDoc.isJMD() ? "JMD:" : "Java:";
             String javaText = javaTextDoc.getString();
             String javaTextLZ = LZString.compressToEncodedURIComponent(javaText);

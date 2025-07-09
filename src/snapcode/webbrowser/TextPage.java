@@ -3,7 +3,9 @@
  */
 package snapcode.webbrowser;
 import snap.gfx.Font;
+import snap.props.PropChange;
 import snap.text.TextBlock;
+import snap.util.Convert;
 import snap.view.TextArea;
 import snap.view.View;
 import snap.viewx.TextPane;
@@ -75,9 +77,9 @@ public class TextPage extends WebPage {
         textArea.setText(getText());
         setFirstFocus(getTextArea());
 
-        // Bind TextDoc.TextModified to JavaPage.TextModified
-        TextBlock textDoc = textArea.getSourceText();
-        textDoc.addPropChangeListener(pc -> setTextModified(textDoc.isTextModified()), TextBlock.TextModified_Prop);
+        // Bind TextModel.TextModified to JavaPage.TextModified
+        TextBlock textModel = textArea.getTextBlock();
+        textModel.addPropChangeListener(this::handleTextModelTextModifiedChange, TextBlock.TextModified_Prop);
     }
 
     /**
@@ -91,14 +93,15 @@ public class TextPage extends WebPage {
     }
 
     /**
-     * Called to register page file for update before save
+     * Called when TextArea.TextModel.TextModified property changes.
      */
-    private void setTextModified(boolean aFlag)
+    private void handleTextModelTextModifiedChange(PropChange propChange)
     {
         WebFile file = getFile();
         if (file != null) {
             WebFile.Updater updater = f -> updateFile();
-            file.setUpdater(aFlag ? updater : null);
+            boolean isTextModified = Convert.booleanValue(propChange.getNewValue());
+            file.setUpdater(isTextModified ? updater : null);
         }
     }
 

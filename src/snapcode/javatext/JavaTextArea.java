@@ -123,7 +123,7 @@ public class JavaTextArea extends TextArea {
     public JFile getJFile()
     {
         // Get JavaTextDoc and forward
-        JavaTextDoc javaTextDoc = (JavaTextDoc) getSourceText();
+        JavaTextDoc javaTextDoc = (JavaTextDoc) getTextBlock();
         return javaTextDoc.getJFile();
     }
 
@@ -867,7 +867,7 @@ public class JavaTextArea extends TextArea {
      */
     public WebFile getSourceFile()
     {
-        JavaTextDoc javaTextDoc = (JavaTextDoc) getSourceText();
+        JavaTextDoc javaTextDoc = (JavaTextDoc) getTextBlock();
         return javaTextDoc.getSourceFile();
     }
 
