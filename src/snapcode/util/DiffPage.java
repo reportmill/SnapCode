@@ -361,7 +361,7 @@ public class DiffPage extends WebPage {
         // The diff range
         TextSel _sel;
 
-        // Y location of range start line in text box.
+        // Y location of range start line in text.
         double _y;
 
         /**
