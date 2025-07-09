@@ -7,7 +7,7 @@ import javakit.parse.*;
 import snap.geom.RoundRect;
 import snap.parse.Tokenizer;
 import snap.util.ArrayUtils;
-import snapcode.project.JavaTextDoc;
+import snapcode.project.JavaTextModel;
 import snap.geom.Rect;
 import snap.gfx.*;
 import snap.text.*;
@@ -71,7 +71,7 @@ public class JavaTextArea extends TextArea {
     private static final Color CLASS_DECL_STROKE_COLOR = CLASS_DECL_COLOR.darker();
 
     // Temporary stand-in for text area init until real java text is assigned
-    private static JavaTextDoc _dummyJavaTextDoc;
+    private static JavaTextModel _dummyJavaTextModel;
 
     /**
      * Constructor.
@@ -121,9 +121,8 @@ public class JavaTextArea extends TextArea {
      */
     public JFile getJFile()
     {
-        // Get JavaTextDoc and forward
-        JavaTextDoc javaTextDoc = (JavaTextDoc) getTextModel();
-        return javaTextDoc.getJFile();
+        JavaTextModel javaTextModel = (JavaTextModel) getTextModel();
+        return javaTextModel.getJFile();
     }
 
     /**
@@ -866,8 +865,8 @@ public class JavaTextArea extends TextArea {
      */
     public WebFile getSourceFile()
     {
-        JavaTextDoc javaTextDoc = (JavaTextDoc) getTextModel();
-        return javaTextDoc.getSourceFile();
+        JavaTextModel javaTextModel = (JavaTextModel) getTextModel();
+        return javaTextModel.getSourceFile();
     }
 
     /**
@@ -1064,9 +1063,9 @@ public class JavaTextArea extends TextArea {
     /**
      * Creates a dummy Java text doc. I don't like this!
      */
-    private static JavaTextDoc getDummyTextDoc()
+    private static JavaTextModel getDummyTextDoc()
     {
-        if (_dummyJavaTextDoc != null) return _dummyJavaTextDoc;
+        if (_dummyJavaTextModel != null) return _dummyJavaTextModel;
 
         // Get/Create dummy java file
         WebFile tempFile = WebFile.createTempFileForName("Dummy.java", false);
@@ -1076,7 +1075,7 @@ public class JavaTextArea extends TextArea {
         }
 
         // Return text doc for temp file
-        return _dummyJavaTextDoc = JavaTextDoc.getJavaTextDocForFile(tempFile);
+        return _dummyJavaTextModel = JavaTextModel.getJavaTextModelForFile(tempFile);
     }
 
     /**

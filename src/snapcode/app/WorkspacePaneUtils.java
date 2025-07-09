@@ -316,8 +316,8 @@ public class WorkspacePaneUtils {
     public static void openEmbedWorkspace()
     {
         // Increase default font size
-        if (JavaTextDocUtils.getDefaultJavaFontSize() < 15)
-            JavaTextDocUtils.setDefaultJavaFontSize(15);
+        if (JavaTextUtils.getDefaultJavaFontSize() < 15)
+            JavaTextUtils.setDefaultJavaFontSize(15);
 
         // Open Java/Jepl string
         WorkspacePane._embedMode = true;

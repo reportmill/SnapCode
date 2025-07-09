@@ -9,9 +9,9 @@ import snap.util.CharSequenceUtils;
 import snap.util.Prefs;
 
 /**
- * Utility methods and support for JavaTextDoc.
+ * Utility methods and support for Java text.
  */
-public class JavaTextDocUtils {
+public class JavaTextUtils {
 
     /**
      * Returns the default font used to display Java text.
@@ -43,7 +43,7 @@ public class JavaTextDocUtils {
     /**
      * Updates JFile for given range change.
      */
-    public static boolean updateJFileForChange(JavaTextDoc javaTextDoc, JFile aJFile, TextModelUtils.CharsChange aCharsChange)
+    public static boolean updateJFileForChange(JavaTextModel javaTextModel, JFile aJFile, TextModelUtils.CharsChange aCharsChange)
     {
         // If no JFile, just bail
         if (aJFile == null) return true;
@@ -80,7 +80,7 @@ public class JavaTextDocUtils {
 
         // Parse new statement
         JStmtBlock newStmt = null;
-        try { newStmt = (JStmtBlock) javaParser.parseStatementForJavaTextDoc(javaTextDoc, charIndex); }
+        try { newStmt = (JStmtBlock) javaParser.parseStatementForJavaText(javaTextModel, charIndex); }
         catch (Exception ignore) { }
 
         // If statement parse failed (no statement or alternate end token), return reparse all
@@ -91,7 +91,7 @@ public class JavaTextDocUtils {
         JNode stmtParent = oldStmt.getParent();
         if (stmtParent instanceof WithBlockStmt)
             ((WithBlockStmt) stmtParent).replaceBlock(newStmt);
-        else System.err.println("JavaTextDocUtils.updateJFileForChange: Parent not WithBlockStmt: " + stmtParent);
+        else System.err.println("JavaTextUtils.updateJFileForChange: Parent not WithBlockStmt: " + stmtParent);
 
         // Return success
         return true;

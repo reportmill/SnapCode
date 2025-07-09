@@ -11,7 +11,7 @@ import snap.web.WebFile;
 /**
  * This class holds the text of a Java file with methods to easily build.
  */
-public class JavaTextDoc extends TextModel {
+public class JavaTextModel extends TextModel {
 
     // The JavaAgent
     private JavaAgent  _javaAgent;
@@ -22,12 +22,12 @@ public class JavaTextDoc extends TextModel {
     /**
      * Constructor.
      */
-    protected JavaTextDoc()
+    protected JavaTextModel()
     {
         super();
 
         // Get/set default font
-        Font codeFont = JavaTextDocUtils.getDefaultJavaFont();
+        Font codeFont = JavaTextUtils.getDefaultJavaFont();
         setDefaultFont(codeFont);
 
         // Reset default LineStyle for code
@@ -42,12 +42,12 @@ public class JavaTextDoc extends TextModel {
     }
 
     /**
-     * Returns whether JavaTextDoc is really Jepl.
+     * Returns whether content is really Jepl.
      */
     public boolean isJepl()  { return getAgent().isJepl(); }
 
     /**
-     * Returns whether JavaTextDoc is really Java markdown.
+     * Returns whether content is really Java markdown.
      */
     public boolean isJMD()  { return getAgent().isJMD(); }
 
@@ -86,11 +86,11 @@ public class JavaTextDoc extends TextModel {
     }
 
     /**
-     * Returns a new JavaTextDoc for given source file.
+     * Returns a new JavaTextModel for given source file.
      */
-    public static JavaTextDoc getJavaTextDocForFile(WebFile sourceFile)
+    public static JavaTextModel getJavaTextModelForFile(WebFile sourceFile)
     {
         JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(sourceFile);
-        return javaAgent.getJavaTextDoc();
+        return javaAgent.getJavaTextModel();
     }
 }

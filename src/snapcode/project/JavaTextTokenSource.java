@@ -9,8 +9,8 @@ import snap.text.TextToken;
  */
 public class JavaTextTokenSource extends Tokenizer {
 
-    // The JavaTextDoc
-    private JavaTextDoc _javaText;
+    // The JavaTextModel
+    private JavaTextModel _javaText;
 
     // The current text line
     private TextLine _textLine;
@@ -21,7 +21,7 @@ public class JavaTextTokenSource extends Tokenizer {
     /**
      * Constructor.
      */
-    public JavaTextTokenSource(JavaTextDoc javaText)
+    public JavaTextTokenSource(JavaTextModel javaText)
     {
         super();
         _javaText = javaText;

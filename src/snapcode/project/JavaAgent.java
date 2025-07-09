@@ -34,10 +34,10 @@ public class JavaAgent {
     // The Project that owns this file
     private Project _project;
 
-    // The JavaTextDoc version of this file
-    private JavaTextDoc _javaTextDoc;
+    // The JavaTextModel for java file
+    private JavaTextModel _javaTextModel;
 
-    // The parsed version of this JavaFile
+    // The parsed version of java file
     protected JFile _jfile;
 
     // The Java text generated from Jepl, if Jepl
@@ -100,7 +100,7 @@ public class JavaAgent {
         _project = null;
         _jfile = null;
         _jeplJavaText = null;
-        _javaTextDoc = null;
+        _javaTextModel = null;
         _externalRefs = null;
         _externalClassRefs = null;
     }
@@ -121,33 +121,28 @@ public class JavaAgent {
     public WebFile getFile()  { return _javaFile; }
 
     /**
-     * Returns the project for this JavaFile.
+     * Returns the project for the Java file.
      */
     public Project getProject()  { return _project; }
 
     /**
-     * Returns the JavaTextDoc for this JavaFile.
+     * Returns the JavaTextModel for the java file.
      */
-    public JavaTextDoc getJavaTextDoc()
+    public JavaTextModel getJavaTextModel()
     {
-        if (_javaTextDoc != null) return _javaTextDoc;
+        if (_javaTextModel != null) return _javaTextModel;
 
-        // Create/load JavaTextDoc
-        _javaTextDoc = createJavaTextDoc();
+        // Create/load JavaTextModel
+        _javaTextModel = new JavaTextModel();
         _jfile = null;
-        _javaTextDoc.readFromSourceURL(_javaFile.getUrl());
+        _javaTextModel.readFromSourceURL(_javaFile.getUrl());
 
         // Listen for changes
-        _javaTextDoc.addPropChangeListener(this::handleJavaTextDocPropChange);
+        _javaTextModel.addPropChangeListener(this::handleJavaTextModelPropChange);
 
         // Set, return
-        return _javaTextDoc;
+        return _javaTextModel;
     }
-
-    /**
-     * Creates the JavaTextDoc.
-     */
-    protected JavaTextDoc createJavaTextDoc()  { return new JavaTextDoc(); }
 
     /**
      * Returns the JFile (parsed Java file).
@@ -306,7 +301,7 @@ public class JavaAgent {
         if (!ArrayUtils.hasMatch(buildIssues, buildIssue -> buildIssue.isError())) {
 
             // Update text
-            String javaText = getJavaTextDoc().getString();
+            String javaText = getJavaTextModel().getString();
             _javaFile.setText(javaText);
 
             // Compile file
@@ -352,8 +347,8 @@ public class JavaAgent {
      */
     public CharSequence getJavaText()
     {
-        if (_javaTextDoc != null)
-            return _javaTextDoc;
+        if (_javaTextModel != null)
+            return _javaTextModel;
         return _javaFile.getText();
     }
 
@@ -407,20 +402,20 @@ public class JavaAgent {
     }
 
     /**
-     * Called when JavaTextDoc does prop change.
+     * Called when JavaTextModel does prop change.
      */
-    protected void handleJavaTextDocPropChange(PropChange aPC)
+    protected void handleJavaTextModelPropChange(PropChange aPC)
     {
         // Get PropName
         String propName = aPC.getPropName();
 
         // Handle CharsChange: Try to update JFile with partial parse
         if (propName == TextModel.Chars_Prop && _jfile != null)
-            handleJavaTextDocCharsChange((TextModelUtils.CharsChange) aPC);
+            handleJavaTextModelCharsChange((TextModelUtils.CharsChange) aPC);
 
-        // Handle TextModified: Register updater to update JavaFile before save
+        // Handle TextModified: Register updater to update Java file before save
         else if (propName == TextModel.TextModified_Prop) {
-            boolean textDocTextModified = _javaTextDoc.isTextModified();
+            boolean textDocTextModified = _javaTextModel.isTextModified();
             WebFile javaFile = getFile();
             WebFile.Updater updater = textDocTextModified ? file -> updateFileFromTextDoc() : null;
             javaFile.setUpdater(updater);
@@ -428,12 +423,12 @@ public class JavaAgent {
     }
 
     /**
-     * Called when JavaTextDoc does chars change to updates JFile incrementally if possible.
+     * Called when JavaTextModel does chars change to updates JFile incrementally if possible.
      */
-    private void handleJavaTextDocCharsChange(TextModelUtils.CharsChange charsChange)
+    private void handleJavaTextModelCharsChange(TextModelUtils.CharsChange charsChange)
     {
         // If partial parse fails, clear JFile for full reparse
-        boolean jfileUpdated = !_isJepl && !_isJMD && JavaTextDocUtils.updateJFileForChange(_javaTextDoc, _jfile, charsChange);
+        boolean jfileUpdated = !_isJepl && !_isJMD && JavaTextUtils.updateJFileForChange(_javaTextModel, _jfile, charsChange);
         if (!jfileUpdated)
             _jfile = null;
         _jeplJavaText = null;
@@ -442,7 +437,7 @@ public class JavaAgent {
     }
 
     /**
-     * Called when JavaFile bytes changes.
+     * Called when Java file bytes change.
      */
     private void handleJavaFileBytesChange()
     {
@@ -455,23 +450,23 @@ public class JavaAgent {
     private void updateFileFromTextDoc()
     {
         WebFile javaFile = getFile();
-        String javaText = _javaTextDoc.getString();
+        String javaText = _javaTextModel.getString();
         javaFile.setText(javaText);
-        _javaTextDoc.setTextModified(false);
+        _javaTextModel.setTextModified(false);
     }
 
     /**
-     * Reloads JavaTextDoc from file.
+     * Reloads JavaTextModel from file.
      */
     protected void reloadFromFile()
     {
-        // If JavaFile.Bytes changed externally, reset JavaTextDoc and JFile
-        if (_javaTextDoc != null) {
+        // If Java file bytes changed externally, reset JavaTextModel and JFile
+        if (_javaTextModel != null) {
             String fileText = _javaFile.getText();
-            String textDocText = _javaTextDoc.getString();
+            String textDocText = _javaTextModel.getString();
             if (!fileText.equals(textDocText)) {
-                _javaTextDoc.setString(fileText);
-                _javaTextDoc.setTextModified(false);
+                _javaTextModel.setString(fileText);
+                _javaTextModel.setTextModified(false);
             }
         }
 

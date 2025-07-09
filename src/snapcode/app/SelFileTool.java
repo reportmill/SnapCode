@@ -3,7 +3,7 @@ import snap.props.PropObject;
 import snap.view.TextArea;
 import snap.web.WebFile;
 import snapcode.javatext.JavaTextArea;
-import snapcode.project.JavaTextDoc;
+import snapcode.project.JavaTextModel;
 import snapcode.util.LZString;
 import snapcode.webbrowser.WebPage;
 
@@ -78,9 +78,9 @@ public class SelFileTool extends PropObject {
         // Handle JavaPage: Return 'Java:...' or 'Jepl:...'
         if (selPage instanceof JavaPage javaPage) {
             JavaTextArea javaTextArea = javaPage.getTextArea();
-            JavaTextDoc javaTextDoc = (JavaTextDoc) javaTextArea.getTextModel();
-            String prefix = javaTextDoc.isJepl() ? "Jepl:" : javaTextDoc.isJMD() ? "JMD:" : "Java:";
-            String javaText = javaTextDoc.getString();
+            JavaTextModel javaTextModel = (JavaTextModel) javaTextArea.getTextModel();
+            String prefix = javaTextModel.isJepl() ? "Jepl:" : javaTextModel.isJMD() ? "JMD:" : "Java:";
+            String javaText = javaTextModel.getString();
             String javaTextLZ = LZString.compressToEncodedURIComponent(javaText);
             return prefix + javaTextLZ;
         }

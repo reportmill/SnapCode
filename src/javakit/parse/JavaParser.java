@@ -4,7 +4,7 @@
 package javakit.parse;
 import java.util.*;
 import snap.parse.*;
-import snapcode.project.JavaTextDoc;
+import snapcode.project.JavaTextModel;
 
 /**
  * A parser for java files.
@@ -66,11 +66,11 @@ public class JavaParser extends JavaParserStmt {
         if (anInput.isEmpty())
             return new JFile();
 
-        // If JavaTextDoc, swap in tokenizer that uses JavaText tokens
+        // If JavaTextModel, swap in tokenizer that uses JavaText tokens
         Tokenizer oldTokenizer = null;
-        if (anInput instanceof JavaTextDoc javaTextDoc) {
+        if (anInput instanceof JavaTextModel javaTextModel) {
             oldTokenizer = getTokenizer();
-            setTokenizer(javaTextDoc.getTokenSource());
+            setTokenizer(javaTextModel.getTokenSource());
         }
 
         // Set input
@@ -150,12 +150,12 @@ public class JavaParser extends JavaParserStmt {
     /**
      * Parses for a statement for given char input and char index.
      */
-    public synchronized JStmt parseStatementForJavaTextDoc(JavaTextDoc javaTextDoc, int charIndex)
+    public synchronized JStmt parseStatementForJavaText(JavaTextModel javaTextModel, int charIndex)
     {
         Tokenizer oldTokenizer = getTokenizer();
-        setTokenizer(javaTextDoc.getTokenSource());
+        setTokenizer(javaTextModel.getTokenSource());
 
-        JStmt stmt = parseStatement(javaTextDoc, charIndex);
+        JStmt stmt = parseStatement(javaTextModel, charIndex);
 
         setTokenizer(oldTokenizer);
 

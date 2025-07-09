@@ -1,7 +1,7 @@
 package snapcode.util;
 import snap.text.TextModel;
 import snap.web.WebSite;
-import snapcode.project.JavaTextDoc;
+import snapcode.project.JavaTextModel;
 import snapcode.javatext.JavaTextArea;
 import snap.geom.Rect;
 import snap.geom.Shape;
@@ -142,12 +142,12 @@ public class DiffPage extends WebPage {
         // Handle JavaFile
         if (aFile.getFileType().equals("java")) {
 
-            // Create JavaTextDoc
-            JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForFile(aFile);
+            // Create JavaTextModel
+            JavaTextModel javaTextModel = JavaTextModel.getJavaTextModelForFile(aFile);
 
-            // Create DiffJavaTextArea and set JavaTextDoc
+            // Create DiffJavaTextArea and set JavaTextModel
             DiffJavaTextArea diffJavaTextArea = new DiffJavaTextArea();
-            diffJavaTextArea.setSourceText(javaTextDoc);
+            diffJavaTextArea.setSourceText(javaTextModel);
             return diffJavaTextArea;
         }
 

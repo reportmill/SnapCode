@@ -14,7 +14,7 @@ import snap.text.TextToken;
 import snap.view.KeyCode;
 import snap.view.ViewEvent;
 import snap.view.ViewUtils;
-import snapcode.project.JavaTextDoc;
+import snapcode.project.JavaTextModel;
 
 /**
  * This class is a helper for JavaTextArea to handle key processing.
@@ -504,8 +504,8 @@ public class JavaTextAdapter extends TextAdapter {
     {
         // If String, trim extra indent
         if (theContent instanceof String) {
-            JavaTextDoc javaTextDoc = (JavaTextDoc) getTextModel();
-            if (javaTextDoc.isJepl())
+            JavaTextModel javaTextModel = (JavaTextModel) getTextModel();
+            if (javaTextModel.isJepl())
                 theContent = JavaTextUtils.removeExtraIndentFromString((String) theContent);
         }
 

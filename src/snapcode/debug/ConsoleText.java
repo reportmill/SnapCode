@@ -7,7 +7,7 @@ import snap.text.TextLink;
 import snap.text.TextStyle;
 import snap.util.Convert;
 import snapcode.apptools.RunTool;
-import snapcode.project.JavaTextDocUtils;
+import snapcode.project.JavaTextUtils;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
 
@@ -31,7 +31,7 @@ public class ConsoleText extends TextModel {
         super(true);
 
         // Set font
-        Font codeFont = JavaTextDocUtils.getDefaultJavaFont();
+        Font codeFont = JavaTextUtils.getDefaultJavaFont();
         setDefaultFont(codeFont);
         setDefaultLineStyle(getDefaultLineStyle().copyForPropKeyValue(TextLineStyle.Spacing_Prop, 2));
     }

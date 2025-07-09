@@ -6,14 +6,14 @@ import javakit.parse.*;
 import snap.text.TextModel;
 import snapcode.project.BuildIssue;
 import snapcode.project.JavaAgent;
-import snapcode.project.JavaTextDoc;
+import snapcode.project.JavaTextModel;
 import javakit.resolver.JavaDecl;
 import snap.gfx.*;
 import snap.props.PropChange;
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.TextPane;
-import snapcode.project.JavaTextDocUtils;
+import snapcode.project.JavaTextUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -50,9 +50,9 @@ public class JavaTextPane extends TextPane {
     public JavaTextArea getTextArea()  { return (JavaTextArea) super.getTextArea(); }
 
     /**
-     * Returns the JavaTextDoc.
+     * Returns the JavaTextModel.
      */
-    public JavaTextDoc getJavaTextDoc()  { return (JavaTextDoc) _textArea.getTextModel(); }
+    public JavaTextModel getJavaTextModel()  { return (JavaTextModel) _textArea.getTextModel(); }
 
     /**
      * Creates the JavaTextArea.
@@ -162,7 +162,7 @@ public class JavaTextPane extends TextPane {
             // Handle FontSizeText, IncreaseFontButton, DecreaseFontButton
             case "FontSizeText": case "IncreaseFontButton": case "DecreaseFontButton":
                 super.respondUI(anEvent);
-                JavaTextDocUtils.setDefaultJavaFontSize(_textArea.getTextFont().getSize());
+                JavaTextUtils.setDefaultJavaFontSize(_textArea.getTextFont().getSize());
                 break;
 
             // Handle OpenDeclarationMenuItem, ShowReferencesMenuItem, ShowDeclarationsMenuItem
@@ -271,7 +271,7 @@ public class JavaTextPane extends TextPane {
         // Reset text on ShowSnapCodeMenuItem
         MenuItem showSnapCodeMenu = settingsButton.getItemForName("ShowSnapCodeMenuItem");
         if (showSnapCodeMenu != null)
-            showSnapCodeMenu.setVisible(!getJavaTextDoc().isJepl() && !getJavaTextDoc().isJMD());
+            showSnapCodeMenu.setVisible(!getJavaTextModel().isJepl() && !getJavaTextModel().isJMD());
     }
 
     /**
@@ -410,8 +410,8 @@ public class JavaTextPane extends TextPane {
         ViewUtils.runDelayedCancelPrevious(_checkFileRun, 1000);
 
         // Clear build issues
-        JavaTextDoc javaTextDoc = getJavaTextDoc();
-        JavaAgent javaAgent = javaTextDoc.getAgent();
+        JavaTextModel javaTextModel = getJavaTextModel();
+        JavaAgent javaAgent = javaTextModel.getAgent();
         javaAgent.setBuildIssues(new BuildIssue[0]);
     }
 
@@ -426,8 +426,8 @@ public class JavaTextPane extends TextPane {
             return;
 
         // Do check
-        JavaTextDoc javaTextDoc = getJavaTextDoc();
-        JavaAgent javaAgent = javaTextDoc.getAgent();
+        JavaTextModel javaTextModel = getJavaTextModel();
+        JavaAgent javaAgent = javaTextModel.getAgent();
         javaAgent.checkFileForErrors();
     }
 
@@ -437,8 +437,8 @@ public class JavaTextPane extends TextPane {
     protected Label[] getLabelsForSelNodePath()
     {
         // If Jepl, labels root should be JClassDecl
-        JavaTextDoc javaTextDoc = getJavaTextDoc();
-        if (javaTextDoc.isJepl() || javaTextDoc.isJMD())
+        JavaTextModel javaTextModel = getJavaTextModel();
+        if (javaTextModel.isJepl() || javaTextModel.isJMD())
             return getLabelsForSelNodePathForJepl();
 
         // Do normal version

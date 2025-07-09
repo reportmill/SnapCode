@@ -10,7 +10,7 @@ import snapcode.project.JavaAgent;
 import snapcode.project.Project;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMember;
-import snapcode.project.JavaTextDoc;
+import snapcode.project.JavaTextModel;
 import snap.util.Convert;
 import snap.text.TextLine;
 import snap.view.View;
@@ -78,13 +78,13 @@ public class JavaPage extends WebPage {
      */
     protected void initUI()
     {
-        // Create JavaTextDoc
+        // Create Java text
         WebFile javaFile = getFile();
-        JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForFile(javaFile);
+        JavaTextModel javaTextModel = JavaTextModel.getJavaTextModelForFile(javaFile);
 
         // Set java text and FirstFocus
         JavaTextArea javaTextArea = getTextArea();
-        javaTextArea.setTextModel(javaTextDoc);
+        javaTextArea.setTextModel(javaTextModel);
         setFirstFocus(javaTextArea);
 
         // Register for enter action
