@@ -119,7 +119,7 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     @Override
     protected double getPrefWidthImpl(double aH)
     {
-        return BoxView.getPrefWidth(this, getChildLast(), aH);
+        return BoxView.getPrefWidth(this, getLastChild(), aH);
     }
 
     /**
@@ -128,7 +128,7 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     @Override
     protected double getPrefHeightImpl(double aW)
     {
-        return BoxView.getPrefHeight(this, getChildLast(), -1);
+        return BoxView.getPrefHeight(this, getLastChild(), -1);
     }
 
     /**
@@ -137,7 +137,7 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     @Override
     protected void layoutImpl()
     {
-        BoxView.layout(this, getChildLast(), true, true);
+        BoxView.layout(this, getLastChild(), true, true);
     }
 
     /**
