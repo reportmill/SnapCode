@@ -398,7 +398,7 @@ public class JavaAgent {
     public void reloadFile()
     {
         _javaFile.resetAndVerify();
-        reloadFromFile();
+        reloadJavaTextModelFromFile();
     }
 
     /**
@@ -415,9 +415,8 @@ public class JavaAgent {
 
         // Handle TextModified: Register updater to update Java file before save
         else if (propName == TextModel.TextModified_Prop) {
-            boolean textDocTextModified = _javaTextModel.isTextModified();
             WebFile javaFile = getFile();
-            WebFile.Updater updater = textDocTextModified ? file -> updateFileFromTextDoc() : null;
+            WebFile.Updater updater = _javaTextModel.isTextModified() ? file -> updateFileFromJavaTextModel() : null;
             javaFile.setUpdater(updater);
         }
     }
@@ -441,13 +440,13 @@ public class JavaAgent {
      */
     private void handleJavaFileBytesChange()
     {
-        ViewUtils.runLater(this::reloadFromFile);
+        ViewUtils.runLater(this::reloadJavaTextModelFromFile);
     }
 
     /**
      * Called to update File.Text before save.
      */
-    private void updateFileFromTextDoc()
+    private void updateFileFromJavaTextModel()
     {
         WebFile javaFile = getFile();
         String javaText = _javaTextModel.getString();
@@ -456,15 +455,15 @@ public class JavaAgent {
     }
 
     /**
-     * Reloads JavaTextModel from file.
+     * Reloads JavaTextModel from java file.
      */
-    protected void reloadFromFile()
+    private void reloadJavaTextModelFromFile()
     {
         // If Java file bytes changed externally, reset JavaTextModel and JFile
         if (_javaTextModel != null) {
             String fileText = _javaFile.getText();
-            String textDocText = _javaTextModel.getString();
-            if (!fileText.equals(textDocText)) {
+            String javaTextStr = _javaTextModel.getString();
+            if (!fileText.equals(javaTextStr)) {
                 _javaTextModel.setString(fileText);
                 _javaTextModel.setTextModified(false);
             }

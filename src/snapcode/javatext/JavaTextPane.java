@@ -374,14 +374,14 @@ public class JavaTextPane extends TextPane {
     }
 
     /**
-     * Called when TextDoc changes.
+     * Called when TextModel does prop change.
      */
     @Override
     protected void handleSourceTextPropChange(PropChange aPC)
     {
         String propName = aPC.getPropName();
 
-        // Handle TextDoc.CharsChange: If added/removed newline, reset LineNumView, LineFootView
+        // Handle TextModel.CharsChange: If added/removed newline, reset LineNumView, LineFootView
         if (propName == TextModel.Chars_Prop) {
             CharSequence chars = (CharSequence) (aPC.getNewValue() != null ? aPC.getNewValue() : aPC.getOldValue());
             if (CharSequenceUtils.indexOfNewline(chars, 0) >= 0)

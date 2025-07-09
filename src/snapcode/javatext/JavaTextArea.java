@@ -78,7 +78,7 @@ public class JavaTextArea extends TextArea {
      */
     public JavaTextArea()
     {
-        super(getDummyTextDoc());
+        super(getDummyJavaTextModel());
         setFill(ViewTheme.get().getContentColor());
         setPadding(5, 5, 5,5);
         setSyncTextFont(false);
@@ -1061,9 +1061,9 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
-     * Creates a dummy Java text doc. I don't like this!
+     * Creates a dummy JavaTextModel. I don't like this!
      */
-    private static JavaTextModel getDummyTextDoc()
+    private static JavaTextModel getDummyJavaTextModel()
     {
         if (_dummyJavaTextModel != null) return _dummyJavaTextModel;
 
@@ -1074,7 +1074,7 @@ public class JavaTextArea extends TextArea {
             tempFile.save();
         }
 
-        // Return text doc for temp file
+        // Return JavaTextModel for temp file
         return _dummyJavaTextModel = JavaTextModel.getJavaTextModelForFile(tempFile);
     }
 
