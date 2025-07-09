@@ -11,7 +11,7 @@ import snap.web.WebFile;
 /**
  * This class holds the text of a Java file with methods to easily build.
  */
-public class JavaTextDoc extends TextDoc {
+public class JavaTextDoc extends TextModel {
 
     // The JavaAgent
     private JavaAgent  _javaAgent;

@@ -2,7 +2,6 @@ package snapcode.app;
 import snap.gfx.Font;
 import snap.props.PropChange;
 import snap.text.TextModel;
-import snap.text.TextDoc;
 import snap.view.TextArea;
 import snap.view.View;
 import snap.view.ViewEvent;
@@ -61,15 +60,15 @@ public class JMDPage extends WebPage {
      */
     protected void initUI()
     {
-        // Create TextDoc
+        // Create text
         WebFile jmdFile = getFile();
-        TextDoc javaTextDoc = new TextDoc();
-        javaTextDoc.setDefaultFont(Font.getCodeFontForSize(14));
-        javaTextDoc.readFromSourceURL(jmdFile.getUrl());
+        TextModel javaTextModel = new TextModel();
+        javaTextModel.setDefaultFont(Font.getCodeFontForSize(14));
+        javaTextModel.readFromSourceURL(jmdFile.getUrl());
 
-        // Set TextArea.TextDoc and FirstFocus
+        // Set TextArea.TextModel and FirstFocus
         TextArea textArea = getTextArea();
-        textArea.setSourceText(javaTextDoc);
+        textArea.setSourceText(javaTextModel);
         setFirstFocus(textArea);
 
         // Register for enter action

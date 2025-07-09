@@ -362,7 +362,7 @@ public class JavaTextPane extends TextPane {
                 _lineFootView.resetAll();
                 break;
 
-            // Handle TextDoc
+            // Handle SourceText
             case TextArea.SourceText_Prop:
                 _lineNumView.resetAll();
                 _lineFootView.resetAll();

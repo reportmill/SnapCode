@@ -660,7 +660,7 @@ public class JavaTextArea extends TextArea {
             // If indent found, remove it
             if (endCharIndex != startCharIndex) {
 
-                // Convert indexes to TextDoc
+                // Convert indexes to TextModel
                 int lineStartCharIndex = startLine.getStartCharIndex();
                 startCharIndex += lineStartCharIndex;
                 endCharIndex += lineStartCharIndex;

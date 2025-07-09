@@ -82,9 +82,9 @@ public class JavaPage extends WebPage {
         WebFile javaFile = getFile();
         JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForFile(javaFile);
 
-        // Set TextArea.TextDoc and FirstFocus
+        // Set java text and FirstFocus
         JavaTextArea javaTextArea = getTextArea();
-        javaTextArea.setSourceText(javaTextDoc);
+        javaTextArea.setTextModel(javaTextDoc);
         setFirstFocus(javaTextArea);
 
         // Register for enter action
