@@ -68,7 +68,7 @@ public class JMDPage extends WebPage {
 
         // Set TextArea.TextModel and FirstFocus
         TextArea textArea = getTextArea();
-        textArea.setSourceText(javaTextModel);
+        textArea.setTextModel(javaTextModel);
         setFirstFocus(textArea);
 
         // Register for enter action

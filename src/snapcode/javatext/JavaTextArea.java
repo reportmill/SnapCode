@@ -963,7 +963,7 @@ public class JavaTextArea extends TextArea {
         switch (aPC.getPropName()) {
 
             // Handle SourceText change: Init SelNode, DeepNode
-            case TextAdapter.SourceText_Prop: _selNode = _deepNode = getJFile(); break;
+            //case TextAdapter.TextModel_Prop: _selNode = _deepNode = getJFile(); break;
 
             // Handle Selection change: Reset SelNode
             case TextAdapter.Selection_Prop:

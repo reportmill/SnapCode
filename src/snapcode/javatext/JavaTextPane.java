@@ -354,7 +354,7 @@ public class JavaTextPane extends TextPane {
         // Do normal version
         super.handleTextAreaPropChange(aPC);
 
-        switch ( aPC.getPropName()) {
+        switch (aPC.getPropName()) {
 
             // Handle SelectedNode change: Reset UI
             case JavaTextArea.SelNode_Prop:
@@ -362,8 +362,8 @@ public class JavaTextPane extends TextPane {
                 _lineFootView.resetAll();
                 break;
 
-            // Handle SourceText
-            case TextArea.SourceText_Prop:
+            // Handle TextModel (triggered from JavaPage.initUI)
+            case TextArea.TextModel_Prop:
                 _lineNumView.resetAll();
                 _lineFootView.resetAll();
                 break;
