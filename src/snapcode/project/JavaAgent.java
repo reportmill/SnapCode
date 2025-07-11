@@ -459,15 +459,9 @@ public class JavaAgent {
      */
     private void reloadJavaTextModelFromFile()
     {
-        // If Java file bytes changed externally, reset JavaTextModel and JFile
-        if (_javaTextModel != null) {
-            String fileText = _javaFile.getText();
-            String javaTextStr = _javaTextModel.getString();
-            if (!fileText.equals(javaTextStr)) {
-                _javaTextModel.setString(fileText);
-                _javaTextModel.setTextModified(false);
-            }
-        }
+        // Reload JavaTextModel from java file
+        if (_javaTextModel != null)
+            _javaTextModel.readFromSourceURL(_javaFile.getUrl());
 
         // Clear JFile and external references
         clearExternalReferences();
