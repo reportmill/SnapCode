@@ -135,7 +135,7 @@ public class JavaAgent {
         // Create/load JavaTextModel
         _javaTextModel = new JavaTextModel();
         _jfile = null;
-        _javaTextModel.readFromSourceURL(_javaFile.getUrl());
+        _javaTextModel.readTextFromSourceFile(_javaFile);
 
         // Listen for changes
         _javaTextModel.addPropChangeListener(this::handleJavaTextModelPropChange);
@@ -471,7 +471,7 @@ public class JavaAgent {
     {
         // Reload JavaTextModel from java file
         if (_javaTextModel != null)
-            _javaTextModel.readFromSourceURL(_javaFile.getUrl());
+            _javaTextModel.readTextFromSourceFile(_javaFile);
 
         // Clear JFile and external references
         clearExternalReferences();

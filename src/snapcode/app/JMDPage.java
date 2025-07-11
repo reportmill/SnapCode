@@ -64,7 +64,7 @@ public class JMDPage extends WebPage {
         WebFile jmdFile = getFile();
         TextModel javaTextModel = new TextModel();
         javaTextModel.setDefaultFont(Font.getCodeFontForSize(14));
-        javaTextModel.readFromSourceURL(jmdFile.getUrl());
+        javaTextModel.readTextFromSourceFile(jmdFile);
 
         // Set TextArea.TextModel and FirstFocus
         TextArea textArea = getTextArea();
