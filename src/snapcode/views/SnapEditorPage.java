@@ -80,15 +80,6 @@ public class SnapEditorPage extends WebPage {
     }
 
     /**
-     * Override to forward to JavaPage.
-     */
-    public void reload()
-    {
-        super.reload();
-        _javaPage.reload();
-    }
-
-    /**
      * Create UI.
      */
     protected View createUI()

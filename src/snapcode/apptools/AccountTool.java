@@ -126,7 +126,7 @@ public class AccountTool extends ViewOwner {
     {
         ViewTheme.setTheme(theme);
         if (!(_workspacePane.getPagePane().getSelPage() instanceof JavaPage))
-            _workspacePane.getPagePane().getBrowser().reloadPage();
+            _workspacePane.getFilesTool().revertSelPage();
     }
 
     /**

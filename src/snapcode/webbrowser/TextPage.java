@@ -83,16 +83,6 @@ public class TextPage extends WebPage {
     }
 
     /**
-     * Override to reload text.
-     */
-    public void reload()
-    {
-        super.reload();
-        _text = null;
-        _textPane.getTextArea().setText(getText());
-    }
-
-    /**
      * Called when TextArea.TextModel.TextModified property changes.
      */
     private void handleTextModelTextModifiedChange(PropChange propChange)

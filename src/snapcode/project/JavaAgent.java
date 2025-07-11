@@ -6,12 +6,10 @@ import javakit.parse.*;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import snap.props.PropChange;
-import snap.props.PropChangeListener;
 import snap.text.TextModel;
 import snap.text.TextModelUtils;
 import snap.util.ArrayUtils;
 import snap.util.SetUtils;
-import snap.view.ViewUtils;
 import snap.web.WebFile;
 import snap.util.MDUtils;
 
@@ -49,9 +47,6 @@ public class JavaAgent {
     // The external class references in Java file
     private Set<JavaClass> _externalClassRefs;
 
-    // A listener for file prop changes
-    private PropChangeListener _fileBytesChangedLsnr;
-
     // The Jepl default imports
     private static String[] _jeplImports;
 
@@ -69,10 +64,6 @@ public class JavaAgent {
 
         // Set File JavaAgent property to this agent
         _javaFile.setProp(JavaAgent.class.getName(), this);
-
-        // Start listening for file bytes changed
-        _fileBytesChangedLsnr = pc -> handleJavaFileBytesChange();
-        _javaFile.addPropChangeListener(_fileBytesChangedLsnr, WebFile.Bytes_Prop);
 
         // Add to Project
         _project = Project.getProjectForFile(_javaFile);
@@ -94,7 +85,6 @@ public class JavaAgent {
         // Clear everything
         clearBuildIssues();
         _javaFile.setProp(JavaAgent.class.getName(), null);
-        _javaFile.removePropChangeListener(_fileBytesChangedLsnr);
         _javaFile.reset();
         _javaFile = null;
         _project = null;
@@ -407,8 +397,26 @@ public class JavaAgent {
      */
     public void reloadFile()
     {
+        // Reset file
         _javaFile.resetAndVerify();
-        reloadJavaTextModelFromFile();
+
+        // Reload JavaTextModel from java file
+        if (_javaTextModel != null)
+            _javaTextModel.readTextFromSourceFile(_javaFile);
+
+        // Clear JFile and external references
+        clearExternalReferences();
+    }
+
+    /**
+     * Called to update Java file from JavaTextModel before save.
+     */
+    private void updateJavaFileFromJavaTextModel()
+    {
+        WebFile javaFile = getFile();
+        String javaText = _javaTextModel.getString();
+        javaFile.setText(javaText);
+        _javaTextModel.setTextModified(false);
     }
 
     /**
@@ -426,7 +434,7 @@ public class JavaAgent {
         // Handle TextModified: Register updater to update Java file before save
         else if (propName == TextModel.TextModified_Prop) {
             WebFile javaFile = getFile();
-            WebFile.Updater updater = _javaTextModel.isTextModified() ? file -> updateFileFromJavaTextModel() : null;
+            WebFile.Updater updater = _javaTextModel.isTextModified() ? file -> updateJavaFileFromJavaTextModel() : null;
             javaFile.setUpdater(updater);
         }
     }
@@ -443,38 +451,6 @@ public class JavaAgent {
         _jeplJavaText = null;
         _externalRefs = null;
         _externalClassRefs = null;
-    }
-
-    /**
-     * Called when Java file bytes change.
-     */
-    private void handleJavaFileBytesChange()
-    {
-        ViewUtils.runLater(this::reloadJavaTextModelFromFile);
-    }
-
-    /**
-     * Called to update File.Text before save.
-     */
-    private void updateFileFromJavaTextModel()
-    {
-        WebFile javaFile = getFile();
-        String javaText = _javaTextModel.getString();
-        javaFile.setText(javaText);
-        _javaTextModel.setTextModified(false);
-    }
-
-    /**
-     * Reloads JavaTextModel from java file.
-     */
-    private void reloadJavaTextModelFromFile()
-    {
-        // Reload JavaTextModel from java file
-        if (_javaTextModel != null)
-            _javaTextModel.readTextFromSourceFile(_javaFile);
-
-        // Clear JFile and external references
-        clearExternalReferences();
     }
 
     /**

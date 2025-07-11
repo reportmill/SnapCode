@@ -125,27 +125,28 @@ public class MainToolBar extends WorkspaceTool {
         switch (anEvent.getName()) {
 
             // Handle HomeButton, BackButton, ForwardButton, ReloadButton
-            case "HomeButton": _pagePane.showHomePage(); break;
-            case "BackButton": _pagePane.getBrowser().trackBack(); break;
-            case "ForwardButton": _pagePane.getBrowser().trackForward(); break;
-            case "ReloadButton": _pagePane.getBrowser().reloadPage(); break;
+            case "HomeButton" -> _pagePane.showHomePage();
+            case "BackButton" -> _pagePane.getBrowser().trackBack();
+            case "ForwardButton" -> _pagePane.getBrowser().trackForward();
+            case "ReloadButton" -> getFilesTool().revertSelPage();
 
             // Handle RunButton, DebugButton, TerminateButton, BuildButton
-            case "RunButton": _workspaceTools.getRunTool().runApp(false); break;
-            case "DebugButton":
+            case "RunButton" -> _workspaceTools.getRunTool().runApp(false);
+            case "DebugButton" -> {
                 if (anEvent.isAltDown()) { String str = null; str.length(); } // Hidden trigger to test NPE
-                _workspaceTools.getRunTool().runApp(true); break;
-            case "TerminateButton": _workspaceTools.getRunTool().cancelRun(); break;
-            case "BuildButton": _workspaceTools.getBuildTool().buildWorkspace(); break;
+                _workspaceTools.getRunTool().runApp(true);
+            }
+            case "TerminateButton" -> _workspaceTools.getRunTool().cancelRun();
+            case "BuildButton" -> _workspaceTools.getBuildTool().buildWorkspace();
 
             // Handle SearchComboBox
-            case "SearchComboBox": handleSearchComboBox(anEvent); break;
+            case "SearchComboBox" -> handleSearchComboBox(anEvent);
 
             // Handle GreenfootButton
-            case "GreenfootButton": WorkspacePaneUtils.selectGoodDefaultFile(_workspacePane, getSelProject()); break;
+            case "GreenfootButton" -> WorkspacePaneUtils.selectGoodDefaultFile(_workspacePane, getSelProject());
 
             // Handle AccountButton
-            case "AccountButton": new AccountTool(_workspacePane).showAccountTool(); break;
+            case "AccountButton" -> new AccountTool(_workspacePane).showAccountTool();
         }
     }
 

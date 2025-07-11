@@ -118,16 +118,6 @@ public class JavaPage extends WebPage {
     }
 
     /**
-     * Override to reload text from file.
-     */
-    public void reload()
-    {
-        WebFile javaFile = getFile();
-        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
-        javaAgent.reloadFile();
-    }
-
-    /**
      * Override to set parameters.
      */
     @Override

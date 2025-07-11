@@ -4,6 +4,7 @@ import snap.util.ListUtils;
 import snap.view.BoxView;
 import snap.web.WebURL;
 import snapcode.app.SnapCloudPage;
+import snapcode.app.WorkspaceTools;
 import snapcode.project.VersionControlUtils;
 import snapcode.project.WorkspaceBuilder;
 import snap.props.PropChange;
@@ -532,10 +533,12 @@ public class VersionControlTool extends ProjectTool {
      */
     private void resetAndReloadFiles(List<WebFile> theFiles)
     {
-        for (WebFile file : theFiles)
-            file.resetAndVerify();
-        for (WebFile file : theFiles)
-            getBrowser().reloadFile(file);
+        // Revert files
+        WorkspaceTools workspaceTools = getWorkspaceTools();
+        FilesTool filesTool = workspaceTools.getFilesTool();
+        theFiles.forEach(filesTool::revertFile);
+
+        // Reset WorkspacePane
         _workspacePane.resetLater();
     }
 

@@ -525,10 +525,8 @@ public class ProjectFilesTool extends WorkspaceTool {
     protected void checkForExternalMods(WebFile aFile)
     {
         // If file has been changed since last load, reload
-        if (aFile.isModifiedExternally()) {
-            aFile.resetAndVerify();
-            _pagePane.reloadFile(aFile);
-        }
+        if (aFile.isModifiedExternally())
+            _filesTool.revertFile(aFile);
 
         // If file is directory, recurse
         if (aFile.isDir()) {

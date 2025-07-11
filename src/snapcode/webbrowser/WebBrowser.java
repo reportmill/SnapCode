@@ -351,16 +351,6 @@ public class WebBrowser extends TransitionPane {
     }
 
     /**
-     * Reloads the given file..
-     */
-    public void reloadFile(WebFile aFile)
-    {
-        WebPage page = getPageForURL(aFile.getUrl());
-        if (page != null)
-            page.reload();
-    }
-
-    /**
      * Shows an exception for given URL.
      */
     public void showException(WebURL aURL, Throwable t)

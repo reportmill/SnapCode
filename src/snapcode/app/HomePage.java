@@ -253,13 +253,4 @@ public class HomePage extends WebPage {
             default: super.respondUI(anEvent); break;
         }
     }
-
-    /**
-     * Override so we don't get plain markdown page.
-     */
-    @Override
-    public void reload()
-    {
-        runLater(_workspacePane._pagePane::showHomePage);
-    }
 }

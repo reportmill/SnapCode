@@ -149,10 +149,8 @@ public class WebBrowserPane extends ViewOwner {
             case "NextButton" -> getBrowser().trackForward();
             case "ReloadButton" -> getBrowser().reloadPage();
 
-
             // Handle AddressText
             case "AddressText" -> getBrowser().setSelUrlForUrlAddress(anEvent.getStringValue());
-
 
             // Handle AddressTextAction
             case "AddressTextAction" -> {

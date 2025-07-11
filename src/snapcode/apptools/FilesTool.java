@@ -7,14 +7,12 @@ import snap.view.View;
 import snap.viewx.FilePanel;
 import snap.viewx.FormBuilder;
 import snap.web.*;
-import snapcode.app.JavaPage;
-import snapcode.app.WorkspacePaneUtils;
+import snapcode.app.*;
+import snapcode.project.JavaAgent;
 import snapcode.project.ProjectUtils;
 import snapcode.project.WorkspaceBuilder;
 import snap.util.StringUtils;
 import snap.viewx.DialogBox;
-import snapcode.app.WorkspacePane;
-import snapcode.app.WorkspaceTool;
 import snapcode.webbrowser.WebPage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -68,10 +66,8 @@ public class FilesTool extends WorkspaceTool {
     public void saveSelFile()
     {
         WebPage selPage = _pagePane.getSelPage();
-        if (selPage instanceof JavaPage) {
-            JavaPage javaPage = (JavaPage) selPage;
+        if (selPage instanceof JavaPage javaPage)
             javaPage.getTextPane().saveChanges();
-        }
     }
 
     /**
@@ -80,11 +76,29 @@ public class FilesTool extends WorkspaceTool {
     public void revertFile(WebFile aFile)
     {
         boolean isSelFile = aFile == getSelFile();
+
+        // Close file
         _workspacePane.closeFile(aFile);
-        aFile.resetAndVerify();
+
+        // Revert files
+        switch (aFile.getFileType()) {
+
+            // Handle Java files
+            case "java", "jepl", "jmd" -> {
+                JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(aFile);
+                javaAgent.reloadFile();
+            }
+
+            // Handle other files
+            default -> aFile.resetAndVerify();
+        }
+
+        // Reset page
         _pagePane.setPageForURL(aFile.getUrl(), null);
-        if (isSelFile)
+        if (isSelFile) {
+            _pagePane.setSelPage(null);
             _pagePane.setSelFile(aFile);
+        }
     }
 
     /**
@@ -94,6 +108,21 @@ public class FilesTool extends WorkspaceTool {
     {
         WebFile selFile = getSelFile();
         revertFile(selFile);
+    }
+
+    /**
+     * Reverts the selected file.
+     */
+    public void revertSelPage()
+    {
+        if (_pagePane.getSelPage() instanceof HomePage) {
+            _pagePane.showHomePage();
+            return;
+        }
+
+        WebFile selPageFile = _pagePane.getSelFile();
+        if (selPageFile != null)
+            revertFile(selPageFile);
     }
 
     /**

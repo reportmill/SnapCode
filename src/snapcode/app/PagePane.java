@@ -103,11 +103,6 @@ public class PagePane extends WebBrowserPane {
     }
 
     /**
-     * Reloads a file.
-     */
-    public void reloadFile(WebFile aFile)  { _browser.reloadFile(aFile); }
-
-    /**
      * Removes a file from OpenFiles list.
      */
     public void removeAllOpenFilesExcept(WebFile aFile)
