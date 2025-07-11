@@ -24,7 +24,7 @@ public class JavaDeps {
     {
         // Get dependencies for file (just return if none)
         JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
-        BuildDependency[] dependencies = findDependenciesForJavaString(javaAgent.getJavaText().toString());
+        BuildDependency[] dependencies = findDependenciesForJavaString(javaAgent.getJavaTextString());
         if (dependencies.length == 0)
             return;
 

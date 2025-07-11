@@ -77,7 +77,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     public CharSequence getCharContent(boolean ignoreEncodingErrors)
     {
         // Get java text string
-        CharSequence javaTextStr = getJavaTextString();
+        CharSequence javaTextStr = getJavaTextChars();
 
         // Since compiler just read new file contents, clear buildIssues for file
         JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(_file);
@@ -88,14 +88,20 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     }
 
     /**
-     * Returns the Java string of file.
+     * Returns the Java chars of file.
      */
-    private CharSequence getJavaTextString()
+    private CharSequence getJavaTextChars()
     {
         // Handle Jepl and Java markdown
         if (_file.getFileType().equals("jepl") || _file.getFileType().equals("jmd")) {
             JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(_file);
             return javaAgent.getJeplJavaText();
+        }
+
+        // If CheckErrorsOnly, get editor java string
+        else if (_compiler._checkErrorsOnly) {
+            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(_file);
+            return javaAgent.getJavaTextString();
         }
 
         // Get string

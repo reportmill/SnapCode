@@ -164,7 +164,7 @@ public class JavaAgent {
     {
         // Get parsed java file
         JavaParser javaParser = JavaParser.getShared();
-        CharSequence javaStr = getJavaText();
+        CharSequence javaStr = getJavaTextChars();
 
         // Parse file
         JFile jfile;
@@ -301,8 +301,8 @@ public class JavaAgent {
         if (!ArrayUtils.hasMatch(buildIssues, buildIssue -> buildIssue.isError())) {
 
             // Update text
-            String javaText = getJavaTextModel().getString();
-            _javaFile.setText(javaText);
+            //String javaText = getJavaTextModel().getString();
+            //_javaFile.setText(javaText);
 
             // Compile file
             SnapCompiler compiler = new SnapCompiler(getProject());
@@ -343,12 +343,22 @@ public class JavaAgent {
     }
 
     /**
-     * Returns the string from Java file.
+     * Returns the chars from Java file in edit state.
      */
-    public CharSequence getJavaText()
+    public CharSequence getJavaTextChars()
     {
         if (_javaTextModel != null)
             return _javaTextModel;
+        return _javaFile.getText();
+    }
+
+    /**
+     * Returns the string from Java file in edit state.
+     */
+    public String getJavaTextString()
+    {
+        if (_javaTextModel != null)
+            return _javaTextModel.getString();
         return _javaFile.getText();
     }
 
