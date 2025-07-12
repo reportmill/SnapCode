@@ -3,8 +3,6 @@
  */
 package snapcode.webbrowser;
 import snap.util.ClassUtils;
-import snap.util.SnapUtils;
-import snap.util.StringUtils;
 import snap.view.View;
 import snap.viewx.TransitionPane;
 import snap.web.WebFile;
@@ -353,52 +351,35 @@ public class WebBrowser extends TransitionPane {
     /**
      * Shows an exception for given URL.
      */
-    public void showException(WebURL aURL, Throwable t)
+    public void showException(WebURL aURL, Throwable aThrowable)
     {
         // If not EventDispatchThread, re-invoke in that thread
         if (!getEnv().isEventThread()) {
-            getEnv().runLater(() -> showException(aURL, t));
+            getEnv().runLater(() -> showException(aURL, aThrowable));
             return;
         }
 
         // Print stack trace to console
-        t.printStackTrace();
+        aThrowable.printStackTrace();
 
         // Create request/response
         WebRequest req = new WebRequest(aURL);
         WebResponse resp = new WebResponse(req);
-        resp.setException(t);
+        resp.setException(aThrowable);
 
         // Create page and set
-        TextPage textPage = createExceptionPage(resp);
-        setSelPage(textPage);
+        TextPage exceptionPage = createExceptionPage(resp);
+        setSelPage(exceptionPage);
     }
 
     /**
      * Creates an exception page for exception.
      */
-    protected TextPage createExceptionPage(WebResponse aResp)
+    protected ExceptionPage createExceptionPage(WebResponse aResp)
     {
-        // Get URL and exception
-        WebURL url = aResp.getURL();
-        Throwable t = aResp.getException();
-
-        // Get default console text
-        String text = String.format("WebBrowser Exception Console\nBrowser Build Date: %s, Version 1.0, JVM %s, User %s\n",
-                SnapUtils.getBuildInfo(), System.getProperty("java.version"), System.getProperty("user.name"));
-        text += t.toString() + '\n';
-        text += "Caused by: " + StringUtils.getStackTraceString(t);
-
-        // Handle FileNotFound
-        if (aResp.getCode() == WebResponse.NOT_FOUND)
-            text = "\nNot Found\n\nThe requested URL was not found on server.\n\n" + url.getString();
-
-        // Create TextFilePage and install
-        TextPage textPage = new TextPage();
-        textPage.setResponse(aResp);
-        textPage.setBrowser(this);
-        textPage.setText(text);
-        return textPage;
+        ExceptionPage exceptionPage = new ExceptionPage(aResp);
+        exceptionPage.setBrowser(this);
+        return exceptionPage;
     }
 
     /**

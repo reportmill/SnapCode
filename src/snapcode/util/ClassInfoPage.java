@@ -1,5 +1,6 @@
 package snapcode.util;
 import javakit.resolver.*;
+import snap.view.TextArea;
 import snapcode.project.ClassFileUtils;
 import snapcode.project.Project;
 import snapcode.webbrowser.TextPage;
@@ -12,9 +13,28 @@ import java.util.Arrays;
 public class ClassInfoPage extends TextPage {
 
     /**
-     * Override to return class info text instead of class file contents.
+     * Constructor.
      */
-    protected String getDefaultText()
+    public ClassInfoPage()
+    {
+        super();
+    }
+
+    /**
+     * Override to load text from class info string.
+     */
+    @Override
+    protected void loadTextAreaText()
+    {
+        TextArea textArea = new TextArea();
+        String classInfoString = getClassInfoString();
+        textArea.setText(classInfoString);
+    }
+
+    /**
+     * Returns class info string.
+     */
+    private String getClassInfoString()
     {
         // Get JavaClass for class file
         WebFile classFile = getFile();
@@ -33,7 +53,7 @@ public class ClassInfoPage extends TextPage {
         Arrays.sort(externalReferences);
 
         // Append References
-        sb.append("\n    - - - - - - - - - - " + externalReferences.length + " References - - - - - - - - - -\n\n");
+        sb.append("\n    - - - - - - - - - - ").append(externalReferences.length).append(" References - - - - - - - - - -\n\n");
         for (JavaDecl ref : externalReferences)
             sb.append(ref.getType()).append(' ').append(ref.getDeclarationString()).append('\n');
 

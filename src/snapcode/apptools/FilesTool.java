@@ -67,7 +67,7 @@ public class FilesTool extends WorkspaceTool {
     {
         WebPage selPage = _pagePane.getSelPage();
         if (selPage instanceof JavaPage javaPage)
-            javaPage.getTextPane().saveChanges();
+            javaPage.getTextPane().saveTextToFile();
     }
 
     /**

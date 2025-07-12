@@ -275,15 +275,16 @@ public class JavaTextPane extends TextPane {
     }
 
     /**
-     * Save file.
+     * Override to hide Java popup.
      */
-    public void saveChanges()
+    @Override
+    public void saveTextToFile()
     {
         // Hide Popup
         getTextArea().getPopup().hide();
 
         // Do normal version
-        super.saveChanges();
+        super.saveTextToFile();
     }
 
     /**

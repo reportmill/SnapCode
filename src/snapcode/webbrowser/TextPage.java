@@ -17,36 +17,15 @@ import snap.web.WebFile;
 public class TextPage extends WebPage {
 
     // The text pane
-    private TextPane _textPane = new TFTextPane();
-
-    // The text
-    private String _text;
+    private TextPane _textPane;
 
     /**
-     * Returns the text.
+     * Constructor.
      */
-    public String getText()
+    public TextPage()
     {
-        if (_text != null) return _text;
-        return _text = getDefaultText();
-    }
-
-    /**
-     * Sets the text.
-     */
-    public void setText(String aString)
-    {
-        _text = aString;
-        if (isUISet())
-            getTextArea().setText(aString);
-    }
-
-    /**
-     * Returns the default text.
-     */
-    protected String getDefaultText()
-    {
-        return getFile().getText();
+        super();
+        _textPane = new TextPageTextPane();
     }
 
     /**
@@ -56,6 +35,19 @@ public class TextPage extends WebPage {
     {
         getUI();
         return _textPane.getTextArea();
+    }
+
+    /**
+     * Loads the text.
+     */
+    protected void loadTextAreaText()
+    {
+        TextArea textArea = getTextArea();
+
+        // Load text from web page file
+        TextModel textModel = textArea.getTextModel();
+        WebFile file = getFile();
+        textModel.readTextFromSourceFile(file);
     }
 
     /**
@@ -74,8 +66,10 @@ public class TextPage extends WebPage {
         // Configure TextArea
         TextArea textArea = getTextArea();
         textArea.getTextModel().setDefaultFont(Font.getCodeFont());
-        textArea.setText(getText());
         setFirstFocus(getTextArea());
+
+        // Load TextArea text
+        loadTextAreaText();
 
         // Bind TextModel.TextModified to JavaPage.TextModified
         TextModel textModel = textArea.getTextModel();
@@ -109,13 +103,13 @@ public class TextPage extends WebPage {
     /**
      * A TextPane subclass.
      */
-    private class TFTextPane extends TextPane {
+    private class TextPageTextPane extends TextPane {
 
         /**
-         * Save file.
+         * Override to save to page file.
          */
         @Override
-        protected void saveChangesImpl()
+        public void saveTextToFile()
         {
             try { getFile().save(); }
             catch (Exception e) { throw new RuntimeException(e); }

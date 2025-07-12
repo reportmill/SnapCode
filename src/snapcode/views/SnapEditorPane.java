@@ -51,11 +51,6 @@ public class SnapEditorPane extends ViewOwner {
     }
 
     /**
-     * Returns the SnapJavaPane.
-     */
-    public JavaTextPane getJavaTextPane()  { return _javaTextPane; }
-
-    /**
      * Returns the selected node view.
      */
     public JNodeView<?> getSelNodeView()  { return _editor.getSelNodeView(); }
@@ -144,7 +139,7 @@ public class SnapEditorPane extends ViewOwner {
         switch (anEvent.getName()) {
 
             // Handle SaveButton
-            case "SaveButton": _javaTextPane.saveChanges(); break;
+            case "SaveButton": _javaTextPane.saveTextToFile(); break;
 
             // Handle CutButton, CopyButton, PasteButton, DeleteButton
             case "CutButton": _editor.cut(); break;
