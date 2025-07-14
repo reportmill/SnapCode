@@ -3,8 +3,7 @@
  */
 package snapcode.project;
 import snap.props.PropChange;
-import snap.props.PropChangeListener;
-import snap.props.PropChangeSupport;
+import snap.props.PropObject;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.util.TaskMonitor;
@@ -17,7 +16,7 @@ import java.util.*;
 /**
  * This is a class to handle file synchronization for a local WebSite with a remote WebSite.
  */
-public class VersionControl {
+public class VersionControl extends PropObject {
 
     // The local site
     private WebSite _localSite;
@@ -33,9 +32,6 @@ public class VersionControl {
 
     // A map of file to it's status
     private Map<WebFile, FileStatus> _filesStatusCache = Collections.synchronizedMap(new HashMap<>());
-
-    // The PropChangeSupport
-    private PropChangeSupport _pcs = PropChangeSupport.EMPTY;
 
     // Constants for the state of files relative to remote cache
     public enum FileStatus { Added, Removed, Modified, Identical }
@@ -556,20 +552,6 @@ public class VersionControl {
         else if (propName == WebFile.LastModTime_Prop)
             clearFileStatus(file);
     }
-
-    /**
-     * Add listener.
-     */
-    public void addPropChangeListener(PropChangeListener aLsnr)
-    {
-        if (_pcs == PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
-        _pcs.addPropChangeListener(aLsnr);
-    }
-
-    /**
-     * Fires a given property change.
-     */
-    protected void firePropChange(PropChange aPC)  { _pcs.firePropChange(aPC); }
 
     /**
      * Updates given file from other file.
