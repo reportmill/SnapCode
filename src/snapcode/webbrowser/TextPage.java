@@ -48,6 +48,9 @@ public class TextPage extends WebPage {
         TextModel textModel = textArea.getTextModel();
         WebFile file = getFile();
         textModel.readTextFromSourceFile(file);
+
+        // Sync text model to source file
+        textModel.syncTextModelToSourceFile();
     }
 
     /**
@@ -104,6 +107,11 @@ public class TextPage extends WebPage {
      * A TextPane subclass.
      */
     private class TextPageTextPane extends TextPane {
+
+        /**
+         * Creates the TextArea.
+         */
+        protected TextArea createTextArea()  { return new TextArea(false); }
 
         /**
          * Override to save to page file.

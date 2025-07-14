@@ -81,6 +81,7 @@ public class JavaPage extends WebPage {
         // Create Java text
         WebFile javaFile = getFile();
         JavaTextModel javaTextModel = JavaTextModel.getJavaTextModelForFile(javaFile);
+        javaTextModel.syncTextModelToSourceFile();
 
         // Set java text and FirstFocus
         JavaTextArea javaTextArea = getTextArea();
@@ -227,7 +228,7 @@ public class JavaPage extends WebPage {
     {
         // Append package declaration
         StringBuilder sb = new StringBuilder();
-        if (packageName != null && packageName.length() > 0)
+        if (packageName != null && !packageName.isEmpty())
             sb.append("package ").append(packageName).append(";\n");
 
         // Append Comment

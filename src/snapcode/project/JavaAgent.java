@@ -12,7 +12,6 @@ import snap.util.ArrayUtils;
 import snap.util.SetUtils;
 import snap.web.WebFile;
 import snap.util.MDUtils;
-
 import java.util.*;
 
 /**
@@ -128,7 +127,7 @@ public class JavaAgent {
         _javaTextModel.readTextFromSourceFile(_javaFile);
 
         // Listen for changes
-        _javaTextModel.addPropChangeListener(this::handleJavaTextModelPropChange);
+        _javaTextModel.addPropChangeListener(this::handleJavaTextModelCharsChange, TextModel.Chars_Prop);
 
         // Set, return
         return _javaTextModel;
@@ -409,41 +408,14 @@ public class JavaAgent {
     }
 
     /**
-     * Called to update Java file from JavaTextModel before save.
-     */
-    private void updateJavaFileFromJavaTextModel()
-    {
-        WebFile javaFile = getFile();
-        String javaText = _javaTextModel.getString();
-        javaFile.setText(javaText);
-        _javaTextModel.setTextModified(false);
-    }
-
-    /**
-     * Called when JavaTextModel does prop change.
-     */
-    protected void handleJavaTextModelPropChange(PropChange aPC)
-    {
-        // Get PropName
-        String propName = aPC.getPropName();
-
-        // Handle CharsChange: Try to update JFile with partial parse
-        if (propName == TextModel.Chars_Prop && _jfile != null)
-            handleJavaTextModelCharsChange((TextModelUtils.CharsChange) aPC);
-
-        // Handle TextModified: Register updater to update Java file before save
-        else if (propName == TextModel.TextModified_Prop) {
-            WebFile javaFile = getFile();
-            WebFile.Updater updater = _javaTextModel.isTextModified() ? file -> updateJavaFileFromJavaTextModel() : null;
-            javaFile.setUpdater(updater);
-        }
-    }
-
-    /**
      * Called when JavaTextModel does chars change to updates JFile incrementally if possible.
      */
-    private void handleJavaTextModelCharsChange(TextModelUtils.CharsChange charsChange)
+    private void handleJavaTextModelCharsChange(PropChange propChange)
     {
+        TextModelUtils.CharsChange charsChange = (TextModelUtils.CharsChange) propChange;
+        if (_jfile == null)
+            return;
+
         // If partial parse fails, clear JFile for full reparse
         boolean jfileUpdated = !_isJepl && !_isJMD && JavaTextUtils.updateJFileForChange(_javaTextModel, _jfile, charsChange);
         if (!jfileUpdated)

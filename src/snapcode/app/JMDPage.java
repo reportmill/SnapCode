@@ -1,6 +1,5 @@
 package snapcode.app;
 import snap.gfx.Font;
-import snap.props.PropChange;
 import snap.text.TextModel;
 import snap.view.TextArea;
 import snap.view.View;
@@ -38,11 +37,6 @@ public class JMDPage extends WebPage {
     }
 
     /**
-     * Returns the JavaTextArea.
-     */
-    public JMDPane getTextPane()  { return _javaTextPane; }
-
-    /**
      * Returns the TextArea.
      */
     public TextArea getTextArea()  { return _javaTextPane.getTextArea(); }
@@ -50,10 +44,7 @@ public class JMDPage extends WebPage {
     /**
      * Creates UI panel.
      */
-    protected View createUI()
-    {
-        return _javaTextPane.getUI();
-    }
+    protected View createUI()  { return _javaTextPane.getUI(); }
 
     /**
      * Init UI.
@@ -61,10 +52,13 @@ public class JMDPage extends WebPage {
     protected void initUI()
     {
         // Create text
-        WebFile jmdFile = getFile();
         TextModel javaTextModel = new TextModel();
         javaTextModel.setDefaultFont(Font.getCodeFontForSize(14));
+
+        // Read text from file
+        WebFile jmdFile = getFile();
         javaTextModel.readTextFromSourceFile(jmdFile);
+        javaTextModel.syncTextModelToSourceFile();
 
         // Set TextArea.TextModel and FirstFocus
         TextArea textArea = getTextArea();
@@ -90,20 +84,9 @@ public class JMDPage extends WebPage {
     }
 
     /**
-     * Called to update page file before save.
-     */
-    private void updateFileFromTextArea()
-    {
-        WebFile file = getFile();
-        TextArea textArea = getTextArea();
-        String textAreaText = textArea.getText();
-        file.setText(textAreaText);
-    }
-
-    /**
      * A TextPane subclass to edit Java Markdown.
      */
-    private class JMDPane extends TextPane {
+    private static class JMDPane extends TextPane {
 
         /**
          * Constructor.
@@ -120,19 +103,6 @@ public class JMDPage extends WebPage {
             textArea.setPadding(5,5, 5,5);
             textArea.setSyncTextFont(false);
             return textArea;
-        }
-
-        @Override
-        protected void handleSourceTextPropChange(PropChange aPC)
-        {
-            // Do normal version
-            super.handleSourceTextPropChange(aPC);
-
-            // Update file
-            if (aPC.getPropName() == TextModel.TextModified_Prop) {
-                WebFile.Updater updater = getTextArea().getTextModel().isTextModified() ? f -> updateFileFromTextArea() : null;
-                getFile().setUpdater(updater);
-            }
         }
     }
 }
