@@ -612,8 +612,8 @@ public class WorkspacePane extends ViewOwner {
         Project project = Project.getProjectForFile(file); assert project != null;
         project.handleProjectFileChange(propChange);
 
-        // Handle LastModTime, Modified, Updater: Update file in ProjectFilesTool
-        if (propName == WebFile.LastModTime_Prop || propName == WebFile.Modified_Prop || propName == WebFile.Updater_Prop)
+        // Handle LastModTime, Modified: Update file in ProjectFilesTool
+        if (propName == WebFile.LastModTime_Prop || propName == WebFile.Modified_Prop)
             getProjectFilesTool().handleFileChange(file);
     }
 
