@@ -1,6 +1,4 @@
 package snapcode.app;
-import snap.props.PropChange;
-import snap.props.PropChangeListener;
 import snap.util.TaskMonitor;
 import snap.view.*;
 import snap.viewx.DialogBox;
@@ -29,9 +27,6 @@ public class ProjectPane extends ViewOwner {
     // The VcsTool for main project
     private VersionControlTool _versionControlTool;
 
-    // A PropChangeListener for Site file changes
-    private PropChangeListener _siteFileLsnr = this::handleProjectSiteFileChange;
-
     /**
      * Constructor.
      */
@@ -46,7 +41,6 @@ public class ProjectPane extends ViewOwner {
 
         // Set this ProjectPane as Site prop
         WebSite projSite = aProject.getSite();
-        projSite.addFileChangeListener(_siteFileLsnr);
         projSite.setProp(ProjectPane.class.getName(), this);
 
         // Create VersionControlTool
@@ -111,31 +105,6 @@ public class ProjectPane extends ViewOwner {
     }
 
     /**
-     * Called when a project site file changes.
-     */
-    private void handleProjectSiteFileChange(PropChange aPC)
-    {
-        // If BuildDir file, just return
-        WebFile file = (WebFile) aPC.getSource();
-        if (_project.getBuildDir().containsFile(file))
-            return;
-
-        // Forward to version control
-        _versionControlTool.getVC().handleProjectFileChange(aPC);
-
-        // Forward to project
-        _project.handleProjectSiteFileChange(aPC);
-
-        // Forward to WorkspacePane
-        _workspacePane.handleSiteFileChange(aPC);
-    }
-
-    /**
-     * Called when project added to workspace pane.
-     */
-    protected void handleProjectAddedToWorkspacePane()  { } //_versionControlTool.handleProjectAddedToWorkspacePane();
-
-    /**
      * Called when project removed from workspace pane.
      */
     protected void handleProjectRemovedFromWorkspacePane()
@@ -143,22 +112,13 @@ public class ProjectPane extends ViewOwner {
         // If already close, just return
         if (_workspacePane == null) return;
 
-        // Stop listening to project site and unregister Project.Site.ProjectPane
+        // Unregister Project.Site.ProjectPane
         WebSite projSite = _project.getSite();
-        projSite.removeFileChangeListener(_siteFileLsnr);
         projSite.setProp(ProjectPane.class.getName(), null);
 
         // Close project and clear workspace pane
         _project.closeProject();
         _workspacePane = null;
-    }
-
-    /**
-     * Returns the site pane for a site.
-     */
-    public static ProjectPane getProjectPaneForSite(WebSite aSite)
-    {
-        return (ProjectPane) aSite.getProp(ProjectPane.class.getName());
     }
 
     /**
@@ -227,6 +187,14 @@ public class ProjectPane extends ViewOwner {
         WebFile sourceDir = getProject().getSourceDir();
         Runnable run = () -> new ProjectAnalysisTool().findUndefines(sourceDir, symbolCheckTextView);
         new Thread(run).start();
+    }
+
+    /**
+     * Returns the site pane for a site.
+     */
+    public static ProjectPane getProjectPaneForSite(WebSite aSite)
+    {
+        return (ProjectPane) aSite.getProp(ProjectPane.class.getName());
     }
 
     /**

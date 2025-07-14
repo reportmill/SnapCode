@@ -72,7 +72,7 @@ public class ProjectFile implements Comparable<ProjectFile> {
         if (_file != null) {
             _isDir = _file.isDir();
             _proj = Project.getProjectForSite(aFile.getSite());
-            _vc = VersionControl.getVersionControlForProjectSite(_file.getSite());
+            _vc = _proj.getVersionControl();
             if (PRIORITY_FILE_TYPES.contains(_file.getFileType()))
                 _priority = 1;
         }

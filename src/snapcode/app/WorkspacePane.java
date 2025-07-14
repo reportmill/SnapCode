@@ -1,6 +1,7 @@
 package snapcode.app;
 import snap.geom.Rect;
 import snap.gfx.GFXEnv;
+import snap.props.PropChangeListener;
 import snap.util.*;
 import snap.view.SharedAction;
 import snap.viewx.DevPane;
@@ -53,6 +54,9 @@ public class WorkspacePane extends ViewOwner {
 
     // Whether currently clearing workspace
     protected static boolean _clearingWorkspace;
+
+    // A PropChangeListener for workspace file changes
+    private PropChangeListener _workspaceFilePropChangeLsnr = this::handleWorkspaceFilePropChange;
 
     // Runnable for update open projects prefs
     private Runnable _updateOpenProjectsPrefsRunnable;
@@ -160,7 +164,8 @@ public class WorkspacePane extends ViewOwner {
      */
     public ProjectPane getProjectPaneForProject(Project aProject)
     {
-        return ArrayUtils.findMatch(_projectPanes, prjPane -> prjPane.getProject() == aProject);
+        ProjectPane[] projectPanes = getProjectPanes();
+        return ArrayUtils.findMatch(projectPanes, prjPane -> prjPane.getProject() == aProject);
     }
 
     /**
@@ -536,8 +541,9 @@ public class WorkspacePane extends ViewOwner {
         ProjectPane projPane = new ProjectPane(this, aProject);
         _projectPanes = ArrayUtils.addId(_projectPanes, projPane);
 
-        // Open project pane
-        projPane.handleProjectAddedToWorkspacePane();
+        // Start listening to project site files
+        WebSite projSite = aProject.getSite();
+        projSite.addFileChangeListener(_workspaceFilePropChangeLsnr);
 
         // Clear root files
         ProjectFilesTool projectFilesTool = getProjectFilesTool();
@@ -580,6 +586,10 @@ public class WorkspacePane extends ViewOwner {
         ProjectPane projPane = getProjectPaneForProject(aProject);
         _projectPanes = ArrayUtils.remove(_projectPanes, projPane);
 
+        // Stop listening to project site and unregister Project.Site.ProjectPane
+        WebSite projSite = aProject.getSite();
+        projSite.removeFileChangeListener(_workspaceFilePropChangeLsnr);
+
         // Close ProjectPane
         projPane.handleProjectRemovedFromWorkspacePane();
 
@@ -591,13 +601,16 @@ public class WorkspacePane extends ViewOwner {
     }
 
     /**
-     * Called when site file changes with File PropChange.
+     * Called when workspace file fires PropChange.
      */
-    protected void handleSiteFileChange(PropChange aPC)
+    protected void handleWorkspaceFilePropChange(PropChange propChange)
     {
-        // Get file/prop
-        String propName = aPC.getPropName();
-        WebFile file = (WebFile) aPC.getSource();
+        String propName = propChange.getPropName();
+        WebFile file = (WebFile) propChange.getSource();
+
+        // Forward to project
+        Project project = Project.getProjectForFile(file); assert project != null;
+        project.handleProjectFileChange(propChange);
 
         // Handle LastModTime, Modified, Updater: Update file in ProjectFilesTool
         if (propName == WebFile.LastModTime_Prop || propName == WebFile.Modified_Prop || propName == WebFile.Updater_Prop)

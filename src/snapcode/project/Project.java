@@ -181,6 +181,11 @@ public class Project extends PropObject {
     }
 
     /**
+     * Returns the version control for project.
+     */
+    public VersionControl getVersionControl()  { return VersionControl.getVersionControlForProjectSite(_site); }
+
+    /**
      * Returns the projects this project depends on.
      */
     private List<Project> openBuildFileProjects()
@@ -422,17 +427,20 @@ public class Project extends PropObject {
     }
 
     /**
-     * Called when a project site file changes.
+     * Called when a project file fires prop change.
      */
-    public void handleProjectSiteFileChange(PropChange aPC)
+    public void handleProjectFileChange(PropChange propChange)
     {
-        // Get source and property name
-        WebFile file = (WebFile) aPC.getSource();
-        String propName = aPC.getPropName();
+        String propName = propChange.getPropName();
+        WebFile file = (WebFile) propChange.getSource();
 
-        // Handle Saved property: Call fileAdded or fileSaved
+        // If build file, just return
+        if (getBuildDir().containsFile(file))
+            return;
+
+        // Handle Exists prop change: Call fileAdded or fileSaved
         if (propName == WebFile.Exists_Prop) {
-            if ((Boolean) aPC.getNewValue())
+            if ((Boolean) propChange.getNewValue())
                 handleSiteFileAdded(file);
             else handleSiteFileRemoved(file);
         }
@@ -440,6 +448,10 @@ public class Project extends PropObject {
         // Handle LastModTime property: Call file saved
         if (propName == WebFile.LastModTime_Prop && file.getExists())
             handleSiteFileSaved(file);
+
+        // Forward to project version control
+        VersionControl versionControl = getVersionControl();
+        versionControl.handleProjectFileChange(propChange);
     }
 
     /**
