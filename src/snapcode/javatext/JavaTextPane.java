@@ -453,6 +453,8 @@ public class JavaTextPane extends TextPane {
     {
         // Get JavaTextPane version
         Label[] pathNodeLabels = getLabelsForSelNodePath(JClassDecl.class);
+        if (pathNodeLabels.length == 0)
+            return pathNodeLabels;
 
         // If last label is ClassLabel, reconfigure
         Label lastLabel = pathNodeLabels[pathNodeLabels.length - 1];
