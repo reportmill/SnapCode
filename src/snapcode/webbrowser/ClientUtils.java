@@ -23,7 +23,7 @@ public class ClientUtils {
     public static Settings getUserLocalSettings()
     {
         WebFile userLocalSettingsFile = getUserLocalSettingsFile();
-        return Settings.get(userLocalSettingsFile);
+        return Settings.getSettingsForFile(userLocalSettingsFile);
     }
 
     /**

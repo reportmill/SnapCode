@@ -105,7 +105,7 @@ public class RunConfigs {
      */
     protected Settings getSettings()
     {
-        return Settings.get(getFile());
+        return Settings.getSettingsForFile(getFile());
     }
 
     /**

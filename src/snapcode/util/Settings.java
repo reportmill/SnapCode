@@ -5,8 +5,7 @@ package snapcode.util;
 import java.util.*;
 
 import snap.props.PropChange;
-import snap.props.PropChangeListener;
-import snap.props.PropChangeSupport;
+import snap.props.PropObject;
 import snap.util.*;
 import snap.util.JSArchiver.*;
 import snap.web.WebFile;
@@ -14,7 +13,7 @@ import snap.web.WebFile;
 /**
  * An object to get, set and store site settings.
  */
-public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetSet, WebFile.Updater {
+public class Settings extends PropObject implements GetKeys, GetValue, SetValue, GetClass, Key.GetSet, WebFile.Updater {
 
     // The file for the source of settings
     private WebFile _file;
@@ -29,16 +28,14 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
     private String _key;
 
     // The map
-    private Map _map = new HashMap<>();
-
-    // The PropChangeSupport
-    private PropChangeSupport _pcs = PropChangeSupport.EMPTY;
+    private Map<String,Object> _map = new HashMap<>();
 
     /**
      * Constructor.
      */
     public Settings()
     {
+        super();
     }
 
     /**
@@ -93,10 +90,7 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
     /**
      * Returns a value.
      */
-    public Object get(String aKey)
-    {
-        return get(aKey, (Object) null);
-    }
+    public Object get(String aKey)  { return get(aKey, (Object) null); }
 
     /**
      * Returns a value.
@@ -150,74 +144,47 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
     /**
      * Returns as a String value.
      */
-    public String getStringValue(String aKey)
-    {
-        return getStringValue(aKey, null);
-    }
+    public String getStringValue(String aKey)  { return getStringValue(aKey, null); }
 
     /**
      * Returns as a String value.
      */
-    public String getStringValue(String aKey, String aDefault)
-    {
-        return Convert.stringValue(get(aKey, aDefault));
-    }
+    public String getStringValue(String aKey, String aDefault)  { return Convert.stringValue(get(aKey, aDefault)); }
 
     /**
      * Returns an bool value.
      */
-    public boolean getBoolValue(String aKey)
-    {
-        return getBoolValue(aKey, false);
-    }
+    public boolean getBoolValue(String aKey)  { return getBoolValue(aKey, false); }
 
     /**
      * Returns an bool value.
      */
-    public boolean getBoolValue(String aKey, boolean aDefault)
-    {
-        return Convert.boolValue(get(aKey, aDefault));
-    }
+    public boolean getBoolValue(String aKey, boolean aDefault)  { return Convert.boolValue(get(aKey, aDefault)); }
 
     /**
      * Returns an int value.
      */
-    public int getIntValue(String aKey)
-    {
-        return getIntValue(aKey, 0);
-    }
+    public int getIntValue(String aKey)  { return getIntValue(aKey, 0); }
 
     /**
      * Returns an int value.
      */
-    public int getIntValue(String aKey, int aDefault)
-    {
-        return Convert.intValue(get(aKey, aDefault));
-    }
+    public int getIntValue(String aKey, int aDefault)  { return Convert.intValue(get(aKey, aDefault)); }
 
     /**
      * Returns a float value.
      */
-    public float getFloatValue(String aKey)
-    {
-        return getFloatValue(aKey, 0);
-    }
+    public float getFloatValue(String aKey)  { return getFloatValue(aKey, 0); }
 
     /**
      * Returns a float value.
      */
-    public float getFloatValue(String aKey, float aDefault)
-    {
-        return Convert.floatValue(get(aKey, aDefault));
-    }
+    public float getFloatValue(String aKey, float aDefault)  { return Convert.floatValue(get(aKey, aDefault)); }
 
     /**
      * Returns a List value.
      */
-    public SettingsList getList(String aKey)
-    {
-        return getList(aKey, false);
-    }
+    public SettingsList getList(String aKey)  { return getList(aKey, false); }
 
     /**
      * Returns a List value, with option to create if missing.
@@ -232,12 +199,15 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
             return settings != null ? settings.getList(remainder, doCreate) : null;
         }
         Object value = get(aKey);
-        if (value instanceof SettingsList) return (SettingsList) value;
-        if (value == null && !doCreate) return null;
-        SettingsList jsList = new SettingsList();
+        if (value instanceof SettingsList)
+            return (SettingsList<Object>) value;
+        if (value == null && !doCreate)
+            return null;
+
+        SettingsList<Object> jsList = new SettingsList<>();
         jsList._key = aKey;
         if (value instanceof List)
-            jsList._list.addAll((List) value);
+            jsList._list.addAll((List<?>) value);
         simplePut(aKey, jsList);
         return jsList;
     }
@@ -271,7 +241,7 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
      */
     public int removeListItem(String aKey, Object aValue)
     {
-        List list = getList(aKey);
+        List<Object> list = getList(aKey);
         if (list == null) return -1;
         int index = list.indexOf(aValue);
         if (index >= 0) removeListItem(aKey, index);
@@ -305,7 +275,7 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
 
         // If value is map, add each entry
         if (value instanceof Map) {
-            Map<String, Object> map = (Map) value;
+            Map<String, Object> map = (Map<String,Object>) value;
             for (Map.Entry<String, Object> entry : map.entrySet())
                 settings.simplePut(entry.getKey(), entry.getValue());
         }
@@ -325,38 +295,19 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
     }
 
     /**
-     * Add listener.
-     */
-    public void addPropChangeListener(PropChangeListener aLsnr)
-    {
-        if (_pcs == PropChangeSupport.EMPTY)
-            _pcs = new PropChangeSupport(this);
-        _pcs.addPropChangeListener(aLsnr);
-    }
-
-    /**
-     * Remove listener.
-     */
-    public void removePropChangeListener(PropChangeListener aLsnr)
-    {
-        _pcs.removePropChangeListener(aLsnr);
-    }
-
-    /**
      * Override to forward to parents if present.
      */
-    protected void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
+    protected void firePropChange(PropChange propChange)
     {
         // If parent is set, forward to it instead
         if (_parent != null) {
-            _parent.firePropChange(_key + '.' + aProp, oldVal, newVal, anIndex);
+            String propName = _key + '.' + propChange.getPropName();
+            _parent.firePropChange(propName, propChange.getOldValue(), propChange.getNewValue(), propChange.getIndex());
             return;
         }
 
         // Do normal firePropChange
-        if (!_pcs.hasListener(aProp)) return;
-        PropChange pc = new PropChange(this, aProp, oldVal, newVal, anIndex);
-        _pcs.firePropChange(pc);
+        super.firePropChange(propChange);
 
         // Update file
         getFile().setUpdater(this);
@@ -380,24 +331,16 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
         return get(aKey);
     }
 
-    public Collection<String> getJSONKeys()
-    {
-        return _map.keySet();
-    }
+    public Collection<String> getJSONKeys()  { return _map.keySet(); }
 
-    public Object getKeyValue(String aKey)
-    {
-        return get(aKey);
-    }
+    public Object getKeyValue(String aKey)  { return get(aKey); }
 
-    public void setKeyValue(String aKey, Object aValue)
-    {
-        put(aKey, aValue);
-    }
+    public void setKeyValue(String aKey, Object aValue)  { put(aKey, aValue); }
 
     /**
      * Standard toString implementation.
      */
+    @Override
     public String toString()
     {
         JSArchiver archiver = new JSArchiver();
@@ -407,7 +350,7 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
     /**
      * Returns the settings for given file.
      */
-    public static synchronized Settings get(WebFile aFile)
+    public static synchronized Settings getSettingsForFile(WebFile aFile)
     {
         Settings stgs = (Settings) aFile.getProp("Settings");
         if (stgs == null)
@@ -472,7 +415,7 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
 
             // If value is map, add each entry
             if (value instanceof Map) {
-                Map<String, Object> map = (Map) value;
+                Map<String, Object> map = (Map<String,Object>) value;
                 for (Map.Entry<String, Object> entry : map.entrySet())
                     settings.simplePut(entry.getKey(), entry.getValue());
             }
