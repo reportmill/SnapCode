@@ -22,9 +22,10 @@ public class JavaTextModel extends TextModel {
     /**
      * Constructor.
      */
-    protected JavaTextModel()
+    protected JavaTextModel(JavaAgent javaAgent)
     {
         super();
+        _javaAgent = javaAgent;
 
         // Get/set default font
         Font codeFont = JavaTextUtils.getDefaultJavaFont();
@@ -54,13 +55,7 @@ public class JavaTextModel extends TextModel {
     /**
      * Returns the JavaAgent.
      */
-    public JavaAgent getAgent()
-    {
-        if (_javaAgent != null) return _javaAgent;
-        WebFile sourceFile = getSourceFile();
-        JavaAgent javaAgent = JavaAgent.getAgentForFile(sourceFile);
-        return _javaAgent = javaAgent;
-    }
+    public JavaAgent getAgent()  { return _javaAgent; }
 
     /**
      * Returns the JFile (parsed Java file).

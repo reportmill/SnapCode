@@ -122,9 +122,9 @@ public class JavaAgent {
         if (_javaTextModel != null) return _javaTextModel;
 
         // Create/load JavaTextModel
-        _javaTextModel = new JavaTextModel();
-        _jfile = null;
+        _javaTextModel = new JavaTextModel(this);
         _javaTextModel.readTextFromSourceFile(_javaFile);
+        _jfile = null;
 
         // Listen for changes
         _javaTextModel.addPropChangeListener(this::handleJavaTextModelCharsChange, TextModel.Chars_Prop);
