@@ -463,17 +463,17 @@ public class MavenDependency extends BuildDependency {
     @Override
     public Object getPropValue(String aPropName)
     {
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // Group, Name, Version, RepositoryURL
-            case Group_Prop: return getGroup();
-            case Name_Prop: return getName();
-            case Version_Prop: return getVersion();
-            case RepositoryURL_Prop: return getRepositoryURL();
+            case Group_Prop -> getGroup();
+            case Name_Prop -> getName();
+            case Version_Prop -> getVersion();
+            case RepositoryURL_Prop -> getRepositoryURL();
 
             // Do normal version
-            default: return super.getPropValue(aPropName);
-        }
+            default -> super.getPropValue(aPropName);
+        };
     }
 
     /**

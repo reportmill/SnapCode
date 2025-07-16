@@ -14,6 +14,7 @@ import snapcode.app.JavaPage;
 import snapcode.app.SnapCodeUtils;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
+import snapcode.project.JavaDeps;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
@@ -253,6 +254,9 @@ public class NewFileTool extends WorkspaceTool {
         newJavaFile.save();
         _workspacePane.openFile(newJavaFile);
 
+        // Must be a better place for this
+        JavaDeps.resolveDependenciesForFile(null, newJavaFile);
+
         // Start build?
         _workspace.getBuilder().buildWorkspaceLater();
 
@@ -302,6 +306,9 @@ public class NewFileTool extends WorkspaceTool {
         newJeplFile.setText(jeplString);
         newJeplFile.save();
         _workspacePane.openFile(newJeplFile);
+
+        // Must be a better place for this
+        JavaDeps.resolveDependenciesForFile(null, newJeplFile);
 
         // Start build?
         _workspace.getBuilder().buildWorkspaceLater();

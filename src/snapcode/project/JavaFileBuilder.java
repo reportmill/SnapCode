@@ -112,7 +112,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
         _buildFiles.clear();
 
         // Resolve dependencies
-        JavaDeps.resolveDependenciesForFiles(taskMonitor, javaFiles);
+        javaFiles.forEach(javaFile -> JavaDeps.resolveDependenciesForFile(taskMonitor, javaFile));
 
         // Do real build
         boolean buildSuccess = buildFilesImpl(taskMonitor, javaFiles);
@@ -193,14 +193,6 @@ public class JavaFileBuilder implements ProjectFileBuilder {
      */
     protected boolean buildFile(WebFile sourceFile)
     {
-        // If Jepl file, check for errors first
-//        if (sourceFile.getFileType().equals("jepl") || sourceFile.getFileType().equals("jmd")) {
-//            if (!buildJeplFile(sourceFile)) {
-//                addBuildFile(sourceFile);
-//                return false;
-//            }
-//        }
-
         // If Java Markdown, copy resource file
         if (sourceFile.getFileType().equals("jmd"))
             _resourceFileBuilder.buildFile(sourceFile);
@@ -286,16 +278,5 @@ public class JavaFileBuilder implements ProjectFileBuilder {
 
         // Return
         return classChanged;
-    }
-
-    /**
-     * Builds a Jepl file.
-     */
-    protected boolean buildJeplFile(WebFile javaFile)
-    {
-        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
-        javaAgent.checkFileForErrors();
-        BuildIssue[] buildErrors = javaAgent.getBuildErrors();
-        return buildErrors.length == 0;
     }
 }

@@ -18,7 +18,7 @@ public abstract class BuildDependency extends PropObject {
     protected String[] _classPaths;
 
     // Constants for type
-    public enum Type { JarFile, Project, Maven };
+    public enum Type { JarFile, Project, Maven }
 
     /**
      * Constructor.

@@ -2,20 +2,11 @@ package snapcode.project;
 import snap.util.ArrayUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
-import java.util.List;
 
 /**
  * This class handles //DEPS and //REPO directives in Java files.
  */
 public class JavaDeps {
-
-    /**
-     * Resolve //DEPS dependencies for given list of files.
-     */
-    public static void resolveDependenciesForFiles(TaskMonitor taskMonitor, List<WebFile> javaFiles)
-    {
-        javaFiles.forEach(javaFile -> resolveDependenciesForFile(taskMonitor, javaFile));
-    }
 
     /**
      * Resolve '//DEPS' dependencies for given java file.
@@ -39,8 +30,7 @@ public class JavaDeps {
                 continue;
 
             // If maven dependency, load first to see if valid
-            if (dependency instanceof MavenDependency) {
-                MavenDependency mavenDependency = (MavenDependency) dependency;
+            if (dependency instanceof MavenDependency mavenDependency) {
                 if (!mavenDependency.isLoaded()) {
                     if (taskMonitor != null)
                         taskMonitor.beginTask("Loading dependency: " + mavenDependency.getName(), 1);

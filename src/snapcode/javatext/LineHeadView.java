@@ -124,8 +124,10 @@ public class LineHeadView extends View {
 
         // Add markers for member Overrides/Implements
         JClassDecl classDecl = _textArea.getJFile().getClassDecl();
-        if (classDecl != null)
-            findMarkersForMethodAndConstructorOverrides(classDecl, _textPane, markers);
+        if (classDecl != null) {
+            try { findMarkersForMethodAndConstructorOverrides(classDecl, _textPane, markers); }
+            catch (Exception e) { e.printStackTrace(); }
+        }
 
         // Add markers for BuildIssues
         BuildIssue[] buildIssues = _textArea.getBuildIssues();
