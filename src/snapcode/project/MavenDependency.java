@@ -324,8 +324,11 @@ public class MavenDependency extends BuildDependency {
         WebFile localJarFile = WebFile.createFileForPath(localJarPath, false);
 
         // If file doesn't exist, load it
-        if (localJarFile != null && !localJarFile.getExists())
-            loadPackageFiles();
+        if (localJarFile != null) {
+             if (!localJarFile.getExists())
+                loadPackageFiles();
+             else setLoaded(true);
+        }
 
         // Return
         return localJarFile;
@@ -406,6 +409,7 @@ public class MavenDependency extends BuildDependency {
             // Set loading
             setLoaded(false);
             setLoading(true);
+            _error = null;
 
             // Get remote and local jar file urls - if either is null, just return
             WebURL remoteJarURL = getRemoteJarURL();
@@ -421,7 +425,7 @@ public class MavenDependency extends BuildDependency {
         // Handle errors
         catch (Exception e) {
             //e.printStackTrace();
-            _error = e.getMessage();
+            _error = "Error: " + e.getMessage();
         }
 
         // Reset Loading and wake waitForLoad thread(s)

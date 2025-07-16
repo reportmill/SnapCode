@@ -79,7 +79,6 @@ public class BuildFileTool extends ProjectTool {
     {
         BuildDependency buildDependency = (BuildDependency) propChange.getSource();
         _dependenciesListView.updateItem(buildDependency);
-        System.out.println("SelDependencyDidChange: " + propChange.getPropName());
         resetLater();
     }
 
