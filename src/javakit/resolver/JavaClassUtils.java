@@ -17,7 +17,8 @@ public class JavaClassUtils {
     public static JavaConstructor getCompatibleConstructor(JavaClass aClass, JavaClass[] paramTypes)
     {
         JavaConstructor[] declaredConstructors = aClass.getDeclaredConstructors();
-        return ArrayUtils.getMax(declaredConstructors, (c1,c2) -> compareMethodMatchRatings(c1, c2, paramTypes));
+        JavaConstructor[] compatibleConstructors = ArrayUtils.filter(declaredConstructors, constr -> isCompatibleConstructor(constr, paramTypes));
+        return ArrayUtils.getMax(compatibleConstructors, (c1,c2) -> compareMethodMatchRatings(c1, c2, paramTypes));
     }
 
     /**
@@ -92,6 +93,17 @@ public class JavaClassUtils {
         if (!method.getName().equals(aName))
             return false;
         int rating = paramTypes != null ? JavaExecutable.getMatchRatingForArgClasses(method, paramTypes) : 1;
+        if (rating <= 0)
+            return false;
+        return true;
+    }
+
+    /**
+     * Returns whether constructor is compatible method.
+     */
+    private static boolean isCompatibleConstructor(JavaConstructor constructor, JavaClass[] paramTypes)
+    {
+        int rating = paramTypes != null ? JavaExecutable.getMatchRatingForArgClasses(constructor, paramTypes) : 1;
         if (rating <= 0)
             return false;
         return true;
