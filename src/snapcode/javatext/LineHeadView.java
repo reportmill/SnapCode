@@ -126,7 +126,7 @@ public class LineHeadView extends View {
         JClassDecl classDecl = _textArea.getJFile().getClassDecl();
         if (classDecl != null) {
             try { findMarkersForMethodAndConstructorOverrides(classDecl, _textPane, markers); }
-            catch (Exception e) { e.printStackTrace(); }
+            catch (Exception e) { System.out.println("LineHeadView.getLineMarkers: " + e); }
         }
 
         // Add markers for BuildIssues

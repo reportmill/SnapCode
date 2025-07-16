@@ -392,7 +392,6 @@ public class MavenDependency extends BuildDependency {
         if (isLoading())
             return;
 
-        System.out.println("MavenDependency.loadPackageFiles");
         // Set Loading true and start thread
         new Thread(() -> loadPackageFilesImpl()).start();
     }
