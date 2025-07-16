@@ -182,8 +182,7 @@ public class MavenDependency extends BuildDependency {
      */
     public String getStatus()
     {
-        WebFile localJarFile = getLocalJarFile();
-        if (localJarFile != null)
+        if (isLoaded())
             return "Loaded";
         if (isLoading())
             return "Loading";
@@ -393,6 +392,7 @@ public class MavenDependency extends BuildDependency {
         if (isLoading())
             return;
 
+        System.out.println("MavenDependency.loadPackageFiles");
         // Set Loading true and start thread
         new Thread(() -> loadPackageFilesImpl()).start();
     }

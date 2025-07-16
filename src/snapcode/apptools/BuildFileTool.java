@@ -22,7 +22,7 @@ public class BuildFileTool extends ProjectTool {
     private BuildDependency _selDependency;
 
     // A prop change listener for selected dependency
-    private PropChangeListener _selDependencyDidPropChangeLsnr = this::selDependencyDidPropChange;
+    private PropChangeListener _selDependencyPropChangeLsnr = this::handleSelDependencyPropChange;
 
     // Dependencies ListView
     private ListView<BuildDependency> _dependenciesListView;
@@ -62,10 +62,10 @@ public class BuildFileTool extends ProjectTool {
 
         // Set value and add/remove prop change listener
         if (_selDependency != null)
-            _selDependency.removePropChangeListener(_selDependencyDidPropChangeLsnr);
+            _selDependency.removePropChangeListener(_selDependencyPropChangeLsnr);
         _selDependency = buildDependency;
         if (_selDependency != null)
-            _selDependency.addPropChangeListener(_selDependencyDidPropChangeLsnr);
+            _selDependency.addPropChangeListener(_selDependencyPropChangeLsnr);
 
         // Update DependenciesListView.Selection
         _dependenciesListView.setSelItem(buildDependency);
@@ -75,10 +75,11 @@ public class BuildFileTool extends ProjectTool {
     /**
      * Called when selected dependency does prop change.
      */
-    private void selDependencyDidPropChange(PropChange aPC)
+    private void handleSelDependencyPropChange(PropChange propChange)
     {
-        BuildDependency buildDependency = (BuildDependency) aPC.getSource();
+        BuildDependency buildDependency = (BuildDependency) propChange.getSource();
         _dependenciesListView.updateItem(buildDependency);
+        System.out.println("SelDependencyDidChange: " + propChange.getPropName());
         resetLater();
     }
 
@@ -104,7 +105,7 @@ public class BuildFileTool extends ProjectTool {
         BuildFile buildFile = getBuildFile();
         List<BuildDependency> dependencies = buildFile.getDependencies();
         _dependenciesListView.setItems(dependencies);
-        buildFile.addPropChangeListener(this::buildFileDidChangeDependency, BuildFile.Dependency_Prop);
+        buildFile.addPropChangeListener(this::handleBuildFileDependencyChange, BuildFile.Dependency_Prop);
 
         // Configure DependencyTypeComboBox
         ComboBox<BuildDependency.Type> dependencyTypeComboBox = getView("DependencyTypeComboBox", ComboBox.class);
@@ -247,8 +248,7 @@ public class BuildFileTool extends ProjectTool {
     {
         // Handle MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText, ShowButton, ReloadButton
         BuildDependency selDependency = getSelDependency();
-        if (selDependency instanceof MavenDependency) {
-            MavenDependency mavenDependency = (MavenDependency) selDependency;
+        if (selDependency instanceof MavenDependency mavenDependency) {
             switch (anEvent.getName()) {
                 case "MavenIdText": mavenDependency.setId(anEvent.getStringValue()); break;
                 case "GroupText": mavenDependency.setGroup(anEvent.getStringValue()); break;
@@ -258,18 +258,20 @@ public class BuildFileTool extends ProjectTool {
                 case "ShowButton": showMavenDependencyInFinder(mavenDependency); break;
                 case "ReloadButton": mavenDependency.loadPackageFiles(); break;
             }
+
+            // If not loaded, trigger load
+            if (!mavenDependency.isLoaded())
+                mavenDependency.getLocalJarFile();
         }
 
         // Handle JarFileDependency: JarPathText
-        else if (selDependency instanceof BuildDependency.JarFileDependency) {
-            BuildDependency.JarFileDependency jarFileDependency = (BuildDependency.JarFileDependency) selDependency;
+        else if (selDependency instanceof BuildDependency.JarFileDependency jarFileDependency) {
             if (anEvent.equals("JarPathText"))
                 jarFileDependency.setJarPath(anEvent.getStringValue());
         }
 
         // Handle ProjectDependency: ProjectNameText
-        else if (selDependency instanceof BuildDependency.ProjectDependency) {
-            BuildDependency.ProjectDependency projectDependency = (BuildDependency.ProjectDependency) selDependency;
+        else if (selDependency instanceof BuildDependency.ProjectDependency projectDependency) {
             if (anEvent.equals("ProjectNameText"))
                 projectDependency.setProjectName(anEvent.getStringValue());
         }
@@ -393,20 +395,20 @@ public class BuildFileTool extends ProjectTool {
     /**
      * Called when BuildFile changes dependency.
      */
-    private void buildFileDidChangeDependency(PropChange aPC)
+    private void handleBuildFileDependencyChange(PropChange propChange)
     {
         BuildFile buildFile = getBuildFile();
 
         // If BuildFile adds dependency, update list
-        if (aPC.getNewValue() != null) {
-            BuildDependency dependency = (BuildDependency) aPC.getNewValue();
+        if (propChange.getNewValue() != null) {
+            BuildDependency dependency = (BuildDependency) propChange.getNewValue();
             _dependenciesListView.setItems(buildFile.getDependencies());
             setSelDependency(dependency);
         }
 
         // If BuildFile removes dependency, remove from list
         else {
-            BuildDependency dependency = (BuildDependency) aPC.getOldValue();
+            BuildDependency dependency = (BuildDependency) propChange.getOldValue();
             _dependenciesListView.removeItemAndUpdateSel(dependency);
             setSelDependency(_dependenciesListView.getSelItem());
         }
