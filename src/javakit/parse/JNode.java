@@ -147,16 +147,13 @@ public class JNode {
     protected JavaType getResolvedTypeForType(JavaType aType)
     {
         // Handle TypeVar
-        if (aType instanceof JavaTypeVariable) {
-            JavaTypeVariable typeVar = (JavaTypeVariable) aType;
+        if (aType instanceof JavaTypeVariable typeVar)
             return getResolvedTypeForTypeVar(typeVar);
-        }
 
         // Handle ParameterizedType
-        else if (aType instanceof JavaParameterizedType) {
+        else if (aType instanceof JavaParameterizedType parameterizedType) {
 
-            // Get parameterized type and parameter types
-            JavaParameterizedType parameterizedType = (JavaParameterizedType) aType;
+            // Get parameter types
             JavaType[] paramTypes = parameterizedType.getParamTypes();
             JavaType[] paramTypesResolved = paramTypes.clone();
             boolean didResolve = false;
@@ -181,8 +178,7 @@ public class JNode {
         }
 
         // Handle Generic array type
-        else if (aType instanceof JavaGenericArrayType) {
-            JavaGenericArrayType arrayType = (JavaGenericArrayType) aType;
+        else if (aType instanceof JavaGenericArrayType arrayType) {
             JavaType compType = arrayType.getComponentType();
             JavaType compTypeResolved = getResolvedTypeForType(compType);
             if (compTypeResolved != compType)
@@ -441,7 +437,7 @@ public class JNode {
      */
     public <T> List<T> getChildrenForClassDeep(Class<T> aClass)
     {
-        List<T> list = new ArrayList<T>();
+        List<T> list = new ArrayList<>();
         findChildrenForClassDeep(aClass, list);
         return list;
     }

@@ -82,19 +82,17 @@ public class JavaTypeUtils {
     public static JavaType getResolvedTypeVariableForTypes(JavaTypeVariable aTypeVar, JavaType paramType, JavaType argType)
     {
         // Handle TypeVar: If name matches, return arg type
-        if (paramType instanceof JavaTypeVariable) {
-            JavaTypeVariable paramTypeVar = (JavaTypeVariable) paramType;
+        if (paramType instanceof JavaTypeVariable paramTypeVar) {
             if (paramTypeVar.getName().equals(aTypeVar.getName()))
                 return argType;
             return aTypeVar;
         }
 
         // Handle Parameterized type
-        if (paramType instanceof JavaParameterizedType) {
+        if (paramType instanceof JavaParameterizedType paramParamType) {
 
-            // Get types as JavaParameterized types
-            JavaParameterizedType paramParamType = (JavaParameterizedType) paramType;
-            JavaParameterizedType argParamType = argType instanceof JavaParameterizedType ? (JavaParameterizedType) argType : null;
+            // Get arg type as parameterized type
+            JavaParameterizedType argParamType = getJavaParameterizedTypeForType(argType);
             if (argParamType == null) {
                 System.err.println("JavaTypeUtils.getResolvedTypeVariableForTypes: arg type not parameterized type");
                 return aTypeVar;
@@ -212,5 +210,24 @@ public class JavaTypeUtils {
 
         // Return not found
         return null;
+    }
+
+    /**
+     * Returns a JavaParameterizedType for given type. Handles case where type is class but extends a parameterized type,
+     * for instance ViewList extends List<View>.
+     */
+    private static JavaParameterizedType getJavaParameterizedTypeForType(JavaType javaType)
+    {
+        if (javaType instanceof JavaParameterizedType)
+            return (JavaParameterizedType) javaType;
+
+        // Handle case where type is class but extends a parameterized type.
+        JavaClass javaClass = javaType.getEvalClass();
+        JavaType superType = javaClass.getGenericSuperclass();
+        if (superType == null)
+            return null;
+
+        // Try again with super type
+        return getJavaParameterizedTypeForType(superType);
     }
 }
