@@ -73,7 +73,7 @@ public class SnapCompiler {
             try {
                 ClassLoader classLoader = getClass().getClassLoader();
                 Class<?> compilerClass = Class.forName("com.sun.tools.javac.api.JavacTool", true, classLoader);
-                _compiler = (JavaCompiler) compilerClass.newInstance();
+                _compiler = (JavaCompiler) compilerClass.getConstructor().newInstance();
             }
 
             catch (Exception e) { throw new RuntimeException(e); }
@@ -232,9 +232,10 @@ public class SnapCompiler {
     /**
      * Returns a BuildIssue for Diagnostic.
      */
-    protected BuildIssue createBuildIssue(Diagnostic aDiagnostic)
+    protected BuildIssue createBuildIssue(Diagnostic<?> aDiagnostic)
     {
         Object diagnosticSource = aDiagnostic.getSource();
+
         if (!(diagnosticSource instanceof SnapCompilerJFO)) {
             if (aDiagnostic.getKind() == Diagnostic.Kind.ERROR) {
                 if (_unknownDiagnosticSourceErrorCount++ < 5)
@@ -260,7 +261,8 @@ public class SnapCompiler {
         // Get message
         String msg = aDiagnostic.getMessage(Locale.ENGLISH);
         int loc = msg.indexOf("location:");
-        if (loc > 0) msg = msg.substring(0, loc).trim();
+        if (loc > 0)
+            msg = msg.substring(0, loc).trim();
 
         // Get LineNumber, ColumnNumber
         int line = (int) aDiagnostic.getLineNumber();
@@ -270,10 +272,12 @@ public class SnapCompiler {
             start = 0;
         int end = Math.max((int) aDiagnostic.getEndPosition(), start);
 
-        // Bogus trim of "unchecked" warnings and "overrides equals
+        // Bogus trim of "unchecked" warnings and "overrides equals" and "Possible 'this' escape"
         if (line < 0 && msg.contains("unchecked"))
             return null;
         if (msg.contains("overrides equals, but"))
+            return null;
+        if (msg.contains("possible 'this' escape"))
             return null;
 
         // If Jepl, convert locations from Java back to Jepl
