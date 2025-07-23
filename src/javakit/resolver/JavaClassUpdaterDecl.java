@@ -354,7 +354,12 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
          * Returns the parameter types.
          */
         @Override
-        public JavaType[] getGenericParameterTypes()  { return _executableDecl.getGenericParameterTypes(); }
+        public JavaType[] getGenericParameterTypes()
+        {
+            if (_executableDecl instanceof JConstrDecl constrDecl)
+                return constrDecl.getGenericParameterTypesAll();
+            return _executableDecl.getGenericParameterTypes();
+        }
 
         /**
          * Returns the return type.
@@ -375,7 +380,12 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
          * Returns the parameter classes.
          */
         @Override
-        public JavaClass[] getParameterClasses()  { return _executableDecl.getParameterClasses(); }
+        public JavaClass[] getParameterClasses()
+        {
+            if (_executableDecl instanceof JConstrDecl constrDecl)
+                return constrDecl.getParameterClassesAll();
+            return _executableDecl.getParameterClasses();
+        }
 
         /**
          * Returns the parameter names.

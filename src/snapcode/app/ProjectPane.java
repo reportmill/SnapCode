@@ -174,10 +174,9 @@ public class ProjectPane extends ViewOwner {
         if (titleView.isExpanded())
             return;
 
-        // Get TextArea
+        // Get TextView
         TextView symbolCheckTextView = getView("SymbolCheckText", TextView.class);
-        if (symbolCheckTextView.length() > 0)
-            return;
+        symbolCheckTextView.clear();
 
         // Initialize
         symbolCheckTextView.addChars("Undefined Symbols:\n");

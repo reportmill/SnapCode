@@ -71,6 +71,44 @@ public class JConstrDecl extends JExecutableDecl {
     }
 
     /**
+     * Returns parameter types for constructor, including parent class(es).
+     */
+    public JavaType[] getGenericParameterTypesAll()
+    {
+        JavaType[] genericParamterTypes = getGenericParameterTypes();
+
+        // If member class and not static, add parent class(es)
+        JavaClass javaClass = getEnclosingClassDecl().getJavaClass();
+        while (javaClass != null && javaClass.isMemberClass() && !javaClass.isStatic()) {
+            JavaClass parentClass = javaClass.getDeclaringClass();
+            genericParamterTypes = ArrayUtils.add(genericParamterTypes, parentClass, 0);
+            javaClass = parentClass;
+        }
+
+        // Return
+        return genericParamterTypes;
+    }
+
+    /**
+     * Returns parameter classes for constructor, including parent class(es).
+     */
+    public JavaClass[] getParameterClassesAll()
+    {
+        JavaClass[] paramterClasses = getParameterClasses();
+
+        // If member class and not static, add parent class(es)
+        JavaClass javaClass = getEnclosingClassDecl().getJavaClass();
+        while (javaClass != null && javaClass.isMemberClass() && !javaClass.isStatic()) {
+            JavaClass parentClass = javaClass.getDeclaringClass();
+            paramterClasses = ArrayUtils.add(paramterClasses, parentClass, 0);
+            javaClass = parentClass;
+        }
+
+        // Return
+        return paramterClasses;
+    }
+
+    /**
      * Override to return constructor.
      */
     @Override

@@ -5,10 +5,10 @@
   </RowView>
   <ColView PrefWidth="500" Margin="8,8,8,20" Spacing="8" Font="Arial 14" title="Project Info">
     <TitleView Name="LOCTitleView" PrefWidth="120" PrefHeight="22" Padding="5" Text="Show Lines of Code" TitleStyle="Plain" Collapsible="true" Expanded="false">
-      <TextView Name="LOCText" PrefWidth="300" Padding="5" Border="#80 1" />
+      <TextView Name="LOCText" PrefWidth="400" Padding="5" Border="#C0 1" BorderRadius="3" />
     </TitleView>
     <TitleView Name="SymbolCheckTitleView" PrefWidth="120" PrefHeight="22" Padding="5" Text="Show Undefined Symbols" TitleStyle="Plain" Collapsible="true" Expanded="false">
-      <TextView Name="SymbolCheckText" PrefWidth="800" PrefHeight="350" Padding="5" Border="#80 1" />
+      <TextView Name="SymbolCheckText" PrefWidth="600" PrefHeight="350" Padding="5" Border="#C0 1" BorderRadius="3" />
     </TitleView>
   </ColView>
 </ColView>
