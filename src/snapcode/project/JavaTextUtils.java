@@ -89,8 +89,8 @@ public class JavaTextUtils {
 
         // Replace old statement with new statement
         JNode stmtParent = oldStmt.getParent();
-        if (stmtParent instanceof WithBlockStmt)
-            ((WithBlockStmt) stmtParent).replaceBlock(newStmt);
+        if (stmtParent instanceof WithBlockStmt parentBlockStmt)
+            parentBlockStmt.replaceBlock(newStmt);
         else System.err.println("JavaTextUtils.updateJFileForChange: Parent not WithBlockStmt: " + stmtParent);
 
         // Return success

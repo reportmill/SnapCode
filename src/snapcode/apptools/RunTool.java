@@ -58,8 +58,12 @@ public class RunTool extends WorkspaceTool implements AppListener {
         List<Project> projects = _workspace.getProjects();
         for (Project project : projects) {
             String mainClassName = project.getBuildFile().getMainClassName();
-            if (mainClassName != null)
-                return RunConfig.createRunConfigForWorkspaceAndClassName(_workspace, mainClassName);
+            if (mainClassName != null) {
+                RunConfig runConfig = RunConfig.createRunConfigForWorkspaceAndClassName(_workspace, mainClassName);
+                WebFile mainJavaFile = runConfig.getMainJavaFile();
+                if (mainJavaFile != null && RunToolUtils.isJavaFileWithMain(runConfig.getMainJavaFile()))
+                    return runConfig;
+            }
         }
 
         // See if selected file is Java file
@@ -163,10 +167,13 @@ public class RunTool extends WorkspaceTool implements AppListener {
      */
     public void runAppForSelFile(boolean isDebug)
     {
-        // If SelFile is Java file, set as run config
+        // Get selected file (just return if not runnable)
         WebFile selFile = getSelFile();
-        if (RunToolUtils.isJavaFileWithMain(selFile))
-            _runConfig = RunConfig.createRunConfigForJavaFile(selFile);
+        if (!RunToolUtils.isJavaFileWithMain(selFile))
+            return;
+
+        // Create default run config
+        _runConfig = RunConfig.createRunConfigForJavaFile(selFile);
 
         // Run app
         runApp(isDebug);
