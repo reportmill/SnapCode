@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * A class to represent individual case entries in a switch statement.
  */
-public class JSwitchEntry extends JNode implements WithStmts, WithVarDeclsX {
+public class JSwitchEntry extends JNode implements WithStmts, WithBlockStmt, WithVarDeclsX {
 
     // The case label expression(s)
     private List<JExpr> _labels = new ArrayList<>(1);
@@ -68,12 +68,50 @@ public class JSwitchEntry extends JNode implements WithStmts, WithVarDeclsX {
     public List<JStmt> getStatements()  { return _stmts; }
 
     /**
+     * Sets the statements.
+     */
+    public void setStatements(List<JStmt> stmtsList)
+    {
+        _stmts.forEach(this::removeChild);
+        _stmts = stmtsList;
+        _stmts.forEach(this::addChild);
+    }
+
+    /**
      * Adds a statement.
      */
     public void addStatement(JStmt aStmt)
     {
         _stmts.add(aStmt);
         addChild(aStmt);
+    }
+
+    /**
+     * WithBlockStmt method: Returns the statement block.
+     */
+    @Override
+    public JStmtBlock getBlock()
+    {
+        // If already set, just return
+        if (_stmts.size() == 1 && _stmts.get(0) instanceof JStmtBlock blockStmt)
+            return blockStmt;
+
+        // Create StmtBlock, add statement and replace
+        JStmtBlock stmtBlock = new JStmtBlock();
+        _stmts.forEach(stmtBlock::addStatement);
+        setBlock(stmtBlock);
+
+        // Return
+        return stmtBlock;
+    }
+
+    /**
+     * WithBlockStmt method: Sets a block.
+     */
+    @Override
+    public void setBlock(JStmtBlock aBlock)
+    {
+        setStatements(List.of(aBlock));
     }
 
     /**
