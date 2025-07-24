@@ -89,8 +89,7 @@ public class JSwitchEntry extends JNode implements WithStmts, WithVarDeclsX {
 
         // If label is typed pattern, add var decl
         for (JExpr label : _labels) {
-            if (label instanceof JExprPattern) {
-                JExprPattern pattern = (JExprPattern) label;
+            if (label instanceof JExprPattern pattern) {
                 JVarDecl patternVarDecl = pattern.getVarDecl();
                 if (patternVarDecl != null)
                     varDecls = ArrayUtils.add(varDecls, patternVarDecl, 0);
@@ -109,15 +108,21 @@ public class JSwitchEntry extends JNode implements WithStmts, WithVarDeclsX {
         JStmt lastStmt = !_stmts.isEmpty() ? _stmts.get(_stmts.size() - 1) : null;
 
         // If last statement is expression statement, return expression type
-        if (lastStmt instanceof JStmtExpr) {
-            JExpr expr = ((JStmtExpr) lastStmt).getExpr();
+        if (lastStmt instanceof JStmtExpr exprStmt) {
+            JExpr expr = exprStmt.getExpr();
             return expr.getEvalType();
         }
 
         // If last statement is return statement, return expression type
-        if (lastStmt instanceof JStmtReturn) {
-            JExpr expr = ((JStmtReturn) lastStmt).getExpr();
-            return expr.getEvalType();
+        if (lastStmt instanceof JStmtReturn returnStmt) {
+            JExpr expr = returnStmt.getExpr();
+            return expr != null ? expr.getEvalType() : null;
+        }
+
+        // If last statement is yield statement, return expression type
+        if (lastStmt instanceof JStmtYield yieldStmt) {
+            JExpr expr = yieldStmt.getExpr();
+            return expr != null ? expr.getEvalType() : null;
         }
 
         // Return not defined

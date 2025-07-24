@@ -126,9 +126,9 @@ Statement
     Block |
     IfStatement | ForStatement | WhileStatement | DoStatement |
     BreakStatement | ContinueStatement | ReturnStatement |
-    SwitchStatement | AssertStatement | EmptyStatement |
-    ThrowStatement | SynchronizedStatement | TryStatement |
-    LabeledStatement |
+    SwitchStatement | YieldStatement | AssertStatement |
+    EmptyStatement | ThrowStatement | SynchronizedStatement |
+    TryStatement | LabeledStatement |
     ExprStatement ";"
 }
 
@@ -161,6 +161,8 @@ ContinueStatement { "continue" Identifier? ";" }
 ReturnStatement { "return" Expression? ";" }
 
 SwitchStatement { SwitchExpr AssertStatement? }
+
+YieldStatement { "yield" Expression ";" }
 
 AssertStatement { "assert" Expression (":" Expression)? ";" }
 

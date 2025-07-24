@@ -52,6 +52,7 @@ public class JavaWord extends JavaDecl {
     public static final JavaWord Throws = new JavaWord("throws", WordType.Statement);
     public static final JavaWord Try = new JavaWord("try", WordType.Statement);
     public static final JavaWord While = new JavaWord("while", WordType.Statement);
+    public static final JavaWord Yield = new JavaWord("yield", WordType.Statement);
 
     // File words
     public static final JavaWord[] FILE_WORDS = { Import, Package };
@@ -63,7 +64,7 @@ public class JavaWord extends JavaDecl {
     public static final JavaWord[] STATEMENT_WORDS = {
             Assert, Break, Case, Catch, Continue, Do, Else, Finally, For, If, Instanceof, New, Return,
             Switch, Synchronized, Throw, Throws, Try, While,
-            Var
+            Var, Yield
     };
 
     // Modifiers
@@ -134,5 +135,5 @@ public class JavaWord extends JavaDecl {
     // Array of JavaWords that want parens
     private static final JavaWord[] WANTS_PARENS = { If, For, While, Assert, Switch, Catch };
     private static final JavaWord[] WANTS_TRAILING_SPACE = { Do, Assert, Case, Else, Finally, Instanceof, New, Return,
-            Synchronized, Throw, Throws, Try  };
+            Synchronized, Throw, Throws, Try, Var, Yield  };
 }

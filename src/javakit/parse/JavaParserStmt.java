@@ -43,7 +43,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get modifiers
             JModifiers modifiers = getPart();
 
             switch (anId) {
@@ -76,7 +75,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get assert statement
             JStmtAssert assertStmt = getPart();
 
             // Handle condition
@@ -105,7 +103,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get labeled statement
             JStmtLabeled labeledStmt = getPart();
 
             switch (anId) {
@@ -137,8 +134,9 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle Statements
             JStmtBlock block = getPart();
+
+            // Handle Statements
             if (aNode.getCustomNode() instanceof JStmt)
                 block.addStatement(aNode.getCustomNode(JStmt.class));
         }
@@ -228,7 +226,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get variable declaration
             JVarDecl varDecl = getPart();
 
             switch (anId) {
@@ -273,7 +270,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get variable declaration
             JVarDecl varDecl = getPart();
 
             switch (anId) {
@@ -312,7 +308,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get variable declaration expression
             JExprVarDecl varDeclExpr = getPart();
 
             switch (anId) {
@@ -364,7 +359,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get expression statement
             JStmtExpr exprStmt = getPart();
 
             switch (anId) {
@@ -420,7 +414,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get Switch statement
             JStmtSwitch switchStmt = getPart();
 
             // Handle SwitchExpr
@@ -443,7 +436,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get if statement
             JStmtIf ifStmt = getPart();
 
             switch (anId) {
@@ -477,7 +469,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get while statement
             JStmtWhile whileStmt = getPart();
 
             switch (anId) {
@@ -509,7 +500,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get do statement
             JStmtDo doStmt = getPart();
 
             switch (anId) {
@@ -544,7 +534,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get ForStmt
             JStmtFor forStmt = getPart();
 
             switch (anId) {
@@ -619,7 +608,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get break statement
             JStmtBreak breakStmt = getPart();
 
             // Handle Identifier
@@ -642,7 +630,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get continue statement
             JStmtContinue continueStmt = getPart();
 
             // Handle Identifier
@@ -663,7 +650,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get return statement
             JStmtReturn returnStmt = getPart();
 
             // Handle Expression
@@ -672,6 +658,26 @@ public class JavaParserStmt extends JavaParserExpr {
         }
 
         protected Class<JStmtReturn> getPartClass()  { return JStmtReturn.class; }
+    }
+
+    /**
+     * YieldStatement Handler.
+     */
+    public static class YieldStatementHandler extends JNodeParseHandler<JStmtYield> {
+
+        /**
+         * ParseHandler method.
+         */
+        protected void parsedOne(ParseNode aNode, String anId)
+        {
+            JStmtYield yieldStmt = getPart();
+
+            // Handle Expression
+            if (anId == "Expression")
+                yieldStmt.setExpr(aNode.getCustomNode(JExpr.class));
+        }
+
+        protected Class<JStmtYield> getPartClass()  { return JStmtYield.class; }
     }
 
     /**
@@ -684,7 +690,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get throw statement
             JStmtThrow throwStmt = getPart();
 
             // Handle Expression
@@ -705,7 +710,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get sync statement
             JStmtSynchronized syncStmt = getPart();
 
             // Handle Expression
@@ -730,7 +734,6 @@ public class JavaParserStmt extends JavaParserExpr {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get try statement
             JStmtTry tryStmt = getPart();
 
             switch (anId) {
