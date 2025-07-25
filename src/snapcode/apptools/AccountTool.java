@@ -1,6 +1,7 @@
 package snapcode.apptools;
 import snap.gfx.Color;
 import snap.util.Prefs;
+import snap.util.UserInfo;
 import snap.view.*;
 import snapcode.app.JavaPage;
 import snapcode.app.WorkspacePane;
@@ -23,7 +24,6 @@ public class AccountTool extends ViewOwner {
     private static final int BOTTOM_MARGIN = 50;
 
     // Constants
-    private static final String USER_EMAIL_KEY = "SnapUserEmail";
     private static final String GITHUB_USER_KEY = "GithubUser";
     private static final String GITHUB_PAC_KEY = "GithubPAC";
 
@@ -68,7 +68,7 @@ public class AccountTool extends ViewOwner {
     protected void resetUI()
     {
         // Update EmailText
-        setViewValue("EmailText", getUserEmail());
+        setViewValue("EmailText", UserInfo.getUserEmail());
 
         // Update LightModeButton, DarkModeButton
         setViewValue("LightModeButton", ViewTheme.get() == ViewTheme.getLight());
@@ -91,7 +91,7 @@ public class AccountTool extends ViewOwner {
             case "CloseButton" -> _popupWindow.hide();
 
             // Handle EmailText
-            case "EmailText" -> setUserEmail(anEvent.getStringValue());
+            case "EmailText" -> UserInfo.setUserEmail(anEvent.getStringValue());
 
             // Handle LightModeButton, DarkModeButton
             case "LightModeButton" -> setTheme(ViewTheme.getLight());
@@ -101,22 +101,6 @@ public class AccountTool extends ViewOwner {
             case "GithubUserText" -> setGithubUser(anEvent.getStringValue());
             case "GithubPacText" -> setGithubPac(anEvent.getStringValue());
         }
-    }
-
-    /**
-     * Returns the user email.
-     */
-    public static String getUserEmail()
-    {
-        return Prefs.getDefaultPrefs().getString(USER_EMAIL_KEY, "");
-    }
-
-    /**
-     * Sets the user email address.
-     */
-    public static void setUserEmail(String aValue)
-    {
-        Prefs.getDefaultPrefs().setValue(USER_EMAIL_KEY, aValue);
     }
 
     /**

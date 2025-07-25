@@ -1,6 +1,7 @@
 package snapcode.app;
 import snap.gfx.Image;
 import snap.util.TaskMonitor;
+import snap.util.UserInfo;
 import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.web.WebFile;
@@ -160,7 +161,7 @@ public class SnapCloudPage extends WebPage {
     protected void resetUI()
     {
         // If user email hasn't been set, show email box
-        String userEmail = AccountTool.getUserEmail();
+        String userEmail = UserInfo.getUserEmail();
         setViewVisible("EmailBox", userEmail == null || userEmail.isEmpty());
 
         // Update ProgressBar
@@ -193,7 +194,7 @@ public class SnapCloudPage extends WebPage {
 
             // Handle EmailText
             case "EmailText":
-                AccountTool.setUserEmail(anEvent.getStringValue());
+                UserInfo.setUserEmail(anEvent.getStringValue());
                 runLater(this::connectToSnapCloudUserSite);
                 break;
 
@@ -237,7 +238,7 @@ public class SnapCloudPage extends WebPage {
      */
     public static WebURL getSnapCloudUserUrl()
     {
-        String userEmail = AccountTool.getUserEmail();
+        String userEmail = UserInfo.getUserEmail();
         if (userEmail == null || userEmail.isEmpty())
             return null;
 
