@@ -47,6 +47,9 @@ Provided by enCode/Create. [Learn to code!](https://www.encodecreate.com)
 * Calculator
   [](https://reportmill.com/SnapCode/Samples/Calculator/Calculator.zip)
   This is a sample of a simple calculator.
+* Puppets
+  [](https://reportmill.com/SnapCode/Samples/Puppets/Puppets.zip)
+  This app animates puppets using JBox2D and rag-doll-physics.
 
 ## Misc Samples
 
