@@ -30,7 +30,7 @@ public class SnapPage extends WebPage {
 
         // Load UI
         View superUI = null;
-        try { superUI = _content = super.createUI(); }
+        try { superUI = _content = UILoader.loadViewForOwnerAndUrl(this, getFile().getUrl()); }
         catch (Exception e) { return createExceptionUI(e); }
         finally { ViewArchiver.setUseRealClass(true); }
 
@@ -58,9 +58,4 @@ public class SnapPage extends WebPage {
         text.setText(StringUtils.getStackTraceString(e));
         return text;
     }
-
-    /**
-     * Override to return UI file.
-     */
-    public Object getUISource()  { return getFile(); }
 }

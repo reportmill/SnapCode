@@ -30,7 +30,7 @@ public class SnapBuilderPage extends WebPage {
     {
         // Set file in EditorPane
         WebFile file = getFile();
-        _editorPane.openSource(file);
+        _editorPane.openEditorForFile(file);
 
         // Return EditorPane.UI
         return _editorPane.getUI();
