@@ -267,11 +267,6 @@ public class JavaTextPane extends TextPane {
         MenuItem showScopeBoxesMenu = settingsButton.getItemForName("ShowScopeBoxesMenuItem");
         if (showScopeBoxesMenu != null)
             showScopeBoxesMenu.setText(JavaTextArea.isShowScopeBoxes() ? "Hide Scope Boxes" : "Show Scope Boxes");
-
-        // Reset text on ShowSnapCodeMenuItem
-        MenuItem showSnapCodeMenu = settingsButton.getItemForName("ShowSnapCodeMenuItem");
-        if (showSnapCodeMenu != null)
-            showSnapCodeMenu.setVisible(!getJavaTextModel().isJepl() && !getJavaTextModel().isJMD());
     }
 
     /**

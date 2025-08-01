@@ -1,4 +1,4 @@
-package snapcode.apptools;
+package snapcode.views;
 import javakit.parse.JClassDecl;
 import javakit.parse.JNode;
 import javakit.parse.JStmt;
@@ -13,9 +13,6 @@ import snap.util.ListUtils;
 import snap.view.*;
 import snapcode.app.*;
 import snapcode.javatext.JavaTextArea;
-import snapcode.views.JBlockView;
-import snapcode.views.JNodeView;
-import snapcode.views.SnapEditorPage;
 import snapcode.webbrowser.WebPage;
 import java.util.stream.Stream;
 
@@ -78,37 +75,6 @@ public class BlocksTool extends WorkspaceTool {
         // Get blockView for SelClass and add to blocksColView
         JBlockView<?>[] blockViews = getBlockViewsForClass(_selClass);
         Stream.of(blockViews).forEach(_methodBlocksColView::addChild);
-    }
-
-    /**
-     * Returns whether current is ShowBlocks.
-     */
-    public boolean isShowBlocks()
-    {
-        WebPage selPage = _pagePane.getSelPage();
-        return selPage instanceof SnapEditorPage;
-    }
-
-    /**
-     * Sets whether current page is ShowBlocks.
-     */
-    public void setShowBlocks(boolean aValue)
-    {
-        if (aValue == isShowBlocks()) return;
-
-        // Handle ShowBlocks
-        if (aValue) {
-            WebPage selPage = _pagePane.getSelPage();
-            if (selPage instanceof JavaPage)
-                ((JavaPage) selPage).openAsSnapCode();
-        }
-
-        // Handle show Java text
-        else {
-            WebPage selPage = _pagePane.getSelPage();
-            if (selPage instanceof SnapEditorPage)
-                ((SnapEditorPage) selPage).openAsJavaText();
-        }
     }
 
     /**
@@ -190,10 +156,6 @@ public class BlocksTool extends WorkspaceTool {
         // Update ClassText
         JavaClass selClass = getSelClass();
         setViewText("ClassText", selClass != null ? selClass.getSimpleName() : null);
-
-        // Update ShowBlocksCheckBox
-        setViewValue("ShowBlocksCheckBox", isShowBlocks());
-        setViewEnabled("ShowBlocksCheckBox", _javaTextArea != null);
     }
 
     /**
@@ -206,9 +168,6 @@ public class BlocksTool extends WorkspaceTool {
 
             // Handle DirectoryListView
             case "DirectoryListView" -> showBlocksforDirectoryIndex(anEvent.getSelIndex());
-
-            // Handle ShowBlocksCheckBox
-            case "ShowBlocksCheckBox" -> setShowBlocks(anEvent.getBoolValue());
         }
     }
 
@@ -248,7 +207,7 @@ public class BlocksTool extends WorkspaceTool {
         // Get drag string and image
         JNode dragNode = dragNodeView.getJNode();
         String dragString = dragNode.getString(); // Was: "SupportPane:" + dragSnapPart.getClass().getSimpleName()
-        Image dragImage = ViewUtils.getImage(dragNodeView);
+        Image dragImage = ViewUtils.getImageForScale(dragNodeView, 1);
 
         // Create Dragboard, set drag string and image and start drag
         Clipboard clipboard = anEvent.getClipboard();
@@ -265,8 +224,6 @@ public class BlocksTool extends WorkspaceTool {
         // Get PagePane JavaPage
         WebPage selPage = _workspacePane.getBrowser().getSelPage();
         JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
-        if (selPage instanceof SnapEditorPage)
-            javaPage = ((SnapEditorPage) selPage).getJavaPage();
 
         // Get JavaPage JavaTextArea and set
         JavaTextArea javaTextArea = javaPage != null ? javaPage.getTextArea() : null;
@@ -410,8 +367,8 @@ public class BlocksTool extends WorkspaceTool {
     {
         String simpleName = javaClass.getSimpleName();
         return switch (simpleName) {
-            case "GameActor" -> GameActorPieces;
-            case "GamePen" -> GamePenPieces;
+            case "Actor" -> ActorPieces;
+            case "PenActor" -> PenActorPieces;
             case "GameView" -> GameViewPieces;
             default -> new String[0];
         };
@@ -419,21 +376,23 @@ public class BlocksTool extends WorkspaceTool {
     }
 
     /**
-     * Returns GameActor pieces.
+     * Returns Actor pieces.
      */
-    private static String[] GameActorPieces = {
+    private static String[] ActorPieces = {
             "moveBy(10);", "turnBy(10);", "scaleBy(.1);",
             "getX();", "getY();", "getWidth();", "getHeight();", "setXY(10,10);", "setSize(50,50);",
             "getRotate();", "setRotate(10);", "getScale();", "setScale(1);",
-            "getAngle(\"Mouse\");", "getDistance(\"Mouse\");", "isMouseDown();", "isMouseClick();",
-            "isKeyDown(\"right\");", "isKeyClicked(\"right\");", "playSound(\"Beep.wav\");", "getScene();",
-            "getPen();", "setPenColor(\"Random\");", "penDown();", "getAnimator();"
+            "getAngleToMouse();", "getDistance(\"Mouse\");", "isMouseDown();", "isMouseClick();",
+            "isKeyDown(\"right\");", "isKeyClicked(\"right\");", "playSound(\"Beep.wav\");", "getGameView();"
     };
 
     /**
-     * Returns GamePen pieces.
+     * Returns PenActor pieces.
      */
-    private static String[] GamePenPieces = { "down();", "up();", "clear();", "setColor(\"Random\");", "setWidth(10);" };
+    private static String[] PenActorPieces = {
+            "isPenDown();", "setPenDown(true);", "penDown();", "clearPen();", "getPenColor();", "setPenColor(\"Random\");",
+            "getPenWidth();", "setPenWidth(10);", "getPenPoint();"
+    };
 
     /**
      * Returns GameView pieces.

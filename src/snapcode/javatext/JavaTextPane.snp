@@ -19,6 +19,5 @@
   <Button Name="JavaDocButton" PrefWidth="116" PrefHeight="22" LeanX="RIGHT" Text="Documentation" />
   <MenuButton Name="SettingsButton" PrefWidth="26" PrefHeight="26" Margin="0,14,0,0" Padding="0" LeanX="RIGHT" ToolTip="Settings" ImageName="Settings.png" ShowArea="false" ShowArrow="false">
     <MenuItem Name="ShowScopeBoxesMenuItem" Text="Show Scope Boxes" />
-    <MenuItem Name="ShowSnapCodeMenuItem" Text="Show SnapCode" />
   </MenuButton>
 </RowView>

@@ -9,6 +9,7 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.view.*;
+import snapcode.views.BlocksConsole;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snapcode.apptools.*;
@@ -76,7 +77,6 @@ public class WorkspaceTools {
 
         // Support tools
         HelpTool helpTool = new HelpTool(_workspacePane);
-        BlocksTool blocksTool = new BlocksTool(_workspacePane);
 
         // Support tools
         SearchTool searchTool = new SearchTool(_workspacePane);
@@ -84,19 +84,20 @@ public class WorkspaceTools {
         BreakpointsTool breakpointsTool = new BreakpointsTool(_workspacePane);
         HttpServerTool httpServerTool = new HttpServerTool(_workspacePane);
         ClassesTool classesTool = new ClassesTool(_workspacePane);
+        BlocksConsole blocksConsole = new BlocksConsole(_workspacePane);
 
         // Create tools array
         _tools = new WorkspaceTool[] {
                 _filesTool, projectFilesTool, newFileTool,
                 runTool, debugTool, buildTool,
-                searchTool, helpTool, blocksTool, classesTool,
+                searchTool, helpTool, classesTool,
                 runConfigsTool, breakpointsTool,
                 httpServerTool
         };
 
         // Configure tray tool lists
-        WorkspaceTool[] leftTools = { helpTool, projectFilesTool };
-        WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, classesTool, blocksTool };
+        WorkspaceTool[] leftTools = { blocksConsole, helpTool, projectFilesTool };
+        WorkspaceTool[] rightTools = { runTool, debugTool, buildTool, searchTool, classesTool };
         WorkspaceTool[] bottomTools = { runConfigsTool, breakpointsTool };
         if (WorkspacePane._embedMode) {
             leftTools = new WorkspaceTool[] { projectFilesTool };

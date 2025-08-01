@@ -17,7 +17,6 @@ import snap.view.View;
 import snapcode.javatext.JavaTextArea;
 import snapcode.javatext.JavaTextPane;
 import snapcode.javatext.NodeMatcher;
-import snapcode.views.SnapEditorPage;
 import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
@@ -371,20 +370,6 @@ public class JavaPage extends WebPage {
     }
 
     /**
-     * Reopen this page as SnapCodePage.
-     */
-    public void openAsSnapCode()
-    {
-        WebFile file = getFile();
-        WebURL url = file.getUrl();
-        WebPage page = new SnapEditorPage(this);
-        page.setFile(file);
-        WebBrowser browser = getBrowser();
-        browser.setPageForURL(url, page);
-        browser.setSelPage(page);
-    }
-
-    /**
      * A JavaTextPane for a JavaPage to implement symbol features and such.
      */
     public class JavaPageJavaTextPane extends JavaTextPane {
@@ -427,20 +412,6 @@ public class JavaPage extends WebPage {
         public int getProgramCounterLine()
         {
             return JavaPage.this.getProgramCounterLine();
-        }
-
-        /**
-         * Respond to UI controls.
-         */
-        @Override
-        public void respondUI(ViewEvent anEvent)
-        {
-            // Handle ShowSnapCodeMenuItem
-            if (anEvent.equals("SnapCodeButton") || anEvent.equals("ShowSnapCodeMenuItem"))
-                openAsSnapCode();
-
-                // Do normal version
-            else super.respondUI(anEvent);
         }
     }
 }

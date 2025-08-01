@@ -182,9 +182,13 @@ public class JavaDoc {
             return null;
 
         // Add suffix
-        String moduleName = aClass.getModule().getName();
         String classPath = className.replace('.', '/');
-        String suffix = moduleName + '/' + classPath + ".html"; // Used to have "index.html?" +
+        String suffix = classPath + ".html";
+
+        // Add module name to suffix
+        String moduleName = aClass.getModule().getName();
+        if (moduleName != null)
+            suffix = moduleName + '/' + suffix;
 
         // If method set, add hash
         if (aMethod != null) {
