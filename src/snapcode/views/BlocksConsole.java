@@ -2,10 +2,12 @@ package snapcode.views;
 import snap.view.*;
 import snap.web.WebFile;
 import snapcode.app.WorkspacePane;
+import snapcode.app.WorkspacePaneUtils;
 import snapcode.app.WorkspaceTool;
 import snapcode.javatext.JavaTextArea;
 import snapcode.javatext.JavaTextPane;
 import snapcode.project.JavaTextModel;
+import snapcode.project.Project;
 
 /**
  * This class manages a blocks project.
@@ -35,11 +37,12 @@ public class BlocksConsole extends WorkspaceTool {
     }
 
     /**
-     * Sets.
+     * Sets current sprite file.
      */
     protected void setCodeEditorForClassName(String className)
     {
-        WebFile javaFile = _workspacePane.getRootProject().getJavaFileForClassName("Sprite1");
+        Project rootProject = _workspacePane.getRootProject();
+        WebFile javaFile = rootProject != null ? rootProject.getJavaFileForClassName("Sprite1") : null;
         if (javaFile == null)
             return;
 
@@ -62,6 +65,9 @@ public class BlocksConsole extends WorkspaceTool {
         // Add
         BoxView codeColView = getView("CodeBoxView", BoxView.class);
         codeColView.setContent(snapEditorPaneUI);
+
+        // Select file
+        _workspacePane.openFile(javaFile);
     }
 
     /**
@@ -91,7 +97,12 @@ public class BlocksConsole extends WorkspaceTool {
     @Override
     protected void initShowing()
     {
-        setCodeEditorForClassName("Sprite1");
+        if (_workspacePane.getRootProject() == null) {
+            WorkspacePaneUtils.openTempBlocksProject(_workspacePane);
+            runLater(() -> setCodeEditorForClassName("Sprite1"));
+        }
+
+        else setCodeEditorForClassName("Sprite1");
     }
 
     /**

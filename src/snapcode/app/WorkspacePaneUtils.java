@@ -311,6 +311,15 @@ public class WorkspacePaneUtils {
     }
 
     /**
+     * Opens a temp blocks project.
+     */
+    public static void openTempBlocksProject(WorkspacePane workspacePane)
+    {
+        Project tempBlocksProject = ProjectUtils.getTempBlocksProject(workspacePane.getWorkspace());
+        openProjectForProjectFile(workspacePane, tempBlocksProject.getSite().getURL().getFile());
+    }
+
+    /**
      * Opens a Workspace in embed mode.
      */
     public static void openEmbedWorkspace()
@@ -383,7 +392,7 @@ public class WorkspacePaneUtils {
 
         // If URL to TempProj or Temp dir, just return
         String filePath = projectURL.getPath();
-        if (filePath.contains("TempProj") || filePath.startsWith(SnapUtils.getTempDir()))
+        if (filePath.startsWith(SnapUtils.getTempDir()) || filePath.startsWith("/tmp"))
             return;
 
         // Add URL

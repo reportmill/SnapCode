@@ -4,6 +4,7 @@
 package snapcode.project;
 import snap.util.*;
 import snap.web.*;
+import snapcode.views.BlocksUtils;
 import java.io.File;
 import java.util.List;
 
@@ -91,6 +92,11 @@ public class ProjectUtils {
         WebFile greenfootFile = aProj.getFileForPath("/src/project.greenfoot");
         if (greenfootFile != null)
             return greenfootFile;
+
+        // Look for Blocks file
+        WebFile blocksFile = aProj.getFileForPath("/src/Sprite1.java");
+        if (blocksFile != null)
+            return blocksFile;
 
         // Look for 'readme' file
         WebFile projRootDir = aProj.getRootDir();
@@ -278,6 +284,24 @@ public class ProjectUtils {
         WebURL tempProjURL = WebURL.getUrl(tempProjPath);
         assert (tempProjURL != null);
         return tempProjURL.getAsSite();
+    }
+
+    /**
+     * Creates a temp project for blocks.
+     */
+    public static Project getTempBlocksProject(Workspace workspace)
+    {
+        // Create temp blocks project
+        Project tempBlocksProj = getTempProjectForName(workspace, "TempBlocksProject");
+
+        // Add default files (Stage1.java, Sprint1.java, Stage1.snp)
+        BlocksUtils.addDefaultFilesForProject(tempBlocksProj);
+
+        // Set main file
+        tempBlocksProj.getBuildFile().setMainClassName("Stage1");
+
+        // Return
+        return tempBlocksProj;
     }
 
     /**

@@ -58,6 +58,8 @@ public class RunToolUtils {
         // Run local if (1) TempProj and (2) jepl file and (3) not swing and (4) not alt-key-down
         if (mainFile == null)
             return false;
+        if (mainFile.getName().equals("Stage1.java"))
+            return true;
         String fileType = mainFile.getFileType();
         if (fileType.equals("jmd"))
             return true;
