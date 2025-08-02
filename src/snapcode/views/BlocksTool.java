@@ -379,7 +379,7 @@ public class BlocksTool extends WorkspaceTool {
      * Returns Actor pieces.
      */
     private static String[] ActorPieces = {
-            "moveBy(10);", "turnBy(10);", "scaleBy(.1);",
+            "moveBy(10);", "turnBy(5);", "scaleBy(.1);",
             "getX();", "getY();", "getWidth();", "getHeight();", "setXY(10,10);", "setSize(50,50);",
             "getRotate();", "setRotate(10);", "getScale();", "setScale(1);",
             "getAngleToMouse();", "getDistance(\"Mouse\");", "isMouseDown();", "isMouseClick();",
