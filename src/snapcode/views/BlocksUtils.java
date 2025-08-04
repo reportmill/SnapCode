@@ -9,6 +9,15 @@ import snapcode.project.Project;
 public class BlocksUtils {
 
     /**
+     * Returns whether given project is a blocks project.
+     */
+    public static boolean isBlocksProject(Project project)
+    {
+        WebSite projSite = project.getSite();
+        return projSite.getFileForPath("/src/Sprite1.java") != null;
+    }
+
+    /**
      * Creates default files for project.
      */
     public static void addDefaultFilesForProject(Project project)

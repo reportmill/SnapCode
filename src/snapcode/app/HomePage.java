@@ -72,6 +72,15 @@ public class HomePage extends WebPage {
     }
 
     /**
+     * Creates a new block code project.
+     */
+    private void createNewBlockCodeProject()
+    {
+        NewFileTool newFileTool = _workspacePane.getNewFileTool();
+        runLater(newFileTool::showNewBlockCodeProjectPanel);
+    }
+
+    /**
      * Removes recent project for given url.
      */
     public void removeRecentProjectUrl(WebURL recentProjectUrl)
@@ -187,12 +196,12 @@ public class HomePage extends WebPage {
         switch (urlAddr) {
 
             // Handle NewJavaClassButton, NewJavaReplButton
-            case "NewJavaClassButton": createNewFileForType("java"); break;
-            case "NewJavaReplButton": createNewFileForType("jepl"); break;
+            case "NewJavaClassButton" -> createNewFileForType("java");
+            case "NewJavaReplButton" -> createNewFileForType("jepl");
 
             // Handle NewProjectButton, NewBlockProjectButton
-            case "NewProjectButton":
-            case "NewBlockProjectButton": createNewProject(); break;
+            case "NewProjectButton" -> createNewProject();
+            case "NewBlockProjectButton" -> createNewBlockCodeProject();
         }
     }
 

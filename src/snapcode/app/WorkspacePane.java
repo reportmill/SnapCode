@@ -569,6 +569,9 @@ public class WorkspacePane extends ViewOwner {
         // Handle show greenfoot
         if (aProject.getBuildFile().isIncludeGreenfootRuntime())
             _toolBar.showGreenfootButton();
+
+        // Handle hide block code button
+        runLater(_toolBar::updateBlockCodeButton);
     }
 
     /**

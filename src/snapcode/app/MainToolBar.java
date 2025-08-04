@@ -12,6 +12,7 @@ import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.apptools.SearchTool;
 import snapcode.project.RunConfig;
+import snapcode.views.BlocksUtils;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -19,6 +20,9 @@ import java.util.stream.Stream;
  * ToolBar.
  */
 public class MainToolBar extends WorkspaceTool {
+
+    // The Block code button
+    private ToggleButton _blockCodeButton;
 
     /**
      * Constructor.
@@ -51,6 +55,28 @@ public class MainToolBar extends WorkspaceTool {
         greenfootButton.setImage(Image.getImageForClassResource(getClass(), "pkg.images/Greenfoot.png"));
         getUI(ChildView.class).addChild(greenfootButton, getView("HomeButton").indexInParent() + 1);
         greenfootButton.setOwner(this);
+    }
+
+    /**
+     * Updates block code button.
+     */
+    public void updateBlockCodeButton()
+    {
+        Project rootProj = _workspacePane.getRootProject();
+        ToggleButton blockCodeButton = getBlockCodeButton();
+        if (blockCodeButton != null)
+            blockCodeButton.setVisible(rootProj != null && BlocksUtils.isBlocksProject(rootProj));
+    }
+
+    /**
+     * Sets the Block code button visible.
+     */
+    private ToggleButton getBlockCodeButton()
+    {
+        if (_blockCodeButton != null) return _blockCodeButton;
+        ToolTray leftToolTray = _workspaceTools.getLeftTray();
+        TabView tabView = leftToolTray.getUI(TabView.class);
+        return _blockCodeButton = tabView.getTab(0).getButton();
     }
 
     /**

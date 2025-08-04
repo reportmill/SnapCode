@@ -7,6 +7,7 @@ import snapcode.project.Project;
 import snap.props.PropChange;
 import snap.util.ListUtils;
 import snap.view.*;
+import snapcode.views.BlocksConsole;
 import snapcode.webbrowser.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -131,6 +132,8 @@ public class PagePane extends WebBrowserPane {
         setSelPage(_homePage);
         if (!_workspacePane._workspaceTools.getHelpTool().isLesson())
             _workspacePane.getWorkspaceTools().getRightTray().hideTools();
+        if (_workspacePane._workspaceTools.getLeftTray().getSelTool() instanceof BlocksConsole)
+            _workspacePane.getWorkspaceTools().getLeftTray().hideTools();
         _workspacePane.getRunTool().cancelRun();
     }
 

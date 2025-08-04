@@ -18,6 +18,8 @@ import snapcode.project.JavaDeps;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
 import snapcode.project.Workspace;
+import snapcode.views.BlocksConsole;
+import snapcode.views.BlocksUtils;
 import java.util.List;
 
 /**
@@ -111,7 +113,21 @@ public class NewFileTool extends WorkspaceTool {
     /**
      * Shows a panel to create new project.
      */
-    public void showNewProjectPanel()
+    public Project showNewProjectPanel()
+    {
+        // Show new project directory panel to select new project directory file
+        WebFile newProjectFile = showNewProjectDirPanel();
+        if (newProjectFile == null)
+            return null;
+
+        // Create new project and return
+        return createNewProjectForProjectDir(newProjectFile);
+    }
+
+    /**
+     * Shows a panel to choose a new project directory.
+     */
+    private WebFile showNewProjectDirPanel()
     {
         // Create file panel to select new directory file
         FilePanel filePanel = new FilePanel();
@@ -137,7 +153,7 @@ public class NewFileTool extends WorkspaceTool {
         // Show file panel to select new directory file
         WebFile newProjectFile = filePanel.showFilePanel(_workspacePane.getUI());
         if (newProjectFile == null)
-            return;
+            return null;
 
         // Make sure file is dir
         if (!newProjectFile.isDir()) {
@@ -146,13 +162,13 @@ public class NewFileTool extends WorkspaceTool {
         }
 
         // Return
-        createNewProjectForProjectDir(newProjectFile);
+        return newProjectFile;
     }
 
     /**
-     * Creates a new project.
+     * Creates a new project for given project directory.
      */
-    public void createNewProjectForProjectDir(WebFile newProjectFile)
+    public Project createNewProjectForProjectDir(WebFile newProjectFile)
     {
         // Create new project
         WebSite projectSite = newProjectFile.getUrl().getAsSite();
@@ -160,6 +176,21 @@ public class NewFileTool extends WorkspaceTool {
 
         // Configure to include SnapKit
         newProject.getBuildFile().setIncludeSnapKitRuntime(true);
+
+        // Return
+        return newProject;
+    }
+
+    /**
+     * Shows a panel to create new block code project.
+     */
+    public void showNewBlockCodeProjectPanel()
+    {
+        Project newBlockCodeProj = showNewProjectPanel();
+        if (newBlockCodeProj != null) {
+            BlocksUtils.addDefaultFilesForProject(newBlockCodeProj);
+            runDelayed(() -> _workspaceTools.showToolForClass(BlocksConsole.class), 500);
+        }
     }
 
     /**
