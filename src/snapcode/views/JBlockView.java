@@ -35,16 +35,16 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     private static JBlockView<?> _blockViewUnderDrag;
 
     // Constant for padding on notched blocks
-    private static final Insets PLAIN_PADDING = new Insets(0, 8, 0, 8);
-    private static final Insets NOTCHED_PADDING = new Insets(0, 8, BlockView.NOTCH_HEIGHT, 8);
+    public static final Insets PLAIN_PADDING = new Insets(0, 8, 0, 8);
+    public static final Insets NOTCHED_PADDING = new Insets(0, 8, BlockView.NOTCH_HEIGHT, 8);
 
     // Constants for selection painting
     private static final Color SELECTED_OVERLAY_COLOR = Color.get("#FFFFFF20");
     private static final Color SELECTED_OVERLAY_STROKE_COLOR = Color.get("#FFFFFFB0");
     private static final Color SELECT_GLOW_COLOR = Color.get("#039ed3").brighter().brighter();
     private static final Color SELECT_GLOW_COLOR_TOP_LEVEL = Color.get("#039ed3").brighter();
-    private static final Effect SELECT_EFFECT = new ShadowEffect(15, SELECT_GLOW_COLOR, 0, 0);
-    private static final Effect SELECT_EFFECT_TOP_LEVEL = new ShadowEffect(12, SELECT_GLOW_COLOR_TOP_LEVEL, 0, 0);
+    private static final Effect SELECT_EFFECT = new ShadowEffect(10, SELECT_GLOW_COLOR, 0, 0);
+    private static final Effect SELECT_EFFECT_TOP_LEVEL = new ShadowEffect(10, SELECT_GLOW_COLOR_TOP_LEVEL, 0, 0);
     private static final Color UNDER_DRAG_COLOR = Color.get("#FFFFFF88");
 
     /**

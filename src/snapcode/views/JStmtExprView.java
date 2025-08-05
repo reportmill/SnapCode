@@ -49,6 +49,6 @@ public class JStmtExprView<JNODE extends JStmtExpr> extends JStmtView<JNODE> {
         JExpr expr = exprStmt.getExpr();
         if (expr instanceof JExprAssign) return "set";
         if (expr instanceof JExprVarDecl) return "declare";
-        return "call";
+        return null; //"call";
     }
 }

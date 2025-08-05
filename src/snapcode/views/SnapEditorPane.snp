@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RowView Padding="3" Spacing="3">
+<RowView Padding="2,5,5,5" Spacing="3">
   <Button Name="SaveButton" PrefWidth="26" PrefHeight="26" ToolTip="Save" ImageName="/snap/viewx/pkg.images/File_Save.png" ShowArea="false" />
   <Separator PrefWidth="13" PrefHeight="18" Vertical="true" />
   <Button Name="CutButton" PrefWidth="26" PrefHeight="26" ToolTip="Cut" ImageName="/snap/viewx/pkg.images/Edit_Cut.png" ShowArea="false" />
@@ -9,5 +9,5 @@
   <Separator PrefWidth="13" PrefHeight="18" Vertical="true" />
   <Button Name="UndoButton" PrefWidth="26" PrefHeight="26" ToolTip="Undo" ImageName="/snap/viewx/pkg.images/Edit_Undo.png" ShowArea="false" />
   <Button Name="RedoButton" PrefWidth="26" PrefHeight="26" ToolTip="Redo" ImageName="/snap/viewx/pkg.images/Edit_Redo.png" ShowArea="false" />
-  <Button Name="JavaDocButton" Margin="5" PrefWidth="116" PrefHeight="26" LeanX="RIGHT" Text="Documentation" />
+  <Button Name="JavaDocButton" PrefWidth="116" PrefHeight="26" LeanX="RIGHT" Text="Documentation" />
 </RowView>

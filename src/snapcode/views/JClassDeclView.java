@@ -1,7 +1,6 @@
 package snapcode.views;
 import javakit.parse.*;
-import snap.gfx.Color;
-import snap.gfx.Font;
+import snap.geom.Insets;
 import snap.util.ArrayUtils;
 import snap.view.ColView;
 import snap.view.Label;
@@ -37,21 +36,6 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JBlockView<JNODE> 
         List<View> rowViews = new ArrayList<>();
         rowViews.add(idView);
 
-        // Add JNodeView for extnds type
-        JType ext = classDecl.getExtendsType();
-        if (ext != null) {
-
-            // Add separator label
-            Label label = new Label(" extends ");
-            label.setFont(Font.Arial14.copyForSize(16));
-            label.setTextColor(Color.WHITE);
-            rowViews.add(label);
-
-            // Add TypeView
-            JNodeView<?> typView = new ClassDeclTypeView<>(ext);
-            rowViews.add(typView);
-        }
-
         // Return array
         return rowViews.toArray(new View[0]);
     }
@@ -74,7 +58,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JBlockView<JNODE> 
     protected RowView createRowView()
     {
         RowView rowView = super.createRowView();
-        rowView.setSpacing(12);
+        rowView.setPadding(Insets.EMPTY);
         return rowView;
     }
 
@@ -131,6 +115,7 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JBlockView<JNODE> 
         {
             JExprId id = getJNode();
             Label label = JNodeViewUtils.createLabel(id.getName());
+            label.setMargin(2, 4, 8, 4);
             label.setFont(label.getFont().copyForSize(20));
             return new View[] { label };
         }
@@ -139,39 +124,5 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JBlockView<JNODE> 
          * Returns a string describing the part.
          */
         public String getNodeString()  { return "ClassId"; }
-    }
-
-    /**
-     * A JNodeView subclass for JClassDecl extends type.
-     */
-    public static class ClassDeclTypeView<JNODE extends JType> extends JBlockView<JNODE> {
-
-        /**
-         * Creates a new JTypeView for given JType.
-         */
-        public ClassDeclTypeView(JNODE aCD)
-        {
-            super(aCD);
-            setMinWidth(120);
-            setBlockType(BlockType.Plain);
-            setColor(ClassDeclColor);
-        }
-
-        /**
-         * Override to return label.
-         */
-        @Override
-        protected View[] createRowViews()
-        {
-            JType typ = getJNode();
-            Label label = JNodeViewUtils.createLabel(typ.getName());
-            label.setFont(label.getFont().copyForSize(14));
-            return new View[] { label };
-        }
-
-        /**
-         * Returns a string describing the part.
-         */
-        public String getNodeString()  { return "Type"; }
     }
 }
