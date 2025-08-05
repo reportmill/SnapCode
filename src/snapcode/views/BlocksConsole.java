@@ -79,7 +79,7 @@ public class BlocksConsole extends WorkspaceTool {
         RowView mainUI = (RowView) UILoader.loadViewForString(BLOCKS_CONSOLE_UI);
 
         // Add StagePane and SpritePane
-        _stagePane = new StagePane();
+        _stagePane = new StagePane(_workspacePane);
         mainUI.addChild(_stagePane.getUI(), 0);
 
         // Add BlocksTool
