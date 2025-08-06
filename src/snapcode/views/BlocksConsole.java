@@ -37,12 +37,12 @@ public class BlocksConsole extends WorkspaceTool {
     }
 
     /**
-     * Sets current sprite file.
+     * Sets current actor file.
      */
     protected void setCodeEditorForClassName(String className)
     {
         Project rootProject = _workspacePane.getRootProject();
-        WebFile javaFile = rootProject != null ? rootProject.getJavaFileForClassName("Sprite1") : null;
+        WebFile javaFile = rootProject != null ? rootProject.getJavaFileForClassName("Actor1") : null;
         if (javaFile == null)
             return;
 
@@ -78,7 +78,7 @@ public class BlocksConsole extends WorkspaceTool {
     {
         RowView mainUI = (RowView) UILoader.loadViewForString(BLOCKS_CONSOLE_UI);
 
-        // Add StagePane and SpritePane
+        // Add StagePane
         _stagePane = new StagePane(_workspacePane);
         mainUI.addChild(_stagePane.getUI(), 0);
 
@@ -99,10 +99,10 @@ public class BlocksConsole extends WorkspaceTool {
     {
         if (_workspacePane.getRootProject() == null) {
             WorkspacePaneUtils.openTempBlocksProject(_workspacePane);
-            runLater(() -> setCodeEditorForClassName("Sprite1"));
+            runLater(() -> setCodeEditorForClassName("Actor1"));
         }
 
-        else setCodeEditorForClassName("Sprite1");
+        else setCodeEditorForClassName("Actor1");
     }
 
     /**

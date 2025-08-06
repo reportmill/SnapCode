@@ -14,19 +14,19 @@ public class BlocksUtils {
     public static boolean isBlocksProject(Project project)
     {
         WebSite projSite = project.getSite();
-        return projSite.getFileForPath("/src/Sprite1.java") != null;
+        return projSite.getFileForPath("/src/Actor1.java") != null;
     }
 
     /**
      * Creates default files for project.
      */
-    public static void addDefaultFilesForProject(Project project)
+    public static void configureNewBlockCodeProject(Project newBlockCodeProject)
     {
-        // Add Sprite1.java
-        WebSite projSite = project.getSite();
-        WebFile sprite1JavaFile = projSite.createFileForPath("/src/Sprite1.java", false);
-        sprite1JavaFile.setText(SPRITE1_JAVA_TEXT);
-        sprite1JavaFile.save();
+        // Add Actor1.java
+        WebSite projSite = newBlockCodeProject.getSite();
+        WebFile actor1JavaFile = projSite.createFileForPath("/src/Actor1.java", false);
+        actor1JavaFile.setText(ACTOR1_JAVA_TEXT);
+        actor1JavaFile.save();
 
         // Add Stage1.java
         WebFile stage1JavaFile = projSite.createFileForPath("/src/Stage1.java", false);
@@ -37,21 +37,24 @@ public class BlocksUtils {
         WebFile stage1SnapFile = projSite.createFileForPath("/src/Stage1.snp", false);
         stage1SnapFile.setText(STAGE1_SNAP_TEXT);
         stage1SnapFile.save();
+
+        // Set main file
+        newBlockCodeProject.getBuildFile().setMainClassName("Stage1");
     }
 
-    // Template for first sprite class
-    public static final String SPRITE1_JAVA_TEXT = """
+    // Template for first actor class
+    public static final String ACTOR1_JAVA_TEXT = """
         import snap.games.*;
 
         /**
-         * This actor subclass represents the first sprite in our block code app.
+         * This actor subclass represents the first actor in our block code app.
          */
-        public class Sprite1 extends Actor {
+        public class Actor1 extends Actor {
 
             /**
              * Constructor.
              */
-            public Sprite1()
+            public Actor1()
             {
             }
             
@@ -67,7 +70,7 @@ public class BlocksUtils {
         import snap.games.*;
 
         /**
-         * This game controller subclass represents the first sprite in our block code app.
+         * This game controller subclass represents the first actor in our block code app.
          */
         public class Stage1 extends GameController {
 
@@ -91,7 +94,7 @@ public class BlocksUtils {
     // Template for first stage class
     public static final String STAGE1_SNAP_TEXT = """
         <GameView Width="500" Height="500" PrefWidth="500" PrefHeight="500">
-          <Actor X="80" Y="80" ImageName="Cat" Class="Sprite1" />
+          <Actor X="80" Y="80" ImageName="Cat" Class="Actor1" />
         </GameView>
         """;
 }

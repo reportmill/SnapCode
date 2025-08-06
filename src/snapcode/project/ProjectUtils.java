@@ -94,7 +94,7 @@ public class ProjectUtils {
             return greenfootFile;
 
         // Look for Blocks file
-        WebFile blocksFile = aProj.getFileForPath("/src/Sprite1.java");
+        WebFile blocksFile = aProj.getFileForPath("/src/Actor1.java");
         if (blocksFile != null)
             return blocksFile;
 
@@ -294,11 +294,8 @@ public class ProjectUtils {
         // Create temp blocks project
         Project tempBlocksProj = getTempProjectForName(workspace, "TempBlocksProject");
 
-        // Add default files (Stage1.java, Sprint1.java, Stage1.snp)
-        BlocksUtils.addDefaultFilesForProject(tempBlocksProj);
-
-        // Set main file
-        tempBlocksProj.getBuildFile().setMainClassName("Stage1");
+        // Add default files (Stage1.java, Sprint1.java, Stage1.snp) and set main class
+        BlocksUtils.configureNewBlockCodeProject(tempBlocksProj);
 
         // Return
         return tempBlocksProj;

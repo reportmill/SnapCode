@@ -188,7 +188,7 @@ public class NewFileTool extends WorkspaceTool {
     {
         Project newBlockCodeProj = showNewProjectPanel();
         if (newBlockCodeProj != null) {
-            BlocksUtils.addDefaultFilesForProject(newBlockCodeProj);
+            BlocksUtils.configureNewBlockCodeProject(newBlockCodeProj);
             runDelayed(() -> _workspaceTools.showToolForClass(BlocksConsole.class), 500);
         }
     }
