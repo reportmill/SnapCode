@@ -1,6 +1,7 @@
 package snapcode.views;
 import snap.view.*;
 import snap.web.WebFile;
+import snapcode.app.JavaPage;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspacePaneUtils;
 import snapcode.app.WorkspaceTool;
@@ -8,6 +9,7 @@ import snapcode.javatext.JavaTextArea;
 import snapcode.javatext.JavaTextPane;
 import snapcode.project.JavaTextModel;
 import snapcode.project.Project;
+import snapcode.webbrowser.WebPage;
 
 /**
  * This class manages a blocks project.
@@ -46,8 +48,13 @@ public class BlocksConsole extends WorkspaceTool {
         if (javaFile == null)
             return;
 
+        // Get WebPage
+        WebPage webPage = _pagePane.getBrowser().getPageForURL(javaFile.getUrl());
+        if (webPage == null)
+            webPage = _pagePane.getBrowser().createPageForURL(javaFile.getUrl());
+
         // Add CodePane
-        _javaTextPane = new JavaTextPane();
+        _javaTextPane = webPage instanceof JavaPage javaPage ? javaPage.getTextPane() : new JavaTextPane();
         _javaTextPane.getUI();
 
         JavaTextModel javaTextModel = JavaTextModel.getJavaTextModelForFile(javaFile);
