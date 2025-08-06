@@ -94,6 +94,26 @@ public class StagePane extends ViewOwner {
         _stageBox.repaint();
     }
 
+    /**
+     * Called when stage changes.
+     */
+    protected void handleStageChanged()
+    {
+        WebFile stageFile = getStageFile();
+        if (stageFile.getUpdater() == null)
+            stageFile.setUpdater(file -> updateStageFile());
+    }
+
+    /**
+     * Updates stage file.
+     */
+    private void updateStageFile()
+    {
+        String stageFileText = new ViewArchiver().toXML(getGameView()).getString();
+        WebFile stageFile = getStageFile();
+        stageFile.setText(stageFileText);
+    }
+
     @Override
     protected View createUI()
     {

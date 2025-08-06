@@ -124,13 +124,27 @@ public class StagePaneBoxView extends BoxView {
     {
         if (_mouseActor == null) return;
         Actor selActor = _stagePane.getSelActor();
+
         double dx = anEvent.getX() - _lastMouseX;
         double dy = anEvent.getY() - _lastMouseY;
-        selActor.setX(selActor.getX() + dx);
-        selActor.setY(selActor.getY() + dy);
+
+        // If alt key down, rotate actor
+        if (anEvent.isAltDown()) {
+            double deltaRotation = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+            selActor.setRotate(selActor.getRotate() + deltaRotation);
+        }
+
+        // Otherwise move actor
+        else {
+            selActor.setX(selActor.getX() + dx);
+            selActor.setY(selActor.getY() + dy);
+        }
+
+        // Update last mouse point and repaint
         _lastMouseX = anEvent.getX();
         _lastMouseY = anEvent.getY();
         repaint();
+        _stagePane.handleStageChanged();
     }
 
     /**
