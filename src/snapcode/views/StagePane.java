@@ -24,13 +24,10 @@ public class StagePane extends ViewOwner {
     private Actor _selActor;
 
     // The stage box
-    private BoxView _stageBox;
+    private StagePaneBoxView _stageBox;
 
-    // The last mouse actor
-    private Actor _mouseActor;
-
-    // The last mouse X/Y
-    private double _lastMouseX, _lastMouseY;
+    // Constants for properties
+    public static final String SelActor_Prop = "SelActor";
 
     /**
      * Constructor.
@@ -74,7 +71,7 @@ public class StagePane extends ViewOwner {
     {
         if (gameView == _gameView) return;
         _gameView = gameView;
-        _gameView.addEventHandler(this::handleGameViewEvent, MousePress, MouseDrag, MouseRelease);
+        _gameView.addEventHandler(_stageBox::handleGameViewEvent, MousePress, MouseDrag, MouseRelease);
         _stageBox.setContent(_gameView);
 
         // Select first actor
@@ -93,56 +90,8 @@ public class StagePane extends ViewOwner {
     public void setSelActor(Actor selActor)
     {
         if (selActor == _selActor) return;
-        _selActor = selActor;
-    }
-
-    /**
-     * Called when game view gets event.
-     */
-    private void handleGameViewEvent(ViewEvent anEvent)
-    {
-        switch (anEvent.getType()) {
-            case MousePress -> handleGameViewMousePress(anEvent);
-            case MouseDrag -> handleGameViewMouseDrag(anEvent);
-            case MouseRelease -> handleGameViewMouseRelease(anEvent);
-        }
-    }
-
-    /**
-     * Called when game view gets mouse press event.
-     */
-    private void handleGameViewMousePress(ViewEvent anEvent)
-    {
-        View mouseView = ViewUtils.getDeepestViewAt(_gameView, anEvent.getX(), anEvent.getY());
-        if (mouseView instanceof Actor mouseActor) {
-            _mouseActor = mouseActor;
-            setSelActor(mouseActor);
-            _lastMouseX = anEvent.getX();
-            _lastMouseY = anEvent.getY();
-        }
-    }
-
-    /**
-     * Called when game view gets mouse drag event.
-     */
-    private void handleGameViewMouseDrag(ViewEvent anEvent)
-    {
-        if (_mouseActor == null) return;
-        Actor selActor = getSelActor();
-        double dx = anEvent.getX() - _lastMouseX;
-        double dy = anEvent.getY() - _lastMouseY;
-        selActor.setX(selActor.getX() + dx);
-        selActor.setY(selActor.getY() + dy);
-        _lastMouseX = anEvent.getX();
-        _lastMouseY = anEvent.getY();
-    }
-
-    /**
-     * Called when game view gets mouse release event.
-     */
-    private void handleGameViewMouseRelease(ViewEvent anEvent)
-    {
-        _mouseActor = null;
+        firePropChange(SelActor_Prop, _selActor, _selActor = selActor);
+        _stageBox.repaint();
     }
 
     @Override
@@ -154,8 +103,8 @@ public class StagePane extends ViewOwner {
     @Override
     protected void initUI()
     {
-        _stageBox = getView("StageBox", BoxView.class);
-
+        _stageBox = getView("StageBox", StagePaneBoxView.class);
+        _stageBox.initWithStagePane(this);
     }
 
     @Override
@@ -167,7 +116,7 @@ public class StagePane extends ViewOwner {
     // The UI
     private static final String STAGE_PANE_UI = """
         <ColView Name="MainColView" PrefWidth="500" FillWidth="true">
-          <BoxView Name="StageBox" Margin="5" Fill="#FF" Border="#C0 1" BorderRadius="4" FillWidth="true" FillHeight="true" />
+          <BoxView Name="StageBox" Margin="5" Fill="#FF" Border="#C0 1" BorderRadius="4" FillWidth="true" FillHeight="true" Class="snapcode.views.StagePaneBoxView" />
           <BoxView Margin="5" Fill="#FF" Border="#C0 1" BorderRadius="4" PrefHeight="300" GrowHeight="true" />
         </ColView>
         """;
