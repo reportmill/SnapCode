@@ -28,7 +28,7 @@ public class JExecutableDeclView<JNODE extends JExecutableDecl> extends JBlockVi
     {
         JExecutableDecl md = getJNode();
         Label label = JNodeViewUtils.createLabel(md.getName());
-        label.setFont(label.getFont().copyForSize(14));
+        label.setFont(label.getFont().copyForSize(16));
         return new View[]{label};
     }
 

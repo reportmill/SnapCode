@@ -115,8 +115,8 @@ public class JClassDeclView<JNODE extends JClassDecl> extends JBlockView<JNODE> 
         {
             JExprId id = getJNode();
             Label label = JNodeViewUtils.createLabel(id.getName());
-            label.setMargin(2, 4, 8, 4);
-            label.setFont(label.getFont().copyForSize(20));
+            label.setMargin(4, 4, 10, 4);
+            label.setFont(label.getFont().copyForSize(24));
             return new View[] { label };
         }
 

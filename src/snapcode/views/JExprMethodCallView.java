@@ -27,12 +27,10 @@ public class JExprMethodCallView<JNODE extends JExprMethodCall> extends JExprVie
         // Create for name
         JExprMethodCall methodCallExpr = getJNode();
         String methodName = methodCallExpr.getName();
+        if (methodCallExpr.getArgCount() == 0)
+            methodName += "()";
         Label methodNameLabel = JNodeViewUtils.createLabel(methodName);
         addChild(methodNameLabel);
-
-        // Add open paren
-        Label openParenLabel = JNodeViewUtils.createLabel("(");
-        addChild(openParenLabel);
 
         // Create views for args
         JExprMethodCall methodCall = getJNode();
@@ -40,9 +38,5 @@ public class JExprMethodCallView<JNODE extends JExprMethodCall> extends JExprVie
         View[] argViews = ArrayUtils.mapNonNull(args, arg -> JNodeView.createNodeViewForNode(arg), View.class);
         for (View argView : argViews)
             addChild(argView);
-
-        // Add close paren
-        Label closeParenLabel = JNodeViewUtils.createLabel(")");
-        addChild(closeParenLabel);
     }
 }

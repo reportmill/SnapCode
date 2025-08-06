@@ -26,7 +26,7 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     public static Color ClassDeclColor = MemberDeclColor; //Color.get("#27B31E");
 
     // Constants for fonts
-    protected static final Font LABEL_FONT = new Font("Arial Bold", 13);
+    protected static final Font LABEL_FONT = Font.getCodeFontForSize(13); //new Font("Arial Bold", 13);
     protected static final Font TEXTFIELD_FONT = new Font("Arial", 12);
 
     /**
