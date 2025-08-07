@@ -49,7 +49,7 @@ public class BlocksUtils {
         /**
          * This actor subclass represents the first actor in our block code app.
          */
-        public class Actor1 extends Actor {
+        public class Actor1 extends PenActor {
 
             /**
              * Constructor.
@@ -93,8 +93,8 @@ public class BlocksUtils {
 
     // Template for first stage class
     public static final String STAGE1_SNAP_TEXT = """
-        <GameView Width="500" Height="500" PrefWidth="500" PrefHeight="500">
-          <Actor X="80" Y="80" ImageName="Cat" Class="Actor1" />
+        <GameView Width="500" Height="500" PrefWidth="500" PrefHeight="500" ImageName="ChessBoardLight">
+          <PenActor X="80" Y="80" ImageName="Robot" Class="Actor1" />
         </GameView>
         """;
 }

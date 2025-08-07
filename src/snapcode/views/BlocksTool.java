@@ -390,8 +390,8 @@ public class BlocksTool extends WorkspaceTool {
      * Returns PenActor pieces.
      */
     private static String[] PenActorPieces = {
-            "isPenDown();", "setPenDown(true);", "penDown();", "clearPen();", "getPenColor();", "setPenColor(\"Random\");",
-            "getPenWidth();", "setPenWidth(10);", "getPenPoint();"
+            "penDown();", "setPenColor(\"Random\");", "setPenWidth(10);"
+            // "isPenDown();", "clearPen();", "setPenDown(true);", "getPenColor();", "getPenWidth();", "getPenPoint();",
     };
 
     /**
