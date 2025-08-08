@@ -22,13 +22,13 @@ import snap.view.*;
 public class JavaPopupList extends PopupList<JavaDecl> {
 
     // The JavaTextArea
-    private JavaTextArea  _textArea;
+    private JavaTextArea _textArea;
 
     // The current selection start
-    private int  _selStart;
+    private int _selStart;
 
     // PropChangeListner for TextArea prop changes
-    private PropChangeListener  _textAreaLsnr = pce -> textAreaPropChange(pce);
+    private PropChangeListener _textAreaPropChangeLsnr = this::handleTextAreaPropChange;
 
     // Constants
     private static Color BACKGROUND_COLOR = Color.get("#FC");
@@ -548,7 +548,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         popupWindow.setXY(winXY.x, winXY.y);
 
         // Start listening to TextArea
-        _textArea.addPropChangeListener(_textAreaLsnr);
+        _textArea.addPropChangeListener(_textAreaPropChangeLsnr);
         _selStart = _textArea.getSelStart();
     }
 
@@ -564,7 +564,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // On hide, remove TextArea prop change listener and do syntax check
         if (!aValue) {
-            _textArea.removePropChangeListener(_textAreaLsnr);
+            _textArea.removePropChangeListener(_textAreaPropChangeLsnr);
             JavaTextPane javaTextPane = _textArea.getOwner(JavaTextPane.class);
             if (javaTextPane != null)
                 javaTextPane.checkFileForErrorsAfterDelay();
@@ -589,17 +589,16 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Catch TextArea Selection changes that should cause Popup to close.
      */
-    private void textAreaPropChange(PropChange aPC)
+    private void handleTextAreaPropChange(PropChange propChange)
     {
         // If not showing, unregister (in case we were PopupList was dismissed without hide)
         if (!isShowing()) {
-            _textArea.removePropChangeListener(_textAreaLsnr);
+            _textArea.removePropChangeListener(_textAreaPropChangeLsnr);
             return;
         }
 
         // If Selection change, update or hide
-        String propName = aPC.getPropName();
-        if (propName == TextArea.Selection_Prop) {
+        if (propChange.getPropName() == TextArea.Selection_Prop) {
             int start = _textArea.getSelStart();
             int end = _textArea.getSelEnd();
             if (start != end || !(start == _selStart + 1 || start == _selStart - 1))

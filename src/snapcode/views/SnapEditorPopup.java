@@ -27,15 +27,25 @@ public class SnapEditorPopup extends ViewOwner {
     // The fixed expression
     private String  _startText, _endText, _idText;
 
+    // Shared instance
+    private static SnapEditorPopup _shared;
+
+    /**
+     * Constructor.
+     */
+    private SnapEditorPopup()
+    {
+        super();
+    }
+
     /**
      * Returns a shared instance.
      */
     public static SnapEditorPopup getShared()
     {
-        return _s != null ? _s : (_s = new SnapEditorPopup());
+        if (_shared != null) return _shared;
+        return _shared = new SnapEditorPopup();
     }
-
-    static SnapEditorPopup _s;
 
     /**
      * Activates the popup list (shows popup if multiple suggestions, does replace for one, does nothing for none).
@@ -49,7 +59,7 @@ public class SnapEditorPopup extends ViewOwner {
         JavaParser javaParser = JavaParser.getShared();
         JNode node = null;
         try { node = javaParser.parseExpression(aString); }
-        catch (Exception e) { }
+        catch (Exception ignored) { }
 
         if (node == null) {
             hide();
