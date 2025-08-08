@@ -19,7 +19,7 @@ public class StagePaneBoxView extends BoxView {
     protected StagePane _stagePane;
 
     // The copy of actor
-    private Actor _actorCopy;
+    protected Actor _actorCopy;
 
     // The last mouse actor
     private Actor _mouseActor;

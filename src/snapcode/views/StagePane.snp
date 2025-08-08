@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView Name="MainColView" PrefWidth="500" FillWidth="true">
+  <BoxView Name="StageBox" Margin="5" Fill="#FF" Border="#C0 1" BorderRadius="4" FillWidth="true" FillHeight="true" Class="snapcode.views.StagePaneBoxView" />
+  <BoxView Margin="5" Align="TOP_LEFT" Fill="#FF" Border="#C0 1" BorderRadius="4" PrefHeight="300" GrowHeight="true">
+    <ColView PrefWidth="400" PrefHeight="400" Padding="10" Spacing="4">
+      <RowView Padding="4,0,0,0">
+        <Label Font="Arial Bold 14" Text="Actor" />
+      </RowView>
+      <Separator PrefWidth="350" PrefHeight="20" />
+      <RowView Padding="4" Spacing="4" GrowWidth="true">
+        <Label PrefWidth="40" Text="Name:" />
+        <TextField Name="NameText" PrefWidth="150" />
+      </RowView>
+      <RowView Padding="4" Spacing="4" GrowWidth="true">
+        <Label PrefWidth="40" Text="X:" />
+        <TextField Name="XText" Align="CENTER" PrefWidth="50" />
+        <ThumbWheel Name="XThumbWheel" PrefWidth="60" PrefHeight="16" Margin="0,0,0,10" Type="linear" />
+        <Label PrefWidth="40" Margin="0,0,0,20" Text="Width:" />
+        <TextField Name="WidthText" Align="CENTER" PrefWidth="50" />
+        <ThumbWheel Name="WidthThumbWheel" PrefWidth="60" PrefHeight="16" Margin="0,0,0,10" Type="linear" />
+      </RowView>
+      <RowView Padding="4" Spacing="4" GrowWidth="true">
+        <Label PrefWidth="40" Text="Y:" />
+        <TextField Name="YText" Align="CENTER" PrefWidth="50" />
+        <ThumbWheel Name="YThumbWheel" PrefWidth="60" PrefHeight="16" Margin="0,0,0,10" Type="linear" />
+        <Label PrefWidth="40" Margin="0,0,0,20" Text="Height:" />
+        <TextField Name="HeightText" Align="CENTER" PrefWidth="50" />
+        <ThumbWheel Name="HeightThumbWheel" PrefWidth="60" PrefHeight="16" Margin="0,0,0,10" Type="linear" />
+      </RowView>
+      <RowView Padding="4" Spacing="4" GrowWidth="true">
+        <Label PrefWidth="40" Text="Rotate:" />
+        <TextField Name="RotateText" Align="CENTER" PrefWidth="50" />
+        <ThumbWheel Name="RotateThumbWheel" PrefWidth="100" PrefHeight="16" Margin="0,0,0,10" />
+      </RowView>
+      <RowView Padding="4" Spacing="4" GrowWidth="true">
+        <Label PrefWidth="40" Text="Image:" />
+        <ComboBox Name="ImageComboBox" MinWidth="80" MinHeight="22" />
+      </RowView>
+    </ColView>
+  </BoxView>
+</ColView>
