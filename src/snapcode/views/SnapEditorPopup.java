@@ -3,6 +3,8 @@ import javakit.parse.JExprId;
 import javakit.parse.JNode;
 import javakit.parse.JavaParser;
 import javakit.resolver.JavaDecl;
+import snap.gfx.Image;
+import snapcode.javatext.JavaTextUtils;
 import snapcode.javatext.NodeCompleter;
 import snap.gfx.Font;
 import snap.view.*;
@@ -134,8 +136,28 @@ public class SnapEditorPopup extends ViewOwner {
         _listView = new ListView<>();
         _listView.setFont(Font.Arial11);
         _listView.setPrefSize(320, 260);
+        _listView.setCellConfigure(this::configureCell);
         _listView.addEventHandler(this::handleListViewKeyEvent, KeyEvents);
         return _listView;
+    }
+
+    /**
+     * Configure cells for list.
+     */
+    private void configureCell(ListCell<JavaDecl> aCell)
+    {
+        // Get cell item
+        JavaDecl item = aCell.getItem();
+        if (item == null) return;
+
+        // Get/set cell text
+        String cellText = item.getSuggestionString();
+        aCell.setText(cellText);
+        //aCell.setTextColor(CELL_TEXT_COLOR);
+
+        // Get/set cell image
+        Image cellImage = JavaTextUtils.getImageForJavaDecl(item);
+        aCell.setImage(cellImage);
     }
 
     /**
