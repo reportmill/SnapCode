@@ -1,6 +1,7 @@
 package snapcode.apptools;
 import snap.props.PropChange;
 import snap.util.ListUtils;
+import snap.util.Prefs;
 import snap.util.SnapEnv;
 import snap.viewx.DialogBox;
 import snap.web.WebFile;
@@ -31,6 +32,19 @@ public class RunTool extends WorkspaceTool implements AppListener {
 
     // The limit to the number of running processes
     private int  _procLimit = 1;
+
+    // Whether to run apps in snapcode proecess
+    private static boolean _runInSnapCodeProcess;
+
+    // Constants for preference keys
+    private static final String RUN_IN_SNAPCODE_PROCESS_KEY = "RunInSnapCodeProcess";
+
+    /**
+     * Initialize values.
+     */
+    static {
+        _runInSnapCodeProcess = Prefs.getDefaultPrefs().getBoolean(RUN_IN_SNAPCODE_PROCESS_KEY, false);
+    }
 
     /**
      * Constructor.
@@ -455,6 +469,9 @@ public class RunTool extends WorkspaceTool implements AppListener {
             String swapConsoleButtonTitle = isAltConsole ? "Show System Console" : "Show App Console";
             setViewText("SwapConsoleButton", swapConsoleButtonTitle);
         }
+
+        // Update RunInSnapCodeProcessMenuItem
+        setViewValue("RunInSnapCodeProcessMenuItem", isRunInSnapCodeProcess());
     }
 
     /**
@@ -466,23 +483,22 @@ public class RunTool extends WorkspaceTool implements AppListener {
         switch (anEvent.getName()) {
 
             // Handle RunButton, TerminateButton
-            case "RunButton": runApp(false); break;
-            case "TerminateButton": cancelRun(); break;
+            case "RunButton" -> runApp(false);
+            case "TerminateButton" -> cancelRun();
 
             // Handle SwapConsoleButton
-            case "SwapConsoleButton": {
+            case "SwapConsoleButton" -> {
                 RunApp selApp = getSelApp();
                 boolean isAltConsole = selApp.getConsoleView() == selApp.getAltConsoleView();
                 View swapConsoleView = isAltConsole ? selApp.getConsoleTextView() : selApp.getAltConsoleView();
                 selApp.setConsoleView(swapConsoleView);
-                break;
             }
 
             // Handle ClearButton
-            case "ClearButton": clearConsole(); break;
+            case "ClearButton", "ClearConsoleMenuItem" -> clearConsole();
 
             // Handle InputTextField: Show input string, add to runner input and clear text
-            case "InputTextField": {
+            case "InputTextField" -> {
 
                 // Get InputTextField string and send to current process
                 String inputString = anEvent.getStringValue();
@@ -492,11 +508,13 @@ public class RunTool extends WorkspaceTool implements AppListener {
 
                 // Clear InputTextField
                 setViewValue("InputTextField", null);
-                break;
             }
 
+            // Handle RunInSnapCodeProcessMenuItem
+            case "RunInSnapCodeProcessMenuItem" -> setRunInSnapCodeProcess(!isRunInSnapCodeProcess());
+
             // Do normal version
-            default: super.respondUI(anEvent); break;
+            default -> super.respondUI(anEvent);
         }
     }
 
@@ -528,5 +546,19 @@ public class RunTool extends WorkspaceTool implements AppListener {
             if (runConfigProject == null || runConfigProject == aProject)
                 _runConfig = null;
         }
+    }
+
+    /**
+     * Returns whether to run processes in SnapCode.
+     */
+    public static boolean isRunInSnapCodeProcess()  { return _runInSnapCodeProcess; }
+
+    /**
+     * Sets whether to run processes in SnapCode.
+     */
+    public static void setRunInSnapCodeProcess(boolean aValue)
+    {
+        _runInSnapCodeProcess = aValue;
+        Prefs.getDefaultPrefs().setValue(RUN_IN_SNAPCODE_PROCESS_KEY, _runInSnapCodeProcess);
     }
 }

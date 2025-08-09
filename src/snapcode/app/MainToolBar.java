@@ -137,9 +137,14 @@ public class MainToolBar extends WorkspaceTool {
         runConfigMenuButton.setText(runConfigMenuItems[0].getText());
         runConfigMenuButton.setMenuItems(runConfigMenuItems);
 
-        // Update TerminateButton
+        // Update RunButton, DebugButton, TerminateButton, BuildButton
+        boolean isRunnable = _workspaceTools.getRunTool().getRunConfig() != null;
+        setViewEnabled("RunButton", isRunnable);
+        setViewEnabled("DebugButton", isRunnable);
         boolean isRunning = _workspaceTools.getRunTool().isRunning();
         setViewEnabled("TerminateButton", isRunning);
+        boolean isBuildable = !_workspace.getProjects().isEmpty();
+        setViewEnabled("BuildButton", isBuildable);
     }
 
     /**
