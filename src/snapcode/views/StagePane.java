@@ -173,12 +173,12 @@ public class StagePane extends ViewOwner {
             case "NameText" -> selActor.setName(anEvent.getStringValue());
 
             // Handle XText, XThumbWheel, YText, YThumbWheel
-            case "XText", "XThumbWheel" -> setActorX(selActor, anEvent.getFloatValue());
-            case "YText", "YThumbWheel" -> setActorY(selActor, anEvent.getFloatValue());
+            case "XText", "XThumbWheel" -> setActorX(selActor, anEvent.getIntValue());
+            case "YText", "YThumbWheel" -> setActorY(selActor, anEvent.getIntValue());
 
             // Handle WidthText, WidthThumbWheel, HeightText, HeightThumbWheel
-            case "WidthText", "WidthThumbWheel" -> setActorWidth(selActor, anEvent.getFloatValue());
-            case "HeightText", "HeightThumbWheel" -> setActorHeight(selActor, anEvent.getFloatValue());
+            case "WidthText", "WidthThumbWheel" -> setActorWidth(selActor, anEvent.getIntValue());
+            case "HeightText", "HeightThumbWheel" -> setActorHeight(selActor, anEvent.getIntValue());
 
             // Handle RotateText, RotateThumbWheel
             case "RotateText", "RotateThumbWheel" -> selActor.setRotate(anEvent.getIntValue());
@@ -195,32 +195,21 @@ public class StagePane extends ViewOwner {
     /**
      * Sets the given actor new X.
      */
-    private void setActorX(Actor actor, float aX)
-    {
-        double oldX = actor.localToParent(actor.getWidth() / 2, actor.getHeight() / 2).x;
-        double dx = aX - oldX;
-        actor.setX(actor.getX() + dx);
-    }
+    private void setActorX(Actor actor, float aX)  { actor.setX(aX - actor.getWidth() / 2); }
 
     /**
      * Sets the given actor new Y.
      */
-    private void setActorY(Actor actor, float aY)
-    {
-        double oldY = actor.localToParent(actor.getWidth() / 2, actor.getHeight() / 2).y;
-        double dy = aY - oldY;
-        actor.setY(actor.getY() + dy);
-    }
+    private void setActorY(Actor actor, float aY)  { actor.setY(aY - actor.getHeight() / 2); }
 
     /**
      * Sets the given actor new width.
      */
     private void setActorWidth(Actor actor, float aWidth)
     {
-        double dx = (aWidth - actor.getWidth()) / 2;
+        actor.setX(actor.getX() + (aWidth - actor.getWidth()) / 2);
         actor.setWidth(aWidth);
         actor.setPrefWidth(aWidth);
-        actor.setX(actor.getX() + dx);
     }
 
     /**
@@ -228,9 +217,8 @@ public class StagePane extends ViewOwner {
      */
     private void setActorHeight(Actor actor, float aHeight)
     {
-        double dy = (aHeight - actor.getHeight()) / 2;
+        actor.setY(actor.getY() + (aHeight - actor.getHeight()) / 2);
         actor.setHeight(aHeight);
         actor.setPrefHeight(aHeight);
-        actor.setY(actor.getY() + dy);
     }
 }
