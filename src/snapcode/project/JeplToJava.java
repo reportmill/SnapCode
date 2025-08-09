@@ -239,14 +239,14 @@ public class JeplToJava {
         // Make main method with runLater call
         else {
             appendIndent();
-            appendString("public static void main(String[] args) throws Exception { ViewUtils.runLater(() -> main2(args)); }\n");
+            appendString("public static void main(String[] args) throws Exception { ViewUtils.runLater(() -> main2()); }\n");
             appendIndent();
-            appendString("public static void main2(String[] args) { try { main3(args); } catch(Exception e) { e.printStackTrace(); } }\n");
+            appendString("public static void main2() { try { main3(); } catch(Exception e) { e.printStackTrace(); } }\n");
 
             // Handle Jepl file - convert initializer to main method
             appendChar('\n');
             appendIndent();
-            appendString("public static void main3(String[] args) throws Exception\n");
+            appendString("public static void main3() throws Exception\n");
         }
 
         // Append { body }
