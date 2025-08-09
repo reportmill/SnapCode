@@ -261,13 +261,23 @@ public class WorkspaceTools {
     }
 
     /**
-     * Sets the selected index for given class.
+     * Shows the given tool.
      */
     public void showTool(WorkspaceTool workspaceTool)
     {
         ToolTray toolTray = getToolTrayForTool(workspaceTool);
         if (toolTray != null)
             toolTray.setSelTool(workspaceTool);
+    }
+
+    /**
+     * Shows the given tool with no animation.
+     */
+    public void showToolNoAnimation(WorkspaceTool workspaceTool)
+    {
+        ToolTray toolTray = getToolTrayForTool(workspaceTool);
+        if (toolTray != null)
+            toolTray.setSelToolNoAnimation(workspaceTool);
     }
 
     /**

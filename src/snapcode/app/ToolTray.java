@@ -61,12 +61,24 @@ public class ToolTray extends ViewOwner {
     }
 
     /**
-     * Sets the selected tool.
+     * Sets the given to be selected.
      */
     public void setSelTool(WorkspaceTool aTool)
     {
         int index = ArrayUtils.indexOfId(_trayTools, aTool);
         setSelIndex(index);
+    }
+
+    /**
+     * Sets the given to be selected (with no animation).
+     */
+    public void setSelToolNoAnimation(WorkspaceTool aTool)
+    {
+        getUI();
+        _tabView.setAnimateTabChange(false);
+        int index = ArrayUtils.indexOfId(_trayTools, aTool);
+        setSelIndex(index);
+        _tabView.setAnimateTabChange(true);
     }
 
     /**

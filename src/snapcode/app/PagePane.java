@@ -138,6 +138,15 @@ public class PagePane extends WebBrowserPane {
     }
 
     /**
+     * Shows the home page.
+     */
+    public void showHomePageNoAnimation()
+    {
+        getBrowser().setTransition(WebBrowser.Instant);
+        showHomePage();
+    }
+
+    /**
      * Shows the given exception.
      */
     public void showException(WebURL aURL, Exception e)

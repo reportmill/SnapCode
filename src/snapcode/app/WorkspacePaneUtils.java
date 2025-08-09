@@ -28,8 +28,8 @@ public class WorkspacePaneUtils {
         WorkspacePane workspacePane = new WorkspacePane();
         workspacePane.show();
 
-        // Show home page
-        ViewUtils.runDelayed(() -> workspacePane.getPagePane().showHomePage(), 500);
+        // Show home page (was: ViewUtils.runDelayed(workspacePane.getPagePane()::showHomePage, 500))
+        workspacePane.getPagePane().showHomePageNoAnimation();
     }
 
     /**
