@@ -93,7 +93,7 @@ public class BlocksUtils {
 
     // Template for first stage class
     public static final String STAGE1_SNAP_TEXT = """
-        <GameView Width="500" Height="500" PrefWidth="500" PrefHeight="500" ImageName="ChessBoardLight">
+        <GameView PrefWidth="501" PrefHeight="501" ImageName="ChessBoardLight">
           <PenActor X="80" Y="80" ImageName="Robot" Class="Actor1" />
         </GameView>
         """;

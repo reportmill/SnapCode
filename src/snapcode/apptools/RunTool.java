@@ -1,7 +1,6 @@
 package snapcode.apptools;
 import snap.props.PropChange;
 import snap.util.ListUtils;
-import snap.util.Prefs;
 import snap.util.SnapEnv;
 import snap.viewx.DialogBox;
 import snap.web.WebFile;
@@ -33,18 +32,8 @@ public class RunTool extends WorkspaceTool implements AppListener {
     // The limit to the number of running processes
     private int  _procLimit = 1;
 
-    // Whether to run apps in snapcode proecess
+    // Whether to run apps in snapcode process
     private static boolean _runInSnapCodeProcess;
-
-    // Constants for preference keys
-    private static final String RUN_IN_SNAPCODE_PROCESS_KEY = "RunInSnapCodeProcess";
-
-    /**
-     * Initialize values.
-     */
-    static {
-        _runInSnapCodeProcess = Prefs.getDefaultPrefs().getBoolean(RUN_IN_SNAPCODE_PROCESS_KEY, false);
-    }
 
     /**
      * Constructor.
@@ -471,7 +460,9 @@ public class RunTool extends WorkspaceTool implements AppListener {
         }
 
         // Update RunInSnapCodeProcessMenuItem
-        setViewValue("RunInSnapCodeProcessMenuItem", isRunInSnapCodeProcess());
+        MenuButton menuButton = getView("MenuButton", MenuButton.class);
+        CheckBoxMenuItem runInSnapCodeProcessMenuItem = (CheckBoxMenuItem) menuButton.getMenuItemForName("RunInSnapCodeProcessMenuItem");
+        runInSnapCodeProcessMenuItem.setSelected(isRunInSnapCodeProcess());
     }
 
     /**
@@ -559,6 +550,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
     public static void setRunInSnapCodeProcess(boolean aValue)
     {
         _runInSnapCodeProcess = aValue;
-        Prefs.getDefaultPrefs().setValue(RUN_IN_SNAPCODE_PROCESS_KEY, _runInSnapCodeProcess);
+        //Prefs.getDefaultPrefs().setValue(RUN_IN_SNAPCODE_PROCESS_KEY, _runInSnapCodeProcess);
     }
 }
