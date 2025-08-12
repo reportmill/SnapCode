@@ -163,7 +163,7 @@ public class RunConfigsTool extends WorkspaceTool {
     /**
      * Creates a pop-up menu for preview edit button (currently with look and feel options).
      */
-    private MenuItem[] getRunMenuButtonItems()
+    private List<MenuItem> getRunMenuButtonItems()
     {
         ViewBuilder<MenuItem> mib = new ViewBuilder<>(MenuItem.class);
 

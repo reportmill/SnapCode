@@ -3,7 +3,6 @@ import snap.geom.HPos;
 import snap.util.ListUtils;
 import snap.util.SnapEnv;
 import snap.gfx.Image;
-import snap.util.ArrayUtils;
 import snap.util.StringUtils;
 import snap.view.*;
 import snap.web.WebFile;
@@ -408,9 +407,9 @@ public class ProjectFilesTool extends WorkspaceTool {
         // Handle PopupTrigger
         if (anEvent.isPopupTrigger()) {
             MenuButton menuButton = getView("MenuButton", MenuButton.class);
-            MenuItem[] menuItems = menuButton.getMenuItems();
+            List<MenuItem> menuItems = menuButton.getMenuItems();
             ViewArchiver viewArchiver = new ViewArchiver();
-            MenuItem[] menuItemsCopy = ArrayUtils.map(menuItems, item -> viewArchiver.copy(item), MenuItem.class);
+            List<MenuItem> menuItemsCopy = ListUtils.map(menuItems, item -> viewArchiver.copy(item));
             Menu menu = new Menu();
             menu.setMenuItems(menuItemsCopy);
             menu.setOwner(this);

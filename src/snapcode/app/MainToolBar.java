@@ -133,8 +133,8 @@ public class MainToolBar extends WorkspaceTool {
         // Update RunConfigMenuButton
         MenuButton runConfigMenuButton = getView("RunConfigMenuButton", MenuButton.class);
         runConfigMenuButton.setText("Run Config");
-        MenuItem[] runConfigMenuItems = getRunConfigMenuItems();
-        runConfigMenuButton.setText(runConfigMenuItems[0].getText());
+        List<MenuItem> runConfigMenuItems = getRunConfigMenuItems();
+        runConfigMenuButton.setText(runConfigMenuItems.get(0).getText());
         runConfigMenuButton.setMenuItems(runConfigMenuItems);
 
         // Update RunButton, DebugButton, TerminateButton, BuildButton
@@ -249,7 +249,7 @@ public class MainToolBar extends WorkspaceTool {
     /**
      * Returns the run config menu items.
      */
-    private MenuItem[] getRunConfigMenuItems()
+    private List<MenuItem> getRunConfigMenuItems()
     {
         // Create menu item for current main class source file
         ViewBuilder<MenuItem> menuItemBuilder = new ViewBuilder<>(MenuItem.class);

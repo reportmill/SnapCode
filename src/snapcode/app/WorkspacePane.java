@@ -15,7 +15,6 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.apptools.*;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * This class is the top level controller for an open project.
@@ -370,8 +369,8 @@ public class WorkspacePane extends ViewOwner {
 
         // Handle Embed mode
         if (_embedMode) {
-            Menu[] menus = menuBar.getMenus();
-            Stream.of(menus).forEach(menu -> menu.setVisible(false));
+            List<Menu> menus = menuBar.getMenus();
+            menus.forEach(menu -> menu.setVisible(false));
         }
 
         // Add key binding to OpenMenuItem and CloseWindow
