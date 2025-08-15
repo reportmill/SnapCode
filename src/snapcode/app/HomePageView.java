@@ -71,27 +71,6 @@ public class HomePageView extends MarkDownView {
         rowView.addChild(imageView);
         rowView.addChild(cloudButton);
         addChild(rowView);
-
-        // Add info
-        View jvmText = new Label("JVM: " + System.getProperty("java.runtime.version")
-                .replace("internal-_", ""));
-        View osVendor = new Label(" Vendor: " + System.getProperty("java.vendor")
-                .replace("Corporation", "Corp").replace("Technologies", "Tech"));
-        View osText = new Label("OS: " + System.getProperty("os.name") + ", " + System.getProperty("os.arch"));
-        View buildText = new Label("Build: " + SnapCodeUtils.getBuildInfo());
-
-        // Add ReleaseNotes link
-        Label releaseNotesLabel = new Label("Release notes");
-        releaseNotesLabel.setTextStyleString("Underline:1;");
-        releaseNotesLabel.setCursor(Cursor.HAND);
-        releaseNotesLabel.addEventHandler(e -> _homePage.showReleaseNotes(), MousePress);
-
-        // Create InfoColView and add
-        ColView infoColView = new ColView();
-        infoColView.setPropsString("Margin:10; Spacing:2; Align:TOP_RIGHT; LeanX:RIGHT; LeanY:TOP; Managed:false; Opacity:.5");
-        infoColView.setChildren(jvmText, osVendor, osText, buildText, releaseNotesLabel);
-        infoColView.setSizeToBestSize();
-        addChild(infoColView);
     }
 
     /**

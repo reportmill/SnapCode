@@ -1,5 +1,6 @@
 package snapcode.app;
 import snap.geom.Insets;
+import snap.util.SnapEnv;
 import snapcode.apptools.AccountTool;
 import snapcode.apptools.RunTool;
 import snapcode.project.Project;
@@ -20,9 +21,6 @@ import java.util.stream.Stream;
  * ToolBar.
  */
 public class MainToolBar extends WorkspaceTool {
-
-    // The Block code button
-    private ToggleButton _blockCodeButton;
 
     /**
      * Constructor.
@@ -63,20 +61,9 @@ public class MainToolBar extends WorkspaceTool {
     public void updateBlockCodeButton()
     {
         Project rootProj = _workspacePane.getRootProject();
-        ToggleButton blockCodeButton = getBlockCodeButton();
+        ToggleButton blockCodeButton = _workspaceTools.getBlockCodeButton();
         if (blockCodeButton != null)
             blockCodeButton.setVisible(rootProj != null && BlocksUtils.isBlocksProject(rootProj));
-    }
-
-    /**
-     * Sets the Block code button visible.
-     */
-    private ToggleButton getBlockCodeButton()
-    {
-        if (_blockCodeButton != null) return _blockCodeButton;
-        ToolTray leftToolTray = _workspaceTools.getLeftTray();
-        TabView tabView = leftToolTray.getUI(TabView.class);
-        return _blockCodeButton = tabView.getTab(0).getButton();
     }
 
     /**
@@ -108,6 +95,10 @@ public class MainToolBar extends WorkspaceTool {
         MenuButton runConfigMenuButton = getView("RunConfigMenuButton", MenuButton.class);
         runConfigMenuButton.getLabel().setPadding(new Insets(0, 0, 0, 5));
 
+        // Make DebugButton, BuildButton visible on desktop only
+        setViewVisible("DebugButton", SnapEnv.isDesktop);
+        setViewVisible("BuildButton", SnapEnv.isDesktop);
+
         // Handle EmbedMode: Hide everything except RunButton and TerminateButton
         if (WorkspacePane._embedMode) {
             ChildView parentView = getUI(ChildView.class);
@@ -131,8 +122,9 @@ public class MainToolBar extends WorkspaceTool {
         setViewEnabled("ForwardButton", _pagePane.getBrowser().getNextURL() != null);
 
         // Update RunConfigMenuButton
+        boolean isBuildable = !_workspace.getProjects().isEmpty();
         MenuButton runConfigMenuButton = getView("RunConfigMenuButton", MenuButton.class);
-        runConfigMenuButton.setText("Run Config");
+        runConfigMenuButton.setVisible(isBuildable);
         List<MenuItem> runConfigMenuItems = getRunConfigMenuItems();
         runConfigMenuButton.setText(runConfigMenuItems.get(0).getText());
         runConfigMenuButton.setMenuItems(runConfigMenuItems);
@@ -143,7 +135,6 @@ public class MainToolBar extends WorkspaceTool {
         setViewEnabled("DebugButton", isRunnable);
         boolean isRunning = _workspaceTools.getRunTool().isRunning();
         setViewEnabled("TerminateButton", isRunning);
-        boolean isBuildable = !_workspace.getProjects().isEmpty();
         setViewEnabled("BuildButton", isBuildable);
     }
 

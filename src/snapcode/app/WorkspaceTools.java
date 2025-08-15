@@ -10,6 +10,7 @@ import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
 import snap.view.*;
 import snapcode.views.BlocksConsole;
+import snapcode.views.BlocksUtils;
 import snapcode.webbrowser.WebPage;
 import snap.web.WebFile;
 import snapcode.apptools.*;
@@ -39,6 +40,12 @@ public class WorkspaceTools {
 
     // The bottom side ToolTray
     protected ToolTray  _bottomTray;
+
+    // The Block code button
+    private ToggleButton _blockCodeButton;
+
+    // The Classes tool button
+    private ToggleButton _classesToolButton;
 
     // PropChangeListener for breakpoints
     private PropChangeListener  _breakpointsLsnr = this::handleBreakpointsChange;
@@ -119,6 +126,11 @@ public class WorkspaceTools {
 
         // Add DevToolsButton
         addDevToolsButton();
+
+        // Hide ClassesToolButton
+        getClassesToolButton().setVisible(false);
+        setShowRightTray(false);
+        setShowBottomTray(false);
     }
 
     /**
@@ -238,7 +250,7 @@ public class WorkspaceTools {
     {
         View trayUI = aTray.getUI();
         View trayParent = trayUI.getParent();
-        if (trayParent.isShowing())
+        if (trayParent != null && trayParent.isShowing())
             ViewAnimUtils.setVisible(trayUI, aValue, true, true);
         else trayUI.setVisible(aValue);
     }
@@ -292,6 +304,73 @@ public class WorkspaceTools {
         if (ArrayUtils.containsId(_bottomTray._trayTools, workspaceTool))
             return _bottomTray;
         return null;
+    }
+
+    /**
+     * Returns the ToolTray for given tool.
+     */
+    public ToolTray getToolTrayForToolClass(Class<?> toolClass)
+    {
+        if (ArrayUtils.hasMatch(_leftTray._trayTools, tool -> tool.getClass() == toolClass))
+            return _leftTray;
+        if (ArrayUtils.hasMatch(_rightTray._trayTools, tool -> tool.getClass() == toolClass))
+            return _rightTray;
+        if (ArrayUtils.hasMatch(_bottomTray._trayTools, tool -> tool.getClass() == toolClass))
+            return _bottomTray;
+        return null;
+    }
+
+    /**
+     * Returns the tool for given class.
+     */
+    public ToggleButton getToolButtonForClass(Class<?> toolClass)
+    {
+        ToolTray toolTray = getToolTrayForToolClass(toolClass);
+        return toolTray.getToolButtonForClass(toolClass);
+    }
+
+    /**
+     * Updates block code button and right tool tray when project added.
+     */
+    public void resetToolTrays()
+    {
+        Project rootProj = _workspacePane.getRootProject();
+
+        // Hide BlockCodeButton if root project missing or is not block project
+        ToggleButton blockCodeButton = getBlockCodeButton();
+        if (blockCodeButton != null)
+            blockCodeButton.setVisible(rootProj != null && BlocksUtils.isBlocksProject(rootProj));
+
+        // Show right tray if root project available
+        setShowRightTray(rootProj != null);
+        setShowBottomTray(rootProj != null);
+    }
+
+    /**
+     * Returns the Block code button.
+     */
+    protected ToggleButton getBlockCodeButton()
+    {
+        if (_blockCodeButton != null) return _blockCodeButton;
+        return _blockCodeButton = getToolButtonForClass(BlocksConsole.class);
+    }
+
+    /**
+     * Shows the classes tool.
+     */
+    public void showClassesTool()
+    {
+        getClassesToolButton().setVisible(true);
+        showToolForClass(ClassesTool.class);
+    }
+
+    /**
+     * Returns the Classes tool button.
+     */
+    protected ToggleButton getClassesToolButton()
+    {
+        if (_classesToolButton != null) return _classesToolButton;
+        return _classesToolButton = getToolButtonForClass(ClassesTool.class);
     }
 
     /**

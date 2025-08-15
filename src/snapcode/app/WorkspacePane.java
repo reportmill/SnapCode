@@ -443,46 +443,47 @@ public class WorkspacePane extends ViewOwner {
         switch (anEvent.getName()) {
 
             // Handle NewFileMenuItem, OpenFileMenuItem
-            case "NewFileMenuItem": getNewFileTool().showNewFilePanel(); anEvent.consume(); break;
-            case "OpenFileMenuItem": getFilesTool().showOpenFilePanel(); anEvent.consume(); break;
+            case "NewFileMenuItem" -> { getNewFileTool().showNewFilePanel(); anEvent.consume(); }
+            case "OpenFileMenuItem" -> { getFilesTool().showOpenFilePanel(); anEvent.consume(); }
 
             // Handle SaveFileMenuItem
-            case "SaveFileMenuItem": getFilesTool().saveSelFile(); anEvent.consume(); break;
+            case "SaveFileMenuItem" -> { getFilesTool().saveSelFile(); anEvent.consume(); }
 
             // Handle RevertFileMenuItem
-            case "RevertFileMenuItem": getFilesTool().revertSelFiles(); anEvent.consume(); break;
+            case "RevertFileMenuItem" -> { getFilesTool().revertSelFiles(); anEvent.consume(); }
 
             // Handle CloseFileMenuItem, CloseFileAction
-            case "CloseFileMenuItem": case "CloseFileAction": closeSelFile(); anEvent.consume(); break;
+            case "CloseFileMenuItem", "CloseFileAction" -> { closeSelFile(); anEvent.consume(); }
 
             // Handle DownloadFileMenuItem, OpenDesktopFileMenuItem
-            case "DownloadFileMenuItem": getFilesTool().downloadFile(); anEvent.consume(); break;
-            case "OpenDesktopFileMenuItem": getFilesTool().showOpenDesktopFilePanel(); anEvent.consume(); break;
+            case "DownloadFileMenuItem" -> { getFilesTool().downloadFile(); anEvent.consume(); }
+            case "OpenDesktopFileMenuItem" -> { getFilesTool().showOpenDesktopFilePanel(); anEvent.consume(); }
 
             // Handle QuitMenuItem
-            case "QuitMenuItem": App.getShared().quitApp(); anEvent.consume(); break;
+            case "QuitMenuItem" -> { App.getShared().quitApp(); anEvent.consume(); }
 
             // Handle ShowLeftTrayMenuItem, ShowRightTrayMenuItem, ShowBottomTrayMenuItem
-            case "ShowLeftTrayMenuItem": _workspaceTools.setShowLeftTray(!_workspaceTools.isShowLeftTray()); break;
-            case "ShowRightTrayMenuItem": _workspaceTools.setShowRightTray(!_workspaceTools.isShowRightTray()); break;
-            case "ShowBottomTrayMenuItem": _workspaceTools.setShowBottomTray(!_workspaceTools.isShowBottomTray()); break;
+            case "ShowLeftTrayMenuItem" -> _workspaceTools.setShowLeftTray(!_workspaceTools.isShowLeftTray());
+            case "ShowRightTrayMenuItem" -> _workspaceTools.setShowRightTray(!_workspaceTools.isShowRightTray());
+            case "ShowBottomTrayMenuItem" -> _workspaceTools.setShowBottomTray(!_workspaceTools.isShowBottomTray());
 
             // Handle CopyWebLinkMenuItem, OpenWebLinkMenuItem
-            case "CopyWebLinkMenuItem": copyWebLink(); break;
-            case "OpenWebLinkMenuItem": openWebLink(); break;
+            case "CopyWebLinkMenuItem" -> copyWebLink();
+            case "OpenWebLinkMenuItem" -> openWebLink();
 
-            // Handle ShowDevToolsMenuItem
-            case "ShowDevToolsMenuItem": DevPane.setDevPaneShowing(getUI(), true); break;
+            // Handle ShowClassesToolMenuItem, ShowDevToolsMenuItem
+            case "ShowClassesToolMenuItem" -> _workspaceTools.showClassesTool();
+            case "ShowDevToolsMenuItem" -> DevPane.setDevPaneShowing(getUI(), true);
 
             // Handle OpenSnapCodePageMenuItem, OpenDownloadPageMenuItem
-            case "OpenSnapCodePageMenuItem": GFXEnv.getEnv().openURL("https://github.com/reportmill/SnapCode"); break;
-            case "OpenDownloadPageMenuItem": GFXEnv.getEnv().openURL("https://jdeploy.com/~snapcodejava"); break;
+            case "OpenSnapCodePageMenuItem" -> GFXEnv.getEnv().openURL("https://github.com/reportmill/SnapCode");
+            case "OpenDownloadPageMenuItem" -> GFXEnv.getEnv().openURL("https://jdeploy.com/~snapcodejava");
 
             // Handle ShowJavaHomeMenuItem
-            case "ShowJavaHomeMenuItem":
+            case "ShowJavaHomeMenuItem" -> {
                 String java = System.getProperty("java.home");
                 FileUtils.openFile(java);
-                break;
+            }
         }
     }
 
@@ -557,7 +558,7 @@ public class WorkspacePane extends ViewOwner {
 
         // If not restoring, select good file and add to recent projects
         if (!_restoringWorkspace) {
-            ViewUtils.runDelayed(() -> WorkspacePaneUtils.selectGoodDefaultFile(this, aProject), 400);
+            runLater(() -> WorkspacePaneUtils.selectGoodDefaultFile(this, aProject));
             WorkspacePaneUtils.addRecentProject(aProject);
         }
 
@@ -569,8 +570,8 @@ public class WorkspacePane extends ViewOwner {
         if (aProject.getBuildFile().isIncludeGreenfootRuntime())
             _toolBar.showGreenfootButton();
 
-        // Handle hide block code button
-        runLater(_toolBar::updateBlockCodeButton);
+        // Reset tool trays
+        runLater(_workspaceTools::resetToolTrays);
     }
 
     /**
@@ -600,6 +601,9 @@ public class WorkspacePane extends ViewOwner {
 
         // Reset UI
         resetLater();
+
+        // Reset tool trays
+        runLater(_workspaceTools::resetToolTrays);
     }
 
     /**

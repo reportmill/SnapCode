@@ -2,6 +2,7 @@ package snapcode.app;
 import snap.geom.Side;
 import snap.props.PropChangeListener;
 import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.view.*;
 import snapcode.apptools.BuildTool;
 import java.util.List;
@@ -21,10 +22,11 @@ public class ToolTray extends ViewOwner {
     private TabView  _tabView;
 
     /**
-     * Creates a new SupportTray for given ProjectPane.
+     * Constructor.
      */
     public ToolTray(Side aSide, WorkspaceTool[] trayTools)
     {
+        super();
         _side = aSide;
         _trayTools = trayTools;
     }
@@ -32,9 +34,20 @@ public class ToolTray extends ViewOwner {
     /**
      * Returns the tool for given class.
      */
-    public <T extends WorkspaceTool> T getToolForClass(Class<T> aToolClass)
+    public <T extends WorkspaceTool> T getToolForClass(Class<T> toolClass)
     {
-        return (T) ArrayUtils.findMatch(_trayTools, tool -> aToolClass.isInstance(tool));
+        return (T) ArrayUtils.findMatch(_trayTools, tool -> toolClass.isInstance(tool));
+    }
+
+    /**
+     * Returns the tool for given class.
+     */
+    public ToggleButton getToolButtonForClass(Class<?> toolClass)
+    {
+        getUI();
+        List<Tab> tabs = _tabView.getTabBar().getTabs();
+        Tab tabForClass = ListUtils.findMatch(tabs, tab -> toolClass == tab.getContentOwner().getClass());
+        return tabForClass != null ? tabForClass.getButton() : null;
     }
 
     /**

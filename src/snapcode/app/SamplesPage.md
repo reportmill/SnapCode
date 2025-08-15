@@ -18,21 +18,6 @@
 
 @[OpenSamples=true]
 
-## Greenfoot projects
-
-* Flight
-  [](https://reportmill.com/SnapCode/Samples/Flight/Flight.gfar)
-* Archery
-  [](https://reportmill.com/SnapCode/Samples/Archery/Archery.gfar)
-* AppleCatchers
-  [](https://reportmill.com/SnapCode/Samples/AppleCatchers/AppleCatchers.gfar)
-* BalloonRide
-  [](https://reportmill.com/SnapCode/Samples/BalloonRide/BalloonRide.gfar)
-
-Provided by enCode/Create. [Learn to code!](https://www.encodecreate.com)
-
-@[OpenSamples=true]
-
 ## Graphics
 
 * Charting
@@ -51,6 +36,21 @@ Provided by enCode/Create. [Learn to code!](https://www.encodecreate.com)
   [](https://reportmill.com/SnapCode/Samples/Puppets/Puppets.zip)
   This app animates puppets using JBox2D and rag-doll-physics.
 
+@[OpenSamples=true]
+
+## Greenfoot projects
+
+* Flight
+  [](https://reportmill.com/SnapCode/Samples/Flight/Flight.gfar)
+* Archery
+  [](https://reportmill.com/SnapCode/Samples/Archery/Archery.gfar)
+* AppleCatchers
+  [](https://reportmill.com/SnapCode/Samples/AppleCatchers/AppleCatchers.gfar)
+* BalloonRide
+  [](https://reportmill.com/SnapCode/Samples/BalloonRide/BalloonRide.gfar)
+
+Provided by enCode/Create. [Learn to code!](https://www.encodecreate.com)
+
 ## Misc Samples
 
 * [Swing Samples](Sample:https://reportmill.com/SnapCode/Samples/SwingSamples/SwingSamples.zip)
@@ -67,6 +67,13 @@ Provided by enCode/Create. [Learn to code!](https://www.encodecreate.com)
   This java repl file shows an example calculating prime numbers.
 * [Snapkit Samples](Sample:https://reportmill.com/SnapCode/Samples/SnapkitSamples/SnapkitSamples.zip)
   This project shows some examples of programming SnapKit.
+* [Java Markdown](Sample:https://reportmill.com/SnapCode/Samples/JavaMarkdown/JavaMarkdown.zip)
+  This sample is a basic introduction to Java markdown.
+
+## Coding Lessons
+
+* [Coding Lesson 1](Sample:https://reportmill.com/SnapCode/lessons/BalloonRide/BalloonRide.md)
+  This lesson is a basic introduction to Java coding.
 
 ## Github Samples
 

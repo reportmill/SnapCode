@@ -15,7 +15,7 @@
     <Label PrefWidth="28" PrefHeight="28" Margin="0,0,0,10" ImageName="pkg.images/DarkMode.png" />
   </RowView>
   <Separator PrefHeight="40" />
-  <ColView GrowHeight="true">
+  <ColView>
     <Label Margin="0,0,10,0" Font="Arial Bold 14" Text="GitHub credentials" />
     <RowView Margin="4" GrowWidth="true">
       <Label Text="User:" />
