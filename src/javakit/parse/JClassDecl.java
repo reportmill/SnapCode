@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import javakit.resolver.*;
 import snap.parse.ParseToken;
 import snap.util.ArrayUtils;
-import snap.util.ObjectArray;
 
 /**
  * This class represents a Java class declaration.
@@ -16,7 +15,7 @@ import snap.util.ObjectArray;
 public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypeParameters {
 
     // The type of class (Class, Interface, Enum, Annotation, Record)
-    protected ClassType  _classType = ClassType.Class;
+    protected ClassType _classType = ClassType.Class;
 
     // TypeVars
     private JTypeVar[] _typeVars = new JTypeVar[0];
@@ -40,19 +39,19 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     protected JType[] _implementsTypes = JType.EMPTY_TYPES_ARRAY;
 
     // The list of fields, methods, enums annotations and child classes
-    protected ObjectArray<JBodyDecl> _bodyDecls = new ObjectArray<>(JBodyDecl.class);
+    protected JBodyDecl[] _bodyDecls = new JBodyDecl[0];
 
     // The list of fields, methods, enums annotations and child classes
     protected JMemberDecl[] _memberDecls;
 
     // The field declarations
-    protected JFieldDecl[]  _fieldDecls;
+    protected JFieldDecl[] _fieldDecls;
 
     // The constructor declarations
-    protected JConstrDecl[]  _constrDecls;
+    protected JConstrDecl[] _constrDecls;
 
     // The method declarations
-    protected JMethodDecl[]  _methodDecls;
+    protected JMethodDecl[] _methodDecls;
 
     // The initializer declarations
     protected JInitializerDecl[] _initializerDecls;
@@ -360,15 +359,15 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     /**
      * Returns the list of body declarations.
      */
-    public JBodyDecl[] getBodyDecls()  { return _bodyDecls.getArray(); }
+    public JBodyDecl[] getBodyDecls()  { return _bodyDecls; }
 
     /**
      * Sets the body declarations.
      */
     public void setBodyDecls(JBodyDecl[] bodyDecls)
     {
-        for (JBodyDecl bodyDecl : bodyDecls)
-            addBodyDecl(bodyDecl);
+        _bodyDecls = bodyDecls;
+        Stream.of(_bodyDecls).forEach(this::addChild);
     }
 
     /**
@@ -376,7 +375,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      */
     public void addBodyDecl(JBodyDecl bodyDecl)
     {
-        _bodyDecls.add(bodyDecl);
+        _bodyDecls = ArrayUtils.add(_bodyDecls, bodyDecl);
         addChild(bodyDecl);
     }
 
