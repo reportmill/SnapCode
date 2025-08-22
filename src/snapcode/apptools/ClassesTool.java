@@ -1,7 +1,6 @@
 package snapcode.apptools;
 import snap.props.PropChangeListener;
 import snap.util.ListUtils;
-import snap.util.ObjectArray;
 import snap.view.*;
 import snap.web.WebFile;
 import snapcode.app.SelFileTool;
@@ -10,7 +9,6 @@ import snapcode.app.WorkspaceTool;
 import snapcode.project.Project;
 import snapcode.project.ProjectUtils;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -222,10 +220,10 @@ public class ClassesTool extends WorkspaceTool {
         public ClassNode getParent(ClassNode anItem)  { return anItem._parentNode; }
 
         @Override
-        public boolean isParent(ClassNode anItem)  { return !anItem._childNodes.isEmpty(); }
+        public boolean isParent(ClassNode anItem)  { return !anItem.getChildNodes().isEmpty(); }
 
         @Override
-        public List<ClassNode> getChildren(ClassNode aParent)  { return Arrays.asList(aParent.getChildNodes()); }
+        public List<ClassNode> getChildren(ClassNode aParent)  { return aParent.getChildNodes(); }
 
         @Override
         public String getText(ClassNode anItem)  { return ""; }
@@ -246,7 +244,7 @@ public class ClassesTool extends WorkspaceTool {
         private WebFile _nodeFile;
 
         // The child nodes
-        private ObjectArray<ClassNode> _childNodes = new ObjectArray<>(ClassNode.class, 0);
+        private List<ClassNode> _childNodes = new ArrayList<>(0);
 
         /**
          * Constructor.
@@ -270,7 +268,7 @@ public class ClassesTool extends WorkspaceTool {
         /**
          * Returns the child nodes.
          */
-        public ClassNode[] getChildNodes()  { return _childNodes.getArray(); }
+        public List<ClassNode> getChildNodes()  { return _childNodes; }
 
         /**
          * Returns a child node for given class.
@@ -316,7 +314,8 @@ public class ClassesTool extends WorkspaceTool {
             ClassNode classNode = new ClassNode(nodeClass, nodeFile);
             classNode._parentNode = this;
             int insertIndex = -Collections.binarySearch(_childNodes, classNode) - 1;
-            _childNodes.add(insertIndex, classNode);
+            if (insertIndex >= 0)
+                _childNodes.add(insertIndex, classNode);
             return classNode;
         }
 
