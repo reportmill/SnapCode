@@ -23,15 +23,6 @@ public class App {
     public static String[] APP_ARGS;
 
     /**
-     * Standard main implementation.
-     */
-    public static void main(final String[] args)
-    {
-        APP_ARGS = args;
-        ViewUtils.runLater(() -> new App());
-    }
-
-    /**
      * Constructor.
      */
     public App()
@@ -223,4 +214,13 @@ public class App {
      * Returns the shared instance.
      */
     public static App getShared()  { return _shared; }
+
+    /**
+     * Standard main implementation.
+     */
+    public static void main(final String[] args)
+    {
+        APP_ARGS = args;
+        ViewUtils.runLater(App::new);
+    }
 }
