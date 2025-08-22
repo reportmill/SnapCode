@@ -5,11 +5,15 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import java.io.File;
+import java.util.List;
 
 /**
  * Utilities for SnapCode.
  */
 public class SnapCodeUtils {
+
+    // Build info, build version
+    private static String _buildInfo, _buildVersion;
 
     /**
      * Returns the SnapCode directory URL.
@@ -65,7 +69,21 @@ public class SnapCodeUtils {
      */
     public static String getBuildInfo()
     {
-        try { return SnapUtils.getText(SnapUtils.class, "/snapcode/BuildInfo.txt").trim(); }
-        catch (Exception e) { return "BuildInfo not found"; }
+        if (_buildInfo != null) return _buildInfo;
+        try { return _buildInfo = SnapUtils.getText(SnapUtils.class, "/snapcode/BuildInfo.txt").trim(); }
+        catch (Exception e) { return "Jan-01-25 12:01 not found"; }
+    }
+
+    /**
+     * Returns a build version string in format YYYY_MM (eg, "2025.08").
+     */
+    public static String getBuildVersion()
+    {
+        if (_buildVersion != null) return _buildVersion;
+        String buildInfo = getBuildInfo();
+        String buildMonth = buildInfo.substring(0, 3);
+        int buildMonthNum = List.of("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec").indexOf(buildMonth) + 1;
+        String buildYear = "20" + buildInfo.substring(7, 9);
+        return _buildVersion = String.format("%s.%02d", buildYear, buildMonthNum);
     }
 }
