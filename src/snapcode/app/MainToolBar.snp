@@ -10,7 +10,7 @@
   <Button Name="RunButton" PrefWidth="28" PrefHeight="28" LeanX="RIGHT" ImageName="/snapcode/apptools/pkg.images/Run.png" ShowArea="false" />
   <Button Name="DebugButton" PrefWidth="28" PrefHeight="28" ImageName="/snapcode/apptools/pkg.images/Debug.gif" ShowArea="false" />
   <Button Name="TerminateButton" PrefWidth="28" PrefHeight="28" ImageName="/snapcode/apptools/pkg.images/Terminate.gif" ShowArea="false" />
-  <Separator PrefHeight="18" Vertical="true" Margin="0,5,0,5" />
+  <Separator Name="Separator" PrefHeight="18" Vertical="true" Margin="0,5,0,5" />
   <Button Name="BuildButton" PrefWidth="28" PrefHeight="28" Margin="0,0,0,10" ImageName="/snapcode/apptools/pkg.images/Build.png" ShowArea="false" />
   <Button Name="AccountButton" PrefWidth="28" PrefHeight="28" Margin="0,0,0,5" Padding="4" LeanX="RIGHT" ImageName="pkg.images/Account.png" ShowArea="false" />
 </RowView>

@@ -99,8 +99,10 @@ public class JavaPage extends WebPage {
     {
         WebURL url = getURL();
         setTextSelectionForUrlParams(url);
-        if (WorkspacePane._embedMode)
+        if (WorkspacePane._embedMode) {
             getTextArea().setSel(getTextArea().length());
+            setViewVisible("BottomBox", false);
+        }
     }
 
     /**

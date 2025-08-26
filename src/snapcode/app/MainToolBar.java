@@ -13,7 +13,6 @@ import snap.web.WebSite;
 import snap.web.WebURL;
 import snapcode.apptools.SearchTool;
 import snapcode.project.RunConfig;
-import snapcode.views.BlocksUtils;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -56,17 +55,6 @@ public class MainToolBar extends WorkspaceTool {
     }
 
     /**
-     * Updates block code button.
-     */
-    public void updateBlockCodeButton()
-    {
-        Project rootProj = _workspacePane.getRootProject();
-        ToggleButton blockCodeButton = _workspaceTools.getBlockCodeButton();
-        if (blockCodeButton != null)
-            blockCodeButton.setVisible(rootProj != null && BlocksUtils.isBlocksProject(rootProj));
-    }
-
-    /**
      * Override to set PickOnBounds.
      */
     protected void initUI()
@@ -104,9 +92,9 @@ public class MainToolBar extends WorkspaceTool {
             ChildView parentView = getUI(ChildView.class);
             Label runLabel = new Label("Run"); runLabel.setFont(Font.Arial13);
             ViewUtils.replaceView(parentView.getChild(0), runLabel);
-            String[] hideNames = { "HomeButton", "BackButton", "ForwardButton", "ReloadButton", "SearchComboBox",
-                "RunConfigMenuButton", "DebugButton", "BuildButton", "AccountButton" };
-            Stream.of(hideNames).forEach(name -> setViewVisible(name, false));
+            List<String> hideNames = List.of("HomeButton", "BackButton", "ForwardButton", "ReloadButton", "SearchComboBox",
+                "RunConfigMenuButton", "DebugButton", "BuildButton", "Separator", "AccountButton");
+            hideNames.forEach(name -> setViewVisible(name, false));
             getView("RunButton").setLean(null);
         }
     }
@@ -124,7 +112,7 @@ public class MainToolBar extends WorkspaceTool {
         // Update RunConfigMenuButton
         boolean isBuildable = !_workspace.getProjects().isEmpty();
         MenuButton runConfigMenuButton = getView("RunConfigMenuButton", MenuButton.class);
-        runConfigMenuButton.setVisible(isBuildable);
+        runConfigMenuButton.setVisible(isBuildable && !WorkspacePane._embedMode);
         List<MenuItem> runConfigMenuItems = getRunConfigMenuItems();
         runConfigMenuButton.setText(runConfigMenuItems.get(0).getText());
         runConfigMenuButton.setMenuItems(runConfigMenuItems);

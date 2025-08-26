@@ -127,10 +127,14 @@ public class WorkspaceTools {
         // Add DevToolsButton
         addDevToolsButton();
 
-        // Hide ClassesToolButton
-        getClassesToolButton().setVisible(false);
+        // Hide RightTray, BottomTray by default
         setShowRightTray(false);
         setShowBottomTray(false);
+
+        // Hide ClassesToolButton
+        ToggleButton classesToolButton = getClassesToolButton();
+        if (classesToolButton != null) classesToolButton.setVisible(false);
+
     }
 
     /**
@@ -326,7 +330,7 @@ public class WorkspaceTools {
     public ToggleButton getToolButtonForClass(Class<?> toolClass)
     {
         ToolTray toolTray = getToolTrayForToolClass(toolClass);
-        return toolTray.getToolButtonForClass(toolClass);
+        return toolTray != null ? toolTray.getToolButtonForClass(toolClass) : null;
     }
 
     /**
@@ -343,7 +347,7 @@ public class WorkspaceTools {
 
         // Show right tray if root project available
         setShowRightTray(rootProj != null);
-        setShowBottomTray(rootProj != null);
+        setShowBottomTray(rootProj != null && !WorkspacePane._embedMode);
     }
 
     /**
