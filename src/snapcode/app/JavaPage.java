@@ -101,7 +101,7 @@ public class JavaPage extends WebPage {
         setTextSelectionForUrlParams(url);
         if (WorkspacePane._embedMode) {
             getTextArea().setSel(getTextArea().length());
-            setViewVisible("BottomBox", false);
+            getTextPane().setStatusBarShowing(false);
         }
     }
 

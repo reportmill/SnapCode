@@ -129,7 +129,8 @@ public class JavaTextPane extends TextPane {
         setViewText("JavaDocButton", javaDocButtonText);
 
         // Reset NodePathBox
-        resetNodePathBox();
+        if (isStatusBarShowing())
+            resetNodePathBox();
     }
 
     /**
