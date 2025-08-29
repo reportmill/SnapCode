@@ -105,6 +105,11 @@ public class JavaTextPane extends TextPane {
         _textArea.addEventHandler(this::handleTextAreaMouseEvent, MousePress, MouseRelease);
         _textArea.addEventHandler(this::handleTextAreaDragEvent, DragEvents);
 
+        // Add extra buttons
+        RowView toolBarRow = getView("ToolBar", RowView.class);
+        View extraButtons = UILoader.loadViewForOwnerAndString(this, EXTRA_TOOLBAR_BUTTONS_UI);
+        toolBarRow.addChild(extraButtons, toolBarRow.getChildCount() - 1);
+
         // Add listener to initialize settings menu
         getView("SettingsButton").addEventHandler(this::handleSettingsButtonMousePress, MousePress);
     }
@@ -514,4 +519,14 @@ public class JavaTextPane extends TextPane {
         // Return
         return pathLabels.toArray(new Label[0]);
     }
+
+    // UI for extra toolbar buttons
+    private static final String EXTRA_TOOLBAR_BUTTONS_UI = """
+          <RowView Spacing="2" LeanX="RIGHT">
+            <Button Name="JavaDocButton" PrefWidth="116" PrefHeight="22" Text="Documentation" />
+            <MenuButton Name="SettingsButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Settings" ImageName="Settings.png" ShowArea="false" ShowArrow="false">
+              <MenuItem Name="ShowScopeBoxesMenuItem" Text="Show Scope Boxes" />
+            </MenuButton>
+          </RowView>
+            """;
 }
