@@ -170,7 +170,7 @@ public class JavaPage extends WebPage {
         String findString = aURL.getRefValue("Find");
         if (findString != null) {
             JavaTextPane textPane = getTextPane();
-            textPane.find(findString, true, true);
+            textPane.findMatchesAndSelectFirst(findString, false);
         }
 
         // Look for Member selection request
