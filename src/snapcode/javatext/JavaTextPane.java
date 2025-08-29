@@ -191,14 +191,8 @@ public class JavaTextPane extends TextPane {
      */
     private void handleTextAreaMouseEvent(ViewEvent anEvent)
     {
-        // Handle PopupTrigger
-        if (anEvent.isPopupTrigger()) { //anEvent.consume();
-            Menu contextMenu = createContextMenu();
-            contextMenu.showMenuAtXY(_textArea, anEvent.getX(), anEvent.getY());
-        }
-
         // Handle MouseClick: If alt-down, open JavaDoc. If HoverNode, open declaration
-        else if (anEvent.isMouseClick()) {
+        if (anEvent.isMouseClick()) {
 
             // If alt is down and there is JavaDoc, open it
             if (anEvent.isAltDown()) {
@@ -299,6 +293,7 @@ public class JavaTextPane extends TextPane {
     /**
      * Creates the ContextMenu.
      */
+    @Override
     protected Menu createContextMenu()
     {
         // Create MenuItems
@@ -306,10 +301,14 @@ public class JavaTextPane extends TextPane {
         viewBuilder.name("OpenDeclarationMenuItem").text("Open Declaration").save();
         viewBuilder.name("ShowReferencesMenuItem").text("Show References").save();
         viewBuilder.name("ShowDeclarationsMenuItem").text("Show Declarations").save();
+        viewBuilder.save();
 
-        // Create context menu
+        // Get menu with items
         Menu contextMenu = viewBuilder.buildMenu("ContextMenu", null);
-        contextMenu.setOwner(this);
+
+        // Add super menu items
+        Menu superMenu = super.createContextMenu();
+        superMenu.getMenuItems().forEach(contextMenu::addItem);
 
         // Return
         return contextMenu;
@@ -378,7 +377,7 @@ public class JavaTextPane extends TextPane {
      * Called when TextModel does prop change.
      */
     @Override
-    protected void handleSourceTextPropChange(PropChange aPC)
+    protected void handleTextModelPropChange(PropChange aPC)
     {
         String propName = aPC.getPropName();
 
