@@ -322,7 +322,7 @@ public class WorkspacePaneUtils {
     /**
      * Opens a Workspace in embed mode.
      */
-    public static void openEmbedWorkspace()
+    public static void openEmbedWorkspace(String javaStr, String fileType)
     {
         // Increase default font size
         if (JavaTextUtils.getDefaultJavaFontSize() < 15)
@@ -339,17 +339,15 @@ public class WorkspacePaneUtils {
         workspacePane.getWindow().getRootView().setBorder(Color.GRAY, 1);
         workspacePane.show();
 
-        // Open Jepl
-        String javaStr = "var button = new Button(\"Hello World\");\n" +
-                "button.setPropsString(\"Font: Arial Bold 24; Margin:40; Padding:10; Effect:Shadow;\");\n" +
-                "button.setAnimString(\"time: 1000; scale: 2; time: 2000; scale: 1; time: 2000; rotate: 360\");\n" +
-                "button.getAnim(0).setLoopCount(3).play();\n" +
-                "button.addEventHandler(e -> show(new Label(\"Stop that\")), View.Action);\n" +
-                "show(button);\n";
+        // If no java string provided, use sample
+        if (javaStr == null) {
+            javaStr = SAMPLE_EMBED_CODE;
+            fileType = "jepl";
+        }
 
         // Create and open new Jepl file
         NewFileTool newFileTool = workspacePane.getNewFileTool();
-        newFileTool.newJavaFileForStringAndType(javaStr, "jepl");
+        newFileTool.newJavaFileForStringAndType(javaStr, fileType);
     }
 
     /**
@@ -409,4 +407,14 @@ public class WorkspacePaneUtils {
         List<WebFile> zipSiteRootFiles = zipSiteRootDir.getFiles();
         return ListUtils.findMatch(zipSiteRootFiles, file -> ProjectUtils.isProjectDir(file));
     }
+
+    // A Sample embed string
+    private static final String SAMPLE_EMBED_CODE = """
+        var button = new Button("Hello World");
+        button.setPropsString("Font: Arial Bold 24; Margin:40; Padding:10; Effect:Shadow;");
+        button.setAnimString("time: 1000; scale: 2; time: 2000; scale: 1; time: 2000; rotate: 360");
+        button.getAnim(0).setLoopCount(3).play();
+        button.addEventHandler(e -> show(new Label("Stop that")), View.Action);
+        show(button);
+        """;
 }

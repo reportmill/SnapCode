@@ -145,7 +145,13 @@ public class App {
 
         // Handle 'embed'
         if (arg0.equals("embed")) {
-            WorkspacePaneUtils.openEmbedWorkspace();
+            WorkspacePaneUtils.openEmbedWorkspace(null, null);
+            return true;
+        }
+
+        // Handle 'embed'
+        if (arg0.startsWith("embed")) {
+            openEmbedWorkspace(arg0);
             return true;
         }
 
@@ -172,6 +178,26 @@ public class App {
             workspacePane.getRunTool().getUI().setPrefWidth(650);
             ViewUtils.runLater(workspacePane.getProjectFilesTool()::hideTool);
         }
+    }
+
+    /**
+     * Opens embed workspace.
+     */
+    private void openEmbedWorkspace(String aString)
+    {
+        // Handle no code provided
+        if (aString.equals("embed")) {
+            WorkspacePaneUtils.openEmbedWorkspace(null, null); return; }
+
+        // Get LZW string
+        String lzwStr = aString.substring("embed:".length());
+
+        // Extract java string from arg
+        String fileType = lzwStr.startsWith("Java:") ? "java" : aString.startsWith("JMD:") ? "jmd" : "jepl";
+        String javaStr = LZString.decompressFromEncodedURIComponent(lzwStr);
+
+        // Open java string
+        WorkspacePaneUtils.openEmbedWorkspace(javaStr, fileType);
     }
 
     /**
