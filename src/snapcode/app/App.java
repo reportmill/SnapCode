@@ -91,7 +91,7 @@ public class App {
         // Handle 'Java:...' or "Jepl:...': Open Java String
         if (arg0.startsWith("Java:") || arg0.startsWith("Jepl:") || arg0.startsWith("JMD:")) {
             openJavaString(arg0);
-            ViewUtils.runDelayed(() -> autoRunOpenFile(), 2000);
+            ViewUtils.runDelayed(this::autoRunOpenFile, 2000);
             return true;
         }
 
@@ -132,7 +132,7 @@ public class App {
 
         // Handle 'Play'
         if (arg0.equals("autorun")) {
-            ViewUtils.runDelayed(() -> autoRunOpenFile(), 800);
+            ViewUtils.runDelayed(this::autoRunOpenFile, 800);
             return false;
         }
 
@@ -152,6 +152,7 @@ public class App {
         // Handle 'embed'
         if (arg0.startsWith("embed")) {
             openEmbedWorkspace(arg0);
+            ViewUtils.runDelayed(this::autoRunOpenFile, 800);
             return true;
         }
 
