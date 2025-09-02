@@ -131,6 +131,10 @@ public class JavaTextPane extends TextPane {
         // Reset NodePathBox
         if (isStatusBarShowing())
             resetNodePathBox();
+
+        // Make LineFootView only visible if textArea is scrolling
+        ScrollView scrollView = _textArea.getParent(ScrollView.class);
+        _lineFootView.setVisible(scrollView.isVBarShowing());
     }
 
     /**
