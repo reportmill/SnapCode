@@ -12,10 +12,23 @@ const SnapCode = {
 //
 function addSnapCodeToElementForId(containerId)
 {
+    // If SnapCodeRunner already installed elsewhere, remove it and restore element height
+    const oldSnapCodeRunner = document.getElementById('SnapCodeRunner');
+    if (oldSnapCodeRunner != null) {
+        if (oldSnapCodeRunner.originalHeight < 200)
+            oldSnapCodeRunner.parentNode.style.height = oldSnapCodeRunner.originalHeight + 'px';
+        oldSnapCodeRunner.parentNode.removeChild(oldSnapCodeRunner);
+    }
+
     // Get container and ensure it can host absolutely positioned children
     const container = document.getElementById(containerId);
     if (getComputedStyle(container).position === "static")
         container.style.position = "relative";
+
+    // Make sure it's at least 300px tall
+    const containerOriginalHeight = container.clientHeight;
+    if (containerOriginalHeight < 200)
+        container.style.height = '200px';
 
     // Get java string from parent element and Base64 encode with lzwstring
     const javaStr = container.innerText;
@@ -23,6 +36,8 @@ function addSnapCodeToElementForId(containerId)
 
     // Create iframe for parent element
     const iframe = document.createElement("iframe");
+    iframe.id = 'SnapCodeRunner';
+    iframe.originalHeight = containerOriginalHeight;
     iframe.src = 'http://localhost:8080#embed:' + javaStrLzw;
     iframe.style.border = "none";
     iframe.style.position = 'absolute';
