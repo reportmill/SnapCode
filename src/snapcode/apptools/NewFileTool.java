@@ -8,6 +8,7 @@ import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.viewx.FilePanel;
 import snap.viewx.FormBuilder;
+import snap.viewx.TransitionPane;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.app.JavaPage;
@@ -336,6 +337,7 @@ public class NewFileTool extends WorkspaceTool {
         WebFile newJeplFile = selSite.createFileForPath(filePath, false);
         newJeplFile.setText(jeplString);
         newJeplFile.save();
+        _pagePane.getBrowser().setTransition(TransitionPane.Instant);
         _workspacePane.openFile(newJeplFile);
 
         // Must be a better place for this
