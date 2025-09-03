@@ -1,8 +1,10 @@
 
 import LZString from './lz-string.min.js';
 
-//const SNAPCODE_URL = 'https://reportmill.com/SnapCode/app/app09?loader=none#embed:';
-const SNAPCODE_URL = 'http://localhost:8080?loader=none#embed:';
+// Get URL to SnapCode
+var SNAPCODE_URL = 'https://reportmill.com/SnapCode/app/app09?loader=none#embed:';
+if (window.location.host.includes('localhost'))
+    SNAPCODE_URL = 'http://localhost:8080?loader=none#embed:';
 
 const SnapCode = {
 
@@ -31,12 +33,12 @@ function addSnapCodeToElementForId(containerId)
     // Make sure it's at least 200px tall
     const containerOriginalHeight = container.style.height;
     const containerOriginalClientHeight = container.clientHeight;
-    if (containerOriginalClientHeight < 240)
-        container.style.height = '240px';
+    if (containerOriginalClientHeight < 260)
+        container.style.height = '260px';
 
     // Get java string from parent element and Base64 encode with lzwstring
     const javaStr = container.innerText;
-    var javaStrLzw = LZString.compressToBase64(javaStr);
+    var javaStrLzw = LZString.compressToEncodedURIComponent(javaStr);
 
     // Create iframe for parent element
     const iframe = document.createElement("iframe");
