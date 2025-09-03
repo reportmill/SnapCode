@@ -180,6 +180,13 @@ function addFontAwesome()
     linkElement.rel = 'stylesheet';
     linkElement.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css';
     document.head.appendChild(linkElement);
+
+    // Create iframe to load SnapCode to make sure it's hot
+    const hiddenIframe = document.createElement('iframe');
+    hiddenIframe.src = SNAPCODE_URL.slice(0, -1);
+    hiddenIframe.style.display = 'none';
+    document.body.appendChild(hiddenIframe);
+    hiddenIframe.onload = function() { document.body.removeChild(hiddenIframe); };
 }
 
 export default SnapCode;
