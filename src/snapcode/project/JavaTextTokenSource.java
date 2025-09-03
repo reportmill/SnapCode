@@ -41,7 +41,7 @@ public class JavaTextTokenSource extends Tokenizer {
 
         // Set token index
         int charIndexInLine = _charIndex - _textLine.getStartCharIndex();
-        TextToken textToken = _textLine.getTokenForCharIndex(charIndexInLine);
+        TextToken textToken = _textLine.getNextTokenForCharIndex(charIndexInLine);
         _tokenIndex = textToken != null ? textToken.getIndex() : _textLine.getTokenCount();
     }
 
