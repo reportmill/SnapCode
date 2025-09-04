@@ -28,7 +28,7 @@ function addSnapCodeToElementForId(containerId)
     // Remove play button
     const playButton = container.querySelector('#SnapCodeRunnerPlayButton');
     if (playButton !== null)
-        container.removeChild(playButton);;
+        container.removeChild(playButton);
 
     // Make sure it's at least 200px tall
     const containerOriginalHeight = container.style.height;
@@ -150,6 +150,11 @@ function getCloseButton()
 //
 function removeExistingSnapCodeRunner()
 {
+    // If SnapCodePrimer still set, remove
+    const snapCodePrimer = document.getElementById('SnapCodePrimer');
+    if (snapCodePrimer !== null)
+        document.body.removeChild(snapCodePrimer);
+
     // Get old SnapCode runner (just return if not found)
     const oldSnapCodeRunner = document.getElementById('SnapCodeRunner');
     if (oldSnapCodeRunner === null)
@@ -185,10 +190,10 @@ function addFontAwesome()
 
     // Create iframe to load SnapCode to make sure it's hot
     const hiddenIframe = document.createElement('iframe');
-    hiddenIframe.src = SNAPCODE_URL.slice(0, -1);
+    hiddenIframe.id = 'SnapCodePrimer';
+    hiddenIframe.src = SNAPCODE_URL + LZString.compressToEncodedURIComponent('IO.print("SnapCode is primed");');
     hiddenIframe.style.display = 'none';
     document.body.appendChild(hiddenIframe);
-    hiddenIframe.onload = function() { document.body.removeChild(hiddenIframe); };
 }
 
 export default SnapCode;
