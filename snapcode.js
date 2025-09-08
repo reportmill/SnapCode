@@ -128,8 +128,8 @@ function getCloseButton()
     button.style.cursor = "pointer";
     button.style.transition = "color 0.3s";
     button.style.position = "absolute";
-    button.style.top = "10px";
-    button.style.right = "10px";
+    button.style.top = "8px";
+    button.style.right = "6px";
     button.style.zIndex = '99999';
 
     // Add the icon
