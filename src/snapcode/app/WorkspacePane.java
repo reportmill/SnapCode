@@ -324,7 +324,6 @@ public class WorkspacePane extends ViewOwner {
             toolBarUI.setManaged(false);
             toolBarUI.setMargin(1, 58, 0, 0);
             toolBarUI.setLean(Pos.TOP_RIGHT);
-            toolBarUI.setSizeToPrefSize();
             ViewUtils.addChild(mainSplit, toolBarUI);
             _workspaceTools.getRightTray().getUI(TabView.class).getTabBar().setVisible(false);
             _workspaceTools.getToolButtonForClass(RunTool.class).setMargin(0, 0, 0, 32);

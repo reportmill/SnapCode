@@ -65,7 +65,6 @@ public class AccountTool extends ViewOwner {
     {
         Button closeButton = getView("CloseButton", Button.class);
         closeButton.setManaged(false);
-        closeButton.setSizeToPrefSize();
         closeButton.setTextColor(Color.GRAY);
 
         // Add Info box

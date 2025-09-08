@@ -113,7 +113,6 @@ public class TaskManager extends ViewOwner {
         rowView.setLean(Pos.BOTTOM_RIGHT);
         rowView.setManaged(false);
         rowView.setChildren(_activityLabel, _progressBar);
-        rowView.setSizeToPrefSize();
 
         // Return
         return rowView;
