@@ -89,13 +89,19 @@ public class MainToolBar extends WorkspaceTool {
 
         // Handle EmbedMode: Hide everything except RunButton and TerminateButton
         if (WorkspacePane._embedMode) {
-            ChildView parentView = getUI(ChildView.class);
-            Label runLabel = new Label("Run"); runLabel.setFont(Font.Arial13);
-            ViewUtils.replaceView(parentView.getChild(0), runLabel);
-            List<String> hideNames = List.of("HomeButton", "BackButton", "ForwardButton", "ReloadButton", "SearchComboBox",
-                "RunConfigMenuButton", "DebugButton", "BuildButton", "Separator", "AccountButton");
+
+            // Hide all children except RunButton
+            List<String> hideNames = List.of("Separator1", "HomeButton", "BackButton", "ForwardButton",
+                "ReloadButton", "SearchComboBox", "RunConfigMenuButton", "DebugButton", "BuildButton", "Separator", "AccountButton");
             hideNames.forEach(name -> setViewVisible(name, false));
-            getView("RunButton").setLean(null);
+
+            // Add "Run" text to RunButton and move image after
+            Button runButton = getView("RunButton", Button.class);
+            View graphic = runButton.getGraphic();
+            runButton.setText("Run");
+            runButton.setGraphic(null);
+            runButton.setGraphicAfter(graphic);
+            runButton.setPrefWidth(-1);
         }
     }
 

@@ -3,12 +3,12 @@
   <RowView Name="ToolBar" PrefHeight="32" Spacing="4">
     <Label Margin="0,4,0,8" Text="Run:" />
     <MenuButton Name="MenuButton" PrefWidth="18" PrefHeight="24" Margin="2" Padding="0" ShowArea="false">
+      <MenuItem Name="SwapConsoleMenuItem" Text="Swap System Console" />
       <MenuItem Name="ClearConsoleMenuItem" Text="Clear console" />
       <CheckBoxMenuItem Name="RunInSnapCodeProcessMenuItem" Text="Run apps in SnapCode Process" />
     </MenuButton>
-    <Button Name="SwapConsoleButton" Padding="1,3,1,3" Font="Arial 11" LeanX="CENTER" />
     <Button Name="ClearButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" ToolTip="Clear console" ImageName="pkg.images/Clear.png" ShowArea="false" />
-    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" Text="&#8211;" ShowArea="false" />
+    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Text="&#8211;" ShowArea="false" />
   </RowView>
   <RectView PrefHeight="1" Fill="#CC" />
   <ScrollView Name="ScrollView" GrowHeight="true" />

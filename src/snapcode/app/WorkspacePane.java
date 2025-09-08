@@ -1,5 +1,7 @@
 package snapcode.app;
+import snap.geom.Pos;
 import snap.geom.Rect;
+import snap.gfx.Color;
 import snap.gfx.GFXEnv;
 import snap.props.PropChangeListener;
 import snap.util.*;
@@ -97,6 +99,11 @@ public class WorkspacePane extends ViewOwner {
      * Returns the workspace.
      */
     public Workspace getWorkspace()  { return _workspace; }
+
+    /**
+     * Returns whether running in embed mode.
+     */
+    public static boolean isEmbedMode()  { return _embedMode; }
 
     /**
      * Returns the PagePane.
@@ -306,8 +313,23 @@ public class WorkspacePane extends ViewOwner {
 
         // Add toobar to menubar
         View toolBarUI = _toolBar.getUI();
-        toolBarUI.setGrowWidth(true);
-        ViewUtils.addChild(menuBar, toolBarUI);
+        if (!_embedMode) {
+            toolBarUI.setGrowWidth(true);
+            ViewUtils.addChild(menuBar, toolBarUI);
+        }
+
+        // If embedded, add toolbar to main split and make float
+        else {
+            menuBar.setVisible(false);
+            toolBarUI.setManaged(false);
+            toolBarUI.setMargin(1, 58, 0, 0);
+            toolBarUI.setLean(Pos.TOP_RIGHT);
+            toolBarUI.setSizeToPrefSize();
+            ViewUtils.addChild(mainSplit, toolBarUI);
+            _workspaceTools.getRightTray().getUI(TabView.class).getTabBar().setVisible(false);
+            _workspaceTools.getToolButtonForClass(RunTool.class).setMargin(0, 0, 0, 32);
+            getUI().setFill(Color.WHITE);
+        }
 
         // Get PagePaneSplitView
         SplitView pagePaneSplitView = getView("PagePaneSplitView", SplitView.class);

@@ -438,6 +438,12 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // Get ScrollView and config
         ScrollView scrollView = getView("ScrollView", ScrollView.class);
         scrollView.setBorder(null);
+
+        // If Embed, hide clear button
+        if (WorkspacePane.isEmbedMode()) {
+            setViewVisible("ClearButton", false);
+            getView("HideButton").setMargin(4, 32, 4, 4);
+        }
     }
 
     /**
@@ -449,15 +455,15 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // Update TerminateButton
         //setViewEnabled("TerminateButton", isRunning());
 
-        // Update SwapConsoleButton
-        RunApp selApp = getSelApp();
-        boolean hasAltConsole = selApp != null && selApp.getAltConsoleView() != null;
-        setViewVisible("SwapConsoleButton", hasAltConsole);
-        if (hasAltConsole) {
-            boolean isAltConsole = selApp.getConsoleView() == selApp.getAltConsoleView();
-            String swapConsoleButtonTitle = isAltConsole ? "Show System Console" : "Show App Console";
-            setViewText("SwapConsoleButton", swapConsoleButtonTitle);
-        }
+        // Update SwapConsoleMenuItem
+        //RunApp selApp = getSelApp();
+        //boolean hasAltConsole = selApp != null && selApp.getAltConsoleView() != null;
+        //setViewVisible("SwapConsoleMenuItem", hasAltConsole);
+        //if (hasAltConsole) {
+        //    boolean isAltConsole = selApp.getConsoleView() == selApp.getAltConsoleView();
+        //    String swapConsoleTitle = isAltConsole ? "Show System Console" : "Show App Console";
+        //    setViewText("SwapConsoleMenuItem", swapConsoleTitle);
+        //}
 
         // Update RunInSnapCodeProcessMenuItem
         MenuButton menuButton = getView("MenuButton", MenuButton.class);
@@ -477,8 +483,8 @@ public class RunTool extends WorkspaceTool implements AppListener {
             case "RunButton" -> runApp(false);
             case "TerminateButton" -> cancelRun();
 
-            // Handle SwapConsoleButton
-            case "SwapConsoleButton" -> {
+            // Handle SwapConsoleMenuItem
+            case "SwapConsoleMenuItem" -> {
                 RunApp selApp = getSelApp();
                 boolean isAltConsole = selApp.getConsoleView() == selApp.getAltConsoleView();
                 View swapConsoleView = isAltConsole ? selApp.getConsoleTextView() : selApp.getAltConsoleView();
