@@ -6,7 +6,6 @@ var SNAPCODE_URL = 'https://reportmill.com/SnapCode/app/app09?loader=none#embed:
 if (window.location.host.includes('localhost'))
     SNAPCODE_URL = 'http://localhost:8080?loader=none#embed:';
 
-// The min height of embedded SnapCode
 const MIN_HEIGHT = 260;
 
 const SnapCode = {
@@ -81,8 +80,9 @@ function addPlayButtonToElementForId(containerId)
 
     // If height not explicitly set, explicitly set it
     if (container.style.height === "") {
+        container.style.width = container.offsetWidth + 'px';
         container.style.height = container.offsetHeight + 'px';
-        container.offsetHeight;
+        container.style.boxSizing = 'border-box';
     }
 
     // Get play button, add action and add to container
