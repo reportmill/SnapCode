@@ -6,6 +6,9 @@ var SNAPCODE_URL = 'https://reportmill.com/SnapCode/app/app09?loader=none#embed:
 if (window.location.host.includes('localhost'))
     SNAPCODE_URL = 'http://localhost:8080?loader=none#embed:';
 
+// The min height of embedded SnapCode
+const MIN_HEIGHT = 260;
+
 const SnapCode = {
 
     addSnapCodeToElementForId,
@@ -30,11 +33,11 @@ function addSnapCodeToElementForId(containerId)
     if (playButton !== null)
         container.removeChild(playButton);
 
-    // Make sure it's at least 200px tall
+    // Make sure it's at least MIN_HEIGHT tall
     const containerOriginalHeight = container.style.height;
     const containerOriginalClientHeight = container.clientHeight;
-    if (containerOriginalClientHeight < 260)
-        container.style.height = '260px';
+    if (containerOriginalClientHeight < MIN_HEIGHT)
+        container.style.height = MIN_HEIGHT + 'px';
 
     // Get java string from parent element and Base64 encode with lzwstring
     const javaStr = container.innerText;
@@ -75,6 +78,12 @@ function addPlayButtonToElementForId(containerId)
     const container = document.getElementById(containerId);
     if (getComputedStyle(container).position === "static")
         container.style.position = "relative";
+
+    // If height not explicitly set, explicitly set it
+    if (container.style.height === "") {
+        container.style.height = container.offsetHeight + 'px';
+        container.offsetHeight;
+    }
 
     // Get play button, add action and add to container
     const playButton = getPlayButton();
@@ -161,7 +170,7 @@ function removeExistingSnapCodeRunner()
         return;
 
     // If old runner was too small, restore original parent container height
-    if (oldSnapCodeRunner.originalClientHeight < 200)
+    if (oldSnapCodeRunner.originalClientHeight < MIN_HEIGHT)
         oldSnapCodeRunner.parentNode.style.height = oldSnapCodeRunner.originalHeight;
 
     // Remove old runner from its parent container
