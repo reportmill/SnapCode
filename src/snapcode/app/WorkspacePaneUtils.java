@@ -1,6 +1,6 @@
 package snapcode.app;
-import snap.gfx.Color;
 import snap.util.*;
+import snap.view.TabView;
 import snap.view.ViewUtils;
 import snap.view.WindowView;
 import snap.viewx.DialogBox;
@@ -8,6 +8,7 @@ import snap.web.*;
 import snapcode.apptools.HelpTool;
 import snapcode.apptools.NewFileTool;
 import snapcode.apptools.ProjectFilesTool;
+import snapcode.apptools.RunTool;
 import snapcode.project.*;
 import java.util.List;
 
@@ -335,14 +336,15 @@ public class WorkspacePaneUtils {
         WorkspaceTools workspaceTools = workspacePane.getWorkspaceTools();
         workspaceTools.setShowLeftTray(false);
         workspaceTools.setShowBottomTray(false);
+        workspaceTools.getToolButtonForClass(RunTool.class).setMargin(0, 0, 0, 32);
         workspacePane.getWindow().setType(WindowView.TYPE_PLAIN);
-        if (javaStr == null)
-            workspacePane.getWindow().getRootView().setBorder(Color.GRAY, 1);
-        else {
-            workspacePane.getWindow().getRootView().setBorderRadius(8);
-            workspacePane.getWindow().getRootView().setClipToBounds(true);
-        }
+        workspacePane.getWindow().getRootView().setBorderRadius(8);
+        workspacePane.getWindow().getRootView().setClipToBounds(true);
         workspacePane.show();
+
+        // If string provided, hide right tray (don't need help)
+        if (javaStr != null)
+            workspacePane.getWorkspaceTools().getRightTray().getUI(TabView.class).getTabBar().setVisible(false);
 
         // If no java string provided, use sample
         if (javaStr == null) {
