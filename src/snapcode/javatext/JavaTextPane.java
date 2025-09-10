@@ -4,7 +4,6 @@
 package snapcode.javatext;
 import javakit.parse.*;
 import snap.text.TextModel;
-import snapcode.app.WorkspacePane;
 import snapcode.project.BuildIssue;
 import snapcode.project.JavaAgent;
 import snapcode.project.JavaTextModel;
