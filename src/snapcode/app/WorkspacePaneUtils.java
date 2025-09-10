@@ -2,7 +2,6 @@ package snapcode.app;
 import snap.util.*;
 import snap.view.TabView;
 import snap.view.ViewUtils;
-import snap.view.WindowView;
 import snap.viewx.DialogBox;
 import snap.web.*;
 import snapcode.apptools.HelpTool;
@@ -337,7 +336,6 @@ public class WorkspacePaneUtils {
         workspaceTools.setShowLeftTray(false);
         workspaceTools.setShowBottomTray(false);
         workspaceTools.getToolButtonForClass(RunTool.class).setMargin(0, 0, 0, 32);
-        workspacePane.getWindow().setType(WindowView.TYPE_PLAIN);
         workspacePane.getWindow().getRootView().setBorderRadius(8);
         workspacePane.getWindow().getRootView().setClipToBounds(true);
         workspacePane.show();

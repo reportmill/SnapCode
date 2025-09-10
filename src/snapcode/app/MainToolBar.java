@@ -14,7 +14,6 @@ import snap.web.WebURL;
 import snapcode.apptools.SearchTool;
 import snapcode.project.RunConfig;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * ToolBar.
