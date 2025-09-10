@@ -336,7 +336,12 @@ public class WorkspacePaneUtils {
         workspaceTools.setShowLeftTray(false);
         workspaceTools.setShowBottomTray(false);
         workspacePane.getWindow().setType(WindowView.TYPE_PLAIN);
-        workspacePane.getWindow().getRootView().setBorder(Color.GRAY, 1);
+        if (javaStr == null)
+            workspacePane.getWindow().getRootView().setBorder(Color.GRAY, 1);
+        else {
+            workspacePane.getWindow().getRootView().setBorderRadius(8);
+            workspacePane.getWindow().getRootView().setClipToBounds(true);
+        }
         workspacePane.show();
 
         // If no java string provided, use sample
