@@ -4,6 +4,7 @@
 package snapcode.javatext;
 import javakit.parse.*;
 import snap.text.TextModel;
+import snapcode.app.WorkspacePane;
 import snapcode.project.BuildIssue;
 import snapcode.project.JavaAgent;
 import snapcode.project.JavaTextModel;
@@ -78,7 +79,7 @@ public class JavaTextPane extends TextPane {
 
         // Create ScrollGroup for JavaTextArea and LineNumView
         ScrollGroup scrollGroup = new ScrollGroup();
-        scrollGroup.setBorder(Color.GRAY9, 1);
+        scrollGroup.setBorder(null);
         scrollGroup.setGrowWidth(true);
         scrollGroup.setMinWidth(200);
         scrollGroup.setContent(_textArea);
