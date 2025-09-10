@@ -152,7 +152,6 @@ public class App {
         // Handle 'embed'
         if (arg0.startsWith("embed")) {
             openEmbedWorkspace(arg0);
-            ViewUtils.runDelayed(this::autoRunOpenFile, 800);
             return true;
         }
 
@@ -199,6 +198,9 @@ public class App {
 
         // Open java string
         WorkspacePaneUtils.openEmbedWorkspace(javaStr, fileType);
+
+        // Auto-run new file
+        ViewUtils.runDelayed(this::autoRunOpenFile, 200);
     }
 
     /**
