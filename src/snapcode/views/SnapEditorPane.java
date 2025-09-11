@@ -175,7 +175,7 @@ public class SnapEditorPane extends ViewOwner {
             Label nodeViewLabel = new Label(nodeView.getNodeString());
             nodeViewLabel.setFont(Font.Arial12);
             nodeViewLabel.setName("NodePathLabel");
-            nodeViewLabel.setProp("SnapPart", nodeView);
+            nodeViewLabel.setMetadataForKey("SnapPart", nodeView);
             if (nodeView == selNodeView)
                 nodeViewLabel.setFill(Color.LIGHTGRAY);
             nodeViewLabel.addEventHandler(this::handleNodePathLabelMouseRelease, MouseRelease);
@@ -200,7 +200,7 @@ public class SnapEditorPane extends ViewOwner {
     private void handleNodePathLabelMouseRelease(ViewEvent anEvent)
     {
         Label nodePathLabel = anEvent.getView(Label.class);
-        JNodeView<?> labelNodeView = (JNodeView<?>) nodePathLabel.getProp("SnapPart");
+        JNodeView<?> labelNodeView = (JNodeView<?>) nodePathLabel.getMetadataForKey("SnapPart");
         JNodeView<?> deepSelNodeView = _deepSelNodeView;
         setSelNodeView(labelNodeView);
         _deepSelNodeView = deepSelNodeView;

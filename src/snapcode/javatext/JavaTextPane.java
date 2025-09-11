@@ -255,7 +255,7 @@ public class JavaTextPane extends TextPane {
     private void handleNodePathLabelMouseRelease(ViewEvent anEvent)
     {
         JavaTextArea javaTextArea = getTextArea();
-        JNode clickedNode = (JNode) anEvent.getView().getProp("JNode");
+        JNode clickedNode = (JNode) anEvent.getView().getMetadataForKey("JNode");
         JNode deepNode = javaTextArea.getDeepNode();
         javaTextArea.setSel(clickedNode.getStartCharIndex(), clickedNode.getEndCharIndex());
         javaTextArea.setDeepNode(deepNode);
@@ -495,7 +495,7 @@ public class JavaTextPane extends TextPane {
 
             // Create label for node
             Label label = labelBuilder.name("NodePathLabel").text(jnode.getNodeString()).font(font).build();
-            label.setProp("JNode", jnode);
+            label.setMetadataForKey("JNode", jnode);
             label.addEventHandler(this::handleNodePathLabelMouseRelease, MouseRelease);
             if (jnode == selNode)
                 label.setFill(Color.LIGHTGRAY);

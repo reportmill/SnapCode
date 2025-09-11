@@ -45,7 +45,7 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
             String str = varDeclExpr.getString();
             TextField tfield = JNodeViewUtils.createTextField(str);
             tfield.setName("ExprText");
-            tfield.setProp("Expr", varDeclExpr);
+            tfield.setMetadataForKey("Expr", varDeclExpr);
             tfield.addEventHandler(e -> handleTextEvent(e));
             rowViews.add(tfield);
         }
@@ -55,7 +55,7 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
             String str = condExpr.getString();
             TextField tfield = JNodeViewUtils.createTextField(str);
             tfield.setName("ExprText");
-            tfield.setProp("Expr", condExpr);
+            tfield.setMetadataForKey("Expr", condExpr);
             tfield.addEventHandler(e -> handleTextEvent(e));
             rowViews.add(tfield);
         }
@@ -65,7 +65,7 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
             String str = updateExpr.getString();
             TextField tfield = JNodeViewUtils.createTextField(str);
             tfield.setName("ExprText");
-            tfield.setProp("Expr", updateExpr);
+            tfield.setMetadataForKey("Expr", updateExpr);
             tfield.addEventHandler(e -> handleTextEvent(e));
             rowViews.add(tfield);
         }
@@ -81,7 +81,7 @@ public class JStmtForView<JNODE extends JStmtFor> extends JStmtView<JNODE> {
     {
         // Get node from textField
         TextField textField = anEvent.getView(TextField.class);
-        JNode jnode = (JNode) textField.getProp("Expr");
+        JNode jnode = (JNode) textField.getMetadataForKey("Expr");
 
         // Replace node with string
         String exprStr = anEvent.getStringValue();
