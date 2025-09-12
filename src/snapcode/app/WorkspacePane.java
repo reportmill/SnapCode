@@ -431,7 +431,7 @@ public class WorkspacePane extends ViewOwner {
         // If browser, maximize window and make plain
         aWindow.setMaximized(SnapEnv.isWebVM);
         if (SnapEnv.isWebVM)
-            aWindow.setType(WindowView.TYPE_PLAIN);
+            aWindow.setType(WindowView.Type.PLAIN);
 
         // Register for handleWinClose on window close
         aWindow.addEventHandler(this::handleWinClose, WinClose);
