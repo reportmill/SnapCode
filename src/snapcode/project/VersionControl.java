@@ -48,7 +48,7 @@ public class VersionControl extends PropObject {
         _remoteSiteUrl = remoteSiteUrl;
 
         // Set this version control as prop in project site
-        localSite.setProp(VersionControl.class.getName(), this);
+        localSite.setMetadataForKey(VersionControl.class.getName(), this);
     }
 
     /**
@@ -579,7 +579,7 @@ public class VersionControl extends PropObject {
     public static VersionControl getVersionControlForProjectSite(WebSite projectSite)
     {
         // Get VersionControl for project site (create if missing)
-        VersionControl versionControl = (VersionControl) projectSite.getProp(VersionControl.class.getName());
+        VersionControl versionControl = (VersionControl) projectSite.getMetadataForKey(VersionControl.class.getName());
         if (versionControl != null)
             return versionControl;
 
@@ -593,7 +593,7 @@ public class VersionControl extends PropObject {
     private static VersionControl createVersionControlForProjectSite(WebSite projectSite)
     {
         // Try again
-        VersionControl versionControl = (VersionControl) projectSite.getProp(VersionControl.class.getName());
+        VersionControl versionControl = (VersionControl) projectSite.getMetadataForKey(VersionControl.class.getName());
         if (versionControl != null)
             return versionControl;
 

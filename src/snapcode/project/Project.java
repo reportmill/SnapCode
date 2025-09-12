@@ -94,7 +94,7 @@ public class Project extends PropObject {
     {
         // Set site and add Site.Project property to this project
         _site = aSite;
-        _site.setProp(Project.class.getSimpleName(), this);
+        _site.setMetadataForKey(Project.class.getSimpleName(), this);
 
         // If site doesn't exist, create root dir, src dir and build file
         if (!aSite.getExists()) {
@@ -511,7 +511,7 @@ public class Project extends PropObject {
         _javaAgents.clear();
 
         // Clear Site.Project
-        _site.setProp(Project.class.getSimpleName(), null);
+        _site.setMetadataForKey(Project.class.getSimpleName(), null);
 
         // Close project site
         try { _site.flush(); }
@@ -561,7 +561,7 @@ public class Project extends PropObject {
      */
     public static synchronized Project getProjectForSite(WebSite aSite)
     {
-        Project proj = (Project) aSite.getProp(Project.class.getSimpleName());
+        Project proj = (Project) aSite.getMetadataForKey(Project.class.getSimpleName());
         return proj;
     }
 

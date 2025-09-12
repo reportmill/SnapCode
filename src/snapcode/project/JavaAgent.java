@@ -62,7 +62,7 @@ public class JavaAgent {
         _isJMD = aFile.getFileType().equals("jmd");
 
         // Set File JavaAgent property to this agent
-        _javaFile.setProp(JavaAgent.class.getName(), this);
+        _javaFile.setMetadataForKey(JavaAgent.class.getName(), this);
 
         // Add to Project
         _project = Project.getProjectForFile(_javaFile);
@@ -83,7 +83,7 @@ public class JavaAgent {
 
         // Clear everything
         clearBuildIssues();
-        _javaFile.setProp(JavaAgent.class.getName(), null);
+        _javaFile.setMetadataForKey(JavaAgent.class.getName(), null);
         _javaFile.reset();
         _javaFile = null;
         _project = null;
@@ -431,7 +431,7 @@ public class JavaAgent {
     public static JavaAgent getAgentForFile(WebFile aFile)
     {
         // Get JavaAgent for given source file - just return if found
-        JavaAgent javaAgent = (JavaAgent) aFile.getProp(JavaAgent.class.getName());
+        JavaAgent javaAgent = (JavaAgent) aFile.getMetadataForKey(JavaAgent.class.getName());
         if (javaAgent != null)
             return javaAgent;
 

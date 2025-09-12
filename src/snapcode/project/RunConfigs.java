@@ -122,9 +122,9 @@ public class RunConfigs {
      */
     public static synchronized RunConfigs getRunConfigsForProjectSite(WebSite aSite)
     {
-        RunConfigs runConfigs = (RunConfigs) aSite.getProp(RunConfigs.class.getName());
+        RunConfigs runConfigs = (RunConfigs) aSite.getMetadataForKey(RunConfigs.class.getName());
         if (runConfigs == null)
-            aSite.setProp(RunConfigs.class.getName(), runConfigs = new RunConfigs(aSite));
+            aSite.setMetadataForKey(RunConfigs.class.getName(), runConfigs = new RunConfigs(aSite));
         return runConfigs;
     }
 }

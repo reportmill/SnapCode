@@ -151,7 +151,7 @@ public class GitDir {
             _repo.close();
         _repo = null;
         _dirFile.delete();
-        _dirFile.setProp(GitDir.class.getName(), null);
+        _dirFile.setMetadataForKey(GitDir.class.getName(), null);
     }
 
     /**
@@ -367,9 +367,9 @@ public class GitDir {
      */
     public synchronized static GitDir getGitDirForFile(WebFile aFile)
     {
-        GitDir gitDir = (GitDir) aFile.getProp(GitDir.class.getName());
+        GitDir gitDir = (GitDir) aFile.getMetadataForKey(GitDir.class.getName());
         if (gitDir == null)
-            aFile.setProp(GitDir.class.getName(), gitDir = new GitDir(aFile));
+            aFile.setMetadataForKey(GitDir.class.getName(), gitDir = new GitDir(aFile));
         return gitDir;
     }
 }

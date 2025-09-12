@@ -44,7 +44,7 @@ public class Settings extends PropObject implements GetKeys, GetValue, SetValue,
     public Settings(WebFile aFile)
     {
         _file = aFile;
-        _file.setProp("Settings", this);
+        _file.setMetadataForKey("Settings", this);
         readFile();
 
         // Watch for file reverted
@@ -352,7 +352,7 @@ public class Settings extends PropObject implements GetKeys, GetValue, SetValue,
      */
     public static synchronized Settings getSettingsForFile(WebFile aFile)
     {
-        Settings stgs = (Settings) aFile.getProp("Settings");
+        Settings stgs = (Settings) aFile.getMetadataForKey("Settings");
         if (stgs == null)
             stgs = new Settings(aFile);
         return stgs;

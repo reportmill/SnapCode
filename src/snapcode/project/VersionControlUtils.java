@@ -76,6 +76,6 @@ public class VersionControlUtils {
         catch (Exception e) { throw new RuntimeException(e); }
 
         // Clear VersionControl
-        projectSite.setProp(VersionControl.class.getName(), null);
+        projectSite.setMetadataForKey(VersionControl.class.getName(), null);
     }
 }

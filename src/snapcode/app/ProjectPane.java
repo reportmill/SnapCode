@@ -41,7 +41,7 @@ public class ProjectPane extends ViewOwner {
 
         // Set this ProjectPane as Site prop
         WebSite projSite = aProject.getSite();
-        projSite.setProp(ProjectPane.class.getName(), this);
+        projSite.setMetadataForKey(ProjectPane.class.getName(), this);
 
         // Create VersionControlTool
         _versionControlTool = new VersionControlTool(this);
@@ -114,7 +114,7 @@ public class ProjectPane extends ViewOwner {
 
         // Unregister Project.Site.ProjectPane
         WebSite projSite = _project.getSite();
-        projSite.setProp(ProjectPane.class.getName(), null);
+        projSite.setMetadataForKey(ProjectPane.class.getName(), null);
 
         // Close project and clear workspace pane
         _project.closeProject();
@@ -193,7 +193,7 @@ public class ProjectPane extends ViewOwner {
      */
     public static ProjectPane getProjectPaneForSite(WebSite aSite)
     {
-        return (ProjectPane) aSite.getProp(ProjectPane.class.getName());
+        return (ProjectPane) aSite.getMetadataForKey(ProjectPane.class.getName());
     }
 
     /**
