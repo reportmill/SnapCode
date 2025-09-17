@@ -335,7 +335,7 @@ show(text);
 ## Image
 
 ```
-var image = getImageForSource("https://reportmill.com/examples/Weird.jpg");
+var image = Image.getImageForSource("https://reportmill.com/examples/Weird.jpg");
 show(image);
 ```
 
