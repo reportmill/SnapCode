@@ -469,7 +469,7 @@ System.out.println(str);
 ## DOM Manipulation (CJDOM)
 
 ```
-//DEPS com.reportmill:cjdom:2025.09
+//DEPS com.reportmill:cjdom:2025.10
 import cjdom.*;
 
 var doc = Window.getDocument();
@@ -482,7 +482,7 @@ doc.getBody().appendChild(button);
 ## ReportMill
 
 ```
-//DEPS com.reportmill:ReportMill16:2025.09
+//DEPS com.reportmill:ReportMill16:2025.10
 import com.reportmill.base.*;
 import com.reportmill.shape.RMDocument;
 import java.io.File;
