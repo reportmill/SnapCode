@@ -18,6 +18,9 @@ public class JeplToJava {
     // The current indent
     private String _indent = "";
 
+    // The JInitializer to be used as main method
+    private JInitializerDecl _mainMethodInitializer;
+
     // The snippet text
     private JavaText _javaText;
 
@@ -54,9 +57,20 @@ public class JeplToJava {
 
         // Append class
         JClassDecl classDecl = _jfile.getClassDecl();
-        if (classDecl != null)
+        if (classDecl != null) {
+
+            // If no main method, set main method initializer
+            JMethodDecl mainMethod = classDecl.getMethodDeclForNameAndTypes("main", null);
+            if (mainMethod == null) {
+                JInitializerDecl[] initializers = classDecl.getInitializerDecls();
+                if (initializers.length > 0)
+                    _mainMethodInitializer = initializers[initializers.length - 1];
+            }
+
+            // Append top level class
             try { appendClassDecl(classDecl); }
             catch (Exception e) { e.printStackTrace(); }
+        }
 
         // Close snippet text
         _javaText.closeText();
@@ -177,6 +191,24 @@ public class JeplToJava {
         appendChar('\n');
         appendIndent();
 
+        // Append method signature
+        appendMethodSignatureForDecl(methodDecl);
+
+        // Append method body
+        appendMethodBody(methodDecl);
+    }
+
+    /**
+     * Appends method signature.
+     */
+    private void appendMethodSignatureForDecl(JMethodDecl methodDecl)
+    {
+        // If main, forward to special version
+        if (methodDecl.getName().equals("main")) {
+            appendMainMethodSignature();
+            return;
+        }
+
         // Append modifiers - make top level Jepl methods 'public static'
         JModifiers mods = methodDecl.getModifiers();
         if (methodDecl.getEnclosingClassDecl().getEnclosingClassDecl() == null)
@@ -194,9 +226,26 @@ public class JeplToJava {
 
         // Append parameters
         appendParameters(methodDecl.getParameters());
+    }
 
-        // Append method body
-        appendMethodBody(methodDecl);
+    /**
+     * Appends main method signature.
+     */
+    private void appendMainMethodSignature()
+    {
+        // If run local, just make main method
+        boolean runLocal = RunToolUtils.isRunLocal(_jfile.getSourceFile());
+        if (runLocal)
+            appendString("public static void main(String[] args) throws Exception\n");
+
+        // Make main method with runLater call
+        else {
+            appendString("public static void main(String[] args) throws Exception { ViewUtils.runLater(() -> main2()); }\n");
+            appendIndent();
+            appendString("public static void main2() { try { main3(); } catch(Exception e) { e.printStackTrace(); } }\n");
+            appendIndent();
+            appendString("public static void main3() throws Exception\n");
+        }
     }
 
     /**
@@ -228,29 +277,14 @@ public class JeplToJava {
     private void appendInitializerDecl(JInitializerDecl initializerDecl)
     {
         appendChar('\n');
+        appendIndent();
 
-        // If run local, just make main method
-        boolean runLocal = RunToolUtils.isRunLocal(_jfile.getSourceFile());
-        if (runLocal) {
-            appendIndent();
-            appendString("public static void main(String[] args) throws Exception\n");
-        }
-
-        // Make main method with runLater call
-        else {
-            appendIndent();
-            appendString("public static void main(String[] args) throws Exception { ViewUtils.runLater(() -> main2()); }\n");
-            appendIndent();
-            appendString("public static void main2() { try { main3(); } catch(Exception e) { e.printStackTrace(); } }\n");
-
-            // Handle Jepl file - convert initializer to main method
-            appendChar('\n');
-            appendIndent();
-            appendString("public static void main3() throws Exception\n");
-        }
+        // If main initializer, append main method signature, otherwise make it static
+        if (initializerDecl == _mainMethodInitializer)
+            appendMainMethodSignature();
+        else appendString("static ");
 
         // Append { body }
-        appendIndent();
         appendString("{\n");
         appendMethodBody(initializerDecl);
         appendIndent();
