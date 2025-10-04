@@ -10,6 +10,7 @@ import snap.text.TextModel;
 import snap.text.TextModelUtils;
 import snap.util.ArrayUtils;
 import snap.util.SetUtils;
+import snap.util.SnapUtils;
 import snap.web.WebFile;
 import snap.util.MDUtils;
 import java.util.*;
@@ -475,6 +476,8 @@ public class JavaAgent {
         imports.add("snap.viewx.QuickDraw");
         imports.add("snap.viewx.QuickDrawPen");
         imports.add("static snap.viewx.ConsoleIO.*");
+        if (SnapUtils.getJavaVersionInt() < 23)
+            imports.add("static snap.viewx.ConsoleIOX.*");
 
         // Set array and return
         return _jeplImports = imports.toArray(new String[0]);
