@@ -1,11 +1,13 @@
 package snapcode.debug;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.text.TextModel;
 import snap.text.TextLineStyle;
 import snap.text.TextLink;
 import snap.text.TextStyle;
 import snap.util.Convert;
+import snap.view.ViewEvent;
+import snap.viewx.ConsoleTextArea;
+import snap.web.WebURL;
 import snapcode.apptools.RunTool;
 import snapcode.project.JavaTextUtils;
 import snapcode.project.Project;
@@ -14,10 +16,13 @@ import snapcode.project.ProjectUtils;
 /**
  * A TextModel to hold system console output.
  */
-public class ConsoleText extends TextModel {
+public class ConsoleTextAreaX extends ConsoleTextArea {
 
     // The RunTool
     private RunTool _runTool;
+
+    // The app
+    private RunApp _runApp;
 
     // Constants
     private static Color ERROR_COLOR = new Color("CC0000");
@@ -26,20 +31,18 @@ public class ConsoleText extends TextModel {
     /**
      * Constructor.
      */
-    public ConsoleText()
+    public ConsoleTextAreaX(RunTool runTool, RunApp runApp)
     {
-        super(true);
+        super();
+        _runTool = runTool;
+        _runApp = runApp;
 
         // Set font
         Font codeFont = JavaTextUtils.getDefaultJavaFont();
-        setDefaultFont(codeFont);
+        getTextModel().setDefaultFont(codeFont);
         setDefaultLineStyle(getDefaultLineStyle().copyForPropKeyValue(TextLineStyle.Spacing_Prop, 2));
+        getTextAdapter().setLinkHandler(this::handleLinkEvent);
     }
-
-    /**
-     * Sets the RunTool.
-     */
-    public void setRunTool(RunTool runTool)  { _runTool = runTool; }
 
     /**
      * Appends given string to text with option for whether text is error.
@@ -55,7 +58,7 @@ public class ConsoleText extends TextModel {
             color = BANNER_COLOR;
 
         // Get default style modified for color
-        TextStyle style = getTextStyleForCharIndex(length());
+        TextStyle style = getTextModel().getTextStyleForCharIndex(length());
         if (!style.getColor().equals(color))
             style = style.copyForStyleValue(color);
 
@@ -114,7 +117,10 @@ public class ConsoleText extends TextModel {
 
         // Get project (if null, return - shouldn't be possible anymore)
         Project rootProject = _runTool.getProject();
-        if (rootProject == null) { System.err.println("ConsoleText.getLink: No Project"); return "/Unknown"; }
+        if (rootProject == null) {
+            System.err.println("ConsoleText.getLink: No Project");
+            return "/Unknown";
+        }
 
         // Get full path to source file in project (or full URL string if external source)
         String sourceCodeFilePath = ProjectUtils.getSourceCodeUrlForClassPath(rootProject, classFilePath);
@@ -127,5 +133,25 @@ public class ConsoleText extends TextModel {
 
         // Return
         return sourceCodeFilePath;
+    }
+
+    /**
+     * Override to send to app.
+     */
+    @Override
+    protected void handleEnterAction()
+    {
+        String inputStr = _runApp._consoleTextArea.getInput().trim() + '\n';
+        _runApp.sendInput(inputStr);
+    }
+
+    /**
+     * Handles link.
+     */
+    private void handleLinkEvent(ViewEvent anEvent, String aLink)
+    {
+        WebURL linkUrl = WebURL.getUrl(aLink);
+        if (linkUrl != null)
+            _runTool.getWorkspacePane().getSelFileTool().setSelUrl(linkUrl);
     }
 }

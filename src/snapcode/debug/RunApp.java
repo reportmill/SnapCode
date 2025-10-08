@@ -48,11 +48,8 @@ public abstract class RunApp {
     // The working directory
     private File _workDir;
 
-    // Text to hold system console output
-    protected ConsoleText _consoleText;
-
-    // TextView to hold console text
-    protected TextArea _consoleTextView;
+    // TextArea to hold console text
+    protected ConsoleTextAreaX _consoleTextArea;
 
     // The console view
     private View _consoleView;
@@ -85,17 +82,13 @@ public abstract class RunApp {
         String[] args = getDefaultRunArgs();
         setArgs(args);
 
-        // Create TextModel to hold system console output
-        _consoleText = new ConsoleText();
-        _consoleText.setRunTool(_runTool);
-
         // Create ConsoleTextView
-        _consoleTextView = new TextArea(_consoleText);
-        _consoleTextView.setEditable(true);
-        _consoleTextView.setFill(Color.WHITE);
-        _consoleTextView.setPadding(8, 8, 8, 8);
-        _consoleTextView.setGrowHeight(true);
-        _consoleView = _consoleTextView;
+        _consoleTextArea = new ConsoleTextAreaX(_runTool, this);
+        _consoleTextArea.setEditable(true);
+        _consoleTextArea.setFill(Color.WHITE);
+        _consoleTextArea.setPadding(8, 8, 8, 8);
+        _consoleTextArea.setGrowHeight(true);
+        _consoleView = _consoleTextArea;
     }
 
     /**
@@ -295,25 +288,20 @@ public abstract class RunApp {
     {
         if (aView == _altConsoleView) return;
         _altConsoleView = aView;
-        setConsoleView(aView != null ? aView : _consoleTextView);
+        setConsoleView(aView != null ? aView : _consoleTextArea);
     }
 
     /**
      * Returns the console text view.
      */
-    public TextArea getConsoleTextView()  { return _consoleTextView; }
-
-    /**
-     * Returns the console text.
-     */
-    public ConsoleText getConsoleText()  { return _consoleText; }
+    public TextArea getConsoleTextView()  { return _consoleTextArea; }
 
     /**
      * Clears the console text.
      */
     public void clearConsole()
     {
-        _consoleText.clear();
+        _consoleTextArea.clear();
         if (_altConsoleView != null) {
             Console.setShared(null);
             setAltConsoleView(null);
@@ -391,7 +379,7 @@ public abstract class RunApp {
     {
         if (!ViewEnv.getEnv().isEventThread())
             ViewUtils.runLater(() -> appendConsoleOutput(aString, isError));
-        else _consoleText.appendString(aString, isError);
+        else _consoleTextArea.appendString(aString, isError);
     }
 
     /**

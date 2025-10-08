@@ -1,7 +1,9 @@
 package snapcode.app;
 import snap.props.PropObject;
+import snap.util.ListUtils;
 import snap.view.TextArea;
 import snap.web.WebFile;
+import snap.web.WebURL;
 import snapcode.javatext.JavaTextArea;
 import snapcode.project.JavaTextModel;
 import snapcode.util.LZString;
@@ -61,6 +63,29 @@ public class SelFileTool extends PropObject {
         // Reset UI
         _workspacePane.resetLater();
         _pagePane.resetLater();
+    }
+
+    /**
+     * Sets the selected URL.
+     */
+    public void setSelUrl(WebURL aUrl)
+    {
+        // Get file for URL
+        String filePath = aUrl.getPath();
+        WebFile file = ListUtils.findNonNull(_workspacePane.getProjects(), proj -> proj.getSourceFileForPath(filePath));
+        if (file == null)
+            file = ListUtils.findNonNull(_workspacePane.getProjects(), proj -> proj.getFileForPath(filePath));
+        if (file == null) {
+            System.out.println("SelFileTool: No such file: " + filePath);
+            return;
+        }
+
+        // Set file
+        setSelFile(file);
+
+        // Set URL to handle url params - BOGUS - not supporting params!!!
+        //if (!file.getUrl().equals(aUrl))
+        //    _pagePane.getBrowser().setSelUrl(aUrl);
     }
 
     /**

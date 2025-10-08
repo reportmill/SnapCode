@@ -469,6 +469,11 @@ public class RunTool extends WorkspaceTool implements AppListener {
         MenuButton menuButton = getView("MenuButton", MenuButton.class);
         CheckBoxMenuItem runInSnapCodeProcessMenuItem = (CheckBoxMenuItem) menuButton.getMenuItemForName("RunInSnapCodeProcessMenuItem");
         runInSnapCodeProcessMenuItem.setSelected(isRunInSnapCodeProcess());
+
+        // Update InputTextField visible (true if showing rich console)
+        RunApp selApp = getSelApp();
+        View consoleView = selApp != null ? selApp.getConsoleView() : null;
+        setViewVisible("InputTextField", !(consoleView instanceof ConsoleTextAreaX));
     }
 
     /**
@@ -495,17 +500,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
             case "ClearButton", "ClearConsoleMenuItem" -> clearConsole();
 
             // Handle InputTextField: Show input string, add to runner input and clear text
-            case "InputTextField" -> {
-
-                // Get InputTextField string and send to current process
-                String inputString = anEvent.getStringValue();
-                RunApp selApp = getSelApp();
-                if (selApp != null)
-                    selApp.sendInput(inputString + '\n');
-
-                // Clear InputTextField
-                setViewValue("InputTextField", null);
-            }
+            case "InputTextField" -> handleInputTextFieldActionEvent(anEvent);
 
             // Handle RunInSnapCodeProcessMenuItem
             case "RunInSnapCodeProcessMenuItem" -> setRunInSnapCodeProcess(!isRunInSnapCodeProcess());
@@ -543,6 +538,21 @@ public class RunTool extends WorkspaceTool implements AppListener {
             if (runConfigProject == null || runConfigProject == aProject)
                 _runConfig = null;
         }
+    }
+
+    /**
+     * Called when InputTextField gets action event.
+     */
+    private void handleInputTextFieldActionEvent(ViewEvent anEvent)
+    {
+        // Get InputTextField string and send to current process
+        String inputString = anEvent.getStringValue();
+        RunApp selApp = getSelApp();
+        if (selApp != null)
+            selApp.sendInput(inputString + '\n');
+
+        // Clear InputTextField
+        setViewValue("InputTextField", null);
     }
 
     /**
