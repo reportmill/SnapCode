@@ -1,6 +1,10 @@
 package snapcode.debug;
+import snap.geom.Rect;
+import snap.geom.RoundRect;
 import snap.gfx.Color;
 import snap.gfx.Font;
+import snap.gfx.Painter;
+import snap.text.TextLine;
 import snap.text.TextLineStyle;
 import snap.text.TextLink;
 import snap.text.TextStyle;
@@ -153,5 +157,31 @@ public class ConsoleTextAreaX extends ConsoleTextArea {
         WebURL linkUrl = WebURL.getUrl(aLink);
         if (linkUrl != null)
             _runTool.getWorkspacePane().getSelFileTool().setSelUrl(linkUrl);
+    }
+
+    /**
+     * Override to paint input box.
+     */
+    @Override
+    protected void paintFront(Painter aPntr)
+    {
+        super.paintFront(aPntr);
+        //if (isFocused() && isSelEmpty() && _runApp.isRunning())
+        //    paintInputBox(aPntr);
+    }
+
+    /**
+     * Paints input box.
+     */
+    private void paintInputBox(Painter aPntr)
+    {
+        Rect selBounds = getSel().getPath().getBounds();
+        int inputCharIndex = getInputCharIndex();
+        TextLine inputLine = getLineForCharIndex(inputCharIndex);
+        if (inputLine.isWhiteSpace())
+            return;
+        double boxX = inputLine.getTextXForCharIndex(inputCharIndex - inputLine.getStartCharIndex()) - 3;
+        RoundRect boxRect = new RoundRect(boxX, selBounds.y - 3, getWidth() - boxX - 40, selBounds.height + 6, 4);
+        aPntr.drawWithPaint(boxRect, Color.GRAY);
     }
 }
