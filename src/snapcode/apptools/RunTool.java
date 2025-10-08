@@ -32,6 +32,9 @@ public class RunTool extends WorkspaceTool implements AppListener {
     // The limit to the number of running processes
     private int  _procLimit = 1;
 
+    // The current console view
+    private View _consoleView;
+
     // Whether to run apps in snapcode process
     private static boolean _runInSnapCodeProcess;
 
@@ -269,22 +272,32 @@ public class RunTool extends WorkspaceTool implements AppListener {
     }
 
     /**
+     * Returns the console view.
+     */
+    public View getConsoleView()  { return _consoleView; }
+
+    /**
+     * Sets the console view.
+     */
+    public void setConsoleView(View consoleView)
+    {
+        if (consoleView == getConsoleView()) return;
+        _consoleView = consoleView;
+        ScrollView scrollView = getView("ScrollView", ScrollView.class);
+        scrollView.setContent(consoleView);
+        scrollView.setFillWidth(consoleView != null && consoleView.isGrowWidth());
+        setViewVisible("InputTextField", !(consoleView instanceof ConsoleTextAreaX));
+        runLater(() -> _consoleView.requestFocus());
+    }
+
+    /**
      * Reset console view.
      */
     protected void resetConsoleView()
     {
         RunApp selApp = getSelApp();
-        if (selApp == null)
-            return;
-
-        // Set selApp.OutputText in ConsoleText
-        View consoleView = selApp.getConsoleView();
-        ScrollView scrollView = getView("ScrollView", ScrollView.class);
-        if (scrollView.getContent() != consoleView)
-            scrollView.setContent(consoleView);
-        scrollView.setFillWidth(consoleView != null && consoleView.isGrowWidth());
-
-        resetLater();
+        if (selApp != null)
+            setConsoleView(selApp.getConsoleView());
     }
 
     /**
@@ -366,6 +379,13 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // Auto-hide tool
         WorkspaceTool appTool = runApp instanceof DebugApp ? getDebugTool() : this;
         appTool.hideToolAutomaticallyAfterDelay(7000);
+
+        // Focus sel page
+        if (_consoleView.isFocused()) {
+            View lastFocusedView = getWindow().getLastFocusedView();
+            if (lastFocusedView != null)
+                runLater(() -> lastFocusedView.requestFocus());
+        }
     }
 
     /**
@@ -469,11 +489,6 @@ public class RunTool extends WorkspaceTool implements AppListener {
         MenuButton menuButton = getView("MenuButton", MenuButton.class);
         CheckBoxMenuItem runInSnapCodeProcessMenuItem = (CheckBoxMenuItem) menuButton.getMenuItemForName("RunInSnapCodeProcessMenuItem");
         runInSnapCodeProcessMenuItem.setSelected(isRunInSnapCodeProcess());
-
-        // Update InputTextField visible (true if showing rich console)
-        RunApp selApp = getSelApp();
-        View consoleView = selApp != null ? selApp.getConsoleView() : null;
-        setViewVisible("InputTextField", !(consoleView instanceof ConsoleTextAreaX));
     }
 
     /**
@@ -548,7 +563,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // Get InputTextField string and send to current process
         String inputString = anEvent.getStringValue();
         RunApp selApp = getSelApp();
-        if (selApp != null)
+        if (selApp != null)  // Should append to output: selApp.appendConsoleOutput(inputString)?
             selApp.sendInput(inputString + '\n');
 
         // Clear InputTextField

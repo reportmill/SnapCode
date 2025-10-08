@@ -97,9 +97,6 @@ public class RunAppBin extends RunApp {
             _stdInWriter = new BufferedWriter(standardInOutputStreamWriter);
         }
 
-        // Append to output
-        appendConsoleOutput(aStr, false);
-
         // Write and flush
         try {
             _stdInWriter.write(aStr);
