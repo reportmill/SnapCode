@@ -1053,9 +1053,9 @@ public class JavaTextArea extends TextArea {
      * Override to update fill.
      */
     @Override
-    protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
+    protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
     {
-        super.themeChanged(oldTheme, newTheme);
+        super.handleThemeChange(oldTheme, newTheme);
         setFill(ViewTheme.get().getContentColor());
         setTextColor(ViewTheme.get().getTextColor());
     }

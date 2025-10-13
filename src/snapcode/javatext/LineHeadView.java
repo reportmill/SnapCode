@@ -357,9 +357,9 @@ public class LineHeadView extends View {
     }
 
     @Override
-    protected void themeChanged(ViewTheme oldTheme, ViewTheme newTheme)
+    protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
     {
-        super.themeChanged(oldTheme, newTheme);
+        super.handleThemeChange(oldTheme, newTheme);
         setFill(ViewTheme.get().getContentColor());
         LINE_NUMBERS_COLOR = newTheme == ViewTheme.getLight() ? Color.GRAY8 : Color.GRAY3;
         LINE_NUMBERS_COLOR_SEL = newTheme == ViewTheme.getLight() ? Color.GRAY4 : Color.GRAY7;
