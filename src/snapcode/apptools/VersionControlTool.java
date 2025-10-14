@@ -1,10 +1,10 @@
 package snapcode.apptools;
 import snap.props.PropChangeListener;
-import snap.util.ListUtils;
 import snap.view.BoxView;
 import snap.web.WebURL;
 import snapcode.app.SnapCloudPage;
 import snapcode.app.WorkspaceTools;
+import snapcode.project.TaskManagerTask;
 import snapcode.project.VersionControlUtils;
 import snapcode.project.WorkspaceBuilder;
 import snap.props.PropChange;
@@ -156,7 +156,7 @@ public class VersionControlTool extends ProjectTool {
             case "CheckoutButton": checkout(); break;
 
             // Handle UpdateFilesButton, ReplaceFilesButton, CommitFilesButton
-            case "UpdateFilesButton": updateFiles(getSiteRootDirAsList()); break;
+            case "UpdateFilesButton": checkForUpdates(false); break;
             case "ReplaceFilesButton": replaceFiles(getSiteRootDirAsList()); break;
             case "CommitFilesButton": commitFiles(getSiteRootDirAsList(), true); break;
 
@@ -271,8 +271,8 @@ public class VersionControlTool extends ProjectTool {
         checkoutRunner.setMonitor(taskMonitor);
 
         // Configure callbacks and start
-        checkoutRunner.setOnSuccess(obj -> checkoutSuccess());
-        checkoutRunner.setOnFailure(exception -> checkoutFailed(exception));
+        checkoutRunner.setOnSuccess(obj -> handleCheckoutSuccess());
+        checkoutRunner.setOnFailure(exception -> handleCheckoutFailed(exception));
         checkoutRunner.start();
 
         // Show progress dialog
@@ -282,7 +282,7 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called when checkout succeeds.
      */
-    private void checkoutSuccess()
+    private void handleCheckoutSuccess()
     {
         // Reload files
         WebSite projectSite = getProjectSite();
@@ -302,31 +302,57 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called when checkout fails.
      */
-    private void checkoutFailed(Exception anException)
+    private void handleCheckoutFailed(Exception anException)
     {
         DialogBox.showExceptionDialog(_workspacePane.getUI(), "Checkout failed", anException);
     }
 
     /**
-     * Called to update files.
+     * Checks for updates to project files and shows update panel if update files found.
      */
-    public void updateFiles(List<WebFile> theFiles)
+    public void checkForUpdates(boolean checkPassively)
+    {
+        checkForUpdatesForFiles(List.of(_proj.getRootDir()), checkPassively);
+    }
+
+    /**
+     * Checks for updates to given files and shows update panel if update files found.
+     */
+    public void checkForUpdatesForFiles(List<WebFile> localFiles, boolean checkPassively)
     {
         // Sanity check
-        if (!_versionControl.isCheckedOut()) { beep(); return; }
+        if (!_versionControl.isCheckedOut()) return;
 
-        // Get root files
-        List<WebFile> rootFiles = theFiles != null ? theFiles : getSelFiles();
-        if (rootFiles.isEmpty())
-            rootFiles = getSiteRootDirAsList();
+        // Create task find update files and forward to update
+        TaskManagerTask<List<WebFile>> updateTask = (TaskManagerTask<List<WebFile>>) _workspacePane.getTaskManager().createTask();
+        updateTask.setTaskFunction(() -> _versionControl.getUpdateFilesForLocalFiles(localFiles));
+        updateTask.setOnSuccess(updateFiles -> handleCheckForUpdatesSuccess(updateFiles, checkPassively));
+        updateTask.setOnFailure(e -> e.printStackTrace());
+        updateTask.start();
+    }
 
-        // Get update files for root files
-        List<WebFile> updateFiles = _versionControl.getUpdateFilesForLocalFiles(rootFiles);
+    /**
+     * Called when checkForUpdatesForFiles succeeds with list of update files and whether to always show transfer pane.
+     */
+    private void handleCheckForUpdatesSuccess(List<WebFile> updateFiles, boolean checkPassively)
+    {
+        // If no update files and update check is passive, just return
+        if (updateFiles.isEmpty() && checkPassively)
+            return;
 
         // Run VcsTransferPane for files and op to confirm
         if (!new VcsTransferPane().showPanel(this, updateFiles, VcsTransferPane.Op.Update))
             return;
 
+        // Update files
+        updateFiles(updateFiles);
+    }
+
+    /**
+     * Called to update files.
+     */
+    private void updateFiles(List<WebFile> updateFiles)
+    {
         // Disable workspace AutoBuild
         _workspace.getBuilder().setAutoBuildEnabled(false);
 
@@ -334,9 +360,9 @@ public class VersionControlTool extends ProjectTool {
         TaskMonitor taskMonitor = new TaskMonitor("Update files from remote site");
         TaskRunner<Boolean> updateRunner = new TaskRunner<>(() -> _versionControl.updateFiles(updateFiles, taskMonitor));
         updateRunner.setMonitor(taskMonitor);
-        updateRunner.setOnSuccess(completed -> updateFilesSuccess(updateFiles));
-        updateRunner.setOnFinished(() -> updateFilesFinished());
-        updateRunner.setOnFailure(exception -> updateFilesFailed(exception));
+        updateRunner.setOnSuccess(completed -> handleUpdateFilesSuccess(updateFiles));
+        updateRunner.setOnFinished(() -> handleUpdateFilesFinished());
+        updateRunner.setOnFailure(exception -> handleUpdateFilesFailed(exception));
         updateRunner.start();
 
         // Show progress dialog
@@ -346,7 +372,7 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called when update files succeeds.
      */
-    private void updateFilesSuccess(List<WebFile> theFiles)
+    private void handleUpdateFilesSuccess(List<WebFile> theFiles)
     {
         resetAndReloadFiles(theFiles);
     }
@@ -354,7 +380,7 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called when update files finishes.
      */
-    private void updateFilesFinished()
+    private void handleUpdateFilesFinished()
     {
         // Reset AutoBuildEnabled and build Project
         WorkspaceBuilder builder = _workspace.getBuilder();
@@ -369,7 +395,7 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called when update files fails.
      */
-    private void updateFilesFailed(Exception anException)
+    private void handleUpdateFilesFailed(Exception anException)
     {
         DialogBox.showExceptionDialog(_workspacePane.getUI(), "Update files failed", anException);
     }
@@ -401,9 +427,9 @@ public class VersionControlTool extends ProjectTool {
         TaskMonitor taskMonitor = new TaskMonitor("Replace files from remote site");
         TaskRunner<Boolean> replaceRunner = new TaskRunner<>(() -> _versionControl.replaceFiles(replaceFiles, taskMonitor));
         replaceRunner.setMonitor(taskMonitor);
-        replaceRunner.setOnSuccess(obj -> replaceFilesSuccess(replaceFiles));
-        replaceRunner.setOnFinished(() -> replaceFilesFinished());
-        replaceRunner.setOnFailure(exception -> replaceFilesFailed(exception));
+        replaceRunner.setOnSuccess(obj -> handleReplaceFilesSuccess(replaceFiles));
+        replaceRunner.setOnFinished(() -> handleReplaceFilesFinished());
+        replaceRunner.setOnFailure(exception -> handleReplaceFilesFailed(exception));
         replaceRunner.start();
 
         // Show progress dialog
@@ -413,7 +439,7 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called when replace files succeeds.
      */
-    private void replaceFilesSuccess(List<WebFile> theFiles)
+    private void handleReplaceFilesSuccess(List<WebFile> theFiles)
     {
         resetAndReloadFiles(theFiles);
     }
@@ -421,7 +447,7 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called when replace files finishes.
      */
-    private void replaceFilesFinished()
+    private void handleReplaceFilesFinished()
     {
         // Reset AutoBuildEnabled and build Project
         WorkspaceBuilder builder = _workspace.getBuilder();
@@ -436,7 +462,7 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Called when replace files fails.
      */
-    private void replaceFilesFailed(Exception anException)
+    private void handleReplaceFilesFailed(Exception anException)
     {
         DialogBox.showExceptionDialog(_workspacePane.getUI(), "Replace files failed", anException);
     }
@@ -545,9 +571,5 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Returns the Site.RootDir as list.
      */
-    private List<WebFile> getSiteRootDirAsList()
-    {
-        WebFile rootDir = getProjectSite().getRootDir();
-        return ListUtils.of(rootDir);
-    }
+    private List<WebFile> getSiteRootDirAsList()  { return List.of(_proj.getRootDir()); }
 }

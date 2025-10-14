@@ -285,7 +285,7 @@ public class ProjectFilesTool extends WorkspaceTool {
             case "UpdateFilesMenuItem": {
                 ProjectPane projectPane = getSelProjectPane();
                 VersionControlTool versionControlTool = projectPane.getVersionControlTool();
-                versionControlTool.updateFiles(null);
+                versionControlTool.checkForUpdatesForFiles(getSelFiles(), false);
                 break;
             }
 

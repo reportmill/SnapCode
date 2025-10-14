@@ -579,6 +579,14 @@ public class WorkspacePane extends ViewOwner {
         if (!_restoringWorkspace && !ViewUtils.hasRunForName("SaveOpenProjectsListToPrefs"))
             ViewUtils.runLaterOnceForName("SaveOpenProjectsListToPrefs", this::saveOpenProjectsListToPrefs);
 
+        // Check for update files
+        VersionControl versionControl = aProject.getVersionControl();
+        if (versionControl.isCheckedOut()) {
+            ProjectPane projectPane = getProjectPaneForProject(aProject);
+            VersionControlTool versionControlTool = projectPane.getVersionControlTool();
+            versionControlTool.checkForUpdates(true);
+        }
+
         // Handle show greenfoot
         if (aProject.getBuildFile().isIncludeGreenfootRuntime())
             _toolBar.showGreenfootButton();
