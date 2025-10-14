@@ -59,12 +59,6 @@ public class WorkspacePane extends ViewOwner {
     // A PropChangeListener for workspace file changes
     private PropChangeListener _workspaceFilePropChangeLsnr = this::handleWorkspaceFilePropChange;
 
-    // Runnable for update open projects prefs
-    private Runnable _updateOpenProjectsPrefsRunnable;
-
-    // Runnable for update open files prefs
-    private Runnable _updateOpenFilesPrefsRunnable;
-
     // Constant for open projects urls
     private static final String OPEN_PROJECTS_PREFS_KEY = "OpenProjects";
     private static final String OPEN_FILES_PREFS_KEY = "OpenFiles";
@@ -582,8 +576,8 @@ public class WorkspacePane extends ViewOwner {
         }
 
         // Update Open Projects prefs
-        if (!_restoringWorkspace && _updateOpenProjectsPrefsRunnable == null)
-            runLater(_updateOpenProjectsPrefsRunnable = this::saveOpenProjectsListToPrefs);
+        if (!_restoringWorkspace && !ViewUtils.hasRunForName("SaveOpenProjectsListToPrefs"))
+            ViewUtils.runLaterOnceForName("SaveOpenProjectsListToPrefs", this::saveOpenProjectsListToPrefs);
 
         // Handle show greenfoot
         if (aProject.getBuildFile().isIncludeGreenfootRuntime())
@@ -666,8 +660,8 @@ public class WorkspacePane extends ViewOwner {
     private void handlePagePaneOpenFilesChanged()
     {
         // Update Open Projects prefs
-        if (!_restoringWorkspace && !_clearingWorkspace && _updateOpenFilesPrefsRunnable == null)
-            runLater(_updateOpenFilesPrefsRunnable = this::saveOpenFilesListToPrefs);
+        if (!_restoringWorkspace && !_clearingWorkspace && !ViewUtils.hasRunForName("SaveOpenFilesListToPrefs"))
+            ViewUtils.runLaterOnceForName("SaveOpenFilesListToPrefs", this::saveOpenFilesListToPrefs);
     }
 
     /**
@@ -722,7 +716,6 @@ public class WorkspacePane extends ViewOwner {
     {
         List<String> projectUrlStrings = ListUtils.map(_workspace.getProjects(), proj -> proj.getSourceURL().getString());
         Prefs.getDefaultPrefs().setStringsForKey(projectUrlStrings, OPEN_PROJECTS_PREFS_KEY);
-        _updateOpenProjectsPrefsRunnable = null;
     }
 
     /**
@@ -749,7 +742,6 @@ public class WorkspacePane extends ViewOwner {
     {
         List<String> openFileUrlStrings = ListUtils.map(_pagePane.getOpenFiles(), file -> file.getUrl().getString());
         Prefs.getDefaultPrefs().setStringsForKey(openFileUrlStrings, OPEN_FILES_PREFS_KEY);
-        _updateOpenFilesPrefsRunnable = null;
     }
 
     /**
