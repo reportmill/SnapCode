@@ -400,9 +400,6 @@ public class WorkspacePane extends ViewOwner {
         // Show project tool (was: runLater(getProjectFilesTool()::showTool))
         _workspaceTools.showToolNoAnimation(getProjectFilesTool());
 
-        // Do AutoBuild
-        buildWorkspaceAllLater();
-
         // IF lesson is set, show help tool
         if (_workspaceTools.getHelpTool().isLesson())
             _workspaceTools.getHelpTool().showTool();
@@ -680,7 +677,7 @@ public class WorkspacePane extends ViewOwner {
         WorkspaceBuilder builder = _workspace.getBuilder();
         builder.addAllFilesToBuild();
         if (builder.isAutoBuildEnabled())
-            builder.buildWorkspaceAfterDelay(800);
+            builder.buildWorkspaceAfterDelay(500);
     }
 
     /**

@@ -312,8 +312,8 @@ public class VersionControl extends PropObject {
         // If task monitor, set bogus task
         if (taskMonitor != null) {
             taskMonitor.startForTaskCount(1);
-            taskMonitor.beginTask("Checking for updates", 2);
-            taskMonitor.updateTask(1);
+            taskMonitor.beginTask("Checking for updates", 1);
+            taskMonitor.setIndeterminate(true);
         }
 
         // Get modified files

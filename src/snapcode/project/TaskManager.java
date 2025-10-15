@@ -168,14 +168,23 @@ public class TaskManager extends ViewOwner {
         // Clear any previous animation
         _progressBar.getAnimCleared(0);
 
-        // Update ProgressBar
-        double progress = getProgress();
-        if (progress > 0) {
-             if (progress < _progressBar.getProgress())
-                 _progressBar.setProgress(0);
-            _progressBar.getAnim(500).setValue(ProgressBar.Progress_Prop, progress).play();
+        // If
+        TaskManagerTask<?> mainTask = getMainTask();
+        if (mainTask != null && mainTask.getTaskMonitor().isIndeterminate())
+            _progressBar.setIndeterminate(true);
+
+        else {
+            _progressBar.setIndeterminate(false);
+
+            // Update ProgressBar
+            double progress = getProgress();
+            if (progress > 0) {
+                if (progress < _progressBar.getProgress())
+                    _progressBar.setProgress(0);
+                _progressBar.getAnim(500).setValue(ProgressBar.Progress_Prop, progress).play();
+            }
+            else _progressBar.setProgress(progress);
         }
-        else _progressBar.setProgress(progress);
 
         // Resize and relayout
         getUI().setSizeToPrefSize();
