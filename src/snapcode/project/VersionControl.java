@@ -194,7 +194,7 @@ public class VersionControl extends PropObject {
         // Find all files to update
         WebSite localSite = getLocalSite();
         WebFile localSiteDir = localSite.getRootDir();
-        List<WebFile> updateFiles = getUpdateFilesForLocalFiles(ListUtils.of(localSiteDir));
+        List<WebFile> updateFiles = getUpdateFilesForLocalFiles(ListUtils.of(localSiteDir), taskMonitor);
 
         // Update files
         return updateFiles(updateFiles, taskMonitor);
@@ -307,12 +307,27 @@ public class VersionControl extends PropObject {
      * Returns the local files that need to be updated from remote for given local files.
      * Files need to be updated if clone version is different from remote.
      */
-    public List<WebFile> getUpdateFilesForLocalFiles(List<WebFile> localFiles)
+    public List<WebFile> getUpdateFilesForLocalFiles(List<WebFile> localFiles, TaskMonitor taskMonitor)
     {
+        // If task monitor, set bogus task
+        if (taskMonitor != null) {
+            taskMonitor.startForTaskCount(1);
+            taskMonitor.beginTask("Checking for updates", 2);
+            taskMonitor.updateTask(1);
+        }
+
+        // Get modified files
         List<WebFile> cloneFiles = ListUtils.map(localFiles, localFile -> createCloneFile(localFile));
         WebSite remoteSite = getRemoteSite();
         List<WebFile> modifiedCloneFiles = getModifiedFilesForFilesInOtherSite(cloneFiles, remoteSite);
-        return ListUtils.map(modifiedCloneFiles, cloneFile -> createLocalFile(cloneFile));
+        List<WebFile> modifiedLocalFiles = ListUtils.map(modifiedCloneFiles, cloneFile -> createLocalFile(cloneFile));
+
+        // End task
+        if (taskMonitor != null)
+            taskMonitor.endTask();
+
+        // Return
+        return modifiedLocalFiles;
     }
 
     /**

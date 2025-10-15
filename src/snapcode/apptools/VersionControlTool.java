@@ -325,7 +325,7 @@ public class VersionControlTool extends ProjectTool {
 
         // Create task find update files and forward to update
         TaskManagerTask<List<WebFile>> updateTask = (TaskManagerTask<List<WebFile>>) _workspacePane.getTaskManager().createTask();
-        updateTask.setTaskFunction(() -> _versionControl.getUpdateFilesForLocalFiles(localFiles));
+        updateTask.setTaskFunction(() -> _versionControl.getUpdateFilesForLocalFiles(localFiles, updateTask.getTaskMonitor()));
         updateTask.setOnSuccess(updateFiles -> handleCheckForUpdatesSuccess(updateFiles, checkPassively));
         updateTask.setOnFailure(e -> e.printStackTrace());
         updateTask.start();

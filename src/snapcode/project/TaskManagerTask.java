@@ -29,9 +29,6 @@ public class TaskManagerTask<T> {
         _taskMonitor = new TaskMonitor();
         _taskRunner = new TaskRunner<>();
         _taskRunner.setMonitor(_taskMonitor);
-
-        _taskMonitor.addPropChangeListener(this::handleTaskMonitorPropChange);
-        _taskRunner.addPropChangeListener(this::handleTaskRunnerPropChange);
     }
 
     /**
@@ -87,7 +84,12 @@ public class TaskManagerTask<T> {
     /**
      * Starts the runner.
      */
-    public void start()  { _taskRunner.start(); }
+    public void start()
+    {
+        _taskMonitor.addPropChangeListener(this::handleTaskMonitorPropChange);
+        _taskRunner.addPropChangeListener(this::handleTaskRunnerPropChange);
+        _taskManager.startTask(this);
+    }
 
     /**
      * Called when task monitor has prop change.

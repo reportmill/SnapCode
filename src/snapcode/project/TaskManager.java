@@ -4,12 +4,17 @@ import snap.props.PropChange;
 import snap.util.TaskMonitor;
 import snap.util.TaskRunner;
 import snap.view.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * This class manages a list of tasks.
  */
 public class TaskManager extends ViewOwner {
+
+    // The currently running tasks
+    private List<TaskManagerTask<?>> _tasks;
 
     // Whether task manager is running tasks
     private boolean _runningTasks;
@@ -37,12 +42,39 @@ public class TaskManager extends ViewOwner {
     public TaskManager()
     {
         super();
+        _tasks = new ArrayList<>();
     }
 
     /**
      * Creates a task.
      */
     public TaskManagerTask<?> createTask()  { return new TaskManagerTask<>(this); }
+
+    /**
+     * Returns the main task.
+     */
+    public TaskManagerTask<?> getMainTask()  { return !_tasks.isEmpty() ? _tasks.get(0) : null; }
+
+    /**
+     * Starts the given task.
+     */
+    public void startTask(TaskManagerTask<?> aTask)
+    {
+        _tasks.add(aTask);
+        aTask.getTaskRunner().start();
+        setRunningTasks(!_tasks.isEmpty());
+        resetLater();
+    }
+
+    /**
+     * Removes the given task.
+     */
+    private void removeTask(TaskManagerTask<?> aTask)
+    {
+        _tasks.remove(aTask);
+        setRunningTasks(!_tasks.isEmpty());
+        resetLater();
+    }
 
     /**
      * Returns whether task manager is running tasks.
@@ -155,6 +187,13 @@ public class TaskManager extends ViewOwner {
      */
     protected void handleTaskPropChange(TaskManagerTask<?> task, PropChange propChange)
     {
+        // If not main task, just return
+        if (task != getMainTask()) {
+            if (propChange.getPropName().equals(TaskRunner.Status_Prop) && task.getTaskRunner().getStatus() != TaskRunner.Status.Running)
+                runLater(() -> removeTask(task));
+            return;
+        }
+
         switch (propChange.getPropName()) {
 
             // Handle TaskRunner Status change
@@ -173,10 +212,15 @@ public class TaskManager extends ViewOwner {
     private void handleTaskStatusChange(TaskManagerTask<?> task)
     {
         TaskRunner.Status taskStatus = task.getTaskRunner().getStatus();
-        switch (taskStatus) {
-            case Running -> { setProgress(0); setRunningTasks(true); }
-            case Finished -> { setProgress(1); runDelayed(() -> setRunningTasks(getProgress() < 1), 500); }
-            default -> setRunningTasks(false);
+
+        // If finished, set progress to 1 and remove task after delay so progress bar finishes
+        if (taskStatus == TaskRunner.Status.Finished) {
+            setProgress(1);
+            runDelayed(() -> removeTask(task), 500);
         }
+
+        // Otherwise, if not running, remove
+        else if (taskStatus != TaskRunner.Status.Running)
+            runLater(() -> removeTask(task));
     }
 }
