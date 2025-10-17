@@ -42,10 +42,6 @@ dependencies {
 
     // Greenfoot
     implementation project(':Greenfoot')
-
-    // So we can get jars
-    implementation project(':WebAPI')
-    implementation project(':SnapCJ')
 }
 
 mainClassName = 'snapcode.app.App'
