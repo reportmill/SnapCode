@@ -275,7 +275,6 @@ public class ClassTree {
         if (aPath.startsWith("/com/oracle")) return true;
         if (aPath.startsWith("/java/applet")) return true;
         if (aPath.startsWith("/java/awt/dnd")) return true;
-        if (aPath.startsWith("/java/awt/im")) return true;
         if (aPath.startsWith("/java/awt/peer")) return true;
         if (aPath.startsWith("/java/awt/print")) return true;
         if (aPath.startsWith("/java/beans")) return true;
@@ -297,9 +296,6 @@ public class ClassTree {
         if (aPath.startsWith("/javax/rmi")) return true;
         if (aPath.startsWith("/javax/smartcardio")) return true;
         if (aPath.startsWith("/javax/sql")) return true;
-        if (aPath.startsWith("/javax/swing/b")) return true;
-        if (aPath.startsWith("/javax/swing/colorchooser")) return true;
-        if (aPath.startsWith("/javax/swing/filechooser")) return true;
         if (aPath.startsWith("/javax/swing/plaf")) return true;
         if (aPath.startsWith("/javax/swing/tree")) return true;
         if (aPath.startsWith("/javax/swing/undo")) return true;
