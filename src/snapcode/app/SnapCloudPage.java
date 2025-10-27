@@ -7,7 +7,6 @@ import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.apptools.AccountTool;
 import snapcode.project.TaskManagerTask;
 import snapcode.webbrowser.DirFilePage;
 import snapcode.webbrowser.WebBrowser;
@@ -23,6 +22,12 @@ public class SnapCloudPage extends WebPage {
 
     // The WebBrowser for remote files
     private WebBrowser _remoteBrowser;
+
+    // The SnapCloud root URL
+    public static final String SNAPCLOUD_ROOT = "s3://snapcode/"; //"dbox://dbox.com/";
+
+    // Initialize SnapCloud
+    static { SnapCloudInit.initSnapCloud(); }
 
     /**
      * Constructor.
@@ -251,7 +256,7 @@ public class SnapCloudPage extends WebPage {
         String domain = userEmail.substring(sepIndex + 1);
 
         // Return
-        String snapCloudUrlAddress  = "dbox://dbox.com/" + domain + "/" + userName;
+        String snapCloudUrlAddress = SNAPCLOUD_ROOT + domain + "/" + userName;
         return WebURL.getUrl(snapCloudUrlAddress);
     }
 }
