@@ -194,7 +194,7 @@ public class VersionControl extends PropObject {
         // Find all files to update
         WebSite localSite = getLocalSite();
         WebFile localSiteDir = localSite.getRootDir();
-        List<WebFile> updateFiles = getUpdateFilesForLocalFiles(ListUtils.of(localSiteDir), taskMonitor);
+        List<WebFile> updateFiles = getUpdateFilesForLocalFilesImpl(ListUtils.of(localSiteDir));
 
         // Update files
         return updateFiles(updateFiles, taskMonitor);
@@ -210,7 +210,7 @@ public class VersionControl extends PropObject {
 
         // Iterate over files and update each
         for (WebFile localFile : localFiles) {
-            taskMonitor.beginTask("Updating " + localFile.getPath(), -1);
+            taskMonitor.beginTask("Updating " + localFile.getPath(), 1);
             updateFile(localFile);
             taskMonitor.endTask();
             if (taskMonitor.isCancelled())
@@ -317,10 +317,7 @@ public class VersionControl extends PropObject {
         }
 
         // Get modified files
-        List<WebFile> cloneFiles = ListUtils.map(localFiles, localFile -> createCloneFile(localFile));
-        WebSite remoteSite = getRemoteSite();
-        List<WebFile> modifiedCloneFiles = getModifiedFilesForFilesInOtherSite(cloneFiles, remoteSite);
-        List<WebFile> modifiedLocalFiles = ListUtils.map(modifiedCloneFiles, cloneFile -> createLocalFile(cloneFile));
+        List<WebFile> modifiedLocalFiles = getUpdateFilesForLocalFilesImpl(localFiles);
 
         // End task
         if (taskMonitor != null)
@@ -328,6 +325,19 @@ public class VersionControl extends PropObject {
 
         // Return
         return modifiedLocalFiles;
+    }
+
+    /**
+     * Returns the local files that need to be updated from remote for given local files.
+     * Files need to be updated if clone version is different from remote.
+     */
+    private List<WebFile> getUpdateFilesForLocalFilesImpl(List<WebFile> localFiles)
+    {
+        // Get modified files
+        List<WebFile> cloneFiles = ListUtils.map(localFiles, localFile -> createCloneFile(localFile));
+        WebSite remoteSite = getRemoteSite();
+        List<WebFile> modifiedCloneFiles = getModifiedFilesForFilesInOtherSite(cloneFiles, remoteSite);
+        return ListUtils.map(modifiedCloneFiles, cloneFile -> createLocalFile(cloneFile));
     }
 
     /**
