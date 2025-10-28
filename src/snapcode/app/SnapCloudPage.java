@@ -24,7 +24,7 @@ public class SnapCloudPage extends WebPage {
     private WebBrowser _remoteBrowser;
 
     // The SnapCloud root URL
-    public static final String SNAPCLOUD_ROOT = "s3://snapcode/"; //"dbox://dbox.com/";
+    public static final String SNAPCLOUD_ROOT = "dbox://dbox.com/";
 
     // Initialize SnapCloud
     static { SnapCloudInit.initSnapCloud(); }

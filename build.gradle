@@ -17,7 +17,6 @@ java {
 
 repositories {
     mavenCentral()
-    maven { url 'https://us-maven.pkg.dev/jxbrowser/releases' }
 }
 
 dependencies {
@@ -30,10 +29,6 @@ dependencies {
 
     // SnapBuilder project
     implementation project(':SnapBuilder')
-
-    // Tools jar
-    //implementation files('lib/tools.jar')
-    implementation files('lib/jdk.compiler.jar')
 
     // JGit
     implementation 'org.eclipse.jgit:org.eclipse.jgit:7.3.0.202506031305-r'

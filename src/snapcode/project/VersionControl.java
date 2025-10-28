@@ -625,9 +625,9 @@ public class VersionControl extends PropObject {
         if (remoteUrl.getFileType().equals("zip"))
             return new VersionControlZip(projectSite, remoteUrl);
 
-        // Handle Dropbox site
-        if (remoteUrl.getScheme().equals("dropbox") || remoteUrl.getScheme().equals("dbox"))
-            return new VersionControlDropbox(projectSite, remoteUrl);
+        // Handle SnapCloud site
+        if (VersionControlSnapCloud.isSnapCloudUrl(remoteUrl))
+            return new VersionControlSnapCloud(projectSite, remoteUrl);
 
         // Handle plain
         return new VersionControl(projectSite, remoteUrl);
