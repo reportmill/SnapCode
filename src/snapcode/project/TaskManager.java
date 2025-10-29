@@ -222,7 +222,7 @@ public class TaskManager extends ViewOwner {
             // Handle ActivityMonitor TaskTitle, TaskWorkUnitIndex change
             case ActivityMonitor.TaskTitle_Prop -> setActivityText(taskRunner.getMonitor().getTaskTitle());
             case ActivityMonitor.TaskIndex_Prop,
-                 ActivityMonitor.TaskWorkUnitIndex_Prop -> setProgress(taskRunner.getMonitor().getTaskProgress());
+                 ActivityMonitor.Progress_Prop -> setProgress(taskRunner.getMonitor().getTaskProgress());
         }
     }
 
