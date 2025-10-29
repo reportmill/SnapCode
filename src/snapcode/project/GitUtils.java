@@ -11,16 +11,6 @@ import snapcode.apptools.AccountTool;
 public class GitUtils {
 
     /**
-     * Returns the git username.
-     */
-    public static String getGitUserName()  { return null; }
-
-    /**
-     * Returns the git password.
-     */
-    public static String getGitPassword()  { return null; }
-
-    /**
      * Returns credentials provider.
      */
     public static CredentialsProvider getCredentialsProvider()

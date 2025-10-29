@@ -244,7 +244,7 @@ public class VersionControlTool extends ProjectTool {
     public void deactivate()
     {
         try {
-            ActivityMonitor activityMonitor = new ActivityMonitor(System.out);
+            ActivityMonitor activityMonitor = ActivityMonitor.getSystemOutActivityMonitor();
             _versionControl.disconnect(activityMonitor);
         }
 

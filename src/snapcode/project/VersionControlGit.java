@@ -109,7 +109,7 @@ public class VersionControlGit extends VersionControl {
 
         // Wrap ActivityMonitor in ProgressMonitor
         if (activityMonitor == null)
-            activityMonitor = new ActivityMonitor(System.out);
+            activityMonitor = ActivityMonitor.getSystemOutActivityMonitor();
         cloneCmd.setProgressMonitor(GitUtils.getProgressMonitor(activityMonitor));
 
         // Run clone and move files to site directory
@@ -173,7 +173,7 @@ public class VersionControlGit extends VersionControl {
         // Do git fetch to bring repo up to date
         try {
             GitDir gdir = getGitDir();
-            gdir.fetch(new ActivityMonitor(System.out));
+            gdir.fetch(ActivityMonitor.getSystemOutActivityMonitor());
         }
         catch (Exception e) { throw new RuntimeException(e); }
 
