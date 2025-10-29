@@ -1,13 +1,13 @@
 package snapcode.app;
 import snap.gfx.Image;
 import snap.util.ActivityMonitor;
+import snap.util.TaskRunner;
 import snap.util.UserInfo;
 import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import snapcode.project.TaskManagerTask;
 import snapcode.webbrowser.DirFilePage;
 import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
@@ -103,8 +103,8 @@ public class SnapCloudPage extends WebPage {
             return;
 
         // Create task for delete and start
-        TaskManagerTask<?> deleteSelFileTask = _workspacePane.getTaskManager().createTask();
-        deleteSelFileTask.setTaskFunction(() -> { deleteSelFileImpl(deleteSelFileTask.getActivityMonitor()); return null; });
+        TaskRunner<?> deleteSelFileTask = _workspacePane.getTaskManager().createTask();
+        deleteSelFileTask.setTaskFunction(() -> { deleteSelFileImpl(deleteSelFileTask.getMonitor()); return null; });
         deleteSelFileTask.start();
     }
 

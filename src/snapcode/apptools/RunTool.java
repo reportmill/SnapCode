@@ -2,11 +2,11 @@ package snapcode.apptools;
 import snap.props.PropChange;
 import snap.util.ListUtils;
 import snap.util.SnapEnv;
+import snap.util.TaskRunner;
 import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.view.*;
 import snapcode.app.JavaPage;
-import snapcode.project.TaskManagerTask;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
 import snapcode.debug.*;
@@ -229,7 +229,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         // If workspace needs build, trigger build
         WorkspaceBuilder workspaceBuilder = _workspace.getBuilder();
         if (workspaceBuilder.isNeedsBuild() || workspaceBuilder.isBuilding()) {
-            TaskManagerTask<Boolean> buildRunner = workspaceBuilder.buildWorkspace();
+            TaskRunner<Boolean> buildRunner = workspaceBuilder.buildWorkspace();
             buildRunner.setOnSuccess(success -> runAppBuildFinished(runApp, success));
         }
 

@@ -23,7 +23,7 @@ public class WorkspaceBuilder {
     private boolean _buildAgain;
 
     // The current build workspace task
-    private TaskManagerTask<Boolean> _buildWorkspaceTask;
+    private TaskRunner<Boolean> _buildWorkspaceTask;
 
     // The last build log
     private StringBuffer _buildLogBuffer;
@@ -71,21 +71,21 @@ public class WorkspaceBuilder {
     /**
      * Build workspace.
      */
-    public TaskManagerTask<Boolean> buildWorkspace()
+    public TaskRunner<Boolean> buildWorkspace()
     {
         // If already building, register for build again and return build runner
-        TaskManagerTask<Boolean> lastRunner = _buildWorkspaceTask;
+        TaskRunner<Boolean> lastRunner = _buildWorkspaceTask;
         if (lastRunner != null) {
             _buildAgain = true;
             return lastRunner;
         }
 
         // Create/configure build task and start
-        _buildWorkspaceTask = (TaskManagerTask<Boolean>) _workspace.getTaskManager().createTask();
-        _buildWorkspaceTask.setTaskFunction(() -> buildWorkspaceImpl(_buildWorkspaceTask.getActivityMonitor()));
+        _buildWorkspaceTask = (TaskRunner<Boolean>) _workspace.getTaskManager().createTask();
+        _buildWorkspaceTask.setTaskFunction(() -> buildWorkspaceImpl(_buildWorkspaceTask.getMonitor()));
         _buildWorkspaceTask.setOnFailure(e -> e.printStackTrace());
         _buildWorkspaceTask.setOnFinished(() -> handleBuildWorkspaceFinished(_buildWorkspaceTask));
-        _buildWorkspaceTask.getActivityMonitor().addPropChangeListener(this::handleBuildTaskTitleChange, ActivityMonitor.TaskTitle_Prop);
+        _buildWorkspaceTask.getMonitor().addPropChangeListener(this::handleBuildTaskTitleChange, ActivityMonitor.TaskTitle_Prop);
         _buildWorkspaceTask.start();
 
         // Register building
@@ -124,9 +124,9 @@ public class WorkspaceBuilder {
      */
     public void stopBuild()
     {
-        TaskManagerTask<?> buildRunner = _buildWorkspaceTask;
+        TaskRunner<?> buildRunner = _buildWorkspaceTask;
         if (buildRunner != null)
-            buildRunner.getTaskRunner().cancel();
+            buildRunner.cancel();
         _buildAgain = false;
     }
 
@@ -211,7 +211,7 @@ public class WorkspaceBuilder {
     /**
      * Called when build is finished.
      */
-    protected void handleBuildWorkspaceFinished(TaskManagerTask<Boolean> buildWorkspaceRunner)
+    protected void handleBuildWorkspaceFinished(TaskRunner<Boolean> buildWorkspaceRunner)
     {
         // If this runner is retired, just return
         if (_buildWorkspaceTask != buildWorkspaceRunner)
@@ -254,8 +254,8 @@ public class WorkspaceBuilder {
     {
         ActivityMonitor activityMonitor = (ActivityMonitor) propChange.getSource();
         String taskTitle = activityMonitor.getTaskTitle();
-        TaskManagerTask<?> taskRunner = _buildWorkspaceTask;
-        if (taskRunner != null && activityMonitor == taskRunner.getActivityMonitor())
+        TaskRunner<?> taskRunner = _buildWorkspaceTask;
+        if (taskRunner != null && activityMonitor == taskRunner.getMonitor())
             _buildLogBuffer.append(taskTitle).append('\n');
     }
 }

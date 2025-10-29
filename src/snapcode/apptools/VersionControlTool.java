@@ -4,7 +4,6 @@ import snap.view.BoxView;
 import snap.web.WebURL;
 import snapcode.app.SnapCloudPage;
 import snapcode.app.WorkspaceTools;
-import snapcode.project.TaskManagerTask;
 import snapcode.project.VersionControlUtils;
 import snapcode.project.WorkspaceBuilder;
 import snap.props.PropChange;
@@ -324,8 +323,8 @@ public class VersionControlTool extends ProjectTool {
         if (!_versionControl.isCheckedOut()) return;
 
         // Create task find update files and forward to update
-        TaskManagerTask<List<WebFile>> updateTask = (TaskManagerTask<List<WebFile>>) _workspacePane.getTaskManager().createTask();
-        updateTask.setTaskFunction(() -> _versionControl.getUpdateFilesForLocalFiles(localFiles, updateTask.getActivityMonitor()));
+        TaskRunner<List<WebFile>> updateTask = (TaskRunner<List<WebFile>>) _workspacePane.getTaskManager().createTask();
+        updateTask.setTaskFunction(() -> _versionControl.getUpdateFilesForLocalFiles(localFiles, updateTask.getMonitor()));
         updateTask.setOnSuccess(updateFiles -> handleCheckForUpdatesSuccess(updateFiles, checkPassively));
         updateTask.setOnFailure(e -> e.printStackTrace());
         updateTask.start();

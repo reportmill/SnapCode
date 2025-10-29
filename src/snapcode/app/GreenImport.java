@@ -58,8 +58,8 @@ public class GreenImport {
     {
         // Create download archive and open project task
         Workspace workspace = workspacePane.getWorkspace();
-        TaskManagerTask<Project> openProjectTask = (TaskManagerTask<Project>) workspace.getTaskManager().createTask();
-        ActivityMonitor activityMonitor = openProjectTask.getActivityMonitor();
+        TaskRunner<Project> openProjectTask = (TaskRunner<Project>) workspace.getTaskManager().createTask();
+        ActivityMonitor activityMonitor = openProjectTask.getMonitor();
         activityMonitor.setTitle("Opening Greenfoot");
 
         // Configure function

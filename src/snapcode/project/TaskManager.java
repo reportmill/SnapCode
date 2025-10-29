@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * This class manages a list of tasks.
+ * This class manages a list of task runners.
  */
 public class TaskManager extends ViewOwner {
 
     // The currently running tasks
-    private List<TaskManagerTask<?>> _tasks;
+    private List<TaskRunner<?>> _tasks;
 
     // Whether task manager is running tasks
     private boolean _runningTasks;
@@ -48,28 +48,39 @@ public class TaskManager extends ViewOwner {
     /**
      * Creates a task.
      */
-    public TaskManagerTask<?> createTask()  { return new TaskManagerTask<>(this); }
+    public TaskRunner<?> createTask()
+    {
+        return new TaskRunner<>() {
+            @Override
+            public void start()
+            {
+                super.start();
+                TaskManager.this.startTask(this);
+            }
+        };
+    }
 
     /**
      * Returns the main task.
      */
-    public TaskManagerTask<?> getMainTask()  { return !_tasks.isEmpty() ? _tasks.get(0) : null; }
+    public TaskRunner<?> getMainTask()  { return !_tasks.isEmpty() ? _tasks.get(0) : null; }
 
     /**
      * Starts the given task.
      */
-    public void startTask(TaskManagerTask<?> aTask)
+    public void startTask(TaskRunner<?> aTask)
     {
+        aTask.addPropChangeListener(pc -> handleTaskPropChange(aTask, pc));
+        aTask.getMonitor().addPropChangeListener(pc -> handleTaskPropChange(aTask, pc));
         _tasks.add(aTask);
-        aTask.getTaskRunner().start();
-        setRunningTasks(!_tasks.isEmpty());
+        setRunningTasks(true);
         resetLater();
     }
 
     /**
      * Removes the given task.
      */
-    private void removeTask(TaskManagerTask<?> aTask)
+    private void removeTask(TaskRunner<?> aTask)
     {
         _tasks.remove(aTask);
         setRunningTasks(!_tasks.isEmpty());
@@ -169,8 +180,8 @@ public class TaskManager extends ViewOwner {
         _progressBar.getAnimCleared(0);
 
         // If
-        TaskManagerTask<?> mainTask = getMainTask();
-        if (mainTask != null && mainTask.getActivityMonitor().isIndeterminate())
+        TaskRunner<?> mainTask = getMainTask();
+        if (mainTask != null && mainTask.getMonitor().isIndeterminate())
             _progressBar.setIndeterminate(true);
 
         else {
@@ -194,42 +205,42 @@ public class TaskManager extends ViewOwner {
     /**
      * Called when task has prop change.
      */
-    protected void handleTaskPropChange(TaskManagerTask<?> task, PropChange propChange)
+    protected void handleTaskPropChange(TaskRunner<?> taskRunner, PropChange propChange)
     {
         // If not main task, just return
-        if (task != getMainTask()) {
-            if (propChange.getPropName().equals(TaskRunner.Status_Prop) && task.getTaskRunner().getStatus() != TaskRunner.Status.Running)
-                runLater(() -> removeTask(task));
+        if (taskRunner != getMainTask()) {
+            if (propChange.getPropName().equals(TaskRunner.Status_Prop) && taskRunner.getStatus() != TaskRunner.Status.Running)
+                runLater(() -> removeTask(taskRunner));
             return;
         }
 
         switch (propChange.getPropName()) {
 
             // Handle TaskRunner Status change
-            case TaskRunner.Status_Prop -> handleTaskStatusChange(task);
+            case TaskRunner.Status_Prop -> handleTaskStatusChange(taskRunner);
 
             // Handle ActivityMonitor TaskTitle, TaskWorkUnitIndex change
-            case ActivityMonitor.TaskTitle_Prop -> setActivityText(task.getActivityMonitor().getTaskTitle());
+            case ActivityMonitor.TaskTitle_Prop -> setActivityText(taskRunner.getMonitor().getTaskTitle());
             case ActivityMonitor.TaskIndex_Prop,
-                 ActivityMonitor.TaskWorkUnitIndex_Prop -> setProgress(task.getActivityMonitor().getTaskProgress());
+                 ActivityMonitor.TaskWorkUnitIndex_Prop -> setProgress(taskRunner.getMonitor().getTaskProgress());
         }
     }
 
     /**
      * Called when task has status change to update RunningTasks property.
      */
-    private void handleTaskStatusChange(TaskManagerTask<?> task)
+    private void handleTaskStatusChange(TaskRunner<?> taskRunner)
     {
-        TaskRunner.Status taskStatus = task.getTaskRunner().getStatus();
+        TaskRunner.Status taskStatus = taskRunner.getStatus();
 
         // If finished, set progress to 1 and remove task after delay so progress bar finishes
         if (taskStatus == TaskRunner.Status.Finished) {
             setProgress(1);
-            runDelayed(() -> removeTask(task), 500);
+            runDelayed(() -> removeTask(taskRunner), 500);
         }
 
         // Otherwise, if not running, remove
         else if (taskStatus != TaskRunner.Status.Running)
-            runLater(() -> removeTask(task));
+            runLater(() -> removeTask(taskRunner));
     }
 }
