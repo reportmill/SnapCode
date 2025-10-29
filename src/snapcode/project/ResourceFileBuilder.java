@@ -1,6 +1,6 @@
 package snapcode.project;
 import snap.util.ListUtils;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snap.web.WebFile;
 
 import java.util.ArrayList;
@@ -84,7 +84,7 @@ public class ResourceFileBuilder implements ProjectFileBuilder {
     /**
      * Compiles files.
      */
-    public boolean buildFiles(TaskMonitor aTM)
+    public boolean buildFiles(ActivityMonitor aTM)
     {
         // If no build files, just return
         if (_buildFiles.isEmpty()) return true;

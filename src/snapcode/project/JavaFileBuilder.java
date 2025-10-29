@@ -5,7 +5,7 @@ package snapcode.project;
 import javakit.resolver.JavaClass;
 import snap.util.ListUtils;
 import snap.util.SnapEnv;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snap.web.WebFile;
 import java.util.*;
 
@@ -98,7 +98,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
      * Compiles files.
      */
     @Override
-    public boolean buildFiles(TaskMonitor taskMonitor)
+    public boolean buildFiles(ActivityMonitor activityMonitor)
     {
         // Clear compiled files
         _compiledFiles.clear();
@@ -112,10 +112,10 @@ public class JavaFileBuilder implements ProjectFileBuilder {
         _buildFiles.clear();
 
         // Resolve dependencies
-        javaFiles.forEach(javaFile -> JavaDeps.resolveDependenciesForFile(taskMonitor, javaFile));
+        javaFiles.forEach(javaFile -> JavaDeps.resolveDependenciesForFile(activityMonitor, javaFile));
 
         // Do real build
-        boolean buildSuccess = buildFilesImpl(taskMonitor, javaFiles);
+        boolean buildSuccess = buildFilesImpl(activityMonitor, javaFiles);
 
         // Clear compiled files
         _compiledFiles.clear();
@@ -127,7 +127,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     /**
      * Compiles given java files and returns whether all were compiled successfully.
      */
-    protected boolean buildFilesImpl(TaskMonitor taskMonitor, List<WebFile> sourceFiles)
+    protected boolean buildFilesImpl(ActivityMonitor activityMonitor, List<WebFile> sourceFiles)
     {
         // Make sure build dir exists
         WebFile buildDir = _proj.getBuildDir();
@@ -138,14 +138,14 @@ public class JavaFileBuilder implements ProjectFileBuilder {
         _compiler = new SnapCompiler(_proj);
         boolean buildFilesSuccess = true;
 
-        // Init task monitor for file count
-        taskMonitor.startForTaskCount(sourceFiles.size());
+        // Init activity monitor for file count
+        activityMonitor.startForTaskCount(sourceFiles.size());
 
         // Iterate over build files and compile
         for (int i = 0; i < sourceFiles.size(); i++) {
 
             // If interrupted, add remaining build files and return
-            if (taskMonitor.isCancelled()) {
+            if (activityMonitor.isCancelled()) {
                 List<WebFile> remainingSourceFiles = sourceFiles.subList(i, sourceFiles.size());
                 remainingSourceFiles.forEach(this::addBuildFile);
                 return false;
@@ -155,11 +155,11 @@ public class JavaFileBuilder implements ProjectFileBuilder {
             WebFile sourceFile = sourceFiles.get(i);
             String className = _proj.getProjectFiles().getClassNameForFile(sourceFile);
             String msg = String.format("Compiling %s (%d of %d)", className, i + 1, sourceFiles.size());
-            taskMonitor.beginTask(msg, 10);
+            activityMonitor.beginTask(msg, 10);
 
             // If file already built, just skip
             if (_compiledFiles.contains(sourceFile)) {
-                taskMonitor.endTask();
+                activityMonitor.endTask();
                 continue;
             }
 
@@ -177,11 +177,11 @@ public class JavaFileBuilder implements ProjectFileBuilder {
             else {
                 buildFilesSuccess = false;
                 if (_compiler._errorCount >= 1000)
-                    taskMonitor.setCancelled(true);
+                    activityMonitor.setCancelled(true);
             }
 
             // Stop task manager task
-            taskMonitor.endTask();
+            activityMonitor.endTask();
         }
 
         // Return

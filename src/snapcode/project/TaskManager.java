@@ -1,7 +1,7 @@
 package snapcode.project;
 import snap.geom.Pos;
 import snap.props.PropChange;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snap.util.TaskRunner;
 import snap.view.*;
 import java.util.ArrayList;
@@ -170,7 +170,7 @@ public class TaskManager extends ViewOwner {
 
         // If
         TaskManagerTask<?> mainTask = getMainTask();
-        if (mainTask != null && mainTask.getTaskMonitor().isIndeterminate())
+        if (mainTask != null && mainTask.getActivityMonitor().isIndeterminate())
             _progressBar.setIndeterminate(true);
 
         else {
@@ -208,10 +208,10 @@ public class TaskManager extends ViewOwner {
             // Handle TaskRunner Status change
             case TaskRunner.Status_Prop -> handleTaskStatusChange(task);
 
-            // Handle TaskMonitor TaskTitle, TaskWorkUnitIndex change
-            case TaskMonitor.TaskTitle_Prop -> setActivityText(task.getTaskMonitor().getTaskTitle());
-            case TaskMonitor.TaskIndex_Prop,
-                 TaskMonitor.TaskWorkUnitIndex_Prop -> setProgress(task.getTaskMonitor().getTaskProgress());
+            // Handle ActivityMonitor TaskTitle, TaskWorkUnitIndex change
+            case ActivityMonitor.TaskTitle_Prop -> setActivityText(task.getActivityMonitor().getTaskTitle());
+            case ActivityMonitor.TaskIndex_Prop,
+                 ActivityMonitor.TaskWorkUnitIndex_Prop -> setProgress(task.getActivityMonitor().getTaskProgress());
         }
     }
 

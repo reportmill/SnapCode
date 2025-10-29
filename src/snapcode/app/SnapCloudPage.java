@@ -1,6 +1,6 @@
 package snapcode.app;
 import snap.gfx.Image;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snap.util.UserInfo;
 import snap.view.*;
 import snap.viewx.DialogBox;
@@ -104,27 +104,27 @@ public class SnapCloudPage extends WebPage {
 
         // Create task for delete and start
         TaskManagerTask<?> deleteSelFileTask = _workspacePane.getTaskManager().createTask();
-        deleteSelFileTask.setTaskFunction(() -> { deleteSelFileImpl(deleteSelFileTask.getTaskMonitor()); return null; });
+        deleteSelFileTask.setTaskFunction(() -> { deleteSelFileImpl(deleteSelFileTask.getActivityMonitor()); return null; });
         deleteSelFileTask.start();
     }
 
     /**
      * Deletes remote file.
      */
-    private void deleteSelFileImpl(TaskMonitor taskMonitor)
+    private void deleteSelFileImpl(ActivityMonitor activityMonitor)
     {
         WebFile selFile = getSelFile(); if (selFile == null) return;
         WebFile parent = selFile.getParent();
 
-        // Init task monitor - add bogus work unit to add progress
-        taskMonitor.startForTaskCount(1);
-        taskMonitor.beginTask("Delete file: " + selFile.getName(), 2);
-        taskMonitor.updateTask(1);
+        // Init activity monitor - add bogus work unit to add progress
+        activityMonitor.startForTaskCount(1);
+        activityMonitor.beginTask("Delete file: " + selFile.getName(), 2);
+        activityMonitor.updateTask(1);
 
         // Delete file, reset and select parent
         selFile.delete();
         setSelFile(parent);
-        taskMonitor.endTask();
+        activityMonitor.endTask();
     }
 
     /**

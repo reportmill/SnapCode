@@ -2,7 +2,7 @@ package snapcode.project;
 import org.eclipse.jgit.lib.ProgressMonitor;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snapcode.apptools.AccountTool;
 
 /**
@@ -35,17 +35,17 @@ public class GitUtils {
     }
 
     /**
-     * Returns a ProgressMonitor for given TaskMonitor.
+     * Returns a ProgressMonitor for given ActivityMonitor.
      */
-    public static ProgressMonitor getProgressMonitor(final TaskMonitor aTM)
+    public static ProgressMonitor getProgressMonitor(ActivityMonitor activityMonitor)
     {
         return new ProgressMonitor() {
-            public void start(int arg0)  { aTM.startForTaskCount(arg0); }
-            public void beginTask(String arg0, int arg1)  { aTM.beginTask(arg0, arg1); }
-            public void update(int arg0)  { aTM.updateTask(arg0); }
-            public void endTask()  { aTM.endTask(); }
+            public void start(int arg0)  { activityMonitor.startForTaskCount(arg0); }
+            public void beginTask(String arg0, int arg1)  { activityMonitor.beginTask(arg0, arg1); }
+            public void update(int arg0)  { activityMonitor.updateTask(arg0); }
+            public void endTask()  { activityMonitor.endTask(); }
             public void showDuration(boolean b)  { }
-            public boolean isCancelled()  { return aTM.isCancelled(); }
+            public boolean isCancelled()  { return activityMonitor.isCancelled(); }
         };
     }
 }

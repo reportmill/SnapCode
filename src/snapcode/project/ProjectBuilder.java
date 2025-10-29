@@ -3,7 +3,7 @@
  */
 package snapcode.project;
 import snap.util.ListUtils;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snap.web.WebFile;
 import java.util.Date;
 import java.util.List;
@@ -52,16 +52,16 @@ public class ProjectBuilder {
     /**
      * Builds the project.
      */
-    public boolean buildProject(TaskMonitor taskMonitor)
+    public boolean buildProject(ActivityMonitor activityMonitor)
     {
         // Check build dependencies
-        boolean dependenciesFound = checkBuildDependencies(taskMonitor);
+        boolean dependenciesFound = checkBuildDependencies(activityMonitor);
         if (!dependenciesFound)
             return false;
 
         // Build files
-        boolean buildSuccess = _javaFileBuilder.buildFiles(taskMonitor);
-        buildSuccess &= _resourceFileBuilder.buildFiles(taskMonitor);
+        boolean buildSuccess = _javaFileBuilder.buildFiles(activityMonitor);
+        buildSuccess &= _resourceFileBuilder.buildFiles(activityMonitor);
         _buildDate = new Date();
 
         // Return build success
@@ -222,7 +222,7 @@ public class ProjectBuilder {
     /**
      * Checks project dependencies.
      */
-    public boolean checkBuildDependencies(TaskMonitor taskMonitor)
+    public boolean checkBuildDependencies(ActivityMonitor activityMonitor)
     {
         // Get maven dependencies
         List<BuildDependency> buildDependencies = _proj.getBuildFile().getDependencies();
@@ -231,9 +231,9 @@ public class ProjectBuilder {
         // Iterate over each and load if needed
         for (MavenDependency mavenDependency : mavenDependencies) {
             if (!mavenDependency.isLoaded()) {
-                taskMonitor.beginTask("Loading dependency: " + mavenDependency.getName(), 1);
+                activityMonitor.beginTask("Loading dependency: " + mavenDependency.getName(), 1);
                 mavenDependency.waitForLoad();
-                taskMonitor.endTask();
+                activityMonitor.endTask();
                 if (!mavenDependency.isLoaded())
                     return false;
             }

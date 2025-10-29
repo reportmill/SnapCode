@@ -6,7 +6,7 @@ import snap.props.PropChange;
 import snap.props.PropObject;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebSite;
@@ -121,7 +121,7 @@ public class VersionControl extends PropObject {
     /**
      * Creates the remote site.
      */
-    public boolean createRemoteSite(TaskMonitor taskMonitor)
+    public boolean createRemoteSite(ActivityMonitor activityMonitor)
     {
         // If remote site not available, return false
         WebSite remoteSite = getRemoteSite();
@@ -139,7 +139,7 @@ public class VersionControl extends PropObject {
             return false;
 
         // Create clone site
-        return createCloneSite(taskMonitor);
+        return createCloneSite(activityMonitor);
     }
 
     /**
@@ -154,7 +154,7 @@ public class VersionControl extends PropObject {
     /**
      * Creates the clone site.
      */
-    public boolean createCloneSite(TaskMonitor taskMonitor)
+    public boolean createCloneSite(ActivityMonitor activityMonitor)
     {
         // Create clone
         WebSite cloneSite = getCloneSite();
@@ -183,7 +183,7 @@ public class VersionControl extends PropObject {
     /**
      * Load remote files and VCS files into site directory.
      */
-    public boolean checkout(TaskMonitor taskMonitor) throws Exception
+    public boolean checkout(ActivityMonitor activityMonitor) throws Exception
     {
         WebSite remoteSite = getRemoteSite();
         if (remoteSite == null) {
@@ -197,28 +197,28 @@ public class VersionControl extends PropObject {
         List<WebFile> updateFiles = getUpdateFilesForLocalFilesImpl(ListUtils.of(localSiteDir));
 
         // Update files
-        return updateFiles(updateFiles, taskMonitor);
+        return updateFiles(updateFiles, activityMonitor);
     }
 
     /**
      * Updates (merges) local site files from remote site.
      */
-    public boolean updateFiles(List<WebFile> localFiles, TaskMonitor taskMonitor) throws Exception
+    public boolean updateFiles(List<WebFile> localFiles, ActivityMonitor activityMonitor) throws Exception
     {
-        // Call TaskMonitor.startTasks
-        taskMonitor.startForTaskCount(localFiles.size());
+        // Call monitor start
+        activityMonitor.startForTaskCount(localFiles.size());
 
         // Iterate over files and update each
         for (WebFile localFile : localFiles) {
-            taskMonitor.beginTask("Updating " + localFile.getPath(), 1);
+            activityMonitor.beginTask("Updating " + localFile.getPath(), 1);
             updateFile(localFile);
-            taskMonitor.endTask();
-            if (taskMonitor.isCancelled())
+            activityMonitor.endTask();
+            if (activityMonitor.isCancelled())
                 break;
         }
 
         // Return
-        return !taskMonitor.isCancelled();
+        return !activityMonitor.isCancelled();
     }
 
     /**
@@ -238,22 +238,22 @@ public class VersionControl extends PropObject {
     /**
      * Replaces (overwrites) local site files from remote site.
      */
-    public boolean replaceFiles(List<WebFile> localFiles, TaskMonitor taskMonitor) throws Exception
+    public boolean replaceFiles(List<WebFile> localFiles, ActivityMonitor activityMonitor) throws Exception
     {
-        // Call TaskMonitor.startTasks
-        taskMonitor.startForTaskCount(localFiles.size());
+        // Call monitor start
+        activityMonitor.startForTaskCount(localFiles.size());
 
         // Iterate over files and replace each
         for (WebFile file : localFiles) {
-            taskMonitor.beginTask("Replacing " + file.getPath(), -1);
+            activityMonitor.beginTask("Replacing " + file.getPath(), -1);
             replaceFile(file);
-            taskMonitor.endTask();
-            if (taskMonitor.isCancelled())
+            activityMonitor.endTask();
+            if (activityMonitor.isCancelled())
                 break;
         }
 
         // Return
-        return !taskMonitor.isCancelled();
+        return !activityMonitor.isCancelled();
     }
 
     /**
@@ -268,22 +268,22 @@ public class VersionControl extends PropObject {
     /**
      * Commits (copies) local site files to remote site.
      */
-    public boolean commitFiles(List<WebFile> localFiles, String aMessage, TaskMonitor taskMonitor) throws Exception
+    public boolean commitFiles(List<WebFile> localFiles, String aMessage, ActivityMonitor activityMonitor) throws Exception
     {
-        // Call TaskMonitor.startTasks
-        taskMonitor.startForTaskCount(localFiles.size());
+        // Call monitor start
+        activityMonitor.startForTaskCount(localFiles.size());
 
         // Iterate over files and commit each
         for (WebFile localFile : localFiles) {
-            taskMonitor.beginTask("Committing " + localFile.getPath(), -1);
+            activityMonitor.beginTask("Committing " + localFile.getPath(), -1);
             commitFile(localFile);
-            taskMonitor.endTask();
-            if (taskMonitor.isCancelled())
+            activityMonitor.endTask();
+            if (activityMonitor.isCancelled())
                 break;
         }
 
         // Return
-        return !taskMonitor.isCancelled();
+        return !activityMonitor.isCancelled();
     }
 
     /**
@@ -307,21 +307,21 @@ public class VersionControl extends PropObject {
      * Returns the local files that need to be updated from remote for given local files.
      * Files need to be updated if clone version is different from remote.
      */
-    public List<WebFile> getUpdateFilesForLocalFiles(List<WebFile> localFiles, TaskMonitor taskMonitor)
+    public List<WebFile> getUpdateFilesForLocalFiles(List<WebFile> localFiles, ActivityMonitor activityMonitor)
     {
-        // If task monitor, set bogus task
-        if (taskMonitor != null) {
-            taskMonitor.startForTaskCount(1);
-            taskMonitor.beginTask("Checking for updates", 1);
-            taskMonitor.setIndeterminate(true);
+        // If activity monitor, set bogus task
+        if (activityMonitor != null) {
+            activityMonitor.startForTaskCount(1);
+            activityMonitor.beginTask("Checking for updates", 1);
+            activityMonitor.setIndeterminate(true);
         }
 
         // Get modified files
         List<WebFile> modifiedLocalFiles = getUpdateFilesForLocalFilesImpl(localFiles);
 
         // End task
-        if (taskMonitor != null)
-            taskMonitor.endTask();
+        if (activityMonitor != null)
+            activityMonitor.endTask();
 
         // Return
         return modifiedLocalFiles;
@@ -518,7 +518,7 @@ public class VersionControl extends PropObject {
     /**
      * Delete VCS support files from site directory.
      */
-    public void disconnect(TaskMonitor taskMonitor) throws Exception
+    public void disconnect(ActivityMonitor activityMonitor) throws Exception
     {
         // Delete clone site
         WebSite cloneSite = getCloneSite();

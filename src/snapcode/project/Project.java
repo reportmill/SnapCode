@@ -523,11 +523,11 @@ public class Project extends PropObject {
     /**
      * Deletes the project.
      */
-    public void deleteProject(TaskMonitor taskMonitor) throws Exception
+    public void deleteProject(ActivityMonitor activityMonitor) throws Exception
     {
-        // Start TaskMonitor
-        taskMonitor.startForTaskCount(1);
-        taskMonitor.beginTask("Deleting files", -1);
+        // Start ActivityMonitor
+        activityMonitor.startForTaskCount(1);
+        activityMonitor.beginTask("Deleting files", -1);
 
         // Clear ClassLoader
         clearClassLoader();
@@ -535,8 +535,8 @@ public class Project extends PropObject {
         // Delete SandBox, Site
         ProjectUtils.deleteProjectFilesForSite(getSite());
 
-        // Finish TaskMonitor
-        taskMonitor.endTask();
+        // Finish ActivityMonitor
+        activityMonitor.endTask();
     }
 
     /**

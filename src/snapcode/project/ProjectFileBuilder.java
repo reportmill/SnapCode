@@ -2,12 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import snap.util.ListUtils;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snap.web.WebFile;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An interface for classes that can "build" changed files.
@@ -42,5 +38,5 @@ public interface ProjectFileBuilder {
     /**
      * Build files.
      */
-    boolean buildFiles(TaskMonitor aTM);
+    boolean buildFiles(ActivityMonitor aTM);
 }

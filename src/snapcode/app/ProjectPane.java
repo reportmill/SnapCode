@@ -1,8 +1,8 @@
 package snapcode.app;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snap.view.*;
 import snap.viewx.DialogBox;
-import snap.util.TaskMonitorPanel;
+import snap.util.ActivityMonitorPanel;
 import snapcode.apptools.ProjectAnalysisTool;
 import snapcode.apptools.VersionControlTool;
 import snapcode.project.*;
@@ -89,8 +89,8 @@ public class ProjectPane extends ViewOwner {
 
         // Delete project
         Project project = getProject();
-        TaskMonitor taskMonitor = new TaskMonitorPanel(aView, "Delete Project");
-        try { project.deleteProject(taskMonitor); }
+        ActivityMonitor activityMonitor = new ActivityMonitorPanel(aView, "Delete Project");
+        try { project.deleteProject(activityMonitor); }
         catch (Exception e) { DialogBox.showExceptionDialog(aView, "Delete Project Failed", e); }
     }
 

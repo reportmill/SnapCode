@@ -7,7 +7,7 @@ import org.eclipse.jgit.api.Git;
 import snap.util.ArrayUtils;
 import snap.web.WebURL;
 import snap.util.FileUtils;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import java.io.File;
@@ -86,7 +86,7 @@ public class VersionControlGit extends VersionControl {
      * Load all remote files into project directory.
      */
     @Override
-    public boolean checkout(TaskMonitor taskMonitor) throws Exception
+    public boolean checkout(ActivityMonitor activityMonitor) throws Exception
     {
         // Make sure local site exists
         WebSite localSite = getLocalSite();
@@ -107,10 +107,10 @@ public class VersionControlGit extends VersionControl {
         cloneCmd.setDirectory(tempDir);
         cloneCmd.setCredentialsProvider(GitUtils.getCredentialsProvider());
 
-        // Wrap TaskMonitor in ProgressMonitor
-        if (taskMonitor == null)
-            taskMonitor = new TaskMonitor(System.out);
-        cloneCmd.setProgressMonitor(GitUtils.getProgressMonitor(taskMonitor));
+        // Wrap ActivityMonitor in ProgressMonitor
+        if (activityMonitor == null)
+            activityMonitor = new ActivityMonitor(System.out);
+        cloneCmd.setProgressMonitor(GitUtils.getProgressMonitor(activityMonitor));
 
         // Run clone and move files to site directory
         try {
@@ -142,10 +142,10 @@ public class VersionControlGit extends VersionControl {
      * Override to merge.
      */
     @Override
-    public boolean updateFiles(List<WebFile> theLocalFiles, TaskMonitor taskMonitor) throws Exception
+    public boolean updateFiles(List<WebFile> theLocalFiles, ActivityMonitor activityMonitor) throws Exception
     {
         GitDir gitDir = getGitDir();
-        gitDir.merge(taskMonitor);
+        gitDir.merge(activityMonitor);
         return true;
     }
 
@@ -153,11 +153,11 @@ public class VersionControlGit extends VersionControl {
      * Override to do commit.
      */
     @Override
-    public boolean commitFiles(List<WebFile> theFiles, String aMessage, TaskMonitor taskMonitor) throws Exception
+    public boolean commitFiles(List<WebFile> theFiles, String aMessage, ActivityMonitor activityMonitor) throws Exception
     {
         GitDir gitDir = getGitDir();
         gitDir.commitFiles(theFiles, aMessage);
-        gitDir.push(taskMonitor);
+        gitDir.push(activityMonitor);
 
         // Clear file status
         theFiles.forEach(this::clearFileStatus);
@@ -168,24 +168,24 @@ public class VersionControlGit extends VersionControl {
      * Override to do fetch first.
      */
     @Override
-    public List<WebFile> getUpdateFilesForLocalFiles(List<WebFile> localFiles, TaskMonitor taskMonitor)
+    public List<WebFile> getUpdateFilesForLocalFiles(List<WebFile> localFiles, ActivityMonitor activityMonitor)
     {
         // Do git fetch to bring repo up to date
         try {
             GitDir gdir = getGitDir();
-            gdir.fetch(new TaskMonitor(System.out));
+            gdir.fetch(new ActivityMonitor(System.out));
         }
         catch (Exception e) { throw new RuntimeException(e); }
 
         // Do normal version
-        return super.getUpdateFilesForLocalFiles(localFiles, taskMonitor);
+        return super.getUpdateFilesForLocalFiles(localFiles, activityMonitor);
     }
 
     /**
      * Delete VCS support files from project directory.
      */
     @Override
-    public void disconnect(TaskMonitor taskMonitor) throws Exception
+    public void disconnect(ActivityMonitor activityMonitor) throws Exception
     {
         GitDir gitDir = getGitDir();
         gitDir.deleteDir();

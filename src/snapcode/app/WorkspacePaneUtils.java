@@ -207,7 +207,7 @@ public class WorkspacePaneUtils {
                 return true;
 
             // Otherwise, delete files
-            try { existingProj.deleteProject(new TaskMonitor("Delete Project")); }
+            try { existingProj.deleteProject(new ActivityMonitor("Delete Project")); }
             catch (Exception e) {
                 DialogBox.showExceptionDialog(workspacePane.getUI(), "Error Deleting Project", e);
                 return true;
@@ -259,9 +259,9 @@ public class WorkspacePaneUtils {
         Workspace workspace = workspacePane.getWorkspace();
 
         // Open project for repo URL
-        TaskMonitor taskMonitor = new TaskMonitor("Checkout " + repoURL.getString());
-        TaskRunner<Boolean> checkoutRunner = new TaskRunner<>(() -> workspace.openProjectForRepoUrl(repoURL, taskMonitor));
-        checkoutRunner.setMonitor(taskMonitor);
+        ActivityMonitor activityMonitor = new ActivityMonitor("Checkout " + repoURL.getString());
+        TaskRunner<Boolean> checkoutRunner = new TaskRunner<>(() -> workspace.openProjectForRepoUrl(repoURL, activityMonitor));
+        checkoutRunner.setMonitor(activityMonitor);
         checkoutRunner.start();
 
         // After add project, trigger build and show files

@@ -82,10 +82,10 @@ public class WorkspaceBuilder {
 
         // Create/configure build task and start
         _buildWorkspaceTask = (TaskManagerTask<Boolean>) _workspace.getTaskManager().createTask();
-        _buildWorkspaceTask.setTaskFunction(() -> buildWorkspaceImpl(_buildWorkspaceTask.getTaskMonitor()));
+        _buildWorkspaceTask.setTaskFunction(() -> buildWorkspaceImpl(_buildWorkspaceTask.getActivityMonitor()));
         _buildWorkspaceTask.setOnFailure(e -> e.printStackTrace());
         _buildWorkspaceTask.setOnFinished(() -> handleBuildWorkspaceFinished(_buildWorkspaceTask));
-        _buildWorkspaceTask.getTaskMonitor().addPropChangeListener(this::handleBuildTaskTitleChange, TaskMonitor.TaskTitle_Prop);
+        _buildWorkspaceTask.getActivityMonitor().addPropChangeListener(this::handleBuildTaskTitleChange, ActivityMonitor.TaskTitle_Prop);
         _buildWorkspaceTask.start();
 
         // Register building
@@ -151,7 +151,7 @@ public class WorkspaceBuilder {
     /**
      * Build workspace real.
      */
-    private boolean buildWorkspaceImpl(TaskMonitor taskMonitor)
+    private boolean buildWorkspaceImpl(ActivityMonitor activityMonitor)
     {
         // Reset BuildAgain
         _buildAgain = false;
@@ -184,7 +184,7 @@ public class WorkspaceBuilder {
 
             // Build project
             ProjectBuilder projectBuilder = childProject.getBuilder();
-            boolean projBuildSuccess = projectBuilder.buildProject(taskMonitor);
+            boolean projBuildSuccess = projectBuilder.buildProject(activityMonitor);
             if (!projBuildSuccess) {
                 buildSuccess = false;
                 break;
@@ -202,7 +202,7 @@ public class WorkspaceBuilder {
 
         // Handle BuildAgain
         if (_buildAgain)
-            return buildWorkspaceImpl(taskMonitor);
+            return buildWorkspaceImpl(activityMonitor);
 
         // Return
         return buildSuccess;
@@ -252,10 +252,10 @@ public class WorkspaceBuilder {
      */
     private void handleBuildTaskTitleChange(PropChange propChange)
     {
-        TaskMonitor taskMonitor = (TaskMonitor) propChange.getSource();
-        String taskTitle = taskMonitor.getTaskTitle();
+        ActivityMonitor activityMonitor = (ActivityMonitor) propChange.getSource();
+        String taskTitle = activityMonitor.getTaskTitle();
         TaskManagerTask<?> taskRunner = _buildWorkspaceTask;
-        if (taskRunner != null && taskMonitor == taskRunner.getTaskMonitor())
+        if (taskRunner != null && activityMonitor == taskRunner.getActivityMonitor())
             _buildLogBuffer.append(taskTitle).append('\n');
     }
 }

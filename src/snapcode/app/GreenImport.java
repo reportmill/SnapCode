@@ -59,11 +59,11 @@ public class GreenImport {
         // Create download archive and open project task
         Workspace workspace = workspacePane.getWorkspace();
         TaskManagerTask<Project> openProjectTask = (TaskManagerTask<Project>) workspace.getTaskManager().createTask();
-        TaskMonitor taskMonitor = openProjectTask.getTaskMonitor();
-        taskMonitor.setTitle("Opening Greenfoot");
+        ActivityMonitor activityMonitor = openProjectTask.getActivityMonitor();
+        activityMonitor.setTitle("Opening Greenfoot");
 
         // Configure function
-        openProjectTask.setTaskFunction(() -> openProjectForGreenfootArchiveUrlImpl(workspacePane, archiveUrl, taskMonitor));
+        openProjectTask.setTaskFunction(() -> openProjectForGreenfootArchiveUrlImpl(workspacePane, archiveUrl, activityMonitor));
 
         // Start task
         workspace.getBuilder().setAutoBuildEnabled(false);
@@ -75,12 +75,12 @@ public class GreenImport {
     /**
      * Opens a new project for Greenfoot archive file URL.
      */
-    private static Project openProjectForGreenfootArchiveUrlImpl(WorkspacePane workspacePane, WebURL archiveUrl, TaskMonitor taskMonitor)
+    private static Project openProjectForGreenfootArchiveUrlImpl(WorkspacePane workspacePane, WebURL archiveUrl, ActivityMonitor activityMonitor)
     {
-        // Init task monitor
-        taskMonitor.startForTaskCount(1);
-        taskMonitor.beginTask("Download project", 2);
-        taskMonitor.updateTask(1);
+        // Init activity monitor
+        activityMonitor.startForTaskCount(1);
+        activityMonitor.beginTask("Download project", 2);
+        activityMonitor.updateTask(1);
 
         // Get greenfoot dir for archive URL
         WebFile greenfootDir = getGreenfootDirForArchiveUrl(archiveUrl);
@@ -93,7 +93,7 @@ public class GreenImport {
         WebSite projectSite = SnapCodeUtils.getSnapCodeProjectSiteForName(scenarioName);
         if (projectSite.getExists() && ProjectUtils.isProjectDir(projectSite.getRootDir())) {
             Project project = workspace.openProjectForSite(projectSite);
-            taskMonitor.endTask();
+            activityMonitor.endTask();
             return project;
         }
 
@@ -118,7 +118,7 @@ public class GreenImport {
         createMainClassForGreenfootProject(project);
 
         // End task
-        taskMonitor.endTask();
+        activityMonitor.endTask();
 
         // Return
         return project;

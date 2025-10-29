@@ -1,6 +1,6 @@
 package snapcode.project;
 import snap.props.PropChange;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snap.util.TaskRunner;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -13,8 +13,8 @@ public class TaskManagerTask<T> {
     // The workspace pane
     private TaskManager _taskManager;
 
-    // The task monitor
-    private TaskMonitor _taskMonitor;
+    // The activity monitor
+    private ActivityMonitor _activityMonitor;
 
     // The task runner
     private TaskRunner<T> _taskRunner;
@@ -26,15 +26,15 @@ public class TaskManagerTask<T> {
     {
         super();
         _taskManager = taskManager;
-        _taskMonitor = new TaskMonitor();
+        _activityMonitor = new ActivityMonitor();
         _taskRunner = new TaskRunner<>();
-        _taskRunner.setMonitor(_taskMonitor);
+        _taskRunner.setMonitor(_activityMonitor);
     }
 
     /**
-     * Returns the task monitor.
+     * Returns the activity monitor.
      */
-    public TaskMonitor getTaskMonitor()  { return _taskMonitor; }
+    public ActivityMonitor getActivityMonitor()  { return _activityMonitor; }
 
     /**
      * Returns the task runner.
@@ -44,12 +44,12 @@ public class TaskManagerTask<T> {
     /**
      * Returns a string to describe task.
      */
-    public String getTitle()  { return _taskMonitor.getTitle(); }
+    public String getTitle()  { return _activityMonitor.getTitle(); }
 
     /**
      * Sets a string to describe task.
      */
-    public void setTitle(String aValue)  { _taskMonitor.setTitle(aValue); }
+    public void setTitle(String aValue)  { _activityMonitor.setTitle(aValue); }
 
     /**
      * Returns the task callable function.
@@ -86,15 +86,15 @@ public class TaskManagerTask<T> {
      */
     public void start()
     {
-        _taskMonitor.addPropChangeListener(this::handleTaskMonitorPropChange);
+        _activityMonitor.addPropChangeListener(this::handleActivityMonitorPropChange);
         _taskRunner.addPropChangeListener(this::handleTaskRunnerPropChange);
         _taskManager.startTask(this);
     }
 
     /**
-     * Called when task monitor has prop change.
+     * Called when activity monitor has prop change.
      */
-    private void handleTaskMonitorPropChange(PropChange propChange)
+    private void handleActivityMonitorPropChange(PropChange propChange)
     {
         _taskManager.handleTaskPropChange(this, propChange);
     }

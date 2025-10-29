@@ -4,7 +4,7 @@
 package snapcode.project;
 import snap.props.PropObject;
 import snap.util.ListUtils;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
@@ -224,7 +224,7 @@ public class Workspace extends PropObject {
     /**
      * Opens a project with given repo URL.
      */
-    public boolean openProjectForRepoUrl(WebURL repoURL, TaskMonitor taskMonitor) throws Exception
+    public boolean openProjectForRepoUrl(WebURL repoURL, ActivityMonitor activityMonitor) throws Exception
     {
         // Hack to support github repos in CheerpJ
         //if (repoURL.getFileType().equals("git") && SnapUtils.isWebVM) repoURL = GitHubUtils.downloadGithubZipFile(repoURL);
@@ -256,7 +256,7 @@ public class Workspace extends PropObject {
         VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
 
         // Checkout project
-        boolean checkoutResult = versionControl.checkout(taskMonitor);
+        boolean checkoutResult = versionControl.checkout(activityMonitor);
         if (!checkoutResult)
             throw new RuntimeException("Checkout failed");
 

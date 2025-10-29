@@ -1,6 +1,6 @@
 package snapcode.project;
 import snap.util.ArrayUtils;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snap.web.WebFile;
 
 /**
@@ -11,7 +11,7 @@ public class JavaDeps {
     /**
      * Resolve '//DEPS' dependencies for given java file.
      */
-    public static void resolveDependenciesForFile(TaskMonitor taskMonitor, WebFile javaFile)
+    public static void resolveDependenciesForFile(ActivityMonitor activityMonitor, WebFile javaFile)
     {
         // Get dependencies for file (just return if none)
         JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
@@ -32,11 +32,11 @@ public class JavaDeps {
             // If maven dependency, load first to see if valid
             if (dependency instanceof MavenDependency mavenDependency) {
                 if (!mavenDependency.isLoaded()) {
-                    if (taskMonitor != null)
-                        taskMonitor.beginTask("Loading dependency: " + mavenDependency.getName(), 1);
+                    if (activityMonitor != null)
+                        activityMonitor.beginTask("Loading dependency: " + mavenDependency.getName(), 1);
                     mavenDependency.waitForLoad();
-                    if (taskMonitor != null)
-                        taskMonitor.endTask();
+                    if (activityMonitor != null)
+                        activityMonitor.endTask();
                     if (!mavenDependency.isLoaded())
                         continue;
                 }

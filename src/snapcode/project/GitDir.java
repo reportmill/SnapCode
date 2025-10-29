@@ -6,7 +6,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.PushResult;
 import snap.util.FilePathUtils;
-import snap.util.TaskMonitor;
+import snap.util.ActivityMonitor;
 import snap.web.*;
 import java.io.File;
 import java.util.ArrayList;
@@ -202,7 +202,7 @@ public class GitDir {
     /**
      * Pushes current committed files.
      */
-    public void push(TaskMonitor aTM) throws Exception
+    public void push(ActivityMonitor aTM) throws Exception
     {
         // Get repository and git
         Git git = getGit();
@@ -219,7 +219,7 @@ public class GitDir {
     /**
      * Fetches updates to repo.
      */
-    public void fetch(TaskMonitor aTM) throws Exception
+    public void fetch(ActivityMonitor aTM) throws Exception
     {
         // Do fetch
         Git git = getGit();
@@ -237,7 +237,7 @@ public class GitDir {
     /**
      * Merges updates to working dir and commits.
      */
-    public void merge(TaskMonitor aTM) throws Exception
+    public void merge(ActivityMonitor aTM) throws Exception
     {
         Git git = getGit();
         MergeCommand merge = git.merge();
