@@ -89,12 +89,12 @@ public class HomePageView extends MarkDownView {
 
                 // Create RestoreWorkspaceButton
                 Button restoreWorkspaceButton = new Button("Restore Workspace");
-                restoreWorkspaceButton.setPropsString("Name:RestoreWorkspaceButton; Font:Arial 13; PrefWidth:140; PrefHeight:24; Margin:0,0,0,20");
+                restoreWorkspaceButton.setPropsString("Name:RestoreWorkspaceButton; TextColor: #50; PrefWidth:140; PrefHeight:24; Margin:0,0,0,20");
                 restoreWorkspaceButton.setVisible(_homePage._workspacePane.getProjects().isEmpty());
 
                 // Create ClearWorkspaceButton
                 Button clearWorkspaceButton = new Button("Clear Workspace");
-                clearWorkspaceButton.setPropsString("Name:ClearWorkspaceButton; Font:Arial 13; PrefWidth:120; PrefHeight:24; Margin:0,0,0,20");
+                clearWorkspaceButton.setPropsString("Name:ClearWorkspaceButton; TextColor: #50; PrefWidth:120; PrefHeight:24; Margin:0,0,0,20");
                 clearWorkspaceButton.setVisible(!_homePage._workspacePane.getProjects().isEmpty());
 
                 // Create row, add children and return
@@ -112,7 +112,7 @@ public class HomePageView extends MarkDownView {
 
                 // Create OpenButton
                 Button openButton = new Button("Open...");
-                openButton.setPropsString("Name:OpenButton; PrefWidth:100; PrefHeight:24; Margin:0,0,0,20");
+                openButton.setPropsString("Name:OpenButton; TextColor: #50; PrefWidth:100; PrefHeight:24; Margin:0,0,0,20");
                 if (SnapEnv.isWebVM) {
                     openButton.setText("Open Browser File...");
                     openButton.setPrefWidth(130);
@@ -120,12 +120,12 @@ public class HomePageView extends MarkDownView {
 
                 // Create OpenDesktopFileButton
                 Button openDesktopFileButton = new Button("Open Desktop File...");
-                openDesktopFileButton.setPropsString("Name:OpenDesktopFileButton; PrefWidth:130; PrefHeight:24; Margin:0,0,0,12");
+                openDesktopFileButton.setPropsString("Name:OpenDesktopFileButton; TextColor: #50; PrefWidth:130; PrefHeight:24; Margin:0,0,0,12");
                 openDesktopFileButton.setVisible(SnapEnv.isWebVM);
 
                 // Create OpenScratchPadButton
                 Button openScratchPadButton = new Button("Open Scratch Pad");
-                openScratchPadButton.setPropsString("Name:OpenScratchPadButton; PrefWidth:120; PrefHeight:24; Margin:0,0,0,20");
+                openScratchPadButton.setPropsString("Name:OpenScratchPadButton; TextColor: #50; PrefWidth:120; PrefHeight:24; Margin:0,0,0,20");
 
                 // Create row, add children and return
                 RowView rowView = new RowView();
@@ -221,9 +221,9 @@ public class HomePageView extends MarkDownView {
         MDNode[] linkNodeChildren = linkNode.getChildNodes();
 
         // Get image node and create image view
-        MDNode imageNode = linkNodeChildren[0];
-        View imageNodeView = createViewForImageNode(imageNode);
-        imageNodeView.setMargin(0, 0, 0, 0);
+        //MDNode imageNode = linkNodeChildren[0];
+        //View imageNodeView = createViewForImageNode(imageNode);
+        //imageNodeView.setMargin(0, 0, 0, 0);
 
         // Create text view
         MDNode textNode = linkNodeChildren[1];
@@ -232,9 +232,9 @@ public class HomePageView extends MarkDownView {
 
         // Create container view
         ColView listItemView = new ColView();
-        listItemView.setPropsString("Fill:#F8; Padding:15; Spacing:6; Align: TOP_CENTER; BorderRadius:8; MinWidth:140;");
+        listItemView.setPropsString("Fill:#F8; Padding:12; Spacing:6; Align: TOP_CENTER; Border: #D0D0F8 1; BorderRadius:8; MinWidth:140;");
         addLinkToLinkView(listItemView, linkNode.getOtherText());
-        listItemView.setChildren(imageNodeView, textNodeView);
+        listItemView.setChildren(textNodeView);
 
         // Return
         return listItemView;
