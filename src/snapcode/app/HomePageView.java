@@ -141,9 +141,9 @@ public class HomePageView extends MarkDownView {
                 View headerView = super.createViewForHeaderNode(headerNode);
 
                 // Create ShowSamplesPageText
-                Label showSamplesText = new Label("Show all samples ...");
-                showSamplesText.setPropsString("Font:Arial Italic 20; Margin:0,0,0,30; Padding:0,0,2,0;");
-                showSamplesText.setTextStyleString("Color:#6666FF; Underline:1;");
+                Label showSamplesText = new Label("Show all ...");
+                showSamplesText.setPropsString("Font:Arial Italic 18; Margin:0,0,0,20; Padding:0,0,2,0;");
+                showSamplesText.setTextStyleString("Color:#7777FF; Underline:1;");
                 showSamplesText.setCursor(Cursor.HAND);
                 showSamplesText.addEventHandler(e -> _homePage.showSamplesPage(), MousePress);
 
