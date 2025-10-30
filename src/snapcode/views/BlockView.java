@@ -51,7 +51,6 @@ public class BlockView extends View {
     public BlockView()
     {
         super();
-        setManaged(false);
         setEffect(BACKGROUND_EFFECT);
     }
 
