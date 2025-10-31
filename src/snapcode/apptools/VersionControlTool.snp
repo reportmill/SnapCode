@@ -18,7 +18,7 @@
     <Button Name="CreateCloneButton" PrefWidth="90" Text="Create Clone" />
     <Button Name="DisconnectButton" PrefWidth="90" Text="Disconnect" />
     <Button Name="SnapCloudButton" PrefWidth="140" Text="Save to SnapCloud" />
-    <ProgressBar Name="ProgressBar" PrefWidth="100" PrefHeight="16" Visible="false" />
+    <ProgressBar Name="ProgressBar" PrefWidth="100" PrefHeight="16" Indeterminate="true" />
   </RowView>
   <BoxView Name="RemoteBrowserBox" Margin="3,5,5,5" Border="#88 1" GrowWidth="true" GrowHeight="true" FillWidth="true" FillHeight="true" />
 </ColView>

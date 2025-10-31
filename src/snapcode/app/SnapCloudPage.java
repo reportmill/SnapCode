@@ -170,10 +170,7 @@ public class SnapCloudPage extends WebPage {
         setViewVisible("EmailBox", userEmail == null || userEmail.isEmpty());
 
         // Update ProgressBar
-        ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
-        boolean loading = _remoteBrowser.isLoading();
-        progressBar.setVisible(loading);
-        progressBar.setProgress(loading ? -1 : 0);
+        setViewVisible("ProgressBar", _remoteBrowser.isLoading());
 
         // Update RemoteBrowserToolsBox, BoxRemoteBrowserBox
         setViewVisible("RemoteBrowserToolsBox", userEmail != null && !userEmail.isEmpty());

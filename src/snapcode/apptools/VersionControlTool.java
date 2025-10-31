@@ -12,7 +12,6 @@ import snapcode.app.ProjectTool;
 import snapcode.project.VersionControl;
 import snap.util.ActivityMonitor;
 import snap.util.TaskRunner;
-import snap.view.ProgressBar;
 import snap.view.ViewEvent;
 import snap.viewx.DialogBox;
 import snapcode.webbrowser.WebBrowser;
@@ -132,10 +131,7 @@ public class VersionControlTool extends ProjectTool {
                 SnapCloudPage.getSnapCloudUserUrl() != null);
 
         // Update ProgressBar
-        ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
-        boolean loading = _remoteBrowser.isLoading();
-        progressBar.setVisible(loading);
-        progressBar.setProgress(loading ? -1 : 0);
+        setViewVisible("ProgressBar", _remoteBrowser.isLoading());
     }
 
     /**

@@ -10,7 +10,7 @@
   <RectView PrefHeight="1" Fill="#CC" />
   <RowView Name="StatusBar" GrowWidth="true">
     <Label Name="StatusText" Margin="2" PrefWidth="227" GrowWidth="true" LeanY="BOTTOM" />
-    <ProgressBar Name="ProgressBar" Margin="2" PrefWidth="46" PrefHeight="16" GrowWidth="true" LeanX="CENTER" LeanY="BOTTOM" Visible="false" />
+    <ProgressBar Name="ProgressBar" Margin="2" PrefWidth="46" PrefHeight="16" GrowWidth="true" LeanX="CENTER" LeanY="BOTTOM" Indeterminate="true" />
     <Label Name="ActivityText" PrefWidth="225" Align="CENTER_RIGHT" GrowWidth="true" LeanX="RIGHT" LeanY="BOTTOM" />
   </RowView>
 </ColView>

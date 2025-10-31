@@ -124,16 +124,7 @@ public class WebBrowserPane extends ViewOwner {
         setViewEnabled("NextButton", browser.getNextURL() != null);
 
         // Update ProgressBar
-        ProgressBar pb = getView("ProgressBar", ProgressBar.class);
-        boolean loading = browser.isLoading();
-        if (loading && !pb.isVisible()) {
-            pb.setVisible(true);
-            pb.setProgress(-1);
-        }
-        else if (!loading && pb.isVisible()) {
-            pb.setProgress(0);
-            pb.setVisible(false);
-        }
+        setViewVisible("ProgressBar", browser.isLoading());
     }
 
     /**
