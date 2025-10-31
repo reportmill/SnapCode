@@ -29,7 +29,7 @@ public class DeclMatcher {
     public static final String[] COMMON_PACKAGES = { "", "java.lang", "java.util", "java.io", "java.nio.file" };
 
     // Constant for empty members
-    private static final int MATCH_LIMIT = 20;
+    private static final int MATCH_LIMIT = 30;
 
     /**
      * Constructor.
@@ -261,8 +261,7 @@ public class DeclMatcher {
                 continue;
 
             // If WithVarDecls node is ForEach statement and id expression is before iterable expression end, skip
-            if (withVarDecls instanceof JStmtFor) {
-                JStmtFor forStmt = (JStmtFor) withVarDecls;
+            if (withVarDecls instanceof JStmtFor forStmt) {
                 JExpr iterableExpr = forStmt.getIterableExpr();
                 if (iterableExpr != null && idExpr.getStartCharIndex() < iterableExpr.getEndCharIndex())
                     continue;
@@ -409,8 +408,7 @@ public class DeclMatcher {
     {
         // Iterate over methods in set and return true if any method overrides given method
         for (JavaMember member : memberSet) {
-            if (member instanceof JavaMethod) {
-                JavaMethod method = (JavaMethod) member;
+            if (member instanceof JavaMethod method) {
                 for (JavaMethod superMethod = method.getSuper(); superMethod != null; superMethod = superMethod.getSuper()) {
                     if (newMethod == superMethod)
                         return true;
