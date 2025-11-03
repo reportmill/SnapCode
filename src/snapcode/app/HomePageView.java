@@ -277,7 +277,7 @@ public class HomePageView extends MarkDownView {
     private ChildView createViewForRecentFileUrl(WebURL recentFileUrl)
     {
         // Create label for name
-        Label nameLabel = new Label(recentFileUrl.getFilename());
+        Label nameLabel = new Label(recentFileUrl.getFilenameSimple());
         nameLabel.setPropsString("Font:Arial 13; MinWidth: 140");
 
         // Create separator
@@ -286,7 +286,8 @@ public class HomePageView extends MarkDownView {
         separator.setPrefSize(28, 14);
 
         // Create label for address
-        Label addressLabel = new Label(recentFileUrl.getString());
+        String projectSourceAddress = SnapCodeUtils.getProjectSourceAddressForUrl(recentFileUrl);
+        Label addressLabel = new Label(projectSourceAddress);
         addressLabel.setPropsString("Font:Arial 11");
 
         // Create close box

@@ -719,7 +719,7 @@ public class WorkspacePane extends ViewOwner {
      */
     private void saveOpenProjectsListToPrefs()
     {
-        List<String> projectUrlStrings = ListUtils.map(_workspace.getProjects(), proj -> proj.getSourceURL().getString());
+        List<String> projectUrlStrings = ListUtils.map(_workspace.getProjects(), proj -> proj.getSite().getURL().getString());
         Prefs.getDefaultPrefs().setStringsForKey(projectUrlStrings, OPEN_PROJECTS_PREFS_KEY);
     }
 

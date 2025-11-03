@@ -142,6 +142,10 @@ public class HomePage extends WebPage {
         if (recentProjectUrl == null)
             return;
 
+        // If recent file is old-style project source URL, remove it. Can go soon
+        if (!recentProjectUrl.getScheme().equals("file"))
+            RecentFiles.removeURL(recentProjectUrl);
+
         // Open project URL
         if (!WorkspacePaneUtils.openProjectUrl(_workspacePane, recentProjectUrl))
             removeRecentProjectUrl(recentProjectUrl);

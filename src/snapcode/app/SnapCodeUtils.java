@@ -4,6 +4,7 @@ import snap.util.SnapUtils;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import snapcode.project.VersionControlUtils;
 import java.io.File;
 import java.util.List;
 
@@ -57,11 +58,31 @@ public class SnapCodeUtils {
     }
 
     /**
-     * Returns the SnapCode directory path.
+     * Returns the source for a given URL.
      */
-    public static String getSnapCodeDirPath()
+    public static String getProjectSourceAddressForUrl(WebURL projectUrl)
     {
-        return getSnapCodeDirURL().getPath();
+        // Get remote
+        WebSite projectSite = SnapCodeUtils.getSnapCodeProjectSiteForName(projectUrl.getFilenameSimple());
+        String projectSourceAddr = VersionControlUtils.getRemoteSiteUrlAddress(projectSite);
+
+        // If no remote address, return "Local" or string
+        if (projectSourceAddr == null) {
+            if (projectUrl.getScheme().equals("file"))
+                return "Local";
+            return projectUrl.getString();
+        }
+
+        // Handle sample
+        if (projectSourceAddr.contains("SnapCode/Samples"))
+            return "Sample:" + projectUrl.getFilename();
+
+        // Handle SnapCloud
+        if (projectSourceAddr.contains("dbox://"))
+            return "SnapCloud";
+
+        // Handle anything else
+        return projectSourceAddr;
     }
 
     /**

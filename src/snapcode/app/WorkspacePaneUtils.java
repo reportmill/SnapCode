@@ -138,9 +138,12 @@ public class WorkspacePaneUtils {
      */
     public static boolean openProjectUrl(WorkspacePane workspacePane, WebURL projectUrl)
     {
-        // If Dropbox, replace project URL with local
-        if (projectUrl.getScheme().equals("dbox"))
-            projectUrl = SnapCodeUtils.getSnapCodeDirURL().getChildUrlForPath(projectUrl.getFilename());
+        // If project for URL name already exists, open that
+        WebFile localProjectDir = SnapCodeUtils.getSnapCodeProjectDirForName(projectUrl.getFilenameSimple());
+        if (ProjectUtils.isProjectDir(localProjectDir)) {
+            openProjectForProjectFile(workspacePane, localProjectDir);
+            return true;
+        }
 
         switch (projectUrl.getFileType()) {
 
@@ -379,19 +382,8 @@ public class WorkspacePaneUtils {
      */
     protected static void addRecentProject(Project aProject)
     {
-        WebURL projectURL = aProject.getSourceURL();
-
-        // If source URL is a repo URL, make sure we can use it to find project
-        if (!projectURL.equals(aProject.getSite().getURL())) {
-
-            // If project not in default dir, use project site URL
-            WebFile projectDefaultDir = SnapCodeUtils.getSnapCodeProjectDirForName(projectURL.getFilenameSimple());
-            if (!projectDefaultDir.getPath().equals(aProject.getSite().getPath()))
-                projectURL = aProject.getSite().getURL();
-
-            // Otherwise, remove project site URL (in case it was previously used prior to setting repo)
-            else RecentFiles.removeURL(aProject.getSite().getURL());
-        }
+        // Get project site URL
+        WebURL projectURL = aProject.getSite().getURL();
 
         // If URL to TempProj or Temp dir, just return
         String filePath = projectURL.getPath();
