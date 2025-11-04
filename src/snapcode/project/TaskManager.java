@@ -61,6 +61,16 @@ public class TaskManager extends ViewOwner {
     }
 
     /**
+     * Creates a task for given name.
+     */
+    public TaskRunner<?> createTaskForName(String aName)
+    {
+        TaskRunner<?> task = createTask();
+        task.setName(aName);
+        return task;
+    }
+
+    /**
      * Returns the main task.
      */
     public TaskRunner<?> getMainTask()  { return !_tasks.isEmpty() ? _tasks.get(0) : null; }
@@ -73,6 +83,8 @@ public class TaskManager extends ViewOwner {
         aTask.addPropChangeListener(pc -> handleTaskPropChange(aTask, pc));
         aTask.getMonitor().addPropChangeListener(pc -> handleTaskPropChange(aTask, pc));
         _tasks.add(aTask);
+        if (_tasks.size() == 1)
+            setActivityText(aTask.getName());
         setRunningTasks(true);
         resetLater();
     }

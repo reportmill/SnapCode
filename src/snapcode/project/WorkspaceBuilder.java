@@ -81,7 +81,7 @@ public class WorkspaceBuilder {
         }
 
         // Create/configure build task and start
-        _buildWorkspaceTask = (TaskRunner<Boolean>) _workspace.getTaskManager().createTask();
+        _buildWorkspaceTask = (TaskRunner<Boolean>) _workspace.getTaskManager().createTaskForName("Build Workspace");
         _buildWorkspaceTask.setTaskFunction(() -> buildWorkspaceImpl(_buildWorkspaceTask.getMonitor()));
         _buildWorkspaceTask.setOnFailure(e -> e.printStackTrace());
         _buildWorkspaceTask.setOnFinished(() -> handleBuildWorkspaceFinished(_buildWorkspaceTask));

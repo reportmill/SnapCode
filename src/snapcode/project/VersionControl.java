@@ -7,6 +7,7 @@ import snap.props.PropObject;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.util.ActivityMonitor;
+import snap.util.SnapEnv;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebSite;
@@ -472,6 +473,10 @@ public class VersionControl extends PropObject {
         long localModTime = aFile.getLastModTime();
         long otherModTime = otherFile.getLastModTime();
         if (localModTime == otherModTime)
+            return FileStatus.Identical;
+
+        // Bogus, but until CheerpJ fixes last mod time we need it !!!
+        if (SnapEnv.isWebVM && aFile.getSize() == otherFile.getSize())
             return FileStatus.Identical;
 
         // If bytes match, return identical

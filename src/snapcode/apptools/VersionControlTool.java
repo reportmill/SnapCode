@@ -319,7 +319,7 @@ public class VersionControlTool extends ProjectTool {
         if (!_versionControl.isCheckedOut()) return;
 
         // Create task find update files and forward to update
-        TaskRunner<List<WebFile>> updateTask = (TaskRunner<List<WebFile>>) _workspacePane.getTaskManager().createTask();
+        TaskRunner<List<WebFile>> updateTask = (TaskRunner<List<WebFile>>) _workspacePane.getTaskManager().createTaskForName("Check for updates");
         updateTask.setTaskFunction(() -> _versionControl.getUpdateFilesForLocalFiles(localFiles, updateTask.getMonitor()));
         updateTask.setOnSuccess(updateFiles -> handleCheckForUpdatesSuccess(updateFiles, checkPassively));
         updateTask.setOnFailure(e -> e.printStackTrace());
@@ -352,16 +352,15 @@ public class VersionControlTool extends ProjectTool {
         _workspace.getBuilder().setAutoBuildEnabled(false);
 
         // Call real update files method and configure callbacks
-        ActivityMonitor activityMonitor = new ActivityMonitor("Update files from remote site");
-        TaskRunner<Boolean> updateRunner = new TaskRunner<>(() -> _versionControl.updateFiles(updateFiles, activityMonitor));
-        updateRunner.setMonitor(activityMonitor);
+        TaskRunner<Boolean> updateRunner = new TaskRunner<>("Update files from remote site");
+        updateRunner.setTaskFunction(() -> _versionControl.updateFiles(updateFiles, updateRunner.getMonitor()));
         updateRunner.setOnSuccess(completed -> handleUpdateFilesSuccess(updateFiles));
         updateRunner.setOnFinished(() -> handleUpdateFilesFinished());
         updateRunner.setOnFailure(exception -> handleUpdateFilesFailed(exception));
         updateRunner.start();
 
         // Show progress dialog
-        activityMonitor.showProgressPanel(_workspacePane.getUI());
+        updateRunner.getMonitor().showProgressPanel(_workspacePane.getUI());
     }
 
     /**
