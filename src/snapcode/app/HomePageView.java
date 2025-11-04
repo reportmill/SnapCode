@@ -3,13 +3,14 @@ import snap.geom.HPos;
 import snap.geom.Insets;
 import snap.gfx.*;
 import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.util.SnapEnv;
 import snap.view.*;
 import snap.web.RecentFiles;
 import snap.web.WebURL;
 import snap.util.MDNode;
 import snap.viewx.MarkDownView;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * The MarkDownView for HomePage.
@@ -249,18 +250,18 @@ public class HomePageView extends MarkDownView {
         setDirectiveValue("OpenRecent", null);
 
         // Get recent files and create views
-        WebURL[] recentFileUrls = RecentFiles.getURLs();
-        if (recentFileUrls.length > 8)
-            recentFileUrls = Arrays.copyOfRange(recentFileUrls, 0, 8);
-        View[] recentFileViews = ArrayUtils.map(recentFileUrls, this::createViewForRecentFileUrl, View.class);
+        List<WebURL> recentFileUrls = RecentFiles.getUrls();
+        if (recentFileUrls.size() > 8)
+            recentFileUrls = recentFileUrls.subList(0, 8);
+        List<View> recentFileViews = ListUtils.map(recentFileUrls, this::createViewForRecentFileUrl);
 
         // Create ColView for list
         ColView openRecentListView = new ColView();
         openRecentListView.setPropsString("Margin:10,10,10,40;");
-        openRecentListView.setChildren(recentFileViews);
+        openRecentListView.setChildren(recentFileViews.toArray(new View[0]));
 
         // If no files, add label
-        if (recentFileUrls.length == 0) {
+        if (recentFileUrls.isEmpty()) {
             Label noRecentFilesLabel = new Label("(No recent files)");
             noRecentFilesLabel.setPropsString("Font:Arial Italic 16; Margin:5");
             noRecentFilesLabel.setTextColor(Color.GRAY);
