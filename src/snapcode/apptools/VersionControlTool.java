@@ -1,6 +1,7 @@
 package snapcode.apptools;
+import snap.geom.HPos;
 import snap.props.PropChangeListener;
-import snap.view.BoxView;
+import snap.view.*;
 import snap.web.WebURL;
 import snapcode.app.SnapCloudPage;
 import snapcode.app.WorkspaceTools;
@@ -12,7 +13,6 @@ import snapcode.app.ProjectTool;
 import snapcode.project.VersionControl;
 import snap.util.ActivityMonitor;
 import snap.util.TaskRunner;
-import snap.view.ViewEvent;
 import snap.viewx.DialogBox;
 import snapcode.webbrowser.WebBrowser;
 import snap.web.WebFile;
@@ -73,6 +73,16 @@ public class VersionControlTool extends ProjectTool {
         // Get VersionControl for project site and set listener
         _versionControl = VersionControl.getVersionControlForProjectSite(projectSite);
         _versionControl.addPropChangeListener(_versionControlPropChangeLsnr);
+        resetLater();
+    }
+
+    /**
+     * Clears the remote URL address.
+     */
+    private void clearRemoteUrlAddress()
+    {
+        setRemoteUrlAddress(null);
+        connectToRemoteSite();
     }
 
     /**
@@ -92,6 +102,24 @@ public class VersionControlTool extends ProjectTool {
         // Add to RemoteBrowserBox
         BoxView remoteBrowserBox = getView("RemoteBrowserBox", BoxView.class);
         remoteBrowserBox.setContent(_remoteBrowser);
+
+        // Add clear button to RemoteURLText
+        CloseBox clearRemoteUrlButton = new CloseBox();
+        clearRemoteUrlButton.setMargin(0, 4, 0, 4);
+        clearRemoteUrlButton.setLeanX(HPos.RIGHT);
+        clearRemoteUrlButton.addEventHandler(e -> clearRemoteUrlAddress(), View.Action);
+        TextField remoteUrlText = getView("RemoteURLText", TextField.class);
+        remoteUrlText.getLabel().setGraphicAfter(clearRemoteUrlButton);
+        remoteUrlText.getLabel().setPickable(true);
+    }
+
+    /**
+     * Override to connect to remote.
+     */
+    @Override
+    protected void initShowing()
+    {
+        connectToRemoteSite();
     }
 
     /**
@@ -110,11 +138,8 @@ public class VersionControlTool extends ProjectTool {
         if (rootDir != null && !rootDir.isVerified())
             CompletableFuture.runAsync(() -> { rootDir.getExists(); resetLater(); });
 
-        // Update CreateRemoteButton, CreateCloneButton, ConnectButton
-        boolean isCloneExists = _versionControl.isCloneExists();
+        // Update CreateRemoteButton
         setViewVisible("CreateRemoteButton", !isRemoteExists && _versionControl.canCreateRemote());
-        setViewVisible("CreateCloneButton", !isCloneExists && _versionControl.canCreateRemote());
-        setViewVisible("ConnectButton", isRemoteExists);
 
         // Update CheckoutButton, UpdateFilesButton, ReplaceFilesButton, CommitFilesButton
         boolean isCheckedOut = _versionControl.isCheckedOut();
@@ -122,9 +147,6 @@ public class VersionControlTool extends ProjectTool {
         setViewVisible("UpdateFilesButton", isCheckedOut);
         setViewVisible("ReplaceFilesButton", isCheckedOut);
         setViewVisible("CommitFilesButton", isCheckedOut);
-
-        // Update DisconnectButton
-        setViewVisible("DisconnectButton", isCloneExists);
 
         // Update SnapCloudButton
         setViewVisible("SnapCloudButton", (remoteUrlAddress == null || remoteUrlAddress.isEmpty()) &&
@@ -142,24 +164,19 @@ public class VersionControlTool extends ProjectTool {
         switch (anEvent.getName()) {
 
             // Handle RemoteURLText
-            case "RemoteURLText": setRemoteUrlAddress(anEvent.getStringValue()); break;
+            case "RemoteURLText" -> setRemoteUrlAddress(anEvent.getStringValue());
 
-            // Handle ConnectButton, CreateCloneButton, CheckoutButton
-            case "CreateRemoteButton": createRemoteSite(); break;
-            case "CreateCloneButton": createCloneSite(); break;
-            case "ConnectButton": connectToRemoteSite(); break;
-            case "CheckoutButton": checkout(); break;
+            // Handle CreateRemoteButton, CheckoutButton
+            case "CreateRemoteButton" -> createRemoteSite();
+            case "CheckoutButton" -> checkout();
 
             // Handle UpdateFilesButton, ReplaceFilesButton, CommitFilesButton
-            case "UpdateFilesButton": checkForUpdates(false); break;
-            case "ReplaceFilesButton": replaceFiles(getSiteRootDirAsList()); break;
-            case "CommitFilesButton": commitFiles(getSiteRootDirAsList(), true); break;
-
-            // Handle DisconnectButton
-            case "DisconnectButton": setRemoteUrlAddress(null); break;
+            case "UpdateFilesButton" -> checkForUpdates(false);
+            case "ReplaceFilesButton" -> replaceFiles(getSiteRootDirAsList());
+            case "CommitFilesButton" -> commitFiles(getSiteRootDirAsList(), true);
 
             // Handle SnapCloudButton
-            case "SnapCloudButton": saveToSnapCloud(); break;
+            case "SnapCloudButton" -> saveToSnapCloud();
         }
     }
 
@@ -195,23 +212,6 @@ public class VersionControlTool extends ProjectTool {
     private void handleCreateRemoteFailed(Exception exception)
     {
         DialogBox.showExceptionDialog(_workspacePane.getUI(), "Create remote failed", exception);
-    }
-
-    /**
-     * Create clone site.
-     */
-    private void createCloneSite()
-    {
-        // Create ActivityMonitor for create clone site
-        String title = "Create clone site " + _versionControl.getRemoteSiteUrlAddress();
-        ActivityMonitor activityMonitor = new ActivityMonitor(title);
-        TaskRunner<Boolean> checkoutRunner = new TaskRunner<>(() -> _versionControl.createCloneSite(activityMonitor));
-        checkoutRunner.setMonitor(activityMonitor);
-
-        // Configure callbacks and start
-        checkoutRunner.setOnSuccess(obj -> handleCreateRemoteSuccess());
-        checkoutRunner.setOnFailure(this::handleCreateRemoteFailed);
-        checkoutRunner.start();
     }
 
     /**
@@ -380,10 +380,6 @@ public class VersionControlTool extends ProjectTool {
         WorkspaceBuilder builder = _workspace.getBuilder();
         builder.setAutoBuildEnabled(true);
         builder.buildWorkspaceLater();
-
-        // Connect to remote site
-        if (isUISet())
-            connectToRemoteSite();
     }
 
     /**
@@ -447,10 +443,6 @@ public class VersionControlTool extends ProjectTool {
         WorkspaceBuilder builder = _workspace.getBuilder();
         builder.setAutoBuildEnabled(true);
         builder.buildWorkspaceLater();
-
-        // Connect to remote site
-        if (isUISet())
-            connectToRemoteSite();
     }
 
     /**
@@ -524,18 +516,25 @@ public class VersionControlTool extends ProjectTool {
         setRemoteUrlAddress(snapCloudProjectUrl.getString());
 
         // Create ActivityMonitor for save to snap cloud
-        String title = "Save to Snap Cloud " + _versionControl.getRemoteSiteUrlAddress();
-        ActivityMonitor activityMonitor = new ActivityMonitor(title);
-        TaskRunner<Boolean> saveToSnapCloudRunner = new TaskRunner<>(() -> saveToSnapCloudImpl(activityMonitor));
-        saveToSnapCloudRunner.setMonitor(activityMonitor);
+        TaskRunner<Boolean> saveToSnapCloudRunner = new TaskRunner<>("Save to Snap Cloud " + _versionControl.getRemoteSiteUrlAddress());
+        saveToSnapCloudRunner.setTaskFunction(() -> saveToSnapCloudImpl(saveToSnapCloudRunner.getMonitor()));
 
         // Configure callbacks and start
-        saveToSnapCloudRunner.setOnSuccess(obj -> resetLater());
+        saveToSnapCloudRunner.setOnFinished(this::handleSaveToSnapCloudFinished);
         saveToSnapCloudRunner.setOnFailure(this::handleCommitFilesFailed);
         saveToSnapCloudRunner.start();
 
         // Show progress dialog
-        activityMonitor.showProgressPanel(_workspacePane.getUI());
+        saveToSnapCloudRunner.getMonitor().showProgressPanel(_workspacePane.getUI());
+    }
+
+    /**
+     * Called when saveToSnapCloud() finishes.
+     */
+    private void handleSaveToSnapCloudFinished()
+    {
+        connectToRemoteSite();
+        resetLater();
     }
 
     /**

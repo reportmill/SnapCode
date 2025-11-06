@@ -3,22 +3,21 @@
   <RowView MinWidth="500" Margin="8,8,8,12" Padding="8" Fill="#F6" Border="#E8 1" BorderRadius="8" Font="Arial 20">
     <Label Text="Version Control" />
   </RowView>
-  <RowView Margin="10,10,30,10" GrowWidth="true" Font="Arial 16">
-    <Label Margin="5,5,5,8" Text="Remote Server:" />
-    <TextField Name="RemoteURLText" Margin="5" Padding="4" PrefWidth="600" />
-  </RowView>
-  <RowView Margin="10" Spacing="5" GrowWidth="true">
-    <Label Margin="5,5,5,8" Font="Arial 16" Text="Remote Files:" />
+  <RowView Margin="20,20,20,40" Spacing="8" GrowWidth="true" Font="Arial 16">
     <Button Name="CreateRemoteButton" PrefWidth="120" Text="Create Remote" />
-    <Button Name="ConnectButton" PrefWidth="90" Text="Connect" />
     <Button Name="CheckoutButton" PrefWidth="120" Text="Checkout Project" />
-    <Button Name="UpdateFilesButton" PrefWidth="90" Text="Update Files" />
-    <Button Name="CommitFilesButton" PrefWidth="90" Text="Commit Files" />
-    <Button Name="ReplaceFilesButton" PrefWidth="90" Text="Replace Files" />
-    <Button Name="CreateCloneButton" PrefWidth="90" Text="Create Clone" />
-    <Button Name="DisconnectButton" PrefWidth="90" Text="Disconnect" />
-    <Button Name="SnapCloudButton" PrefWidth="140" Text="Save to SnapCloud" />
+    <Button Name="UpdateFilesButton" PrefWidth="120" Text="Update Files" />
+    <Button Name="CommitFilesButton" PrefWidth="120" Text="Commit Files" />
+    <Button Name="ReplaceFilesButton" PrefWidth="120" Text="Replace Files" />
+    <Button Name="SnapCloudButton" PrefWidth="160" Text="Save to SnapCloud" />
+  </RowView>
+  <RowView Margin="10,10,10,10" GrowWidth="true" Font="Arial 14">
+    <Label Margin="0,0,0,8" Text="Remote Server:" />
+    <TextField Name="RemoteURLText" Margin="5" Padding="4" PrefWidth="500" />
+  </RowView>
+  <RowView GrowWidth="true">
+    <Label Margin="5,5,5,18" Font="Arial 14" Text="Remote Files:" />
     <ProgressBar Name="ProgressBar" PrefWidth="100" PrefHeight="16" Indeterminate="true" />
   </RowView>
-  <BoxView Name="RemoteBrowserBox" Margin="3,5,5,5" Border="#88 1" GrowWidth="true" GrowHeight="true" FillWidth="true" FillHeight="true" />
+  <BoxView Name="RemoteBrowserBox" Margin="3,8,8,8" Border="#88 1" BorderRadius="4" GrowWidth="true" GrowHeight="true" FillWidth="true" FillHeight="true" />
 </ColView>
