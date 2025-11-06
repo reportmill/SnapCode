@@ -185,13 +185,9 @@ public class VersionControlTool extends ProjectTool {
      */
     private void createRemoteSite()
     {
-        // Create ActivityMonitor for create remote site
-        String title = "Create remote site " + _versionControl.getRemoteSiteUrlAddress();
-        ActivityMonitor activityMonitor = new ActivityMonitor(title);
-        TaskRunner<Boolean> createRemoteSiteRunner = new TaskRunner<>(() -> _versionControl.createRemoteSite(activityMonitor));
-        createRemoteSiteRunner.setMonitor(activityMonitor);
-
-        // Configure callbacks and start
+        // Create task runner for create remote site, configure callbacks and start
+        TaskRunner<Boolean> createRemoteSiteRunner = new TaskRunner<>("Create remote site " + _versionControl.getRemoteSiteUrlAddress());
+        createRemoteSiteRunner.setTaskFunction(() -> _versionControl.createRemoteSite(createRemoteSiteRunner.getMonitor()));
         createRemoteSiteRunner.setOnSuccess(obj -> handleCreateRemoteSuccess());
         createRemoteSiteRunner.setOnFailure(this::handleCreateRemoteFailed);
         createRemoteSiteRunner.start();
@@ -259,19 +255,15 @@ public class VersionControlTool extends ProjectTool {
         WorkspaceBuilder builder = _workspace.getBuilder();
         builder.setAutoBuildEnabled(false);
 
-        // Create ActivityMonitor for checkout
-        String title = "Checkout from " + _versionControl.getRemoteSiteUrlAddress();
-        ActivityMonitor activityMonitor = new ActivityMonitor(title);
-        TaskRunner<Boolean> checkoutRunner = new TaskRunner<>(() -> _versionControl.checkout(activityMonitor));
-        checkoutRunner.setMonitor(activityMonitor);
-
-        // Configure callbacks and start
+        // Create task runner for checkout, configure callbacks and start
+        TaskRunner<Boolean> checkoutRunner = new TaskRunner<>("Checkout from " + _versionControl.getRemoteSiteUrlAddress());
+        checkoutRunner.setTaskFunction(() -> _versionControl.checkout(checkoutRunner.getMonitor()));
         checkoutRunner.setOnSuccess(obj -> handleCheckoutSuccess());
         checkoutRunner.setOnFailure(exception -> handleCheckoutFailed(exception));
         checkoutRunner.start();
 
         // Show progress dialog
-        activityMonitor.showProgressPanel(_workspacePane.getUI());
+        checkoutRunner.getMonitor().showProgressPanel(_workspacePane.getUI());
     }
 
     /**
@@ -351,7 +343,7 @@ public class VersionControlTool extends ProjectTool {
         // Disable workspace AutoBuild
         _workspace.getBuilder().setAutoBuildEnabled(false);
 
-        // Call real update files method and configure callbacks
+        // Create task runner for update, configure callbacks and start
         TaskRunner<Boolean> updateRunner = new TaskRunner<>("Update files from remote site");
         updateRunner.setTaskFunction(() -> _versionControl.updateFiles(updateFiles, updateRunner.getMonitor()));
         updateRunner.setOnSuccess(completed -> handleUpdateFilesSuccess(updateFiles));
@@ -413,17 +405,16 @@ public class VersionControlTool extends ProjectTool {
         // Disable workspace AutoBuild
         _workspace.getBuilder().setAutoBuildEnabled(false);
 
-        // Call real replace method and configure callbacks
-        ActivityMonitor activityMonitor = new ActivityMonitor("Replace files from remote site");
-        TaskRunner<Boolean> replaceRunner = new TaskRunner<>(() -> _versionControl.replaceFiles(replaceFiles, activityMonitor));
-        replaceRunner.setMonitor(activityMonitor);
+        // Create task runner for replace files, configure callbacks and start
+        TaskRunner<Boolean> replaceRunner = new TaskRunner<>("Replace files from remote site");
+        replaceRunner.setTaskFunction(() -> _versionControl.replaceFiles(replaceFiles, replaceRunner.getMonitor()));
         replaceRunner.setOnSuccess(obj -> handleReplaceFilesSuccess(replaceFiles));
         replaceRunner.setOnFinished(() -> handleReplaceFilesFinished());
         replaceRunner.setOnFailure(exception -> handleReplaceFilesFailed(exception));
         replaceRunner.start();
 
         // Show progress dialog
-        activityMonitor.showProgressPanel(_workspacePane.getUI());
+        replaceRunner.getMonitor().showProgressPanel(_workspacePane.getUI());
     }
 
     /**
@@ -474,16 +465,15 @@ public class VersionControlTool extends ProjectTool {
         if (showPanel && !transferPane.showPanel(this, commitFiles, VcsTransferPane.Op.Commit))
             return;
 
-        // Do real commit
+        // Create task runner for commit, configure callbacks and start
         String commitMessage = transferPane.getCommitMessage();
-        ActivityMonitor activityMonitor = new ActivityMonitor("Commit files to remote site");
-        TaskRunner<Boolean> commitRunner = new TaskRunner<>(() -> _versionControl.commitFiles(commitFiles, commitMessage, activityMonitor));
-        commitRunner.setMonitor(activityMonitor);
+        TaskRunner<Boolean> commitRunner = new TaskRunner<>("Commit files to remote site");
+        commitRunner.setTaskFunction(() -> _versionControl.commitFiles(commitFiles, commitMessage, commitRunner.getMonitor()));
         commitRunner.setOnFailure(exception -> handleCommitFilesFailed(exception));
         commitRunner.start();
 
         // Show progress dialog
-        activityMonitor.showProgressPanel(_workspacePane.getUI());
+        commitRunner.getMonitor().showProgressPanel(_workspacePane.getUI());
     }
 
     /**
@@ -515,11 +505,9 @@ public class VersionControlTool extends ProjectTool {
         WebURL snapCloudProjectUrl = snapCloudUserUrl.getChildUrlForPath(_proj.getName());
         setRemoteUrlAddress(snapCloudProjectUrl.getString());
 
-        // Create ActivityMonitor for save to snap cloud
+        // Create task runner for save to snap cloud, configure callbacks and start
         TaskRunner<Boolean> saveToSnapCloudRunner = new TaskRunner<>("Save to Snap Cloud " + _versionControl.getRemoteSiteUrlAddress());
         saveToSnapCloudRunner.setTaskFunction(() -> saveToSnapCloudImpl(saveToSnapCloudRunner.getMonitor()));
-
-        // Configure callbacks and start
         saveToSnapCloudRunner.setOnFinished(this::handleSaveToSnapCloudFinished);
         saveToSnapCloudRunner.setOnFailure(this::handleCommitFilesFailed);
         saveToSnapCloudRunner.start();
