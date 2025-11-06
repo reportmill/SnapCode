@@ -148,6 +148,11 @@ public class VersionControlTool extends ProjectTool {
         setViewVisible("ReplaceFilesButton", isCheckedOut);
         setViewVisible("CommitFilesButton", isCheckedOut);
 
+        // Update ReplaceFilesButton, CommitFilesButton Enabled based on whether there are modified files
+        boolean isProjectModified = isCheckedOut && _versionControl.isFileModified(_versionControl.getLocalSite().getRootDir());
+        setViewEnabled("ReplaceFilesButton", isProjectModified);
+        setViewEnabled("CommitFilesButton", isProjectModified);
+
         // Update SnapCloudButton
         setViewVisible("SnapCloudButton", (remoteUrlAddress == null || remoteUrlAddress.isEmpty()) &&
                 SnapCloudPage.getSnapCloudUserUrl() != null);
@@ -222,11 +227,11 @@ public class VersionControlTool extends ProjectTool {
             return;
         }
 
-        // Reset remote site root dir
-        WebFile rootDir = remoteSite.getRootDir();
-        rootDir.reset();
+        // Reset remote files
+        remoteSite.resetFiles();
 
         // Set root dir in remote browser
+        WebFile rootDir = remoteSite.getRootDir();
         _remoteBrowser.setSelFile(rootDir);
     }
 
@@ -309,6 +314,9 @@ public class VersionControlTool extends ProjectTool {
     {
         // Sanity check
         if (!_versionControl.isCheckedOut()) return;
+
+        // Reset remote files
+        getRemoteSite().resetFiles();
 
         // Create task find update files and forward to update
         TaskRunner<List<WebFile>> updateTask = (TaskRunner<List<WebFile>>) _workspacePane.getTaskManager().createTaskForName("Check for updates");
@@ -492,6 +500,9 @@ public class VersionControlTool extends ProjectTool {
         WebFile file = (WebFile) aPC.getSource();
         ProjectFilesTool projectFilesTool = _workspacePane.getProjectFilesTool();
         projectFilesTool.handleFileChange(file);
+
+        // Reset UI to update some buttons enabled (commit/replace)
+        resetLater();
     }
 
     /**

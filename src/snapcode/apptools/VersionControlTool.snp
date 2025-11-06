@@ -6,7 +6,7 @@
   <RowView Margin="20,20,20,40" Spacing="8" GrowWidth="true" Font="Arial 16">
     <Button Name="CreateRemoteButton" PrefWidth="120" Text="Create Remote" />
     <Button Name="CheckoutButton" PrefWidth="120" Text="Checkout Project" />
-    <Button Name="UpdateFilesButton" PrefWidth="120" Text="Update Files" />
+    <Button Name="UpdateFilesButton" PrefWidth="150" Text="Check for Updates" />
     <Button Name="CommitFilesButton" PrefWidth="120" Text="Commit Files" />
     <Button Name="ReplaceFilesButton" PrefWidth="120" Text="Replace Files" />
     <Button Name="SnapCloudButton" PrefWidth="160" Text="Save to SnapCloud" />
