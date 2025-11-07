@@ -434,10 +434,6 @@ public class Project extends PropObject {
         String propName = propChange.getPropName();
         WebFile file = (WebFile) propChange.getSource();
 
-        // If build file, just return
-        if (getBuildDir().containsFile(file))
-            return;
-
         // Handle Exists prop change: Call fileAdded or fileSaved
         if (propName == WebFile.Exists_Prop) {
             if ((Boolean) propChange.getNewValue())

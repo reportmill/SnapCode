@@ -5,6 +5,7 @@ import snap.view.*;
 import snap.web.WebURL;
 import snapcode.app.SnapCloudPage;
 import snapcode.app.WorkspaceTools;
+import snapcode.project.VersionControlSnapCloud;
 import snapcode.project.VersionControlUtils;
 import snapcode.project.WorkspaceBuilder;
 import snap.props.PropChange;
@@ -153,9 +154,12 @@ public class VersionControlTool extends ProjectTool {
         setViewEnabled("ReplaceFilesButton", isProjectModified);
         setViewEnabled("CommitFilesButton", isProjectModified);
 
-        // Update SnapCloudButton
+        // Update SnapCloudButton, SnapCloudAutosaveCheckBox
         setViewVisible("SnapCloudButton", (remoteUrlAddress == null || remoteUrlAddress.isEmpty()) &&
                 SnapCloudPage.getSnapCloudUserUrl() != null);
+        setViewVisible("SnapCloudAutosaveCheckBox", _versionControl instanceof VersionControlSnapCloud);
+        if (_versionControl instanceof VersionControlSnapCloud snapCloudVC)
+            setViewValue("SnapCloudAutosaveCheckBox", snapCloudVC.isAutoSave());
 
         // Update ProgressBar
         setViewVisible("ProgressBar", _remoteBrowser.isLoading());
@@ -180,8 +184,9 @@ public class VersionControlTool extends ProjectTool {
             case "ReplaceFilesButton" -> replaceFiles(getSiteRootDirAsList());
             case "CommitFilesButton" -> commitFiles(getSiteRootDirAsList(), true);
 
-            // Handle SnapCloudButton
+            // Handle SnapCloudButton, SnapCloudAutosaveCheckBox
             case "SnapCloudButton" -> saveToSnapCloud();
+            case "SnapCloudAutosaveCheckBox" -> ((VersionControlSnapCloud) _versionControl).setAutoSave(anEvent.getBoolValue());
         }
     }
 
@@ -517,23 +522,11 @@ public class VersionControlTool extends ProjectTool {
         setRemoteUrlAddress(snapCloudProjectUrl.getString());
 
         // Create task runner for save to snap cloud, configure callbacks and start
-        TaskRunner<Boolean> saveToSnapCloudRunner = new TaskRunner<>("Save to Snap Cloud " + _versionControl.getRemoteSiteUrlAddress());
+        TaskRunner<Boolean> saveToSnapCloudRunner = (TaskRunner<Boolean>) _workspacePane.getTaskManager().createTaskForName("Save to SnapCloud");
         saveToSnapCloudRunner.setTaskFunction(() -> saveToSnapCloudImpl(saveToSnapCloudRunner.getMonitor()));
         saveToSnapCloudRunner.setOnFinished(this::handleSaveToSnapCloudFinished);
         saveToSnapCloudRunner.setOnFailure(this::handleCommitFilesFailed);
         saveToSnapCloudRunner.start();
-
-        // Show progress dialog
-        saveToSnapCloudRunner.getMonitor().showProgressPanel(_workspacePane.getUI());
-    }
-
-    /**
-     * Called when saveToSnapCloud() finishes.
-     */
-    private void handleSaveToSnapCloudFinished()
-    {
-        connectToRemoteSite();
-        resetLater();
     }
 
     /**
@@ -545,6 +538,28 @@ public class VersionControlTool extends ProjectTool {
         List<WebFile> commitFiles = _versionControl.getModifiedFilesForLocalFiles(getSiteRootDirAsList());
         return _versionControl.commitFiles(commitFiles, "", activityMonitor);
     }
+
+    /**
+     * Called when saveToSnapCloud() finishes.
+     */
+    private void handleSaveToSnapCloudFinished()
+    {
+        if (isShowing()) {
+            connectToRemoteSite();
+            resetLater();
+        }
+        _autosaveFilesRun = null;
+    }
+
+    /**
+     * Called to handle SnapCloud autosave.
+     */
+    public void autosaveFilesToSnapCloud()
+    {
+        if (_autosaveFilesRun == null)
+            runDelayed(_autosaveFilesRun = this::saveToSnapCloud, 500);
+    }
+    private Runnable _autosaveFilesRun;
 
     /**
      * Resets the given files and reloads.

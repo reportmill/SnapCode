@@ -632,13 +632,26 @@ public class WorkspacePane extends ViewOwner {
         String propName = propChange.getPropName();
         WebFile file = (WebFile) propChange.getSource();
 
-        // Forward to project
-        Project project = Project.getProjectForFile(file); assert project != null;
-        project.handleProjectFileChange(propChange);
-
         // Handle LastModTime, Modified: Update file in ProjectFilesTool
         if (propName == WebFile.LastModTime_Prop || propName == WebFile.Modified_Prop)
             getProjectFilesTool().handleFileChange(file);
+
+        // If build file, just return
+        Project project = Project.getProjectForFile(file); assert project != null;
+        if (project.getBuildDir().containsFile(file))
+            return;
+
+        // Forward to project
+        project.handleProjectFileChange(propChange);
+
+        // Handle autosave files to SnapCloud
+        if (propName == WebFile.LastModTime_Prop) {
+            if (project.getVersionControl() instanceof VersionControlSnapCloud snapCloudVC && snapCloudVC.isAutoSave()) {
+                ProjectPane projectPane = getProjectPaneForProject(project);
+                VersionControlTool versionControlTool = projectPane.getVersionControlTool();
+                versionControlTool.autosaveFilesToSnapCloud();
+            }
+        }
     }
 
     /**
