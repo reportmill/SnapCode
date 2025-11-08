@@ -476,8 +476,14 @@ public class VersionControl extends PropObject {
             return FileStatus.Identical;
 
         // Bogus, but until CheerpJ fixes last mod time we need it !!!
-        if (SnapEnv.isWebVM && aFile.getSize() == otherFile.getSize())
-            return FileStatus.Identical;
+        if (SnapEnv.isWebVM) {
+            localModTime /= 1000; // CheerpJ stores to the second, not millis
+            otherModTime /= 1000;
+            if (localModTime == otherModTime)
+                return FileStatus.Identical;
+            if (aFile.getSize() == otherFile.getSize())
+                return FileStatus.Identical;
+        }
 
         // If bytes match, return identical
         if (ArrayUtils.equals(aFile.getBytes(), otherFile.getBytes()))
