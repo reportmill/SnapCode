@@ -649,12 +649,20 @@ public class VersionControl extends PropObject {
     {
         // If other file exists, copy to local file
         if (otherFile.getExists()) {
-            if (localFile.isFile())
+
+            // Only copy files
+            if (localFile.isFile()) {
+
+                // Copy file
                 localFile.setBytes(otherFile.getBytes());
-            WebResponse resp = localFile.save();
-            if (resp.getException() != null)
-                throw new RuntimeException(resp.getException());
-            localFile.saveLastModTime(otherFile.getLastModTime());
+                WebResponse resp = localFile.save();
+                if (resp.getException() != null)
+                    throw new RuntimeException(resp.getException());
+
+                // Set last mod time to other file mod time
+                try { WebSite.setLastModTimeForFile(localFile, otherFile.getLastModTime()); }
+                catch (Exception e) { throw new RuntimeException(e); }
+            }
         }
 
         // Otherwise delete local file
