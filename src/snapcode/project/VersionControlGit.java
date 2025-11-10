@@ -86,7 +86,7 @@ public class VersionControlGit extends VersionControl {
      * Load all remote files into project directory.
      */
     @Override
-    public boolean checkout(ActivityMonitor activityMonitor) throws Exception
+    protected boolean checkoutImpl(ActivityMonitor activityMonitor) throws Exception
     {
         // Make sure local site exists
         WebSite localSite = getLocalSite();
@@ -142,7 +142,7 @@ public class VersionControlGit extends VersionControl {
      * Override to merge.
      */
     @Override
-    public boolean updateFiles(List<WebFile> theLocalFiles, ActivityMonitor activityMonitor) throws Exception
+    protected boolean updateFilesImpl(List<WebFile> theLocalFiles, ActivityMonitor activityMonitor) throws Exception
     {
         GitDir gitDir = getGitDir();
         gitDir.merge(activityMonitor);

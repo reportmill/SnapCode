@@ -31,11 +31,17 @@ public class VersionControl extends PropObject {
     // The clone site
     private WebSite _cloneSite;
 
+    // The current activity status
+    private ActivityStatus _activityStatus = ActivityStatus.Idle;
+
     // A map of file to it's status
     private Map<WebFile, FileStatus> _filesStatusCache = Collections.synchronizedMap(new HashMap<>());
 
     // Constants for the state of files relative to remote cache
     public enum FileStatus { Added, Removed, Modified, Identical }
+
+    // Constants for activity status
+    public enum ActivityStatus { Idle, Checkout, Updating, Replacing, Committing }
 
     // Constants for properties
     public static final String FileStatus_Prop = "FileStatus";
@@ -104,6 +110,11 @@ public class VersionControl extends PropObject {
         WebFile cloneDir = sandboxDir.createChildFileForPath("/Clone", true);
         return cloneDir.getAsSite();
     }
+
+    /**
+     * Returns the activity status.
+     */
+    public boolean isIdle()  { return _activityStatus == ActivityStatus.Idle; }
 
     /**
      * Returns whether remote site exists.
@@ -186,6 +197,20 @@ public class VersionControl extends PropObject {
      */
     public boolean checkout(ActivityMonitor activityMonitor) throws Exception
     {
+        try {
+            _activityStatus = ActivityStatus.Checkout;
+            return checkoutImpl(activityMonitor);
+        }
+
+        // Reset activity status
+        finally { _activityStatus = ActivityStatus.Idle; }
+    }
+
+    /**
+     * Load remote files and VCS files into site directory.
+     */
+    protected boolean checkoutImpl(ActivityMonitor activityMonitor) throws Exception
+    {
         WebSite remoteSite = getRemoteSite();
         if (remoteSite == null) {
             System.err.println("VersionControl.checkout: Remote not available: " + getRemoteSiteUrlAddress());
@@ -205,6 +230,20 @@ public class VersionControl extends PropObject {
      * Updates (merges) local site files from remote site.
      */
     public boolean updateFiles(List<WebFile> localFiles, ActivityMonitor activityMonitor) throws Exception
+    {
+        try {
+            _activityStatus = ActivityStatus.Updating;
+            return updateFilesImpl(localFiles, activityMonitor);
+        }
+
+        // Reset activity status
+        finally { _activityStatus = ActivityStatus.Idle; }
+    }
+
+    /**
+     * Updates (merges) local site files from remote site.
+     */
+    protected boolean updateFilesImpl(List<WebFile> localFiles, ActivityMonitor activityMonitor) throws Exception
     {
         // Call monitor start
         activityMonitor.startForTaskCount(localFiles.size());
@@ -240,6 +279,20 @@ public class VersionControl extends PropObject {
      * Replaces (overwrites) local site files from remote site.
      */
     public boolean replaceFiles(List<WebFile> localFiles, ActivityMonitor activityMonitor) throws Exception
+    {
+        try {
+            _activityStatus = ActivityStatus.Replacing;
+            return replaceFilesImpl(localFiles, activityMonitor);
+        }
+
+        // Reset activity status
+        finally { _activityStatus = ActivityStatus.Idle; }
+    }
+
+    /**
+     * Replaces (overwrites) local site files from remote site.
+     */
+    protected boolean replaceFilesImpl(List<WebFile> localFiles, ActivityMonitor activityMonitor) throws Exception
     {
         // Call monitor start
         activityMonitor.startForTaskCount(localFiles.size());

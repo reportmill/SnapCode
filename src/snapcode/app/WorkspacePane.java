@@ -644,9 +644,10 @@ public class WorkspacePane extends ViewOwner {
         // Forward to project
         project.handleProjectFileChange(propChange);
 
-        // Handle autosave files to SnapCloud
-        if (propName == WebFile.LastModTime_Prop) {
-            if (project.getVersionControl() instanceof VersionControlSnapCloud snapCloudVC && snapCloudVC.isAutoSave()) {
+        // Handle autosave files to SnapCloud if local file was saved and version control is idle and SnapCloud
+        if (propName == WebFile.LastModTime_Prop && !file.isDir()) {
+            VersionControl vc = project.getVersionControl();
+            if (vc.isIdle() && vc instanceof VersionControlSnapCloud snapCloudVC && snapCloudVC.isAutoSave()) {
                 ProjectPane projectPane = getProjectPaneForProject(project);
                 VersionControlTool versionControlTool = projectPane.getVersionControlTool();
                 versionControlTool.autosaveFilesToSnapCloud();
