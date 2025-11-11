@@ -3,6 +3,7 @@
  */
 package snapcode.project;
 import snap.util.FilePathUtils;
+import snap.util.SnapEnv;
 import snap.util.SnapUtils;
 import snap.web.WebFile;
 import javax.tools.*;
@@ -102,7 +103,7 @@ public class SnapCompiler {
         else options.add("-g");
 
         // Set release version
-        if (SnapUtils.getJavaVersionInt() > 11 && !SnapUtils.isWebVM) {
+        if (SnapUtils.getJavaVersionInt() > 11 && !SnapEnv.isWebVM) {
             BuildFile buildFile = _proj.getBuildFile();
             int compileRelease = buildFile.getCompileRelease();
             options.add("--release");
