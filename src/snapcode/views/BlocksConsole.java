@@ -7,6 +7,7 @@ import snapcode.app.WorkspacePaneUtils;
 import snapcode.app.WorkspaceTool;
 import snapcode.javatext.JavaTextArea;
 import snapcode.javatext.JavaTextPane;
+import snapcode.project.JavaAgent;
 import snapcode.project.JavaTextModel;
 import snapcode.project.Project;
 import snapcode.webbrowser.WebPage;
@@ -57,7 +58,9 @@ public class BlocksConsole extends WorkspaceTool {
         _javaTextPane = webPage instanceof JavaPage javaPage ? javaPage.getTextPane() : new JavaTextPane();
         _javaTextPane.getUI();
 
-        JavaTextModel javaTextModel = JavaTextModel.getJavaTextModelForFile(javaFile);
+        // Get java text model for java file
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
+        JavaTextModel javaTextModel = javaAgent.getJavaTextModel();
 
         // Set java text and FirstFocus
         JavaTextArea javaTextArea = _javaTextPane.getTextArea();

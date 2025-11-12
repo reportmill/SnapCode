@@ -77,9 +77,10 @@ public class JavaPage extends WebPage {
      */
     protected void initUI()
     {
-        // Create Java text
+        // Get Java text
         WebFile javaFile = getFile();
-        JavaTextModel javaTextModel = JavaTextModel.getJavaTextModelForFile(javaFile);
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
+        JavaTextModel javaTextModel = javaAgent.getJavaTextModel();
 
         // Set java text and FirstFocus
         JavaTextArea javaTextArea = getTextArea();

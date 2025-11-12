@@ -6,7 +6,6 @@ import javakit.parse.JFile;
 import snap.gfx.Font;
 import snap.parse.Tokenizer;
 import snap.text.*;
-import snap.web.WebFile;
 
 /**
  * This class holds the text of a Java file with methods to easily build.
@@ -78,14 +77,5 @@ public class JavaTextModel extends TextModel {
     protected TextToken[] createTokensForTextLine(TextLine aTextLine)
     {
         return JavaTextTokenizer.SHARED.createTokensForTextLine(aTextLine);
-    }
-
-    /**
-     * Returns a new JavaTextModel for given source file.
-     */
-    public static JavaTextModel getJavaTextModelForFile(WebFile sourceFile)
-    {
-        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(sourceFile);
-        return javaAgent.getJavaTextModel();
     }
 }

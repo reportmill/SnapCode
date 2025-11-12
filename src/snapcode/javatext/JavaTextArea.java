@@ -1075,7 +1075,8 @@ public class JavaTextArea extends TextArea {
         }
 
         // Return JavaTextModel for temp file
-        return _dummyJavaTextModel = JavaTextModel.getJavaTextModelForFile(tempFile);
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(tempFile);
+        return _dummyJavaTextModel = javaAgent.getJavaTextModel();
     }
 
     /**
