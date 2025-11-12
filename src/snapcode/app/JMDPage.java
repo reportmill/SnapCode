@@ -57,8 +57,7 @@ public class JMDPage extends WebPage {
 
         // Read text from file
         WebFile jmdFile = getFile();
-        javaTextModel.readTextFromSourceFile(jmdFile);
-        javaTextModel.syncTextModelToSourceFile();
+        javaTextModel.syncTextModelToSourceFile(jmdFile);
 
         // Set TextArea.TextModel and FirstFocus
         TextArea textArea = getTextArea();

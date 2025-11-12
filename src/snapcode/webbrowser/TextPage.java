@@ -47,10 +47,7 @@ public class TextPage extends WebPage {
         // Load text from web page file
         TextModel textModel = textArea.getTextModel();
         WebFile file = getFile();
-        textModel.readTextFromSourceFile(file);
-
-        // Sync text model to source file
-        textModel.syncTextModelToSourceFile();
+        textModel.syncTextModelToSourceFile(file);
     }
 
     /**

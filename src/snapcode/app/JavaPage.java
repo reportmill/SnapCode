@@ -80,7 +80,6 @@ public class JavaPage extends WebPage {
         // Create Java text
         WebFile javaFile = getFile();
         JavaTextModel javaTextModel = JavaTextModel.getJavaTextModelForFile(javaFile);
-        javaTextModel.syncTextModelToSourceFile();
 
         // Set java text and FirstFocus
         JavaTextArea javaTextArea = getTextArea();

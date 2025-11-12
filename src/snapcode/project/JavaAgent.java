@@ -124,7 +124,7 @@ public class JavaAgent {
 
         // Create/load JavaTextModel
         _javaTextModel = new JavaTextModel(this);
-        _javaTextModel.readTextFromSourceFile(_javaFile);
+        _javaTextModel.syncTextModelToSourceFile(_javaFile);
         _jfile = null;
 
         // Listen for changes
@@ -402,7 +402,7 @@ public class JavaAgent {
 
         // Reload JavaTextModel from java file
         if (_javaTextModel != null)
-            _javaTextModel.readTextFromSourceFile(_javaFile);
+            _javaTextModel.syncTextModelToSourceFile(_javaFile);
 
         // Clear JFile and external references
         clearExternalReferences();

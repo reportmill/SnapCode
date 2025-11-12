@@ -58,7 +58,6 @@ public class BlocksConsole extends WorkspaceTool {
         _javaTextPane.getUI();
 
         JavaTextModel javaTextModel = JavaTextModel.getJavaTextModelForFile(javaFile);
-        javaTextModel.syncTextModelToSourceFile();
 
         // Set java text and FirstFocus
         JavaTextArea javaTextArea = _javaTextPane.getTextArea();
