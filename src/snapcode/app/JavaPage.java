@@ -10,7 +10,6 @@ import snapcode.project.JavaAgent;
 import snapcode.project.Project;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMember;
-import snapcode.project.JavaTextModel;
 import snap.util.Convert;
 import snap.text.TextLine;
 import snap.view.View;
@@ -77,15 +76,12 @@ public class JavaPage extends WebPage {
      */
     protected void initUI()
     {
-        // Get Java text
+        // Set java file in text pane
         WebFile javaFile = getFile();
-        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
-        JavaTextModel javaTextModel = javaAgent.getJavaTextModel();
+        _javaTextPane.setTextFile(javaFile);
 
-        // Set java text and FirstFocus
-        JavaTextArea javaTextArea = getTextArea();
-        javaTextArea.setTextModel(javaTextModel);
-        setFirstFocus(javaTextArea);
+        // Set FirstFocus to text area
+        setFirstFocus(getTextArea());
 
         // Register for enter action
         addKeyActionFilter("EnterAction", "Shortcut+ENTER");

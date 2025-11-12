@@ -6,6 +6,7 @@ import javakit.parse.*;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 import snap.props.PropChange;
+import snap.text.TextAgent;
 import snap.text.TextModel;
 import snap.text.TextModelUtils;
 import snap.util.ArrayUtils;
@@ -18,7 +19,7 @@ import java.util.*;
 /**
  * This class holds a parsed Java file.
  */
-public class JavaAgent {
+public class JavaAgent extends TextAgent {
 
     // The java file
     private WebFile _javaFile;
@@ -53,17 +54,20 @@ public class JavaAgent {
     // The Jepl default imports with charts
     private static String[] _jeplImportsWithCharts;
 
+    // Register as agent provider with TextAgent
+    static {
+        TextAgent.addAgentProvider(file -> isJavaFile(file) ? new JavaAgent(file) : null);
+    }
+
     /**
      * Constructor for given file.
      */
-    private JavaAgent(WebFile aFile)
+    protected JavaAgent(WebFile aFile)
     {
+        super(aFile);
         _javaFile = aFile;
         _isJepl = aFile.getFileType().equals("jepl");
         _isJMD = aFile.getFileType().equals("jmd");
-
-        // Set File JavaAgent property to this agent
-        _javaFile.setMetadataForKey(JavaAgent.class.getName(), this);
 
         // Add to Project
         _project = Project.getProjectForFile(_javaFile);
@@ -76,16 +80,10 @@ public class JavaAgent {
      */
     public void closeAgent()
     {
-        // If already close, complain and return
-        if (_javaFile == null) {
-            System.err.println("JavaAgent.closeAgent: Multiple closes");
-            return;
-        }
+        super.closeAgent();
 
         // Clear everything
         clearBuildIssues();
-        _javaFile.setMetadataForKey(JavaAgent.class.getName(), null);
-        _javaFile.reset();
         _javaFile = null;
         _project = null;
         _jfile = null;
@@ -118,20 +116,23 @@ public class JavaAgent {
     /**
      * Returns the JavaTextModel for the java file.
      */
-    public JavaTextModel getJavaTextModel()
+    public JavaTextModel getJavaTextModel()  { return getTextModel(); }
+
+    /**
+     * Returns the JavaTextModel for the java file.
+     */
+    @Override
+    public JavaTextModel getTextModel()
     {
         if (_javaTextModel != null) return _javaTextModel;
+        return _javaTextModel = (JavaTextModel) super.getTextModel();
+    }
 
-        // Create/load JavaTextModel
-        _javaTextModel = new JavaTextModel(this);
-        _javaTextModel.syncTextModelToSourceFile(_javaFile);
-        _jfile = null;
-
-        // Listen for changes
-        _javaTextModel.addPropChangeListener(this::handleJavaTextModelCharsChange, TextModel.Chars_Prop);
-
-        // Set, return
-        return _javaTextModel;
+    @Override
+    protected TextModel createTextModel()
+    {
+        try { return new JavaTextModel(this); }
+        finally { _jfile = null; }
     }
 
     /**
@@ -393,31 +394,27 @@ public class JavaAgent {
     }
 
     /**
-     * Reloads agent from file.
+     * Override to clear jfile and external references.
      */
     public void reloadFile()
     {
-        // Reset file
-        _javaFile.resetAndVerify();
-
-        // Reload JavaTextModel from java file
-        if (_javaTextModel != null)
-            _javaTextModel.syncTextModelToSourceFile(_javaFile);
-
-        // Clear JFile and external references
+        super.reloadFile();
         clearExternalReferences();
     }
 
     /**
      * Called when JavaTextModel does chars change to updates JFile incrementally if possible.
      */
-    private void handleJavaTextModelCharsChange(PropChange propChange)
+    @Override
+    protected void handleTextModelCharsChange(PropChange propChange)
     {
-        TextModelUtils.CharsChange charsChange = (TextModelUtils.CharsChange) propChange;
+        // Do normal version (just return if no jfile)
+        super.handleTextModelCharsChange(propChange);
         if (_jfile == null)
             return;
 
         // If partial parse fails, clear JFile for full reparse
+        TextModelUtils.CharsChange charsChange = (TextModelUtils.CharsChange) propChange;
         boolean jfileUpdated = !_isJepl && !_isJMD && JavaTextUtils.updateJFileForChange(_javaTextModel, _jfile, charsChange);
         if (!jfileUpdated)
             _jfile = null;
@@ -427,22 +424,20 @@ public class JavaAgent {
     }
 
     /**
+     * Returns whether given file is Java file.
+     */
+    public static boolean isJavaFile(WebFile aFile)
+    {
+        String fileType = aFile.getFileType();
+        return fileType.equals("java") || fileType.equals("jepl") || fileType.equals("jmd");
+    }
+
+    /**
      * Returns the JavaAgent for given file.
      */
     public static JavaAgent getAgentForFile(WebFile aFile)
     {
-        // Get JavaAgent for given source file - just return if found
-        JavaAgent javaAgent = (JavaAgent) aFile.getMetadataForKey(JavaAgent.class.getName());
-        if (javaAgent != null)
-            return javaAgent;
-
-        // If java file, create and return
-        String fileType = aFile.getFileType();
-        if (fileType.equals("java") || fileType.equals("jepl") || fileType.equals("jmd"))
-            return new JavaAgent(aFile);
-
-        // Return not found
-        return null;
+        return isJavaFile(aFile) ? getAgentForJavaFile(aFile) : null;
     }
 
     /**
@@ -450,15 +445,15 @@ public class JavaAgent {
      */
     public static JavaAgent getAgentForJavaFile(WebFile javaFile)
     {
-        JavaAgent javaAgent = getAgentForFile(javaFile);
-        assert (javaAgent != null);
-        return javaAgent;
+        if (javaFile == null)
+            System.currentTimeMillis();
+        return (JavaAgent) TextAgent.getAgentForFile(javaFile);
     }
 
     /**
      * Returns the default JEPL imports.
      */
-    public static String[] getJeplDefaultImports()
+    private static String[] getJeplDefaultImports()
     {
         if (_jeplImports != null) return _jeplImports;
 
@@ -486,7 +481,7 @@ public class JavaAgent {
     /**
      * Returns the default JEPL imports with charts support.
      */
-    public static String[] getJeplDefaultImportsWithCharts()
+    private static String[] getJeplDefaultImportsWithCharts()
     {
         if (_jeplImportsWithCharts != null) return _jeplImportsWithCharts;
         String[] jeplImports = getJeplDefaultImports();

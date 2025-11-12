@@ -85,7 +85,7 @@ public class ProjectAnalysisTool {
     {
         // Handle Java file: Find undefines
         if (aFile.isFile() && aFile.getFileType().equals("java")) {
-            JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
+            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(aFile);
             JNode jfile = javaAgent.getJFile();
             findUndefines(jfile, aTextArea);
         }

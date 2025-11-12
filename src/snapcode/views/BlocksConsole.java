@@ -5,10 +5,7 @@ import snapcode.app.JavaPage;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspacePaneUtils;
 import snapcode.app.WorkspaceTool;
-import snapcode.javatext.JavaTextArea;
 import snapcode.javatext.JavaTextPane;
-import snapcode.project.JavaAgent;
-import snapcode.project.JavaTextModel;
 import snapcode.project.Project;
 import snapcode.webbrowser.WebPage;
 
@@ -42,7 +39,7 @@ public class BlocksConsole extends WorkspaceTool {
     /**
      * Sets current actor file.
      */
-    protected void setCodeEditorForClassName(String className)
+    protected void setCodeEditorForClassName()
     {
         Project rootProject = _workspacePane.getRootProject();
         WebFile javaFile = rootProject != null ? rootProject.getJavaFileForClassName("Actor1") : null;
@@ -58,14 +55,11 @@ public class BlocksConsole extends WorkspaceTool {
         _javaTextPane = webPage instanceof JavaPage javaPage ? javaPage.getTextPane() : new JavaTextPane();
         _javaTextPane.getUI();
 
-        // Get java text model for java file
-        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
-        JavaTextModel javaTextModel = javaAgent.getJavaTextModel();
+        // Set text pane text file
+        _javaTextPane.setTextFile(javaFile);
 
-        // Set java text and FirstFocus
-        JavaTextArea javaTextArea = _javaTextPane.getTextArea();
-        javaTextArea.setTextModel(javaTextModel);
-        setFirstFocus(javaTextArea);
+        // Set FirstFocus
+        setFirstFocus(_javaTextPane.getTextArea());
 
         //
         _snapEditorPane = new SnapEditorPane(_javaTextPane);
@@ -108,10 +102,10 @@ public class BlocksConsole extends WorkspaceTool {
     {
         if (_workspacePane.getRootProject() == null) {
             WorkspacePaneUtils.openTempBlocksProject(_workspacePane);
-            runLater(() -> setCodeEditorForClassName("Actor1"));
+            runLater(() -> setCodeEditorForClassName());
         }
 
-        else setCodeEditorForClassName("Actor1");
+        else setCodeEditorForClassName();
     }
 
     /**
