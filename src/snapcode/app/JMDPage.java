@@ -1,5 +1,6 @@
 package snapcode.app;
 import snap.gfx.Font;
+import snap.text.TextAgent;
 import snap.text.TextModel;
 import snap.view.TextArea;
 import snap.view.View;
@@ -15,8 +16,8 @@ import snapcode.webbrowser.WebPage;
  */
 public class JMDPage extends WebPage {
 
-    // The JMDPane
-    private JMDPane _javaTextPane;
+    // The TextPane
+    private TextPane _textPane;
 
     /**
      * Constructor.
@@ -24,7 +25,7 @@ public class JMDPage extends WebPage {
     public JMDPage()
     {
         super();
-        _javaTextPane = new JMDPane();
+        _textPane = new TextPane();
     }
 
     /**
@@ -39,29 +40,35 @@ public class JMDPage extends WebPage {
     /**
      * Returns the TextArea.
      */
-    public TextArea getTextArea()  { return _javaTextPane.getTextArea(); }
+    public TextArea getTextArea()  { return _textPane.getTextArea(); }
 
     /**
      * Creates UI panel.
      */
-    protected View createUI()  { return _javaTextPane.getUI(); }
+    @Override
+    protected View createUI()  { return _textPane.getUI(); }
 
     /**
      * Init UI.
      */
+    @Override
     protected void initUI()
     {
-        // Create text
-        TextModel javaTextModel = new TextModel();
-        javaTextModel.setDefaultFont(Font.getCodeFontForSize(14));
-
-        // Read text from file
+        // Get text agent for file and configure text model
         WebFile jmdFile = getFile();
-        javaTextModel.syncTextModelToSourceFile(jmdFile);
+        TextAgent textAgent = TextAgent.getAgentForFile(jmdFile);
+        textAgent.setTextModelSupplier(() -> {
+            TextModel textModel = new TextModel();
+            textModel.setDefaultFont(Font.getCodeFontForSize(14));
+            return textModel;
+        });
+
+        // Set text pane text file
+        _textPane.setTextFile(jmdFile);
 
         // Set TextArea.TextModel and FirstFocus
         TextArea textArea = getTextArea();
-        textArea.setTextModel(javaTextModel);
+        textArea.setPadding(5,5, 5,5);
         setFirstFocus(textArea);
 
         // Register for enter action
@@ -79,29 +86,6 @@ public class JMDPage extends WebPage {
             WorkspacePane workspacePane = getWorkspacePane();
             RunTool runTool = workspacePane.getRunTool();
             runTool.runAppForSelFile(false);
-        }
-    }
-
-    /**
-     * A TextPane subclass to edit Java Markdown.
-     */
-    private static class JMDPane extends TextPane {
-
-        /**
-         * Constructor.
-         */
-        public JMDPane()
-        {
-            super();
-        }
-
-        @Override
-        protected TextArea createTextArea()
-        {
-            TextArea textArea = super.createTextArea();
-            textArea.setPadding(5,5, 5,5);
-            textArea.setSyncTextFont(false);
-            return textArea;
         }
     }
 }
