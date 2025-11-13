@@ -1,4 +1,5 @@
 package snapcode.util;
+import snap.text.TextLayout;
 import snap.text.TextModel;
 import snap.web.WebSite;
 import snapcode.project.JavaAgent;
@@ -95,15 +96,15 @@ public class DiffPage extends WebPage {
 
             // Handle insert
             if (insert) {
-                TextModel textModel = _leftTextArea.getTextModel();
-                lranges.add(new TextSel(textModel, localIndex, localIndex + length));
+                TextLayout textLayout = _leftTextArea.getTextLayout();
+                lranges.add(new TextSel(textLayout, localIndex, localIndex + length));
                 localIndex += length;
             }
 
             // Handle delete
             else if (delete) {
-                TextModel textModel = _rightTextArea.getTextModel();
-                rranges.add(new TextSel(textModel, remoteIndex, remoteIndex + length));
+                TextLayout textLayout = _rightTextArea.getTextLayout();
+                rranges.add(new TextSel(textLayout, remoteIndex, remoteIndex + length));
                 remoteIndex += length;
             }
 
