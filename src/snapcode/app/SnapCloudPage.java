@@ -8,6 +8,7 @@ import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import snapcode.project.VersionControlSnapCloud;
 import snapcode.webbrowser.DirFilePage;
 import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
@@ -22,9 +23,6 @@ public class SnapCloudPage extends WebPage {
 
     // The WebBrowser for remote files
     private WebBrowser _remoteBrowser;
-
-    // The SnapCloud root URL
-    public static final String SNAPCLOUD_ROOT = "dbox://dbox.com/";
 
     // Initialize SnapCloud
     static { SnapCloudInit.initSnapCloud(); }
@@ -227,33 +225,10 @@ public class SnapCloudPage extends WebPage {
     /**
      * Returns the snap cloud URL for account user email.
      */
-    public static WebSite getSnapCloudUserSite()
-    {
-        WebURL snapCloudUserUrl = getSnapCloudUserUrl();
-        if (snapCloudUserUrl == null)
-            return null;
-        return snapCloudUserUrl.getAsSite();
-    }
+    public static WebSite getSnapCloudUserSite()  { return VersionControlSnapCloud.getSnapCloudUserSite(); }
 
     /**
      * Returns the snap cloud URL for account user email.
      */
-    public static WebURL getSnapCloudUserUrl()
-    {
-        String userEmail = UserInfo.getUserEmail();
-        if (userEmail == null || userEmail.isEmpty())
-            return null;
-
-        int sepIndex = userEmail.indexOf('@');
-        if (sepIndex <= 0)
-            return null;
-
-        // Get username and domain
-        String userName = userEmail.substring(0, sepIndex);
-        String domain = userEmail.substring(sepIndex + 1);
-
-        // Return
-        String snapCloudUrlAddress = SNAPCLOUD_ROOT + domain + "/" + userName;
-        return WebURL.getUrl(snapCloudUrlAddress);
-    }
+    public static WebURL getSnapCloudUserUrl()  { return VersionControlSnapCloud.getSnapCloudUserUrl(); }
 }

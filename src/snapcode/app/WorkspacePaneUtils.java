@@ -145,6 +145,12 @@ public class WorkspacePaneUtils {
             return true;
         }
 
+        // Handle SnapCloud URL
+        if (VersionControlSnapCloud.isSnapCloudUrl(projectUrl)) {
+            openProjectForRepoUrl(workspacePane, projectUrl);
+            return true;
+        }
+
         switch (projectUrl.getFileType()) {
 
             // Handle zip, git: Open project for repo URL

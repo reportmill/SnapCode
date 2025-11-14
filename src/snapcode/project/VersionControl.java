@@ -126,6 +126,11 @@ public class VersionControl extends PropObject {
     }
 
     /**
+     * Returns whether remote site is writeable.
+     */
+    public boolean isRemoteWritable()  { return true; }
+
+    /**
      * Returns whether remote site can be created.
      */
     public boolean canCreateRemote()  { return false; }
@@ -324,6 +329,9 @@ public class VersionControl extends PropObject {
      */
     public boolean commitFiles(List<WebFile> localFiles, String aMessage, ActivityMonitor activityMonitor) throws Exception
     {
+        if (!isRemoteWritable())
+            throw new Exception("VersionControl.commitFiles: Remote not writable");
+
         // Call monitor start
         activityMonitor.startForTaskCount(localFiles.size());
 

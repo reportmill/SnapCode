@@ -147,7 +147,7 @@ public class VersionControlTool extends ProjectTool {
         setViewVisible("CheckoutButton", !isCheckedOut && isRemoteExists);
         setViewVisible("UpdateFilesButton", isCheckedOut);
         setViewVisible("ReplaceFilesButton", isCheckedOut);
-        setViewVisible("CommitFilesButton", isCheckedOut);
+        setViewVisible("CommitFilesButton", isCheckedOut && _versionControl.isRemoteWritable());
 
         // Update ReplaceFilesButton, CommitFilesButton Enabled based on whether there are modified files
         boolean isProjectModified = isCheckedOut && _versionControl.isFileModified(_versionControl.getLocalSite().getRootDir());
