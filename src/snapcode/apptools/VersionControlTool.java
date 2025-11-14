@@ -33,6 +33,9 @@ public class VersionControlTool extends ProjectTool {
     // The WebBrowser for remote files
     private WebBrowser _remoteBrowser;
 
+    // The RemoteURLText close box
+    private CloseBox _clearRemoteUrlButton;
+
     // The VersionControl prop change listener
     private PropChangeListener _versionControlPropChangeLsnr = this::handleVersionControlFileStatusChange;
 
@@ -105,12 +108,12 @@ public class VersionControlTool extends ProjectTool {
         remoteBrowserBox.setContent(_remoteBrowser);
 
         // Add clear button to RemoteURLText
-        CloseBox clearRemoteUrlButton = new CloseBox();
-        clearRemoteUrlButton.setMargin(0, 4, 0, 4);
-        clearRemoteUrlButton.setLeanX(HPos.RIGHT);
-        clearRemoteUrlButton.addEventHandler(e -> clearRemoteUrlAddress(), View.Action);
+        _clearRemoteUrlButton = new CloseBox();
+        _clearRemoteUrlButton.setMargin(0, 4, 0, 4);
+        _clearRemoteUrlButton.setLeanX(HPos.RIGHT);
+        _clearRemoteUrlButton.addEventHandler(e -> clearRemoteUrlAddress(), View.Action);
         TextField remoteUrlText = getView("RemoteURLText", TextField.class);
-        remoteUrlText.getLabel().setGraphicAfter(clearRemoteUrlButton);
+        remoteUrlText.getLabel().setGraphicAfter(_clearRemoteUrlButton);
         remoteUrlText.getLabel().setPickable(true);
     }
 
@@ -131,6 +134,7 @@ public class VersionControlTool extends ProjectTool {
         // Update RemoteURLText
         String remoteUrlAddress = getRemoteUrlAddress();
         setViewValue("RemoteURLText", remoteUrlAddress);
+        _clearRemoteUrlButton.setVisible(remoteUrlAddress != null && !remoteUrlAddress.isBlank());
 
         // Get remote exists in non-blocking way
         WebSite remoteSite = getRemoteSite();

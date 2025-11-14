@@ -4,6 +4,7 @@ import snap.util.SnapUtils;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import snapcode.project.VersionControlSnapCloud;
 import snapcode.project.VersionControlUtils;
 import java.io.File;
 import java.util.List;
@@ -78,8 +79,12 @@ public class SnapCodeUtils {
             return "Sample:" + projectUrl.getFilename();
 
         // Handle SnapCloud
-        if (projectSourceAddr.contains("dbox://"))
-            return "SnapCloud";
+        WebURL projectSourceUrl = VersionControlUtils.getRemoteSiteUrl(projectSite);
+        if (projectSourceUrl != null && VersionControlSnapCloud.isSnapCloudUrl(projectSourceUrl)) {
+            if (VersionControlSnapCloud.isSnapCloudUrlWritable(projectSourceUrl))
+                return "SnapCloud";
+            return "SnapCloud - " + projectSourceUrl.getPath();
+        }
 
         // Handle anything else
         return projectSourceAddr;

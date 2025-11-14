@@ -16,7 +16,7 @@ public class VersionControlSnapCloud extends VersionControl {
     private boolean _writable;
 
     // The SnapCloud root URL
-    public static final String SNAPCLOUD_ROOT = "dbox://dbox.com/";
+    public static final String SNAPCLOUD_ROOT = "snapcloud:/"; // "dbox://dbox.com/";
 
     /**
      * Constructor.
@@ -71,7 +71,7 @@ public class VersionControlSnapCloud extends VersionControl {
     public static boolean isSnapCloudUrl(WebURL aURL)
     {
         String scheme = aURL.getScheme();
-        return scheme.equals("dbox") || scheme.equals("dropbox");
+        return scheme.equals("snapcloud") || scheme.equals("sc") || scheme.equals("dbox") || scheme.equals("dropbox");
     }
 
     /**

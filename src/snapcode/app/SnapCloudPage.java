@@ -62,8 +62,10 @@ public class SnapCloudPage extends WebPage {
      */
     private WebFile getSelFile()
     {
-        DirFilePage dirFilePage = (DirFilePage) _remoteBrowser.getSelPage();
-        return dirFilePage != null ? dirFilePage.getSelFile() : null;
+        WebPage selPage = _remoteBrowser.getSelPage();
+        if (selPage instanceof DirFilePage dirFilePage)
+            return dirFilePage.getSelFile();
+        return null;
     }
 
     /**
