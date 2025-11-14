@@ -744,18 +744,15 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
-     * Override to setTextModified.
+     * Override to shift breakpoints and build issues.
      */
-    protected void handleSourceTextPropChange(PropChange anEvent)
+    protected void handleTextModelPropChange(PropChange anEvent)
     {
-        // Do normal version and update TextPane.TextModified
-        super.handleSourceTextPropChange(anEvent);
-
-        // Get PropName
-        String propName = anEvent.getPropName();
+        // Do normal version
+        super.handleTextModelPropChange(anEvent);
 
         // Handle Chars_Prop: Call didAddChars/didRemoveChars
-        if (propName == TextModel.Chars_Prop) {
+        if (anEvent.getPropName() == TextModel.Chars_Prop) {
 
             // Get CharsChange info
             TextModelUtils.CharsChange charsChange = (TextModelUtils.CharsChange) anEvent;
@@ -765,8 +762,8 @@ public class JavaTextArea extends TextArea {
 
             // Forward to did add/remove chars
             if (addChars != null)
-                didAddChars(addChars, charIndex);
-            else didRemoveChars(removeChars, charIndex);
+                handleTextModelAddChars(addChars, charIndex);
+            else handleTextModelRemoveChars(removeChars, charIndex);
 
             // Reset sel tokens
             setSelTokens(new TextToken[0]);
@@ -774,9 +771,9 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
-     * Called when characters are added.
+     * Called when text model adds chars to shift breakpoints and build issues.
      */
-    protected void didAddChars(CharSequence theChars, int charIndex)
+    private void handleTextModelAddChars(CharSequence theChars, int charIndex)
     {
         // Iterate over BuildIssues and shift start/end for removed chars
         int charsLength = theChars.length();
@@ -816,9 +813,9 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
-     * Called when characters are removed.
+     * Called when text model removes chars to shift breakpoints and build issues.
      */
-    protected void didRemoveChars(CharSequence theChars, int charIndex)
+    private void handleTextModelRemoveChars(CharSequence theChars, int charIndex)
     {
         // See if we need to shift BuildIssues
         int endOld = charIndex + theChars.length();
