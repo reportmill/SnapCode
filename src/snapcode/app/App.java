@@ -113,6 +113,16 @@ public class App {
             }
         }
 
+        // Handle 'snapcloud:' or 'sc:'
+        if (arg0.startsWith("snapcloud:") || arg0.startsWith("sc:")) {
+            WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
+            WebURL openUrl = WebURL.getUrl(arg0);
+            if (openUrl != null) {
+                WorkspacePaneUtils.openFileUrl(workspacePane, openUrl);
+                return true;
+            }
+        }
+
         // Handle 'Sample:'
         if (arg0.startsWith("sample:")) {
             WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
