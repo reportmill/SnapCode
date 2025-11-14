@@ -9,6 +9,9 @@ import java.util.Objects;
  */
 public class VersionControlUtils {
 
+    // The path to remote file
+    private static final String REMOTE_CONFIG_FILE = "/remote.config";
+
     /**
      * Returns the remote site URL for a given project site.
      */
@@ -33,8 +36,7 @@ public class VersionControlUtils {
     public static String getRemoteSiteUrlAddress(WebSite projectSite)
     {
         // Get remote settings file
-        WebFile sandboxDir = projectSite.getSandboxDir();
-        WebFile remoteSettingsFile = sandboxDir.createChildFileForPath("/settings/remote", false);
+        WebFile remoteSettingsFile = getRemoteConfigFile(projectSite);
         if (!remoteSettingsFile.getExists())
             return null;
 
@@ -53,8 +55,7 @@ public class VersionControlUtils {
         if (Objects.equals(remoteUrlAddress, getRemoteSiteUrlAddress(projectSite))) return;
 
         // Get remote settings file
-        WebFile sandboxDir = projectSite.getSandboxDir();
-        WebFile remoteSettingsFile = sandboxDir.createChildFileForPath("/settings/remote", false);
+        WebFile remoteSettingsFile = getRemoteConfigFile(projectSite);
 
         // Save URL to remote settings file
         try {
@@ -77,5 +78,14 @@ public class VersionControlUtils {
 
         // Clear VersionControl
         projectSite.setMetadataForKey(VersionControl.class.getName(), null);
+    }
+
+    /**
+     * Returns the remote config file.
+     */
+    private static WebFile getRemoteConfigFile(WebSite projectSite)
+    {
+        WebFile sandboxDir = projectSite.getSandboxDir();
+        return sandboxDir.createChildFileForPath(REMOTE_CONFIG_FILE, false);
     }
 }
