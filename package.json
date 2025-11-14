@@ -5,7 +5,7 @@
     "main": "index.js",
     "preferGlobal": true,
     "repository": "",
-    "version": "2025.10.4",
+    "version": "2025.11.15",
     "jdeploy": {
         "jdk": true,
         "fallbackToUniversal": false,
@@ -20,7 +20,7 @@
             "extension": "java",
             "mimetype": "text/java"
         }],
-        "jar": "build/libs/SnapCodeAll-2025.10.jar",
+        "jar": "build/libs/SnapCodeAll-2025.11.jar",
         "javafx": true,
         "title": "SnapCode",
         "downloadPage": {"platforms": ["all"]},
