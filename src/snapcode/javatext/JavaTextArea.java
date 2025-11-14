@@ -49,6 +49,9 @@ public class JavaTextArea extends TextArea {
     // A PopupList to show code completion stuff
     private JavaPopupList _popup;
 
+    // The Java File
+    private WebFile _javaFile;
+
     // Whether to draw boxes around scope levels (class, methods, code blocks)
     private static boolean _showScopeBoxes;
 
@@ -863,18 +866,26 @@ public class JavaTextArea extends TextArea {
     /**
      * Returns the source file.
      */
-    public WebFile getSourceFile()
+    public WebFile getJavaFile()
     {
-        JavaTextModel javaTextModel = (JavaTextModel) getTextModel();
-        return javaTextModel.getSourceFile();
+        if (_javaFile != null) return _javaFile;
+        JavaTextPane javaTextPane = getOwner(JavaTextPane.class);
+        if (javaTextPane != null)
+            _javaFile = javaTextPane.getTextFile();
+        return _javaFile;
     }
+
+    /**
+     * Sets the source file.
+     */
+    public void setJavaFile(WebFile javaFile)  { _javaFile = javaFile; }
 
     /**
      * Returns BuildIssues from ProjectFile.
      */
     public BuildIssue[] getBuildIssues()
     {
-        WebFile javaFile = getSourceFile();
+        WebFile javaFile = getJavaFile(); if (javaFile == null) return new BuildIssue[0];
         JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
         return javaAgent.getBuildIssues();
     }
@@ -884,8 +895,8 @@ public class JavaTextArea extends TextArea {
      */
     private Breakpoints getWorkspaceBreakpoints()
     {
-        WebFile file = getSourceFile();
-        Project proj = Project.getProjectForFile(file);
+        WebFile javaFile = getJavaFile();
+        Project proj = javaFile != null ? Project.getProjectForFile(javaFile) : null;
         Workspace workspace = proj != null ? proj.getWorkspace() : null;
         return workspace != null ? workspace.getBreakpoints() : null;
     }
@@ -900,13 +911,9 @@ public class JavaTextArea extends TextArea {
         if (breakpointsHpr == null)
             return Breakpoints.NO_BREAKPOINTS;
 
-        // Get java file
-        WebFile file = getSourceFile();
-        if (file == null)
-            return Breakpoints.NO_BREAKPOINTS;
-
-        // Return breakpoints for file
-        return breakpointsHpr.getBreakpointsForFile(file);
+        // Get java file and return breakpoints for file
+        WebFile javaFile = getJavaFile();
+        return breakpointsHpr.getBreakpointsForFile(javaFile);
     }
 
     /**
@@ -919,11 +926,9 @@ public class JavaTextArea extends TextArea {
         if (breakpointsHpr == null)
             return;
 
-        // Get java file
-        WebFile file = getSourceFile();
-
-        // Add breakpoint for file
-        breakpointsHpr.addBreakpointForFile(file, aLine);
+        // Get java file and add breakpoint for file line
+        WebFile javaFile = getJavaFile();
+        breakpointsHpr.addBreakpointForFile(javaFile, aLine);
     }
 
     /**
