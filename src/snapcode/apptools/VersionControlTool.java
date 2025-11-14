@@ -517,7 +517,7 @@ public class VersionControlTool extends ProjectTool {
     /**
      * Save files to Snap cloud in background.
      */
-    private void saveToSnapCloud()
+    public void saveToSnapCloud()
     {
         // Reset RemoteUrl to snap cloud
         WebURL snapCloudUserUrl = SnapCloudPage.getSnapCloudUserUrl();

@@ -8,6 +8,9 @@ import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import snapcode.apptools.NewFileTool;
+import snapcode.apptools.VersionControlTool;
+import snapcode.project.Project;
 import snapcode.project.VersionControlSnapCloud;
 import snapcode.webbrowser.DirFilePage;
 import snapcode.webbrowser.WebBrowser;
@@ -76,6 +79,25 @@ public class SnapCloudPage extends WebPage {
         DirFilePage dirFilePage = (DirFilePage) _remoteBrowser.getSelPage();
         if (dirFilePage != null)
             dirFilePage.setSelFile(aFile);
+    }
+
+    /**
+     * Creates a new project.
+     */
+    private void createNewSnapCodeProject()
+    {
+        NewFileTool newFileTool = _workspacePane.getNewFileTool();
+        ViewUtils.runLater(() -> {
+            Project newProject = newFileTool.showNewProjectPanel();
+            if (newProject != null) {
+                ViewUtils.runLater(() -> {
+                    ProjectPane projectPane = _workspacePane.getProjectPaneForProject(newProject);
+                    VersionControlTool versionControlTool = projectPane.getVersionControlTool();
+                    versionControlTool.saveToSnapCloud();
+                    WorkspacePaneUtils.selectGoodDefaultFile(_workspacePane, newProject);
+                });
+            }
+        });
     }
 
     /**
@@ -167,14 +189,15 @@ public class SnapCloudPage extends WebPage {
     {
         // If user email hasn't been set, show email box
         String userEmail = UserInfo.getUserEmail();
-        setViewVisible("EmailBox", userEmail == null || userEmail.isEmpty());
+        setViewVisible("EmailBox", userEmail == null || userEmail.isBlank());
+        setViewVisible("NewSnapCloudProjectButton", userEmail != null && !userEmail.isBlank());
 
         // Update ProgressBar
         setViewVisible("ProgressBar", _remoteBrowser.isLoading());
 
         // Update RemoteBrowserToolsBox, BoxRemoteBrowserBox
-        setViewVisible("RemoteBrowserToolsBox", userEmail != null && !userEmail.isEmpty());
-        setViewVisible("RemoteBrowserBox", userEmail != null && !userEmail.isEmpty());
+        setViewVisible("RemoteBrowserToolsBox", userEmail != null && !userEmail.isBlank());
+        setViewVisible("RemoteBrowserBox", userEmail != null && !userEmail.isBlank());
 
         // Update OpenProjectButton
         WebURL selProjectUrl = getSelectedProjectUrl();
@@ -194,17 +217,20 @@ public class SnapCloudPage extends WebPage {
     {
         switch (anEvent.getName()) {
 
+            // Handle NewSnapCloudProjectButton
+            case "NewSnapCloudProjectButton" -> createNewSnapCodeProject();
+
             // Handle EmailText
-            case "EmailText":
+            case "EmailText" -> {
                 UserInfo.setUserEmail(anEvent.getStringValue());
                 runLater(this::connectToSnapCloudUserSite);
-                break;
+            }
 
             // Handle OpenProjectButton
-            case "OpenProjectButton": openProjectForSelFile(); break;
+            case "OpenProjectButton" -> openProjectForSelFile();
 
             // Handle DeleteFileButton
-            case "DeleteFileButton": deleteSelFile(); break;
+            case "DeleteFileButton" -> deleteSelFile();
         }
     }
 

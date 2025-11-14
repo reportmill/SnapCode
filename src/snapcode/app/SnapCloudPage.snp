@@ -4,13 +4,16 @@
     <Label Name="SnapCloudLabel" Margin="0,8,0,8" />
     <Label Margin="0,0,20,10" ImageName="pkg.images/Cloud.png" />
   </RowView>
+  <RowView Margin="5,5,5,50">
+    <Button Name="NewSnapCloudProjectButton" Padding="8" Fill="#F8" Text="New SnapCloud Project" />
+  </RowView>
   <Separator PrefHeight="30" />
   <RowView Name="EmailBox" Margin="10,0,0,0">
     <Label Margin="0,8,0,8" Text="Cloud User Email:" />
     <TextField Name="EmailText" Margin="5,20,5,5" PrefWidth="300" />
   </RowView>
   <RowView Name="RemoteBrowserToolsBox" Spacing="5" GrowWidth="true">
-    <Label Margin="5,5,5,8" Font="Arial 16" Text="Remote Files:" />
+    <Label Margin="5,5,5,8" Font="Arial 16" Text="Remote Projects:" />
     <Button Name="OpenProjectButton" Padding="3,5,3,5" />
     <ProgressBar Name="ProgressBar" PrefWidth="100" PrefHeight="16" Indeterminate="true" />
     <Button Name="DeleteFileButton" PrefWidth="24" PrefHeight="24" Margin="0,10,0,6" LeanX="RIGHT" ToolTip="Delete selected file" ImageName="/snap/viewx/pkg.images/Edit_Delete.png" ShowArea="false" />
