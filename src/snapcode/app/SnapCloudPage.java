@@ -239,15 +239,17 @@ public class SnapCloudPage extends WebPage {
      */
     private WebURL getSelectedProjectUrl()
     {
+        // If no selected directory, just return
         WebFile selFile = getSelFile();
         if (selFile == null || selFile.isRoot())
             return null;
 
-        while (selFile.getParent() != null && !selFile.getParent().isRoot())
+        // Get project directory
+        while (!selFile.getParent().isRoot())
             selFile = selFile.getParent();
 
-        String urlAddr = selFile.getUrlAddress();
-        return WebURL.getUrl(urlAddr);
+        // Return as flat url
+        return selFile.getUrl().getFlatUrl();
     }
 
     /**
