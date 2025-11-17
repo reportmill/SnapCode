@@ -41,7 +41,7 @@ public class JStmtReturn extends JStmt {
     {
         // Handle Constructor: Return error if unexpected return type
         JExecutableDecl executableDecl = getParent(JExecutableDecl.class);
-        if (executableDecl instanceof JConstrDecl) {
+        if (executableDecl instanceof JConstrDecl || executableDecl == null) {
             if (_expr != null)
                 return NodeError.newErrorArray(_expr, "Unexpected return value");
             return NodeError.NO_ERRORS;

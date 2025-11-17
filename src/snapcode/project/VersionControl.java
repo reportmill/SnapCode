@@ -393,7 +393,7 @@ public class VersionControl extends PropObject {
      * Returns the local files that need to be updated from remote for given local files.
      * Files need to be updated if clone version is different from remote.
      */
-    private List<WebFile> getUpdateFilesForLocalFilesImpl(List<WebFile> localFiles)
+    protected List<WebFile> getUpdateFilesForLocalFilesImpl(List<WebFile> localFiles)
     {
         // Get modified files
         List<WebFile> cloneFiles = ListUtils.map(localFiles, localFile -> createCloneFile(localFile));
