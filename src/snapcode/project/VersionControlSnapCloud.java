@@ -1,8 +1,14 @@
 package snapcode.project;
+import snap.util.ActivityMonitor;
 import snap.util.Prefs;
 import snap.util.UserInfo;
+import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * This version control class uses drop box.
@@ -66,6 +72,26 @@ public class VersionControlSnapCloud extends VersionControl {
     public boolean canCreateRemote()  { return _writable; }
 
     /**
+     * Override to prefetch files.
+     */
+    @Override
+    protected List<WebFile> getUpdateFilesForLocalFilesImpl(List<WebFile> localFiles)
+    {
+        localFiles.forEach(file -> prefetchFiles(file));
+        return super.getUpdateFilesForLocalFilesImpl(localFiles);
+    }
+
+    /**
+     * Override to preload files.
+     */
+    @Override
+    protected boolean updateFilesImpl(List<WebFile> localFiles, ActivityMonitor activityMonitor) throws Exception
+    {
+        localFiles.forEach(file -> preloadFiles(file));
+        return super.updateFilesImpl(localFiles, activityMonitor);
+    }
+
+    /**
      * Returns whether given URL is SnapCloud.
      */
     public static boolean isSnapCloudUrl(WebURL aURL)
@@ -117,5 +143,59 @@ public class VersionControlSnapCloud extends VersionControl {
         // Return
         String snapCloudUrlAddress = SNAPCLOUD_ROOT + domain + "/" + userName;
         return WebURL.getUrl(snapCloudUrlAddress);
+    }
+
+    /**
+     * Prefetches files in directory.
+     */
+    private void prefetchFiles(WebFile aFile)
+    {
+        WebFile remoteFile = getRemoteSite().createFileForPath(aFile.getPath(), aFile.isDir());
+        CompletableFuture.runAsync(() -> prefetchFilesImpl(remoteFile));
+        Thread.yield();
+    }
+
+    /**
+     * Prefetches given files.
+     */
+    private static void prefetchFilesImpl(WebFile aFile)
+    {
+        if (aFile.isDir()) {
+            List<WebFile> dirFiles = aFile.getFiles();
+            dirFiles.parallelStream().forEach(file -> prefetchFilesImpl(file));
+            return;
+        }
+
+        // Prefetch header - probably not needed because dir getFiles already fetches
+        if (!aFile.isVerified())
+            aFile.getExists();
+    }
+
+    /**
+     * Preloads files in directory.
+     */
+    private void preloadFiles(WebFile aFile)
+    {
+        WebFile remoteFile = getRemoteSite().createFileForPath(aFile.getPath(), aFile.isDir());
+
+        // Preload files in executer
+        ExecutorService executor = Executors.newCachedThreadPool();
+        executor.submit(() -> preloadFilesImpl(remoteFile, executor));
+        executor.shutdown();
+    }
+
+    /**
+     * Preloads given file.
+     */
+    private static void preloadFilesImpl(WebFile aFile, ExecutorService executor)
+    {
+        if (aFile.isDir()) {
+            List<WebFile> dirFiles = aFile.getFiles();
+            dirFiles.forEach(file -> executor.submit(() -> preloadFilesImpl(file, executor)));
+            return;
+        }
+
+        // Preload file
+        aFile.getBytes();
     }
 }
