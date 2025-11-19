@@ -6,9 +6,7 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 /**
  * This version control class uses drop box.
@@ -150,7 +148,7 @@ public class VersionControlSnapCloud extends VersionControl {
      */
     private void prefetchFiles(WebFile aFile)
     {
-        WebFile remoteFile = getRemoteSite().createFileForPath(aFile.getPath(), aFile.isDir());
+        WebFile remoteFile = getRemoteSite().getFileForPath(aFile.getPath());
         CompletableFuture.runAsync(() -> prefetchFilesImpl(remoteFile));
         Thread.yield();
     }
@@ -176,9 +174,9 @@ public class VersionControlSnapCloud extends VersionControl {
      */
     private void preloadFiles(WebFile aFile)
     {
-        WebFile remoteFile = getRemoteSite().createFileForPath(aFile.getPath(), aFile.isDir());
+        WebFile remoteFile = getRemoteSite().getFileForPath(aFile.getPath());
 
-        // Preload files in executer
+        // Preload files in executor
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.submit(() -> preloadFilesImpl(remoteFile, executor));
         executor.shutdown();
