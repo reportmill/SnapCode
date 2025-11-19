@@ -1,5 +1,6 @@
 package snapcode.project;
 import snap.util.ActivityMonitor;
+import snap.util.ListUtils;
 import snap.util.Prefs;
 import snap.util.UserInfo;
 import snap.web.WebFile;
@@ -70,22 +71,22 @@ public class VersionControlSnapCloud extends VersionControl {
     public boolean canCreateRemote()  { return _writable; }
 
     /**
-     * Override to prefetch files.
+     * Override to prefetch remote files.
      */
     @Override
     protected List<WebFile> getUpdateFilesForLocalFilesImpl(List<WebFile> localFiles)
     {
-        localFiles.forEach(file -> prefetchFiles(file));
+        prefetchRemoteFilesForLocalFiles(localFiles);
         return super.getUpdateFilesForLocalFilesImpl(localFiles);
     }
 
     /**
-     * Override to preload files.
+     * Override to preload remote files.
      */
     @Override
     protected boolean updateFilesImpl(List<WebFile> localFiles, ActivityMonitor activityMonitor) throws Exception
     {
-        localFiles.forEach(file -> preloadFiles(file));
+        preloadRemoteFilesForLocalFiles(localFiles);
         return super.updateFilesImpl(localFiles, activityMonitor);
     }
 
@@ -144,23 +145,31 @@ public class VersionControlSnapCloud extends VersionControl {
     }
 
     /**
+     * Prefetches remote files for given local files.
+     */
+    private void prefetchRemoteFilesForLocalFiles(List<WebFile> localFiles)
+    {
+        localFiles.forEach(file -> prefetchRemoteFileForLocalFile(file));
+    }
+
+    /**
      * Prefetches files in directory.
      */
-    private void prefetchFiles(WebFile aFile)
+    private void prefetchRemoteFileForLocalFile(WebFile aFile)
     {
         WebFile remoteFile = getRemoteSite().getFileForPath(aFile.getPath());
-        CompletableFuture.runAsync(() -> prefetchFilesImpl(remoteFile));
+        CompletableFuture.runAsync(() -> prefetchRemoteFileForLocalFileImpl(remoteFile));
         Thread.yield();
     }
 
     /**
      * Prefetches given files.
      */
-    private static void prefetchFilesImpl(WebFile aFile)
+    private static void prefetchRemoteFileForLocalFileImpl(WebFile aFile)
     {
         if (aFile.isDir()) {
             List<WebFile> dirFiles = aFile.getFiles();
-            dirFiles.parallelStream().forEach(file -> prefetchFilesImpl(file));
+            dirFiles.parallelStream().forEach(file -> prefetchRemoteFileForLocalFileImpl(file));
             return;
         }
 
@@ -170,30 +179,31 @@ public class VersionControlSnapCloud extends VersionControl {
     }
 
     /**
-     * Preloads files in directory.
+     * Preloads remote files for given local files. Expects all files to be regular files.
      */
-    private void preloadFiles(WebFile aFile)
+    private void preloadRemoteFilesForLocalFiles(List<WebFile> localFiles)
     {
-        WebFile remoteFile = getRemoteSite().getFileForPath(aFile.getPath());
+        if (localFiles.size() <= 1)
+            return;
+        if (ListUtils.hasMatch(localFiles, file -> file.isDir())) {
+            System.err.println("VersionControlSnapCloud.preloadRemoteFilesForLocalFiles: Unexpected dir provided");
+            return;
+        }
 
         // Preload files in executor
+        WebSite remoteSite = getRemoteSite();
         ExecutorService executor = Executors.newCachedThreadPool();
-        executor.submit(() -> preloadFilesImpl(remoteFile, executor));
+        localFiles.forEach(file -> executor.submit(() -> preloadRemoteFileForLocalFile(file, remoteSite)));
         executor.shutdown();
     }
 
     /**
      * Preloads given file.
      */
-    private static void preloadFilesImpl(WebFile aFile, ExecutorService executor)
+    private static void preloadRemoteFileForLocalFile(WebFile localFile, WebSite remoteSite)
     {
-        if (aFile.isDir()) {
-            List<WebFile> dirFiles = aFile.getFiles();
-            dirFiles.forEach(file -> executor.submit(() -> preloadFilesImpl(file, executor)));
-            return;
-        }
-
-        // Preload file
-        aFile.getBytes();
+        WebFile remoteFile = remoteSite.createFileForPath(localFile.getPath(), localFile.isDir());
+        if (remoteFile.getExists())
+            remoteFile.getBytes();
     }
 }
