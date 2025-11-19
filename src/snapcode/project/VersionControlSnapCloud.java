@@ -8,6 +8,7 @@ import snap.web.WebSite;
 import snap.web.WebURL;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.stream.Stream;
 
 /**
  * This version control class uses drop box.
@@ -131,16 +132,19 @@ public class VersionControlSnapCloud extends VersionControl {
         if (userEmail == null || userEmail.isBlank())
             return null;
 
-        int sepIndex = userEmail.indexOf('@');
-        if (sepIndex <= 0)
+        // Get domain separator index
+        int domainSeperatorIndex = userEmail.indexOf('@');
+        if (domainSeperatorIndex <= 0)
             return null;
 
-        // Get username and domain
-        String userName = userEmail.substring(0, sepIndex);
-        String domain = userEmail.substring(sepIndex + 1);
+        // Get username and domain-path and user path
+        String userName = userEmail.substring(0, domainSeperatorIndex);
+        String domain = userEmail.substring(domainSeperatorIndex + 1);
+        String domainPath = ListUtils.joinStrings(ListUtils.getReverse(List.of(domain.split("\\."))), "/");
+        String userPath = !domain.equals("ignore") ? domainPath + '/' + userName : userName;
 
         // Return
-        String snapCloudUrlAddress = SNAPCLOUD_ROOT + domain + "/" + userName;
+        String snapCloudUrlAddress = SNAPCLOUD_ROOT + userPath;
         return WebURL.getUrl(snapCloudUrlAddress);
     }
 
