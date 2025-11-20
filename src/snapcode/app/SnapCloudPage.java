@@ -113,6 +113,40 @@ public class SnapCloudPage extends WebPage {
     }
 
     /**
+     * Shows a share/copy link panel for selected project.
+     */
+    private void shareProjectForSelFile()
+    {
+        WebURL snapCloudUserUrl = getSelectedProjectUrl();
+        if (snapCloudUserUrl == null)
+            return;
+
+        // Get share link
+        String shareLink = "https://reportmill.com/SnapCode/app/#" + snapCloudUserUrl.getString();
+
+        // Define share link panel UI
+        String SHARE_PROJECT_PANEL_UI = """
+            <TextView Name="TextArea" Font="Arial 14" Margin="20" Padding="8" Border="#88" BorderRadius="4" />
+            """;
+
+        // Create share link panel UI
+        TextArea shareLinkTextArea = (TextArea) UILoader.loadViewForString(SHARE_PROJECT_PANEL_UI);
+        shareLinkTextArea.setEditable(true);
+        shareLinkTextArea.setText(shareLink);
+        shareLinkTextArea.selectAll();
+
+        // Show share link panel
+        DialogBox dialogBox = new DialogBox("Share Link Panel");
+        dialogBox.setMessage("Copy link below");
+        dialogBox.setContent(shareLinkTextArea);
+        dialogBox.showMessageDialog(_workspacePane.getUI());
+
+        // Copy link to pasteboard
+        Clipboard clipboard = Clipboard.get();
+        clipboard.addData(shareLink);
+    }
+
+    /**
      * Deletes remote file.
      */
     private void deleteSelFile()
@@ -202,8 +236,11 @@ public class SnapCloudPage extends WebPage {
         // Update OpenProjectButton
         WebURL selProjectUrl = getSelectedProjectUrl();
         setViewVisible("OpenProjectButton", selProjectUrl != null);
-        if (selProjectUrl != null)
+        setViewVisible("ShareProjectButton", selProjectUrl != null);
+        if (selProjectUrl != null) {
             setViewText("OpenProjectButton", "Open " + selProjectUrl.getFilename());
+            setViewText("ShareProjectButton", "Share " + selProjectUrl.getFilename() + "...");
+        }
 
         // Update DeleteFileButton
         setViewVisible("DeleteFileButton", selProjectUrl != null);
@@ -226,8 +263,9 @@ public class SnapCloudPage extends WebPage {
                 runLater(this::connectToSnapCloudUserSite);
             }
 
-            // Handle OpenProjectButton
+            // Handle OpenProjectButton, ShareProjectButton
             case "OpenProjectButton" -> openProjectForSelFile();
+            case "ShareProjectButton" -> shareProjectForSelFile();
 
             // Handle DeleteFileButton
             case "DeleteFileButton" -> deleteSelFile();
