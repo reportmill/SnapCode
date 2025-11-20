@@ -357,7 +357,7 @@ public class ProjectUtils {
     /**
      * Deletes project files for site.
      */
-    public static void deleteProjectFilesForSite(WebSite projectSite) throws Exception
+    public static void deleteProjectFilesForSite(WebSite projectSite)
     {
         projectSite.deleteSite();
 

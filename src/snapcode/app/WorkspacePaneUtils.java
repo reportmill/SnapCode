@@ -268,14 +268,11 @@ public class WorkspacePaneUtils {
         Workspace workspace = workspacePane.getWorkspace();
 
         // Open project for repo URL
-        ActivityMonitor activityMonitor = new ActivityMonitor("Checkout " + repoURL.getString());
-        TaskRunner<Boolean> checkoutRunner = new TaskRunner<>(() -> workspace.openProjectForRepoUrl(repoURL, activityMonitor));
-        checkoutRunner.setMonitor(activityMonitor);
+        TaskRunner<Boolean> checkoutRunner = new TaskRunner<>("Checkout " + repoURL.getString());
+        checkoutRunner.setTaskFunction(() -> workspace.openProjectForRepoUrl(repoURL, checkoutRunner.getMonitor()));
+        checkoutRunner.setOnFailure(e -> handleOpenProjectForRepoUrlFailed(workspacePane, repoURL, e));
+        checkoutRunner.setOnCancelled(() -> handleOpenProjectForRepoUrlCancelled(repoURL));
         checkoutRunner.start();
-
-        // After add project, trigger build and show files
-        //checkoutRunner.setOnSuccess(val -> openProjectForRepoUrlFinished(workspacePane, repoURL));
-        checkoutRunner.setOnFailure(e -> openProjectForRepoUrlFailed(workspacePane, repoURL, e));
 
         // Show check progress panel
         checkoutRunner.getMonitor().showProgressPanel(workspacePane.getUI());
@@ -284,11 +281,23 @@ public class WorkspacePaneUtils {
     /**
      * Called if openProjectForRepoURL fails.
      */
-    private static void openProjectForRepoUrlFailed(WorkspacePane workspacePane, WebURL repoURL, Exception anException)
+    private static void handleOpenProjectForRepoUrlFailed(WorkspacePane workspacePane, WebURL repoURL, Exception anException)
     {
         DialogBox dialogBox = new DialogBox("Checkout failed");
         dialogBox.setErrorMessage("Failed checkout: " + repoURL.getString() + '\n' + "Error: " + anException.getMessage());
         dialogBox.showMessageDialog(workspacePane.getUI());
+
+        handleOpenProjectForRepoUrlCancelled(repoURL);
+    }
+
+    /**
+     * Called if openProjectForRepoURL is cancelled to delete any partially checked out files.
+     */
+    private static void handleOpenProjectForRepoUrlCancelled(WebURL repoURL)
+    {
+        System.out.println("WorkspacePane: open project repo interrupted - local project files removed");
+        WebSite projectSite = SnapCodeUtils.getSnapCodeProjectSiteForName(repoURL.getFilenameSimple());
+        ProjectUtils.deleteProjectFilesForSite(projectSite);
     }
 
     /**
