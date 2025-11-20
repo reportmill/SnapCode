@@ -1,6 +1,8 @@
 package snapcode.app;
 import snap.util.FileUtils;
 import snap.util.SnapUtils;
+import snap.view.*;
+import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
@@ -111,5 +113,34 @@ public class SnapCodeUtils {
         int buildMonthNum = List.of("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec").indexOf(buildMonth) + 1;
         String buildYear = "20" + buildInfo.substring(7, 9);
         return _buildVersion = String.format("%s.%02d", buildYear, buildMonthNum);
+    }
+
+    /**
+     * Shows a copy link panel.
+     */
+    public static void showCopyLinkPanel(View aView, String linkString)
+    {
+        // Define copy link panel UI
+        String COPY_LINK_PANEL_UI = """
+            <TextView Name="TextArea" Margin="20" Padding="8" Font="Arial 14" Border="#88" BorderRadius="4" />
+            """;
+
+        // Create copy link panel UI and configure
+        TextArea shareLinkTextArea = (TextArea) UILoader.loadViewForString(COPY_LINK_PANEL_UI);
+        shareLinkTextArea.setMaxWidth(750);
+        shareLinkTextArea.setEditable(true);
+        shareLinkTextArea.setWrapLines(true);
+        shareLinkTextArea.setText(linkString);
+        shareLinkTextArea.selectAll();
+
+        // Show copy link panel
+        DialogBox dialogBox = new DialogBox("Copy Link Panel");
+        dialogBox.setMessage("Copy link below");
+        dialogBox.setContent(shareLinkTextArea);
+        dialogBox.showMessageDialog(aView);
+
+        // Copy link to pasteboard
+        Clipboard clipboard = Clipboard.get();
+        clipboard.addData(linkString);
     }
 }

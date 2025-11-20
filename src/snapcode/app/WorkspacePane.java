@@ -699,9 +699,8 @@ public class WorkspacePane extends ViewOwner {
      */
     private void copyWebLink()
     {
-        String string = "https://reportmill.com/SnapCode/app/#" + _selFileTool.getWindowLocationHash();
-        Clipboard clipboard = Clipboard.get();
-        clipboard.addData(string);
+        String webLink = "https://reportmill.com/SnapCode/app/#" + _selFileTool.getWindowLocationHash();
+        SnapCodeUtils.showCopyLinkPanel(getUI(), webLink);
     }
 
     /**

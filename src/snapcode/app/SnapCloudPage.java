@@ -121,29 +121,9 @@ public class SnapCloudPage extends WebPage {
         if (snapCloudUserUrl == null)
             return;
 
-        // Get share link
+        // Get share link and show copy link panel
         String shareLink = "https://reportmill.com/SnapCode/app/#" + snapCloudUserUrl.getString();
-
-        // Define share link panel UI
-        String SHARE_PROJECT_PANEL_UI = """
-            <TextView Name="TextArea" Font="Arial 14" Margin="20" Padding="8" Border="#88" BorderRadius="4" />
-            """;
-
-        // Create share link panel UI
-        TextArea shareLinkTextArea = (TextArea) UILoader.loadViewForString(SHARE_PROJECT_PANEL_UI);
-        shareLinkTextArea.setEditable(true);
-        shareLinkTextArea.setText(shareLink);
-        shareLinkTextArea.selectAll();
-
-        // Show share link panel
-        DialogBox dialogBox = new DialogBox("Share Link Panel");
-        dialogBox.setMessage("Copy link below");
-        dialogBox.setContent(shareLinkTextArea);
-        dialogBox.showMessageDialog(_workspacePane.getUI());
-
-        // Copy link to pasteboard
-        Clipboard clipboard = Clipboard.get();
-        clipboard.addData(shareLink);
+        SnapCodeUtils.showCopyLinkPanel(_workspacePane.getUI(), shareLink);
     }
 
     /**
