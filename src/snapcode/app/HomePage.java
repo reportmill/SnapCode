@@ -238,19 +238,20 @@ public class HomePage extends WebPage {
         switch (anEvent.getName()) {
 
             // Handle CloudButton
-            case "CloudButton": showSnapCloudPage(); break;
+            case "CloudButton" -> showSnapCloudPage();
 
             // Handle ClearWorkspaceButton, RestoreWorkspaceButton
-            case "ClearWorkspaceButton": clearWorkspace(); break;
-            case "RestoreWorkspaceButton": restoreWorkspace(); break;
+            case "ClearWorkspaceButton" -> clearWorkspace();
+            case "RestoreWorkspaceButton" -> restoreWorkspace();
 
-            // Handle OpenButton, OpenDesktopFileButton, OpenScratchPadButton
-            case "OpenButton": _workspacePane.getFilesTool().showOpenFilePanel(); break;
-            case "OpenDesktopFileButton": _workspacePane.getFilesTool().showOpenDesktopFilePanel(); break;
-            case "OpenScratchPadButton": WorkspacePaneUtils.openScratchPad(_workspacePane); break;
+            // Handle OpenLocalFileButton, OpenDesktopFileButton, OpenScratchPadButton, OpenUrlButton
+            case "OpenLocalFileButton" -> _workspacePane.getFilesTool().showOpenFilePanel();
+            case "OpenDesktopFileButton" -> _workspacePane.getFilesTool().showOpenDesktopFilePanel();
+            case "OpenScratchPadButton" -> WorkspacePaneUtils.openScratchPad(_workspacePane);
+            case "OpenUrlButton" -> _workspacePane.getFilesTool().showOpenUrlPanel();
 
             // Do normal version
-            default: super.respondUI(anEvent); break;
+            default -> super.respondUI(anEvent);
         }
     }
 }

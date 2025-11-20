@@ -105,18 +105,18 @@ public class HomePageView extends MarkDownView {
                 return rowView;
             }
 
-            // Handle "Open Recent": Add OpenButton
+            // Handle "Open Recent": Add OpenLocalFileButton
             case "Open Recent:": {
 
                 // Create normal headerView
                 View headerView = super.createViewForHeaderNode(headerNode);
 
-                // Create OpenButton
-                Button openButton = new Button("Open...");
-                openButton.setPropsString("Name:OpenButton; TextColor: #50; PrefWidth:100; PrefHeight:24; Margin:0,0,0,20");
+                // Create OpenLocalFileButton
+                Button openLocalFileButton = new Button("Open Local...");
+                openLocalFileButton.setPropsString("Name:OpenLocalFileButton; TextColor: #50; PrefWidth:100; PrefHeight:24; Margin:0,0,0,20");
                 if (SnapEnv.isWebVM) {
-                    openButton.setText("Open Browser File...");
-                    openButton.setPrefWidth(130);
+                    openLocalFileButton.setText("Open Browser File...");
+                    openLocalFileButton.setPrefWidth(130);
                 }
 
                 // Create OpenDesktopFileButton
@@ -126,12 +126,16 @@ public class HomePageView extends MarkDownView {
 
                 // Create OpenScratchPadButton
                 Button openScratchPadButton = new Button("Open Scratch Pad");
-                openScratchPadButton.setPropsString("Name:OpenScratchPadButton; TextColor: #50; PrefWidth:120; PrefHeight:24; Margin:0,0,0,20");
+                openScratchPadButton.setPropsString("Name:OpenScratchPadButton; TextColor: #50; PrefWidth:120; PrefHeight:24; Margin:0,0,0,12");
+
+                // Create OpenUrlButton
+                Button openUrlButton = new Button("Open URL...");
+                openUrlButton.setPropsString("Name:OpenUrlButton; TextColor: #50; PrefWidth:100; PrefHeight:24; Margin:0,0,0,12");
 
                 // Create row, add children and return
                 RowView rowView = new RowView();
                 rowView.setMargin(headerView.getMargin()); headerView.setMargin(Insets.EMPTY);
-                rowView.setChildren(headerView, openButton, openDesktopFileButton, openScratchPadButton);
+                rowView.setChildren(headerView, openLocalFileButton, openDesktopFileButton, openScratchPadButton, openUrlButton);
                 return rowView;
             }
 

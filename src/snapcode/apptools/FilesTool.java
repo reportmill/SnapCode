@@ -61,6 +61,19 @@ public class FilesTool extends WorkspaceTool {
     }
 
     /**
+     * Shows the open URL panel.
+     */
+    public void showOpenUrlPanel()
+    {
+        String openUrlAddr = DialogBox.showInputDialog(_workspacePane.getUI(), "Open URL", "Enter URL to open", null);
+        if (openUrlAddr != null && !openUrlAddr.isBlank()) {
+            WebURL openUrl = WebURL.getUrl(openUrlAddr);
+            if (openUrl != null)
+                WorkspacePaneUtils.openFileUrl(_workspacePane, openUrl);
+        }
+    }
+
+    /**
      * Saves the selected file.
      */
     public void saveSelFile()
