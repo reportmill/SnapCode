@@ -242,7 +242,7 @@ public class JavaTextAdapter extends TextAdapter {
 
         // If after multi-line comment, remove space from indent
         else if (isEndMultiLineComment) {
-            if (sb.length() > 0)
+            if (!sb.isEmpty())
                 sb.delete(sb.length() - 1, sb.length());
         }
 
@@ -323,8 +323,7 @@ public class JavaTextAdapter extends TextAdapter {
         TextToken textToken = aTextLine.getLastToken();
         if (isUnbalancedOpenBracketToken(textToken)) {
             String closeBracketStr = '\n' + indentStr + "}";
-            int selStart = aTextLine.getNext().getEndCharIndex() - 1;
-            _textModel.addChars(closeBracketStr, selStart);
+            _textModel.addChars(closeBracketStr, newSelStart);
         }
     }
 
@@ -387,14 +386,13 @@ public class JavaTextAdapter extends TextAdapter {
      */
     public char getPairedCharForOpener(char openerChar)
     {
-        switch (openerChar) {
-            case '\'':
-            case '"': return openerChar;
-            case '(': return ')';
-            case '[': return ']';
-            case '{': return '}';
-            default: throw new IllegalArgumentException("JavaTextAreaKey.getPairedCharCloser: Illegal char: " + openerChar);
-        }
+        return switch (openerChar) {
+            case '\'', '"' -> openerChar;
+            case '(' -> ')';
+            case '[' -> ']';
+            case '{' -> '}';
+            default -> throw new IllegalArgumentException("JavaTextAreaKey.getPairedCharCloser: Illegal char: " + openerChar);
+        };
     }
 
     /**
