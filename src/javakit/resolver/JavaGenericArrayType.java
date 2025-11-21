@@ -60,8 +60,15 @@ public class JavaGenericArrayType extends JavaType {
     }
 
     /**
+     * Returns whether is an array.
+     */
+    @Override
+    public boolean isArray()  { return true; }
+
+    /**
      * Returns the Array component type.
      */
+    @Override
     public JavaType getComponentType()  { return _componentType; }
 
     /**

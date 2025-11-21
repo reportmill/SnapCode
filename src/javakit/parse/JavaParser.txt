@@ -334,7 +334,7 @@ PatternList { "(" PatternExpr ("," PatternExpr)* ")" }
 
 Name { Identifier (LookAhead(2) "." Identifier)* }
 
-Identifier { "[$_a-zA-Z][$\w]*" }
+Identifier { "[$_a-zA-Z][$\w]*" | "yield" }
 
 Literal { IntegerLiteral | FloatLiteral | CharacterLiteral | TextBlockLiteral | StringLiteral | BooleanLiteral | NullLiteral }
 

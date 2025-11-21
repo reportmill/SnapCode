@@ -322,8 +322,8 @@ public class JType extends JNode {
         // If parent.parent is Lambda expression, get type for var decl
         JNode parentNode = getParent();
         JNode grandparentNode = parentNode.getParent();
-        if (grandparentNode instanceof JExprLambda)
-            return ((JExprLambda) grandparentNode).getJavaTypeForLambdaParameterVarDecl(varDecl);
+        if (grandparentNode instanceof JExprLambda lambdaExpr)
+            return lambdaExpr.getJavaTypeForLambdaParameterVarDecl(varDecl);
 
         // If initializer expression set, return its EvalType
         JExpr initExpr = varDecl.getInitExpr();
@@ -338,8 +338,8 @@ public class JType extends JNode {
         }
 
         // If parentNode.parent is ForEachStmt, get iterable type
-        if (grandparentNode instanceof JStmtFor)
-            return ((JStmtFor) grandparentNode).getForEachIterationType();
+        if (grandparentNode instanceof JStmtFor forStmt)
+            return forStmt.getForEachIterationType();
 
         // Return not found
         return null;
@@ -371,20 +371,17 @@ public class JType extends JNode {
     @Override
     protected NodeError[] getErrorsImpl()
     {
-        NodeError[] errors = NodeError.NO_ERRORS;
-
-        // Handle unresolved type
         JavaType javaType = getJavaType();
-        if (javaType == null) {
-            String className = getName();
-            String errorString = "Can't resolve type: " + className;
-            if ("var".equals(className))
-                errorString = "Cannot infer type: 'var' on variable without initializer";
-            errors = NodeError.addError(errors,this, errorString, 0);
-        }
+        if (javaType != null)
+            return NodeError.NO_ERRORS;
+
+        // Let compiler handle 'var' errors
+        String className = getName();
+        if ("var".equals(className))
+            return NodeError.NO_ERRORS;
 
         // Return
-        return errors;
+        return NodeError.newErrorArray(this, "Can't resolve type: " + className);
     }
 
     /**

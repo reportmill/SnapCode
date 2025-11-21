@@ -215,8 +215,7 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
             return iterableType.getComponentType();
 
         // Handle iterable is ParameterizedType: Return first
-        if (iterableType instanceof JavaParameterizedType) {
-            JavaParameterizedType parameterizedType = (JavaParameterizedType) iterableType;
+        if (iterableType instanceof JavaParameterizedType parameterizedType) {
             JavaType[] parameterTypes = parameterizedType.getParamTypes();
             if (parameterTypes.length > 0)
                 return parameterTypes[0];
