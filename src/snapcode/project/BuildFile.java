@@ -214,7 +214,7 @@ public class BuildFile extends PropObject {
     {
         BuildDependency dependency = _dependencies.get(anIndex);
         List<BuildDependency> newDependencies = new ArrayList<>(_dependencies);
-        _dependencies.remove(anIndex);
+        newDependencies.remove(anIndex);
         setDependencies(newDependencies);
         firePropChange(Dependency_Prop, dependency, null);
     }
