@@ -415,9 +415,10 @@ public class VersionControlTool extends ProjectTool {
         // Get replace files for root files
         List<WebFile> replaceFiles = _versionControl.getModifiedFilesForLocalFiles(rootFiles);
 
-        // Run VcsTransferPane for files and op
-        if (!new VcsTransferPane().showPanel(this, replaceFiles, VcsTransferPane.Op.Replace))
-            return;
+        // If more than one file, run VcsTransferPane to show files and get confirmation
+        if (rootFiles.size() > 1 || rootFiles.get(0).isDir())
+            if (!new VcsTransferPane().showPanel(this, replaceFiles, VcsTransferPane.Op.Replace))
+                return;
 
         // Disable workspace AutoBuild
         _workspace.getBuilder().setAutoBuildEnabled(false);
