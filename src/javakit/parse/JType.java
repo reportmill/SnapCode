@@ -191,7 +191,7 @@ public class JType extends JNode {
 
         // If parent is type, see if name is nested TypeArg from class extends/implements (e.g.: public class XXX extends List<E>)
         JNode parent = getParent();
-        if (parent instanceof JType parentType) {
+        if (parent instanceof JType parentType && !(parent instanceof JTypeUnion)) {
             JavaClass baseClass = parentType.getBaseClass();
             if (baseClass != null) {
                 JavaTypeVariable typeVarType = baseClass.getTypeParameterForName(baseName);
@@ -257,7 +257,7 @@ public class JType extends JNode {
     /**
      * Returns the base type.
      */
-    private JavaClass getBaseClass()
+    protected JavaClass getBaseClass()
     {
         // Bogus - Look for TypeVar and use BoundsClass. Otherwise getBaseType() below can stack overflow
         String baseName = getName();

@@ -88,7 +88,7 @@ MethodDecl
 
 FormalParams { "(" (FormalParam ("," FormalParam)*)? ")" }
 
-FormalParam { ("final" | Annotation)? Type "..."? Identifier ("[" "]")* }
+FormalParam { ("final" | Annotation)? Type ("|" Type)* "..."? Identifier ("[" "]")* }
 
 ThrowsList { "throws" Name ("," Name)* }
 

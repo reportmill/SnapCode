@@ -230,28 +230,27 @@ public class JavaParserStmt extends JavaParserExpr {
 
             switch (anId) {
 
-                // Handle Type
-                case "Type":
-                    varDecl.setType(aNode.getCustomNode(JType.class));
-                    break;
+                // Handle Type: Check for union type (like in catch clause)
+                case "Type" -> {
+                    JType type = aNode.getCustomNode(JType.class);
+                    if (varDecl.getType() != null)
+                        type = JTypeUnion.addTypeToType(varDecl.getType(), type);
+                    varDecl.setType(type);
+                }
 
                 // Handle vararg: Fix this
-                case "...": {
+                case "..." -> {
                     JType varType = varDecl.getType();
                     varType.setArrayCount(varType.getArrayCount() + 1);
-                    break;
                 }
 
                 // Handle Identifier
-                case "Identifier":
-                    varDecl.setId(aNode.getCustomNode(JExprId.class));
-                    break;
+                case "Identifier" -> varDecl.setId(aNode.getCustomNode(JExprId.class));
 
                 // Handle ("[" "]")*
-                case "[": {
+                case "[" -> {
                     JType varType = varDecl.getType();
                     varType.setArrayCount(varType.getArrayCount() + 1);
-                    break;
                 }
             }
         }
