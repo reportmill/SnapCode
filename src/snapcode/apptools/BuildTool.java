@@ -1,4 +1,6 @@
 package snapcode.apptools;
+import snap.gfx.Color;
+import snap.gfx.Font;
 import snap.text.TextModel;
 import snap.util.ArrayUtils;
 import snap.util.FormatUtils;
@@ -10,7 +12,9 @@ import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
+
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -20,6 +24,9 @@ public class BuildTool extends WorkspaceTool {
 
     // The selected issue
     private BuildIssue  _selIssue;
+
+    // The errors tree
+    private TreeView<Object> _errorsTree;
 
     // The build log text
     private TextModel _buildLogTextModel;
@@ -64,6 +71,15 @@ public class BuildTool extends WorkspaceTool {
     }
 
     /**
+     * Returns the list of issue files.
+     */
+    public List<WebFile> getIssueFiles()
+    {
+        BuildIssue[] getIssues = getIssues();
+        return Stream.of(getIssues).map(issue -> issue.getFile()).distinct().toList();
+    }
+
+    /**
      * Returns the selected issue.
      */
     public BuildIssue getSelIssue()  { return _selIssue; }
@@ -94,10 +110,11 @@ public class BuildTool extends WorkspaceTool {
      */
     protected void initUI()
     {
-        // Configure ErrorsList
-        ListView<BuildIssue> errorsList = getView("ErrorsList", ListView.class);
-        errorsList.setCellConfigure(this::configureErrorsCell);
-        errorsList.setRowHeight(24);
+        // Configure ErrorsTree
+        _errorsTree = getView("ErrorsTree", TreeView.class);
+        _errorsTree.setResolver(new ErrorTreeResolver());
+        _errorsTree.setCellConfigure(this::configureErrorsTreeCell);
+        _errorsTree.setRowHeight(28);
 
         // Get BuildLogTextBlock
         TextView buildLogTextView = getView("BuildLogTextView", TextView.class);
@@ -132,9 +149,10 @@ public class BuildTool extends WorkspaceTool {
         // Update BuildStatusLabel
         setViewText("BuildStatusLabel", getBuildStatusText());
 
-        // Update ErrorsList
-        setViewItems("ErrorsList", getIssues());
-        setViewSelItem("ErrorsList", getSelIssue());
+        // Update ErrorsTree
+        _errorsTree.setItems((List<Object>) (List<?>) getIssueFiles());
+        _errorsTree.setSelItem(getSelIssue());
+        _errorsTree.expandAll();
 
         // Update BuildLogTextBlock: If Workspace.Builder.BuildLogBuffer is longer, append to BuildLogTextView
         StringBuffer buildLogBuffer = _workspace.getBuilder().getBuildLogBuffer();
@@ -160,8 +178,8 @@ public class BuildTool extends WorkspaceTool {
             case "StopButton" -> _workspace.getBuilder().stopBuild();
             case "CleanButton" -> cleanWorkspace();
 
-            // Handle ErrorsList
-            case "ErrorsList" -> handleErrorListActionEvent(anEvent);
+            // Handle ErrorsTree
+            case "ErrorsTree" -> handleErrorsTreeActionEvent(anEvent);
 
             // Do normal version
             default -> super.respondUI(anEvent);
@@ -169,34 +187,44 @@ public class BuildTool extends WorkspaceTool {
     }
 
     /**
-     * Configures an errors list cell.
+     * Configures an errors tree cell.
      */
-    protected void configureErrorsCell(ListCell<BuildIssue> aCell)
+    protected void configureErrorsTreeCell(ListCell<?> aCell)
     {
-        BuildIssue buildIssue = aCell.getItem();
-        if (buildIssue == null)
-            return;
+        // Handle Error file (headers)
+        if (aCell.getItem() instanceof WebFile errorFile) {
+            aCell.setText(getErrorFileText(errorFile));
+            aCell.setFont(Font.Arial16);
+            aCell.setFill(ERROR_TREE_HEADER_COLOR);
+        }
 
-        // Get/set cell text
-        String issueText = buildIssue.getText();
-        String issueFilename = buildIssue.getFile().getName();
-        int issueLineNum = buildIssue.getLine() + 1;
-        String text = String.format("%s (%s:%d)", issueText, issueFilename, issueLineNum);
-        text = text.replace('\n', ' ');
-        aCell.setText(text);
+        // Handle BuildIssue
+        else if (aCell.getItem() instanceof BuildIssue buildIssue) {
+            aCell.setText(getBuildIssueText(buildIssue));
+            aCell.setFont(Font.Arial14);
+            if (!aCell.isSelected())
+                aCell.setFill(ERROR_TREE_CONTENT_COLOR);
 
-        // Set cell image
-        aCell.setImage(buildIssue.isError() ? ErrorImage : WarningImage);
-        aCell.getGraphic().setPadding(2, 5, 2, 5);
+            // Set cell image
+            aCell.setImage(buildIssue.isError() ? ErrorImage : WarningImage);
+            aCell.getGraphic().setPadding(2, 5, 2, 5);
+        }
+
+        // Handle empty cell
+        else aCell.setFill(ERROR_TREE_CONTENT_COLOR);
     }
+
+    // ErrorsTree cell fill colors
+    private static final Color ERROR_TREE_HEADER_COLOR = Color.get("#F6");
+    private static final Color ERROR_TREE_CONTENT_COLOR = Color.get("#FD");
 
     /**
      * Called when ErrorList is clicked.
      */
-    private void handleErrorListActionEvent(ViewEvent anEvent)
+    private void handleErrorsTreeActionEvent(ViewEvent anEvent)
     {
         // Set issue
-        BuildIssue issue = (BuildIssue) anEvent.getSelItem();
+        BuildIssue issue = getIssueForErrorTreeNode(anEvent.getSelItem());
         setSelIssue(issue);
 
         // Open File
@@ -252,4 +280,78 @@ public class BuildTool extends WorkspaceTool {
      */
     @Override
     public String getTitle()  { return "Build"; }
+
+    /**
+     * Returns an issue for given errors tree node.
+     */
+    private static BuildIssue getIssueForErrorTreeNode(Object errorTreeNode)
+    {
+        if (errorTreeNode instanceof BuildIssue)
+            return (BuildIssue) errorTreeNode;
+        WebFile errorFile = (WebFile) errorTreeNode;
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(errorFile);
+        BuildIssue[] buildIssues = javaAgent.getBuildIssues();
+        return buildIssues[0];
+    }
+
+    /**
+     * Returns the error file text.
+     */
+    private static String getErrorFileText(WebFile errorFile)
+    {
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(errorFile);
+        BuildIssue[] buildIssues = javaAgent.getBuildIssues();
+        return errorFile.getName() + " - " + buildIssues.length + " errors";
+    }
+
+    /**
+     * Returns the build issue text.
+     */
+    private static String getBuildIssueText(BuildIssue buildIssue)
+    {
+        String issueText = buildIssue.getText();
+        String issueFilename = buildIssue.getFile().getName();
+        int issueLineNum = buildIssue.getLine() + 1;
+        String text = String.format("%s (%s:%d)", issueText, issueFilename, issueLineNum);
+        return text.replace('\n', ' ');
+    }
+
+    /**
+     * TreeResolver for ErrorsTree.
+     */
+    private static class ErrorTreeResolver extends TreeResolver<Object> {
+
+        @Override
+        public Object getParent(Object anItem)
+        {
+            if (anItem instanceof WebFile)
+                return null;
+            BuildIssue issue = (BuildIssue) anItem;
+            return issue.getFile();
+        }
+
+        @Override
+        public boolean isParent(Object anItem)
+        {
+            return anItem instanceof WebFile;
+        }
+
+        @Override
+        public List<Object> getChildren(Object aParent)
+        {
+            WebFile errorFile = (WebFile) aParent;
+            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(errorFile);
+            return List.of(javaAgent.getBuildIssues());
+        }
+
+        @Override
+        public String getText(Object anItem)
+        {
+            if (anItem instanceof WebFile)
+                return getErrorFileText((WebFile) anItem);
+            if (anItem instanceof BuildIssue)
+                return getBuildIssueText((BuildIssue) anItem);
+            return null;
+        }
+    }
 }

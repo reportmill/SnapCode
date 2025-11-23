@@ -157,10 +157,11 @@ public class ProjectFilesTool extends WorkspaceTool {
         // Get and configure FilesTree
         _filesTree = getView("FilesTree", TreeView.class);
         _filesTree.setResolver(new ProjectFile.ProjectFileTreeResolver());
+        _filesTree.setCellConfigure(this::configureFilesTreeCell);
         _filesTree.setRowHeight(24);
         _filesTree.addEventFilter(this::handleTreeViewMouseEvent, MousePress, MouseRelease);
         _filesTree.addEventFilter(this::handleTreeViewDragEvent, DragEvents);
-        _filesTree.addEventFilter(this::handleDragGestureEvent, DragGesture);
+        //_filesTree.addEventFilter(this::handleDragGestureEvent, DragGesture);
 
         // Get FilesList
         _filesList = getView("FilesList", ListView.class);
@@ -537,6 +538,21 @@ public class ProjectFilesTool extends WorkspaceTool {
     }
 
     /**
+     * Called to configure FilesTree cell.
+     */
+    private void configureFilesTreeCell(ListCell<ProjectFile> aCell)
+    {
+        // Get item
+        ProjectFile item = aCell.getItem();
+        if (item == null)
+            return;
+
+        // Set cell text/graphic
+        aCell.setText(item.getText());
+        aCell.setGraphic(item.getGraphic());
+    }
+
+    /**
      * Called to configure FilesList cell.
      */
     private void configureFilesListCell(ListCell<ProjectFile> aCell)
@@ -546,15 +562,16 @@ public class ProjectFilesTool extends WorkspaceTool {
         if (item == null)
             return;
 
-        // Configure cell
-        aCell.setPadding(2, 6, 2, 4);
+        // Set cell text/graphic
+        aCell.setText(item.getText());
         aCell.setGraphic(item.getGraphic());
+        aCell.setPadding(2, 6, 2, 4);
         aCell.setGrowWidth(true);
 
+        // Add close box
         CloseBox closeBox = new CloseBox();
         closeBox.setLeanX(HPos.RIGHT);
         closeBox.addEventHandler(e -> _workspacePane.closeFile(item.getFile()), View.Action);
-
         aCell.setGraphicAfter(closeBox);
     }
 

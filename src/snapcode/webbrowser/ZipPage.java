@@ -2,11 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.webbrowser;
-import snap.gfx.Image;
 import snap.view.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import snapcode.util.FileIcons;
 import java.util.List;
 
 /**
@@ -88,8 +86,5 @@ public class ZipPage extends WebPage {
 
         // Return child file name
         public String getText(WebFile aFile)  { return aFile.getName(); }
-
-        // Return child file icon
-        public Image getImage(WebFile aFile)  { return FileIcons.getFileIconImage(aFile); }
     }
 }

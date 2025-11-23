@@ -202,8 +202,5 @@ public class ProjectFile implements Comparable<ProjectFile> {
 
         /** Returns the text to be used for given item. */
         public String getText(ProjectFile anItem)  { return anItem.getText(); }
-
-        /** Return the image to be used for given item. */
-        public View getGraphic(ProjectFile anItem)  { return anItem.getGraphic(); }
     }
 }

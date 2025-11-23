@@ -12,7 +12,7 @@
   <SplitView Vertical="true" GrowHeight="true" Border="null">
     <ColView GrowHeight="true">
       <Label Margin="8" Text="Build Issues:" />
-      <ListView Name="ErrorsList" Margin="0,5,5,5" BorderRadius="5" Font="Arial 14" GrowWidth="true" GrowHeight="true" />
+      <TreeView Name="ErrorsTree" Margin="0,5,5,5" BorderRadius="5" Font="Arial 14" GrowWidth="true" GrowHeight="true" />
     </ColView>
     <TextView Name="BuildLogTextView" PrefHeight="250" />
   </SplitView>
