@@ -41,7 +41,7 @@ public class TextPage extends WebPage {
         WebFile textFile = getFile();
         TextAgent textAgent = TextAgent.getAgentForFile(textFile);
         textAgent.setTextModelSupplier(() -> {
-            TextModel textModel = new TextModel();
+            TextModel textModel = TextModel.createDefaultTextModel();
             textModel.setDefaultFont(Font.getCodeFont());
             return textModel;
         });

@@ -58,7 +58,7 @@ public class JMDPage extends WebPage {
         WebFile jmdFile = getFile();
         TextAgent textAgent = TextAgent.getAgentForFile(jmdFile);
         textAgent.setTextModelSupplier(() -> {
-            TextModel textModel = new TextModel();
+            TextModel textModel = TextModel.createDefaultTextModel();
             textModel.setDefaultFont(Font.getCodeFontForSize(14));
             return textModel;
         });

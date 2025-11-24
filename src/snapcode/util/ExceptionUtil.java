@@ -21,7 +21,7 @@ public class ExceptionUtil {
         String str = StringUtils.getStackTraceString(anException);
         str = StringUtils.trimEnd(str);
 
-        TextModel textModel = new TextModel(true);
+        TextModel textModel = TextModel.createDefaultTextModel(true);
         textModel.setDefaultFont(Font.Arial14);
         appendString(textModel, str, ERROR_COLOR);
         return textModel;
