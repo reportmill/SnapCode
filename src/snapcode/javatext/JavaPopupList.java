@@ -294,8 +294,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         JNode idNode = idExpr;
         if (idNode.getParent() instanceof JExprMethodCall)
             idNode = idNode.getParent();
-        if (idNode.getParent() instanceof JExprDot) {
-            JExprDot dotExpr = (JExprDot) idNode.getParent();
+        if (idNode.getParent() instanceof JExprDot dotExpr) {
             if (idNode == dotExpr.getExpr()) {
                 JExpr prefixExpr = dotExpr.getPrefixExpr();
                 JExpr newDotExpr = new JExprDot(prefixExpr, virtualIdExpr);
@@ -347,7 +346,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // If completion has args and next char is args, strip args from string
         int parenStart = completionStr.indexOf('(');
-        if (replaceEnd < _textArea.length() && _textArea.charAt(replaceEnd) == '(')
+        if (parenStart > 0 && replaceEnd < _textArea.length() && _textArea.charAt(replaceEnd) == '(')
             completionStr = completionStr.substring(0, parenStart);
 
         // Replace selection with completeString
@@ -406,30 +405,38 @@ public class JavaPopupList extends PopupList<JavaDecl> {
      */
     private int indexOfParenContent(JavaDecl completionDecl, String completionStr)
     {
+        // If executable, forward to real method
+        if (completionDecl instanceof JavaExecutable javaExecutable)
+            return indexOfParenContentForExecutable(javaExecutable, completionStr);
+
+        // If not executable, just return paren index (probably is "if (...)" or "for (...)" )
+        return completionStr.indexOf('(');
+    }
+
+    /**
+     * Returns whether JavaExecutable suggestion has parens that want content.
+     */
+    private int indexOfParenContentForExecutable(JavaExecutable javaExecutable, String completionStr)
+    {
         // If no open paren, just return
         int argStart = completionStr.indexOf('(');
         if (argStart < 0)
             return -1;
 
-        // If not executable, just return paren index (probably is "if (...)" or "for (...)" )
-        if (!(completionDecl instanceof JavaExecutable))
-            return argStart;
-
         // If method/constructor with non-zero params, return paren index
-        JavaExecutable exec = (JavaExecutable) completionDecl;
-        if (exec.getParameterCount() > 0)
+        if (javaExecutable.getParameterCount() > 0)
             return argStart;
 
         // If constructor
-        JavaClass declClass = exec.getDeclaringClass();
-        if (exec instanceof JavaConstructor) {
+        JavaClass declClass = javaExecutable.getDeclaringClass();
+        if (javaExecutable instanceof JavaConstructor) {
             boolean multipleConstructors = declClass.getDeclaredConstructors().length > 1;
             return multipleConstructors ? argStart : -1;
         }
 
         // If more methods with this name
         JavaMethod[] methods = declClass.getDeclaredMethods();
-        JavaMethod javaMethod = (JavaMethod) exec;
+        JavaMethod javaMethod = (JavaMethod) javaExecutable;
         String methodName = javaMethod.getName();
         int count = 0;
         for (JavaMethod method : methods) {
