@@ -5,29 +5,25 @@ import snapcode.debug.DebugApp;
 import snap.gfx.Font;
 import snap.view.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * A debug pane.
+ * This view owner class manages showing variables for current stack frame in the debugger.
  */
 public class DebugVarsPane extends WorkspaceTool {
 
     // The DebugTool
-    private DebugTool  _debugTool;
+    private DebugTool _debugTool;
 
-    // The variable table
-    private TreeView<VarTreeItem>  _varTree;
+    // The variable tree
+    private TreeView<VarTreeItem> _varsTree;
 
-    // The variable text
-    private TextView  _varText;
-
-    // Whether to reset VarTable
-    private boolean  _resetVarTable = true;
+    // Whether VarsTree needs reset
+    private boolean _resetVarsTree = true;
 
     /**
-     * Creates a new DebugVarsPane.
+     * Constructor.
      */
     public DebugVarsPane(DebugTool debugTool)
     {
@@ -38,37 +34,36 @@ public class DebugVarsPane extends WorkspaceTool {
     /**
      * Returns the debug app.
      */
-    public DebugApp getDebugApp()
-    {
-        return _debugTool.getSelDebugApp();
-    }
+    public DebugApp getDebugApp()  { return _debugTool.getSelDebugApp(); }
 
     /**
      * Create UI.
      */
     protected void initUI()
     {
-        // Create VarTree and configure
-        _varTree = getView("TreeView", TreeView.class);
-        _varTree.setFont(Font.Arial11);
-        TreeCol c0 = _varTree.getCol(0);
-        c0.setHeaderText("Name");
-        c0.setPrefWidth(100);
-        TreeCol c1 = new TreeCol();
-        c1.setHeaderText("Value");
-        c1.setPrefWidth(100);
-        c1.setGrowWidth(true);
-        TreeCol c2 = new TreeCol();
-        c2.setHeaderText("Type");
-        c2.setPrefWidth(100);
-        c2.setGrowWidth(true);
-        _varTree.addCol(c1);
-        _varTree.addCol(c2);
-        _varTree.setResolver(new VarTreeResolver());
+        // Get VarsTree
+        _varsTree = getView("TreeView", TreeView.class);
+        _varsTree.setFont(Font.Arial11);
+        _varsTree.setResolver(new VarTreeResolver());
 
-        // Create VarText TextView and configure in ScrollView
-        _varText = getView("TextView", TextView.class);
-        _varText.setWrapLines(true);
+        // Configure "Name" column
+        TreeCol<VarTreeItem> nameCol = _varsTree.getCol(0);
+        nameCol.setHeaderText("Name");
+        nameCol.setPrefWidth(100);
+
+        // Add "Value" column
+        TreeCol<VarTreeItem> valueCol = new TreeCol<>();
+        valueCol.setHeaderText("Value");
+        valueCol.setPrefWidth(100);
+        valueCol.setGrowWidth(true);
+        _varsTree.addCol(valueCol);
+
+        // Add "Type" column
+        TreeCol<VarTreeItem> typeCol = new TreeCol<>();
+        typeCol.setHeaderText("Type");
+        typeCol.setPrefWidth(100);
+        typeCol.setGrowWidth(true);
+        _varsTree.addCol(typeCol);
     }
 
     /**
@@ -77,70 +72,72 @@ public class DebugVarsPane extends WorkspaceTool {
     public void resetUI()
     {
         // Reset VarTable.Items
-        if (_resetVarTable) {
-            _resetVarTable = false;
-            List vitems = createVarItems();
-            _varTree.setItems(vitems);
+        if (_resetVarsTree) {
+            _resetVarsTree = false;
+            List<VarTreeItem> varItems = createVarItems();
+            _varsTree.setItems(varItems);
         }
 
         // Update VarText
-        VarTreeItem vitem = _varTree.getSelItem();
-        if (vitem != null && getDebugApp() != null && getDebugApp().isPaused()) {
-            String pvalue = vitem.getValueToString();
-            _varText.setText(pvalue != null ? pvalue : "(null)");
-        } else _varText.setText("");
+        VarTreeItem selVarTreeItem = _varsTree.getSelItem();
+        if (selVarTreeItem != null && getDebugApp() != null && getDebugApp().isPaused()) {
+            String varValueStr = selVarTreeItem.getValueToString();
+            setViewText("TextView", varValueStr != null ? varValueStr : "(null)");
+        }
+        else setViewText("TextView", "");
     }
 
     /**
-     * Tells table to update model from DebugApp.
+     * Called to notify that VarsTree needs reset from DebugApp.
      */
-    void resetVarTable()
+    protected void resetVarTable()
     {
-        if (isUISet()) {
-            _resetVarTable = true;
-            resetLater();
-        }
+        if (!isUISet()) return;
+        _resetVarsTree = true;
+        resetLater();
     }
 
     /**
      * Creates Var items.
      */
-    List createVarItems()
+    private List<VarTreeItem> createVarItems()
     {
         // Get DebugApp and current frame
-        DebugApp dapp = getDebugApp();
-        if (dapp == null) return Collections.EMPTY_LIST;
-        StackFrame frame = dapp.getCurrentFrame();
-        if (frame == null) return Collections.EMPTY_LIST;
-        List vitems = new ArrayList();
+        DebugApp debugApp = getDebugApp();
+        if (debugApp == null)
+            return Collections.EMPTY_LIST;
+        StackFrame frame = debugApp.getCurrentFrame();
+        if (frame == null)
+            return Collections.EMPTY_LIST;
+        List<VarTreeItem> varItems = new ArrayList<>();
 
         // Add Frame.ThisObject
-        ObjectReference oref = frame.thisObject();
-        if (oref != null) vitems.add(new VarTreeItem(dapp, "this", oref));
+        ObjectReference objRef = frame.thisObject();
+        if (objRef != null)
+            varItems.add(new VarTreeItem(debugApp, "this", objRef));
 
         // Get Local Variables and add
-        List<LocalVariable> vars;
-        try {
-            vars = frame.visibleVariables();
-        } catch (Exception e) {
+        List<LocalVariable> localVars;
+        try { localVars = frame.visibleVariables(); }
+        catch (Exception e) {
             System.err.println(e.getMessage());
-            vars = Collections.emptyList();
+            localVars = Collections.emptyList();
         }
-        for (LocalVariable lv : vars) {
-            String name = null;
-            Value value = null;
+
+        for (LocalVariable localVar : localVars) {
+            VarTreeItem varItem;
             try {
-                name = lv.name();
-                value = frame.getValue(lv);
-            } catch (Exception e) {
-                name = e.toString();
+                String name = localVar.name();
+                Value value = frame.getValue(localVar);
+                varItem = new VarTreeItem(debugApp, name, value);
             }
-            vitems.add(new VarTreeItem(dapp, name, value));
+            catch (Exception e) { varItem = new VarTreeItem(debugApp, e.toString(), null); }
+            varItems.add(varItem);
         }
 
         // Sort and return
-        Collections.sort(vitems);
-        return vitems;
+        Collections.sort(varItems);
+        return varItems;
     }
 
     /**
@@ -159,7 +156,7 @@ public class DebugVarsPane extends WorkspaceTool {
         String _name;
         Object _value;
         VarTreeItem _parent;
-        VarTreeItem[] _children;
+        List<VarTreeItem> _children;
 
         /**
          * Create VarTableItem.
@@ -174,65 +171,50 @@ public class DebugVarsPane extends WorkspaceTool {
         /**
          * Return the debug app.
          */
-        public DebugApp getApp()
-        {
-            return _app;
-        }
+        public DebugApp getApp()  { return _app; }
 
         /**
          * Returns the parent item.
          */
-        public VarTreeItem getParent()
-        {
-            return _parent;
-        }
+        public VarTreeItem getParent()  { return _parent; }
 
         /**
          * Returns name.
          */
-        public String getName()
-        {
-            return _name;
-        }
+        public String getName()  { return _name; }
 
         /**
          * Returns the value.
          */
-        public Object getValue()
-        {
-            return _value;
-        }
+        public Object getValue()  { return _value; }
 
         /**
          * Return value.
          */
         public String getValueString()
         {
-            Object value = _value;
-            if (value instanceof ArrayReference) {
-                ArrayReference aref = (ArrayReference) value;
-                ReferenceType rtype = aref.referenceType();
-                String name = rtype.name();
-                int ind = name.lastIndexOf('.');
-                if (ind > 0) name = name.substring(ind + 1);
-                return String.format("%s[%d] (id=%d)", name, aref.length(), aref.uniqueID());
+            if (_value instanceof ArrayReference arrayRef) {
+                ReferenceType refType = arrayRef.referenceType();
+                String name = refType.name();
+                int dotIndex = name.lastIndexOf('.');
+                if (dotIndex > 0)
+                    name = name.substring(dotIndex + 1);
+                return String.format("%s[%d] (id=%d)", name, arrayRef.length(), arrayRef.uniqueID());
             }
 
-            if (value instanceof StringReference) {
-                StringReference sref = (StringReference) value;
-                return sref.value();
+            if (_value instanceof StringReference stringRef)
+                return stringRef.value();
+
+            if (_value instanceof ObjectReference objRef) {
+                ReferenceType refType = objRef.referenceType();
+                String name = refType.name();
+                int dotIndex = name.lastIndexOf('.');
+                if (dotIndex > 0)
+                    name = name.substring(dotIndex + 1);
+                return String.format("%s (id=%d)", name, objRef.uniqueID());
             }
 
-            if (value instanceof ObjectReference) {
-                ObjectReference oref = (ObjectReference) value;
-                ReferenceType rtype = oref.referenceType();
-                String name = rtype.name();
-                int ind = name.lastIndexOf('.');
-                if (ind > 0) name = name.substring(ind + 1);
-                return String.format("%s (id=%d)", name, oref.uniqueID());
-            }
-
-            return value != null ? value.toString() : "(null)";
+            return _value != null ? _value.toString() : "(null)";
         }
 
         /**
@@ -268,42 +250,41 @@ public class DebugVarsPane extends WorkspaceTool {
         /**
          * Override to get ObjectReference children.
          */
-        public VarTreeItem[] getChildren()
+        public List<VarTreeItem> getChildren()
         {
             if (_children != null) return _children;
-            List<VarTreeItem> list = new ArrayList();
-            ObjectReference or = (ObjectReference) _value;
-            ReferenceType rt = or.referenceType();
+
+            ObjectReference objRef = (ObjectReference) _value;
+            ReferenceType refType = objRef.referenceType();
+            List<VarTreeItem> varItems = new ArrayList<>();
 
             // Handle Arrays
-            if (or instanceof ArrayReference) {
-                ArrayReference aref = (ArrayReference) or;
+            if (objRef instanceof ArrayReference arrayRef) {
                 int i = 0;
-                for (Value value : aref.getValues())
-                    list.add(new VarTreeItem(getApp(), "[" + (i++) + ']', value));
+                for (Value value : arrayRef.getValues())
+                    varItems.add(new VarTreeItem(getApp(), "[" + (i++) + ']', value));
             }
 
             // Handle anything else: Iterate over fields for ReferenceType to create VarTableItems
             else {
-                List<Field> fields = rt.allFields();
+                List<Field> fields = refType.allFields();
                 for (Field field : fields) {
-                    if (field.isStatic() || field.isEnumConstant()) continue;
-                    String name = field.name();
-                    Value value = null;
+                    if (field.isStatic() || field.isEnumConstant())
+                        continue;
+                    VarTreeItem varItem;
                     try {
-                        value = or.getValue(field);
-                    } catch (Exception e) {
-                        name = e.toString();
+                        Value value = objRef.getValue(field);
+                        varItem = new VarTreeItem(getApp(), field.name(), value);
                     }
-                    list.add(new VarTreeItem(getApp(), name, value));
+                    catch (Exception e) { varItem = new VarTreeItem(getApp(), e.toString(), null); }
+                    varItems.add(varItem);
                 }
-                Collections.sort(list);
+                Collections.sort(varItems);
             }
 
             // Get array, set parents and return
-            _children = list.toArray(new VarTreeItem[0]);
-            for (VarTreeItem item : _children) item._parent = this;
-            return _children;
+            varItems.forEach(varItem -> varItem._parent = this);
+            return _children = varItems;
         }
 
         /**
@@ -332,36 +313,28 @@ public class DebugVarsPane extends WorkspaceTool {
         /**
          * Returns the parent of given item.
          */
-        public VarTreeItem getParent(VarTreeItem anItem)
-        {
-            return anItem._parent;
-        }
+        public VarTreeItem getParent(VarTreeItem anItem)  { return anItem._parent; }
 
         /**
          * Whether given object is a parent (has children).
          */
-        public boolean isParent(VarTreeItem anItem)
-        {
-            return anItem.isParent();
-        }
+        public boolean isParent(VarTreeItem anItem)  { return anItem.isParent(); }
 
         /**
          * Returns the children.
          */
-        public List<VarTreeItem> getChildren(VarTreeItem aParent)
-        {
-            return Arrays.asList(aParent.getChildren());
-        }
+        public List<VarTreeItem> getChildren(VarTreeItem aParent)  { return aParent.getChildren(); }
 
         /**
          * Returns the text to be used for given item.
          */
         public String getText(VarTreeItem anItem, int aCol)
         {
-            if (aCol == 0) return anItem.getName();
-            if (aCol == 1) return anItem.getValueString();
+            if (aCol == 0)
+                return anItem.getName();
+            if (aCol == 1)
+                return anItem.getValueString();
             return anItem.getVarClass();
         }
     }
-
 }

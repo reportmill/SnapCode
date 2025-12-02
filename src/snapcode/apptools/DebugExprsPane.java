@@ -7,24 +7,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A debug pane.
+ * This view owner class manages evaluating and showing expressions in the debugger.
  */
 public class DebugExprsPane extends WorkspaceTool {
 
     // The DebugTool
-    private DebugTool  _debugTool;
+    private DebugTool _debugTool;
 
-    // The variable table
-    private TreeView<ExprTreeItem>  _varTree;
-
-    // The variable text
-    private TextView  _varText;
+    // The variables tree
+    private TreeView<ExprTreeItem> _varsTree;
 
     // The list of expression tree items
     private List<ExprTreeItem>  _exprItems = new ArrayList<>();
 
+    // Whether VarsTree needs reset
+    private boolean _resetVarsTree = true;
+
     /**
-     * Creates a new DebugExprsPane.
+     * Constructor.
      */
     public DebugExprsPane(DebugTool debugTool)
     {
@@ -35,10 +35,7 @@ public class DebugExprsPane extends WorkspaceTool {
     /**
      * Returns the debug app.
      */
-    public DebugApp getDebugApp()
-    {
-        return _debugTool.getSelDebugApp();
-    }
+    public DebugApp getDebugApp()  { return _debugTool.getSelDebugApp(); }
 
     /**
      * Create UI.
@@ -46,35 +43,24 @@ public class DebugExprsPane extends WorkspaceTool {
     @Override
     protected void initUI()
     {
-        // Create VarTree and configure
-        _varTree = getView("TreeView", TreeView.class);
-        TreeCol c0 = _varTree.getCol(0);
-        c0.setHeaderText("Name");
-        c0.setPrefWidth(150);
-        c0.setGrowWidth(true);
-        TreeCol c1 = new TreeCol();
-        c1.setHeaderText("Value");
-        c1.setPrefWidth(150);
-        c1.setGrowWidth(true);
-        _varTree.addCol(c1);
+        // Get VarTree and configure first "Name" column
+        _varsTree = getView("TreeView", TreeView.class);
+        TreeCol<?> treeCol0 = _varsTree.getCol(0);
+        treeCol0.setHeaderText("Name");
+        treeCol0.setPrefWidth(150);
+        treeCol0.setGrowWidth(true);
+
+        // Add second "Value" column
+        TreeCol<ExprTreeItem> treeCol1 = new TreeCol<>();
+        treeCol1.setHeaderText("Value");
+        treeCol1.setPrefWidth(150);
+        treeCol1.setGrowWidth(true);
+        _varsTree.addCol(treeCol1);
         TreeResolver<ExprTreeItem> resolver = (TreeResolver<ExprTreeItem>) (TreeResolver<?>) new DebugVarsPane.VarTreeResolver();
-        _varTree.setResolver(resolver); //_varTree.setEditable(true);
+        _varsTree.setResolver(resolver);
 
         // Set default item
         _exprItems.add(new ExprTreeItem("this"));
-
-        // Set Cell Factory
-    /*TreeTableColumn col0 = (TreeTableColumn)_varTable.getColumns().get(0);
-    col0.setEditable(true); col0.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
-    col0.setOnEditCommit(new EventHandler<CellEditEvent>() {
-        public void handle(CellEditEvent e) {
-            if(!(e.getRowValue() instanceof ExprTableItem)) return;
-            ExprTableItem titem = (ExprTableItem)e.getRowValue();
-            titem._expr = titem._name = (String)e.getNewValue(); resetVarTable(); } });*/
-
-        // Create VarText TextView and configure in ScrollView
-        _varText = getView("TextView", TextView.class);
-        _varText.setWrapLines(true);
     }
 
     /**
@@ -83,40 +69,39 @@ public class DebugExprsPane extends WorkspaceTool {
     protected void resetUI()
     {
         // Set items
-        _varTree.setItems(_exprItems);
-        if (_varTree.getSelItem() == null && _exprItems.size() > 0) _varTree.setSelIndex(0);
+        _varsTree.setItems(_exprItems);
+        if (_varsTree.getSelItem() == null && !_exprItems.isEmpty())
+            _varsTree.setSelIndex(0);
 
         // Iterate over ExprTableItems and reset values
-        if (_resetVarTable) {
-            _resetVarTable = false;
-            for (ExprTreeItem item : _exprItems) item.eval();
-            _varTree.updateItems();
+        if (_resetVarsTree) {
+            _resetVarsTree = false;
+            _exprItems.forEach(ExprTreeItem::eval);
+            _varsTree.updateItems();
         }
 
         // Update ExprText
-        DebugVarsPane.VarTreeItem varTreeItem = _varTree.getSelItem();
-        setViewText("ExprText", varTreeItem instanceof ExprTreeItem ? varTreeItem.getName() : null);
-        setViewEnabled("ExprText", varTreeItem instanceof ExprTreeItem);
+        DebugVarsPane.VarTreeItem varTreeItem = _varsTree.getSelItem();
+        setViewText("ExprText", varTreeItem != null ? varTreeItem.getName() : null);
+        setViewEnabled("ExprText", varTreeItem != null);
 
         // Update VarText
         if (varTreeItem != null && getDebugApp() != null && getDebugApp().isPaused()) {
-            String pvalue = varTreeItem.getValueToString();
-            _varText.setText(pvalue != null ? pvalue : "(null)");
-        } else _varText.setText("");
+            String varValueStr = varTreeItem.getValueToString();
+            setViewText("TextView", varValueStr != null ? varValueStr : "(null)");
+        }
+        else setViewText("TextView", "");
     }
 
     /**
-     * Tells table to update model from DebugApp.
+     * Called to notify that VarsTree needs reset from DebugApp.
      */
-    void resetVarTable()
+    protected void resetVarTable()
     {
-        if (isUISet()) {
-            _resetVarTable = true;
-            resetLater();
-        }
+        if (!isUISet()) return;
+        _resetVarsTree = true;
+        resetLater();
     }
-
-    boolean _resetVarTable = true;
 
     /**
      * Respond UI.
@@ -125,31 +110,32 @@ public class DebugExprsPane extends WorkspaceTool {
     {
         // Handle ExprText
         if (anEvent.equals("ExprText")) {
-            DebugVarsPane.VarTreeItem item = _varTree.getSelItem();
-            ExprTreeItem exitem = item instanceof ExprTreeItem ? (ExprTreeItem) item : null;
-            if (exitem == null) return;
-            ExprTreeItem nitem = new ExprTreeItem(anEvent.getStringValue());
-            nitem.eval();
-            _exprItems.set(_exprItems.indexOf(exitem), nitem);
-            _varTree.setItems(_exprItems);
-            _varTree.setSelItem(nitem);
+            ExprTreeItem selExprItem = _varsTree.getSelItem();
+            if (selExprItem == null)
+                return;
+
+            ExprTreeItem newExprItem = new ExprTreeItem(anEvent.getStringValue());
+            newExprItem.eval();
+            _exprItems.set(_exprItems.indexOf(selExprItem), newExprItem);
+            _varsTree.setItems(_exprItems);
+            _varsTree.setSelItem(newExprItem);
             resetVarTable();
         }
 
         // Handle AddButton
         if (anEvent.equals("AddButton")) {
-            ExprTreeItem nitem = new ExprTreeItem(anEvent.getStringValue());
-            nitem.eval();
-            _exprItems.add(nitem);
-            _varTree.setItems(_exprItems);
-            _varTree.setSelItem(nitem);
-            //runLater(() -> _varTree.edit(_exprItems.size()-1, _varTree.getCol(0)));
+            ExprTreeItem newExprItem = new ExprTreeItem(anEvent.getStringValue());
+            newExprItem.eval();
+            _exprItems.add(newExprItem);
+            _varsTree.setItems(_exprItems);
+            _varsTree.setSelItem(newExprItem);
         }
 
         // Handle RemoveButton
         if (anEvent.equals("RemoveButton")) {
-            int index = _varTree.getSelIndex();
-            if (index >= 0 && index < _exprItems.size()) _exprItems.remove(index);
+            int index = _varsTree.getSelIndex();
+            if (index >= 0 && index < _exprItems.size())
+                _exprItems.remove(index);
         }
 
         // Everything makes text focus
@@ -182,24 +168,18 @@ public class DebugExprsPane extends WorkspaceTool {
         /**
          * Override to use current app.
          */
-        public DebugApp getApp()
-        {
-            return getDebugApp();
-        }
+        public DebugApp getApp()  { return getDebugApp(); }
 
         /**
          * Makes TreeItem re-eval expression.
          */
         void eval()
         {
-            DebugApp dapp = getDebugApp();
-            _children = null; //if(isChildrenSet()) { resetChildren(); setExpanded(false); }
-            try {
-                _value = dapp != null ? ExprEval.eval(dapp, _expr) : null;
-            } catch (Exception e) {
-                _value = e;
-            }
+            _children = null;
+
+            DebugApp debugApp = getDebugApp();
+            try { _value = debugApp != null ? ExprEval.eval(debugApp, _expr) : null; }
+            catch (Exception e) { _value = e; }
         }
     }
-
 }
