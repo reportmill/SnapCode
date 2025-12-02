@@ -1,7 +1,6 @@
 package snapcode.apptools;
 import snapcode.app.WorkspaceTool;
 import snapcode.debug.DebugApp;
-import snapcode.debug.ExprEval;
 import snap.view.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +14,10 @@ public class DebugExprsPane extends WorkspaceTool {
     private DebugTool _debugTool;
 
     // The variables tree
-    private TreeView<ExprTreeItem> _varsTree;
+    private TreeView<DebugVarItem> _varsTree;
 
     // The list of expression tree items
-    private List<ExprTreeItem>  _exprItems = new ArrayList<>();
+    private List<DebugVarItem> _exprItems = new ArrayList<>();
 
     // Whether VarsTree needs reset
     private boolean _resetVarsTree = true;
@@ -43,29 +42,31 @@ public class DebugExprsPane extends WorkspaceTool {
     @Override
     protected void initUI()
     {
-        // Get VarTree and configure first "Name" column
+        // Get VarsTree
         _varsTree = getView("TreeView", TreeView.class);
+        _varsTree.setResolver(new DebugVarItem.VarTreeResolver());
+
+        // Configure "Name" column
         TreeCol<?> treeCol0 = _varsTree.getCol(0);
         treeCol0.setHeaderText("Name");
         treeCol0.setPrefWidth(150);
         treeCol0.setGrowWidth(true);
 
         // Add second "Value" column
-        TreeCol<ExprTreeItem> treeCol1 = new TreeCol<>();
+        TreeCol<DebugVarItem> treeCol1 = new TreeCol<>();
         treeCol1.setHeaderText("Value");
         treeCol1.setPrefWidth(150);
         treeCol1.setGrowWidth(true);
         _varsTree.addCol(treeCol1);
-        TreeResolver<ExprTreeItem> resolver = (TreeResolver<ExprTreeItem>) (TreeResolver<?>) new DebugVarsPane.VarTreeResolver();
-        _varsTree.setResolver(resolver);
 
         // Set default item
-        _exprItems.add(new ExprTreeItem("this"));
+        _exprItems.add(DebugVarItem.createItemForExpression("this"));
     }
 
     /**
      * Reset UI.
      */
+    @Override
     protected void resetUI()
     {
         // Set items
@@ -76,18 +77,19 @@ public class DebugExprsPane extends WorkspaceTool {
         // Iterate over ExprTableItems and reset values
         if (_resetVarsTree) {
             _resetVarsTree = false;
-            _exprItems.forEach(ExprTreeItem::eval);
+            DebugApp debugApp = getDebugApp();
+            _exprItems.forEach(exprItem -> exprItem.evaluateExpression(debugApp));
             _varsTree.updateItems();
         }
 
         // Update ExprText
-        DebugVarsPane.VarTreeItem varTreeItem = _varsTree.getSelItem();
+        DebugVarItem varTreeItem = _varsTree.getSelItem();
         setViewText("ExprText", varTreeItem != null ? varTreeItem.getName() : null);
         setViewEnabled("ExprText", varTreeItem != null);
 
         // Update VarText
         if (varTreeItem != null && getDebugApp() != null && getDebugApp().isPaused()) {
-            String varValueStr = varTreeItem.getValueToString();
+            String varValueStr = varTreeItem.invokeToStringMethod(getDebugApp());
             setViewText("TextView", varValueStr != null ? varValueStr : "(null)");
         }
         else setViewText("TextView", "");
@@ -106,36 +108,40 @@ public class DebugExprsPane extends WorkspaceTool {
     /**
      * Respond UI.
      */
+    @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle ExprText
-        if (anEvent.equals("ExprText")) {
-            ExprTreeItem selExprItem = _varsTree.getSelItem();
-            if (selExprItem == null)
-                return;
+        switch (anEvent.getName()) {
 
-            ExprTreeItem newExprItem = new ExprTreeItem(anEvent.getStringValue());
-            newExprItem.eval();
-            _exprItems.set(_exprItems.indexOf(selExprItem), newExprItem);
-            _varsTree.setItems(_exprItems);
-            _varsTree.setSelItem(newExprItem);
-            resetVarTable();
-        }
+            // Handle ExprText
+            case "ExprText" -> {
+                DebugVarItem selExprItem = _varsTree.getSelItem();
+                if (selExprItem == null)
+                    return;
 
-        // Handle AddButton
-        if (anEvent.equals("AddButton")) {
-            ExprTreeItem newExprItem = new ExprTreeItem(anEvent.getStringValue());
-            newExprItem.eval();
-            _exprItems.add(newExprItem);
-            _varsTree.setItems(_exprItems);
-            _varsTree.setSelItem(newExprItem);
-        }
+                DebugVarItem newExprItem = DebugVarItem.createItemForExpression(anEvent.getStringValue());
+                newExprItem.evaluateExpression(getDebugApp());
+                _exprItems.set(_exprItems.indexOf(selExprItem), newExprItem);
+                _varsTree.setItems(_exprItems);
+                _varsTree.setSelItem(newExprItem);
+                resetVarTable();
+            }
 
-        // Handle RemoveButton
-        if (anEvent.equals("RemoveButton")) {
-            int index = _varsTree.getSelIndex();
-            if (index >= 0 && index < _exprItems.size())
-                _exprItems.remove(index);
+            // Handle AddButton
+            case "AddButton" -> {
+                DebugVarItem newExprItem = DebugVarItem.createItemForExpression(anEvent.getStringValue());
+                newExprItem.evaluateExpression(getDebugApp());
+                _exprItems.add(newExprItem);
+                _varsTree.setItems(_exprItems);
+                _varsTree.setSelItem(newExprItem);
+            }
+
+            // Handle RemoveButton
+            case "RemoveButton" -> {
+                int index = _varsTree.getSelIndex();
+                if (index >= 0 && index < _exprItems.size())
+                    _exprItems.remove(index);
+            }
         }
 
         // Everything makes text focus
@@ -147,39 +153,4 @@ public class DebugExprsPane extends WorkspaceTool {
      */
     @Override
     public String getTitle()  { return "Expressions"; }
-
-    /**
-     * A class to hold a ExprTableItem Variable.
-     */
-    public class ExprTreeItem extends DebugVarsPane.VarTreeItem {
-
-        // Ivars
-        String _expr;
-
-        /**
-         * Create ExprTableItem.
-         */
-        public ExprTreeItem(String aName)
-        {
-            super(null, aName, null);
-            _expr = aName;
-        }
-
-        /**
-         * Override to use current app.
-         */
-        public DebugApp getApp()  { return getDebugApp(); }
-
-        /**
-         * Makes TreeItem re-eval expression.
-         */
-        void eval()
-        {
-            _children = null;
-
-            DebugApp debugApp = getDebugApp();
-            try { _value = debugApp != null ? ExprEval.eval(debugApp, _expr) : null; }
-            catch (Exception e) { _value = e; }
-        }
-    }
 }
