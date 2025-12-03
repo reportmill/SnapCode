@@ -466,11 +466,10 @@ var str = FigletFont.convertOneLine("Hello World");
 System.out.println(str);
 ```
 
-## DOM Manipulation (CJDOM)
+## DOM Manipulation (WebAPIs)
 
 ```
-//DEPS com.reportmill:cjdom:2025.11
-import cjdom.*;
+import snap.webapi.*;
 
 var doc = Window.getDocument();
 var button = doc.createElement("button");
@@ -482,7 +481,7 @@ doc.getBody().appendChild(button);
 ## ReportMill
 
 ```
-//DEPS com.reportmill:ReportMill16:2025.11
+//DEPS com.reportmill:ReportMill16:2025.12
 import com.reportmill.base.*;
 import com.reportmill.shape.RMDocument;
 import java.io.File;
