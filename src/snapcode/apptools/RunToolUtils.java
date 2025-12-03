@@ -1,6 +1,5 @@
 package snapcode.apptools;
 import snap.util.SnapEnv;
-import snap.view.ViewUtils;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.debug.*;
@@ -74,8 +73,18 @@ public class RunToolUtils {
         if (buildFile.isEnableCompilePreview())
             return false;
 
-        boolean isSwing = mainFile.getText().contains("javax.swing");
-        return !isSwing && !ViewUtils.isControlDown() && proj.getBuildFile().getDependencies().isEmpty();
+        // If there are dependencies, return false
+        if (!proj.getBuildFile().getDependencies().isEmpty())
+            return false;
+
+        // If Swing or WebAPIs, return false
+        if (mainFile.getText().contains("javax.swing"))
+            return false;
+        if (mainFile.getText().contains(".webapi."))
+            return false;
+
+        // Return true
+        return true;
     }
 
     /**
