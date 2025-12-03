@@ -14,44 +14,38 @@ import snapcode.debug.Exceptions.*;
 public class BreakpointReq {
 
     // App
-    DebugApp _app;
+    private DebugApp _debugApp;
 
     // Breakpoint
-    Breakpoint _bpoint;
+    protected Breakpoint _breakPoint;
 
     // Request
-    EventRequest _request = null;
+    private EventRequest _request = null;
 
     // The exception, if request couldn't be resolved
-    Exception _error;
+    private Exception _error;
 
     // Constants for status
-    public enum Status {Deferred, Resolved, Erroneous}
+    public enum Status { Deferred, Resolved, Erroneous }
 
     /**
-     * Creates a new EventRequestSpec.
+     * Constructor.
      */
     public BreakpointReq(DebugApp aRuntime, Breakpoint aBP)
     {
-        _app = aRuntime;
-        _bpoint = aBP;
+        _debugApp = aRuntime;
+        _breakPoint = aBP;
     }
 
     /**
      * Returns the name.
      */
-    public String getName()
-    {
-        return _bpoint.getName();
-    }
+    public String getName()  { return _breakPoint.getName(); }
 
     /**
      * Returns the type.
      */
-    public Type getType()
-    {
-        return _bpoint.getType();
-    }
+    public Type getType()  { return _breakPoint.getType(); }
 
     /**
      * Called when ClassPrepare event is received to resolve EventRequests added prior to run.
@@ -68,15 +62,15 @@ public class BreakpointReq {
     public void install(VirtualMachine vm)
     {
         // try to resolve immediately: Iterate over vm classes and try to resolve if ref-type found
-        List<ReferenceType> classes = vm.allClasses();
-        for (ReferenceType refType : classes)
+        List<ReferenceType> allClasses = vm.allClasses();
+        for (ReferenceType refType : allClasses)
             if (matches(refType)) {
                 install(refType);
                 return;
             }
 
         // If ref-type not found, notify deferred
-        _app.breakpointReqWasDeferred(this);
+        _debugApp.breakpointReqWasDeferred(this);
     }
 
     /**
@@ -89,14 +83,14 @@ public class BreakpointReq {
             _request = createEventRequest(aRefType);
             _request.putProperty("spec", this); // Don't think we need this
             _request.enable();
-            _app.breakpointReqWasSet(this);  // Notify successful set
-            System.out.println("Installed BP " + getName() + " :" + _bpoint.getLineNum());
+            _debugApp.breakpointReqWasSet(this);  // Notify successful set
+            System.out.println("Installed BP " + getName() + " :" + _breakPoint.getLineNum());
         }
 
         // If create event request fails, set error and notify
         catch (Exception exc) {
             _error = exc;
-            _app.breakpointReqSetFailed(this);
+            _debugApp.breakpointReqSetFailed(this);
         }
     }
 
@@ -107,9 +101,9 @@ public class BreakpointReq {
     {
         // Delete request and notify
         EventRequest request = getEventRequest();
-        if (request != null && _app.isRunning())
+        if (request != null && _debugApp.isRunning())
             request.virtualMachine().eventRequestManager().deleteEventRequest(request);
-        _app.breakpointReqWasDeleted(this);
+        _debugApp.breakpointReqWasDeleted(this);
     }
 
     /**
@@ -123,27 +117,24 @@ public class BreakpointReq {
         try { refType.locationsOfLine(_lineNumber); }  // Try to find line number
         catch(AbsentInformationException exc) { return false; } catch(ObjectCollectedException  exc) { return false; }
         return true; //catch(InvalidLineNumberException  exc) { } }*/
-
-        // Pattern
-        //return _isWild? refType.name().endsWith(_className) : refType.name().equals(_className);
+        // Pattern //return _isWild? refType.name().endsWith(_className) : refType.name().equals(_className);
 
         // See if root name matches
-        String rname = aRefType.name(), cname = _bpoint.getClassName();
-        boolean match = rname.startsWith(cname) && (rname.length() == cname.length() || rname.startsWith(cname + '$'));
+        String rname = aRefType.name();
+        String className = _breakPoint.getClassName();
+        boolean match = rname.startsWith(className) && (rname.length() == className.length() || rname.startsWith(className + '$'));
 
         // Make sure location is available
         if (match) {
-            try {
-                location((ClassType) aRefType);
-            } catch (Exception e) {
-                return false;
-            }
+            try { location((ClassType) aRefType); }
+            catch (Exception e) { return false; }
         }
 
         // Ignore matches for ProjectClassLoader. TODO: Need better way to resolve duplicate classes
-        if (match)
-            if (aRefType.classLoader().type().name().endsWith("ProjectClassLoaderX"))
-                match = false;
+        if (match && aRefType.classLoader().type().name().endsWith("ProjectClassLoaderX"))
+            match = false;
+
+        // Return
         return match;
     }
 
@@ -174,22 +165,22 @@ public class BreakpointReq {
         // Handle Method
         if (getType() == Type.MethodBreakpoint) {
             Location location = location((ClassType) aRefType);
-            if (!isValidMethodName(_bpoint.getMethodName()))
-                throw new MalformedMemberNameException(_bpoint.getMethodName());
+            if (!DebugUtils.isValidMethodName(_breakPoint.getMethodName()))
+                throw new MalformedMemberNameException(_breakPoint.getMethodName());
             return aRefType.virtualMachine().eventRequestManager().createBreakpointRequest(location);
         }
 
         // Handle Exception
         if (getType() == Type.Exception) {
             EventRequestManager eventRequestManager = aRefType.virtualMachine().eventRequestManager();
-            return eventRequestManager.createExceptionRequest(aRefType, _bpoint.isNotifyCaught(), _bpoint.isNotifyUncaught());
+            return eventRequestManager.createExceptionRequest(aRefType, _breakPoint.isNotifyCaught(), _breakPoint.isNotifyUncaught());
         }
 
         // Handle AccessWatchpoint and ModificationWatchpoint
         if (getType() == Type.AccessWatchpoint || getType() == Type.ModificationWatchpoint) {
-            Field field = aRefType.fieldByName(_bpoint.getFieldName());
+            Field field = aRefType.fieldByName(_breakPoint.getFieldName());
             if (field == null)
-                throw new NoSuchFieldException(_bpoint.getFieldName());
+                throw new NoSuchFieldException(_breakPoint.getFieldName());
 
             // Handle Access/Modification Watchpoint
             if (getType() == Type.AccessWatchpoint)
@@ -209,8 +200,8 @@ public class BreakpointReq {
     {
         // Handle Type LineNumber
         if (getType() == Type.LineBreakpoint) try {
-            List locs = aClass.locationsOfLine(_bpoint.getLineNum());
-            if (locs.size() == 0)
+            List<Location> locs = aClass.locationsOfLine(_breakPoint.getLineNum());
+            if (locs.isEmpty())
                 throw new LineNotFoundException();
 
             // TODO handle multiple locations
@@ -226,18 +217,14 @@ public class BreakpointReq {
         }
 
         // Handle Type Method
-        Method method = findMatchingMethod(_app, aClass, _bpoint.getMethodName(), _bpoint.getMethodArgs());
-        Location location = method.location();
-        return location;
+        Method method = findMatchingMethod(_debugApp, aClass, _breakPoint.getMethodName(), _breakPoint.getMethodArgs());
+        return method.location();
     }
 
     /**
      * Returns the exception, if request hit error.
      */
-    public Exception getError()
-    {
-        return _error;
-    }
+    public Exception getError()  { return _error; }
 
     /**
      * Returns the error message.
@@ -246,21 +233,19 @@ public class BreakpointReq {
     {
         // Handle Type LineNumber
         if (_error instanceof LineNotFoundException)
-            return "No code at line " + _bpoint.getLineNum() + " in " + getName();
-        if (_error instanceof InvalidTypeException)
-            return "Breakpoints can be located only in classes. " + getName() + " is an interface or array";
+            return "No code at line " + _breakPoint.getLineNum() + " in " + getName();
 
         // Handle Type Method
         if (_error instanceof AmbiguousMethodException)
-            return "Method " + _bpoint.getMethodName() + " is overloaded; specify arguments"; // Should list methods here
+            return "Method " + _breakPoint.getMethodName() + " is overloaded; specify arguments"; // Should list methods here
         if (_error instanceof NoSuchMethodException)
-            return "No method " + _bpoint.getMethodName() + " in " + getName();
+            return "No method " + _breakPoint.getMethodName() + " in " + getName();
         if (_error instanceof InvalidTypeException)
             return "Breakpoints can be located only in classes. " + getName() + " is an interface or array";
 
         // Handle Type Watchpoint
         if (_error instanceof NoSuchFieldException)
-            return "No field " + _bpoint.getFieldName() + " in " + getName();
+            return "No field " + _breakPoint.getFieldName() + " in " + getName();
 
         // Basic errors
         if (_error instanceof IllegalArgumentException)
@@ -273,26 +258,17 @@ public class BreakpointReq {
     /**
      * @return true if this spec has been resolved.
      */
-    public boolean isResolved()
-    {
-        return _request != null;
-    }
+    public boolean isResolved()  { return _request != null; }
 
     /**
      * @return true if this spec has not yet been resolved.
      */
-    public boolean isUnresolved()
-    {
-        return _request == null && _error == null;
-    }
+    public boolean isUnresolved()  { return _request == null && _error == null; }
 
     /**
      * @return true if this spec is unresolvable due to error.
      */
-    public boolean isErroneous()
-    {
-        return _error != null;
-    }
+    public boolean isErroneous()  { return _error != null; }
 
     /**
      * Returns the status.
@@ -303,12 +279,10 @@ public class BreakpointReq {
     }
 
     /**
-     * Returns whether given name is valid method name.
+     * Standard toString implementation.
      */
-    public static boolean isValidMethodName(String aName)
-    {
-        return DebugUtils.isJavaIdentifier(aName) || aName.equals("<init>") || aName.equals("<clinit>");
-    }
+    @Override
+    public String toString()  { return _breakPoint + " (" + getStatus() + ")"; }
 
     /**
      * Attempt an unambiguous match of the method name and argument specification to a method. If no arguments
@@ -318,9 +292,9 @@ public class BreakpointReq {
             throws AmbiguousMethodException, NoSuchMethodException, NoSessionException
     {
         // Normalize the argument string once before looping below.
-        List argTypeNames = null;
+        List<String> argTypeNames = null;
         if (theArgs != null) {
-            argTypeNames = new ArrayList(theArgs.size());
+            argTypeNames = new ArrayList<>(theArgs.size());
             for (String name : theArgs) {
                 name = normalizeArgTypeName(name, aRT);
                 argTypeNames.add(name);
@@ -364,8 +338,8 @@ public class BreakpointReq {
     {
         // Separate the type name from any array modifiers, stripping whitespace after the name ends.
         int i = 0;
-        StringBuffer typePart = new StringBuffer();
-        StringBuffer arrayPart = new StringBuffer();
+        StringBuilder typePart = new StringBuilder();
+        StringBuilder arrayPart = new StringBuilder();
         aName = aName.trim();
         int nameLength = aName.length();
 
@@ -392,14 +366,14 @@ public class BreakpointReq {
 
         aName = typePart.toString();
 
-        // When there's no sign of a package name already, try to expand the the name to a fully qualified class name
+        // When there's no sign of a package name already, try to expand name to a fully qualified class name
         if (aName.indexOf('.') == -1 || aName.startsWith("*.")) {
             try {
-                List refs = anApp.findClassesMatchingPattern(aName);
-                if (refs.size() > 0)  //### ambiguity???
-                    aName = ((ReferenceType) (refs.get(0))).name();
-            } catch (IllegalArgumentException e) {
-            } // We'll try the name as is
+                List<ReferenceType> refs = anApp.findClassesMatchingPattern(aName);
+                if (!refs.isEmpty())  //### ambiguity???
+                    aName = refs.get(0).name();
+            }
+            catch (IllegalArgumentException ignore) { } // We'll try the name as is
         }
         aName += arrayPart.toString();
         if (isVarArgs)
@@ -423,7 +397,8 @@ public class BreakpointReq {
         for (int i = 0, iMax = argTypeNames.size(); i < iMax; i++) {
 
             // Get both names
-            String comp1 = argTypeNames.get(i), comp2 = theNames.get(i);
+            String comp1 = argTypeNames.get(i);
+            String comp2 = theNames.get(i);
 
             // If names not equal...
             if (!comp1.equals(comp2)) {
@@ -449,13 +424,4 @@ public class BreakpointReq {
         // Return true since everything matched
         return true;
     }
-
-    /**
-     * Standard toString implementation.
-     */
-    public String toString()
-    {
-        return _bpoint + " (" + getStatus() + ")";
-    }
-
 }

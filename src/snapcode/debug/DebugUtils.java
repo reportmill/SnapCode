@@ -73,19 +73,18 @@ public class DebugUtils {
     /**
      * Return the thread status description.
      */
-    public static String getStatus(ThreadReference threadReference)
+    public static String getStatusForThreadReference(ThreadReference threadReference)
     {
         int status = threadReference.status();
-        String result;
-        switch (status) {
-            case ThreadReference.THREAD_STATUS_UNKNOWN: result = "unknown status"; break;
-            case ThreadReference.THREAD_STATUS_ZOMBIE: result = "zombie"; break;
-            case ThreadReference.THREAD_STATUS_RUNNING: result = "running"; break;
-            case ThreadReference.THREAD_STATUS_SLEEPING: result = "sleeping"; break;
-            case ThreadReference.THREAD_STATUS_MONITOR: result = "waiting to acquire a monitor lock"; break;
-            case ThreadReference.THREAD_STATUS_WAIT: result = "waiting on a condition"; break;
-            default: result = "<invalid thread status>";
-        }
+        String result = switch (status) {
+            case ThreadReference.THREAD_STATUS_UNKNOWN -> "unknown status";
+            case ThreadReference.THREAD_STATUS_ZOMBIE -> "zombie";
+            case ThreadReference.THREAD_STATUS_RUNNING -> "running";
+            case ThreadReference.THREAD_STATUS_SLEEPING -> "sleeping";
+            case ThreadReference.THREAD_STATUS_MONITOR -> "waiting to acquire a monitor lock";
+            case ThreadReference.THREAD_STATUS_WAIT -> "waiting on a condition";
+            default -> "<invalid thread status>";
+        };
 
         // If suspended, add text
         if (threadReference.isSuspended())
@@ -103,48 +102,8 @@ public class DebugUtils {
         ReferenceType clazz = ref.referenceType();
         long id = ref.uniqueID();  //### TODO use real id
         if (clazz == null)
-            return toHex(id);
-        return "(" + clazz.name() + ")" + toHex(id);
-    }
-
-    /**
-     * Convert a long to a hexadecimal string.
-     */
-    public static String toHex(long n)
-    {
-        // Store digits in reverse order.
-        char[] s1 = new char[16], s2 = new char[18];
-        int i = 0;
-        do {
-            long d = n & 0xf;
-            s1[i++] = (char) ((d < 10) ? ('0' + d) : ('a' + d - 10));
-        } while ((n >>>= 4) > 0);
-
-        // Now reverse the array.
-        s2[0] = '0';
-        s2[1] = 'x';
-        int j = 2;
-        while (--i >= 0) s2[j++] = s1[i];
-        return new String(s2, 0, j);
-    }
-
-    /**
-     * Convert hexadecimal strings to longs.
-     */
-    public static long fromHex(String hexStr)
-    {
-        String str = hexStr.startsWith("0x") ? hexStr.substring(2).toLowerCase() : hexStr.toLowerCase();
-        if (hexStr.length() == 0)
-            throw new NumberFormatException();
-
-        long ret = 0;
-        for (int i = 0; i < str.length(); i++) {
-            int c = str.charAt(i);
-            if (c >= '0' && c <= '9') ret = (ret * 16) + (c - '0');
-            else if (c >= 'a' && c <= 'f') ret = (ret * 16) + (c - 'a' + 10);
-            else throw new NumberFormatException();
-        }
-        return ret;
+            return "0x" + Long.toHexString(id);
+        return "(" + clazz.name() + ")0x" + Long.toHexString(id);
     }
 
     /**
@@ -156,19 +115,25 @@ public class DebugUtils {
         return loc.declaringType().name() + "." + loc.method().name() + "(), line=" + loc.lineNumber();
     }
 
-    public static boolean isValidMethodName(String s)
+    /**
+     * Returns whether given name is valid method name.
+     */
+    public static boolean isValidMethodName(String methodName)
     {
-        return isJavaIdentifier(s) || s.equals("<init>") || s.equals("<clinit>");
+        return isJavaIdentifier(methodName) || methodName.equals("<init>") || methodName.equals("<clinit>");
     }
 
-    public static boolean isJavaIdentifier(String s)
+    /**
+     * Returns whether given string is Java identifier.
+     */
+    public static boolean isJavaIdentifier(String string)
     {
-        if (s.length() == 0) return false;
-        int cp = s.codePointAt(0);
+        if (string.isEmpty()) return false;
+        int cp = string.codePointAt(0);
         if (!Character.isJavaIdentifierStart(cp))
             return false;
-        for (int i = Character.charCount(cp); i < s.length(); i += Character.charCount(cp)) {
-            cp = s.codePointAt(i);
+        for (int i = Character.charCount(cp); i < string.length(); i += Character.charCount(cp)) {
+            cp = string.codePointAt(i);
             if (!Character.isJavaIdentifierPart(cp))
                 return false;
         }

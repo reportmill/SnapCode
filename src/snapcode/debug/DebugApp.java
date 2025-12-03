@@ -389,17 +389,15 @@ public class DebugApp extends RunAppBin {
             return ((StringReference) aVal).value();
 
         // Handle ArrayReference: Concatenate values
-        if (aVal instanceof ArrayReference) {
-            ArrayReference arrayRef = (ArrayReference) aVal;
+        if (aVal instanceof ArrayReference arrayRef) {
             List<Value> values = arrayRef.getValues();
             String valuesStr = ListUtils.mapToStringsAndJoin(values, this::toString, ", ");
             return '[' + valuesStr + ']';
         }
 
         // Handle ObjectReference: Invoke toString() method
-        if (aVal instanceof ObjectReference) {
-            ObjectReference oref = (ObjectReference) aVal;
-            Value val = invokeMethod(oref, "toString", Collections.EMPTY_LIST);
+        if (aVal instanceof ObjectReference objRef) {
+            Value val = invokeMethod(objRef, "toString", Collections.EMPTY_LIST);
             return toString(val);
         }
 
@@ -484,13 +482,8 @@ public class DebugApp extends RunAppBin {
     {
         // Get threads, sort (should trigger VMDisconnectedException if VM has disconnected) and return
         try {
-            List<ThreadReference> threads = new ArrayList(_vm.allThreads());
-            Collections.sort(threads, new Comparator<ThreadReference>() {
-                public int compare(ThreadReference o1, ThreadReference o2)
-                {
-                    return o1.name().compareTo(o2.name());
-                }
-            });
+            List<ThreadReference> threads = new ArrayList<>(_vm.allThreads());
+            threads.sort(Comparator.comparing(ThreadReference::name));
             return threads;
         }
 
@@ -500,9 +493,8 @@ public class DebugApp extends RunAppBin {
         }
     }
 
-//public List topLevelThreadGroups() throws NoSessionException{ensureActiveSession();return _vm.topLevelThreadGroups();}
-//public ThreadGroupReference systemThreadGroup() throws NoSessionException
-//{ ensureActiveSession(); return _vm.topLevelThreadGroups().get(0);}
+//public List topLevelThreadGroups() { ensureActiveSession();return _vm.topLevelThreadGroups(); }
+//public ThreadGroupReference systemThreadGroup() { ensureActiveSession(); return _vm.topLevelThreadGroups().get(0); }
 
     /**
      * Thread control.
@@ -606,7 +598,7 @@ public class DebugApp extends RunAppBin {
      * SendLineToApp support.
      */
     private LinkedList<String> _inputBuffer = new LinkedList<>();
-    private Object _inputLock = new Object();
+    private final Object _inputLock = new Object();
     private DebugUtils.InputListener _appInput = () -> getInputBufferLine();
 
     /**
@@ -619,7 +611,7 @@ public class DebugApp extends RunAppBin {
         while (line == null) {
             synchronized (_inputLock) {
                 try {
-                    while (_inputBuffer.size() < 1)
+                    while (_inputBuffer.isEmpty())
                         _inputLock.wait();
                     line = _inputBuffer.removeLast();
                 }
@@ -644,7 +636,7 @@ public class DebugApp extends RunAppBin {
     {
         // If Breakpoint already set, just return
         for (BreakpointReq bpr : _eventRequestSpecs) {
-            if (bpr._bpoint.equals(aBP)) {
+            if (bpr._breakPoint.equals(aBP)) {
                 System.err.println("Breakpoint already added " + aBP);
                 return;
             }
@@ -665,7 +657,7 @@ public class DebugApp extends RunAppBin {
         // Find BreakpointReq
         BreakpointReq bpr = null;
         for (BreakpointReq br : _eventRequestSpecs) {
-            if (br._bpoint == aBP) {
+            if (br._breakPoint == aBP) {
                 bpr = br;
                 break;
             }
@@ -701,10 +693,10 @@ public class DebugApp extends RunAppBin {
      * class name is specified, else return null if there is none. In general, we must return a list of types, because
      * multiple class loaders could have loaded a class with the same fully-qualified name.
      */
-    public List<ReferenceType> findClassesByName(String name) throws NoSessionException
+    public List<ReferenceType> findClassesByName(String className) throws NoSessionException
     {
         ensureActiveSession();
-        return _vm.classesByName(name);
+        return _vm.classesByName(className);
     }
 
     /**
@@ -712,24 +704,17 @@ public class DebugApp extends RunAppBin {
      * pattern.  The pattern syntax is open to some future revision, but currently consists of a fully-qualified class name
      * in which the first component may optionally be a "*" character, designating an arbitrary prefix.
      */
-    public List<ReferenceType> findClassesMatchingPattern(String aPattern) throws NoSessionException
+    public List<ReferenceType> findClassesMatchingPattern(String classNamePattern) throws NoSessionException
     {
-        ensureActiveSession();
-
-        // Wildcard matches any leading package name.
-        if (aPattern.startsWith("*.")) {
-            String pattern = aPattern.substring(1);
-            List result = new ArrayList();  //### Is default size OK?
-            List<ReferenceType> classes = _vm.allClasses();
-            for (ReferenceType type : classes) {
-                if (type.name().endsWith(pattern))
-                    result.add(type);
-            }
-            return result;
+        // Handle Wildcard: matches any leading package name.
+        if (classNamePattern.startsWith("*.")) {
+            String pattern = classNamePattern.substring(1);
+            List<ReferenceType> allClasses = allClasses();
+            return ListUtils.filter(allClasses, type -> type.name().endsWith(pattern));
         }
 
-        // It's a class name.
-        return _vm.classesByName(aPattern);
+        // Return matching class names
+        return findClassesByName(classNamePattern);
     }
 
     /**
@@ -813,32 +798,30 @@ public class DebugApp extends RunAppBin {
         switch (type) {
 
             // Handle Class prepare
-            case ClassPrepare: resolve(anEvent.getReferenceType()); break;
+            case ClassPrepare -> resolve(anEvent.getReferenceType());
 
             // Handle VMDisconnect
-            case VMDisconnect: endSession(); break;
+            case VMDisconnect -> endSession();
 
             // Handle LocationTrigger
-            case LocationTrigger:
+            case LocationTrigger -> {
                 if (_runToLineBreak != null) {
                     removeBreakpoint(_runToLineBreak);
                     _runToLineBreak = null;
                 }
                 setCurrentThread(anEvent.getThread(), 0);
                 wantsPause = true;
-                break;
+            }
 
             // Handle Exception
-            case Exception:
+            case Exception -> {
                 setCurrentThread(anEvent.getThread(), 0);
                 wantsPause = true;
-                break;
+            }
 
-            // Handle AccessWatchpoint
-            case AccessWatchpoint: wantsPause = true; break;
-
-            // Handle ModificationWatchpoint
-            case ModificationWatchpoint: wantsPause = true; break;
+            // Handle AccessWatchpoint, ModificationWatchpoint
+            case AccessWatchpoint -> wantsPause = true;
+            case ModificationWatchpoint -> wantsPause = true;
         }
 
         // If event paused VM either resume or make it official
@@ -905,22 +888,23 @@ public class DebugApp extends RunAppBin {
      */
     private static List<Method> methods(ReferenceType refType, String aName, int kind)
     {
-        List<Method> list = refType.methodsByName(aName);
-        Iterator<Method> iter = list.iterator();
-        while (iter.hasNext()) {
-            Method method = iter.next();
-            boolean isStatic = method.isStatic();
-            if ((kind == STATIC && !isStatic) || (kind == INSTANCE && isStatic)) {
-                iter.remove();
-            }
-        }
-        return list;
+        List<Method> methodsForName = refType.methodsByName(aName);
+        return ListUtils.filter(methodsForName, method -> isMethodKind(method, kind));
+    }
+
+    /**
+     * Returns whether given method matches given kind.
+     */
+    private static boolean isMethodKind(Method aMethod, int aKind)
+    {
+        boolean isStatic = aMethod.isStatic();
+        return isStatic && aKind == STATIC || !isStatic && aKind == INSTANCE;
     }
 
     /**
      * Returns a method for given args.
      */
-    static Method method(List<Method> overloads, List<Value> args)
+    private static Method method(List<Method> overloads, List<Value> args)
     {
         // If there is only one method to call, we'll just choose that without looking at the args.  If they aren't right
         // the invoke will return a better error message than we could generate here.
@@ -983,18 +967,20 @@ public class DebugApp extends RunAppBin {
         // If any pair aren't assignable, return DIFFERENT
         while (typeIter.hasNext()) {
             Type argType = typeIter.next();
-            Value value = valIter.next();
-            if (value == null) {
-                // Null values can be passed to any non-primitive argument
-                if (primitiveTypeNames.contains(argType.name()))
+            Value argValue = valIter.next();
+
+            // Handle Null: If primitive return different. Otherwise null values exactly match object type
+            if (argValue == null) {
+                if (PRIMITIVE_NAMES.contains(argType.name()))
                     return DIFFERENT;
-                // Else, we will assume that a null value
-                // exactly matches an object type.
+                continue;
             }
-            if (!value.type().equals(argType)) {
-                if (isAssignableTo(value.type(), argType))
-                    result = ASSIGNABLE;
-                else return DIFFERENT;
+
+            // Handle not exact match
+            if (!argValue.type().equals(argType)) {
+                if (!isAssignableTo(argValue.type(), argType))
+                    return DIFFERENT;
+                result = ASSIGNABLE;
             }
         }
         return result;
@@ -1035,10 +1021,7 @@ public class DebugApp extends RunAppBin {
         // fromType must be an InterfaceType
         else interfaces = ((InterfaceType) fromType).superinterfaces();
 
-        for (InterfaceType interfaze : interfaces)
-            if (isAssignableTo(interfaze, toType))
-                return true;
-        return false;
+        return ListUtils.hasMatch(interfaces, intrfc -> isAssignableTo(intrfc, toType));
     }
 
     /**
@@ -1080,9 +1063,6 @@ public class DebugApp extends RunAppBin {
         return isAssignableTo(fromType, toType);
     }
 
-    /**
-     * PrimitiveTypeNames.
-     */
-    private static String[] ptnames = { "boolean", "byte", "char", "short", "int", "long", "float", "double" };
-    private static List<String> primitiveTypeNames = Arrays.asList(ptnames);
+    // Constant for list of primitive type names.
+    private static List<String> PRIMITIVE_NAMES = List.of("boolean", "byte", "char", "short", "int", "long", "float", "double");
 }

@@ -47,26 +47,25 @@ public class ExprEval {
     /**
      * Evaluate JLiteral.
      */
-    static Value evalLiteral(DebugApp anApp, JExprLiteral aLiteral) throws Exception
+    private static Value evalLiteral(DebugApp anApp, JExprLiteral aLiteral)
     {
         VirtualMachine aVM = anApp._vm;
-        switch (aLiteral.getLiteralType()) {
-            case Boolean: return aVM.mirrorOf((Boolean) aLiteral.getValue());
-            case Integer: return aVM.mirrorOf((Integer) aLiteral.getValue());
-            case Long: return aVM.mirrorOf((Long) aLiteral.getValue());
-            case Float: return aVM.mirrorOf((Float) aLiteral.getValue());
-            case Double: return aVM.mirrorOf((Double) aLiteral.getValue());
-            case Character: return aVM.mirrorOf((Character) aLiteral.getValue());
-            case String: return aVM.mirrorOf((String) aLiteral.getValue());
-            case Null: return null;
-            default: throw new RuntimeException("No Literal Type");
-        }
+        return switch (aLiteral.getLiteralType()) {
+            case Boolean -> aVM.mirrorOf((Boolean) aLiteral.getValue());
+            case Integer -> aVM.mirrorOf((Integer) aLiteral.getValue());
+            case Long -> aVM.mirrorOf((Long) aLiteral.getValue());
+            case Float -> aVM.mirrorOf((Float) aLiteral.getValue());
+            case Double -> aVM.mirrorOf((Double) aLiteral.getValue());
+            case Character -> aVM.mirrorOf((Character) aLiteral.getValue());
+            case String -> aVM.mirrorOf((String) aLiteral.getValue());
+            case Null -> null;
+        };
     }
 
     /**
      * Evaluate JIdentifier.
      */
-    static Value evalIdentifier(DebugApp anApp, ObjectReference anOR, JExprId anId) throws Exception
+    private static Value evalIdentifier(DebugApp anApp, ObjectReference anOR, JExprId anId) throws Exception
     {
         // Get identifier name
         String name = anId.getName();
@@ -93,7 +92,7 @@ public class ExprEval {
     /**
      * Evaluate JMethodCall.
      */
-    static Value evalMethod(DebugApp anApp, ObjectReference anOR, JExprMethodCall anExpr) throws Exception
+    private static Value evalMethod(DebugApp anApp, ObjectReference anOR, JExprMethodCall anExpr) throws Exception
     {
         ObjectReference thisObj = anApp.thisObject();
         List<Value> args = new ArrayList<>();
@@ -105,24 +104,24 @@ public class ExprEval {
     /**
      * Evaluate JExprArrayIndex.
      */
-    static Value evalArrayIndex(DebugApp anApp, ObjectReference anOR, JExprArrayIndex anExpr) throws Exception
+    static Value evalArrayIndex(DebugApp debugApp, ObjectReference objRef, JExprArrayIndex anExpr) throws Exception
     {
-        // Get Array
+        // Get array reference (return null if not found)
         JExpr arrayExpr = anExpr.getArrayExpr();
-        Value val = evalExpr(anApp, anOR, arrayExpr);
-        if (!(val instanceof ArrayReference)) return null;
-        ArrayReference aref = (ArrayReference) val;
+        Value arrayRefValue = evalExpr(debugApp, objRef, arrayExpr);
+        if (!(arrayRefValue instanceof ArrayReference arrayRef))
+            return null;
 
         // Get Index
         JExpr indexExpr = anExpr.getIndexExpr();
-        ObjectReference thisObj = anApp.thisObject();
-        val = evalExpr(anApp, thisObj, indexExpr);
-        if (!(val instanceof PrimitiveValue)) return null;
-        PrimitiveValue pval = (PrimitiveValue) val;
-        int index = pval.intValue();
+        ObjectReference thisObj = debugApp.thisObject();
+        Value arrayIndexValue = evalExpr(debugApp, thisObj, indexExpr);
+        if (!(arrayIndexValue instanceof PrimitiveValue primitiveValue))
+            return null;
 
-        // Return ArrayReference value at index
-        return aref.getValue(index);
+        // Return array value at index
+        int index = primitiveValue.intValue();
+        return arrayRef.getValue(index);
     }
 
     /**
@@ -181,30 +180,24 @@ public class ExprEval {
         else if (opCount == 2) {
             JExpr expr2 = anExpr.getOperand(1);
             Value val2 = evalExpr(anApp, anOR, expr2);
-            switch (op) {
-                case Add: return add(anApp, val1, val2);
-                case Subtract: return subtract(anApp, val1, val2);
-                case Multiply: return multiply(anApp, val1, val2);
-                case Divide: return divide(anApp, val1, val2);
-                case Mod: return mod(anApp, val1, val2);
-                case Equal:
-                case NotEqual:
-                case LessThan:
-                case GreaterThan:
-                case LessThanOrEqual:
-                case GreaterThanOrEqual: return compareNumeric(anApp, val1, val2, op);
-                case Or:
-                case And: return compareLogical(anApp, val1, val2, op);
-                default: throw new RuntimeException("Operator not supported " + anExpr.getOp());
-                // BitOr, BitXOr, BitAnd, InstanceOf, ShiftLeft, ShiftRight, ShiftRightUnsigned,
-            }
+            // BitOr, BitXOr, BitAnd, InstanceOf, ShiftLeft, ShiftRight, ShiftRightUnsigned,
+            return switch (op) {
+                case Add -> add(anApp, val1, val2);
+                case Subtract -> subtract(anApp, val1, val2);
+                case Multiply -> multiply(anApp, val1, val2);
+                case Divide -> divide(anApp, val1, val2);
+                case Mod -> mod(anApp, val1, val2);
+                case Equal, NotEqual, LessThan, GreaterThan, LessThanOrEqual, GreaterThanOrEqual -> compareNumeric(anApp, val1, val2, op);
+                case Or, And -> compareLogical(anApp, val1, val2, op);
+                default -> throw new RuntimeException("Operator not supported " + anExpr.getOp());
+            };
         }
 
         // Handle ternary
         else if (opCount == 3 && op == JExprMath.Op.Conditional) {
-            if (!(val1 instanceof PrimitiveValue))
+            if (!(val1 instanceof PrimitiveValue primitiveValue))
                 throw new RuntimeException("Ternary conditional expr not bool: " + expr1);
-            boolean result = ((PrimitiveValue) val1).booleanValue();
+            boolean result = primitiveValue.booleanValue();
             JExpr expr = result ? anExpr.getOperand(1) : anExpr.getOperand(2);
             return evalExpr(anApp, anOR, expr);
         }
@@ -293,15 +286,15 @@ public class ExprEval {
      */
     private static boolean compareNumeric(double aVal1, double aVal2, JExprMath.Op anOp)
     {
-        switch (anOp) {
-            case Equal: return aVal1 == aVal2;
-            case NotEqual: return aVal1 != aVal2;
-            case LessThan: return aVal1 < aVal2;
-            case GreaterThan: return aVal1 > aVal2;
-            case LessThanOrEqual: return aVal1 <= aVal2;
-            case GreaterThanOrEqual: return aVal1 >= aVal2;
-            default: throw new RuntimeException("Not a compare op " + anOp);
-        }
+        return switch (anOp) {
+            case Equal -> aVal1 == aVal2;
+            case NotEqual -> aVal1 != aVal2;
+            case LessThan -> aVal1 < aVal2;
+            case GreaterThan -> aVal1 > aVal2;
+            case LessThanOrEqual -> aVal1 <= aVal2;
+            case GreaterThanOrEqual -> aVal1 >= aVal2;
+            default -> throw new RuntimeException("Not a compare op " + anOp);
+        };
     }
 
     /**
@@ -310,7 +303,8 @@ public class ExprEval {
     private static Value compareLogical(DebugApp anApp, Value aVal1, Value aVal2, JExprMath.Op anOp)
     {
         if (aVal1 instanceof PrimitiveValue && aVal2 instanceof PrimitiveValue) {
-            boolean v1 = ((PrimitiveValue) aVal1).booleanValue(), v2 = ((PrimitiveValue) aVal2).booleanValue();
+            boolean v1 = ((PrimitiveValue) aVal1).booleanValue();
+            boolean v2 = ((PrimitiveValue) aVal2).booleanValue();
             boolean val = compareLogical(v1, v2, anOp);
             return anApp._vm.mirrorOf(val);
         }
