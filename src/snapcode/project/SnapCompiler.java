@@ -225,7 +225,7 @@ public class SnapCompiler {
     {
         Workspace workspace = _proj.getWorkspace();
         BuildIssues buildIssues = workspace.getBuildIssues();
-        buildIssues.add(anIssue);
+        buildIssues.addBuildIssue(anIssue);
         if (anIssue.getKind() == BuildIssue.Kind.Error)
             _errorCount++;
     }

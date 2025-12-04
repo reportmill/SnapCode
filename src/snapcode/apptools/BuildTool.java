@@ -62,21 +62,13 @@ public class BuildTool extends WorkspaceTool {
     }
 
     /**
-     * Returns the array of current build issues.
-     */
-    public BuildIssue[] getIssues()
-    {
-        BuildIssues buildIssues = _workspace.getBuildIssues();
-        return buildIssues.getIssues();
-    }
-
-    /**
      * Returns the list of issue files.
      */
-    public List<WebFile> getIssueFiles()
+    public List<WebFile> getBuildIssueFiles()
     {
-        BuildIssue[] getIssues = getIssues();
-        return Stream.of(getIssues).map(issue -> issue.getFile()).distinct().toList();
+        BuildIssues buildIssuesMgr = _workspace.getBuildIssues();
+        List<BuildIssue> buildIssues = buildIssuesMgr.getBuildIssues();
+        return buildIssues.stream().map(issue -> issue.getFile()).distinct().toList();
     }
 
     /**
@@ -150,7 +142,7 @@ public class BuildTool extends WorkspaceTool {
         setViewText("BuildStatusLabel", getBuildStatusText());
 
         // Update ErrorsTree
-        _errorsTree.setItems((List<Object>) (List<?>) getIssueFiles());
+        _errorsTree.setItems((List<Object>) (List<?>) getBuildIssueFiles());
         _errorsTree.setSelItem(getSelIssue());
         _errorsTree.expandAll();
 

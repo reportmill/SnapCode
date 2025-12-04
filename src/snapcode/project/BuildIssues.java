@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 public class BuildIssues extends PropObject {
 
     // The actual list of BuildIssuess
-    private List<BuildIssue>  _issues = new ArrayList<>();
+    private List<BuildIssue> _buildIssues = new ArrayList<>();
 
     // The total count of errors and warnings
     private int  _errorCount;
@@ -41,7 +41,7 @@ public class BuildIssues extends PropObject {
     /**
      * Returns the number of breakpoints.
      */
-    public int size()  { return _issues.size(); }
+    public int size()  { return _buildIssues.size(); }
 
     /**
      * Returns the number of errors currently tracked.
@@ -56,74 +56,60 @@ public class BuildIssues extends PropObject {
     /**
      * Returns an array of the currently tracked issues.
      */
-    public BuildIssue[] getIssues()
-    {
-        return _issues.toArray(new BuildIssue[0]);
-    }
+    public List<BuildIssue> getBuildIssues()  { return List.copyOf(_buildIssues); }
 
     /**
      * Adds a BuildIssue at sorted index.
      */
-    public boolean add(BuildIssue aBI)
+    public void addBuildIssue(BuildIssue aBuildIssue)
     {
         // Get insertion index (just return if already in list)
-        int index = -Collections.binarySearch(_issues, aBI) - 1;
+        int index = -Collections.binarySearch(_buildIssues, aBuildIssue) - 1;
         if (index < 0)
-            return false;
+            return;
 
         // Add to file list
-        WebFile buildIssueFile = aBI.getFile();
+        WebFile buildIssueFile = aBuildIssue.getFile();
         List<BuildIssue> buildIssuesForFile = _fileIssues.computeIfAbsent(buildIssueFile, k -> new ArrayList<>());
-        buildIssuesForFile.add(aBI);
+        buildIssuesForFile.add(aBuildIssue);
 
         // Update ErrorCount/WarningCount
-        if (aBI.isError())
+        if (aBuildIssue.isError())
             _errorCount++;
         else _warningCount++;
 
         // Add issue
-        _issues.add(index, aBI);
+        _buildIssues.add(index, aBuildIssue);
 
         // Fire prop change
-        firePropChange(ITEMS_PROP, null, aBI, index);
-
-        // Return
-        return true;
+        firePropChange(ITEMS_PROP, null, aBuildIssue, index);
     }
 
     /**
      * Removes a BuildIssue.
      */
-    public void remove(BuildIssue aBI)
+    public void removeBuildIssue(BuildIssue aBuildIssue)
     {
         // Remove from file
-        WebFile buildIssueFile = aBI.getFile();
+        WebFile buildIssueFile = aBuildIssue.getFile();
         List<BuildIssue> buildIssues = _fileIssues.get(buildIssueFile);
         if (buildIssues != null) {
-            buildIssues.remove(aBI);
-            if (buildIssues.size() == 0)
+            buildIssues.remove(aBuildIssue);
+            if (buildIssues.isEmpty())
                 _fileIssues.remove(buildIssueFile);
         }
 
         // Update ErrorCount/WarningCount
-        if (aBI.isError())
+        if (aBuildIssue.isError())
             _errorCount--;
         else _warningCount--;
 
         // Remove from master list
-        int index = _issues.indexOf(aBI);
-        _issues.remove(aBI);
+        int index = _buildIssues.indexOf(aBuildIssue);
+        _buildIssues.remove(aBuildIssue);
 
         // Fire prop change
-        firePropChange(ITEMS_PROP, aBI, null, index);
-    }
-
-    /**
-     * Returns an array of build issues.
-     */
-    public BuildIssue[] getArray()
-    {
-        return _issues.toArray(new BuildIssue[0]);
+        firePropChange(ITEMS_PROP, aBuildIssue, null, index);
     }
 
     /**
@@ -132,10 +118,7 @@ public class BuildIssues extends PropObject {
     public void clear()
     {
         _fileIssues.clear();
-
-        BuildIssue[] issues = getIssues();
-        for (BuildIssue issue : issues)
-            remove(issue);
+        getBuildIssues().forEach(this::removeBuildIssue);
     }
 
     /**
@@ -143,21 +126,17 @@ public class BuildIssues extends PropObject {
      */
     public BuildIssue[] getIssuesForFile(WebFile aFile)
     {
-        List<BuildIssue> buildIssues;
-
         // Handle file: Just load from map
-        if (aFile.isFile())
-            buildIssues = _fileIssues.get(aFile);
-
-            // Handle directory: aggregate directory files
-        else {
-            buildIssues = new ArrayList<>();
-            for (WebFile file : aFile.getFiles())
-                Collections.addAll(buildIssues, getIssuesForFile(file));
+        if (aFile.isFile()) {
+            List<BuildIssue> buildIssues = _fileIssues.get(aFile);
+            return buildIssues != null ? buildIssues.toArray(new BuildIssue[0]) : NO_ISSUES;
         }
 
-        // Return list
-        return buildIssues != null ? buildIssues.toArray(new BuildIssue[0]) : NO_ISSUES;
+        // Handle directory: aggregate directory files
+        List<BuildIssue> buildIssues = new ArrayList<>();
+        for (WebFile file : aFile.getFiles())
+            Collections.addAll(buildIssues, getIssuesForFile(file));
+        return buildIssues.toArray(new BuildIssue[0]);
     }
 
     /**
@@ -212,7 +191,7 @@ public class BuildIssues extends PropObject {
     private static boolean isPackage(WebFile aFile)
     {
         // If file name has extension, return false
-        if (aFile.getFileType().length() > 0)
+        if (!aFile.getFileType().isEmpty())
             return false;
 
         // If file in Project.SourceDir

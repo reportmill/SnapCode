@@ -236,11 +236,11 @@ public class JavaAgent extends TextAgent {
         WebFile javaFile = getFile();
         BuildIssue[] oldIssues = buildIssuesMgr.getIssuesForFile(javaFile);
         for (BuildIssue buildIssue : oldIssues)
-            buildIssuesMgr.remove(buildIssue);
+            buildIssuesMgr.removeBuildIssue(buildIssue);
 
         // Add new issues
         for (BuildIssue buildIssue : buildIssues)
-            buildIssuesMgr.add(buildIssue);
+            buildIssuesMgr.addBuildIssue(buildIssue);
     }
 
     /**
