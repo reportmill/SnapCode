@@ -42,16 +42,9 @@ public class JVarDecl extends JNode implements WithId {
         if (_type == null)
             return null;
 
-        // If array count is set, replace with type to account for it
-        if (_arrayCount > 0) {
-            JavaType javaType = _type.getJavaType();
-            JType type2 = JType.createTypeForTypeAndToken(javaType, _startToken);
-            type2._arrayCount = _type._arrayCount + _arrayCount;
-            for (int i = 0; i < _arrayCount && type2._javaType != null; i++)
-                type2._javaType = type2._javaType.getArrayType();
-            _type = type2;
-            _type._parent = this;
-        }
+        // If array count is set (in C array style), replace with new array type
+        if (_arrayCount > 0)
+            _type = createArrayType();
 
         // Return
         return _type;
@@ -85,6 +78,29 @@ public class JVarDecl extends JNode implements WithId {
 
         // Return unknown
         return null;
+    }
+
+    /**
+     * Creates an array type for C style array var decls, e.g.: Type id[];
+     */
+    private JType createArrayType()
+    {
+        // Get array component type (just return if not found)
+        JavaType componentType = _type.getJavaType();
+        if (componentType == null)
+            return null;
+
+        // Create/configure array type
+        JType arrayType = JType.createTypeForTypeAndToken(componentType, _startToken);
+        arrayType._parent = this;
+        arrayType._arrayCount = _type._arrayCount + _arrayCount;
+        if (arrayType._javaType != null) {
+            for (int i = 0; i < _arrayCount; i++)
+                arrayType._javaType = arrayType._javaType.getArrayType();
+        }
+
+        // Return
+        return arrayType;
     }
 
     /**
