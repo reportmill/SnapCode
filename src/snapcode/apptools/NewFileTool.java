@@ -367,10 +367,10 @@ public class NewFileTool extends WorkspaceTool {
                 {"Java File from clipboard", "java-from-clipboard"},
                 {"Java REPL File", "jepl"},
                 {"Java Markdown File", "jmd" },
+                {"File of any type", "" },
                 {"SnapKit UI File", "snp"},
                 {"Directory", "dir"},
-                {"Sound File", "wav"},
-                {"ReportMill Report Template", "rpt"}
+                {"Sound File", "wav"} //, {"ReportMill Report Template", "rpt"}
         };
 
         // Add and configure radio buttons
@@ -434,7 +434,7 @@ public class NewFileTool extends WorkspaceTool {
         // Create file and return
         WebSite fileSite = parentDir.getSite();
         String filePath = filename.startsWith("/") ? filename : parentDir.getDirPath() + filename;
-        boolean isDir = fileType.isEmpty() || fileType.equals("dir");
+        boolean isDir = fileType.equals("dir"); // || fileType.isEmpty()
         return fileSite.createFileForPath(filePath, isDir);
     }
 
