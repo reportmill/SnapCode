@@ -9,11 +9,9 @@ import snap.props.PropChange;
 import snap.text.TextAgent;
 import snap.text.TextModel;
 import snap.text.TextModelUtils;
-import snap.util.ArrayUtils;
-import snap.util.SetUtils;
-import snap.util.SnapUtils;
+import snap.util.*;
 import snap.web.WebFile;
-import snap.util.MDUtils;
+
 import java.util.*;
 
 /**
@@ -203,11 +201,11 @@ public class JavaAgent extends TextAgent {
     /**
      * Returns the build issues.
      */
-    public BuildIssue[] getBuildIssues()
+    public List<BuildIssue> getBuildIssues()
     {
         Workspace workspace = _project != null ? _project.getWorkspace() : null;
         if (workspace == null)
-            return new BuildIssue[0];
+            return Collections.emptyList();
         BuildIssues projBuildIssues = workspace.getBuildIssues();
         return projBuildIssues.getIssuesForFile(_javaFile);
     }
@@ -215,16 +213,16 @@ public class JavaAgent extends TextAgent {
     /**
      * Returns the build errors.
      */
-    public BuildIssue[] getBuildErrors()
+    public List<BuildIssue> getBuildErrors()
     {
-        BuildIssue[] buildIssues = getBuildIssues();
-        return ArrayUtils.filter(buildIssues, issue -> issue.isError());
+        List<BuildIssue> buildIssues = getBuildIssues();
+        return ListUtils.filter(buildIssues, issue -> issue.isError());
     }
 
     /**
      * Sets the build issues.
      */
-    public void setBuildIssues(BuildIssue[] buildIssues)
+    public void setBuildIssues(List<BuildIssue> buildIssues)
     {
         // Get Workspace.BuildIssues and clear
         Workspace workspace = _project != null ? _project.getWorkspace() : null;
@@ -234,7 +232,7 @@ public class JavaAgent extends TextAgent {
 
         // Remove old issues
         WebFile javaFile = getFile();
-        BuildIssue[] oldIssues = buildIssuesMgr.getIssuesForFile(javaFile);
+        List<BuildIssue> oldIssues = buildIssuesMgr.getIssuesForFile(javaFile);
         for (BuildIssue buildIssue : oldIssues)
             buildIssuesMgr.removeBuildIssue(buildIssue);
 
@@ -248,7 +246,7 @@ public class JavaAgent extends TextAgent {
      */
     public void clearBuildIssues()
     {
-        setBuildIssues(new BuildIssue[0]);
+        setBuildIssues(Collections.emptyList());
     }
 
     /**
@@ -286,7 +284,7 @@ public class JavaAgent extends TextAgent {
             buildIssues = ArrayUtils.addAll(buildIssues, unusedImportErrors);
 
         // Set build issues
-        setBuildIssues(buildIssues);
+        setBuildIssues(List.of(buildIssues));
 
         // If no errors, let compiler have a go
         if (!ArrayUtils.hasMatch(buildIssues, buildIssue -> buildIssue.isError())) {
@@ -311,7 +309,7 @@ public class JavaAgent extends TextAgent {
         JFile jfile = getJFile();
         JImportDecl[] unusedImports = jfile.getUnusedImports();
         if (unusedImports.length == 0)
-            return BuildIssues.NO_ISSUES;
+            return new BuildIssue[0];
 
         // Create BuildIssues for each and return
         return ArrayUtils.map(unusedImports, id -> createUnusedImportBuildIssue(_javaFile, id), BuildIssue.class);
@@ -445,8 +443,6 @@ public class JavaAgent extends TextAgent {
      */
     public static JavaAgent getAgentForJavaFile(WebFile javaFile)
     {
-        if (javaFile == null)
-            System.currentTimeMillis();
         return (JavaAgent) TextAgent.getAgentForFile(javaFile);
     }
 

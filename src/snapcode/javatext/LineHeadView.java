@@ -130,7 +130,7 @@ public class LineHeadView extends View {
         }
 
         // Add markers for BuildIssues
-        BuildIssue[] buildIssues = _textArea.getBuildIssues();
+        List<BuildIssue> buildIssues = _textArea.getBuildIssues();
         for (BuildIssue issue : buildIssues)
             if (issue.getEnd() <= _textArea.length())
                 markers.add(new LineHeadMarker.BuildIssueMarker(_textPane, issue));

@@ -110,7 +110,7 @@ public class NodeError implements Comparable<NodeError> {
 
         // Add node errors for parse exceptions
         NodeError[] parseErrors = getNodeErrorForFileParseException(jfile);
-        if (parseErrors != null) {
+        if (parseErrors.length > 0) {
             Collections.addAll(errorsList, parseErrors);
             Collections.sort(errorsList);
         }
@@ -156,7 +156,7 @@ public class NodeError implements Comparable<NodeError> {
         // Get exception - just return null if none
         Exception exception = jfile.getException();
         if (exception == null)
-            return null;
+            return NO_ERRORS;
 
         // Get last node
         JNode lastNode = null;
@@ -167,12 +167,10 @@ public class NodeError implements Comparable<NodeError> {
         if (lastNode == null)
             lastNode = getLastNodeForNode(jfile);
         if (lastNode == null || lastNode.getStartToken() == null)
-            return null;
+            return NO_ERRORS;
 
-        // Get message
+        // Return error for exception message
         String msg = exception.getMessage();
-
-        // Return error
         return newErrorArray(lastNode, msg);
     }
 

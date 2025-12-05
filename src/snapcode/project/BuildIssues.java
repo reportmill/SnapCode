@@ -5,7 +5,6 @@ package snapcode.project;
 import snap.props.PropObject;
 import snap.web.WebFile;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * A class to manage a list of BuildIssue.
@@ -23,9 +22,6 @@ public class BuildIssues extends PropObject {
 
     // A map to track BuildIssues by WebFile
     private Map<WebFile,List<BuildIssue>>  _fileIssues = new Hashtable<>();
-
-    // An Empty array of BuildIssues
-    public static final BuildIssue[] NO_ISSUES = new BuildIssue[0];
 
     // Constant for Items
     public static final String ITEMS_PROP = "Items";
@@ -124,19 +120,19 @@ public class BuildIssues extends PropObject {
     /**
      * Returns the BuildIssues for a given file.
      */
-    public BuildIssue[] getIssuesForFile(WebFile aFile)
+    public List<BuildIssue> getIssuesForFile(WebFile aFile)
     {
         // Handle file: Just load from map
         if (aFile.isFile()) {
             List<BuildIssue> buildIssues = _fileIssues.get(aFile);
-            return buildIssues != null ? buildIssues.toArray(new BuildIssue[0]) : NO_ISSUES;
+            return buildIssues != null ? List.copyOf(buildIssues) : Collections.emptyList();
         }
 
         // Handle directory: aggregate directory files
         List<BuildIssue> buildIssues = new ArrayList<>();
         for (WebFile file : aFile.getFiles())
-            Collections.addAll(buildIssues, getIssuesForFile(file));
-        return buildIssues.toArray(new BuildIssue[0]);
+            buildIssues.addAll(getIssuesForFile(file));
+        return buildIssues;
     }
 
     /**
@@ -148,14 +144,14 @@ public class BuildIssues extends PropObject {
         if (aFile.isFile()) {
 
             // Get build issues - just return null if none
-            BuildIssue[] buildIssues = getIssuesForFile(aFile);
-            if (buildIssues.length == 0)
+            List<BuildIssue> buildIssues = getIssuesForFile(aFile);
+            if (buildIssues.isEmpty())
                 return null;
 
             // If any issue is error, return error
-            boolean containsError = Stream.of(buildIssues).anyMatch(issue -> issue.getKind() == BuildIssue.Kind.Error);
+            boolean containsError = buildIssues.stream().anyMatch(issue -> issue.getKind() == BuildIssue.Kind.Error);
             if (containsError)
-                    return BuildIssue.Kind.Error;
+                return BuildIssue.Kind.Error;
 
             // Return warning
             return BuildIssue.Kind.Warning;

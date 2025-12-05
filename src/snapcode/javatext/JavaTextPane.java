@@ -417,7 +417,7 @@ public class JavaTextPane extends TextPane {
         // Clear build issues
         JavaTextModel javaTextModel = getJavaTextModel();
         JavaAgent javaAgent = javaTextModel.getAgent();
-        javaAgent.setBuildIssues(new BuildIssue[0]);
+        javaAgent.clearBuildIssues();
     }
 
     /**

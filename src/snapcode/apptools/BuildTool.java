@@ -2,7 +2,6 @@ package snapcode.apptools;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.text.TextModel;
-import snap.util.ArrayUtils;
 import snap.util.FormatUtils;
 import snapcode.project.*;
 import snapcode.javatext.JavaTextUtils;
@@ -12,10 +11,8 @@ import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.app.WorkspacePane;
 import snapcode.app.WorkspaceTool;
-
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * A pane/panel to show current build issues.
@@ -261,10 +258,10 @@ public class BuildTool extends WorkspaceTool {
         // Check for errors and report
         _buildLogTextModel.setString("Check " + selFile.getName() + " for errors (" + FormatUtils.formatDate(new Date()) + ")\n");
         javaAgent.checkFileForErrors();
-        BuildIssue[] buildIssues = javaAgent.getBuildIssues();
-        BuildIssue[] errorIssues = ArrayUtils.filter(buildIssues, bi -> bi.isError());
-        _buildLogTextModel.addChars("Found "  + errorIssues.length + " error(s)\n");
-        Stream.of(buildIssues).forEach(bi -> _buildLogTextModel.addChars(bi.getText()));
+        List<BuildIssue> errorIssues = javaAgent.getBuildErrors();
+        _buildLogTextModel.addChars("Found "  + errorIssues.size() + " error(s)\n");
+        List<BuildIssue> buildIssues = javaAgent.getBuildIssues();
+        buildIssues.forEach(bi -> _buildLogTextModel.addChars(bi.getText()));
     }
 
     /**
@@ -282,8 +279,8 @@ public class BuildTool extends WorkspaceTool {
             return (BuildIssue) errorTreeNode;
         WebFile errorFile = (WebFile) errorTreeNode;
         JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(errorFile);
-        BuildIssue[] buildIssues = javaAgent.getBuildIssues();
-        return buildIssues[0];
+        List<BuildIssue> buildIssues = javaAgent.getBuildIssues();
+        return buildIssues.get(0);
     }
 
     /**
@@ -292,8 +289,8 @@ public class BuildTool extends WorkspaceTool {
     private static String getErrorFileText(WebFile errorFile)
     {
         JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(errorFile);
-        BuildIssue[] buildIssues = javaAgent.getBuildIssues();
-        return errorFile.getName() + " - " + buildIssues.length + " errors";
+        List<BuildIssue> buildErrors = javaAgent.getBuildErrors();
+        return errorFile.getName() + " - " + buildErrors.size() + " errors";
     }
 
     /**
@@ -333,7 +330,7 @@ public class BuildTool extends WorkspaceTool {
         {
             WebFile errorFile = (WebFile) aParent;
             JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(errorFile);
-            return List.of(javaAgent.getBuildIssues());
+            return (List<Object>) (List<?>) javaAgent.getBuildIssues();
         }
 
         @Override

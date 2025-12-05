@@ -79,7 +79,7 @@ public class LineFootView extends View {
         List<LineFootMarker<?>> markers = new ArrayList<>();
 
         // Add markers for TextArea.JavaSource.BuildIssues
-        BuildIssue[] buildIssues = _textArea.getBuildIssues();
+        List<BuildIssue> buildIssues = _textArea.getBuildIssues();
         for (BuildIssue issue : buildIssues)
             markers.add(new LineFootMarker.BuildIssueMarker(_textPane, issue));
 

@@ -413,7 +413,7 @@ public class JavaTextArea extends TextArea {
         aPntr.setFont(getFont());
 
         // Underline build issues
-        BuildIssue[] issues = getBuildIssues();
+        List<BuildIssue> issues = getBuildIssues();
         Set<TextLine> paintedLines = new HashSet<>();
         for (BuildIssue issue : issues) {
             if (issue.isError())
@@ -777,7 +777,7 @@ public class JavaTextArea extends TextArea {
     {
         // Iterate over BuildIssues and shift start/end for removed chars
         int charsLength = theChars.length();
-        BuildIssue[] buildIssues = getBuildIssues();
+        List<BuildIssue> buildIssues = getBuildIssues();
         for (BuildIssue buildIssue : buildIssues) {
             int buildIssueStart = buildIssue.getStart();
             if (charIndex <= buildIssueStart)
@@ -819,7 +819,7 @@ public class JavaTextArea extends TextArea {
     {
         // See if we need to shift BuildIssues
         int endOld = charIndex + theChars.length();
-        BuildIssue[] buildIssues = getBuildIssues();
+        List<BuildIssue> buildIssues = getBuildIssues();
         for (BuildIssue buildIssue : buildIssues) {
             int buildIssueStart = buildIssue.getStart();
             int buildIssueEnd = buildIssue.getEnd();
@@ -880,9 +880,9 @@ public class JavaTextArea extends TextArea {
     /**
      * Returns BuildIssues from ProjectFile.
      */
-    public BuildIssue[] getBuildIssues()
+    public List<BuildIssue> getBuildIssues()
     {
-        WebFile javaFile = getJavaFile(); if (javaFile == null) return new BuildIssue[0];
+        WebFile javaFile = getJavaFile(); if (javaFile == null) return Collections.emptyList();
         JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
         return javaAgent.getBuildIssues();
     }
