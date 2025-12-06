@@ -34,73 +34,29 @@ public class JavaTextAdapter extends TextAdapter {
     }
 
     /**
-     * Called when a key is pressed.
+     * Override to add more shortcut key features
      */
     @Override
-    public void keyPressed(ViewEvent anEvent)
+    protected void handleShortcutKeyPressEvent(ViewEvent anEvent)
     {
-        // Get event info
-        int keyCode = anEvent.getKeyCode();
-        boolean shortcutDown = anEvent.isShortcutDown();
-        boolean shiftDown = anEvent.isShiftDown();
+        switch (anEvent.getKeyCode()) {
 
-        // Handle tab
-        if (keyCode == KeyCode.TAB) {
-            if (!anEvent.isShiftDown())
-                _javaTextArea.indentLines();
-            else _javaTextArea.outdentLines();
-            anEvent.consume();
-            return;
+            // Shortcut + Slash
+            case KeyCode.SLASH -> { _javaTextArea.commentLinesWithLineComment(); anEvent.consume(); }
+
+            // Shortcut + D
+            case KeyCode.D -> { duplicate(); anEvent.consume(); }
+
+            // Do normal version
+            default -> super.handleShortcutKeyPressEvent(anEvent);
         }
-
-        // Handle newline special
-        if (keyCode == KeyCode.ENTER && isSelEmpty()) {
-            processNewline();
-            anEvent.consume();
-            return;
-        }
-
-        // Handle delete of adjacent paired chars (parens, quotes, square brackets) - TODO: don't do if in string/comment
-        boolean isDelete = keyCode == KeyCode.BACK_SPACE || shortcutDown && !shiftDown && keyCode == KeyCode.X;
-        if (isDelete && getSel().getSize() <= 1) {
-            int prevCharIndex = getSelStart();
-            if (isSelEmpty())
-                prevCharIndex--;
-            char prevChar = prevCharIndex >= 0 && prevCharIndex + 1 < length() ? charAt(prevCharIndex) : 0;
-            if (isPairedCharOpener(prevChar)) {
-                char nextChar = prevChar != 0 ? charAt(prevCharIndex + 1) : 0;
-                char closeChar = getPairedCharForOpener(prevChar);
-                if (nextChar == closeChar)
-                    _textModel.removeChars(prevCharIndex + 1, prevCharIndex + 2);
-            }
-        }
-
-        // Handle Shortcut keys
-        if (shortcutDown) {
-
-            switch (keyCode) {
-
-                // Shortcut + Slash
-                case KeyCode.SLASH: {
-                    _javaTextArea.commentLinesWithLineComment();
-                    anEvent.consume();
-                    return;
-                }
-
-                // Shortcut + D
-                case KeyCode.D: duplicate(); anEvent.consume(); return;
-            }
-        }
-
-        // Do normal version
-        super.keyPressed(anEvent);
     }
 
     /**
      * Called when a key is typed.
      */
     @Override
-    public void keyTyped(ViewEvent anEvent)
+    public void handleKeyTypeEvent(ViewEvent anEvent)
     {
         // Get keyChar - if undefined or control char, just return
         char keyChar = anEvent.getKeyChar();
@@ -126,7 +82,7 @@ public class JavaTextAdapter extends TextAdapter {
         }
 
         // Do normal version
-        super.keyTyped(anEvent);
+        super.handleKeyTypeEvent(anEvent);
 
         // If opener char, insert closer char
         boolean isPairedOpener = isPairedCharOpener(keyChar);
@@ -159,10 +115,17 @@ public class JavaTextAdapter extends TextAdapter {
     }
 
     /**
-     * Process newline key event.
+     * Override to do special enter key processing.
      */
-    protected void processNewline()
+    @Override
+    protected void handleEnterKeyPressEvent(ViewEvent anEvent)
     {
+        // If not empty selection, just do normal version
+        if (!isSelEmpty()) {
+            super.handleEnterKeyPressEvent(anEvent);
+            return;
+        }
+
         // If shift or shortcut key down, just select line end and return
         if (ViewUtils.isShiftDown() || ViewUtils.isShortcutDown()) {
             int lineEndCharIndex = getSel().getLineEnd();
@@ -363,6 +326,41 @@ public class JavaTextAdapter extends TextAdapter {
 
         // Return not unbalanced
         return false;
+    }
+
+    /**
+     * Override to handle backspace for paired chars.
+     */
+    @Override
+    protected void handleBackSpaceKeyPressEvent(ViewEvent anEvent)
+    {
+        if (getSel().getSize() <= 1) {
+            int prevCharIndex = getSelStart();
+            if (isSelEmpty())
+                prevCharIndex--;
+            char prevChar = prevCharIndex >= 0 && prevCharIndex + 1 < length() ? charAt(prevCharIndex) : 0;
+            if (isPairedCharOpener(prevChar)) {
+                char nextChar = prevChar != 0 ? charAt(prevCharIndex + 1) : 0;
+                char closeChar = getPairedCharForOpener(prevChar);
+                if (nextChar == closeChar)
+                    _textModel.removeChars(prevCharIndex + 1, prevCharIndex + 2);
+            }
+        }
+
+        // Do normal version
+        super.handleBackSpaceKeyPressEvent(anEvent);
+    }
+
+    /**
+     * Override to have tab key handle indent/outdent.
+     */
+    @Override
+    protected void handleTabKeyPressEvent(ViewEvent anEvent)
+    {
+        if (!anEvent.isShiftDown())
+            _javaTextArea.indentLines();
+        else _javaTextArea.outdentLines();
+        anEvent.consume();
     }
 
     /**
