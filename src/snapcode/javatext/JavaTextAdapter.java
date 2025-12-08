@@ -67,12 +67,9 @@ public class JavaTextAdapter extends TextAdapter {
         if (anEvent.isShortcutDown() || anEvent.isControlDown())
             return;
 
-        // Handle paired chars
-        if (isSelEmpty()) {
-
-            // Handle closer char: If next char is identical closer, assume this char is redundant and just return
-            // TODO: Don't do if in string/comment - but should also work if chars are no longer adjacent
-            if (isPairedCharCloserRedundant(keyChar)) {
+        // If paired char closer and redundant (next char is closer char), skip forward and return
+        if (isSelEmpty() && isPairedCharCloser(keyChar) && !isInComment()) {
+            if (isPairedCharCloserRedundant(keyChar)) { // TODO: Don't do if in string - but should work if chars no longer adjacent
                 setSel(getSelStart() + 1);
                 anEvent.consume();
                 return;
@@ -82,9 +79,8 @@ public class JavaTextAdapter extends TextAdapter {
         // Do normal version
         super.handleKeyTypeEvent(anEvent);
 
-        // If opener char, insert closer char
-        boolean isPairedOpener = isPairedCharOpener(keyChar);
-        if (isPairedOpener)
+        // If paired char opener, insert closer char
+        if (isPairedCharOpener(keyChar) && !isInComment())
             handlePairedCharOpener(keyChar);
 
         // Handle open bracket: If empty line and indented more than previous line, remove level of indent
@@ -433,10 +429,6 @@ public class JavaTextAdapter extends TextAdapter {
      */
     public boolean isPairedCharCloserRedundant(char keyChar)
     {
-        // If not paired char closer, return false
-        if (!isPairedCharCloser(keyChar))
-            return false;
-
         // Get previous char (just return if not identical)
         int start = getSelStart();
         if (start >= length())
@@ -515,6 +507,16 @@ public class JavaTextAdapter extends TextAdapter {
 
         // Do normal version
         super.replaceCharsWithContent(theContent);
+    }
+
+    /**
+     * Returns whether current insert char index is in comment.
+     */
+    private boolean isInComment()
+    {
+        TextToken selToken = _javaTextArea.getTokenForCharIndex(getSelStart());
+        String selTokenName = selToken != null ? selToken.getName() : null;
+        return selTokenName == Tokenizer.SINGLE_LINE_COMMENT || selTokenName == Tokenizer.MULTI_LINE_COMMENT;
     }
 
     /**
