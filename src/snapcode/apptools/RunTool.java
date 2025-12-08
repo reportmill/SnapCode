@@ -464,6 +464,9 @@ public class RunTool extends WorkspaceTool implements AppListener {
             setViewVisible("ClearButton", false);
             getView("HideButton").setMargin(4, 32, 4, 4);
         }
+
+        // Add mouse press listener to disable auto hide when clicked
+        getUI().addEventFilter(e -> _wasShownAutomatically = false, MousePress);
     }
 
     /**

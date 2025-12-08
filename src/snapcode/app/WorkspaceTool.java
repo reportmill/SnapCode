@@ -29,7 +29,7 @@ public class WorkspaceTool extends ViewOwner {
     protected PagePane  _pagePane;
 
     // Whether this tool was shown automatically
-    private boolean _wasShownAutomatically;
+    protected boolean _wasShownAutomatically;
 
     /**
      * Constructor.
