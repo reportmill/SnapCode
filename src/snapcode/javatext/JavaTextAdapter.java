@@ -64,9 +64,7 @@ public class JavaTextAdapter extends TextAdapter {
             return;
 
         // If shortcut or control key down, just return
-        boolean commandDown = anEvent.isShortcutDown();
-        boolean controlDown = anEvent.isControlDown();
-        if (commandDown || controlDown)
+        if (anEvent.isShortcutDown() || anEvent.isControlDown())
             return;
 
         // Handle paired chars
@@ -186,9 +184,19 @@ public class JavaTextAdapter extends TextAdapter {
      */
     protected void processNewlineForMultilineComment(TextLine aTextLine)
     {
+        // Get whether given line is start of multiline comment
         String lineString = aTextLine.getString().trim();
         boolean isStartOfMultiLineComment = lineString.startsWith("/*") && !lineString.endsWith("*/");
+
+        // Get whether already in multiline comment
         boolean isInMultiLineComment = lineString.startsWith("*") && !lineString.endsWith("*/");
+        if (!isInMultiLineComment) {
+            TextLine nextLine = aTextLine.getNext();
+            if (nextLine != null && nextLine.getTokenCount() > 0)
+                isInMultiLineComment = nextLine.getToken(0).getName() == Tokenizer.MULTI_LINE_COMMENT;
+        }
+
+        // Get whether current line is end of multiline comment
         boolean isEndMultiLineComment = lineString.startsWith("*") && lineString.endsWith("*/");
 
         // Create indent string
@@ -213,7 +221,7 @@ public class JavaTextAdapter extends TextAdapter {
         replaceChars(sb.toString());
 
         // If start of multi-line comment, append terminator
-        if (isStartOfMultiLineComment) {
+        if (isStartOfMultiLineComment && !isInMultiLineComment) {
             int start = getSelStart();
             String str = sb.substring(0, sb.length() - 1) + "/";
             _textModel.addChars(str, start);
