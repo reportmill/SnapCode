@@ -26,7 +26,8 @@ public class JavaTypeUtils {
             else {
                 argTypes = Arrays.copyOf(argTypes, paramTypes.length);
                 JavaType compClass = argTypes[paramTypes.length - 1];
-                argTypes[paramTypes.length -1 ] = compClass.getArrayType();
+                if (compClass != null)
+                    argTypes[paramTypes.length -1 ] = compClass.getArrayType();
             }
         }
 
