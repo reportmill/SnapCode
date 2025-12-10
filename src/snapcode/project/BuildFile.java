@@ -87,6 +87,12 @@ public class BuildFile extends PropObject {
         WebFile buildFile = getBuildFile();
         if (buildFile.getExists())
             readFile();
+
+        // Otherwise, see if common source dir is present
+        if (aProj.getFileForPath("core/src/main/java") != null)
+            _srcPath = "core/src/main/java";
+        if (aProj.getFileForPath("src/main/java") != null)
+            _srcPath = "src/main/java";
     }
 
     /**

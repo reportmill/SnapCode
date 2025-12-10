@@ -24,7 +24,14 @@ public class VersionControlZip extends VersionControl {
     @Override
     protected WebSite getRemoteSiteImpl()
     {
-        WebSite zipSite = _remoteSiteUrl.getAsSite();
+        WebURL remoteSiteUrl = getRemoteSiteUrl();
+
+        // Fix Github zip
+        if (isGitHubRepoZipUrl(remoteSiteUrl))
+            remoteSiteUrl = getGitHubRepoZipUrl(remoteSiteUrl);
+
+        // Get project site for remote zip URL
+        WebSite zipSite = remoteSiteUrl.getAsSite();
         return getProjectSiteForZipFileSite(zipSite);
     }
 
@@ -46,5 +53,24 @@ public class VersionControlZip extends VersionControl {
         // This can't be good
         System.err.println("VersionControlZip.getProjectSiteForZipFileSite: Couldn't find project in zip file: " + zipFileSite);
         return zipFileSite;
+    }
+
+    /**
+     * Returns whether URL is for GitHub zip.
+     */
+    private static boolean isGitHubRepoZipUrl(WebURL remoteUrl)
+    {
+        String repoUrlAddr = remoteUrl.getString();
+        return repoUrlAddr.startsWith("https://github.com/") && !repoUrlAddr.contains("/archive/");
+    }
+
+    /**
+     * Returns the modified URL to download GitHub repository as Zip.
+     */
+    private static WebURL getGitHubRepoZipUrl(WebURL remoteUrl)
+    {
+        String repoUrlAddr = remoteUrl.getString();
+        String repoUrlAddr2 = repoUrlAddr.replace(".zip", "/archive/refs/heads/master.zip");
+        return WebURL.createUrl(repoUrlAddr2);
     }
 }

@@ -151,6 +151,10 @@ public class WorkspacePaneUtils {
             return true;
         }
 
+        // If GitHub repo with missing file type, add '.git' extension
+        if (projectUrl.getFileType().isEmpty() && projectUrl.getString().startsWith("https://github.com/"))
+            projectUrl = WebURL.createUrl(projectUrl.getString() + ".git");
+
         switch (projectUrl.getFileType()) {
 
             // Handle zip, git: Open project for repo URL
@@ -160,7 +164,7 @@ public class WorkspacePaneUtils {
             // Handle gfar
             case "gfar": GreenImport.openProjectForGreenfootArchiveUrl(workspacePane, projectUrl); return true;
 
-            // Handle anything else: Open project for given file
+            // Handle anything else: Open project for given file. Maybe only do this for existing SnapCode projects?
             default:
                 WebFile file = projectUrl.getFile();
                 if (file == null)
@@ -186,78 +190,6 @@ public class WorkspacePaneUtils {
         // Open project: Get project site and open in workspace
         Workspace workspace = workspacePane.getWorkspace();
         workspace.openProjectForSite(projectSite);
-    }
-
-    /**
-     * Adds a project to given workspace pane for Zip URL.
-     */
-    public static boolean openProjectForZipUrl(WorkspacePane workspacePane, WebURL zipURL)
-    {
-        // Get zipped directory file for zip file
-        WebFile zipDirFile = getZipFileMainFile(zipURL);
-        if (zipDirFile == null) {
-            String msg = "Can't find archived directory in zip file: " + zipURL.getString();
-            DialogBox.showErrorDialog(workspacePane.getUI(), "Error Opening Zip Url", msg);
-            return false;
-        }
-
-        // If project already exists, ask to replace it
-        Workspace workspace = workspacePane.getWorkspace();
-        String projectName = zipDirFile.getName();
-        Project existingProj = workspace.getProjectForName(projectName);
-        if (existingProj != null) {
-
-            // Ask to replace project - just return if denied
-            DialogBox dialogBox = new DialogBox("Open Zip Url");
-            String msg = "A project with the same name already exists.\nDo you want to replace it?";
-            dialogBox.setQuestionMessage(msg);
-            int answer = dialogBox.showOptionDialog(workspacePane.getUI(), null);
-            if (answer == DialogBox.NO_OPTION)
-                return true;
-
-            // Otherwise, delete files
-            try { existingProj.deleteProject(new ActivityMonitor("Delete Project")); }
-            catch (Exception e) {
-                DialogBox.showExceptionDialog(workspacePane.getUI(), "Error Deleting Project", e);
-                return true;
-            }
-        }
-
-        // Get project dir
-        WebFile projectDir = SnapCodeUtils.getSnapCodeProjectDirForName(zipDirFile.getName());
-
-        // If project directory already exists, ask to replace it
-        if (projectDir.getExists()) {
-
-            // Ask to replace directory - just open directory project if denied
-            DialogBox dialogBox = new DialogBox("Open Zip Url");
-            String msg = "A project directory with the same name already exists.\nDo you want to replace it?";
-            dialogBox.setQuestionMessage(msg);
-            int answer = dialogBox.showOptionDialog(workspacePane.getUI(), null);
-            if (answer == DialogBox.CANCEL_OPTION)
-                return false;
-
-            // If replace, delete project dir
-            if (answer == DialogBox.YES_OPTION) {
-                try { projectDir.delete(); }
-                catch (Exception e) {
-                    DialogBox.showExceptionDialog(workspacePane.getUI(), "Error Deleting Directory", e);
-                    return false;
-                }
-            }
-        }
-
-        // Copy to SnapCode dir
-        if (!projectDir.getExists())
-            WebUtils.copyFile(zipDirFile, SnapCodeUtils.getSnapCodeDir());
-
-        // Set remote Zip address
-        WebSite projectSite = projectDir.getUrl().getAsSite();
-        VersionControlUtils.setRemoteSiteUrl(projectSite, zipURL);
-
-        // Select good default file
-        openProjectForProjectFile(workspacePane, projectDir);
-        return true;
     }
 
     /**
