@@ -252,7 +252,7 @@ public class Workspace extends PropObject {
         }
 
         // Get version control
-        VersionControlUtils.setRemoteSiteUrl(projSite, repoURL);
+        VersionControlUtils.setRemoteSiteUrl(projSite, repoURL.getFileUrl());
         VersionControl versionControl = VersionControl.getVersionControlForProjectSite(projSite);
 
         // Checkout project

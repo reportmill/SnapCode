@@ -142,6 +142,8 @@ public class WorkspacePaneUtils {
         WebFile localProjectDir = SnapCodeUtils.getSnapCodeProjectDirForName(projectUrl.getFilenameSimple());
         if (ProjectUtils.isProjectDir(localProjectDir)) {
             openProjectForProjectFile(workspacePane, localProjectDir);
+            if (projectUrl.getRef() != null)
+                openRepoUrlFileReference(workspacePane, projectUrl);
             return true;
         }
 
@@ -202,6 +204,7 @@ public class WorkspacePaneUtils {
         // Open project for repo URL
         TaskRunner<Boolean> checkoutRunner = new TaskRunner<>("Checkout " + repoURL.getString());
         checkoutRunner.setTaskFunction(() -> workspace.openProjectForRepoUrl(repoURL, checkoutRunner.getMonitor()));
+        checkoutRunner.setOnSuccess(e -> openRepoUrlFileReference(workspacePane, repoURL));
         checkoutRunner.setOnFailure(e -> handleOpenProjectForRepoUrlFailed(workspacePane, repoURL, e));
         checkoutRunner.setOnCancelled(() -> handleOpenProjectForRepoUrlCancelled(repoURL));
         checkoutRunner.start();
@@ -230,6 +233,30 @@ public class WorkspacePaneUtils {
         System.out.println("WorkspacePane: open project repo interrupted - local project files removed");
         WebSite projectSite = SnapCodeUtils.getSnapCodeProjectSiteForName(repoURL.getFilenameSimple());
         ProjectUtils.deleteProjectFilesForSite(projectSite);
+    }
+
+    /**
+     * Opens a file reference for given URL.
+     */
+    private static void openRepoUrlFileReference(WorkspacePane workspacePane, WebURL repoURL)
+    {
+        // If no file ref, just return
+        String fileRef = repoURL.getRef();
+        if (fileRef == null || fileRef.isBlank())
+            return;
+        if (!fileRef.startsWith("/"))
+            fileRef = '/' + fileRef;
+
+        // Get project for repo URL
+        Project project = workspacePane.getWorkspace().getProjectForName(repoURL.getFilenameSimple());
+        if (project == null)
+            return;
+
+        // If file ref resolves to project file, open it
+        WebFile file = project.getSourceFileForPath(fileRef);
+        if (file == null) file = project.getFileForPath(fileRef);
+        if (file != null) { WebFile finalFile = file;
+            ViewUtils.runLater(() -> workspacePane.openFile(finalFile)); }
     }
 
     /**
@@ -339,17 +366,6 @@ public class WorkspacePaneUtils {
 
         // Add URL
         RecentFiles.addURL(projectURL);
-    }
-
-    /**
-     * Returns the Zip file zipped directory file.
-     */
-    private static WebFile getZipFileMainFile(WebURL zipUrl)
-    {
-        WebSite zipSite = zipUrl.getAsSite();
-        WebFile zipSiteRootDir = zipSite.getRootDir();
-        List<WebFile> zipSiteRootFiles = zipSiteRootDir.getFiles();
-        return ListUtils.findMatch(zipSiteRootFiles, file -> ProjectUtils.isProjectDir(file));
     }
 
     // A Sample embed string
