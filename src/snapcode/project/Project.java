@@ -96,12 +96,16 @@ public class Project extends PropObject {
         _site = aSite;
         _site.setMetadataForKey(Project.class.getSimpleName(), this);
 
-        // If site doesn't exist, create root dir, src dir and build file
+        // If site doesn't exist, create root dir + src dir and save
         if (!aSite.getExists()) {
             WebFile srcDir = _site.createFileForPath("/src", true);
             srcDir.save();
-            getBuildFile().writeFile();
         }
+
+        // If build file doesn't exist, save
+        BuildFile buildFile = getBuildFile();
+        if (!buildFile.getBuildFile().getExists())
+            buildFile.writeFile();
     }
 
     /**
