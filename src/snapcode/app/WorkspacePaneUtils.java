@@ -153,9 +153,15 @@ public class WorkspacePaneUtils {
             return true;
         }
 
-        // If GitHub repo with missing file type, add '.git' extension
-        if (projectUrl.getFileType().isEmpty() && projectUrl.getString().startsWith("https://github.com/"))
-            projectUrl = WebURL.createUrl(projectUrl.getString() + ".git");
+        // If GitHub repo with missing file type, add '.zip' extension
+        if (projectUrl.getString().startsWith("https://github.com/")) {
+            if (projectUrl.getFileType().isEmpty())
+                projectUrl = WebURL.createUrl(projectUrl.getString() + ".zip");
+
+            // Browser should always do zip till CJ filesystem fixed
+            if (SnapEnv.isWebVM && projectUrl.getFileType().equals("git"))
+                projectUrl = WebURL.createUrl(projectUrl.getString().replace(".git", ".zip"));
+        }
 
         switch (projectUrl.getFileType()) {
 
