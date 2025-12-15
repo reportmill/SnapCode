@@ -254,26 +254,26 @@ public class JFile extends JNode {
     /**
      * Returns an import that can be used to resolve the given class name.
      */
-    public JImportDecl getImportForClassName(String aName)
+    public JImportDecl getImportForClassName(String className)
     {
         // Handle fully specified name
-        if (isKnownClassName(aName))
+        if (isKnownClassName(className))
             return null;
 
         // Find matching or containing import for name
-        JImportDecl match = ListUtils.findMatch(_importDecls, id -> id.matchesName(aName));
-        if (match == null)
-            match = ListUtils.findMatch(_importDecls, id -> id.containsName(aName));
+        JImportDecl importDecl = ListUtils.findMatch(_importDecls, impDecl -> impDecl.isExplicitImportForClassName(className));
+        if (importDecl == null)
+            importDecl = ListUtils.findMatch(_importDecls, impDecl -> impDecl.isImplicitImportForClassName(className));
 
         // Remove match from UnusedImports and return
-        if (match != null) {
-            if (match.isInclusive())
-                match.addFoundClassName(aName);
-            match._used = true;
+        if (importDecl != null) {
+            if (importDecl.isInclusive())
+                importDecl.addFoundClassName(className);
+            importDecl._used = true;
         }
 
         // Return
-        return match;
+        return importDecl;
     }
 
     /**

@@ -82,25 +82,22 @@ public class JImportDecl extends JNode {
     }
 
     /**
-     * Returns whether import matches given name.
-     * For example: import java.util.List matches "List" and "java.util.List".
+     * Returns whether import is simple class import or explicit static inner class import and matches given name. Some examples:
+     *   - import java.util.List                    - matches "List" and "java.util.List".
+     *   - import static java.time.DayOfWeek.Friday - matches Friday
      */
-    public boolean matchesName(String aName)
+    public boolean isExplicitImportForClassName(String className)
     {
-        // If inclusive, just return
-        if (isInclusive())
-            return false;
-
-        // Get import name (just continue if null)
-        String importName = getName();
-        if (importName == null)
+        // If inclusive or not a class, just return
+        if (isInclusive() || !isClassName())
             return false;
 
         // If import matches given name
-        if (importName.endsWith(aName)) {
-            if (importName.length() == aName.length())
+        String importName = getName();
+        if (importName.endsWith(className)) {
+            if (importName.length() == className.length())
                 return true;
-            if (importName.charAt(importName.length() - aName.length() - 1) == '.')
+            if (importName.charAt(importName.length() - className.length() - 1) == '.')
                 return true;
         }
 
@@ -114,23 +111,23 @@ public class JImportDecl extends JNode {
      *      import java.util.* contains "List"
      *      import static java.lang.Math.* contains "PI"
      */
-    public boolean containsName(String aName)
+    public boolean isImplicitImportForClassName(String className)
     {
-        // Get import name (just continue if null)
+        // If not inclusive (implicit) or import name not available, just return
         String importName = getName();
-        if (importName == null)
+        if (!isInclusive() || importName == null)
             return false;
 
-        // If import is inclusive ("import xxx.*") and ImportName.aName is known class, return class name
-        if (isInclusive()) {
-            String className = importName + '.' + aName;
-            if (isKnownClassName(className))
+        // If package import, see if name is package class
+        if (!isStatic()) {
+            String pkgClassName = importName + '.' + className;
+            if (isKnownClassName(pkgClassName))
                 return true;
         }
 
-        // If import is class, see if name is inner class - should also check for inner member
-        if (isClassName()) {
-            String innerClassName = importName + '$' + aName;
+        // If static wildcard import, see if name is import class inner class
+        else if (isClassName()) {
+            String innerClassName = importName + '$' + className;
             if (isKnownClassName(innerClassName))
                 return true;
         }
