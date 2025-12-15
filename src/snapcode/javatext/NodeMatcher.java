@@ -133,6 +133,8 @@ public class NodeMatcher {
     {
         if(aNode instanceof JExprLiteral)
             return !((JExprLiteral) aNode).isNull();
+        if (aNode instanceof JExprSwitch)
+            return !(aNode.getParent() instanceof JStmtSwitch);
 
         try { aNode.getClass().getDeclaredMethod("getDeclImpl"); }
         catch(Exception e) { return false; }

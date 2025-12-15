@@ -189,6 +189,15 @@ public class JExprMethodRef extends JExprLambdaBase {
         if (prefixClass == null || prefixClass.isArray())
             return null;
 
+        // Get parameter types from lambda method and look for constructor
+        JavaType[] paramTypes = getLambdaMethodParameterTypesResolved();
+        JavaClass[] paramClasses = paramTypes != null ? ArrayUtils.map(paramTypes, type -> type.getEvalClass(), JavaClass.class) : null;
+        if (paramClasses != null) {
+            JavaConstructor constructor = prefixClass.getDeclaredConstructorForClasses(paramClasses);
+            if (constructor != null)
+                return constructor;
+        }
+
         // Return default constructor
         return prefixClass.getDeclaredConstructorForClasses(new JavaClass[0]);
     }
