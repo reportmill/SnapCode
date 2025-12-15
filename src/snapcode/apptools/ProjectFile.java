@@ -114,7 +114,7 @@ public class ProjectFile implements Comparable<ProjectFile> {
                 _file.isRoot() ? _file.getSite().getName() : _file.getName();
 
         // Get Prefix, Suffix
-        String prefix = _vc.isFileModified(_file) ? ">" : "";
+        String prefix = isFileModified() ? ">" : "";
         String suffix = _file.isUpdateSet() ? " *" : "";
 
         // Return all parts
@@ -152,6 +152,17 @@ public class ProjectFile implements Comparable<ProjectFile> {
 
         // Return
         return fileIconView;
+    }
+
+    /**
+     * Returns whether file is modified.
+     */
+    private boolean isFileModified()
+    {
+        WebFile buildDir = _proj.getBuildDir();
+        if (_file == buildDir || buildDir.containsFile(_file))
+            return false;
+        return _vc.isFileModified(_file);
     }
 
     /**
