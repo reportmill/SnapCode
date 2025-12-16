@@ -30,8 +30,8 @@ public class JavaClass extends JavaType {
     // The modifiers
     protected int  _mods;
 
-    // Whether class decl is enum, interface, primitive
-    private boolean  _enum, _interface, _primitive;
+    // Whether class decl is enum, interface, record, primitive
+    private boolean  _enum, _interface, _record, _primitive;
 
     // The array of interfaces
     protected JavaClass[] _interfaces;
@@ -100,6 +100,7 @@ public class JavaClass extends JavaType {
         _mods = aClass.getModifiers();
         _enum = aClass.isEnum();
         _interface = aClass.isInterface();
+        _record = aClass.isRecord();
         _primitive = aClass.isPrimitive();
 
         // Create/set updater
@@ -190,6 +191,7 @@ public class JavaClass extends JavaType {
         _mods |= Modifier.PUBLIC; // Lame - but used for NodeCompleter until it handles current class properly
         _enum = aClassDecl.isEnum();
         _interface = aClassDecl.isInterface();
+        _record = aClassDecl.isRecord();
 
         // Create/set updater
         _updater = new JavaClassUpdaterDecl(this, aClassDecl);
@@ -271,14 +273,19 @@ public class JavaClass extends JavaType {
     public boolean isMemberClass()  { return _declaringClass != null; }
 
     /**
-     * Returns whether is a enum reference.
+     * Returns whether this class represents an enum type.
      */
     public boolean isEnum()  { return _enum; }
 
     /**
-     * Returns whether is a interface reference.
+     * Returns whether this class represents an interface type.
      */
     public boolean isInterface()  { return _interface; }
+
+    /**
+     * Returns whether this class is a record class.
+     */
+    public boolean isRecord()  { return _record; }
 
     /**
      * Returns whether is an array.

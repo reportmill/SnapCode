@@ -170,8 +170,8 @@ public class JExprAlloc extends JExpr implements WithArgs {
         // Get arg classes
         JavaClass[] argClasses = ArrayUtils.map(_args, arg -> arg instanceof JExprLambdaBase ? null : arg.getEvalClass(), JavaClass.class);
 
-        // If inner class and not static, add implied class types to arg types array
-        if (javaClass.isMemberClass() && !javaClass.isStatic()) {
+        // If inner class and not static and not a record, add implied class types to arg types array
+        if (javaClass.isMemberClass() && !javaClass.isStatic() && !javaClass.isRecord()) {
             JavaClass parentClass = javaClass.getDeclaringClass();
             argClasses = ArrayUtils.add(argClasses, parentClass, 0);
         }
