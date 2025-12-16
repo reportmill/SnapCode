@@ -140,6 +140,9 @@ public class WorkspaceBuilder {
         projects.forEach(project -> project.getBuilder().cleanProject());
         setAutoBuildEnabled(true);
 
+        // Clear build issues
+        _workspace.getBuildIssues().clear();
+
         // Next build should add all files
         addAllFilesToBuild();
 
