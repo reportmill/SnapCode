@@ -78,8 +78,9 @@ public class JConstrDecl extends JExecutableDecl {
         JavaType[] genericParamterTypes = getGenericParameterTypes();
 
         // If member class and not static, add parent class(es)
-        JavaClass javaClass = getEnclosingClassDecl().getJavaClass();
-        while (javaClass != null && javaClass.isMemberClass() && !javaClass.isStatic()) {
+        JClassDecl enclosingClassDecl = getEnclosingClassDecl();
+        JavaClass javaClass = enclosingClassDecl.getJavaClass();
+        while (javaClass != null && javaClass.isMemberClass() && !javaClass.isStatic() && !enclosingClassDecl.isRecord()) {
             JavaClass parentClass = javaClass.getDeclaringClass();
             genericParamterTypes = ArrayUtils.add(genericParamterTypes, parentClass, 0);
             javaClass = parentClass;
