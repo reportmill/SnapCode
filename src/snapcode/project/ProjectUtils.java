@@ -76,6 +76,8 @@ public class ProjectUtils {
             for (WebFile file : dirFiles) {
                 if (ArrayUtils.contains(projectFileNames, file.getName()) || isSourceFile(file))
                     return true;
+                if (file.isDir() && isProjectDir(file))
+                    return true;
             }
         }
 
