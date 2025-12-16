@@ -111,8 +111,8 @@ public class NodeCompleter {
 
         // If id is JVarDecl.Id, only offer camel case name
         JNode parent = anId.getParent();
-        if (parent instanceof JVarDecl && anId == ((JVarDecl) parent).getId()) {
-            addCompletionsForNewVarDecl((JVarDecl) parent);
+        if (parent instanceof JVarDecl varDecl && anId == varDecl.getId()) {
+            addCompletionsForNewVarDeclType(varDecl.getJavaType());
             return;
         }
 
@@ -273,18 +273,17 @@ public class NodeCompleter {
     /**
      * Adds a single completion for a new variable declaration using the type name.
      */
-    private void addCompletionsForNewVarDecl(JVarDecl varDecl)
+    private void addCompletionsForNewVarDeclType(JavaType varDeclEvalType)
     {
         // Get type from var decl
-        JavaType evalType = varDecl.getJavaType();
-        if (evalType == null || evalType.isPrimitive() || evalType.isArray() && evalType.getComponentType().isPrimitive())
+        if (varDeclEvalType == null || varDeclEvalType.isPrimitive() || varDeclEvalType.isArray() && varDeclEvalType.getComponentType().isPrimitive())
             return;
 
         // Get suggested var name from type name
-        String typeName = evalType.getSimpleName();
+        String typeName = varDeclEvalType.getSimpleName();
         String varName = StringUtils.firstCharLowerCase(typeName);
 
-        // If prefixMatcher matches suggested var name, add var name
+        // If prefixMatcher matches suggested var name, add type name
         if (_prefixMatcher.matchesString(varName)) {
             JavaDecl nameDecl = new JavaWord(varName, JavaWord.WordType.Unknown);
             addCompletionDecl(nameDecl);
@@ -297,6 +296,12 @@ public class NodeCompleter {
                 JavaDecl nameDecl = new JavaWord(varNameStripJ, JavaWord.WordType.Unknown);
                 addCompletionDecl(nameDecl);
             }
+        }
+
+        // If '_' prefix, create/add suggestion for type name with '_' prefix
+        if (_prefixMatcher.matchesString('_' + varName)) {
+            JavaDecl nameDecl = new JavaWord('_' + varName, JavaWord.WordType.Unknown);
+            addCompletionDecl(nameDecl);
         }
     }
 
@@ -331,6 +336,10 @@ public class NodeCompleter {
             addWordCompletions(JavaWord.MODIFIERS);
             addWordCompletions(JavaWord.CLASS_WORDS);
         }
+
+        // If id is method decl id and no params defined, add camel case type name (not sure why incomplete field decl parses as method decl)
+        if (anId.getParent() instanceof JMethodDecl methodDecl && anId == methodDecl.getId() && methodDecl.getParameters().length == 0)
+            addCompletionsForNewVarDeclType(methodDecl.getReturnType().getJavaType());
     }
 
     /**
@@ -376,13 +385,12 @@ public class NodeCompleter {
     {
         // If parent is method decl id, return true
         JNode parent = idExpr.getParent();
-        if (parent instanceof JMethodDecl && idExpr == ((JMethodDecl) parent).getId())
+        if (parent instanceof JMethodDecl methodDecl && idExpr == methodDecl.getId())
             return true;
 
         // If parent is type and its parent is method decl type, return true
         if (parent instanceof JType) {
-            JNode grandParent = parent.getParent();
-            if (grandParent instanceof JMethodDecl && parent == ((JMethodDecl) grandParent).getReturnType())
+            if (parent.getParent() instanceof JMethodDecl methodDecl && parent == methodDecl.getReturnType())
                 return true;
         }
 
