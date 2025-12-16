@@ -5,6 +5,7 @@ package javakit.resolver;
 import javakit.parse.JClassDecl;
 import javakit.parse.JFile;
 import snap.util.ArrayUtils;
+import snap.util.SnapEnv;
 import java.lang.reflect.*;
 
 /**
@@ -100,7 +101,7 @@ public class JavaClass extends JavaType {
         _mods = aClass.getModifiers();
         _enum = aClass.isEnum();
         _interface = aClass.isInterface();
-        _record = aClass.isRecord();
+        _record = aClass.isRecord() || SnapEnv.isWebVM && aClass.getSuperclass() == java.lang.Record.class; // Frick
         _primitive = aClass.isPrimitive();
 
         // Create/set updater
