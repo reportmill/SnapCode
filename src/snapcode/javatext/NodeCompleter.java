@@ -81,7 +81,7 @@ public class NodeCompleter {
             replaceClassesWithConstructors();
 
         // If no matches, just return
-        if (_list.size() == 0)
+        if (_list.isEmpty())
             return NO_MATCHES;
 
         // Get receiving class - If just Object, clear it out
@@ -202,19 +202,15 @@ public class NodeCompleter {
             return;
 
         // Handle parent is Package: Add packages and classes with prefix
-        if (scopeDecl instanceof JavaPackage) {
+        if (scopeDecl instanceof JavaPackage parentPackage) {
 
-            // Get parent package name
-            JavaPackage parentPackage = (JavaPackage) scopeDecl;
+            // Get parent package children that match
             JavaDecl[] packageChildren = parentPackage.getChildren();
-
-            // Get matching children
             JavaDecl[] matchingChildren = ArrayUtils.filter(packageChildren, decl -> _prefixMatcher.matchesString(decl.getSimpleName()));
 
             // Add matching children (skip non-public classes)
             for (JavaDecl matchingDecl : matchingChildren) {
-                if (matchingDecl instanceof JavaClass) {
-                    JavaClass matchingClass = (JavaClass) matchingDecl;
+                if (matchingDecl instanceof JavaClass matchingClass) {
                     if (!Modifier.isPublic(matchingClass.getModifiers()))
                         continue;
                 }
@@ -324,7 +320,16 @@ public class NodeCompleter {
 
         // If type, add type completions
         if (anId.getParent() instanceof JType) {
+
+            // Add enclosing class inner classes that match prefix
+            JavaClass enclosingClass = classDecl.getJavaClass();
+            JavaClass[] matchingInnerClasses = _prefixMatcher.getInnerClassesForClass(enclosingClass);
+            addCompletionDecls(matchingInnerClasses);
+
+            // Add any classes that match prefix
             addCompletionsForTypeId();
+
+            // Add modifiers and class declaration words
             addWordCompletions(JavaWord.MODIFIERS);
             addWordCompletions(JavaWord.CLASS_WORDS);
         }
@@ -355,8 +360,7 @@ public class NodeCompleter {
     {
         for (int i = _list.size() - 1; i >= 0; i--) {
             JavaDecl decl = _list.get(i);
-            if (decl instanceof JavaClass) {
-                JavaClass javaClass = (JavaClass) decl;
+            if (decl instanceof JavaClass javaClass) {
                 if (!javaClass.isPrimitive()) {
                     _list.remove(i);
                     JavaConstructor[] constructors = javaClass.getDeclaredConstructors();
