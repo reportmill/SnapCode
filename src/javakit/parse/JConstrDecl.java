@@ -49,8 +49,8 @@ public class JConstrDecl extends JExecutableDecl {
         if (javaClass == null)
             return null;
 
-        // If inner class and not static, add implied class type to arg types array
-        if (javaClass.isMemberClass() && !javaClass.isStatic()) {
+        // If inner class and not static and not record, add implied parent class type to arg types array
+        if (javaClass.isMemberClass() && !javaClass.isStatic() && !javaClass.isRecord()) {
             JavaClass parentClass = javaClass.getDeclaringClass();
             parameterClasses = ArrayUtils.add(parameterClasses, parentClass, 0);
         }
@@ -77,9 +77,8 @@ public class JConstrDecl extends JExecutableDecl {
     {
         JavaType[] genericParamterTypes = getGenericParameterTypes();
 
-        // If member class and not static, add parent class(es)
-        JClassDecl enclosingClassDecl = getEnclosingClassDecl();
-        JavaClass javaClass = enclosingClassDecl.getJavaClass();
+        // If member class and not static, add parent class param(s)
+        JavaClass javaClass = getEnclosingClassDecl().getJavaClass();
         while (javaClass != null && javaClass.isMemberClass() && !javaClass.isStatic() && !javaClass.isRecord()) {
             JavaClass parentClass = javaClass.getDeclaringClass();
             genericParamterTypes = ArrayUtils.add(genericParamterTypes, parentClass, 0);
@@ -97,9 +96,9 @@ public class JConstrDecl extends JExecutableDecl {
     {
         JavaClass[] paramterClasses = getParameterClasses();
 
-        // If member class and not static, add parent class(es)
+        // If member class and not static and not record, add parent class param(s)
         JavaClass javaClass = getEnclosingClassDecl().getJavaClass();
-        while (javaClass != null && javaClass.isMemberClass() && !javaClass.isStatic()) {
+        while (javaClass != null && javaClass.isMemberClass() && !javaClass.isStatic() && !javaClass.isRecord()) {
             JavaClass parentClass = javaClass.getDeclaringClass();
             paramterClasses = ArrayUtils.add(paramterClasses, parentClass, 0);
             javaClass = parentClass;
