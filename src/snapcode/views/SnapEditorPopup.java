@@ -8,6 +8,7 @@ import snapcode.javatext.JavaTextUtils;
 import snapcode.javatext.NodeCompleter;
 import snap.gfx.Font;
 import snap.view.*;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -80,8 +81,8 @@ public class SnapEditorPopup extends ViewOwner {
         _idText = id.getName();
 
         // Get suggestions
-        JavaDecl[] suggestions = new NodeCompleter().getCompletionsForId(id);
-        if (suggestions.length == 0) {
+        List<JavaDecl> suggestions = new NodeCompleter().getCompletionsForId(id);
+        if (suggestions.isEmpty()) {
             hide();
             return;
         }

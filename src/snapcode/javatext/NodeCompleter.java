@@ -17,19 +17,19 @@ import snap.util.StringUtils;
 public class NodeCompleter {
 
     // The resolver
-    private Resolver  _resolver;
+    private Resolver _resolver;
 
     // A PrefixMatcher to match current id prefix to completions with fancy camel case matching
     private DeclMatcher _prefixMatcher;
 
-    // The list of completions
-    private List<JavaDecl>  _list = new ArrayList<>();
+    // The set of completions
+    private Set<JavaDecl> _completions = new HashSet<>();
 
     // An identifier matcher
-    private static Matcher  _idMatcher;
+    private static Matcher _idMatcher;
 
     // Constant for no matches
-    private static JavaDecl[]  NO_MATCHES = new JavaDecl[0];
+    private static List<JavaDecl> NO_MATCHES = Collections.emptyList();
 
     /**
      * Constructor.
@@ -49,7 +49,7 @@ public class NodeCompleter {
     /**
      * Returns completion for id expression node.
      */
-    public JavaDecl[] getCompletionsForId(JExprId anId)
+    public List<JavaDecl> getCompletionsForId(JExprId anId)
     {
         // Get resolver for id node
         _resolver = anId.getResolver();
@@ -81,7 +81,7 @@ public class NodeCompleter {
             replaceClassesWithConstructors();
 
         // If no matches, just return
-        if (_list.isEmpty())
+        if (_completions.isEmpty())
             return NO_MATCHES;
 
         // Get receiving class - If just Object, clear it out
@@ -89,10 +89,8 @@ public class NodeCompleter {
         if (receivingClass != null && receivingClass.getName().equals("java.lang.Object"))
             receivingClass = null;
 
-        // Get array and sort
-        JavaDecl[] decls = _list.toArray(new JavaDecl[0]);
-        Arrays.sort(decls, new DeclCompare(_prefixMatcher, receivingClass));
-        return decls;
+        // Return sorted list
+        return _completions.stream().sorted(new DeclCompare(_prefixMatcher, receivingClass)).toList();
     }
 
     /**
@@ -341,7 +339,7 @@ public class NodeCompleter {
     private void addCompletionDecl(JavaDecl aDecl)
     {
         if (aDecl == null) return;
-        _list.add(aDecl);
+        _completions.add(aDecl);
     }
 
     /**
@@ -358,11 +356,12 @@ public class NodeCompleter {
      */
     private void replaceClassesWithConstructors()
     {
-        for (int i = _list.size() - 1; i >= 0; i--) {
-            JavaDecl decl = _list.get(i);
+        JavaDecl[] completions = _completions.toArray(new JavaDecl[0]);
+        for (int i = completions.length - 1; i >= 0; i--) {
+            JavaDecl decl = completions[i];
             if (decl instanceof JavaClass javaClass) {
                 if (!javaClass.isPrimitive()) {
-                    _list.remove(i);
+                    _completions.remove(decl);
                     JavaConstructor[] constructors = javaClass.getDeclaredConstructors();
                     addCompletionDecls(constructors);
                 }

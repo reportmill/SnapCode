@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.javatext;
+import java.util.Collections;
 import java.util.List;
 import javakit.parse.*;
 import javakit.resolver.*;
@@ -113,8 +114,8 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     private void updatePopupList()
     {
         // Get completions (just return if empty)
-        JavaDecl[] completions = getCompletionsAtCursor();
-        if (completions == null || completions.length == 0) {
+        List<JavaDecl> completions = getCompletionsAtCursor();
+        if (completions.isEmpty()) {
             hide();
             return;
         }
@@ -155,17 +156,16 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Returns completions for current text selection.
      */
-    public JavaDecl[] getCompletionsAtCursor()
+    public List<JavaDecl> getCompletionsAtCursor()
     {
         // Get id expression at cursor (just return if none)
         JExprId idExpr = getIdExprAtCursor();
         if (idExpr == null)
-            return null;
+            return Collections.emptyList();
 
         // Get completions and return
         NodeCompleter javaCompleter = new NodeCompleter();
-        JavaDecl[] completions = javaCompleter.getCompletionsForId(idExpr);
-        return completions;
+        return javaCompleter.getCompletionsForId(idExpr);
     }
 
     /**
