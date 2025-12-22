@@ -113,16 +113,6 @@ public class RunConfig {
     }
 
     /**
-     * Returns the main class file path.
-     */
-    public String getMainClassFilePath()
-    {
-        String className = getMainClassName();
-        if (className == null) className = "null";
-        return "/" + className.replace('.', '/') + ".class";
-    }
-
-    /**
      * Returns the main java file.
      */
     public WebFile getMainJavaFile()
@@ -167,7 +157,8 @@ public class RunConfig {
     public boolean isSwing()
     {
         WebFile javaFile = getMainJavaFile();
-        return javaFile != null && javaFile.getText().contains("javax.swing");
+        String javaText = javaFile != null ? javaFile.getText() : null;
+        return javaText != null && javaText.contains("javax.swing");
     }
 
     /**
