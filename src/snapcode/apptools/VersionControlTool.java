@@ -313,8 +313,8 @@ public class VersionControlTool extends ProjectTool {
      */
     public void checkForUpdates(boolean checkPassively)
     {
-        // If project was just checked out (build file is less than a minute old), just return
-        if (_proj.getBuildFile().getBuildFile().getLastModTime() > System.currentTimeMillis() - 60000)
+        // If project was just checked out (project dir is less than a minute old), just return
+        if (_proj.getRootDir().getLastModTime() > System.currentTimeMillis() - 60000)
             return;
 
         checkForUpdatesForFiles(List.of(_proj.getRootDir()), checkPassively);
