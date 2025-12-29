@@ -2,6 +2,7 @@ package snapcode.apptools;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.text.TextModel;
+import snap.text.TextStyle;
 import snap.util.FormatUtils;
 import snapcode.project.*;
 import snapcode.javatext.JavaTextUtils;
@@ -182,9 +183,10 @@ public class BuildTool extends WorkspaceTool {
     {
         // Handle Error file (headers)
         if (aCell.getItem() instanceof WebFile errorFile) {
-            aCell.setText(getErrorFileText(errorFile));
-            aCell.setFont(Font.Arial16);
             aCell.setFill(ERROR_TREE_HEADER_COLOR);
+            aCell.getTextArea().setTextModel(TextModel.createMinimalTextModel(true));
+            aCell.getTextArea().addCharsWithStyle(getErrorFileText(errorFile), ERROR_TREE_HEADER_STYLE1);
+            aCell.getTextArea().addCharsWithStyle("   " + errorFile.getSite().getName() + errorFile.getParent().getPath(), ERROR_TREE_HEADER_STYLE2);
         }
 
         // Handle BuildIssue
@@ -206,6 +208,8 @@ public class BuildTool extends WorkspaceTool {
     // ErrorsTree cell fill colors
     private static final Color ERROR_TREE_HEADER_COLOR = Color.get("#F6");
     private static final Color ERROR_TREE_CONTENT_COLOR = Color.get("#FD");
+    private static final TextStyle ERROR_TREE_HEADER_STYLE1 = new TextStyle().copyForStyleValues(Font.Arial16);
+    private static final TextStyle ERROR_TREE_HEADER_STYLE2 = new TextStyle().copyForStyleValues(Font.Arial16, Color.get("#80"));
 
     /**
      * Called when ErrorList is clicked.
