@@ -5,6 +5,7 @@ package snapcode.project;
 import javakit.parse.*;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
+import snap.parse.Tokenizer;
 import snap.props.PropChange;
 import snap.text.TextAgent;
 import snap.text.TextModel;
@@ -159,7 +160,7 @@ public class JavaAgent extends TextAgent {
         JFile jfile;
         if (_isJepl || _isJMD)
             jfile = parseJepl(javaParser, javaStr);
-        else jfile = javaParser.parseFile(javaStr);
+        else jfile = javaParser.parseFile(javaStr, _javaTextModel);
 
         // Set SourceFile
         jfile.setSourceFile(_javaFile);
@@ -184,9 +185,9 @@ public class JavaAgent extends TextAgent {
 
         if (_isJMD) {
             javaStr = MDUtils.getJeplForJMD(className, javaStr);
-            return javaParser.parseJeplFile(javaStr, className, importNames, superClassName);
+            return javaParser.parseJeplFile(javaStr, className, importNames, superClassName, _javaTextModel);
         }
-        return javaParser.parseJeplFile(javaStr, className, importNames, superClassName);
+        return javaParser.parseJeplFile(javaStr, className, importNames, superClassName, _javaTextModel);
     }
 
     /**
@@ -337,7 +338,7 @@ public class JavaAgent extends TextAgent {
     public CharSequence getJavaTextChars()
     {
         if (_javaTextModel != null)
-            return _javaTextModel;
+            return _javaTextModel.getChars();
         return _javaFile.getText();
     }
 

@@ -265,7 +265,7 @@ public class NewFileTool extends WorkspaceTool {
     {
         // Get Java class name
         JavaParser javaParser = JavaParser.getShared();
-        JFile jfile = javaParser.parseFile(javaString);
+        JFile jfile = javaParser.parseFile(javaString, null);
         String className = jfile.getName();
         if (className == null || className.isEmpty()) {
             String title = "New Java File from clipboard";

@@ -15,6 +15,9 @@ public class JavaParser extends JavaParserStmt {
     // The exception, if one was hit
     private Exception  _exception;
 
+    // An optimized tokenizer, if available
+    private Tokenizer _optimizedTokenizer;
+
     // The shared parser
     private static JavaParser  _shared;
 
@@ -48,10 +51,13 @@ public class JavaParser extends JavaParserStmt {
     /**
      * Parses for java file for given char input.
      */
-    public synchronized JFile parseFile(CharSequence anInput)
+    public synchronized JFile parseFile(CharSequence anInput, JavaTextModel javaTextModel)
     {
         ParseRule javaRule = getPrimaryRule();
-        return parseFileWithRule(anInput, javaRule);
+        if (javaTextModel != null)
+            _optimizedTokenizer = javaTextModel.getTokenSource();
+        try { return parseFileWithRule(anInput, javaRule); }
+        finally { _optimizedTokenizer = null; }
     }
 
     /**
@@ -66,11 +72,11 @@ public class JavaParser extends JavaParserStmt {
         if (anInput.isEmpty())
             return new JFile();
 
-        // If JavaTextModel, swap in tokenizer that uses JavaText tokens
+        // If optimized tokenizer available, swap it in (JavaTextModel can vend cached tokens)
         Tokenizer oldTokenizer = null;
-        if (anInput instanceof JavaTextModel javaTextModel) {
+        if (_optimizedTokenizer != null) {
             oldTokenizer = getTokenizer();
-            setTokenizer(javaTextModel.getTokenSource());
+            setTokenizer(_optimizedTokenizer);
         }
 
         // Set input
@@ -125,14 +131,19 @@ public class JavaParser extends JavaParserStmt {
     /**
      * Parses for java file for given char input.
      */
-    public synchronized JFile parseJeplFile(CharSequence anInput, String className, String[] importNames, String superClassName)
+    public synchronized JFile parseJeplFile(CharSequence anInput, String className, String[] importNames, String superClassName, JavaTextModel javaTextModel)
     {
         // Get JeplRule
         ParseRule jeplRule = getRuleForName("JeplFile");
         jeplRule.setHandler(new JeplFileHandler(className, importNames, superClassName));
 
+        // If JavaTextModel available, use its tokenizer
+        if (javaTextModel != null)
+            _optimizedTokenizer = javaTextModel.getTokenSource();
+
         // Do normal version
-        return parseFileWithRule(anInput, jeplRule);
+        try { return parseFileWithRule(anInput, jeplRule); }
+        finally { _optimizedTokenizer = null; }
     }
 
     /**
@@ -155,7 +166,7 @@ public class JavaParser extends JavaParserStmt {
         Tokenizer oldTokenizer = getTokenizer();
         setTokenizer(javaTextModel.getTokenSource());
 
-        JStmt stmt = parseStatement(javaTextModel, charIndex);
+        JStmt stmt = parseStatement(javaTextModel.getChars(), charIndex);
 
         setTokenizer(oldTokenizer);
 
