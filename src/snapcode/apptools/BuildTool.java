@@ -184,7 +184,8 @@ public class BuildTool extends WorkspaceTool {
         // Handle Error file (headers)
         if (aCell.getItem() instanceof WebFile errorFile) {
             aCell.setFill(ERROR_TREE_HEADER_COLOR);
-            aCell.getTextArea().setTextModel(TextModel.createMinimalTextModel(true));
+            aCell.getTextArea().clear();
+            aCell.getTextArea().setRichText(true);
             aCell.getTextArea().addCharsWithStyle(getErrorFileText(errorFile), ERROR_TREE_HEADER_STYLE1);
             aCell.getTextArea().addCharsWithStyle("   " + errorFile.getSite().getName() + errorFile.getParent().getPath(), ERROR_TREE_HEADER_STYLE2);
         }
