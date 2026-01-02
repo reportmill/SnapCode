@@ -153,6 +153,13 @@ public class WorkspacePaneUtils {
             return true;
         }
 
+        // Handle 'github:' URL
+        if (projectUrl.getString().startsWith("github:")) {
+            String projUrlAddr = projectUrl.getString();
+            String projUrlAddrReal = projUrlAddr.replace("github:", "https://github.com");
+            projectUrl = WebURL.createUrl(projUrlAddrReal);
+        }
+
         // If GitHub repo with missing file type, add '.zip' extension
         if (projectUrl.getString().startsWith("https://github.com/")) {
             if (projectUrl.getFileType().isEmpty())

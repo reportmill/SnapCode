@@ -113,8 +113,8 @@ public class App {
             }
         }
 
-        // Handle 'snapcloud:' or 'sc:'
-        if (arg0.startsWith("snapcloud:") || arg0.startsWith("sc:")) {
+        // Handle 'snapcloud:', 'sc:', 'github:'
+        if (arg0.startsWith("snapcloud:") || arg0.startsWith("sc:") || arg0.startsWith("github:")) {
             WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
             WebURL openUrl = WebURL.getUrl(arg0);
             if (openUrl != null) {
