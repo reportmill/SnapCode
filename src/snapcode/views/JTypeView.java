@@ -1,6 +1,8 @@
 package snapcode.views;
 import javakit.parse.JType;
+import snap.view.BoxViewLayout;
 import snap.view.Label;
+import snap.view.ViewLayout;
 
 /**
  * A JNodeView subclass for JClassDecl.
@@ -35,4 +37,13 @@ public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
      * Returns a string describing the part.
      */
     public String getNodeString()  { return "Type"; }
+
+    /**
+     * Override to return box layout.
+     */
+    @Override
+    protected ViewLayout<?> getViewLayoutImpl()
+    {
+        return new BoxViewLayout<>(this, getLastChild(), true, true);
+    }
 }

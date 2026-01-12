@@ -51,37 +51,10 @@ public class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
     }
 
     /**
-     * Override.
+     * Override to return row layout.
      */
     @Override
-    protected double getPrefWidthImpl(double aH)
-    {
-        if (getChildCount() > 1)
-            return RowView.getPrefWidth(this, aH);
-        return super.getPrefWidthImpl(aH);
-    }
-
-    /**
-     * Override.
-     */
-    @Override
-    protected double getPrefHeightImpl(double aW)
-    {
-        if (getChildCount() > 1)
-            return RowView.getPrefHeight(this, aW);
-        return super.getPrefHeightImpl(aW);
-    }
-
-    /**
-     * Override to resize rects.
-     */
-    @Override
-    protected void layoutImpl()
-    {
-        if (getChildCount() > 1)
-            RowView.layout(this, false);
-        else super.layoutImpl();
-    }
+    protected ViewLayout<?> getViewLayoutImpl()  { return new RowViewLayout<>(this, false); }
 
     /**
      * Fires TextFieldAction.

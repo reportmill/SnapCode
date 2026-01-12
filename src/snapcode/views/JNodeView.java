@@ -114,33 +114,6 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
     }
 
     /**
-     * Override.
-     */
-    @Override
-    protected double getPrefWidthImpl(double aH)
-    {
-        return BoxView.getPrefWidth(this, getLastChild(), aH);
-    }
-
-    /**
-     * Override.
-     */
-    @Override
-    protected double getPrefHeightImpl(double aW)
-    {
-        return BoxView.getPrefHeight(this, getLastChild(), -1);
-    }
-
-    /**
-     * Override to resize rects.
-     */
-    @Override
-    protected void layoutImpl()
-    {
-        BoxView.layout(this, getLastChild(), true, true);
-    }
-
-    /**
      * Standard toString implementation.
      */
     @Override
