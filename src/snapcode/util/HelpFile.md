@@ -481,7 +481,7 @@ doc.getBody().appendChild(button);
 ## ReportMill
 
 ```
-//DEPS com.reportmill:ReportMill16:2025.12
+//DEPS com.reportmill:ReportMill16:2026.01
 import com.reportmill.base.*;
 import com.reportmill.shape.RMDocument;
 import java.io.File;
