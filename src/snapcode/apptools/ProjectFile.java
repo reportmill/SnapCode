@@ -1,4 +1,5 @@
 package snapcode.apptools;
+import snap.geom.Insets;
 import snapcode.project.BuildIssue;
 import snapcode.javatext.JavaTextUtils;
 import snapcode.project.BuildIssues;
@@ -52,8 +53,8 @@ public class ProjectFile implements Comparable<ProjectFile> {
     public enum FileType { PLAIN, PACKAGE_DIR, SOURCE_DIR }
 
     // Icons
-    private static Image ErrorBadge = Image.getImageForClassResource(ProjectFile.class, "ErrorBadge.png");
-    private static Image WarningBadge = Image.getImageForClassResource(ProjectFile.class, "WarningBadge.png");
+    private static Image ErrorBadge = Image.getImageForClassResource(ProjectFile.class, "pkg.images/ErrorBadge.png");
+    private static Image WarningBadge = Image.getImageForClassResource(ProjectFile.class, "pkg.images/WarningBadge.png");
     private static Image Package = JavaTextUtils.PackageImage;
 
     // Priority file types
@@ -142,7 +143,8 @@ public class ProjectFile implements Comparable<ProjectFile> {
         if (status != null) {
             Image badge = status == BuildIssue.Kind.Error ? ErrorBadge : WarningBadge;
             ImageView badgeImageView = new ImageView(badge);
-            badgeImageView.setLean(Pos.BOTTOM_LEFT);
+            badgeImageView.setMargin(new Insets(0, 0, 2, 0));
+            badgeImageView.setLean(Pos.BOTTOM_RIGHT);
 
             // Create StackView
             StackView stackView = new StackView();
