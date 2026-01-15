@@ -1,12 +1,5 @@
 <!-- title: "SnapCode - a real Java IDE for the Web" -->
 
-<div style="position:relative;left:-25px;top:-40px;height:60px;">
-  <script src="https://reportmill.com/shared/navbar.js"></script>
-  <font size="1" face="Verdana, Helvetica, Arial" color="#CB0017">
-    <a href="http://www.reportmill.com">HOME</a> &gt; SnapCode
-  </font>
-</div>
-
 # <a name="title">SnapCode - a real Java IDE for the Web</a>
 
 <div style="margin-left:20px;">
@@ -29,22 +22,24 @@
 
 ## <a name="Overview">Overview</a>
 
-SnapCode makes it fast and easy to start coding Java in any modern browser. SnapCode offers modern coding features, support for
-Java REPL (Read-Eval-Print-Loop), and full featured library support for UI, graphics, charting, 3D and more.
-All of this makes SnapCode effective for a broad range of uses from education to engineering and data science.
+SnapCode is a full-featured Java IDE that runs in the browser. It is free, modern, powerful, tailored for education
+and is the fastest and easiest way to start writing and sharing Java code.
 
-SnapCode gets things started quickly with these features:
+SnapCode offers modern coding features, support for Java REPL (Read-Eval-Print-Loop), support for working with projects
+in the cloud and full-featured library support for UI, graphics, charting, 3D and more. The full list of
+compelling advantages includes:
 
-- No install - runs in browser [(Click here to run)](https://reportmill.com/SnapCode/app)
-- Java REPL coding - just start coding (no class/main-method boilerplate needed)
+- [Runs in any modern browser (click to run)](https://reportmill.com/SnapCode)
+- [Runs on all major desktops (click to download)](https://reportmill.com/SnapCode/download.html)
+- REPL coding - just start coding (no class/main-method boilerplate needed)
 - REPL style output (shows stacked output as rich interactive views)
+- Support for [working in the cloud](https://github.com/reportmill/SnapCode/wiki/SnapCloud-web-projects) and with GitHub
+- Support for sharing running apps/code and [embedding in HTML](https://github.com/reportmill/SnapCode/wiki/Embed-SnapCode-in-HTML-page)
+- [Block coding support](https://github.com/reportmill/SnapCode/wiki/Java-Block-Coding-in-SnapCode)
 - Integrated UI builder
 - Integrated help system
-- Block coding support
 - Project level search (strings or symbols, references and declarations)
 - Integrated developer tools
-- Support for 'Share' links to easily share code
-- Desktop app: [Download Page](https://reportmill.com/SnapCode/download.html)
 
 ## <a name="ModernFeatures">Modern IDE Features</a>
 
