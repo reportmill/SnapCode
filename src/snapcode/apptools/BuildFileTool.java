@@ -144,12 +144,13 @@ public class BuildFileTool extends ProjectTool {
         setViewVisible("MavenDependencyBox", isMavenDependency);
         if (isMavenDependency) {
 
-            // Update MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText
+            // Update MavenIdText, GroupText, PackageNameText, VersionText, ClassifierText, RepositoryURLText
             MavenDependency mavenDependency = (MavenDependency) selDependency;
             setViewValue("MavenIdText", mavenDependency.getId());
             setViewValue("GroupText", mavenDependency.getGroup());
             setViewValue("PackageNameText", mavenDependency.getName());
             setViewValue("VersionText", mavenDependency.getVersion());
+            setViewValue("ClassifierText", mavenDependency.getClassifier());
             String repoURL = mavenDependency.getRepositoryURL();
             setViewValue("RepositoryURLText", repoURL);
             if (repoURL == null)
@@ -245,17 +246,18 @@ public class BuildFileTool extends ProjectTool {
      */
     private void respondDependencyUI(ViewEvent anEvent)
     {
-        // Handle MavenIdText, GroupText, PackageNameText, VersionText, RepositoryURLText, ShowButton, ReloadButton
+        // Handle MavenIdText, GroupText, PackageNameText, VersionText, ClassifierText, RepositoryURLText, ShowButton, ReloadButton
         BuildDependency selDependency = getSelDependency();
         if (selDependency instanceof MavenDependency mavenDependency) {
             switch (anEvent.getName()) {
-                case "MavenIdText": mavenDependency.setId(anEvent.getStringValue()); break;
-                case "GroupText": mavenDependency.setGroup(anEvent.getStringValue()); break;
-                case "PackageNameText": mavenDependency.setName(anEvent.getStringValue()); break;
-                case "VersionText": mavenDependency.setVersion(anEvent.getStringValue()); break;
-                case "RepositoryURLText": mavenDependency.setRepositoryURL(anEvent.getStringValue()); break;
-                case "ShowButton": showMavenDependencyInFinder(mavenDependency); break;
-                case "ReloadButton": mavenDependency.loadPackageFiles(); break;
+                case "MavenIdText" -> mavenDependency.setId(anEvent.getStringValue());
+                case "GroupText" -> mavenDependency.setGroup(anEvent.getStringValue());
+                case "PackageNameText" -> mavenDependency.setName(anEvent.getStringValue());
+                case "VersionText" -> mavenDependency.setVersion(anEvent.getStringValue());
+                case "ClassifierText" -> mavenDependency.setClassifier(anEvent.getStringValue());
+                case "RepositoryURLText" -> mavenDependency.setRepositoryURL(anEvent.getStringValue());
+                case "ShowButton" -> showMavenDependencyInFinder(mavenDependency);
+                case "ReloadButton" -> mavenDependency.loadPackageFiles();
             }
 
             // If not loaded, trigger load

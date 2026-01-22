@@ -23,6 +23,9 @@ public class MavenDependency extends BuildDependency {
     // The version name
     private String _version;
 
+    // The classifier
+    private String _classifier;
+
     // The repository url
     private String _repositoryURL;
 
@@ -45,6 +48,7 @@ public class MavenDependency extends BuildDependency {
     public static final String Group_Prop = "Group";
     public static final String Name_Prop = "Name";
     public static final String Version_Prop = "Version";
+    public static final String Classifier_Prop = "Classifier";
     public static final String RepositoryURL_Prop = "RepositoryURL";
     public static final String Loaded_Prop = "Loaded";
     public static final String Loading_Prop = "Loading";
@@ -83,11 +87,14 @@ public class MavenDependency extends BuildDependency {
         if (_id != null) return _id;
 
         // If any part is invalid, just return
-        if (_group == null || _group.isEmpty() || _name == null || _name.isEmpty() || _version == null || _version.isEmpty())
+        if (_group == null || _group.isBlank() || _name == null || _name.isBlank() || _version == null || _version.isBlank())
             return null;
 
         // Create id string and return
-        return _id = _group + ":" + _name + ":" + _version;
+        _id = _group + ":" + _name + ":" + _version;
+        if (_classifier != null && !_classifier.isBlank())
+            _id += ':' + _classifier;
+        return _id;
     }
 
     /**
@@ -103,6 +110,7 @@ public class MavenDependency extends BuildDependency {
         setGroup(names.length > 0 ? names[0] : null);
         setName(names.length > 1 ? names[1] : null);
         setVersion(names.length > 2 ? names[2] : null);
+        setClassifier(names.length > 3 ? names[3] : null);
         setLoaded(false);
     }
 
@@ -135,9 +143,7 @@ public class MavenDependency extends BuildDependency {
     public void setName(String aValue)
     {
         if (Objects.equals(aValue, _name)) return;
-        _classPaths = null;
-        _id = null;
-        _error = null;
+        _classPaths = null; _id = null; _error = null;
         firePropChange(Name_Prop, _name, _name = aValue);
         setLoaded(false);
     }
@@ -153,10 +159,24 @@ public class MavenDependency extends BuildDependency {
     public void setVersion(String aValue)
     {
         if (Objects.equals(aValue, _version)) return;
-        _classPaths = null;
-        _id = null;
-        _error = null;
+        _classPaths = null; _id = null; _error = null;
         firePropChange(Version_Prop, _version, _version = aValue);
+        setLoaded(false);
+    }
+
+    /**
+     * Returns the classifier.
+     */
+    public String getClassifier()  { return _classifier; }
+
+    /**
+     * Sets the classifier.
+     */
+    public void setClassifier(String aValue)
+    {
+        if (Objects.equals(aValue, _classifier)) return;
+        _classPaths = null; _id = null; _error = null;
+        firePropChange(Classifier_Prop, _classifier, _classifier = aValue);
         setLoaded(false);
     }
 
@@ -382,8 +402,15 @@ public class MavenDependency extends BuildDependency {
         String groupPath = '/' + group.replace(".", "/");
         String packagePath = FilePathUtils.getChildPath(groupPath, packageName);
         String versionPath = FilePathUtils.getChildPath(packagePath, version);
-        String jarName = packageName + '-' + version + ".jar";
-        return FilePathUtils.getChildPath(versionPath, jarName);
+
+        // Get jar filename
+        String jarName = packageName + '-' + version;
+        if (_classifier != null && !_classifier.isBlank())
+            jarName += '-' + _classifier;
+        String jarFilename = jarName + ".jar";
+
+        // Return jar path
+        return FilePathUtils.getChildPath(versionPath, jarFilename);
     }
 
     /**
@@ -457,6 +484,7 @@ public class MavenDependency extends BuildDependency {
         aPropSet.addPropNamed(Group_Prop, String.class);
         aPropSet.addPropNamed(Name_Prop, String.class);
         aPropSet.addPropNamed(Version_Prop, String.class);
+        aPropSet.addPropNamed(Classifier_Prop, String.class);
         aPropSet.addPropNamed(RepositoryURL_Prop, String.class);
     }
 
@@ -468,10 +496,11 @@ public class MavenDependency extends BuildDependency {
     {
         return switch (aPropName) {
 
-            // Group, Name, Version, RepositoryURL
+            // Group, Name, Version, Classifier, RepositoryURL
             case Group_Prop -> getGroup();
             case Name_Prop -> getName();
             case Version_Prop -> getVersion();
+            case Classifier_Prop -> getClassifier();
             case RepositoryURL_Prop -> getRepositoryURL();
 
             // Do normal version
@@ -487,14 +516,15 @@ public class MavenDependency extends BuildDependency {
     {
         switch (aPropName) {
 
-            // Group, Name, Version, RepositoryURL
-            case Group_Prop: setGroup(Convert.stringValue(aValue)); break;
-            case Name_Prop: setName(Convert.stringValue(aValue)); break;
-            case Version_Prop: setVersion(Convert.stringValue(aValue)); break;
-            case RepositoryURL_Prop: setRepositoryURL(Convert.stringValue(aValue)); break;
+            // Group, Name, Version, Classifier, RepositoryURL
+            case Group_Prop -> setGroup(Convert.stringValue(aValue));
+            case Name_Prop -> setName(Convert.stringValue(aValue));
+            case Version_Prop -> setVersion(Convert.stringValue(aValue));
+            case Classifier_Prop -> setClassifier(Convert.stringValue(aValue));
+            case RepositoryURL_Prop -> setRepositoryURL(Convert.stringValue(aValue));
 
             // Do normal version
-            default: super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(aPropName, aValue);
         }
     }
 

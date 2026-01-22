@@ -54,6 +54,10 @@
         <TextField Name="VersionText" PrefWidth="120" />
       </RowView>
       <RowView Padding="4" Spacing="4">
+        <Label PrefWidth="100" Text="Classifier:" />
+        <TextField Name="ClassifierText" PrefWidth="120" />
+      </RowView>
+      <RowView Padding="4" Spacing="4">
         <Label PrefWidth="100" Text="Repository URL:" />
         <TextField Name="RepositoryURLText" PrefWidth="250" />
       </RowView>
