@@ -23,6 +23,10 @@
     <Label Text="Include SnapCharts Runtime" />
     <CheckBox Name="IncludeSnapChartsRuntimeCheckBox" />
   </RowView>
+  <RowView Spacing="5">
+    <Label Text="Include JavaFX Runtime" />
+    <CheckBox Name="IncludeJavaFXCheckBox" />
+  </RowView>
   <ColView Name="BuildDependenciesBox">
     <RowView PrefWidth="400" Margin="0,0,4,0">
       <Label Text="Build Dependencies:" />

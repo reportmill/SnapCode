@@ -4,6 +4,7 @@ import snap.gfx.Font;
 import snap.gfx.GFXEnv;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
+import snap.util.SnapEnv;
 import snap.web.WebFile;
 import snapcode.app.*;
 import snapcode.project.*;
@@ -126,9 +127,11 @@ public class BuildFileTool extends ProjectTool {
         // Update CompileReleaseComboBox
         setViewValue("CompileReleaseComboBox", buildFile.getCompileRelease());
 
-        // Update IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox
+        // Update IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox, IncludeJavaFXCheckBox
         setViewValue("IncludeSnapKitRuntimeCheckBox", buildFile.isIncludeSnapKitRuntime());
         setViewValue("IncludeSnapChartsRuntimeCheckBox", buildFile.isIncludeSnapChartsRuntime());
+        setViewValue("IncludeJavaFXCheckBox", buildFile.isIncludeJavaFX());
+        setViewEnabled("IncludeJavaFXCheckBox", SnapEnv.isDesktop);
 
         // Update RemoveDependencyButton
         BuildDependency selDependency = getSelDependency();
@@ -201,43 +204,44 @@ public class BuildFileTool extends ProjectTool {
         switch (anEvent.getName()) {
 
             // Update SourcePathText, BuildPathText
-            case "SourcePathText": buildFile.setSourcePath(anEvent.getStringValue()); break;
-            case "BuildPathText": buildFile.setBuildPath(anEvent.getStringValue()); break;
+            case "SourcePathText" -> buildFile.setSourcePath(anEvent.getStringValue());
+            case "BuildPathText" -> buildFile.setBuildPath(anEvent.getStringValue());
 
             // Update CompileReleaseComboBox
-            case "CompileReleaseComboBox": buildFile.setCompileRelease(anEvent.getIntValue()); break;
+            case "CompileReleaseComboBox" -> buildFile.setCompileRelease(anEvent.getIntValue());
 
-            // Update IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox
-            case "IncludeSnapKitRuntimeCheckBox": buildFile.setIncludeSnapKitRuntime(anEvent.getBoolValue()); break;
-            case "IncludeSnapChartsRuntimeCheckBox": buildFile.setIncludeSnapChartsRuntime(anEvent.getBoolValue()); break;
+            // Update IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox, IncludeJavaFXCheckBox
+            case "IncludeSnapKitRuntimeCheckBox" -> buildFile.setIncludeSnapKitRuntime(anEvent.getBoolValue());
+            case "IncludeSnapChartsRuntimeCheckBox" -> buildFile.setIncludeSnapChartsRuntime(anEvent.getBoolValue());
+            case "IncludeJavaFXCheckBox" -> buildFile.setIncludeJavaFX(anEvent.getBoolValue());
 
             // Handle AddDependencyButton, RemoveDependencyButton
-            case "AddDependencyButton": showAddDependencyPanel(); break;
-            case "RemoveDependencyButton": removeSelectedDependency(); break;
+            case "AddDependencyButton" -> showAddDependencyPanel();
+            case "RemoveDependencyButton" -> removeSelectedDependency();
 
             // Handle DependenciesList
-            case "DependenciesListView":
+            case "DependenciesListView" -> {
                 BuildDependency buildDependency = _dependenciesListView.getSelItem();
                 setSelDependency(buildDependency);
-                break;
+            }
 
             // Handle DeleteAction
-            case "DeleteAction": case "BackSpaceAction":
+            case "DeleteAction", "BackSpaceAction" -> {
                 if (getView("DependenciesListView").isFocused()) {
                     BuildDependency dependency = (BuildDependency) getViewSelItem("DependenciesListView");
                     buildFile.removeDependency(dependency);
                 }
-                break;
+            }
 
             // Handle DependencyTypeComboBox
-            case "DependencyTypeComboBox": changeSelectedDependencyType(); break;
+            case "DependencyTypeComboBox" -> changeSelectedDependencyType();
 
             // Handle MainClassNameText, EnableCompilePreviewCheckBox
-            case "MainClassNameText": buildFile.setMainClassName(anEvent.getStringValue()); break;
-            case "EnableCompilePreviewCheckBox": buildFile.setEnableCompilePreview(anEvent.getBoolValue()); break;
+            case "MainClassNameText" -> buildFile.setMainClassName(anEvent.getStringValue());
+            case "EnableCompilePreviewCheckBox" -> buildFile.setEnableCompilePreview(anEvent.getBoolValue());
 
             // Handle dependency
-            default: respondDependencyUI(anEvent); break;
+            default -> respondDependencyUI(anEvent);
         }
     }
 

@@ -32,8 +32,11 @@ public class BuildFile extends PropObject {
     // The main class name
     private String _mainClassName;
 
-    // Whether to include the built-in SnapKit runtime as dependency
+    // Whether to include SnapKit runtime as dependency
     private boolean _includeSnapKitRuntime;
+
+    // Whether to include JavaFX as dependency
+    private boolean _includeJavaFX;
 
     // The actual build file
     private WebFile _buildFile;
@@ -53,6 +56,7 @@ public class BuildFile extends PropObject {
     public static final String Dependencies_Prop = "Dependencies";
     public static final String MainClassName_Prop = "MainClassName";
     public static final String IncludeSnapKitRuntime_Prop = "IncludeSnapKitRuntime";
+    public static final String IncludeJavaFX_Prop = "IncludeJavaFX";
 
     // Constants for defaults
     private static final String DEFAULT_SOURCE_PATH = "src";
@@ -295,6 +299,20 @@ public class BuildFile extends PropObject {
     }
 
     /**
+     * Returns whether to include JavaFX as dependency.
+     */
+    public boolean isIncludeJavaFX()  { return _includeJavaFX; }
+
+    /**
+     * Sets whether to include JavaFX as dependency.
+     */
+    public void setIncludeJavaFX(boolean aValue)
+    {
+        if (aValue == _includeJavaFX) return;
+        firePropChange(IncludeJavaFX_Prop, _includeJavaFX, _includeJavaFX = aValue);
+    }
+
+    /**
      * Returns whether to include built-in greenfoot runtime.
      */
     public boolean isIncludeGreenfootRuntime()
@@ -426,11 +444,12 @@ public class BuildFile extends PropObject {
         aPropSet.addPropNamed(CompileRelease_Prop, int.class);
         aPropSet.addPropNamed(EnableCompilePreview_Prop, boolean.class);
 
-        // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime
+        // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapCharts, IncludeJavaFX
         aPropSet.addPropNamed(Dependencies_Prop, List.class);
         aPropSet.addPropNamed(MainClassName_Prop, String.class);
         aPropSet.addPropNamed(IncludeSnapKitRuntime_Prop, boolean.class);
-        //aPropSet.addPropNamed(IncludeSnapChartsRuntime_Prop, boolean.class);
+        //aPropSet.addPropNamed(IncludeSnapCharts_Prop, boolean.class);
+        aPropSet.addPropNamed(IncludeJavaFX_Prop, boolean.class);
     }
 
     /**
@@ -440,23 +459,24 @@ public class BuildFile extends PropObject {
     public Object getPropValue(String aPropName)
     {
         // Handle properties
-        switch (aPropName) {
+        return switch (aPropName) {
 
             // SourcePath, BuildPath, CompileRelease, EnableCompilePreview
-            case SourcePath_Prop: return getSourcePath();
-            case BuildPath_Prop: return getBuildPath();
-            case CompileRelease_Prop: return getCompileRelease();
-            case EnableCompilePreview_Prop: return isEnableCompilePreview();
+            case SourcePath_Prop -> getSourcePath();
+            case BuildPath_Prop -> getBuildPath();
+            case CompileRelease_Prop -> getCompileRelease();
+            case EnableCompilePreview_Prop -> isEnableCompilePreview();
 
-            // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime
-            case Dependencies_Prop: return getDependencies();
-            case MainClassName_Prop: return getMainClassName();
-            case IncludeSnapKitRuntime_Prop: return isIncludeSnapKitRuntime();
-            //case IncludeSnapChartsRuntime_Prop: return isIncludeSnapChartsRuntime();
+            // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapCharts, IncludeJavaFX
+            case Dependencies_Prop -> getDependencies();
+            case MainClassName_Prop -> getMainClassName();
+            case IncludeSnapKitRuntime_Prop -> isIncludeSnapKitRuntime();
+            //case IncludeSnapCharts_Prop: return isIncludeSnapCharts();
+            case IncludeJavaFX_Prop -> isIncludeJavaFX();
 
             // Handle super class properties (or unknown)
-            default: System.err.println("BuildFile.getPropValue: Unknown prop: " + aPropName); return null;
-        }
+            default -> { System.err.println("BuildFile.getPropValue: Unknown prop: " + aPropName); yield null; }
+        };
     }
 
     /**
@@ -469,19 +489,20 @@ public class BuildFile extends PropObject {
         switch (aPropName) {
 
             // SourcePath, BuildPath, CompileRelease, EnableCompilePreview
-            case SourcePath_Prop: setSourcePath(Convert.stringValue(aValue)); break;
-            case BuildPath_Prop: setBuildPath(Convert.stringValue(aValue)); break;
-            case CompileRelease_Prop: setCompileRelease(Convert.intValue(aValue)); break;
-            case EnableCompilePreview_Prop: setEnableCompilePreview(Convert.booleanValue(aValue)); break;
+            case SourcePath_Prop -> setSourcePath(Convert.stringValue(aValue));
+            case BuildPath_Prop -> setBuildPath(Convert.stringValue(aValue));
+            case CompileRelease_Prop -> setCompileRelease(Convert.intValue(aValue));
+            case EnableCompilePreview_Prop -> setEnableCompilePreview(Convert.booleanValue(aValue));
 
-            // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapChartsRuntime
-            case Dependencies_Prop: setDependencies((List<BuildDependency>) aValue); break;
-            case MainClassName_Prop: setMainClassName(Convert.stringValue(aValue)); break;
-            case IncludeSnapKitRuntime_Prop: setIncludeSnapKitRuntime(Convert.boolValue(aValue)); break;
-            //case IncludeSnapChartsRuntime_Prop: setIncludeSnapChartsRuntime(Convert.boolValue(aValue)); break;
+            // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapCharts, IncludeJavaFX
+            case Dependencies_Prop -> setDependencies((List<BuildDependency>) aValue);
+            case MainClassName_Prop -> setMainClassName(Convert.stringValue(aValue));
+            case IncludeSnapKitRuntime_Prop -> setIncludeSnapKitRuntime(Convert.boolValue(aValue));
+            //case IncludeSnapCharts_Prop: setIncludeSnapCharts(Convert.boolValue(aValue)); break;
+            case IncludeJavaFX_Prop -> setIncludeJavaFX(Convert.boolValue(aValue));
 
             // Handle super class properties (or unknown)
-            default: System.err.println("BuildFile.setPropValue: Unknown prop: " + aPropName);
+            default -> System.err.println("BuildFile.setPropValue: Unknown prop: " + aPropName);
         }
     }
 
