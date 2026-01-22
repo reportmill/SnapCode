@@ -12,9 +12,7 @@ import snap.web.*;
 import java.io.Closeable;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class manages all aspects of a project.
@@ -213,25 +211,31 @@ public class Project extends PropObject {
         // Get build file dependencies
         BuildFile buildFile = getBuildFile();
         List<BuildDependency> dependencies = buildFile.getDependencies();
-        String[] compileClassPaths = new String[0];
+        Set<String> compileClassPaths = new LinkedHashSet<>();
 
         // If BuildFile.IncludeSnapKitRuntime, add SnapKit jar path
         if (buildFile.isIncludeSnapKitRuntime()) {
             boolean includeGreenfoot = buildFile.isIncludeGreenfootRuntime();
             String[] snapKitPaths = ProjectUtils.getSnapKitAndSnapChartsClassPaths(includeGreenfoot);
-            compileClassPaths = ArrayUtils.addAllUnique(snapKitPaths);
+            compileClassPaths.addAll(List.of(snapKitPaths));
+        }
+
+        // If IncludeJavaFX, add JavaFX jar paths
+        if (buildFile.isIncludeJavaFX()) {
+            List<String> javaFXPaths = ProjectUtils.getJavaFXPaths();
+            compileClassPaths.addAll(javaFXPaths);
         }
 
         // Iterate over compile dependencies and add runtime class paths for each
         for (BuildDependency dependency : dependencies) {
             String[] classPaths = dependency.getClassPaths();
             if (classPaths != null)
-                compileClassPaths = ArrayUtils.addAllUnique(compileClassPaths, classPaths);
+                compileClassPaths.addAll(List.of(classPaths));
             else System.err.println("Project.getCompileClassPaths: Can't get class path for: " + dependency);
         }
 
         // Return
-        return compileClassPaths;
+        return compileClassPaths.toArray(new String[0]);
     }
 
     /**

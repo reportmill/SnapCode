@@ -2,6 +2,7 @@ package snapcode.debug;
 import snap.gfx.Color;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
+import snap.util.ListUtils;
 import snap.util.SnapEnv;
 import snap.view.TextArea;
 import snap.view.View;
@@ -10,11 +11,9 @@ import snap.view.ViewUtils;
 import snap.web.WebFile;
 import snap.viewx.Console;
 import snapcode.apptools.RunTool;
-import snapcode.project.Breakpoint;
+import snapcode.project.*;
 import snap.web.WebURL;
-import snapcode.project.BuildFile;
-import snapcode.project.Project;
-import snapcode.project.RunConfig;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -460,8 +459,26 @@ public abstract class RunApp {
         if (buildFile.isEnableCompilePreview())
             commands.add("--enable-preview");
 
-        // Get Class path and add to list
+        // Get class paths
         String[] classPaths = project.getRuntimeClassPaths();
+
+        // If JavaFX, remove JavaFX class paths
+        if (buildFile.isIncludeJavaFX()) {
+
+            // Remove JavaFX class paths
+            List<String> classPathList = new ArrayList<>(List.of(classPaths));
+            List<String> javaFXPaths = ProjectUtils.getJavaFXPaths();
+            classPathList.removeAll(javaFXPaths);
+            classPaths = classPathList.toArray(new String[0]);
+
+            // Add JavaFX module args
+            commands.add("--module-path");
+            commands.add(ListUtils.mapToStringsAndJoin(javaFXPaths, FilePathUtils::getNativePath, ":"));
+            commands.add("--add-modules");
+            commands.add("javafx.controls,javafx.fxml");
+        }
+
+        // Get Class path and add to list
         String[] classPathsNtv = FilePathUtils.getNativePaths(classPaths);
         String classPath = FilePathUtils.getJoinedPath(classPathsNtv);
         commands.add("-cp");

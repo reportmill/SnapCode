@@ -6,6 +6,7 @@ import snap.util.*;
 import snap.web.*;
 import snapcode.views.BlocksUtils;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -358,6 +359,78 @@ public class ProjectUtils {
 
         // Return
         return snapClassPaths;
+    }
+
+    /**
+     * Returns JavaFX class paths.
+     */
+    public static List<String> getJavaFXPaths()
+    {
+        if (_javaFXPaths != null) return _javaFXPaths;
+        List<MavenDependency> javaFXDependencies = getJavaFXDependencies();
+        List<String> javaFXPaths = new ArrayList<>();
+        javaFXDependencies.forEach(dep -> javaFXPaths.addAll(List.of(dep.getClassPaths())));
+        return _javaFXPaths = javaFXPaths;
+    }
+
+    // JavaFX Class paths
+    private static List<String> _javaFXPaths;
+
+    /**
+     * Returns JavaFX dependencies.
+     */
+    private static List<MavenDependency> getJavaFXDependencies()
+    {
+        if (_javaFXDependencies != null) return _javaFXDependencies;
+        String arch = getArchString();
+        int version = 22;
+        MavenDependency dep1 = new MavenDependency("org.openjfx:javafx-base:" + version + ':' + arch);
+        MavenDependency dep2 = new MavenDependency("org.openjfx:javafx-graphics:" + version + ':' + arch);
+        MavenDependency dep3 = new MavenDependency("org.openjfx:javafx-controls:" + version + ':' + arch);
+        MavenDependency dep4 = new MavenDependency("org.openjfx:javafx-fxml:" + version + ':' + arch);
+        _javaFXDependencies = List.of(dep1, dep2, dep3, dep4);
+        _javaFXDependencies.forEach(MavenDependency::getClassPaths);
+        return _javaFXDependencies;
+    }
+
+    // JavaFX dependencies
+    private static List<MavenDependency> _javaFXDependencies;
+
+    /**
+     * Returns the architecture string.
+     */
+    private static String getArchString()
+    {
+        return switch (getArch()) {
+            case MacArm -> "mac-aarch64";
+            case MacIntel -> "mac";
+            case WinArm -> "win-aarch64";
+            case WinIntel -> "win";
+            default -> "linux";
+        };
+    }
+
+    private enum Arch { MacArm, MacIntel, WinIntel, WinArm, Linux }
+
+    /**
+     * Returns the architecture.
+     */
+    private static Arch getArch()
+    {
+        String javaVersion = System.getProperty("java.version");
+        String javaVendor = System.getProperty("java.vendor");
+        String osName = System.getProperty("os.name").toLowerCase();
+        String osArch = System.getProperty("os.arch").toLowerCase();
+        System.out.println("Java " + javaVersion + ", vendor: " + javaVendor);
+        System.out.println("OS Name: " + osName + ", Arch: " + osArch);
+
+        if (osName.contains("mac"))
+            return osArch.contains("aarch64") ? Arch.MacArm : Arch.MacIntel;
+        if (osName.contains("windows"))
+            return osArch.contains("aarch64") ? Arch.WinArm : Arch.WinIntel;
+
+        System.out.println("Assuming linux");
+        return Arch.Linux;
     }
 
     /**
