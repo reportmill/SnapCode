@@ -473,7 +473,7 @@ public abstract class RunApp {
 
             // Add JavaFX module args
             commands.add("--module-path");
-            commands.add(ListUtils.mapToStringsAndJoin(javaFXPaths, FilePathUtils::getNativePath, ":"));
+            commands.add(ListUtils.mapToStringsAndJoin(javaFXPaths, FilePathUtils::getNativePath, FilePathUtils.PATH_SEPARATOR));
             commands.add("--add-modules");
             commands.add("javafx.controls,javafx.fxml");
         }

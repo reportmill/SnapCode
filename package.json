@@ -5,7 +5,7 @@
     "main": "index.js",
     "preferGlobal": true,
     "repository": "",
-    "version": "2026.1.15",
+    "version": "2026.1.21",
     "jdeploy": {
         "jdk": true,
         "fallbackToUniversal": false,
@@ -21,7 +21,7 @@
             "mimetype": "text/java"
         }],
         "jar": "build/libs/SnapCodeAll-2026.01.jar",
-        "javafx": true,
+        "javafx": false,
         "title": "SnapCode",
         "downloadPage": {"platforms": ["all"]},
         "platformBundlesEnabled": false
