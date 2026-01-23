@@ -5,8 +5,8 @@ import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebURL;
 import snap.web.WebUtils;
-
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -34,6 +34,9 @@ public class MavenDependency extends BuildDependency {
 
     // Whether dependency is loaded
     private boolean _loaded;
+
+    // The POM file
+    private MavenPomFile _pomFile;
 
     // Load listeners
     private Runnable[] _loadLsnrs = new Runnable[0];
@@ -256,6 +259,24 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
+     * Returns the POM file.
+     */
+    public MavenPomFile getPomFile()
+    {
+        if (_pomFile != null) return _pomFile;
+        return _pomFile = new MavenPomFile(this);
+    }
+
+    /**
+     * Returns the transitive dependencies.
+     */
+    public List<MavenDependency> getTransitiveDependencies()
+    {
+        MavenPomFile pomFile = getPomFile();
+        return pomFile.getDependencies();
+    }
+
+    /**
      * Adds a load listener.
      */
     public synchronized void addLoadListener(Runnable aRunnable)
@@ -355,39 +376,6 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
-     * Returns the pom file URL in remote repository.
-     */
-    public WebURL getRemotePomUrl()
-    {
-        String pomUrlString = getRemoteJarUrlString().replace(".jar", ".pom");
-        if (_classifier != null && !_classifier.isBlank())
-            pomUrlString = pomUrlString.replace('-' + _classifier, "");
-        return WebURL.getUrl(pomUrlString);
-    }
-
-    /**
-     * Returns the local pom file, triggering load if missing.
-     */
-    public WebFile getLocalPomFile()
-    {
-        // Create local jar file
-        String localPomPath = getLocalJarPath().replace(".jar", ".pom");
-        if (_classifier != null && !_classifier.isBlank())
-            localPomPath = localPomPath.replace('-' + _classifier, "");
-        WebFile localPomFile = WebFile.createFileForPath(localPomPath, false);
-
-        // If file doesn't exist, load it
-        if (localPomFile != null) {
-             if (!localPomFile.getExists())
-                loadPackageFiles();
-             else setLoaded(true);
-        }
-
-        // Return
-        return localPomFile;
-    }
-
-    /**
      * Returns the remote Jar URL string.
      */
     public String getRemoteJarUrlString()
@@ -479,13 +467,11 @@ public class MavenDependency extends BuildDependency {
 
             // Fetch file
             copyUrlToFile(remoteJarURL, localJarFile);
-            setLoaded(true);
 
-            // Get remote and local jar file urls - if either is null, just return
-            WebURL remotePomUrl = getRemotePomUrl();
-            WebFile localPomFile = getLocalPomFile();
-            if (remotePomUrl != null && localPomFile != null)
-                copyUrlToFile(remotePomUrl, localPomFile);
+            // Load POM file
+            MavenPomFile pomFile = getPomFile();
+            pomFile.loadPomFile();
+            setLoaded(true);
         }
 
         // Handle errors
@@ -570,7 +556,7 @@ public class MavenDependency extends BuildDependency {
     /**
      * Copies a given source URL to given destination file.
      */
-    private static void copyUrlToFile(WebURL sourceURL, WebFile destFile) throws IOException
+    protected static void copyUrlToFile(WebURL sourceURL, WebFile destFile) throws IOException
     {
         // Get bytes from source url
         byte[] sourceBytes = sourceURL.getBytesOrThrow();
