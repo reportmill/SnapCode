@@ -454,6 +454,20 @@ frame.setLocationRelativeTo(null);
 frame.setVisible(true);
 ```
 
+# DOM Manipulation (WebAPIs)
+
+## Hello World
+
+```
+import snap.webapi.*;
+
+var doc = Window.getDocument();
+var button = doc.createElement("button");
+button.getStyle().setCssText("position:fixed; top:20px; left:20px; padding:20px");
+button.setTextContent("Hello World!");
+doc.getBody().appendChild(button);
+```
+
 # External Libraries
 
 ## JFiglet
@@ -466,16 +480,13 @@ var str = FigletFont.convertOneLine("Hello World");
 System.out.println(str);
 ```
 
-## DOM Manipulation (WebAPIs)
+## JBox2D
 
 ```
-import snap.webapi.*;
+//DEPS org.jbox2d:jbox2d-testbed:2.2.1.1
+import javax.swing.*;
 
-var doc = Window.getDocument();
-var button = doc.createElement("button");
-button.getStyle().setCssText("position:fixed; top:20px; left:20px; padding:20px");
-button.setTextContent("Hello World!");
-doc.getBody().appendChild(button);
+org.jbox2d.testbed.framework.TestbedMain.main(new String[0]);
 ```
 
 ## ReportMill

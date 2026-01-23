@@ -471,6 +471,14 @@ public class MavenDependency extends BuildDependency {
             // Load POM file
             MavenPomFile pomFile = getPomFile();
             pomFile.loadPomFile();
+
+            // Load transitive dependencies
+            List<MavenDependency> transitiveDependencies = getTransitiveDependencies();
+            for (MavenDependency transitiveDependency : transitiveDependencies) {
+                if (!transitiveDependency.isLoaded())
+                    transitiveDependency.loadPackageFilesImpl();
+            }
+
             setLoaded(true);
         }
 

@@ -44,8 +44,7 @@ public class MavenPomFile {
             return _dependencies = Collections.emptyList();
 
         // Get dependencies and return
-        List<MavenDependency> dependencies = ListUtils.mapNonNull(dependencyXMLs, MavenPomFile::getDependencyForXML);
-        return _dependencies = dependencies;
+        return _dependencies = ListUtils.mapNonNull(dependencyXMLs, MavenPomFile::getDependencyForXML);
     }
 
     /**
@@ -53,18 +52,22 @@ public class MavenPomFile {
      */
     private static MavenDependency getDependencyForXML(XMLElement dependencyXML)
     {
+        // Get XML elements for group, artifact, version
         XMLElement groupIdXML = dependencyXML.getElement("groupId");
         XMLElement artifactIdXML = dependencyXML.getElement("artifactId");
         XMLElement versionXML = dependencyXML.getElement("version");
         if (groupIdXML == null || artifactIdXML == null || versionXML == null)
             return null;
+
+        // Get groupId, artifactId, version
         String groupId = groupIdXML.getValue();
         String artifactId = artifactIdXML.getValue();
         String version = versionXML.getValue();
         if (groupId == null || groupId.isBlank() || artifactId == null || artifactId.isBlank() || version == null || version.isBlank())
             return null;
-        String id = groupId + ":" + artifactId + ":" + version;
-        return new MavenDependency(id);
+
+        // Create and return maven dependency for id
+        return new MavenDependency(groupId + ":" + artifactId + ":" + version);
     }
 
     /**
