@@ -328,7 +328,7 @@ public class MavenDependency extends BuildDependency {
     /**
      * Returns the jar URL in remote repository.
      */
-    public WebURL getRemoteJarURL()
+    public WebURL getRemoteJarUrl()
     {
         String urlString = getRemoteJarUrlString();
         return WebURL.getUrl(urlString);
@@ -352,6 +352,39 @@ public class MavenDependency extends BuildDependency {
 
         // Return
         return localJarFile;
+    }
+
+    /**
+     * Returns the pom file URL in remote repository.
+     */
+    public WebURL getRemotePomUrl()
+    {
+        String pomUrlString = getRemoteJarUrlString().replace(".jar", ".pom");
+        if (_classifier != null && !_classifier.isBlank())
+            pomUrlString = pomUrlString.replace('-' + _classifier, "");
+        return WebURL.getUrl(pomUrlString);
+    }
+
+    /**
+     * Returns the local pom file, triggering load if missing.
+     */
+    public WebFile getLocalPomFile()
+    {
+        // Create local jar file
+        String localPomPath = getLocalJarPath().replace(".jar", ".pom");
+        if (_classifier != null && !_classifier.isBlank())
+            localPomPath = localPomPath.replace('-' + _classifier, "");
+        WebFile localPomFile = WebFile.createFileForPath(localPomPath, false);
+
+        // If file doesn't exist, load it
+        if (localPomFile != null) {
+             if (!localPomFile.getExists())
+                loadPackageFiles();
+             else setLoaded(true);
+        }
+
+        // Return
+        return localPomFile;
     }
 
     /**
@@ -439,7 +472,7 @@ public class MavenDependency extends BuildDependency {
             _error = null;
 
             // Get remote and local jar file urls - if either is null, just return
-            WebURL remoteJarURL = getRemoteJarURL();
+            WebURL remoteJarURL = getRemoteJarUrl();
             WebFile localJarFile = getLocalJarFile();
             if (remoteJarURL == null || localJarFile == null)
                 return;
@@ -447,6 +480,12 @@ public class MavenDependency extends BuildDependency {
             // Fetch file
             copyUrlToFile(remoteJarURL, localJarFile);
             setLoaded(true);
+
+            // Get remote and local jar file urls - if either is null, just return
+            WebURL remotePomUrl = getRemotePomUrl();
+            WebFile localPomFile = getLocalPomFile();
+            if (remotePomUrl != null && localPomFile != null)
+                copyUrlToFile(remotePomUrl, localPomFile);
         }
 
         // Handle errors
