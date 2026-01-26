@@ -42,8 +42,8 @@ public class JTypeView<JNODE extends JType> extends JNodeView<JNODE> {
      * Override to return box layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()
+    protected ViewLayout getViewLayoutImpl()
     {
-        return new BoxViewLayout<>(this, getLastChild(), true, true);
+        return new BoxViewLayout(this, getLastChild(), true, true);
     }
 }

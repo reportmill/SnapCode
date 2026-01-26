@@ -54,7 +54,7 @@ public class JExprView<JNODE extends JExpr> extends JNodeView<JNODE> {
      * Override to return row layout.
      */
     @Override
-    protected ViewLayout<?> getViewLayoutImpl()  { return new RowViewLayout<>(this, false); }
+    protected ViewLayout getViewLayoutImpl()  { return new RowViewLayout(this, false); }
 
     /**
      * Fires TextFieldAction.
