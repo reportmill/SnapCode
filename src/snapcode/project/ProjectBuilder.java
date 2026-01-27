@@ -232,7 +232,7 @@ public class ProjectBuilder {
         for (MavenDependency mavenDependency : mavenDependencies) {
             if (!mavenDependency.isLoaded()) {
                 activityMonitor.beginTask("Loading dependency: " + mavenDependency.getName(), 1);
-                mavenDependency.waitForLoad();
+                mavenDependency.loadPackageFiles();
                 activityMonitor.endTask();
                 if (!mavenDependency.isLoaded())
                     return false;

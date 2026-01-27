@@ -2,10 +2,7 @@ package snapcode.project;
 import snap.props.PropSet;
 import snap.util.*;
 import snap.web.WebFile;
-import snap.web.WebResponse;
-import snap.web.WebURL;
 import snap.web.WebUtils;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,6 +31,9 @@ public class MavenDependency extends BuildDependency {
 
     // Whether dependency is loaded
     private boolean _loaded;
+
+    // The Jar file
+    private MavenFile _jarFile;
 
     // The POM file
     private MavenPomFile _pomFile;
@@ -65,6 +65,8 @@ public class MavenDependency extends BuildDependency {
     public MavenDependency()
     {
         super();
+        _jarFile = new MavenFile(this, "jar");
+        _pomFile = new MavenPomFile(this);
     }
 
     /**
@@ -74,6 +76,8 @@ public class MavenDependency extends BuildDependency {
     {
         super();
         setId(mavenId);
+        _jarFile = new MavenFile(this, "jar");
+        _pomFile = new MavenPomFile(this);
     }
 
     /**
@@ -259,13 +263,14 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
+     * Returns the Jar file.
+     */
+    public MavenFile getJarFile()  { return _jarFile; }
+
+    /**
      * Returns the POM file.
      */
-    public MavenPomFile getPomFile()
-    {
-        if (_pomFile != null) return _pomFile;
-        return _pomFile = new MavenPomFile(this);
-    }
+    public MavenPomFile getPomFile()  { return _pomFile; }
 
     /**
      * Returns the transitive dependencies.
@@ -336,80 +341,58 @@ public class MavenDependency extends BuildDependency {
     @Override
     protected String[] getClassPathsImpl()
     {
-        // Get local jar file (just return if it doesn't exist)
-        WebFile localJarFile = getLocalJarFile();
-        if (localJarFile == null)
+        String localJarPath = getLocalFilePathForType("jar");
+        if (localJarPath == null)
             return null;
 
         // Return
-        String localJarPath = getLocalJarPath();
-        return new String[]{localJarPath};
+        return new String[] { localJarPath };
     }
 
     /**
-     * Returns the jar URL in remote repository.
+     * Returns the local maven directory file.
      */
-    public WebURL getRemoteJarUrl()
+    public WebFile getLocalMavenDir()
     {
-        String urlString = getRemoteJarUrlString();
-        return WebURL.getUrl(urlString);
+        String localMavenDirPath = getLocalFilePathForType(null);
+        return WebFile.createFileForPath(localMavenDirPath, true);
     }
 
     /**
-     * Returns the local Jar file, triggering load if missing.
+     * Returns the remote file URL string.
      */
-    public WebFile getLocalJarFile()
-    {
-        // Create local jar file
-        String localJarPath = getLocalJarPath();
-        WebFile localJarFile = WebFile.createFileForPath(localJarPath, false);
-
-        // If file doesn't exist, load it
-        if (localJarFile != null) {
-             if (!localJarFile.getExists())
-                loadPackageFiles();
-             else setLoaded(true);
-        }
-
-        // Return
-        return localJarFile;
-    }
-
-    /**
-     * Returns the remote Jar URL string.
-     */
-    public String getRemoteJarUrlString()
+    public String getRemoteFileUrlStringForType(String fileType)
     {
         String repositoryURL = getRepositoryUrlOrDefault();
-        String relativeJarPath = getRelativeJarPath();
-        if (repositoryURL == null || relativeJarPath == null)
+        String relativeFilePath = getRelativeFilePathForType(fileType);
+        if (repositoryURL == null || relativeFilePath == null)
             return null;
-        return FilePathUtils.getChildPath(repositoryURL, relativeJarPath);
+        return FilePathUtils.getChildPath(repositoryURL, relativeFilePath);
     }
 
     /**
-     * Returns the remote Jar URL string.
+     * Returns the local file path string.
      */
-    public String getLocalJarPath()
+    public String getLocalFilePathForType(String fileType)
     {
         // Get local maven cache path
         String homeDir = System.getProperty("user.home");
         String MAVEN_REPO_PATH = SnapEnv.isWebVM ? "maven_cache" : ".m2/repository";
         String localMavenCachePath = FilePathUtils.getChildPath(homeDir, MAVEN_REPO_PATH);
 
-        // Get relative jar path
-        String relativeJarPath = getRelativeJarPath();
-        if (relativeJarPath == null)
+        // Get relative file path
+        String relativeFilePath = getRelativeFilePathForType(fileType);
+        if (relativeFilePath == null)
             return null;
 
         // Return combined path
-        return FilePathUtils.getChildPath(localMavenCachePath, relativeJarPath);
+        return FilePathUtils.getChildPath(localMavenCachePath, relativeFilePath);
     }
 
     /**
-     * Returns the relative Jar path (from any maven root).
+     * Returns the relative file path (from any maven root).
      */
-    private String getRelativeJarPath()
+    private String getRelativeFilePathForType(String fileType)
     {
         // Get parts - if any are null, return null
         String group = getGroup();
@@ -423,35 +406,41 @@ public class MavenDependency extends BuildDependency {
         String groupPath = '/' + group.replace(".", "/");
         String packagePath = FilePathUtils.getChildPath(groupPath, packageName);
         String versionPath = FilePathUtils.getChildPath(packagePath, version);
+        if (fileType == null)
+            return versionPath;
 
-        // Get jar filename
-        String jarName = packageName + '-' + version;
-        if (_classifier != null && !_classifier.isBlank())
-            jarName += '-' + _classifier;
-        String jarFilename = jarName + ".jar";
+        // Get filename
+        String filenameSimple = packageName + '-' + version;
+        if (_classifier != null && !_classifier.isBlank() && fileType.equals("jar"))
+            filenameSimple += '-' + _classifier;
+        String filename = filenameSimple + '.' + fileType;
 
-        // Return jar path
-        return FilePathUtils.getChildPath(versionPath, jarFilename);
+        // Return path
+        return FilePathUtils.getChildPath(versionPath, filename);
     }
 
     /**
-     * Loads file.
+     * Pre-Loads files in background.
      */
-    public void loadPackageFiles()
+    public void preloadPackageFiles()
     {
         // If already loading, just return
-        if (isLoading())
+        if (isLoaded() || isLoading())
             return;
 
         // Set Loading true and start thread
-        new Thread(() -> loadPackageFilesImpl()).start();
+        new Thread(this::loadPackageFiles).start();
     }
 
     /**
      * Loads package files.
      */
-    private synchronized void loadPackageFilesImpl()
+    public synchronized void loadPackageFiles()
     {
+        // If already loaded, just return
+        if (isLoaded())
+            return;
+
         try {
 
             // Set loading
@@ -459,52 +448,42 @@ public class MavenDependency extends BuildDependency {
             setLoading(true);
             _error = null;
 
-            // Get remote and local jar file urls - if either is null, just return
-            WebURL remoteJarURL = getRemoteJarUrl();
-            WebFile localJarFile = getLocalJarFile();
-            if (remoteJarURL == null || localJarFile == null)
-                return;
-
-            // Fetch file
-            copyUrlToFile(remoteJarURL, localJarFile);
-
-            // Load POM file
-            MavenPomFile pomFile = getPomFile();
-            pomFile.loadPomFile();
+            // Load jar file
+            getJarFile().getLocalFile();
 
             // Load transitive dependencies
             List<MavenDependency> transitiveDependencies = getTransitiveDependencies();
-            for (MavenDependency transitiveDependency : transitiveDependencies) {
-                if (!transitiveDependency.isLoaded())
-                    transitiveDependency.loadPackageFilesImpl();
-            }
+            transitiveDependencies.forEach(MavenDependency::loadPackageFiles);
 
             setLoaded(true);
         }
 
         // Handle errors
-        catch (Exception e) {
-            //e.printStackTrace();
-            _error = "Error: " + e.getMessage();
-        }
+        catch (Exception e) { _error = "Error: " + e.getMessage(); }
 
-        // Reset Loading and wake waitForLoad thread(s)
-        finally {
-            setLoading(false);
-            notifyAll();
-        }
+        // Reset Loading
+        finally { setLoading(false); }
     }
 
     /**
-     * Waits for dependency to load.
+     * Reloads files.
      */
-    public synchronized void waitForLoad()
+    public void reloadPackageFiles()
     {
-        if (!isLoaded() || isLoading()) {
-            loadPackageFiles();
-            try { wait(); }
-            catch (Exception e) { System.out.println("MavenDependency.waitForLoad: Failure: " + e.getMessage()); }
-        }
+        deletePackageFiles();
+        preloadPackageFiles();
+    }
+
+    /**
+     * Deletes package files.
+     */
+    public void deletePackageFiles()
+    {
+        List<MavenDependency> transitiveDependencies = getTransitiveDependencies();
+        transitiveDependencies.forEach(MavenDependency::deletePackageFiles);
+        getJarFile().deleteLocalFile();
+        getPomFile().deleteLocalFile();
+        setLoaded(false);
     }
 
     /**
@@ -559,32 +538,5 @@ public class MavenDependency extends BuildDependency {
             // Do normal version
             default -> super.setPropValue(aPropName, aValue);
         }
-    }
-
-    /**
-     * Copies a given source URL to given destination file.
-     */
-    protected static void copyUrlToFile(WebURL sourceURL, WebFile destFile) throws IOException
-    {
-        // Get bytes from source url
-        byte[] sourceBytes = sourceURL.getBytesOrThrow();
-        if (sourceBytes == null || sourceBytes.length == 0)
-            throw new RuntimeException("Couldn't download remote jar file: " + sourceURL.getString());
-
-        // Get old size. Shouldn't need to delete existing, but seemed to be corruption problem on WebVM.
-        long oldSize = 0;          // Maybe gone now that FileSite just does writeBytes()
-        if (destFile.getExists()) {
-            oldSize = destFile.getSize();
-            destFile.delete();
-        }
-
-        // Set source bytes in destination file and save
-        destFile.setBytes(sourceBytes);
-        WebResponse resp = destFile.save();
-        if (resp.getException() != null)
-            throw new RuntimeException(resp.getException());
-
-        // Log change
-        System.out.println("MavenDependency: Updated " + destFile.getPath() + ", old-size: " + oldSize + ", new-size: " + sourceBytes.length);
     }
 }

@@ -2,18 +2,13 @@ package snapcode.project;
 import snap.util.ListUtils;
 import snap.util.XMLElement;
 import snap.web.WebFile;
-import snap.web.WebURL;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * This class reads a POM file for a maven dependency.
  */
-public class MavenPomFile {
-
-    // The maven dependency
-    private MavenDependency _mavenDependency;
+public class MavenPomFile extends MavenFile {
 
     // The dependencies
     private List<MavenDependency> _dependencies;
@@ -26,7 +21,7 @@ public class MavenPomFile {
      */
     public MavenPomFile(MavenDependency mavenDependency)
     {
-        _mavenDependency = mavenDependency;
+        super(mavenDependency, "pom");
     }
 
     /**
@@ -76,57 +71,19 @@ public class MavenPomFile {
     private XMLElement getXML()
     {
         if (_xml != null) return _xml;
-        WebFile pomFile = getLocalPomFile();
-        _mavenDependency.waitForLoad();
+        WebFile pomFile = getLocalFile();
         String xmlString = pomFile.getText();
         if (xmlString == null) {
             System.err.println("MavenPomFile: Can't read pom file: " + pomFile);
             return null;
         }
-        return _xml = XMLElement.readXmlFromString(xmlString);
-    }
 
-    /**
-     * Returns the pom file URL in remote repository.
-     */
-    public WebURL getRemotePomUrl()
-    {
-        String pomUrlString = _mavenDependency.getRemoteJarUrlString().replace(".jar", ".pom");
-        String classifier = _mavenDependency.getClassifier();
-        if (classifier != null && !classifier.isBlank())
-            pomUrlString = pomUrlString.replace('-' + classifier, "");
-        return WebURL.getUrl(pomUrlString);
-    }
-
-    /**
-     * Returns the local pom file, triggering load if missing.
-     */
-    public WebFile getLocalPomFile()
-    {
-        // Create local jar file
-        String localPomPath = _mavenDependency.getLocalJarPath().replace(".jar", ".pom");
-        String classifier = _mavenDependency.getClassifier();
-        if (classifier != null && !classifier.isBlank())
-            localPomPath = localPomPath.replace('-' + classifier, "");
-        WebFile localPomFile = WebFile.createFileForPath(localPomPath, false);
-
-        // If file doesn't exist, load it
-        if (localPomFile != null && !localPomFile.getExists())
-            _mavenDependency.loadPackageFiles();
-
-        // Return
-        return localPomFile;
-    }
-
-    /**
-     * Downloads pom file from remote to local cache.
-     */
-    protected void loadPomFile() throws IOException
-    {
-        // Get remote and local jar file urls - if either is null, just return
-        WebURL remotePomUrl = getRemotePomUrl();
-        WebFile localPomFile = getLocalPomFile();
-        if (remotePomUrl != null && localPomFile != null)
-            MavenDependency.copyUrlToFile(remotePomUrl, localPomFile);
+        // Read and return
+        try { return _xml = XMLElement.readXmlFromString(xmlString); }
+        catch (Exception e) {
+            System.err.println("MavenPomFile.getXML: Error reading file: " + pomFile.getPath());
+            System.err.println(e);
+            return null;
+        }
     }
 }

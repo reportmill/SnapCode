@@ -261,12 +261,12 @@ public class BuildFileTool extends ProjectTool {
                 case "ClassifierText" -> mavenDependency.setClassifier(anEvent.getStringValue());
                 case "RepositoryURLText" -> mavenDependency.setRepositoryURL(anEvent.getStringValue());
                 case "ShowButton" -> showMavenDependencyInFinder(mavenDependency);
-                case "ReloadButton" -> mavenDependency.loadPackageFiles();
+                case "ReloadButton" -> mavenDependency.reloadPackageFiles();
             }
 
             // If not loaded, trigger load
             if (!mavenDependency.isLoaded())
-                mavenDependency.getLocalJarFile();
+                mavenDependency.preloadPackageFiles();
         }
 
         // Handle JarFileDependency: JarPathText
@@ -390,11 +390,9 @@ public class BuildFileTool extends ProjectTool {
      */
     private void showMavenDependencyInFinder(MavenDependency mavenDependency)
     {
-        WebFile file = mavenDependency.getLocalJarFile();
-        if (file != null) {
-            WebFile dirFile = file.isDir() ? file : file.getParent();
-            GFXEnv.getEnv().openFile(dirFile);
-        }
+        WebFile mavenDir = mavenDependency.getLocalMavenDir();
+        if (mavenDir != null)
+            GFXEnv.getEnv().openFile(mavenDir);
     }
 
     /**
