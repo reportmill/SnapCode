@@ -65,8 +65,6 @@ public class MavenDependency extends BuildDependency {
     public MavenDependency()
     {
         super();
-        _jarFile = new MavenFile(this, "jar");
-        _pomFile = new MavenPomFile(this);
     }
 
     /**
@@ -76,8 +74,6 @@ public class MavenDependency extends BuildDependency {
     {
         super();
         setId(mavenId);
-        _jarFile = new MavenFile(this, "jar");
-        _pomFile = new MavenPomFile(this);
     }
 
     /**
@@ -118,7 +114,6 @@ public class MavenDependency extends BuildDependency {
         setName(names.length > 1 ? names[1] : null);
         setVersion(names.length > 2 ? names[2] : null);
         setClassifier(names.length > 3 ? names[3] : null);
-        setLoaded(false);
     }
 
     /**
@@ -132,11 +127,8 @@ public class MavenDependency extends BuildDependency {
     public void setGroup(String aValue)
     {
         if (Objects.equals(aValue, _group)) return;
-        _classPaths = null;
-        _id = null;
-        _error = null;
+        handlePropChange();
         firePropChange(Group_Prop, _group, _group = aValue);
-        setLoaded(false);
     }
 
     /**
@@ -150,9 +142,8 @@ public class MavenDependency extends BuildDependency {
     public void setName(String aValue)
     {
         if (Objects.equals(aValue, _name)) return;
-        _classPaths = null; _id = null; _error = null;
+        handlePropChange();
         firePropChange(Name_Prop, _name, _name = aValue);
-        setLoaded(false);
     }
 
     /**
@@ -166,9 +157,8 @@ public class MavenDependency extends BuildDependency {
     public void setVersion(String aValue)
     {
         if (Objects.equals(aValue, _version)) return;
-        _classPaths = null; _id = null; _error = null;
+        handlePropChange();
         firePropChange(Version_Prop, _version, _version = aValue);
-        setLoaded(false);
     }
 
     /**
@@ -182,9 +172,8 @@ public class MavenDependency extends BuildDependency {
     public void setClassifier(String aValue)
     {
         if (Objects.equals(aValue, _classifier)) return;
-        _classPaths = null; _id = null; _error = null;
+        handlePropChange();
         firePropChange(Classifier_Prop, _classifier, _classifier = aValue);
-        setLoaded(false);
     }
 
     /**
@@ -198,10 +187,8 @@ public class MavenDependency extends BuildDependency {
     public void setRepositoryURL(String aValue)
     {
         if (Objects.equals(aValue, _repositoryURL)) return;
-        _classPaths = null;
-        _error = null;
+        handlePropChange();
         firePropChange(RepositoryURL_Prop, _repositoryURL, _repositoryURL = aValue);
-        setLoaded(false);
     }
 
     /**
@@ -265,12 +252,20 @@ public class MavenDependency extends BuildDependency {
     /**
      * Returns the Jar file.
      */
-    public MavenFile getJarFile()  { return _jarFile; }
+    public MavenFile getJarFile()
+    {
+        if (_jarFile != null) return _jarFile;
+        return _jarFile = new MavenFile(this, "jar");
+    }
 
     /**
      * Returns the POM file.
      */
-    public MavenPomFile getPomFile()  { return _pomFile; }
+    public MavenPomFile getPomFile()
+    {
+        if (_pomFile != null) return _pomFile;
+        return _pomFile = new MavenPomFile(this);
+    }
 
     /**
      * Returns the transitive dependencies.
@@ -483,6 +478,16 @@ public class MavenDependency extends BuildDependency {
         transitiveDependencies.forEach(MavenDependency::deletePackageFiles);
         getJarFile().deleteLocalFile();
         getPomFile().deleteLocalFile();
+        setLoaded(false);
+    }
+
+    /**
+     * Called when any property changes.
+     */
+    private void handlePropChange()
+    {
+        _classPaths = null; _id = null; _error = null;
+        _jarFile = _pomFile = null;
         setLoaded(false);
     }
 
