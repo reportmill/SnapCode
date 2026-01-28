@@ -4,6 +4,7 @@ import snap.gfx.Font;
 import snap.gfx.GFXEnv;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
+import snap.util.ListUtils;
 import snap.util.SnapEnv;
 import snap.web.WebFile;
 import snapcode.app.*;
@@ -25,8 +26,8 @@ public class BuildFileTool extends ProjectTool {
     // A prop change listener for selected dependency
     private PropChangeListener _selDependencyPropChangeLsnr = this::handleSelDependencyPropChange;
 
-    // Dependencies ListView
-    private ListView<BuildDependency> _dependenciesListView;
+    // Dependencies TreeView
+    private TreeView<BuildDependency> _dependenciesTreeView;
 
     // The Java versions
     private static final Integer[] JAVA_VERSIONS = new Integer[] { 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
@@ -68,8 +69,8 @@ public class BuildFileTool extends ProjectTool {
         if (_selDependency != null)
             _selDependency.addPropChangeListener(_selDependencyPropChangeLsnr);
 
-        // Update DependenciesListView.Selection
-        _dependenciesListView.setSelItem(buildDependency);
+        // Update DependenciesTreeView.Selection
+        _dependenciesTreeView.setSelItem(buildDependency);
         resetLater();
     }
 
@@ -79,7 +80,7 @@ public class BuildFileTool extends ProjectTool {
     private void handleSelDependencyPropChange(PropChange propChange)
     {
         BuildDependency buildDependency = (BuildDependency) propChange.getSource();
-        _dependenciesListView.updateItem(buildDependency);
+        _dependenciesTreeView.updateItem(buildDependency);
         resetLater();
     }
 
@@ -95,16 +96,17 @@ public class BuildFileTool extends ProjectTool {
         // Configure CompileReleaseComboBox
         getView("CompileReleaseComboBox", ComboBox.class).setItems(JAVA_VERSIONS);
 
-        // Configure DependenciesListView
-        _dependenciesListView = getView("DependenciesListView", ListView.class);
-        _dependenciesListView.setRowHeight(26);
-        _dependenciesListView.setCellConfigure(this::configureDependenciesListCell);
-        _dependenciesListView.addEventHandler(this::handleDependenciesListDragEvent, DragEvents);
+        // Configure DependenciesTreeView
+        _dependenciesTreeView = getView("DependenciesTreeView", TreeView.class);
+        _dependenciesTreeView.setResolver(new DependenciesTreeResolver());
+        _dependenciesTreeView.setRowHeight(26);
+        _dependenciesTreeView.setCellConfigure(this::configureDependenciesListCell);
+        _dependenciesTreeView.addEventHandler(this::handleDependenciesListDragEvent, DragEvents);
 
-        // Set DependenciesListView items
+        // Set DependenciesTreeView items
         BuildFile buildFile = getBuildFile();
         List<BuildDependency> dependencies = buildFile.getDependencies();
-        _dependenciesListView.setItems(dependencies);
+        _dependenciesTreeView.setItems(dependencies);
         buildFile.addPropChangeListener(this::handleBuildFileDependencyChange, BuildFile.Dependency_Prop);
 
         // Configure DependencyTypeComboBox
@@ -133,9 +135,12 @@ public class BuildFileTool extends ProjectTool {
         setViewValue("IncludeJavaFXCheckBox", buildFile.isIncludeJavaFX());
         setViewEnabled("IncludeJavaFXCheckBox", SnapEnv.isDesktop);
 
-        // Update RemoveDependencyButton
+        // Update RemoveDependencyButton, ExpandDependenciesButton, CollapseDependenciesButton
         BuildDependency selDependency = getSelDependency();
         setViewDisabled("RemoveDependencyButton", selDependency == null);
+        boolean hasChildren = ListUtils.hasMatch(_dependenciesTreeView.getItems(), item -> _dependenciesTreeView.isItemParent(item));
+        setViewVisible("ExpandDependenciesButton", hasChildren);
+        setViewVisible("CollapseDependenciesButton", hasChildren);
 
         // Get selected dependency
         setViewVisible("DependencyTypeBox", selDependency != null);
@@ -215,20 +220,22 @@ public class BuildFileTool extends ProjectTool {
             case "IncludeSnapChartsRuntimeCheckBox" -> buildFile.setIncludeSnapChartsRuntime(anEvent.getBoolValue());
             case "IncludeJavaFXCheckBox" -> buildFile.setIncludeJavaFX(anEvent.getBoolValue());
 
-            // Handle AddDependencyButton, RemoveDependencyButton
+            // Handle AddDependencyButton, RemoveDependencyButton, ExpandDependenciesButton, CollapseDependenciesButton
             case "AddDependencyButton" -> showAddDependencyPanel();
             case "RemoveDependencyButton" -> removeSelectedDependency();
+            case "ExpandDependenciesButton" -> _dependenciesTreeView.expandAll();
+            case "CollapseDependenciesButton" -> _dependenciesTreeView.collapseAll();
 
-            // Handle DependenciesList
-            case "DependenciesListView" -> {
-                BuildDependency buildDependency = _dependenciesListView.getSelItem();
+            // Handle DependenciesTreeView
+            case "DependenciesTreeView" -> {
+                BuildDependency buildDependency = _dependenciesTreeView.getSelItem();
                 setSelDependency(buildDependency);
             }
 
             // Handle DeleteAction
             case "DeleteAction", "BackSpaceAction" -> {
-                if (getView("DependenciesListView").isFocused()) {
-                    BuildDependency dependency = (BuildDependency) getViewSelItem("DependenciesListView");
+                if (_dependenciesTreeView.isFocused()) {
+                    BuildDependency dependency = _dependenciesTreeView.getSelItem();
                     buildFile.removeDependency(dependency);
                 }
             }
@@ -352,7 +359,7 @@ public class BuildFileTool extends ProjectTool {
     {
         // Remove selected dependency
         BuildFile buildFile = getBuildFile();
-        int index = _dependenciesListView.getSelIndex();
+        int index = _dependenciesTreeView.getSelIndex();
         buildFile.removeDependency(index);
 
         // Create new dependency for type and add
@@ -405,15 +412,15 @@ public class BuildFileTool extends ProjectTool {
         // If BuildFile adds dependency, update list
         if (propChange.getNewValue() != null) {
             BuildDependency dependency = (BuildDependency) propChange.getNewValue();
-            _dependenciesListView.setItems(buildFile.getDependencies());
+            _dependenciesTreeView.setItems(buildFile.getDependencies());
             setSelDependency(dependency);
         }
 
         // If BuildFile removes dependency, remove from list
         else {
             BuildDependency dependency = (BuildDependency) propChange.getOldValue();
-            _dependenciesListView.removeItemAndUpdateSel(dependency);
-            setSelDependency(_dependenciesListView.getSelItem());
+            _dependenciesTreeView.removeItemAndUpdateSel(dependency);
+            setSelDependency(_dependenciesTreeView.getSelItem());
         }
     }
 
@@ -438,6 +445,32 @@ public class BuildFileTool extends ProjectTool {
         public String getTitle()
         {
             return getURL().getSite().getName() + " - Build File";
+        }
+    }
+
+    /**
+     * A tree resolver for DependenciesTreeView.
+     */
+    private class DependenciesTreeResolver extends TreeResolver<BuildDependency> {
+
+        @Override
+        public BuildDependency getParent(BuildDependency anItem)
+        {
+            return _dependenciesTreeView.findItemParent(anItem);
+        }
+
+        @Override
+        public boolean isParent(BuildDependency anItem)
+        {
+            return anItem instanceof MavenDependency mvnDependency && !mvnDependency.getTransitiveDependencies().isEmpty();
+        }
+
+        @Override
+        public List<BuildDependency> getChildren(BuildDependency aParent)
+        {
+            if (aParent instanceof MavenDependency mvnDependency)
+                return (List<BuildDependency>) (List<?>) mvnDependency.getTransitiveDependencies();
+            return null;
         }
     }
 }
