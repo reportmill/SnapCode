@@ -152,17 +152,13 @@ public class BuildFileTool extends ProjectTool {
         setViewVisible("MavenDependencyBox", isMavenDependency);
         if (isMavenDependency) {
 
-            // Update MavenIdText, GroupText, PackageNameText, VersionText, ClassifierText, RepositoryURLText
+            // Update MavenIdText, GroupText, PackageNameText, VersionText, ClassifierText
             MavenDependency mavenDependency = (MavenDependency) selDependency;
             setViewValue("MavenIdText", mavenDependency.getId());
             setViewValue("GroupText", mavenDependency.getGroup());
             setViewValue("PackageNameText", mavenDependency.getName());
             setViewValue("VersionText", mavenDependency.getVersion());
             setViewValue("ClassifierText", mavenDependency.getClassifier());
-            String repoURL = mavenDependency.getRepositoryURL();
-            setViewValue("RepositoryURLText", repoURL);
-            if (repoURL == null)
-                getView("RepositoryURLText", TextField.class).setPromptText(mavenDependency.getRepositoryDefaultName());
 
             // Update StatusText, StatusProgressBar, ShowButton, ReloadButton, ClassPathsText
             String status = mavenDependency.getStatus();
@@ -257,7 +253,7 @@ public class BuildFileTool extends ProjectTool {
      */
     private void respondDependencyUI(ViewEvent anEvent)
     {
-        // Handle MavenIdText, GroupText, PackageNameText, VersionText, ClassifierText, RepositoryURLText, ShowButton, ReloadButton
+        // Handle MavenIdText, GroupText, PackageNameText, VersionText, ClassifierText, ShowButton, ReloadButton
         BuildDependency selDependency = getSelDependency();
         if (selDependency instanceof MavenDependency mavenDependency) {
             switch (anEvent.getName()) {
@@ -266,7 +262,6 @@ public class BuildFileTool extends ProjectTool {
                 case "PackageNameText" -> mavenDependency.setName(anEvent.getStringValue());
                 case "VersionText" -> mavenDependency.setVersion(anEvent.getStringValue());
                 case "ClassifierText" -> mavenDependency.setClassifier(anEvent.getStringValue());
-                case "RepositoryURLText" -> mavenDependency.setRepositoryURL(anEvent.getStringValue());
                 case "ShowButton" -> showMavenDependencyInFinder(mavenDependency);
                 case "ReloadButton" -> mavenDependency.reloadPackageFiles();
             }
@@ -451,12 +446,14 @@ public class BuildFileTool extends ProjectTool {
     /**
      * A tree resolver for DependenciesTreeView.
      */
-    private class DependenciesTreeResolver extends TreeResolver<BuildDependency> {
+    private static class DependenciesTreeResolver extends TreeResolver<BuildDependency> {
 
         @Override
         public BuildDependency getParent(BuildDependency anItem)
         {
-            return _dependenciesTreeView.findItemParent(anItem);
+            if (anItem instanceof MavenDependency mavenDependency)
+                return mavenDependency.getParent();
+            return null;
         }
 
         @Override

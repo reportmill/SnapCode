@@ -64,10 +64,6 @@
         <TextField Name="ClassifierText" PrefWidth="120" />
       </RowView>
       <RowView Padding="4" Spacing="4">
-        <Label PrefWidth="100" Text="Repository URL:" />
-        <TextField Name="RepositoryURLText" PrefWidth="250" />
-      </RowView>
-      <RowView Padding="4" Spacing="4">
         <Label PrefWidth="100" Text="Status:" />
         <Label Name="StatusText" PrefWidth="80" Padding="4" Fill="#FA" Border="#E8 1" BorderRadius="3" />
         <ProgressBar Name="StatusProgressBar" PrefWidth="40" PrefHeight="16" Indeterminate="true" />

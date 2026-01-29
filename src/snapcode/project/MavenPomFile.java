@@ -11,7 +11,7 @@ import java.util.List;
 public class MavenPomFile extends MavenFile {
 
     // The dependencies
-    private List<MavenDependency> _dependencies;
+    private List<MavenPackage> _dependencies;
 
     // The XML
     private XMLElement _xml;
@@ -19,7 +19,7 @@ public class MavenPomFile extends MavenFile {
     /**
      * Constructor.
      */
-    public MavenPomFile(MavenDependency mavenDependency)
+    public MavenPomFile(MavenPackage mavenDependency)
     {
         super(mavenDependency, "pom");
     }
@@ -27,7 +27,7 @@ public class MavenPomFile extends MavenFile {
     /**
      * Returns dependencies.
      */
-    public List<MavenDependency> getDependencies()
+    public List<MavenPackage> getDependencies()
     {
         if (_dependencies != null) return _dependencies;
 
@@ -45,7 +45,7 @@ public class MavenPomFile extends MavenFile {
     /**
      * Creates a maven dependency for dependency xml element.
      */
-    private static MavenDependency getDependencyForXML(XMLElement dependencyXML)
+    private static MavenPackage getDependencyForXML(XMLElement dependencyXML)
     {
         // Get XML elements for group, artifact, version
         XMLElement groupIdXML = dependencyXML.getElement("groupId");
@@ -62,7 +62,7 @@ public class MavenPomFile extends MavenFile {
             return null;
 
         // Create and return maven dependency for id
-        return new MavenDependency(groupId + ":" + artifactId + ":" + version);
+        return MavenPackage.getMavenPackageForId(groupId + ":" + artifactId + ":" + version);
     }
 
     /**
@@ -82,7 +82,7 @@ public class MavenPomFile extends MavenFile {
         try { return _xml = XMLElement.readXmlFromString(xmlString); }
         catch (Exception e) {
             System.err.println("MavenPomFile.getXML: Error reading file: " + pomFile.getPath());
-            System.err.println(e);
+            System.err.println(e.getMessage());
             return null;
         }
     }

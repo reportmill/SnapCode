@@ -2,7 +2,6 @@ package snapcode.project;
 import snap.props.PropSet;
 import snap.util.*;
 import snap.web.WebFile;
-import snap.web.WebUtils;
 import java.util.List;
 import java.util.Objects;
 
@@ -10,6 +9,9 @@ import java.util.Objects;
  * This class represents a Maven dependency.
  */
 public class MavenDependency extends BuildDependency {
+
+    // The parent dependency
+    private MavenDependency _parent;
 
     // The group name
     private String _group;
@@ -23,41 +25,20 @@ public class MavenDependency extends BuildDependency {
     // The classifier
     private String _classifier;
 
-    // The repository url
-    private String _repositoryURL;
-
     // The id string
     private String _id;
 
-    // Whether dependency is loaded
-    private boolean _loaded;
+    // The maven package
+    private MavenPackage _mavenPackage;
 
-    // The Jar file
-    private MavenFile _jarFile;
-
-    // The POM file
-    private MavenPomFile _pomFile;
-
-    // Load listeners
-    private Runnable[] _loadLsnrs = new Runnable[0];
-
-    // Whether dependency is loading
-    private boolean _loading;
-
-    // The error string
-    private String _error;
+    // The transitive dependencies
+    private List<MavenDependency> _transitiveDependencies;
 
     // Constants for properties
     public static final String Group_Prop = "Group";
     public static final String Name_Prop = "Name";
     public static final String Version_Prop = "Version";
     public static final String Classifier_Prop = "Classifier";
-    public static final String RepositoryURL_Prop = "RepositoryURL";
-    public static final String Loaded_Prop = "Loaded";
-    public static final String Loading_Prop = "Loading";
-
-    // Constant for Maven central URL
-    public static final String MAVEN_CENTRAL_URL = "https://repo1.maven.org/maven2";
 
     /**
      * Constructor.
@@ -75,6 +56,22 @@ public class MavenDependency extends BuildDependency {
         super();
         setId(mavenId);
     }
+
+    /**
+     * Constructor with maven id.
+     */
+    public MavenDependency(MavenDependency parent, MavenPackage mavenPackage)
+    {
+        super();
+        _parent = parent;
+        _mavenPackage = mavenPackage;
+        setId(mavenPackage.getId());
+    }
+
+    /**
+     * Returns the parent.
+     */
+    public MavenDependency getParent()  { return _parent; }
 
     /**
      * Returns the type.
@@ -177,18 +174,47 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
-     * Returns the repository name.
+     * Returns the maven package.
      */
-    public String getRepositoryURL()  { return _repositoryURL; }
+    public MavenPackage getMavenPackage()
+    {
+        if (_mavenPackage != null) return _mavenPackage;
+        String mavenId = getId();
+        if (mavenId == null)
+            return null;
+        return _mavenPackage = MavenPackage.getMavenPackageForId(mavenId);
+    }
 
     /**
-     * Sets the repository name.
+     * Returns the transitive dependencies.
      */
-    public void setRepositoryURL(String aValue)
+    public List<MavenDependency> getTransitiveDependencies()
     {
-        if (Objects.equals(aValue, _repositoryURL)) return;
-        handlePropChange();
-        firePropChange(RepositoryURL_Prop, _repositoryURL, _repositoryURL = aValue);
+        if (_transitiveDependencies != null) return _transitiveDependencies;
+        MavenPackage mavenPackage = getMavenPackage();
+        List<MavenPackage> transitiveDependencies = mavenPackage != null ? mavenPackage.getTransitiveDependencies() : null;
+        if (transitiveDependencies == null)
+            return null;
+        return _transitiveDependencies = ListUtils.map(transitiveDependencies, dep -> new MavenDependency(this, dep));
+    }
+
+    /**
+     * Override to get class paths for project.
+     */
+    @Override
+    protected String[] getClassPathsImpl()
+    {
+        MavenPackage mavenPackage = getMavenPackage();
+        return mavenPackage != null ? new String[] { mavenPackage.getClassPath() } : null;
+    }
+
+    /**
+     * Returns the local maven directory file.
+     */
+    public WebFile getLocalMavenDir()
+    {
+        MavenPackage mavenPackage = getMavenPackage();
+        return mavenPackage != null ? mavenPackage.getLocalMavenDir() : null;
     }
 
     /**
@@ -208,210 +234,26 @@ public class MavenDependency extends BuildDependency {
      */
     public String getError()
     {
-        if (_error != null) return _error;
-        return _error = getErrorImpl();
-    }
-
-    /**
-     * Returns the error.
-     */
-    private String getErrorImpl()
-    {
-        if (_group == null || _group.isEmpty())
-            return "Invalid group";
-        if (_name == null || _name.isEmpty())
-            return "Invalid package name";
-        if (_version == null || _version.isEmpty())
-            return "Invalid version";
-        return null;
+        MavenPackage mavenPackage = getMavenPackage();
+        return mavenPackage != null ? mavenPackage.getError() : null;
     }
 
     /**
      * Returns whether maven package is loaded.
      */
-    public boolean isLoaded()  { return _loaded; }
-
-    /**
-     * Sets whether maven package is loaded.
-     */
-    protected synchronized void setLoaded(boolean aValue)
+    public boolean isLoaded()
     {
-        if (aValue == _loaded) return;
-        firePropChange(Loaded_Prop, _loaded, _loaded = aValue);
-
-        // Handle true: Fire load listeners
-        if (aValue) {
-
-            // Fire load listeners
-            for (Runnable loadLsnr : _loadLsnrs)
-                loadLsnr.run();
-            _loadLsnrs = new Runnable[0];
-        }
-    }
-
-    /**
-     * Returns the Jar file.
-     */
-    public MavenFile getJarFile()
-    {
-        if (_jarFile != null) return _jarFile;
-        return _jarFile = new MavenFile(this, "jar");
-    }
-
-    /**
-     * Returns the POM file.
-     */
-    public MavenPomFile getPomFile()
-    {
-        if (_pomFile != null) return _pomFile;
-        return _pomFile = new MavenPomFile(this);
-    }
-
-    /**
-     * Returns the transitive dependencies.
-     */
-    public List<MavenDependency> getTransitiveDependencies()
-    {
-        MavenPomFile pomFile = getPomFile();
-        return pomFile.getDependencies();
-    }
-
-    /**
-     * Adds a load listener.
-     */
-    public synchronized void addLoadListener(Runnable aRunnable)
-    {
-        if (isLoaded())
-            aRunnable.run();
-        else _loadLsnrs = ArrayUtils.add(_loadLsnrs, aRunnable);
+        MavenPackage mavenPackage = getMavenPackage();
+        return mavenPackage != null && mavenPackage.isLoaded();
     }
 
     /**
      * Returns whether maven package is loading.
      */
-    public boolean isLoading()  { return _loading; }
-
-    /**
-     * Sets whether maven package is loading.
-     */
-    protected void setLoading(boolean aValue)
+    public boolean isLoading()
     {
-        if (aValue == _loading) return;
-        firePropChange(Loading_Prop, _loading, _loading = aValue);
-    }
-
-    /**
-     * Returns the repository URL or default.
-     */
-    public String getRepositoryUrlOrDefault()
-    {
-        if (_repositoryURL != null)
-            return _repositoryURL;
-        if (_name != null) {
-            String name = _name.toLowerCase();
-            if (name.contains("reportmill") || name.contains("snapkit") || name.contains("snapcharts"))
-                return "https://reportmill.com/maven";
-            String group = _group.toLowerCase();
-            if (group.contains("reportmill"))
-                return "https://reportmill.com/maven";
-        }
-        if (SnapEnv.isWebVM)
-            return WebUtils.getCorsProxyAddress(MAVEN_CENTRAL_URL);
-        return MAVEN_CENTRAL_URL;
-    }
-
-    /**
-     * Returns the name of the default repository.
-     */
-    public String getRepositoryDefaultName()
-    {
-        if (getRepositoryUrlOrDefault().contains("reportmill"))
-            return "ReportMill";
-        return "Maven Central";
-    }
-
-    /**
-     * Override to get class paths for project.
-     */
-    @Override
-    protected String[] getClassPathsImpl()
-    {
-        String localJarPath = getLocalFilePathForType("jar");
-        if (localJarPath == null)
-            return null;
-
-        // Return
-        return new String[] { localJarPath };
-    }
-
-    /**
-     * Returns the local maven directory file.
-     */
-    public WebFile getLocalMavenDir()
-    {
-        String localMavenDirPath = getLocalFilePathForType(null);
-        return WebFile.createFileForPath(localMavenDirPath, true);
-    }
-
-    /**
-     * Returns the remote file URL string.
-     */
-    public String getRemoteFileUrlStringForType(String fileType)
-    {
-        String repositoryURL = getRepositoryUrlOrDefault();
-        String relativeFilePath = getRelativeFilePathForType(fileType);
-        if (repositoryURL == null || relativeFilePath == null)
-            return null;
-        return FilePathUtils.getChildPath(repositoryURL, relativeFilePath);
-    }
-
-    /**
-     * Returns the local file path string.
-     */
-    public String getLocalFilePathForType(String fileType)
-    {
-        // Get local maven cache path
-        String homeDir = System.getProperty("user.home");
-        String MAVEN_REPO_PATH = SnapEnv.isWebVM ? "maven_cache" : ".m2/repository";
-        String localMavenCachePath = FilePathUtils.getChildPath(homeDir, MAVEN_REPO_PATH);
-
-        // Get relative file path
-        String relativeFilePath = getRelativeFilePathForType(fileType);
-        if (relativeFilePath == null)
-            return null;
-
-        // Return combined path
-        return FilePathUtils.getChildPath(localMavenCachePath, relativeFilePath);
-    }
-
-    /**
-     * Returns the relative file path (from any maven root).
-     */
-    private String getRelativeFilePathForType(String fileType)
-    {
-        // Get parts - if any are null, return null
-        String group = getGroup();
-        String packageName = getName();
-        String version = getVersion();
-        if (group == null || group.isEmpty() || packageName == null || packageName.isEmpty() ||
-                version == null || version.isEmpty())
-            return null;
-
-        // Build relative package jar path and return
-        String groupPath = '/' + group.replace(".", "/");
-        String packagePath = FilePathUtils.getChildPath(groupPath, packageName);
-        String versionPath = FilePathUtils.getChildPath(packagePath, version);
-        if (fileType == null)
-            return versionPath;
-
-        // Get filename
-        String filenameSimple = packageName + '-' + version;
-        if (_classifier != null && !_classifier.isBlank() && fileType.equals("jar"))
-            filenameSimple += '-' + _classifier;
-        String filename = filenameSimple + '.' + fileType;
-
-        // Return path
-        return FilePathUtils.getChildPath(versionPath, filename);
+        MavenPackage mavenPackage = getMavenPackage();
+        return mavenPackage != null && mavenPackage.isLoading();
     }
 
     /**
@@ -419,12 +261,9 @@ public class MavenDependency extends BuildDependency {
      */
     public void preloadPackageFiles()
     {
-        // If already loading, just return
-        if (isLoaded() || isLoading())
-            return;
-
-        // Set Loading true and start thread
-        new Thread(this::loadPackageFiles).start();
+        MavenPackage mavenPackage = getMavenPackage();
+        if (mavenPackage != null)
+            mavenPackage.preloadPackageFiles();
     }
 
     /**
@@ -432,32 +271,9 @@ public class MavenDependency extends BuildDependency {
      */
     public synchronized void loadPackageFiles()
     {
-        // If already loaded, just return
-        if (isLoaded())
-            return;
-
-        try {
-
-            // Set loading
-            setLoaded(false);
-            setLoading(true);
-            _error = null;
-
-            // Load jar file
-            getJarFile().getLocalFile();
-
-            // Load transitive dependencies
-            List<MavenDependency> transitiveDependencies = getTransitiveDependencies();
-            transitiveDependencies.forEach(MavenDependency::loadPackageFiles);
-
-            setLoaded(true);
-        }
-
-        // Handle errors
-        catch (Exception e) { _error = "Error: " + e.getMessage(); }
-
-        // Reset Loading
-        finally { setLoading(false); }
+        MavenPackage mavenPackage = getMavenPackage();
+        if (mavenPackage != null)
+            mavenPackage.loadPackageFiles();
     }
 
     /**
@@ -465,20 +281,9 @@ public class MavenDependency extends BuildDependency {
      */
     public void reloadPackageFiles()
     {
-        deletePackageFiles();
-        preloadPackageFiles();
-    }
-
-    /**
-     * Deletes package files.
-     */
-    public void deletePackageFiles()
-    {
-        List<MavenDependency> transitiveDependencies = getTransitiveDependencies();
-        transitiveDependencies.forEach(MavenDependency::deletePackageFiles);
-        getJarFile().deleteLocalFile();
-        getPomFile().deleteLocalFile();
-        setLoaded(false);
+        MavenPackage mavenPackage = getMavenPackage();
+        if (mavenPackage != null)
+            mavenPackage.reloadPackageFiles();
     }
 
     /**
@@ -486,9 +291,9 @@ public class MavenDependency extends BuildDependency {
      */
     private void handlePropChange()
     {
-        _classPaths = null; _id = null; _error = null;
-        _jarFile = _pomFile = null;
-        setLoaded(false);
+        _classPaths = null; _id = null;
+        _mavenPackage = null;
+        _transitiveDependencies = null;
     }
 
     /**
@@ -502,7 +307,6 @@ public class MavenDependency extends BuildDependency {
         aPropSet.addPropNamed(Name_Prop, String.class);
         aPropSet.addPropNamed(Version_Prop, String.class);
         aPropSet.addPropNamed(Classifier_Prop, String.class);
-        aPropSet.addPropNamed(RepositoryURL_Prop, String.class);
     }
 
     /**
@@ -513,12 +317,11 @@ public class MavenDependency extends BuildDependency {
     {
         return switch (aPropName) {
 
-            // Group, Name, Version, Classifier, RepositoryURL
+            // Group, Name, Version, Classifier
             case Group_Prop -> getGroup();
             case Name_Prop -> getName();
             case Version_Prop -> getVersion();
             case Classifier_Prop -> getClassifier();
-            case RepositoryURL_Prop -> getRepositoryURL();
 
             // Do normal version
             default -> super.getPropValue(aPropName);
@@ -533,12 +336,11 @@ public class MavenDependency extends BuildDependency {
     {
         switch (aPropName) {
 
-            // Group, Name, Version, Classifier, RepositoryURL
+            // Group, Name, Version, Classifier
             case Group_Prop -> setGroup(Convert.stringValue(aValue));
             case Name_Prop -> setName(Convert.stringValue(aValue));
             case Version_Prop -> setVersion(Convert.stringValue(aValue));
             case Classifier_Prop -> setClassifier(Convert.stringValue(aValue));
-            case RepositoryURL_Prop -> setRepositoryURL(Convert.stringValue(aValue));
 
             // Do normal version
             default -> super.setPropValue(aPropName, aValue);

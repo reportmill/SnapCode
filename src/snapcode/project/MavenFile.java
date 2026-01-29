@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 public class MavenFile {
 
     // The maven dependency
-    private MavenDependency _mavenDependency;
+    private MavenPackage _mavenDependency;
 
     // The file type
     private String _fileType;
@@ -21,7 +21,7 @@ public class MavenFile {
     /**
      * Constructor.
      */
-    public MavenFile(MavenDependency mavenDependency, String fileType)
+    public MavenFile(MavenPackage mavenDependency, String fileType)
     {
         _mavenDependency = mavenDependency;
         _fileType = fileType;
