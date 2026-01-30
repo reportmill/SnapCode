@@ -315,7 +315,7 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     /**
      * Override.
      */
-    protected double getPrefWidthImpl(double aH)
+    protected double computePrefWidth(double aH)
     {
         double prefW = getRowView().getBestWidth(aH);
         if (_colView != null || isParentBlock()) {
@@ -329,7 +329,7 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     /**
      * Override.
      */
-    protected double getPrefHeightImpl(double aW)
+    protected double computePrefHeight(double aW)
     {
         RowView rowView = getRowView();
         double rowH = rowView.getBestHeight(aW);
