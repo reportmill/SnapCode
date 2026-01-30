@@ -395,4 +395,16 @@ public class MavenDependency extends BuildDependency {
             default -> super.setPropValue(aPropName, aValue);
         }
     }
+
+    /**
+     * Override to add parent check.
+     */
+    @Override
+    public boolean equals(Object anObj)  { return super.equals(anObj) && _parent == ((MavenDependency) anObj)._parent; }
+
+    /**
+     * Override to add parent.
+     */
+    @Override
+    public int hashCode()  { return Objects.hash(_parent, getId()); }
 }
