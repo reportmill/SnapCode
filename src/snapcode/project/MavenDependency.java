@@ -2,6 +2,7 @@ package snapcode.project;
 import snap.props.PropSet;
 import snap.util.*;
 import snap.web.WebFile;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -204,10 +205,10 @@ public class MavenDependency extends BuildDependency {
     {
         if (_dependencies != null) return _dependencies;
         MavenPackage mavenPackage = getMavenPackage();
-        List<MavenPackage> transitiveDependencies = mavenPackage != null ? mavenPackage.getTransitiveDependencies() : null;
-        if (transitiveDependencies == null)
-            return null;
-        return _dependencies = ListUtils.map(transitiveDependencies, dep -> new MavenDependency(this, dep));
+        List<MavenPackage> dependencies = mavenPackage != null ? mavenPackage.getDependencies() : null;
+        if (dependencies == null)
+            return _dependencies = Collections.emptyList();
+        return _dependencies = ListUtils.map(dependencies, dep -> new MavenDependency(this, dep));
     }
 
     /**

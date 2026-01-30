@@ -2,6 +2,7 @@ package snapcode.project;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.util.DownloadFile;
+import java.io.IOException;
 import java.nio.file.Paths;
 
 /**
@@ -47,11 +48,8 @@ public class MavenFile {
 
         // If file doesn't exist, load it
         if (localFile != null && !localFile.getExists()) {
-            DownloadFile downloadFile = getDownloadFile();
-            if (downloadFile != null) {
-                try { downloadFile.getLocalPath(); }
-                catch (Exception e) { throw new RuntimeException(e); }
-            }
+            try { downloadFile(); }
+            catch (IOException e) { return null; }
         }
 
         // Return
@@ -69,6 +67,17 @@ public class MavenFile {
             catch (Exception e) { System.err.println("MavenFile: Delete local file failed: " + e.getMessage()); }
         }
         _downloadFile = null;
+    }
+
+    /**
+     * Loads the file.
+     */
+    public void downloadFile() throws IOException
+    {
+        DownloadFile downloadFile = getDownloadFile();
+        if (downloadFile == null)
+            throw new IOException("Can't resolve maven path for: " + _mavenDependency.getId());
+        downloadFile.getLocalPath();
     }
 
     /**

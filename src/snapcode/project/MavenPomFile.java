@@ -72,7 +72,7 @@ public class MavenPomFile extends MavenFile {
     {
         if (_xml != null) return _xml;
         WebFile pomFile = getLocalFile();
-        String xmlString = pomFile.getText();
+        String xmlString = pomFile != null ? pomFile.getText() : null;
         if (xmlString == null) {
             System.err.println("MavenPomFile: Can't read pom file: " + pomFile);
             return null;

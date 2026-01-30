@@ -140,7 +140,7 @@ public class MavenPackage extends PropObject {
     /**
      * Returns the transitive dependencies.
      */
-    public List<MavenPackage> getTransitiveDependencies()
+    public List<MavenPackage> getDependencies()
     {
         MavenPomFile pomFile = getPomFile();
         return pomFile.getDependencies();
@@ -293,10 +293,10 @@ public class MavenPackage extends PropObject {
             _error = null;
 
             // Load jar file
-            getJarFile().getLocalFile();
+            getJarFile().downloadFile();
 
             // Load transitive dependencies
-            List<MavenPackage> transitiveDependencies = getTransitiveDependencies();
+            List<MavenPackage> transitiveDependencies = getDependencies();
             transitiveDependencies.forEach(MavenPackage::loadPackageFiles);
 
             setLoaded(true);
@@ -336,7 +336,7 @@ public class MavenPackage extends PropObject {
      */
     public void deletePackageFiles()
     {
-        List<MavenPackage> transitiveDependencies = getTransitiveDependencies();
+        List<MavenPackage> transitiveDependencies = getDependencies();
         transitiveDependencies.forEach(MavenPackage::deletePackageFiles);
         getJarFile().deleteLocalFile();
         getPomFile().deleteLocalFile();

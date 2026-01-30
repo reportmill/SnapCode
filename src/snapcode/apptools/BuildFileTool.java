@@ -267,8 +267,10 @@ public class BuildFileTool extends ProjectTool {
             }
 
             // If not loaded, trigger load
-            if (!mavenDependency.isLoaded())
+            if (!mavenDependency.isLoaded()) {
                 mavenDependency.preloadPackageFiles();
+                runDelayed(this::resetLater, 1000); // Really need to have 'handleDependencyLoadedChange'
+            }
         }
 
         // Handle JarFileDependency: JarPathText
