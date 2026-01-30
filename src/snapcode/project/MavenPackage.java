@@ -47,6 +47,9 @@ public class MavenPackage extends PropObject {
     // The error string
     private String _error;
 
+    // Cached artifact id
+    private String _artifactId;
+
     // A map of all packages
     private static Map<String, MavenPackage> _packages = new HashMap<>();
 
@@ -106,6 +109,15 @@ public class MavenPackage extends PropObject {
      * Returns the classifier.
      */
     public String getClassifier()  { return _classifier; }
+
+    /**
+     * Returns the artifact id.
+     */
+    public String getArtifactId()
+    {
+        if (_artifactId != null) return _artifactId;
+        return _artifactId = _group + ":" + _name;
+    }
 
     /**
      * Returns the Jar file.

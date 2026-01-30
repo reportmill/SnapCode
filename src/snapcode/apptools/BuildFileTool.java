@@ -385,6 +385,10 @@ public class BuildFileTool extends ProjectTool {
         label.setMargin(0, 8, 0, 4);
         label.setPadding(1, 1, 1, 2);
         aCell.setGraphic(label);
+        if (buildDependency instanceof MavenDependency mavenDependency && mavenDependency.getParent() != null) {
+            aCell.setTextColor(Color.DARKGRAY);
+            label.setTextColor(Color.DARKGRAY);
+        }
     }
 
     /**
@@ -459,14 +463,15 @@ public class BuildFileTool extends ProjectTool {
         @Override
         public boolean isParent(BuildDependency anItem)
         {
-            return anItem instanceof MavenDependency mvnDependency && !mvnDependency.getTransitiveDependencies().isEmpty();
+            return anItem instanceof MavenDependency mvnDependency && !mvnDependency.isRedundant() &&
+                !mvnDependency.getDependencies().isEmpty();
         }
 
         @Override
         public List<BuildDependency> getChildren(BuildDependency aParent)
         {
             if (aParent instanceof MavenDependency mvnDependency)
-                return (List<BuildDependency>) (List<?>) mvnDependency.getTransitiveDependencies();
+                return (List<BuildDependency>) (List<?>) mvnDependency.getDependencies();
             return null;
         }
     }

@@ -255,7 +255,7 @@ public class Project extends PropObject {
 
         // Add transitive class paths
         if (dependency instanceof MavenDependency mavenDependency) {
-            List<MavenDependency> transitiveDependencies = mavenDependency.getTransitiveDependencies();
+            List<MavenDependency> transitiveDependencies = mavenDependency.getDependencies();
             for (MavenDependency transitiveDependency : transitiveDependencies)
                 addClassPathsForDependencyToSet(transitiveDependency, compileClassPaths);
         }

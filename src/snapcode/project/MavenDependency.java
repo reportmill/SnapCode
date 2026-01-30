@@ -32,7 +32,10 @@ public class MavenDependency extends BuildDependency {
     private MavenPackage _mavenPackage;
 
     // The transitive dependencies
-    private List<MavenDependency> _transitiveDependencies;
+    private List<MavenDependency> _dependencies;
+
+    // Whether this dependency artifact is already in dependency tree
+    private Boolean _redundant;
 
     // Constants for properties
     public static final String Group_Prop = "Group";
@@ -174,6 +177,15 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
+     * Returns the artifact id.
+     */
+    public String getArtifactId()
+    {
+        MavenPackage mavenPackage = getMavenPackage();
+        return mavenPackage != null ? mavenPackage.getArtifactId() : null;
+    }
+
+    /**
      * Returns the maven package.
      */
     public MavenPackage getMavenPackage()
@@ -188,14 +200,14 @@ public class MavenDependency extends BuildDependency {
     /**
      * Returns the transitive dependencies.
      */
-    public List<MavenDependency> getTransitiveDependencies()
+    public List<MavenDependency> getDependencies()
     {
-        if (_transitiveDependencies != null) return _transitiveDependencies;
+        if (_dependencies != null) return _dependencies;
         MavenPackage mavenPackage = getMavenPackage();
         List<MavenPackage> transitiveDependencies = mavenPackage != null ? mavenPackage.getTransitiveDependencies() : null;
         if (transitiveDependencies == null)
             return null;
-        return _transitiveDependencies = ListUtils.map(transitiveDependencies, dep -> new MavenDependency(this, dep));
+        return _dependencies = ListUtils.map(transitiveDependencies, dep -> new MavenDependency(this, dep));
     }
 
     /**
@@ -215,6 +227,43 @@ public class MavenDependency extends BuildDependency {
     {
         MavenPackage mavenPackage = getMavenPackage();
         return mavenPackage != null ? mavenPackage.getLocalMavenDir() : null;
+    }
+
+    /**
+     * Returns the first dependency matching given artifact id.
+     */
+    public MavenDependency findDependencyForArtifactId(String artifactId)
+    {
+        MavenDependency rootDependency = this;
+        while (rootDependency._parent != null) rootDependency = rootDependency._parent;
+        return rootDependency.findDependencyForArtifactIdImpl(artifactId);
+    }
+
+    /**
+     * Returns the first dependency matching given artifact id.
+     */
+    private MavenDependency findDependencyForArtifactIdImpl(String artifactId)
+    {
+        if (Objects.equals(getArtifactId(), artifactId))
+            return this;
+        for (MavenDependency dependency : getDependencies()) {
+            MavenDependency dependencyForArtifactId = dependency.findDependencyForArtifactIdImpl(artifactId);
+            if (dependencyForArtifactId != null)
+                return dependencyForArtifactId;
+        }
+
+        // Return not found
+        return null;
+    }
+
+    /**
+     * Returns whether dependency is already in this dependency tree.
+     */
+    public boolean isRedundant()
+    {
+        if (_redundant != null) return _redundant;
+        String artifactId = getArtifactId();
+        return _redundant = artifactId != null && findDependencyForArtifactId(artifactId) != this;
     }
 
     /**
@@ -291,9 +340,9 @@ public class MavenDependency extends BuildDependency {
      */
     private void handlePropChange()
     {
-        _classPaths = null; _id = null;
+        _classPaths = null; _id = null; _redundant = null;
         _mavenPackage = null;
-        _transitiveDependencies = null;
+        _dependencies = null;
     }
 
     /**
