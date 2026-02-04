@@ -47,17 +47,19 @@ public class DebugExprsPane extends WorkspaceTool {
         _varsTree.setResolver(new DebugVarItem.VarTreeResolver());
 
         // Configure "Name" column
-        TreeCol<?> treeCol0 = _varsTree.getCol(0);
-        treeCol0.setHeaderText("Name");
-        treeCol0.setPrefWidth(150);
-        treeCol0.setGrowWidth(true);
+        TreeCol<DebugVarItem> nameCol = _varsTree.getCol(0);
+        nameCol.setHeaderText("Name");
+        nameCol.setItemTextFunction(DebugVarItem::getName);
+        nameCol.setPrefWidth(150);
+        nameCol.setGrowWidth(true);
 
         // Add second "Value" column
-        TreeCol<DebugVarItem> treeCol1 = new TreeCol<>();
-        treeCol1.setHeaderText("Value");
-        treeCol1.setPrefWidth(150);
-        treeCol1.setGrowWidth(true);
-        _varsTree.addCol(treeCol1);
+        TreeCol<DebugVarItem> valueCol = new TreeCol<>();
+        valueCol.setHeaderText("Value");
+        valueCol.setItemTextFunction(DebugVarItem::getValueString);
+        valueCol.setPrefWidth(150);
+        valueCol.setGrowWidth(true);
+        _varsTree.addCol(valueCol);
 
         // Set default item
         _exprItems.add(DebugVarItem.createItemForExpression("this"));

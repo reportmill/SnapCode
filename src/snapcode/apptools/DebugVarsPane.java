@@ -49,11 +49,13 @@ public class DebugVarsPane extends WorkspaceTool {
         // Configure "Name" column
         TreeCol<DebugVarItem> nameCol = _varsTree.getCol(0);
         nameCol.setHeaderText("Name");
+        nameCol.setItemTextFunction(DebugVarItem::getName);
         nameCol.setPrefWidth(100);
 
         // Add "Value" column
         TreeCol<DebugVarItem> valueCol = new TreeCol<>();
         valueCol.setHeaderText("Value");
+        valueCol.setItemTextFunction(DebugVarItem::getValueString);
         valueCol.setPrefWidth(100);
         valueCol.setGrowWidth(true);
         _varsTree.addCol(valueCol);
@@ -61,6 +63,7 @@ public class DebugVarsPane extends WorkspaceTool {
         // Add "Type" column
         TreeCol<DebugVarItem> typeCol = new TreeCol<>();
         typeCol.setHeaderText("Type");
+        typeCol.setItemTextFunction(DebugVarItem::getVarClass);
         typeCol.setPrefWidth(100);
         typeCol.setGrowWidth(true);
         _varsTree.addCol(typeCol);

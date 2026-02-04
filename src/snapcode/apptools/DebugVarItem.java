@@ -245,17 +245,5 @@ public class DebugVarItem implements Comparable<DebugVarItem> {
          * Returns the children.
          */
         public List<DebugVarItem> getChildren(DebugVarItem aParent)  { return aParent.getChildren(); }
-
-        /**
-         * Returns the text to be used for given item.
-         */
-        public String getText(DebugVarItem anItem, int aCol)
-        {
-            if (aCol == 0)
-                return anItem.getName();
-            if (aCol == 1)
-                return anItem.getValueString();
-            return anItem.getVarClass();
-        }
     }
 }
