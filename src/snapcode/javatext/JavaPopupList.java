@@ -28,7 +28,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     // The current selection start
     private int _selStart;
 
-    // PropChangeListner for TextArea prop changes
+    // PropChangeListener for TextArea prop changes
     private PropChangeListener _textAreaPropChangeLsnr = this::handleTextAreaPropChange;
 
     // Constants
@@ -52,7 +52,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         _textArea = aJavaTextArea;
         setPrefWidth(500);
-        setPrefRowCount(12);
+        setMaxHeight(15 * getRowHeight());
 
         // Set font
         TextModel textModel = aJavaTextArea.getTextModel();
