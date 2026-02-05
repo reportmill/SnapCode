@@ -117,9 +117,9 @@ public class JNodeView<JNODE extends JNode> extends ChildView {
      * Standard toString implementation.
      */
     @Override
-    public String toString()
+    public String toStringProps()
     {
-        return _jnode.toString();
+        return super.toStringProps() + ", Node=" + _jnode.toString();
     }
 
     /**
