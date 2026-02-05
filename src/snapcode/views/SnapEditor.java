@@ -168,7 +168,7 @@ public class SnapEditor extends StackView {
         // Start explode
         int gridW = (int) nodeView.getWidth() / 8;
         int gridH = Math.max((int) nodeView.getHeight() / 8, 8);
-        Explode explode = new Explode(nodeView, gridW, gridH, () -> removeNodeViewAnimDone(nodeView));
+        Explode explode = new Explode(nodeView, gridW, gridH, () -> handleRemoveNodeViewAnimFinished(nodeView));
         explode.setRunTime(300);
         explode.setHostView(this);
         explode.play();
@@ -180,7 +180,7 @@ public class SnapEditor extends StackView {
     /**
      * Called when anim is done.
      */
-    private void removeNodeViewAnimDone(JNodeView<?> nodeView)
+    private void handleRemoveNodeViewAnimFinished(JNodeView<?> nodeView)
     {
         // Remove the node
         if (nodeView.isManaged()) {
@@ -192,6 +192,7 @@ public class SnapEditor extends StackView {
         else {
             JFileView fileView = getFileView();
             fileView.removeChild(nodeView);
+            setSelNodeView(fileView);
         }
     }
 
