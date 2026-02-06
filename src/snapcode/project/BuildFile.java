@@ -26,6 +26,9 @@ public class BuildFile extends PropObject {
     // Whether to enable compiler preview language features
     private boolean _enableCompilePreview;
 
+    // The repositories
+    private List<MavenRepository> _repositories;
+
     // The dependencies
     private List<BuildDependency> _dependencies;
 
@@ -42,7 +45,7 @@ public class BuildFile extends PropObject {
     private WebFile _buildFile;
 
     // A listener to propagate dependency changes to build file listeners
-    private PropChangeListener _dependencyDidChangeLsnr = this::dependencyDidChange;
+    private PropChangeListener _dependencyPropChangeLsnr = this::handleDependencyPropChange;
 
     // Constants
     public static final String BUILD_FILE_PATH = "/build.snapcode";
@@ -52,6 +55,8 @@ public class BuildFile extends PropObject {
     public static final String BuildPath_Prop = "BuildPath";
     public static final String CompileRelease_Prop = "CompileRelease";
     public static final String EnableCompilePreview_Prop = "EnableCompilerPreview";
+    public static final String Repository_Prop = "Repository";
+    public static final String Repositories_Prop = "Repositories";
     public static final String Dependency_Prop = "Dependency";
     public static final String Dependencies_Prop = "Dependencies";
     public static final String MainClassName_Prop = "MainClassName";
@@ -74,6 +79,7 @@ public class BuildFile extends PropObject {
         // Set defaults
         _srcPath = DEFAULT_SOURCE_PATH;
         _buildPath = DEFAULT_BUILD_PATH;
+        _repositories = Collections.emptyList();
         _dependencies = Collections.emptyList();
         _compileRelease = DEFAULT_JAVA_VERSION;
         _enableCompilePreview = DEFAULT_ENABLE_COMPILE_PREVIEW;
@@ -171,6 +177,59 @@ public class BuildFile extends PropObject {
     }
 
     /**
+     * Returns the repositories.
+     */
+    public List<MavenRepository> getRepositories()  { return _repositories; }
+
+    /**
+     * Sets the repositories.
+     */
+    public void setRepositories(List<MavenRepository> theRepos)
+    {
+        if (ListUtils.equalsId(theRepos, _repositories)) return;
+        firePropChange(Repositories_Prop, _repositories, _repositories = List.copyOf(theRepos));
+    }
+
+    /**
+     * Adds a repository.
+     */
+    public void addRepository(MavenRepository aRepo)  { addRepository(aRepo, _repositories.size()); }
+
+    /**
+     * Adds a repository at given index.
+     */
+    public void addRepository(MavenRepository aRepo, int anIndex)
+    {
+        if (_repositories.contains(aRepo)) return;
+        List<MavenRepository> newRepos = new ArrayList<>(_repositories);
+        newRepos.add(anIndex, aRepo);
+        setRepositories(newRepos);
+        firePropChange(Repository_Prop, null, aRepo);
+    }
+
+    /**
+     * Removes a repository at given index.
+     */
+    public void removeRepository(int anIndex)
+    {
+        MavenRepository repo = _repositories.get(anIndex);
+        List<MavenRepository> newRepos = new ArrayList<>(_repositories);
+        newRepos.remove(anIndex);
+        setRepositories(newRepos);
+        firePropChange(Repository_Prop, repo, null);
+    }
+
+    /**
+     * Removes a given repository.
+     */
+    public void removeRepository(MavenRepository aDependency)
+    {
+        int index = _repositories.indexOf(aDependency);
+        if (index >= 0)
+            removeRepository(index);
+    }
+
+    /**
      * Returns the dependencies.
      */
     public List<BuildDependency> getDependencies()  { return _dependencies; }
@@ -184,13 +243,13 @@ public class BuildFile extends PropObject {
 
         // Reset old
         List<BuildDependency> oldDependencies = _dependencies;
-        _dependencies.forEach(dep -> dep.removePropChangeListener(_dependencyDidChangeLsnr));
+        _dependencies.forEach(dep -> dep.removePropChangeListener(_dependencyPropChangeLsnr));
 
         // Set new
         _dependencies = List.copyOf(theDependencies);
         for (BuildDependency dependency : theDependencies) {
             dependency._buildFile = this;
-            dependency.addPropChangeListener(_dependencyDidChangeLsnr);
+            dependency.addPropChangeListener(_dependencyPropChangeLsnr);
         }
 
         // Fire prop change
@@ -406,9 +465,9 @@ public class BuildFile extends PropObject {
     /**
      * Called when a dependency changes to forward to build file listeners.
      */
-    private void dependencyDidChange(PropChange aPC)
+    private void handleDependencyPropChange(PropChange propChange)
     {
-        firePropChange(aPC);
+        firePropChange(propChange);
     }
 
     /**
@@ -444,7 +503,8 @@ public class BuildFile extends PropObject {
         aPropSet.addPropNamed(CompileRelease_Prop, int.class);
         aPropSet.addPropNamed(EnableCompilePreview_Prop, boolean.class);
 
-        // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapCharts, IncludeJavaFX
+        // Repositories, Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapCharts, IncludeJavaFX
+        aPropSet.addPropNamed(Repositories_Prop, List.class);
         aPropSet.addPropNamed(Dependencies_Prop, List.class);
         aPropSet.addPropNamed(MainClassName_Prop, String.class);
         aPropSet.addPropNamed(IncludeSnapKitRuntime_Prop, boolean.class);
@@ -467,7 +527,8 @@ public class BuildFile extends PropObject {
             case CompileRelease_Prop -> getCompileRelease();
             case EnableCompilePreview_Prop -> isEnableCompilePreview();
 
-            // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapCharts, IncludeJavaFX
+            // Repositories, Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapCharts, IncludeJavaFX
+            case Repositories_Prop -> getRepositories();
             case Dependencies_Prop -> getDependencies();
             case MainClassName_Prop -> getMainClassName();
             case IncludeSnapKitRuntime_Prop -> isIncludeSnapKitRuntime();
@@ -494,7 +555,8 @@ public class BuildFile extends PropObject {
             case CompileRelease_Prop -> setCompileRelease(Convert.intValue(aValue));
             case EnableCompilePreview_Prop -> setEnableCompilePreview(Convert.booleanValue(aValue));
 
-            // Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapCharts, IncludeJavaFX
+            // Repositories, Dependencies, MainClassName, IncludeSnapKitRuntime, IncludeSnapCharts, IncludeJavaFX
+            case Repositories_Prop -> setRepositories((List<MavenRepository>) aValue);
             case Dependencies_Prop -> setDependencies((List<BuildDependency>) aValue);
             case MainClassName_Prop -> setMainClassName(Convert.stringValue(aValue));
             case IncludeSnapKitRuntime_Prop -> setIncludeSnapKitRuntime(Convert.boolValue(aValue));
@@ -515,6 +577,7 @@ public class BuildFile extends PropObject {
         archiver.addClassMapClass(BuildDependency.JarFileDependency.class);
         archiver.addClassMapClass(BuildDependency.ProjectDependency.class);
         archiver.addClassMapClass(MavenDependency.class);
+        archiver.addClassMapClass(MavenRepository.class);
         return archiver;
     }
 }
