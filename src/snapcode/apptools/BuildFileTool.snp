@@ -27,6 +27,13 @@
     <Label Text="Include JavaFX Runtime" />
     <CheckBox Name="IncludeJavaFXCheckBox" />
   </RowView>
+  <RowView Name="RepositoryButtonsView" Margin="0,0,0,40" Spacing="4">
+    <Button Name="AddRepositoryButton" PrefWidth="22" PrefHeight="22" Text="+" />
+    <Button Name="RemoveRepositoryButton" PrefWidth="22" PrefHeight="22" Text="-" />
+  </RowView>
+  <TitleView Name="RepositoriesTitleView" Padding="5" Text="Repositories" TitleStyle="Plain" Collapsible="true" Expanded="false">
+    <ListView Name="RepositoriesListView" MinWidth="390" MinHeight="100" RowHeight="26" />
+  </TitleView>
   <ColView Name="BuildDependenciesBox">
     <RowView PrefWidth="400" Margin="0,0,4,0">
       <Label Text="Build Dependencies:" />
@@ -35,7 +42,7 @@
       <Button Name="AddDependencyButton" PrefWidth="22" PrefHeight="22" Margin="0,4,0,4" Text="+" />
       <Button Name="RemoveDependencyButton" PrefWidth="22" PrefHeight="22" Margin="0,8,0,4" Text="-" />
     </RowView>
-    <TreeView Name="DependenciesTreeView" MinWidth="400" PrefHeight="150" Margin="0,0,8,0" />
+    <TreeView Name="DependenciesTreeView" MinWidth="400" PrefHeight="150" Margin="0,0,8,0" RowHeight="26" />
     <ColView Name="DependencyTypeBox" Margin="0,0,0,10" Padding="5,10,5,10" Fill="#F4" Border="#E8 1" BorderRadius="8" Font="Arial 12">
       <RowView Padding="4" Spacing="4">
         <Label PrefWidth="100" Text="Dependency Type:" />

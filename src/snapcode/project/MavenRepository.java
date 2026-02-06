@@ -26,6 +26,11 @@ public class MavenRepository extends PropObject {
     /**
      * Constructor.
      */
+    public MavenRepository()  { }
+
+    /**
+     * Constructor.
+     */
     private MavenRepository(String name)
     {
         _name = name;

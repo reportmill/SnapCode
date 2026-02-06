@@ -20,11 +20,17 @@ import java.util.List;
  */
 public class BuildFileTool extends ProjectTool {
 
+    // The selected build repository
+    private MavenRepository _selRepository;
+
     // The selected build dependency
     private BuildDependency _selDependency;
 
     // A prop change listener for selected dependency
     private PropChangeListener _selDependencyPropChangeLsnr = this::handleSelDependencyPropChange;
+
+    // Repositories ListView
+    private ListView<MavenRepository> _repositoriesListView;
 
     // Dependencies TreeView
     private TreeView<BuildDependency> _dependenciesTreeView;
@@ -49,6 +55,26 @@ public class BuildFileTool extends ProjectTool {
      * Returns the BuildFile.
      */
     public BuildFile getBuildFile()  { return _proj.getBuildFile(); }
+
+    /**
+     * Returns the selected build repository.
+     */
+    public MavenRepository getSelRepository()  { return _selRepository; }
+
+    /**
+     * Sets the selected build repository.
+     */
+    public void setSelRepository(MavenRepository buildRepository)
+    {
+        if (buildRepository == _selRepository) return;
+
+        // Set value and add/remove prop change listener
+        _selRepository = buildRepository;
+
+        // Update RepositoriesListView.Selection
+        _repositoriesListView.setSelItem(buildRepository);
+        resetLater();
+    }
 
     /**
      * Returns the selected build dependency.
@@ -96,15 +122,31 @@ public class BuildFileTool extends ProjectTool {
         // Configure CompileReleaseComboBox
         getView("CompileReleaseComboBox", ComboBox.class).setItems(JAVA_VERSIONS);
 
+        // Move RepositoryButtonsView from top level to RepositoriesTitleView
+        View repositoryButtonsView = getView("RepositoryButtonsView", View.class);
+        TitleView repositoriesTitleView = getView("RepositoriesTitleView", TitleView.class);
+        repositoriesTitleView.getLabel().setGraphicAfter(repositoryButtonsView);
+        ViewUtils.bindExpr(repositoriesTitleView, TitleView.Expanded_Prop, repositoryButtonsView, View.Visible_Prop, TitleView.Expanded_Prop);
+        repositoryButtonsView.setVisible(false);
+
+        // Configure RepositoriesListView
+        BuildFile buildFile = getBuildFile();
+        _repositoriesListView = getView("RepositoriesListView", ListView.class);
+        _repositoriesListView.setItemTextFunction(MavenRepository::getName);
+
+        // Configure RepositoriesListView items
+        List<MavenRepository> repositories = buildFile.getRepositories();
+        _repositoriesListView.setItems(repositories);
+        buildFile.addPropChangeListener(this::handleBuildFileRepositoryChange, BuildFile.Repository_Prop);
+
         // Configure DependenciesTreeView
         _dependenciesTreeView = getView("DependenciesTreeView", TreeView.class);
-        _dependenciesTreeView.setResolver(new DependenciesTreeResolver());
         _dependenciesTreeView.setRowHeight(26);
+        _dependenciesTreeView.setResolver(new DependenciesTreeResolver());
         _dependenciesTreeView.setCellConfigure(this::configureDependenciesListCell);
         _dependenciesTreeView.addEventHandler(this::handleDependenciesListDragEvent, DragEvents);
 
         // Set DependenciesTreeView items
-        BuildFile buildFile = getBuildFile();
         List<BuildDependency> dependencies = buildFile.getDependencies();
         _dependenciesTreeView.setItems(dependencies);
         buildFile.addPropChangeListener(this::handleBuildFileDependencyChange, BuildFile.Dependency_Prop);
@@ -134,6 +176,10 @@ public class BuildFileTool extends ProjectTool {
         setViewValue("IncludeSnapChartsRuntimeCheckBox", buildFile.isIncludeSnapChartsRuntime());
         setViewValue("IncludeJavaFXCheckBox", buildFile.isIncludeJavaFX());
         setViewEnabled("IncludeJavaFXCheckBox", SnapEnv.isDesktop);
+
+        // Update RemoveRepositoryButton
+        MavenRepository selRepository = getSelRepository();
+        setViewEnabled("RemoveRepositoryButton", selRepository != null);
 
         // Update RemoveDependencyButton, ExpandDependenciesButton, CollapseDependenciesButton
         BuildDependency selDependency = getSelDependency();
@@ -216,17 +262,19 @@ public class BuildFileTool extends ProjectTool {
             case "IncludeSnapChartsRuntimeCheckBox" -> buildFile.setIncludeSnapChartsRuntime(anEvent.getBoolValue());
             case "IncludeJavaFXCheckBox" -> buildFile.setIncludeJavaFX(anEvent.getBoolValue());
 
+            // Handle AddRepositoryButton, RemoveRepositoryButton
+            case "AddRepositoryButton" -> showAddRepositoryPanel();
+            case "RemoveRepositoryButton" -> removeSelectedRepository();
+
             // Handle AddDependencyButton, RemoveDependencyButton, ExpandDependenciesButton, CollapseDependenciesButton
             case "AddDependencyButton" -> showAddDependencyPanel();
             case "RemoveDependencyButton" -> removeSelectedDependency();
             case "ExpandDependenciesButton" -> _dependenciesTreeView.expandAll();
             case "CollapseDependenciesButton" -> _dependenciesTreeView.collapseAll();
 
-            // Handle DependenciesTreeView
-            case "DependenciesTreeView" -> {
-                BuildDependency buildDependency = _dependenciesTreeView.getSelItem();
-                setSelDependency(buildDependency);
-            }
+            // Handle RepositoriesListView, DependenciesTreeView
+            case "RepositoriesListView" -> setSelRepository(_repositoriesListView.getSelItem());
+            case "DependenciesTreeView" -> setSelDependency(_dependenciesTreeView.getSelItem());
 
             // Handle DeleteAction
             case "DeleteAction", "BackSpaceAction" -> {
@@ -246,6 +294,37 @@ public class BuildFileTool extends ProjectTool {
             // Handle dependency
             default -> respondDependencyUI(anEvent);
         }
+    }
+
+    /**
+     * Shows a panel to add a repository.
+     */
+    private void showAddRepositoryPanel()
+    {
+        String repoName = DialogBox.showInputDialog(getUI(), "Add Repository", "Enter Repository Name", null);
+        if (repoName == null)
+            return;
+
+        // Get repo for name and add
+        MavenRepository newRepository = MavenRepository.getRepoForName(repoName);
+        BuildFile buildFile = getBuildFile();
+        buildFile.addRepository(newRepository);
+    }
+
+    /**
+     * Removes the selected repository.
+     */
+    private void removeSelectedRepository()
+    {
+        // Ask user to confirm (just return if cancelled)
+        String msg = "Are you sure you want to remove selected repository?";
+        if (!DialogBox.showConfirmDialog(getUI(), "Remove Repository", msg))
+            return;
+
+        // Remove selected
+        BuildFile buildFile = getBuildFile();
+        MavenRepository selRepository = getSelRepository();
+        buildFile.removeRepository(selRepository);
     }
 
     /**
@@ -401,6 +480,28 @@ public class BuildFileTool extends ProjectTool {
         WebFile mavenDir = mavenDependency.getLocalMavenDir();
         if (mavenDir != null)
             GFXEnv.getEnv().openFile(mavenDir);
+    }
+
+    /**
+     * Called when BuildFile changes repository.
+     */
+    private void handleBuildFileRepositoryChange(PropChange propChange)
+    {
+        BuildFile buildFile = getBuildFile();
+
+        // If BuildFile adds repository, update list
+        if (propChange.getNewValue() != null) {
+            MavenRepository repository = (MavenRepository) propChange.getNewValue();
+            _repositoriesListView.setItems(buildFile.getRepositories());
+            setSelRepository(repository);
+        }
+
+        // If BuildFile removes dependency, remove from list
+        else {
+            MavenRepository repository = (MavenRepository) propChange.getOldValue();
+            _repositoriesListView.removeItemAndUpdateSel(repository);
+            setSelRepository(_repositoriesListView.getSelItem());
+        }
     }
 
     /**

@@ -68,6 +68,7 @@ public class BuildFile extends PropObject {
     private static final String DEFAULT_BUILD_PATH = "bin";
     private static final int DEFAULT_JAVA_VERSION = SnapUtils.getJavaVersionInt();
     private static final boolean DEFAULT_ENABLE_COMPILE_PREVIEW = false;
+    public static final List<MavenRepository> DEFAULT_REPOSITORIES = List.of(MavenRepository.getRepoForName("mavenCentral"));
 
     /**
      * Constructor.
@@ -79,7 +80,7 @@ public class BuildFile extends PropObject {
         // Set defaults
         _srcPath = DEFAULT_SOURCE_PATH;
         _buildPath = DEFAULT_BUILD_PATH;
-        _repositories = Collections.emptyList();
+        _repositories = DEFAULT_REPOSITORIES;
         _dependencies = Collections.emptyList();
         _compileRelease = DEFAULT_JAVA_VERSION;
         _enableCompilePreview = DEFAULT_ENABLE_COMPILE_PREVIEW;
@@ -510,6 +511,17 @@ public class BuildFile extends PropObject {
         aPropSet.addPropNamed(IncludeSnapKitRuntime_Prop, boolean.class);
         //aPropSet.addPropNamed(IncludeSnapCharts_Prop, boolean.class);
         aPropSet.addPropNamed(IncludeJavaFX_Prop, boolean.class);
+    }
+
+    /**
+     * Override to handle Repositories property special.
+     */
+    @Override
+    public boolean isPropDefault(String aPropName)
+    {
+        if (aPropName == Repositories_Prop)
+            return ListUtils.equalsId(getRepositories(), DEFAULT_REPOSITORIES) || getRepositories().isEmpty();
+        return super.isPropDefault(aPropName);
     }
 
     /**
