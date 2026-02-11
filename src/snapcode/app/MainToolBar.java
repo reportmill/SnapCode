@@ -76,7 +76,7 @@ public class MainToolBar extends WorkspaceTool {
         searchText.setBorderRadius(8);
         searchText.setPromptText("Search");
         searchText.getLabel().setImage(Image.getImageForClassResource(TextPane.class, "Find.png"));
-        TextField.setBackLabelAlignAnimatedOnFocused(searchText, true);
+        ViewAnimUtils.configureTextFieldImageToAnimateLeftOnFocused(searchText);
 
         // Configure RunConfigMenuButton
         MenuButton runConfigMenuButton = getView("RunConfigMenuButton", MenuButton.class);
