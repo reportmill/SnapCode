@@ -4,15 +4,14 @@
     "description": "A Java IDE for education",
     "main": "index.js",
     "preferGlobal": true,
-    "repository": "",
-    "version": "2026.2.5",
+    "version": "2026.2.10",
     "jdeploy": {
         "jdk": true,
         "fallbackToUniversal": false,
         "publishTargets": [{
-            "name": "npm: snapcodejava",
+            "name": "npm: npm",
             "type": "NPM",
-            "url": "snapcodejava"
+            "url": ""
         }],
         "javaVersion": "25",
         "documentTypes": [{
@@ -21,7 +20,6 @@
             "mimetype": "text/java"
         }],
         "jar": "build/libs/SnapCodeAll-2026.02.jar",
-        "javafx": false,
         "title": "SnapCode",
         "downloadPage": {"platforms": ["all"]},
         "platformBundlesEnabled": false
@@ -33,7 +31,6 @@
         "yauzl": "^2.10.0",
         "shelljs": "^0.8.4"
     },
-    "license": "",
     "name": "snapcodejava",
     "files": ["jdeploy-bundle"],
     "scripts": {"test": "echo \"Error: no test specified\" && exit 1"},
