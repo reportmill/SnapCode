@@ -2,7 +2,6 @@ package snapcode.app;
 import snap.geom.HPos;
 import snap.geom.Insets;
 import snap.gfx.*;
-import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.util.SnapEnv;
 import snap.view.*;
@@ -222,8 +221,8 @@ public class HomePageView extends MarkDownView {
     private ChildView createViewForCreateNewListItem(MDNode listItemNode)
     {
         // Get link node and children
-        MDNode linkNode = listItemNode.getChildNodes()[0];
-        MDNode[] linkNodeChildren = linkNode.getChildNodes();
+        MDNode linkNode = listItemNode.getChildNodes().get(0);
+        List<MDNode> linkNodeChildren = linkNode.getChildNodes();
 
         // Get image node and create image view
         //MDNode imageNode = linkNodeChildren[0];
@@ -231,7 +230,7 @@ public class HomePageView extends MarkDownView {
         //imageNodeView.setMargin(0, 0, 0, 0);
 
         // Create text view
-        MDNode textNode = linkNodeChildren[1];
+        MDNode textNode = linkNodeChildren.get(1);
         View textNodeView = createViewForTextNode(textNode);
         textNodeView.setMargin(0, 0, 0, 0);
 
@@ -336,13 +335,13 @@ public class HomePageView extends MarkDownView {
     private ChildView createViewForOpenSamplesList(MDNode listNode)
     {
         // Create views for list items
-        MDNode[] listItemNodes = listNode.getChildNodes();
-        View[] listItemViews = ArrayUtils.map(listItemNodes, node -> createViewForOpenSamplesListItem(node), View.class);
+        List<MDNode> listItemNodes = listNode.getChildNodes();
+        List<View> listItemViews = ListUtils.map(listItemNodes, node -> createViewForOpenSamplesListItem(node));
 
         // Create ColView and add item views
         ChildView listNodeView = new RowView();
         listNodeView.setMargin(0, 20, 0, 30);
-        listNodeView.setChildren(listItemViews);
+        listNodeView.setChildren(listItemViews.toArray(new View[0]));
 
         // Clear directive
         setDirectiveValue("OpenSamples", null);
@@ -357,13 +356,13 @@ public class HomePageView extends MarkDownView {
     private ChildView createViewForOpenSamplesListItem(MDNode listItemNode)
     {
         // Get title node
-        MDNode[] listNodeChildren = listItemNode.getChildNodes();
-        MDNode titleNode = listNodeChildren[0];
+        List<MDNode> listNodeChildren = listItemNode.getChildNodes();
+        MDNode titleNode = listNodeChildren.get(0);
         Label titleLabel = new Label(titleNode.getText());
         titleLabel.setPropsString("Font:Arial Bold 14; Margin:10,10,5,15;");
 
         // Get link node
-        MDNode linkNode = listNodeChildren[1];
+        MDNode linkNode = listNodeChildren.get(1);
         String linkUrlAddr = linkNode.getOtherText();
         WebURL linkUrl = WebURL.getUrl(linkUrlAddr); assert (linkUrl != null);
         WebURL parentUrl = linkUrl.getParent();

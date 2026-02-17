@@ -1,12 +1,12 @@
 package snapcode.app;
 import snap.geom.Insets;
 import snap.gfx.*;
-import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snap.view.*;
 import snap.web.WebURL;
 import snap.util.MDNode;
 import snap.viewx.MarkDownView;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * The MarkDownView for SamplesPage.
@@ -131,12 +131,12 @@ public class SamplesPageView extends MarkDownView {
     private ChildView createViewForOpenSamplesList(MDNode listNode)
     {
         // Create views for list items
-        MDNode[] listItemNodes = listNode.getChildNodes();
-        View[] listItemViews = ArrayUtils.map(listItemNodes, node -> createViewForOpenSamplesListItem(node), View.class);
+        List<MDNode> listItemNodes = listNode.getChildNodes();
+        List<View> listItemViews = ListUtils.map(listItemNodes, node -> createViewForOpenSamplesListItem(node));
 
         // Calculate rows and create rowView array
         int COLUMN_COUNT = 5;
-        int rowCount = (int) Math.ceil(listItemViews.length / (double) COLUMN_COUNT);
+        int rowCount = (int) Math.ceil(listItemViews.size() / (double) COLUMN_COUNT);
         RowView[] rowViews = new RowView[rowCount];
 
         // Add items to row views
@@ -144,12 +144,12 @@ public class SamplesPageView extends MarkDownView {
 
             // Get views in row
             int startIndex = i * COLUMN_COUNT;
-            int endIndex = Math.min(startIndex + COLUMN_COUNT, listItemViews.length);
-            View[] rowItemViews = Arrays.copyOfRange(listItemViews, startIndex, endIndex);
+            int endIndex = Math.min(startIndex + COLUMN_COUNT, listItemViews.size());
+            List<View> rowItemViews = listItemViews.subList(startIndex, endIndex);
 
             // Create rowView and add row item views
             RowView rowView = rowViews[i] = new RowView();
-            rowView.setChildren(rowItemViews);
+            rowView.setChildren(rowItemViews.toArray(new View[0]));
         }
 
         // Create ColView and add rows
@@ -170,13 +170,13 @@ public class SamplesPageView extends MarkDownView {
     private ChildView createViewForOpenSamplesListItem(MDNode listItemNode)
     {
         // Get title node
-        MDNode[] listNodeChildren = listItemNode.getChildNodes();
-        MDNode titleNode = listNodeChildren[0];
+        List<MDNode> listNodeChildren = listItemNode.getChildNodes();
+        MDNode titleNode = listNodeChildren.get(0);
         Label titleLabel = new Label(titleNode.getText());
         titleLabel.setPropsString("Font:Arial Bold 14; Margin:10,10,5,15;");
 
         // Get link node
-        MDNode linkNode = listNodeChildren[1];
+        MDNode linkNode = listNodeChildren.get(1);
         String linkUrlAddr = linkNode.getOtherText();
         WebURL linkUrl = WebURL.getUrl(linkUrlAddr); assert (linkUrl != null);
         WebURL parentUrl = linkUrl.getParent();
