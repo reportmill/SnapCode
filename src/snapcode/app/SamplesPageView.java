@@ -4,14 +4,14 @@ import snap.gfx.*;
 import snap.util.ListUtils;
 import snap.view.*;
 import snap.web.WebURL;
-import snap.util.MDNode;
-import snap.viewx.MarkDownView;
+import snap.util.MarkdownNode;
+import snap.viewx.MarkdownView;
 import java.util.List;
 
 /**
- * The MarkDownView for SamplesPage.
+ * The MarkdownView for SamplesPage.
  */
-public class SamplesPageView extends MarkDownView {
+public class SamplesPageView extends MarkdownView {
 
     // The SamplesPage
     private SamplesPage _samplesPage;
@@ -44,10 +44,10 @@ public class SamplesPageView extends MarkDownView {
      * Override to add header.
      */
     @Override
-    public void setMarkDown(String markDown)
+    public void setMarkdown(String markdownStr)
     {
         addHeader();
-        super.setMarkDown(markDown);
+        super.setMarkdown(markdownStr);
     }
 
     /**
@@ -71,7 +71,7 @@ public class SamplesPageView extends MarkDownView {
      * Override.
      */
     @Override
-    protected View createViewForHeaderNode(MDNode headerNode)
+    protected View createViewForHeaderNode(MarkdownNode headerNode)
     {
         // Add "Open Greenfoot Scenario Could Id..." to Greefoot Projects header
         if (headerNode.getText().equals("Greenfoot projects")) {
@@ -101,7 +101,7 @@ public class SamplesPageView extends MarkDownView {
      * Override to remap CreateNew list.
      */
     @Override
-    protected ChildView createViewForListNode(MDNode listNode)
+    protected ChildView createViewForListNode(MarkdownNode listNode)
     {
         // Handle OpenSamples
         if (isDirectiveSet("OpenSamples"))
@@ -115,7 +115,7 @@ public class SamplesPageView extends MarkDownView {
      * Override to remap CreateNew list.
      */
     @Override
-    protected ChildView createViewForListItemNode(MDNode listItemNode)
+    protected ChildView createViewForListItemNode(MarkdownNode listItemNode)
     {
         // Handle OpenSamples
         if (isDirectiveSet("OpenSamples"))
@@ -128,10 +128,10 @@ public class SamplesPageView extends MarkDownView {
     /**
      * Creates a view for "Open Samples" list.
      */
-    private ChildView createViewForOpenSamplesList(MDNode listNode)
+    private ChildView createViewForOpenSamplesList(MarkdownNode listNode)
     {
         // Create views for list items
-        List<MDNode> listItemNodes = listNode.getChildNodes();
+        List<MarkdownNode> listItemNodes = listNode.getChildNodes();
         List<View> listItemViews = ListUtils.map(listItemNodes, node -> createViewForOpenSamplesListItem(node));
 
         // Calculate rows and create rowView array
@@ -167,16 +167,16 @@ public class SamplesPageView extends MarkDownView {
     /**
      * Creates a view for "Open Samples" list item.
      */
-    private ChildView createViewForOpenSamplesListItem(MDNode listItemNode)
+    private ChildView createViewForOpenSamplesListItem(MarkdownNode listItemNode)
     {
         // Get title node
-        List<MDNode> listNodeChildren = listItemNode.getChildNodes();
-        MDNode titleNode = listNodeChildren.get(0);
+        List<MarkdownNode> listNodeChildren = listItemNode.getChildNodes();
+        MarkdownNode titleNode = listNodeChildren.get(0);
         Label titleLabel = new Label(titleNode.getText());
         titleLabel.setPropsString("Font:Arial Bold 14; Margin:10,10,5,15;");
 
         // Get link node
-        MDNode linkNode = listNodeChildren.get(1);
+        MarkdownNode linkNode = listNodeChildren.get(1);
         String linkUrlAddr = linkNode.getOtherText();
         WebURL linkUrl = WebURL.getUrl(linkUrlAddr); assert (linkUrl != null);
         WebURL parentUrl = linkUrl.getParent();

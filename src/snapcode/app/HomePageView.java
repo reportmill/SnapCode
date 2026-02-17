@@ -7,14 +7,14 @@ import snap.util.SnapEnv;
 import snap.view.*;
 import snap.web.RecentFiles;
 import snap.web.WebURL;
-import snap.util.MDNode;
-import snap.viewx.MarkDownView;
+import snap.util.MarkdownNode;
+import snap.viewx.MarkdownView;
 import java.util.List;
 
 /**
- * The MarkDownView for HomePage.
+ * The MarkdownView for HomePage.
  */
-public class HomePageView extends MarkDownView {
+public class HomePageView extends MarkdownView {
 
     // The HomePage
     private HomePage _homePage;
@@ -42,10 +42,10 @@ public class HomePageView extends MarkDownView {
      * Override to add header.
      */
     @Override
-    public void setMarkDown(String markDown)
+    public void setMarkdown(String markdownStr)
     {
         addHeader();
-        super.setMarkDown(markDown);
+        super.setMarkdown(markdownStr);
     }
 
     /**
@@ -77,7 +77,7 @@ public class HomePageView extends MarkDownView {
      * Override.
      */
     @Override
-    protected View createViewForHeaderNode(MDNode headerNode)
+    protected View createViewForHeaderNode(MarkdownNode headerNode)
     {
         switch (headerNode.getText()) {
 
@@ -167,7 +167,7 @@ public class HomePageView extends MarkDownView {
      * Override to remap CreateNew list.
      */
     @Override
-    protected ChildView createViewForListNode(MDNode listNode)
+    protected ChildView createViewForListNode(MarkdownNode listNode)
     {
         // Handle CreateNew, OpenRecent, OpenSamples
         if (isDirectiveSet("CreateNew"))
@@ -185,7 +185,7 @@ public class HomePageView extends MarkDownView {
      * Override to remap CreateNew list.
      */
     @Override
-    protected ChildView createViewForListItemNode(MDNode listItemNode)
+    protected ChildView createViewForListItemNode(MarkdownNode listItemNode)
     {
         // Handle CreateNew, OpenSamples
         if (isDirectiveSet("CreateNew"))
@@ -200,7 +200,7 @@ public class HomePageView extends MarkDownView {
     /**
      * Creates a view for "Create New" list.
      */
-    private ChildView createViewForCreateNewList(MDNode listNode)
+    private ChildView createViewForCreateNewList(MarkdownNode listNode)
     {
         // Do normal version
         ChildView listNodeView = super.createViewForListNode(listNode);
@@ -218,19 +218,19 @@ public class HomePageView extends MarkDownView {
     /**
      * Creates a view for "Create New" list item.
      */
-    private ChildView createViewForCreateNewListItem(MDNode listItemNode)
+    private ChildView createViewForCreateNewListItem(MarkdownNode listItemNode)
     {
         // Get link node and children
-        MDNode linkNode = listItemNode.getChildNodes().get(0);
-        List<MDNode> linkNodeChildren = linkNode.getChildNodes();
+        MarkdownNode linkNode = listItemNode.getChildNodes().get(0);
+        List<MarkdownNode> linkNodeChildren = linkNode.getChildNodes();
 
         // Get image node and create image view
-        //MDNode imageNode = linkNodeChildren[0];
+        //MarkdownNode imageNode = linkNodeChildren.get(0);
         //View imageNodeView = createViewForImageNode(imageNode);
         //imageNodeView.setMargin(0, 0, 0, 0);
 
         // Create text view
-        MDNode textNode = linkNodeChildren.get(1);
+        MarkdownNode textNode = linkNodeChildren.get(1);
         View textNodeView = createViewForTextNode(textNode);
         textNodeView.setMargin(0, 0, 0, 0);
 
@@ -332,10 +332,10 @@ public class HomePageView extends MarkDownView {
     /**
      * Creates a view for "Open Samples" list.
      */
-    private ChildView createViewForOpenSamplesList(MDNode listNode)
+    private ChildView createViewForOpenSamplesList(MarkdownNode listNode)
     {
         // Create views for list items
-        List<MDNode> listItemNodes = listNode.getChildNodes();
+        List<MarkdownNode> listItemNodes = listNode.getChildNodes();
         List<View> listItemViews = ListUtils.map(listItemNodes, node -> createViewForOpenSamplesListItem(node));
 
         // Create ColView and add item views
@@ -353,16 +353,16 @@ public class HomePageView extends MarkDownView {
     /**
      * Creates a view for "Open Samples" list item.
      */
-    private ChildView createViewForOpenSamplesListItem(MDNode listItemNode)
+    private ChildView createViewForOpenSamplesListItem(MarkdownNode listItemNode)
     {
         // Get title node
-        List<MDNode> listNodeChildren = listItemNode.getChildNodes();
-        MDNode titleNode = listNodeChildren.get(0);
+        List<MarkdownNode> listNodeChildren = listItemNode.getChildNodes();
+        MarkdownNode titleNode = listNodeChildren.get(0);
         Label titleLabel = new Label(titleNode.getText());
         titleLabel.setPropsString("Font:Arial Bold 14; Margin:10,10,5,15;");
 
         // Get link node
-        MDNode linkNode = listNodeChildren.get(1);
+        MarkdownNode linkNode = listNodeChildren.get(1);
         String linkUrlAddr = linkNode.getOtherText();
         WebURL linkUrl = WebURL.getUrl(linkUrlAddr); assert (linkUrl != null);
         WebURL parentUrl = linkUrl.getParent();

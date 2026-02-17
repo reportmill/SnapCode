@@ -3,7 +3,7 @@
  */
 package snapcode.util;
 
-import snap.viewx.MarkDownView;
+import snap.viewx.MarkdownView;
 
 /**
  * This class represents a section of help from a HelpFile.
@@ -22,8 +22,8 @@ public class HelpSection {
     // The content
     private String  _content;
 
-    // The MarkDownView
-    private MarkDownView _markDownView;
+    // The MarkdownView
+    private MarkdownView _markdownView;
 
     /**
      * Constructor.
@@ -80,19 +80,19 @@ public class HelpSection {
     }
 
     /**
-     * Returns the MarkDownView.
+     * Returns the MarkdownView.
      */
-    public MarkDownView getMarkDownView()
+    public MarkdownView getMarkdownView()
     {
         // If already set, just return
-        if (_markDownView != null) return _markDownView;
+        if (_markdownView != null) return _markdownView;
 
         // Create and configure
-        MarkDownView markDownView = new MarkDownView();
-        markDownView.setSourceUrl(_helpFile.getSourceURL());
-        markDownView.setMarkDown("# " + _sectionText);
+        MarkdownView markdownView = new MarkdownView();
+        markdownView.setSourceUrl(_helpFile.getSourceURL());
+        markdownView.setMarkdown("# " + _sectionText);
 
         // Set and return
-        return _markDownView = markDownView;
+        return _markdownView = markdownView;
     }
 }

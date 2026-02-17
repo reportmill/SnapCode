@@ -216,7 +216,7 @@ public class HomePage extends WebPage {
     {
         WebURL homePageUrl = getURL();
         String homePageText = homePageUrl.getText();
-        _homePageView.setMarkDown(homePageText);
+        _homePageView.setMarkdown(homePageText);
     }
 
     /**

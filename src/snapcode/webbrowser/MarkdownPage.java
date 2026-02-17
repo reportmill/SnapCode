@@ -4,20 +4,20 @@
 package snapcode.webbrowser;
 import snap.view.*;
 import snap.web.WebFile;
-import snap.viewx.MarkDownView;
+import snap.viewx.MarkdownView;
 
 /**
  * A page for mark down.
  */
-public class MarkDownPage extends WebPage {
+public class MarkdownPage extends WebPage {
 
-    // The MarkDownView
-    private MarkDownView _markdownView;
+    // The MarkdownView
+    private MarkdownView _markdownView;
 
     /**
      * Constructor.
      */
-    public MarkDownPage()
+    public MarkdownPage()
     {
         super();
     }
@@ -28,7 +28,7 @@ public class MarkDownPage extends WebPage {
     @Override
     protected View createUI()
     {
-        _markdownView = new MarkDownView();
+        _markdownView = new MarkdownView();
         _markdownView.setGrowWidth(true);
         _markdownView.setGrowHeight(true);
 
@@ -48,6 +48,6 @@ public class MarkDownPage extends WebPage {
     {
         WebFile file = getFile();
         String fileText = file.getText();
-        _markdownView.setMarkDown(fileText);
+        _markdownView.setMarkdown(fileText);
     }
 }

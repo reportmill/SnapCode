@@ -59,7 +59,7 @@ public class PagePaneBrowser extends WebBrowser {
             case "snp": return SnapBuilderPage.class;
 
             // Handle mark down file
-            case "md": return MarkDownPage.class;
+            case "md": return MarkdownPage.class;
 
             // Handle build file (build.snapcode)
             case "snapcode": return BuildFileTool.BuildFilePage.class;

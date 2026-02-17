@@ -60,6 +60,6 @@ public class SamplesPage extends WebPage {
     {
         WebURL homePageUrl = getURL();
         String homePageText = homePageUrl.getText();
-        _samplesPageView.setMarkDown(homePageText);
+        _samplesPageView.setMarkdown(homePageText);
     }
 }

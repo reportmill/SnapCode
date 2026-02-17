@@ -5,7 +5,6 @@ package snapcode.project;
 import javakit.parse.*;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
-import snap.parse.Tokenizer;
 import snap.props.PropChange;
 import snap.text.TextAgent;
 import snap.text.TextModel;
@@ -184,7 +183,7 @@ public class JavaAgent extends TextAgent {
         String superClassName = "Object";
 
         if (_isJMD) {
-            javaStr = MDUtils.getJeplForJMD(className, javaStr);
+            javaStr = MarkdownUtils.getJeplForJMD(className, javaStr);
             return javaParser.parseJeplFile(javaStr, className, importNames, superClassName, _javaTextModel);
         }
         return javaParser.parseJeplFile(javaStr, className, importNames, superClassName, _javaTextModel);

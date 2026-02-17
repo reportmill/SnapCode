@@ -2,8 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.apptools;
-import snap.util.MDNode;
-import snap.viewx.MarkDownView;
+import snap.util.MarkdownNode;
+import snap.viewx.MarkdownView;
 import snapcode.javatext.JavaTextArea;
 import snap.geom.Insets;
 import snap.gfx.Color;
@@ -93,7 +93,7 @@ public class HelpTool extends WorkspaceTool {
         _selSection = aSection;
 
         // Update SectionTextArea
-        MarkDownView sectionText = aSection.getMarkDownView();
+        MarkdownView sectionText = aSection.getMarkdownView();
         sectionText.setBorderRadius(4);
         _helpTextScrollView.setContent(sectionText);
     }
@@ -301,12 +301,12 @@ public class HelpTool extends WorkspaceTool {
      */
     private String getHelpCode()
     {
-        // Get current section and MarkDown doc
+        // Get current section and Markdown doc
         HelpSection selSection = getSelSection();
-        MarkDownView markDown = selSection.getMarkDownView();
+        MarkdownView markdownView = selSection.getMarkdownView();
 
         // Return selected code block node text
-        MDNode codeBlockNode = markDown.getSelCodeBlockNode();
+        MarkdownNode codeBlockNode = markdownView.getSelCodeBlockNode();
         return codeBlockNode != null ? codeBlockNode.getText() : null;
     }
 
