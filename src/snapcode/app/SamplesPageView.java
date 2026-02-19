@@ -132,7 +132,7 @@ public class SamplesPageView extends MarkdownView {
     {
         // Create views for list items
         List<MarkdownNode> listItemNodes = listNode.getChildNodes();
-        List<View> listItemViews = ListUtils.map(listItemNodes, node -> createViewForOpenSamplesListItem(node));
+        List<View> listItemViews = ListUtils.map(listItemNodes, this::createViewForOpenSamplesListItem);
 
         // Calculate rows and create rowView array
         int COLUMN_COUNT = 5;
@@ -170,13 +170,13 @@ public class SamplesPageView extends MarkdownView {
     private ChildView createViewForOpenSamplesListItem(MarkdownNode listItemNode)
     {
         // Get title node
-        List<MarkdownNode> listNodeChildren = listItemNode.getChildNodes();
-        MarkdownNode titleNode = listNodeChildren.get(0);
+        List<MarkdownNode> listItemInlineNodes = listItemNode.getFirstChild().getChildNodes();
+        MarkdownNode titleNode = listItemInlineNodes.get(0);
         Label titleLabel = new Label(titleNode.getText());
         titleLabel.setPropsString("Font:Arial Bold 14; Margin:10,10,5,15;");
 
         // Get link node
-        MarkdownNode linkNode = listNodeChildren.get(1);
+        MarkdownNode linkNode = listItemInlineNodes.get(1);
         String linkUrlAddr = linkNode.getOtherText();
         WebURL linkUrl = WebURL.getUrl(linkUrlAddr); assert (linkUrl != null);
         WebURL parentUrl = linkUrl.getParent();

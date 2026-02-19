@@ -221,7 +221,8 @@ public class HomePageView extends MarkdownView {
     private ChildView createViewForCreateNewListItem(MarkdownNode listItemNode)
     {
         // Get link node and children
-        MarkdownNode linkNode = listItemNode.getChildNodes().get(0);
+        MarkdownNode listItemParagraph = listItemNode.getFirstChild();
+        MarkdownNode linkNode = listItemParagraph.getFirstChild();
         List<MarkdownNode> linkNodeChildren = linkNode.getChildNodes();
 
         // Get image node and create image view
@@ -336,7 +337,7 @@ public class HomePageView extends MarkdownView {
     {
         // Create views for list items
         List<MarkdownNode> listItemNodes = listNode.getChildNodes();
-        List<View> listItemViews = ListUtils.map(listItemNodes, node -> createViewForOpenSamplesListItem(node));
+        List<View> listItemViews = ListUtils.map(listItemNodes, this::createViewForOpenSamplesListItem);
 
         // Create ColView and add item views
         ChildView listNodeView = new RowView();
@@ -356,13 +357,13 @@ public class HomePageView extends MarkdownView {
     private ChildView createViewForOpenSamplesListItem(MarkdownNode listItemNode)
     {
         // Get title node
-        List<MarkdownNode> listNodeChildren = listItemNode.getChildNodes();
-        MarkdownNode titleNode = listNodeChildren.get(0);
+        List<MarkdownNode> listItemInlineNodes = listItemNode.getFirstChild().getChildNodes();
+        MarkdownNode titleNode = listItemInlineNodes.get(0);
         Label titleLabel = new Label(titleNode.getText());
         titleLabel.setPropsString("Font:Arial Bold 14; Margin:10,10,5,15;");
 
         // Get link node
-        MarkdownNode linkNode = listNodeChildren.get(1);
+        MarkdownNode linkNode = listItemInlineNodes.get(1);
         String linkUrlAddr = linkNode.getOtherText();
         WebURL linkUrl = WebURL.getUrl(linkUrlAddr); assert (linkUrl != null);
         WebURL parentUrl = linkUrl.getParent();
