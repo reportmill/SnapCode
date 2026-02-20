@@ -164,7 +164,7 @@ public class HomePageView extends MarkdownView {
     }
 
     /**
-     * Override to remap CreateNew list.
+     * Override to remap lists: CreateNew, OpenRecent and OpenSamples.
      */
     @Override
     protected ChildView createViewForListNode(MarkdownNode listNode)
@@ -182,36 +182,23 @@ public class HomePageView extends MarkdownView {
     }
 
     /**
-     * Override to remap CreateNew list.
-     */
-    @Override
-    protected ChildView createViewForListItemNode(MarkdownNode listItemNode)
-    {
-        // Handle CreateNew, OpenSamples
-        if (isDirectiveSet("CreateNew"))
-            return createViewForCreateNewListItem(listItemNode);
-        if (isDirectiveSet("OpenSamples"))
-            return createViewForOpenSamplesListItem(listItemNode);
-
-        // Do normal version
-        return super.createViewForListItemNode(listItemNode);
-    }
-
-    /**
      * Creates a view for "Create New" list.
      */
     private ChildView createViewForCreateNewList(MarkdownNode listNode)
     {
-        // Do normal version
-        ChildView listNodeView = super.createViewForListNode(listNode);
+        // Get views for list items
+        List<MarkdownNode> listItemNodes = listNode.getChildNodes();
+        List<View> listItemViews = ListUtils.map(listItemNodes, this::createViewForCreateNewListItem);
         setDirectiveValue("CreateNew", null);
 
         // Replace list view with row
         RowView newListView = new RowView();
-        newListView.setMargin(listNodeView.getMargin());
+        newListView.setMargin(new Insets(18, 8, 18, 8));
         newListView.setPadding(0, 0, 0, 20);
         newListView.setSpacing(20);
-        newListView.setChildren(listNodeView.getChildrenArray());
+        newListView.setChildren(listItemViews.toArray(new View[0]));
+
+        // Return
         return newListView;
     }
 

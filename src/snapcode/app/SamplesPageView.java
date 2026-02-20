@@ -101,34 +101,20 @@ public class SamplesPageView extends MarkdownView {
      * Override to remap CreateNew list.
      */
     @Override
-    protected ChildView createViewForListNode(MarkdownNode listNode)
+    protected void addViewForListNode(MarkdownNode listNode)
     {
         // Handle OpenSamples
         if (isDirectiveSet("OpenSamples"))
-            return createViewForOpenSamplesList(listNode);
+            addViewForOpenSamplesList(listNode);
 
         // Do normal version
-        return super.createViewForListNode(listNode);
-    }
-
-    /**
-     * Override to remap CreateNew list.
-     */
-    @Override
-    protected ChildView createViewForListItemNode(MarkdownNode listItemNode)
-    {
-        // Handle OpenSamples
-        if (isDirectiveSet("OpenSamples"))
-            return createViewForOpenSamplesListItem(listItemNode);
-
-        // Do normal version
-        return super.createViewForListItemNode(listItemNode);
+        else super.addViewForListNode(listNode);
     }
 
     /**
      * Creates a view for "Open Samples" list.
      */
-    private ChildView createViewForOpenSamplesList(MarkdownNode listNode)
+    private void addViewForOpenSamplesList(MarkdownNode listNode)
     {
         // Create views for list items
         List<MarkdownNode> listItemNodes = listNode.getChildNodes();
@@ -160,8 +146,8 @@ public class SamplesPageView extends MarkdownView {
         // Clear directive
         setDirectiveValue("OpenSamples", null);
 
-        // Return
-        return listNodeView;
+        // Add view for list node
+        addViewForNode(listNodeView, listNode);
     }
 
     /**
