@@ -5,8 +5,8 @@ plugins {
     id 'maven-publish'
 }
 
-group 'com.reportmill'
-version new SimpleDateFormat("yyyy.MM").format(new Date())
+group = 'com.reportmill'
+version = new SimpleDateFormat("yyyy.MM").format(new Date())
 
 sourceSets.main.java.srcDirs = ['src']
 sourceSets.main.resources.srcDirs = ['src']
@@ -15,19 +15,12 @@ java {
     toolchain { languageVersion = JavaLanguageVersion.of(17) }
 }
 
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
 dependencies {
 
-    // SnapKit project
     implementation project(':SnapKit')
-
-    // SnapKitGL project
     implementation project(':SnapKitGL')
-
-    // SnapBuilder project
     implementation project(':SnapBuilder')
 
     // JGit
@@ -46,7 +39,7 @@ application {
 /**
  * Custom task to build jar that includes all dependencies.
  */
-task buildFullJar(type: Jar) {
+tasks.register('buildFullJar', Jar) {
     archiveBaseName = 'SnapCodeAll'
     manifest {
         attributes(
@@ -58,14 +51,14 @@ task buildFullJar(type: Jar) {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     exclude('**/test/**', '/META-INF/*.SF', '/META-INF/*.RSA', '/com/teamdev/**') //, '**/org/**', '**/sun/**')
-    processResources { finalizedBy ('buildInfo') }
+    processResources { finalizedBy('buildInfo') }
     with jar
     dependsOn build
     duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
-task copyCJ(type: Copy) {
-    from (
+tasks.register('copyCJ', Copy) {
+    from(
             "../SnapKit/cjdom.js",
             "../SnapKit/build/libs/SnapKit-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar",
             "../SnapBuilder/build/libs/SnapBuilder-" + new SimpleDateFormat("yyyy.MM").format(new Date()) + ".jar",
@@ -75,8 +68,8 @@ task copyCJ(type: Copy) {
     dependsOn buildFullJar
 }
 
-task copyGT(type: Copy) {
-    from (
+tasks.register('copyGT', Copy) {
+    from(
             "../SnapCode/build/classes/java/main/GitTest.class"
     )
     into "build/libs"
@@ -101,7 +94,7 @@ publishing {
 
     publications {
         gpr(MavenPublication) {
-            artifactId 'SnapCodeAll'
+            artifactId = 'SnapCodeAll'
             artifact buildFullJar // from(components.java)
             pom.withXml {
                 asNode().dependencies.dependency.each { dep -> dep.parent().remove(dep) }
@@ -110,7 +103,7 @@ publishing {
     }
 }
 
-task copyDependencies(type: Copy) {
+tasks.register('copyDependencies', Copy) {
     from configurations.runtimeClasspath
     into 'build/libs-all'
 }
