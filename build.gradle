@@ -39,7 +39,9 @@ dependencies {
     implementation project(':Greenfoot')
 }
 
-mainClassName = 'snapcode.app.App'
+application {
+    mainClass = 'snapcode.app.App'
+}
 
 /**
  * Custom task to build jar that includes all dependencies.
