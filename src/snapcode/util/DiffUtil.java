@@ -1862,10 +1862,8 @@ public class DiffUtil {
      * @param text2 Ignored.
      * @param diffs Array of Diff objects for text1 to text2.
      * @return LinkedList of Patch objects.
-     * @deprecated Prefer patch_make(String text1, LinkedList<Diff> diffs).
      */
-    public LinkedList<Patch> patch_make(String text1, String text2,
-                                        LinkedList<Diff> diffs)
+    public LinkedList<Patch> patch_make(String text1, String text2, LinkedList<Diff> diffs)
     {
         return patch_make(text1, diffs);
     }
