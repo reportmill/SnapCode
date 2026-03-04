@@ -21,7 +21,7 @@ public class RunToolUtils {
         if (!fileType.equals("java"))
             return false;
         String fileText = aFile.getText();
-        return fileText.contains(" main(String");
+        return fileText.contains(" main(");
     }
 
     /**
