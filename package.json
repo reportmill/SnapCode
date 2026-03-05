@@ -19,7 +19,7 @@
             "extension": "java",
             "mimetype": "text/java"
         }],
-        "jar": "build/libs/SnapCodeAll-2026.02.jar",
+        "jar": "build/libs/SnapCodeAll-2026.03.jar",
         "title": "SnapCode",
         "downloadPage": {"platforms": ["all"]},
         "platformBundlesEnabled": false
