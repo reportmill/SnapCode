@@ -157,7 +157,7 @@ public class RunConfigsTool extends WorkspaceTool {
         MenuButton rmb = getView("RunMenuButton", MenuButton.class);
         rmb.setMenuItems(getRunMenuButtonItems());
         for (MenuItem mi : rmb.getMenuItems())
-            mi.setOwner(this);
+            mi.setController(this);
     }
 
     /**

@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * This class is the top level controller for an open project.
  */
-public class WorkspacePane extends ViewOwner {
+public class WorkspacePane extends ViewController {
 
     // The Workspace
     private Workspace _workspace;

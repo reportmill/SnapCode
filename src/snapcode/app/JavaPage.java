@@ -45,7 +45,7 @@ public class JavaPage extends WebPage {
     WorkspacePane getWorkspacePane()
     {
         WebBrowser browser = getBrowser();
-        return browser.getOwner(WorkspacePane.class);
+        return browser.getController(WorkspacePane.class);
     }
 
     /**

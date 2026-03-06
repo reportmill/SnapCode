@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This view owner class manages showing variables for current stack frame in the debugger.
+ * This view controller class manages showing variables for current stack frame in the debugger.
  */
 public class DebugVarsPane extends WorkspaceTool {
 

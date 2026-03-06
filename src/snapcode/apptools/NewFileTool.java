@@ -441,7 +441,7 @@ public class NewFileTool extends WorkspaceTool {
     /**
      * A panel to allow user to paste text for new Java file.
      */
-    private static class PasteJavaTextPane extends ViewOwner {
+    private static class PasteJavaTextPane extends ViewController {
 
         // The paste text
         private String _pasteText;

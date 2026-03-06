@@ -866,7 +866,7 @@ public class JavaTextArea extends TextArea {
     public WebFile getJavaFile()
     {
         if (_javaFile != null) return _javaFile;
-        JavaTextPane javaTextPane = getOwner(JavaTextPane.class);
+        JavaTextPane javaTextPane = getController(JavaTextPane.class);
         if (javaTextPane != null)
             _javaFile = javaTextPane.getTextFile();
         return _javaFile;
@@ -947,7 +947,7 @@ public class JavaTextArea extends TextArea {
      */
     public int getProgramCounterLine()
     {
-        JavaTextPane javaTextPane = getOwner(JavaTextPane.class);
+        JavaTextPane javaTextPane = getController(JavaTextPane.class);
         if (javaTextPane == null)
             return -1;
         return javaTextPane.getProgramCounterLine();

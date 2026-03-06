@@ -11,7 +11,7 @@ import java.util.Objects;
 /**
  * This class manages a list of task runners.
  */
-public class TaskManager extends ViewOwner {
+public class TaskManager extends ViewController {
 
     // The currently running tasks
     private List<TaskRunner<?>> _tasks;

@@ -30,7 +30,7 @@ public class SnapPage extends WebPage {
 
         // Load UI
         View superUI = null;
-        try { superUI = _content = UILoader.loadViewForOwnerAndUrl(this, getFile().getUrl()); }
+        try { superUI = _content = UILoader.loadViewForControllerAndUrl(this, getFile().getUrl()); }
         catch (Exception e) { return createExceptionUI(e); }
         finally { ViewArchiver.setUseRealClass(true); }
 

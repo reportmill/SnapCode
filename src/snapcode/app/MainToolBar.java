@@ -50,7 +50,7 @@ public class MainToolBar extends WorkspaceTool {
         greenfootButton.setShowArea(false);
         greenfootButton.setImage(Image.getImageForClassResource(getClass(), "pkg.images/Greenfoot.png"));
         getUI(ChildView.class).addChild(greenfootButton, getView("HomeButton").indexInParent() + 1);
-        greenfootButton.setOwner(this);
+        greenfootButton.setController(this);
     }
 
     /**

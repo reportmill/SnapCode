@@ -250,7 +250,7 @@ public class WorkspaceTools {
     /**
      * Sets given tray UI visible - using anim if parent onscreen.
      */
-    private void setTrayVisible(ViewOwner aTray, boolean aValue)
+    private void setTrayVisible(ViewController aTray, boolean aValue)
     {
         View trayUI = aTray.getUI();
         View trayParent = trayUI.getParent();

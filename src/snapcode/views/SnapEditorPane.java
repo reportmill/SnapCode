@@ -11,7 +11,7 @@ import snap.view.*;
 /**
  * This class manages a SnapEditor.
  */
-public class SnapEditorPane extends ViewOwner {
+public class SnapEditorPane extends ViewController {
 
     // The main editor UI
     private SnapEditor _editor;
@@ -180,7 +180,7 @@ public class SnapEditorPane extends ViewOwner {
                 nodeViewLabel.setFill(Color.LIGHTGRAY);
             nodeViewLabel.addEventHandler(this::handleNodePathLabelMouseRelease, MouseRelease);
             _nodePathBox.addChild(nodeViewLabel, 0);
-            nodeViewLabel.setOwner(this);
+            nodeViewLabel.setController(this);
 
             // Iterate
             nodeView = nodeView.getNodeViewParent();

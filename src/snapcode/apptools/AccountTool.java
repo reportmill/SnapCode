@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * This class manages settings for current user.
  */
-public class AccountTool extends ViewOwner {
+public class AccountTool extends ViewController {
 
     // The workspace pane
     private WorkspacePane _workspacePane;

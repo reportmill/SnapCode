@@ -4,7 +4,6 @@
 package snapcode.javatext;
 import javakit.parse.*;
 import snap.text.TextModel;
-import snapcode.project.BuildIssue;
 import snapcode.project.JavaAgent;
 import snapcode.project.JavaTextModel;
 import javakit.resolver.JavaDecl;
@@ -107,7 +106,7 @@ public class JavaTextPane extends TextPane {
 
         // Add extra buttons
         RowView toolBarRow = getView("ToolBar", RowView.class);
-        View extraButtons = UILoader.loadViewForOwnerAndString(this, EXTRA_TOOLBAR_BUTTONS_UI);
+        View extraButtons = UILoader.loadViewForControllerAndString(this, EXTRA_TOOLBAR_BUTTONS_UI);
         toolBarRow.addChild(extraButtons, toolBarRow.getChildCount() - 1);
 
         // Add listener to initialize settings menu

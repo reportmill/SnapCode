@@ -379,8 +379,8 @@ var button = new Button("Hello World");
 button.setPrefSize(400, 400);
 
 // Create controller for button and show window
-ViewOwner viewOwner = new ViewOwner(button);
-viewOwner.setWindowVisible(true);
+ViewController viewController = new ViewController(button);
+viewController.setWindowVisible(true);
 ```
 
 # Animate UI

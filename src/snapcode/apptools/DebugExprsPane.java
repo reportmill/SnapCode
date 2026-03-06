@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This view owner class manages evaluating and showing expressions in the debugger.
+ * This view controller class manages evaluating and showing expressions in the debugger.
  */
 public class DebugExprsPane extends WorkspaceTool {
 

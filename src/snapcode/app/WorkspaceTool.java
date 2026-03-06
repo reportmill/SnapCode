@@ -4,7 +4,7 @@ import snap.view.ViewUtils;
 import snapcode.apptools.FilesTool;
 import snapcode.project.Project;
 import snapcode.project.Workspace;
-import snap.view.ViewOwner;
+import snap.view.ViewController;
 import snapcode.webbrowser.WebBrowser;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * This is the base class for workspace tools.
  */
-public class WorkspaceTool extends ViewOwner {
+public class WorkspaceTool extends ViewController {
 
     // The WorkspacePane
     protected WorkspacePane  _workspacePane;

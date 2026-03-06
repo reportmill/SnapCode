@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * A class to hold TabView to show WorkspaceTool instances (ProblemsTool, DebugTool, etc.).
  */
-public class ToolTray extends ViewOwner {
+public class ToolTray extends ViewController {
 
     // The side
     private Side  _side;
@@ -152,9 +152,9 @@ public class ToolTray extends ViewOwner {
     protected void resetUI()
     {
         Tab selTab = _tabView.getSelItem();
-        ViewOwner viewOwner = selTab != null ? selTab.getContentOwner() : null;
-        if (viewOwner != null)
-            viewOwner.resetLater();
+        ViewController viewController = selTab != null ? selTab.getContentOwner() : null;
+        if (viewController != null)
+            viewController.resetLater();
     }
 
     /**

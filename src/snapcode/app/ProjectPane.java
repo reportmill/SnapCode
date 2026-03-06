@@ -12,7 +12,7 @@ import snap.web.WebSite;
 /**
  * A class to manage UI aspects of a Project.
  */
-public class ProjectPane extends ViewOwner {
+public class ProjectPane extends ViewController {
 
     // The WorkspacePane that owns this ProjectPane
     private WorkspacePane _workspacePane;

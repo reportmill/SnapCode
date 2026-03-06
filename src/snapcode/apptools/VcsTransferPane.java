@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Runs panel and transfers files for a Project WebSite.
  */
-public class VcsTransferPane extends ViewOwner {
+public class VcsTransferPane extends ViewController {
 
     // The VersionControlTool
     private VersionControlTool _versionControlTool;

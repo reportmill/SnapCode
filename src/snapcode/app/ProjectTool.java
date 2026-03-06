@@ -1,7 +1,7 @@
 package snapcode.app;
+import snap.view.ViewController;
 import snapcode.project.Project;
 import snapcode.project.Workspace;
-import snap.view.ViewOwner;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snapcode.webbrowser.WebBrowser;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * This class is the base for support panes specific to individual projects.
  */
-public class ProjectTool extends ViewOwner {
+public class ProjectTool extends ViewController {
 
     // The WorkspacePane
     protected WorkspacePane  _workspacePane;

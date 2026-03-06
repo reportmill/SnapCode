@@ -413,7 +413,7 @@ public class ProjectFilesTool extends WorkspaceTool {
             List<MenuItem> menuItemsCopy = ListUtils.map(menuItems, item -> viewArchiver.copy(item));
             Menu menu = new Menu();
             menu.setMenuItems(menuItemsCopy);
-            menu.setOwner(this);
+            menu.setController(this);
             menu.showMenuAtXY(anEvent.getView(), anEvent.getX(), anEvent.getY());
         }
 

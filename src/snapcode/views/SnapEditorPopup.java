@@ -14,7 +14,7 @@ import java.util.Objects;
 /**
  * This class provides UI for editing an expression.
  */
-public class SnapEditorPopup extends ViewOwner {
+public class SnapEditorPopup extends ViewController {
 
     // The expression part
     private JNodeView<?>  _nodeView;

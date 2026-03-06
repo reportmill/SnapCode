@@ -573,7 +573,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         // On hide, remove TextArea prop change listener and do syntax check
         if (!aValue) {
             _textArea.removePropChangeListener(_textAreaPropChangeLsnr);
-            JavaTextPane javaTextPane = _textArea.getOwner(JavaTextPane.class);
+            JavaTextPane javaTextPane = _textArea.getController(JavaTextPane.class);
             if (javaTextPane != null)
                 javaTextPane.checkFileForErrorsAfterDelay();
         }

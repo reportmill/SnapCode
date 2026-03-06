@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Stage Pane
  */
-public class StagePane extends ViewOwner {
+public class StagePane extends ViewController {
 
     // The workspace pane
     private WorkspacePane _workspacePane;

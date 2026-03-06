@@ -13,7 +13,7 @@ import snap.web.WebURL;
 /**
  * A class to manage a WebBrowser with a standard toolbar.
  */
-public class WebBrowserPane extends ViewOwner {
+public class WebBrowserPane extends ViewController {
 
     // The browser
     protected WebBrowser _browser;

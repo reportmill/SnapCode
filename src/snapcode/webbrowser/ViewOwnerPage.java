@@ -3,31 +3,31 @@
  */
 package snapcode.webbrowser;
 import snap.view.View;
-import snap.view.ViewOwner;
+import snap.view.ViewController;
 
 /**
- * A WebPage subclass to wrap a ViewOwner in a WebPage.
+ * A WebPage subclass to wrap a view controller in a WebPage.
  */
 public class ViewOwnerPage extends WebPage {
 
-    // The ViewOwner
-    private ViewOwner  _owner;
+    // The view controller
+    private ViewController _owner;
 
     /**
-     * Creates a new ViewOwnerPage for given ViewOwner.
+     * Constructor.
      */
-    public ViewOwnerPage(ViewOwner anOwner)
+    public ViewOwnerPage(ViewController anOwner)
     {
         _owner = anOwner;
     }
 
     /**
-     * Returns the ViewOwner for this page.
+     * Returns the view controller for this page.
      */
-    public ViewOwner getViewOwner()  { return _owner; }
+    public ViewController getViewOwner()  { return _owner; }
 
     /**
-     * Override to return ViewOwner UI.
+     * Override to return controller UI.
      */
     protected View createUI()
     {
@@ -35,7 +35,7 @@ public class ViewOwnerPage extends WebPage {
     }
 
     /**
-     * Override to forward to ViewOwner.
+     * Override to forward to controller.
      */
     public Object getFirstFocus()
     {

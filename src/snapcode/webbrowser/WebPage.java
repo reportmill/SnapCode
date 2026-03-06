@@ -2,15 +2,15 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.webbrowser;
+import snap.view.ViewController;
 import snap.view.ViewEvent;
-import snap.view.ViewOwner;
 import snap.web.*;
 import java.util.Objects;
 
 /**
  * A visual representation of a WebFile used in WebBrowser.
  */
-public class WebPage extends ViewOwner {
+public class WebPage extends ViewController {
 
     // The URL
     private WebURL  _url;
