@@ -58,7 +58,7 @@ public class App {
     public void quitApp()
     {
         // Hide open WorkspacePane
-        WorkspacePane workspacePane = WindowView.getOpenWindowOwner(WorkspacePane.class);
+        WorkspacePane workspacePane = WindowView.getOpenWindowController(WorkspacePane.class);
         if (workspacePane != null)
             workspacePane.closeWorkspacePane();
 
@@ -218,7 +218,7 @@ public class App {
      */
     private void autoRunOpenFile()
     {
-        WorkspacePane workspacePane = WindowView.getOpenWindowOwner(WorkspacePane.class);
+        WorkspacePane workspacePane = WindowView.getOpenWindowController(WorkspacePane.class);
         if (workspacePane != null) {
             RunTool runTool = workspacePane.getRunTool();
             runTool.runAppForSelFile(false);

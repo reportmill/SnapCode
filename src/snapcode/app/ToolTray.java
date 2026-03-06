@@ -46,7 +46,7 @@ public class ToolTray extends ViewController {
     {
         getUI();
         List<Tab> tabs = _tabView.getTabBar().getTabs();
-        Tab tabForClass = ListUtils.findMatch(tabs, tab -> toolClass == tab.getContentOwner().getClass());
+        Tab tabForClass = ListUtils.findMatch(tabs, tab -> toolClass == tab.getContentController().getClass());
         return tabForClass != null ? tabForClass.getButton() : null;
     }
 
@@ -69,7 +69,7 @@ public class ToolTray extends ViewController {
     public WorkspaceTool getSelTool()
     {
         Tab selTab = _tabView.getSelItem();
-        WorkspaceTool selTool = selTab != null ? (WorkspaceTool) selTab.getContentOwner() : null;
+        WorkspaceTool selTool = selTab != null ? (WorkspaceTool) selTab.getContentController() : null;
         return selTool;
     }
 
@@ -139,7 +139,7 @@ public class ToolTray extends ViewController {
         // Iterate over tools and add tab for each
         for (WorkspaceTool tool : _trayTools) {
             String title = tool.getTitle();
-            tabBuilder.title(title).contentOwner(tool).add();
+            tabBuilder.title(title).contentController(tool).add();
         }
 
         // Return
@@ -152,7 +152,7 @@ public class ToolTray extends ViewController {
     protected void resetUI()
     {
         Tab selTab = _tabView.getSelItem();
-        ViewController viewController = selTab != null ? selTab.getContentOwner() : null;
+        ViewController viewController = selTab != null ? selTab.getContentController() : null;
         if (viewController != null)
             viewController.resetLater();
     }
