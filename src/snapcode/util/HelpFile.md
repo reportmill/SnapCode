@@ -499,7 +499,7 @@ import java.io.File;
 
 // Get template and dataset
 RMDocument template = new RMDocument(RMExtras.getMoviesURL());
-Object dataSet = new RMXMLReader().readObject(RMExtras.getHollywoodURL());
+Object dataSet = new RMXMLReader().readObjectFromUrl(RMExtras.getHollywoodURL(), null);
 
 // Generate report, write PDF and open file
 RMDocument report = template.generateReport(dataSet);

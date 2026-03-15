@@ -1,17 +1,20 @@
 {
     "bin": {"snapcode": "jdeploy-bundle/jdeploy.js"},
     "author": "ReportMill Software, Inc.",
+    "name": "snapcodejava",
     "description": "A Java IDE for education",
+    "files": ["jdeploy-bundle"],
     "main": "index.js",
     "preferGlobal": true,
-    "version": "2026.2.10",
+    "scripts": {"test": "echo \"Error: no test specified\" && exit 1"},
+    "version": "2026.3.12",
     "jdeploy": {
         "jdk": true,
         "fallbackToUniversal": false,
         "publishTargets": [{
-            "name": "npm: npm",
-            "type": "NPM",
-            "url": ""
+            "name": "github: github",
+            "type": "GITHUB",
+            "url": "https://github.com/reportmill/SnapCode"
         }],
         "javaVersion": "25",
         "documentTypes": [{
@@ -31,8 +34,5 @@
         "yauzl": "^2.10.0",
         "shelljs": "^0.8.4"
     },
-    "name": "snapcodejava",
-    "files": ["jdeploy-bundle"],
-    "scripts": {"test": "echo \"Error: no test specified\" && exit 1"},
     "homepage": "https://reportmill.com/SnapCode"
 }
