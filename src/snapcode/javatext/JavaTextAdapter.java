@@ -498,11 +498,11 @@ public class JavaTextAdapter extends TextAdapter {
     @Override
     public void replaceCharsWithContent(Object theContent)
     {
-        // If String, trim extra indent
-        if (theContent instanceof String) {
-            JavaTextModel javaTextModel = (JavaTextModel) getTextModel();
-            if (javaTextModel.isJepl())
-                theContent = JavaTextUtils.removeExtraIndentFromString((String) theContent);
+        // If String, strip extra indent
+        if (theContent instanceof String contentString && getTextModel() instanceof JavaTextModel javaTextModel && javaTextModel.isJepl()) {
+            theContent = contentString.stripTrailing().stripIndent();
+            if (contentString.endsWith("\n"))
+                theContent = theContent + "\n";
         }
 
         // Do normal version

@@ -18,8 +18,7 @@ public class ExceptionUtil {
      */
     public static TextModel getTextModelForException(Exception anException)
     {
-        String str = StringUtils.getStackTraceString(anException);
-        str = StringUtils.trimEnd(str);
+        String str = StringUtils.getStackTraceString(anException).stripTrailing();
 
         TextModel textModel = TextModel.createDefaultTextModel(true);
         textModel.setDefaultFont(Font.Arial14);

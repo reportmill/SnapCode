@@ -4,8 +4,6 @@
 package javakit.parse;
 import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
-import snap.util.ArrayUtils;
-import snap.util.CharSequenceUtils;
 
 /**
  * A JExpr subclass for literals.
@@ -29,22 +27,7 @@ public class JExprLiteral extends JExpr {
      */
     public JExprLiteral()
     {
-    }
-
-    /**
-     * Creates a new literal with given value.
-     */
-    public JExprLiteral(Object aValue)
-    {
-        _value = aValue;
-        if (aValue instanceof Boolean) _literalType = LiteralType.Boolean;
-        else if (aValue instanceof Integer) _literalType = LiteralType.Integer;
-        else if (aValue instanceof Long) _literalType = LiteralType.Long;
-        else if (aValue instanceof Float) _literalType = LiteralType.Float;
-        else if (aValue instanceof Double) _literalType = LiteralType.Double;
-        else if (aValue instanceof Character) _literalType = LiteralType.Character;
-        else if (aValue instanceof String) _literalType = LiteralType.String;
-        else if (aValue == null) _literalType = LiteralType.Null;
+        super();
     }
 
     /**
@@ -125,36 +108,44 @@ public class JExprLiteral extends JExpr {
      */
     public String getValueString()
     {
-        // If value string already set, just return
         if (_valueStr != null) return _valueStr;
+        return _valueStr = getValueStringImpl();
+    }
 
+    /**
+     * Returns the value string.
+     */
+    private String getValueStringImpl()
+    {
         // Create value string from value
-        if (_value == null) _valueStr = "null";
-        else if (_value instanceof Boolean)
-            _valueStr = _value.toString();
-        else if (_value instanceof Character || _value instanceof String)
-            _valueStr = _value.toString();
-        else if (_value instanceof Byte || _value instanceof Short)
-            _valueStr = _value.toString();
-        else if (_value instanceof Integer)
-            _valueStr = _value.toString();
-        else if (_value instanceof Long)
-            _valueStr = _value.toString() + 'L';
-        else if (_value instanceof Float) {
+        if (_value == null)
+            return "null";
+        if (_value instanceof Boolean)
+            return _value.toString();
+        if (_value instanceof Character || _value instanceof String)
+            return _value.toString();
+        if (_value instanceof Byte || _value instanceof Short)
+            return _value.toString();
+        if (_value instanceof Integer)
+            return _value.toString();
+        if (_value instanceof Long)
+            return _value.toString() + 'L';
+        if (_value instanceof Float) {
             float val = (Float) _value;
             if (val == (int) val)
-                _valueStr = Integer.toString((int) val) + 'f';
-            else _valueStr = _value.toString() + 'f';
+                return Integer.toString((int) val) + 'f';
+            return _value.toString() + 'f';
         }
-        else if (_value instanceof Double) {
+        if (_value instanceof Double) {
             double val = (Double) _value;
             if (val == (long) val)
-                _valueStr = Long.toString((int) val) + 'd';
-            else _valueStr = _value.toString() + 'd';
+                return Long.toString((int) val) + 'd';
+            return _value.toString() + 'd';
         }
 
-        // Return value string
-        return _valueStr;
+        // Complain
+        System.err.println("JLiteral.getValueStringImpl(): Unknown value type: " + _value.getClass().getName());
+        return null;
     }
 
     /**
@@ -162,16 +153,16 @@ public class JExprLiteral extends JExpr {
      */
     public Class<?> getValueClass()
     {
-        switch (getLiteralType()) {
-            case Boolean: return boolean.class;
-            case Integer: return int.class;
-            case Long: return long.class;
-            case Float: return float.class;
-            case Double: return double.class;
-            case Character: return char.class;
-            case String: return String.class;
-            default: return null;
-        }
+        return switch (getLiteralType()) {
+            case Boolean -> boolean.class;
+            case Integer -> int.class;
+            case Long -> long.class;
+            case Float -> float.class;
+            case Double -> double.class;
+            case Character -> char.class;
+            case String -> String.class;
+            case Null -> null;
+        };
     }
 
     /**
@@ -206,17 +197,16 @@ public class JExprLiteral extends JExpr {
      */
     public String getNodeString()
     {
-        switch (getLiteralType()) {
-            case Boolean: return "Boolean";
-            case Integer: return "Integer";
-            case Long: return "Long";
-            case Float: return "Float";
-            case Double: return "Double";
-            case Character: return "Character";
-            case String: return "String";
-            case Null: return "Null";
-            default: throw new RuntimeException("JLiteral unknown type: " + getLiteralType());
-        }
+        return switch (getLiteralType()) {
+            case Boolean -> "Boolean";
+            case Integer -> "Integer";
+            case Long -> "Long";
+            case Float -> "Float";
+            case Double -> "Double";
+            case Character -> "Character";
+            case String -> "String";
+            case Null -> "Null";
+        };
     }
 
     /**
@@ -224,8 +214,11 @@ public class JExprLiteral extends JExpr {
      */
     private static String getStringForStringLiteral(String stringLiteral)
     {
-        if (!stringLiteral.isEmpty() && stringLiteral.charAt(0) == '"')
-            return getStringForTextBlock(stringLiteral);
+        // Handle text block string
+        if (stringLiteral.startsWith("\"\"\"") && stringLiteral.length() >= 6) {
+            String textBlock = stringLiteral.substring(3, stringLiteral.length() - 3);
+            return textBlock.stripIndent();
+        }
 
         String str = stringLiteral.substring(1, stringLiteral.length() - 1);
         str = str.replace("\\n", "\n");
@@ -234,37 +227,5 @@ public class JExprLiteral extends JExpr {
         str = str.replace("\\\\", "\\");
         str = str.replace("\\\"", "\"");
         return str;
-    }
-
-    /**
-     * Processes raw text block into string the way Java compiler would.
-     */
-    private static String getStringForTextBlock(String textBlock)
-    {
-        // Split into lines
-        String[] lines = textBlock.split("\n", -1);
-
-        // Determine common leading whitespace (ignoring empty lines)
-        ArrayUtils.getMin(lines, (line1,line2) -> CharSequenceUtils.getIndentLength(line2) - CharSequenceUtils.getIndentLength(line1));
-        int minIndent = Integer.MAX_VALUE;
-        for (String line : lines) {
-            int leadingSpaces = CharSequenceUtils.getIndentLength(line);
-            if (leadingSpaces > 0 && leadingSpaces < line.length())
-                minIndent = Math.min(minIndent, leadingSpaces);
-        }
-
-        // Remove common leading whitespace and handle escape sequences
-        StringBuilder result = new StringBuilder();
-        for (String line : lines) {
-            String trimmedLine = line.length() >= minIndent ? line.substring(minIndent) : line;
-            trimmedLine = trimmedLine.replace("\\s", " ");
-            result.append(trimmedLine).append("\n");
-        }
-
-        // Remove the final newline
-        if (result.length() > 0)
-            result.setLength(result.length() - 1);
-
-        return result.toString();
     }
 }

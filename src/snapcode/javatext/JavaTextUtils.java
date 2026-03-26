@@ -4,7 +4,6 @@
 package snapcode.javatext;
 import javakit.resolver.JavaDecl;
 import snap.gfx.Image;
-import snap.util.CharSequenceUtils;
 
 /**
  * This class contains utility support for Java text.
@@ -35,58 +34,5 @@ public class JavaTextUtils {
             case Word -> WordImage;
             default -> DefaultImage;
         };
-    }
-
-    /**
-     * Removes superfluous indent from a string.
-     */
-    public static String removeExtraIndentFromString(String str)
-    {
-        // Get string as lines
-        String[] lines = str.split("\n");
-
-        // If there is superfluous indent, remove from lines and reset string
-        int minIndent = getMinIndentLengthForStrings(lines);
-        if (minIndent > 0) {
-
-            // Get indent string
-            String indentStr = " ".repeat(minIndent);
-
-            // Remove indent string from lines
-            for (int i = 0; i < lines.length; i++)
-                lines[i] = lines[i].replaceFirst(indentStr, "");
-
-            // Rebuild string
-            boolean endsWithNewline = str.endsWith("\n");
-            str = String.join("\n", lines);
-            if (endsWithNewline)
-                str += "\n";
-        }
-
-        // Return
-        return str;
-    }
-
-    /**
-     * Returns the minimum number of leading spaces in given array of strings (disregards empty or whitespace lines).
-     */
-    private static int getMinIndentLengthForStrings(String[] lines)
-    {
-        int minIndent = Integer.MAX_VALUE;
-
-        // Iterate over lines
-        for (String line : lines) {
-
-            // Skip empty/whitespace lines
-            if (CharSequenceUtils.isWhiteSpace(line))
-                continue;
-
-            // Get indent for line
-            int indent = CharSequenceUtils.getIndentLength(line);
-            minIndent = Math.min(minIndent, indent);
-        }
-
-        // Return
-        return minIndent != Integer.MAX_VALUE ? minIndent : 0;
     }
 }
