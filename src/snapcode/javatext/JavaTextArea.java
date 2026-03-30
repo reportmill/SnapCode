@@ -346,8 +346,18 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
+     * Override to paint tokens instead of runs.
+     */
+    @Override
+    protected void paintFront(Painter aPntr)
+    {
+        TextPainter.TOKEN_PAINTER.paintTextAdapter(aPntr, _textAdapter);
+    }
+
+    /**
      * Override to draw print margin.
      */
+    @Override
     protected void paintBack(Painter aPntr)
     {
         // Do normal version
