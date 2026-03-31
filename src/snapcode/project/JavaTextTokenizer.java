@@ -84,7 +84,7 @@ public class JavaTextTokenizer extends Tokenizer {
         // Get/set token color
         Color color = getColorForParseToken(textToken);
         if (color != null)
-            textToken.setTextColor(color);
+            textToken.setColor(color);
 
         // Return
         return textToken;
