@@ -34,6 +34,8 @@ public class LineFootView extends View {
         // Set vars
         _textPane = textPane;
         _textArea = textPane.getTextArea();
+        setFill(_textArea.getFill());
+        ViewUtils.bind(_textArea, View.Fill_Prop, this, false);
 
         // Configure
         setPrefWidth(14);
@@ -105,6 +107,7 @@ public class LineFootView extends View {
      */
     protected void resetAll()
     {
+        runLater(() -> setVisible(getMarkers().length > 0));
         _markers = null;
         repaint();
     }
