@@ -147,8 +147,8 @@ public class JavaTextPane extends TextPane {
     {
         // Clear path box and add Lin/Col position label
         RowView nodePathBox = getView("BottomBox", RowView.class);
-        while (nodePathBox.getChildCount() > 1)
-            nodePathBox.removeChild(1);
+        while (nodePathBox.getChildCount() > 2)
+            nodePathBox.removeChild(2);
 
         // Create and add Path node labels
         Label[] pathNodeLabels = getLabelsForSelNodePath();
