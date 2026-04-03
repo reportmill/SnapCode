@@ -83,9 +83,7 @@ public class JavaTextPane extends TextPane {
         scrollGroup.setContent(_textArea);
         scrollGroup.setLeftView(_lineNumView);
         scrollGroup.getScrollView().getVBar().setFill(_textArea.getFill());
-        ViewUtils.bind(_textArea, View.Fill_Prop, scrollGroup.getScrollView().getVBar(), false);
-        //scrollGroup.getScrollView().getHBar().setFill(_textArea.getFill());
-        //ViewUtils.bind(_textArea, View.Fill_Prop, scrollGroup.getScrollView().getHBar(), false);
+        scrollGroup.getScrollView().getHBar().setFill(ViewTheme.get().getContentAltColor());
 
         // Replace TextPane center with scrollGroup
         borderView.setCenter(scrollGroup);
@@ -407,6 +405,16 @@ public class JavaTextPane extends TextPane {
         _lineNumView.resetAll();
         _lineFootView.resetAll();
         _textArea.repaint();
+    }
+
+    /**
+     * Override to fix scroll bar color.
+     */
+    @Override
+    protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
+    {
+        ScrollView scrollView = _textArea.getParent(ScrollView.class);
+        scrollView.getVBar().setFill(_textArea.getFill());
     }
 
     /**
