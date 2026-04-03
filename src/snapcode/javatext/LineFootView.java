@@ -34,8 +34,7 @@ public class LineFootView extends View {
         // Set vars
         _textPane = textPane;
         _textArea = textPane.getTextArea();
-        setFill(_textArea.getFill());
-        ViewUtils.bind(_textArea, View.Fill_Prop, this, false);
+        setFill(ViewTheme.get().getContentColor());
 
         // Configure
         setPrefWidth(14);
@@ -185,5 +184,15 @@ public class LineFootView extends View {
             aPntr.setPaint(marker.getStrokeColor());
             aPntr.draw(marker);
         }
+    }
+
+    /**
+     * Override to update colors.
+     */
+    @Override
+    protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
+    {
+        super.handleThemeChange(oldTheme, newTheme);
+        setFill(ViewTheme.get().getContentColor());
     }
 }

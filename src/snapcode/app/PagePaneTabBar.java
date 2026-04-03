@@ -27,6 +27,7 @@ public class PagePaneTabBar extends TabBar {
     {
         super();
         _pagePane = aPagePane;
+        setFill(ViewTheme.get().getContentColor());
         setFont(TAB_BAR_FONT);
         setGrowWidth(true);
         setTabCloseActionHandler((e,tab) -> handleTabCloseAction(tab));
@@ -167,5 +168,15 @@ public class PagePaneTabBar extends TabBar {
 
         // Accept all project files
         return _pagePane.isProjectFile(aFile);
+    }
+
+    /**
+     * Override to update colors.
+     */
+    @Override
+    protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
+    {
+        super.handleThemeChange(oldTheme, newTheme);
+        setFill(ViewTheme.get().getContentColor());
     }
 }

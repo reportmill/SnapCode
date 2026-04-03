@@ -52,11 +52,9 @@ public class LineHeadView extends View {
      */
     public LineHeadView(JavaTextPane aJTP)
     {
-        // Set ivars
+        super();
         _textPane = aJTP;
         _textArea = aJTP.getTextArea();
-
-        // Config
         setFill(ViewTheme.get().getContentColor());
         setCursor(Cursor.HAND);
         enableEvents(MouseMove, MouseRelease, MouseExit);
@@ -356,6 +354,9 @@ public class LineHeadView extends View {
         }
     }
 
+    /**
+     * Override to update colors.
+     */
     @Override
     protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
     {
