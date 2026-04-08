@@ -1068,8 +1068,8 @@ public class JavaTextArea extends TextArea {
     protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
     {
         super.handleThemeChange(oldTheme, newTheme);
-        setFill(ViewTheme.get().getContentColor());
-        setTextColor(ViewTheme.get().getTextColor());
+        setFill(getStyle().getFill());
+        setTextColor(getStyle().getTextColor());
     }
 
     /**
