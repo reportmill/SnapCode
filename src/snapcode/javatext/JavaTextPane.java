@@ -83,7 +83,6 @@ public class JavaTextPane extends TextPane {
         scrollGroup.setContent(_textArea);
         scrollGroup.setLeftView(_lineNumView);
         scrollGroup.getScrollView().getVBar().setFill(_textArea.getFill());
-        scrollGroup.getScrollView().getHBar().setFill(ViewTheme.get().getContentAltColor());
 
         // Replace TextPane center with scrollGroup
         borderView.setCenter(scrollGroup);
