@@ -34,6 +34,7 @@ public class MarkdownPage extends WebPage {
 
         // Wrap in scrollview
         ScrollView scrollView = new ScrollView(_markdownView);
+        scrollView.setBorder(null);
         scrollView.setFillWidth(true);
 
         // Return
