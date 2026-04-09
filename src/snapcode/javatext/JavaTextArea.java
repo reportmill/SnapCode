@@ -83,6 +83,7 @@ public class JavaTextArea extends TextArea {
     {
         super(getDummyJavaTextModel());
         setFill(ViewTheme.get().getContentColor());
+        setTextColor(getStyle().getTextColor());
         setPadding(5, 5, 5,5);
         setSyncTextFont(false);
         setEditable(true);
