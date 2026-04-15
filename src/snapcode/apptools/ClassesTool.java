@@ -168,7 +168,8 @@ public class ClassesTool extends WorkspaceTool {
         // Create label for node class
         Class<?> nodeClass = classNode.getNodeClass();
         Label label = new Label(nodeClass.getSimpleName());
-        label.setPropsString("Fill:#F5CC9B; Border:#66 1; MinWidth:60; MinHeight:26; Padding:2,4,2,8; BorderRadius:4;");
+        label.setStyleString("Fill:#F5CC9B; Border:#66 1; Padding:2,4,2,8; BorderRadius:4;");
+        label.setMinSize(60, 26);
 
         // Return
         return label;

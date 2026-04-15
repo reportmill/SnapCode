@@ -89,12 +89,12 @@ public class HomePageView extends MarkdownView {
 
                 // Create RestoreWorkspaceButton
                 Button restoreWorkspaceButton = new Button("Restore Workspace");
-                restoreWorkspaceButton.setPropsString("Name:RestoreWorkspaceButton; TextColor: #50; PrefWidth:140; PrefHeight:24; Margin:0,0,0,20");
+                restoreWorkspaceButton.setStyleString("Name:RestoreWorkspaceButton; TextColor: #50; PrefWidth:140; PrefHeight:24; Margin:0,0,0,20");
                 restoreWorkspaceButton.setVisible(_homePage._workspacePane.getProjects().isEmpty());
 
                 // Create ClearWorkspaceButton
                 Button clearWorkspaceButton = new Button("Clear Workspace");
-                clearWorkspaceButton.setPropsString("Name:ClearWorkspaceButton; TextColor: #50; PrefWidth:120; PrefHeight:24; Margin:0,0,0,20");
+                clearWorkspaceButton.setStyleString("Name:ClearWorkspaceButton; TextColor: #50; PrefWidth:120; PrefHeight:24; Margin:0,0,0,20");
                 clearWorkspaceButton.setVisible(!_homePage._workspacePane.getProjects().isEmpty());
 
                 // Create row, add children and return
@@ -112,7 +112,7 @@ public class HomePageView extends MarkdownView {
 
                 // Create OpenLocalFileButton
                 Button openLocalFileButton = new Button("Open Local...");
-                openLocalFileButton.setPropsString("Name:OpenLocalFileButton; TextColor: #50; PrefWidth:100; PrefHeight:24; Margin:0,0,0,20");
+                openLocalFileButton.setStyleString("Name:OpenLocalFileButton; TextColor: #50; PrefWidth:100; PrefHeight:24; Margin:0,0,0,20");
                 if (SnapEnv.isWebVM) {
                     openLocalFileButton.setText("Open Browser File...");
                     openLocalFileButton.setPrefWidth(130);
@@ -120,16 +120,16 @@ public class HomePageView extends MarkdownView {
 
                 // Create OpenDesktopFileButton
                 Button openDesktopFileButton = new Button("Open Desktop File...");
-                openDesktopFileButton.setPropsString("Name:OpenDesktopFileButton; TextColor: #50; PrefWidth:130; PrefHeight:24; Margin:0,0,0,12");
+                openDesktopFileButton.setStyleString("Name:OpenDesktopFileButton; TextColor: #50; PrefWidth:130; PrefHeight:24; Margin:0,0,0,12");
                 openDesktopFileButton.setVisible(SnapEnv.isWebVM);
 
                 // Create OpenScratchPadButton
                 Button openScratchPadButton = new Button("Open Scratch Pad");
-                openScratchPadButton.setPropsString("Name:OpenScratchPadButton; TextColor: #50; PrefWidth:120; PrefHeight:24; Margin:0,0,0,12");
+                openScratchPadButton.setStyleString("Name:OpenScratchPadButton; TextColor: #50; PrefWidth:120; PrefHeight:24; Margin:0,0,0,12");
 
                 // Create OpenUrlButton
                 Button openUrlButton = new Button("Open URL...");
-                openUrlButton.setPropsString("Name:OpenUrlButton; TextColor: #50; PrefWidth:100; PrefHeight:24; Margin:0,0,0,12");
+                openUrlButton.setStyleString("Name:OpenUrlButton; TextColor: #50; PrefWidth:100; PrefHeight:24; Margin:0,0,0,12");
 
                 // Create row, add children and return
                 RowView rowView = new RowView();
@@ -146,7 +146,7 @@ public class HomePageView extends MarkdownView {
 
                 // Create ShowSamplesPageText
                 Label showSamplesText = new Label("Show all ...");
-                showSamplesText.setPropsString("Font:Arial Italic 18; Margin:0,0,0,20; Padding:0,0,2,0;");
+                showSamplesText.setStyleString("Font:Arial Italic 18; Margin:0,0,0,20; Padding:0,0,2,0;");
                 showSamplesText.setTextStyleString("Color:#7777FF; Underline:1;");
                 showSamplesText.setCursor(Cursor.HAND);
                 showSamplesText.addEventHandler(e -> _homePage.showSamplesPage(), MousePress);
@@ -224,7 +224,7 @@ public class HomePageView extends MarkdownView {
 
         // Create container view
         ColView listItemView = new ColView();
-        listItemView.setPropsString("Fill:#F8; Padding:12; Spacing:6; Align: TOP_CENTER; Border: #D0D0F8 1; BorderRadius:8; MinWidth:140;");
+        listItemView.setStyleString("Fill:#F8; Padding:12; Spacing:6; Align: TOP_CENTER; Border: #D0D0F8 1; BorderRadius:8; MinWidth:140;");
         addLinkToLinkView(listItemView, linkNode.getOtherText());
         listItemView.setChildren(textNodeView);
 
@@ -248,13 +248,13 @@ public class HomePageView extends MarkdownView {
 
         // Create ColView for list
         ColView openRecentListView = new ColView();
-        openRecentListView.setPropsString("Margin:10,10,10,40;");
+        openRecentListView.setStyleString("Margin:10,10,10,40;");
         openRecentListView.setChildren(recentFileViews.toArray(new View[0]));
 
         // If no files, add label
         if (recentFileUrls.isEmpty()) {
             Label noRecentFilesLabel = new Label("(No recent files)");
-            noRecentFilesLabel.setPropsString("Font:Arial Italic 16; Margin:5");
+            noRecentFilesLabel.setStyleString("Font:Arial Italic 16; Margin:5");
             noRecentFilesLabel.setTextColor(Color.GRAY);
             openRecentListView.addChild(noRecentFilesLabel);
         }
@@ -270,7 +270,7 @@ public class HomePageView extends MarkdownView {
     {
         // Create label for name
         Label nameLabel = new Label(recentFileUrl.getFilenameSimple());
-        nameLabel.setPropsString("Font:Arial 13; MinWidth: 140");
+        nameLabel.setStyleString("Font:Arial 13; MinWidth: 140");
 
         // Create separator
         Separator separator = new Separator();
@@ -280,7 +280,7 @@ public class HomePageView extends MarkdownView {
         // Create label for address
         String projectSourceAddress = SnapCodeUtils.getProjectSourceAddressForUrl(recentFileUrl);
         Label addressLabel = new Label(projectSourceAddress);
-        addressLabel.setPropsString("Font:Arial 11");
+        addressLabel.setStyleString("Font:Arial 11");
 
         // Create close box
         CloseBox closeBox = new CloseBox();
@@ -291,7 +291,7 @@ public class HomePageView extends MarkdownView {
 
         // Create recent file view and add children
         RowView recentFileView = new RowView();
-        recentFileView.setPropsString("Fill:#F8; BorderRadius:5; Margin:5; Padding:5;");
+        recentFileView.setStyleString("Fill:#F8; BorderRadius:5; Margin:5; Padding:5;");
         recentFileView.setMinWidth(550);
         recentFileView.setChildren(nameLabel, separator, addressLabel, closeBox);
 
@@ -347,7 +347,7 @@ public class HomePageView extends MarkdownView {
         List<MarkdownNode> listItemInlineNodes = listItemNode.getFirstChild().getChildNodes();
         MarkdownNode titleNode = listItemInlineNodes.get(0);
         Label titleLabel = new Label(titleNode.getText());
-        titleLabel.setPropsString("Font:Arial Bold 14; Margin:10,10,5,15;");
+        titleLabel.setStyleString("Font:Arial Bold 14; Margin:10,10,5,15;");
 
         // Get link node
         MarkdownNode linkNode = listItemInlineNodes.get(1);
@@ -364,7 +364,7 @@ public class HomePageView extends MarkdownView {
 
         // Create row view for image and text
         ColView listItemView = new ColView();
-        listItemView.setPropsString("Fill:#F8; Margin:5,15,5,15; Padding:5; BorderRadius:8; MinWidth:140; Align:TOP_CENTER;");
+        listItemView.setStyleString("Fill:#F8; Margin:5,15,5,15; Padding:5; BorderRadius:8; MinWidth:140; Align:TOP_CENTER;");
         listItemView.setChildren(titleLabel, imageView);
         addLinkToLinkView(listItemView, "Sample:" + linkUrlAddr);
 

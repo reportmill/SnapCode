@@ -57,7 +57,7 @@ public class SamplesPageView extends MarkdownView {
     {
         // Create label for heading
         Label samplesLabel = new Label("Samples");
-        samplesLabel.setPropsString("Font:Arial Bold 64;");
+        samplesLabel.setStyleString("Font:Arial Bold 64;");
         samplesLabel.setTextStyleString("Color:#CD5652; Border:WHITE 2; CharSpacing:2;");
         samplesLabel.setEffect(new ShadowEffect(12, Color.BLACK, 0, 0));
 
@@ -81,7 +81,7 @@ public class SamplesPageView extends MarkdownView {
 
             // Create learn to code label
             Label learnToCodeLabel = new Label("Open Scenario Id ...");
-            learnToCodeLabel.setPropsString("Font:Arial Italic 18; Margin:0,0,0,30; Padding:0,0,2,0;");
+            learnToCodeLabel.setStyleString("Font:Arial Italic 18; Margin:0,0,0,30; Padding:0,0,2,0;");
             learnToCodeLabel.setTextStyleString("Color:#6666FF; Underline:1;");
             learnToCodeLabel.setCursor(Cursor.HAND);
             learnToCodeLabel.addEventHandler(e -> GreenImport.showGreenfootPanel(_samplesPage._workspacePane), MousePress);
@@ -159,7 +159,7 @@ public class SamplesPageView extends MarkdownView {
         List<MarkdownNode> listItemInlineNodes = listItemNode.getFirstChild().getChildNodes();
         MarkdownNode titleNode = listItemInlineNodes.get(0);
         Label titleLabel = new Label(titleNode.getText());
-        titleLabel.setPropsString("Font:Arial Bold 14; Margin:10,10,5,15;");
+        titleLabel.setStyleString("Font:Arial Bold 14; Margin:10,10,5,15;");
 
         // Get link node
         MarkdownNode linkNode = listItemInlineNodes.get(1);
@@ -176,7 +176,7 @@ public class SamplesPageView extends MarkdownView {
 
         // Create row view for image and text
         ColView listItemView = new ColView();
-        listItemView.setPropsString("Fill:#F8; Margin:5,15,5,15; Padding:5; BorderRadius:8; MinWidth:140; Align:TOP_CENTER;");
+        listItemView.setStyleString("Fill:#F8; Margin:5,15,5,15; Padding:5; BorderRadius:8; MinWidth:140; Align:TOP_CENTER;");
         listItemView.setChildren(titleLabel, imageView);
         addLinkToLinkView(listItemView, "Sample:" + linkUrlAddr);
 

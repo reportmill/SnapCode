@@ -157,7 +157,7 @@ public class AccountTool extends ViewController {
 
         // Create InfoColView and add
         ColView infoColView = new ColView();
-        infoColView.setPropsString("Font: Arial 12; Margin:10; Spacing:2;");
+        infoColView.setStyleString("Font: Arial 12; Margin:10; Spacing:2;");
         infoColView.setChildren(separator, headerLabel, jvmText, osVendor, osText, buildText, releaseNotesLabel);
         infoColView.setSizeToBestSize();
 

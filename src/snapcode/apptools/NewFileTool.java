@@ -466,23 +466,23 @@ public class NewFileTool extends WorkspaceTool {
         {
             // Create "Java Text:"
             Label label = new Label("Pasted Java Text:");
-            label.setPropsString("Font:Arial 24;");
+            label.setStyleString("Font:Arial 24;");
             Button pasteButton = new Button("Paste");
-            pasteButton.setPropsString("Name:PasteButton; PrefWidth:60; PrefHeight:22; LeanX:RIGHT;");
+            pasteButton.setStyleString("Name:PasteButton; PrefWidth:60; PrefHeight:22; LeanX:RIGHT;");
             RowView rowView = new RowView();
-            rowView.setPropsString("Margin:0,4,8,2");
+            rowView.setStyleString("Margin:0,4,8,2");
             rowView.setChildren(label, pasteButton);
 
             // Create TextView
             TextView textView = new TextView();
-            textView.setPropsString("Name:TextView; GrowWidth:true; GrowHeight:true;");
+            textView.setStyleString("Name:TextView; GrowWidth:true; GrowHeight:true;");
             textView.setPrefSize(500, 360);
             textView.setText(_pasteText);
 
             // Create ColView
             ColView colView = new ColView();
             colView.setChildren(rowView, textView);
-            colView.setPropsString("Margin:10; FillWidth:true;");
+            colView.setStyleString("Margin:10; FillWidth:true;");
             return colView;
         }
 
