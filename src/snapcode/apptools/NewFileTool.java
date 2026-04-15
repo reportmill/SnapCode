@@ -464,26 +464,13 @@ public class NewFileTool extends WorkspaceTool {
         @Override
         protected View createUI()
         {
-            // Create "Java Text:"
-            Label label = new Label("Pasted Java Text:");
-            label.setStyleString("Font:Arial 24;");
-            Button pasteButton = new Button("Paste");
-            pasteButton.setStyleString("Name:PasteButton; PrefWidth:60; PrefHeight:22; LeanX:RIGHT;");
-            RowView rowView = new RowView();
-            rowView.setStyleString("Margin:0,4,8,2");
-            rowView.setChildren(label, pasteButton);
+            return UILoader.loadViewForString(PASTE_JAVA_PANE_UI);
+        }
 
-            // Create TextView
-            TextView textView = new TextView();
-            textView.setStyleString("Name:TextView; GrowWidth:true; GrowHeight:true;");
-            textView.setPrefSize(500, 360);
-            textView.setText(_pasteText);
-
-            // Create ColView
-            ColView colView = new ColView();
-            colView.setChildren(rowView, textView);
-            colView.setStyleString("Margin:10; FillWidth:true;");
-            return colView;
+        @Override
+        protected void initUI()
+        {
+            setViewText("TextView", _pasteText);
         }
 
         @Override
@@ -496,5 +483,16 @@ public class NewFileTool extends WorkspaceTool {
                 setViewText("TextView", javaString);
             }
         }
+
+        // Panel UI
+        private static String PASTE_JAVA_PANE_UI = """
+            <ColView Margin="10" FillWidth="true">
+              <RowView Margin="0,4,8,2">
+                <Label Font="Arial 24" Text="Pasted Java Text:" />
+                <Button Name="PasteButton" PrefWidth="60" PrefHeight="22" LeanX="RIGHT" Text="Paste"/>
+              </RowView>
+              <TextView Name="TextView" PrefWidth="500" PrefHeight="360" GrowWidth="true" GrowHeight="true" />
+            </ColView>
+            """;
     }
 }
