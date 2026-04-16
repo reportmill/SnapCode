@@ -83,7 +83,7 @@ public class JavaTextArea extends TextArea {
     {
         super(getDummyJavaTextModel());
         setFill(ViewTheme.get().getContentColor());
-        setTextColor(getClassStyle().getTextColor());
+        setTextColor(ViewTheme.get().getTextColor());
         setPadding(5, 5, 5,5);
         setSyncTextFont(false);
         setEditable(true);
@@ -1069,8 +1069,8 @@ public class JavaTextArea extends TextArea {
     protected void handleThemeChange(ViewTheme oldTheme, ViewTheme newTheme)
     {
         super.handleThemeChange(oldTheme, newTheme);
-        setFill(getClassStyle().getFill());
-        setTextColor(getClassStyle().getTextColor());
+        setFill(ViewTheme.get().getContentColor());
+        setTextColor(ViewTheme.get().getTextColor());
     }
 
     /**
