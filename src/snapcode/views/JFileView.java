@@ -7,6 +7,7 @@ import snap.gfx.Paint;
 import snap.gfx.Painter;
 import snap.view.ColView;
 import snap.view.RowView;
+import snap.view.ViewThemeUtils;
 import snap.view.ViewUtils;
 
 /**
@@ -18,7 +19,7 @@ public class JFileView extends JBlockView<JFile> {
     SnapEditor _editor;
 
     // Background fill
-    static final Paint BACK_FILL = ViewUtils.getBackFill();
+    static final Paint BACK_FILL = ViewThemeUtils.getBackFill();
 
     /**
      * Constructor.

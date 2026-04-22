@@ -35,7 +35,7 @@ public class SnapPage extends WebPage {
         finally { ViewArchiver.setUseRealClass(true); }
 
         if (!(superUI instanceof DocView)) {
-            superUI.setFill(ViewUtils.getBackFill());
+            superUI.setFill(ViewThemeUtils.getBackFill());
             superUI.setBorder(Color.BLACK, 1);
             superUI.setEffect(new ShadowEffect().copySimple());
             BoxView box = new BoxView(superUI);
