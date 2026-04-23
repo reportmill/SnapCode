@@ -282,6 +282,8 @@ public class BuildTool extends WorkspaceTool {
         if (errorTreeNode instanceof BuildIssue)
             return (BuildIssue) errorTreeNode;
         WebFile errorFile = (WebFile) errorTreeNode;
+        if (errorFile == null)
+            return null;
         JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(errorFile);
         List<BuildIssue> buildIssues = javaAgent.getBuildIssues();
         return buildIssues.get(0);
