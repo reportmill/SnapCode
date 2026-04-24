@@ -7,7 +7,7 @@ import java.util.*;
 import snap.props.PropChange;
 import snap.props.PropObject;
 import snap.util.*;
-import snap.util.JSArchiver.*;
+import snap.util.JsonArchiver.*;
 import snap.web.WebFile;
 
 /**
@@ -73,7 +73,7 @@ public class Settings extends PropObject implements GetKeys, GetValue, SetValue,
         _map.clear();
 
         // Get/configure archiver
-        JSArchiver archiver = new JSArchiver();
+        JsonArchiver archiver = new JsonArchiver();
         archiver.addImport("snap.util.*");
         archiver.setRootObject(this);
 
@@ -343,7 +343,7 @@ public class Settings extends PropObject implements GetKeys, GetValue, SetValue,
     @Override
     public String toString()
     {
-        JSArchiver archiver = new JSArchiver();
+        JsonArchiver archiver = new JsonArchiver();
         return archiver.writeObject(this).toString();
     }
 

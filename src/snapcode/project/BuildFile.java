@@ -433,7 +433,7 @@ public class BuildFile extends PropObject {
         String jsonStr = configFile.getText();
 
         // Read BuildFile properties from JSON
-        PropArchiverJS archiver = createArchiver();
+        PropArchiverJson archiver = createArchiver();
         archiver.setRootObject(this);
         archiver.readPropObjectFromJSONString(jsonStr);
 
@@ -453,8 +453,8 @@ public class BuildFile extends PropObject {
         WebFile configFile = getBuildFile();
 
         // Get BuildFile properties archived to JSON bytes
-        PropArchiverJS archiver = createArchiver();
-        JSObject jsonObj = archiver.writePropObjectToJSON(this);
+        PropArchiverJson archiver = createArchiver();
+        JsonObject jsonObj = archiver.writePropObjectToJSON(this);
         String jsonStr = jsonObj.toString();
         byte[] jsonBytes = jsonStr.getBytes();
 
@@ -583,9 +583,9 @@ public class BuildFile extends PropObject {
     /**
      * Creates the archiver.
      */
-    private PropArchiverJS createArchiver()
+    private PropArchiverJson createArchiver()
     {
-        PropArchiverJS archiver = new PropArchiverJS();
+        PropArchiverJson archiver = new PropArchiverJson();
         archiver.addClassMapClass(BuildDependency.JarFileDependency.class);
         archiver.addClassMapClass(BuildDependency.ProjectDependency.class);
         archiver.addClassMapClass(MavenDependency.class);
