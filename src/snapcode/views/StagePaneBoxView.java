@@ -1,5 +1,5 @@
 package snapcode.views;
-import snap.games.Actor;
+import snap.games.ActorView;
 import snap.gfx.Color;
 import snap.gfx.Effect;
 import snap.gfx.Painter;
@@ -19,10 +19,10 @@ public class StagePaneBoxView extends BoxView {
     protected StagePane _stagePane;
 
     // The copy of actor
-    protected Actor _actorCopy;
+    protected ActorView _actorCopy;
 
     // The last mouse actor
-    private Actor _mouseActor;
+    private ActorView _mouseActor;
 
     // The last mouse X/Y
     private double _lastMouseX, _lastMouseY;
@@ -51,12 +51,12 @@ public class StagePaneBoxView extends BoxView {
     /**
      * Returns the selected actor copy.
      */
-    public Actor getSelActorCopy()
+    public ActorView getSelActorCopy()
     {
         if (_actorCopy != null) return _actorCopy;
 
         // Get selected actor
-        Actor selActor = _stagePane.getSelActor();
+        ActorView selActor = _stagePane.getSelActor();
         if (selActor == null)
             return null;
 
@@ -80,8 +80,8 @@ public class StagePaneBoxView extends BoxView {
     protected void paintAbove(Painter aPntr)
     {
         // Get selected actor copy
-        Actor selActor = _stagePane.getSelActor();
-        Actor selActorCopy = getSelActorCopy();
+        ActorView selActor = _stagePane.getSelActor();
+        ActorView selActorCopy = getSelActorCopy();
         if (selActorCopy == null) return;
 
         // Repaint SelView so selection is behind
@@ -92,24 +92,24 @@ public class StagePaneBoxView extends BoxView {
     }
 
     /**
-     * Called when game view gets event.
+     * Called when stage view gets event.
      */
-    protected void handleGameViewEvent(ViewEvent anEvent)
+    protected void handleStageViewEvent(ViewEvent anEvent)
     {
         switch (anEvent.getType()) {
-            case MousePress -> handleGameViewMousePress(anEvent);
-            case MouseDrag -> handleGameViewMouseDrag(anEvent);
-            case MouseRelease -> handleGameViewMouseRelease(anEvent);
+            case MousePress -> handleStageViewMousePress(anEvent);
+            case MouseDrag -> handleStageViewMouseDrag(anEvent);
+            case MouseRelease -> handleStageViewMouseRelease(anEvent);
         }
     }
 
     /**
-     * Called when game view gets mouse press event.
+     * Called when stage view gets mouse press event.
      */
-    private void handleGameViewMousePress(ViewEvent anEvent)
+    private void handleStageViewMousePress(ViewEvent anEvent)
     {
         View mouseView = ViewUtils.getDeepestViewAt(getContent(), anEvent.getX(), anEvent.getY());
-        if (mouseView instanceof Actor mouseActor) {
+        if (mouseView instanceof ActorView mouseActor) {
             _mouseActor = mouseActor;
             _stagePane.setSelActor(mouseActor);
             _lastMouseX = anEvent.getX();
@@ -118,12 +118,12 @@ public class StagePaneBoxView extends BoxView {
     }
 
     /**
-     * Called when game view gets mouse drag event.
+     * Called when stage view gets mouse drag event.
      */
-    private void handleGameViewMouseDrag(ViewEvent anEvent)
+    private void handleStageViewMouseDrag(ViewEvent anEvent)
     {
         if (_mouseActor == null) return;
-        Actor selActor = _stagePane.getSelActor();
+        ActorView selActor = _stagePane.getSelActor();
 
         double dx = anEvent.getX() - _lastMouseX;
         double dy = anEvent.getY() - _lastMouseY;
@@ -148,9 +148,9 @@ public class StagePaneBoxView extends BoxView {
     }
 
     /**
-     * Called when game view gets mouse release event.
+     * Called when stage view gets mouse release event.
      */
-    private void handleGameViewMouseRelease(ViewEvent anEvent)
+    private void handleStageViewMouseRelease(ViewEvent anEvent)
     {
         _mouseActor = null;
     }

@@ -1,12 +1,11 @@
 package snapcode.views;
-import snap.games.Actor;
-import snap.games.GameView;
+import snap.games.ActorView;
+import snap.games.StageView;
 import snap.geom.Point;
 import snap.view.*;
 import snap.web.WebFile;
 import snapcode.app.WorkspacePane;
 import snapcode.project.Project;
-
 import java.util.List;
 
 /**
@@ -20,11 +19,11 @@ public class StagePane extends ViewController {
     // The stage file
     private WebFile _stageFile;
 
-    // The current game view
-    private GameView _gameView;
+    // The current stage view
+    private StageView _stageView;
 
     // The selected actor
-    private Actor _selActor;
+    private ActorView _selActor;
 
     // The stage box
     private StagePaneBoxView _stageBox;
@@ -48,8 +47,8 @@ public class StagePane extends ViewController {
     {
         WebFile stageFile = getStageFile();
 
-        GameView gameView = (GameView) UILoader.loadViewForUrl(stageFile.getUrl());
-        setGameView(gameView);
+        StageView stageView = (StageView) UILoader.loadViewForUrl(stageFile.getUrl());
+        setStageView(stageView);
     }
 
     /**
@@ -63,34 +62,34 @@ public class StagePane extends ViewController {
     }
 
     /**
-     * Returns the current game view.
+     * Returns the current stage view.
      */
-    public GameView getGameView()  { return _gameView; }
+    public StageView getStageView()  { return _stageView; }
 
     /**
-     * Sets the current game view.
+     * Sets the current stage view.
      */
-    public void setGameView(GameView gameView)
+    public void setStageView(StageView stageView)
     {
-        if (gameView == _gameView) return;
-        _gameView = gameView;
-        _gameView.addEventHandler(_stageBox::handleGameViewEvent, MousePress, MouseDrag, MouseRelease);
-        _stageBox.setContent(_gameView);
+        if (stageView == _stageView) return;
+        _stageView = stageView;
+        _stageView.addEventHandler(_stageBox::handleStageViewEvent, MousePress, MouseDrag, MouseRelease);
+        _stageBox.setContent(_stageView);
 
         // Select first actor
-        Actor firstActor = !_gameView.getActors().isEmpty() ? _gameView.getActors().get(0) : null;
+        ActorView firstActor = !_stageView.getActors().isEmpty() ? _stageView.getActors().get(0).getActorView() : null;
         setSelActor(firstActor);
     }
 
     /**
      * Returns the selected actor.
      */
-    public Actor getSelActor()  { return _selActor; }
+    public ActorView getSelActor()  { return _selActor; }
 
     /**
      * Sets the selected actor.
      */
-    public void setSelActor(Actor selActor)
+    public void setSelActor(ActorView selActor)
     {
         if (selActor == _selActor) return;
         firePropChange(SelActor_Prop, _selActor, _selActor = selActor);
@@ -113,7 +112,7 @@ public class StagePane extends ViewController {
      */
     private void updateStageFile()
     {
-        String stageFileText = new ViewArchiver().toXML(getGameView()).getString();
+        String stageFileText = new ViewArchiver().toXML(getStageView()).getString();
         WebFile stageFile = getStageFile();
         stageFile.setText(stageFileText);
     }
@@ -136,7 +135,7 @@ public class StagePane extends ViewController {
     @Override
     protected void resetUI()
     {
-        Actor selActor = getSelActor(); if (selActor == null) return;
+        ActorView selActor = getSelActor(); if (selActor == null) return;
 
         // Update NameText
         setViewValue("NameText", selActor.getName());
@@ -165,7 +164,7 @@ public class StagePane extends ViewController {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        Actor selActor = getSelActor(); if (selActor == null) return;
+        ActorView selActor = getSelActor(); if (selActor == null) return;
 
         switch (anEvent.getName()) {
 
@@ -195,30 +194,30 @@ public class StagePane extends ViewController {
     /**
      * Sets the given actor new X.
      */
-    private void setActorX(Actor actor, float aX)  { actor.setX(aX - actor.getWidth() / 2); }
+    private void setActorX(ActorView actor, float aX)  { actor.setX(aX - actor.getWidth() / 2); }
 
     /**
      * Sets the given actor new Y.
      */
-    private void setActorY(Actor actor, float aY)  { actor.setY(aY - actor.getHeight() / 2); }
+    private void setActorY(ActorView actor, float aY)  { actor.setY(aY - actor.getHeight() / 2); }
 
     /**
      * Sets the given actor new width.
      */
-    private void setActorWidth(Actor actor, float aWidth)
+    private void setActorWidth(ActorView actorView, float aWidth)
     {
-        actor.setX(actor.getX() + (aWidth - actor.getWidth()) / 2);
-        actor.setWidth(aWidth);
-        actor.setPrefWidth(aWidth);
+        actorView.setX(actorView.getX() + (aWidth - actorView.getWidth()) / 2);
+        actorView.setWidth(aWidth);
+        actorView.setPrefWidth(aWidth);
     }
 
     /**
      * Sets the given actor new height.
      */
-    private void setActorHeight(Actor actor, float aHeight)
+    private void setActorHeight(ActorView actorView, float aHeight)
     {
-        actor.setY(actor.getY() + (aHeight - actor.getHeight()) / 2);
-        actor.setHeight(aHeight);
-        actor.setPrefHeight(aHeight);
+        actorView.setY(actorView.getY() + (aHeight - actorView.getHeight()) / 2);
+        actorView.setHeight(aHeight);
+        actorView.setPrefHeight(aHeight);
     }
 }

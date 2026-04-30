@@ -369,7 +369,7 @@ public class BlocksTool extends WorkspaceTool {
         return switch (simpleName) {
             case "Actor" -> ActorPieces;
             case "PenActor" -> PenActorPieces;
-            case "GameView" -> GameViewPieces;
+            case "StageView" -> StageViewPieces;
             default -> new String[0];
         };
         //else try { strings = (String[])ClassUtils.getMethod(aClass, "getSnapPieces").invoke(null); } catch(Exception e){ }
@@ -383,7 +383,7 @@ public class BlocksTool extends WorkspaceTool {
             "getX();", "getY();", "getWidth();", "getHeight();", "setXY(10,10);", "setSize(50,50);",
             "getRotate();", "setRotate(10);", "getScale();", "setScale(1);",
             "getAngleToMouse();", "getDistance(\"Mouse\");", "isMouseDown();", "isMouseClick();",
-            "isKeyDown(\"right\");", "isKeyClicked(\"right\");", "playSound(\"Beep.wav\");", "getGameView();"
+            "isKeyDown(\"right\");", "isKeyClicked(\"right\");", "playSound(\"Beep.wav\");", "getStageView();"
     };
 
     /**
@@ -395,9 +395,9 @@ public class BlocksTool extends WorkspaceTool {
     };
 
     /**
-     * Returns GameView pieces.
+     * Returns StageView pieces.
      */
-    private static String[] GameViewPieces = {
+    private static String[] StageViewPieces = {
             "getWidth();", "getHeight();",
             "isMouseDown();", "isMouseClick();", "getMouseX();", "getMouseY();", "isKeyDown(\"right\");",
             "isKeyClicked(\"right\");", "getActor(\"Cat1\");", "playSound(\"Beep.wav\");",
