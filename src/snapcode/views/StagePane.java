@@ -1,5 +1,6 @@
 package snapcode.views;
 import snap.games.ActorView;
+import snap.games.GameController;
 import snap.games.StageView;
 import snap.geom.Point;
 import snap.view.*;
@@ -47,7 +48,8 @@ public class StagePane extends ViewController {
     {
         WebFile stageFile = getStageFile();
 
-        StageView stageView = (StageView) UILoader.loadViewForUrl(stageFile.getUrl());
+        //StageView stageView = (StageView) UILoader.loadViewForUrl(stageFile.getUrl());
+        StageView stageView = GameController.loadStageViewForUrl(null, stageFile.getUrl());
         setStageView(stageView);
     }
 
@@ -77,7 +79,7 @@ public class StagePane extends ViewController {
         _stageBox.setContent(_stageView);
 
         // Select first actor
-        ActorView firstActor = !_stageView.getActors().isEmpty() ? _stageView.getActors().get(0).getActorView() : null;
+        ActorView firstActor = !_stageView.getActors().isEmpty() ? _stageView.getActors().get(0) : null;
         setSelActor(firstActor);
     }
 

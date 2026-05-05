@@ -70,7 +70,7 @@ public class BlocksUtils {
         import snap.games.*;
 
         /**
-         * This game controller subclass represents the first actor in our block code app.
+         * This game controller subclass represents the first stage in our block code app.
          */
         public class Stage1 extends GameController {
 
