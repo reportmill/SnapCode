@@ -4,13 +4,13 @@
     <Button Name="BackButton" Margin="4" ToolTip="Page Back" />
     <Button Name="ReloadButton" Margin="4" ImageName="/snap/viewx/pkg.images/Reload.png" />
     <Button Name="NextButton" Margin="4" ToolTip="Page Forward" />
-    <TextField Name="AddressText" Margin="4" PrefWidth="350" Font="Arial 12" GrowWidth="true" />
+    <TextField Name="AddressText" PrefWidth="350" Margin="4" Font="Arial 12" GrowWidth="true" />
     <Button Name="InfoButton" Margin="4" LeanX="RIGHT" ToolTip="Get Browser Info" ImageName="/snap/viewx/pkg.images/Info.png" />
   </RowView>
   <RectView PrefHeight="1" Fill="#CC" />
   <RowView Name="StatusBar" GrowWidth="true">
-    <Label Name="StatusText" Margin="2" PrefWidth="227" GrowWidth="true" LeanY="BOTTOM" />
-    <ProgressBar Name="ProgressBar" Margin="2" PrefWidth="46" PrefHeight="16" GrowWidth="true" LeanX="CENTER" LeanY="BOTTOM" Indeterminate="true" />
+    <Label Name="StatusText" PrefWidth="227" Margin="2" GrowWidth="true" LeanY="BOTTOM" />
+    <ProgressBar Name="ProgressBar" PrefWidth="46" PrefHeight="16" Margin="2" GrowWidth="true" LeanX="CENTER" LeanY="BOTTOM" Indeterminate="true" />
     <Label Name="ActivityText" PrefWidth="225" Align="CENTER_RIGHT" GrowWidth="true" LeanX="RIGHT" LeanY="BOTTOM" />
   </RowView>
 </ColView>

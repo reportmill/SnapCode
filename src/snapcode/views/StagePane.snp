@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView Name="MainColView" PrefWidth="500" FillWidth="true">
-  <BoxView Name="StageBox" Margin="5" Fill="#FF" Border="#C0 1" BorderRadius="4" FillWidth="true" FillHeight="true" Class="snapcode.views.StagePaneBoxView" />
-  <BoxView Margin="5" Align="TOP_LEFT" Fill="#FF" Border="#C0 1" BorderRadius="4" PrefHeight="300" GrowHeight="true">
+  <BoxView Name="StageBox" Margin="5" Fill="#FF" Border="#C0" BorderRadius="4" Class="snapcode.views.StagePaneBoxView" FillWidth="true" FillHeight="true" />
+  <BoxView PrefHeight="300" Align="TOP_LEFT" Margin="5" Fill="#FF" Border="#C0" BorderRadius="4" GrowHeight="true">
     <ColView PrefWidth="400" PrefHeight="400" Padding="10" Spacing="4">
       <RowView Padding="4,0,0,0">
         <Label Font="Arial Bold 14" Text="Actor" />
@@ -13,23 +13,23 @@
       </RowView>
       <RowView Padding="4" Spacing="4" GrowWidth="true">
         <Label PrefWidth="40" Text="X:" />
-        <TextField Name="XText" Align="CENTER" PrefWidth="50" />
+        <TextField Name="XText" PrefWidth="50" Align="CENTER" />
         <ThumbWheel Name="XThumbWheel" PrefWidth="60" PrefHeight="16" Margin="0,0,0,10" Type="linear" />
         <Label PrefWidth="40" Margin="0,0,0,20" Text="Width:" />
-        <TextField Name="WidthText" Align="CENTER" PrefWidth="50" />
+        <TextField Name="WidthText" PrefWidth="50" Align="CENTER" />
         <ThumbWheel Name="WidthThumbWheel" PrefWidth="60" PrefHeight="16" Margin="0,0,0,10" Type="linear" />
       </RowView>
       <RowView Padding="4" Spacing="4" GrowWidth="true">
         <Label PrefWidth="40" Text="Y:" />
-        <TextField Name="YText" Align="CENTER" PrefWidth="50" />
+        <TextField Name="YText" PrefWidth="50" Align="CENTER" />
         <ThumbWheel Name="YThumbWheel" PrefWidth="60" PrefHeight="16" Margin="0,0,0,10" Type="linear" />
         <Label PrefWidth="40" Margin="0,0,0,20" Text="Height:" />
-        <TextField Name="HeightText" Align="CENTER" PrefWidth="50" />
+        <TextField Name="HeightText" PrefWidth="50" Align="CENTER" />
         <ThumbWheel Name="HeightThumbWheel" PrefWidth="60" PrefHeight="16" Margin="0,0,0,10" Type="linear" />
       </RowView>
       <RowView Padding="4" Spacing="4" GrowWidth="true">
         <Label PrefWidth="40" Text="Rotate:" />
-        <TextField Name="RotateText" Align="CENTER" PrefWidth="50" />
+        <TextField Name="RotateText" PrefWidth="50" Align="CENTER" />
         <ThumbWheel Name="RotateThumbWheel" PrefWidth="100" PrefHeight="16" Margin="0,0,0,10" />
       </RowView>
       <RowView Padding="4" Spacing="4" GrowWidth="true">

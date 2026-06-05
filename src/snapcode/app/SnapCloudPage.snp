@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView Padding="20,20,20,20" PrefHeight="220" Font="Arial 14" FillWidth="true">
+<ColView PrefHeight="220" Padding="20" Font="Arial 14" FillWidth="true">
   <RowView>
     <Label Name="SnapCloudLabel" Margin="0,8,0,8" />
     <Label Margin="0,0,20,10" ImageName="pkg.images/Cloud.png" />
@@ -10,14 +10,14 @@
   <Separator PrefHeight="30" />
   <RowView Name="EmailBox" Margin="10,0,0,0">
     <Label Margin="0,8,0,8" Text="Cloud User Email:" />
-    <TextField Name="EmailText" Margin="5,20,5,5" PrefWidth="300" />
+    <TextField Name="EmailText" PrefWidth="300" Margin="5,20,5,5" />
   </RowView>
   <RowView Name="RemoteBrowserToolsBox" Spacing="5" GrowWidth="true">
     <Label Margin="5,5,5,8" Font="Arial 16" Text="Remote Projects:" />
-    <Button Name="OpenProjectButton" Padding="3,5,3,5" Margin="0,0,0,12" />
-    <Button Name="ShareProjectButton" Padding="3,5,3,5" Margin="0,0,0,12" />
+    <Button Name="OpenProjectButton" Margin="0,0,0,12" Padding="3,5,3,5" />
+    <Button Name="ShareProjectButton" Margin="0,0,0,12" Padding="3,5,3,5" />
     <Button Name="DeleteFileButton" PrefWidth="24" PrefHeight="24" Margin="0,0,0,12" ToolTip="Delete selected file" ImageName="/snap/viewx/pkg.images/Edit_Delete.png" ShowArea="false" />
     <ProgressBar Name="ProgressBar" PrefWidth="100" PrefHeight="16" Margin="0,0,0,12" Indeterminate="true" />
   </RowView>
-  <BoxView Name="RemoteBrowserBox" Margin="3,5,5,5" Border="#88 1" GrowWidth="true" GrowHeight="true" FillWidth="true" FillHeight="true" />
+  <BoxView Name="RemoteBrowserBox" Margin="3,5,5,5" Border="#88" GrowWidth="true" GrowHeight="true" FillWidth="true" FillHeight="true" />
 </ColView>

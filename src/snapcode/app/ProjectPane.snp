@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView Name="ColView" GrowHeight="true" Fill="#FF">
-  <RowView MinWidth="500" Margin="8" Padding="8,8,8,12" Fill="#F6" Border="#E8 1" BorderRadius="8" Font="Arial 20">
+<ColView Name="ColView" Fill="#FF" GrowHeight="true">
+  <RowView MinWidth="500" Margin="8" Padding="8,8,8,12" Fill="#F6" Border="#E8" BorderRadius="8" Font="Arial 20">
     <Label Text="Project Info" />
   </RowView>
-  <ColView PrefWidth="500" Margin="8,8,8,20" Spacing="8" Font="Arial 14" Title="Project Info">
+  <ColView PrefWidth="500" Margin="8,8,8,20" Spacing="8" Font="Arial 14">
     <TitleView Name="LOCTitleView" PrefWidth="120" PrefHeight="22" Padding="5" Text="Show Lines of Code" TitleStyle="Plain" Collapsible="true" Expanded="false">
-      <TextView Name="LOCText" PrefWidth="400" Padding="5" Border="#C0 1" BorderRadius="3" />
+      <TextView Name="LOCText" PrefWidth="400" Padding="5" BorderRadius="3" />
     </TitleView>
     <TitleView Name="SymbolCheckTitleView" PrefWidth="120" PrefHeight="22" Padding="5" Text="Show Undefined Symbols" TitleStyle="Plain" Collapsible="true" Expanded="false">
-      <TextView Name="SymbolCheckText" PrefWidth="600" PrefHeight="350" Padding="5" Border="#C0 1" BorderRadius="3" />
+      <TextView Name="SymbolCheckText" PrefWidth="600" PrefHeight="350" Padding="5" BorderRadius="3" />
     </TitleView>
   </ColView>
 </ColView>

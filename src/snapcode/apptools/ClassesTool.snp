@@ -6,5 +6,5 @@
     <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" Text="&#8211;" ShowArea="false" />
   </RowView>
   <RectView PrefHeight="1" Fill="#CC" />
-  <TreeView Name="TreeView" Margin="8" GrowHeight="true" BorderRadius="4" />
+  <TreeView Name="TreeView" Margin="8" BorderRadius="4" GrowHeight="true" />
 </ColView>
