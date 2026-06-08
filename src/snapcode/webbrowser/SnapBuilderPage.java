@@ -44,7 +44,7 @@ public class SnapBuilderPage extends WebPage {
         // Create text
         ParentView newDocView = EditorUtils.createNewDocView();
         ViewArchiver viewArchiver = new ViewArchiver();
-        String fileText = viewArchiver.writeToXML(newDocView).getString();
+        String fileText = viewArchiver.writeObjectToXml(newDocView).getString();
         snapFile.setText(fileText);
     }
 }

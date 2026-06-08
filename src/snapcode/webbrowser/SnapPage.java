@@ -26,13 +26,13 @@ public class SnapPage extends WebPage {
      */
     protected View createUI()
     {
-        ViewArchiver.setUseRealClass(false);
+        UILoader.setUseRealClassDefault(false);
 
         // Load UI
         View superUI = null;
         try { superUI = _content = UILoader.loadViewForControllerAndUrl(this, getFile().getUrl()); }
         catch (Exception e) { return createExceptionUI(e); }
-        finally { ViewArchiver.setUseRealClass(true); }
+        finally { UILoader.setUseRealClassDefault(true); }
 
         if (!(superUI instanceof DocView)) {
             superUI.setFill(ViewThemeUtils.getBackFill());

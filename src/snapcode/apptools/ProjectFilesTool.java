@@ -410,7 +410,7 @@ public class ProjectFilesTool extends WorkspaceTool {
             MenuButton menuButton = getView("MenuButton", MenuButton.class);
             List<MenuItem> menuItems = menuButton.getMenuItems();
             ViewArchiver viewArchiver = new ViewArchiver();
-            List<MenuItem> menuItemsCopy = ListUtils.map(menuItems, item -> viewArchiver.copy(item));
+            List<MenuItem> menuItemsCopy = ListUtils.map(menuItems, item -> viewArchiver.copyPropObject(item));
             Menu menu = new Menu();
             menu.setMenuItems(menuItemsCopy);
             menu.setController(this);

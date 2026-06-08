@@ -114,7 +114,7 @@ public class StagePane extends ViewController {
      */
     private void updateStageFile()
     {
-        String stageFileText = new ViewArchiver().toXML(getStageView()).getString();
+        String stageFileText = new ViewArchiver().writeObjectToXml(getStageView()).getString();
         WebFile stageFile = getStageFile();
         stageFile.setText(stageFileText);
     }

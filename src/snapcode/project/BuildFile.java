@@ -435,7 +435,7 @@ public class BuildFile extends PropObject {
         // Read BuildFile properties from JSON
         PropArchiverJson archiver = createArchiver();
         archiver.setRootObject(this);
-        archiver.readPropObjectFromJSONString(jsonStr);
+        archiver.readObjectFromJsonString(jsonStr);
 
         // Upgrade greenfoot
         MavenDependency gf = (MavenDependency) ListUtils.findMatch(getDependencies(),
@@ -454,7 +454,7 @@ public class BuildFile extends PropObject {
 
         // Get BuildFile properties archived to JSON bytes
         PropArchiverJson archiver = createArchiver();
-        JsonObject jsonObj = archiver.writePropObjectToJSON(this);
+        JsonObject jsonObj = archiver.writeObjectToJSON(this);
         String jsonStr = jsonObj.toString();
         byte[] jsonBytes = jsonStr.getBytes();
 
