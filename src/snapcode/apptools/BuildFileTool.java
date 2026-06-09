@@ -36,7 +36,7 @@ public class BuildFileTool extends ProjectTool {
     private TreeView<BuildDependency> _dependenciesTreeView;
 
     // The Java versions
-    private static final Integer[] JAVA_VERSIONS = new Integer[] { 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+    private static final Integer[] JAVA_VERSIONS = new Integer[] { 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 };
 
     /**
      * Constructor.
