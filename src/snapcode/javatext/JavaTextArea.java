@@ -85,7 +85,6 @@ public class JavaTextArea extends TextArea {
         setFill(ViewTheme.get().getContentColor());
         setTextColor(ViewTheme.get().getTextColor());
         setPadding(5, 5, 5,5);
-        setSyncTextFont(false);
         setEditable(true);
         setUndoActivated(true);
     }
