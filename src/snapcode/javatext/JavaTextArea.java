@@ -85,8 +85,9 @@ public class JavaTextArea extends TextArea {
         setFill(ViewTheme.get().getContentColor());
         setTextColor(ViewTheme.get().getTextColor());
         setPadding(5, 5, 5,5);
-        setEditable(true);
+        _textAdapter.setEditable(true);
         setUndoActivated(true);
+        addEventFilter(this::handleMouseEvent, MousePress, MouseDrag);
     }
 
     /**
@@ -1015,38 +1016,31 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
-     * Override to forward to popup list.
+     * Called when JavaTextArea gets mouse press or mouse move event.
      */
-    @Override
-    protected void mousePressed(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
-        // If java popup showing, hide
-        JavaPopupList javaPopupList = getPopup();
-        if (javaPopupList.isShowing())
-            javaPopupList.hide();
+        switch (anEvent.getType()) {
 
-        // Do normal version
-        super.mousePressed(anEvent);
-    }
+            // Handle MousePress: If java popup showing, hide
+            case MousePress -> {
+                JavaPopupList javaPopupList = getPopup();
+                if (javaPopupList.isShowing())
+                    javaPopupList.hide();
+            }
 
-    /**
-     * Override to set hover node.
-     */
-    @Override
-    protected void mouseMoved(ViewEvent anEvent)
-    {
-        // Handle HoverEnabled + HoverNode
-        if (isHoverEnabled()) {
-            if (!anEvent.isShortcutDown())
-                setHoverEnabled(false);
-            else {
-                JNode hoverNode = getNodeAtXY(anEvent.getX(), anEvent.getY());
-                setHoverNode(hoverNode);
+            // Handle MouseMove: Set HoverNode/HoverEnabled
+            case MouseMove -> {
+                if (isHoverEnabled()) {
+                    if (!anEvent.isShortcutDown())
+                        setHoverEnabled(false);
+                    else {
+                        JNode hoverNode = getNodeAtXY(anEvent.getX(), anEvent.getY());
+                        setHoverNode(hoverNode);
+                    }
+                }
             }
         }
-
-        // Do normal version
-        super.mouseMoved(anEvent);
     }
 
     /**

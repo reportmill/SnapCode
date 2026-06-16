@@ -122,21 +122,20 @@ public class SnapCodeUtils {
     {
         // Define copy link panel UI
         String COPY_LINK_PANEL_UI = """
-            <TextView Name="TextArea" Margin="20" Padding="8" Font="Arial 14" Border="#88" BorderRadius="4" />
+            <TextView Margin="20" Padding="8" Font="Arial 14" Border="#88" BorderRadius="4" />
             """;
 
         // Create copy link panel UI and configure
-        TextArea shareLinkTextArea = (TextArea) UILoader.loadViewForString(COPY_LINK_PANEL_UI);
-        shareLinkTextArea.setMaxWidth(750);
-        shareLinkTextArea.setEditable(true);
-        shareLinkTextArea.setWrapLines(true);
-        shareLinkTextArea.setText(linkString);
-        shareLinkTextArea.selectAll();
+        TextView shareLinkText = (TextView) UILoader.loadViewForString(COPY_LINK_PANEL_UI);
+        shareLinkText.setMaxWidth(750);
+        shareLinkText.setWrapLines(true);
+        shareLinkText.setText(linkString);
+        shareLinkText.selectAll();
 
         // Show copy link panel
         DialogBox dialogBox = new DialogBox("Copy Link Panel");
         dialogBox.setMessage("Copy link below");
-        dialogBox.setContent(shareLinkTextArea);
+        dialogBox.setContent(shareLinkText);
         dialogBox.showMessageDialog(aView);
 
         // Copy link to pasteboard

@@ -181,7 +181,7 @@ public class DiffPage extends WebPage {
             super();
             setPadding(5, 5, 5, 5);
             setFill(Color.WHITE);
-            setEditable(true);
+            _textAdapter.setEditable(true);
         }
 
         /**

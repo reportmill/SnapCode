@@ -83,7 +83,6 @@ public abstract class RunApp {
 
         // Create ConsoleTextView
         _consoleTextArea = new ConsoleTextAreaX(_runTool, this);
-        _consoleTextArea.setEditable(true);
         _consoleTextArea.setFill(Color.WHITE);
         _consoleTextArea.setPadding(8, 8, 8, 8);
         _consoleTextArea.setGrowHeight(true);
