@@ -58,6 +58,9 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         TextModel textModel = aJavaTextArea.getTextModel();
         Font font = textModel.getDefaultFont();
         setFont(font);
+
+        // Register to update when java text area does key release
+        _textArea.addEventFilter(this::handleJavaTextAreaKeyReleaseEvent, KeyRelease);
     }
 
     /**
@@ -71,7 +74,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Update JavaPopupList (show, hide or update completions) for TextArea KeyReleased event.
      */
-    public void updateForTextAreaKeyReleasedEvent(ViewEvent anEvent)
+    private void handleJavaTextAreaKeyReleaseEvent(ViewEvent anEvent)
     {
         // If shift key or up/down arrows, just ignore
         int keyCode = anEvent.getKeyCode();
@@ -157,7 +160,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Returns completions for current text selection.
      */
-    public List<JavaDecl> getCompletionsAtCursor()
+    private List<JavaDecl> getCompletionsAtCursor()
     {
         // Get id expression at cursor (just return if none)
         JExprId idExpr = getIdExprAtCursor();
@@ -172,7 +175,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Returns the id expression at cursor, if available.
      */
-    protected JExprId getIdExprAtCursor()
+    private JExprId getIdExprAtCursor()
     {
         // If selection not empty, just return
         if (!_textArea.isSelEmpty())
@@ -455,7 +458,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Adds the import statement for completed decl into text, if missing.
      */
-    protected void addImportForNodeAndDecl(JNode aNode, JavaDecl aDecl)
+    private void addImportForNodeAndDecl(JNode aNode, JavaDecl aDecl)
     {
         // Get JavaClass for class or constructor (just return if not found)
         JavaClass javaClass = aDecl instanceof JavaClass ? (JavaClass) aDecl :
@@ -488,7 +491,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     /**
      * Adds the import statement for completed decl into text, if missing.
      */
-    protected void addImportForNodeAndClass(JNode aNode, JavaClass aJavaClass)
+    private void addImportForNodeAndClass(JNode aNode, JavaClass aJavaClass)
     {
         // Get JFile
         JFile aFile = aNode.getFile();

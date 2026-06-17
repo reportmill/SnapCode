@@ -988,34 +988,6 @@ public class JavaTextArea extends TextArea {
     }
 
     /**
-     * Override to enable hover node.
-     */
-    @Override
-    protected void keyPressed(ViewEvent anEvent)
-    {
-        // If Shortcut, set HoverEnabled
-        int keyCode = anEvent.getKeyCode();
-        setHoverEnabled(keyCode == KeyCode.COMMAND || keyCode == KeyCode.CONTROL);
-
-        // Do normal version
-        super.keyPressed(anEvent);
-    }
-
-    /**
-     * Override for hover node.
-     */
-    @Override
-    protected void keyReleased(ViewEvent anEvent)
-    {
-        setHoverEnabled(false);
-        super.keyReleased(anEvent);
-
-        // Forward to java popup list
-        JavaPopupList javaPopupList = getPopup();
-        javaPopupList.updateForTextAreaKeyReleasedEvent(anEvent);
-    }
-
-    /**
      * Called when JavaTextArea gets mouse press or mouse move event.
      */
     private void handleMouseEvent(ViewEvent anEvent)

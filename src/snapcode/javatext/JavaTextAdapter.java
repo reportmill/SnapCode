@@ -53,6 +53,19 @@ public class JavaTextAdapter extends TextAdapter {
     }
 
     /**
+     * Override to update hover enabled.
+     */
+    @Override
+    protected void handleKeyPressEvent(ViewEvent anEvent)
+    {
+        // If Shortcut, set HoverEnabled
+        int keyCode = anEvent.getKeyCode();
+        _javaTextArea.setHoverEnabled(keyCode == KeyCode.COMMAND || keyCode == KeyCode.CONTROL);
+
+        super.handleKeyPressEvent(anEvent);
+    }
+
+    /**
      * Called when a key is typed.
      */
     @Override
@@ -106,6 +119,16 @@ public class JavaTextAdapter extends TextAdapter {
             if (thisLine.getString().trim().startsWith("}") && thisIndent > prevIndent && thisIndent > INDENT_LENGTH)
                 removeIndentLevelFromLine(thisLine);
         }
+    }
+
+    /**
+     * Override to update hover enabled.
+     */
+    @Override
+    protected void handleKeyReleaseEvent(ViewEvent anEvent)
+    {
+        _javaTextArea.setHoverEnabled(false);
+        super.handleKeyReleaseEvent(anEvent);
     }
 
     /**
