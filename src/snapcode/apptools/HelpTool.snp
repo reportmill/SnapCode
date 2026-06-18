@@ -2,7 +2,7 @@
 <ColView PrefWidth="400" Font="Arial 12" FillWidth="true">
   <RowView Name="ToolBar" PrefHeight="32" Spacing="4">
     <Label Margin="0,10,0,8" Font="Arial 14" Text="Help:" />
-    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Text="&#8211;" ShowArea="false" />
+    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Text="&#8211;" Plain="true" />
   </RowView>
   <RectView PrefHeight="1" Fill="#CC" GrowWidth="true" />
   <RowView Margin="4,4,0,4" GrowWidth="true">

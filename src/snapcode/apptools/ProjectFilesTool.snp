@@ -2,7 +2,7 @@
 <ColView PrefWidth="240" Font="Arial 14" GrowWidth="true" FillWidth="true">
   <RowView Name="RowView" MinHeight="32">
     <Label Name="FilesLabel" Margin="0,10,0,8" Text="Project:" />
-    <MenuButton Name="MenuButton" PrefWidth="24" PrefHeight="24" Margin="2" Padding="0" ShowArea="false">
+    <MenuButton Name="MenuButton" PrefWidth="24" PrefHeight="24" Margin="2" Padding="0" Plain="true">
       <MenuItem Name="NewFileMenuItem" Text="New File..." />
       <MenuItem Name="RemoveFileMenuItem" Text="Remove Files..." />
       <MenuItem />
@@ -20,9 +20,9 @@
       <MenuItem Name="OpenInTextEditorMenuItem" Text="Open File in text editor" />
       <MenuItem Name="OpenInBrowserMenuItem" Text="Open File in new window" />
     </MenuButton>
-    <Button Name="DisplayModeButton" PrefWidth="24" PrefHeight="24" Margin="4" Padding="0" LeanX="RIGHT" ToolTip="File display mode: File Tree" ImageName="FilesTree.png" ShowArea="false" />
-    <Button Name="DownloadFileButton" PrefWidth="24" PrefHeight="24" Margin="4" Padding="0" ImageName="Download.png" ShowArea="false" />
-    <Button Name="NewFileButton" PrefWidth="24" PrefHeight="24" Margin="4" Padding="0" LeanX="RIGHT" ImageName="Add.png" ShowArea="false" />
+    <Button Name="DisplayModeButton" PrefWidth="24" PrefHeight="24" Margin="4" Padding="0" LeanX="RIGHT" ToolTip="File display mode: File Tree" ImageName="FilesTree.png" Plain="true" />
+    <Button Name="DownloadFileButton" PrefWidth="24" PrefHeight="24" Margin="4" Padding="0" ImageName="Download.png" Plain="true" />
+    <Button Name="NewFileButton" PrefWidth="24" PrefHeight="24" Margin="4" Padding="0" LeanX="RIGHT" ImageName="Add.png" Plain="true" />
   </RowView>
   <RectView PrefHeight="1" Fill="#CD" />
   <TreeView Name="FilesTree" Border="null" GrowHeight="true" />

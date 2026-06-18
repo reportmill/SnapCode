@@ -61,7 +61,7 @@ public class HomePageView extends MarkdownView {
         Button cloudButton = new Button();
         cloudButton.setName("CloudButton");
         cloudButton.setImage(Image.getImageForClassResource(HomePageView.class, "pkg.images/Cloud.png"));
-        cloudButton.setShowArea(false);
+        cloudButton.setPlain(true);
         cloudButton.setMaxSize(70, 50);
         cloudButton.setMargin(0, 0, 25, 40);
         cloudButton.setLeanX(HPos.CENTER);

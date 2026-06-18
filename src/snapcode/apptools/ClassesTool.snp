@@ -2,8 +2,8 @@
 <ColView PrefWidth="300" Font="Arial 12" GrowHeight="true" FillWidth="true">
   <RowView Name="ToolBar" PrefHeight="32" Spacing="4">
     <Label Margin="0,10,0,8" Text="Classes:" />
-    <Button Name="ReloadButton" PrefWidth="26" PrefHeight="24" Margin="4" LeanX="RIGHT" ImageName="/snap/viewx/pkg.images/Reload.png" ShowArea="false" />
-    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" Text="&#8211;" ShowArea="false" />
+    <Button Name="ReloadButton" PrefWidth="26" PrefHeight="24" Margin="4" LeanX="RIGHT" ImageName="/snap/viewx/pkg.images/Reload.png" Plain="true" />
+    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" Text="&#8211;" Plain="true" />
   </RowView>
   <RectView PrefHeight="1" Fill="#CC" />
   <TreeView Name="TreeView" Margin="8" BorderRadius="4" GrowHeight="true" />

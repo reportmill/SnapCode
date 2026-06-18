@@ -538,7 +538,7 @@ public class JavaTextPane extends TextPane {
     private static final String EXTRA_TOOLBAR_BUTTONS_UI = """
           <RowView Spacing="2" LeanX="RIGHT">
             <Button Name="JavaDocButton" PrefWidth="116" PrefHeight="22" Text="Documentation" />
-            <MenuButton Name="SettingsButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Settings" ImageName="Settings.png" ShowArea="false" ShowArrow="false">
+            <MenuButton Name="SettingsButton" PrefWidth="26" PrefHeight="26" Padding="0" ToolTip="Settings" ImageName="Settings.png" Plain="true" ShowArrow="false">
               <MenuItem Name="ShowScopeBoxesMenuItem" Text="Show Scope Boxes" />
             </MenuButton>
           </RowView>

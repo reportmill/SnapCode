@@ -26,5 +26,5 @@
       <TextField Name="GithubPacText" Margin="5,20,5,4" GrowWidth="true" />
     </RowView>
   </ColView>
-  <Button Name="CloseButton" PrefWidth="32" PrefHeight="32" Margin="10,10,0,0" Font="Arial 18" LeanX="RIGHT" LeanY="TOP" Text="X" ShowArea="false" />
+  <Button Name="CloseButton" PrefWidth="32" PrefHeight="32" Margin="10,10,0,0" Font="Arial 18" LeanX="RIGHT" LeanY="TOP" Text="X" Plain="true" />
 </ColView>

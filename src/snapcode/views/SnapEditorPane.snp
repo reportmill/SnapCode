@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RowView Padding="2,5,5,5" Spacing="3">
-  <Button Name="SaveButton" PrefWidth="26" PrefHeight="26" ToolTip="Save" ImageName="/snap/viewx/pkg.images/File_Save.png" ShowArea="false" />
+  <Button Name="SaveButton" PrefWidth="26" PrefHeight="26" ToolTip="Save" ImageName="/snap/viewx/pkg.images/File_Save.png" Plain="true" />
   <Separator PrefWidth="13" PrefHeight="18" Vertical="true" />
-  <Button Name="CutButton" PrefWidth="26" PrefHeight="26" ToolTip="Cut" ImageName="/snap/viewx/pkg.images/Edit_Cut.png" ShowArea="false" />
-  <Button Name="CopyButton" PrefWidth="26" PrefHeight="26" ToolTip="Copy" ImageName="/snap/viewx/pkg.images/Edit_Copy.png" ShowArea="false" />
-  <Button Name="PasteButton" PrefWidth="26" PrefHeight="26" ToolTip="Paste" ImageName="/snap/viewx/pkg.images/Edit_Paste.png" ShowArea="false" />
-  <Button Name="DeleteButton" PrefWidth="26" PrefHeight="26" ToolTip="Delete" ImageName="/snap/viewx/pkg.images/Edit_Delete.png" ShowArea="false" />
+  <Button Name="CutButton" PrefWidth="26" PrefHeight="26" ToolTip="Cut" ImageName="/snap/viewx/pkg.images/Edit_Cut.png" Plain="true" />
+  <Button Name="CopyButton" PrefWidth="26" PrefHeight="26" ToolTip="Copy" ImageName="/snap/viewx/pkg.images/Edit_Copy.png" Plain="true" />
+  <Button Name="PasteButton" PrefWidth="26" PrefHeight="26" ToolTip="Paste" ImageName="/snap/viewx/pkg.images/Edit_Paste.png" Plain="true" />
+  <Button Name="DeleteButton" PrefWidth="26" PrefHeight="26" ToolTip="Delete" ImageName="/snap/viewx/pkg.images/Edit_Delete.png" Plain="true" />
   <Separator PrefWidth="13" PrefHeight="18" Vertical="true" />
-  <Button Name="UndoButton" PrefWidth="26" PrefHeight="26" ToolTip="Undo" ImageName="/snap/viewx/pkg.images/Edit_Undo.png" ShowArea="false" />
-  <Button Name="RedoButton" PrefWidth="26" PrefHeight="26" ToolTip="Redo" ImageName="/snap/viewx/pkg.images/Edit_Redo.png" ShowArea="false" />
+  <Button Name="UndoButton" PrefWidth="26" PrefHeight="26" ToolTip="Undo" ImageName="/snap/viewx/pkg.images/Edit_Undo.png" Plain="true" />
+  <Button Name="RedoButton" PrefWidth="26" PrefHeight="26" ToolTip="Redo" ImageName="/snap/viewx/pkg.images/Edit_Redo.png" Plain="true" />
   <Button Name="JavaDocButton" PrefWidth="116" PrefHeight="26" LeanX="RIGHT" Text="Documentation" />
 </RowView>

@@ -2,11 +2,11 @@
 <ColView PrefWidth="400" Font="Arial 12" GrowHeight="true" FillWidth="true">
   <RowView Name="ToolBar" PrefHeight="32" Spacing="4">
     <Label Margin="0,10,0,8" Text="Build:" />
-    <Button Name="BuildButton" PrefWidth="24" PrefHeight="24" ImageName="pkg.images/Build.png" ShowArea="false" />
-    <Button Name="StopButton" PrefWidth="24" PrefHeight="24" ToolTip="Clear console" ImageName="pkg.images/Terminate.gif" ShowArea="false" />
+    <Button Name="BuildButton" PrefWidth="24" PrefHeight="24" ImageName="pkg.images/Build.png" Plain="true" />
+    <Button Name="StopButton" PrefWidth="24" PrefHeight="24" ToolTip="Clear console" ImageName="pkg.images/Terminate.gif" Plain="true" />
     <Label Name="BuildStatusLabel" Margin="0,0,0,40" />
-    <Button Name="CleanButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" ToolTip="Clear console" ImageName="pkg.images/Clear.png" ShowArea="false" />
-    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Text="&#8211;" ShowArea="false" />
+    <Button Name="CleanButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" ToolTip="Clear console" ImageName="pkg.images/Clear.png" Plain="true" />
+    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Text="&#8211;" Plain="true" />
   </RowView>
   <RectView PrefHeight="1" Fill="#CC" GrowWidth="true" />
   <SplitView Vertical="true" Border="null" GrowHeight="true">

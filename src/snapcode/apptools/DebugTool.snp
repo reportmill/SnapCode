@@ -2,15 +2,15 @@
 <ColView PrefWidth="400" Font="Arial 12" FillWidth="true">
   <RowView MinHeight="32" Spacing="4">
     <Label Margin="0,8,0,8" Text="Debug:" />
-    <Button Name="ResumeButton" PrefWidth="24" PrefHeight="24" ImageName="Resume.gif" ShowArea="false" />
-    <Button Name="SuspendButton" PrefWidth="24" PrefHeight="24" ImageName="Suspend.gif" ShowArea="false" />
-    <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" ImageName="Terminate.gif" ShowArea="false" />
+    <Button Name="ResumeButton" PrefWidth="24" PrefHeight="24" ImageName="Resume.gif" Plain="true" />
+    <Button Name="SuspendButton" PrefWidth="24" PrefHeight="24" ImageName="Suspend.gif" Plain="true" />
+    <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" ImageName="Terminate.gif" Plain="true" />
     <Separator PrefWidth="8" PrefHeight="24" Vertical="true" />
-    <Button Name="StepIntoButton" PrefWidth="24" PrefHeight="24" ImageName="StepInto.gif" ShowArea="false" />
-    <Button Name="StepOverButton" PrefWidth="24" PrefHeight="24" ImageName="StepOver.gif" ShowArea="false" />
-    <Button Name="StepReturnButton" PrefWidth="24" PrefHeight="24" ImageName="StepReturn.gif" ShowArea="false" />
-    <Button Name="RunToLineButton" PrefWidth="24" PrefHeight="24" ImageName="RunToLine.png" ShowArea="false" />
-    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Text="&#8211;" ShowArea="false" />
+    <Button Name="StepIntoButton" PrefWidth="24" PrefHeight="24" ImageName="StepInto.gif" Plain="true" />
+    <Button Name="StepOverButton" PrefWidth="24" PrefHeight="24" ImageName="StepOver.gif" Plain="true" />
+    <Button Name="StepReturnButton" PrefWidth="24" PrefHeight="24" ImageName="StepReturn.gif" Plain="true" />
+    <Button Name="RunToLineButton" PrefWidth="24" PrefHeight="24" ImageName="RunToLine.png" Plain="true" />
+    <Button Name="HideButton" PrefWidth="24" PrefHeight="24" Margin="4" LeanX="RIGHT" Text="&#8211;" Plain="true" />
   </RowView>
   <RectView PrefHeight="1" Fill="#CD" />
   <RowView Name="AppsBox" Margin="10" Spacing="5">
