@@ -208,7 +208,7 @@ public class NewFileTool extends WorkspaceTool {
 
         // Handle Java
         else {
-            String javaString = JavaPage.getJavaContentStringForPackageAndClassName(null, "JavaFiddle");
+            String javaString = JavaPage.getJavaContentStringForPackageAndClassName(null, "JavaFiddle", true);
             newJavaFileForString(javaString);
         }
     }

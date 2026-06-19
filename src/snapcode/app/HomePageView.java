@@ -205,28 +205,23 @@ public class HomePageView extends MarkdownView {
     /**
      * Creates a view for "Create New" list item.
      */
-    private ChildView createViewForCreateNewListItem(MarkdownNode listItemNode)
+    private View createViewForCreateNewListItem(MarkdownNode listItemNode)
     {
         // Get link node and children
         MarkdownNode listItemParagraph = listItemNode.getFirstChild();
         MarkdownNode linkNode = listItemParagraph.getFirstChild();
         List<MarkdownNode> linkNodeChildren = linkNode.getChildNodes();
 
-        // Get image node and create image view
-        //MarkdownNode imageNode = linkNodeChildren.get(0);
-        //View imageNodeView = createViewForImageNode(imageNode);
-        //imageNodeView.setMargin(0, 0, 0, 0);
-
         // Create text view
-        MarkdownNode textNode = linkNodeChildren.get(1);
-        View textNodeView = createViewForTextNode(textNode);
-        textNodeView.setMargin(0, 0, 0, 0);
+        MarkdownNode textNode = linkNodeChildren.get(0);
+        TextArea textNodeView = (TextArea) createViewForTextNode(textNode);
+        textNodeView.getTextAdapter().setSelectable(false);
+        textNodeView.setMargin(Insets.EMPTY);
 
         // Create container view
-        ColView listItemView = new ColView();
+        BoxView listItemView = new BoxView(textNodeView);
         listItemView.setStyleString("Fill:#F8; Padding:12; Spacing:6; Align: TOP_CENTER; Border: #D0D0F8 1; BorderRadius:8; MinWidth:140;");
         addLinkToLinkView(listItemView, linkNode.getOtherText());
-        listItemView.setChildren(textNodeView);
 
         // Return
         return listItemView;

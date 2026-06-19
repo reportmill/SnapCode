@@ -210,16 +210,17 @@ public class JavaPage extends WebPage {
         WebFile parentDir = javaFile.getParent();
         String packageName = project != null ? project.getClassNameForFile(parentDir) : javaFile.getSimpleName();
         String className = javaFile.getSimpleName();
+        boolean includeMain = project != null && project.getSourceDir().getFiles().isEmpty();
 
         // If Java file, set default java text
-        String javaText = JavaPage.getJavaContentStringForPackageAndClassName(packageName, className);
+        String javaText = JavaPage.getJavaContentStringForPackageAndClassName(packageName, className, includeMain);
         javaFile.setText(javaText);
     }
 
     /**
      * Creates a new file for use with showNewFilePanel method.
      */
-    public static String getJavaContentStringForPackageAndClassName(String packageName, String className)
+    public static String getJavaContentStringForPackageAndClassName(String packageName, String className, boolean includeMain)
     {
         // Append package declaration
         StringBuilder sb = new StringBuilder();
@@ -233,13 +234,17 @@ public class JavaPage extends WebPage {
         sb.append("public class ").append(className).append(" {\n\n");
 
         // Append standard main implementation
-        sb.append("    /**\n");
-        sb.append("     * Standard main implementation.\n");
-        sb.append("     */\n");
-        sb.append("    public static void main(String[] args)\n");
-        sb.append("    {\n");
-        sb.append("    }\n");
-        sb.append('\n');
+        if (includeMain) {
+            sb.append("""
+                    /**
+                     * Standard main implementation.
+                     */
+                    public static void main(String args[])
+                    {
+                    }
+                
+                """);
+        }
 
         // Append close
         sb.append("}");

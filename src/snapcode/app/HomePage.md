@@ -3,10 +3,10 @@
 
 ## Create New:
 
-* [![](https://reportmill.com/SnapCode/images/JeplFile_64.png) New Java Snippet ]( NewJavaReplButton )
-* [![](https://reportmill.com/SnapCode/images/JavaFile_64.png) New Java Class File ]( NewJavaClassButton )
-* [![](https://reportmill.com/SnapCode/images/Project_64.png) New Java Project ]( NewProjectButton )
-* [![](https://reportmill.com/SnapCode/images/BlockProject_64.png) New Block Project ]( NewBlockProjectButton )
+* [New Java Snippet](NewJavaReplButton)
+* [New Java Class File](NewJavaClassButton)
+* [New Java Project](NewProjectButton)
+* [New Block Project](NewBlockProjectButton)
 
 @[OpenRecent=true]
 
