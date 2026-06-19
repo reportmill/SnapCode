@@ -7,6 +7,7 @@ import snap.text.TextAgent;
 import snap.text.TextModel;
 import snap.view.TextArea;
 import snap.view.View;
+import snap.view.ViewTheme;
 import snap.viewx.TextPane;
 import snap.web.WebFile;
 
@@ -24,7 +25,10 @@ public class TextPage extends WebPage {
     public TextPage()
     {
         super();
-        _textPane = new TextPane(new TextArea(false));
+        TextArea textArea = new TextArea(false);
+        textArea.setFill(ViewTheme.get().getContentColor());
+        textArea.getTextAdapter().setEditable(true);
+        _textPane = new TextPane(textArea);
     }
 
     /**
