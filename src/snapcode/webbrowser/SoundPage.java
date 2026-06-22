@@ -2,8 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.webbrowser;
-import snap.geom.Pos;
-import snap.gfx.Color;
 import snap.gfx.SoundClip;
 import snap.view.*;
 
@@ -17,6 +15,14 @@ public class SoundPage extends WebPage {
 
     // A Timer
     private ViewTimer _timer = new ViewTimer(() -> fireActionEventForObject("ProgressTimer", null), 100);
+
+    /**
+     * Constructor.
+     */
+    public SoundPage()
+    {
+        super();
+    }
 
     /**
      * Returns the clip to be edited.
@@ -74,76 +80,42 @@ public class SoundPage extends WebPage {
     /**
      * Creates the UI panel.
      */
-    protected View createUI()
-    {
-        // Create play button
-        Button playButton = new Button();
-        playButton.setText("Play");
-        playButton.setName("PlayButton");
-        playButton.setMinWidth(100);
+    protected View createUI()  { return UILoader.loadViewForControllerAndString(this, SOUND_PAGE_UI); }
 
-        // Create progress slider
-        Slider progSlider = new Slider();
-        progSlider.setName("ProgressSlider");
-        progSlider.setPrefWidth(200);
-
-        // Create time label
-        Label timeLabel = new Label("0");
-        timeLabel.setName("TimeLabel");
-        timeLabel.setPrefWidth(36);
-
-        // Put those controls in a panel
-        RowView playPanel = new RowView();
-        playPanel.setSpacing(5);
-        playPanel.setPadding(20, 10, 20, 10);
-        playPanel.setBorder(Color.BLACK, 1);
-        playPanel.setChildren(playButton, progSlider, timeLabel);
-        Label playPanelTitle = new Label("Playback");
-
-        // Create record button
-        Button recButton = new Button();
-        recButton.setText("Record");
-        recButton.setName("RecordButton");
-        recButton.setMinWidth(100);
-
-        // Create save button
-        Button saveButton = new Button();
-        saveButton.setText("Save");
-        saveButton.setName("SaveButton");
-        saveButton.setMinWidth(100);
-
-        // Put those controls in a panel
-        RowView recSavePane = new RowView();
-        recSavePane.setSpacing(5);
-        recSavePane.setPadding(20, 20, 20, 20);
-        recSavePane.setBorder(Color.BLACK, 1);
-        recSavePane.setChildren(recButton, saveButton);
-        Label recSavePaneTitle = new Label("Record/Save");
-
-        // Return VBox, add pieces and return
-        ColView colView = new ColView();
-        colView.setAlign(Pos.TOP_CENTER);
-        colView.setPadding(50, 50, 50, 50);
-        colView.setSpacing(10);
-        colView.setChildren(playPanelTitle, playPanel, recSavePaneTitle, recSavePane);
-        return colView;
-    }
+    // SoundPage UI
+    private static String SOUND_PAGE_UI = """
+        <ColView Align="TOP_CENTER" Padding="50" Spacing="10">
+          <Label Text="Playback" />
+          <RowView Padding="20,10,20,10" Spacing="5" Border="#00">
+            <Button Name="PlayButton" Text="Play" MinWidth="100" />
+            <Slider Name="ProgressSlider" PrefWidth="200" />
+            <Label Name="TimeLabel" Text="0" PrefWidth="36" />
+          </RowView>
+          <Label Text="Record/Save" />
+          <RowView Padding="20" Spacing="5" Border="#00">
+            <Button Name="RecordButton" Text="Record" MinWidth="100" />
+            <Button Name="SaveButton" Text="Save" MinWidth="100" />
+          </RowView>
+        </ColView>
+        """;
 
     /**
      * Reset UI.
      */
     protected void resetUI()
     {
+        SoundClip soundClip = getClip();
+
         // Update PlayButton
-        setViewEnabled("PlayButton", _clip != null);
+        setViewEnabled("PlayButton", soundClip != null);
 
         // Update ProgressSlider
-        setViewValue("ProgressSlider", _clip != null ? _timer.getTime() : 0);
-        setViewEnabled("ProgressSlider", _clip != null);
-        getView("ProgressSlider", Slider.class).setMax(_clip != null ? _clip.getLength() : 0);
+        setViewValue("ProgressSlider", soundClip != null ? _timer.getTime() : 0);
+        setViewEnabled("ProgressSlider", soundClip != null);
+        getView("ProgressSlider", Slider.class).setMax(soundClip != null ? soundClip.getLength() : 0);
 
         // Update TimeLabel
-        setViewValue("TimeLabel", _clip != null ? _clip.getLength() : 0);
+        setViewValue("TimeLabel", soundClip != null ? soundClip.getLength() : 0);
     }
 
     /**
@@ -151,17 +123,21 @@ public class SoundPage extends WebPage {
      */
     protected void respondUI(ViewEvent anEvent)
     {
+        SoundClip soundClip = getClip();
+
         switch (anEvent.getName()) {
 
             // Handle ProgressTimer
             case "ProgressTimer" -> {
-                if (_clip.isPlaying()) setViewValue("ProgressSlider", _clip.getTime());
+                if (soundClip.isPlaying())
+                    setViewValue("ProgressSlider", soundClip.getTime());
                 else stop();
             }
 
             // Handle PlayButton
             case "PlayButton" -> {
-                if (getClip().isPlaying()) stop();
+                if (getClip().isPlaying())
+                    stop();
                 else play();
             }
 
@@ -175,21 +151,19 @@ public class SoundPage extends WebPage {
 
             // Handle RecordButton
             case "RecordButton" -> {
-                SoundClip sound = getClip();
-                if (sound.isRecording()) {
-                    sound.recordStop();
+                if (soundClip.isRecording()) {
+                    soundClip.recordStop();
                     setViewText("RecordButton", "Record");
                 }
                 else {
-                    sound.recordStart();
+                    soundClip.recordStart();
                     setViewText("RecordButton", "Stop");
                 }
             }
 
             // Handle SaveButton
             case "SaveButton" -> {
-                SoundClip sound = getClip();
-                try { sound.save(); }
+                try { soundClip.save(); }
                 catch (Exception e2) { throw new RuntimeException(e2); }
             }
         }
