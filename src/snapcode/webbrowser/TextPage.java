@@ -72,4 +72,16 @@ public class TextPage extends WebPage {
         // Load TextArea text
         loadTextAreaText();
     }
+
+    /**
+     * Override to detach text adapter when removed from browser.
+     */
+    @Override
+    protected void setBrowser(WebBrowser aBrowser)
+    {
+        if (aBrowser == getBrowser()) return;
+        super.setBrowser(aBrowser);
+        if (aBrowser == null)
+            getTextArea().getTextAdapter().detachAdapterFromTextModel();
+    }
 }

@@ -13,10 +13,10 @@ import snap.view.*;
 public class SoundPage extends WebPage {
 
     // Contents of a sampled audio file
-    private SoundClip  _clip;
+    private SoundClip _clip;
 
     // A Timer
-    private ViewTimer  _timer = new ViewTimer(() -> fireActionEventForObject("ProgressTimer", null), 100);
+    private ViewTimer _timer = new ViewTimer(() -> fireActionEventForObject("ProgressTimer", null), 100);
 
     /**
      * Returns the clip to be edited.
@@ -24,19 +24,16 @@ public class SoundPage extends WebPage {
     public SoundClip getClip()
     {
         if (_clip == null)
-            try {
-                _clip = SoundClip.get(getFile());
-            }
-            catch (Exception e) {
-                System.err.println(e);
-            }
+            try { _clip = SoundClip.get(getFile()); }
+            catch (Exception e) { System.err.println("SoundPage.getClip: Error loading clip: " + e.getMessage()); }
         return _clip;
     }
 
     /**
      * Override to stop sound when file pane removed.
      */
-    public void notifyPageRemoved(WebBrowser aBrowser)
+    @Override
+    protected void handlePageRemovedFromBrowser(WebBrowser aBrowser)
     {
         stop();
     }
@@ -124,12 +121,12 @@ public class SoundPage extends WebPage {
         Label recSavePaneTitle = new Label("Record/Save");
 
         // Return VBox, add pieces and return
-        ColView vbox = new ColView();
-        vbox.setAlign(Pos.TOP_CENTER);
-        vbox.setPadding(50, 50, 50, 50);
-        vbox.setSpacing(10);
-        vbox.setChildren(playPanelTitle, playPanel, recSavePaneTitle, recSavePane);
-        return vbox;
+        ColView colView = new ColView();
+        colView.setAlign(Pos.TOP_CENTER);
+        colView.setPadding(50, 50, 50, 50);
+        colView.setSpacing(10);
+        colView.setChildren(playPanelTitle, playPanel, recSavePaneTitle, recSavePane);
+        return colView;
     }
 
     /**
@@ -154,49 +151,47 @@ public class SoundPage extends WebPage {
      */
     protected void respondUI(ViewEvent anEvent)
     {
-        SoundClip sound = getClip();
+        switch (anEvent.getName()) {
 
-        // Handle ProgressTimer
-        if (anEvent.equals("ProgressTimer")) {
-            if (_clip.isPlaying()) setViewValue("ProgressSlider", _clip.getTime());
-            else stop();
-        }
-
-        // Handle PlayButton
-        else if (anEvent.equals("PlayButton")) {
-            if (getClip().isPlaying()) stop();
-            else play();
-        }
-
-        // Handle ProgressSlider
-        else if (anEvent.equals("ProgressSlider")) {
-            int value = getViewIntValue("ProgressSlider");
-            setViewText("TimeLabel", value / 1000 + "." + (value % 1000) / 100); // Update the time label
-            if (value != _timer.getTime()) // If we're not already there, skip there.
-                skip(value);
-        }
-
-        // Handle RecordButton
-        else if (anEvent.equals("RecordButton")) {
-            if (sound.isRecording()) {
-                sound.recordStop();
-                setViewText("RecordButton", "Record");
+            // Handle ProgressTimer
+            case "ProgressTimer" -> {
+                if (_clip.isPlaying()) setViewValue("ProgressSlider", _clip.getTime());
+                else stop();
             }
-            else {
-                sound.recordStart();
-                setViewText("RecordButton", "Stop");
-            }
-        }
 
-        // Handle SaveButton
-        else if (anEvent.equals("SaveButton")) {
-            try {
-                sound.save();
+            // Handle PlayButton
+            case "PlayButton" -> {
+                if (getClip().isPlaying()) stop();
+                else play();
             }
-            catch (Exception e2) {
-                throw new RuntimeException(e2);
+
+            // Handle ProgressSlider
+            case "ProgressSlider" -> {
+                int value = getViewIntValue("ProgressSlider");
+                setViewText("TimeLabel", value / 1000 + "." + (value % 1000) / 100); // Update the time label
+                if (value != _timer.getTime()) // If not already there, skip there.
+                    skip(value);
+            }
+
+            // Handle RecordButton
+            case "RecordButton" -> {
+                SoundClip sound = getClip();
+                if (sound.isRecording()) {
+                    sound.recordStop();
+                    setViewText("RecordButton", "Record");
+                }
+                else {
+                    sound.recordStart();
+                    setViewText("RecordButton", "Stop");
+                }
+            }
+
+            // Handle SaveButton
+            case "SaveButton" -> {
+                SoundClip sound = getClip();
+                try { sound.save(); }
+                catch (Exception e2) { throw new RuntimeException(e2); }
             }
         }
     }
-
 }

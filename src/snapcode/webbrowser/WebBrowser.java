@@ -144,37 +144,26 @@ public class WebBrowser extends TransitionPane {
 
         // Notify current page of imminent removal
         if (_selPage != null)
-            _selPage.notifyPageRemoved(this);
+            _selPage.handlePageRemovedFromBrowser(this);
 
-        // Set page
-        _selPage = aPage;
+        // Set new sel page
+        batchPropChange(SelPage_Prop, _selPage, _selPage = aPage);
 
-        // Get page UI - if already set, just return
-        View pageUI = _selPage != null ? _selPage.getUI() : null;
-        if (pageUI == getContent())
-            return;
-
-        // Set component
-        setContent(pageUI);
+        // Set new page content
+        View newPageContent = _selPage != null ? _selPage.getUI() : null;
+        setContent(newPageContent);
 
         // Focus default component
         if (_selPage != null) {
             _selPage.setBrowser(this);
-            _selPage.notifyPageAdded(this);                 // Notify PageAdded
+            _selPage.handlePageAddedToBrowser(this);                 // Notify PageAdded
             if (_selPage.getFirstFocus() != null)              // Set Page Focus
                 _selPage.requestFocus(_selPage.getFirstFocus());
             getHistory().setURL(_selPage.getURL());  // Update History
         }
 
-        // Notify change
-        firePropChange(SelPage_Prop, null, _selPage);
-
-        // Flush WebSite for the heck of it?
-        WebFile file = getSelFile();
-        if (file != null) {
-            try { file.getSite().flush(); }
-            catch (Exception e) { throw new RuntimeException(e); }
-        }
+        // Fire prop change
+        fireBatchPropChanges();
     }
 
     /**
@@ -205,6 +194,16 @@ public class WebBrowser extends TransitionPane {
      */
     public void setPageForURL(WebURL aURL, WebPage aPage)
     {
+        // If already set, just return
+        WebPage oldPage = getPageForURL(aURL);
+        if (oldPage == aPage)
+            return;
+
+        // If old page exists, clear browser
+        if (oldPage != null)
+            oldPage.setBrowser(null);
+
+        // Set new page
         WebURL baseUrl = aURL.getQueryUrl();
         if (aPage != null) {
             _allPages.put(baseUrl, aPage);

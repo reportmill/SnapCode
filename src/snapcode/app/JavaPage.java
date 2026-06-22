@@ -45,7 +45,7 @@ public class JavaPage extends WebPage {
     WorkspacePane getWorkspacePane()
     {
         WebBrowser browser = getBrowser();
-        return browser.getController(WorkspacePane.class);
+        return browser != null ? browser.getController(WorkspacePane.class) : null;
     }
 
     /**
@@ -364,10 +364,22 @@ public class JavaPage extends WebPage {
      */
     protected int getProgramCounterLine()
     {
-        WorkspacePane workspacePane = getWorkspacePane();
+        WorkspacePane workspacePane = getWorkspacePane(); if (workspacePane == null) return -1;
         WorkspaceTools workspaceTools = workspacePane.getWorkspaceTools();
         DebugTool debugTool = workspaceTools.getToolForClass(DebugTool.class);
         return debugTool != null ? debugTool.getProgramCounter(getFile()) : -1;
+    }
+
+    /**
+     * Override to detach text adapter when removed from browser.
+     */
+    @Override
+    protected void setBrowser(WebBrowser aBrowser)
+    {
+        if (aBrowser == getBrowser()) return;
+        super.setBrowser(aBrowser);
+        if (aBrowser == null)
+            getTextArea().getTextAdapter().detachAdapterFromTextModel();
     }
 
     /**

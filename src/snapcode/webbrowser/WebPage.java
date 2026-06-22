@@ -40,7 +40,7 @@ public class WebPage extends ViewController {
     /**
      * Returns the WebBrowser for this WebPage.
      */
-    public void setBrowser(WebBrowser aBrowser)
+    protected void setBrowser(WebBrowser aBrowser)
     {
         _browser = aBrowser;
     }
@@ -167,7 +167,7 @@ public class WebPage extends ViewController {
         // Get file name and path
         String filePath = pageURL.getPath();
         filePath = filePath.substring(0, filePath.length() - filename.length() - 1);
-        if (filePath.length() > 0)
+        if (!filePath.isEmpty())
             title += " - " + filePath;
 
         // Get Site.Name
@@ -182,14 +182,14 @@ public class WebPage extends ViewController {
     }
 
     /**
-     * Notification that WebPage was installed in WebBrowser.
+     * Called when WebPage is shown in given browser.
      */
-    public void notifyPageAdded(WebBrowser aBrowser)  { }
+    protected void handlePageAddedToBrowser(WebBrowser aBrowser)  { }
 
     /**
-     * Notification that WebPage was removed from WebBrowser.
+     * Called when WebPage is removed from given browser.
      */
-    public void notifyPageRemoved(WebBrowser aBrowser)  { }
+    protected void handlePageRemovedFromBrowser(WebBrowser aBrowser)  { }
 
     /**
      * Override to show exception page.

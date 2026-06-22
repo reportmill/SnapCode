@@ -541,8 +541,6 @@ public class Project extends PropObject {
         _site.setMetadataForKey(Project.class.getSimpleName(), null);
 
         // Close project site
-        try { _site.flush(); }
-        catch (Exception e) { throw new RuntimeException(e); }
         _site.resetFiles();
         _site = null;
     }
