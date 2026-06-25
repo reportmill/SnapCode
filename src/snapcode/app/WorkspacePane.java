@@ -425,7 +425,7 @@ public class WorkspacePane extends ViewController {
             aWindow.setType(WindowView.Type.PLAIN);
 
         // Register for handleWinClose on window close
-        aWindow.addEventHandler(this::handleWinClose, WinClose);
+        aWindow.setCloseHandler(this::handleWinClose);
     }
 
     /**
