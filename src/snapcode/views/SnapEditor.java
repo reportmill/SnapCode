@@ -45,7 +45,7 @@ public class SnapEditor extends StackView {
         super();
         setFocusable(true);
         setFocusWhenPressed(true);
-        enableEvents(KeyPress, MousePress, MouseDrag, MouseRelease);
+        addEventHandler(this::handleMouseOrKeyEvent, MousePress, MouseDrag, MouseRelease, KeyPress);
 
         // Set JavaTextArea and start listening to changes
         _javaTextArea = javaTextArea;
@@ -211,16 +211,16 @@ public class SnapEditor extends StackView {
     }
 
     /**
-     * Process events.
+     * Handle mouse or key events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseOrKeyEvent(ViewEvent anEvent)
     {
         // Handle MousePressed
         switch (anEvent.getType()) {
-            case KeyPress: keyPress(anEvent); break;
-            case MousePress: mousePress(anEvent); break;
-            case MouseDrag: mouseDragged(anEvent); break;
-            case MouseRelease: mouseReleased(); break;
+            case MousePress -> mousePress(anEvent);
+            case MouseDrag -> mouseDragged(anEvent);
+            case MouseRelease -> mouseReleased();
+            case KeyPress -> keyPress(anEvent);
         }
     }
 

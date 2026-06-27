@@ -252,9 +252,10 @@ public class DiffPage extends WebPage {
          */
         public OverviewPane()
         {
-            enableEvents(MouseMove, MouseRelease);
+            super();
             setToolTipEnabled(true);
             setPrefWidth(14);
+            addEventHandler(this::handleMouseEvent, MouseMove, MouseRelease);
         }
 
         /**
@@ -289,7 +290,7 @@ public class DiffPage extends WebPage {
         /**
          * Called on mouse click to select marker line.
          */
-        protected void processEvent(ViewEvent anEvent)
+        protected void handleMouseEvent(ViewEvent anEvent)
         {
             // Handle MosueClicked
             if (anEvent.isMouseClick()) {

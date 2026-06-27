@@ -57,7 +57,7 @@ public class LineHeadView extends View {
         _textArea = aJTP.getTextArea();
         setFill(ViewTheme.get().getContentColor());
         setCursor(Cursor.HAND);
-        enableEvents(MouseMove, MouseRelease, MouseExit);
+        addEventHandler(this::handleMouseEvent, MouseMove, MouseRelease, MouseExit);
 
         // Set PrefSize
         setPrefSizeForText();
@@ -230,9 +230,9 @@ public class LineHeadView extends View {
     }
 
     /**
-     * Handle events.
+     * Handle mouse events.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
         // Handle MouseClick
         if (anEvent.isMouseClick())

@@ -104,7 +104,7 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
 
         // If part of hierarchy, enable drag events
         if (_jnode.getFile() != null)
-            enableEvents(DragEvents);
+            addEventHandler(this::handleDragEvent, DragEvents);
     }
 
     /**
@@ -372,18 +372,9 @@ public class JBlockView<JNODE extends JNode> extends JNodeView<JNODE> {
     }
 
     /**
-     * ProcessEvent.
-     */
-    protected void processEvent(ViewEvent anEvent)
-    {
-        if (anEvent.isDragEvent()) handleDragEvent(anEvent);
-        else super.processEvent(anEvent);
-    }
-
-    /**
      * Responds to drag events.
      */
-    protected void handleDragEvent(ViewEvent anEvent)
+    private void handleDragEvent(ViewEvent anEvent)
     {
         // Handle DragEvent: Accept drag event
         anEvent.acceptDrag();

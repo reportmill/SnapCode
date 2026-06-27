@@ -39,7 +39,7 @@ public class LineFootView extends View {
         // Configure
         setPrefWidth(14);
         setCursor(Cursor.HAND);
-        enableEvents(MouseMove, MouseRelease, MouseExit);
+        addEventHandler(this::handleMouseEvent, MouseMove, MouseRelease, MouseExit);
     }
 
     /**
@@ -112,9 +112,9 @@ public class LineFootView extends View {
     }
 
     /**
-     * Called on mouse click to select marker line.
+     * Called on mouse event.
      */
-    protected void processEvent(ViewEvent anEvent)
+    private void handleMouseEvent(ViewEvent anEvent)
     {
         // Handle MouseClicked
         if (anEvent.isMouseClick())
