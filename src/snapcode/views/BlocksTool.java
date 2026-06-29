@@ -296,7 +296,7 @@ public class BlocksTool extends WorkspaceTool {
 
         // Create block view for statement node
         JBlockView<?> blockView = JBlockView.createBlockViewForNode(stmtNode); assert (blockView != null);
-        blockView.getEventAdapter().disableEvents(DragEvents);
+        //blockView.getEventAdapter().disableEvents(DragEvents);
 
         // Return
         return blockView;
