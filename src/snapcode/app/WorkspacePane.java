@@ -301,11 +301,8 @@ public class WorkspacePane extends ViewController {
         mainSplit.setBorder(null);
         mainSplit.setDividerSpan(1);
 
-        // Get MenuBar and register to process events
-        MenuBar menuBar = getView("MenuBar", MenuBar.class);
-        menuBar.addEventHandler(e -> { if (e.isShortcutDown()) ViewUtils.processEvent(menuBar, e); }, KeyPress);
-
         // Add toobar to menubar
+        MenuBar menuBar = getView("MenuBar", MenuBar.class);
         View toolBarUI = _toolBar.getUI();
         if (!_embedMode) {
             toolBarUI.setGrowWidth(true);
