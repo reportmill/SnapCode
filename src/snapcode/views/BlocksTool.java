@@ -133,7 +133,7 @@ public class BlocksTool extends WorkspaceTool {
         // Register to handle MouseRelease, DragGesture
         View uiView = getUI();
         uiView.addEventHandler(this::handleMouseRelease, MouseRelease);
-        uiView.addEventHandler(this::handleDragGesture, ViewEvent.Type.DragGesture);
+        uiView.addEventHandler(this::handleDragGesture, DragGesture);
     }
 
     /**
