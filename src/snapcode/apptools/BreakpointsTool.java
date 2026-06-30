@@ -44,8 +44,8 @@ public class BreakpointsTool extends WorkspaceTool {
     {
         _breakpointsList = getView("BreakpointList", ListView.class);
         _breakpointsList.setRowHeight(24);
-        _breakpointsList.addEventFilter(e -> breakpointsListDidMouseRelease(e), View.MouseRelease);
-        getBreakpoints().addPropChangeListener(pce -> resetLater());
+        _breakpointsList.addEventFilter(this::handleBreakpointsListMouseReleaseEvent, View.MouseRelease);
+        getBreakpoints().addPropChangeListener(pc -> resetLater());
     }
 
     /**
@@ -77,7 +77,7 @@ public class BreakpointsTool extends WorkspaceTool {
     /**
      * Called when BreakpointsList gets MouseRelease.
      */
-    private void breakpointsListDidMouseRelease(ViewEvent anEvent)
+    private void handleBreakpointsListMouseReleaseEvent(ViewEvent anEvent)
     {
         if (anEvent.getClickCount() == 2) {
             Breakpoint breakpoint = getSelBreakpoint();
