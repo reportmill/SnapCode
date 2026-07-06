@@ -384,7 +384,7 @@ public class WorkspacePaneUtils {
     // A Sample embed string
     private static final String SAMPLE_EMBED_CODE = """
         var button = new Button("Hello World");
-        button.setPropsString("Font: Arial Bold 24; Margin:40; Padding:10; Effect:Shadow;");
+        button.setStyleString("Font: Arial Bold 24; Margin:40; Padding:10; Effect:Shadow;");
         button.setAnimString("time: 1000; scale: 2; time: 2000; scale: 1; time: 2000; rotate: 360");
         button.getAnim(0).setLoopCount(3).play();
         button.addEventHandler(e -> show(new Label("Stop that")), View.Action);
