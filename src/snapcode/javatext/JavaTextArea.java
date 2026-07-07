@@ -87,7 +87,7 @@ public class JavaTextArea extends TextArea {
         setPadding(5, 5, 5,5);
         _textAdapter.setEditable(true);
         setUndoActivated(true);
-        addEventFilter(this::handleMouseEvent, MousePress, MouseDrag);
+        addEventFilter(this::handleMousePressOrMoveEvent, MousePress, MouseMove);
     }
 
     /**
@@ -990,7 +990,7 @@ public class JavaTextArea extends TextArea {
     /**
      * Called when JavaTextArea gets mouse press or mouse move event.
      */
-    private void handleMouseEvent(ViewEvent anEvent)
+    private void handleMousePressOrMoveEvent(ViewEvent anEvent)
     {
         switch (anEvent.getType()) {
 
