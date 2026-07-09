@@ -124,7 +124,7 @@ public class JavaPage extends WebPage {
 
         // Set selection
         if (isUISet())
-            setTextSelectionForUrlParams(aURL);
+            runLater(() -> runLater(() -> setTextSelectionForUrlParams(aURL)));
     }
 
     /**
