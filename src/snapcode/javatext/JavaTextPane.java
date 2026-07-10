@@ -296,24 +296,24 @@ public class JavaTextPane extends TextPane {
     }
 
     /**
-     * Creates the ContextMenu.
+     * Override to add additional menu items.
      */
     @Override
     protected Menu createContextMenu()
     {
-        // Create MenuItems
-        ViewBuilder<MenuItem> viewBuilder = new ViewBuilder<>(MenuItem.class);
-        viewBuilder.name("OpenDeclarationMenuItem").text("Open Declaration").save();
-        viewBuilder.name("ShowReferencesMenuItem").text("Show References").save();
-        viewBuilder.name("ShowDeclarationsMenuItem").text("Show Declarations").save();
-        viewBuilder.save();
+        Menu contextMenu = super.createContextMenu();
 
-        // Get menu with items
-        Menu contextMenu = viewBuilder.buildMenu("ContextMenu", null);
-
-        // Add super menu items
-        Menu superMenu = super.createContextMenu();
-        superMenu.getMenuItems().forEach(contextMenu::addItem);
+        // Create additional menu items
+        String ADDITIONAL_MENU_ITEMS_UI = """
+                <Menu>
+                  <MenuItem />
+                  <MenuItem Name="OpenDeclarationMenuItem" Text="Open Declaration" />
+                  <MenuItem Name="ShowReferencesMenuItem" Text="Show References" />
+                  <MenuItem Name="ShowDeclarationsMenuItem" Text="Show Declarations" />
+                </Menu>
+                """;
+        Menu additionalMenuItems = (Menu) UILoader.loadViewForString(ADDITIONAL_MENU_ITEMS_UI);
+        additionalMenuItems.getMenuItems().forEach(contextMenu::addItem);
 
         // Return
         return contextMenu;
@@ -517,7 +517,7 @@ public class JavaTextPane extends TextPane {
                 break;
 
             // Add separator
-            Label separator = labelBuilder.text(" \u2022 ").font(font).build();
+            Label separator = labelBuilder.text(" • ").font(font).build();
             pathLabels.add(0, separator);
         }
 
@@ -542,5 +542,5 @@ public class JavaTextPane extends TextPane {
               <MenuItem Name="ShowScopeBoxesMenuItem" Text="Show Scope Boxes" />
             </MenuButton>
           </RowView>
-            """;
+          """;
 }
