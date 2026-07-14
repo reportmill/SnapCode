@@ -60,7 +60,7 @@ public class JavaTextAdapter extends TextAdapter {
     {
         // If Shortcut, set HoverEnabled
         int keyCode = anEvent.getKeyCode();
-        _javaTextArea.setHoverEnabled(keyCode == KeyCode.COMMAND || keyCode == KeyCode.CONTROL);
+        _javaTextArea.setHoverEnabled(keyCode == KeyCode.META || keyCode == KeyCode.CONTROL);
 
         super.handleKeyPressEvent(anEvent);
     }

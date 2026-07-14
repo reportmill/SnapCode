@@ -72,7 +72,7 @@ public class ProjectUtils {
                 return false;
 
             // If name doesn't start with char, return false
-            if (!Character.isLetter(aFile.getName().charAt(0)))
+            if (!Character.isLetterOrDigit(aFile.getName().charAt(0)))
                 return false;
 
             // If dir contains build file, src dir, or src file, return true
