@@ -86,6 +86,8 @@ public class GreenfootPage extends WebPage {
     {
         // Create RootClassNode for Object
         ClassNode rootClassNode = new ClassNode(Object.class, null);
+        rootClassNode.addChildNodeForClassAndFile(World.class, null);
+        rootClassNode.addChildNodeForClassAndFile(Actor.class, null);
 
         // Iterate over all source files and add node for each
         WebFile[] sourceFiles = getAllSourceFiles();
