@@ -386,6 +386,7 @@ public class WorkspacePane extends ViewController {
         // Add key binding to OpenMenuItem and CloseWindow
         //addKeyActionHandler("OpenMenuItem", "meta O");
         //addKeyActionHandler("CloseFileAction", "meta W");
+        addKeyActionHandler("SearchAllAction", "Shortcut Shift F");
     }
 
     /**
@@ -491,6 +492,9 @@ public class WorkspacePane extends ViewController {
                 String java = System.getProperty("java.home");
                 FileUtils.openFile(java);
             }
+
+            // SearchAllAction
+            case "SearchAllAction" -> _toolBar.selectSearchText();
         }
     }
 

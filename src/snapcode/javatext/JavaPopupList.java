@@ -60,7 +60,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         setFont(font);
 
         // Register to update when java text area does key release
-        _textArea.addEventFilter(this::handleJavaTextAreaKeyReleaseEvent, KeyRelease);
+        _textArea.addEventHandler(this::handleJavaTextAreaKeyReleaseEvent, KeyRelease);
     }
 
     /**
@@ -83,7 +83,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // If Java identifier char or backspace, show/update popup list
         if (isUpdateCompletionsEvent(anEvent))
-            ViewUtils.runLater(this::updatePopupList);
+            updatePopupList();
 
         // Otherwise if Showing, hide
         else if (isShowing())
