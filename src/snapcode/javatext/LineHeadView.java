@@ -63,10 +63,8 @@ public class LineHeadView extends View {
         setPrefSizeForText();
 
         // Set Padding
-        Insets padding = _textArea.getPadding().clone();
-        padding.left = 6;
-        padding.right = 12;
-        setPadding(padding);
+        Insets padding = _textArea.getPadding();
+        setPadding(padding.withLeft(6).withRight(12));
     }
 
     /**

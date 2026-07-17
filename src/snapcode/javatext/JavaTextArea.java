@@ -366,7 +366,7 @@ public class JavaTextArea extends TextArea {
 
         // Configure MarginLine
         if (isShowPrintMargin()) {
-            double x = getPadding().getLeft() + getFont().charAdvance('X') * 120 + .5;
+            double x = getPadding().left + getFont().charAdvance('X') * 120 + .5;
             aPntr.setColor(PRINT_MARGIN_COLOR);
             aPntr.setStroke(Stroke.Stroke1);
             aPntr.drawLine(x, 0, x, getHeight());
