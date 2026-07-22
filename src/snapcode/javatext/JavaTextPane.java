@@ -246,7 +246,7 @@ public class JavaTextPane extends TextPane {
         if (!clipboard.isLoaded()) {
             clipboard.addLoadListener(() -> handleTextAreaDropString(clipboard)); return; }
         String string = clipboard.getString();
-        _textArea.replaceCharsWithContent(string);
+        _textArea.getTextAdapter().pasteString(string);
     }
 
     /**

@@ -519,17 +519,14 @@ public class JavaTextAdapter extends TextAdapter {
      * Override to remove extra indent from pasted strings.
      */
     @Override
-    public void replaceCharsWithContent(Object theContent)
+    public void pasteString(String pasteString)
     {
         // If String, strip extra indent
-        if (theContent instanceof String contentString && getTextModel() instanceof JavaTextModel javaTextModel && javaTextModel.isJepl()) {
-            theContent = contentString.stripTrailing().stripIndent();
-            if (contentString.endsWith("\n"))
-                theContent = theContent + "\n";
-        }
+        if (getTextModel() instanceof JavaTextModel javaTextModel && javaTextModel.isJepl())
+            pasteString = pasteString.stripTrailing().stripIndent() + (pasteString.endsWith("\n") ? "\n" : "");
 
         // Do normal version
-        super.replaceCharsWithContent(theContent);
+        super.pasteString(pasteString);
     }
 
     /**
