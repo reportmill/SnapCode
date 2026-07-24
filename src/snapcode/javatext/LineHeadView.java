@@ -200,7 +200,7 @@ public class LineHeadView extends View {
 
         // Add width for line numbers
         if (_showLineNumbers) {
-            Font font = _textArea.getTextFont();
+            Font font = _textArea.getDefaultTextStyle().getFont();
             int lineCount = _textArea.getLineCount();
             double colCount = Math.ceil(Math.log10(lineCount) + .0001);
             double charWidth = Math.ceil(font.charAdvance('0'));
@@ -307,7 +307,7 @@ public class LineHeadView extends View {
     protected void paintLineNumbers(Painter aPntr)
     {
         // Get/set Font and TextColor
-        Font font = _textArea.getTextFont();
+        Font font = _textArea.getDefaultTextStyle().getFont();
         aPntr.setFont(font);
         aPntr.setColor(LINE_NUMBERS_COLOR);
 

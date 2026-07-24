@@ -172,7 +172,7 @@ public class JavaTextPane extends TextPane {
             // Handle FontSizeText, IncreaseFontButton, DecreaseFontButton
             case "FontSizeText": case "IncreaseFontButton": case "DecreaseFontButton":
                 super.respondUI(anEvent);
-                JavaTextUtils.setDefaultJavaFontSize(_textArea.getTextFont().getSize());
+                JavaTextUtils.setDefaultJavaFontSize(_textArea.getDefaultTextStyle().getFont().getSize());
                 break;
 
             // Handle OpenDeclarationMenuItem, ShowReferencesMenuItem, ShowDeclarationsMenuItem
