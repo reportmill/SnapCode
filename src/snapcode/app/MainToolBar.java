@@ -99,7 +99,7 @@ public class MainToolBar extends WorkspaceTool {
             View graphic = runButton.getGraphic();
             runButton.setText("Run");
             runButton.setGraphic(null);
-            runButton.setGraphicAfter(graphic);
+            runButton.setTailGraphic(graphic);
             runButton.setPrefWidth(-1);
         }
     }

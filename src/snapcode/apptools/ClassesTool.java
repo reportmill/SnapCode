@@ -157,7 +157,7 @@ public class ClassesTool extends WorkspaceTool {
         if (classNode == null) return;
 
         Label classNodeLabel = createLabelForClassNode(classNode);
-        classTreeCell.setGraphicAfter(classNodeLabel);
+        classTreeCell.setTailGraphic(classNodeLabel);
     }
 
     /**

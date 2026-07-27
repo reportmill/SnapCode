@@ -137,7 +137,7 @@ public class HelpTool extends WorkspaceTool {
         // If not lesson, hide ProgressTools
         if (!isLesson())
             setViewVisible("ProgressToolsView", false);
-        getView("NextButton", Button.class).setImageAfter(Image.getImageForClassResource(getClass(), "/snapcode/app/pkg.images/RightArrow.png"));
+        getView("NextButton", Button.class).setTailImage(Image.getImageForClassResource(getClass(), "/snapcode/app/pkg.images/RightArrow.png"));
     }
 
     /**

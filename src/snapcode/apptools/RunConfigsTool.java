@@ -51,27 +51,9 @@ public class RunConfigsTool extends WorkspaceTool {
         _selRunConfig = aConfig;
     }
 
-//    /**
-//     * Override to add menu button.
-//     */
-//    protected View createUI()
-//    {
-//        // Do normal version
-//        RowView superUI = (RowView) super.createUI();
-//
-//        // Add MenuButton - was from MainToolBar
-//        MenuButton menuButton = new MenuButton();
-//        menuButton.setName("RunMenuButton");
-//        menuButton.setPrefSize(15, 14);
-//        menuButton.setMargin(22, 0, 0, 0);
-//        menuButton.setItems(Arrays.asList(getRunMenuButtonItems()));
-//        menuButton.getGraphicAfter().setPadding(0, 0, 0, 0);
-//        superUI.addChild(menuButton, 5);
-//
-//        // Return
-//        return superUI;
-//    }
-
+    /**
+     * Reset UI.
+     */
     @Override
     protected void resetUI()
     {
@@ -101,15 +83,14 @@ public class RunConfigsTool extends WorkspaceTool {
     /**
      * Respond to UI changes.
      */
-    public void respondUI(ViewEvent anEvent)
+    @Override
+    protected void respondUI(ViewEvent anEvent)
     {
         // Handle RunConfigsList
         if (anEvent.equals("RunConfigsList")) {
             Object selItem = anEvent.getSelItem();
-            if (selItem instanceof RunConfig) {
-                RunConfig runConfig = (RunConfig) selItem;
+            if (selItem instanceof RunConfig runConfig)
                 setSelRunConfig(runConfig);
-            }
         }
 
         // Handle NameText, MainClassText, AppArgsText, VMArgsText

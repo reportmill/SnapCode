@@ -283,7 +283,7 @@ public class SearchTool extends WorkspaceTool {
         closeBox.setMargin(0, 4, 0, 4);
         closeBox.setLeanX(HPos.RIGHT);
         closeBox.addEventHandler(e -> clearSearch(), View.Action);
-        searchText.getLabel().setGraphicAfter(closeBox);
+        searchText.getLabel().setTailGraphic(closeBox);
         searchText.getLabel().setPickable(true);
 
         // Configure ResultsList

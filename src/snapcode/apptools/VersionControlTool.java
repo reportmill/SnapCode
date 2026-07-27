@@ -113,7 +113,7 @@ public class VersionControlTool extends ProjectTool {
         _clearRemoteUrlButton.setLeanX(HPos.RIGHT);
         _clearRemoteUrlButton.addEventHandler(e -> clearRemoteUrlAddress(), View.Action);
         TextField remoteUrlText = getView("RemoteURLText", TextField.class);
-        remoteUrlText.getLabel().setGraphicAfter(_clearRemoteUrlButton);
+        remoteUrlText.getLabel().setTailGraphic(_clearRemoteUrlButton);
         remoteUrlText.getLabel().setPickable(true);
     }
 

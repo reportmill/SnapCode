@@ -572,7 +572,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         CloseBox closeBox = new CloseBox();
         closeBox.setLeanX(HPos.RIGHT);
         closeBox.addEventHandler(e -> _workspacePane.closeFile(item.getFile()), View.Action);
-        aCell.setGraphicAfter(closeBox);
+        aCell.setTailGraphic(closeBox);
     }
 
     /**

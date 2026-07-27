@@ -125,7 +125,7 @@ public class BuildFileTool extends ProjectTool {
         // Move RepositoryButtonsView from top level to RepositoriesTitleView
         View repositoryButtonsView = getView("RepositoryButtonsView", View.class);
         TitleView repositoriesTitleView = getView("RepositoriesTitleView", TitleView.class);
-        repositoriesTitleView.getLabel().setGraphicAfter(repositoryButtonsView);
+        repositoriesTitleView.getLabel().setTailGraphic(repositoryButtonsView);
         ViewUtils.bindExpr(repositoriesTitleView, TitleView.Expanded_Prop, repositoryButtonsView, View.Visible_Prop, TitleView.Expanded_Prop);
         repositoryButtonsView.setVisible(false);
 
