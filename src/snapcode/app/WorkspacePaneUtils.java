@@ -1,6 +1,7 @@
 package snapcode.app;
 import snap.util.*;
 import snap.view.TabView;
+import snap.view.View;
 import snap.view.ViewUtils;
 import snap.viewx.DialogBox;
 import snap.web.*;
@@ -327,7 +328,7 @@ public class WorkspacePaneUtils {
         workspaceTools.setShowBottomTray(false);
         workspaceTools.getToolButtonForClass(RunTool.class).setMargin(0, 0, 0, 32);
         workspacePane.getWindow().getRootView().setBorderRadius(8);
-        workspacePane.getWindow().getRootView().setClipToBounds(true);
+        workspacePane.getWindow().getRootView().setOverflow(View.Overflow.Clip);
         workspacePane.show();
 
         // If string provided, hide right tray (don't need help)
