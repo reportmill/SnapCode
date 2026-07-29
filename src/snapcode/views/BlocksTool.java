@@ -207,7 +207,7 @@ public class BlocksTool extends WorkspaceTool {
         // Get drag string and image
         JNode dragNode = dragNodeView.getJNode();
         String dragString = dragNode.getString(); // Was: "SupportPane:" + dragSnapPart.getClass().getSimpleName()
-        Image dragImage = ViewUtils.getImageForScale(dragNodeView, 1);
+        Image dragImage = ViewUtils.getImageForDpiScale(dragNodeView, 1);
 
         // Create Dragboard, set drag string and image and start drag
         Clipboard clipboard = anEvent.getClipboard();
