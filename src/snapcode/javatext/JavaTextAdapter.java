@@ -201,50 +201,45 @@ public class JavaTextAdapter extends TextAdapter {
     /**
      * Process newline key event.
      */
-    protected void processNewlineForMultilineComment(TextLine aTextLine)
+    protected void processNewlineForMultilineComment(TextLine textLine)
     {
         // Get whether given line is start of multiline comment
-        String lineString = aTextLine.getString().trim();
+        String lineString = textLine.getString().trim();
         boolean isStartOfMultiLineComment = lineString.startsWith("/*") && !lineString.endsWith("*/");
 
         // Get whether already in multiline comment
         boolean isInMultiLineComment = lineString.startsWith("*") && !lineString.endsWith("*/");
         if (!isInMultiLineComment) {
-            TextLine nextLine = aTextLine.getNext();
-            if (nextLine != null && nextLine.getTokenCount() > 0)
-                isInMultiLineComment = nextLine.getToken(0).getName() == Tokenizer.MULTI_LINE_COMMENT;
+            TextLine nextLine = textLine.getNext();
+            if (nextLine != null && nextLine.getTokenCount() > 0) {
+                TextToken nextToken = nextLine.getToken(0);
+                isInMultiLineComment = nextToken.getName() == Tokenizer.MULTI_LINE_COMMENT && !nextToken.getString().startsWith("/*");
+            }
         }
 
-        // Get whether current line is end of multiline comment
-        boolean isEndMultiLineComment = lineString.startsWith("*") && lineString.endsWith("*/");
-
-        // Create indent string
-        String indentStr = aTextLine.getIndentString();
-        StringBuilder sb = new StringBuilder().append('\n').append(indentStr);
+        // Get basic insert chars: newline + next line indent
+        String indentStr = textLine.getIndentString();
+        StringBuilder insertChars = new StringBuilder().append('\n').append(indentStr);
 
         // If start of multi-line comment, add " * "
         if (isStartOfMultiLineComment)
-            sb.append(" * ");
+            insertChars.append(" * ");
 
         // If in multi-line comment, add "* "
         else if (isInMultiLineComment)
-            sb.append("* ");
+            insertChars.append("* ");
 
         // If after multi-line comment, remove space from indent
-        else if (isEndMultiLineComment) {
-            if (!sb.isEmpty())
-                sb.delete(sb.length() - 1, sb.length());
-        }
+        else if (lineString.startsWith("*") && lineString.endsWith("*/"))
+            insertChars.delete(insertChars.length() - 1, insertChars.length());
 
-        // Do normal version
-        replaceChars(sb.toString());
+        // Add insert chars
+        replaceChars(insertChars);
 
-        // If start of multi-line comment, append terminator
+        // If start of multi-line comment, append comment terminator
         if (isStartOfMultiLineComment && !isInMultiLineComment) {
-            int start = getSelStart();
-            String str = sb.substring(0, sb.length() - 1) + "/";
-            _textModel.addChars(str, start);
-            setSel(start);
+            String commentTerminatorStr = insertChars.substring(0, insertChars.length() - 1) + "/";
+            _textModel.addChars(commentTerminatorStr, getSelStart());
         }
     }
 
