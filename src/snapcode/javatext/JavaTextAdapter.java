@@ -3,17 +3,10 @@
  */
 package snapcode.javatext;
 import javakit.parse.*;
-import static snapcode.javatext.JavaTextArea.INDENT_STRING;
 import static snapcode.javatext.JavaTextArea.INDENT_LENGTH;
-import snap.parse.ParseToken;
 import snap.parse.Tokenizer;
-import snap.text.TextAdapter;
-import snap.text.TextModel;
-import snap.text.TextLine;
-import snap.text.TextToken;
-import snap.view.KeyCode;
-import snap.view.ViewEvent;
-import snap.view.ViewUtils;
+import snap.text.*;
+import snap.view.*;
 import snapcode.project.JavaTextModel;
 
 /**
@@ -22,7 +15,10 @@ import snapcode.project.JavaTextModel;
 public class JavaTextAdapter extends TextAdapter {
 
     // The JavaTextArea
-    private JavaTextArea  _javaTextArea;
+    private JavaTextArea _javaTextArea;
+
+    // A helper class to do smart editing
+    private JavaSmartEditor _smartEditor;
 
     /**
      * Constructor.
@@ -31,6 +27,7 @@ public class JavaTextAdapter extends TextAdapter {
     {
         super(textModel);
         _javaTextArea = javaTextArea;
+        _smartEditor = new JavaSmartEditor(this);
     }
 
     /**
@@ -150,22 +147,20 @@ public class JavaTextAdapter extends TextAdapter {
             return;
         }
 
-        // Get line and its indent
-        TextLine textLine = getSel().getStartLine();
-
         // If entering a multi-line comment, handle special
-        if (isEnteringMultilineComment(textLine)) {
-            processNewlineForMultilineComment(textLine);
+        if (_smartEditor.isEnteringMultilineComment()) {
+            _smartEditor.addNewlineForMultilineComment();
             return;
         }
 
         // If entering a block statement, handle special
-        if (isEnteringBlockStatement(textLine)) {
-            processNewlineForBlockStatement(textLine);
+        if (_smartEditor.isEnteringBlockStatement()) {
+            _smartEditor.addNewlineForBlockStatement();
             return;
         }
 
         // Get indent string for new line
+        TextLine textLine = getSel().getStartLine();
         String indentStr = textLine.getIndentString();
 
         // If leaving conditional (if, for, do, while) without brackets, remove level of indent
@@ -186,168 +181,6 @@ public class JavaTextAdapter extends TextAdapter {
 
         // Do normal version
         replaceChars(insertChars);
-    }
-
-    /**
-     * Returns whether this line is processing a multi line comment.
-     */
-    private boolean isEnteringMultilineComment(TextLine aTextLine)
-    {
-        int selStartInLine = getSelStart() - aTextLine.getStartCharIndex();
-        TextToken lastToken = getLastTokenBeforeCharIndex(aTextLine, selStartInLine);
-        return lastToken != null && lastToken.getName() == Tokenizer.MULTI_LINE_COMMENT;
-    }
-
-    /**
-     * Process newline key event.
-     */
-    protected void processNewlineForMultilineComment(TextLine textLine)
-    {
-        // Get whether given line is start of multiline comment
-        String lineString = textLine.getString().trim();
-        boolean isStartOfMultiLineComment = lineString.startsWith("/*") && !lineString.endsWith("*/");
-
-        // Get whether already in multiline comment
-        boolean isInMultiLineComment = lineString.startsWith("*") && !lineString.endsWith("*/");
-        if (!isInMultiLineComment) {
-            TextLine nextLine = textLine.getNext();
-            if (nextLine != null && nextLine.getTokenCount() > 0) {
-                TextToken nextToken = nextLine.getToken(0);
-                isInMultiLineComment = nextToken.getName() == Tokenizer.MULTI_LINE_COMMENT && !nextToken.getString().startsWith("/*");
-            }
-        }
-
-        // Get basic insert chars: newline + next line indent
-        String indentStr = textLine.getIndentString();
-        StringBuilder insertChars = new StringBuilder().append('\n').append(indentStr);
-
-        // If start of multi-line comment, add " * "
-        if (isStartOfMultiLineComment)
-            insertChars.append(" * ");
-
-        // If in multi-line comment, add "* "
-        else if (isInMultiLineComment)
-            insertChars.append("* ");
-
-        // If after multi-line comment, remove space from indent
-        else if (lineString.startsWith("*") && lineString.endsWith("*/"))
-            insertChars.delete(insertChars.length() - 1, insertChars.length());
-
-        // Add insert chars
-        replaceChars(insertChars);
-
-        // If start of multi-line comment, append comment terminator
-        if (isStartOfMultiLineComment && !isInMultiLineComment) {
-            String commentTerminatorStr = insertChars.substring(0, insertChars.length() - 1) + "/";
-            _textModel.addChars(commentTerminatorStr, getSelStart());
-        }
-    }
-
-    /**
-     * Returns whether this line is in process of entering a block statement (if, for, do, while).
-     */
-    private boolean isEnteringBlockStatement(TextLine aTextLine)
-    {
-        // Get last token on given line
-        int selStart = getSelStart();
-        int selStartInLine = selStart - aTextLine.getStartCharIndex();
-        TextToken lastToken = getLastTokenBeforeCharIndex(aTextLine, selStartInLine);
-
-        // If at beginning of line, check previous line
-        if (lastToken == null && selStartInLine == 0 && aTextLine.getPrevious() != null)
-            lastToken = aTextLine.getPrevious().getLastToken();
-
-        // If no last token, return false
-        if (lastToken == null)
-            return false;
-
-        // If last token is open bracket, return true
-        String lastTokenString = lastToken.getString();
-        if (lastTokenString.equals("{"))
-            return true;
-
-        // If last node is conditional (if, for, do, while), return true
-        JNode lastNode = _javaTextArea.getNodeForCharIndex(lastToken.getEndCharIndex());
-        if (lastNode instanceof JStmtConditional)
-            return true;
-
-        // Return false
-        return false;
-    }
-
-    /**
-     * Process newline key event.
-     */
-    protected void processNewlineForBlockStatement(TextLine aTextLine)
-    {
-        // Create string for new line plus indent
-        String indentStr = aTextLine.getIndentString();
-        String insertChars = '\n' + indentStr + INDENT_STRING;
-        int newSelStart = getSelStart() + insertChars.length();
-
-        // If trailing white space, remove from insertChars
-        int charIndexInLine = getSelStart() - aTextLine.getStartCharIndex();
-        while (charIndexInLine < aTextLine.length() - 1 && Character.isWhitespace(aTextLine.charAt(charIndexInLine)) && insertChars.length() > 1) {
-            insertChars = insertChars.substring(0, insertChars.length() - 1);
-            charIndexInLine++;
-        }
-
-        // Do normal version
-        replaceChars(insertChars);
-        setSel(newSelStart);
-
-        // If next token is close bracket, move it to next line and return
-        TextLine nextLine = aTextLine.getNext();
-        TextToken nextToken = nextLine.getTokenCount() > 0 ? nextLine.getToken(0) : null;
-        if (nextToken != null && nextToken.getString().equals("}")) {
-            _textModel.addChars('\n' + indentStr, newSelStart);
-            return;
-        }
-
-        // If last token is unbalanced open bracket, proactively append close bracket
-        TextToken textToken = aTextLine.getLastToken();
-        if (isUnbalancedOpenBracketToken(textToken)) {
-            String closeBracketStr = '\n' + indentStr + "}";
-            _textModel.addChars(closeBracketStr, newSelStart);
-        }
-    }
-
-    /**
-     * Returns whether token is an open bracket and needs a close bracket.
-     */
-    private boolean isUnbalancedOpenBracketToken(TextToken textToken)
-    {
-        // If token isn't open bracket, return false
-        if (textToken == null || !textToken.getString().equals("{"))
-            return false;
-
-        // Get node for text token
-        JNode textTokenNode = _javaTextArea.getNodeForCharIndex(textToken.getStartCharIndex());
-
-        // Iterate over node and parents to see if any is unbalanced block
-        for (JNode node = textTokenNode; node != null; node = node.getParent()) {
-
-            // If node is open bracket (or class decl), return true if no close bracket
-            if (node.getStartToken().getString().equals("{") || node instanceof JClassDecl) {
-
-                // If node end token isn't close bracket return unbalanced
-                ParseToken nodeEndToken = node.getEndToken();
-                if (!nodeEndToken.getString().equals("}"))
-                    return true;
-
-                // Skip initializer since it does share last child (JStmtBlock) token
-                if (node instanceof JInitializerDecl)
-                    continue;
-
-                // If node end token is really it's last child end token, return unbalanced
-                JNode nodeLastChild = node.getLastChild();
-                if (nodeLastChild != null && nodeEndToken == nodeLastChild.getEndToken())
-                    return true;
-            }
-        }
-
-        // Return not unbalanced
-        return false;
     }
 
     /**
@@ -511,6 +344,16 @@ public class JavaTextAdapter extends TextAdapter {
     }
 
     /**
+     * Returns whether current insert char index is in comment.
+     */
+    private boolean isInComment()
+    {
+        TextToken selToken = _javaTextArea.getTokenForCharIndex(getSelStart());
+        String selTokenName = selToken != null ? selToken.getName() : null;
+        return selTokenName == Tokenizer.SINGLE_LINE_COMMENT || selTokenName == Tokenizer.MULTI_LINE_COMMENT;
+    }
+
+    /**
      * Override to remove extra indent from pasted strings.
      */
     @Override
@@ -525,29 +368,20 @@ public class JavaTextAdapter extends TextAdapter {
     }
 
     /**
-     * Returns whether current insert char index is in comment.
+     * Override to update smart editor.
      */
-    private boolean isInComment()
+    @Override
+    public void setTextArea(TextArea textArea)
     {
-        TextToken selToken = _javaTextArea.getTokenForCharIndex(getSelStart());
-        String selTokenName = selToken != null ? selToken.getName() : null;
-        return selTokenName == Tokenizer.SINGLE_LINE_COMMENT || selTokenName == Tokenizer.MULTI_LINE_COMMENT;
+        super.setTextArea(textArea);
+        _smartEditor._javaTextArea = (JavaTextArea) textArea;
     }
 
-    /**
-     * Returns the last token before given char index.
-     */
-    private static TextToken getLastTokenBeforeCharIndex(TextLine textLine, int charIndex)
+    @Override
+    public void setTextModel(TextModel textModel)
     {
-        // Iterate over line tokens (backwards) and return first token that starts at or before char index
-        TextToken[] tokens = textLine.getTokens();
-        for (int i = tokens.length - 1; i >= 0; i--) {
-            TextToken token = tokens[i];
-            if (charIndex > token.getStartCharIndexInLine())
-                return token;
-        }
-
-        // Return not found
-        return null;
+        super.setTextModel(textModel);
+        if (_smartEditor != null)
+            _smartEditor._textModel = textModel;
     }
 }
