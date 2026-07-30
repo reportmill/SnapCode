@@ -219,39 +219,9 @@ public class JavaTextAdapter extends TextAdapter {
     }
 
     /**
-     * Returns whether given char is paired char opener.
-     */
-    public boolean isPairedCharOpener(char aChar)
-    {
-        return aChar == '\'' || aChar == '"' || aChar == '(' || aChar == '[' || aChar == '{';
-    }
-
-    /**
-     * Returns whether given char is paired char closer.
-     */
-    public boolean isPairedCharCloser(char aChar)
-    {
-        return aChar == '\'' || aChar == '"' || aChar == ')' || aChar == ']' || aChar == '}';
-    }
-
-    /**
-     * Returns the paired closer char for given opener char.
-     */
-    public char getPairedCharForOpener(char openerChar)
-    {
-        return switch (openerChar) {
-            case '\'', '"' -> openerChar;
-            case '(' -> ')';
-            case '[' -> ']';
-            case '{' -> '}';
-            default -> throw new IllegalArgumentException("JavaTextAreaKey.getPairedCharCloser: Illegal char: " + openerChar);
-        };
-    }
-
-    /**
      * Handles paired char opener: Insert close char as convenience.
      */
-    public void handlePairedCharOpener(char aChar)
+    private void handlePairedCharOpener(char aChar)
     {
         // If open bracket
         if (aChar == '{') {
@@ -278,7 +248,7 @@ public class JavaTextAdapter extends TextAdapter {
     /**
      * Handles paired char closer: Avoid redundancy of user closing already closed pair.
      */
-    public boolean isPairedCharCloserRedundant(char keyChar)
+    private boolean isPairedCharCloserRedundant(char keyChar)
     {
         // Get previous char (just return if not identical)
         int start = getSelStart();
@@ -311,7 +281,7 @@ public class JavaTextAdapter extends TextAdapter {
     /**
      * Duplicates the current selection - or line if selection is empty.
      */
-    public void duplicate()
+    private void duplicate()
     {
         int selStart = getSelStart();
         int selEnd = getSelEnd();
@@ -383,5 +353,35 @@ public class JavaTextAdapter extends TextAdapter {
         super.setTextModel(textModel);
         if (_smartEditor != null)
             _smartEditor._textModel = textModel;
+    }
+
+    /**
+     * Returns whether given char is paired char opener.
+     */
+    private static boolean isPairedCharOpener(char aChar)
+    {
+        return aChar == '\'' || aChar == '"' || aChar == '(' || aChar == '[' || aChar == '{';
+    }
+
+    /**
+     * Returns whether given char is paired char closer.
+     */
+    private static boolean isPairedCharCloser(char aChar)
+    {
+        return aChar == '\'' || aChar == '"' || aChar == ')' || aChar == ']' || aChar == '}';
+    }
+
+    /**
+     * Returns the paired closer char for given opener char.
+     */
+    private static char getPairedCharForOpener(char openerChar)
+    {
+        return switch (openerChar) {
+            case '\'', '"' -> openerChar;
+            case '(' -> ')';
+            case '[' -> ']';
+            case '{' -> '}';
+            default -> throw new IllegalArgumentException("JavaTextAreaKey.getPairedCharCloser: Illegal char: " + openerChar);
+        };
     }
 }
