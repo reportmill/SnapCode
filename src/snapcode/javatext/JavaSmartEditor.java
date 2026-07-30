@@ -1,14 +1,7 @@
 package snapcode.javatext;
-import javakit.parse.JClassDecl;
-import javakit.parse.JInitializerDecl;
-import javakit.parse.JNode;
-import javakit.parse.JStmtConditional;
-import snap.parse.ParseToken;
-import snap.parse.Tokenizer;
-import snap.text.TextLine;
-import snap.text.TextModel;
-import snap.text.TextSel;
-import snap.text.TextToken;
+import javakit.parse.*;
+import snap.parse.*;
+import snap.text.*;
 import static snapcode.javatext.JavaTextArea.INDENT_STRING;
 
 /**
@@ -36,7 +29,7 @@ class JavaSmartEditor {
     }
 
     /**
-     * Returns whether this line is processing a multi line comment.
+     * Returns whether text selection is in or after a multi-line comment.
      */
     public boolean isEnteringMultilineComment()
     {
@@ -47,7 +40,7 @@ class JavaSmartEditor {
     }
 
     /**
-     * Process newline key event.
+     * Adds a newline when text selection is in a multi-line comment.
      */
     public void addNewlineForMultilineComment()
     {
@@ -57,14 +50,7 @@ class JavaSmartEditor {
         boolean isStartOfMultiLineComment = lineString.startsWith("/*") && !lineString.endsWith("*/");
 
         // Get whether already in multiline comment
-        boolean isInMultiLineComment = lineString.startsWith("*") && !lineString.endsWith("*/");
-        if (!isInMultiLineComment) {
-            TextLine nextLine = textLine.getNext();
-            if (nextLine != null && nextLine.getTokenCount() > 0) {
-                TextToken nextToken = nextLine.getToken(0);
-                isInMultiLineComment = nextToken.getName() == Tokenizer.MULTI_LINE_COMMENT && !nextToken.getString().startsWith("/*");
-            }
-        }
+        boolean isInMultiLineComment = isLineInMultiLineComment(textLine, lineString);
 
         // Get basic insert chars: newline + next line indent
         String indentStr = textLine.getIndentString();
@@ -93,7 +79,7 @@ class JavaSmartEditor {
     }
 
     /**
-     * Returns whether this line is in process of entering a block statement (if, for, do, while).
+     * Returns whether text selection is in a block statement (if, for, do, while).
      */
     public boolean isEnteringBlockStatement()
     {
@@ -126,7 +112,7 @@ class JavaSmartEditor {
     }
 
     /**
-     * Process newline key event.
+     * Adds a newline when text selection is in a block statement (if, for, do, while).
      */
     public void addNewlineForBlockStatement()
     {
@@ -216,6 +202,25 @@ class JavaSmartEditor {
 
         // Return not found
         return null;
+    }
+
+    /**
+     * Returns whether given line is in a multi-line comment.
+     */
+    private static boolean isLineInMultiLineComment(TextLine textLine, String lineString)
+    {
+        boolean isInMultiLineComment = lineString.startsWith("*") && !lineString.endsWith("*/");
+
+        if (!isInMultiLineComment) {
+            TextLine nextLine = textLine.getNext();
+            while (nextLine != null && nextLine.getTokenCount() == 0) nextLine = nextLine.getNext();
+            if (nextLine != null) {
+                TextToken nextToken = nextLine.getToken(0);
+                isInMultiLineComment = nextToken.getName() == Tokenizer.MULTI_LINE_COMMENT && !nextToken.getString().startsWith("/*");
+            }
+        }
+
+        return isInMultiLineComment;
     }
 
     // Conveniences
