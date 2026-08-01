@@ -10,7 +10,7 @@ import snap.text.*;
 /**
  * This class holds the text of a Java file with methods to easily build.
  */
-public class JavaTextModel extends TextBlock {
+public class JavaTextModel extends TextModel {
 
     // The JavaAgent
     private JavaAgent  _javaAgent;
