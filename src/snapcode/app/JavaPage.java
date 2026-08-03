@@ -239,7 +239,7 @@ public class JavaPage extends WebPage {
                     /**
                      * Standard main implementation.
                      */
-                    public static void main(String args[])
+                    public static void main(String[] args)
                     {
                     }
                 

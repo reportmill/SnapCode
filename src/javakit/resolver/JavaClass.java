@@ -432,18 +432,22 @@ public class JavaClass extends JavaType {
 
         // Check superclass
         JavaClass superClass = getSuperClass();
-        if (superClass != null)
+        if (superClass != null) {
             field = superClass.getFieldForName(aName);
+            if (field != null)
+                return field;
+        }
 
         // Check interfaces
         JavaClass[] interfaces = getInterfaces();
         for (JavaClass iface : interfaces) {
-            if ((field = iface.getFieldForName(aName)) != null)
+            field = iface.getFieldForName(aName);
+            if (field != null)
                 return field;
         }
 
-        // Return
-        return field;
+        // Return not found
+        return null;
     }
 
     /**
@@ -625,18 +629,18 @@ public class JavaClass extends JavaType {
             return this;
 
         // Handle primitive types
-        switch (_name) {
-            case "java.lang.Boolean": return getJavaClassForClass(boolean.class);
-            case "java.lang.Byte": return getJavaClassForClass(byte.class);
-            case "java.lang.Character": return getJavaClassForClass(char.class);
-            case "java.lang.Short": return getJavaClassForClass(short.class);
-            case "java.lang.Integer": return getJavaClassForClass(int.class);
-            case "java.lang.Long": return getJavaClassForClass(long.class);
-            case "java.lang.Float": return getJavaClassForClass(float.class);
-            case "java.lang.Double": return getJavaClassForClass(double.class);
-            case "java.lang.Void": return getJavaClassForClass(void.class);
-            default: return null;
-        }
+        return switch (_name) {
+            case "java.lang.Boolean" -> getJavaClassForClass(boolean.class);
+            case "java.lang.Byte" -> getJavaClassForClass(byte.class);
+            case "java.lang.Character" -> getJavaClassForClass(char.class);
+            case "java.lang.Short" -> getJavaClassForClass(short.class);
+            case "java.lang.Integer" -> getJavaClassForClass(int.class);
+            case "java.lang.Long" -> getJavaClassForClass(long.class);
+            case "java.lang.Float" -> getJavaClassForClass(float.class);
+            case "java.lang.Double" -> getJavaClassForClass(double.class);
+            case "java.lang.Void" -> getJavaClassForClass(void.class);
+            default -> null;
+        };
     }
 
     /**
@@ -648,18 +652,18 @@ public class JavaClass extends JavaType {
             return this;
 
         // Handle primitive types
-        switch (_name) {
-            case "boolean": return getJavaClassForClass(Boolean.class);
-            case "byte": return getJavaClassForClass(Byte.class);
-            case "char": return getJavaClassForClass(Character.class);
-            case "short": return getJavaClassForClass(Short.class);
-            case "int": return getJavaClassForClass(Integer.class);
-            case "long": return getJavaClassForClass(Long.class);
-            case "float": return getJavaClassForClass(Float.class);
-            case "double": return getJavaClassForClass(Double.class);
-            case "void": return getJavaClassForClass(Void.class);
-            default: return null;
-        }
+        return switch (_name) {
+            case "boolean" -> getJavaClassForClass(Boolean.class);
+            case "byte" -> getJavaClassForClass(Byte.class);
+            case "char" -> getJavaClassForClass(Character.class);
+            case "short" -> getJavaClassForClass(Short.class);
+            case "int" -> getJavaClassForClass(Integer.class);
+            case "long" -> getJavaClassForClass(Long.class);
+            case "float" -> getJavaClassForClass(Float.class);
+            case "double" -> getJavaClassForClass(Double.class);
+            case "void" -> getJavaClassForClass(Void.class);
+            default -> null;
+        };
     }
 
     /**

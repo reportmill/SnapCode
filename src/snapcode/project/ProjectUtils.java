@@ -68,7 +68,7 @@ public class ProjectUtils {
         if (aFile.isDir()) {
 
             // If file doesn't exist, return false
-            if (!aFile.getExists())
+            if (!aFile.getExists() || aFile.isRoot())
                 return false;
 
             // If name doesn't start with char, return false
