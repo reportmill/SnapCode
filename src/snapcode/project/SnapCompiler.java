@@ -256,10 +256,10 @@ public class SnapCompiler {
 
         if (aDiagnostic.getKind() == Diagnostic.Kind.ERROR) {
             if (_unknownDiagnosticSourceErrorCount++ < 5)
-                System.err.println("SnapCompiler: Unknown Error: " + aDiagnostic);
+                System.err.println("SnapCompiler: Unknown Error: " + getMessageString(aDiagnostic));
         }
 
-        else System.out.println("SnapCompiler: Unknown warning: " + aDiagnostic);
+        else System.out.println("SnapCompiler: Unknown warning: " + getMessageString(aDiagnostic));
         return null;
     }
 
@@ -268,6 +268,9 @@ public class SnapCompiler {
      */
     private BuildIssue createBuildIssueForDiagnosticAndSnapJFO(Diagnostic<?> aDiagnostic, SnapCompilerJFO snapFileJFO)
     {
+        if (isSillyDiagnostic(aDiagnostic))
+            return null;
+
         WebFile javaFile = snapFileJFO.getFile();
 
         // Get issue kind
@@ -278,11 +281,8 @@ public class SnapCompiler {
             default -> BuildIssue.Kind.Note;
         };
 
-        // Get message without location
-        String errorMsg = aDiagnostic.getMessage(Locale.ENGLISH);
-        int stripLocationIndex = errorMsg.indexOf("location:");
-        if (stripLocationIndex > 0)
-            errorMsg = errorMsg.substring(0, stripLocationIndex).trim();
+        // Get user friendly, single line message
+        String errorMsg = getMessageString(aDiagnostic);
 
         // Get LineNumber, ColumnNumber
         int line = (int) aDiagnostic.getLineNumber();
@@ -291,16 +291,6 @@ public class SnapCompiler {
         if (startCharIndex < 0)
             startCharIndex = 0;
         int endCharIndex = Math.max((int) aDiagnostic.getEndPosition(), startCharIndex);
-
-        // Bogus trim of "unchecked" warnings and "overrides equals" and "Possible 'this' escape"
-        if (line < 0 && errorMsg.contains("unchecked"))
-            return null;
-        if (errorMsg.contains("overrides equals, but"))
-            return null;
-        if (errorMsg.contains("possible 'this' escape"))
-            return null;
-        if (errorMsg.contains("preview feature"))
-            return null;
 
         // If Jepl, convert locations from Java back to Jepl
         if (javaFile.getFileType().equals("jepl")) {
@@ -313,5 +303,60 @@ public class SnapCompiler {
 
         // Return new BuildIssue
         return new BuildIssue().init(javaFile, kind, errorMsg, line - 1, col - 1, startCharIndex, endCharIndex);
+    }
+
+    /**
+     * Returns the most user friendly single line string (no newlines) for a Diagnostic's message.
+     */
+    private static String getMessageString(Diagnostic<?> aDiagnostic)
+    {
+        // Get message
+        String message = aDiagnostic.getMessage(Locale.ENGLISH);
+        if (message == null)
+            return "";
+
+        // Strip trailing 'symbol:'/'location:' detail lines, which just repeat info in the source
+        int stripIndex = message.indexOf("symbol:");
+        if (stripIndex < 0)
+            stripIndex = message.indexOf("location:");
+        if (stripIndex > 0)
+            message = message.substring(0, stripIndex);
+
+        // Collapse any newlines and runs of whitespace into single spaces
+        message = message.replaceAll("\n\\s*", ", ").trim();
+        message = message.replaceAll("\\s+", " ");
+
+        // Strip trailing semicolon (multi-line diagnostics often end their summary line with one)
+        if (message.endsWith(";"))
+            message = message.substring(0, message.length() - 1).trim();
+
+        // Return
+        return message;
+    }
+
+    /**
+     * Returns whether given diagnostic should be ignored.
+     */
+    private static boolean isSillyDiagnostic(Diagnostic<?> aDiagnostic)
+    {
+        String errorMsg = aDiagnostic.getMessage(Locale.ENGLISH);
+
+        // Skip "unchecked" warnings
+        if (aDiagnostic.getLineNumber() < 0 && errorMsg.contains("unchecked"))
+            return true;
+
+        // Skip "overrides equals"
+        if (errorMsg.contains("overrides equals, but"))
+            return true;
+
+        // Skip "Possible 'this' escape"
+        if (errorMsg.contains("possible 'this' escape"))
+            return true;
+
+        // Skip 'preview feature' warning
+        if (errorMsg.contains("preview feature"))
+            return true;
+
+        return false;
     }
 }

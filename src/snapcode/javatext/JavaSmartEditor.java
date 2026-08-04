@@ -158,8 +158,10 @@ class JavaSmartEditor {
         if (textToken == null || !textToken.getString().equals("{"))
             return false;
 
-        // Get node for text token
+        // Get node for text token (if broken parse, just return)
         JNode textTokenNode = _javaTextArea.getNodeForCharIndex(textToken.getStartCharIndex());
+        if (textTokenNode.getStartToken() == null)
+            return false;
 
         // Iterate over node and parents to see if any is unbalanced block
         for (JNode node = textTokenNode; node != null; node = node.getParent()) {
