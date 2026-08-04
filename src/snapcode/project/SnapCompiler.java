@@ -17,22 +17,22 @@ import java.util.*;
 public class SnapCompiler {
 
     // The Project
-    protected Project  _proj;
+    protected Project _proj;
 
     // Whether to check errors only
     protected boolean _checkErrorsOnly;
 
     // The shared compiler
-    private JavaCompiler  _compiler;
+    private JavaCompiler _compiler;
 
     // The options for compile
-    private List<String>  _options;
+    private List<String> _options;
 
     // The shared file manager for any project compile
     private SnapCompilerFM _fileManager;
 
     // Whether compile succeeded (no errors encountered)
-    private boolean  _succeeded;
+    private boolean _succeeded;
 
     // The Set of source files compiled by last compile
     protected Set<WebFile> _compiledJavaFiles = new HashSet<>();
@@ -41,7 +41,10 @@ public class SnapCompiler {
     protected Set<WebFile> _modifiedJavaFiles = new HashSet<>();
 
     // The number of errors currently encountered
-    protected int  _errorCount;
+    protected int _errorCount;
+
+    // The number of errors from unknown diagnostics
+    private int _unknownDiagnosticSourceErrorCount;
 
     /**
      * Constructor.
@@ -89,7 +92,6 @@ public class SnapCompiler {
      */
     protected List<String> getOptions()
     {
-        // If already set, just return
         if (_options != null) return _options;
 
         // Create Options list, add debug flag and source/target flag for Java 1.5
@@ -124,7 +126,6 @@ public class SnapCompiler {
             options.add(classPath);
         }
 
-        // Set/return
         return _options = options;
     }
 
@@ -159,7 +160,7 @@ public class SnapCompiler {
         JavaCompiler compiler = getCompiler();
         StringWriter additionalOutputWriter = new StringWriter();
         SnapCompilerFM fileManager = getFileManager();
-        DiagnosticListener<JavaFileObject> diagnosticListener = diag -> reportDiagnostic(diag);
+        DiagnosticListener<JavaFileObject> diagnosticLsnr = this::handleDiagnostic;
 
         // Get JFOs
         JavaFileObject jfo = fileManager.getJavaFileObject(aFile);
@@ -167,7 +168,7 @@ public class SnapCompiler {
 
         // Get task, call and return _succeeded
         List<String> options = getOptions();
-        CompilationTask task = compiler.getTask(additionalOutputWriter, fileManager, diagnosticListener, options, null, jfos);
+        CompilationTask task = compiler.getTask(additionalOutputWriter, fileManager, diagnosticLsnr, options, null, jfos);
 
         // Call task
         _succeeded = true;
@@ -219,95 +220,98 @@ public class SnapCompiler {
     }
 
     /**
-     * Report BuildIssue.
+     * Handles given compiler Diagnostic.
      */
-    protected void reportBuildIssue(BuildIssue anIssue)
+    private void handleDiagnostic(Diagnostic<?> aDiagnostic)
+    {
+        if (_succeeded && aDiagnostic.getKind() == Diagnostic.Kind.ERROR)
+            _succeeded = false;
+
+        // Create build issue for given diagnostic and add to workspace
+        BuildIssue buildIssue = createBuildIssueForDiagnostic(aDiagnostic);
+        if (buildIssue != null)
+            addBuildIssueToWorkspace(buildIssue);
+    }
+
+    /**
+     * Adds given BuildIssue to workspace.
+     */
+    protected void addBuildIssueToWorkspace(BuildIssue buildIssue)
     {
         Workspace workspace = _proj.getWorkspace();
         BuildIssues buildIssues = workspace.getBuildIssues();
-        buildIssues.addBuildIssue(anIssue);
-        if (anIssue.getKind() == BuildIssue.Kind.Error)
+        buildIssues.addBuildIssue(buildIssue);
+        if (buildIssue.getKind() == BuildIssue.Kind.Error)
             _errorCount++;
     }
 
     /**
      * Returns a BuildIssue for Diagnostic.
      */
-    protected BuildIssue createBuildIssue(Diagnostic<?> aDiagnostic)
+    private BuildIssue createBuildIssueForDiagnostic(Diagnostic<?> aDiagnostic)
     {
         Object diagnosticSource = aDiagnostic.getSource();
+        if (diagnosticSource instanceof SnapCompilerJFO snapFileJFO)
+            return createBuildIssueForDiagnosticAndSnapJFO(aDiagnostic, snapFileJFO);
 
-        if (!(diagnosticSource instanceof SnapCompilerJFO)) {
-            if (aDiagnostic.getKind() == Diagnostic.Kind.ERROR) {
-                if (_unknownDiagnosticSourceErrorCount++ < 5)
-                    System.err.println("SnapCompiler: Unknown Error: " + aDiagnostic);
-            }
-            else System.out.println("SnapCompiler: Unknown warning: " + aDiagnostic);
-            return null;
+        if (aDiagnostic.getKind() == Diagnostic.Kind.ERROR) {
+            if (_unknownDiagnosticSourceErrorCount++ < 5)
+                System.err.println("SnapCompiler: Unknown Error: " + aDiagnostic);
         }
 
-        // Get File
-        SnapCompilerJFO snapFileJFO = (SnapCompilerJFO) diagnosticSource;
-        WebFile file = snapFileJFO.getFile();
+        else System.out.println("SnapCompiler: Unknown warning: " + aDiagnostic);
+        return null;
+    }
 
-        // Get Kind
-        BuildIssue.Kind kind = BuildIssue.Kind.Note;
-        switch (aDiagnostic.getKind()) {
-            case ERROR: kind = BuildIssue.Kind.Error; break;
-            case WARNING: kind = BuildIssue.Kind.Warning; break;
-            case MANDATORY_WARNING: kind = BuildIssue.Kind.Warning; break;
-            default:
-        }
+    /**
+     * Returns a BuildIssue for Diagnostic.
+     */
+    private BuildIssue createBuildIssueForDiagnosticAndSnapJFO(Diagnostic<?> aDiagnostic, SnapCompilerJFO snapFileJFO)
+    {
+        WebFile javaFile = snapFileJFO.getFile();
 
-        // Get message
-        String msg = aDiagnostic.getMessage(Locale.ENGLISH);
-        int loc = msg.indexOf("location:");
-        if (loc > 0)
-            msg = msg.substring(0, loc).trim();
+        // Get issue kind
+        BuildIssue.Kind kind = switch (aDiagnostic.getKind()) {
+            case ERROR -> BuildIssue.Kind.Error;
+            case WARNING -> BuildIssue.Kind.Warning;
+            case MANDATORY_WARNING -> BuildIssue.Kind.Warning;
+            default -> BuildIssue.Kind.Note;
+        };
+
+        // Get message without location
+        String errorMsg = aDiagnostic.getMessage(Locale.ENGLISH);
+        int stripLocationIndex = errorMsg.indexOf("location:");
+        if (stripLocationIndex > 0)
+            errorMsg = errorMsg.substring(0, stripLocationIndex).trim();
 
         // Get LineNumber, ColumnNumber
         int line = (int) aDiagnostic.getLineNumber();
         int col = (int) aDiagnostic.getColumnNumber();
-        int start = (int) aDiagnostic.getStartPosition();
-        if (start < 0)
-            start = 0;
-        int end = Math.max((int) aDiagnostic.getEndPosition(), start);
+        int startCharIndex = (int) aDiagnostic.getStartPosition();
+        if (startCharIndex < 0)
+            startCharIndex = 0;
+        int endCharIndex = Math.max((int) aDiagnostic.getEndPosition(), startCharIndex);
 
         // Bogus trim of "unchecked" warnings and "overrides equals" and "Possible 'this' escape"
-        if (line < 0 && msg.contains("unchecked"))
+        if (line < 0 && errorMsg.contains("unchecked"))
             return null;
-        if (msg.contains("overrides equals, but"))
+        if (errorMsg.contains("overrides equals, but"))
             return null;
-        if (msg.contains("possible 'this' escape"))
+        if (errorMsg.contains("possible 'this' escape"))
+            return null;
+        if (errorMsg.contains("preview feature"))
             return null;
 
         // If Jepl, convert locations from Java back to Jepl
-        if (file.getFileType().equals("jepl")) {
-            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(file);
+        if (javaFile.getFileType().equals("jepl")) {
+            JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
             JeplToJava.JavaText javaText = javaAgent.getJeplJavaText();
-            start = javaText.getJeplCharIndexForJavaCharIndex(start);
-            end = javaText.getJeplCharIndexForJavaCharIndex(end);
-            line = javaText.getJeplLineIndexForJeplCharIndex(start);
+            startCharIndex = javaText.getJeplCharIndexForJavaCharIndex(startCharIndex);
+            endCharIndex = javaText.getJeplCharIndexForJavaCharIndex(endCharIndex);
+            line = javaText.getJeplLineIndexForJeplCharIndex(startCharIndex);
         }
 
-        // Create and configure BuildIssue and return
-        BuildIssue issue = new BuildIssue().init(file, kind, msg, line - 1, col - 1, start, end);
-        return issue;
-    }
-
-    private int _unknownDiagnosticSourceErrorCount = 0;
-
-    /**
-     * Report Diagnostic.
-     */
-    private void reportDiagnostic(Diagnostic<?> aDiagnostic)
-    {
-        if (_succeeded && aDiagnostic.getKind() == Diagnostic.Kind.ERROR)
-            _succeeded = false;
-
-        // Create issue and report
-        BuildIssue issue = createBuildIssue(aDiagnostic);
-        if (issue != null)
-            reportBuildIssue(issue);
+        // Return new BuildIssue
+        return new BuildIssue().init(javaFile, kind, errorMsg, line - 1, col - 1, startCharIndex, endCharIndex);
     }
 }

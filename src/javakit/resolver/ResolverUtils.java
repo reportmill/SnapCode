@@ -46,25 +46,20 @@ public class ResolverUtils {
      */
     public static String getClassNameForClassCoding(String aName)
     {
-        char char0 = aName.charAt(0);
-        switch (char0) {
-            case 'B': return "byte";
-            case 'C': return "char";
-            case 'D': return "double";
-            case 'F': return "float";
-            case 'I': return "int";
-            case 'J': return "long";
-            case 'S': return "short";
-            case 'Z': return "boolean";
-            case 'V': return "void";
-            case 'L':
-                int end = aName.indexOf(';', 1);
-                return aName.substring(1, end);
-            case '[': return getClassNameForClassCoding(aName.substring(1)) + "[]";
-        }
-
-        // Unsupported coding char
-        throw new RuntimeException("ResolverUtils.getClassNameForClassCoding: Not a coded class string " + aName);
+        return switch (aName.charAt(0)) {
+            case 'B' -> "byte";
+            case 'C' -> "char";
+            case 'D' -> "double";
+            case 'F' -> "float";
+            case 'I' -> "int";
+            case 'J' -> "long";
+            case 'S' -> "short";
+            case 'Z' -> "boolean";
+            case 'V' -> "void";
+            case 'L' -> { int end = aName.indexOf(';', 1); yield aName.substring(1, end); }
+            case '[' -> getClassNameForClassCoding(aName.substring(1)) + "[]";
+            default -> throw new RuntimeException("ResolverUtils.getClassNameForClassCoding: Not a coded class string " + aName);
+        };
     }
 
     /**
@@ -72,27 +67,26 @@ public class ResolverUtils {
      */
     public static Class<?> getClassForClassCoding(String aName, ClassLoader aClassLoader)
     {
-        char c = aName.charAt(0);
-        switch (c) {
-            case 'B': return byte.class;
-            case 'C': return char.class;
-            case 'D': return double.class;
-            case 'F': return float.class;
-            case 'I': return int.class;
-            case 'J': return long.class;
-            case 'S': return short.class;
-            case 'Z': return boolean.class;
-            case 'V': return void.class;
-            case 'L':
+        return switch (aName.charAt(0)) {
+            case 'B' -> byte.class;
+            case 'C' -> char.class;
+            case 'D' -> double.class;
+            case 'F' -> float.class;
+            case 'I' -> int.class;
+            case 'J' -> long.class;
+            case 'S' -> short.class;
+            case 'Z' -> boolean.class;
+            case 'V' -> void.class;
+            case 'L' -> {
                 int end = aName.indexOf(';', 1);
-                return getClassForName(aName.substring(1, end), aClassLoader);
-            case '[':
+                yield getClassForName(aName.substring(1, end), aClassLoader);
+            }
+            case '[' -> {
                 Class<?> cls = getClassForClassCoding(aName.substring(1), aClassLoader);
-                return cls != null ? Array.newInstance(cls, 0).getClass() : null;
-        }
-
-        // Unsupported coding char
-        throw new RuntimeException("ResolverUtils.getClassForClassCoding: Not a coded class " + aName);
+                yield cls != null ? Array.newInstance(cls, 0).getClass() : null;
+            }
+            default -> throw new RuntimeException("ResolverUtils.getClassForClassCoding: Not a coded class " + aName);
+        };
     }
 
     /**
@@ -111,18 +105,18 @@ public class ResolverUtils {
         if (aName.length() > 7 || !Character.isLowerCase(aName.charAt(0)) || aName.indexOf('.') > 0)
             return null;
 
-        switch (aName) {
-            case "boolean": return boolean.class;
-            case "char": return char.class;
-            case "byte": return byte.class;
-            case "short": return short.class;
-            case "int": return int.class;
-            case "long": return long.class;
-            case "float": return float.class;
-            case "double": return double.class;
-            case "void": return void.class;
-            default: return null;
-        }
+        return switch (aName) {
+            case "boolean" -> boolean.class;
+            case "char" -> char.class;
+            case "byte" -> byte.class;
+            case "short" -> short.class;
+            case "int" -> int.class;
+            case "long" -> long.class;
+            case "float" -> float.class;
+            case "double" -> double.class;
+            case "void" -> void.class;
+            default -> null;
+        };
     }
 
     /**
@@ -135,31 +129,27 @@ public class ResolverUtils {
             return (Class<?>) aType;
 
         // Handle GenericArrayType
-        if (aType instanceof GenericArrayType) {
-            GenericArrayType gat = (GenericArrayType) aType;
-            Class<?> cls = getClassForType(gat.getGenericComponentType());
+        if (aType instanceof GenericArrayType genericArrayType) {
+            Class<?> cls = getClassForType(genericArrayType.getGenericComponentType());
             return Array.newInstance(cls, 0).getClass();
         }
 
         // Handle ParameterizedType (e.g., Class <T>, List <T>, Map <K,V>)
-        if (aType instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) aType;
+        if (aType instanceof ParameterizedType parameterizedType) {
             Type rawType = parameterizedType.getRawType();
             return getClassForType(rawType);
         }
 
         // Handle TypeVariable
-        if (aType instanceof TypeVariable) {
-            TypeVariable<?> typeVar = (TypeVariable<?>) aType;
+        if (aType instanceof TypeVariable<?> typeVar) {
             Type[] boundsTypes = typeVar.getBounds();
             Type bounds0 = boundsTypes.length > 0 ? boundsTypes[0] : Object.class;
             return getClassForType(bounds0);
         }
 
         // Handle WildcardType
-        if (aType instanceof WildcardType) {
-            WildcardType wc = (WildcardType) aType;
-            Type[] boundsTypes = wc.getLowerBounds().length > 0 ? wc.getLowerBounds() : wc.getUpperBounds();
+        if (aType instanceof WildcardType wildcardType) {
+            Type[] boundsTypes = wildcardType.getLowerBounds().length > 0 ? wildcardType.getLowerBounds() : wildcardType.getUpperBounds();
             Type boundsType = boundsTypes.length > 0 ? boundsTypes[0] : Object.class;
             return getClassForType(boundsType);
         }
@@ -180,8 +170,8 @@ public class ResolverUtils {
     }
 
     // Common packages to preload
-    static List<String> pkgNames = List.of("java", "java.lang", "java.util", "java.io", "java.awt", "javax", "javax.swing");
-    static int pkgIndex;
+    private static List<String> pkgNames = List.of("java", "java.lang", "java.util", "java.io", "java.awt", "javax", "javax.swing");
+    private static int pkgIndex;
 
     /**
      * Primes the resolver.
