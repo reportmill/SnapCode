@@ -11,19 +11,22 @@ import java.util.*;
 public class JImportDecl extends JNode {
 
     // The import name expression
-    protected JExpr  _nameExpr;
+    private JExpr _nameExpr;
 
     // Whether import is static
-    protected boolean  _static;
+    private boolean _static;
 
     // Whether import is inclusive (ends with '.*')
-    protected boolean  _inclusive;
+    private boolean _inclusive;
+
+    // Whether import is module
+    private boolean _module;
 
     // Whether import is used
-    protected boolean  _used;
+    protected boolean _used;
 
     // The list of child class names found by this import, if inclusive
-    protected Set<String> _found = Collections.EMPTY_SET;
+    private Set<String> _found = Collections.EMPTY_SET;
 
     /**
      * Constructor.
@@ -54,10 +57,7 @@ public class JImportDecl extends JNode {
     /**
      * Sets whether import is static.
      */
-    public void setStatic(boolean aValue)
-    {
-        _static = aValue;
-    }
+    public void setStatic(boolean aValue)  { _static = aValue; }
 
     /**
      * Returns whether import is inclusive.
@@ -67,10 +67,17 @@ public class JImportDecl extends JNode {
     /**
      * Sets whether import is inclusive.
      */
-    public void setInclusive(boolean aValue)
-    {
-        _inclusive = aValue;
-    }
+    public void setInclusive(boolean aValue)  { _inclusive = aValue; }
+
+    /**
+     * Returns whether import is for module.
+     */
+    public boolean isModule()  { return _module; }
+
+    /**
+     * Sets whether import is for module.
+     */
+    public void setModule(boolean aValue)  { _module = aValue; }
 
     /**
      * Returns whether import is class name.
@@ -140,10 +147,7 @@ public class JImportDecl extends JNode {
      * Override to get name.
      */
     @Override
-    protected String getNameImpl()
-    {
-        return _nameExpr != null ? _nameExpr.getName() : "";
-    }
+    protected String getNameImpl()  { return _nameExpr != null ? _nameExpr.getName() : ""; }
 
     /**
      * Returns class or package declaration.

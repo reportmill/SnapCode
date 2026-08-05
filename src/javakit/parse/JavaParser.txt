@@ -25,7 +25,7 @@ JeplNode
 
 PackageDecl { LookAhead (Annotation* "package") Modifiers "package" Name ";" }
 
-ImportDecl { "import" "static"? Name ("." "*")? ";" }
+ImportDecl { "import" "static"? "module"? Name ("." "*")? ";" }
 
 Modifiers { Modifier* }
 
@@ -172,7 +172,7 @@ ReturnStatement { "return" Expression? ";" }
 
 SwitchStatement { SwitchExpr AssertStatement? }
 
-YieldStatement { "yield" Expression ";" }
+YieldStatement { LookAhead(3) "yield" Expression ";" }
 
 AssertStatement { "assert" Expression (":" Expression)? ";" }
 
