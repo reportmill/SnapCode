@@ -49,7 +49,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * Parses for java file for given char input.
+     * Parses java file for given char input.
      */
     public synchronized JFile parseFile(CharSequence anInput, JavaTextModel javaTextModel)
     {
@@ -61,7 +61,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * Parses for java file for given char input.
+     * Parses java file for given char input.
      */
     protected synchronized JFile parseFileWithRule(CharSequence anInput, ParseRule javaFileRule)
     {
@@ -129,7 +129,25 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * Parses for java file for given char input.
+     * Parses compact class file for given char input.
+     */
+    public synchronized JFile parseCompactSourceFile(CharSequence anInput, String className, String[] importNames, JavaTextModel javaTextModel)
+    {
+        // Get CompactSourceFile rule
+        ParseRule compactSourceFileRule = getRuleForName("CompactSourceFile");
+        compactSourceFileRule.setHandler(new JeplFileHandler(className, importNames, "Object"));
+
+        // If JavaTextModel available, use its tokenizer
+        if (javaTextModel != null)
+            _optimizedTokenizer = javaTextModel.getTokenSource();
+
+        // Do normal version
+        try { return parseFileWithRule(anInput, compactSourceFileRule); }
+        finally { _optimizedTokenizer = null; }
+    }
+
+    /**
+     * Parses jepl file for given char input.
      */
     public synchronized JFile parseJeplFile(CharSequence anInput, String className, String[] importNames, String superClassName, JavaTextModel javaTextModel)
     {
@@ -147,7 +165,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * Parses for a statement for given char input and char index.
+     * Parses a statement for given char input and char index.
      */
     public synchronized JStmt parseStatement(CharSequence charInput, int charIndex)
     {
@@ -159,7 +177,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * Parses for a statement for given char input and char index.
+     * Parses a statement for given char input and char index.
      */
     public synchronized JStmt parseStatementForJavaText(JavaTextModel javaTextModel, int charIndex)
     {
@@ -174,7 +192,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * Parses for an expression for given char input.
+     * Parses an expression for given char input.
      */
     public synchronized JExpr parseExpression(CharSequence charInput)
     {
@@ -185,7 +203,7 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * Parses for file imports for given char input.
+     * Parses file imports for given char input.
      */
     public synchronized JFile parseFileImports(CharSequence charInput)
     {

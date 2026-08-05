@@ -54,8 +54,37 @@ public class JeplFileHandler extends JavaParserExpr.JNodeParseHandler<JFile> {
 
         switch (anId) {
 
+            // Handle ImportDecl
+            case "ImportDecl" -> {
+                JImportDecl importDecl = aNode.getCustomNode(JImportDecl.class);
+                jfile.addImportDecl(importDecl);
+            }
+
+            // Handle Modifiers: Hold on to mods
+            case "Modifiers" -> _mods = aNode.getCustomNode(JModifiers.class);
+
+            // Handle MethodDecl, FieldDecl
+            case "MethodDecl", "FieldDecl" -> {
+                JMemberDecl methodDecl = aNode.getCustomNode(JMemberDecl.class);
+                methodDecl.setModifiers(_mods);
+                _mods = null;
+                classDecl.addBodyDecl(methodDecl);
+                jfile.setEndToken(endToken);
+                _initDecl = null;
+            }
+
+            // Handle ClassDecl, EnumDecl
+            case "ClassDecl", "EnumDecl" -> {
+                JClassDecl innerClassDecl = aNode.getCustomNode(JClassDecl.class);
+                innerClassDecl.setModifiers(_mods);
+                _mods = null;
+                classDecl.addBodyDecl(innerClassDecl);
+                jfile.setEndToken(endToken);
+                _initDecl = null;
+            }
+
             // Handle BlockStatement
-            case "BlockStatement":
+            case "BlockStatement" -> {
 
                 // If no current InitDecl, create (with statement block) and add
                 if (_initDecl == null) {
@@ -79,40 +108,6 @@ public class JeplFileHandler extends JavaParserExpr.JNodeParseHandler<JFile> {
                 // Update end tokens
                 _initDecl.setEndToken(endToken);
                 classDecl.setEndToken(endToken);
-                break;
-
-            // Handle ImportDecl
-            case "ImportDecl":
-                JImportDecl importDecl = aNode.getCustomNode(JImportDecl.class);
-                jfile.addImportDecl(importDecl);
-                break;
-
-            // Handle Modifiers: Ignore for now
-            case "Modifiers":
-                _mods = aNode.getCustomNode(JModifiers.class);
-                break;
-
-            // Handle MethodDecl
-            case "MethodDecl": {
-                JMethodDecl methodDecl = aNode.getCustomNode(JMethodDecl.class);
-                methodDecl.setModifiers(_mods);
-                _mods = null;
-                classDecl.addBodyDecl(methodDecl);
-                jfile.setEndToken(endToken);
-                _initDecl = null;
-                break;
-            }
-
-            // Handle ClassDecl, EnumDecl
-            case "ClassDecl":
-            case "EnumDecl": {
-                JClassDecl innerClassDecl = aNode.getCustomNode(JClassDecl.class);
-                innerClassDecl.setModifiers(_mods);
-                _mods = null;
-                classDecl.addBodyDecl(innerClassDecl);
-                jfile.setEndToken(endToken);
-                _initDecl = null;
-                break;
             }
         }
     }

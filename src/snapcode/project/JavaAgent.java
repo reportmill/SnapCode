@@ -153,22 +153,36 @@ public class JavaAgent extends TextAgent {
     {
         // Get parsed java file
         JavaParser javaParser = JavaParser.getShared();
-        CharSequence javaStr = getJavaTextChars();
+        CharSequence javaChars = getJavaTextChars();
 
         // Parse file
         JFile jfile;
         if (_isJepl || _isJMD)
-            jfile = parseJepl(javaParser, javaStr);
-        else jfile = javaParser.parseFile(javaStr, _javaTextModel);
+            jfile = parseJepl(javaParser, javaChars);
+        else jfile = javaParser.parseFile(javaChars, _javaTextModel);
+
+        // If no class found, try parsing compact source file
+        if (jfile.getClassDecl() == null)
+            jfile = parseCompactSourceFile(javaParser, javaChars);
 
         // Set SourceFile
         jfile.setSourceFile(_javaFile);
         Project project = getProject();
         if (project != null)
-            jfile.setResolverSupplier(() -> project.getResolver());
+            jfile.setResolverSupplier(project::getResolver);
 
         // Return
         return jfile;
+    }
+
+    /**
+     * Parses a compact source file.
+     */
+    private JFile parseCompactSourceFile(JavaParser javaParser, CharSequence javaStr)
+    {
+        String className = getFile().getSimpleName();
+        String[] importNames = getJeplDefaultImports();
+        return javaParser.parseCompactSourceFile(javaStr, className, importNames, _javaTextModel);
     }
 
     /**
@@ -216,7 +230,7 @@ public class JavaAgent extends TextAgent {
     public List<BuildIssue> getBuildErrors()
     {
         List<BuildIssue> buildIssues = getBuildIssues();
-        return ListUtils.filter(buildIssues, issue -> issue.isError());
+        return ListUtils.filter(buildIssues, BuildIssue::isError);
     }
 
     /**
@@ -287,7 +301,7 @@ public class JavaAgent extends TextAgent {
         setBuildIssues(List.of(buildIssues));
 
         // If no errors, let compiler have a go
-        if (!ArrayUtils.hasMatch(buildIssues, buildIssue -> buildIssue.isError())) {
+        if (!ArrayUtils.hasMatch(buildIssues, BuildIssue::isError)) {
 
             // Update text
             //String javaText = getJavaTextModel().getString();

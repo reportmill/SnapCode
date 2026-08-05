@@ -3,6 +3,16 @@ JavaFile { PackageDecl? ImportDecl* TypeDecl+ }
 
 JavaFileImports { PackageDecl? ImportDecl* }
 
+CompactSourceFile { ImportDecl* CompactSourceMember* }
+
+CompactSourceMember
+{
+    LookAhead (Modifiers TypeParams? ResultType Identifier "(") Modifiers MethodDecl |
+    LookAhead (Modifiers Type Identifier ("[" "]")* ("," | "=" | ";")) Modifiers FieldDecl |
+    LookAhead (Modifiers ("class" | "interface" | "record")) Modifiers ClassDecl |
+    LookAhead (Modifiers "enum") Modifiers EnumDecl
+}
+
 JeplFile { ImportDecl* JeplNode* }
 
 JeplNode
