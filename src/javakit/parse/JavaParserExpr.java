@@ -218,7 +218,7 @@ public class JavaParserExpr extends Parser {
         }
 
         @Override
-        protected Class getPartClass()  { return JType[].class; }
+        protected Class<JType[]> getPartClass()  { return JType[].class; }
     }
 
     /**
@@ -427,30 +427,33 @@ public class JavaParserExpr extends Parser {
         /**
          * Returns a JExprMath.Op for given op string.
          */
-        public static JExprMath.Op getOpForString(String anId)
+        private static JExprMath.Op getOpForString(String anId)
         {
-            switch (anId) {
-                case "||": return JExprMath.Op.Or;
-                case "&&": return JExprMath.Op.And;
-                case "|": return JExprMath.Op.BitOr;
-                case "^": return JExprMath.Op.BitXOr;
-                case "&": return JExprMath.Op.BitAnd;
-                case "==": return JExprMath.Op.Equal;
-                case "!=": return JExprMath.Op.NotEqual;
-                case "<": return JExprMath.Op.LessThan;
-                case ">": return JExprMath.Op.GreaterThan;
-                case "<=": return JExprMath.Op.LessThanOrEqual;
-                case ">=": return JExprMath.Op.GreaterThanOrEqual;
-                case "<<": return JExprMath.Op.ShiftLeft;
-                case "ShiftRight": return JExprMath.Op.ShiftRight;
-                case "ShiftRightUnsigned": return JExprMath.Op.ShiftRightUnsigned;
-                case "+": return JExprMath.Op.Add;
-                case "-": return JExprMath.Op.Subtract;
-                case "*": return JExprMath.Op.Multiply;
-                case "/": return JExprMath.Op.Divide;
-                case "%": return JExprMath.Op.Mod;
-                default: System.err.println("BinaryExprHandler.getOpForString: Unknown op string: " + anId); return null;
-            }
+            return switch (anId) {
+                case "||" -> JExprMath.Op.Or;
+                case "&&" -> JExprMath.Op.And;
+                case "|" -> JExprMath.Op.BitOr;
+                case "^" -> JExprMath.Op.BitXOr;
+                case "&" -> JExprMath.Op.BitAnd;
+                case "==" -> JExprMath.Op.Equal;
+                case "!=" -> JExprMath.Op.NotEqual;
+                case "<" -> JExprMath.Op.LessThan;
+                case ">" -> JExprMath.Op.GreaterThan;
+                case "<=" -> JExprMath.Op.LessThanOrEqual;
+                case ">=" -> JExprMath.Op.GreaterThanOrEqual;
+                case "<<" -> JExprMath.Op.ShiftLeft;
+                case "ShiftRight" -> JExprMath.Op.ShiftRight;
+                case "ShiftRightUnsigned" -> JExprMath.Op.ShiftRightUnsigned;
+                case "+" -> JExprMath.Op.Add;
+                case "-" -> JExprMath.Op.Subtract;
+                case "*" -> JExprMath.Op.Multiply;
+                case "/" -> JExprMath.Op.Divide;
+                case "%" -> JExprMath.Op.Mod;
+                default -> {
+                    System.err.println("BinaryExprHandler.getOpForString: Unknown op string: " + anId);
+                    yield null;
+                }
+            };
         }
     }
 
@@ -832,7 +835,7 @@ public class JavaParserExpr extends Parser {
         }
 
         @Override
-        protected Class getPartClass()  { return JExpr[].class; }
+        protected Class<JExpr[]> getPartClass()  { return JExpr[].class; }
     }
 
     /**
@@ -924,7 +927,7 @@ public class JavaParserExpr extends Parser {
         }
 
         @Override
-        protected Class getPartClass()  { return JExprArrayInit.class; }
+        protected Class<JExprArrayInit> getPartClass()  { return JExprArrayInit.class; }
     }
 
     /**
@@ -1023,6 +1026,7 @@ public class JavaParserExpr extends Parser {
         /**
          * ParseHandler method.
          */
+        @Override
         protected void parsedOne(ParseNode aNode, String anId)
         {
             JSwitchEntry switchEntry = getPart();
@@ -1030,39 +1034,42 @@ public class JavaParserExpr extends Parser {
             switch (anId) {
 
                 // Handle NullLiteral
-                case "NullLiteral": System.err.println("SwitchEntryHandler: NullLiteral support not implemented"); break;
+                case "NullLiteral" -> System.err.println("SwitchEntryHandler: NullLiteral support not implemented");
 
                 // Handle default
-                case "default": switchEntry.setDefault(true); break;
+                case "default" -> switchEntry.setDefault(true);
 
                 // Handle PatternExpr
-                case "PatternExpr":
+                case "PatternExpr" -> {
                     JExprPattern patternExpr = aNode.getCustomNode(JExprPattern.class);
                     switchEntry.addLabel(patternExpr);
-                    break;
+                }
 
-                // Handle ConditionalExpr
-                case "ConditionalExpr":
+                // Handle ConditionalExpr: Set expr as either guard (if label is pattern) or label
+                case "ConditionalExpr" -> {
                     JExpr expr = aNode.getCustomNode(JExpr.class);
-                    switchEntry.addLabel(expr);
-                    break;
+                    if (switchEntry.getLabel() instanceof JExprPattern)
+                        switchEntry.setGuard(expr);
+                    else switchEntry.addLabel(expr);
+                }
 
                 // Handle BlockStatement, Block, ThrowStatement
-                case "BlockStatement": case "Block": case "ThrowStatement":
+                case "BlockStatement", "Block", "ThrowStatement" -> {
                     JStmt stmt = aNode.getCustomNode(JStmt.class);
                     switchEntry.addStatement(stmt);
-                    break;
+                }
 
                 // Handle Expression
-                case "Expression":
+                case "Expression" -> {
                     JExpr entryExpr = aNode.getCustomNode(JExpr.class);
                     JStmtExpr exprStmt = new JStmtExpr();
                     exprStmt.setExpr(entryExpr);
                     switchEntry.addStatement(exprStmt);
-                    break;
+                }
             }
         }
 
+        @Override
         protected Class<JSwitchEntry> getPartClass()  { return JSwitchEntry.class; }
     }
 
@@ -1219,7 +1226,6 @@ public class JavaParserExpr extends Parser {
          */
         public final void parsedOne(ParseNode aNode)
         {
-            // Do normal version
             super.parsedOne(aNode);
 
             // Set start/end token

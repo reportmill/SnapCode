@@ -16,6 +16,9 @@ public class JSwitchEntry extends JNode implements WithStmts, WithBlockStmt, Wit
     // The case label expression(s)
     private List<JExpr> _labels = new ArrayList<>(1);
 
+    // The 'when' expression
+    private JExpr _guard;
+
     // Whether case is default
     private boolean _default;
 
@@ -51,6 +54,16 @@ public class JSwitchEntry extends JNode implements WithStmts, WithBlockStmt, Wit
         _labels.add(anExpr);
         addChild(anExpr);
     }
+
+    /**
+     * Returns the guard ('when') expression, if set.
+     */
+    public JExpr getGuard()  { return _guard; }
+
+    /**
+     * Sets the guard ('when') expression, if set.
+     */
+    public void setGuard(JExpr guardExpr)  { addChild(_guard = guardExpr); }
 
     /**
      * Returns whether label is default.
