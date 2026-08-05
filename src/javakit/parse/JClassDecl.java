@@ -38,6 +38,9 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     // The implements list
     protected JType[] _implementsTypes = JType.EMPTY_TYPES_ARRAY;
 
+    // The permitted subclasses
+    protected JType[] _permittedSubclasses = JType.EMPTY_TYPES_ARRAY;
+
     // The list of fields, methods, enums annotations and child classes
     protected JBodyDecl[] _bodyDecls = new JBodyDecl[0];
 
@@ -274,6 +277,20 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     {
         _implementsTypes = ArrayUtils.add(_implementsTypes, aType);
         addChild(aType);
+    }
+
+    /**
+     * Returns the permitted subclasses.
+     */
+    public JType[] getPermittedSubclasses()  { return _permittedSubclasses; }
+
+    /**
+     * Adds a permitted subclass.
+     */
+    public void addPermittedSubclass(JType classType)
+    {
+        _permittedSubclasses = ArrayUtils.add(_permittedSubclasses, classType);
+        addChild(classType);
     }
 
     /**

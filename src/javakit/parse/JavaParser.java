@@ -381,12 +381,12 @@ public class JavaParser extends JavaParserStmt {
     }
 
     /**
-     * ClassDecl Handler: ("class" | "interface") Identifier TypeParams? ExtendsList? ImplementsList? ClassBody
+     * ClassDecl Handler: ("class" | "interface") Identifier TypeParams? ExtendsList? ImplementsList? PermitsList? ClassBody
      */
     public static class ClassDeclHandler extends JNodeParseHandler<JClassDecl> {
 
-        // Whether in 'extends' mode (as opposed to 'implements' mode
-        private boolean _extending;
+        // The current class list specifier for 'extends', 'implements' or 'permits'
+        private String _classListType = "";
 
         /**
          * ParseHandler method.
@@ -403,45 +403,38 @@ public class JavaParser extends JavaParserStmt {
                     classDecl.setBodyDecls(bodyDecls);
                 }
 
-                // Handle "class", "interface", "record"
                 case "interface" -> classDecl.setClassType(JClassDecl.ClassType.Interface);
                 case "record" -> classDecl.setClassType(JClassDecl.ClassType.Record);
 
-                // Handle Identifier
                 case "Identifier" -> {
                     JExprId classId = aNode.getCustomNode(JExprId.class);
                     classDecl.setId(classId);
                 }
 
-                // Handle TypeParams
                 case "TypeParams" -> {
                     JTypeVar[] typeParams = aNode.getCustomNode(JTypeVar[].class);
                     classDecl.setTypeVars(typeParams);
                 }
 
-                // Handle ExtendsList or ImplementsList mode and extendsList/implementsList
-                case "extends" -> _extending = true;
-                case "implements" -> _extending = false;
+                // Handle class list specifiers
+                case "extends", "implements", "permits" -> _classListType = anId;
+
+                // Handle class list item
                 case "ClassType" -> {
-                    JType type = aNode.getCustomNode(JType.class);
-                    if (_extending)
-                        classDecl.addExtendsType(type);
-                    else classDecl.addImplementsType(type);
+                    JType classType = aNode.getCustomNode(JType.class);
+                    switch (_classListType) {
+                        case "extends" -> classDecl.addExtendsType(classType);
+                        case "implements" -> classDecl.addImplementsType(classType);
+                        case "permits" -> classDecl.addPermittedSubclass(classType);
+                    }
                 }
 
-                // Handle FormalParams
                 case "FormalParams" -> {
                     JVarDecl[] formalParams = aNode.getCustomNode(JVarDecl[].class);
                     classDecl.setParameters(formalParams);
                 }
             }
         }
-
-        /**
-         * Override to clear Extending.
-         */
-        @Override
-        public void reset()  { super.reset(); _extending = false; }
 
         @Override
         protected Class<JClassDecl> getPartClass()  { return JClassDecl.class; }

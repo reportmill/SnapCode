@@ -32,20 +32,22 @@ Modifiers { Modifier* }
 Modifier
 {
     "public" | "static" | "protected" | "private" | "final" | "abstract" | "synchronized" |
-    "default" | "native" | "transient" | "volatile" | "strictfp" | Annotation
+    "default" | "native" | "transient" | "sealed" | "volatile" | "strictfp" | Annotation
 }
 
 TypeDecl { ";" | Modifiers (ClassDecl | EnumDecl | AnnotationDecl) }
 
 ClassDecl
 {
-    (("class" | "interface") Identifier TypeParams? ExtendsList? ImplementsList? ClassBody) |
+    (("class" | "interface") Identifier TypeParams? ExtendsList? ImplementsList? PermitsList? ClassBody) |
     (("record" Identifier TypeParams? FormalParams ImplementsList? ClassBody))
 }
 
 ExtendsList { "extends" ClassType ("," ClassType)* }
 
 ImplementsList { "implements" ClassType ("," ClassType)* }
+
+PermitsList { "permits" ClassType ("," ClassType)* }
 
 ClassBody { "{" ClassBodyDecl* "}" }
 

@@ -12,6 +12,12 @@ public class JModifiers extends JNode {
     // The modifiers value
     private int _mods;
 
+    // Whether modifiers includes "default"
+    private boolean _default;
+
+    // Whether modifiers includes "sealed"
+    private boolean _sealed;
+
     /**
      * Constructor.
      */
@@ -90,11 +96,36 @@ public class JModifiers extends JNode {
     public boolean isSynchronized()  { return Modifier.isSynchronized(_mods); }
 
     /**
+     * Returns whether modifiers includes default.
+     */
+    public boolean isDefault()  { return _default; }
+
+    /**
+     * Adds "default".
+     */
+    public void addDefault()  { _default = true; }
+
+    /**
+     * Returns whether modifiers includes sealed.
+     */
+    public boolean isSealed()  { return _sealed; }
+
+    /**
+     * Adds "sealed".
+     */
+    public void addSealed()  { _sealed = true; }
+
+    /**
      * Override to customize for this class.
      */
     @Override
     protected String createString()
     {
-        return Modifier.toString(_mods);
+        String modifierStr = Modifier.toString(_mods);
+        if (_default)
+            modifierStr += " default";
+        if (_sealed)
+            modifierStr += " sealed";
+        return modifierStr.trim();
     }
 }
