@@ -20,6 +20,7 @@ public class JavaWord extends JavaDecl {
     public static final JavaWord Default = new JavaWord("default", WordType.Modifier);
     public static final JavaWord Final = new JavaWord("final", WordType.Modifier);
     public static final JavaWord Static = new JavaWord("static", WordType.Modifier);
+    public static final JavaWord Sealed = new JavaWord("sealed", WordType.Modifier);
 
     // Declarations
     public static final JavaWord Class = new JavaWord("class", WordType.Declaration);
@@ -28,6 +29,7 @@ public class JavaWord extends JavaDecl {
     public static final JavaWord Record = new JavaWord("record", WordType.Declaration);
     public static final JavaWord Extends = new JavaWord("extends", WordType.Declaration);
     public static final JavaWord Implements = new JavaWord("implements", WordType.Declaration);
+    public static final JavaWord Permits = new JavaWord("permits", WordType.Declaration);
     public static final JavaWord Import = new JavaWord("import", WordType.Declaration);
     public static final JavaWord Package = new JavaWord("package", WordType.Declaration);
     public static final JavaWord Var = new JavaWord("var", WordType.Declaration);
@@ -58,7 +60,7 @@ public class JavaWord extends JavaDecl {
     public static final JavaWord[] FILE_WORDS = { Import, Package };
 
     // Class words
-    public static final JavaWord[] CLASS_WORDS = { Class, Interface, Enum, Record, Extends, Implements };
+    public static final JavaWord[] CLASS_WORDS = { Class, Interface, Enum, Record, Extends, Implements, Permits };
 
     // Statement words
     public static final JavaWord[] STATEMENT_WORDS = {
@@ -68,7 +70,7 @@ public class JavaWord extends JavaDecl {
     };
 
     // Modifiers
-    public static final JavaWord[] MODIFIERS = { Public, Private, Protected, Abstract, Default, Final, Static };
+    public static final JavaWord[] MODIFIERS = { Public, Private, Protected, Abstract, Default, Final, Static, Sealed };
 
     /**
      * Constructor.

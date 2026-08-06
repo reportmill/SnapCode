@@ -268,21 +268,16 @@ public class JavaAgent extends TextAgent {
      */
     public void checkFileForErrors()
     {
-        NodeError[] errors = NodeError.NO_ERRORS;
-
-        // Check for DEPS
+        // Check for //DEPS directive
         JavaDeps.resolveDependenciesForFile(null, _javaFile);
 
         // Get parse errors
+        NodeError[] errors = NodeError.NO_ERRORS;
         JFile jFile = getJFile();
         if (jFile.getException() != null)
             errors = NodeError.getNodeErrorForFileParseException(jFile);
 
-        // Get errors for body declarations
-        if (errors.length == 0)
-            errors = jFile.getDeclarationErrors();
-
-        // If no declaration errors, reload class and do full error check
+        // If no parse errors, reload class and do full error check
         if (errors.length == 0) {
             reloadClassFromClassDecl();
             errors = NodeError.getAllNodeErrors(jFile);
@@ -290,24 +285,18 @@ public class JavaAgent extends TextAgent {
 
         // Convert to BuildIssues and set in agent
         WebFile javaFile = getFile();
-        BuildIssue[] buildIssues = ArrayUtils.map(errors, error -> BuildIssue.createIssueForNodeError(error, javaFile), BuildIssue.class);
+        List<BuildIssue> buildIssues = ArrayUtils.mapToList(errors, error -> BuildIssue.createIssueForNodeError(error, javaFile));
 
         // Check for unused imports
-        BuildIssue[] unusedImportErrors = getUnusedImportErrors();
-        if (unusedImportErrors.length > 0)
-            buildIssues = ArrayUtils.addAll(buildIssues, unusedImportErrors);
+        List<BuildIssue> unusedImportErrors = getUnusedImportErrors();
+        if (!unusedImportErrors.isEmpty())
+            buildIssues.addAll(unusedImportErrors);
 
         // Set build issues
-        setBuildIssues(List.of(buildIssues));
+        setBuildIssues(buildIssues);
 
         // If no errors, let compiler have a go
-        if (!ArrayUtils.hasMatch(buildIssues, BuildIssue::isError)) {
-
-            // Update text
-            //String javaText = getJavaTextModel().getString();
-            //_javaFile.setText(javaText);
-
-            // Compile file
+        if (!ListUtils.hasMatch(buildIssues, BuildIssue::isError)) {
             SnapCompiler compiler = new SnapCompiler(getProject());
             compiler.checkErrorsOnly();
             compiler.compileFile(_javaFile);
@@ -317,16 +306,16 @@ public class JavaAgent extends TextAgent {
     /**
      * Returns an array of unused imports for Java file.
      */
-    protected BuildIssue[] getUnusedImportErrors()
+    private List<BuildIssue> getUnusedImportErrors()
     {
         // Get unused import decls
         JFile jfile = getJFile();
-        JImportDecl[] unusedImports = jfile.getUnusedImports();
-        if (unusedImports.length == 0)
-            return new BuildIssue[0];
+        Set<JImportDecl> unusedImports = jfile.getUnusedImports();
+        if (unusedImports.isEmpty())
+            return Collections.emptyList();
 
         // Create BuildIssues for each and return
-        return ArrayUtils.map(unusedImports, id -> createUnusedImportBuildIssue(_javaFile, id), BuildIssue.class);
+        return ListUtils.map(unusedImports, idecl -> createUnusedImportBuildIssue(_javaFile, idecl));
     }
 
     /**

@@ -14,7 +14,7 @@ import snap.web.WebFile;
 public class JFile extends JNode {
 
     // The source file for this JFile
-    protected WebFile  _sourceFile;
+    protected WebFile _sourceFile;
 
     // The resolver for source file
     protected Resolver _resolver;
@@ -26,22 +26,22 @@ public class JFile extends JNode {
     private CharSequence _javaChars;
 
     // The package declaration
-    protected JPackageDecl  _packageDecl;
+    protected JPackageDecl _packageDecl;
 
     // The list of imports
-    protected List<JImportDecl>  _importDecls = new ArrayList<>();
+    protected List<JImportDecl> _importDecls = new ArrayList<>();
 
     // The list of class declarations
-    protected List<JClassDecl>  _classDecls = new ArrayList<>();
+    protected List<JClassDecl> _classDecls = new ArrayList<>();
 
     // The static imports
     private JImportDecl[] _staticImportDecls;
 
     // The parse exception, if one was hit
-    protected Exception  _exception;
+    protected Exception _exception;
 
     // An array to hold unused imports
-    protected JImportDecl[]  _unusedImports;
+    protected Set<JImportDecl> _unusedImports;
 
     /**
      * Constructor.
@@ -59,10 +59,7 @@ public class JFile extends JNode {
     /**
      * Sets the WebFile for this JFile.
      */
-    public void setSourceFile(WebFile aFile)
-    {
-        _sourceFile = aFile;
-    }
+    public void setSourceFile(WebFile aFile)  { _sourceFile = aFile; }
 
     /**
      * Returns whether file is Repl Java instead of just java.
@@ -367,23 +364,22 @@ public class JFile extends JNode {
     /**
      * Returns unused imports for file.
      */
-    public JImportDecl[] getUnusedImports()
+    public Set<JImportDecl> getUnusedImports()
     {
         // If already set, just return
         if (_unusedImports != null) return _unusedImports;
 
         // Get import decls
         List<JImportDecl> importDecls = getImportDecls();
-        if (isRepl()) {
+        if (isRepl())
             importDecls = ListUtils.filter(importDecls, imp -> imp.getStartToken() != imp.getEndToken());
-        }
 
         // Resolve class names
-        Set<JImportDecl> unusedImportDecls = new HashSet<>(importDecls);
-        resolveClassNames(this, unusedImportDecls);
+        Set<JImportDecl> unusedImports = new HashSet<>(importDecls);
+        resolveClassNames(this, unusedImports);
 
         // Set array and return
-        return _unusedImports = unusedImportDecls.toArray(new JImportDecl[0]);
+        return _unusedImports = unusedImports;
     }
 
     /**
@@ -433,15 +429,6 @@ public class JFile extends JNode {
     public void setException(Exception anException)
     {
         _exception = anException;
-    }
-
-    /**
-     * Returns any current declaration errors.
-     */
-    public NodeError[] getDeclarationErrors()
-    {
-        JClassDecl classDecl = getClassDecl();
-        return classDecl != null ? classDecl.getErrors() : NodeError.NO_ERRORS;
     }
 
     /**
