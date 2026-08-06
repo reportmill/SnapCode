@@ -185,9 +185,9 @@ public class JType extends JNode {
             return getWildcardBoundsType();
 
         // Try to find class directly
-        JavaType javaClass = getJavaClassForName(baseName);
-        if (javaClass != null)
-            return javaClass;
+        JavaType classForBaseName = getJavaClassForName(baseName);
+        if (classForBaseName != null)
+            return classForBaseName;
 
         // If parent is type, see if name is nested TypeArg from class extends/implements (e.g.: public class XXX extends List<E>)
         JNode parent = getParent();
@@ -299,14 +299,14 @@ public class JType extends JNode {
      * Override to handle 'var' types.
      */
     @Override
-    protected JavaDecl getDeclForChildId(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId childId)
     {
         // Handle BaseExpr
-        if (anExprId == _baseExpr)
+        if (childId == _baseExpr)
             return getBaseType();
 
         // Do normal version
-        return super.getDeclForChildId(anExprId);
+        return super.getDeclForChildId(childId);
     }
 
     /**

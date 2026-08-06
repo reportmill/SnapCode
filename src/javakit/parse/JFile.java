@@ -205,10 +205,10 @@ public class JFile extends JNode {
      * Override to check for package name, import class name, static import class member.
      */
     @Override
-    protected JavaDecl getDeclForChildId(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId childId)
     {
         // See if it's a known class name using imports
-        String idName = anExprId.getName();
+        String idName = childId.getName();
         String className = getImportClassName(idName);
         JavaClass javaClass = className != null ? getJavaClassForName(className) : null;
         if (javaClass != null)
@@ -224,17 +224,17 @@ public class JFile extends JNode {
             return getJavaPackageForName(idName);
 
         // Do normal version
-        return super.getDeclForChildId(anExprId);
+        return super.getDeclForChildId(childId);
     }
 
     /**
      * Override - from old getDeclForChildNode(). Is it really needed ???
      */
     @Override
-    protected JavaType getJavaTypeForChildType(JType aJType)
+    protected JavaType getJavaTypeForChildType(JType childType)
     {
         // See if it's a known class name using imports
-        String typeName = aJType.getName();
+        String typeName = childType.getName();
         String className = getImportClassName(typeName);
         JavaClass javaClass = className != null ? getJavaClassForName(className) : null;
         if (javaClass != null)
@@ -248,7 +248,7 @@ public class JFile extends JNode {
             System.err.println("JFile.getJavaTypeForChildType: Shouldn't find member: " + typeName);
 
         // Do normal version
-        return super.getJavaTypeForChildType(aJType);
+        return super.getJavaTypeForChildType(childType);
     }
 
     /**

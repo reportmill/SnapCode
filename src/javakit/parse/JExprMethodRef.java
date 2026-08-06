@@ -243,10 +243,10 @@ public class JExprMethodRef extends JExprLambdaBase {
     /**
      * Returns the JavaDecl most closely associated with given child JExprId node.
      */
-    protected JavaDecl getDeclForChildId(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId childId)
     {
         // If given id is MethodId, return method
-        if (anExprId == _methodId) {
+        if (childId == _methodId) {
 
             // If array creation, return prefix expr class
             if (getType() == Type.ArrayInit)
@@ -259,7 +259,7 @@ public class JExprMethodRef extends JExprLambdaBase {
         }
 
         // Do normal version
-        return super.getDeclForChildId(anExprId);
+        return super.getDeclForChildId(childId);
     }
 
     /**

@@ -185,19 +185,19 @@ public class JSwitchEntry extends JNode implements WithStmts, WithBlockStmt, Wit
      * Override to try to resolve given id name from any preceding ClassDecl statements.
      */
     @Override
-    protected JavaDecl getDeclForChildId(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId childId)
     {
         // If node is case label id, try to evaluate against Switch expression enum type
-        if (_labels.contains(anExprId))
-            return getDeclForCaseLabel(anExprId);
+        if (_labels.contains(childId))
+            return getDeclForCaseLabel(childId);
 
         // If any previous statements are class decl statements that declare type, return class
-        JavaClass javaClass = WithStmts.getJavaClassForChildTypeOrId(this, anExprId);
+        JavaClass javaClass = WithStmts.getJavaClassForChildTypeOrId(this, childId);
         if (javaClass != null)
             return javaClass;
 
         // Do normal version
-        return super.getDeclForChildId(anExprId);
+        return super.getDeclForChildId(childId);
     }
 
     /**
@@ -234,14 +234,14 @@ public class JSwitchEntry extends JNode implements WithStmts, WithBlockStmt, Wit
      * Override to try to resolve given type from any preceding ClassDecl statements.
      */
     @Override
-    protected JavaType getJavaTypeForChildType(JType aJType)
+    protected JavaType getJavaTypeForChildType(JType childType)
     {
         // If any previous statements are class decl statements that declare type, return class
-        JavaClass javaClass = WithStmts.getJavaClassForChildTypeOrId(this, aJType);
+        JavaClass javaClass = WithStmts.getJavaClassForChildTypeOrId(this, childType);
         if (javaClass != null)
             return javaClass;
 
         // Do normal version
-        return super.getJavaTypeForChildType(aJType);
+        return super.getJavaTypeForChildType(childType);
     }
 }

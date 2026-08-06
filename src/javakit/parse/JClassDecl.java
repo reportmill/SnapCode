@@ -591,22 +591,22 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      * Override to check field declarations for id.
      */
     @Override
-    protected JavaDecl getDeclForChildId(JExprId anExprId)
+    protected JavaDecl getDeclForChildId(JExprId childId)
     {
         // If it's "this", set class and return ClassField
-        String name = anExprId.getName();
-        if (name.equals("this"))
+        String childIdName = childId.getName();
+        if (childIdName.equals("this"))
             return getDecl();
 
         // If it's "super", set class and return ClassField
-        if (name.equals("super"))
+        if (childIdName.equals("super"))
             return getSuperClass();
 
         // Iterate over enum constants
         if (isEnum()) {
             JEnumConst[] enumConstants = getEnumConstants();
             for (JEnumConst enumConst : enumConstants) {
-                if (name.equals(enumConst.getName()))
+                if (childIdName.equals(enumConst.getName()))
                     return enumConst.getDecl();
             }
         }
@@ -614,7 +614,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
         // See if it's a field reference from superclass
         JavaClass superClass = getSuperClass();
         if (superClass != null) {
-            JavaField field = superClass.getFieldForName(name);
+            JavaField field = superClass.getFieldForName(childIdName);
             if (field != null)
                 return field;
         }
@@ -623,45 +623,47 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
         JType[] implementsTypes = getImplementsTypes();
         for (JType implementsType : implementsTypes) {
             JavaClass interf = implementsType.getEvalClass();
-            JavaField field2 = interf != null ? interf.getDeclaredFieldForName(name) : null;
+            JavaField field2 = interf != null ? interf.getDeclaredFieldForName(childIdName) : null;
             if (field2 != null)
                 return field2;
         }
 
         // Look for InnerClass of given name
-        JavaClass evalClass = getEvalClass();
-        if (evalClass != null) {
-            JavaClass innerClass = evalClass.getDeclaredClassForName(name);
+        JavaClass thisClass = getEvalClass();
+        if (thisClass != null) {
+            JavaClass innerClass = thisClass.getDeclaredClassForName(childIdName);
             if (innerClass != null)
                 return innerClass;
         }
 
         // Do normal version
-        return super.getDeclForChildId(anExprId);
+        return super.getDeclForChildId(childId);
     }
 
     /**
      * Returns the JavaDecl most closely associated with given child JType node.
      */
     @Override
-    protected JavaType getJavaTypeForChildType(JType type)
+    protected JavaType getJavaTypeForChildType(JType childType)
     {
         // Look for JTypeVar for given type name
-        String typeName = type.getName();
+        String typeName = childType.getName();
         JTypeVar typeVar = getTypeParamDeclForName(typeName);
         if (typeVar != null)
             return typeVar.getTypeVariable();
 
-        // Look for InnerClass of given name
-        JavaClass evalClass = getEvalClass();
-        if (evalClass != null) {
-            JavaClass innerClass = evalClass.getDeclaredClassForName(typeName);
+        // See if this class matches name or has inner class of name
+        JavaClass thisClass = getEvalClass();
+        if (thisClass != null) {
+            if (thisClass.getSimpleName().equals(typeName))
+                return thisClass;
+            JavaClass innerClass = thisClass.getDeclaredClassForName(typeName);
             if (innerClass != null)
                 return innerClass;
         }
 
         // Do normal version
-        return super.getJavaTypeForChildType(type);
+        return super.getJavaTypeForChildType(childType);
     }
 
     /**
@@ -781,12 +783,12 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      */
     public String getNodeString()
     {
-        switch (getClassType()) {
-            case Interface: return "InterfaceDecl";
-            case Enum: return "EnumDecl";
-            case Annotation: return "AnnotationDecl";
-            case Record: return "RecordDecl";
-            default: return "ClassDecl";
-        }
+        return switch (getClassType()) {
+            case Interface -> "InterfaceDecl";
+            case Enum -> "EnumDecl";
+            case Annotation -> "AnnotationDecl";
+            case Record -> "RecordDecl";
+            default -> "ClassDecl";
+        };
     }
 }
