@@ -32,7 +32,7 @@ public class JavaDecl implements Comparable<JavaDecl> {
     protected JavaType  _evalType;
 
     // Constants for type
-    public enum DeclType { Class, Field, Constructor, Method, Package, VarDecl, ParamType, TypeVar, GenArrayType, Word }
+    public enum DeclType { Class, Field, Constructor, Method, Package, Module, VarDecl, ParamType, TypeVar, GenArrayType, Word }
 
     /**
      * Constructor.

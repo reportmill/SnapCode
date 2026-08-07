@@ -264,7 +264,7 @@ public class JFile extends JNode {
 
         // Remove match from UnusedImports and return
         if (importDecl != null) {
-            if (importDecl.isInclusive())
+            if (importDecl.isInclusive() || importDecl.isModule())
                 importDecl.addFoundClassName(className);
             importDecl._used = true;
         }

@@ -120,8 +120,13 @@ public class JImportDecl extends JNode {
      */
     public boolean isImplicitImportForClassName(String className)
     {
-        // If not inclusive (implicit) or import name not available, just return
         String importName = getName();
+
+        // Handle module
+        if (getDecl() instanceof JavaModule javaModule)
+            return javaModule.getPackageForSimpleClassName(className) != null;
+
+        // If not inclusive (implicit) or import name not available, just return
         if (!isInclusive() || importName == null)
             return false;
 
@@ -158,6 +163,12 @@ public class JImportDecl extends JNode {
         String importName = getName();
         if (importName.isEmpty())
             return null;
+
+        // If module, return module
+        if (isModule()) {
+            Resolver resolver = getResolver();
+            return resolver != null ? resolver.getJavaModuleForName(importName) : null;
+        }
 
         // If package name, return package
         if (_inclusive && isKnownPackageName(importName))
@@ -236,6 +247,9 @@ public class JImportDecl extends JNode {
      */
     public String getImportClassName(String aName)
     {
+        if (getDecl() instanceof JavaModule javaModule)
+            return javaModule.getClassNameForSimpleClassName(aName);
+
         String className = isClassName() ? getEvalClassName() : getName();
         if (_inclusive) {
             if (!isStatic() || !className.endsWith(aName))
@@ -277,18 +291,30 @@ public class JImportDecl extends JNode {
     }
 
     /**
+     * Override to check for package name, import class name, static import class member.
+     */
+    @Override
+    protected JavaDecl getDeclForChildId(JExprId childId)
+    {
+        if (isModule()) {
+            Resolver resolver = getResolver();
+            return resolver != null ? resolver.getJavaModuleForName(childId.getName()) : null;
+        }
+
+        return getJavaPackageForName(childId.getName());
+    }
+
+    /**
      * Override to customize for this class.
      */
     @Override
     protected String createString()
     {
         StringBuilder sb = new StringBuilder("import ");
-        if (isStatic())
-            sb.append("static ");
+        if (isStatic()) sb.append("static ");
+        if (isModule()) sb.append("module ");
         sb.append(getName());
-        if (isInclusive())
-            sb.append(".*");
-        sb.append(';');
-        return sb.toString();
+        if (isInclusive()) sb.append(".*");
+        return sb.append(';').toString();
     }
 }

@@ -19,6 +19,9 @@ public class Resolver {
     // The ClassTree
     private ClassTree  _classTree;
 
+    // A cache of JavaModules by name
+    private Map<String,JavaModule> _modules = new HashMap<>();
+
     // A cache of JavaPackages by name
     private Map<String,JavaPackage>  _packages = new HashMap<>();
 
@@ -184,7 +187,7 @@ public class Resolver {
     /**
      * Returns a known java package (creates if missing).
      */
-    protected synchronized JavaPackage getKnownJavaPackageForName(String packageName)
+    synchronized JavaPackage getKnownJavaPackageForName(String packageName)
     {
         // Get from Packages cache and just return if found
         JavaPackage pkg = _packages.get(packageName);
@@ -217,6 +220,30 @@ public class Resolver {
 
         // Return new package
         return new JavaPackage(this, parentPackage, packageName);
+    }
+
+    /**
+     * Returns whether module for given name really exists.
+     */
+    public boolean isKnownModuleName(String moduleName)
+    {
+        return moduleName.equals("java") || moduleName.equals("java.base") || moduleName.equals("java.desktop");
+    }
+
+    /**
+     * Returns a java module for module name.
+     */
+    public JavaModule getJavaModuleForName(String moduleName)
+    {
+        // Get from Modules cache and just return if found
+        JavaModule module = _modules.get(moduleName);
+        if (module != null || !isKnownModuleName(moduleName))
+            return module;
+
+        // Create module and add to cache
+        module = new JavaModule(this, moduleName);
+        _modules.put(moduleName, module);
+        return module;
     }
 
     /**

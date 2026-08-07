@@ -480,8 +480,7 @@ public class JNode {
     public JavaClass getJavaClassForName(String className)
     {
         Resolver resolver = getResolver(); if (resolver == null) return null;
-        JavaClass javaClass = resolver.getJavaClassForName(className);
-        return javaClass;
+        return resolver.getJavaClassForName(className);
     }
 
     /**
@@ -490,8 +489,7 @@ public class JNode {
     public JavaClass getJavaClassForClass(Class<?> aClass)
     {
         Resolver resolver = getResolver(); if (resolver == null) return null;
-        JavaClass javaClass = resolver.getJavaClassForClass(aClass);
-        return javaClass;
+        return resolver.getJavaClassForClass(aClass);
     }
 
     /**
@@ -501,7 +499,6 @@ public class JNode {
     {
         Resolver resolver = getResolver(); if (resolver == null) return false;
         return resolver.isKnownPackageName(aName);
-        //return javaPackage != null;
     }
 
     /**
@@ -510,8 +507,7 @@ public class JNode {
     public JavaPackage getJavaPackageForName(String className)
     {
         Resolver resolver = getResolver(); if (resolver == null) return null;
-        JavaPackage pkg = resolver.getJavaPackageForName(className);
-        return pkg;
+        return resolver.getJavaPackageForName(className);
     }
 
     /**

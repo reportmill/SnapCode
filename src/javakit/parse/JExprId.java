@@ -96,8 +96,7 @@ public class JExprId extends JExpr {
     protected JavaDecl getDeclImpl()
     {
         // If parent is MethodRef, forward on - I don't like this, but don't want to confuse id with vars of same name
-        JNode parent = getParent();
-        if (parent instanceof JExprMethodRef methodRefExpr && methodRefExpr.getMethodId() == this)
+        if (getParent() instanceof JExprMethodRef methodRefExpr && methodRefExpr.getMethodId() == this)
             return getDeclForChildId(this);
 
         // Look for a master node, if this id is just part of another node or a var reference
@@ -157,33 +156,35 @@ public class JExprId extends JExpr {
             return "UnknownId";
 
         // Handle decl types
-        switch (decl.getType()) {
+        return switch (decl.getType()) {
 
             // Handle Class, ParamType
-            case Class:
-            case ParamType: return "ClassId";
+            case Class, ParamType -> "ClassId";
 
             // Handle Field (or enum)
-            case Field:
+            case Field -> {
                 JavaField field = (JavaField) decl;
-                return field.isEnumConstant() ? "EnumId" : "FieldId";
+                yield field.isEnumConstant() ? "EnumId" : "FieldId";
+            }
 
-            // Handle Constructor, Method, Package, TypeVar
-            case Constructor: return "ConstrId";
-            case Method: return "MethodId";
-            case Package: return "PackageId";
-            case TypeVar: return "TypeVarId";
+            // Handle Constructor, Method, Package, Module, TypeVar
+            case Constructor -> "ConstrId";
+            case Method -> "MethodId";
+            case Package -> "PackageId";
+            case Module -> "ModuleId";
+            case TypeVar -> "TypeVarId";
 
             // Handle VarDecl
-            case VarDecl:
+            case VarDecl -> {
                 JNode parentNode = getParent();
                 if (parentNode instanceof JStmtBreak || parentNode instanceof JStmtLabeled)
-                    return "LabelId";
-                return "VarId";
+                    yield "LabelId";
+                yield "VarId";
+            }
 
             // Handle unknown
-            default: return "UnknownId";
-        }
+            default -> "UnknownId";
+        };
     }
 
     /**
