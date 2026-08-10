@@ -1,7 +1,6 @@
 package javakit.resolver;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import snap.util.ListUtils;
+import java.util.*;
 
 /**
  * This class represents a Java Module.
@@ -38,7 +37,8 @@ public class JavaModule extends JavaDecl {
         assert module != null;
         Set<String> packageNames = module.getPackages();
 
-        return _packages = packageNames.stream().map(_resolver::getJavaPackageForName).toList();
+        // Return packages for names (some might be null due to exclusions)
+        return _packages = ListUtils.mapNonNull(packageNames, _resolver::getJavaPackageForName);
     }
 
     /**
