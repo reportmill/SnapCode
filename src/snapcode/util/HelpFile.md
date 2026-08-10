@@ -507,3 +507,26 @@ String filePath = System.getProperty("java.io.tmpdir") + File.separator + "Repor
 report.writePDF(filePath);
 GFXEnv.getEnv().openFile(filePath);
 ```
+
+# Java 21
+
+## Pattern Matching in Switch
+
+```
+int random = new Random().nextInt(4);
+var testObj = switch (random) {
+    case 0 -> new ArrayList<>();
+    case 1 -> new HashMap<>();
+    case 2 -> new HashSet<>();
+    case 3 -> List.of("Hello");
+    default -> throw new RuntimeException("Impossible value: " + random);
+};
+
+switch (testObj) {
+    case List<?> list when list.isEmpty() -> System.out.println("List class (empty)");
+    case List<?> list -> System.out.println("List class");
+    case Map<?,?> map -> System.out.println("Map class");
+    case Set<?> set -> System.out.println("Set class");
+    default -> throw new RuntimeException("Impossible value: " + random);
+}
+```
