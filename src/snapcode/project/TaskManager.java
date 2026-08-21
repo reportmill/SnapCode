@@ -186,7 +186,7 @@ public class TaskManager extends ViewController {
             return;
 
         // Update ActivityLabel
-        setViewValue(_activityLabel, getActivityText());
+        _activityLabel.setText(getActivityText());
 
         // Clear any previous animation
         _progressBar.getAnimCleared(0);
@@ -208,10 +208,6 @@ public class TaskManager extends ViewController {
             }
             else _progressBar.setProgress(progress);
         }
-
-        // Resize and relayout
-        getUI().setSizeToPrefSize();
-        getUI().getParent().relayout();
     }
 
     /**
