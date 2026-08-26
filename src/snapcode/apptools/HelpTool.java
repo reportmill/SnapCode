@@ -267,7 +267,7 @@ public class HelpTool extends WorkspaceTool {
 
         // Get Help String
         HelpFile helpFile = getHelpFile();
-        HelpSection helpSection = helpFile.getSectionForId(sectionId);
+        HelpSection helpSection = helpFile.getSectionForHeaderId(sectionId);
         if (helpSection != null)
             addHelpCodeToDocForHelpSection(helpSection, true);
         else DialogBox.showWarningDialog(getWorkspacePane().getUI(), "Help Code Not Found",

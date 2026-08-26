@@ -3,6 +3,8 @@
  */
 package snapcode.util;
 import snap.util.ListUtils;
+import snap.util.MarkdownNode;
+import snap.viewx.MarkdownView;
 import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,10 +70,24 @@ public class HelpFile {
     /**
      * Returns the help section for id.
      */
-    public HelpSection getSectionForId(String sectionId)
+    public HelpSection getSectionForHeaderId(String aHeaderId)
     {
-        String sectionId2 = sectionId.replace('-', ' ');
-        return ListUtils.findMatch(getSections(), section -> section.getHeader().equalsIgnoreCase(sectionId2));
+        String headerId = aHeaderId.replace('-', ' ');
+        HelpSection helpSection = ListUtils.findMatch(getSections(), section -> section.getHeader().equalsIgnoreCase(headerId));
+        if (helpSection != null)
+            return helpSection;
+
+        // Search sections for header id - if found, set code block
+        helpSection = ListUtils.findMatch(getSections(), section -> section.getCodeBlockNodeForHeaderId(headerId) != null);
+        if (helpSection != null) {
+            MarkdownNode codeBlockForHeaderId = helpSection.getCodeBlockNodeForHeaderId(headerId);
+            if (codeBlockForHeaderId != null) {
+                MarkdownView markdownView = helpSection.getMarkdownView();
+                markdownView.setSelCodeBlockNode(codeBlockForHeaderId);
+            }
+        }
+
+        return helpSection;
     }
 
     /**

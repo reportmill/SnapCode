@@ -2,8 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.util;
-
+import snap.util.MarkdownNode;
 import snap.viewx.MarkdownView;
+import java.util.List;
 
 /**
  * This class represents a section of help from a HelpFile.
@@ -77,6 +78,35 @@ public class HelpSection {
     public void setContent(String aString)
     {
         _content = aString;
+    }
+
+    /**
+     * Returns the markdown nodes.
+     */
+    public List<MarkdownNode> getMarkdownNodes()
+    {
+        return getMarkdownView().getMarkdownNodes();
+    }
+
+    /**
+     * Returns header markdown node for given id.
+     */
+    public MarkdownNode getCodeBlockNodeForHeaderId(String headerId)
+    {
+        boolean foundHeader = false;
+
+        for (MarkdownNode markdownNode : getMarkdownNodes()) {
+
+            if (foundHeader && markdownNode.getNodeType() == MarkdownNode.NodeType.CodeBlock)
+                return markdownNode;
+
+            if (markdownNode.getNodeType() == MarkdownNode.NodeType.Header) {
+                if (markdownNode.getText().toLowerCase().equalsIgnoreCase(headerId))
+                    foundHeader = true;
+            }
+        }
+
+        return null;
     }
 
     /**
