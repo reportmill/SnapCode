@@ -165,6 +165,16 @@ public class App {
             return true;
         }
 
+        // Handle 'help'
+        if (arg0.startsWith("help:")) {
+            WorkspacePane workspacePane = new WorkspacePane(); workspacePane.show();
+            ViewUtils.runLater(() -> {
+                HelpTool helpTool = workspacePane.getWorkspaceTools().getHelpTool();
+                helpTool.addHelpCodeToDocForSectionId(arg0.substring("help:".length()));
+            });
+            return true;
+        }
+
         // Return not handled
         return false;
     }

@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.util;
+import snap.util.ListUtils;
 import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,6 +63,15 @@ public class HelpFile {
     public void setSections(List<HelpSection> theSections)
     {
         _sections = theSections;
+    }
+
+    /**
+     * Returns the help section for id.
+     */
+    public HelpSection getSectionForId(String sectionId)
+    {
+        String sectionId2 = sectionId.replace('-', ' ');
+        return ListUtils.findMatch(getSections(), section -> section.getHeader().equalsIgnoreCase(sectionId2));
     }
 
     /**

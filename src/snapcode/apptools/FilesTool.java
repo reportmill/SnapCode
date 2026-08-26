@@ -67,6 +67,10 @@ public class FilesTool extends WorkspaceTool {
     {
         String openUrlAddr = DialogBox.showInputDialog(_workspacePane.getUI(), "Open URL", "Enter URL to open", null);
         if (openUrlAddr != null && !openUrlAddr.isBlank()) {
+            if (openUrlAddr.startsWith("help:")) {
+                getWorkspacePane().getWorkspaceTools().getHelpTool().addHelpCodeToDocForSectionId(openUrlAddr.substring("help:".length()));
+                return;
+            }
             WebURL openUrl = WebURL.getUrl(openUrlAddr);
             if (openUrl != null)
                 WorkspacePaneUtils.openFileUrl(_workspacePane, openUrl);

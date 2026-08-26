@@ -3,6 +3,7 @@
  */
 package snapcode.apptools;
 import snap.util.MarkdownNode;
+import snap.viewx.DialogBox;
 import snap.viewx.MarkdownView;
 import snapcode.javatext.JavaTextArea;
 import snap.geom.Insets;
@@ -229,12 +230,13 @@ public class HelpTool extends WorkspaceTool {
     private void copyHelpCode()
     {
         // Get Help String
-        String helpCode = getHelpCode();
+        HelpSection helpSection = getSelSection();
+        String helpCode = helpSection != null ? getHelpCodeForHelpSection(helpSection) : null;
         if (helpCode == null)
             return;
 
         // Add SnapCharts if needed
-        addSnapChartsToProjectIfNeeded();
+        addSnapChartsToProjectIfNeededForHelpSection(helpSection);
 
         // Set help code in text area
         Clipboard clipboard = Clipboard.get();
@@ -246,26 +248,57 @@ public class HelpTool extends WorkspaceTool {
      */
     private void addHelpCodeToDoc()
     {
-        // Get Help String
-        String helpCode = getHelpCode();
-        if (helpCode == null)
-            return;
+        HelpSection helpSection = getSelSection();
+        if (helpSection != null)
+            addHelpCodeToDocForHelpSection(helpSection, false);
+    }
 
+    /**
+     * Finds help code in current help file and adds to current JavaPage.
+     */
+    public void addHelpCodeToDocForSectionId(String sectionId)
+    {
+        // Make sure help file is loaded
+        if (_helpFile.getSections().isEmpty()) {
+            WebURL helpFileURL = getDefaultHelpFileUrl();
+            HelpFile helpFile = new HelpFile(helpFileURL);
+            setHelpFile(helpFile);
+        }
+
+        // Get Help String
+        HelpFile helpFile = getHelpFile();
+        HelpSection helpSection = helpFile.getSectionForId(sectionId);
+        if (helpSection != null)
+            addHelpCodeToDocForHelpSection(helpSection, true);
+        else DialogBox.showWarningDialog(getWorkspacePane().getUI(), "Help Code Not Found",
+                "Couldn't find help code for section: " + sectionId + ".");
+    }
+
+    /**
+     * Adds given code to current JavaPage.
+     */
+    private void addHelpCodeToDocForHelpSection(HelpSection helpSection, boolean autoRun)
+    {
         // If no project, open temp proj
         if (getSelSite() == null) {
             NewFileTool newFileTool = _workspacePane.getNewFileTool();
             runLater(() -> newFileTool.createFileForType("jepl"));
-            runLater(this::addHelpCodeToDoc);
+            runLater(() -> addHelpCodeToDocForHelpSection(helpSection, autoRun));
             return;
         }
 
         // Add SnapCharts if needed
-        addSnapChartsToProjectIfNeeded();
+        addSnapChartsToProjectIfNeededForHelpSection(helpSection);
 
         // Get JavaPage (just return if not found)
         WebPage selPage = _pagePane.getSelPage();
         JavaPage javaPage = selPage instanceof JavaPage ? (JavaPage) selPage : null;
         if (javaPage == null)
+            return;
+
+        // Get help code
+        String helpCode = getHelpCodeForHelpSection(helpSection);
+        if (helpCode == null)
             return;
 
         // Set help code in text area
@@ -276,6 +309,12 @@ public class HelpTool extends WorkspaceTool {
 
         // Focus on text area
         javaTextArea.requestFocus();
+
+        // Handle Autorun
+        if (autoRun) {
+            RunTool runTool = _workspacePane.getRunTool();
+            runTool.runAppForSelFile(false);
+        }
     }
 
     /**
@@ -297,15 +336,11 @@ public class HelpTool extends WorkspaceTool {
     }
 
     /**
-     * Returns help code.
+     * Returns help code for given help section.
      */
-    private String getHelpCode()
+    private String getHelpCodeForHelpSection(HelpSection helpSection)
     {
-        // Get current section and Markdown doc
-        HelpSection selSection = getSelSection();
-        MarkdownView markdownView = selSection.getMarkdownView();
-
-        // Return selected code block node text
+        MarkdownView markdownView = helpSection.getMarkdownView();
         MarkdownNode codeBlockNode = markdownView.getSelCodeBlockNode();
         return codeBlockNode != null ? codeBlockNode.getText() : null;
     }
@@ -313,11 +348,10 @@ public class HelpTool extends WorkspaceTool {
     /**
      * Adds SnapCharts to project.
      */
-    private void addSnapChartsToProjectIfNeeded()
+    private void addSnapChartsToProjectIfNeededForHelpSection(HelpSection helpSection)
     {
         // If not needed, just return
-        HelpSection selSection = getSelSection();
-        String header = selSection.getHeader().toLowerCase();
+        String header = helpSection.getHeader().toLowerCase();
         if (!header.contains(" chart") && !header.contains(" datasets"))
             return;
 
