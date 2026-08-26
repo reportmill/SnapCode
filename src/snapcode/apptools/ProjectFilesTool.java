@@ -11,8 +11,7 @@ import snapcode.app.*;
 import snapcode.util.DiffPage;
 import snapcode.util.FileIcons;
 import snapcode.webbrowser.*;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * A class to handle visual management of project files.
@@ -36,6 +35,12 @@ public class ProjectFilesTool extends WorkspaceTool {
 
     // The root project files (for TreeView)
     protected List<ProjectFile> _rootFiles;
+
+    // A runnable to reset file tree after delay
+    private Runnable _resetFilesTreeRunnable;
+
+    // The files that have changed since last reset files tree
+    private Set<WebFile> _changedFiles = Collections.synchronizedSet(new HashSet<>());
 
     // Images for files tree/list
     private static Image FILES_TREE_ICON = Image.getImageForClassResource(ProjectFilesTool.class, "FilesTree.png");
@@ -115,13 +120,9 @@ public class ProjectFilesTool extends WorkspaceTool {
      */
     public List<ProjectFile> getRootFiles()
     {
-        // If already set, just return
         if (_rootFiles != null) return _rootFiles;
-
-        // Create RootFiles for Workspace.Sites
         List<WebSite> workspaceSites = _workspace.getProjectSites();
-        List<ProjectFile> rootFiles = ListUtils.map(workspaceSites, site -> _fileSystem.getProjectFileForRootFile(site.getRootDir()));
-        return _rootFiles = rootFiles;
+        return _rootFiles = ListUtils.map(workspaceSites, site -> _fileSystem.getProjectFileForRootFile(site.getRootDir()));
     }
 
     /**
@@ -131,21 +132,17 @@ public class ProjectFilesTool extends WorkspaceTool {
     {
         _rootFiles = null;
         _fileSystem.resetRootFiles();
-
         if (_filesTree != null)
-            ViewUtils.runLater(this::resetFilesTree);
+            resetFilesTreeDelayed();
     }
 
     /**
      * Returns a project file for given WebFile.
      */
-    private ProjectFile getProjectFile(WebFile aFile)
+    private ProjectFile getProjectFileForFile(WebFile aFile)
     {
-        // If file not in workspace, just return null
         if (aFile == null || !_workspacePane.getProjectSites().contains(aFile.getSite()))
             return null;
-
-        // Get project file
         return _fileSystem.getProjectFileForFile(aFile);
     }
 
@@ -170,10 +167,6 @@ public class ProjectFilesTool extends WorkspaceTool {
         _filesList.addEventFilter(this::handleTreeViewMouseEvent, MousePress, MouseRelease);
         _filesList.addEventFilter(this::handleTreeViewDragEvent, DragEvents);
 
-        // Set TreeView items
-        List<ProjectFile> rootFiles = getRootFiles();
-        _filesTree.setItems(rootFiles);
-
         // Register for copy/paste
         addKeyActionHandler("CopyAction", "Shortcut+C");
         addKeyActionHandler("PasteAction", "Shortcut+V");
@@ -182,7 +175,8 @@ public class ProjectFilesTool extends WorkspaceTool {
         _workspacePane.getSelFileTool().addPropChangeListener(pc -> handleSelFileChange(), SelFileTool.SelFile_Prop);
 
         // Register for Window.Focused change
-        _workspacePane.getWindow().addPropChangeListener(pc -> windowFocusChanged(), View.Focused_Prop);
+        if (!SnapEnv.isWebVM) // No reason to do this for WebVM ?
+            _workspacePane.getWindow().addPropChangeListener(pc -> handleWindowFocusChange(), View.Focused_Prop);
     }
 
     /**
@@ -191,7 +185,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     @Override
     protected void initShowing()
     {
-        runLater(this::resetFilesTree);
+        resetFilesTreeDelayed();
     }
 
     /**
@@ -201,12 +195,12 @@ public class ProjectFilesTool extends WorkspaceTool {
     {
         // Reset FilesList items
         List<WebFile> openFiles = _pagePane.getOpenFiles();
-        List<ProjectFile> openProjectFiles = ListUtils.map(openFiles, file -> getProjectFile(file));
+        List<ProjectFile> openProjectFiles = ListUtils.map(openFiles, this::getProjectFileForFile);
         _filesList.setItems(openProjectFiles);
 
         // Reset selected file
         WebFile selFile = getSelFile();
-        ProjectFile selProjectFile = getProjectFile(selFile);
+        ProjectFile selProjectFile = getProjectFileForFile(selFile);
         _filesTree.setSelItem(selProjectFile);
         _filesList.setSelItem(selProjectFile);
     }
@@ -313,6 +307,16 @@ public class ProjectFilesTool extends WorkspaceTool {
      */
     private void resetFilesTree()
     {
+        _resetFilesTreeRunnable = null;
+
+        // Get changed project files and clear their children
+        List<ProjectFile> changedProjectFiles = Collections.emptyList();
+        if (!_changedFiles.isEmpty()) {
+            changedProjectFiles = ListUtils.mapNonNull(_changedFiles, this::getProjectFileForFile);
+            _changedFiles.clear();
+            changedProjectFiles.stream().filter(ProjectFile::isDir).forEach(projFile -> projFile._childFiles = null);
+        }
+
         // Get whether files tree has yet to load
         boolean firstTreeLoad = _filesTree.getItems().isEmpty();
 
@@ -324,7 +328,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         if (_fileSystem instanceof LastModTimeFileSystem)
             _filesTree.expandAll();
 
-            // Show first project root dir
+        // Show first project root dir
         else if (firstTreeLoad) {
             if (!rootFiles.isEmpty())
                 _filesTree.expandItem(rootFiles.get(0));
@@ -333,23 +337,25 @@ public class ProjectFilesTool extends WorkspaceTool {
                 _filesTree.expandItem(filesTreeFiles.get(1));
         }
 
+        // Make files tree update project files
+        if (!changedProjectFiles.isEmpty()) {
+            if (_filesTree.isShowing())
+                changedProjectFiles.forEach(_filesTree::updateItem);
+            else if (_filesList.isShowing())
+                changedProjectFiles.forEach(_filesList::updateItem);
+        }
+
         // Reset
         resetLater();
     }
 
     /**
-     * Called to update files tree for given project file when real file has changed.
+     * Resets the file tree after delay.
      */
-    private void resetFilesTreeForProjectFile(ProjectFile projectFile)
+    private void resetFilesTreeDelayed()
     {
-        // If project file has parent, update it too
-        ProjectFile parentFile = projectFile.getParent();
-        if (parentFile != null)
-            resetFilesTreeForProjectFile(parentFile);
-
-        // Update FilesTree
-        _filesTree.updateItem(projectFile);
-        _filesList.updateItem(projectFile);
+        if (_resetFilesTreeRunnable == null)
+            runDelayed(_resetFilesTreeRunnable = this::resetFilesTree, 200);
     }
 
     /**
@@ -362,7 +368,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         // If directory was selected, show all tree items for it
         WebFile selFile = getSelFile();
         if (selFile != null && selFile.isDir()) {
-            ProjectFile projectFile = getProjectFile(selFile);
+            ProjectFile projectFile = getProjectFileForFile(selFile);
             if (projectFile != null)
                 _filesTree.expandItem(projectFile);
         }
@@ -379,25 +385,16 @@ public class ProjectFilesTool extends WorkspaceTool {
         // If UI not set, just return
         if (_filesTree == null) return;
 
-        // Get project file
-        ProjectFile projectFile = getProjectFile(aFile);
-
-        // If no project file
-        if (projectFile == null) {
-            WebFile parentFile = aFile.getParent();
-            if (parentFile != null)
-                handleFileChange(parentFile);
+        // If file already registered, just return
+        if (_changedFiles.contains(aFile))
             return;
-        }
 
-        // Update project file
-        resetFilesTreeForProjectFile(projectFile);
-
-        // If directory, reload children
-        if (aFile.isDir()) {
-            projectFile._childFiles = null;
-            ViewUtils.runLater(this::resetFilesTree);
-        }
+        // Add file and file parent and call reset files tree delayed
+        _changedFiles.add(aFile);
+        WebFile parentFile = aFile.getParent();
+        if (parentFile != null)
+            handleFileChange(parentFile);
+        resetFilesTreeDelayed();
     }
 
     /**
@@ -410,7 +407,7 @@ public class ProjectFilesTool extends WorkspaceTool {
             MenuButton menuButton = getView("MenuButton", MenuButton.class);
             List<MenuItem> menuItems = menuButton.getMenuItems();
             ViewArchiver viewArchiver = new ViewArchiver();
-            List<MenuItem> menuItemsCopy = ListUtils.map(menuItems, item -> viewArchiver.copyPropObject(item));
+            List<MenuItem> menuItemsCopy = ListUtils.map(menuItems, viewArchiver::copyPropObject);
             Menu menu = new Menu();
             menu.setMenuItems(menuItemsCopy);
             menu.setController(this);
@@ -503,26 +500,16 @@ public class ProjectFilesTool extends WorkspaceTool {
     /**
      * Called when window focus changes to check if files have been externally modified.
      */
-    protected void windowFocusChanged()
+    private void handleWindowFocusChange()
     {
-        boolean isWindowFocused = _workspacePane.getWindow().isFocused();
-
-        // If window focus gained, check for external file mods
-        if (isWindowFocused) {
-            if (!SnapEnv.isWebVM) { // No reason to do this for WebVM ?
-                for (ProjectFile file : getRootFiles())
-                    checkForExternalMods(file.getFile());
-            }
-        }
-
-        // If window focus lost, save all files
-        //else _workspace.saveAllFiles();
+        if (_workspacePane.getWindow().isFocused())
+            getRootFiles().stream().map(ProjectFile::getFile).forEach(this::checkForExternalMods);
     }
 
     /**
      * Checks file for external updates.
      */
-    protected void checkForExternalMods(WebFile aFile)
+    private void checkForExternalMods(WebFile aFile)
     {
         // If file has been changed since last load, reload
         if (aFile.isModifiedExternally())
