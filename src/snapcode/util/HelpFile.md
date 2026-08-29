@@ -168,6 +168,119 @@ System.out.println("2 == 3 ? " + paris2.equals(paris3));
 System.out.println("1 == 3 ? " + paris1.equals(paris3));
 ```
 
+# Sealed Classes
+
+## Sealed classes with switch
+
+```
+// Switch on Sealed Types
+sealed interface Shape permits Rectangle, Square, Circle { }
+record Point(double x, double y) { }
+record Edge(double u, double v) {
+    public double scalar(Edge other)  { return this.u*other.u + this.v*other.v; }
+    public double norm()  { return Math.sqrt(this.scalar(this)); }
+}
+record Square(Point p, Edge e) implements Shape { }
+record Rectangle(Point p, Edge e1, Edge e2) implements Shape {
+    public Rectangle {
+        if (Math.abs(e1.scalar(e2)) > 1E-06)
+            throw new IllegalArgumentException("Edges must be orthogonal");
+    }
+}
+record Circle(Point center, double radius) implements Shape { }
+
+ToDoubleFunction<Shape> surface = shape ->
+        switch (shape) {
+            case Rectangle r -> Math.sqrt(r.e1().norm()*r.e2().norm());
+            case Square s -> s.e().norm();
+            case Circle c -> Math.PI * c.radius() * c.radius();
+        };
+Function<Shape, String> toString = shape ->
+        switch (shape) {
+            case Rectangle r -> "Rectangle -> %.2f".formatted(surface.applyAsDouble(r));
+            case Square s -> "Square    -> %.2f".formatted(surface.applyAsDouble(s));
+            case Circle c -> "Circle    -> %.2f".formatted(surface.applyAsDouble(c));
+        };
+
+Shape s0 = new Square(new Point(0d, 0d), new Edge(0d, 0d));
+Shape s1 = new Square(new Point(0d, 1d), new Edge(1d, 0d));
+Shape s2 = new Square(new Point(2d, 3d), new Edge(1d, 1d));
+Shape s3 = new Square(new Point(5d, 0d), new Edge(1d, 2d));
+Rectangle r0 = new Rectangle(new Point(0d, 0d), new Edge(0d, 0d), new Edge(0d, 0d));
+Rectangle r1 = new Rectangle(new Point(1d, 2d), new Edge(1d, 0d), new Edge(0d, 0d));
+Rectangle r2 = new Rectangle(new Point(4d, 1d), new Edge(0d, 0d), new Edge(1d, 0d));
+Rectangle r3 = new Rectangle(new Point(0d, 3d), new Edge(1d, 0d), new Edge(0d, 1d));
+Rectangle r4 = new Rectangle(new Point(2d, 3d), new Edge(1d, 1d), new Edge(1d, -1d));
+Circle c1 = new Circle(new Point(0d, 0d), 1d);
+Circle c2 = new Circle(new Point(2d, 3d), 2d);
+var shapes = List.of(s0, s1, s2, s3, r0, r1, r2, r3, r4, c1, c2);
+shapes.stream().map(toString).forEach(System.out::println);
+```
+
+# Java 21
+
+## Pattern Matching in Switch
+
+```
+// Create object of random collection class
+var testObj = switch (new Random().nextInt(4)) {
+    case 0 -> new ArrayList<>();
+    case 1 -> new HashMap<>();
+    case 2 -> new HashSet<>();
+    case 3 -> List.of("Hello");
+};
+
+// Print object by class
+switch (testObj) {
+    case List<?> list when list.isEmpty() -> System.out.println("List class (empty)");
+    case List<?> list -> System.out.println("List class");
+    case Map<?,?> map -> System.out.println("Map class");
+    case Set<?> set -> System.out.println("Set class");
+    default -> throw new RuntimeException("Impossible value: " + random);
+}
+```
+
+## Nested Record Patterns
+
+```
+record Point(int x, int y) { }
+enum Color { RED, GREEN, BLUE }
+record ColoredPoint(Point p, Color c) { }
+record Rectangle(ColoredPoint upperLeft, ColoredPoint lowerRight) { }
+
+var cp1 = new ColoredPoint(new Point(1,3), Color.RED);
+var cp2 = new ColoredPoint(new Point(2,4), Color.BLUE);
+var rect = new Rectangle(cp1, cp2);
+
+printUpperLeftColoredPoint(rect);
+
+static void printUpperLeftColoredPoint(Rectangle r) {
+    if (r instanceof Rectangle(ColoredPoint ul, ColoredPoint lr)) {
+         System.out.println(ul.c());
+    }
+}
+```
+
+# Java 25
+
+## Compact source file
+
+```
+void main()
+{
+    IO.println("Hello World");
+}
+```
+
+## Unnamed Variables and Patterns
+
+```
+// Consumer with Unnamed Pattern
+List<String> strings = List.of("one", "two", "three");
+Consumer<String> notInterested = _ -> System.out.println("I'm not interested in this argument");
+strings.forEach(notInterested);
+```
+
 # Define datasets
 
 ## Simple array
@@ -506,27 +619,4 @@ RMDocument report = template.generateReport(dataSet);
 String filePath = System.getProperty("java.io.tmpdir") + File.separator + "Report.pdf";
 report.writePDF(filePath);
 GFXEnv.getEnv().openFile(filePath);
-```
-
-# Java 21
-
-## Pattern Matching in Switch
-
-```
-int random = new Random().nextInt(4);
-var testObj = switch (random) {
-    case 0 -> new ArrayList<>();
-    case 1 -> new HashMap<>();
-    case 2 -> new HashSet<>();
-    case 3 -> List.of("Hello");
-    default -> throw new RuntimeException("Impossible value: " + random);
-};
-
-switch (testObj) {
-    case List<?> list when list.isEmpty() -> System.out.println("List class (empty)");
-    case List<?> list -> System.out.println("List class");
-    case Map<?,?> map -> System.out.println("Map class");
-    case Set<?> set -> System.out.println("Set class");
-    default -> throw new RuntimeException("Impossible value: " + random);
-}
 ```
