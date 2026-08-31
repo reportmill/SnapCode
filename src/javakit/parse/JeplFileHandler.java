@@ -1,9 +1,6 @@
 package javakit.parse;
-import snap.parse.ParseHandler;
-import snap.parse.ParseNode;
-import snap.parse.ParseToken;
-
-import java.lang.reflect.Modifier;
+import snap.parse.*;
+import java.util.List;
 
 /**
  * JeplFile Handler.
@@ -14,10 +11,7 @@ public class JeplFileHandler extends JavaParserExpr.JNodeParseHandler<JFile> {
     private String _className;
 
     // The import names
-    private String[] _importNames;
-
-    // The super class name
-    private String _superClassName;
+    private List<String> _importNames;
 
     // A running ivar for batches of statements
     JInitializerDecl _initDecl;
@@ -31,12 +25,11 @@ public class JeplFileHandler extends JavaParserExpr.JNodeParseHandler<JFile> {
     /**
      * Constructor.
      */
-    public JeplFileHandler(String className, String[] importNames, String superClassName)
+    public JeplFileHandler(String className, List<String> importNames)
     {
         super();
         _className = className;
         _importNames = importNames;
-        _superClassName = superClassName;
     }
 
     /**
@@ -124,26 +117,15 @@ public class JeplFileHandler extends JavaParserExpr.JNodeParseHandler<JFile> {
         jfile.setStartToken(startToken);
 
         // Create/add JImportDecls
-        for (String importName : _importNames)
-            addImportToJFile(jfile, importName);
+        _importNames.forEach(importName -> addImportToJFile(jfile, importName));
 
         // Create/add ClassDecl
         JClassDecl classDecl = new JClassDecl();
-        JModifiers modifiers = new JModifiers(Modifier.PUBLIC);
-        modifiers.setStartToken(startToken);
-        modifiers.getString();
-        classDecl.setModifiers(modifiers);
         classDecl.setName(_className);
         classDecl.setStartToken(startToken);
         jfile.addClassDecl(classDecl);
 
-        // Add Superclass
-        JType extendsType = JType.createTypeForNameAndToken(_superClassName, startToken);
-        classDecl.addExtendsType(extendsType);
-
         _initDecl = null;
-
-        // Return
         return jfile;
     }
 
@@ -159,7 +141,7 @@ public class JeplFileHandler extends JavaParserExpr.JNodeParseHandler<JFile> {
     protected ParseHandler<JFile> createBackupHandler()
     {
         System.err.println("JeplParser.createBackupHandler: This should never get called");
-        return new JeplFileHandler(_className, _importNames, _superClassName);
+        return new JeplFileHandler(_className, _importNames);
     }
 
     /**

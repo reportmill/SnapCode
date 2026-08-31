@@ -205,6 +205,7 @@ public class RunAppSrc extends RunApp {
         // Get main method and invoke
         try {
             Method mainMethod = mainClass.getMethod("main", String[].class);
+            mainMethod.setAccessible(true);
             mainMethod.invoke(null, (Object) new String[0]);
         }
 

@@ -89,10 +89,10 @@ public class JeplToJava {
     {
         appendIndent();
 
-        // Append class modifiers
+        // Append class modifiers (make inner classes static)
         JModifiers mods = classDecl.getModifiers();
-        if (classDecl.getEnclosingClassDecl() != null)
-            mods = new JModifiers(Modifier.PUBLIC | Modifier.STATIC);
+        if (classDecl.getEnclosingClassDecl() != null && classDecl.isClass() && classDecl.getParent(JExecutableDecl.class) == null)
+            mods.addValue(Modifier.STATIC);
         appendModifiers(mods);
 
         // Append class name
@@ -118,6 +118,19 @@ public class JeplToJava {
         if (!implementsTypes.isEmpty()) {
             appendString(" implements ");
             appendNodeNames(implementsTypes, ", ");
+        }
+
+        // Append permits
+        List<JType> permittedSubclasses = List.of(classDecl.getPermittedSubclasses());
+        if (!permittedSubclasses.isEmpty()) {
+            appendString(" permits ");
+            appendNodeNames(permittedSubclasses, ", ");
+        }
+
+        // If empty, just add brackets and return
+        if (classDecl.getBodyDecls().length == 0) {
+            appendString(" { }\n");
+            return;
         }
 
         // Append class decl body
@@ -226,6 +239,7 @@ public class JeplToJava {
 
         // Append parameters
         appendParameters(methodDecl.getParameters());
+        appendChar('\n');
     }
 
     /**
@@ -264,8 +278,13 @@ public class JeplToJava {
         // Append class name
         appendNodeName(constrDecl);
 
-        // Append parameters
-        appendParameters(constrDecl.getParameters());
+        // If compact record constructor, just append space, otherwise append parameters
+        if (constrDecl.getEnclosingClassDecl().isRecord() && constrDecl.getParameters().length == 0)
+            appendChar(' ');
+        else {
+            appendParameters(constrDecl.getParameters());
+            appendChar('\n');
+        }
 
         // Append method body
         appendMethodBody(constrDecl);
@@ -310,7 +329,8 @@ public class JeplToJava {
     private void appendModifiers(JModifiers modifiers)
     {
         appendNodeString(modifiers);
-        appendChar(' ');
+        if (!modifiers.getString().isBlank())
+            appendChar(' ');
     }
 
     /**
@@ -321,7 +341,7 @@ public class JeplToJava {
         // Append parameters
         appendChar('(');
         appendNodeStrings(List.of(varDecls), ", ");
-        appendString(")\n");
+        appendChar(')');
     }
 
     /**

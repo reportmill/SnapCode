@@ -47,10 +47,7 @@ public class JavaAgent extends TextAgent {
     private Set<JavaClass> _externalClassRefs;
 
     // The Jepl default imports
-    private static String[] _jeplImports;
-
-    // The Jepl default imports with charts
-    private static String[] _jeplImportsWithCharts;
+    private static List<String> _jeplImports;
 
     // Register as agent provider with TextAgent
     static {
@@ -181,7 +178,7 @@ public class JavaAgent extends TextAgent {
     private JFile parseCompactSourceFile(JavaParser javaParser, CharSequence javaStr)
     {
         String className = getFile().getSimpleName();
-        String[] importNames = getJeplDefaultImports();
+        List<String> importNames = getJeplDefaultImports();
         return javaParser.parseCompactSourceFile(javaStr, className, importNames, _javaTextModel);
     }
 
@@ -191,16 +188,13 @@ public class JavaAgent extends TextAgent {
     private JFile parseJepl(JavaParser javaParser, CharSequence javaStr)
     {
         String className = getFile().getSimpleName();
-        String[] importNames = getJeplDefaultImports();
+        List<String> importNames = getJeplDefaultImports();
         if (_project.getBuildFile().isIncludeSnapChartsRuntime())
             importNames = getJeplDefaultImportsWithCharts();
-        String superClassName = "Object";
-
-        if (_isJMD) {
+        if (_isJMD)
             javaStr = MarkdownUtils.getJeplForJMD(className, javaStr);
-            return javaParser.parseJeplFile(javaStr, className, importNames, superClassName, _javaTextModel);
-        }
-        return javaParser.parseJeplFile(javaStr, className, importNames, superClassName, _javaTextModel);
+
+        return javaParser.parseJeplFile(javaStr, className, importNames, _javaTextModel);
     }
 
     /**
@@ -452,7 +446,7 @@ public class JavaAgent extends TextAgent {
     /**
      * Returns the default JEPL imports.
      */
-    private static String[] getJeplDefaultImports()
+    private static List<String> getJeplDefaultImports()
     {
         if (_jeplImports != null) return _jeplImports;
 
@@ -472,19 +466,17 @@ public class JavaAgent extends TextAgent {
         imports.add("static snap.viewx.ConsoleIO.*");
         if (SnapUtils.getJavaVersionInt() < 23)
             imports.add("static snap.viewx.ConsoleIOX.*");
-
-        // Set array and return
-        return _jeplImports = imports.toArray(new String[0]);
+        return _jeplImports = imports;
     }
 
     /**
      * Returns the default JEPL imports with charts support.
      */
-    private static String[] getJeplDefaultImportsWithCharts()
+    private static List<String> getJeplDefaultImportsWithCharts()
     {
-        if (_jeplImportsWithCharts != null) return _jeplImportsWithCharts;
-        String[] jeplImports = getJeplDefaultImports();
-        return _jeplImportsWithCharts = ArrayUtils.addAll(jeplImports, "snapcharts.data.*", "static snapcharts.charts.SnapCharts.*");
+        List<String> imports = new ArrayList<>(getJeplDefaultImports());
+        imports.addAll(List.of("snapcharts.data.*", "static snapcharts.charts.SnapCharts.*"));
+        return imports;
     }
 
     /**

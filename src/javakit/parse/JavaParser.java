@@ -131,11 +131,11 @@ public class JavaParser extends JavaParserStmt {
     /**
      * Parses compact class file for given char input.
      */
-    public synchronized JFile parseCompactSourceFile(CharSequence anInput, String className, String[] importNames, JavaTextModel javaTextModel)
+    public synchronized JFile parseCompactSourceFile(CharSequence anInput, String className, List<String> importNames, JavaTextModel javaTextModel)
     {
         // Get CompactSourceFile rule
         ParseRule compactSourceFileRule = getRuleForName("CompactSourceFile");
-        compactSourceFileRule.setHandler(new JeplFileHandler(className, importNames, "Object"));
+        compactSourceFileRule.setHandler(new JeplFileHandler(className, importNames));
 
         // If JavaTextModel available, use its tokenizer
         if (javaTextModel != null)
@@ -149,11 +149,11 @@ public class JavaParser extends JavaParserStmt {
     /**
      * Parses jepl file for given char input.
      */
-    public synchronized JFile parseJeplFile(CharSequence anInput, String className, String[] importNames, String superClassName, JavaTextModel javaTextModel)
+    public synchronized JFile parseJeplFile(CharSequence anInput, String className, List<String> importNames, JavaTextModel javaTextModel)
     {
         // Get JeplRule
         ParseRule jeplRule = getRuleForName("JeplFile");
-        jeplRule.setHandler(new JeplFileHandler(className, importNames, superClassName));
+        jeplRule.setHandler(new JeplFileHandler(className, importNames));
 
         // If JavaTextModel available, use its tokenizer
         if (javaTextModel != null)
