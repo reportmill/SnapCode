@@ -190,7 +190,8 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
         // Create constructor
         JConstrDecl constrDecl = new JConstrDecl();
         constrDecl.setModifiers(modifiers);
-        constrDecl.setId(classDeclId);
+        constrDecl._id = classDeclId;
+        constrDecl.setName(classDeclId.getName());
         constrDecl.setParameters(varDecls);
         constrDecl.setStartToken(emptyToken);
         constrDecl.setEndToken(emptyToken);

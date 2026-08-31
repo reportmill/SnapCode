@@ -3,8 +3,7 @@
  */
 package javakit.parse;
 import javakit.resolver.*;
-import snap.util.ListUtils;
-import java.util.List;
+import java.util.*;
 
 /**
  * The JNode base class for Java expressions.
@@ -112,10 +111,12 @@ public abstract class JExpr extends JNode implements WithVarDecls {
      */
     protected JVarDecl[] getVarDeclsImpl()
     {
-        List<JExprInstanceOf> varDecls = getChildrenForClassDeep(JExprInstanceOf.class);
-        if (varDecls.isEmpty())
+        List<JExprInstanceOf> instanceOfExprs = getChildrenForClassDeep(JExprInstanceOf.class);
+        if (instanceOfExprs.isEmpty())
             return new JVarDecl[0];
-        return ListUtils.mapNonNullToArray(varDecls, instanceOfExpr -> instanceOfExpr.getPatternVarDecl(), JVarDecl.class);
+        List<JVarDecl> varDecls = new ArrayList<>();
+        instanceOfExprs.forEach(instanceOfExpr -> Collections.addAll(varDecls, instanceOfExpr.getVarDecls()));
+        return varDecls.toArray(new JVarDecl[0]);
     }
 
     /**

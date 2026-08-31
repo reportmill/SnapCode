@@ -128,7 +128,7 @@ public class JeplToJava {
         }
 
         // If empty, just add brackets and return
-        if (classDecl.getBodyDecls().length == 0) {
+        if (classDecl.getBodyDecls().length == 0 && classDecl.getEnumConstants().length == 0) {
             appendString(" { }\n");
             return;
         }

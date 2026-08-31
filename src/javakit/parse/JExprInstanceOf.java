@@ -67,11 +67,6 @@ public class JExprInstanceOf extends JExpr {
     }
 
     /**
-     * Returns the pattern Var decl.
-     */
-    public JVarDecl getPatternVarDecl()  { return _pattern != null ? _pattern.getVarDecl() : null; }
-
-    /**
      * Returns the node name.
      */
     public String getNodeString()  { return "InstanceOf"; }
@@ -88,9 +83,5 @@ public class JExprInstanceOf extends JExpr {
      * Override to return pattern var decl, if set.
      */
     @Override
-    protected JVarDecl[] getVarDeclsImpl()
-    {
-        JVarDecl patternVarDecl = getPatternVarDecl();
-        return patternVarDecl != null ? new JVarDecl[] { patternVarDecl } : new JVarDecl[0];
-    }
+    protected JVarDecl[] getVarDeclsImpl()  { return _pattern != null ? _pattern.getVarDecls() : new JVarDecl[0]; }
 }

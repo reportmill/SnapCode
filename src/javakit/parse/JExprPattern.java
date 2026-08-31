@@ -3,8 +3,7 @@
  */
 package javakit.parse;
 import javakit.resolver.JavaDecl;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * A JExpr subclass for pattern expressions.
@@ -110,6 +109,21 @@ public class JExprPattern extends JExpr implements WithId {
      * Returns the var decl, if type pattern.
      */
     public JVarDecl getVarDecl()  { return _varDecl; }
+
+    /**
+     * Returns the var decl, if type pattern.
+     */
+    protected JVarDecl[] getVarDeclsImpl()
+    {
+        if (_varDecl != null)
+            return new JVarDecl[] { _varDecl };
+        if (_patternList != null) {
+            List<JVarDecl> varDecls = new ArrayList<>();
+            _patternList.forEach(pattern -> Collections.addAll(varDecls, pattern.getVarDecls()));
+            return varDecls.toArray(new JVarDecl[0]);
+        }
+        return new JVarDecl[0];
+    }
 
     /**
      * Override to return var decl if typed pattern.
