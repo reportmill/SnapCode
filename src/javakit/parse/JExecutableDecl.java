@@ -17,13 +17,16 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     private JTypeVar[] _typeVars = new JTypeVar[0];
 
     // The formal parameters
-    protected JVarDecl[] _params = new JVarDecl[0];
+    protected JVarDecl[] _params = EMPTY_VAR_DECLS;
 
     // The array of thrown exception class name expressions
     protected JExpr[] _throwsList = JExpr.EMPTY_EXPR_ARRAY;
 
     // The statement Block
     protected JStmtBlock  _block;
+
+    // An array for empty params
+    private static JVarDecl[] EMPTY_VAR_DECLS = new JVarDecl[0];
 
     /**
      * Constructor.
@@ -62,6 +65,11 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
         _params = varDecls;
         Stream.of(_params).forEach(vdecl -> addChild(vdecl));
     }
+
+    /**
+     * Returns whether parameters have been set.
+     */
+    public boolean isParametersSet()  { return _params != EMPTY_VAR_DECLS; }
 
     /**
      * Returns the array of thrown exception class name expressions.

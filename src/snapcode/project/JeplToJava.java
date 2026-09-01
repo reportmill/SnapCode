@@ -279,7 +279,7 @@ public class JeplToJava {
         appendNodeName(constrDecl);
 
         // If compact record constructor, just append space, otherwise append parameters
-        if (constrDecl.getEnclosingClassDecl().isRecord() && constrDecl.getParameters().length == 0)
+        if (constrDecl.isRecordCompactConstructor())
             appendChar(' ');
         else {
             appendParameters(constrDecl.getParameters());

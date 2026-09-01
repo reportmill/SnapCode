@@ -4,6 +4,7 @@
 package javakit.parse;
 import javakit.resolver.*;
 import snap.util.ArrayUtils;
+import java.util.Arrays;
 
 /**
  * A Java member for a constructor declaration.
@@ -106,6 +107,28 @@ public class JConstrDecl extends JExecutableDecl {
 
         // Return
         return paramterClasses;
+    }
+
+    /**
+     * Returns whether constructor is record canonical constructor.
+     */
+    public boolean isRecordCanonicalConstructor()
+    {
+        JClassDecl enclosingClassDecl = getEnclosingClassDecl();
+        if (enclosingClassDecl == null || !enclosingClassDecl.isRecord())
+            return false;
+        if (!isParametersSet())
+            return true;
+        JVarDecl[] recordParameters = enclosingClassDecl.getParameters();
+        return Arrays.equals(recordParameters, getParameters());
+    }
+
+    /**
+     * Returns whether constructor is record compact constructor.
+     */
+    public boolean isRecordCompactConstructor()
+    {
+        return isRecordCanonicalConstructor() && !isParametersSet();
     }
 
     /**
