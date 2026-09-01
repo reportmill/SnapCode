@@ -5,9 +5,7 @@ package snapcode.javatext;
 import javakit.parse.*;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaLocalVar;
-import snap.util.ArrayUtils;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class provides utility methods to match nodes to Java declarations.
@@ -17,12 +15,12 @@ public class NodeMatcher {
     /**
      * Returns matching id expression nodes for given id node.
      */
-    public static JExprId[] getMatchingIdNodesForIdNode(JExprId idExpr)
+    public static List<JExprId> getMatchingIdNodesForIdNode(JExprId idExpr)
     {
         // Get decl - if null, return empty array
         JavaDecl nodeDecl = idExpr.getDecl();
         if (nodeDecl == null)
-            return new JExprId[0];
+            return Collections.emptyList();
 
         // Get root node
         JNode rootNode = getRootNodeForId(idExpr, nodeDecl);
@@ -53,11 +51,11 @@ public class NodeMatcher {
     /**
      * Returns matching id expression nodes for given decl.
      */
-    private static JExprId[] getMatchingIdNodesForDecl(JNode rootNode, JavaDecl aDecl)
+    private static List<JExprId> getMatchingIdNodesForDecl(JNode rootNode, JavaDecl aDecl)
     {
         List<JExprId> matchingNodes = new ArrayList<>();
         findMatchingIdNodesForDecl(rootNode, aDecl, matchingNodes);
-        return matchingNodes.toArray(new JExprId[0]);
+        return matchingNodes;
     }
 
     /**
@@ -65,13 +63,11 @@ public class NodeMatcher {
      */
     private static void findMatchingIdNodesForDecl(JNode aNode, JavaDecl aDecl, List<JExprId> matchingIdNodes)
     {
-        // If JExprId, check for match
-        if (aNode instanceof JExprId) {
-            if (isPossibleMatch(aNode, aDecl)) {
-                JavaDecl decl = aNode.getDecl();
-                if (decl != null && aDecl.matches(decl))
-                    matchingIdNodes.add((JExprId) aNode);
-            }
+        // If JExprId with matching name, check for actual match
+        if (aNode instanceof JExprId idExpr && aDecl.getName().contains(idExpr.getName())) {
+            JavaDecl decl = idExpr.getDecl();
+            if (decl != null && aDecl.matches(decl))
+                matchingIdNodes.add(idExpr);
         }
 
         // Recurse
@@ -84,8 +80,8 @@ public class NodeMatcher {
      */
     public static List<JExprId> getReferenceNodesForDecl(JFile jfile, JavaDecl aDecl)
     {
-        JExprId[] matchingIdNodes = getMatchingIdNodesForDecl(jfile, aDecl);
-        return ArrayUtils.filterToList(matchingIdNodes, node -> isReferenceNode(node));
+        List<JExprId> matchingIdNodes = getMatchingIdNodesForDecl(jfile, aDecl);
+        return matchingIdNodes.stream().filter(NodeMatcher::isReferenceNode).toList();
     }
 
     /**
@@ -110,20 +106,8 @@ public class NodeMatcher {
      */
     public static List<JExprId> getDeclarationNodesForDecl(JFile jfile, JavaDecl aDecl)
     {
-        JExprId[] matchingIdNodes = getMatchingIdNodesForDecl(jfile, aDecl);
-        return ArrayUtils.filterToList(matchingIdNodes, node -> node.isDeclIdNode());
-    }
-
-    /**
-     * Returns whether node is a possible match.
-     */
-    private static boolean isPossibleMatch(JNode aNode, JavaDecl aDecl)
-    {
-        // If Node is identifier and Decl.Name contains Node.Name
-        if (aNode instanceof JExprId)
-            return aDecl.getName().contains(aNode.getName());
-
-        return false;
+        List<JExprId> matchingIdNodes = getMatchingIdNodesForDecl(jfile, aDecl);
+        return matchingIdNodes.stream().filter(JExprId::isDeclIdNode).toList();
     }
 
     /**
@@ -131,8 +115,8 @@ public class NodeMatcher {
      */
     public static boolean isDeclExpected(JNode aNode)
     {
-        if(aNode instanceof JExprLiteral)
-            return !((JExprLiteral) aNode).isNull();
+        if(aNode instanceof JExprLiteral literalExpr)
+            return !literalExpr.isNull();
         if (aNode instanceof JExprSwitch)
             return !(aNode.getParent() instanceof JStmtSwitch);
 

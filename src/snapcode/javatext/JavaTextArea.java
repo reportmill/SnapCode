@@ -7,6 +7,7 @@ import javakit.parse.*;
 import snap.geom.RoundRect;
 import snap.parse.Tokenizer;
 import snap.util.ArrayUtils;
+import snap.util.ListUtils;
 import snapcode.project.JavaTextModel;
 import snap.geom.Rect;
 import snap.gfx.*;
@@ -223,12 +224,12 @@ public class JavaTextArea extends TextArea {
             return new TextToken[0];
 
         // Get other matching nodes
-        JExprId[] matchingIdNodes = NodeMatcher.getMatchingIdNodesForIdNode(idExpr);
-        if (matchingIdNodes.length == 0)
+        List<JExprId> matchingIdNodes = NodeMatcher.getMatchingIdNodesForIdNode(idExpr);
+        if (matchingIdNodes.isEmpty())
             return new TextToken[0];
 
         // Return TextTokens for nodes
-        return ArrayUtils.mapNonNull(matchingIdNodes, idnode -> getTokenForIdNode(idnode), TextToken.class);
+        return ListUtils.mapNonNullToArray(matchingIdNodes, this::getTokenForIdNode, TextToken.class);
     }
 
     /**

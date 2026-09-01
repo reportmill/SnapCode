@@ -697,19 +697,14 @@ public class JavaParser extends JavaParserStmt {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get field decl
             JFieldDecl fieldDecl = getPart();
 
             switch (anId) {
-
-                case "Type":
-                    fieldDecl.setType(aNode.getCustomNode(JType.class));
-                    break;
-
-                case "VarDecl":
+                case "Type" -> fieldDecl.setType(aNode.getCustomNode(JType.class));
+                case "VarDecl" -> {
                     JVarDecl vd = aNode.getCustomNode(JVarDecl.class);
                     fieldDecl.addVarDecl(vd);
-                    break;
+                }
             }
         }
 
@@ -726,7 +721,6 @@ public class JavaParser extends JavaParserStmt {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get method decl
             JMethodDecl methodDecl = getPart();
 
             switch (anId) {
@@ -773,7 +767,6 @@ public class JavaParser extends JavaParserStmt {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get constructor decl
             JConstrDecl constrDecl = getPart();
 
             switch (anId) {
@@ -863,7 +856,6 @@ public class JavaParser extends JavaParserStmt {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Get constructor call statement
             JStmtConstrCall constrCallStmt = getPart();
 
             switch (anId) {
