@@ -146,7 +146,7 @@ public class JavaClassUpdater {
     {
         Class<?> realClass = getRealClassImpl();
         Class<?>[] interfaces = realClass.getInterfaces();
-        return ArrayUtils.map(interfaces, cls -> _javaClass.getJavaClassForClass(cls), JavaClass.class);
+        return ArrayUtils.map(interfaces, _javaClass::getJavaClassForClass, JavaClass.class);
     }
 
     /**
@@ -156,7 +156,7 @@ public class JavaClassUpdater {
     {
         Class<?> realClass = getRealClassImpl();
         Type[] interfaces = realClass.getGenericInterfaces();
-        return ArrayUtils.map(interfaces, type -> _resolver.getJavaTypeForType(type), JavaType.class);
+        return ArrayUtils.map(interfaces, _resolver::getJavaTypeForType, JavaType.class);
     }
 
     /**
@@ -184,7 +184,7 @@ public class JavaClassUpdater {
         }
 
         // Add JavaDecl for each inner class
-        return ArrayUtils.map(innerClasses, cls -> _resolver.getJavaClassForClass(cls), JavaClass.class);
+        return ArrayUtils.map(innerClasses, _resolver::getJavaClassForClass, JavaClass.class);
     }
 
     /**
@@ -208,7 +208,7 @@ public class JavaClassUpdater {
         Method[] methods;
         try { methods = realClass.getDeclaredMethods(); }
         catch (Throwable e) { e.printStackTrace(); return new JavaMethod[0]; }
-        return ArrayUtils.mapNonNull(methods, meth -> getJavaMethodForMethod(meth), JavaMethod.class);
+        return ArrayUtils.mapNonNull(methods, this::getJavaMethodForMethod, JavaMethod.class);
     }
 
     /**
@@ -230,7 +230,7 @@ public class JavaClassUpdater {
         Constructor<?>[] constrs;
         try { constrs = realClass.getDeclaredConstructors(); }
         catch (Throwable e) { e.printStackTrace(); return new JavaConstructor[0]; }
-        return ArrayUtils.mapNonNull(constrs, constr -> getJavaConstructorForConstructor(constr), JavaConstructor.class);
+        return ArrayUtils.mapNonNull(constrs, this::getJavaConstructorForConstructor, JavaConstructor.class);
     }
 
     /**
@@ -258,7 +258,7 @@ public class JavaClassUpdater {
     protected JavaField[] getMergedFields(JavaField[] oldFields)
     {
         JavaField[] newFields = getDeclaredFields();
-        boolean didChange = false;
+        boolean didChange = newFields.length != oldFields.length;
 
         // Iterate over new fields and merge with old
         for (int i = 0; i < newFields.length; i++) {
@@ -282,7 +282,7 @@ public class JavaClassUpdater {
     protected JavaMethod[] getMergedMethods(JavaMethod[] oldMethods)
     {
         JavaMethod[] newMethods = getDeclaredMethods();
-        boolean didChange = false;
+        boolean didChange = newMethods.length != oldMethods.length;
 
         // Iterate over new fields and merge with old
         for (int i = 0; i < newMethods.length; i++) {
@@ -306,7 +306,7 @@ public class JavaClassUpdater {
     protected JavaConstructor[] getMergedConstructors(JavaConstructor[] oldConstructors)
     {
         JavaConstructor[] newConstructors = getDeclaredConstructors();
-        boolean didChange = false;
+        boolean didChange = newConstructors.length != oldConstructors.length;
 
         // Iterate over new constructors and merge with old
         for (int i = 0; i < newConstructors.length; i++) {
