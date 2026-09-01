@@ -180,17 +180,21 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
 
         // Get constructors from ClassDecl.ConstructorDecls
         JConstrDecl[] constrDecls = _classDecl.getConstructorDecls();
-        if (constrDecls.length > 0)
-            return ArrayUtils.map(constrDecls, this::getJavaConstructorForConstructorDecl, JavaConstructor.class);
+        JavaConstructor[] constructors = ArrayUtils.mapNonNull(constrDecls, JavaClassUpdaterDecl::getJavaConstructorForConstructorDecl, JavaConstructor.class);
 
-        // If none, return default
-        return new JavaConstructor[] { JavaConstructor.createDefaultConstructor(_javaClass) };
+        // If no explicit constructors or no record canonical constructor, add default constructor
+        if (constructors.length == 0 || _classDecl.isRecord() && ArrayUtils.hasMatch(constrDecls, JConstrDecl::isRecordCanonicalConstructor)) {
+            JavaConstructor defaultConstructor = createDefaultConstructor(_javaClass, _classDecl);
+            constructors = ArrayUtils.add(constructors, defaultConstructor, 0);
+        }
+
+        return constructors;
     }
 
     /**
      * Returns a JavaConstructor for given JConstrDecl.
      */
-    private JavaConstructor getJavaConstructorForConstructorDecl(JConstrDecl constrDecl)
+    private static JavaConstructor getJavaConstructorForConstructorDecl(JConstrDecl constrDecl)
     {
         // Get constructor - just return if can't be found or created
         JavaConstructor javaConstr = constrDecl.getConstructor();
@@ -201,7 +205,6 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         if (getJavaExecutableDecl(javaConstr) != constrDecl)
             javaConstr = createConstructorForDecl(constrDecl);
 
-        // Return
         return javaConstr;
     }
 
@@ -267,6 +270,39 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         ExecutableReader execReader = new JavaClassUpdaterDecl.ExecutableReaderDecl(constrDecl);
         javaConstructor.setReader(execReader);
         return javaConstructor;
+    }
+
+    /**
+     * Creates a default constructor for given class.
+     */
+    public static JavaConstructor createDefaultConstructor(JavaClass javaClass, JClassDecl classDecl)
+    {
+        JavaConstructor constr = new JavaConstructor(javaClass._resolver, javaClass, null);
+        constr._mods = Modifier.PUBLIC;
+        constr._name = constr._simpleName = javaClass.getSimpleName();
+        constr._evalType = javaClass;
+        constr._typeParameters = new JavaTypeVariable[0];
+        constr._genericParameterTypes = JavaType.EMPTY_TYPES_ARRAY;
+        constr._parameterTypes = new JavaClass[0];
+        constr._parameterNames = new String[0];
+
+        // If record, set constructor parameters
+        if (classDecl.isRecord()) {
+            JVarDecl[] paramDecls = classDecl.getParameters();
+            JavaType[] genericParamTypes = ArrayUtils.mapNonNull(paramDecls, JVarDecl::getJavaType, JavaType.class);
+            JavaClass[] paramTypes = ArrayUtils.mapNonNull(paramDecls, JVarDecl::getJavaClass, JavaClass.class);
+            JExprId[] nameIds = ArrayUtils.mapNonNull(paramDecls, JVarDecl::getId, JExprId.class);
+            String[] paramNames = ArrayUtils.map(nameIds, JExprId::getName, String.class);
+            if (genericParamTypes.length == paramDecls.length && paramTypes.length == paramDecls.length &&
+                paramNames.length == paramDecls.length) {
+                constr._typeParameters = ArrayUtils.mapNonNull(classDecl.getTypeParamDecls(), JTypeVar::getTypeVariable, JavaTypeVariable.class);
+                constr._genericParameterTypes = genericParamTypes;
+                constr._parameterTypes = paramTypes;
+                constr._parameterNames = paramNames;
+            }
+        }
+
+        return constr;
     }
 
     /**

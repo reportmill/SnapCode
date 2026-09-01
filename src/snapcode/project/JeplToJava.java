@@ -60,7 +60,7 @@ public class JeplToJava {
         if (classDecl != null) {
 
             // If no main method, set main method initializer
-            JMethodDecl mainMethod = classDecl.getMethodDeclForNameAndTypes("main", null);
+            JMethodDecl mainMethod = classDecl.getMethodDeclForNameAndTypes("main");
             if (mainMethod == null) {
                 JInitializerDecl[] initializers = classDecl.getInitializerDecls();
                 if (initializers.length > 0)

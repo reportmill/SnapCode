@@ -23,9 +23,6 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     // The formal parameters (for records)
     protected JVarDecl[] _params;
 
-    // The constructor decl for a record
-    private JConstrDecl _recordConstrDecl;
-
     // The formal parameters as fields (for records)
     protected JFieldDecl[] _paramFieldDecls;
 
@@ -132,14 +129,9 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      */
     public void setTypeVars(JTypeVar[] theTVs)
     {
-        // Remove old type vars
-        Stream.of(_typeVars).forEach(tvar -> removeChild(tvar));
-
-        // Set new
+        Stream.of(_typeVars).forEach(this::removeChild);
         _typeVars = theTVs;
-
-        // Add new type vars
-        Stream.of(_typeVars).forEach(tvar -> addChild(tvar));
+        Stream.of(_typeVars).forEach(this::addChild);
     }
 
     /**
@@ -158,10 +150,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
             Stream.of(_paramMethodDecls).forEach(this::removeChild);
 
         _params = varDecls;
-
-        // Create constructor decl
-        _recordConstrDecl = createConstructorDeclForParams(this, varDecls);
-        addChild(_recordConstrDecl);
+        Stream.of(_params).forEach(this::addChild);
 
         // Create field parameters
         _paramFieldDecls = ArrayUtils.mapNonNull(_params, JClassDecl::createFieldDeclForParam, JFieldDecl.class);
@@ -170,34 +159,6 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
         // Create method
         _paramMethodDecls = ArrayUtils.mapNonNull(_params, JClassDecl::createMethodDeclForParam, JMethodDecl.class);
         Stream.of(_paramMethodDecls).forEach(this::addChild);
-    }
-
-    /**
-     * Creates a constructor decl for given parameters.
-     */
-    private static JConstrDecl createConstructorDeclForParams(JClassDecl classDecl, JVarDecl[] varDecls)
-    {
-        JExprId classDeclId = classDecl.getId();
-
-        // Create method modifiers
-        int startCharIndex = varDecls.length > 0 ? varDecls[0].getStartCharIndex() : classDeclId.getStartCharIndex();
-        ParseToken emptyToken = new ParseToken.Builder().name("").pattern("").text("")
-                .startCharIndex(startCharIndex).endCharIndex(startCharIndex).build();
-        JModifiers modifiers = new JModifiers(Modifier.PUBLIC);
-        modifiers.setStartToken(emptyToken);
-        modifiers.setEndToken(emptyToken);
-
-        // Create constructor
-        JConstrDecl constrDecl = new JConstrDecl();
-        constrDecl.setModifiers(modifiers);
-        constrDecl._id = classDeclId;
-        constrDecl.setName(classDeclId.getName());
-        constrDecl.setParameters(varDecls);
-        constrDecl.setStartToken(emptyToken);
-        constrDecl.setEndToken(emptyToken);
-
-        // Return
-        return constrDecl;
     }
 
     /**
@@ -315,17 +276,16 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     {
         // Get extends class
         JType extendsType = getExtendsType();
-        JavaClass extendsClass = extendsType != null ? extendsType.getEvalClass() : null;
+        JavaClass superClass = extendsType != null ? extendsType.getEvalClass() : null;
 
-        // If no ExtendsClass return Object.class (but complain if it was declared but not found)
-        if (extendsClass == null) {
+        // If no superclass, return Object.class (but complain if it was declared but not found)
+        if (superClass == null) {
             if (extendsType != null)
                 System.err.println("JClassDecl: Couldn't find superclass: " + extendsType.getName());
             return getJavaClassForClass(Object.class);
         }
 
-        // Return
-        return extendsClass;
+        return superClass;
     }
 
     /**
@@ -333,7 +293,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      */
     public JavaClass[] getInterfaces()
     {
-        return ArrayUtils.mapNonNull(_implementsTypes, interfType -> interfType.getEvalClass(), JavaClass.class);
+        return ArrayUtils.mapNonNull(_implementsTypes, JType::getEvalClass, JavaClass.class);
     }
 
     /**
@@ -428,15 +388,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     public JConstrDecl[] getConstructorDecls()
     {
         if (_constrDecls != null) return _constrDecls;
-
-        // Get parsed constructor decls
-        JConstrDecl[] constrDecls = ArrayUtils.filterByClass(getBodyDecls(), JConstrDecl.class);
-
-        // Add implicit record decl
-        if (isRecord() && _recordConstrDecl != null)
-            constrDecls = ArrayUtils.add(constrDecls, _recordConstrDecl, 0);
-
-        return _constrDecls = constrDecls;
+        return _constrDecls = ArrayUtils.filterByClass(getBodyDecls(), JConstrDecl.class);
     }
 
     /**
@@ -471,18 +423,10 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     /**
      * Returns the JMethodDecl for given name.
      */
-    public JMethodDecl getMethodDeclForNameAndTypes(String aName, JavaType[] argTypes)
+    public JMethodDecl getMethodDeclForNameAndTypes(String aName, JavaType ... argTypes)
     {
-        // Get methods
         JMethodDecl[] methodDecls = getMethodDecls();
-
-        // Iterate over each and return if match
-        for (JMethodDecl methodDecl : methodDecls)
-            if (methodDecl.getName().equals(aName))
-                return methodDecl;
-
-        // Return not found
-        return null;
+        return ArrayUtils.findMatch(methodDecls, methodDecl -> methodDecl.getName().equals(aName));
     }
 
     /**
@@ -508,27 +452,24 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      */
     public JClassDecl[] getEnclosedClassDecls()
     {
-        // Get class decls from body decls
-        List<JClassDecl> cds = new ArrayList<>();
+        List<JClassDecl> classDecls = new ArrayList<>();
         for (JBodyDecl bodyDecl : getBodyDecls())
-            findEnclosedClassDecls(bodyDecl, cds);
-
-        // Return array
-        return cds.toArray(new JClassDecl[0]);
+            findEnclosedClassDecls(bodyDecl, classDecls);
+        return classDecls.toArray(new JClassDecl[0]);
     }
 
     /**
      * Finds inner class declarations and anonymous class declarations in Alloc expressions.
      */
-    private void findEnclosedClassDecls(JNode aNode, List<JClassDecl> theCDs)
+    private void findEnclosedClassDecls(JNode aNode, List<JClassDecl> classDecls)
     {
         // Handle Class decl
         if (aNode instanceof JClassDecl)
-            theCDs.add((JClassDecl) aNode);
+            classDecls.add((JClassDecl) aNode);
 
         // Otherwise recurse
-        else for (JNode c : aNode.getChildren())
-            findEnclosedClassDecls(c, theCDs);
+        else for (JNode child : aNode.getChildren())
+            findEnclosedClassDecls(child, classDecls);
     }
 
     /**
@@ -673,16 +614,12 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     @Override
     public JVarDecl[] getVarDecls()
     {
-        // If already set, just return
         if (_varDecls != null) return _varDecls;
 
         // Get FieldDecls.VarDecls
         JFieldDecl[] fieldDecls = getFieldDecls();
         Stream<JVarDecl> varDeclsStream = Stream.of(fieldDecls).flatMap(fieldDecl -> Stream.of(fieldDecl.getVarDecls()));
-        JVarDecl[] varDecls = varDeclsStream.toArray(size -> new JVarDecl[size]);
-
-        // Set and return
-        return _varDecls = varDecls;
+        return _varDecls = varDeclsStream.toArray(JVarDecl[]::new);
     }
 
     /**
@@ -745,38 +682,6 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
 
         // Do normal version
         return super.getResolvedTypeForTypeVar(aTypeVar);
-    }
-
-    /**
-     * Override to return errors for ExtendsList, ImplementsList, BodyDecls, TypeVars.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        NodeError[] errors = NodeError.NO_ERRORS;
-
-        // Get errors for extends list
-        JType[] extendsTypes = getExtendsTypes();
-        errors = NodeError.addNodeErrorsForNodes(errors, extendsTypes);
-
-        // Get errors for implements list
-        JType[] implementsTypes = getImplementsTypes();
-        errors = NodeError.addNodeErrorsForNodes(errors, implementsTypes);
-
-        // Get errors for BodyDecls
-        JBodyDecl[] bodyDecls = getBodyDecls();
-        errors = NodeError.addNodeErrorsForNodes(errors, bodyDecls);
-
-        // Get errors for type vars
-        JTypeVar[] typeVars = getTypeParamDecls();
-        errors = NodeError.addNodeErrorsForNodes(errors, typeVars);
-
-        // Get errors for EnumConstants
-        JEnumConst[] enumConst = getEnumConstants();
-        errors = NodeError.addNodeErrorsForNodes(errors, enumConst);
-
-        // Return
-        return errors;
     }
 
     /**
