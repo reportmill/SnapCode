@@ -1,7 +1,6 @@
 package javakit.parse;
 import snap.util.ArrayUtils;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 /**
  * This interface identifies nodes with VarDecls. Known uses:
@@ -24,8 +23,7 @@ public interface WithVarDecls {
     default JVarDecl getVarDeclForName(String aName)
     {
         JVarDecl[] varDecls = getVarDecls();
-        Predicate<JVarDecl> nameEquals = vd -> Objects.equals(aName, vd.getName());
-        return ArrayUtils.findMatch(varDecls, nameEquals);
+        return ArrayUtils.findMatch(varDecls, varDecl -> Objects.equals(aName, varDecl.getName()));
     }
 
     /**
@@ -45,6 +43,10 @@ public interface WithVarDecls {
                 return varDecl;
             return null;
         }
+
+        // Handle var decl is record parameter
+        if (varDecl.getParent() instanceof JClassDecl)
+            return varDecl;
 
         // If id appears before var decl end, return null
         if (anId.getStartCharIndex() < varDecl.getEndCharIndex())

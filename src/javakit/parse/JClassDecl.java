@@ -2,11 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Stream;
 import javakit.resolver.*;
-import snap.parse.ParseToken;
 import snap.util.ArrayUtils;
 
 /**
@@ -22,12 +20,6 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
 
     // The formal parameters (for records)
     protected JVarDecl[] _params;
-
-    // The formal parameters as fields (for records)
-    protected JFieldDecl[] _paramFieldDecls;
-
-    // The formal parameters as methods (for records)
-    protected JMethodDecl[] _paramMethodDecls;
 
     // The extends list
     protected JType[] _extendsTypes = JType.EMPTY_TYPES_ARRAY;
@@ -144,68 +136,8 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
      */
     public void setParameters(JVarDecl[] varDecls)
     {
-        if (_paramFieldDecls != null)
-            Stream.of(_paramFieldDecls).forEach(this::removeChild);
-        if (_paramMethodDecls != null)
-            Stream.of(_paramMethodDecls).forEach(this::removeChild);
-
         _params = varDecls;
         Stream.of(_params).forEach(this::addChild);
-
-        // Create field parameters
-        _paramFieldDecls = ArrayUtils.mapNonNull(_params, JClassDecl::createFieldDeclForParam, JFieldDecl.class);
-        Stream.of(_paramFieldDecls).forEach(this::addChild);
-
-        // Create method
-        _paramMethodDecls = ArrayUtils.mapNonNull(_params, JClassDecl::createMethodDeclForParam, JMethodDecl.class);
-        Stream.of(_paramMethodDecls).forEach(this::addChild);
-    }
-
-    /**
-     * Creates a field decl for a record param.
-     */
-    private static JFieldDecl createFieldDeclForParam(JVarDecl varDecl)
-    {
-        // Create field modifiers
-        int startCharIndex = varDecl.getStartCharIndex();
-        ParseToken emptyToken = new ParseToken.Builder().name("").pattern("").text("")
-                .startCharIndex(startCharIndex).endCharIndex(startCharIndex).build();
-        JModifiers modifiers = new JModifiers(Modifier.PRIVATE);
-        modifiers.setStartToken(emptyToken);
-        modifiers.setEndToken(emptyToken);
-
-        JFieldDecl fieldDecl = new JFieldDecl();
-        fieldDecl.setModifiers(modifiers);
-        fieldDecl.addVarDecl(varDecl);
-        return fieldDecl;
-    }
-
-    /**
-     * Creates a method decl for a record param.
-     */
-    private static JMethodDecl createMethodDeclForParam(JVarDecl varDecl)
-    {
-        JExprId varDeclId = varDecl.getId();
-        if (varDeclId == null)
-            return null;
-
-        // Create method modifiers
-        int startCharIndex = varDecl.getStartCharIndex();
-        ParseToken emptyToken = new ParseToken.Builder().name("").pattern("").text("")
-                .startCharIndex(startCharIndex).endCharIndex(startCharIndex).build();
-        JModifiers modifiers = new JModifiers(Modifier.PUBLIC);
-        modifiers.setStartToken(emptyToken);
-        modifiers.setEndToken(emptyToken);
-
-        JMethodDecl methodDecl = new JMethodDecl();
-        methodDecl.setModifiers(modifiers);
-        methodDecl.setReturnType(varDecl.getType());
-        varDecl.getType().setParent(varDecl);
-        methodDecl.setId(varDeclId);
-        varDeclId.setParent(varDecl);
-        methodDecl.setStartToken(emptyToken);
-        methodDecl.setEndToken(emptyToken);
-        return methodDecl;
     }
 
     /**
@@ -263,10 +195,10 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     /**
      * Adds an enum constant.
      */
-    public void addEnumConstant(JEnumConst anEC)
+    public void addEnumConstant(JEnumConst enumConst)
     {
-        _enumConstants = ArrayUtils.add(_enumConstants, anEC);
-        addChild(anEC);
+        _enumConstants = ArrayUtils.add(_enumConstants, enumConst);
+        addChild(enumConst);
     }
 
     /**
@@ -372,14 +304,17 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     public JFieldDecl[] getFieldDecls()
     {
         if (_fieldDecls != null) return _fieldDecls;
+        return _fieldDecls = ArrayUtils.filterByClass(getBodyDecls(), JFieldDecl.class);
+    }
 
-        JFieldDecl[] fieldDecls = ArrayUtils.filterByClass(getBodyDecls(), JFieldDecl.class);
-
-        // If Record, prepend record params as fields
-        if (isRecord() && _paramFieldDecls != null)
-            fieldDecls = ArrayUtils.addAll(_paramFieldDecls, fieldDecls);
-
-        return _fieldDecls = fieldDecls;
+    /**
+     * Returns all field var decls.
+     */
+    public JVarDecl[] getFieldVarDecls()
+    {
+        JFieldDecl[] fieldDecls = getFieldDecls();
+        Stream<JVarDecl> varDeclsStream = Stream.of(fieldDecls).flatMap(fieldDecl -> Stream.of(fieldDecl.getVarDecls()));
+        return _varDecls = varDeclsStream.toArray(JVarDecl[]::new);
     }
 
     /**
@@ -411,13 +346,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     public JMethodDecl[] getMethodDecls()
     {
         if (_methodDecls != null) return _methodDecls;
-
-        JMethodDecl[] methodDecls = ArrayUtils.filterByClass(getBodyDecls(), JMethodDecl.class);
-
-        if (isRecord() && _paramMethodDecls != null)
-            methodDecls = ArrayUtils.addAll(_paramMethodDecls, methodDecls);
-
-        return _methodDecls = methodDecls;
+        return _methodDecls = ArrayUtils.filterByClass(getBodyDecls(), JMethodDecl.class);
     }
 
     /**
@@ -553,6 +482,15 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
             }
         }
 
+        // See if it is record parameter
+        if (isRecord()) {
+            JVarDecl[] params = getParameters();
+            for (JVarDecl param : params) {
+                if (childIdName.equals(param.getName()))
+                    return param.getDecl();
+            }
+        }
+
         // See if it's a field reference from superclass
         JavaClass superClass = getSuperClass();
         if (superClass != null) {
@@ -615,11 +553,10 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     public JVarDecl[] getVarDecls()
     {
         if (_varDecls != null) return _varDecls;
-
-        // Get FieldDecls.VarDecls
-        JFieldDecl[] fieldDecls = getFieldDecls();
-        Stream<JVarDecl> varDeclsStream = Stream.of(fieldDecls).flatMap(fieldDecl -> Stream.of(fieldDecl.getVarDecls()));
-        return _varDecls = varDeclsStream.toArray(JVarDecl[]::new);
+        _varDecls = getFieldVarDecls();
+        if (isRecord())
+            _varDecls = ArrayUtils.addAll(getParameters(), _varDecls);
+        return _varDecls;
     }
 
     /**

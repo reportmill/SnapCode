@@ -202,6 +202,12 @@ public class JVarDecl extends JNode implements WithId {
             return enclosingClass.getDeclaredFieldForName(name);
         }
 
+        // If record parameter, return JavaDecl for field
+        if (par instanceof JClassDecl classDecl) {
+            JavaClass recordClass = classDecl.getJavaClass();
+            return recordClass.getDeclaredFieldForName(name);
+        }
+
         // Get the eval type
         JavaType evalType = getJavaType();
         if (evalType == null) // Can happen for Lambdas

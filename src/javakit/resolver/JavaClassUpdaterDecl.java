@@ -89,7 +89,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     protected JavaClass[] getDeclaredClasses()
     {
         JClassDecl[] classDecls = _classDecl.getDeclaredClassDecls();
-        return ArrayUtils.mapNonNull(classDecls, cdecl -> cdecl.getJavaClass(), JavaClass.class);
+        return ArrayUtils.mapNonNull(classDecls, JClassDecl::getJavaClass, JavaClass.class);
     }
 
     /**
@@ -98,44 +98,47 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     @Override
     protected JavaField[] getDeclaredFields()
     {
-        // Get FieldDecls
-        JVarDecl[] fieldDecls = _classDecl.getVarDecls();
-
-        // Get fields
-        JavaField[] fields = ArrayUtils.map(fieldDecls, vd -> getJavaFieldForVarDecl(vd, _javaClass), JavaField.class);
+        // Get fields for all field decl var decls
+        JVarDecl[] fieldDecls = _classDecl.getFieldVarDecls();
+        JavaField[] fields = ArrayUtils.map(fieldDecls, this::getJavaFieldForVarDecl, JavaField.class);
 
         // Handle enum: Add constant fields
         if (_classDecl.isEnum()) {
             JEnumConst[] enumConsts = _classDecl.getEnumConstants();
-            JavaField[] enumFields = ArrayUtils.map(enumConsts, ec -> getJavaFieldForEnumConst(ec, _javaClass), JavaField.class);
+            JavaField[] enumFields = ArrayUtils.map(enumConsts, this::getJavaFieldForEnumConst, JavaField.class);
             fields = ArrayUtils.addAll(fields, enumFields);
         }
 
-        // Return
+        // Handle record: Add fields for record parameters
+        else if (_classDecl.isRecord()) {
+            JVarDecl[] params = _classDecl.getParameters();
+            JavaField[] recordFields = ArrayUtils.mapNonNull(params, this::getJavaFieldForVarDecl, JavaField.class);
+            fields = ArrayUtils.addAll(recordFields, fields);
+        }
+
         return fields;
     }
 
     /**
      * Returns a JavaField for given field var decl from class decl, creating if missing.
      */
-    private JavaField getJavaFieldForVarDecl(JVarDecl varDecl, JavaClass javaClass)
+    private JavaField getJavaFieldForVarDecl(JVarDecl varDecl)
     {
         String fieldName = varDecl.getName();
-        JFieldDecl fieldDecl = (JFieldDecl) varDecl.getParent();
-        int fieldMods = fieldDecl.getModifiers().getValue();
+        int fieldMods = varDecl.getParent() instanceof JFieldDecl fieldDecl ? fieldDecl.getModifiers().getValue() : Modifier.PROTECTED;
         JavaType fieldType = varDecl.getJavaType();
         if (fieldType == null)
-            fieldType = javaClass.getJavaClassForClass(Object.class);
-        return JavaField.createField(javaClass, fieldName, fieldType, fieldMods);
+            fieldType = _javaClass.getJavaClassForClass(Object.class);
+        return JavaField.createField(_javaClass, fieldName, fieldType, fieldMods);
     }
 
     /**
      * Returns a JavaField for given enum constant from class decl, creating if missing.
      */
-    private JavaField getJavaFieldForEnumConst(JEnumConst enumConst, JavaClass javaClass)
+    private JavaField getJavaFieldForEnumConst(JEnumConst enumConst)
     {
         String enumConstName = enumConst.getName();
-        return JavaField.createField(javaClass, enumConstName, javaClass, Modifier.PUBLIC | Modifier.STATIC);
+        return JavaField.createField(_javaClass, enumConstName, _javaClass, Modifier.PUBLIC | Modifier.STATIC);
     }
 
     /**
@@ -149,13 +152,22 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
 
         // Get methods from ClassDecl.MethodDecls
         JMethodDecl[] methodDecls = _classDecl.getMethodDecls();
-        return ArrayUtils.mapNonNull(methodDecls, mdecl -> getJavaMethodForMethodDecl(mdecl), JavaMethod.class);
+        JavaMethod[] methods = ArrayUtils.mapNonNull(methodDecls, JavaClassUpdaterDecl::getJavaMethodForMethodDecl, JavaMethod.class);
+
+        // If record, create and add methods for record parameters
+        if (_classDecl.isRecord()) {
+            JVarDecl[] params = _classDecl.getParameters();
+            JavaMethod[] recordMethods = ArrayUtils.mapNonNull(params, this::getJavaMethodForVarDecl, JavaMethod.class);
+            methods = ArrayUtils.addAll(recordMethods, methods);
+        }
+
+        return methods;
     }
 
     /**
      * Returns a JavaMethod for given JMethodDecl.
      */
-    private JavaMethod getJavaMethodForMethodDecl(JMethodDecl methodDecl)
+    private static JavaMethod getJavaMethodForMethodDecl(JMethodDecl methodDecl)
     {
         // Get method - just return if can't be found or created
         JavaMethod javaMethod = methodDecl.getMethod();
@@ -166,7 +178,27 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         if (getJavaExecutableDecl(javaMethod) != methodDecl)
             javaMethod = createMethodForDecl(methodDecl);
 
-        // Return
+        return javaMethod;
+    }
+
+    /**
+     * Returns a JavaMethod for given JVarDecl.
+     */
+    private JavaMethod getJavaMethodForVarDecl(JVarDecl varDecl)
+    {
+        JExprId varDeclId = varDecl.getId();
+        if (varDeclId == null)
+            return null;
+
+        // Create JavaMethod
+        JavaMethod javaMethod = new JavaMethod(varDecl.getResolver(), _javaClass, null);
+        javaMethod._mods = Modifier.PUBLIC;
+        javaMethod._name = javaMethod._simpleName = varDeclId.getName();
+        javaMethod._typeParameters = new JavaTypeVariable[0];
+        javaMethod._genericParameterTypes = JavaType.EMPTY_TYPES_ARRAY;
+        javaMethod._parameterTypes = new JavaClass[0];
+        javaMethod._parameterNames = new String[0];
+        javaMethod._genericReturnType = varDecl.getJavaType();
         return javaMethod;
     }
 
@@ -215,11 +247,8 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
     public Object[] getEnumConstants()
     {
         JavaField[] fields = super.getDeclaredFields();
-        fields = ArrayUtils.filter(fields, field -> field.isStatic());
-        Object[] enumConsts = new Object[fields.length];
-        for (int i = 0; i < fields.length; i++)
-            enumConsts[i] = new JavaEnum(_javaClass, fields[i].getName());
-        return enumConsts;
+        fields = ArrayUtils.filter(fields, JavaField::isStatic);
+        return ArrayUtils.map(fields, field -> new JavaEnum(_javaClass, field.getName()), JavaEnum.class);
     }
 
     /**
@@ -373,7 +402,7 @@ public class JavaClassUpdaterDecl extends JavaClassUpdater {
         {
             // Get TypeVariables
             JTypeVar[] typeVars = _executableDecl.getTypeParamDecls();
-            return ArrayUtils.map(typeVars, tvar -> getJavaTypeVariableForTypeVarDecl(tvar), JavaTypeVariable.class);
+            return ArrayUtils.map(typeVars, this::getJavaTypeVariableForTypeVarDecl, JavaTypeVariable.class);
         }
 
         /**
