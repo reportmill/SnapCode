@@ -27,8 +27,7 @@ public interface WithStmts {
                 break;
 
             // If statement is class decl, return class if match
-            if (stmt instanceof JStmtClassDecl) {
-                JStmtClassDecl classDeclStmt = (JStmtClassDecl) stmt;
+            if (stmt instanceof JStmtClassDecl classDeclStmt) {
                 JClassDecl classDecl = classDeclStmt.getClassDecl();
                 if (Objects.equals(typeName, classDecl.getName()))
                     return classDecl.getJavaClass();
