@@ -2,9 +2,7 @@ package snapcode.project;
 import javakit.parse.JavaParser;
 import snap.gfx.Color;
 import snap.parse.*;
-import snap.text.TextLine;
-import snap.text.TextStyle;
-import snap.text.TextToken;
+import snap.text.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,11 +15,9 @@ public class JavaTextTokenizer extends Tokenizer {
     private TextLine _textLine;
 
     // Constants for Syntax Coloring
-    private static Color COMMENT_COLOR = new Color("#3F7F5F"); // Green
+    private static Color COMMENT_COLOR = new Color("#608C60"); // Gray; was #3F7F5F, green
     private static Color RESERVED_WORD_COLOR = new Color("#1232AC"); // Blue-ish; was #660033, maroon
     private static Color STRING_LITERAL_COLOR = new Color("#377B2A"); // Green; was #C80000, red-ish
-    private static Color FIELD_COLOR = new Color("#7C1E8F"); // Purple
-    private static Color METHOD_COLOR = new Color("#286077"); // Turquoise
 
     // A code tokenizer
     public static JavaTextTokenizer SHARED = new JavaTextTokenizer();

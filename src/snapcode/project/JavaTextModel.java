@@ -2,7 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import javakit.parse.JFile;
+import javakit.parse.*;
+import javakit.resolver.*;
+import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.parse.Tokenizer;
 import snap.text.*;
@@ -17,6 +19,10 @@ public class JavaTextModel extends TextModel {
 
     // The tokenizer
     private JavaTextTokenSource _tokenizer;
+
+    // Context for member coloring
+    public static Color FIELD_COLOR = new Color("#7C1E8F"); // Purple
+    public static Color METHOD_COLOR = new Color("#286077"); // Turquoise
 
     /**
      * Constructor.
@@ -69,6 +75,62 @@ public class JavaTextModel extends TextModel {
      * Returns tokenizer that provides tokens from lines.
      */
     public Tokenizer getTokenSource()  { return _tokenizer; }
+
+    /**
+     * Sets color of member id tokens.
+     */
+    public void setColorOfMemberIds()
+    {
+        setColorOfMemberIds(getJFile());
+    }
+
+    /**
+     * Sets color of member id tokens.
+     */
+    private void setColorOfMemberIds(JNode aNode)
+    {
+        if (aNode instanceof JExprId idExpr) {
+            JavaDecl javaDecl = idExpr.getDecl();
+            if (javaDecl instanceof JavaField) {
+                TextToken textToken = getTokenForIdNode(idExpr);
+                if (textToken != null)
+                    textToken.setColor(FIELD_COLOR);
+            }
+            else if (javaDecl instanceof JavaExecutable && idExpr.getParent() instanceof JExecutableDecl) {
+                TextToken textToken = getTokenForIdNode(idExpr);
+                if (textToken != null)
+                    textToken.setColor(METHOD_COLOR);
+            }
+        }
+
+        else aNode.getChildren().forEach(this::setColorOfMemberIds);
+    }
+
+    /**
+     * Returns the text token for given id node.
+     */
+    public TextToken getTokenForIdNode(JExprId idExpr)
+    {
+        // If node is zero length, return null
+        if (idExpr.getCharLength() == 0)
+            return null;
+
+        // Get line index (skip if negative - assume Repl import statement or something)
+        int lineIndex = idExpr.getLineIndex();
+        if (lineIndex < 0)
+            return null;
+
+        // Get node line, then token from line (faster than having to find line by node startCharIndex)
+        TextLine textLine = getLine(lineIndex);
+        int textLineStartCharIndex = textLine.getStartCharIndex();
+        int nodeStartCharIndex = idExpr.getStartCharIndex();
+        int tokenStartCharIndexInLine = nodeStartCharIndex - textLineStartCharIndex;
+        TextToken token = textLine.getTokenForCharIndex(tokenStartCharIndexInLine);
+        if (token == null) // Should be impossible
+            System.out.println("JavaTextModel.getTokenForIdNode: Can't find token for matching node: " + idExpr);
+
+        return token;
+    }
 
     /**
      * Override to create tokens.

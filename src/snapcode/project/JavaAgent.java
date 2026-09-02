@@ -3,15 +3,11 @@
  */
 package snapcode.project;
 import javakit.parse.*;
-import javakit.resolver.JavaClass;
-import javakit.resolver.JavaDecl;
+import javakit.resolver.*;
 import snap.props.PropChange;
-import snap.text.TextAgent;
-import snap.text.TextModel;
-import snap.text.TextModelUtils;
+import snap.text.*;
 import snap.util.*;
 import snap.web.WebFile;
-
 import java.util.*;
 
 /**
@@ -135,12 +131,10 @@ public class JavaAgent extends TextAgent {
      */
     public JFile getJFile()
     {
-        // If already set, just return
         if (_jfile != null) return _jfile;
-
-        // Create, Set, return
-        JFile jfile = createJFile();
-        return _jfile = jfile;
+        _jfile = createJFile();
+        setColorOfMemberIds();
+        return _jfile;
     }
 
     /**
@@ -275,6 +269,7 @@ public class JavaAgent extends TextAgent {
         if (errors.length == 0) {
             reloadClassFromClassDecl();
             errors = NodeError.getAllNodeErrors(jFile);
+            setColorOfMemberIds();
         }
 
         // Convert to BuildIssues and set in agent
@@ -416,6 +411,15 @@ public class JavaAgent extends TextAgent {
         _jeplJavaText = null;
         _externalRefs = null;
         _externalClassRefs = null;
+    }
+
+    /**
+     * Sets color of member id tokens.
+     */
+    private void setColorOfMemberIds()
+    {
+        if (_javaTextModel != null)
+            _javaTextModel.setColorOfMemberIds();
     }
 
     /**

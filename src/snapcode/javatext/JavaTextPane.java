@@ -32,7 +32,7 @@ public class JavaTextPane extends TextPane {
     protected LineFootView  _lineFootView;
 
     // A runnable to check file for errors after delay
-    private Runnable _checkFileRun = () -> checkFileForErrors();
+    private Runnable _checkFileRun = this::checkFileForErrors;
 
     /**
      * Constructor.
@@ -444,6 +444,7 @@ public class JavaTextPane extends TextPane {
         JavaTextModel javaTextModel = getJavaTextModel();
         JavaAgent javaAgent = javaTextModel.getAgent();
         javaAgent.checkFileForErrors();
+        getTextArea().repaint();
     }
 
     /**

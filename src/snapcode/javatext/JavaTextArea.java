@@ -229,35 +229,8 @@ public class JavaTextArea extends TextArea {
             return new TextToken[0];
 
         // Return TextTokens for nodes
-        return ListUtils.mapNonNullToArray(matchingIdNodes, this::getTokenForIdNode, TextToken.class);
-    }
-
-    /**
-     * Returns the text token for given id node.
-     */
-    private TextToken getTokenForIdNode(JExprId idExpr)
-    {
-        // If node is zero length, return null
-        if (idExpr.getCharLength() == 0)
-            return null;
-
-        // Get line index (skip if negative - assume Repl import statement or something)
-        int lineIndex = idExpr.getLineIndex();
-        if (lineIndex < 0)
-            return null;
-
-        // Get node line, then token from line (faster than having to find line by node startCharIndex)
-        TextModel textModel = getTextModel();
-        TextLine textLine = textModel.getLine(lineIndex);
-        int textLineStartCharIndex = textLine.getStartCharIndex();
-        int nodeStartCharIndex = idExpr.getStartCharIndex();
-        int tokenStartCharIndexInLine = nodeStartCharIndex - textLineStartCharIndex;
-        TextToken token = textLine.getTokenForCharIndex(tokenStartCharIndexInLine);
-        if (token == null) // Should be impossible
-            System.out.println("JavaTextArea.getTokensForNode: Can't find token for matching node: " + idExpr);
-
-        // Return
-        return token;
+        JavaTextModel javaTextModel = (JavaTextModel) getTextModel();
+        return ListUtils.mapNonNullToArray(matchingIdNodes, javaTextModel::getTokenForIdNode, TextToken.class);
     }
 
     /**
