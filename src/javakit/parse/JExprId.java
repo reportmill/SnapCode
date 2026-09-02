@@ -38,15 +38,6 @@ public class JExprId extends JExpr {
     }
 
     /**
-     * Returns whether this is variable identifier.
-     */
-    public boolean isVarId()
-    {
-        JavaDecl decl = getDecl();
-        return decl instanceof JavaLocalVar;
-    }
-
-    /**
      * Returns VarDecl node by looking in parent nodes (i.e., in scope) for this id.
      */
     public JVarDecl getVarDecl()
@@ -59,8 +50,8 @@ public class JExprId extends JExpr {
                 return varDecl;
 
             // If parent has var decls, and has one that defines this id name, return it
-            if (parentNode instanceof WithVarDecls) {
-                JVarDecl varDecl = ((WithVarDecls) parentNode).getVarDeclForId(this);
+            if (parentNode instanceof WithVarDecls withVarDecls) {
+                JVarDecl varDecl = withVarDecls.getVarDeclForId(this);
                 if (varDecl != null)
                     return varDecl;
             }
@@ -194,8 +185,7 @@ public class JExprId extends JExpr {
     protected NodeError[] getErrorsImpl()
     {
         // If Parent is WithId, just return
-        JNode parentNode = getParent();
-        if (parentNode instanceof WithId && ((WithId) parentNode).getId() == this)
+        if (getParent() instanceof WithId withId && withId.getId() == this)
             return NodeError.NO_ERRORS;
 
         // Handle can't resolve id
@@ -203,7 +193,6 @@ public class JExprId extends JExpr {
         if (decl == null)
             return NodeError.newErrorArray(this, "Can't resolve id: " + getName());
 
-        // Return
         return NodeError.NO_ERRORS;
     }
 }

@@ -34,7 +34,8 @@ public class JExprDot extends JExpr {
      */
     public void setPrefixExpr(JExpr anExpr)
     {
-        replaceChild(_prefixExpr, _prefixExpr = anExpr);
+        _prefixExpr = anExpr;
+        addChild(_prefixExpr, 0);
     }
 
     /**
@@ -56,7 +57,7 @@ public class JExprDot extends JExpr {
     @Override
     protected String getNameImpl()
     {
-        String prefixName = _prefixExpr.getName();
+        String prefixName = _prefixExpr != null? _prefixExpr.getName() : "(null)";
         String exprName = _expr != null ? _expr.getName() : "(null)";
         return prefixName + '.' + exprName;
     }

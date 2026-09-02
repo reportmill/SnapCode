@@ -228,6 +228,7 @@ var testObj = switch (new Random().nextInt(4)) {
     case 1 -> new HashMap<>();
     case 2 -> new HashSet<>();
     case 3 -> List.of("Hello");
+    default -> { System.err.println("Impossible value"); yield null; }
 };
 
 // Print object by class
@@ -236,7 +237,7 @@ switch (testObj) {
     case List<?> list -> System.out.println("List class");
     case Map<?,?> map -> System.out.println("Map class");
     case Set<?> set -> System.out.println("Set class");
-    default -> throw new RuntimeException("Impossible value: " + random);
+    default -> throw new RuntimeException("Impossible value: " + testObj);
 }
 ```
 
