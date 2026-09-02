@@ -17,9 +17,11 @@ public class JavaTextTokenizer extends Tokenizer {
     private TextLine _textLine;
 
     // Constants for Syntax Coloring
-    private static Color COMMENT_COLOR = new Color("#3F7F5F"); //336633
-    private static Color RESERVED_WORD_COLOR = new Color("#660033");
-    private static Color STRING_LITERAL_COLOR = new Color("#C80000"); // CC0000
+    private static Color COMMENT_COLOR = new Color("#3F7F5F"); // Green
+    private static Color RESERVED_WORD_COLOR = new Color("#1232AC"); // Blue-ish; was #660033, maroon
+    private static Color STRING_LITERAL_COLOR = new Color("#377B2A"); // Green; was #C80000, red-ish
+    private static Color FIELD_COLOR = new Color("#7C1E8F"); // Purple
+    private static Color METHOD_COLOR = new Color("#286077"); // Turquoise
 
     // A code tokenizer
     public static JavaTextTokenizer SHARED = new JavaTextTokenizer();
@@ -118,14 +120,14 @@ public class JavaTextTokenizer extends Tokenizer {
             switch (tokenName) {
 
                 // Handle comments
-                case Tokenizer.SINGLE_LINE_COMMENT:
-                case Tokenizer.MULTI_LINE_COMMENT: return COMMENT_COLOR;
+                case Tokenizer.SINGLE_LINE_COMMENT, Tokenizer.MULTI_LINE_COMMENT: return COMMENT_COLOR;
 
                 // Handle string literals
-                case "StringLiteral":
-                case "CharacterLiteral":
-                case Tokenizer.TEXT_BLOCK:
-                case Tokenizer.TEXT_BLOCK_MORE: return STRING_LITERAL_COLOR;
+                case "StringLiteral", "CharacterLiteral", Tokenizer.TEXT_BLOCK, Tokenizer.TEXT_BLOCK_MORE:
+                    return STRING_LITERAL_COLOR;
+
+                // Handle numeric literals
+                case "IntLiteral", "HexLiteral", "OctalLiteral", "FloatLiteral": return RESERVED_WORD_COLOR;
             }
         }
 
