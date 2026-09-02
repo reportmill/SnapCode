@@ -28,10 +28,10 @@ public class ProjectFilesTool extends WorkspaceTool {
     private FilesTool _filesTool;
 
     // The file tree
-    private TreeView<ProjectFile>  _filesTree;
+    private TreeView<ProjectFile> _filesTree;
 
     // The file list
-    private ListView<ProjectFile>  _filesList;
+    private ListView<ProjectFile> _filesList;
 
     // The root project files (for TreeView)
     protected List<ProjectFile> _rootFiles;
@@ -40,7 +40,7 @@ public class ProjectFilesTool extends WorkspaceTool {
     private Runnable _resetFilesTreeRunnable;
 
     // The files that have changed since last reset files tree
-    private Set<WebFile> _changedFiles = Collections.synchronizedSet(new HashSet<>());
+    private final Set<WebFile> _changedFiles = Collections.synchronizedSet(new HashSet<>());
 
     // Images for files tree/list
     private static Image FILES_TREE_ICON = Image.getImageForClassResource(ProjectFilesTool.class, "FilesTree.png");
@@ -312,8 +312,10 @@ public class ProjectFilesTool extends WorkspaceTool {
         // Get changed project files and clear their children
         List<ProjectFile> changedProjectFiles = Collections.emptyList();
         if (!_changedFiles.isEmpty()) {
-            changedProjectFiles = ListUtils.mapNonNull(_changedFiles, this::getProjectFileForFile);
-            _changedFiles.clear();
+            synchronized (_changedFiles) {
+                changedProjectFiles = ListUtils.mapNonNull(_changedFiles, this::getProjectFileForFile);
+                _changedFiles.clear();
+            }
             changedProjectFiles.stream().filter(ProjectFile::isDir).forEach(projFile -> projFile._childFiles = null);
         }
 

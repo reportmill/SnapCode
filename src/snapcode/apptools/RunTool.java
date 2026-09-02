@@ -152,7 +152,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         _selApp = aProc;
 
         resetLater();
-        runLater(() -> resetConsoleView());
+        runLater(this::resetConsoleView);
         DebugTool debugTool = getDebugTool();
         debugTool.resetLater();
         _workspacePane.getToolBar().resetLater();
@@ -287,7 +287,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         scrollView.setContent(consoleView);
         scrollView.setFillWidth(consoleView != null && consoleView.isGrowWidth());
         setViewVisible("InputTextField", !(consoleView instanceof ConsoleTextAreaX));
-        runLater(() -> _consoleView.requestFocus());
+        runLater(_consoleView::requestFocus);
     }
 
     /**
@@ -381,10 +381,10 @@ public class RunTool extends WorkspaceTool implements AppListener {
         appTool.hideToolAutomaticallyAfterDelay(7000);
 
         // Focus sel page
-        if (_consoleView.isFocused()) {
+        if (_consoleView != null && _consoleView.isFocused()) {
             View lastFocusedView = getWindow().getLastFocusedView();
             if (lastFocusedView != null)
-                runLater(() -> lastFocusedView.requestFocus());
+                runLater(lastFocusedView::requestFocus);
         }
     }
 
