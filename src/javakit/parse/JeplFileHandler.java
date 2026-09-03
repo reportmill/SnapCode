@@ -1,5 +1,6 @@
 package javakit.parse;
 import snap.parse.*;
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 /**
@@ -121,6 +122,7 @@ public class JeplFileHandler extends JavaParserExpr.JNodeParseHandler<JFile> {
 
         // Create/add ClassDecl
         JClassDecl classDecl = new JClassDecl();
+        classDecl.getModifiers().addValue(Modifier.PUBLIC);
         classDecl.setName(_className);
         classDecl.setStartToken(startToken);
         jfile.addClassDecl(classDecl);

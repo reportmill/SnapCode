@@ -185,10 +185,11 @@ public class JavaAgent extends TextAgent {
         List<String> importNames = getJeplDefaultImports();
         if (_project.getBuildFile().isIncludeSnapChartsRuntime())
             importNames = getJeplDefaultImportsWithCharts();
+        JavaTextModel javaTextModel = _isJMD ? null : _javaTextModel;
         if (_isJMD)
             javaStr = MarkdownUtils.getJeplForJMD(className, javaStr);
 
-        return javaParser.parseJeplFile(javaStr, className, importNames, _javaTextModel);
+        return javaParser.parseJeplFile(javaStr, className, importNames, javaTextModel);
     }
 
     /**
@@ -418,7 +419,7 @@ public class JavaAgent extends TextAgent {
      */
     private void setColorOfMemberIds()
     {
-        if (_javaTextModel != null)
+        if (_javaTextModel != null && !_isJepl && !_isJMD)
             _javaTextModel.setColorOfMemberIds();
     }
 

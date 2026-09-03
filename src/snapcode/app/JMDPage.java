@@ -8,6 +8,7 @@ import snap.view.ViewEvent;
 import snap.viewx.TextPane;
 import snap.web.WebFile;
 import snapcode.apptools.RunTool;
+import snapcode.project.JavaAgent;
 import snapcode.webbrowser.WebBrowser;
 import snapcode.webbrowser.WebPage;
 
@@ -56,7 +57,7 @@ public class JMDPage extends WebPage {
     {
         // Get text agent for file and configure text model
         WebFile jmdFile = getFile();
-        TextAgent textAgent = TextAgent.getAgentForFile(jmdFile);
+        TextAgent textAgent = JavaAgent.getAgentForJavaFile(jmdFile);
         textAgent.setTextModelSupplier(() -> {
             TextModel textModel = TextModel.createDefaultTextModel();
             textModel.setDefaultFont(Font.getCodeFontForSize(14));
