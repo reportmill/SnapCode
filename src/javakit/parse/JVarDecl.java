@@ -194,18 +194,14 @@ public class JVarDecl extends JNode implements WithId {
         JNode par = getParent();
         if (par instanceof JFieldDecl) {
             JClassDecl enclosingClassDecl = getEnclosingClassDecl();
-            if (enclosingClassDecl == null)
-                return null;
-            JavaClass enclosingClass = enclosingClassDecl.getJavaClass();
-            if (enclosingClass == null)
-                return null;
-            return enclosingClass.getDeclaredFieldForName(name);
+            JavaClass enclosingClass = enclosingClassDecl != null ? enclosingClassDecl.getJavaClass() : null;
+            return enclosingClass != null ? enclosingClass.getDeclaredFieldForName(name) : null;
         }
 
         // If record parameter, return JavaDecl for field
         if (par instanceof JClassDecl classDecl) {
             JavaClass recordClass = classDecl.getJavaClass();
-            return recordClass.getDeclaredFieldForName(name);
+            return recordClass != null ? recordClass.getDeclaredFieldForName(name) : null;
         }
 
         // Get the eval type
