@@ -96,17 +96,6 @@ public class JNode {
     }
 
     /**
-     * Returns the JavaDecl most closely associated with given child JType node.
-     */
-    protected JavaType getJavaTypeForChildType(JType childType)
-    {
-        // Forward to parent
-        if (_parent != null)
-            return _parent.getJavaTypeForChildType(childType);
-        return null;
-    }
-
-    /**
      * Returns the JavaDecl that this nodes evaluates to (resolved, if TypeVar).
      */
     public JavaType getEvalType()
@@ -373,21 +362,6 @@ public class JNode {
      * Returns the last child.
      */
     public JNode getLastChild()  { return _children.getLast(); }
-
-    /**
-     * Returns whether given node is ancestor of this node.
-     */
-    public boolean isAncestor(JNode aNode)
-    {
-        // Iterate up parents and return true if node is found
-        for (JNode parent = _parent; parent != null; parent = parent.getParent()) {
-            if (aNode == parent)
-                return true;
-        }
-
-        // Return not ancestor
-        return false;
-    }
 
     /**
      * Returns the node at given char index.

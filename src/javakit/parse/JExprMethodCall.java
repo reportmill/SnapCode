@@ -95,7 +95,7 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
             return getMethodForLambdaArgs(compatibleMethods);
 
         // Return first method
-        return compatibleMethods.get(0);
+        return compatibleMethods.getFirst();
     }
 
     /**
@@ -118,7 +118,7 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
         }
 
         // Return first method
-        return compatibleMethods.get(0);
+        return compatibleMethods.getFirst();
     }
 
     /**
