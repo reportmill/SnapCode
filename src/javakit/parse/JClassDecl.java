@@ -459,68 +459,6 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     protected JavaClass getDeclImpl()  { return getJavaClass(); }
 
     /**
-     * Override to check field declarations for id.
-     */
-    @Override
-    protected JavaDecl getDeclForChildId(JExprId childId)
-    {
-        // If it's "this", set class and return ClassField
-        String childIdName = childId.getName();
-        if (childIdName.equals("this"))
-            return getDecl();
-
-        // If it's "super", set class and return ClassField
-        if (childIdName.equals("super"))
-            return getSuperClass();
-
-        // Iterate over enum constants
-        if (isEnum()) {
-            JEnumConst[] enumConstants = getEnumConstants();
-            for (JEnumConst enumConst : enumConstants) {
-                if (childIdName.equals(enumConst.getName()))
-                    return enumConst.getDecl();
-            }
-        }
-
-        // See if it is record parameter
-        if (isRecord()) {
-            JVarDecl[] params = getParameters();
-            for (JVarDecl param : params) {
-                if (childIdName.equals(param.getName()))
-                    return param.getDecl();
-            }
-        }
-
-        // See if it's a field reference from superclass
-        JavaClass superClass = getSuperClass();
-        if (superClass != null) {
-            JavaField field = superClass.getFieldForName(childIdName);
-            if (field != null)
-                return field;
-        }
-
-        // Check interfaces (id could be interface static field)
-        JType[] implementsTypes = getImplementsTypes();
-        for (JType implementsType : implementsTypes) {
-            JavaClass interf = implementsType.getEvalClass();
-            JavaField field2 = interf != null ? interf.getDeclaredFieldForName(childIdName) : null;
-            if (field2 != null)
-                return field2;
-        }
-
-        // Look for InnerClass of given name
-        JavaClass thisClass = getEvalClass();
-        if (thisClass != null) {
-            JavaClass innerClass = thisClass.getDeclaredClassForName(childIdName);
-            if (innerClass != null)
-                return innerClass;
-        }
-
-        // Do normal version
-        return super.getDeclForChildId(childId);
-    }
-
-    /**
      * Returns the JavaDecl most closely associated with given child JType node.
      */
     @Override

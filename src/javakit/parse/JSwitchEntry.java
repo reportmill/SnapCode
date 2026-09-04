@@ -39,7 +39,7 @@ public class JSwitchEntry extends JNode implements WithStmts, WithBlockStmt, Wit
     /**
      * Returns the label expression.
      */
-    public JExpr getLabel()  { return !_labels.isEmpty() ? _labels.get(0) : null; }
+    public JExpr getLabel()  { return !_labels.isEmpty() ? _labels.getFirst() : null; }
 
     /**
      * Returns the label expressions.
@@ -106,7 +106,7 @@ public class JSwitchEntry extends JNode implements WithStmts, WithBlockStmt, Wit
     public JStmtBlock getBlock()
     {
         // If already set, just return
-        if (_stmts.size() == 1 && _stmts.get(0) instanceof JStmtBlock blockStmt)
+        if (_stmts.size() == 1 && _stmts.getFirst() instanceof JStmtBlock blockStmt)
             return blockStmt;
 
         // Create StmtBlock, add statement and replace
@@ -156,7 +156,7 @@ public class JSwitchEntry extends JNode implements WithStmts, WithBlockStmt, Wit
      */
     public JavaType getReturnType()
     {
-        JStmt lastStmt = !_stmts.isEmpty() ? _stmts.get(_stmts.size() - 1) : null;
+        JStmt lastStmt = !_stmts.isEmpty() ? _stmts.getLast() : null;
 
         // If last statement is expression statement, return expression type
         if (lastStmt instanceof JStmtExpr exprStmt) {
@@ -181,29 +181,9 @@ public class JSwitchEntry extends JNode implements WithStmts, WithBlockStmt, Wit
     }
 
     /**
-     * Override to check inner variable declaration statements.
-     * Override to try to resolve given id name from any preceding ClassDecl statements.
-     */
-    @Override
-    protected JavaDecl getDeclForChildId(JExprId childId)
-    {
-        // If node is case label id, try to evaluate against Switch expression enum type
-        if (_labels.contains(childId))
-            return getDeclForCaseLabel(childId);
-
-        // If any previous statements are class decl statements that declare type, return class
-        JavaClass javaClass = WithStmts.getJavaClassForChildTypeOrId(this, childId);
-        if (javaClass != null)
-            return javaClass;
-
-        // Do normal version
-        return super.getDeclForChildId(childId);
-    }
-
-    /**
      * Returns the decl for the case expression.
      */
-    private JavaDecl getDeclForCaseLabel(JExpr caseLabel)
+    public JavaDecl getDeclForCaseLabel(JExpr caseLabel)
     {
         JNode switchStmt = getParent();
         JExpr switchExpr = null;
@@ -237,7 +217,7 @@ public class JSwitchEntry extends JNode implements WithStmts, WithBlockStmt, Wit
     protected JavaType getJavaTypeForChildType(JType childType)
     {
         // If any previous statements are class decl statements that declare type, return class
-        JavaClass javaClass = WithStmts.getJavaClassForChildTypeOrId(this, childType);
+        JavaClass javaClass = WithStmts.getJavaClassForChildType(this, childType);
         if (javaClass != null)
             return javaClass;
 

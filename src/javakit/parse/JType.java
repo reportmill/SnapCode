@@ -3,7 +3,6 @@
  */
 package javakit.parse;
 import javakit.resolver.JavaClass;
-import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaType;
 import javakit.resolver.JavaTypeVariable;
 import snap.parse.ParseToken;
@@ -296,20 +295,6 @@ public class JType extends JNode {
     protected JavaType getDeclImpl()  { return getJavaType(); }
 
     /**
-     * Override to handle 'var' types.
-     */
-    @Override
-    protected JavaDecl getDeclForChildId(JExprId childId)
-    {
-        // Handle BaseExpr
-        if (childId == _baseExpr)
-            return getBaseType();
-
-        // Do normal version
-        return super.getDeclForChildId(childId);
-    }
-
-    /**
      * Special code for getting 'var' type.
      */
     private JavaType getDeclForVar()
@@ -388,10 +373,7 @@ public class JType extends JNode {
      * Override to customize for this class.
      */
     @Override
-    protected String createString()
-    {
-        return getName();
-    }
+    protected String createString()  { return getName(); }
 
     /**
      * Returns the JavaType for given type, using java.lang.Object if not found.
@@ -407,39 +389,20 @@ public class JType extends JNode {
      */
     public static JType createTypeForTypeAndToken(JavaType aType, ParseToken aToken)
     {
-        return createTypeForTypeAndNameAndToken(aType, null, aToken);
-    }
-
-    /**
-     * Creates a type for name and token.
-     */
-    public static JType createTypeForNameAndToken(String aName, ParseToken aToken)
-    {
-        return createTypeForTypeAndNameAndToken(null, aName, aToken);
-    }
-
-    /**
-     * Creates a type for name and token.
-     */
-    private static JType createTypeForTypeAndNameAndToken(JavaType aType, String aName, ParseToken aToken)
-    {
         JType type = new JType();
         type._startToken = type._endToken = aToken;
-        if (aType != null) {
-            type._javaType = aType;
-            type._primitive = aType.isPrimitive();
-            aName = aType.getName();
-        }
+        type._javaType = aType;
+        type._primitive = aType.isPrimitive();
 
         // Create/add ids for name
-        String[] idStrings = aName.split("\\.");
+        String typeName = aType.getName();
+        String[] idStrings = typeName.split("\\.");
         for (String idStr : idStrings) {
             JExprId id = new JExprId(idStr);
             id._startToken = id._endToken = aToken;
             type.addId(id);
         }
 
-        // Return
         return type;
     }
 }

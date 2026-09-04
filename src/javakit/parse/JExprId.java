@@ -88,7 +88,7 @@ public class JExprId extends JExpr {
     {
         // If parent is MethodRef, forward on - I don't like this, but don't want to confuse id with vars of same name
         if (getParent() instanceof JExprMethodRef methodRefExpr && methodRefExpr.getMethodId() == this)
-            return getDeclForChildId(this);
+            return ResolveDeclForChildId.getDeclForChildId(this);
 
         // Look for a master node, if this id is just part of another node or a var reference
         JNode declNode = getDeclNodeForId();
@@ -96,7 +96,7 @@ public class JExprId extends JExpr {
             return declNode.getDecl();
 
         // Forward to parents
-        return getDeclForChildId(this);
+        return ResolveDeclForChildId.getDeclForChildId(this);
     }
 
     /**

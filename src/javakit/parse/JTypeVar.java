@@ -121,20 +121,6 @@ public class JTypeVar extends JNode implements WithId {
     protected JavaDecl getDeclImpl()  { return getTypeVariable(); }
 
     /**
-     * Override to handle ID and nested case, e.g.: T extends Class <? super T>
-     */
-    @Override
-    protected JavaDecl getDeclForChildId(JExprId childId)
-    {
-        // Handle nested case, e.g.: T extends Class <? super T>
-        if (childId.getName().equals(getName()))
-            return getJavaClassForClass(Object.class);
-
-        // Do normal version
-        return super.getDeclForChildId(childId);
-    }
-
-    /**
      * Override - from old getDeclForChildNode(). Is it really needed ???
      */
     @Override

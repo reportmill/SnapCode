@@ -199,32 +199,6 @@ public class JFile extends JNode {
     }
 
     /**
-     * Override to check for package name, import class name, static import class member.
-     */
-    @Override
-    protected JavaDecl getDeclForChildId(JExprId childId)
-    {
-        // See if it's a known class name using imports
-        String idName = childId.getName();
-        String className = getImportClassName(idName);
-        JavaClass javaClass = className != null ? getJavaClassForName(className) : null;
-        if (javaClass != null)
-            return javaClass;
-
-        // See if it's a known static import class member
-        JavaMember field = getStaticImportMemberForNameAndParamTypes(idName, null);
-        if (field != null)
-            return field;
-
-        // If name is known package name, return package
-        if (isKnownPackageName(idName))
-            return getJavaPackageForName(idName);
-
-        // Do normal version
-        return super.getDeclForChildId(childId);
-    }
-
-    /**
      * Override - from old getDeclForChildNode(). Is it really needed ???
      */
     @Override

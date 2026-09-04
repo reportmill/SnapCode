@@ -205,7 +205,7 @@ public class JExprMethodRef extends JExprLambdaBase {
     /**
      * Returns the prefix expression eval class.
      */
-    private JavaClass getPrefixExprClass()
+    public JavaClass getPrefixExprClass()
     {
         JavaType prefixEvalType = _prefixExpr != null ? _prefixExpr.getEvalType() : null;
         return prefixEvalType != null ? prefixEvalType.getEvalClass() : null;
@@ -238,28 +238,6 @@ public class JExprMethodRef extends JExprLambdaBase {
 
         // Return not found
         return null;
-    }
-
-    /**
-     * Returns the JavaDecl most closely associated with given child JExprId node.
-     */
-    protected JavaDecl getDeclForChildId(JExprId childId)
-    {
-        // If given id is MethodId, return method
-        if (childId == _methodId) {
-
-            // If array creation, return prefix expr class
-            if (getType() == Type.ArrayInit)
-                return getPrefixExprClass();
-
-            // If method ref is for method or constructor, return it
-            JavaExecutable methodOrConstr = getExecutable();
-            if (methodOrConstr != null)
-                return methodOrConstr;
-        }
-
-        // Do normal version
-        return super.getDeclForChildId(childId);
     }
 
     /**

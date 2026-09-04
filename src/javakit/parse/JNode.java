@@ -96,17 +96,6 @@ public class JNode {
     }
 
     /**
-     * Returns the JavaDecl most closely associated with given child JExprId node.
-     */
-    protected JavaDecl getDeclForChildId(JExprId childId)
-    {
-        // Forward to parent
-        if (_parent != null)
-            return _parent.getDeclForChildId(childId);
-        return null;
-    }
-
-    /**
      * Returns the JavaDecl most closely associated with given child JType node.
      */
     protected JavaType getJavaTypeForChildType(JType childType)

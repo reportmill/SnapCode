@@ -13,17 +13,17 @@ public interface WithStmts {
     List<JStmt> getStatements();
 
     /**
-     * Returns VarDecls encapsulated by WithStmts (JStmtVarDecl.VarDecls).
+     * Looks for given child type in given statements.
      */
-    static JavaClass getJavaClassForChildTypeOrId(WithStmts withStmts, JNode typeOrIdNode)
+    static JavaClass getJavaClassForChildType(WithStmts withStmts, JType childType)
     {
         List<JStmt> statements = withStmts.getStatements();
-        String typeName = typeOrIdNode.getName();
+        String typeName = childType.getName();
 
         for (JStmt stmt : statements) {
 
             // If statement decl beyond type decl, just return
-            if (stmt.getStartCharIndex() >= typeOrIdNode.getStartCharIndex())
+            if (stmt.getStartCharIndex() >= childType.getStartCharIndex())
                 break;
 
             // If statement is class decl, return class if match

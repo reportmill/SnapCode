@@ -26,7 +26,7 @@ public class JImportDecl extends JNode {
     protected boolean _used;
 
     // The list of child class names found by this import, if inclusive
-    private Set<String> _found = Collections.EMPTY_SET;
+    private Set<String> _foundClassNames = Collections.EMPTY_SET;
 
     /**
      * Constructor.
@@ -278,30 +278,16 @@ public class JImportDecl extends JNode {
     /**
      * Returns the list of child class names found by this import (if inclusive).
      */
-    public Set<String> getFoundClassNames()  { return _found; }
+    public Set<String> getFoundClassNames()  { return _foundClassNames; }
 
     /**
      * Adds a child class name to list of those
      */
     protected void addFoundClassName(String aName)
     {
-        if (_found == Collections.EMPTY_SET)
-            _found = new HashSet<>();
-        _found.add(aName);
-    }
-
-    /**
-     * Override to check for package name, import class name, static import class member.
-     */
-    @Override
-    protected JavaDecl getDeclForChildId(JExprId childId)
-    {
-        if (isModule()) {
-            Resolver resolver = getResolver();
-            return resolver != null ? resolver.getJavaModuleForName(childId.getName()) : null;
-        }
-
-        return getJavaPackageForName(childId.getName());
+        if (_foundClassNames == Collections.EMPTY_SET)
+            _foundClassNames = new HashSet<>();
+        _foundClassNames.add(aName);
     }
 
     /**

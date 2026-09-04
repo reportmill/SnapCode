@@ -90,18 +90,4 @@ public class JStmtConstrCall extends JStmt implements WithArgs {
         // Return not found
         return null;
     }
-
-    /**
-     * Tries to resolve the method declaration for this node.
-     */
-    @Override
-    protected JavaDecl getDeclForChildId(JExprId childId)
-    {
-        // Check IdList
-        if (childId.getParent() == this && ArrayUtils.containsId(_idList, childId))
-            return getDecl();
-
-        // Do normal version
-        return super.getDeclForChildId(childId);
-    }
 }

@@ -59,19 +59,4 @@ public class JStmtLabeled extends JStmt implements WithBodyStmt {
         // Return
         return localVar;
     }
-
-    /**
-     * Override to handle label variable declaration.
-     */
-    @Override
-    protected JavaDecl getDeclForChildId(JExprId childId)
-    {
-        // Check label name
-        String name = childId.getName();
-        if (Objects.equals(name, getName()))
-            return getDecl();
-
-        // Do normal version
-        return super.getDeclForChildId(childId);
-    }
 }
