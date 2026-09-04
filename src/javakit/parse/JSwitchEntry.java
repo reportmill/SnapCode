@@ -1,10 +1,6 @@
 package javakit.parse;
-import javakit.resolver.JavaClass;
-import javakit.resolver.JavaDecl;
-import javakit.resolver.JavaField;
 import javakit.resolver.JavaType;
 import snap.util.ArrayUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -178,50 +174,5 @@ public class JSwitchEntry extends JNode implements WithStmts, WithBlockStmt, Wit
 
         // Return not defined
         return null;
-    }
-
-    /**
-     * Returns the decl for the case expression.
-     */
-    public JavaDecl getDeclForCaseLabel(JExpr caseLabel)
-    {
-        JNode switchStmt = getParent();
-        JExpr switchExpr = null;
-        if (switchStmt instanceof JStmtSwitch)
-            switchExpr = ((JStmtSwitch) switchStmt).getSelector();
-        else if (switchStmt instanceof JExprSwitch)
-            switchExpr = ((JExprSwitch) switchStmt).getSelector();
-
-        // Get Switch expression type
-        JavaType switchExprType = switchExpr != null ? switchExpr.getEvalType() : null;
-        if (switchExprType == null)
-            return null;
-
-        // Handle enum switch
-        if (switchExprType.isEnum()) {
-            JavaClass enumClass = (JavaClass) switchExprType;
-            String enumName = caseLabel.getName();
-            JavaField enumConst = enumClass.getDeclaredFieldForName(enumName);
-            if (enumConst != null)
-                return enumConst;
-        }
-
-        // Return switch expr decl
-        return switchExprType;
-    }
-
-    /**
-     * Override to try to resolve given type from any preceding ClassDecl statements.
-     */
-    @Override
-    protected JavaType getJavaTypeForChildType(JType childType)
-    {
-        // If any previous statements are class decl statements that declare type, return class
-        JavaClass javaClass = WithStmts.getJavaClassForChildType(this, childType);
-        if (javaClass != null)
-            return javaClass;
-
-        // Do normal version
-        return super.getJavaTypeForChildType(childType);
     }
 }

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Utility to resolve an id to declaration.
+ * Utility methods to resolve an id to declaration.
  */
 class ResolveDeclForChildId {
 
@@ -121,7 +121,7 @@ class ResolveDeclForChildId {
 
                     // If node is case label id, try to evaluate against Switch expression enum type
                     if (switchEntry.getLabels().contains(childId))
-                        return switchEntry.getDeclForCaseLabel(childId);
+                        return getJavaDeclForCaseLabelId(childId);
 
                     // If any previous statements are class decl statements that declare type, return class
                     JavaClass javaClass = getJavaClassForStatementsAndChildId(switchEntry, childId);
@@ -191,5 +191,30 @@ class ResolveDeclForChildId {
 
         // Return not found
         return null;
+    }
+
+    /**
+     * Returns the decl for the case expression.
+     */
+    private static JavaDecl getJavaDeclForCaseLabelId(JExprId caseLabelId)
+    {
+        JExprSwitch switchStmt = caseLabelId.getParent(JExprSwitch.class);
+        JExpr switchExpr = switchStmt.getSelector();
+
+        // Get Switch expression type
+        JavaType switchExprType = switchExpr != null ? switchExpr.getEvalType() : null;
+        if (switchExprType == null)
+            return null;
+
+        // Handle enum switch
+        if (switchExprType.isEnum()) {
+            JavaClass enumClass = (JavaClass) switchExprType;
+            String enumName = caseLabelId.getName();
+            JavaField enumConst = enumClass.getDeclaredFieldForName(enumName);
+            if (enumConst != null)
+                return enumConst;
+        }
+
+        return switchExprType;
     }
 }

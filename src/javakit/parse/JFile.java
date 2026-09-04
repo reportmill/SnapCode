@@ -135,7 +135,7 @@ public class JFile extends JNode {
         // Get index to insert after last import (JeplParser can add extra imports after Class decl added)
         int index = getChildCount();
         if (!_importDecls.isEmpty() && !_classDecls.isEmpty()) {
-            JImportDecl lastImportDecl = _importDecls.get(_importDecls.size() - 1);
+            JImportDecl lastImportDecl = _importDecls.getLast();
             index = _children.indexOf(lastImportDecl) + 1;
         }
 
@@ -146,7 +146,7 @@ public class JFile extends JNode {
     /**
      * Returns the JClassDecl for the file.
      */
-    public JClassDecl getClassDecl()  { return !_classDecls.isEmpty() ? _classDecls.get(0) : null; }
+    public JClassDecl getClassDecl()  { return !_classDecls.isEmpty() ? _classDecls.getFirst() : null; }
 
     /**
      * Returns the JClassDecls for the file.
@@ -196,30 +196,6 @@ public class JFile extends JNode {
     {
         JClassDecl classDecl = getClassDecl();
         return classDecl != null ? classDecl.getJavaClass() : null;
-    }
-
-    /**
-     * Override - from old getDeclForChildNode(). Is it really needed ???
-     */
-    @Override
-    protected JavaType getJavaTypeForChildType(JType childType)
-    {
-        // See if it's a known class name using imports
-        String typeName = childType.getName();
-        String className = getImportClassName(typeName);
-        JavaClass javaClass = className != null ? getJavaClassForName(className) : null;
-        if (javaClass != null)
-            return javaClass;
-
-        // These were from legacy getDeclForChildIdOrType() - I think they are bogus and should go
-        if (isKnownPackageName(typeName)) //return getJavaPackageForName(typeName);
-            System.err.println("JFile.getJavaTypeForChildType: Shouldn't find package: " + typeName);
-        JavaMember field = getStaticImportMemberForNameAndParamTypes(typeName, null);
-        if (field != null) //return field;
-            System.err.println("JFile.getJavaTypeForChildType: Shouldn't find member: " + typeName);
-
-        // Do normal version
-        return super.getJavaTypeForChildType(childType);
     }
 
     /**

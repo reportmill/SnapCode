@@ -459,32 +459,6 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     protected JavaClass getDeclImpl()  { return getJavaClass(); }
 
     /**
-     * Returns the JavaDecl most closely associated with given child JType node.
-     */
-    @Override
-    protected JavaType getJavaTypeForChildType(JType childType)
-    {
-        // Look for JTypeVar for given type name
-        String typeName = childType.getName();
-        JTypeVar typeVar = getTypeParamDeclForName(typeName);
-        if (typeVar != null)
-            return typeVar.getTypeVariable();
-
-        // See if this class matches name or has inner class of name
-        JavaClass thisClass = getEvalClass();
-        if (thisClass != null) {
-            if (thisClass.getSimpleName().equals(typeName))
-                return thisClass;
-            JavaClass innerClass = thisClass.getDeclaredClassForName(typeName);
-            if (innerClass != null)
-                return innerClass;
-        }
-
-        // Do normal version
-        return super.getJavaTypeForChildType(childType);
-    }
-
-    /**
      * Returns VarDecls encapsulated by class (JFieldDecl VarDecls).
      */
     @Override

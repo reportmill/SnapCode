@@ -200,7 +200,7 @@ public class JType extends JNode {
         }
 
         // Try to resolve from parents (maybe import class, inner class, method/class type arg, etc.)
-        return getJavaTypeForChildType(this);
+        return ResolveDeclForChildType.getJavaTypeForChildType(this);
     }
 
     /**

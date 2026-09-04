@@ -151,22 +151,6 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
     }
 
     /**
-     * Override to resolve method/constructor type vars.
-     */
-    @Override
-    protected JavaType getJavaTypeForChildType(JType childType)
-    {
-        // Handle TypeVar name: return typevar decl
-        String typeName = childType.getName();
-        JTypeVar typeVarDecl = getTypeParamDeclForName(typeName);
-        if (typeVarDecl != null)
-            return typeVarDecl.getTypeVariable();
-
-        // Do normal version
-        return super.getJavaTypeForChildType(childType);
-    }
-
-    /**
      * Override to return errors for ReturnValue, Parameters, ThrowsList and TypeVars.
      */
     @Override
