@@ -128,6 +128,11 @@ public class JType extends JNode {
     }
 
     /**
+     * Returns whether type is wildcard type.
+     */
+    public boolean isWildcardType()  { return getName().equals("?"); }
+
+    /**
      * Returns the wildcard bounds.
      */
     public JType getWildcardBounds()  { return _wildcardBounds; }
@@ -179,20 +184,14 @@ public class JType extends JNode {
             return getDeclForVar();
 
         // Handle wildcard
-        String baseName = getName();
-        if (baseName.equals("?"))
+        if (isWildcardType())
             return getWildcardBoundsType();
 
-        // Try to find class directly
-        JavaType classForBaseName = getJavaClassForName(baseName);
-        if (classForBaseName != null)
-            return classForBaseName;
-
-        // If parent is type, see if name is nested TypeArg from class extends/implements (e.g.: public class XXX extends List<E>)
-        JNode parent = getParent();
-        if (parent instanceof JType parentType && !(parent instanceof JTypeUnion)) {
+        // If parent is parameterized type, see if name is nested TypeArg from class extends/implements (e.g.: public class XXX extends List<E>)
+        if (getParent() instanceof JType parentType && parentType._typeArgs != EMPTY_TYPES_ARRAY) {
             JavaClass baseClass = parentType.getBaseClass();
             if (baseClass != null) {
+                String baseName = getName();
                 JavaTypeVariable typeVarType = baseClass.getTypeParameterForName(baseName);
                 if (typeVarType != null)
                     return typeVarType;
@@ -361,12 +360,11 @@ public class JType extends JNode {
             return NodeError.NO_ERRORS;
 
         // Let compiler handle 'var' errors
-        String className = getName();
-        if ("var".equals(className))
+        if (isVarType())
             return NodeError.NO_ERRORS;
 
         // Return
-        return NodeError.newErrorArray(this, "Can't resolve type: " + className);
+        return NodeError.newErrorArray(this, "Can't resolve type: " + getName());
     }
 
     /**
