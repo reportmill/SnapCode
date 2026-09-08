@@ -576,8 +576,8 @@ public class JavaParserExpr extends Parser {
                 case "PrimaryPrefix" -> _part = aNode.getCustomNode(JExpr.class);
 
                 case "PrimarySuffix" -> {
-                    JExpr expr = aNode.getCustomNode(JExpr.class);
-                    _part = joinExpressions(_part, expr);
+                    JExpr suffixExpr = aNode.getCustomNode(JExpr.class);
+                    _part = joinExpressions(_part, suffixExpr);
                 }
             }
         }
@@ -588,12 +588,6 @@ public class JavaParserExpr extends Parser {
         private static JExpr joinExpressions(JExpr prefixExpr, JExpr suffixExpr)
         {
             switch (suffixExpr) {
-
-                // Handle DotExpr: Set scope expression
-                case JExprDot dotExpr -> {
-                    dotExpr.setScopeExpr(prefixExpr);
-                    return suffixExpr;
-                }
 
                 // Handle method call: Set scope expression
                 case JExprMethodCall methodCallExpr -> {
@@ -607,10 +601,8 @@ public class JavaParserExpr extends Parser {
                     return methodRef;
                 }
 
-                // If ArrayIndex with missing ArrayExpr, set and return
+                // Handle ArrayIndex: Set ArrayExpr
                 case JExprArrayIndex arrayIndexExpr -> {
-                    if (arrayIndexExpr.getArrayExpr() != null)
-                        System.err.println("JExpr.join: ArrayIndex.ArrayExpr not null");
                     arrayIndexExpr.setArrayExpr(prefixExpr);
                     return arrayIndexExpr;
                 }
@@ -675,7 +667,7 @@ public class JavaParserExpr extends Parser {
                     parenExpr.setExpr(innerExpr);
                 }
 
-                case "AllocExpr" -> _part = aNode.getCustomNode(JExpr.class);
+                case "AllocExpr" -> _part = aNode.getCustomNode(JExprAlloc.class);
 
                 // Handle ResultType "." "class"
                 case "class" -> {
@@ -727,24 +719,12 @@ public class JavaParserExpr extends Parser {
         {
             switch (anId) {
 
-                // Handle [ "." "super" ] and [ "." "this" ]
-                case "super", "this" -> {
-                    JExpr thisExpr = new JExprId(aNode);
-                    if (_part instanceof JExprDot dotExpr)
-                        dotExpr.setExpr(thisExpr);
-                    else System.err.println("JavaParserExpr.PrimarySuffixHandler: Unexpected dot expr: " + _part);
-                }
+                case "super", "this" -> _part = new JExprId(aNode);
 
-                // Handle AllocExpr
-                case "AllocExpr" -> _part = aNode.getCustomNode(JExpr.class);
+                case "AllocExpr" -> _part = aNode.getCustomNode(JExprAlloc.class);
 
-                // Handle MemberSelector: TypeArgs Identifier (currently handed below without TypeArgs)
-                //else if(anId=="TypeArgs") _part = aNode.getCustomNode(JavaExpression.class);
-
-                // Handle "[" Expression
+                // Handle array index: "[" Expression "]"
                 case "[" -> _part = new JExprArrayIndex(null, null);
-
-                // Handle "[" Expression "]"
                 case "Expression" -> {
                     JExpr arrayIndexExpr = aNode.getCustomNode(JExpr.class);
                     if (_part instanceof JExprArrayIndex)
@@ -755,9 +735,7 @@ public class JavaParserExpr extends Parser {
                 // Handle ("." | "::") Identifier
                 case "Identifier" -> {
                     JExprId id = aNode.getCustomNode(JExprId.class);
-                    if (_part instanceof JExprDot dotExpr)
-                        dotExpr.setExpr(id);
-                    else if (_part instanceof JExprMethodRef methodRefExpr)
+                    if (_part instanceof JExprMethodRef methodRefExpr)
                         methodRefExpr.setMethodId(id);
                     else _part = id;
                 }
@@ -777,6 +755,9 @@ public class JavaParserExpr extends Parser {
                         _part = new JExprMethodCall(idExpr, argExprs);
                     else System.err.println("JavaParserExpr.PrimarySuffixHandler: Method call missing id");
                 }
+
+                // Handle TypeArgs: e.g.: List<String> list = Collections.<String>emptyList();
+                //case "TypeArgs" -> _part = aNode.getCustomNode(JExpr.class);
             }
         }
 
