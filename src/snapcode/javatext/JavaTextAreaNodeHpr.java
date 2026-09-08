@@ -118,12 +118,10 @@ public class JavaTextAreaNodeHpr {
      */
     public int getCharIndexAfterNode(JNode aNode)
     {
-        int nodeEndCharIndex = aNode.getEndCharIndex();
-        JNode nodeParent = aNode.getParent();
-        JExprDot dotExpr = nodeParent instanceof JExprDot ? (JExprDot) nodeParent : null;
-        if (dotExpr != null)
+        if (aNode.getParent() instanceof JExprDot dotExpr)
             return dotExpr.getExpr().getEndCharIndex();
 
+        int nodeEndCharIndex = aNode.getEndCharIndex();
         TextLine textLine = _javaTextArea.getLineForCharIndex(nodeEndCharIndex);
         return textLine.getEndCharIndex();
     }

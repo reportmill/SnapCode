@@ -589,15 +589,21 @@ public class JavaParserExpr extends Parser {
         {
             switch (suffixExpr) {
 
-                // Handle DotExpr: Just set prefix
+                // Handle DotExpr: Set scope expression
                 case JExprDot dotExpr -> {
-                    dotExpr.setPrefixExpr(prefixExpr);
+                    dotExpr.setScopeExpr(prefixExpr);
                     return suffixExpr;
                 }
 
-                // Handle MethodRef: Set prefix expression
+                // Handle method call: Set scope expression
+                case JExprMethodCall methodCallExpr -> {
+                    methodCallExpr.setScopeExpr(prefixExpr);
+                    return methodCallExpr;
+                }
+
+                // Handle MethodRef: Set scope expression
                 case JExprMethodRef methodRef -> {
-                    methodRef.setPrefixExpr(prefixExpr);
+                    methodRef.setScopeExpr(prefixExpr);
                     return methodRef;
                 }
 
@@ -609,7 +615,7 @@ public class JavaParserExpr extends Parser {
                     return arrayIndexExpr;
                 }
 
-                // Handle MethodCall, field, ...
+                // Handle field, ...
                 default -> { return new JExprDot(prefixExpr, suffixExpr); }
             }
         }
@@ -695,11 +701,8 @@ public class JavaParserExpr extends Parser {
         {
             if (_part == null)
                 _part = anExpr;
-            else if (_part instanceof JExprDot dotExpr) {
-                if (dotExpr.getExpr() == null)
-                    dotExpr.setExpr(anExpr);
-                else System.err.println("JavaParserExpr.PrimaryPrefixHandler.addExpr: Can't add to full dot expr: " + dotExpr.getString() + " + " + anExpr.getString());
-            }
+            else if (_part instanceof JExprDot dotExpr && dotExpr.getExpr() == null)
+                dotExpr.setExpr(anExpr);
             else System.err.println("JavaParserExpr.PrimaryPrefixHandler.addExpr: Can't add to expr: " + _part.getString());
         }
 

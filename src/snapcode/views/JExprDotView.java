@@ -24,10 +24,10 @@ public class JExprDotView<JNODE extends JExprDot> extends JExprView<JNODE> {
     {
         JExprDot dotExpr = getJNode();
 
-        JExpr prefixExpr = dotExpr.getPrefixExpr();
-        JNodeView<?> prefixView = JNodeView.createNodeViewForNode(prefixExpr);
-        prefixView.setGrowWidth(true);
-        addChild(prefixView);
+        JExpr scopeExpr = dotExpr.getScopeExpr();
+        JNodeView<?> scopeView = JNodeView.createNodeViewForNode(scopeExpr);
+        scopeView.setGrowWidth(true);
+        addChild(scopeView);
 
         // Create dot label
         Label dotLabel = JNodeViewUtils.createLabel(".");

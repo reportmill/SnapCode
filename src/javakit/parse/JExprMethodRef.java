@@ -11,8 +11,8 @@ import java.util.Objects;
  */
 public class JExprMethodRef extends JExprLambdaBase {
 
-    // The prefix expression
-    private JExpr _prefixExpr;
+    // The scope expression
+    private JExpr _scopeExpr;
 
     // The method name identifier
     private JExprId _methodId;
@@ -33,25 +33,24 @@ public class JExprMethodRef extends JExprLambdaBase {
     /**
      * Creates a new Method Reference expression for expression and id.
      */
-    public JExprMethodRef(JExpr prefixExpr, JExprId anId)
+    public JExprMethodRef(JExpr scopeExpr, JExprId anId)
     {
-        setPrefixExpr(prefixExpr);
+        setScopeExpr(scopeExpr);
         setMethodId(anId);
     }
 
     /**
-     * Returns the prefix expression.
+     * Returns the scope expression.
      */
-    public JExpr getPrefixExpr()  { return _prefixExpr; }
+    @Override
+    public JExpr getScopeExpr()  { return _scopeExpr; }
 
     /**
-     * Sets the prefix expression.
+     * Sets the scope expression.
      */
-    public void setPrefixExpr(JExpr anExpr)
+    public void setScopeExpr(JExpr anExpr)
     {
-        if (_prefixExpr == null)
-            addChild(_prefixExpr = anExpr, 0);
-        else replaceChild(_prefixExpr, _prefixExpr = anExpr);
+        addChild(_scopeExpr = anExpr, 0);
     }
 
     /**
@@ -83,9 +82,9 @@ public class JExprMethodRef extends JExprLambdaBase {
     {
         // If something::new, return type Constructor or ArrayInit
         if (Objects.equals(getMethodName(), "new")) {
-            if (_prefixExpr instanceof JExprType typeExpr) {
-                JType prefixType = typeExpr.getType();
-                if (prefixType != null && prefixType.isArrayType())
+            if (_scopeExpr instanceof JExprType typeExpr) {
+                JType scopeType = typeExpr.getType();
+                if (scopeType != null && scopeType.isArrayType())
                     return Type.ArrayInit;
             }
             return Type.Constructor;
@@ -96,7 +95,7 @@ public class JExprMethodRef extends JExprLambdaBase {
             return Type.Unknown;
         if (method.getParameterCount() == 0)
             return Type.InstanceMethod;
-        if (_prefixExpr.isClassNameLiteral())
+        if (_scopeExpr.isClassNameLiteral())
             return Type.StaticMethod;
         return Type.HelperMethod;
     }
@@ -125,11 +124,11 @@ public class JExprMethodRef extends JExprLambdaBase {
         if (methodName == null)
             return null;
 
-        // Get prefix expr eval class
-        JExpr prefixExpr = _prefixExpr;
-        JavaType prefixEvalType = prefixExpr != null ? prefixExpr.getEvalType() : null;
-        JavaClass prefixClass = prefixEvalType != null ? prefixEvalType.getEvalClass() : null;
-        if (prefixClass == null)
+        // Get scope expr eval class
+        JExpr scopeExpr = _scopeExpr;
+        JavaType scopeEvalType = scopeExpr != null ? scopeExpr.getEvalType() : null;
+        JavaClass scopeClass = scopeEvalType != null ? scopeEvalType.getEvalClass() : null;
+        if (scopeClass == null)
             return null;
 
         // Get parameter types from lambda method and look for method
@@ -138,11 +137,11 @@ public class JExprMethodRef extends JExprLambdaBase {
         if (paramClasses == null)
             return null;
 
-        // If one parameter with same class as prefix expression class, search for instance method with no args
+        // If one parameter with same class as scope expression class, search for instance method with no args
         if (paramClasses.length == 1) {
             JavaClass paramClass = paramClasses[0];
-            if (prefixClass.isAssignableFrom(paramClass)) {
-                JavaMethod instanceMethod = JavaClassUtils.getCompatibleMethod(prefixClass, methodName, new JavaClass[0], false);
+            if (scopeClass.isAssignableFrom(paramClass)) {
+                JavaMethod instanceMethod = JavaClassUtils.getCompatibleMethod(scopeClass, methodName, new JavaClass[0], false);
                 if (instanceMethod != null && !instanceMethod.isStatic())
                     return instanceMethod;
             }
@@ -154,10 +153,10 @@ public class JExprMethodRef extends JExprLambdaBase {
             return null;
 
         // Get whether scope expression is class name literal
-        boolean staticOnly = prefixExpr.isClassNameLiteral();
+        boolean staticOnly = scopeExpr.isClassNameLiteral();
 
         // Search for static or helper method for name and arg types
-        JavaMethod helperMethod = JavaClassUtils.getCompatibleMethod(prefixClass, methodName, paramClasses, staticOnly);
+        JavaMethod helperMethod = JavaClassUtils.getCompatibleMethod(scopeClass, methodName, paramClasses, staticOnly);
         if (helperMethod != null)
             return helperMethod;
 
@@ -184,31 +183,31 @@ public class JExprMethodRef extends JExprLambdaBase {
         if (!Objects.equals(methodName, "new"))
             return null;
 
-        // Get prefix expr eval class
-        JavaClass prefixClass = getPrefixExprClass();
-        if (prefixClass == null || prefixClass.isArray())
+        // Get scope expr eval class
+        JavaClass scopeClass = getScopeExprClass();
+        if (scopeClass == null || scopeClass.isArray())
             return null;
 
         // Get parameter types from lambda method and look for constructor
         JavaType[] paramTypes = getLambdaMethodParameterTypesResolved();
         JavaClass[] paramClasses = paramTypes != null ? ArrayUtils.map(paramTypes, type -> type.getEvalClass(), JavaClass.class) : null;
         if (paramClasses != null) {
-            JavaConstructor constructor = prefixClass.getDeclaredConstructorForClasses(paramClasses);
+            JavaConstructor constructor = scopeClass.getDeclaredConstructorForClasses(paramClasses);
             if (constructor != null)
                 return constructor;
         }
 
         // Return default constructor
-        return prefixClass.getDeclaredConstructorForClasses(new JavaClass[0]);
+        return scopeClass.getDeclaredConstructorForClasses(new JavaClass[0]);
     }
 
     /**
-     * Returns the prefix expression eval class.
+     * Returns the scope expression eval class.
      */
-    public JavaClass getPrefixExprClass()
+    public JavaClass getScopeExprClass()
     {
-        JavaType prefixEvalType = _prefixExpr != null ? _prefixExpr.getEvalType() : null;
-        return prefixEvalType != null ? prefixEvalType.getEvalClass() : null;
+        JavaType scopeEvalType = _scopeExpr != null ? _scopeExpr.getEvalType() : null;
+        return scopeEvalType != null ? scopeEvalType.getEvalClass() : null;
     }
 
     /**
@@ -222,14 +221,14 @@ public class JExprMethodRef extends JExprLambdaBase {
     }
 
     /**
-     * Override to get from executable or prefix array class.
+     * Override to get from executable or scope array class.
      */
     @Override
     protected JavaType getLambdaReturnType()
     {
-        // If array creation, return prefix expr class
+        // If array creation, return scope expr class
         if (getType() == Type.ArrayInit)
-            return getPrefixExprClass();
+            return getScopeExprClass();
 
         // Return method return type
         JavaExecutable methodRefMethod = getExecutable();
@@ -246,10 +245,10 @@ public class JExprMethodRef extends JExprLambdaBase {
     @Override
     protected NodeError[] getErrorsImpl()
     {
-        // If prefix expression has errors, return them
-        NodeError[] prefixExprErrors = _prefixExpr.getErrors();
-        if (prefixExprErrors.length > 0)
-            return prefixExprErrors;
+        // If scope expression has errors, return them
+        NodeError[] scopeExprErrors = _scopeExpr.getErrors();
+        if (scopeExprErrors.length > 0)
+            return scopeExprErrors;
 
         // If no MethodId expression has errors, return them
         if (_methodId == null)

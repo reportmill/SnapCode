@@ -19,8 +19,8 @@ public class ExprEval {
         JExpr expr = javaParser.parseExpression(anExpr);
 
         // Evaluate expression
-        ObjectReference oref = anApp.thisObject();
-        try { return evalExpr(anApp, oref, expr); }
+        ObjectReference thisObj = anApp.thisObject();
+        try { return evalExpr(anApp, thisObj, expr); }
         catch (Exception e) { return e; }
     }
 
@@ -29,19 +29,15 @@ public class ExprEval {
      */
     public static Value evalExpr(DebugApp anApp, ObjectReference anOR, JExpr anExpr) throws Exception
     {
-        if (anExpr instanceof JExprLiteral)
-            return evalLiteral(anApp, (JExprLiteral) anExpr);
-        if (anExpr instanceof JExprId)
-            return evalIdentifier(anApp, anOR, (JExprId) anExpr);
-        if (anExpr instanceof JExprMethodCall)
-            return evalMethod(anApp, anOR, (JExprMethodCall) anExpr);
-        if (anExpr instanceof JExprMath)
-            return evalMathExpr(anApp, anOR, (JExprMath) anExpr);
-        if (anExpr instanceof JExprArrayIndex)
-            return evalArrayIndex(anApp, anOR, (JExprArrayIndex) anExpr);
-        if (anExpr instanceof JExprDot)
-            return evalExprChain(anApp, anOR, (JExprDot) anExpr);
-        return null;
+        return switch (anExpr) {
+            case JExprLiteral literalExpr -> evalLiteral(anApp, literalExpr);
+            case JExprId idExpr -> evalIdentifier(anApp, anOR, idExpr);
+            case JExprMethodCall methodCall -> evalMethodCall(anApp, anOR, methodCall);
+            case JExprMath mathExpr -> evalMathExpr(anApp, anOR, mathExpr);
+            case JExprArrayIndex arrayIndexExpr -> evalArrayIndex(anApp, anOR, arrayIndexExpr);
+            case JExprDot dotExpr -> evalDotExpr(anApp, anOR, dotExpr);
+            case null, default -> null;
+        };
     }
 
     /**
@@ -92,13 +88,25 @@ public class ExprEval {
     /**
      * Evaluate JMethodCall.
      */
-    private static Value evalMethod(DebugApp anApp, ObjectReference anOR, JExprMethodCall anExpr) throws Exception
+    private static Value evalMethodCall(DebugApp anApp, ObjectReference anOR, JExprMethodCall methodCall) throws Exception
     {
         ObjectReference thisObj = anApp.thisObject();
+
+        // Get evaluated args
         List<Value> args = new ArrayList<>();
-        for (JExpr arg : anExpr.getArgs())
+        for (JExpr arg : methodCall.getArgs())
             args.add(evalExpr(anApp, thisObj, arg));
-        return anApp.invokeMethod(anOR, anExpr.getName(), args);
+
+        // Get scope object
+        ObjectReference scopeObj = anOR;
+        JExpr scopeExpr = methodCall.getScopeExpr();
+        if (scopeExpr != null) {
+            Object scopeVal = evalExpr(anApp, thisObj, scopeExpr);
+            if (scopeVal instanceof ObjectReference)
+                scopeObj = (ObjectReference) scopeVal;
+        }
+
+        return anApp.invokeMethod(scopeObj, methodCall.getName(), args);
     }
 
     /**
@@ -125,32 +133,32 @@ public class ExprEval {
     }
 
     /**
-     * Evaluate JExprChain.
+     * Evaluate JExprDot.
      */
-    static Value evalExprChain(DebugApp anApp, ObjectReference anOR, JExprDot anExpr) throws Exception
+    static Value evalDotExpr(DebugApp anApp, ObjectReference anOR, JExprDot dotExpr) throws Exception
     {
         ObjectReference or = anOR;
 
-        // Eval prefix
-        JExpr prefixExpr = anExpr.getPrefixExpr();
-        Object prefixVal = evalExpr(anApp, or, prefixExpr);
-        if (prefixVal instanceof ObjectReference)
-            or = (ObjectReference) prefixVal;
+        // Eval scope
+        JExpr scopeExpr = dotExpr.getScopeExpr();
+        Object scopeVal = evalExpr(anApp, or, scopeExpr);
+        if (scopeVal instanceof ObjectReference)
+            or = (ObjectReference) scopeVal;
 
         // Eval expression
-        JExpr expr = anExpr.getExpr();
+        JExpr expr = dotExpr.getExpr();
         return evalExpr(anApp, or, expr);
     }
 
     /**
      * Evaluate JExprMath.
      */
-    static Value evalMathExpr(DebugApp anApp, ObjectReference anOR, JExprMath anExpr) throws Exception
+    static Value evalMathExpr(DebugApp anApp, ObjectReference anOR, JExprMath mathExpr) throws Exception
     {
         // Get first value
-        JExprMath.Op op = anExpr.getOp();
-        int opCount = anExpr.getOperandCount();
-        JExpr expr1 = anExpr.getOperand(0);
+        JExprMath.Op op = mathExpr.getOp();
+        int opCount = mathExpr.getOperandCount();
+        JExpr expr1 = mathExpr.getOperand(0);
         Value val1 = evalExpr(anApp, anOR, expr1);
 
         // Handle Unary
@@ -160,25 +168,25 @@ public class ExprEval {
                     boolean val = ((PrimitiveValue) val1).booleanValue();
                     return anApp._vm.mirrorOf(!val);
                 }
-                throw new RuntimeException("Logical Not MathExpr not boolean: " + anExpr);
+                throw new RuntimeException("Logical Not MathExpr not boolean: " + mathExpr);
             }
             if (op == JExprMath.Op.Negate) { // Need to not promote everything to double
                 if (val1.type() instanceof PrimitiveType) {
                     double val = ((PrimitiveValue) val1).doubleValue();
                     return anApp._vm.mirrorOf(-val);
                 }
-                throw new RuntimeException("Numeric Negate MathExpr not numeric: " + anExpr);
+                throw new RuntimeException("Numeric Negate MathExpr not numeric: " + mathExpr);
             }
             else switch (op) {
                 case Not:
-                default: throw new RuntimeException("Operator not supported " + anExpr.getOp());
+                default: throw new RuntimeException("Operator not supported " + mathExpr.getOp());
                 //PreIncrement, PreDecrement, BitComp, PostIncrement, PostDecrement
             }
         }
 
         // Handle Binary
         else if (opCount == 2) {
-            JExpr expr2 = anExpr.getOperand(1);
+            JExpr expr2 = mathExpr.getOperand(1);
             Value val2 = evalExpr(anApp, anOR, expr2);
             // BitOr, BitXOr, BitAnd, InstanceOf, ShiftLeft, ShiftRight, ShiftRightUnsigned,
             return switch (op) {
@@ -189,7 +197,7 @@ public class ExprEval {
                 case Mod -> mod(anApp, val1, val2);
                 case Equal, NotEqual, LessThan, GreaterThan, LessThanOrEqual, GreaterThanOrEqual -> compareNumeric(anApp, val1, val2, op);
                 case Or, And -> compareLogical(anApp, val1, val2, op);
-                default -> throw new RuntimeException("Operator not supported " + anExpr.getOp());
+                default -> throw new RuntimeException("Operator not supported " + mathExpr.getOp());
             };
         }
 
@@ -198,12 +206,12 @@ public class ExprEval {
             if (!(val1 instanceof PrimitiveValue primitiveValue))
                 throw new RuntimeException("Ternary conditional expr not bool: " + expr1);
             boolean result = primitiveValue.booleanValue();
-            JExpr expr = result ? anExpr.getOperand(1) : anExpr.getOperand(2);
+            JExpr expr = result ? mathExpr.getOperand(1) : mathExpr.getOperand(2);
             return evalExpr(anApp, anOR, expr);
         }
 
         // Complain
-        throw new RuntimeException("Invalid MathExpr " + anExpr);
+        throw new RuntimeException("Invalid MathExpr " + mathExpr);
     }
 
     /**

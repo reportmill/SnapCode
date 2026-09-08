@@ -6,8 +6,8 @@ import javakit.resolver.*;
  */
 public class JExprDot extends JExpr {
 
-    // The prefix expression
-    private JExpr _prefixExpr;
+    // The scope expression
+    private JExpr _scopeExpr;
 
     // The primary expression (id or method call)
     private JExpr _expr;
@@ -15,27 +15,28 @@ public class JExprDot extends JExpr {
     /**
      * Constructor.
      */
-    public JExprDot(JExpr prefixExpr, JExpr anExpr)
+    public JExprDot(JExpr scopeExpr, JExpr anExpr)
     {
         super();
-        if (prefixExpr != null)
-            setPrefixExpr(prefixExpr);
+        if (scopeExpr != null)
+            setScopeExpr(scopeExpr);
         if (anExpr != null)
             setExpr(anExpr);
     }
 
     /**
-     * Returns the prefix expression.
+     * Returns the scope expression.
      */
-    public JExpr getPrefixExpr()  { return _prefixExpr; }
+    @Override
+    public JExpr getScopeExpr()  { return _scopeExpr; }
 
     /**
-     * Sets the prefix expression.
+     * Sets the scope expression.
      */
-    public void setPrefixExpr(JExpr anExpr)
+    public void setScopeExpr(JExpr anExpr)
     {
-        _prefixExpr = anExpr;
-        addChild(_prefixExpr, 0);
+        _scopeExpr = anExpr;
+        addChild(_scopeExpr, 0);
     }
 
     /**
@@ -57,13 +58,13 @@ public class JExprDot extends JExpr {
     @Override
     protected String getNameImpl()
     {
-        String prefixName = _prefixExpr != null? _prefixExpr.getName() : "(null)";
+        String scopeName = _scopeExpr != null? _scopeExpr.getName() : "(null)";
         String exprName = _expr != null ? _expr.getName() : "(null)";
-        return prefixName + '.' + exprName;
+        return scopeName + '.' + exprName;
     }
 
     /**
-     * Override to get decl from prefix and expression.
+     * Override to get decl from scope and expression.
      */
     @Override
     protected JavaDecl getDeclImpl()
@@ -79,24 +80,24 @@ public class JExprDot extends JExpr {
         if (name == null)
             return null;
 
-        // Get prefix declaration
-        JExpr prefixExpr = getPrefixExpr();
-        JavaDecl prefixDecl = prefixExpr.getDecl();
-        if (prefixDecl == null) {
-            System.err.println("JExprDot.getDeclForExpr: No decl for prefix in " + getName());
+        // Get scope declaration
+        JExpr scopeExpr = getScopeExpr();
+        JavaDecl scopeDecl = scopeExpr.getDecl();
+        if (scopeDecl == null) {
+            System.err.println("JExprDot.getDeclForExpr: No decl for scope in " + getName());
             return null;
         }
 
-        // Handle prefix is Package: Return child class or package for name
-        if (prefixDecl instanceof JavaPackage javaPkg)
+        // Handle scope is Package: Return child class or package for name
+        if (scopeDecl instanceof JavaPackage javaPkg)
             return javaPkg.getChildForName(name);
 
-        // Handle prefix is Module: Return child module for name
-        if (prefixDecl instanceof JavaModule javaModule)
+        // Handle scope is Module: Return child module for name
+        if (scopeDecl instanceof JavaModule javaModule)
             return javaModule.getChildForName(name);
 
         // Get eval class
-        JavaClass parentClass = prefixExpr.getEvalClass();
+        JavaClass parentClass = scopeExpr.getEvalClass();
         if (parentClass == null)
             return null;
 

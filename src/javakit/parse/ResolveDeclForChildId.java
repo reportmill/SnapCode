@@ -138,9 +138,9 @@ class ResolveDeclForChildId {
                 // Handle method ref
                 case JExprMethodRef methodRefExpr when childId == methodRefExpr.getMethodId() -> {
 
-                    // If array creation, return prefix expr class
+                    // If array creation, return scope expr class
                     if (methodRefExpr.getType() == JExprMethodRef.Type.ArrayInit)
-                        return methodRefExpr.getPrefixExprClass();
+                        return methodRefExpr.getScopeExprClass();
 
                     // If method ref is for method or constructor, return it
                     JavaExecutable methodOrConstr = methodRefExpr.getExecutable();

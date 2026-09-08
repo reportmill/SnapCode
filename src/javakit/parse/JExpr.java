@@ -25,47 +25,32 @@ public abstract class JExpr extends JNode implements WithVarDecls {
     }
 
     /**
-     * Returns the prefix expression for this expression, if this expression is part of dot expression.
+     * Returns the scope expression for this expression, if this expression has scope.
      */
     public JExpr getScopeExpr()
     {
-        // If parent is JExprDot and this is DotExpr.Expr, return DotExpr.PrefixExpr
-        JNode parent = getParent();
-        if (parent instanceof JExprDot dotExpr) {
-            if (dotExpr.getExpr() == this)
-                return dotExpr.getPrefixExpr();
+        switch (getParent()) {
+
+            // Handle dot expression: If this node is DotExpr.Expr, return scope expression
+            case JExprDot dotExpr -> {
+                if (dotExpr.getExpr() == this)
+                    return dotExpr.getScopeExpr();
+            }
+
+            // Handle method call: If this node is method name, return scope expression
+            case JExprMethodCall methodCallExpr -> {
+                if (methodCallExpr.getId() == this)
+                    return methodCallExpr.getScopeExpr();
+            }
+
+            // Handle method ref: If this node is method name, return scope expression
+            case JExprMethodRef methodRef -> {
+                if (methodRef.getMethodId() == this)
+                    return methodRef.getScopeExpr();
+            }
+
+            case null, default -> { }
         }
-
-        // If parent is method call and this node is name, get parent for method call
-        if (parent instanceof JExprMethodCall methodCallExpr) {
-            if (methodCallExpr.getId() == this)
-                return methodCallExpr.getScopeExpr();
-        }
-
-        // If parent is method ref and this is MethodRef.Id, return MethodRef.PrefixExpr
-        if (parent instanceof JExprMethodRef methodRef) {
-            if (methodRef.getMethodId() == this)
-                return methodRef.getPrefixExpr();
-        }
-
-        // Return not found
-        return null;
-    }
-
-    /**
-     * Returns the JavaType for the scope expression (if present) or enclosing class.
-     */
-    public JavaType getScopeEvalType()
-    {
-        // If scope expression exists, return its decl
-        JExpr scopeExpr = getScopeExpr();
-        if (scopeExpr != null)
-            return scopeExpr.getEvalType();
-
-        // Otherwise, return enclosing class
-        JClassDecl classDecl = getEnclosingClassDecl();
-        if (classDecl != null)
-            return classDecl.getEvalType();
 
         // Return not found
         return null;
@@ -77,7 +62,7 @@ public abstract class JExpr extends JNode implements WithVarDecls {
     public boolean isClassNameLiteral()
     {
         // Get id for expression if simple id or dot expression
-        JExpr expr = this instanceof JExprDot ? ((JExprDot) this).getExpr() : this;
+        JExpr expr = this instanceof JExprDot dotExpr ? dotExpr.getExpr() : this;
         JExprId exprId = expr instanceof JExprId ? (JExprId) expr : null;
         if (exprId == null)
             return false;

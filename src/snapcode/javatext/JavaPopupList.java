@@ -227,21 +227,21 @@ public class JavaPopupList extends PopupList<JavaDecl> {
 
         // Get previous expression - if null, just return
         JNode prevNode = _textArea.getNodeForCharIndex(prevCharIndex);
-        JExpr prefixExpr = prevNode instanceof JExpr ? (JExpr) prevNode : null;
-        if (prefixExpr == null)
+        JExpr scopeExpr = prevNode instanceof JExpr ? (JExpr) prevNode : null;
+        if (scopeExpr == null)
             return null;
 
         // Create new id expression with empty string
-        ParseToken prevToken = prefixExpr.getEndToken();
+        ParseToken prevToken = scopeExpr.getEndToken();
         JExprId virtualIdExpr = new JExprId("");
         virtualIdExpr.setStartToken(prevToken);
         virtualIdExpr.setEndToken(prevToken);
 
-        // Create new dot expression for prefix expression and new id, set parent to prefixExpr and reset prefixExpr parent
-        JNode prefixExprParent = prefixExpr.getParent();
-        JExpr newDotExpr = prevChar == '.' ? new JExprDot(prefixExpr, virtualIdExpr) : new JExprMethodRef(prefixExpr, virtualIdExpr);
-        newDotExpr.setParent(prefixExpr);
-        prefixExpr.setParent(prefixExprParent);
+        // Create new dot expression for scope expression and new id, set parent to scopeExpr and reset scopeExpr parent
+        JNode scopeExprParent = scopeExpr.getParent();
+        JExpr newDotExpr = prevChar == '.' ? new JExprDot(scopeExpr, virtualIdExpr) : new JExprMethodRef(scopeExpr, virtualIdExpr);
+        newDotExpr.setParent(scopeExpr);
+        scopeExpr.setParent(scopeExprParent);
 
         // Return
         return virtualIdExpr;
@@ -300,10 +300,10 @@ public class JavaPopupList extends PopupList<JavaDecl> {
             idNode = idNode.getParent();
         if (idNode.getParent() instanceof JExprDot dotExpr) {
             if (idNode == dotExpr.getExpr()) {
-                JExpr prefixExpr = dotExpr.getPrefixExpr();
-                JExpr newDotExpr = new JExprDot(prefixExpr, virtualIdExpr);
+                JExpr scopeExpr = dotExpr.getScopeExpr();
+                JExpr newDotExpr = new JExprDot(scopeExpr, virtualIdExpr);
                 newDotExpr.setParent(dotExpr.getParent());
-                prefixExpr.setParent(dotExpr);
+                scopeExpr.setParent(dotExpr);
             }
         }
 

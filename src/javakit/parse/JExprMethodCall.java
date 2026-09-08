@@ -13,6 +13,9 @@ import java.util.stream.Stream;
  */
 public class JExprMethodCall extends JExpr implements WithId, WithArgs {
 
+    // The scope expression
+    private JExpr _scopeExpr;
+
     // The identifier
     private JExprId _id;
 
@@ -37,6 +40,20 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
     {
         setId(anId);
         setArgs(theArgs);
+    }
+
+    /**
+     * Returns the scope expression.
+     */
+    @Override
+    public JExpr getScopeExpr()  { return _scopeExpr; }
+
+    /**
+     * Sets the scope expression.
+     */
+    public void setScopeExpr(JExpr scopeExpr)
+    {
+        addChild(_scopeExpr = scopeExpr, 0);
     }
 
     /**
@@ -78,6 +95,21 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
     {
         if (_method != null) return _method;
         return _method = getMethodImpl();
+    }
+
+    /**
+     * Returns the JavaType for the scope expression (if present) or enclosing class.
+     */
+    private JavaType getScopeEvalType()
+    {
+        // If scope expression exists, forward to it
+        JExpr scopeExpr = getScopeExpr();
+        if (scopeExpr != null)
+            return scopeExpr.getEvalType();
+
+        // Otherwise, return enclosing class
+        JClassDecl classDecl = getEnclosingClassDecl();
+        return classDecl != null ? classDecl.getEvalType() : null;
     }
 
     /**
