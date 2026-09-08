@@ -595,29 +595,6 @@ public class JavaParserExpr extends Parser {
                     return suffixExpr;
                 }
 
-                // Handle MethodCall: Set prefix expression
-                case JExprMethodCall methodCall -> {
-
-                    // If prefix is dot expression, replace dotExpr.Expr with method call
-                    if (prefixExpr instanceof JExprDot dotExpr) {
-                        JExpr dotExprExpr = dotExpr.getExpr();
-                        if (dotExprExpr instanceof JExprId idExpr) {
-                            dotExpr.setExpr(methodCall);
-                            methodCall.setId(idExpr);
-                        }
-                        return prefixExpr;
-                    }
-
-                    // Handle prefix is method id
-                    if (prefixExpr instanceof JExprId idExpr) {
-                        methodCall.setId(idExpr);
-                        return suffixExpr;
-                    }
-
-                    // Otherwise just return prefix - shouldn't happen unless parse is really whacked
-                    return prefixExpr;
-                }
-
                 // Handle MethodRef: Set prefix expression
                 case JExprMethodRef methodRef -> {
                     methodRef.setPrefixExpr(prefixExpr);
@@ -632,6 +609,7 @@ public class JavaParserExpr extends Parser {
                     return arrayIndexExpr;
                 }
 
+                // Handle MethodCall, field, ...
                 default -> { return new JExprDot(prefixExpr, suffixExpr); }
             }
         }
@@ -643,13 +621,13 @@ public class JavaParserExpr extends Parser {
      * PrimaryPrefix Handler.
      *     Literal |
      *     LookAhead ((Identifier ".")* "this") (Identifier ".")* "this" |
-     *     "super" "." Identifier |
-     *     LookAhead (ClassType "." "super" "." Identifier) ClassType "." "super" "." Identifier |
+     *     "super" "." Identifier Arguments? |
+     *     LookAhead (ClassType "." "super" "." Identifier) ClassType "." "super" "." Identifier Arguments? |
      *     "(" Expression ")" |
      *     AllocExpr |
      *     LookAhead (ResultType "." "class") ResultType "." "class" |
      *     LookAhead (ReferenceType "::") ReferenceType |
-     *     Name
+     *     Identifier Arguments?
      */
     public static class PrimaryPrefixHandler extends JNodeParseHandler<JExpr> {
 
@@ -699,7 +677,14 @@ public class JavaParserExpr extends Parser {
                     addExpr(classExpr);
                 }
 
-                case "Name" -> _part = (JExpr) aNode.getCustomNode();
+                case "Arguments" -> {
+                    JExpr[] argExprs = aNode.getCustomNode(JExpr[].class);
+                    if (_part instanceof JExprId idExpr)
+                        _part = new JExprMethodCall(idExpr, argExprs);
+                    else if (_part instanceof JExprDot dotExpr && dotExpr.getExpr() instanceof JExprId idExpr)
+                        dotExpr.setExpr(new JExprMethodCall(idExpr, argExprs));
+                    else System.err.println("JavaParserExpr.PrimaryPrefixHandler: Method call missing id");
+                }
             }
         }
 
@@ -726,10 +711,9 @@ public class JavaParserExpr extends Parser {
      *     LookAhead(2) "." "super" |
      *     LookAhead(2) "." "this" |
      *     LookAhead(2) "." AllocExpr |
-     *     LookAhead(2) "." TypeArgs? Identifier |
+     *     LookAhead(2) "." TypeArgs? Identifier Arguments? |
      *     "[" Expression "]" |
      *     "::" (Identifier | "new") |
-     *     Arguments
      */
     public static class PrimarySuffixHandler extends JNodeParseHandler<JExpr> {
 
@@ -745,8 +729,7 @@ public class JavaParserExpr extends Parser {
                     JExpr thisExpr = new JExprId(aNode);
                     if (_part instanceof JExprDot dotExpr)
                         dotExpr.setExpr(thisExpr);
-                    else
-                        System.err.println("JavaParserExpr.PrimarySuffixHandler.parseOne: Unexpected dot expr: " + _part);
+                    else System.err.println("JavaParserExpr.PrimarySuffixHandler: Unexpected dot expr: " + _part);
                 }
 
                 // Handle AllocExpr
@@ -763,8 +746,7 @@ public class JavaParserExpr extends Parser {
                     JExpr arrayIndexExpr = aNode.getCustomNode(JExpr.class);
                     if (_part instanceof JExprArrayIndex)
                         ((JExprArrayIndex) _part).setIndexExpr(arrayIndexExpr);
-                    else
-                        System.err.println("JavaParserExpr.PrimarySuffixHandler.parseOne: Unexpected array index expr: " + _part);
+                    else System.err.println("JavaParserExpr.PrimarySuffixHandler: Unexpected array index expr: " + _part);
                 }
 
                 // Handle ("." | "::") Identifier
@@ -777,9 +759,6 @@ public class JavaParserExpr extends Parser {
                     else _part = id;
                 }
 
-                // Handle "." Identifier
-                case "." -> _part = new JExprDot(null, null);
-
                 // Handle "::" Identifier: Set part to JExprMethodRef
                 case "::" -> _part = new JExprMethodRef(null, null);
 
@@ -789,10 +768,11 @@ public class JavaParserExpr extends Parser {
                     ((JExprMethodRef) _part).setMethodId(newId);
                 }
 
-                // Handle Arguments
                 case "Arguments" -> {
                     JExpr[] argExprs = aNode.getCustomNode(JExpr[].class);
-                    _part = new JExprMethodCall(null, argExprs);
+                    if (_part instanceof JExprId idExpr)
+                        _part = new JExprMethodCall(idExpr, argExprs);
+                    else System.err.println("JavaParserExpr.PrimarySuffixHandler: Method call missing id");
                 }
             }
         }

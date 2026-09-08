@@ -259,13 +259,13 @@ PrimaryPrefix
 {
     Literal |
     LookAhead ((Identifier ".")* "this") (Identifier ".")* "this" |
-    "super" "." Identifier |
-    LookAhead (ClassType "." "super" "." Identifier) ClassType "." "super" "." Identifier |
+    "super" "." Identifier Arguments? |
+    LookAhead (ClassType "." "super" "." Identifier) ClassType "." "super" "." Identifier Arguments? |
     "(" Expression ")" |
     AllocExpr |
     LookAhead (ResultType "." "class") ResultType "." "class" |
     LookAhead (ArrayType) ReferenceType |
-    Name
+    Identifier Arguments?
 }
 
 PrimarySuffix
@@ -273,10 +273,9 @@ PrimarySuffix
     LookAhead(2) "." "super" |
     LookAhead(2) "." "this" |
     LookAhead(2) "." AllocExpr |
-    LookAhead(2) "." TypeArgs? Identifier |
+    LookAhead(2) "." TypeArgs? Identifier Arguments? |
     "[" Expression "]" |
-    "::" (Identifier | "new") |
-    Arguments
+    "::" (Identifier | "new")
 }
 
 AssignOp { "=" | "*=" | "/=" | "%=" | "+=" | "-=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|=" }
