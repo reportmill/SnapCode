@@ -685,21 +685,6 @@ public class JavaClass extends JavaType {
     }
 
     /**
-     * Returns a resolved type for given TypeVar.
-     */
-    @Override
-    public JavaType getResolvedTypeForTypeVariable(JavaTypeVariable aTypeVar)
-    {
-        // If SuerType is ParameterizedType, let it try to resolve
-        JavaType superType = getGenericSuperclass();
-        if (superType instanceof JavaParameterizedType)
-            return superType.getResolvedTypeForTypeVariable(aTypeVar);
-
-        // Otherwise just return null
-        return null; //aTypeVar.getEvalClass();
-    }
-
-    /**
      * Returns a string representation of suggestion.
      */
     @Override

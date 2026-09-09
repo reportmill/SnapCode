@@ -9,6 +9,75 @@ import java.util.Arrays;
 class ResolveTypeUtils {
 
     /**
+     * Returns a resolved type for given JavaType and TypeVar.
+     */
+    public static JavaType getResolvedTypeForJavaTypeAndTypeVariable(JavaType parentType, JavaTypeVariable typeVar)
+    {
+        switch (parentType) {
+
+            case JavaClass javaClass -> {
+
+                // If SuperType is ParameterizedType, let it try to resolve
+                JavaType superType = javaClass.getGenericSuperclass();
+                if (superType instanceof JavaParameterizedType)
+                    return getResolvedTypeForJavaTypeAndTypeVariable(superType, typeVar);
+
+                // Otherwise just return null
+                return null; //aTypeVar.getEvalClass();
+            }
+
+            case JavaParameterizedType parameterizedType -> {
+
+                // Search for TypeVar name in ParamTypes
+                JavaClass javaClass = parameterizedType.getEvalClass();
+                String typeVarName = typeVar.getName();
+
+                // If class (or superclasses or interfaces) can resolve type var, return type
+                JavaType resolvedType = getResolvedTypeForClass(parameterizedType, typeVarName, javaClass);
+                if (resolvedType != null)
+                    return resolvedType;
+
+                // Do normal version
+                return null; //super.getResolvedTypeForTypeVariable(aTypeVar);
+            }
+
+            default -> { return null; }
+        }
+    }
+
+    /**
+     * Returns resolved type for interfaces.
+     */
+    private static JavaType getResolvedTypeForClass(JavaParameterizedType parameterizedType, String typeVarName, JavaClass javaClass)
+    {
+        // Check class
+        JavaTypeVariable[] typeParams = javaClass.getTypeParameters();
+        int typeParamIndex = ArrayUtils.findMatchIndex(typeParams, tvar -> tvar.getName().equals(typeVarName));
+        JavaType[] paramTypes = parameterizedType.getParamTypes();
+        if (typeParamIndex >= 0 && typeParamIndex < paramTypes.length)
+            return paramTypes[typeParamIndex];
+
+        // Check superclass
+        JavaClass superClass = javaClass.getSuperClass();
+        if (superClass != null) {
+            JavaType resolvedType = getResolvedTypeForClass(parameterizedType, typeVarName, superClass);
+            if (resolvedType != null)
+                return resolvedType;
+        }
+
+        // Check interfaces
+        JavaClass[] interfaces = javaClass.getInterfaces();
+        for (JavaClass interfc : interfaces) {
+            JavaType resolvedType = getResolvedTypeForClass(parameterizedType, typeVarName, interfc);
+            if (resolvedType != null)
+                return resolvedType;
+        }
+
+        // Return not found
+        return null;
+    }
+
+    /**
      * Returns a resolved type for given type variable, method and arg types.
      */
     public static JavaType getResolvedTypeForTypeVarAndMethodAndArgTypes(JavaTypeVariable aTypeVar, JavaExecutable method, JavaType[] argTypes)

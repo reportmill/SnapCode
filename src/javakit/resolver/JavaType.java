@@ -120,14 +120,6 @@ public class JavaType extends JavaDecl {
     public boolean isResolvedType()  { return true; }
 
     /**
-     * Returns a resolved type for given TypeVar.
-     */
-    public JavaType getResolvedTypeForTypeVariable(JavaTypeVariable aTypeVar)
-    {
-        return null; //aTypeVar.getEvalType();
-    }
-
-    /**
      * Returns the Array decl for this base class.
      */
     public JavaType getArrayType()

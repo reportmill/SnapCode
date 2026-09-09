@@ -67,10 +67,17 @@ class ResolveType {
                 // If this class is subclass of parameterized type with given type var, return resolved type
                 JavaClass javaClass = classDecl.getJavaClass();
                 if (javaClass != null) {
-                    JavaType resolvedType = javaClass.getResolvedTypeForTypeVariable(aTypeVar);
+                    JavaType resolvedType = ResolveTypeUtils.getResolvedTypeForJavaTypeAndTypeVariable(javaClass, aTypeVar);
                     if (resolvedType != null)
                         return resolvedType;
                 }
+            }
+
+            case JMethodDecl methodDecl -> {
+
+                JTypeVar typeVar = methodDecl.getTypeParamDeclForName(aTypeVar.getName());
+                if (typeVar != null)
+                    return typeVar.getBoundsClass();
             }
 
             case JExprLambdaBase lambdaBase -> {
@@ -104,7 +111,7 @@ class ResolveType {
 
                 // Try to resolve from ScopeNode.Type
                 JavaType scopeType = methodCall.getScopeEvalType();
-                JavaType scopeResolvedType = scopeType != null ? scopeType.getResolvedTypeForTypeVariable(aTypeVar) : null;
+                JavaType scopeResolvedType = scopeType != null ? ResolveTypeUtils.getResolvedTypeForJavaTypeAndTypeVariable(scopeType, aTypeVar) : null;
                 if (scopeResolvedType != null && scopeResolvedType.isResolvedType())
                     return scopeResolvedType;
             }
@@ -114,7 +121,7 @@ class ResolveType {
                 // If VarDecl type is parameterized type, try to resolve given type var
                 JavaType javaType = varDecl.getJavaType();
                 if (javaType != null) {
-                    JavaType resolvedType = javaType.getResolvedTypeForTypeVariable(aTypeVar);
+                    JavaType resolvedType = ResolveTypeUtils.getResolvedTypeForJavaTypeAndTypeVariable(javaType, aTypeVar);
                     if (resolvedType != null)
                         return resolvedType;
                 }
@@ -133,7 +140,6 @@ class ResolveType {
         // Since type var not resolved, return bounds type
         return aTypeVar.getEvalType();
     }
-
 
     /**
      * Returns whether given type var shows up in lambda method return type but not in parameters.
