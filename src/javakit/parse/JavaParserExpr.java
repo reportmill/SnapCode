@@ -589,6 +589,12 @@ public class JavaParserExpr extends Parser {
         {
             switch (suffixExpr) {
 
+                // Handle field: Set scope expression
+                case JExprFieldAccess fieldAccessExpr -> {
+                    fieldAccessExpr.setScopeExpr(prefixExpr);
+                    return fieldAccessExpr;
+                }
+
                 // Handle method call: Set scope expression
                 case JExprMethodCall methodCallExpr -> {
                     methodCallExpr.setScopeExpr(prefixExpr);
@@ -607,7 +613,7 @@ public class JavaParserExpr extends Parser {
                     return arrayIndexExpr;
                 }
 
-                // Handle field, ...
+                // Handle other
                 default -> { return new JExprDot(prefixExpr, suffixExpr); }
             }
         }
@@ -638,7 +644,7 @@ public class JavaParserExpr extends Parser {
 
                 case "Literal" -> _part = aNode.getCustomNode(JExprLiteral.class);
 
-                // Handle Identifier of [ (Identifier ".")* this ] and [ "super" "." Identifier ]
+                // Handle Identifier of [ (Identifier ".")* "this" ] and [ "super" "." Identifier ]
                 case "Identifier" -> {
                     JExprId idExpr = aNode.getCustomNode(JExprId.class);
                     addExpr(idExpr);
@@ -759,6 +765,14 @@ public class JavaParserExpr extends Parser {
                 // Handle TypeArgs: e.g.: List<String> list = Collections.<String>emptyList();
                 //case "TypeArgs" -> _part = aNode.getCustomNode(JExpr.class);
             }
+        }
+
+        @Override
+        public JExpr parsedAll()
+        {
+            if (_part instanceof JExprId idExpr && !idExpr.getName().equals("this") && !idExpr.getName().equals("super"))
+                _part = new JExprFieldAccess(idExpr);
+            return super.parsedAll();
         }
 
         protected Class<JExpr> getPartClass()  { return JExpr.class; }
