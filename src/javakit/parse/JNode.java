@@ -115,72 +115,8 @@ public class JNode {
             return evalType;
 
         // Try to resolve type variables from Class/Method TypeVars
-        JavaType resolvedType = getResolvedTypeForType(evalType);
+        JavaType resolvedType = ResolveType.getResolvedTypeForType(this, evalType);
         return resolvedType != null ? resolvedType : evalType.getEvalClass();
-    }
-
-    /**
-     * Returns a resolved type for given type.
-     */
-    protected JavaType getResolvedTypeForType(JavaType aType)
-    {
-        // Handle TypeVar
-        if (aType instanceof JavaTypeVariable typeVar)
-            return getResolvedTypeForTypeVar(typeVar);
-
-        // Handle ParameterizedType
-        else if (aType instanceof JavaParameterizedType parameterizedType) {
-
-            // Get parameter types
-            JavaType[] paramTypes = parameterizedType.getParamTypes();
-            JavaType[] paramTypesResolved = paramTypes.clone();
-            boolean didResolve = false;
-
-            // Iterate over each and resolve if needed
-            for (int i = 0; i < paramTypes.length; i++) {
-                JavaType paramType = paramTypes[i];
-                if (!paramType.isResolvedType()) {
-                    JavaType paramTypeResolved = getResolvedTypeForType(paramType);
-                    if (paramTypeResolved != paramType) {
-                        paramTypesResolved[i] = paramTypeResolved;
-                        didResolve = true;
-                    }
-                }
-            }
-
-            // If something was resolved, create new type with resolved parameter types
-            if (didResolve) {
-                JavaClass rawType = parameterizedType.getRawType();
-                return rawType.getParameterizedTypeForTypes(paramTypesResolved);
-            }
-        }
-
-        // Handle Generic array type
-        else if (aType instanceof JavaGenericArrayType arrayType) {
-            JavaType compType = arrayType.getComponentType();
-            JavaType compTypeResolved = getResolvedTypeForType(compType);
-            if (compTypeResolved != compType)
-                return compTypeResolved.getArrayType();
-        }
-
-        // Return
-        return aType;
-    }
-
-    /**
-     * Returns a resolved type for given type.
-     */
-    protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
-    {
-        // Get parent to resolve type (skip method calls - since args aren't defined in those terms)
-        JNode parent = getParent();
-        while (parent instanceof JExprMethodCall && !(this instanceof JExprLambdaBase))
-            parent = parent.getParent();
-        if (parent != null)
-            return parent.getResolvedTypeForTypeVar(aTypeVar);
-
-        // Since type var not resolved, return bounds type
-        return aTypeVar.getEvalType();
     }
 
     /**

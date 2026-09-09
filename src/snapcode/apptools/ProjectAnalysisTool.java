@@ -101,7 +101,7 @@ public class ProjectAnalysisTool {
      */
     private void findUndefines(JNode aNode, TextArea aTextArea)
     {
-        if (_undefCount > 49) return;
+        //if (_undefCount > 49) return;
 
         if (aNode.getDecl() == null && NodeMatcher.isDeclExpected(aNode)) {
             aNode.getDecl();

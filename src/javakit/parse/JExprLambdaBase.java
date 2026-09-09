@@ -162,7 +162,7 @@ public abstract class JExprLambdaBase extends JExpr {
     protected JavaType[] getLambdaMethodParameterTypesResolved()
     {
         JavaType[] paramTypes = getLambdaMethodParameterTypes();
-        return paramTypes != null ? ArrayUtils.map(paramTypes, type -> getResolvedTypeForType(type), JavaType.class) : null;
+        return paramTypes != null ? ArrayUtils.map(paramTypes, type -> ResolveType.getResolvedTypeForType(this, type), JavaType.class) : null;
     }
 
     /**
@@ -206,47 +206,6 @@ public abstract class JExprLambdaBase extends JExpr {
 
     // Whether resolving eval type
     private boolean _resolvingEvalType;
-
-    /**
-     * Override to try to resolve return type.
-     */
-    @Override
-    protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
-    {
-        // If type var is return type only, try to resolve with lambda expression type or method ref method return type
-        if (isTypeVarInReturnTypeOnly(aTypeVar)) {
-
-            // Get generic return type and resolved return type and try to resolve
-            JavaType lambdaMethodReturnType = getLambdaMethodReturnType();
-            JavaType lambdaReturnType = getLambdaReturnType();
-            if (lambdaReturnType != null) {
-                JavaType resolvedType = JavaTypeUtils.getResolvedTypeVariableForTypes(aTypeVar, lambdaMethodReturnType, lambdaReturnType);
-                if (resolvedType != aTypeVar)
-                    return resolvedType;
-            }
-
-            // If resolve failed, return Object
-            return aTypeVar.getEvalType(); //getJavaClassForName("java.lang.Object");
-        }
-
-        // Do normal version
-        return super.getResolvedTypeForTypeVar(aTypeVar);
-    }
-
-    /**
-     * Returns whether given type var shows up in lambda method return type but not in parameters.
-     */
-    private boolean isTypeVarInReturnTypeOnly(JavaTypeVariable aTypeVar)
-    {
-        // If not in return type, return false
-        JavaType lambdaMethodReturnType = getLambdaMethodReturnType();
-        if (lambdaMethodReturnType == null || !lambdaMethodReturnType.hasTypeVar(aTypeVar))
-            return false;
-
-        // If in parameter types, return false
-        JavaType[] lambdaMethodParamTypes = getLambdaMethodParameterTypes();
-        return !ArrayUtils.hasMatch(lambdaMethodParamTypes, type -> type.hasTypeVar(aTypeVar));
-    }
 
     /**
      * Returns the node name.

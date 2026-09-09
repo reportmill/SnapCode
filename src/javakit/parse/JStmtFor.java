@@ -238,7 +238,7 @@ public class JStmtFor extends JStmtConditional implements WithVarDecls {
 
         // If not resolved, resolve it
         if (!iterationType.isResolvedType())
-            iterationType = getResolvedTypeForType(iterationType);
+            iterationType = ResolveType.getResolvedTypeForType(this, iterationType);
 
         // Return
         return iterationType.getEvalClass();

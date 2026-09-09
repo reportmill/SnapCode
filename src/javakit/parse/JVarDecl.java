@@ -218,24 +218,6 @@ public class JVarDecl extends JNode implements WithId {
     }
 
     /**
-     * Override to try to resolve from type.
-     */
-    @Override
-    protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
-    {
-        // If VarDecl type is parameterized type, try to resolve given type var
-        JavaType javaType = getJavaType();
-        if (javaType != null) {
-            JavaType resolvedType = javaType.getResolvedTypeForTypeVariable(aTypeVar);
-            if (resolvedType != null)
-                return resolvedType;
-        }
-
-        // Do normal version
-        return super.getResolvedTypeForTypeVar(aTypeVar);
-    }
-
-    /**
      * Override to avoid NPE when parsing incomplete method def.
      */
     @Override

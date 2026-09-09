@@ -98,21 +98,6 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
     }
 
     /**
-     * Returns the JavaType for the scope expression (if present) or enclosing class.
-     */
-    private JavaType getScopeEvalType()
-    {
-        // If scope expression exists, forward to it
-        JExpr scopeExpr = getScopeExpr();
-        if (scopeExpr != null)
-            return scopeExpr.getEvalType();
-
-        // Otherwise, return enclosing class
-        JClassDecl classDecl = getEnclosingClassDecl();
-        return classDecl != null ? classDecl.getEvalType() : null;
-    }
-
-    /**
      * Returns the method.
      */
     private JavaMethod getMethodImpl()
@@ -221,6 +206,21 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
     }
 
     /**
+     * Returns the JavaType for the scope expression (if present) or enclosing class.
+     */
+    JavaType getScopeEvalType()
+    {
+        // If scope expression exists, forward to it
+        JExpr scopeExpr = getScopeExpr();
+        if (scopeExpr != null)
+            return scopeExpr.getEvalType();
+
+        // Otherwise, return enclosing class
+        JClassDecl classDecl = getEnclosingClassDecl();
+        return classDecl != null ? classDecl.getEvalType() : null;
+    }
+
+    /**
      * Override to return method.
      */
     @Override
@@ -244,47 +244,6 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
 
     // Whether resolving eval type
     private boolean _resolvingEvalType;
-
-    /**
-     * Returns a resolved type for given type.
-     */
-    @Override
-    protected JavaType getResolvedTypeForTypeVar(JavaTypeVariable aTypeVar)
-    {
-        // Try to resolve from method types
-        JavaType methodResolvedType = getResolvedTypeForTypeVarFromMethodTypes(aTypeVar);
-        if (methodResolvedType != aTypeVar) {
-            if (methodResolvedType.isResolvedType())
-                return methodResolvedType;
-            return getResolvedTypeForType(methodResolvedType);
-        }
-
-        // Try to resolve from ScopeNode.Type
-        JavaType scopeType = getScopeEvalType();
-        JavaType scopeResolvedType = scopeType != null ? scopeType.getResolvedTypeForTypeVariable(aTypeVar) : null;
-        if (scopeResolvedType != null)
-                return scopeResolvedType;
-
-        // Do normal version
-        return super.getResolvedTypeForTypeVar(aTypeVar);
-    }
-
-    /**
-     * Returns a resolved type for given type variable.
-     */
-    private JavaType getResolvedTypeForTypeVarFromMethodTypes(JavaTypeVariable aTypeVar)
-    {
-        // Get method (just return if not found or doesn't have type var
-        JavaMethod method = getMethod();
-        if (method == null || method.getTypeParameterForName(aTypeVar.getName()) == null)
-            return aTypeVar;
-
-        // Get method parameter types and arg types
-        JavaType[] argTypes = ArrayUtils.map(_args, arg -> arg.getEvalType(), JavaType.class);
-
-        // Forward to getResolvedTypeVariableForTypeArrays()
-        return JavaTypeUtils.getResolvedTypeForTypeVarAndMethodAndArgTypes(aTypeVar, method, argTypes);
-    }
 
     /**
      * Override to provide errors for JStmtExpr.
