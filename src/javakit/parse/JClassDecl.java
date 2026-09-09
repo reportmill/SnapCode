@@ -19,7 +19,7 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     private JTypeVar[] _typeVars = new JTypeVar[0];
 
     // The formal parameters (for records)
-    protected JVarDecl[] _params;
+    protected JVarDecl[] _params = new JVarDecl[0];
 
     // The extends list
     protected JType[] _extendsTypes = JType.EMPTY_TYPES_ARRAY;
