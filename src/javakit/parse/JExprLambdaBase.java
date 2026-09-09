@@ -143,7 +143,7 @@ public abstract class JExprLambdaBase extends JExpr {
         // If lambda method from subclass of lambda type, translate return type to lambda type
         if (lambdaMethod.getDeclaringClass() != lambdaClass) {
             JavaClass lambdaMethodClass = lambdaMethod.getDeclaringClass();
-            paramType = JavaTypeUtils.translateParamTypeToSubclass(paramType, lambdaMethodClass, lambdaType);
+            paramType = ResolveTypeUtils.translateParamTypeToSubclass(paramType, lambdaMethodClass, lambdaType);
             if (paramType.isResolvedType())
                 return paramType;
         }
@@ -153,7 +153,7 @@ public abstract class JExprLambdaBase extends JExpr {
         JavaType[] resolvedTypes = lambdaType.getParamTypes();
 
         // Try to resolve type from lambda generic and resolved types
-        return JavaTypeUtils.getResolvedTypeForTypeArrays(paramType, genericTypes, resolvedTypes);
+        return ResolveTypeUtils.getResolvedTypeForTypeArrays(paramType, genericTypes, resolvedTypes);
     }
 
     /**

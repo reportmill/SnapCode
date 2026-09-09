@@ -82,7 +82,7 @@ class ResolveType {
                     JavaType lambdaMethodReturnType = lambdaBase.getLambdaMethodReturnType();
                     JavaType lambdaReturnType = lambdaBase.getLambdaReturnType();
                     if (lambdaReturnType != null) {
-                        JavaType resolvedType = JavaTypeUtils.getResolvedTypeVariableForTypes(aTypeVar, lambdaMethodReturnType, lambdaReturnType);
+                        JavaType resolvedType = ResolveTypeUtils.getResolvedTypeVariableForTypes(aTypeVar, lambdaMethodReturnType, lambdaReturnType);
                         if (resolvedType != aTypeVar)
                             return resolvedType;
                     }
@@ -165,6 +165,6 @@ class ResolveType {
         JavaType[] argTypes = ArrayUtils.map(methodArgs, arg -> arg.getEvalType(), JavaType.class);
 
         // Forward to getResolvedTypeVariableForTypeArrays()
-        return JavaTypeUtils.getResolvedTypeForTypeVarAndMethodAndArgTypes(aTypeVar, method, argTypes);
+        return ResolveTypeUtils.getResolvedTypeForTypeVarAndMethodAndArgTypes(aTypeVar, method, argTypes);
     }
 }

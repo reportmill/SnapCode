@@ -1,11 +1,12 @@
-package javakit.resolver;
+package javakit.parse;
+import javakit.resolver.*;
 import snap.util.ArrayUtils;
 import java.util.Arrays;
 
 /**
- * Utility methods for JavaType.
+ * Utility methods for Resolving JavaTypes.
  */
-public class JavaTypeUtils {
+class ResolveTypeUtils {
 
     /**
      * Returns a resolved type for given type variable, method and arg types.

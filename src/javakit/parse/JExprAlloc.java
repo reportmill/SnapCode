@@ -232,7 +232,7 @@ public class JExprAlloc extends JExpr implements WithArgs {
 
         // Get arg types and resolved type parameters - just return class if nothing resolved
         JavaType[] argTypes = ArrayUtils.map(_args, arg -> arg instanceof JExprLambdaBase ? null : arg.getEvalType(), JavaType.class);
-        JavaType[] resolvedTypeParams = ArrayUtils.map(typeParams, type -> JavaTypeUtils.getResolvedTypeVariableForTypeArrays(type, paramTypes, argTypes), JavaType.class);
+        JavaType[] resolvedTypeParams = ArrayUtils.map(typeParams, type -> ResolveTypeUtils.getResolvedTypeVariableForTypeArrays(type, paramTypes, argTypes), JavaType.class);
         if (ArrayUtils.equalsId(typeParams, resolvedTypeParams))
             return javaClass;
 
