@@ -491,22 +491,31 @@ public class JavaClass extends JavaType {
     /**
      * Returns a class for class name from this class or any superclass.
      */
-    public JavaClass getClassForName(String aName)
+    public JavaClass getClassForName(String className)
     {
         // Check for declared class of this class
-        JavaClass cls = getDeclaredClassForName(aName);
+        JavaClass cls = getDeclaredClassForName(className);
         if (cls != null)
             return cls;
 
         // Check super classes
         JavaClass superClass = getSuperClass();
-        if (superClass != null)
-            cls = superClass.getClassForName(aName);
+        if (superClass != null) {
+            cls = superClass.getClassForName(className);
+            if (cls != null)
+                return cls;
+        }
 
         // Check interfaces
+        JavaClass[] interfaces = getInterfaces();
+        for (JavaClass iface : interfaces) {
+            cls = iface.getClassForName(className);
+            if (cls != null)
+                return cls;
+        }
 
-        // Return
-        return cls;
+        // Return not found
+        return null;
     }
 
     /**

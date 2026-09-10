@@ -767,13 +767,13 @@ public class JavaParserExpr extends Parser {
             }
         }
 
-        @Override
-        public JExpr parsedAll()
-        {
-            if (_part instanceof JExprId idExpr && !idExpr.getName().equals("this") && !idExpr.getName().equals("super"))
-                _part = new JExprFieldAccess(idExpr);
-            return super.parsedAll();
-        }
+//        @Override
+//        public JExpr parsedAll()
+//        {
+//            if (_part instanceof JExprId idExpr && !idExpr.getName().equals("this") && !idExpr.getName().equals("super"))
+//                _part = new JExprFieldAccess(idExpr);
+//            return super.parsedAll();
+//        }
 
         protected Class<JExpr> getPartClass()  { return JExpr.class; }
     }

@@ -97,7 +97,7 @@ class ResolveDeclForChildId {
                     // Look for InnerClass of given name
                     JavaClass thisClass = classDecl.getEvalClass();
                     if (thisClass != null) {
-                        JavaClass innerClass = thisClass.getDeclaredClassForName(childIdName);
+                        JavaClass innerClass = thisClass.getClassForName(childIdName);
                         if (innerClass != null)
                             return innerClass;
                     }
