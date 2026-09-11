@@ -68,16 +68,21 @@ public class JExprSwitch extends JExpr {
     /**
      * Returns the expression type.
      */
-    public JavaDecl getExprType()
+    public JavaType getExprType()
     {
-        JavaType exprType = null;
+        List<JavaType> returnTypes = new ArrayList<>();
 
         // Get return type
         for (JSwitchEntry switchEntry : _entries) {
-            exprType = switchEntry.getReturnType();
-            if (exprType != null)
-                break;
+            JavaType entryType = switchEntry.getReturnType();
+            if (entryType != null)
+                returnTypes.add(entryType);
         }
+
+        // Get common ancestor type
+        JavaType exprType = !returnTypes.isEmpty() ? returnTypes.getFirst() : null;
+        for (int i = 1; i < returnTypes.size(); i++)
+            exprType = exprType.getCommonAncestor(returnTypes.get(i));
 
         // Return
         return exprType;

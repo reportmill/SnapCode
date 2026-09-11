@@ -152,27 +152,49 @@ public class JSwitchEntry extends JNode implements WithStmts, WithBlockStmt, Wit
      */
     public JavaType getReturnType()
     {
-        JStmt lastStmt = !_stmts.isEmpty() ? _stmts.getLast() : null;
+        List<JavaType> returnTypes = new ArrayList<>();
 
-        // If last statement is expression statement, return expression type
-        if (lastStmt instanceof JStmtExpr exprStmt) {
+        // If last statement is expression, add type
+        if (!_stmts.isEmpty() && _stmts.getLast() instanceof JStmtExpr exprStmt) {
             JExpr expr = exprStmt.getExpr();
-            return expr.getEvalType();
+            JavaType exprType = expr.getEvalType();
+            if (exprType != null)
+                returnTypes.add(exprType);
         }
 
-        // If last statement is return statement, return expression type
-        if (lastStmt instanceof JStmtReturn returnStmt) {
-            JExpr expr = returnStmt.getExpr();
-            return expr != null ? expr.getEvalType() : null;
-        }
+        // Look for any child return/yield statement
+        findReturnTypes(this, returnTypes);
 
-        // If last statement is yield statement, return expression type
-        if (lastStmt instanceof JStmtYield yieldStmt) {
-            JExpr expr = yieldStmt.getExpr();
-            return expr != null ? expr.getEvalType() : null;
-        }
+        // Get common ancestor type
+        JavaType returnType = !returnTypes.isEmpty() ? returnTypes.getFirst() : null;
+        for (int i = 1; i < returnTypes.size(); i++)
+            returnType = returnType.getCommonAncestor(returnTypes.get(i));
 
-        // Return not defined
-        return null;
+        return returnType;
+    }
+
+    /**
+     * Find types for all return/yield statements.
+     */
+    private void findReturnTypes(JNode node, List<JavaType> types)
+    {
+        switch (node) {
+
+            case JStmtReturn returnStmt -> {
+                JExpr expr = returnStmt.getExpr();
+                JavaType exprType = expr != null ? expr.getEvalType() : null;
+                if (exprType != null)
+                    types.add(exprType);
+            }
+
+            case JStmtYield yieldStmt -> {
+                JExpr expr = yieldStmt.getExpr();
+                JavaType exprType = expr != null ? expr.getEvalType() : null;
+                if (exprType != null)
+                    types.add(exprType);
+            }
+
+            default -> node.getChildren().forEach(child -> findReturnTypes(child, types));
+        }
     }
 }

@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 
 /**
@@ -178,18 +177,8 @@ public class JExprLiteral extends JExpr {
      */
     protected JavaDecl getDeclImpl()
     {
-        // Get value class (just return if null)
         Class<?> valueClass = getValueClass();
-        if (valueClass == null)
-            return null;
-
-        JavaClass javaClass = getJavaClassForClass(valueClass);
-        JavaClass declPrim = javaClass.getPrimitive();
-        if (declPrim != null)
-            javaClass = declPrim;
-
-        // Return
-        return javaClass;
+        return valueClass != null ? getJavaClassForClass(valueClass) : null;
     }
 
     /**
