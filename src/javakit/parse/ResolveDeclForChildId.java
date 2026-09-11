@@ -156,8 +156,10 @@ class ResolveDeclForChildId {
 
                 // Handle type
                 case JType type -> {
-                    if (childId == type.getBaseExpr())
-                        return type.getBaseType();
+                    if (childId == type.getId()) {
+                        JavaDecl typeDecl = type.getDecl();
+                        return typeDecl instanceof JavaType ? type.getBaseType() : typeDecl;
+                    }
                 }
 
                 case JNode jnode -> { }

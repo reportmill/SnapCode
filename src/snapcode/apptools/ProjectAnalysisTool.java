@@ -81,25 +81,29 @@ public class ProjectAnalysisTool {
     /**
      * Loads the undefined symbols in file.
      */
-    public void findUndefines(WebFile aFile, TextArea aTextArea)
+    public void findUndefinesForFile(WebFile aFile, TextArea aTextArea)
     {
         // Handle Java file: Find undefines
         if (aFile.isFile() && aFile.getFileType().equals("java")) {
             JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(aFile);
             JNode jfile = javaAgent.getJFile();
-            findUndefines(jfile, aTextArea);
+            try { findUndefinesForNode(jfile, aTextArea); }
+            catch (Throwable e) {
+                e.printStackTrace();
+                System.err.println("Error finding undefines for " + aFile.getPath());
+            }
         }
 
         // Handle dir: Recurse
         else if (aFile.isDir())
             for (WebFile child : aFile.getFiles())
-                findUndefines(child, aTextArea);
+                findUndefinesForFile(child, aTextArea);
     }
 
     /**
      * Loads the undefined symbols in file.
      */
-    private void findUndefines(JNode aNode, TextArea aTextArea)
+    private void findUndefinesForNode(JNode aNode, TextArea aTextArea)
     {
         //if (_undefCount > 49) return;
 
@@ -121,7 +125,7 @@ public class ProjectAnalysisTool {
         // Recurse into node
         else if (aNode.getChildCount() > 0) {
             for (JNode child : aNode.getChildren())
-                findUndefines(child, aTextArea);
+                findUndefinesForNode(child, aTextArea);
         }
     }
 

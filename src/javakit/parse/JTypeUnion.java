@@ -38,7 +38,7 @@ public class JTypeUnion extends JType {
      * Returns the base expression.
      */
     @Override
-    public JExpr getBaseExpr()  { return _firstType.getBaseExpr(); }
+    public JExprId getId()  { return _firstType.getId(); }
 
     /**
      * Returns the name.

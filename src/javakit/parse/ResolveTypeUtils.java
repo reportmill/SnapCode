@@ -96,7 +96,7 @@ class ResolveTypeUtils {
             else {
                 argTypes = Arrays.copyOf(argTypes, paramTypes.length);
                 JavaType compClass = argTypes[paramTypes.length - 1];
-                if (compClass != null)
+                if (compClass != null && !compClass.isArray())
                     argTypes[paramTypes.length -1 ] = compClass.getArrayType();
             }
         }

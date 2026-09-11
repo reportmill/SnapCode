@@ -146,18 +146,16 @@ public class JavaParserExpr extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            JType type = getPart();
-
             switch (anId) {
 
                 case "Identifier" -> {
                     JExprId id = aNode.getCustomNode(JExprId.class);
-                    type.addId(id);
+                    _part = new JType(_part, id);
                 }
 
                 case "TypeArgs" -> {
                     JType[] typeArgs = aNode.getCustomNode(JType[].class);
-                    type.setTypeArgs(typeArgs);
+                    _part.setTypeArgs(typeArgs);
                 }
             }
         }
@@ -227,10 +225,7 @@ public class JavaParserExpr extends Parser {
                 }
 
                 // Handle "?" (Wildcard)
-                case "?" -> {
-                    _part = new JType();
-                    _part.addId(new JExprId(aNode));
-                }
+                case "?" -> _part = new JType(null, new JExprId(aNode));
             }
         }
 
@@ -249,8 +244,7 @@ public class JavaParserExpr extends Parser {
         protected void parsedOne(ParseNode aNode, String anId)
         {
             JExprId idExpr = new JExprId(aNode);
-            _part = new JType();
-            _part.addId(idExpr);
+            _part = new JType(null, idExpr);
             _part.setPrimitive(true);
         }
 
@@ -273,10 +267,9 @@ public class JavaParserExpr extends Parser {
                 case "Type" -> _part = aNode.getCustomNode(JType.class);
 
                 case "void" -> {
-                    JType type = getPart();
                     JExprId idExpr = new JExprId(aNode);
-                    type.addId(idExpr);
-                    type.setPrimitive(true);
+                    _part = new JType(null, idExpr);
+                    _part.setPrimitive(true);
                 }
             }
         }

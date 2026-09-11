@@ -2,9 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import javakit.resolver.JavaClass;
-import javakit.resolver.JavaType;
-import javakit.resolver.JavaTypeVariable;
+import javakit.resolver.*;
 import snap.parse.ParseToken;
 import snap.util.ArrayUtils;
 
@@ -13,8 +11,11 @@ import snap.util.ArrayUtils;
  */
 public class JType extends JNode {
 
-    // The base expression
-    private JExpr _baseExpr;
+    // The scope
+    private JType _scopeType;
+
+    // The id
+    private JExprId _id;
 
     // Whether type is primitive type
     protected boolean  _primitive;
@@ -34,6 +35,9 @@ public class JType extends JNode {
     // The JavaType
     protected JavaType _javaType;
 
+    // The package - if this type is really a package
+    private JavaPackage _javaPackage;
+
     // Constant for empty types array
     public static final JType[] EMPTY_TYPES_ARRAY = new JType[0];
 
@@ -46,27 +50,41 @@ public class JType extends JNode {
     }
 
     /**
-     * Returns the base expression.
+     * Constructor.
      */
-    public JExpr getBaseExpr()  { return _baseExpr; }
-
-    /**
-     * Sets the base expression.
-     */
-    public void setBaseExpr(JExpr anExpr)
+    public JType(JType scopeType, JExprId idExpr)
     {
-        replaceChild(_baseExpr, _baseExpr = anExpr);
+        super();
+        setScopeType(scopeType);
+        setId(idExpr);
     }
 
     /**
-     * Adds an identifier.
+     * Returns the scope type.
      */
-    public void addId(JExprId anId)
+    public JType getScopeType()  { return _scopeType; }
+
+    /**
+     * Sets the scope type.
+     */
+    public void setScopeType(JType scopeType)
     {
-        JExpr baseExpr = anId;
-        if (_baseExpr != null)
-            baseExpr = new JExprDot(_baseExpr, anId);
-        setBaseExpr(baseExpr);
+        replaceChild(_scopeType, _scopeType = scopeType);
+    }
+
+    /**
+     * Returns the type identifier.
+     */
+    public JExprId getId()  { return _id; }
+
+    /**
+     * Sets the type identifier.
+     */
+    public void setId(JExprId idExpr)
+    {
+        replaceChild(_id, _id = idExpr);
+        if (_id != null && (_id.getName().equals("java") ||_id.getName().equals("com") || _id.getName().equals("snap")))
+            System.currentTimeMillis();
     }
 
     /**
@@ -158,12 +176,7 @@ public class JType extends JNode {
     /**
      * Returns the simple name.
      */
-    public String getSimpleName()
-    {
-        String name = getName();
-        int index = name.lastIndexOf('.');
-        return index > 0 ? name.substring(index + 1) : name;
-    }
+    public String getSimpleName()  { return _id != null ? _id.getName() : null; }
 
     /**
      * Returns the base type.
@@ -179,6 +192,24 @@ public class JType extends JNode {
      */
     private JavaType getBaseTypeImpl()
     {
+        String simpleName = getSimpleName();
+
+        // Try to resolve with scope type
+        JType scopeType = getScopeType();
+        if (scopeType != null) {
+            JavaDecl scopeDecl = scopeType.getDecl();
+            if (scopeDecl instanceof JavaType) {
+                JavaClass scopeClass = scopeType.getJavaClass();
+                return scopeClass != null ? scopeClass.getClassForName(simpleName) : null;
+            }
+            else if (scopeDecl instanceof JavaPackage scopePackage) {
+                JavaClass baseClass = scopePackage.getClassForName(simpleName);
+                if (baseClass != null)
+                    return baseClass;
+            }
+            return null;
+        }
+
         // Handle 'var'
         if (isVarType())
             return getDeclForVar();
@@ -188,11 +219,10 @@ public class JType extends JNode {
             return getWildcardBoundsType();
 
         // If parent is parameterized type, see if name is nested TypeArg from class extends/implements (e.g.: public class XXX extends List<E>)
-        if (getParent() instanceof JType parentType && parentType._typeArgs != EMPTY_TYPES_ARRAY) {
+        if (getParent() instanceof JType parentType && parentType.getScopeType() != this && parentType._typeArgs != EMPTY_TYPES_ARRAY) {
             JavaClass baseClass = parentType.getBaseClass();
             if (baseClass != null) {
-                String baseName = getName();
-                JavaTypeVariable typeVarType = baseClass.getTypeParameterForName(baseName);
+                JavaTypeVariable typeVarType = baseClass.getTypeParameterForName(simpleName);
                 if (typeVarType != null)
                     return typeVarType;
             }
@@ -278,20 +308,53 @@ public class JType extends JNode {
     }
 
     /**
+     * Returns the package, if this type is really a package.
+     */
+    public JavaPackage getJavaPackage()
+    {
+        if (_javaPackage != null) return _javaPackage;
+        return _javaPackage = getJavaPackageImpl();
+    }
+
+    /**
+     * Returns the package, if this type is really a package.
+     */
+    private JavaPackage getJavaPackageImpl()
+    {
+        String simpleName = getSimpleName();
+        JType scopeType = getScopeType();
+        if (scopeType != null) {
+            JavaDecl scopeDecl = scopeType.getDecl();
+            return scopeDecl instanceof JavaPackage scopePackage ? scopePackage.getPackageForName(simpleName) : null;
+        }
+        return getJavaPackageForName(simpleName);
+    }
+
+    /**
      * Override to get name from base expression.
      */
     @Override
     protected String getNameImpl()
     {
-        JExpr baseExpr = getBaseExpr();
-        return baseExpr != null ? baseExpr.getName() : null;
+        JExprId idExpr = getId();
+        String name = idExpr.getName();
+        JType scopeType = getScopeType();
+        if (scopeType != null)
+            name = scopeType.getName() + "." + name;
+        return name;
     }
 
     /**
      * Override to return JavaType.
      */
     @Override
-    protected JavaType getDeclImpl()  { return getJavaType(); }
+    protected JavaDecl getDeclImpl()
+    {
+        JavaType javaType = getJavaType();
+        if (javaType != null)
+            return javaType;
+        return getJavaPackage();
+    }
 
     /**
      * Special code for getting 'var' type.
@@ -387,18 +450,19 @@ public class JType extends JNode {
      */
     public static JType createTypeForTypeAndToken(JavaType aType, ParseToken aToken)
     {
-        JType type = new JType();
-        type._startToken = type._endToken = aToken;
-        type._javaType = aType;
-        type._primitive = aType.isPrimitive();
-
-        // Create/add ids for name
         String typeName = aType.getName();
         String[] idStrings = typeName.split("\\.");
+        JType type = null;
+
+        // Create/add ids for name
         for (String idStr : idStrings) {
+            type = new JType(type, null);
+            type._startToken = type._endToken = aToken;
+            type._javaType = aType;
+            type._primitive = aType.isPrimitive();
             JExprId id = new JExprId(idStr);
             id._startToken = id._endToken = aToken;
-            type.addId(id);
+            type.setId(id);
         }
 
         return type;

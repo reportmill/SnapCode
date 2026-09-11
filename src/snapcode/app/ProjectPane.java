@@ -184,7 +184,7 @@ public class ProjectPane extends ViewController {
 
         // Find callbacks
         WebFile sourceDir = getProject().getSourceDir();
-        Runnable run = () -> new ProjectAnalysisTool().findUndefines(sourceDir, symbolCheckTextView);
+        Runnable run = () -> new ProjectAnalysisTool().findUndefinesForFile(sourceDir, symbolCheckTextView);
         new Thread(run).start();
     }
 
