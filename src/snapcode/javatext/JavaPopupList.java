@@ -501,7 +501,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         String simpleName = aJavaClass.getSimpleName();
 
         // Get importClassName for simple class name (If already present, just return)
-        String importClassName = aFile.getImportClassName(simpleName);
+        String importClassName = aFile.getClassNameForSimpleName(simpleName);
         if (importClassName != null && importClassName.equals(className))
             return;
 

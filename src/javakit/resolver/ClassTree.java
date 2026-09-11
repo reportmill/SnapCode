@@ -276,7 +276,6 @@ public class ClassTree {
         if (aPath.startsWith("/java/applet")) return true;
         if (aPath.startsWith("/java/awt/dnd")) return true;
         if (aPath.startsWith("/java/awt/peer")) return true;
-        if (aPath.startsWith("/java/awt/print")) return true;
         if (aPath.startsWith("/java/beans")) return true;
         if (aPath.startsWith("/java/lang/model")) return true;
         if (aPath.startsWith("/java/lang/management")) return true;

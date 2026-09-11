@@ -13,7 +13,7 @@ class ResolveDeclForChildType {
      */
     public static JavaType getJavaTypeForChildType(JType childType)
     {
-        String typeName = childType.getName();
+        String typeName = childType.getSimpleName();
 
         for (JNode parentNode = childType.getParent(); parentNode != null; parentNode = parentNode.getParent()) {
 
@@ -21,7 +21,7 @@ class ResolveDeclForChildType {
 
                 // Handle JFile: See if type is found in imports
                 case JFile jfile -> {
-                    String className = jfile.getImportClassName(typeName);
+                    String className = jfile.getClassNameForSimpleName(typeName);
                     JavaClass javaClass = className != null ? jfile.getJavaClassForName(className) : null;
                     if (javaClass != null)
                         return javaClass;

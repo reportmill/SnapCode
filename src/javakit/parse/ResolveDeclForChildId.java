@@ -33,7 +33,7 @@ class ResolveDeclForChildId {
                 case JFile jfile -> {
 
                     // See if it's a known class name using imports
-                    String className = jfile.getImportClassName(childIdName);
+                    String className = jfile.getClassNameForSimpleName(childIdName);
                     JavaClass javaClass = className != null ? jfile.getJavaClassForName(className) : null;
                     if (javaClass != null)
                         return javaClass;

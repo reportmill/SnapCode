@@ -53,7 +53,7 @@ public class JavaModule extends JavaDecl {
     /**
      * Returns a package for given simple class name.
      */
-    public JavaPackage getPackageForSimpleClassName(String simpleClassName)
+    public JavaPackage getPackageForSimpleName(String simpleClassName)
     {
         for (JavaPackage pkg : getPackages()) {
             if (pkg.getChildForName(simpleClassName) instanceof JavaClass)
@@ -65,9 +65,9 @@ public class JavaModule extends JavaDecl {
     /**
      * Returns a full class name for given simple class name.
      */
-    public String getClassNameForSimpleClassName(String simpleClassName)
+    public String getClassNameForSimpleName(String simpleClassName)
     {
-        JavaPackage pkg = getPackageForSimpleClassName(simpleClassName);
+        JavaPackage pkg = getPackageForSimpleName(simpleClassName);
         return pkg != null ? pkg.getName() + '.' + simpleClassName : null;
     }
 }

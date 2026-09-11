@@ -124,7 +124,7 @@ public class JImportDecl extends JNode {
 
         // Handle module
         if (getDecl() instanceof JavaModule javaModule)
-            return javaModule.getPackageForSimpleClassName(className) != null;
+            return javaModule.getPackageForSimpleName(className) != null;
 
         // If not inclusive (implicit) or import name not available, just return
         if (!isInclusive() || importName == null)
@@ -132,7 +132,7 @@ public class JImportDecl extends JNode {
 
         // If package import, see if name is package class
         if (!isStatic()) {
-            String pkgClassName = importName + '.' + className;
+            String pkgClassName = importName + (isClassName() ? '$' : '.') + className;
             if (isKnownClassName(pkgClassName))
                 return true;
         }
@@ -245,15 +245,15 @@ public class JImportDecl extends JNode {
     /**
      * Returns the class name for a given name.
      */
-    public String getImportClassName(String aName)
+    public String getClassNameForSimpleName(String simpleName)
     {
         if (getDecl() instanceof JavaModule javaModule)
-            return javaModule.getClassNameForSimpleClassName(aName);
+            return javaModule.getClassNameForSimpleName(simpleName);
 
         String className = isClassName() ? getEvalClassName() : getName();
         if (_inclusive) {
-            if (!isStatic() || !className.endsWith(aName))
-                className += (isClassName() ? '$' : '.') + aName;
+            if (!isStatic() || !className.endsWith(simpleName))
+                className += (isClassName() ? '$' : '.') + simpleName;
         }
         return className;
     }

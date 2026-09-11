@@ -226,48 +226,30 @@ public class JFile extends JNode {
     /**
      * Returns a Class name for given name referenced in file.
      */
-    public String getImportClassName(String aName)
+    public String getClassNameForSimpleName(String simpleName)
     {
-        // Handle fully specified name (or java.lang name)
-        JavaClass knownClass = getJavaClassForName(aName);
+        // See if class is in unnamed (default) package
+        JavaClass knownClass = getJavaClassForName(simpleName);
         if (knownClass != null)
             return knownClass.getName();
 
-        // If name has parts, handle them separately
-        if (aName.indexOf('.') > 0) {
-
-            // Get import part names
-            String[] names = aName.split("\\.");
-            String className = getImportClassName(names[0]);
-            if (className == null)
-                return null;
-
-            // Get JavaClass for name
-            JavaClass javaClass = getJavaClassForName(className);
-            for (int i = 1; javaClass != null && i < names.length; i++)
-                javaClass = javaClass.getDeclaredClassForName(names[i]);
-
-            // Return class name
-            return javaClass != null ? javaClass.getName() : null;
-        }
-
-        // Try "java.lang" + name
-        JavaClass javaLangClass = getJavaClassForName("java.lang." + aName);
+        // See if class is in "java.lang" package
+        JavaClass javaLangClass = getJavaClassForName("java.lang." + simpleName);
         if (javaLangClass != null)
             return javaLangClass.getName();
 
         // If file declares package, see if it's in package
         String packageName = getPackageName();
         if (packageName != null && !packageName.isEmpty()) {
-            String className = packageName + '.' + aName;
+            String className = packageName + '.' + simpleName;
             if (isKnownClassName(className))
                 return className;
         }
 
         // If import declaration for name, return import class
-        JImportDecl importDecl = getImportForClassName(aName);
+        JImportDecl importDecl = getImportForClassName(simpleName);
         if (importDecl != null)
-            return importDecl.getImportClassName(aName);
+            return importDecl.getClassNameForSimpleName(simpleName);
 
         // Return not found
         return null;
