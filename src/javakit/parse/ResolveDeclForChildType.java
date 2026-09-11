@@ -40,7 +40,7 @@ class ResolveDeclForChildType {
                     if (thisClass != null) {
                         if (thisClass.getSimpleName().equals(typeName))
                             return thisClass;
-                        JavaClass innerClass = thisClass.getDeclaredClassForName(typeName);
+                        JavaClass innerClass = thisClass.getClassForName(typeName);
                         if (innerClass != null)
                             return innerClass;
                     }
