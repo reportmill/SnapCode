@@ -14,9 +14,29 @@ class ResolveDeclForChildId {
      */
     public static JavaDecl getDeclForChildId(JExprId childId)
     {
+        // Handle parent WithId (method/class/field decl id, method call/ref id, local var decl id, etc.)
+        JNode childParent = childId.getParent();
+        if (childParent instanceof WithId withId && withId.getId() == childId)
+            return childParent.getDecl();
+
+        // Handle parent is dot expression: Return dot expression
+        if (childParent instanceof JExprDot dotExpr && dotExpr.getExpr() == childId)
+            return dotExpr.getDecl();
+
         String childIdName = childId.getName();
 
         for (JNode parentNode = childId.getParent(); parentNode != null; parentNode = parentNode.getParent()) {
+
+            // If parent is var decl and this is its id, return it
+            if (parentNode instanceof JVarDecl varDecl && varDecl.getId() == childId)
+                return varDecl.getDecl();
+
+            // If parent has var decls, and has one that defines this id name, return it
+            if (parentNode instanceof WithVarDecls withVarDecls) {
+                JVarDecl varDecl = withVarDecls.getVarDeclForId(childId);
+                if (varDecl != null)
+                    return varDecl.getDecl();
+            }
 
             switch (parentNode) {
 
