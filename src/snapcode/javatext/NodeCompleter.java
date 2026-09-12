@@ -103,7 +103,7 @@ public class NodeCompleter {
     private void addCompletionsForId(JExprId anId)
     {
         // If id is scoped, do special case
-        JExpr scopeExpr = anId.getScopeExpr();
+        JNode scopeExpr = anId.getScopeNode();
         if (scopeExpr != null) {
             addCompletionsForScopedId(scopeExpr);
             return;
@@ -188,7 +188,7 @@ public class NodeCompleter {
      *   - Class or package names (if parent is package)
      *   - Fields or methods names (if parent evaluates to type)
      */
-    private void addCompletionsForScopedId(JExpr scopeExpr)
+    private void addCompletionsForScopedId(JNode scopeExpr)
     {
         // Get scope expression decl
         JavaDecl scopeDecl = scopeExpr.getDecl();
@@ -223,7 +223,7 @@ public class NodeCompleter {
             JavaClass scopeExprEvalClass = scopeDecl.getEvalClass();
 
             // Get whether expression is class name
-            boolean staticMembersOnly = scopeExpr.isClassNameLiteral();
+            boolean staticMembersOnly = scopeExpr instanceof JType || scopeExpr instanceof JExpr expr && expr.isClassNameLiteral();
             if (staticMembersOnly) {
 
                 // If parent is MethodRef, reset value so we get all methods

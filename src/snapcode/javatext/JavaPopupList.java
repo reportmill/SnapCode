@@ -139,7 +139,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     private void showPopupList()
     {
         // Get start char index for completion node
-        JExprId selNode = getIdExprAtCursor();
+        JExprId selNode = getIdExprAtCursor(); if (selNode == null) return;
         String selNodeStr = selNode.getName();
         int selStart = _textArea.getSelStart();
         int nodeStart = selStart - selNodeStr.length();
@@ -298,14 +298,14 @@ public class JavaPopupList extends PopupList<JavaDecl> {
         JNode idNode = idExpr;
         if (idNode.getParent() instanceof JExprMethodCall)
             idNode = idNode.getParent();
-        if (idNode.getParent() instanceof JExprDot dotExpr) {
-            if (idNode == dotExpr.getExpr()) {
-                JExpr scopeExpr = dotExpr.getScopeExpr();
-                JExpr newDotExpr = new JExprDot(scopeExpr, virtualIdExpr);
-                newDotExpr.setParent(dotExpr.getParent());
-                scopeExpr.setParent(dotExpr);
-            }
+        if (idNode.getParent() instanceof JExprDot dotExpr && idNode == dotExpr.getExpr()) {
+            JExpr scopeExpr = dotExpr.getScopeExpr();
+            JExpr newDotExpr = new JExprDot(scopeExpr, virtualIdExpr);
+            newDotExpr.setParent(dotExpr.getParent());
+            scopeExpr.setParent(dotExpr);
         }
+        else if (idNode.getParent() instanceof JType jtype)
+            System.err.println("JavaPopupList.getVirtualIdExprForPrefix(): found an inner type");
 
         // Return
         return virtualIdExpr;
@@ -317,7 +317,7 @@ public class JavaPopupList extends PopupList<JavaDecl> {
     private void applySuggestion()
     {
         // Get jnode and completion decl
-        JExprId selNode = getIdExprAtCursor();
+        JExprId selNode = getIdExprAtCursor(); if (selNode == null) return;
         JavaDecl completionDecl = getSelItem();
 
         // Handle body decl

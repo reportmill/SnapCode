@@ -57,6 +57,16 @@ public abstract class JExpr extends JNode implements WithVarDecls {
     }
 
     /**
+     * Returns the scope node.
+     */
+    public JNode getScopeNode()
+    {
+        if (getParent() instanceof JType jtype && jtype.getId() == this)
+            return jtype.getScopeType();
+        return getScopeExpr();
+    }
+
+    /**
      * Returns whether expression is a class name literal.
      */
     public boolean isClassNameLiteral()
