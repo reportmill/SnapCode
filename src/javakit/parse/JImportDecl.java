@@ -220,29 +220,6 @@ public class JImportDecl extends JNode {
     }
 
     /**
-     * Override to return errors for import.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        // Handle missing package or class name
-        if (getName().isEmpty())
-            return NodeError.newErrorArray(this, "Import needs package or class name");
-
-        // Handle super errors
-        NodeError[] superErrors = super.getErrorsImpl();
-        if (superErrors.length > 0)
-            return superErrors;
-
-        // Handle missing wildcard
-        if (getDecl() instanceof JavaPackage && !isInclusive())
-            return NodeError.newErrorArray(this, "Import needs to end with class name or wildcard (*)");
-
-        // Return no errors
-        return NodeError.NO_ERRORS;
-    }
-
-    /**
      * Returns the class name for a given name.
      */
     public String getClassNameForSimpleName(String simpleName)

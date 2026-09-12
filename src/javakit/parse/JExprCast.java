@@ -61,27 +61,4 @@ public class JExprCast extends JExpr {
     {
         return _type != null ? _type.getDecl() : null;
     }
-
-    /**
-     * Override to provide errors for JStmtExpr.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        // If Type or Expr have errors, just return them
-        NodeError[] errors = super.getErrorsImpl();
-        if (errors.length > 0)
-            return errors;
-
-        // Handle missing type or expression
-        if (_type == null)
-            return NodeError.newErrorArray(this, "Missing or incomplete cast type");
-        if (_expr == null)
-            return NodeError.newErrorArray(this, "Missing or incomplete cast expression");
-
-        // Maybe add an "isCastable()" check? If common superclass is Object and expression class isn't Object, return false?
-
-        // Return
-        return errors;
-    }
 }

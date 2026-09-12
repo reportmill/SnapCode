@@ -224,39 +224,6 @@ public class JVarDecl extends JNode implements WithId {
     protected String getNameImpl()  { return ""; }
 
     /**
-     * Override to check valid assignment type.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        // If not var and type has errors, return them
-        JType type = getType();
-        if (type == null)
-            return NodeError.newErrorArray(this, "Missing type");
-        if (!type.isVarType()) {
-            NodeError[] typeErrors = type.getErrors();
-            if (typeErrors.length > 0)
-                return typeErrors;
-        }
-
-        // If initializer expression set, check for errors
-        JExpr initExpr = getInitExpr();
-        if (initExpr != null) {
-            NodeError[] initializerErrors = initExpr.getErrors();
-            if (initializerErrors.length > 0)
-                return initializerErrors;
-        }
-
-        // If type has errors, just return it
-        NodeError[] typeErrors = type.getErrors();
-        if (typeErrors.length > 0)
-            return typeErrors;
-
-        // Return normal version
-        return super.getErrorsImpl();
-    }
-
-    /**
      * Returns an identifier string describing where this variable declaration is defined.
      */
     protected static String getUniqueId(JNode aNode, String aName, JavaType aType)

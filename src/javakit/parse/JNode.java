@@ -473,25 +473,7 @@ public class JNode {
     public NodeError[] getErrors()
     {
         if (_errors != null) return _errors;
-        return _errors = getErrorsImpl();
-    }
-
-    /**
-     * Returns the node errors.
-     */
-    protected NodeError[] getErrorsImpl()
-    {
-        NodeError[] errors = NodeError.NO_ERRORS;
-
-        // Iterate over children and add any errors for each
-        for (JNode child : _children) {
-            NodeError[] childErrors = child.getErrors();
-            if (childErrors.length > 0)
-                errors = ArrayUtils.addAll(errors, childErrors);
-        }
-
-        // Return
-        return errors;
+        return _errors = NodeErrorFinder.getErrorsForNode(this);
     }
 
     /**

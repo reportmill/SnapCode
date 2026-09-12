@@ -264,12 +264,12 @@ public class JavaAgent extends TextAgent {
         NodeError[] errors = NodeError.NO_ERRORS;
         JFile jFile = getJFile();
         if (jFile.getException() != null)
-            errors = NodeError.getNodeErrorForFileParseException(jFile);
+            errors = NodeErrorFinder.getNodeErrorForFileParseException(jFile);
 
         // If no parse errors, reload class and do full error check
         if (errors.length == 0) {
             reloadClassFromClassDecl();
-            errors = NodeError.getAllNodeErrors(jFile);
+            errors = NodeErrorFinder.getNodeErrorsForFile(jFile);
             setColorOfMemberIds();
         }
 

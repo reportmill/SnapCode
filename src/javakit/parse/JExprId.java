@@ -167,22 +167,4 @@ public class JExprId extends JExpr {
             default -> "UnknownId";
         };
     }
-
-    /**
-     * Override to provide errors for JExprId.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        // If Parent is WithId, just return
-        if (getParent() instanceof WithId withId && withId.getId() == this)
-            return NodeError.NO_ERRORS;
-
-        // Handle can't resolve id
-        JavaDecl decl = getDecl();
-        if (decl == null)
-            return NodeError.newErrorArray(this, "Can't resolve id: " + getName());
-
-        return NodeError.NO_ERRORS;
-    }
 }

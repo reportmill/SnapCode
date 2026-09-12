@@ -149,28 +149,4 @@ public abstract class JExecutableDecl extends JMemberDecl implements WithBlockSt
         JVarDecl[] parameters = getParameters();
         return ArrayUtils.map(parameters, JVarDecl::getJavaClass, JavaClass.class);
     }
-
-    /**
-     * Override to return errors for ReturnValue, Parameters, ThrowsList and TypeVars.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        NodeError[] errors = NodeError.NO_ERRORS;
-
-        // Get errors for params
-        JVarDecl[] parameters = getParameters();
-        errors = NodeError.addNodeErrorsForNodes(errors, parameters);
-
-        // Get errors for throws list
-        JExpr[] throwsList = getThrowsList();
-        errors = NodeError.addNodeErrorsForNodes(errors, throwsList);
-
-        // Get errors for type vars
-        JTypeVar[] typeVars = getTypeParamDecls();
-        errors = NodeError.addNodeErrorsForNodes(errors, typeVars);
-
-        // Return
-        return errors;
-    }
 }

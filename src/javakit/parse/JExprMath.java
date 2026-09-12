@@ -237,22 +237,6 @@ public class JExprMath extends JExpr {
     }
 
     /**
-     * Override to customize for math expression.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        // If missing operands, return error
-        int opCountActual = getOperandCount();
-        int opCountExpected = _op.getOperandCount();
-        if (opCountActual < opCountExpected)
-            return NodeError.newErrorArray(this, "Missing operand");
-
-        // Do normal version
-        return super.getErrorsImpl();
-    }
-
-    /**
      * Returns the part name.
      */
     public String getNodeString()  { return _op + "Expr"; }

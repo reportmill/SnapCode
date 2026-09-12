@@ -71,26 +71,4 @@ public class JStmtConditional extends JStmt implements WithBodyStmt, WithBlockSt
      */
     @Override
     public JVarDecl[] getVarDecls()  { return _cond != null ? _cond.getVarDecls() : new JVarDecl[0]; }
-
-    /**
-     * Override to provide errors for conditional statements.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        NodeError[] errors = super.getErrorsImpl();
-        if (errors.length > 0)
-            return errors;
-
-        // Handle missing conditional
-        if (_cond == null && !(this instanceof JStmtFor))
-            return NodeError.newErrorArray(this, "Missing conditional");
-
-        // Handle missing statement
-        if (_stmt == null)
-            return NodeError.newErrorArray(this, "Missing statement block");
-
-        // Return
-        return errors;
-    }
 }

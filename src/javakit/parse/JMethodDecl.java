@@ -89,21 +89,4 @@ public class JMethodDecl extends JExecutableDecl {
      * Returns the part name.
      */
     public String getNodeString()  { return "MethodDecl"; }
-
-    /**
-     * Override to return errors for ReturnValue, Parameters, ThrowsList and TypeVars.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        // Get errors for type
-        JType returnType = getReturnType();
-        if (returnType == null) {
-            JNode errorNode = getChildCount() > 0 ? getChild(0) : this; // Typing "List<" can cause method decl with no children
-            return NodeError.newErrorArray(errorNode, "Missing return type");
-        }
-
-        // Do normal version
-        return super.getErrorsImpl();
-    }
 }

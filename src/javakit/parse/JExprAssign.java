@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import javakit.resolver.JavaClass;
 import javakit.resolver.JavaDecl;
 
 /**
@@ -28,7 +27,7 @@ public class JExprAssign extends JExpr {
         ShiftLeft ("<<="), ShiftRight (">>="), ShiftRightUnsigned (">>>=");
 
         // The Op string
-        private String  _string;
+        private final String _string;
 
         /** Constructor. */
         Op(String aString)  { _string = aString; }
@@ -96,42 +95,6 @@ public class JExprAssign extends JExpr {
         if (_op == Op.Assign)
             return "AssignExpr";
         return "Assign" + _op + "Expr";
-    }
-
-    /**
-     * Override to check valid assignment type.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        // Get left side expression and errors - just return if errors found
-        JExpr leftSideExpr = getLeftSideExpr();
-        NodeError[] leftSideErrors = leftSideExpr.getErrors();
-        if (leftSideErrors.length > 0)
-            return leftSideErrors;
-
-        // Get value expression and errors - just return if errors found
-        JExpr valueExpr = getValueExpr();
-        if (valueExpr == null)
-            return NodeError.newErrorArray(this, "Missing assignment value");
-        NodeError[] valueExprErrors = valueExpr.getErrors();
-        if (valueExprErrors.length > 0)
-            return valueExprErrors;
-
-        // Get assign to class - return error if null (impossible since no left side errors)
-        JavaClass assignToClass = leftSideExpr.getEvalClass();
-        if (assignToClass == null)
-            return NodeError.newErrorArray(this, "Can't resolve type: " + leftSideExpr.getName());
-
-        // Get assign to class and value class - return error if no match
-        //JavaClass valueClass = valueExpr.getEvalClass();
-        //if (valueClass == null && assignToClass.isPrimitive())
-        //    return NodeError.newErrorArray(this, "Incompatible types: <nulltype> cannot be converted to " + assignToClass.getName());
-        //if (!assignToClass.isAssignableFrom(valueClass))
-        //    return NodeError.newErrorArray(this, "Invalid assignment type");
-
-        // Return
-        return super.getErrorsImpl();
     }
 
     /**

@@ -54,20 +54,4 @@ public class JExprParen extends JExpr {
             return null;
         return _expr.getEvalType();
     }
-
-    /**
-     * Override to provide errors for JStmtExpr.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        NodeError[] errors = super.getErrorsImpl();
-
-        // Handle missing statement
-        if (_expr == null)
-            errors = NodeError.addError(errors, this, "Missing or incomplete expression", 0);
-
-        // Return
-        return errors;
-    }
 }

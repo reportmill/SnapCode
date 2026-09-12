@@ -240,30 +240,6 @@ public class JExprMethodRef extends JExprLambdaBase {
     }
 
     /**
-     * Override to customize for MethodRef.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        // If scope expression has errors, return them
-        NodeError[] scopeExprErrors = _scopeExpr.getErrors();
-        if (scopeExprErrors.length > 0)
-            return scopeExprErrors;
-
-        // If no MethodId expression has errors, return them
-        if (_methodId == null)
-            return  NodeError.newErrorArray(this, "Method reference method name not specified");
-
-        // If MethodId has errors, return them
-        NodeError[] methodIdErrors = _methodId.getErrors();
-        if (methodIdErrors.length > 0)
-            return methodIdErrors;
-
-        // Return no errors
-        return super.getErrorsImpl();
-    }
-
-    /**
      * Returns the node name.
      */
     public String getNodeString()  { return "MethodRef"; }

@@ -246,39 +246,6 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
     private boolean _resolvingEvalType;
 
     /**
-     * Override to provide errors for JStmtExpr.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        // If any arg errors, return them
-        for (JExpr arg : _args) {
-            NodeError[] argErrors = arg.getErrors();
-            if (argErrors.length > 0)
-                return argErrors;
-        }
-
-        // Handle can't resolve method
-        JavaMethod method = getMethod();
-        if (method == null) {
-
-            // If no method exists for name, return can't resolve method name
-            boolean hasAnyMethodForName = getMethodAny() != null;
-            String methodString = getMethodString(hasAnyMethodForName);
-            return NodeError.newErrorArray(this, "Can't find method: " + methodString);
-        }
-
-        // If missing args, complain
-        int paramCount = method.getParameterCount();
-        int argCount = getArgCount();
-        if (paramCount > argCount && !method.isVarArgs())
-            return NodeError.newErrorArray(this, "Missing args, " + paramCount + " expected, " + argCount + " provided");
-
-        // Return
-        return NodeError.NO_ERRORS;
-    }
-
-    /**
      * Looks to see if there is any method for given name.
      */
     protected JavaMethod getMethodAny()
@@ -296,40 +263,6 @@ public class JExprMethodCall extends JExpr implements WithId, WithArgs {
 
         // Search for compatible method for name and arg types
         return JavaClassUtils.getCompatibleMethod(scopeClass, name, null, staticOnly);
-    }
-
-    /**
-     * Returns a string for method.
-     */
-    private String getMethodString(boolean withArgs)
-    {
-        // Get method name and arg types
-        String methodName = getName();
-        if (methodName == null)
-            return "No name found";
-        if (!withArgs)
-            return methodName + "()";
-        String argTypesString = getArgTypesString();
-        String methodString = methodName + argTypesString;
-
-        // Get scope node class name
-        JavaDecl scopeEvalType = getScopeEvalType();
-        String scopeClassName = scopeEvalType != null ? scopeEvalType.getEvalClassName() : null;
-        if (scopeClassName != null)
-            methodString = scopeClassName + '.' + methodString;
-
-        // Return
-        return methodString;
-    }
-
-    /**
-     * Returns the parameter string.
-     */
-    private String getArgTypesString()
-    {
-        JavaType[] argTypes = ArrayUtils.map(_args, expr -> expr != null ? expr.getEvalType() : null, JavaType.class);
-        String argTypeString = ArrayUtils.mapToStringsAndJoin(argTypes, type -> type != null ? type.getSimpleName() : "null", ",");
-        return '(' + argTypeString + ')';
     }
 
     /**

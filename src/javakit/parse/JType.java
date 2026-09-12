@@ -413,24 +413,6 @@ public class JType extends JNode {
     }
 
     /**
-     * Override to provide errors for this class.
-     */
-    @Override
-    protected NodeError[] getErrorsImpl()
-    {
-        JavaType javaType = getJavaType();
-        if (javaType != null)
-            return NodeError.NO_ERRORS;
-
-        // Let compiler handle 'var' errors
-        if (isVarType())
-            return NodeError.NO_ERRORS;
-
-        // Return
-        return NodeError.newErrorArray(this, "Can't resolve type: " + getName());
-    }
-
-    /**
      * Override to customize for this class.
      */
     @Override
