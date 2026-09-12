@@ -2,12 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
-import snap.parse.ParseException;
 import snap.util.ArrayUtils;
 import snap.util.StringUtils;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * This class represents an error in a JNode.
