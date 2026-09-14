@@ -315,6 +315,10 @@ public class SnapCompiler {
         if (message == null)
             return "";
 
+        // Handle common errors
+        if (message.startsWith("cannot find symbol"))
+            return "Cannot resolve symbol '" + getDiagnosticSubstring(aDiagnostic) + "'";
+
         // Strip trailing 'symbol:'/'location:' detail lines, which just repeat info in the source
         int stripIndex = message.indexOf("symbol:");
         if (stripIndex < 0)
@@ -358,5 +362,33 @@ public class SnapCompiler {
             return true;
 
         return false;
+    }
+
+    /**
+     * Returns the diagnostic text defined by start/end position.
+     */
+    private static String getDiagnosticSubstring(Diagnostic<?> aDiagnostic)
+    {
+        // Get java file for diagnostic
+        Object diagnosticSource = aDiagnostic.getSource();
+        WebFile javaFile = diagnosticSource instanceof SnapCompilerJFO snapFileJFO ? snapFileJFO.getFile() : null;
+        if (javaFile == null) { System.err.println("SnapCompiler.getTextForDiagnostic: No file");
+            return "";
+        }
+
+        // Get java text for java file
+        JavaAgent javaAgent = JavaAgent.getAgentForJavaFile(javaFile);
+        String javaText = javaAgent.getJavaTextString();
+        if (javaFile.getFileType().equals("jepl"))
+            javaText = javaAgent.getJeplJavaText().toString();
+
+        // Get diagnostic start/end positions
+        int startCharIndex = (int) aDiagnostic.getStartPosition();
+        if (startCharIndex < 0)
+            startCharIndex = 0;
+        int endCharIndex = Math.max((int) aDiagnostic.getEndPosition(), startCharIndex);
+
+        // Return start/end text
+        return javaText.substring(startCharIndex, endCharIndex).trim();
     }
 }
