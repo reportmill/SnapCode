@@ -127,8 +127,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
             public void close() throws IOException
             {
                 super.close();
-                if (_compiler._checkErrorsOnly)
-                    return;
+                //if (_compiler._checkErrorsOnly) return;
                 byte[] classFileBytes = toByteArray();
                 compileFinished(classFileBytes);
             }

@@ -260,37 +260,28 @@ public class JavaAgent extends TextAgent {
         // Check for //DEPS directive
         JavaDeps.resolveDependenciesForFile(null, _javaFile);
 
-        // Get parse errors
-        NodeError[] errors = NodeError.NO_ERRORS;
-        JFile jFile = getJFile();
-        if (jFile.getException() != null)
-            errors = NodeErrorFinder.getNodeErrorForFileParseException(jFile);
-
-        // If no parse errors, reload class and do full error check
-        if (errors.length == 0) {
-            reloadClassFromClassDecl();
-            errors = NodeErrorFinder.getNodeErrorsForFile(jFile);
-            setColorOfMemberIds();
-        }
-
-        // Convert to BuildIssues and set in agent
-        WebFile javaFile = getFile();
-        List<BuildIssue> buildIssues = ArrayUtils.mapToList(errors, error -> BuildIssue.createIssueForNodeError(error, javaFile));
+        // Perform error check compile
+        SnapCompiler compiler = new SnapCompiler(getProject());
+        compiler.checkErrorsOnly();
+        boolean compileSuccess = compiler.compileFile(_javaFile);
+        if (!compileSuccess)
+            return;
 
         // Check for unused imports
         List<BuildIssue> unusedImportErrors = getUnusedImportErrors();
-        if (!unusedImportErrors.isEmpty())
-            buildIssues.addAll(unusedImportErrors);
-
-        // Set build issues
-        setBuildIssues(buildIssues);
-
-        // If no errors, let compiler have a go
-        if (!ListUtils.hasMatch(buildIssues, BuildIssue::isError)) {
-            SnapCompiler compiler = new SnapCompiler(getProject());
-            compiler.checkErrorsOnly();
-            compiler.compileFile(_javaFile);
+        if (!unusedImportErrors.isEmpty()) {
+            unusedImportErrors = new ArrayList<>(unusedImportErrors);
+            List<BuildIssue> buildIssues = getBuildIssues();
+            unusedImportErrors.addAll(buildIssues);
+            setBuildIssues(unusedImportErrors);
         }
+
+        // Reload class
+        JFile jFile = getJFile();
+        JClassDecl classDecl = jFile != null ? jFile.getClassDecl() : null;
+        JavaClass javaClass = classDecl != null ? classDecl.getJavaClass() : null;
+        if (javaClass != null)
+            javaClass.reloadClass();
     }
 
     /**
@@ -306,22 +297,6 @@ public class JavaAgent extends TextAgent {
 
         // Create BuildIssues for each and return
         return ListUtils.map(unusedImports, idecl -> createUnusedImportBuildIssue(_javaFile, idecl));
-    }
-
-    /**
-     * Reload class from JClassDecl.
-     */
-    private void reloadClassFromClassDecl()
-    {
-        // Get class decl (just return if null)
-        JFile jFile = getJFile();
-        JClassDecl classDecl = jFile.getClassDecl();
-        if (classDecl == null)
-            return;
-
-        // Reload class
-        JavaClass javaClass = classDecl.getJavaClass();
-        javaClass.reloadClassFromClassDecl(classDecl);
     }
 
     /**
