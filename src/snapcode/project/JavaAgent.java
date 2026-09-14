@@ -277,11 +277,7 @@ public class JavaAgent extends TextAgent {
         }
 
         // Reload class
-        JFile jFile = getJFile();
-        JClassDecl classDecl = jFile != null ? jFile.getClassDecl() : null;
-        JavaClass javaClass = classDecl != null ? classDecl.getJavaClass() : null;
-        if (javaClass != null)
-            javaClass.reloadClass();
+        reloadClassFromClassDecl();
     }
 
     /**
@@ -297,6 +293,22 @@ public class JavaAgent extends TextAgent {
 
         // Create BuildIssues for each and return
         return ListUtils.map(unusedImports, idecl -> createUnusedImportBuildIssue(_javaFile, idecl));
+    }
+
+    /**
+     * Reload class from JClassDecl.
+     */
+    private void reloadClassFromClassDecl()
+    {
+        // Get class decl (just return if null)
+        JFile jFile = getJFile();
+        JClassDecl classDecl = jFile.getClassDecl();
+        if (classDecl == null)
+            return;
+
+        // Reload class
+        JavaClass javaClass = classDecl.getJavaClass();
+        javaClass.reloadClassFromClassDecl(classDecl);
     }
 
     /**

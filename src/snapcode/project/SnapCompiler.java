@@ -102,7 +102,7 @@ public class SnapCompiler {
         // Handle CheckErrorsOnly (either set proc none or add debug)
         if (_checkErrorsOnly)
             options.add("-proc:none");
-        options.add("-g");
+        else options.add("-g");
 
         // Set release version
         if (SnapUtils.getJavaVersionInt() > 11 && !SnapEnv.isWebVM) {
