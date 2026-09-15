@@ -54,7 +54,7 @@ public class ClassTreeSite {
         // If root package and base module, add primitives
         if (filePath.equals("/") && _site.getName().endsWith("java.base")) {
             List<Class<?>> primitives = List.of(boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class, void.class);
-            List<ClassTree.ClassTreeNode> primitiveNodes = ListUtils.map(primitives, cls -> new ClassTree.ClassTreeNode(cls.getName(), false));
+            List<ClassTree.ClassTreeNode> primitiveNodes = ListUtils.map(primitives, cls -> createClassTreeNode(cls.getName(), false));
             classTreeNodes.addAll(primitiveNodes);
         }
 
@@ -76,15 +76,15 @@ public class ClassTreeSite {
             // Handle class file
             if (isClassFile(file)) {
                 String className = getClassNameForClassFile(file);
-                ClassTree.ClassTreeNode classNode = new ClassTree.ClassTreeNode(className, false);
+                ClassTree.ClassTreeNode classNode = createClassTreeNode(className, false);
                 classTreeNodes.add(classNode);
             }
 
             // Handle package
             else if (isPackageDir(file)) {
                 String packageName = getPackageNameForPackageDirFile(file);
-                if (!ListUtils.hasMatch(classTreeNodes, classTreeNode -> classTreeNode.fullName.equals(packageName))) {
-                    ClassTree.ClassTreeNode packageNode = new ClassTree.ClassTreeNode(packageName, true);
+                if (!ListUtils.hasMatch(classTreeNodes, classTreeNode -> classTreeNode.fullName().equals(packageName))) {
+                    ClassTree.ClassTreeNode packageNode = createClassTreeNode(packageName, true);
                     classTreeNodes.add(packageNode);
                 }
             }
@@ -146,6 +146,25 @@ public class ClassTreeSite {
     {
         WebURL moduleUrl = WebURL.getUrl("jrt:/" + moduleName); assert moduleUrl != null;
         return new ClassTreeSite(moduleUrl.getSite());
+    }
+
+    /**
+     * Creates a class tree node for given full name and whether name is package.
+     */
+    private static ClassTree.ClassTreeNode createClassTreeNode(String fullName, boolean isPackage)
+    {
+        String simpleName = getSimpleName(fullName);
+        return new ClassTree.ClassTreeNode(fullName, isPackage, simpleName);
+    }
+
+    /**
+     * Returns a simple class/package name for given full name.
+     */
+    private static String getSimpleName(String fullName)
+    {
+        int sepIndex = fullName.lastIndexOf('$');
+        if (sepIndex < 0) sepIndex = fullName.lastIndexOf('.');
+        return fullName.substring(sepIndex + 1);
     }
 
     /**
@@ -215,30 +234,30 @@ public class ClassTreeSite {
     private static void writeClassTreePackageToStringBuilder(ClassTreeSite classTreeSite, String packageName, StringBuilder sb)
     {
         List<ClassTree.ClassTreeNode> rootNodes = classTreeSite.getClassTreeNodesForPackageName(packageName);
-        List<ClassTree.ClassTreeNode> classNodes = ListUtils.filter(rootNodes, node -> !node.isPackage);
-        List<ClassTree.ClassTreeNode> packageNodes = ListUtils.filter(rootNodes, node -> node.isPackage);
+        List<ClassTree.ClassTreeNode> classNodes = ListUtils.filter(rootNodes, node -> !node.isPackage());
+        List<ClassTree.ClassTreeNode> packageNodes = ListUtils.filter(rootNodes, ClassTree.ClassTreeNode::isPackage);
 
         // Write /package-name
         sb.append('/').append(packageName).append('\n');
         classNodes.forEach(classNode -> writeClassNodeToStringBuilder(classNode, sb, false));
-        packageNodes.forEach(packageNode -> writeClassTreePackageToStringBuilder(classTreeSite, packageNode.fullName, sb));
+        packageNodes.forEach(packageNode -> writeClassTreePackageToStringBuilder(classTreeSite, packageNode.fullName(), sb));
     }
 
     private static void writeClassNodeToStringBuilder(ClassTree.ClassTreeNode classNode, StringBuilder sb, boolean isInner)
     {
         Class<?> cls;
-        try { cls = Class.forName(classNode.fullName); }
-        catch (ClassNotFoundException e) { System.err.println("Cannot find class " + classNode.fullName); return; }
+        try { cls = Class.forName(classNode.fullName()); }
+        catch (ClassNotFoundException e) { System.err.println("Cannot find class " + classNode.fullName()); return; }
         if (!Modifier.isPublic(cls.getModifiers()))
             return;
 
         if (isInner) sb.append('$');
-        sb.append(classNode.simpleName).append('\n');
+        sb.append(classNode.simpleName()).append('\n');
 
         // Recurse for inner classes - For now only getting 1 level of inner classes
         if (!isInner) {
             Class<?>[] innerClasses = cls.getDeclaredClasses();
-            Stream.of(innerClasses).forEach(icls -> writeClassNodeToStringBuilder(new ClassTree.ClassTreeNode(icls.getName(), false), sb, true));
+            Stream.of(innerClasses).forEach(icls -> writeClassNodeToStringBuilder(createClassTreeNode(icls.getName(), false), sb, true));
         }
     }
 

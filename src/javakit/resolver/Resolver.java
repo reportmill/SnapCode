@@ -73,13 +73,13 @@ public class Resolver {
     private JavaDecl getJavaDeclForClassTreeNode(ClassTree.ClassTreeNode classTreeNode)
     {
         // If package, create/return package
-        if (classTreeNode.isPackage)
-            return getJavaPackageForName(classTreeNode.fullName);
+        if (classTreeNode.isPackage())
+            return getJavaPackageForName(classTreeNode.fullName());
 
         // Return class
-        JavaClass javaClass = getJavaClassForName(classTreeNode.fullName);
+        JavaClass javaClass = getJavaClassForName(classTreeNode.fullName());
         if (javaClass == null) // This should never happen
-            System.err.println("Resolver.getJavaDeclForClassTreeNode: Can't find class: " + classTreeNode.fullName);
+            System.err.println("Resolver.getJavaDeclForClassTreeNode: Can't find class: " + classTreeNode.fullName());
         return javaClass;
     }
 
@@ -288,8 +288,7 @@ public class Resolver {
             return getJavaGenericArrayTypeForType((GenericArrayType) aType);
 
         // Handle WildcardType: Punt for now, focus on lower bound
-        if (aType instanceof WildcardType) {
-            WildcardType wc = (WildcardType) aType;
+        if (aType instanceof WildcardType wc) {
             Type[] boundsTypes = wc.getLowerBounds().length > 0 ? wc.getLowerBounds() : wc.getUpperBounds();
             Type boundsType = boundsTypes.length > 0 ? boundsTypes[0] : Object.class;
             return getJavaTypeForType(boundsType);
@@ -422,8 +421,7 @@ public class Resolver {
         String typeVarName = typeVar.getName();
 
         // Handle class: Get JavaClass and return JavaTypeVariable for name
-        if (classOrMethod instanceof Class) {
-            Class<?> ownerClass = (Class<?>) classOrMethod;
+        if (classOrMethod instanceof Class<?> ownerClass) {
             JavaClass javaClass = getJavaClassForClass(ownerClass);
             return javaClass.getTypeParameterForName(typeVarName);
         }
@@ -501,5 +499,4 @@ public class Resolver {
      * Standard toStringProps implementation.
      */
     public String toStringProps()  { return ""; }
-
 }

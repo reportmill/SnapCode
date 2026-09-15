@@ -16,6 +16,11 @@ public class ClassTree {
     private List<ClassTreeSite> _classPathSites;
 
     /**
+     * A record to hold package or class entry.
+     */
+    public record ClassTreeNode(String fullName, boolean isPackage, String simpleName) { }
+
+    /**
      * Constructor.
      */
     public ClassTree(String[] classPaths)
@@ -52,29 +57,14 @@ public class ClassTree {
     public String toString()  { return getClass().getSimpleName() + ": " + _classPathSites; }
 
     /**
-     * Returns a simple class name for given node name.
-     */
-    private static String getSimpleNodeName(String aNodeName)
-    {
-        // Get index of last '$' or '.'
-        int sepIndex = aNodeName.lastIndexOf('$');
-        if (sepIndex < 0)
-            sepIndex = aNodeName.lastIndexOf('.');
-
-        // Return ClassName stripped of package and/or parent-class
-        return aNodeName.substring(sepIndex + 1);
-    }
-
-    /**
      * Returns an array of ClassTreeSites for given resolver class path.
      */
     private static List<ClassTreeSite> getClassPathSitesForClassPaths(String[] classPaths)
     {
-        List<ClassTreeSite> classFileSites = new ArrayList<>();
-
-        // Add JRT sites
-        List<String> moduleNames = ListUtils.of("java.base", "java.prefs", "java.desktop");
-        moduleNames.forEach(moduleName -> classFileSites.add(ClassTreeSite.getSiteForModuleName(moduleName)));
+        // Get sites for base modules
+        List<String> moduleNames = List.of("java.base", "java.prefs", "java.desktop");
+        List<ClassTreeSite> moduleSites = ListUtils.map(moduleNames, ClassTreeSite::getSiteForModuleName);
+        List<ClassTreeSite> classFileSites = new ArrayList<>(moduleSites);
 
         // Add project class path sites (build dirs, jar files)
         for (String classPath : classPaths) {
@@ -92,50 +82,5 @@ public class ClassTree {
         }
 
         return classFileSites;
-    }
-
-    /**
-     * A class to hold package info.
-     */
-    public static class ClassTreeNode {
-
-        // Whether node is package
-        public final boolean isPackage;
-
-        // The package full name
-        public final String fullName;
-
-        // The package simple name
-        public final String simpleName;
-
-        /**
-         * Constructor.
-         */
-        public ClassTreeNode(String aPackageName, boolean isPackage)
-        {
-            super();
-            this.isPackage = isPackage;
-            fullName = aPackageName;
-            simpleName = getSimpleNodeName(aPackageName);
-        }
-
-        /**
-         * Standard toString implementation.
-         */
-        public String toString()
-        {
-            // Get class name
-            String className = getClass().getSimpleName();
-
-            // Get prop strings: FullName, SimpleName, Parent
-            StringBuffer propStrings = new StringBuffer();
-            if (isPackage)
-                StringUtils.appendProp(propStrings, "Package", true);
-            StringUtils.appendProp(propStrings, "FullName", fullName);
-            StringUtils.appendProp(propStrings, "SimpleName", simpleName);
-
-            // Return
-            return className + " { " + propStrings + " }";
-        }
     }
 }
