@@ -41,9 +41,7 @@ public abstract class ClassTree {
         classTreeList.addAll(classPathSites);
 
         // Return class tree for list
-        ClassTreeForSites classTree = new ClassTreeForSites();
-        classTree._classPathSites = classTreeList;
-        return classTree;
+        return new ClassTreeForSites(classTreeList);
     }
 
     /**
@@ -85,9 +83,6 @@ public abstract class ClassTree {
          */
         public ClassTreeForSite(WebSite aSite)  { _site = aSite; }
 
-        /**
-         * Returns whether given package name is known.
-         */
         @Override
         public boolean isKnownPackageName(String packageName)
         {
@@ -96,9 +91,6 @@ public abstract class ClassTree {
             return isKnownPackageFilePath(filePath);
         }
 
-        /**
-         * Returns ClassTreeNode array for classes and child packages for given node.
-         */
         @Override
         public List<ClassTreeNode> getClassTreeNodesForPackageName(String packageName)
         {
@@ -108,34 +100,29 @@ public abstract class ClassTree {
             return classTreeNodes;
         }
 
-        /**
-         * Returns whether given package file path is known.
-         */
-        boolean isKnownPackageFilePath(String filePath)
+        // Returns whether given package file path is known
+        boolean isKnownPackageFilePath(String packageFilePath)
         {
-            WebFile file = _site.getFileForPath(filePath);
-            return file != null && file.isDir() && file.getPath().equals(filePath);
+            WebFile file = _site.getFileForPath(packageFilePath);
+            return file != null && file.isDir() && file.getPath().equals(packageFilePath);
         }
 
-        /**
-         * Returns ClassTreeNode array for classes and child packages for given node.
-         */
-        void findClassTreeNodesForPackageFilePath(String filePath, List<ClassTreeNode> classTreeNodes)
+        // Finds ClassTreeNode for classes and child packages for given package file path
+        void findClassTreeNodesForPackageFilePath(String packageFilePath, List<ClassTreeNode> classTreeNodes)
         {
-            // Get files
-            WebFile nodeFile = _site.getFileForPath(filePath);
-            if (nodeFile == null)
+            WebFile packageFile = _site.getFileForPath(packageFilePath);
+            if (packageFile == null)
                 return;
 
             // If root package and base module, add primitives
-            if (filePath.equals("/") && _site.getName().endsWith("java.base")) {
+            if (packageFilePath.equals("/") && _site.getName().endsWith("java.base")) {
                 List<Class<?>> primitives = List.of(boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class, void.class);
                 List<ClassTreeNode> primitiveNodes = ListUtils.map(primitives, cls -> ClassTreeUtils.createClassTreeNode(cls.getName(), false));
                 classTreeNodes.addAll(primitiveNodes);
             }
 
             // Iterate over files and Find child classes and packages for each
-            ClassTreeUtils.findChildNodesForDirFile(nodeFile, classTreeNodes);
+            ClassTreeUtils.findChildNodesForDirFile(packageFile, classTreeNodes);
         }
     }
 
@@ -147,9 +134,12 @@ public abstract class ClassTree {
         // The list of class path sites
         private List<ClassTreeForSite> _classPathSites;
 
-        /**
-         * Returns whether given package name is known.
-         */
+        public ClassTreeForSites(List<ClassTreeForSite> classPathSites)
+        {
+            super();
+            _classPathSites = classPathSites;
+        }
+
         @Override
         public boolean isKnownPackageName(String packageName)
         {
@@ -158,9 +148,6 @@ public abstract class ClassTree {
             return ListUtils.hasMatch(_classPathSites, classTreeSite -> classTreeSite.isKnownPackageFilePath(filePath));
         }
 
-        /**
-         * Returns ClassTreeNode array for classes and child packages for given node.
-         */
         @Override
         public List<javakit.resolver.ClassTree.ClassTreeNode> getClassTreeNodesForPackageName(String packageName)
         {
@@ -170,9 +157,6 @@ public abstract class ClassTree {
             return classTreeNodes;
         }
 
-        /**
-         * Standard toString implementation.
-         */
         @Override
         public String toString()  { return getClass().getSimpleName() + ": " + _classPathSites; }
     }
