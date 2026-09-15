@@ -6,6 +6,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import snap.util.ArrayUtils;
 import snap.util.ClassUtils;
+import snap.util.ListUtils;
 import snapcode.project.Project;
 
 /**
@@ -62,8 +63,8 @@ public class Resolver {
     {
         ClassTree classTree = getClassTree();
         String packageName = parentPackage.getName();
-        ClassTree.ClassTreeNode[] childNodes = classTree.getClassTreeNodesForPackageName(packageName);
-        return ArrayUtils.mapNonNull(childNodes, childNode -> getJavaDeclForClassTreeNode(childNode), JavaDecl.class);
+        List<ClassTree.ClassTreeNode> childNodes = classTree.getClassTreeNodesForPackageName(packageName);
+        return ListUtils.mapNonNullToArray(childNodes, this::getJavaDeclForClassTreeNode, JavaDecl.class);
     }
 
     /**

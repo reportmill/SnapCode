@@ -3,26 +3,17 @@
  */
 package javakit.resolver;
 import snap.util.*;
-import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
+import java.util.*;
 
 /**
  * Represents a tree of packages/classes.
  */
 public class ClassTree {
 
-    // The array of class path sites
-    private WebSite[] _classPathSites;
-
-    // Constants
-    public static final ClassTreeNode[] EMPTY_NODE_ARRAY = new ClassTreeNode[0];
+    // The list of class path sites
+    private List<ClassTreeSite> _classPathSites;
 
     /**
      * Constructor.
@@ -30,86 +21,18 @@ public class ClassTree {
     public ClassTree(String[] classPaths)
     {
         super();
-
-        // Get ClassPathSites for ClassPaths
         _classPathSites = getClassPathSitesForClassPaths(classPaths);
     }
 
     /**
      * Returns ClassTreeNode array for classes and child packages for given node.
      */
-    protected ClassTreeNode[] getClassTreeNodesForPackageName(String packageName)
+    public List<ClassTreeNode> getClassTreeNodesForPackageName(String packageName)
     {
-        // Get files
-        WebFile[] nodeFiles = getFilesForPackageName(packageName);
-        if (nodeFiles.length == 0)
-            return EMPTY_NODE_ARRAY;
-
-        // Create nodes list
-        List<ClassTreeNode> classTreeNodes = new ArrayList<>(nodeFiles[0].getFileCount());
-
-        // If root package, add primitives
-        if (packageName.isEmpty()) {
-            Class<?>[] primitives = { boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class, void.class };
-            ClassTreeNode[] primitiveNodes = ArrayUtils.map(primitives, cls -> new ClassTreeNode(cls.getName(), false), ClassTreeNode.class);
-            Collections.addAll(classTreeNodes, primitiveNodes);
-        }
-
-        // Iterate over files and Find child classes and packages for each
-        for (WebFile nodeFile : nodeFiles)
-            findChildNodesForDirFile(nodeFile, classTreeNodes);
-
-        // Return array
-        return classTreeNodes.toArray(EMPTY_NODE_ARRAY);
-    }
-
-    /**
-     * Returns a file for given package name.
-     */
-    private WebFile[] getFilesForPackageName(String packageName)
-    {
-        // Get file path
         String filePath = '/' + packageName.replace(".", "/");
-        WebFile[] files = new WebFile[0];
-
-        // Iterate over sites and return first match
-        for (WebSite classPathSite : _classPathSites) {
-            WebFile nodeFile = classPathSite.getFileForPath(filePath);
-            if (nodeFile != null)
-                files = ArrayUtils.add(files, nodeFile);
-        }
-
-        // Return files
-        return files;
-    }
-
-    /**
-     * Finds child packages and classes for given package node.
-     */
-    private void findChildNodesForDirFile(WebFile dirFile, List<ClassTreeNode> classTreeNodes)
-    {
-        // Get directory files
-        List<WebFile> dirFiles = dirFile.getFiles();
-
-        // Iterate over dir files and add to ClassFiles or PackageDirs
-        for (WebFile file : dirFiles) {
-
-            // Handle class file
-            if (isClassFile(file)) {
-                String className = getClassNameForClassFile(file);
-                ClassTreeNode classNode = new ClassTreeNode(className, false);
-                classTreeNodes.add(classNode);
-            }
-
-            // Handle package
-            else if (isPackageDir(file)) {
-                String packageName = getPackageNameForPackageDirFile(file);
-                if (!ListUtils.hasMatch(classTreeNodes, classTreeNode -> classTreeNode.fullName.equals(packageName))) {
-                    ClassTreeNode packageNode = new ClassTreeNode(packageName, true);
-                    classTreeNodes.add(packageNode);
-                }
-            }
-        }
+        List<ClassTreeNode> classTreeNodes = new ArrayList<>();
+        _classPathSites.forEach(site -> site.findClassTreeNodesForPackageFilePath(filePath, classTreeNodes));
+        return classTreeNodes;
     }
 
     /**
@@ -118,35 +41,20 @@ public class ClassTree {
     public boolean isKnownPackageName(String packageName)
     {
         if (packageName.isEmpty()) return true;
-
-        // Get path for package name
         String filePath = '/' + packageName.replace(".", "/");
-
-        // If any site has dir with package name (and case matches), return true
-        for (WebSite site : _classPathSites) {
-            WebFile file = site.getFileForPath(filePath);
-            if (file != null && file.isDir() && file.getPath().equals(filePath))
-                return true;
-        }
-
-        // Return not known
-        return false;
+        return ListUtils.hasMatch(_classPathSites, classTreeSite -> classTreeSite.isKnownPackageFilePath(filePath));
     }
 
     /**
      * Standard toString implementation.
      */
     @Override
-    public String toString()
-    {
-        String sitesString = Arrays.toString(_classPathSites);
-        return getClass().getSimpleName() + ": " + sitesString;
-    }
+    public String toString()  { return getClass().getSimpleName() + ": " + _classPathSites; }
 
     /**
      * Returns a simple class name for given node name.
      */
-    protected static String getSimpleNodeName(String aNodeName)
+    private static String getSimpleNodeName(String aNodeName)
     {
         // Get index of last '$' or '.'
         int sepIndex = aNodeName.lastIndexOf('$');
@@ -158,15 +66,15 @@ public class ClassTree {
     }
 
     /**
-     * Returns an array of WebSites for given resolver class path.
+     * Returns an array of ClassTreeSites for given resolver class path.
      */
-    private static WebSite[] getClassPathSitesForClassPaths(String[] classPaths)
+    private static List<ClassTreeSite> getClassPathSitesForClassPaths(String[] classPaths)
     {
-        // Create sites
-        List<WebSite> classFileSites = new ArrayList<>();
+        List<ClassTreeSite> classFileSites = new ArrayList<>();
 
         // Add JRT sites
-        findJrtSites(classFileSites);
+        List<String> moduleNames = ListUtils.of("java.base", "java.prefs", "java.desktop");
+        moduleNames.forEach(moduleName -> classFileSites.add(ClassTreeSite.getSiteForModuleName(moduleName)));
 
         // Add project class path sites (build dirs, jar files)
         for (String classPath : classPaths) {
@@ -180,141 +88,10 @@ public class ClassTree {
 
             // Get site for class path entry and add to sites
             WebSite classPathSite = classPathURL.getAsSite();
-            classFileSites.add(classPathSite);
+            classFileSites.add(new ClassTreeSite(classPathSite));
         }
 
-        // Return array
-        return classFileSites.toArray(new WebSite[0]);
-    }
-
-    /**
-     * Finds the JRT sites and adds to given list.
-     */
-    private static void findJrtSites(List<WebSite> classFileSites)
-    {
-        // Handle Java 9+: Add standard jrt sites
-        if (SnapUtils.getJavaVersionInt() > 8) {
-            List<String> moduleNames = ListUtils.of("java.base", "java.prefs", "java.desktop");
-            List<WebSite> jrtSites = ListUtils.map(moduleNames, moduleName -> getSiteForModuleName(moduleName));
-            classFileSites.addAll(jrtSites);
-        }
-
-        // Handle Java 8: Add rt.jar
-        else {
-            WebURL jreURL = WebURL.getUrl(List.class); assert jreURL != null;
-            WebSite jreSite = jreURL.getSite();
-            classFileSites.add(jreSite);
-        }
-    }
-
-    /**
-     * Returns the JRT site for module name.
-     */
-    private static WebSite getSiteForModuleName(String moduleName)
-    {
-        WebURL moduleUrl = WebURL.getUrl("jrt:/" + moduleName); assert moduleUrl != null;
-        return moduleUrl.getSite();
-    }
-
-    /**
-     * Returns class name for class file.
-     */
-    private static String getClassNameForClassFile(WebFile aFile)
-    {
-        String filePath = aFile.getPath();
-        String filePathNoExtension = filePath.substring(1, filePath.length() - 6);
-        String className = filePathNoExtension.replace('/', '.');
-        return className;
-    }
-
-    /**
-     * Returns package name for package file.
-     */
-    private static String getPackageNameForPackageDirFile(WebFile aFile)
-    {
-        String filePath = aFile.getPath();
-        return filePath.substring(1).replace('/', '.');
-    }
-
-    /**
-     * Returns whether given WebFile is a package dir.
-     */
-    private static boolean isPackageDir(WebFile aFile)
-    {
-        if (!aFile.isDir())
-            return false;
-        if (aFile.getName().indexOf('.') > 0)
-            return false;
-        String path = aFile.getPath();
-        if (isIgnorePath(path))
-            return false;
-        return true;
-    }
-
-    /**
-     * Returns whether given WebFile is a package dir.
-     */
-    private static boolean isClassFile(WebFile aFile)
-    {
-        String path = aFile.getPath();
-        if (!path.endsWith(".class"))
-            return false;
-        if (isIgnorePath(path))
-            return false;
-        return true;
-    }
-
-    /**
-     * Returns whether given package/class path should be ignored.
-     */
-    private static boolean isIgnorePath(String aPath)
-    {
-        if (aPath.startsWith("/module")) return true;
-        if (aPath.startsWith("/sun")) return true;
-        if (aPath.startsWith("/apple")) return true;
-        if (aPath.startsWith("/com/sun")) return true;
-        if (aPath.startsWith("/com/apple")) return true;
-        if (aPath.startsWith("/com/oracle")) return true;
-        if (aPath.startsWith("/java/applet")) return true;
-        if (aPath.startsWith("/java/awt/dnd")) return true;
-        if (aPath.startsWith("/java/awt/peer")) return true;
-        if (aPath.startsWith("/java/beans")) return true;
-        if (aPath.startsWith("/java/lang/model")) return true;
-        if (aPath.startsWith("/java/lang/management")) return true;
-        if (aPath.startsWith("/java/nio/channels")) return true;
-        if (aPath.startsWith("/java/rmi")) return true;
-        if (aPath.startsWith("/java/sql")) return true;
-        if (aPath.startsWith("/java/util/spi")) return true;
-        if (aPath.startsWith("/java/util/Spliterators")) return true;
-        if (aPath.startsWith("/javax/jws")) return true;
-        if (aPath.startsWith("/javax/lang")) return true;
-        if (aPath.startsWith("/javax/naming")) return true;
-        if (aPath.startsWith("/javax/net")) return true;
-        if (aPath.startsWith("/javax/security")) return true;
-        if (aPath.startsWith("/javax/accessibility")) return true;
-        if (aPath.startsWith("/javax/management")) return true;
-        if (aPath.startsWith("/javax/print")) return true;
-        if (aPath.startsWith("/javax/rmi")) return true;
-        if (aPath.startsWith("/javax/smartcardio")) return true;
-        if (aPath.startsWith("/javax/sql")) return true;
-        if (aPath.startsWith("/javax/swing/plaf")) return true;
-        if (aPath.startsWith("/javax/swing/tree")) return true;
-        if (aPath.startsWith("/javax/swing/undo")) return true;
-        if (aPath.startsWith("/javax/transaction")) return true;
-        if (aPath.startsWith("/javax/xml")) return true;
-        if (aPath.startsWith("/jdk")) return true;
-        if (aPath.startsWith("/org/jcp")) return true;
-        if (aPath.startsWith("/org/omg")) return true;
-        if (aPath.startsWith("/org/w3c")) return true;
-        if (aPath.startsWith("/org/xml")) return true;
-        if (aPath.startsWith("/META-INF")) return true;
-
-        // If inner class, return false
-        if (aPath.contains("$"))
-            return true;
-
-        // Return true
-        return false;
+        return classFileSites;
     }
 
     /**
@@ -360,56 +137,5 @@ public class ClassTree {
             // Return
             return className + " { " + propStrings + " }";
         }
-    }
-
-    private static void writeClassesForModuleName(String moduleName)
-    {
-        ClassTree classTree = new ClassTree(new String[0]);
-        classTree._classPathSites = new WebSite[] { getSiteForModuleName(moduleName) };
-        String classTreeString = writeClassTreeToString(classTree);
-        SnapUtils.writeBytes(classTreeString.getBytes(), "/tmp/" + moduleName + ".txt");
-    }
-
-    private static String writeClassTreeToString(ClassTree classTree)
-    {
-        StringBuilder sb = new StringBuilder();
-        writeClassTreePackageToStringBuilder(classTree, "", sb);
-        return sb.toString();
-    }
-
-    private static void writeClassTreePackageToStringBuilder(ClassTree classTree, String packageName, StringBuilder sb)
-    {
-        ClassTreeNode[] rootNodes = classTree.getClassTreeNodesForPackageName(packageName);
-        ClassTreeNode[] classNodes = ArrayUtils.filter(rootNodes, node -> !node.isPackage);
-        ClassTreeNode[] packageNodes = ArrayUtils.filter(rootNodes, node -> node.isPackage);
-
-        // Write /package-name
-        sb.append('/').append(packageName).append('\n');
-        Stream.of(classNodes).forEach(classNode -> writeClassNodeToStringBuilder(classNode, sb, false));
-        Stream.of(packageNodes).forEach(packageNode -> writeClassTreePackageToStringBuilder(classTree, packageNode.fullName, sb));
-    }
-
-    private static void writeClassNodeToStringBuilder(ClassTreeNode classNode, StringBuilder sb, boolean isInner)
-    {
-        Class<?> cls;
-        try { cls = Class.forName(classNode.fullName); }
-        catch (ClassNotFoundException e) { System.err.println("Cannot find class " + classNode.fullName); return; }
-        if (!Modifier.isPublic(cls.getModifiers()))
-            return;
-
-        if (isInner) sb.append('$');
-        sb.append(classNode.simpleName).append('\n');
-
-        // Recurse for inner classes - For now only getting 1 level of inner classes
-        if (!isInner) {
-            Class<?>[] innerClasses = cls.getDeclaredClasses();
-            Stream.of(innerClasses).forEach(icls -> writeClassNodeToStringBuilder(new ClassTreeNode(icls.getName(), false), sb, true));
-        }
-    }
-
-    public static void main(String[] args)
-    {
-        //writeClassesForModuleName("java.base");
-        writeClassesForModuleName("java.desktop");
     }
 }
