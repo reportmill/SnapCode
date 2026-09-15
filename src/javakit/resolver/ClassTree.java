@@ -3,18 +3,13 @@
  */
 package javakit.resolver;
 import snap.util.*;
-import snap.web.WebFile;
-import snap.web.WebSite;
-import snap.web.WebURL;
+import snap.web.*;
 import java.util.*;
 
 /**
  * Represents a tree of packages/classes.
  */
-public class ClassTree {
-
-    // The list of class path sites
-    private List<ClassTreeForSite> _classPathSites;
+public abstract class ClassTree {
 
     /**
      * A record to hold package or class entry.
@@ -24,29 +19,12 @@ public class ClassTree {
     /**
      * Returns whether given package name is known.
      */
-    public boolean isKnownPackageName(String packageName)
-    {
-        if (packageName.isEmpty()) return true;
-        String filePath = '/' + packageName.replace(".", "/");
-        return ListUtils.hasMatch(_classPathSites, classTreeSite -> classTreeSite.isKnownPackageFilePath(filePath));
-    }
+    public abstract boolean isKnownPackageName(String packageName);
 
     /**
      * Returns ClassTreeNode array for classes and child packages for given node.
      */
-    public List<ClassTreeNode> getClassTreeNodesForPackageName(String packageName)
-    {
-        String filePath = '/' + packageName.replace(".", "/");
-        List<ClassTreeNode> classTreeNodes = new ArrayList<>();
-        _classPathSites.forEach(site -> site.findClassTreeNodesForPackageFilePath(filePath, classTreeNodes));
-        return classTreeNodes;
-    }
-
-    /**
-     * Standard toString implementation.
-     */
-    @Override
-    public String toString()  { return getClass().getSimpleName() + ": " + _classPathSites; }
+    public abstract List<ClassTreeNode> getClassTreeNodesForPackageName(String packageName);
 
     /**
      * Creates a class tree for given class paths.
@@ -63,7 +41,7 @@ public class ClassTree {
         classTreeList.addAll(classPathSites);
 
         // Return class tree for list
-        ClassTree classTree = new ClassTree();
+        ClassTreeForSites classTree = new ClassTreeForSites();
         classTree._classPathSites = classTreeList;
         return classTree;
     }
@@ -71,7 +49,7 @@ public class ClassTree {
     /**
      * Returns the ClassTree for module name.
      */
-    public static ClassTreeForSite getClassTreeForModuleName(String moduleName)
+    static ClassTreeForSite getClassTreeForModuleName(String moduleName)
     {
         WebURL moduleUrl = WebURL.getUrl("jrt:/" + moduleName); assert moduleUrl != null;
         return new ClassTreeForSite(moduleUrl.getSite());
@@ -80,7 +58,7 @@ public class ClassTree {
     /**
      * Returns a ClassTree for given class path.
      */
-    public static ClassTreeForSite getClassTreeForClassPath(String classPath)
+    private static ClassTreeForSite getClassTreeForClassPath(String classPath)
     {
         // Get URL for class path
         WebURL classPathURL = WebURL.getUrl(classPath);
@@ -97,7 +75,7 @@ public class ClassTree {
     /**
      * This class represents a class tree for a website.
      */
-    public static class ClassTreeForSite {
+    static class ClassTreeForSite extends ClassTree {
 
         // The web site
         private WebSite _site;
@@ -108,8 +86,20 @@ public class ClassTree {
         public ClassTreeForSite(WebSite aSite)  { _site = aSite; }
 
         /**
+         * Returns whether given package name is known.
+         */
+        @Override
+        public boolean isKnownPackageName(String packageName)
+        {
+            if (packageName.isEmpty()) return true;
+            String filePath = '/' + packageName.replace(".", "/");
+            return isKnownPackageFilePath(filePath);
+        }
+
+        /**
          * Returns ClassTreeNode array for classes and child packages for given node.
          */
+        @Override
         public List<ClassTreeNode> getClassTreeNodesForPackageName(String packageName)
         {
             String filePath = '/' + packageName.replace(".", "/");
@@ -147,5 +137,43 @@ public class ClassTree {
             // Iterate over files and Find child classes and packages for each
             ClassTreeUtils.findChildNodesForDirFile(nodeFile, classTreeNodes);
         }
+    }
+
+    /**
+     * A class tree for a list of class tree sites.
+     */
+    static class ClassTreeForSites extends ClassTree {
+
+        // The list of class path sites
+        private List<ClassTreeForSite> _classPathSites;
+
+        /**
+         * Returns whether given package name is known.
+         */
+        @Override
+        public boolean isKnownPackageName(String packageName)
+        {
+            if (packageName.isEmpty()) return true;
+            String filePath = '/' + packageName.replace(".", "/");
+            return ListUtils.hasMatch(_classPathSites, classTreeSite -> classTreeSite.isKnownPackageFilePath(filePath));
+        }
+
+        /**
+         * Returns ClassTreeNode array for classes and child packages for given node.
+         */
+        @Override
+        public List<javakit.resolver.ClassTree.ClassTreeNode> getClassTreeNodesForPackageName(String packageName)
+        {
+            String filePath = '/' + packageName.replace(".", "/");
+            List<javakit.resolver.ClassTree.ClassTreeNode> classTreeNodes = new ArrayList<>();
+            _classPathSites.forEach(site -> site.findClassTreeNodesForPackageFilePath(filePath, classTreeNodes));
+            return classTreeNodes;
+        }
+
+        /**
+         * Standard toString implementation.
+         */
+        @Override
+        public String toString()  { return getClass().getSimpleName() + ": " + _classPathSites; }
     }
 }

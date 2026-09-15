@@ -47,8 +47,7 @@ class ClassTreeUtils {
     {
         String filePath = aFile.getPath();
         String filePathNoExtension = filePath.substring(1, filePath.length() - 6);
-        String className = filePathNoExtension.replace('/', '.');
-        return className;
+        return filePathNoExtension.replace('/', '.');
     }
 
     /**
@@ -65,9 +64,7 @@ class ClassTreeUtils {
      */
     private static boolean isPackageDir(WebFile aFile)
     {
-        if (!aFile.isDir())
-            return false;
-        if (aFile.getName().indexOf('.') > 0)
+        if (!aFile.isDir() || aFile.getName().indexOf('.') > 0)
             return false;
         return !isIgnorePath(aFile.getPath());
     }
@@ -154,28 +151,28 @@ class ClassTreeUtils {
      */
     private static void writeClassesForModuleName(String moduleName)
     {
-        ClassTree.ClassTreeForSite classTreeSite = ClassTree.getClassTreeForModuleName(moduleName);
-        String classTreeString = writeClassTreeSiteToString(classTreeSite);
+        ClassTree classTree = ClassTree.getClassTreeForModuleName(moduleName);
+        String classTreeString = writeClassTreeToString(classTree);
         SnapUtils.writeBytes(classTreeString.getBytes(), "/tmp/" + moduleName + ".txt");
     }
 
-    private static String writeClassTreeSiteToString(ClassTree.ClassTreeForSite classTreeSite)
+    private static String writeClassTreeToString(ClassTree classTree)
     {
         StringBuilder sb = new StringBuilder();
-        writeClassTreePackageToStringBuilder(classTreeSite, "", sb);
+        writeClassTreePackageToStringBuilder(classTree, "", sb);
         return sb.toString();
     }
 
-    private static void writeClassTreePackageToStringBuilder(ClassTree.ClassTreeForSite classTreeSite, String packageName, StringBuilder sb)
+    private static void writeClassTreePackageToStringBuilder(ClassTree classTree, String packageName, StringBuilder sb)
     {
-        List<ClassTree.ClassTreeNode> rootNodes = classTreeSite.getClassTreeNodesForPackageName(packageName);
+        List<ClassTree.ClassTreeNode> rootNodes = classTree.getClassTreeNodesForPackageName(packageName);
         List<ClassTree.ClassTreeNode> classNodes = ListUtils.filter(rootNodes, node -> !node.isPackage());
         List<ClassTree.ClassTreeNode> packageNodes = ListUtils.filter(rootNodes, ClassTree.ClassTreeNode::isPackage);
 
         // Write /package-name
         sb.append('/').append(packageName).append('\n');
         classNodes.forEach(classNode -> writeClassNodeToStringBuilder(classNode, sb, false));
-        packageNodes.forEach(packageNode -> writeClassTreePackageToStringBuilder(classTreeSite, packageNode.fullName(), sb));
+        packageNodes.forEach(packageNode -> writeClassTreePackageToStringBuilder(classTree, packageNode.fullName(), sb));
     }
 
     private static void writeClassNodeToStringBuilder(ClassTree.ClassTreeNode classNode, StringBuilder sb, boolean isInner)
