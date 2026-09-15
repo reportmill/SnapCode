@@ -53,7 +53,7 @@ public class Resolver {
     {
         if (_classTree != null) return _classTree;
         String[] classPaths = _project.getRuntimeClassPaths();
-        return _classTree = new ClassTree(classPaths);
+        return _classTree = ClassTree.getClassTreeForClassPaths(classPaths);
     }
 
     /**

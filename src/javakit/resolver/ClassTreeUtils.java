@@ -1,71 +1,20 @@
 package javakit.resolver;
-import snap.util.*;
-import snap.web.*;
+import snap.util.ListUtils;
+import snap.util.SnapUtils;
+import snap.web.WebFile;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * This class represents a class tree site.
+ * Utility methods for ClassTree.
  */
-public class ClassTreeSite {
-
-    // The web site
-    private WebSite _site;
-
-    /**
-     * Constructor.
-     */
-    public ClassTreeSite(WebSite aSite)
-    {
-        _site = aSite;
-    }
-
-    /**
-     * Returns whether given package file path is known.
-     */
-    boolean isKnownPackageFilePath(String filePath)
-    {
-        WebFile file = _site.getFileForPath(filePath);
-        return file != null && file.isDir() && file.getPath().equals(filePath);
-    }
-
-    /**
-     * Returns ClassTreeNode array for classes and child packages for given node.
-     */
-    public List<ClassTree.ClassTreeNode> getClassTreeNodesForPackageName(String packageName)
-    {
-        String filePath = '/' + packageName.replace(".", "/");
-        List<ClassTree.ClassTreeNode> classTreeNodes = new ArrayList<>();
-        findClassTreeNodesForPackageFilePath(filePath, classTreeNodes);
-        return classTreeNodes;
-    }
-
-    /**
-     * Returns ClassTreeNode array for classes and child packages for given node.
-     */
-    void findClassTreeNodesForPackageFilePath(String filePath, List<ClassTree.ClassTreeNode> classTreeNodes)
-    {
-        // Get files
-        WebFile nodeFile = _site.getFileForPath(filePath);
-        if (nodeFile == null)
-            return;
-
-        // If root package and base module, add primitives
-        if (filePath.equals("/") && _site.getName().endsWith("java.base")) {
-            List<Class<?>> primitives = List.of(boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class, void.class);
-            List<ClassTree.ClassTreeNode> primitiveNodes = ListUtils.map(primitives, cls -> createClassTreeNode(cls.getName(), false));
-            classTreeNodes.addAll(primitiveNodes);
-        }
-
-        // Iterate over files and Find child classes and packages for each
-        findChildNodesForDirFile(nodeFile, classTreeNodes);
-    }
+class ClassTreeUtils {
 
     /**
      * Finds child packages and classes for given package node.
      */
-    private void findChildNodesForDirFile(WebFile dirFile, List<ClassTree.ClassTreeNode> classTreeNodes)
+    public static void findChildNodesForDirFile(WebFile dirFile, List<ClassTree.ClassTreeNode> classTreeNodes)
     {
         // Get directory files
         List<WebFile> dirFiles = dirFile.getFiles();
@@ -120,10 +69,7 @@ public class ClassTreeSite {
             return false;
         if (aFile.getName().indexOf('.') > 0)
             return false;
-        String path = aFile.getPath();
-        if (isIgnorePath(path))
-            return false;
-        return true;
+        return !isIgnorePath(aFile.getPath());
     }
 
     /**
@@ -134,24 +80,13 @@ public class ClassTreeSite {
         String path = aFile.getPath();
         if (!path.endsWith(".class"))
             return false;
-        if (isIgnorePath(path))
-            return false;
-        return true;
-    }
-
-    /**
-     * Returns the JRT site for module name.
-     */
-    public static ClassTreeSite getSiteForModuleName(String moduleName)
-    {
-        WebURL moduleUrl = WebURL.getUrl("jrt:/" + moduleName); assert moduleUrl != null;
-        return new ClassTreeSite(moduleUrl.getSite());
+        return !isIgnorePath(path);
     }
 
     /**
      * Creates a class tree node for given full name and whether name is package.
      */
-    private static ClassTree.ClassTreeNode createClassTreeNode(String fullName, boolean isPackage)
+    public static ClassTree.ClassTreeNode createClassTreeNode(String fullName, boolean isPackage)
     {
         String simpleName = getSimpleName(fullName);
         return new ClassTree.ClassTreeNode(fullName, isPackage, simpleName);
@@ -219,19 +154,19 @@ public class ClassTreeSite {
      */
     private static void writeClassesForModuleName(String moduleName)
     {
-        ClassTreeSite classTreeSite = ClassTreeSite.getSiteForModuleName(moduleName);
+        ClassTree.ClassTreeForSite classTreeSite = ClassTree.getClassTreeForModuleName(moduleName);
         String classTreeString = writeClassTreeSiteToString(classTreeSite);
         SnapUtils.writeBytes(classTreeString.getBytes(), "/tmp/" + moduleName + ".txt");
     }
 
-    private static String writeClassTreeSiteToString(ClassTreeSite classTreeSite)
+    private static String writeClassTreeSiteToString(ClassTree.ClassTreeForSite classTreeSite)
     {
         StringBuilder sb = new StringBuilder();
         writeClassTreePackageToStringBuilder(classTreeSite, "", sb);
         return sb.toString();
     }
 
-    private static void writeClassTreePackageToStringBuilder(ClassTreeSite classTreeSite, String packageName, StringBuilder sb)
+    private static void writeClassTreePackageToStringBuilder(ClassTree.ClassTreeForSite classTreeSite, String packageName, StringBuilder sb)
     {
         List<ClassTree.ClassTreeNode> rootNodes = classTreeSite.getClassTreeNodesForPackageName(packageName);
         List<ClassTree.ClassTreeNode> classNodes = ListUtils.filter(rootNodes, node -> !node.isPackage());
