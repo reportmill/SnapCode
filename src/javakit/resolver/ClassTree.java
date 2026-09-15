@@ -6,10 +6,12 @@ import snap.util.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Represents a tree of packages/classes.
@@ -358,5 +360,56 @@ public class ClassTree {
             // Return
             return className + " { " + propStrings + " }";
         }
+    }
+
+    private static void writeClassesForModuleName(String moduleName)
+    {
+        ClassTree classTree = new ClassTree(new String[0]);
+        classTree._classPathSites = new WebSite[] { getSiteForModuleName(moduleName) };
+        String classTreeString = writeClassTreeToString(classTree);
+        SnapUtils.writeBytes(classTreeString.getBytes(), "/tmp/" + moduleName + ".txt");
+    }
+
+    private static String writeClassTreeToString(ClassTree classTree)
+    {
+        StringBuilder sb = new StringBuilder();
+        writeClassTreePackageToStringBuilder(classTree, "", sb);
+        return sb.toString();
+    }
+
+    private static void writeClassTreePackageToStringBuilder(ClassTree classTree, String packageName, StringBuilder sb)
+    {
+        ClassTreeNode[] rootNodes = classTree.getClassTreeNodesForPackageName(packageName);
+        ClassTreeNode[] classNodes = ArrayUtils.filter(rootNodes, node -> !node.isPackage);
+        ClassTreeNode[] packageNodes = ArrayUtils.filter(rootNodes, node -> node.isPackage);
+
+        // Write /package-name
+        sb.append('/').append(packageName).append('\n');
+        Stream.of(classNodes).forEach(classNode -> writeClassNodeToStringBuilder(classNode, sb, false));
+        Stream.of(packageNodes).forEach(packageNode -> writeClassTreePackageToStringBuilder(classTree, packageNode.fullName, sb));
+    }
+
+    private static void writeClassNodeToStringBuilder(ClassTreeNode classNode, StringBuilder sb, boolean isInner)
+    {
+        Class<?> cls;
+        try { cls = Class.forName(classNode.fullName); }
+        catch (ClassNotFoundException e) { System.err.println("Cannot find class " + classNode.fullName); return; }
+        if (!Modifier.isPublic(cls.getModifiers()))
+            return;
+
+        if (isInner) sb.append('$');
+        sb.append(classNode.simpleName).append('\n');
+
+        // Recurse for inner classes - For now only getting 1 level of inner classes
+        if (!isInner) {
+            Class<?>[] innerClasses = cls.getDeclaredClasses();
+            Stream.of(innerClasses).forEach(icls -> writeClassNodeToStringBuilder(new ClassTreeNode(icls.getName(), false), sb, true));
+        }
+    }
+
+    public static void main(String[] args)
+    {
+        //writeClassesForModuleName("java.base");
+        writeClassesForModuleName("java.desktop");
     }
 }
