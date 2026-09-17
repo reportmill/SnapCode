@@ -49,6 +49,9 @@ public abstract class ClassTree {
      */
     static ClassTreeForSite getClassTreeForModuleName(String moduleName)
     {
+        if (moduleName.equals("java.base") || moduleName.equals("java.desktop"))
+            return new ClassTreeForModuleFile(moduleName);
+
         WebURL moduleUrl = WebURL.getUrl("jrt:/" + moduleName); assert moduleUrl != null;
         return new ClassTreeForSite(moduleUrl.getSite());
     }
@@ -114,16 +117,12 @@ public abstract class ClassTree {
             if (packageFile == null)
                 return;
 
-            // If root package and base module, add primitives
-            if (packageFilePath.equals("/") && _site.getName().endsWith("java.base")) {
-                List<Class<?>> primitives = List.of(boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class, void.class);
-                List<ClassTreeNode> primitiveNodes = ListUtils.map(primitives, cls -> ClassTreeUtils.createClassTreeNode(cls.getName(), false));
-                classTreeNodes.addAll(primitiveNodes);
-            }
-
             // Iterate over files and Find child classes and packages for each
             ClassTreeUtils.findChildNodesForDirFile(packageFile, classTreeNodes);
         }
+
+        @Override
+        public String toString()  { return getClass().getSimpleName() + ": " + _site.getUrlAddress(); }
     }
 
     /**
@@ -152,12 +151,48 @@ public abstract class ClassTree {
         public List<javakit.resolver.ClassTree.ClassTreeNode> getClassTreeNodesForPackageName(String packageName)
         {
             String filePath = '/' + packageName.replace(".", "/");
+
+            // Create nodes list - if root package, add primitives
             List<javakit.resolver.ClassTree.ClassTreeNode> classTreeNodes = new ArrayList<>();
+            if (packageName.isEmpty()) {
+                List<Class<?>> primitives = List.of(boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class, void.class);
+                List<ClassTreeNode> primitiveNodes = ListUtils.map(primitives, cls -> ClassTreeUtils.createClassTreeNode(cls.getName(), false));
+                classTreeNodes.addAll(primitiveNodes);
+            }
+
             _classPathSites.forEach(site -> site.findClassTreeNodesForPackageFilePath(filePath, classTreeNodes));
             return classTreeNodes;
         }
 
         @Override
         public String toString()  { return getClass().getSimpleName() + ": " + _classPathSites; }
+    }
+
+    /**
+     * A class tree for a module that has a provided contents file.
+     */
+    static class ClassTreeForModuleFile extends ClassTreeForSite {
+
+        // Map of class nodes for class path
+        private Map<String,List<ClassTreeNode>> _classPathNodes;
+
+        public ClassTreeForModuleFile(String moduleName)
+        {
+            super(null);
+            _classPathNodes = ClassTreeUtils.readClassNodesForModuleName(moduleName);
+        }
+
+        // Returns whether given package file path is known
+        @Override
+        boolean isKnownPackageFilePath(String packageFilePath)  { return _classPathNodes.containsKey(packageFilePath); }
+
+        // Finds ClassTreeNode for classes and child packages for given package file path
+        @Override
+        void findClassTreeNodesForPackageFilePath(String packageFilePath, List<ClassTreeNode> classTreeNodes)
+        {
+            List<ClassTreeNode> nodesForPath = _classPathNodes.get(packageFilePath);
+            if (nodesForPath != null)
+                classTreeNodes.addAll(nodesForPath);
+        }
     }
 }

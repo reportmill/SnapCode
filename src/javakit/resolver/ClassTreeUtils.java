@@ -1,10 +1,8 @@
 package javakit.resolver;
-import snap.util.ListUtils;
-import snap.util.SnapUtils;
-import snap.web.WebFile;
+import snap.util.*;
+import snap.web.*;
 import java.lang.reflect.Modifier;
-import java.util.List;
-import java.util.stream.Stream;
+import java.util.*;
 
 /**
  * Utility methods for ClassTree.
@@ -171,26 +169,63 @@ class ClassTreeUtils {
 
         // Write /package-name
         sb.append('/').append(packageName).append('\n');
-        classNodes.forEach(classNode -> writeClassNodeToStringBuilder(classNode, sb, false));
+        classNodes.forEach(classNode -> writeClassNodeToStringBuilder(classNode, sb));
         packageNodes.forEach(packageNode -> writeClassTreePackageToStringBuilder(classTree, packageNode.fullName(), sb));
     }
 
-    private static void writeClassNodeToStringBuilder(ClassTree.ClassTreeNode classNode, StringBuilder sb, boolean isInner)
+    private static void writeClassNodeToStringBuilder(ClassTree.ClassTreeNode classNode, StringBuilder sb)
     {
         Class<?> cls;
         try { cls = Class.forName(classNode.fullName()); }
         catch (ClassNotFoundException e) { System.err.println("Cannot find class " + classNode.fullName()); return; }
         if (!Modifier.isPublic(cls.getModifiers()))
             return;
+        if (List.of("StringTemplate", "TemplateRuntime", "FormatProcessor").contains(classNode.simpleName()))
+            return; // Some java 21 excludes
 
-        if (isInner) sb.append('$');
         sb.append(classNode.simpleName()).append('\n');
+    }
 
-        // Recurse for inner classes - For now only getting 1 level of inner classes
-        if (!isInner) {
-            Class<?>[] innerClasses = cls.getDeclaredClasses();
-            Stream.of(innerClasses).forEach(icls -> writeClassNodeToStringBuilder(createClassTreeNode(icls.getName(), false), sb, true));
+    public static Map<String,List<ClassTree.ClassTreeNode>> readClassNodesForModuleName(String moduleName)
+    {
+        WebURL moduleUrl = WebURL.getResourceUrl(ClassTreeUtils.class, moduleName + ".txt");
+        assert moduleUrl != null;
+        Iterator<String> moduleEntries = moduleUrl.getText().lines().iterator();
+        Map<String,List<ClassTree.ClassTreeNode>> classPathNodes = new LinkedHashMap<>();
+
+        String packagePath = moduleEntries.next();
+        readPackageEntry(packagePath, moduleEntries, classPathNodes);
+        return classPathNodes;
+    }
+
+    private static String readPackageEntry(String packagePath, Iterator<String> moduleEntries, Map<String, List<ClassTree.ClassTreeNode>> classPathNodes)
+    {
+        List<ClassTree.ClassTreeNode> packagePathNodes = new ArrayList<>();
+        String packageName = packagePath.substring(1) + '.';
+        classPathNodes.put(packagePath.replace('.', '/'), packagePathNodes);
+
+        while (moduleEntries.hasNext()) {
+            String nextEntry = moduleEntries.next();
+
+            // Handle package path entry
+            if (nextEntry.startsWith("/")) {
+
+                while (nextEntry != null) {
+
+                    // Handle child package
+                    if (nextEntry.startsWith(packagePath + '.') || packagePath.equals("/"))
+                        packagePathNodes.add(createClassTreeNode(nextEntry.substring(1), true));
+                    else return nextEntry;
+
+                    nextEntry = readPackageEntry(nextEntry, moduleEntries, classPathNodes);
+                }
+            }
+
+            // Handle class entry
+            else packagePathNodes.add(createClassTreeNode(packageName + nextEntry, false));
         }
+
+        return null;
     }
 
     public static void main(String[] args)
