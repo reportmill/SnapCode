@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.parse;
+import javakit.resolver.*;
 
 /**
  * A Java part for package declaration.
@@ -39,5 +40,17 @@ public class JPackageDecl extends JNode {
     protected String getNameImpl()
     {
         return _nameExpr != null ? _nameExpr.getName() : null;
+    }
+
+    /**
+     * Returns the package.
+     */
+    public JavaPackage getPackage()  { return (JavaPackage) getDecl(); }
+
+    @Override
+    protected JavaDecl getDeclImpl()
+    {
+        String packageName = getName();
+        return getJavaPackageForName(packageName);
     }
 }

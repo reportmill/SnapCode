@@ -203,7 +203,7 @@ public class JType extends JNode {
                 return scopeClass != null ? scopeClass.getClassForName(simpleName) : null;
             }
             else if (scopeDecl instanceof JavaPackage scopePackage) {
-                JavaClass baseClass = scopePackage.getClassForName(simpleName);
+                JavaClass baseClass = scopePackage.getClassForSimpleName(simpleName);
                 if (baseClass != null)
                     return baseClass;
             }
@@ -325,7 +325,7 @@ public class JType extends JNode {
         JType scopeType = getScopeType();
         if (scopeType != null) {
             JavaDecl scopeDecl = scopeType.getDecl();
-            return scopeDecl instanceof JavaPackage scopePackage ? scopePackage.getPackageForName(simpleName) : null;
+            return scopeDecl instanceof JavaPackage scopePackage ? scopePackage.getPackageForSimpleName(simpleName) : null;
         }
         return getJavaPackageForName(simpleName);
     }

@@ -48,15 +48,6 @@ public class JavaPackage extends JavaDecl {
     public JavaPackage getPackage()  { return _package; }
 
     /**
-     * Returns the child packages and classes.
-     */
-    public JavaDecl[] getChildren()
-    {
-        if (_children != null) return _children;
-        return _children = _resolver.getChildrenForPackage(this);
-    }
-
-    /**
      * Returns the child packages.
      */
     public JavaPackage[] getPackages()
@@ -77,21 +68,41 @@ public class JavaPackage extends JavaDecl {
     }
 
     /**
+     * Returns the child packages and classes.
+     */
+    public JavaDecl[] getChildren()
+    {
+        if (_children != null) return _children;
+        return _children = _resolver.getChildrenForPackage(this);
+    }
+
+    /**
+     * Reloads children.
+     */
+    void reloadChildrenWithClass(JavaClass aClass)
+    {
+        if (_children != null) {
+            _children = ArrayUtils.add(getChildren(), aClass);
+            _classes = null;
+        }
+    }
+
+    /**
      * Returns the child package for given simple name.
      */
-    public JavaPackage getPackageForName(String packageName)
+    public JavaPackage getPackageForSimpleName(String simplePackageName)
     {
         JavaPackage[] childPackages = getPackages();
-        return ArrayUtils.findMatch(childPackages, pkg -> pkg.getSimpleName().equals(packageName));
+        return ArrayUtils.findMatch(childPackages, pkg -> pkg.getSimpleName().equals(simplePackageName));
     }
 
     /**
      * Returns the child class for given simple name.
      */
-    public JavaClass getClassForName(String className)
+    public JavaClass getClassForSimpleName(String simpleClassName)
     {
         JavaClass[] childClasses = getClasses();
-        return ArrayUtils.findMatch(childClasses, cls -> cls.getSimpleName().equals(className));
+        return ArrayUtils.findMatch(childClasses, cls -> cls.getSimpleName().equals(simpleClassName));
     }
 
     /**

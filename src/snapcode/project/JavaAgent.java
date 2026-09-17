@@ -278,6 +278,7 @@ public class JavaAgent extends TextAgent {
 
         // Reload class
         reloadClassFromClassDecl();
+        setColorOfMemberIds();
     }
 
     /**

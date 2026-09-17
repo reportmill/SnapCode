@@ -71,7 +71,6 @@ public class JFile extends JNode {
      */
     public Resolver getResolver()
     {
-        // If already set, just return
         if (_resolver != null) return _resolver;
 
         // Get Resolver
@@ -117,10 +116,7 @@ public class JFile extends JNode {
     /**
      * Returns the package name.
      */
-    public String getPackageName()
-    {
-        return _packageDecl != null ? _packageDecl.getName() : null;
-    }
+    public String getPackageName()  { return _packageDecl != null ? _packageDecl.getName() : null; }
 
     /**
      * Returns the import statements.
@@ -168,8 +164,7 @@ public class JFile extends JNode {
     public JImportDecl[] getStaticImportDecls()
     {
         if (_staticImportDecls != null) return _staticImportDecls;
-        JImportDecl[] staticImports = ListUtils.filterToArray(_importDecls, importDecl -> importDecl.isStatic(), JImportDecl.class);
-        return _staticImportDecls = staticImports;
+        return _staticImportDecls = ListUtils.filterToArray(_importDecls, importDecl -> importDecl.isStatic(), JImportDecl.class);
     }
 
     /**
@@ -298,7 +293,6 @@ public class JFile extends JNode {
      */
     public Set<JImportDecl> getUnusedImports()
     {
-        // If already set, just return
         if (_unusedImports != null) return _unusedImports;
 
         // Get import decls

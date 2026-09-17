@@ -2,10 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package javakit.resolver;
-import javakit.parse.JClassDecl;
-import javakit.parse.JFile;
-import snap.util.ArrayUtils;
-import snap.util.SnapEnv;
+import javakit.parse.*;
+import snap.util.*;
 import java.lang.reflect.*;
 
 /**
@@ -91,10 +89,7 @@ public class JavaClass extends JavaType {
         // If declaring package, set and make sure this class is child
         else if (declaringPkgOrClass instanceof JavaPackage) {
             _package = (JavaPackage) declaringPkgOrClass;
-            if (_package._children != null) { // Can happen for new classes?
-                _package._children = ArrayUtils.add(_package._children, this);
-                _package._classes = null;
-            }
+            _package.reloadChildrenWithClass(this);
         }
 
         // Set Mods, Enum, Interface, Primitive
@@ -179,9 +174,10 @@ public class JavaClass extends JavaType {
             JFile jFile = aClassDecl.getFile();
             String pkgName = jFile.getPackageName();
             if (pkgName == null) pkgName = "";
-            _package = aResolver.getKnownJavaPackageForName(pkgName);
-            _package._children = ArrayUtils.add(_package.getChildren(), this);
-            _package._classes = null;
+            JPackageDecl packageDecl = jFile.getPackageDecl();
+            _package = packageDecl != null ? packageDecl.getPackage() : null;
+            if (_package != null)
+                _package.reloadChildrenWithClass(this);
         }
 
         // Add to decls
