@@ -130,6 +130,10 @@ public class NodeCompleter {
         // Add global literal completions (true, false, null, this, super)
         addGlobalLiteralCompletions();
 
+        // If outside class decl, add import/package
+        if (anId.getParent(JClassDecl.class) == null)
+            addWordCompletions(JavaWord.FILE_HEADER_WORDS);
+
         // Get variables with prefix of name and add to completions
         List<JVarDecl> varDecls = _prefixMatcher.getVarDeclsForId(anId);
         for (JVarDecl varDecl : varDecls)

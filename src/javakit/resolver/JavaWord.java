@@ -56,8 +56,8 @@ public class JavaWord extends JavaDecl {
     public static final JavaWord While = new JavaWord("while", WordType.Statement);
     public static final JavaWord Yield = new JavaWord("yield", WordType.Statement);
 
-    // File words
-    public static final JavaWord[] FILE_WORDS = { Import, Package };
+    // File header words
+    public static final JavaWord[] FILE_HEADER_WORDS = { Import, Package };
 
     // Class words
     public static final JavaWord[] CLASS_WORDS = { Class, Interface, Enum, Record, Extends, Implements, Permits };

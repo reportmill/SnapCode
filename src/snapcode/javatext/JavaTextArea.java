@@ -89,6 +89,7 @@ public class JavaTextArea extends TextArea {
         _textAdapter.setEditable(true);
         setUndoActivated(true);
         addEventFilter(this::handleMousePressOrMoveEvent, MousePress, MouseMove);
+        _popup = new JavaPopupList(this);
     }
 
     /**
@@ -310,15 +311,7 @@ public class JavaTextArea extends TextArea {
     /**
      * Returns the code completion popup.
      */
-    public JavaPopupList getPopup()
-    {
-        // If already set, just return
-        if (_popup != null) return _popup;
-
-        // Create, set, return
-        JavaPopupList popupList = new JavaPopupList(this);
-        return _popup = popupList;
-    }
+    public JavaPopupList getPopup()  { return _popup; }
 
     /**
      * Override to paint tokens instead of runs.
