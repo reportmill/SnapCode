@@ -61,6 +61,14 @@ public class MavenPomFile extends MavenFile {
         if (groupId == null || groupId.isBlank() || artifactId == null || artifactId.isBlank() || version == null || version.isBlank())
             return null;
 
+        // Oh, this is just frickin sad
+        if (version.startsWith("[") || version.startsWith("("))
+            version = version.substring(1);
+        if (version.contains(","))
+            version = version.substring(0, version.indexOf(","));
+        if (version.contains("+"))
+            version = version.replace("+", "");
+
         // Create and return maven dependency for id
         return MavenPackage.getMavenPackageForId(groupId + ":" + artifactId + ":" + version);
     }
@@ -72,7 +80,7 @@ public class MavenPomFile extends MavenFile {
     {
         if (_xml != null) return _xml;
         WebFile pomFile = getLocalFile();
-        String xmlString = pomFile != null ? pomFile.getText() : null;
+        String xmlString = pomFile.getExists() ? pomFile.getText() : null;
         if (xmlString == null) {
             System.err.println("MavenPomFile: Can't read pom file: " + pomFile);
             return null;

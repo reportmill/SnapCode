@@ -47,9 +47,9 @@ public class MavenFile {
         WebFile localFile = WebFile.createFileForPath(localFilePath, false);
 
         // If file doesn't exist, load it
-        if (localFile != null && !localFile.getExists()) {
+        if (!localFile.getExists()) {
             try { downloadFile(); }
-            catch (IOException e) { return null; }
+            catch (IOException e) { System.err.println("MavenFile: Failed to download file: " + e.getMessage()); }
         }
 
         // Return
