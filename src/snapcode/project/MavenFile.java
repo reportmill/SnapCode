@@ -1,4 +1,5 @@
 package snapcode.project;
+import snap.util.XMLElement;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcode.util.DownloadFile;
@@ -10,8 +11,8 @@ import java.nio.file.Paths;
  */
 public class MavenFile {
 
-    // The maven dependency
-    private MavenPackage _mavenDependency;
+    // The maven package
+    private MavenPackage _mavenPackage;
 
     // The file type
     private String _fileType;
@@ -22,18 +23,23 @@ public class MavenFile {
     /**
      * Constructor.
      */
-    public MavenFile(MavenPackage mavenDependency, String fileType)
+    public MavenFile(MavenPackage mavenPackage, String fileType)
     {
-        _mavenDependency = mavenDependency;
+        _mavenPackage = mavenPackage;
         _fileType = fileType;
     }
+
+    /**
+     * Returns the package.
+     */
+    public MavenPackage getPackage()  { return _mavenPackage; }
 
     /**
      * Returns the file URL in remote repository.
      */
     public WebURL getRemoteUrl()
     {
-        String fileUrlString = _mavenDependency.getRemoteFileUrlStringForType(_fileType);
+        String fileUrlString = _mavenPackage.getRemoteFileUrlStringForType(_fileType);
         return WebURL.getUrl(fileUrlString);
     }
 
@@ -43,7 +49,7 @@ public class MavenFile {
     public WebFile getLocalFile()
     {
         // Create local file
-        String localFilePath = _mavenDependency.getLocalFilePathForType(_fileType);
+        String localFilePath = _mavenPackage.getLocalFilePathForType(_fileType);
         WebFile localFile = WebFile.createFileForPath(localFilePath, false);
 
         // If file doesn't exist, load it
@@ -76,7 +82,7 @@ public class MavenFile {
     {
         DownloadFile downloadFile = getDownloadFile();
         if (downloadFile == null)
-            throw new IOException("Can't resolve maven path for: " + _mavenDependency.getId());
+            throw new IOException("Can't resolve maven path for: " + _mavenPackage.getId());
         downloadFile.getLocalPath();
     }
 
@@ -87,9 +93,30 @@ public class MavenFile {
     {
         if (_downloadFile != null) return _downloadFile;
         WebURL remoteUrl = getRemoteUrl();
-        String localFilePath = _mavenDependency.getLocalFilePathForType(_fileType);
+        String localFilePath = _mavenPackage.getLocalFilePathForType(_fileType);
         if (remoteUrl == null || localFilePath == null)
             return null;
         return _downloadFile = new DownloadFile(remoteUrl.getJavaUrl(), Paths.get(localFilePath));
+    }
+
+    /**
+     * Returns the XML for this MavenFile.
+     */
+    XMLElement getLocalFileXml()
+    {
+        WebFile pomFile = getLocalFile();
+        String xmlString = pomFile.getExists() ? pomFile.getText() : null;
+        if (xmlString == null) {
+            System.err.println(getClass().getSimpleName() + ".getLocalFileXml: Can't read pom file: " + pomFile);
+            return null;
+        }
+
+        // Read and return
+        try { return XMLElement.readXmlFromString(xmlString); }
+        catch (Exception e) {
+            System.err.println(getClass().getSimpleName() + ".getLocalFileXml: Error reading file: " + pomFile.getPath());
+            System.err.println(e.getMessage());
+            return null;
+        }
     }
 }

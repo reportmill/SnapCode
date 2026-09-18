@@ -1,7 +1,6 @@
 package snapcode.project;
 import snap.util.ListUtils;
 import snap.util.XMLElement;
-import snap.web.WebFile;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,9 +18,9 @@ public class MavenPomFile extends MavenFile {
     /**
      * Constructor.
      */
-    public MavenPomFile(MavenPackage mavenDependency)
+    public MavenPomFile(MavenPackage mavenPackage)
     {
-        super(mavenDependency, "pom");
+        super(mavenPackage, "pom");
     }
 
     /**
@@ -79,19 +78,6 @@ public class MavenPomFile extends MavenFile {
     private XMLElement getXML()
     {
         if (_xml != null) return _xml;
-        WebFile pomFile = getLocalFile();
-        String xmlString = pomFile.getExists() ? pomFile.getText() : null;
-        if (xmlString == null) {
-            System.err.println("MavenPomFile: Can't read pom file: " + pomFile);
-            return null;
-        }
-
-        // Read and return
-        try { return _xml = XMLElement.readXmlFromString(xmlString); }
-        catch (Exception e) {
-            System.err.println("MavenPomFile.getXML: Error reading file: " + pomFile.getPath());
-            System.err.println(e.getMessage());
-            return null;
-        }
+        return _xml = getLocalFileXml();
     }
 }
