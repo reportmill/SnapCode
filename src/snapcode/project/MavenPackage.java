@@ -14,6 +14,9 @@ import java.util.Objects;
  */
 public class MavenPackage extends PropObject {
 
+    // The artifact
+    private MavenArtifact _mavenArtifact;
+
     // The id string
     private String _id;
 
@@ -57,9 +60,6 @@ public class MavenPackage extends PropObject {
     public static final String Loaded_Prop = "Loaded";
     public static final String Loading_Prop = "Loading";
 
-    // Constant for Maven central URL
-    public static final String MAVEN_CENTRAL_URL = "https://repo1.maven.org/maven2";
-
     /**
      * Constructor with maven id.
      */
@@ -88,6 +88,8 @@ public class MavenPackage extends PropObject {
         _name = names.length > 1 ? names[1] : null;
         _version = names.length > 2 ? names[2] : null;
         _classifier = names.length > 3 ? names[3] : null;
+
+        _mavenArtifact = MavenArtifact.getMavenArtifactForId(_group + ':' + _name);
     }
 
     /**
@@ -109,6 +111,11 @@ public class MavenPackage extends PropObject {
      * Returns the classifier.
      */
     public String getClassifier()  { return _classifier; }
+
+    /**
+     * Returns the artifact.
+     */
+    public MavenArtifact getMavenArtifact()  { return _mavenArtifact; }
 
     /**
      * Returns the artifact id.
@@ -151,17 +158,12 @@ public class MavenPackage extends PropObject {
      */
     public String getRepositoryUrlOrDefault()
     {
-        if (_name != null) {
-            String name = _name.toLowerCase();
-            if (name.contains("reportmill") || name.contains("snapkit") || name.contains("snapcharts"))
-                return "https://reportmill.com/maven";
-            String group = _group.toLowerCase();
-            if (group.contains("reportmill"))
-                return "https://reportmill.com/maven";
-        }
+        MavenArtifact mavenArtifact = getMavenArtifact();
+        if (mavenArtifact != null)
+            return mavenArtifact.getRepositoryUrlOrDefault();
         if (SnapEnv.isWebVM)
-            return WebUtils.getCorsProxyAddress(MAVEN_CENTRAL_URL);
-        return MAVEN_CENTRAL_URL;
+            return WebUtils.getCorsProxyAddress(MavenArtifact.MAVEN_CENTRAL_URL);
+        return MavenArtifact.MAVEN_CENTRAL_URL;
     }
 
     /**
@@ -223,22 +225,19 @@ public class MavenPackage extends PropObject {
      */
     private String getRelativeFilePathForType(String fileType)
     {
-        // Get parts - if any are null, return null
-        String group = getGroup();
-        String packageName = getName();
-        String version = getVersion();
-        if (group == null || group.isEmpty() || packageName == null || packageName.isEmpty() ||
-                version == null || version.isEmpty())
+        // Get artifact path
+        String artifactPath = _mavenArtifact != null ? _mavenArtifact.getRemoteFileUrlStringForFilename(null) : null;
+        if (artifactPath == null)
             return null;
 
         // Build relative package jar path and return
-        String groupPath = '/' + group.replace(".", "/");
-        String packagePath = FilePathUtils.getChildPath(groupPath, packageName);
-        String versionPath = FilePathUtils.getChildPath(packagePath, version);
+        String version = getVersion();
+        String versionPath = version != null ? FilePathUtils.getChildPath(artifactPath, version) : null;
         if (fileType == null)
             return versionPath;
 
         // Get filename
+        String packageName = getName();
         String filenameSimple = packageName + '-' + version;
         if (_classifier != null && !_classifier.isBlank() && fileType.equals("jar"))
             filenameSimple += '-' + _classifier;

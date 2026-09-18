@@ -285,7 +285,7 @@ public class MavenArtifact extends PropObject {
     private static String getNormalizedArtifactId(String artifactId)
     {
         String[] names = artifactId.split(":");
-        if (names.length <= 2 || names[0].isBlank() || names[1].isBlank())
+        if (names.length < 2 || names[0].isBlank() || names[1].isBlank())
             return null;
         return names[0] + ":" + names[1];
     }
