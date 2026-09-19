@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * This class reads a metadata-local.xml file for a maven dependency.
  */
-public class MavenArtifactMetadata {
+public class MavenArtifactFile {
 
     // The maven artifact
     private MavenArtifact _mavenArtifact;
@@ -32,9 +32,18 @@ public class MavenArtifactMetadata {
     /**
      * Constructor.
      */
-    public MavenArtifactMetadata(MavenArtifact mavenArtifact)
+    public MavenArtifactFile(MavenArtifact mavenArtifact)
     {
         _mavenArtifact = mavenArtifact;
+    }
+
+    /**
+     * Returns the latest version.
+     */
+    public String getLatestVersion()
+    {
+        List<String> versions = getVersions();
+        return !versions.isEmpty() ? versions.getLast() : null;
     }
 
     /**
@@ -60,7 +69,7 @@ public class MavenArtifactMetadata {
             return Collections.emptyList();
 
         // Get version strings and return
-        return ListUtils.mapNonNull(versionXMLs, MavenArtifactMetadata::getVersionStringForVersionXml);
+        return ListUtils.mapNonNull(versionXMLs, MavenArtifactFile::getVersionStringForVersionXml);
     }
 
     /**
@@ -84,7 +93,7 @@ public class MavenArtifactMetadata {
         // If file doesn't exist, load it
         if (!localFile.getExists()) {
             try { downloadFile(); }
-            catch (IOException e) { System.err.println("MavenFile: Failed to download file: " + e.getMessage()); }
+            catch (IOException e) { System.err.println(getClass().getSimpleName() + ": Failed to download file: " + e.getMessage()); }
         }
 
         // Return
@@ -99,7 +108,7 @@ public class MavenArtifactMetadata {
         DownloadFile downloadFile = getDownloadFile();
         if (downloadFile != null) {
             try { downloadFile.deleteLocalFile(); }
-            catch (Exception e) { System.err.println("MavenFile: Delete local file failed: " + e.getMessage()); }
+            catch (Exception e) { System.err.println(getClass().getSimpleName() + ": Delete local file failed: " + e.getMessage()); }
         }
         _downloadFile = null;
     }
@@ -157,6 +166,9 @@ public class MavenArtifactMetadata {
         String fileUrlString = _mavenArtifact.getRemoteFileUrlStringForFilename(METADATA_FILE_NAME);
         return WebURL.getUrl(fileUrlString);
     }
+
+    @Override
+    public String toString()  { return getClass().getSimpleName() + ": " + getRemoteUrl(); }
 
     /**
      * Returns the version string for given version XML, e.g.: <version>2025.01.02</version>.

@@ -119,4 +119,7 @@ public class MavenFile {
             return null;
         }
     }
+
+    @Override
+    public String toString()  { return getClass().getSimpleName() + ": " + getRemoteUrl(); }
 }

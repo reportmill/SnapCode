@@ -29,6 +29,9 @@ public class MavenDependency extends BuildDependency {
     // The id string
     private String _id;
 
+    // The maven artifact
+    private MavenArtifact _mavenArtifact;
+
     // The maven package
     private MavenPackage _mavenPackage;
 
@@ -171,9 +174,17 @@ public class MavenDependency extends BuildDependency {
      */
     public String getResolvedId()
     {
-        if (getVersion() == getResolvedVersion() || getId() == null)
+        String groupId = getGroupId();
+        if (groupId == null)
+            return null;
+        if (groupId.equals("${project.groupId}")) {
+            if (getParent() != null)
+                groupId = getParent().getGroupId();
+        }
+
+        if (getVersion() == getResolvedVersion() && groupId == getGroupId() || getId() == null)
             return getId();
-        String resolvedId = _groupId + ":" + _artifactId + ":" + getResolvedVersion();
+        String resolvedId = groupId + ":" + _artifactId + ":" + getResolvedVersion();
         if (_classifier != null && !_classifier.isBlank())
             resolvedId += ':' + _classifier;
         return resolvedId;
@@ -186,6 +197,12 @@ public class MavenDependency extends BuildDependency {
     {
         String version = getVersion();
 
+        switch (version) {
+            case "${project.version}" -> { return getParent().getResolvedVersion(); }
+            case "${junit.version}" -> { return getMavenArtifact().getLatestVersion(); }
+            case "${hamcrestVersion}" -> { return "1.3"; }
+        }
+
         // Oh, this is just frickin sad
         if (version.startsWith("[") || version.startsWith("("))
             version = version.substring(1);
@@ -193,6 +210,11 @@ public class MavenDependency extends BuildDependency {
             version = version.substring(0, version.indexOf(","));
         if (version.contains("+"))
             version = version.replace("+", "");
+
+        if (version != getVersion()) {
+            MavenArtifact mavenArtifact = getMavenArtifact();
+            return mavenArtifact.getLatestVersion();
+        }
 
         return version;
     }
@@ -205,6 +227,18 @@ public class MavenDependency extends BuildDependency {
         if (_groupId == null || _groupId.isBlank() || _artifactId == null || _artifactId.isBlank())
             return null;
         return _groupId + ":" + _artifactId;
+    }
+
+    /**
+     * Returns the maven artifact.
+     */
+    public MavenArtifact getMavenArtifact()
+    {
+        if (_mavenArtifact != null) return _mavenArtifact;
+        String artifactId = getFullArtifactId();
+        if (artifactId == null)
+            return null;
+        return _mavenArtifact = MavenArtifact.getMavenArtifactForId(artifactId);
     }
 
     /**
@@ -422,4 +456,7 @@ public class MavenDependency extends BuildDependency {
      */
     @Override
     public int hashCode()  { return Objects.hash(_parent, getId()); }
+
+    @Override
+    public String toString()  { return "MavenDependency: " + getId(); }
 }

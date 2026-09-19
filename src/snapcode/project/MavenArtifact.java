@@ -21,7 +21,7 @@ public class MavenArtifact extends PropObject {
     private String _artifactId;
 
     // The package metadata file (e.g.: /group/artifact/maven-metadata.xml)
-    private MavenArtifactMetadata _metadataFile;
+    private MavenArtifactFile _metadataFile;
 
     // Whether dependency is loaded
     private boolean _loaded;
@@ -81,12 +81,30 @@ public class MavenArtifact extends PropObject {
     public String getArtifactId()  { return _artifactId; }
 
     /**
+     * Returns the latest version.
+     */
+    public String getLatestVersion()
+    {
+        MavenArtifactFile metadata = getMetadataFile();
+        return metadata.getLatestVersion();
+    }
+
+    /**
+     * Returns the latest version.
+     */
+    public List<String> getVersions()
+    {
+        MavenArtifactFile metadata = getMetadataFile();
+        return metadata.getVersions();
+    }
+
+    /**
      * Returns the artifact metadata file (e.g.: /group/artifact/maven-metadata.xml).
      */
-    public MavenArtifactMetadata getMetadataFile()
+    public MavenArtifactFile getMetadataFile()
     {
         if (_metadataFile != null) return _metadataFile;
-        return _metadataFile = new MavenArtifactMetadata(this);
+        return _metadataFile = new MavenArtifactFile(this);
     }
 
     /**

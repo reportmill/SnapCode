@@ -30,7 +30,7 @@ public class MavenPomFile extends MavenFile {
     {
         if (_dependencies != null) return _dependencies;
         List<XMLElement> dependencyXMLs = getDependencyXMLs();
-        return _dependencies = ListUtils.mapNonNull(dependencyXMLs, MavenPomFile::getDependencyForXML);
+        return _dependencies = ListUtils.mapNonNull(dependencyXMLs, this::getDependencyForXML);
     }
 
     /**
@@ -47,19 +47,19 @@ public class MavenPomFile extends MavenFile {
     /**
      * Creates a maven dependency for dependency xml element.
      */
-    private static String getMavenIdForXML(XMLElement dependencyXML)
+    private String getMavenIdForXML(XMLElement dependencyXML)
     {
         // Get XML elements for group, artifact, version
         XMLElement groupIdXML = dependencyXML.getElement("groupId");
         XMLElement artifactIdXML = dependencyXML.getElement("artifactId");
         XMLElement versionXML = dependencyXML.getElement("version");
-        if (groupIdXML == null || artifactIdXML == null || versionXML == null)
+        if (groupIdXML == null || artifactIdXML == null)
             return null;
 
         // Get groupId, artifactId, version
         String groupId = groupIdXML.getValue();
         String artifactId = artifactIdXML.getValue();
-        String version = versionXML.getValue();
+        String version = versionXML != null ? versionXML.getValue() : getPackage().getVersion();
         if (groupId == null || groupId.isBlank() || artifactId == null || artifactId.isBlank() || version == null || version.isBlank())
             return null;
 
@@ -70,7 +70,7 @@ public class MavenPomFile extends MavenFile {
     /**
      * Creates a maven package for dependency xml element.
      */
-    private static MavenDependency getDependencyForXML(XMLElement dependencyXML)
+    private MavenDependency getDependencyForXML(XMLElement dependencyXML)
     {
         String mavenId = getMavenIdForXML(dependencyXML);
         return mavenId != null ? new MavenDependency(mavenId) : null;
