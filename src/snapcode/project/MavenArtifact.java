@@ -150,7 +150,7 @@ public class MavenArtifact extends PropObject {
     /**
      * Returns the relative file path (from any maven root).
      */
-    private String getRelativeFilePathForFilename(String filename)
+    String getRelativeFilePathForFilename(String filename)
     {
         // Get parts - if any are null, return null
         String group = getGroup();

@@ -62,17 +62,6 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
-     * Constructor with maven id.
-     */
-    public MavenDependency(MavenDependency parent, MavenPackage mavenPackage)
-    {
-        super();
-        _parent = parent;
-        _mavenPackage = mavenPackage;
-        setId(mavenPackage.getId());
-    }
-
-    /**
      * Returns the parent.
      */
     public MavenDependency getParent()  { return _parent; }
@@ -178,6 +167,37 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
+     * Returns the resolved id.
+     */
+    public String getResolvedId()
+    {
+        if (getVersion() == getResolvedVersion() || getId() == null)
+            return getId();
+        String resolvedId = _group + ":" + _name + ":" + getResolvedVersion();
+        if (_classifier != null && !_classifier.isBlank())
+            resolvedId += ':' + _classifier;
+        return resolvedId;
+    }
+
+    /**
+     * Returns the resolved version.
+     */
+    public String getResolvedVersion()
+    {
+        String version = getVersion();
+
+        // Oh, this is just frickin sad
+        if (version.startsWith("[") || version.startsWith("("))
+            version = version.substring(1);
+        if (version.contains(","))
+            version = version.substring(0, version.indexOf(","));
+        if (version.contains("+"))
+            version = version.replace("+", "");
+
+        return version;
+    }
+
+    /**
      * Returns the artifact id.
      */
     public String getArtifactId()
@@ -192,7 +212,7 @@ public class MavenDependency extends BuildDependency {
     public MavenPackage getMavenPackage()
     {
         if (_mavenPackage != null) return _mavenPackage;
-        String mavenId = getId();
+        String mavenId = getResolvedId();
         if (mavenId == null)
             return null;
         return _mavenPackage = MavenPackage.getMavenPackageForId(mavenId);
@@ -205,10 +225,11 @@ public class MavenDependency extends BuildDependency {
     {
         if (_dependencies != null) return _dependencies;
         MavenPackage mavenPackage = getMavenPackage();
-        List<MavenPackage> dependencies = mavenPackage != null ? mavenPackage.getDependencies() : null;
-        if (dependencies == null)
-            return _dependencies = Collections.emptyList();
-        return _dependencies = ListUtils.map(dependencies, dep -> new MavenDependency(this, dep));
+        if (mavenPackage == null)
+            return Collections.emptyList();
+        List<MavenDependency> dependencies = mavenPackage.getDependencies();
+        dependencies.forEach(dependency -> dependency._parent = this);
+        return _dependencies = dependencies;
     }
 
     /**

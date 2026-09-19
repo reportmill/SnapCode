@@ -10,7 +10,7 @@ import java.util.List;
 public class MavenPomFile extends MavenFile {
 
     // The dependencies
-    private List<MavenPackage> _dependencies;
+    private List<MavenDependency> _dependencies;
 
     // The XML
     private XMLElement _xml;
@@ -26,25 +26,28 @@ public class MavenPomFile extends MavenFile {
     /**
      * Returns dependencies.
      */
-    public List<MavenPackage> getDependencies()
+    public List<MavenDependency> getDependencies()
     {
         if (_dependencies != null) return _dependencies;
+        List<XMLElement> dependencyXMLs = getDependencyXMLs();
+        return _dependencies = ListUtils.mapNonNull(dependencyXMLs, MavenPomFile::getDependencyForXML);
+    }
 
-        // Get <dependency> XML elements
+    /**
+     * Returns dependency XML elements.
+     */
+    private List<XMLElement> getDependencyXMLs()
+    {
         XMLElement xml = getXML();
         XMLElement dependenciesXML = xml != null ? xml.getElement("dependencies") : null;
         List<XMLElement> dependencyXMLs = dependenciesXML != null ? dependenciesXML.getElements("dependency") : null;
-        if (dependencyXMLs == null)
-            return _dependencies = Collections.emptyList();
-
-        // Get dependencies and return
-        return _dependencies = ListUtils.mapNonNull(dependencyXMLs, MavenPomFile::getDependencyForXML);
+        return dependencyXMLs != null ? dependencyXMLs : Collections.emptyList();
     }
 
     /**
      * Creates a maven dependency for dependency xml element.
      */
-    private static MavenPackage getDependencyForXML(XMLElement dependencyXML)
+    private static String getMavenIdForXML(XMLElement dependencyXML)
     {
         // Get XML elements for group, artifact, version
         XMLElement groupIdXML = dependencyXML.getElement("groupId");
@@ -60,16 +63,17 @@ public class MavenPomFile extends MavenFile {
         if (groupId == null || groupId.isBlank() || artifactId == null || artifactId.isBlank() || version == null || version.isBlank())
             return null;
 
-        // Oh, this is just frickin sad
-        if (version.startsWith("[") || version.startsWith("("))
-            version = version.substring(1);
-        if (version.contains(","))
-            version = version.substring(0, version.indexOf(","));
-        if (version.contains("+"))
-            version = version.replace("+", "");
+        // Create and return maven id
+        return groupId + ":" + artifactId + ":" + version;
+    }
 
-        // Create and return maven dependency for id
-        return MavenPackage.getMavenPackageForId(groupId + ":" + artifactId + ":" + version);
+    /**
+     * Creates a maven package for dependency xml element.
+     */
+    private static MavenDependency getDependencyForXML(XMLElement dependencyXML)
+    {
+        String mavenId = getMavenIdForXML(dependencyXML);
+        return mavenId != null ? new MavenDependency(mavenId) : null;
     }
 
     /**

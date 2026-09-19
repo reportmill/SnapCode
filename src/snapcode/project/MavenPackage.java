@@ -1,6 +1,7 @@
 package snapcode.project;
 import snap.props.PropObject;
 import snap.util.FilePathUtils;
+import snap.util.ListUtils;
 import snap.util.SnapEnv;
 import snap.web.WebFile;
 import snap.web.WebUtils;
@@ -17,13 +18,13 @@ public class MavenPackage extends PropObject {
     // The artifact
     private MavenArtifact _mavenArtifact;
 
-    // The id string
+    // The package id string
     private String _id;
 
-    // The group name
-    private String _group;
+    // The group id string
+    private String _groupId;
 
-    // The product name
+    // The artifact id name
     private String _name;
 
     // The version name
@@ -84,18 +85,18 @@ public class MavenPackage extends PropObject {
 
         // Set Group, Name, Version
         String[] names = aValue.split(":");
-        _group = names.length > 0 ? names[0] : null;
+        _groupId = names.length > 0 ? names[0] : null;
         _name = names.length > 1 ? names[1] : null;
         _version = names.length > 2 ? names[2] : null;
         _classifier = names.length > 3 ? names[3] : null;
 
-        _mavenArtifact = MavenArtifact.getMavenArtifactForId(_group + ':' + _name);
+        _mavenArtifact = MavenArtifact.getMavenArtifactForId(_groupId + ':' + _name);
     }
 
     /**
      * Returns the group name.
      */
-    public String getGroup()  { return _group; }
+    public String getGroupId()  { return _groupId; }
 
     /**
      * Returns the product name.
@@ -123,7 +124,7 @@ public class MavenPackage extends PropObject {
     public String getArtifactId()
     {
         if (_artifactId != null) return _artifactId;
-        return _artifactId = _group + ":" + _name;
+        return _artifactId = _groupId + ":" + _name;
     }
 
     /**
@@ -147,10 +148,19 @@ public class MavenPackage extends PropObject {
     /**
      * Returns the transitive dependencies.
      */
-    public List<MavenPackage> getDependencies()
+    public List<MavenDependency> getDependencies()
     {
         MavenPomFile pomFile = getPomFile();
         return pomFile.getDependencies();
+    }
+
+    /**
+     * Returns the transitive dependencies.
+     */
+    private List<MavenPackage> getDependencyPackages()
+    {
+        List<MavenDependency> dependencies = getDependencies();
+        return ListUtils.mapNonNull(dependencies, MavenDependency::getMavenPackage);
     }
 
     /**
@@ -172,12 +182,7 @@ public class MavenPackage extends PropObject {
     public String getClassPath()
     {
         if (_classPath != null) return _classPath;
-        String localJarPath = getLocalFilePathForType("jar");
-        if (localJarPath == null)
-            return null;
-
-        // Return
-        return _classPath = localJarPath;
+        return _classPath = getLocalFilePathForType("jar");
     }
 
     /**
@@ -192,7 +197,7 @@ public class MavenPackage extends PropObject {
     /**
      * Returns the remote file URL string.
      */
-    public String getRemoteFileUrlStringForType(String fileType)
+    String getRemoteFileUrlStringForType(String fileType)
     {
         String repositoryURL = getRepositoryUrlOrDefault();
         String relativeFilePath = getRelativeFilePathForType(fileType);
@@ -204,7 +209,7 @@ public class MavenPackage extends PropObject {
     /**
      * Returns the local file path string.
      */
-    public String getLocalFilePathForType(String fileType)
+    String getLocalFilePathForType(String fileType)
     {
         // Get local maven cache path
         String homeDir = System.getProperty("user.home");
@@ -226,7 +231,7 @@ public class MavenPackage extends PropObject {
     private String getRelativeFilePathForType(String fileType)
     {
         // Get artifact path
-        String artifactPath = _mavenArtifact != null ? _mavenArtifact.getRemoteFileUrlStringForFilename(null) : null;
+        String artifactPath = _mavenArtifact != null ? _mavenArtifact.getRelativeFilePathForFilename(null) : null;
         if (artifactPath == null)
             return null;
 
@@ -255,7 +260,7 @@ public class MavenPackage extends PropObject {
     /**
      * Sets whether maven package is loaded.
      */
-    protected synchronized void setLoaded(boolean aValue)
+    private synchronized void setLoaded(boolean aValue)
     {
         if (aValue == _loaded) return;
         firePropChange(Loaded_Prop, _loaded, _loaded = aValue);
@@ -269,7 +274,7 @@ public class MavenPackage extends PropObject {
     /**
      * Sets whether maven package is loading.
      */
-    protected void setLoading(boolean aValue)
+    private void setLoading(boolean aValue)
     {
         if (aValue == _loading) return;
         firePropChange(Loading_Prop, _loading, _loading = aValue);
@@ -295,7 +300,7 @@ public class MavenPackage extends PropObject {
             getJarFile().downloadFile();
 
             // Load transitive dependencies
-            List<MavenPackage> transitiveDependencies = getDependencies();
+            List<MavenPackage> transitiveDependencies = getDependencyPackages();
             transitiveDependencies.forEach(MavenPackage::loadPackageFiles);
 
             setLoaded(true);
@@ -335,7 +340,7 @@ public class MavenPackage extends PropObject {
      */
     public void deletePackageFiles()
     {
-        List<MavenPackage> transitiveDependencies = getDependencies();
+        List<MavenPackage> transitiveDependencies = getDependencyPackages();
         transitiveDependencies.forEach(MavenPackage::deletePackageFiles);
         getJarFile().deleteLocalFile();
         getPomFile().deleteLocalFile();
@@ -356,7 +361,7 @@ public class MavenPackage extends PropObject {
      */
     private String getErrorImpl()
     {
-        if (_group == null || _group.isEmpty())
+        if (_groupId == null || _groupId.isEmpty())
             return "Invalid group";
         if (_name == null || _name.isEmpty())
             return "Invalid package name";
@@ -377,4 +382,7 @@ public class MavenPackage extends PropObject {
         _packages.put(mavenId, mavenPackage);
         return mavenPackage;
     }
+
+    @Override
+    public String toString()  { return "MavenPackage: " + getId(); }
 }
