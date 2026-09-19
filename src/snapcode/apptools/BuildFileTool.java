@@ -201,8 +201,8 @@ public class BuildFileTool extends ProjectTool {
             // Update MavenIdText, GroupText, PackageNameText, VersionText, ClassifierText
             MavenDependency mavenDependency = (MavenDependency) selDependency;
             setViewValue("MavenIdText", mavenDependency.getId());
-            setViewValue("GroupText", mavenDependency.getGroup());
-            setViewValue("PackageNameText", mavenDependency.getName());
+            setViewValue("GroupText", mavenDependency.getGroupId());
+            setViewValue("PackageNameText", mavenDependency.getArtifactId());
             setViewValue("VersionText", mavenDependency.getVersion());
             setViewValue("ClassifierText", mavenDependency.getClassifier());
 
@@ -337,8 +337,8 @@ public class BuildFileTool extends ProjectTool {
         if (selDependency instanceof MavenDependency mavenDependency) {
             switch (anEvent.getName()) {
                 case "MavenIdText" -> mavenDependency.setId(anEvent.getStringValue());
-                case "GroupText" -> mavenDependency.setGroup(anEvent.getStringValue());
-                case "PackageNameText" -> mavenDependency.setName(anEvent.getStringValue());
+                case "GroupText" -> mavenDependency.setGroupId(anEvent.getStringValue());
+                case "PackageNameText" -> mavenDependency.setArtifactId(anEvent.getStringValue());
                 case "VersionText" -> mavenDependency.setVersion(anEvent.getStringValue());
                 case "ClassifierText" -> mavenDependency.setClassifier(anEvent.getStringValue());
                 case "ShowButton" -> showMavenDependencyInFinder(mavenDependency);

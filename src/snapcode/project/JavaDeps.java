@@ -33,7 +33,7 @@ public class JavaDeps {
             if (dependency instanceof MavenDependency mavenDependency) {
                 if (!mavenDependency.isLoaded()) {
                     if (activityMonitor != null)
-                        activityMonitor.beginTask("Loading dependency: " + mavenDependency.getName(), 1);
+                        activityMonitor.beginTask("Loading dependency: " + mavenDependency.getArtifactId(), 1);
                     mavenDependency.loadPackageFiles();
                     if (activityMonitor != null)
                         activityMonitor.endTask();

@@ -14,11 +14,11 @@ public class MavenArtifact extends PropObject {
     // The id string
     private String _id;
 
-    // The group name
-    private String _group;
+    // The group id string
+    private String _groupId;
 
-    // The product name
-    private String _name;
+    // The artifact id string
+    private String _artifactId;
 
     // The package metadata file (e.g.: /group/artifact/maven-metadata.xml)
     private MavenArtifactMetadata _metadataFile;
@@ -65,20 +65,20 @@ public class MavenArtifact extends PropObject {
 
         // Set Group, Name
         String[] names = aValue.split(":");
-        _group = names.length > 0 ? names[0] : null;
-        _name = names.length > 1 ? names[1] : null;
-        _id = _group + ":" + _name;
+        _groupId = names.length > 0 ? names[0] : null;
+        _artifactId = names.length > 1 ? names[1] : null;
+        _id = _groupId + ":" + _artifactId;
     }
 
     /**
-     * Returns the group name.
+     * Returns the group id string.
      */
-    public String getGroup()  { return _group; }
+    public String getGroupId()  { return _groupId; }
 
     /**
-     * Returns the product name.
+     * Returns the artifact id string.
      */
-    public String getName()  { return _name; }
+    public String getArtifactId()  { return _artifactId; }
 
     /**
      * Returns the artifact metadata file (e.g.: /group/artifact/maven-metadata.xml).
@@ -94,11 +94,11 @@ public class MavenArtifact extends PropObject {
      */
     public String getRepositoryUrlOrDefault()
     {
-        if (_name != null) {
-            String name = _name.toLowerCase();
+        if (_artifactId != null) {
+            String name = _artifactId.toLowerCase();
             if (name.contains("reportmill") || name.contains("snapkit") || name.contains("snapcharts"))
                 return "https://reportmill.com/maven";
-            String group = _group.toLowerCase();
+            String group = _groupId.toLowerCase();
             if (group.contains("reportmill"))
                 return "https://reportmill.com/maven";
         }
@@ -153,8 +153,8 @@ public class MavenArtifact extends PropObject {
     String getRelativeFilePathForFilename(String filename)
     {
         // Get parts - if any are null, return null
-        String group = getGroup();
-        String packageName = getName();
+        String group = getGroupId();
+        String packageName = getArtifactId();
         if (group == null || group.isEmpty() || packageName == null || packageName.isEmpty())
             return null;
 
@@ -176,7 +176,7 @@ public class MavenArtifact extends PropObject {
     /**
      * Sets whether maven package is loaded.
      */
-    protected synchronized void setLoaded(boolean aValue)
+    private synchronized void setLoaded(boolean aValue)
     {
         if (aValue == _loaded) return;
         firePropChange(Loaded_Prop, _loaded, _loaded = aValue);
@@ -190,7 +190,7 @@ public class MavenArtifact extends PropObject {
     /**
      * Sets whether maven package is loading.
      */
-    protected void setLoading(boolean aValue)
+    private void setLoading(boolean aValue)
     {
         if (aValue == _loading) return;
         firePropChange(Loading_Prop, _loading, _loading = aValue);
@@ -201,7 +201,6 @@ public class MavenArtifact extends PropObject {
      */
     public synchronized void loadPackageFiles()
     {
-        // If already loaded, just return
         if (isLoaded())
             return;
 
@@ -252,12 +251,15 @@ public class MavenArtifact extends PropObject {
      */
     private String getErrorImpl()
     {
-        if (_group == null || _group.isEmpty())
-            return "Invalid group";
-        if (_name == null || _name.isEmpty())
-            return "Invalid artifact name";
+        if (_groupId == null || _groupId.isEmpty())
+            return "Invalid group id";
+        if (_artifactId == null || _artifactId.isEmpty())
+            return "Invalid artifact id";
         return null;
     }
+
+    @Override
+    public String toString()  { return "MavenArtifact: " + getId(); }
 
     /**
      * Returns the package for given id.
@@ -268,21 +270,21 @@ public class MavenArtifact extends PropObject {
         if (mavenArtifact != null)
             return mavenArtifact;
 
-        String normalizedArtifactId = getNormalizedArtifactId(mavenId);
-        if (normalizedArtifactId == null)
+        String fullArtifactId = getFullArtifactId(mavenId);
+        if (fullArtifactId == null)
             return null;
-        if (!normalizedArtifactId.equals(mavenId)) {
-            mavenArtifact = getMavenArtifactForId(normalizedArtifactId);
+        if (!fullArtifactId.equals(mavenId)) {
+            mavenArtifact = getMavenArtifactForId(fullArtifactId);
             _artifacts.put(mavenId, mavenArtifact);
             return mavenArtifact;
         }
 
-        mavenArtifact = new MavenArtifact(normalizedArtifactId);
-        _artifacts.put(normalizedArtifactId, mavenArtifact);
+        mavenArtifact = new MavenArtifact(fullArtifactId);
+        _artifacts.put(fullArtifactId, mavenArtifact);
         return mavenArtifact;
     }
 
-    private static String getNormalizedArtifactId(String artifactId)
+    private static String getFullArtifactId(String artifactId)
     {
         String[] names = artifactId.split(":");
         if (names.length < 2 || names[0].isBlank() || names[1].isBlank())

@@ -231,7 +231,7 @@ public class ProjectBuilder {
         // Iterate over each and load if needed
         for (MavenDependency mavenDependency : mavenDependencies) {
             if (!mavenDependency.isLoaded()) {
-                activityMonitor.beginTask("Loading dependency: " + mavenDependency.getName(), 1);
+                activityMonitor.beginTask("Loading dependency: " + mavenDependency.getArtifactId(), 1);
                 mavenDependency.loadPackageFiles();
                 activityMonitor.endTask();
                 if (!mavenDependency.isLoaded())

@@ -24,8 +24,8 @@ public class MavenPackage extends PropObject {
     // The group id string
     private String _groupId;
 
-    // The artifact id name
-    private String _name;
+    // The artifact id string
+    private String _artifactId;
 
     // The version name
     private String _version;
@@ -50,9 +50,6 @@ public class MavenPackage extends PropObject {
 
     // The error string
     private String _error;
-
-    // Cached artifact id
-    private String _artifactId;
 
     // A map of all packages
     private static Map<String, MavenPackage> _packages = new HashMap<>();
@@ -86,11 +83,11 @@ public class MavenPackage extends PropObject {
         // Set Group, Name, Version
         String[] names = aValue.split(":");
         _groupId = names.length > 0 ? names[0] : null;
-        _name = names.length > 1 ? names[1] : null;
+        _artifactId = names.length > 1 ? names[1] : null;
         _version = names.length > 2 ? names[2] : null;
         _classifier = names.length > 3 ? names[3] : null;
 
-        _mavenArtifact = MavenArtifact.getMavenArtifactForId(_groupId + ':' + _name);
+        _mavenArtifact = MavenArtifact.getMavenArtifactForId(_groupId + ':' + _artifactId);
     }
 
     /**
@@ -101,7 +98,7 @@ public class MavenPackage extends PropObject {
     /**
      * Returns the product name.
      */
-    public String getName()  { return _name; }
+    public String getArtifactId()  { return _artifactId; }
 
     /**
      * Returns the version name.
@@ -117,15 +114,6 @@ public class MavenPackage extends PropObject {
      * Returns the artifact.
      */
     public MavenArtifact getMavenArtifact()  { return _mavenArtifact; }
-
-    /**
-     * Returns the artifact id.
-     */
-    public String getArtifactId()
-    {
-        if (_artifactId != null) return _artifactId;
-        return _artifactId = _groupId + ":" + _name;
-    }
 
     /**
      * Returns the Jar file.
@@ -242,8 +230,7 @@ public class MavenPackage extends PropObject {
             return versionPath;
 
         // Get filename
-        String packageName = getName();
-        String filenameSimple = packageName + '-' + version;
+        String filenameSimple = getArtifactId() + '-' + version;
         if (_classifier != null && !_classifier.isBlank() && fileType.equals("jar"))
             filenameSimple += '-' + _classifier;
         String filename = filenameSimple + '.' + fileType;
@@ -285,7 +272,6 @@ public class MavenPackage extends PropObject {
      */
     public synchronized void loadPackageFiles()
     {
-        // If already loaded, just return
         if (isLoaded())
             return;
 
@@ -363,7 +349,7 @@ public class MavenPackage extends PropObject {
     {
         if (_groupId == null || _groupId.isEmpty())
             return "Invalid group";
-        if (_name == null || _name.isEmpty())
+        if (_artifactId == null || _artifactId.isEmpty())
             return "Invalid package name";
         if (_version == null || _version.isEmpty())
             return "Invalid version";

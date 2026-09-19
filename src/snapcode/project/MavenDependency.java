@@ -14,11 +14,11 @@ public class MavenDependency extends BuildDependency {
     // The parent dependency
     private MavenDependency _parent;
 
-    // The group name
-    private String _group;
+    // The group id string
+    private String _groupId;
 
-    // The product name
-    private String _name;
+    // The artifact id string
+    private String _artifactId;
 
     // The version name
     private String _version;
@@ -39,8 +39,8 @@ public class MavenDependency extends BuildDependency {
     private Boolean _redundant;
 
     // Constants for properties
-    public static final String Group_Prop = "Group";
-    public static final String Name_Prop = "Name";
+    public static final String GroupId_Prop = "GroupId";
+    public static final String ArtifactId_Prop = "ArtifactId";
     public static final String Version_Prop = "Version";
     public static final String Classifier_Prop = "Classifier";
 
@@ -80,11 +80,11 @@ public class MavenDependency extends BuildDependency {
         if (_id != null) return _id;
 
         // If any part is invalid, just return
-        if (_group == null || _group.isBlank() || _name == null || _name.isBlank() || _version == null || _version.isBlank())
+        if (_groupId == null || _groupId.isBlank() || _artifactId == null || _artifactId.isBlank() || _version == null || _version.isBlank())
             return null;
 
         // Create id string and return
-        _id = _group + ":" + _name + ":" + _version;
+        _id = _groupId + ":" + _artifactId + ":" + _version;
         if (_classifier != null && !_classifier.isBlank())
             _id += ':' + _classifier;
         return _id;
@@ -100,40 +100,40 @@ public class MavenDependency extends BuildDependency {
 
         // Set Group, Name, Version
         String[] names = aValue.split(":");
-        setGroup(names.length > 0 ? names[0] : null);
-        setName(names.length > 1 ? names[1] : null);
+        setGroupId(names.length > 0 ? names[0] : null);
+        setArtifactId(names.length > 1 ? names[1] : null);
         setVersion(names.length > 2 ? names[2] : null);
         setClassifier(names.length > 3 ? names[3] : null);
     }
 
     /**
-     * Returns the group name.
+     * Returns the group id string.
      */
-    public String getGroup()  { return _group; }
+    public String getGroupId()  { return _groupId; }
 
     /**
-     * Sets the group name.
+     * Sets the group id string.
      */
-    public void setGroup(String aValue)
+    public void setGroupId(String aValue)
     {
-        if (Objects.equals(aValue, _group)) return;
+        if (Objects.equals(aValue, _groupId)) return;
         handlePropChange();
-        firePropChange(Group_Prop, _group, _group = aValue);
+        firePropChange(GroupId_Prop, _groupId, _groupId = aValue);
     }
 
     /**
-     * Returns the product name.
+     * Returns the artifact id string.
      */
-    public String getName()  { return _name; }
+    public String getArtifactId()  { return _artifactId; }
 
     /**
-     * Sets the product name.
+     * Sets the artifact id string.
      */
-    public void setName(String aValue)
+    public void setArtifactId(String aValue)
     {
-        if (Objects.equals(aValue, _name)) return;
+        if (Objects.equals(aValue, _artifactId)) return;
         handlePropChange();
-        firePropChange(Name_Prop, _name, _name = aValue);
+        firePropChange(ArtifactId_Prop, _artifactId, _artifactId = aValue);
     }
 
     /**
@@ -173,7 +173,7 @@ public class MavenDependency extends BuildDependency {
     {
         if (getVersion() == getResolvedVersion() || getId() == null)
             return getId();
-        String resolvedId = _group + ":" + _name + ":" + getResolvedVersion();
+        String resolvedId = _groupId + ":" + _artifactId + ":" + getResolvedVersion();
         if (_classifier != null && !_classifier.isBlank())
             resolvedId += ':' + _classifier;
         return resolvedId;
@@ -200,10 +200,11 @@ public class MavenDependency extends BuildDependency {
     /**
      * Returns the artifact id.
      */
-    public String getArtifactId()
+    public String getFullArtifactId()
     {
-        MavenPackage mavenPackage = getMavenPackage();
-        return mavenPackage != null ? mavenPackage.getArtifactId() : null;
+        if (_groupId == null || _groupId.isBlank() || _artifactId == null || _artifactId.isBlank())
+            return null;
+        return _groupId + ":" + _artifactId;
     }
 
     /**
@@ -266,7 +267,7 @@ public class MavenDependency extends BuildDependency {
      */
     private MavenDependency findDependencyForArtifactIdImpl(String artifactId)
     {
-        if (Objects.equals(getArtifactId(), artifactId))
+        if (Objects.equals(getFullArtifactId(), artifactId))
             return this;
         for (MavenDependency dependency : getDependencies()) {
             MavenDependency dependencyForArtifactId = dependency.findDependencyForArtifactIdImpl(artifactId);
@@ -284,7 +285,7 @@ public class MavenDependency extends BuildDependency {
     public boolean isRedundant()
     {
         if (_redundant != null) return _redundant;
-        String artifactId = getArtifactId();
+        String artifactId = getFullArtifactId();
         return _redundant = artifactId != null && findDependencyForArtifactId(artifactId) != this;
     }
 
@@ -374,8 +375,8 @@ public class MavenDependency extends BuildDependency {
     protected void initProps(PropSet aPropSet)
     {
         super.initProps(aPropSet);
-        aPropSet.addPropNamed(Group_Prop, String.class);
-        aPropSet.addPropNamed(Name_Prop, String.class);
+        aPropSet.addPropNamed(GroupId_Prop, String.class);
+        aPropSet.addPropNamed(ArtifactId_Prop, String.class);
         aPropSet.addPropNamed(Version_Prop, String.class);
         aPropSet.addPropNamed(Classifier_Prop, String.class);
     }
@@ -384,18 +385,14 @@ public class MavenDependency extends BuildDependency {
      * Override to support props for this class.
      */
     @Override
-    public Object getPropValue(String aPropName)
+    public Object getPropValue(String propName)
     {
-        return switch (aPropName) {
-
-            // Group, Name, Version, Classifier
-            case Group_Prop -> getGroup();
-            case Name_Prop -> getName();
+        return switch (propName) {
+            case GroupId_Prop -> getGroupId();
+            case ArtifactId_Prop -> getArtifactId();
             case Version_Prop -> getVersion();
             case Classifier_Prop -> getClassifier();
-
-            // Do normal version
-            default -> super.getPropValue(aPropName);
+            default -> super.getPropValue(propName);
         };
     }
 
@@ -403,18 +400,14 @@ public class MavenDependency extends BuildDependency {
      * Override to support props for this class.
      */
     @Override
-    public void setPropValue(String aPropName, Object aValue)
+    public void setPropValue(String propName, Object aValue)
     {
-        switch (aPropName) {
-
-            // Group, Name, Version, Classifier
-            case Group_Prop -> setGroup(Convert.stringValue(aValue));
-            case Name_Prop -> setName(Convert.stringValue(aValue));
+        switch (propName) {
+            case GroupId_Prop -> setGroupId(Convert.stringValue(aValue));
+            case ArtifactId_Prop -> setArtifactId(Convert.stringValue(aValue));
             case Version_Prop -> setVersion(Convert.stringValue(aValue));
             case Classifier_Prop -> setClassifier(Convert.stringValue(aValue));
-
-            // Do normal version
-            default -> super.setPropValue(aPropName, aValue);
+            default -> super.setPropValue(propName, aValue);
         }
     }
 
