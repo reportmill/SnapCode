@@ -40,7 +40,8 @@ public class MavenArtifact extends PropObject {
     public static final String Loading_Prop = "Loading";
 
     // Constant for Maven central URL
-    public static final String MAVEN_CENTRAL_URL = "https://repo1.maven.org/maven2";
+    //public static final String MAVEN_CENTRAL_URL = "https://repo1.maven.org/maven2";
+    public static final String MAVEN_CENTRAL_URL = "https://maven-central.storage-download.googleapis.com/maven2";
 
     /**
      * Constructor with maven id.
@@ -240,19 +241,6 @@ public class MavenArtifact extends PropObject {
 
         // Reset Loading
         finally { setLoading(false); }
-    }
-
-    /**
-     * Pre-Loads files in background.
-     */
-    public void preloadPackageFiles()
-    {
-        // If already loading, just return
-        if (isLoaded() || isLoading())
-            return;
-
-        // Set Loading true and start thread
-        new Thread(this::loadPackageFiles).start();
     }
 
     /**

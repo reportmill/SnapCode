@@ -224,22 +224,8 @@ public class ProjectBuilder {
      */
     public boolean checkBuildDependencies(ActivityMonitor activityMonitor)
     {
-        // Get maven dependencies
         List<BuildDependency> buildDependencies = _proj.getBuildFile().getDependencies();
         List<MavenDependency> mavenDependencies = ListUtils.filterByClass(buildDependencies, MavenDependency.class);
-
-        // Iterate over each and load if needed
-        for (MavenDependency mavenDependency : mavenDependencies) {
-            if (!mavenDependency.isLoaded()) {
-                activityMonitor.beginTask("Loading dependency: " + mavenDependency.getArtifactId(), 1);
-                mavenDependency.loadPackageFiles();
-                activityMonitor.endTask();
-                if (!mavenDependency.isLoaded())
-                    return false;
-            }
-        }
-
-        // Return
-        return true;
+        return MavenDependency.loadDependenciesDeep(mavenDependencies, activityMonitor);
     }
 }

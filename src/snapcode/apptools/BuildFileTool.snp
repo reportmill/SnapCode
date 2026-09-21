@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="500" Padding="16" Spacing="10" Font="Arial 14">
-  <RowView MinWidth="450" Padding="10" Fill="#F0" Border="#E8" BorderRadius="8" Font="Arial 22">
+<ColView PrefWidth="600" Padding="16" Spacing="10" Font="Arial 14">
+  <RowView MinWidth="550" Padding="10" Fill="#F0" Border="#E8" BorderRadius="8" Font="Arial 22">
     <Label Text="Build File" />
   </RowView>
   <RowView Spacing="5">
@@ -12,8 +12,16 @@
     <TextField Name="BuildPathText" PrefWidth="255" />
   </RowView>
   <RowView Spacing="5">
+    <Label Text="Main Class Name:" />
+    <TextField Name="MainClassNameText" PrefWidth="255" />
+  </RowView>
+  <RowView Spacing="5">
     <Label Text="Compile release version:" />
     <ComboBox Name="CompileReleaseComboBox" MinWidth="80" MinHeight="22" Align="CENTER" />
+  </RowView>
+  <RowView Spacing="5">
+    <Label Text="Enable Compiler Preview Language Features" />
+    <CheckBox Name="EnableCompilePreviewCheckBox" />
   </RowView>
   <RowView Spacing="5">
     <Label Text="Include SnapKit Runtime" />
@@ -35,21 +43,21 @@
     <ListView Name="RepositoriesListView" MinWidth="390" MinHeight="100" RowHeight="26" />
   </TitleView>
   <ColView Name="BuildDependenciesBox">
-    <RowView PrefWidth="400" Margin="0,0,4,0">
+    <RowView PrefWidth="500" Margin="0,0,4,0">
       <Label Text="Build Dependencies:" />
       <Button Name="ExpandDependenciesButton" PrefWidth="22" PrefHeight="22" Margin="0,4,0,4" Padding="0" LeanX="RIGHT" ToolTip="Expand Dependencies" ImageName="ExpandAll.png" Plain="true" />
       <Button Name="CollapseDependenciesButton" PrefWidth="22" PrefHeight="22" Margin="0,10,0,4" Padding="0" ToolTip="Collapse Dependencies" ImageName="CollapseAll.png" Plain="true" />
       <Button Name="AddDependencyButton" PrefWidth="22" PrefHeight="22" Margin="0,4,0,4" Text="+" />
       <Button Name="RemoveDependencyButton" PrefWidth="22" PrefHeight="22" Margin="0,8,0,4" Text="-" />
     </RowView>
-    <TreeView Name="DependenciesTreeView" MinWidth="400" PrefHeight="150" Margin="0,0,8,0" />
-    <ColView Name="DependencyTypeBox" Margin="0,0,0,10" Padding="5,10,5,10" Fill="#F4" Border="#E8" BorderRadius="8" Font="Arial 12">
+    <TreeView Name="DependenciesTreeView" MinWidth="500" PrefHeight="150" Margin="0,0,8,0" />
+    <ColView Name="DependencyTypeBox" MinWidth="480" Margin="0,0,0,10" Padding="5,10,5,10" Fill="#F4" Border="#E8" BorderRadius="8" Font="Arial 12">
       <RowView Padding="4" Spacing="4">
         <Label PrefWidth="100" Text="Dependency Type:" />
         <ComboBox Name="DependencyTypeComboBox" PrefWidth="250" PrefHeight="24" />
       </RowView>
     </ColView>
-    <ColView Name="MavenDependencyBox" Margin="5,0,0,10" Padding="10" Fill="#F4" Border="#E8" BorderRadius="8" Font="Arial 12">
+    <ColView Name="MavenDependencyBox" MinWidth="480" Margin="5,0,0,10" Padding="10" Fill="#F4" Border="#E8" BorderRadius="8" Font="Arial 12">
       <RowView Padding="4" Spacing="4">
         <Label PrefWidth="100" Text="Maven Id:" />
         <TextField Name="MavenIdText" PrefWidth="250" />
@@ -95,12 +103,4 @@
       </RowView>
     </ColView>
   </ColView>
-  <RowView Spacing="5">
-    <Label Text="Main Class Name:" />
-    <TextField Name="MainClassNameText" PrefWidth="255" />
-  </RowView>
-  <RowView Spacing="5">
-    <Label Text="Enable Compiler Preview Language Features" />
-    <CheckBox Name="EnableCompilePreviewCheckBox" />
-  </RowView>
 </ColView>

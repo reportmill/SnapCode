@@ -4,6 +4,7 @@ import snap.gfx.Font;
 import snap.gfx.GFXEnv;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
+import snap.props.PropObject;
 import snap.util.ListUtils;
 import snap.util.SnapEnv;
 import snap.web.WebFile;
@@ -164,12 +165,14 @@ public class BuildFileTool extends ProjectTool {
     {
         BuildFile buildFile = getBuildFile();
 
-        // Update SourcePathText, BuildPathText
+        // Update SourcePathText, BuildPathText, MainClassNameText
         setViewValue("SourcePathText", buildFile.getSourcePath());
         setViewValue("BuildPathText", buildFile.getBuildPath());
+        setViewValue("MainClassNameText", buildFile.getMainClassName());
 
-        // Update CompileReleaseComboBox
+        // Update CompileReleaseComboBox, EnableCompilePreviewCheckBox
         setViewValue("CompileReleaseComboBox", buildFile.getCompileRelease());
+        setViewValue("EnableCompilePreviewCheckBox", buildFile.isEnableCompilePreview());
 
         // Update IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox, IncludeJavaFXCheckBox
         setViewValue("IncludeSnapKitRuntimeCheckBox", buildFile.isIncludeSnapKitRuntime());
@@ -235,9 +238,8 @@ public class BuildFileTool extends ProjectTool {
             setViewValue("ProjectNameText", projectDependency.getProjectName());
         }
 
-        // Update MainClassNameText, EnableCompilePreviewCheckBox
-        setViewValue("MainClassNameText", buildFile.getMainClassName());
-        setViewValue("EnableCompilePreviewCheckBox", buildFile.isEnableCompilePreview());
+        // Watch unloaded dependencies
+        watchForUnloadedDependency();
     }
 
     /**
@@ -250,17 +252,23 @@ public class BuildFileTool extends ProjectTool {
 
         switch (anEvent.getName()) {
 
-            // Update SourcePathText, BuildPathText
+            // Update SourcePathText, BuildPathText, MainClassNameText
             case "SourcePathText" -> buildFile.setSourcePath(anEvent.getStringValue());
             case "BuildPathText" -> buildFile.setBuildPath(anEvent.getStringValue());
+            case "MainClassNameText" -> buildFile.setMainClassName(anEvent.getStringValue());
 
-            // Update CompileReleaseComboBox
+            // Update CompileReleaseComboBox, EnableCompilePreviewCheckBox
             case "CompileReleaseComboBox" -> buildFile.setCompileRelease(anEvent.getIntValue());
+            case "EnableCompilePreviewCheckBox" -> buildFile.setEnableCompilePreview(anEvent.getBoolValue());
 
             // Update IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox, IncludeJavaFXCheckBox
             case "IncludeSnapKitRuntimeCheckBox" -> buildFile.setIncludeSnapKitRuntime(anEvent.getBoolValue());
             case "IncludeSnapChartsRuntimeCheckBox" -> buildFile.setIncludeSnapChartsRuntime(anEvent.getBoolValue());
-            case "IncludeJavaFXCheckBox" -> buildFile.setIncludeJavaFX(anEvent.getBoolValue());
+            case "IncludeJavaFXCheckBox" -> {
+                if (ViewUtils.isAltDown())
+                    MavenDependency.deleteDependencies(ListUtils.filterByClass(buildFile.getDependencies(), MavenDependency.class));
+                else buildFile.setIncludeJavaFX(anEvent.getBoolValue());
+            }
 
             // Handle AddRepositoryButton, RemoveRepositoryButton
             case "AddRepositoryButton" -> showAddRepositoryPanel();
@@ -286,10 +294,6 @@ public class BuildFileTool extends ProjectTool {
 
             // Handle DependencyTypeComboBox
             case "DependencyTypeComboBox" -> changeSelectedDependencyType();
-
-            // Handle MainClassNameText, EnableCompilePreviewCheckBox
-            case "MainClassNameText" -> buildFile.setMainClassName(anEvent.getStringValue());
-            case "EnableCompilePreviewCheckBox" -> buildFile.setEnableCompilePreview(anEvent.getBoolValue());
 
             // Handle dependency
             default -> respondDependencyUI(anEvent);
@@ -526,6 +530,44 @@ public class BuildFileTool extends ProjectTool {
         }
     }
 
+    private void watchForUnloadedDependency()
+    {
+        BuildFile buildFile = getBuildFile();
+        watchForUnloadedDependencies(buildFile.getDependencies());
+    }
+
+    private boolean watchForUnloadedDependencies(List<? extends BuildDependency> dependencies)
+    {
+        for (BuildDependency dependency : dependencies) {
+            if (dependency instanceof MavenDependency mavenDependency) {
+                if (!mavenDependency.isLoaded()) {
+                    MavenArtifact mavenArtifact = mavenDependency.getMavenArtifact();
+                    if (mavenArtifact != null && !mavenArtifact.isLoaded()) {
+                        mavenArtifact.addPropChangeListener(_handleMavenDependencyLoadedLsnr, MavenArtifact.Loaded_Prop);
+                        return true;
+                    }
+                    MavenPackage mavenPackage = mavenDependency.getMavenPackage();
+                    if (mavenPackage != null && !mavenPackage.isLoaded()) {
+                        mavenPackage.addPropChangeListener(_handleMavenDependencyLoadedLsnr, MavenPackage.Loaded_Prop);
+                        return true;
+                    }
+                }
+                if (watchForUnloadedDependencies(mavenDependency.getDependencies()))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private PropChangeListener _handleMavenDependencyLoadedLsnr = this::handleMavenDependencyLoaded;
+
+    private void handleMavenDependencyLoaded(PropChange propChange)
+    {
+        PropObject mavenDependency = (PropObject) propChange.getSource();
+        mavenDependency.removePropChangeListener(_handleMavenDependencyLoadedLsnr);
+        watchForUnloadedDependency();
+    }
+
     /**
      * A WebPage subclass for BuildFileTool.
      */
@@ -567,7 +609,7 @@ public class BuildFileTool extends ProjectTool {
         public boolean isParent(BuildDependency anItem)
         {
             return anItem instanceof MavenDependency mvnDependency && !mvnDependency.isRedundant() &&
-                !mvnDependency.getDependencies().isEmpty();
+                mvnDependency.isLoaded() && !mvnDependency.getDependencies().isEmpty();
         }
 
         @Override

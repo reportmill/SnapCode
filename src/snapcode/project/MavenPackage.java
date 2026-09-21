@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This class represents a Maven dependency.
@@ -282,12 +283,9 @@ public class MavenPackage extends PropObject {
             setLoading(true);
             _error = null;
 
-            // Load jar file
+            // Load jar file and pom file
             getJarFile().downloadFile();
-
-            // Load transitive dependencies
-            List<MavenPackage> transitiveDependencies = getDependencyPackages();
-            transitiveDependencies.forEach(MavenPackage::loadPackageFiles);
+            getPomFile().downloadFile();
 
             setLoaded(true);
         }
@@ -300,25 +298,13 @@ public class MavenPackage extends PropObject {
     }
 
     /**
-     * Pre-Loads files in background.
-     */
-    public void preloadPackageFiles()
-    {
-        // If already loading, just return
-        if (isLoaded() || isLoading())
-            return;
-
-        // Set Loading true and start thread
-        new Thread(this::loadPackageFiles).start();
-    }
-
-    /**
      * Reloads files.
      */
     public void reloadPackageFiles()
     {
         deletePackageFiles();
-        preloadPackageFiles();
+        if (!isLoaded())
+            CompletableFuture.runAsync(this::loadPackageFiles);
     }
 
     /**

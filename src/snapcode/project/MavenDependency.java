@@ -5,6 +5,7 @@ import snap.web.WebFile;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This class represents a Maven dependency.
@@ -349,6 +350,9 @@ public class MavenDependency extends BuildDependency {
      */
     public boolean isLoaded()
     {
+        MavenArtifact mavenArtifact = getMavenArtifact();
+        if (mavenArtifact == null || !mavenArtifact.isLoaded())
+            return false;
         MavenPackage mavenPackage = getMavenPackage();
         return mavenPackage != null && mavenPackage.isLoaded();
     }
@@ -358,6 +362,9 @@ public class MavenDependency extends BuildDependency {
      */
     public boolean isLoading()
     {
+        MavenArtifact mavenArtifact = getMavenArtifact();
+        if (mavenArtifact != null && mavenArtifact.isLoading())
+            return true;
         MavenPackage mavenPackage = getMavenPackage();
         return mavenPackage != null && mavenPackage.isLoading();
     }
@@ -367,9 +374,7 @@ public class MavenDependency extends BuildDependency {
      */
     public void preloadPackageFiles()
     {
-        MavenPackage mavenPackage = getMavenPackage();
-        if (mavenPackage != null)
-            mavenPackage.preloadPackageFiles();
+        CompletableFuture.runAsync(this::loadPackageFiles);
     }
 
     /**
@@ -377,6 +382,9 @@ public class MavenDependency extends BuildDependency {
      */
     public synchronized void loadPackageFiles()
     {
+        MavenArtifact mavenArtifact = getMavenArtifact();
+        if (mavenArtifact != null)
+            mavenArtifact.loadPackageFiles();
         MavenPackage mavenPackage = getMavenPackage();
         if (mavenPackage != null)
             mavenPackage.loadPackageFiles();
@@ -459,4 +467,55 @@ public class MavenDependency extends BuildDependency {
 
     @Override
     public String toString()  { return "MavenDependency: " + getId(); }
+
+    /**
+     * Loads dependencies deep.
+     */
+    public static boolean loadDependenciesDeep(List<MavenDependency> dependencies, ActivityMonitor activityMonitor)
+    {
+        // Preload dependencies
+        dependencies.forEach(MavenDependency::preloadPackageFiles);
+
+        // Iterate over each and load if needed
+        for (MavenDependency mavenDependency : dependencies) {
+
+            // Load dependency
+            if (!mavenDependency.isLoaded()) {
+                if (activityMonitor != null)
+                    activityMonitor.beginTask("Loading dependency: " + mavenDependency.getArtifactId(), 1);
+                mavenDependency.loadPackageFiles();
+                if (activityMonitor != null)
+                    activityMonitor.endTask();
+                if (!mavenDependency.isLoaded())
+                    return false;
+            }
+
+            // Load child dependencies
+            List<MavenDependency> childDependencies = mavenDependency.getDependencies();
+            if (!childDependencies.isEmpty())
+                loadDependenciesDeep(childDependencies, activityMonitor);
+        }
+
+        return true;
+    }
+
+    /**
+     * Deletes all given dependencies.
+     */
+    public static void deleteDependencies(List<MavenDependency> dependencies)
+    {
+        for (MavenDependency mavenDependency : dependencies) {
+            if (mavenDependency.isLoaded()) {
+                deleteDependencies(mavenDependency.getDependencies());
+                MavenArtifact mavenArtifact = mavenDependency.getMavenArtifact();
+                if (mavenArtifact != null) {
+                    WebFile localPackageDir = mavenArtifact.getLocalMavenDir();
+                    if (localPackageDir != null && localPackageDir.getExists()) {
+                        System.out.println("Deleting package dir: " + localPackageDir.getPath());
+                        localPackageDir.delete();
+                    }
+                }
+            }
+        }
+    }
 }
