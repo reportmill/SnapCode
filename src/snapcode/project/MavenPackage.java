@@ -1,18 +1,13 @@
 package snapcode.project;
 import snap.props.PropObject;
 import snap.util.FilePathUtils;
-import snap.util.ListUtils;
 import snap.util.SnapEnv;
 import snap.web.WebFile;
-import snap.web.WebUtils;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * This class represents a Maven dependency.
+ * This class represents a Maven package.
  */
 public class MavenPackage extends PropObject {
 
@@ -65,24 +60,10 @@ public class MavenPackage extends PropObject {
     private MavenPackage(String mavenId)
     {
         super();
-        setId(mavenId);
-    }
-
-    /**
-     * Returns id string.
-     */
-    public String getId()  { return _id; }
-
-    /**
-     * Sets properties for given id string.
-     */
-    private void setId(String aValue)
-    {
-        if (Objects.equals(aValue, _id)) return;
-        _id = aValue;
+        _id = mavenId;
 
         // Set Group, Name, Version
-        String[] names = aValue.split(":");
+        String[] names = mavenId.split(":");
         _groupId = names.length > 0 ? names[0] : null;
         _artifactId = names.length > 1 ? names[1] : null;
         _version = names.length > 2 ? names[2] : null;
@@ -90,6 +71,11 @@ public class MavenPackage extends PropObject {
 
         _mavenArtifact = MavenArtifact.getMavenArtifactForId(_groupId + ':' + _artifactId);
     }
+
+    /**
+     * Returns id string.
+     */
+    public String getId()  { return _id; }
 
     /**
      * Returns the group name.
@@ -144,28 +130,6 @@ public class MavenPackage extends PropObject {
     }
 
     /**
-     * Returns the transitive dependencies.
-     */
-    private List<MavenPackage> getDependencyPackages()
-    {
-        List<MavenDependency> dependencies = getDependencies();
-        return ListUtils.mapNonNull(dependencies, MavenDependency::getMavenPackage);
-    }
-
-    /**
-     * Returns the repository URL or default.
-     */
-    public String getRepositoryUrlOrDefault()
-    {
-        MavenArtifact mavenArtifact = getMavenArtifact();
-        if (mavenArtifact != null)
-            return mavenArtifact.getRepositoryUrlOrDefault();
-        if (SnapEnv.isWebVM)
-            return WebUtils.getCorsProxyAddress(MavenArtifact.MAVEN_CENTRAL_URL);
-        return MavenArtifact.MAVEN_CENTRAL_URL;
-    }
-
-    /**
      * Returns the class path for this dependency.
      */
     public String getClassPath()
@@ -188,7 +152,7 @@ public class MavenPackage extends PropObject {
      */
     String getRemoteFileUrlStringForType(String fileType)
     {
-        String repositoryURL = getRepositoryUrlOrDefault();
+        String repositoryURL = _mavenArtifact.getRepositoryUrlOrDefault();
         String relativeFilePath = getRelativeFilePathForType(fileType);
         if (repositoryURL == null || relativeFilePath == null)
             return null;
@@ -220,7 +184,7 @@ public class MavenPackage extends PropObject {
     private String getRelativeFilePathForType(String fileType)
     {
         // Get artifact path
-        String artifactPath = _mavenArtifact != null ? _mavenArtifact.getRelativeFilePathForFilename(null) : null;
+        String artifactPath = _mavenArtifact.getRelativeFilePathForFilename(null);
         if (artifactPath == null)
             return null;
 
@@ -312,8 +276,6 @@ public class MavenPackage extends PropObject {
      */
     public void deletePackageFiles()
     {
-        List<MavenPackage> transitiveDependencies = getDependencyPackages();
-        transitiveDependencies.forEach(MavenPackage::deletePackageFiles);
         getJarFile().deleteLocalFile();
         getPomFile().deleteLocalFile();
         setLoaded(false);

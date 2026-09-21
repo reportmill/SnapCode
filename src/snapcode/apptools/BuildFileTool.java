@@ -265,8 +265,11 @@ public class BuildFileTool extends ProjectTool {
             case "IncludeSnapKitRuntimeCheckBox" -> buildFile.setIncludeSnapKitRuntime(anEvent.getBoolValue());
             case "IncludeSnapChartsRuntimeCheckBox" -> buildFile.setIncludeSnapChartsRuntime(anEvent.getBoolValue());
             case "IncludeJavaFXCheckBox" -> {
-                if (ViewUtils.isAltDown())
-                    MavenDependency.deleteDependencies(ListUtils.filterByClass(buildFile.getDependencies(), MavenDependency.class));
+                if (ViewUtils.isAltDown()) {
+                    List<MavenDependency> dependencies = ListUtils.filterByClass(buildFile.getDependencies(), MavenDependency.class);
+                    MavenDependency.deleteDependencies(dependencies);
+                    dependencies.forEach(MavenDependency::preloadPackageFiles);
+                }
                 else buildFile.setIncludeJavaFX(anEvent.getBoolValue());
             }
 
@@ -533,28 +536,31 @@ public class BuildFileTool extends ProjectTool {
     private void watchForUnloadedDependency()
     {
         BuildFile buildFile = getBuildFile();
-        watchForUnloadedDependencies(buildFile.getDependencies());
+        List<MavenDependency> dependencies = ListUtils.filterByClass(buildFile.getDependencies(), MavenDependency.class);
+        watchForUnloadedDependencies(dependencies);
     }
 
-    private boolean watchForUnloadedDependencies(List<? extends BuildDependency> dependencies)
+    private boolean watchForUnloadedDependencies(List<MavenDependency> dependencies)
     {
-        for (BuildDependency dependency : dependencies) {
-            if (dependency instanceof MavenDependency mavenDependency) {
-                if (!mavenDependency.isLoaded()) {
-                    MavenArtifact mavenArtifact = mavenDependency.getMavenArtifact();
-                    if (mavenArtifact != null && !mavenArtifact.isLoaded()) {
-                        mavenArtifact.addPropChangeListener(_handleMavenDependencyLoadedLsnr, MavenArtifact.Loaded_Prop);
-                        return true;
-                    }
-                    MavenPackage mavenPackage = mavenDependency.getMavenPackage();
-                    if (mavenPackage != null && !mavenPackage.isLoaded()) {
-                        mavenPackage.addPropChangeListener(_handleMavenDependencyLoadedLsnr, MavenPackage.Loaded_Prop);
-                        return true;
-                    }
-                }
-                if (watchForUnloadedDependencies(mavenDependency.getDependencies()))
+        for (MavenDependency mavenDependency : dependencies) {
+            if (!mavenDependency.isLoaded()) {
+                MavenArtifact mavenArtifact = mavenDependency.getMavenArtifact();
+                if (mavenArtifact != null && !mavenArtifact.isLoaded() && !mavenArtifact.isLoading()) {
+                    mavenArtifact.addPropChangeListener(_handleMavenDependencyLoadedLsnr, MavenArtifact.Loaded_Prop);
+                    mavenDependency.preloadPackageFiles();
+                    System.out.println("Watching load for " + mavenDependency.getResolvedId() + " artifact");
                     return true;
+                }
+                MavenPackage mavenPackage = mavenDependency.getMavenPackage();
+                if (mavenPackage != null && !mavenPackage.isLoaded() && !mavenPackage.isLoading()) {
+                    mavenPackage.addPropChangeListener(_handleMavenDependencyLoadedLsnr, MavenPackage.Loaded_Prop);
+                    mavenDependency.preloadPackageFiles();
+                    System.out.println("Watching load for " + mavenDependency.getResolvedId() + " package");
+                    return true;
+                }
             }
+            if (watchForUnloadedDependencies(mavenDependency.getDependencies()))
+                return true;
         }
         return false;
     }
@@ -565,6 +571,10 @@ public class BuildFileTool extends ProjectTool {
     {
         PropObject mavenDependency = (PropObject) propChange.getSource();
         mavenDependency.removePropChangeListener(_handleMavenDependencyLoadedLsnr);
+        if (mavenDependency instanceof MavenArtifact mavenArtifact)
+            System.out.println("Done watching artifact " + mavenArtifact.getArtifactId());
+        else if (mavenDependency instanceof MavenPackage mavenPackage)
+            System.out.println("Done watching package: " + mavenPackage.getId());
         watchForUnloadedDependency();
     }
 

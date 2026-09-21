@@ -382,6 +382,9 @@ public class MavenDependency extends BuildDependency {
      */
     public synchronized void loadPackageFiles()
     {
+        if (isLoaded())
+            return;
+        System.out.println("Loading maven dependency: " + getResolvedId());
         MavenArtifact mavenArtifact = getMavenArtifact();
         if (mavenArtifact != null)
             mavenArtifact.loadPackageFiles();

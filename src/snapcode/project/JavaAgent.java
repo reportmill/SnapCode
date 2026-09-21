@@ -133,7 +133,7 @@ public class JavaAgent extends TextAgent {
     {
         if (_jfile != null) return _jfile;
         _jfile = createJFile();
-        setColorOfMemberIds();
+        //setColorOfMemberIds();
         return _jfile;
     }
 
@@ -278,7 +278,7 @@ public class JavaAgent extends TextAgent {
 
         // Reload class
         reloadClassFromClassDecl();
-        setColorOfMemberIds();
+        //setColorOfMemberIds();
     }
 
     /**

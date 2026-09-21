@@ -142,17 +142,17 @@ public class MavenArtifactFile {
      */
     XMLElement getLocalFileXml()
     {
-        WebFile pomFile = getLocalFile();
-        String xmlString = pomFile.getExists() ? pomFile.getText() : null;
+        WebFile artifactFile = getLocalFile();
+        String xmlString = artifactFile.getExists() ? artifactFile.getText() : null;
         if (xmlString == null) {
-            System.err.println(getClass().getSimpleName() + ".getLocalFileXml: Can't read pom file: " + pomFile);
+            System.err.println(getClass().getSimpleName() + ".getLocalFileXml: Can't read artifact file: " + artifactFile);
             return null;
         }
 
         // Read and return
         try { return XMLElement.readXmlFromString(xmlString); }
         catch (Exception e) {
-            System.err.println(getClass().getSimpleName() + ".getLocalFileXml: Error reading file: " + pomFile.getPath());
+            System.err.println(getClass().getSimpleName() + ".getLocalFileXml: Error reading artifact file: " + artifactFile.getPath());
             System.err.println(e.getMessage());
             return null;
         }
