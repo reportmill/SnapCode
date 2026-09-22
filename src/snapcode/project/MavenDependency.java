@@ -409,6 +409,7 @@ public class MavenDependency extends BuildDependency {
     private void handlePropChange()
     {
         _classPaths = null; _id = null; _redundant = null;
+        _mavenArtifact = null;
         _mavenPackage = null;
         _dependencies = null;
     }
@@ -512,7 +513,7 @@ public class MavenDependency extends BuildDependency {
                 deleteDependencies(mavenDependency.getDependencies());
                 MavenArtifact mavenArtifact = mavenDependency.getMavenArtifact();
                 if (mavenArtifact != null) {
-                    WebFile localPackageDir = mavenArtifact.getLocalMavenDir();
+                    WebFile localPackageDir = mavenArtifact.getLocalArtifactDir();
                     if (localPackageDir != null && localPackageDir.getExists()) {
                         System.out.println("Deleting package dir: " + localPackageDir.getPath());
                         localPackageDir.delete();

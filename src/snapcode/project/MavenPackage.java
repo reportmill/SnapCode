@@ -152,7 +152,7 @@ public class MavenPackage extends PropObject {
      */
     String getRemoteFileUrlStringForType(String fileType)
     {
-        String repositoryURL = _mavenArtifact.getRepositoryUrlOrDefault();
+        String repositoryURL = _mavenArtifact.getRemoteRepositoryDirUrlString();
         String relativeFilePath = getRelativeFilePathForType(fileType);
         if (repositoryURL == null || relativeFilePath == null)
             return null;
@@ -184,7 +184,7 @@ public class MavenPackage extends PropObject {
     private String getRelativeFilePathForType(String fileType)
     {
         // Get artifact path
-        String artifactPath = _mavenArtifact.getRelativeFilePathForFilename(null);
+        String artifactPath = _mavenArtifact.getRelativeArtifactDirPath();
         if (artifactPath == null)
             return null;
 

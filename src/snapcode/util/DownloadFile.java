@@ -61,9 +61,9 @@ public final class DownloadFile {
 
         // We won: perform the download and complete the future.
         try {
-            Path result = downloadUrlToLocalPath(_remoteUrl, _localPath);
-            created.complete(result);
-            return result;
+            downloadUrlToLocalPath(_remoteUrl, _localPath);
+            created.complete(_localPath);
+            return _localPath;
         }
 
         // Allow retry on next call
@@ -88,11 +88,11 @@ public final class DownloadFile {
     /**
      * Downloads remote url to local.
      */
-    private static Path downloadUrlToLocalPath(URL remoteUrl, Path localPath) throws IOException
+    public static void downloadUrlToLocalPath(URL remoteUrl, Path localPath) throws IOException
     {
         // Double-check after we "won" the CAS: maybe file appeared (e.g., created externally)
         if (Files.exists(localPath))
-            return localPath;
+            return;
 
         // Make sure parent directory exists
         Path parent = localPath.getParent();
@@ -126,9 +126,6 @@ public final class DownloadFile {
         catch (AtomicMoveNotSupportedException e) {
             Files.move(downloadPath, localPath, StandardCopyOption.REPLACE_EXISTING);
         }
-
-        // Return
-        return localPath;
     }
 
     /**

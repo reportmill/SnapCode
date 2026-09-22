@@ -1,9 +1,11 @@
 package snapcode.project;
 import snap.props.PropObject;
-import snap.util.FilePathUtils;
-import snap.util.SnapEnv;
-import snap.web.WebFile;
-import snap.web.WebUtils;
+import snap.util.*;
+import snap.web.*;
+import snapcode.util.DownloadFile;
+import java.io.IOException;
+import java.net.*;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -11,17 +13,20 @@ import java.util.*;
  */
 public class MavenArtifact extends PropObject {
 
-    // The id string
-    private String _id;
+    // The full artifact id string
+    private final String _id;
 
     // The group id string
-    private String _groupId;
+    private final String _groupId;
 
     // The artifact id string
-    private String _artifactId;
+    private final String _artifactId;
 
-    // The package metadata file (e.g.: /group/artifact/maven-metadata.xml)
-    private MavenArtifactFile _metadataFile;
+    // The versions
+    private List<String> _versions;
+
+    // The downloaded local file
+    private WebFile _localFile;
 
     // Whether dependency is loaded
     private boolean _loaded;
@@ -39,37 +44,29 @@ public class MavenArtifact extends PropObject {
     public static final String Loaded_Prop = "Loaded";
     public static final String Loading_Prop = "Loading";
 
+    // Metadata filename
+    static final String METADATA_FILE_NAME = "maven-metadata.xml";
+
     // Constant for Maven central URL
     //public static final String MAVEN_CENTRAL_URL = "https://repo1.maven.org/maven2";
     public static final String MAVEN_CENTRAL_URL = "https://maven-central.storage-download.googleapis.com/maven2";
 
     /**
-     * Constructor with maven id.
+     * Constructor with full artifact id.
      */
-    private MavenArtifact(String mavenId)
+    private MavenArtifact(String artifactId)
     {
         super();
-        setId(mavenId);
+        _id = artifactId;
+        String[] names = artifactId.split(":");
+        _groupId = names[0];
+        _artifactId = names[1];
     }
 
     /**
      * Returns id string.
      */
     public String getId()  { return _id; }
-
-    /**
-     * Sets properties for given id string.
-     */
-    private void setId(String aValue)
-    {
-        if (Objects.equals(aValue, _id)) return;
-
-        // Set Group, Name
-        String[] names = aValue.split(":");
-        _groupId = names.length > 0 ? names[0] : null;
-        _artifactId = names.length > 1 ? names[1] : null;
-        _id = _groupId + ":" + _artifactId;
-    }
 
     /**
      * Returns the group id string.
@@ -86,105 +83,163 @@ public class MavenArtifact extends PropObject {
      */
     public String getLatestVersion()
     {
-        MavenArtifactFile metadata = getMetadataFile();
-        return metadata.getLatestVersion();
+        List<String> versions = getAllVersions();
+        return !versions.isEmpty() ? versions.getLast() : null;
     }
 
     /**
      * Returns the latest version.
      */
-    public List<String> getVersions()
+    public List<String> getAllVersions()
     {
-        MavenArtifactFile metadata = getMetadataFile();
-        return metadata.getVersions();
+        if (_versions != null) return _versions;
+        return _versions = getVersionsImpl();
+    }
+
+    private List<String> getVersionsImpl()
+    {
+        // Get <version> XML elements
+        XMLElement xml = getLocalArtifactFileXML();
+        XMLElement versioningXML = xml != null ? xml.getElement("versioning") : null;
+        XMLElement versionsXML = versioningXML != null ? versioningXML.getElement("versions") : null;
+        List<XMLElement> versionXMLs = versionsXML != null ? versionsXML.getElements("version") : null;
+        if (versionXMLs == null || versionXMLs.isEmpty())
+            return Collections.emptyList();
+
+        // Get version strings and return
+        return ListUtils.mapNonNull(versionXMLs, MavenArtifact::getVersionStringForVersionXml);
+    }
+
+    private static String getVersionStringForVersionXml(XMLElement xml)
+    {
+        String version = xml.getValue();
+        return !version.isBlank() ? version.trim() : null;
     }
 
     /**
-     * Returns the artifact metadata file (e.g.: /group/artifact/maven-metadata.xml).
+     * Returns the local artifact file XML.
      */
-    public MavenArtifactFile getMetadataFile()
+    private XMLElement getLocalArtifactFileXML()
     {
-        if (_metadataFile != null) return _metadataFile;
-        return _metadataFile = new MavenArtifactFile(this);
-    }
-
-    /**
-     * Returns the repository URL or default.
-     */
-    public String getRepositoryUrlOrDefault()
-    {
-        if (_artifactId != null) {
-            String name = _artifactId.toLowerCase();
-            if (name.contains("reportmill") || name.contains("snapkit") || name.contains("snapcharts"))
-                return "https://reportmill.com/maven";
-            String group = _groupId.toLowerCase();
-            if (group.contains("reportmill"))
-                return "https://reportmill.com/maven";
+        String xmlString;
+        try { xmlString = getLocalArtifactFile().getText(); }
+        catch (IOException e) {
+            System.err.println(getClass().getSimpleName() + ".getXML: Can't read artifact file: " + e.getMessage());
+            return null;
         }
-        if (SnapEnv.isWebVM)
-            return WebUtils.getCorsProxyAddress(MAVEN_CENTRAL_URL);
-        return MAVEN_CENTRAL_URL;
+
+        // Read and return
+        try { return XMLElement.readXmlFromString(xmlString); }
+        catch (Exception e) {
+            System.err.println(getClass().getSimpleName() + ".getXML: Error reading artifact file: " + e.getMessage());
+            System.err.println(e.getMessage());
+            return null;
+        }
     }
 
     /**
-     * Returns the local maven directory file.
+     * Returns the local artifact file (downloads if missing).
      */
-    public WebFile getLocalMavenDir()
+    public WebFile getLocalArtifactFile() throws IOException
     {
-        String localMavenDirPath = getLocalFilePathForFilename(null);
+        if (_localFile != null) return _localFile;
+        return _localFile = getLocalArtifactFileImpl();
+    }
+
+    private synchronized WebFile getLocalArtifactFileImpl() throws IOException
+    {
+        // If local file already exists, just return
+        String localFilePath = getLocalArtifactFilePath();
+        WebFile localFile = WebFile.getFileForPath(localFilePath);
+        if (localFile != null)
+            return localFile;
+
+        // Download file
+        String remoteFileUrlString = getRemoteArtifactFileUrlString();
+        URL remoteFileUrl = URI.create(remoteFileUrlString).toURL();
+        DownloadFile.downloadUrlToLocalPath(remoteFileUrl, Path.of(localFilePath));
+
+        // Return file which should exist now
+        return WebFile.getFileForPath(localFilePath);
+    }
+
+    /**
+     * Deletes the local artifact file.
+     */
+    void deleteLocalArtifactFile()
+    {
+        String localFilePath = getLocalArtifactFilePath();
+        WebFile localFile = WebFile.getFileForPath(localFilePath);
+        if (localFile == null)
+            return;
+
+        try { localFile.delete(); }
+        catch (Exception e) { System.err.println(getClass().getSimpleName() + ": Delete local file failed: " + e.getMessage()); }
+        _localFile = null;
+    }
+
+    /**
+     * Returns the local maven artifact directory file.
+     */
+    WebFile getLocalArtifactDir()
+    {
+        String localMavenDirPath = getLocalArtifactDirPath();
         return WebFile.createFileForPath(localMavenDirPath, true);
     }
 
     /**
-     * Returns the remote file URL string.
+     * Returns the local maven artifact directory path string.
      */
-    public String getRemoteFileUrlStringForFilename(String filename)
+    String getLocalArtifactDirPath()
     {
-        String repositoryURL = getRepositoryUrlOrDefault();
-        String relativeFilePath = getRelativeFilePathForFilename(filename);
-        if (repositoryURL == null || relativeFilePath == null)
-            return null;
-        return FilePathUtils.getChildPath(repositoryURL, relativeFilePath);
+        // Get local maven cache directory path
+        String homeDir = System.getProperty("user.home");
+        String MAVEN_REPO_PATH = SnapEnv.isWebVM ? "maven_cache" : ".m2/repository";
+        String localMavenCacheDir = FilePathUtils.getChildPath(homeDir, MAVEN_REPO_PATH);
+
+        // Build path with /<group-id-path>/<artifact-id> and return
+        String relativeArtifactDirPath = getRelativeArtifactDirPath();
+        return FilePathUtils.getChildPath(localMavenCacheDir, relativeArtifactDirPath);
     }
 
     /**
      * Returns the local file path string.
      */
-    public String getLocalFilePathForFilename(String filename)
+    String getLocalArtifactFilePath()
     {
-        // Get local maven cache path
-        String homeDir = System.getProperty("user.home");
-        String MAVEN_REPO_PATH = SnapEnv.isWebVM ? "maven_cache" : ".m2/repository";
-        String localMavenCachePath = FilePathUtils.getChildPath(homeDir, MAVEN_REPO_PATH);
-
-        // Get relative file path
-        String relativeFilePath = getRelativeFilePathForFilename(filename);
-        if (relativeFilePath == null)
-            return null;
-
-        // Return combined path
-        return FilePathUtils.getChildPath(localMavenCachePath, relativeFilePath);
+        String localArtifactDirPath = getLocalArtifactDirPath();
+        return FilePathUtils.getChildPath(localArtifactDirPath, METADATA_FILE_NAME);
     }
 
     /**
-     * Returns the relative file path (from any maven root).
+     * Returns the remote artifact metadata file URL string.
      */
-    String getRelativeFilePathForFilename(String filename)
+    String getRemoteArtifactFileUrlString()
     {
-        // Get parts - if any are null, return null
-        String group = getGroupId();
-        String packageName = getArtifactId();
-        if (group == null || group.isEmpty() || packageName == null || packageName.isEmpty())
-            return null;
+        String remoteRepositoryDirURL = getRemoteRepositoryDirUrlString();
+        String relativeArtifactFilePath = getRelativeArtifactDirPath() + '/' + METADATA_FILE_NAME;
+        return FilePathUtils.getChildPath(remoteRepositoryDirURL, relativeArtifactFilePath);
+    }
 
-        // Build relative package jar path and return
-        String groupPath = '/' + group.replace(".", "/");
-        String artifactPath = FilePathUtils.getChildPath(groupPath, packageName);
-        if(filename == null)
-            return artifactPath;
+    /**
+     * Returns the relative artifact directory path.
+     */
+    String getRelativeArtifactDirPath()  { return '/' + _groupId.replace(".", "/") + '/' + _artifactId; }
 
-        // Return artifact path + filename
-        return FilePathUtils.getChildPath(artifactPath, filename);
+    /**
+     * Returns the repository URL or default.
+     */
+    public String getRemoteRepositoryDirUrlString()
+    {
+        if (_groupId.toLowerCase().contains("reportmill"))
+            return "https://reportmill.com/maven";
+        String artifactId = _artifactId.toLowerCase();
+        if (artifactId.contains("reportmill") || artifactId.contains("snapkit") || artifactId.contains("snapcharts"))
+            return "https://reportmill.com/maven";
+
+        if (SnapEnv.isWebVM)
+            return WebUtils.getCorsProxyAddress(MAVEN_CENTRAL_URL);
+        return MAVEN_CENTRAL_URL;
     }
 
     /**
@@ -230,8 +285,8 @@ public class MavenArtifact extends PropObject {
             setLoading(true);
             _error = null;
 
-            // Load metadata file
-            getMetadataFile().downloadFile();
+            // Fetch metadata file
+            getLocalArtifactFile();
 
             setLoaded(true);
         }
