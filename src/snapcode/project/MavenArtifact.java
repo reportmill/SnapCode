@@ -2,7 +2,6 @@ package snapcode.project;
 import snap.props.PropObject;
 import snap.util.*;
 import snap.web.*;
-import snapcode.util.DownloadFile;
 import java.io.IOException;
 import java.net.*;
 import java.nio.file.Path;
@@ -25,8 +24,8 @@ public class MavenArtifact extends PropObject {
     // The versions
     private List<String> _versions;
 
-    // The downloaded local file
-    private WebFile _localFile;
+    // The downloaded local artifact metadata file
+    private WebFile _localArtifactFile;
 
     // Whether dependency is loaded
     private boolean _loaded;
@@ -124,14 +123,14 @@ public class MavenArtifact extends PropObject {
         String xmlString;
         try { xmlString = getLocalArtifactFile().getText(); }
         catch (IOException e) {
-            System.err.println(getClass().getSimpleName() + ".getXML: Can't read artifact file: " + e.getMessage());
+            System.err.println(getClass().getSimpleName() + ".getLocalArtifactFileXML: Can't read artifact file: " + e.getMessage());
             return null;
         }
 
         // Read and return
         try { return XMLElement.readXmlFromString(xmlString); }
         catch (Exception e) {
-            System.err.println(getClass().getSimpleName() + ".getXML: Error reading artifact file: " + e.getMessage());
+            System.err.println(getClass().getSimpleName() + ".getLocalArtifactFileXML: Error reading artifact file: " + e.getMessage());
             System.err.println(e.getMessage());
             return null;
         }
@@ -142,8 +141,8 @@ public class MavenArtifact extends PropObject {
      */
     public WebFile getLocalArtifactFile() throws IOException
     {
-        if (_localFile != null) return _localFile;
-        return _localFile = getLocalArtifactFileImpl();
+        if (_localArtifactFile != null) return _localArtifactFile;
+        return _localArtifactFile = getLocalArtifactFileImpl();
     }
 
     private synchronized WebFile getLocalArtifactFileImpl() throws IOException
@@ -157,7 +156,7 @@ public class MavenArtifact extends PropObject {
         // Download file
         String remoteFileUrlString = getRemoteArtifactFileUrlString();
         URL remoteFileUrl = URI.create(remoteFileUrlString).toURL();
-        DownloadFile.downloadUrlToLocalPath(remoteFileUrl, Path.of(localFilePath));
+        MavenPackageHelper.downloadUrlToLocalPath(remoteFileUrl, Path.of(localFilePath));
 
         // Return file which should exist now
         return WebFile.getFileForPath(localFilePath);
@@ -175,7 +174,7 @@ public class MavenArtifact extends PropObject {
 
         try { localFile.delete(); }
         catch (Exception e) { System.err.println(getClass().getSimpleName() + ": Delete local file failed: " + e.getMessage()); }
-        _localFile = null;
+        _localArtifactFile = null;
     }
 
     /**

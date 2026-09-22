@@ -279,15 +279,6 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
-     * Returns the local maven directory file.
-     */
-    public WebFile getLocalMavenDir()
-    {
-        MavenPackage mavenPackage = getMavenPackage();
-        return mavenPackage != null ? mavenPackage.getLocalMavenDir() : null;
-    }
-
-    /**
      * Returns the first dependency matching given artifact id.
      */
     public MavenDependency findDependencyForArtifactId(String artifactId)

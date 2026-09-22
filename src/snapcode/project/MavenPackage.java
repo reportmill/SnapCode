@@ -1,8 +1,7 @@
 package snapcode.project;
 import snap.props.PropObject;
-import snap.util.FilePathUtils;
-import snap.util.SnapEnv;
 import snap.web.WebFile;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -10,9 +9,6 @@ import java.util.concurrent.CompletableFuture;
  * This class represents a Maven package.
  */
 public class MavenPackage extends PropObject {
-
-    // The artifact
-    private MavenArtifact _mavenArtifact;
 
     // The package id string
     private String _id;
@@ -29,11 +25,17 @@ public class MavenPackage extends PropObject {
     // The classifier
     private String _classifier;
 
-    // The Jar file
-    private MavenFile _jarFile;
+    // The artifact
+    private MavenArtifact _mavenArtifact;
 
-    // The POM file
-    private MavenPomFile _pomFile;
+    // The dependencies
+    private List<MavenDependency> _dependencies;
+
+    // The local jar file
+    private WebFile _localJarFile;
+
+    // The local pom file
+    private WebFile _localPomFile;
 
     // The class path
     private String _classPath;
@@ -46,6 +48,9 @@ public class MavenPackage extends PropObject {
 
     // The error string
     private String _error;
+
+    // Helper class
+    MavenPackageHelper _helper;
 
     // A map of all packages
     private static Map<String, MavenPackage> _packages = new HashMap<>();
@@ -70,6 +75,7 @@ public class MavenPackage extends PropObject {
         _classifier = names.length > 3 ? names[3] : null;
 
         _mavenArtifact = MavenArtifact.getMavenArtifactForId(_groupId + ':' + _artifactId);
+        _helper = new MavenPackageHelper(this);
     }
 
     /**
@@ -103,30 +109,30 @@ public class MavenPackage extends PropObject {
     public MavenArtifact getMavenArtifact()  { return _mavenArtifact; }
 
     /**
-     * Returns the Jar file.
-     */
-    public MavenFile getJarFile()
-    {
-        if (_jarFile != null) return _jarFile;
-        return _jarFile = new MavenFile(this, "jar");
-    }
-
-    /**
-     * Returns the POM file.
-     */
-    public MavenPomFile getPomFile()
-    {
-        if (_pomFile != null) return _pomFile;
-        return _pomFile = new MavenPomFile(this);
-    }
-
-    /**
      * Returns the transitive dependencies.
      */
     public List<MavenDependency> getDependencies()
     {
-        MavenPomFile pomFile = getPomFile();
-        return pomFile.getDependencies();
+        if (_dependencies != null) return _dependencies;
+        return _dependencies = _helper.getDependencies();
+    }
+
+    /**
+     * Returns the local Jar file.
+     */
+    public WebFile getLocalJarFile() throws IOException
+    {
+        if (_localJarFile != null) return _localJarFile;
+        return _localJarFile = _helper.getLocalJarFile();
+    }
+
+    /**
+     * Returns the local pom file.
+     */
+    public WebFile getLocalPomFile() throws IOException
+    {
+        if (_localPomFile != null) return _localPomFile;
+        return _localPomFile = _helper.getLocalPomFile();
     }
 
     /**
@@ -135,7 +141,7 @@ public class MavenPackage extends PropObject {
     public String getClassPath()
     {
         if (_classPath != null) return _classPath;
-        return _classPath = getLocalFilePathForType("jar");
+        return _classPath = _helper.getLocalFilePathForType("jar");
     }
 
     /**
@@ -143,65 +149,8 @@ public class MavenPackage extends PropObject {
      */
     public WebFile getLocalMavenDir()
     {
-        String localMavenDirPath = getLocalFilePathForType(null);
+        String localMavenDirPath = _helper.getLocalFilePathForType(null);
         return WebFile.createFileForPath(localMavenDirPath, true);
-    }
-
-    /**
-     * Returns the remote file URL string.
-     */
-    String getRemoteFileUrlStringForType(String fileType)
-    {
-        String repositoryURL = _mavenArtifact.getRemoteRepositoryDirUrlString();
-        String relativeFilePath = getRelativeFilePathForType(fileType);
-        if (repositoryURL == null || relativeFilePath == null)
-            return null;
-        return FilePathUtils.getChildPath(repositoryURL, relativeFilePath);
-    }
-
-    /**
-     * Returns the local file path string.
-     */
-    String getLocalFilePathForType(String fileType)
-    {
-        // Get local maven cache path
-        String homeDir = System.getProperty("user.home");
-        String MAVEN_REPO_PATH = SnapEnv.isWebVM ? "maven_cache" : ".m2/repository";
-        String localMavenCachePath = FilePathUtils.getChildPath(homeDir, MAVEN_REPO_PATH);
-
-        // Get relative file path
-        String relativeFilePath = getRelativeFilePathForType(fileType);
-        if (relativeFilePath == null)
-            return null;
-
-        // Return combined path
-        return FilePathUtils.getChildPath(localMavenCachePath, relativeFilePath);
-    }
-
-    /**
-     * Returns the relative file path (from any maven root).
-     */
-    private String getRelativeFilePathForType(String fileType)
-    {
-        // Get artifact path
-        String artifactPath = _mavenArtifact.getRelativeArtifactDirPath();
-        if (artifactPath == null)
-            return null;
-
-        // Build relative package jar path and return
-        String version = getVersion();
-        String versionPath = version != null ? FilePathUtils.getChildPath(artifactPath, version) : null;
-        if (fileType == null)
-            return versionPath;
-
-        // Get filename
-        String filenameSimple = getArtifactId() + '-' + version;
-        if (_classifier != null && !_classifier.isBlank() && fileType.equals("jar"))
-            filenameSimple += '-' + _classifier;
-        String filename = filenameSimple + '.' + fileType;
-
-        // Return path
-        return FilePathUtils.getChildPath(versionPath, filename);
     }
 
     /**
@@ -248,8 +197,8 @@ public class MavenPackage extends PropObject {
             _error = null;
 
             // Load jar file and pom file
-            getJarFile().downloadFile();
-            getPomFile().downloadFile();
+            getLocalJarFile();
+            getLocalPomFile();
 
             setLoaded(true);
         }
@@ -276,8 +225,16 @@ public class MavenPackage extends PropObject {
      */
     public void deletePackageFiles()
     {
-        getJarFile().deleteLocalFile();
-        getPomFile().deleteLocalFile();
+        String localJarFilePath = _helper.getLocalJarFilePath();
+        WebFile localJarFile = WebFile.getFileForPath(localJarFilePath);
+        if (localJarFile != null)
+            localJarFile.delete();
+
+        String localPomFilePath = _helper.getLocalPomFilePath();
+        WebFile localPomFile = WebFile.getFileForPath(localPomFilePath);
+        if (localPomFile != null)
+            localPomFile.delete();
+
         setLoaded(false);
     }
 

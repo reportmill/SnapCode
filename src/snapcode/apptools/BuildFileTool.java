@@ -484,7 +484,8 @@ public class BuildFileTool extends ProjectTool {
      */
     private void showMavenDependencyInFinder(MavenDependency mavenDependency)
     {
-        WebFile mavenDir = mavenDependency.getLocalMavenDir();
+        MavenPackage mavenPackage = mavenDependency.getMavenPackage();
+        WebFile mavenDir = mavenPackage != null ? mavenPackage.getLocalMavenDir() : null;
         if (mavenDir != null)
             GFXEnv.getEnv().openFile(mavenDir);
     }
