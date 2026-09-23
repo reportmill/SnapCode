@@ -175,26 +175,37 @@ public class MavenDependency extends BuildDependency {
      */
     public String getResolvedId()
     {
-        String groupId = getGroupId();
-        if (groupId == null)
-            return null;
-        if (groupId.equals("${project.groupId}")) {
-            if (getParent() != null)
-                groupId = getParent().getGroupId();
-        }
-
-        if (getVersion() == getResolvedVersion() && groupId == getGroupId() || getId() == null)
+        String resolvedGroupId = getResolvedGroupId();
+        String resolvedVersion = getResolvedVersion();
+        if (resolvedGroupId == getGroupId() && resolvedVersion == getVersion() || getId() == null)
             return getId();
-        String resolvedId = groupId + ":" + _artifactId + ":" + getResolvedVersion();
+
+        String resolvedId = resolvedGroupId + ":" + _artifactId + ":" + resolvedVersion;
         if (_classifier != null && !_classifier.isBlank())
             resolvedId += ':' + _classifier;
         return resolvedId;
     }
 
     /**
+     * Returns the resolved group id.
+     */
+    private String getResolvedGroupId()
+    {
+        String groupId = getGroupId();
+        if (groupId == null || groupId.isBlank())
+            return null;
+        if (groupId.equals("${project.groupId}")) {
+            if (getParent() != null)
+                groupId = getParent().getGroupId();
+        }
+
+        return groupId;
+    }
+
+    /**
      * Returns the resolved version.
      */
-    public String getResolvedVersion()
+    private String getResolvedVersion()
     {
         String version = getVersion();
 
@@ -221,13 +232,14 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
-     * Returns the artifact id.
+     * Returns the resolved group + artifact id.
      */
-    public String getFullArtifactId()
+    public String getResolvedGroupArtifactId()
     {
-        if (_groupId == null || _groupId.isBlank() || _artifactId == null || _artifactId.isBlank())
+        String resolvedGroupId = getResolvedGroupId();
+        if (resolvedGroupId == null || _artifactId == null || _artifactId.isBlank())
             return null;
-        return _groupId + ":" + _artifactId;
+        return resolvedGroupId + ":" + _artifactId;
     }
 
     /**
@@ -236,10 +248,10 @@ public class MavenDependency extends BuildDependency {
     public MavenArtifact getMavenArtifact()
     {
         if (_mavenArtifact != null) return _mavenArtifact;
-        String artifactId = getFullArtifactId();
-        if (artifactId == null)
+        String groupArtifactId = getResolvedGroupArtifactId();
+        if (groupArtifactId == null)
             return null;
-        return _mavenArtifact = MavenArtifact.getMavenArtifactForId(artifactId);
+        return _mavenArtifact = MavenArtifact.getMavenArtifactForId(groupArtifactId);
     }
 
     /**
@@ -279,40 +291,37 @@ public class MavenDependency extends BuildDependency {
     }
 
     /**
-     * Returns the first dependency matching given artifact id.
+     * Returns whether dependency is already in this dependency tree.
      */
-    public MavenDependency findDependencyForArtifactId(String artifactId)
+    public boolean isRedundant()
     {
+        if (_redundant != null) return _redundant;
+
+        String groupArtifactId = getResolvedGroupArtifactId();
+        if (groupArtifactId == null)
+            return _redundant = false;
+
         MavenDependency rootDependency = this;
         while (rootDependency._parent != null) rootDependency = rootDependency._parent;
-        return rootDependency.findDependencyForArtifactIdImpl(artifactId);
+        return _redundant = rootDependency.findDependencyForGroupArtifactId(groupArtifactId) != this;
     }
 
     /**
-     * Returns the first dependency matching given artifact id.
+     * Returns the first dependency matching given group artifact id, searching recursively.
      */
-    private MavenDependency findDependencyForArtifactIdImpl(String artifactId)
+    private MavenDependency findDependencyForGroupArtifactId(String groupArtifactId)
     {
-        if (Objects.equals(getFullArtifactId(), artifactId))
+        if (Objects.equals(getResolvedGroupArtifactId(), groupArtifactId))
             return this;
+
         for (MavenDependency dependency : getDependencies()) {
-            MavenDependency dependencyForArtifactId = dependency.findDependencyForArtifactIdImpl(artifactId);
+            MavenDependency dependencyForArtifactId = dependency.findDependencyForGroupArtifactId(groupArtifactId);
             if (dependencyForArtifactId != null)
                 return dependencyForArtifactId;
         }
 
         // Return not found
         return null;
-    }
-
-    /**
-     * Returns whether dependency is already in this dependency tree.
-     */
-    public boolean isRedundant()
-    {
-        if (_redundant != null) return _redundant;
-        String artifactId = getFullArtifactId();
-        return _redundant = artifactId != null && findDependencyForArtifactId(artifactId) != this;
     }
 
     /**
