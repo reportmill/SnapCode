@@ -112,8 +112,15 @@ public class BuildFileTool extends ProjectTool {
     }
 
     /**
+     * Create UI.
+     */
+    @Override
+    protected View createUI()  { return new ScrollView(super.createUI()); }
+
+    /**
      * Initialize UI.
      */
+    @Override
     protected void initUI()
     {
         // Have Backspace and Delete remove selected Jar path
@@ -201,13 +208,12 @@ public class BuildFileTool extends ProjectTool {
         setViewVisible("MavenDependencyBox", isMavenDependency);
         if (isMavenDependency) {
 
-            // Update MavenIdText, GroupText, PackageNameText, VersionText, ClassifierText
+            // Update MavenIdText, GroupIdText, ArtifactIdText, VersionText
             MavenDependency mavenDependency = (MavenDependency) selDependency;
             setViewValue("MavenIdText", mavenDependency.getId());
-            setViewValue("GroupText", mavenDependency.getGroupId());
-            setViewValue("PackageNameText", mavenDependency.getArtifactId());
+            setViewValue("GroupIdText", mavenDependency.getGroupId());
+            setViewValue("ArtifactIdText", mavenDependency.getArtifactId());
             setViewValue("VersionText", mavenDependency.getVersion());
-            setViewValue("ClassifierText", mavenDependency.getClassifier());
 
             // Update StatusText, StatusProgressBar, ShowButton, ReloadButton, ClassPathsText
             String status = mavenDependency.getStatus();
@@ -220,6 +226,10 @@ public class BuildFileTool extends ProjectTool {
             setViewValue("ClassPathsLabel", error == null ? "Class path:" : "Error:");
             String classPathsText = error != null ? error : mavenDependency.getClassPathsJoined("\n");
             setViewValue("ClassPathsText", classPathsText);
+
+            List.of("GroupIdText", "ArtifactIdText", "VersionText").forEach(item -> {
+                getView(item).getParent().setVisible(mavenDependency.getParent() == null);
+            });
         }
 
         // Update JarFileDependencyBox, JarPathText
@@ -339,15 +349,14 @@ public class BuildFileTool extends ProjectTool {
      */
     private void respondDependencyUI(ViewEvent anEvent)
     {
-        // Handle MavenIdText, GroupText, PackageNameText, VersionText, ClassifierText, ShowButton, ReloadButton
+        // Handle MavenIdText, GroupIdText, ArtifactIdText, VersionText, ShowButton, ReloadButton
         BuildDependency selDependency = getSelDependency();
         if (selDependency instanceof MavenDependency mavenDependency) {
             switch (anEvent.getName()) {
                 case "MavenIdText" -> mavenDependency.setId(anEvent.getStringValue());
-                case "GroupText" -> mavenDependency.setGroupId(anEvent.getStringValue());
-                case "PackageNameText" -> mavenDependency.setArtifactId(anEvent.getStringValue());
+                case "GroupIdText" -> mavenDependency.setGroupId(anEvent.getStringValue());
+                case "ArtifactIdText" -> mavenDependency.setArtifactId(anEvent.getStringValue());
                 case "VersionText" -> mavenDependency.setVersion(anEvent.getStringValue());
-                case "ClassifierText" -> mavenDependency.setClassifier(anEvent.getStringValue());
                 case "ShowButton" -> showMavenDependencyInFinder(mavenDependency);
                 case "ReloadButton" -> mavenDependency.reloadPackageFiles();
             }
