@@ -14,6 +14,7 @@ class MavenPackageHelper {
     // The package and artifact
     private MavenPackage _mavenPackage;
     private MavenArtifact _mavenArtifact;
+    private XMLElement _localPomFileXML;
 
     /**
      * Constructor.
@@ -130,6 +131,27 @@ class MavenPackageHelper {
     }
 
     /**
+     * Returns the properties.
+     */
+    Map<String, String> getProperties()
+    {
+        Map<String, String> properties = new HashMap<>();
+        for (XMLElement propertyXML : getPropertyXMLs())
+            properties.put(propertyXML.getName(), propertyXML.getValue());
+        return properties;
+    }
+
+    /**
+     * Returns dependency XML elements.
+     */
+    private List<XMLElement> getPropertyXMLs()
+    {
+        XMLElement xml = getLocalPomFileXML();
+        XMLElement propertiesXML = xml != null ? xml.getElement("properties") : null;
+        return propertiesXML != null ? propertiesXML.getElements() : Collections.emptyList();
+    }
+
+    /**
      * Returns dependencies.
      */
     List<MavenDependency> getDependencies()
@@ -186,6 +208,8 @@ class MavenPackageHelper {
      */
     private XMLElement getLocalPomFileXML()
     {
+        if (_localPomFileXML != null) return _localPomFileXML;
+
         String xmlString;
         try { xmlString = _mavenPackage.getLocalPomFile().getText(); }
         catch (IOException e) {
@@ -194,7 +218,7 @@ class MavenPackageHelper {
         }
 
         // Read and return
-        try { return XMLElement.readXmlFromString(xmlString); }
+        try { return _localPomFileXML = XMLElement.readXmlFromString(xmlString); }
         catch (Exception e) {
             System.err.println(getClass().getSimpleName() + ".getLocalPomFileXML: Error reading file: " + e.getMessage());
             return null;

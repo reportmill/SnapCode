@@ -208,11 +208,23 @@ public class MavenDependency extends BuildDependency {
     private String getResolvedVersion()
     {
         String version = getVersion();
+        if (version == null || version.isBlank())
+            return null;
 
         switch (version) {
             case "${project.version}" -> { return getParent().getResolvedVersion(); }
             case "${junit.version}" -> { return getMavenArtifact().getLatestVersion(); }
-            case "${hamcrestVersion}" -> { return "1.3"; }
+        }
+
+        if (version.startsWith("${")) {
+            MavenDependency parentDependency = getParent();
+            MavenPackage parentPackage = parentDependency != null ? parentDependency.getMavenPackage() : null;
+            if (parentPackage != null) {
+                String propName = version.substring(2, version.length() - 1).trim();
+                String value = parentPackage.getProperties().get(propName);
+                if (value != null)
+                    return value.trim();
+            }
         }
 
         // Oh, this is just frickin sad

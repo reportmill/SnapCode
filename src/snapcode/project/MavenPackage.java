@@ -28,6 +28,9 @@ public class MavenPackage extends PropObject {
     // The artifact
     private MavenArtifact _mavenArtifact;
 
+    // The properties
+    private Map<String,String> _properties;
+
     // The dependencies
     private List<MavenDependency> _dependencies;
 
@@ -107,6 +110,15 @@ public class MavenPackage extends PropObject {
      * Returns the artifact.
      */
     public MavenArtifact getMavenArtifact()  { return _mavenArtifact; }
+
+    /**
+     * Returns the properties.
+     */
+    public Map<String,String> getProperties()
+    {
+        if (_properties != null) return _properties;
+        return _properties = _helper.getProperties();
+    }
 
     /**
      * Returns the transitive dependencies.
