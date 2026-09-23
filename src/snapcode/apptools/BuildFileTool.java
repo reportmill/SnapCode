@@ -4,7 +4,6 @@ import snap.gfx.Font;
 import snap.gfx.GFXEnv;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
-import snap.props.PropObject;
 import snap.util.ListUtils;
 import snap.util.SnapEnv;
 import snap.web.WebFile;
@@ -15,6 +14,7 @@ import snap.viewx.*;
 import snapcode.webbrowser.WebPage;
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A class to manage UI aspects of a Project.
@@ -93,8 +93,11 @@ public class BuildFileTool extends ProjectTool {
         if (_selDependency != null)
             _selDependency.removePropChangeListener(_selDependencyPropChangeLsnr);
         _selDependency = buildDependency;
-        if (_selDependency != null)
+        if (_selDependency != null) {
             _selDependency.addPropChangeListener(_selDependencyPropChangeLsnr);
+            if (_selDependency instanceof MavenDependency mavenDependency && !mavenDependency.isLoaded())
+                loadMavenDependency(mavenDependency);
+        }
 
         // Update DependenciesTreeView.Selection
         _dependenciesTreeView.setSelItem(buildDependency);
@@ -191,65 +194,8 @@ public class BuildFileTool extends ProjectTool {
         MavenRepository selRepository = getSelRepository();
         setViewEnabled("RemoveRepositoryButton", selRepository != null);
 
-        // Update RemoveDependencyButton, ExpandDependenciesButton, CollapseDependenciesButton
-        BuildDependency selDependency = getSelDependency();
-        setViewDisabled("RemoveDependencyButton", selDependency == null);
-        boolean hasChildren = ListUtils.hasMatch(_dependenciesTreeView.getItems(), item -> _dependenciesTreeView.isItemParent(item));
-        setViewVisible("ExpandDependenciesButton", hasChildren);
-        setViewVisible("CollapseDependenciesButton", hasChildren);
-
-        // Get selected dependency
-        setViewVisible("DependencyTypeBox", selDependency != null);
-        if (selDependency != null)
-            setViewSelItem("DependencyTypeComboBox", selDependency.getType());
-
-        // Update MavenDependencyBox
-        boolean isMavenDependency = selDependency instanceof MavenDependency;
-        setViewVisible("MavenDependencyBox", isMavenDependency);
-        if (isMavenDependency) {
-
-            // Update MavenIdText, GroupIdText, ArtifactIdText, VersionText
-            MavenDependency mavenDependency = (MavenDependency) selDependency;
-            setViewValue("MavenIdText", mavenDependency.getId());
-            setViewValue("GroupIdText", mavenDependency.getGroupId());
-            setViewValue("ArtifactIdText", mavenDependency.getArtifactId());
-            setViewValue("VersionText", mavenDependency.getVersion());
-
-            // Update StatusText, StatusProgressBar, ShowButton, ReloadButton, ClassPathsText
-            String status = mavenDependency.getStatus();
-            String error = mavenDependency.getError();
-            setViewValue("StatusText", status);
-            getView("StatusText", Label.class).setTextColor(error != null ? Color.RED : Color.BLACK);
-            setViewVisible("StatusProgressBar", mavenDependency.isLoading());
-            setViewVisible("ShowButton", status.equals("Loaded"));
-            setViewVisible("ReloadButton", status.equals("Loaded"));
-            setViewValue("ClassPathsLabel", error == null ? "Class path:" : "Error:");
-            String classPathsText = error != null ? error : mavenDependency.getClassPathsJoined("\n");
-            setViewValue("ClassPathsText", classPathsText);
-
-            List.of("GroupIdText", "ArtifactIdText", "VersionText").forEach(item -> {
-                getView(item).getParent().setVisible(mavenDependency.getParent() == null);
-            });
-        }
-
-        // Update JarFileDependencyBox, JarPathText
-        boolean isJarFileDependency = selDependency instanceof BuildDependency.JarFileDependency;
-        setViewVisible("JarFileDependencyBox", isJarFileDependency);
-        if (isJarFileDependency) {
-            BuildDependency.JarFileDependency jarFileDependency = (BuildDependency.JarFileDependency) selDependency;
-            setViewValue("JarPathText", jarFileDependency.getJarPath());
-        }
-
-        // Update ProjectDependencyBox, ProjectNameText
-        boolean isProjectDependency = selDependency instanceof BuildDependency.ProjectDependency;
-        setViewVisible("ProjectDependencyBox", isProjectDependency);
-        if (isProjectDependency) {
-            BuildDependency.ProjectDependency projectDependency = (BuildDependency.ProjectDependency) selDependency;
-            setViewValue("ProjectNameText", projectDependency.getProjectName());
-        }
-
-        // Watch unloaded dependencies
-        watchForUnloadedDependency();
+        // Update dependencies
+        resetDependencyUI();
     }
 
     /**
@@ -274,14 +220,7 @@ public class BuildFileTool extends ProjectTool {
             // Update IncludeSnapKitRuntimeCheckBox, IncludeSnapChartsRuntimeCheckBox, IncludeJavaFXCheckBox
             case "IncludeSnapKitRuntimeCheckBox" -> buildFile.setIncludeSnapKitRuntime(anEvent.getBoolValue());
             case "IncludeSnapChartsRuntimeCheckBox" -> buildFile.setIncludeSnapChartsRuntime(anEvent.getBoolValue());
-            case "IncludeJavaFXCheckBox" -> {
-                if (ViewUtils.isAltDown()) {
-                    List<MavenDependency> dependencies = ListUtils.filterByClass(buildFile.getDependencies(), MavenDependency.class);
-                    MavenDependency.deleteDependencies(dependencies);
-                    dependencies.forEach(MavenDependency::preloadPackageFiles);
-                }
-                else buildFile.setIncludeJavaFX(anEvent.getBoolValue());
-            }
+            case "IncludeJavaFXCheckBox" -> buildFile.setIncludeJavaFX(anEvent.getBoolValue());
 
             // Handle AddRepositoryButton, RemoveRepositoryButton
             case "AddRepositoryButton" -> showAddRepositoryPanel();
@@ -292,6 +231,7 @@ public class BuildFileTool extends ProjectTool {
             case "RemoveDependencyButton" -> removeSelectedDependency();
             case "ExpandDependenciesButton" -> _dependenciesTreeView.expandAll();
             case "CollapseDependenciesButton" -> _dependenciesTreeView.collapseAll();
+            case "ReloadDependenciesMenuItem" -> reloadDependencies();
 
             // Handle RepositoriesListView, DependenciesTreeView
             case "RepositoriesListView" -> setSelRepository(_repositoriesListView.getSelItem());
@@ -345,6 +285,68 @@ public class BuildFileTool extends ProjectTool {
     }
 
     /**
+     * Reset UI for dependencies.
+     */
+    private void resetDependencyUI()
+    {
+        // Update RemoveDependencyButton, ExpandDependenciesButton, CollapseDependenciesButton
+        BuildDependency selDependency = getSelDependency();
+        setViewDisabled("RemoveDependencyButton", selDependency == null);
+        boolean hasChildren = ListUtils.hasMatch(_dependenciesTreeView.getItems(), item -> _dependenciesTreeView.isItemParent(item));
+        setViewVisible("ExpandDependenciesButton", hasChildren);
+        setViewVisible("CollapseDependenciesButton", hasChildren);
+
+        // Get selected dependency
+        setViewVisible("DependencyTypeBox", selDependency != null);
+        if (selDependency != null)
+            setViewSelItem("DependencyTypeComboBox", selDependency.getType());
+
+        // Update MavenDependencyBox
+        setViewVisible("MavenDependencyBox", selDependency instanceof MavenDependency);
+        if (selDependency instanceof MavenDependency mavenDependency) {
+
+            // Update MavenIdText, GroupIdText, ArtifactIdText, VersionText
+            setViewValue("MavenIdText", mavenDependency.getId());
+            setViewValue("GroupIdText", mavenDependency.getGroupId());
+            setViewValue("ArtifactIdText", mavenDependency.getArtifactId());
+            setViewValue("VersionText", mavenDependency.getVersion());
+
+            // Update StatusText, StatusProgressBar, ShowButton, ReloadButton, ClassPathsText
+            String status = mavenDependency.getStatus();
+            String error = mavenDependency.getError();
+            setViewValue("StatusText", status);
+            getView("StatusText", Label.class).setTextColor(error != null ? Color.RED : Color.BLACK);
+            setViewVisible("StatusProgressBar", mavenDependency.isLoading());
+            setViewVisible("ShowButton", status.equals("Loaded"));
+            setViewVisible("ReloadButton", status.equals("Loaded"));
+            setViewValue("ClassPathsLabel", error == null ? "Class path:" : "Error:");
+            String classPathsText = error != null ? error : mavenDependency.getClassPathsJoined("\n");
+            setViewValue("ClassPathsText", classPathsText);
+
+            // Hide individual maven fields unless root dependency
+            boolean isRootDependency = mavenDependency.getParent() == null;
+            List<String> idFieldNames = List.of("GroupIdText", "ArtifactIdText", "VersionText");
+            idFieldNames.forEach(item -> getView(item).getParent().setVisible(isRootDependency));
+        }
+
+        // Update JarFileDependencyBox, JarPathText
+        boolean isJarFileDependency = selDependency instanceof BuildDependency.JarFileDependency;
+        setViewVisible("JarFileDependencyBox", isJarFileDependency);
+        if (isJarFileDependency) {
+            BuildDependency.JarFileDependency jarFileDependency = (BuildDependency.JarFileDependency) selDependency;
+            setViewValue("JarPathText", jarFileDependency.getJarPath());
+        }
+
+        // Update ProjectDependencyBox, ProjectNameText
+        boolean isProjectDependency = selDependency instanceof BuildDependency.ProjectDependency;
+        setViewVisible("ProjectDependencyBox", isProjectDependency);
+        if (isProjectDependency) {
+            BuildDependency.ProjectDependency projectDependency = (BuildDependency.ProjectDependency) selDependency;
+            setViewValue("ProjectNameText", projectDependency.getProjectName());
+        }
+    }
+
+    /**
      * Respond to UI changes for dependency.
      */
     private void respondDependencyUI(ViewEvent anEvent)
@@ -362,10 +364,8 @@ public class BuildFileTool extends ProjectTool {
             }
 
             // If not loaded, trigger load
-            if (!mavenDependency.isLoaded()) {
-                mavenDependency.preloadPackageFiles();
-                runDelayed(this::resetLater, 1000); // Really need to have 'handleDependencyLoadedChange'
-            }
+            if (!mavenDependency.isLoaded())
+                loadMavenDependency(mavenDependency);
         }
 
         // Handle JarFileDependency: JarPathText
@@ -482,9 +482,15 @@ public class BuildFileTool extends ProjectTool {
         label.setMargin(0, 8, 0, 4);
         label.setPadding(1, 1, 1, 2);
         aCell.setGraphic(label);
-        if (buildDependency instanceof MavenDependency mavenDependency && mavenDependency.getParent() != null) {
-            aCell.setTextColor(Color.DARKGRAY);
-            label.setTextColor(Color.DARKGRAY);
+        if (buildDependency instanceof MavenDependency mavenDependency) {
+            if (!mavenDependency.isLoaded()) {
+                aCell.setTextColor(Color.RED);
+                label.setTextColor(Color.RED);
+            }
+            if (mavenDependency.getParent() != null) {
+                aCell.setTextColor(Color.DARKGRAY);
+                label.setTextColor(Color.DARKGRAY);
+            }
         }
     }
 
@@ -543,49 +549,27 @@ public class BuildFileTool extends ProjectTool {
         }
     }
 
-    private void watchForUnloadedDependency()
+    /**
+     * Reloads dependencies.
+     */
+    private void reloadDependencies()
     {
         BuildFile buildFile = getBuildFile();
         List<MavenDependency> dependencies = ListUtils.filterByClass(buildFile.getDependencies(), MavenDependency.class);
-        watchForUnloadedDependencies(dependencies);
+        MavenDependency.deleteDependencies(dependencies);
+        _dependenciesTreeView.updateItems();
+        dependencies.forEach(this::loadMavenDependency);
     }
 
-    private boolean watchForUnloadedDependencies(List<MavenDependency> dependencies)
+    /**
+     * Tries to load given dependency and updates tree when done.
+     */
+    private void loadMavenDependency(MavenDependency mavenDependency)
     {
-        for (MavenDependency mavenDependency : dependencies) {
-            if (!mavenDependency.isLoaded()) {
-                MavenArtifact mavenArtifact = mavenDependency.getMavenArtifact();
-                if (mavenArtifact != null && !mavenArtifact.isLoaded() && !mavenArtifact.isLoading()) {
-                    mavenArtifact.addPropChangeListener(_handleMavenDependencyLoadedLsnr, MavenArtifact.Loaded_Prop);
-                    mavenDependency.preloadPackageFiles();
-                    System.out.println("Watching load for " + mavenDependency.getResolvedId() + " artifact");
-                    return true;
-                }
-                MavenPackage mavenPackage = mavenDependency.getMavenPackage();
-                if (mavenPackage != null && !mavenPackage.isLoaded() && !mavenPackage.isLoading()) {
-                    mavenPackage.addPropChangeListener(_handleMavenDependencyLoadedLsnr, MavenPackage.Loaded_Prop);
-                    mavenDependency.preloadPackageFiles();
-                    System.out.println("Watching load for " + mavenDependency.getResolvedId() + " package");
-                    return true;
-                }
-            }
-            if (watchForUnloadedDependencies(mavenDependency.getDependencies()))
-                return true;
-        }
-        return false;
-    }
-
-    private PropChangeListener _handleMavenDependencyLoadedLsnr = this::handleMavenDependencyLoaded;
-
-    private void handleMavenDependencyLoaded(PropChange propChange)
-    {
-        PropObject mavenDependency = (PropObject) propChange.getSource();
-        mavenDependency.removePropChangeListener(_handleMavenDependencyLoadedLsnr);
-        if (mavenDependency instanceof MavenArtifact mavenArtifact)
-            System.out.println("Done watching artifact " + mavenArtifact.getArtifactId());
-        else if (mavenDependency instanceof MavenPackage mavenPackage)
-            System.out.println("Done watching package: " + mavenPackage.getId());
-        watchForUnloadedDependency();
+        CompletableFuture.runAsync(() -> {
+            mavenDependency.loadPackageFiles();
+            _dependenciesTreeView.updateItems();
+        });
     }
 
     /**
