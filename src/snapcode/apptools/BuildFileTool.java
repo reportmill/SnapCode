@@ -14,6 +14,7 @@ import snap.viewx.*;
 import snapcode.webbrowser.WebPage;
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -310,6 +311,13 @@ public class BuildFileTool extends ProjectTool {
             setViewValue("GroupIdText", mavenDependency.getGroupId());
             setViewValue("ArtifactIdText", mavenDependency.getArtifactId());
             setViewValue("VersionText", mavenDependency.getVersion());
+
+            // Update ResolvedMavenIdText
+            String resolvedId = mavenDependency.getResolvedId();
+            boolean resolvedIdDiffers = !Objects.equals(resolvedId, mavenDependency.getId());
+            getView("ResolvedMavenIdText").getParent().setVisible(resolvedIdDiffers);
+            if (resolvedIdDiffers)
+                setViewValue("ResolvedMavenIdText", resolvedId);
 
             // Update StatusText, StatusProgressBar, ShowButton, ReloadButton, ClassPathsText
             String status = mavenDependency.getStatus();

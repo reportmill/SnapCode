@@ -63,7 +63,11 @@
     <ColView Name="MavenDependencyBox" MinWidth="480" Margin="5,0,0,10" Padding="10" Fill="#F4" Border="#E8" BorderRadius="8" Font="Arial 13">
       <RowView Padding="4" Spacing="4">
         <Label PrefWidth="80" Text="Maven Id:" />
-        <TextField Name="MavenIdText" PrefWidth="300" />
+        <TextField Name="MavenIdText" PrefWidth="360" />
+      </RowView>
+      <RowView Padding="4" Spacing="4">
+        <Label PrefWidth="80" Text="Resolved Id:" />
+        <TextField Name="ResolvedMavenIdText" PrefWidth="360" />
       </RowView>
       <RowView Padding="4" Spacing="4">
         <Label PrefWidth="80" Text="Group id:" />
