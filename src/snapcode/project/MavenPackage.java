@@ -4,6 +4,7 @@ import snap.web.WebFile;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 
 /**
  * This class represents a Maven package.
@@ -61,6 +62,9 @@ public class MavenPackage extends PropObject {
     // A map of all packages
     private static Map<String, MavenPackage> _packages = new HashMap<>();
 
+    // Constant for maven id validator pattern
+    private static Pattern MAVEN_ID_PATTERN = Pattern.compile("^[a-zA-Z0-9_.\\-]+:[a-zA-Z0-9_.\\-]+:[a-zA-Z0-9_.\\-]+$");
+
     // Constants for properties
     public static final String Loaded_Prop = "Loaded";
     public static final String Loading_Prop = "Loading";
@@ -72,14 +76,11 @@ public class MavenPackage extends PropObject {
     {
         super();
         _id = mavenId;
-
-        // Set Group, Name, Version
         String[] names = mavenId.split(":");
-        _groupId = names.length > 0 ? names[0] : null;
-        _artifactId = names.length > 1 ? names[1] : null;
-        _version = names.length > 2 ? names[2] : null;
+        _groupId = names[0];
+        _artifactId = names[1];
+        _version = names[2];
         _classifier = names.length > 3 ? names[3] : null;
-
         _mavenArtifact = MavenArtifact.getMavenArtifactForId(_groupId + ':' + _artifactId);
         _helper = new MavenPackageHelper(this);
     }
@@ -283,25 +284,7 @@ public class MavenPackage extends PropObject {
     /**
      * Returns the error.
      */
-    public String getError()
-    {
-        if (_error != null) return _error;
-        return _error = getErrorImpl();
-    }
-
-    /**
-     * Returns the error.
-     */
-    private String getErrorImpl()
-    {
-        if (_groupId == null || _groupId.isEmpty())
-            return "Invalid group";
-        if (_artifactId == null || _artifactId.isEmpty())
-            return "Invalid package name";
-        if (_version == null || _version.isEmpty())
-            return "Invalid version";
-        return null;
-    }
+    public String getError()  { return _error; }
 
     /**
      * Returns the package for given id.
@@ -311,6 +294,8 @@ public class MavenPackage extends PropObject {
         MavenPackage mavenPackage = _packages.get(mavenId);
         if (mavenPackage != null)
             return mavenPackage;
+        if (!MAVEN_ID_PATTERN.matcher(mavenId).matches())
+            return null;
         mavenPackage = new MavenPackage(mavenId);
         _packages.put(mavenId, mavenPackage);
         return mavenPackage;

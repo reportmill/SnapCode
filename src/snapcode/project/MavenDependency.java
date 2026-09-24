@@ -353,6 +353,13 @@ public class MavenDependency extends BuildDependency {
      */
     public String getError()
     {
+        if (_groupId == null || _groupId.isBlank())
+            return "Invalid group";
+        if (_artifactId == null || _artifactId.isBlank())
+            return "Invalid package name";
+        if (_version == null || _version.isBlank())
+            return "Invalid version";
+
         MavenPackage mavenPackage = getMavenPackage();
         return mavenPackage != null ? mavenPackage.getError() : null;
     }
