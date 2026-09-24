@@ -34,6 +34,9 @@ public class MavenPackage extends PropObject {
     // The dependencies
     private List<MavenDependency> _dependencies;
 
+    // The parent package
+    private MavenPackage _parentPackage;
+
     // The local jar file
     private WebFile _localJarFile;
 
@@ -121,12 +124,39 @@ public class MavenPackage extends PropObject {
     }
 
     /**
+     * Returns the property value for given key.
+     */
+    public String getPropertyValueForKey(String key)
+    {
+        // Check properties
+        Map<String,String> props = getProperties();
+        String value = props.get(key);
+        if (value != null)
+            return value;
+
+        // Check parent
+        MavenPackage parentPackage = getParentPackage();
+        if (parentPackage != null)
+            value = parentPackage.getPropertyValueForKey(key);
+        return value;
+    }
+
+    /**
      * Returns the transitive dependencies.
      */
     public List<MavenDependency> getDependencies()
     {
         if (_dependencies != null) return _dependencies;
         return _dependencies = _helper.getDependencies();
+    }
+
+    /**
+     * Returns the parent package, if available.
+     */
+    public MavenPackage getParentPackage()
+    {
+        if (_parentPackage != null) return _parentPackage;
+        return _parentPackage = _helper.getParentPackage();
     }
 
     /**

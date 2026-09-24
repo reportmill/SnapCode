@@ -211,19 +211,19 @@ public class MavenDependency extends BuildDependency {
         if (version == null || version.isBlank())
             return null;
 
-        switch (version) {
-            case "${project.version}" -> { return getParent().getResolvedVersion(); }
-            case "${junit.version}" -> { return getMavenArtifact().getLatestVersion(); }
-        }
+        // Handle ${project.version}
+        if (version.equals("${project.version}"))
+            return getParent().getResolvedVersion();
 
+        // Handle key
         if (version.startsWith("${")) {
             MavenDependency parentDependency = getParent();
             MavenPackage parentPackage = parentDependency != null ? parentDependency.getMavenPackage() : null;
             if (parentPackage != null) {
                 String propName = version.substring(2, version.length() - 1).trim();
-                String value = parentPackage.getProperties().get(propName);
+                String value = parentPackage.getPropertyValueForKey(propName);
                 if (value != null)
-                    return value.trim();
+                    return value;
             }
         }
 

@@ -204,6 +204,17 @@ class MavenPackageHelper {
     }
 
     /**
+     * Returns the parent package, if available.
+     */
+    public MavenPackage getParentPackage()
+    {
+        XMLElement xml = getLocalPomFileXML();
+        XMLElement parentXML = xml != null ? xml.getElement("parent") : null;
+        String parentId = parentXML != null ? getMavenIdForXML(parentXML) : null;
+        return parentId != null ? MavenPackage.getMavenPackageForId(parentId) : null;
+    }
+
+    /**
      * Returns the XML.
      */
     private XMLElement getLocalPomFileXML()
