@@ -110,13 +110,13 @@ public class NodeCompleter {
         }
 
         // If id is JVarDecl.Id, only offer camel case name
-        JNode parent = anId.getParent();
-        if (parent instanceof JVarDecl varDecl && anId == varDecl.getId()) {
-            addCompletionsForNewVarDeclType(varDecl.getJavaType());
+        if (isVarDeclId(anId)) {
+            addCompletionsForNewVarDeclType(getJavaTypeForVarDeclId(anId));
             return;
         }
 
         // If parent is class, add class words
+        JNode parent = anId.getParent();
         if (parent instanceof JClassDecl)
             addWordCompletions(JavaWord.CLASS_WORDS);
 
@@ -400,6 +400,51 @@ public class NodeCompleter {
 
         // Return not body decl id
         return false;
+    }
+
+    /**
+     * Returns whether id is var decl id. .
+     */
+    private boolean isVarDeclId(JExprId anId)
+    {
+        // Handle reasonable case where id is var decl id
+        JNode parent = anId.getParent();
+        if (parent instanceof JVarDecl varDecl)
+            return anId == varDecl.getId();
+
+        // Handles weird case where incomplete var decl statement parses as 2 expression statements
+        JStmtExpr exprStmt = anId.getParent(JStmtExpr.class);
+        if (exprStmt != null) {
+            JStmt previousStmt = exprStmt.getPreviousStatement();
+            if (previousStmt instanceof JStmtExpr && !previousStmt.getEndToken().getString().equals(";"))
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns the type for a var decl id.
+     */
+    private JavaType getJavaTypeForVarDeclId(JExprId anId)
+    {
+        // Handle reasonable case where id is var decl id
+        JNode parent = anId.getParent();
+        if (parent instanceof JVarDecl varDecl)
+            return varDecl.getJavaType();
+
+        // Handles weird case where incomplete var decl statement parses as 2 expression statements
+        JStmtExpr exprStmt = anId.getParent(JStmtExpr.class);
+        if (exprStmt != null) {
+            JStmt previousStmt = exprStmt.getPreviousStatement();
+            if (previousStmt instanceof JStmtExpr prevExprStmt) {
+                JExpr expr = prevExprStmt.getExpr();
+                if (expr != null && expr.getDecl() instanceof JavaType javaType)
+                    return javaType;
+            }
+        }
+
+        return null;
     }
 
     /**

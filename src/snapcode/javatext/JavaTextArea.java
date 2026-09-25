@@ -514,8 +514,8 @@ public class JavaTextArea extends TextArea {
 
         // Paint inner box (white)
         JStmt startStmt = blockStmts.get(0);
-        while (blockStmt.getLineIndex() == startStmt.getLineIndex() && startStmt.getNextStmt() != null)
-            startStmt = startStmt.getNextStmt();
+        while (blockStmt.getLineIndex() == startStmt.getLineIndex() && startStmt.getNextStatement() != null)
+            startStmt = startStmt.getNextStatement();
         JStmt endStmt = blockStmts.get(blockStmts.size() - 1);
         if (blockStmt.getLineIndex() == endStmt.getLineIndex())
             return;

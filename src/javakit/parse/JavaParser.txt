@@ -120,7 +120,7 @@ Block { "{" BlockStatement* "}" }
 
 BlockStatement
 {
-    LookAhead (VarDeclExpr) VarDeclExpr ";" |
+    LookAhead (Modifiers Type Identifier (";" | "=" | "," | "[")) VarDeclExpr ";" |
     Statement |
     ClassDecl | EnumDecl
 }
