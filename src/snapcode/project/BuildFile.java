@@ -300,6 +300,34 @@ public class BuildFile extends PropObject {
     }
 
     /**
+     * Returns all dependencies.
+     */
+    public List<BuildDependency> getAllDependencies()
+    {
+        Map<String,BuildDependency> deps = new LinkedHashMap<>();
+        for (BuildDependency dependency : getDependencies())
+            findAllDependencies(dependency, deps);
+        return new ArrayList<>(deps.values());
+    }
+
+    private void findAllDependencies(BuildDependency buildDependency, Map<String,BuildDependency> dependencies)
+    {
+        String id = buildDependency.getId();
+        if (buildDependency instanceof MavenDependency mavenDependency)
+            id = mavenDependency.getResolvedGroupArtifactId();
+        if (id == null || dependencies.containsKey(id))
+            return;
+
+        dependencies.put(id, buildDependency);
+
+        // Recurse for maven dependencies
+        if (buildDependency instanceof MavenDependency mavenDependency) {
+            List<MavenDependency> childDependencies = mavenDependency.getDependencies();
+            childDependencies.forEach(dependency -> findAllDependencies(dependency, dependencies));
+        }
+    }
+
+    /**
      * Returns the main class name.
      */
     public String getMainClassName()  { return _mainClassName; }

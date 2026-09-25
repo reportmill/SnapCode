@@ -210,7 +210,7 @@ public class Project extends PropObject {
     {
         // Get build file dependencies
         BuildFile buildFile = getBuildFile();
-        Set<String> compileClassPaths = new LinkedHashSet<>();
+        List<String> compileClassPaths = new ArrayList<>();
 
         // If BuildFile.IncludeSnapKitRuntime, add SnapKit jar path
         if (buildFile.isIncludeSnapKitRuntime()) {
@@ -226,39 +226,16 @@ public class Project extends PropObject {
         }
 
         // Iterate over compile dependencies and add runtime class paths for each
-        List<BuildDependency> dependencies = buildFile.getDependencies();
-        for (BuildDependency dependency : dependencies)
-            addClassPathsForDependencyToSet(dependency, compileClassPaths);
+        List<BuildDependency> buildFileDependencies = buildFile.getAllDependencies();
+        for (BuildDependency dependency : buildFileDependencies) {
+            String[] classPaths = dependency.getClassPaths();
+            if (classPaths != null)
+                Collections.addAll(compileClassPaths, classPaths);
+            else System.err.println("Project.getCompileClassPaths: Can't get class path for: " + dependency);
+        }
 
         // Return
         return compileClassPaths.toArray(new String[0]);
-    }
-
-    /**
-     * Adds class paths for given dependency to given set.
-     */
-    private static void addClassPathsForDependencyToSet(BuildDependency dependency, Set<String> compileClassPaths)
-    {
-        // Get dependency class paths - complain if missing
-        String[] classPaths = dependency.getClassPaths();
-        if (classPaths == null) {
-            System.err.println("Project.addClassPathsForDependencyToSet: Can't get class path for: " + dependency);
-            return;
-        }
-
-        // If already added, just return
-        if (compileClassPaths.contains(classPaths[0]))
-            return;
-
-        // Add dependency class paths
-        Collections.addAll(compileClassPaths, classPaths);
-
-        // Add transitive class paths
-        if (dependency instanceof MavenDependency mavenDependency) {
-            List<MavenDependency> transitiveDependencies = mavenDependency.getDependencies();
-            for (MavenDependency transitiveDependency : transitiveDependencies)
-                addClassPathsForDependencyToSet(transitiveDependency, compileClassPaths);
-        }
     }
 
     /**

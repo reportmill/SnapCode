@@ -15,9 +15,9 @@ public class JStmt extends JNode {
      */
     public JStmt getNextStatement()
     {
-        if (_parent instanceof WithStmts) {
-            List<JStmt> stmts = ((WithStmts) _parent).getStatements();
-            int nextIndex = ListUtils.findMatchIndex(stmts, stmt -> stmt == this) + 1;
+        if (_parent instanceof WithStmts withStmts) {
+            List<JStmt> stmts = withStmts.getStatements();
+            int nextIndex = ListUtils.indexOfId(stmts, this) + 1;
             return nextIndex > 0  && nextIndex < stmts.size() ? stmts.get(nextIndex) : null;
         }
 
@@ -29,9 +29,9 @@ public class JStmt extends JNode {
      */
     public JStmt getPreviousStatement()
     {
-        if (_parent instanceof WithStmts) {
-            List<JStmt> stmts = ((WithStmts) _parent).getStatements();
-            int prevIndex = ListUtils.findMatchIndex(stmts, stmt -> stmt == this) - 1;
+        if (_parent instanceof WithStmts withStmts) {
+            List<JStmt> stmts = withStmts.getStatements();
+            int prevIndex = ListUtils.indexOfId(stmts, this) - 1;
             return prevIndex >= 0 ? stmts.get(prevIndex) : null;
         }
 
