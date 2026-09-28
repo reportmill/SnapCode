@@ -3,10 +3,9 @@
 
 ## Create New:
 
-* [New Java Snippet](NewJavaReplButton)
 * [New Java Class File](NewJavaClassButton)
 * [New Java Project](NewProjectButton)
-* [New Block Project](NewBlockProjectButton)
+* [New Java Snippet](NewJavaReplButton)
 
 @[OpenRecent=true]
 
