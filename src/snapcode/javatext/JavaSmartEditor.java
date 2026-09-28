@@ -169,6 +169,10 @@ class JavaSmartEditor {
             // If node is open bracket (or class decl), return true if no close bracket
             if (node.getStartToken().getString().equals("{") || node instanceof JClassDecl) {
 
+                // If node is implicit class decl from compact source file, just return false
+                if (node instanceof JClassDecl && node.getStartToken().getString().isEmpty())
+                    return false;
+
                 // If node end token isn't close bracket return unbalanced
                 ParseToken nodeEndToken = node.getEndToken();
                 if (!nodeEndToken.getString().equals("}"))

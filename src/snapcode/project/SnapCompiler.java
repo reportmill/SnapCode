@@ -4,7 +4,6 @@
 package snapcode.project;
 import snap.util.FilePathUtils;
 import snap.util.SnapEnv;
-import snap.util.SnapUtils;
 import snap.web.WebFile;
 import javax.tools.*;
 import javax.tools.JavaCompiler.CompilationTask;
@@ -104,8 +103,8 @@ public class SnapCompiler {
             options.add("-proc:none");
         else options.add("-g");
 
-        // Set release version
-        if (SnapUtils.getJavaVersionInt() > 11 && !SnapEnv.isWebVM) {
+        // Set release version - doesn't work in WebVM because of compiler jar packaging
+        if (!SnapEnv.isWebVM) {
             BuildFile buildFile = _proj.getBuildFile();
             int compileRelease = buildFile.getCompileRelease();
             options.add("--release");
