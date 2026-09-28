@@ -150,11 +150,13 @@ public class JavaAgent extends TextAgent {
         JFile jfile;
         if (_isJepl || _isJMD)
             jfile = parseJepl(javaParser, javaChars);
-        else jfile = javaParser.parseFile(javaChars, _javaTextModel);
+        else {
+            jfile = javaParser.parseFile(javaChars, _javaTextModel);
 
-        // If no class found, try parsing compact source file
-        if (jfile.getClassDecl() == null)
-            jfile = parseCompactSourceFile(javaParser, javaChars);
+            // If no class found, try parsing compact source file
+            if (jfile.getClassDecl() == null)
+                jfile = parseCompactSourceFile(javaParser, javaChars);
+        }
 
         // Set SourceFile
         jfile.setSourceFile(_javaFile);
@@ -172,8 +174,7 @@ public class JavaAgent extends TextAgent {
     private JFile parseCompactSourceFile(JavaParser javaParser, CharSequence javaStr)
     {
         String className = getFile().getSimpleName();
-        List<String> importNames = getJeplDefaultImports();
-        return javaParser.parseCompactSourceFile(javaStr, className, importNames, _javaTextModel);
+        return javaParser.parseCompactSourceFile(javaStr, className, _javaTextModel);
     }
 
     /**

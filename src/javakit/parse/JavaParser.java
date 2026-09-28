@@ -131,11 +131,11 @@ public class JavaParser extends JavaParserStmt {
     /**
      * Parses compact class file for given char input.
      */
-    public synchronized JFile parseCompactSourceFile(CharSequence anInput, String className, List<String> importNames, JavaTextModel javaTextModel)
+    public synchronized JFile parseCompactSourceFile(CharSequence anInput, String className, JavaTextModel javaTextModel)
     {
         // Get CompactSourceFile rule
         ParseRule compactSourceFileRule = getRuleForName("CompactSourceFile");
-        compactSourceFileRule.setHandler(new JeplFileHandler(className, importNames));
+        compactSourceFileRule.setHandler(new JeplFileHandler(className, List.of("module java.base")));
 
         // If JavaTextModel available, use its tokenizer
         if (javaTextModel != null)

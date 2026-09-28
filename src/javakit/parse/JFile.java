@@ -300,6 +300,14 @@ public class JFile extends JNode {
         if (isRepl())
             importDecls = ListUtils.filter(importDecls, imp -> imp.getStartToken() != imp.getEndToken());
 
+        // Remove module imports
+        if (ListUtils.hasMatch(importDecls, JImportDecl::isModule))
+            importDecls = ListUtils.filter(importDecls, impDecl -> !impDecl.isModule());
+
+        // If no imports, just return
+        if (importDecls.isEmpty())
+            return _unusedImports = Collections.emptySet();
+
         // Resolve class names
         Set<JImportDecl> unusedImports = new HashSet<>(importDecls);
         resolveClassNames(this, unusedImports);

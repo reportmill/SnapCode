@@ -159,12 +159,16 @@ public class JeplFileHandler extends JavaParserExpr.JNodeParseHandler<JFile> {
         boolean isInclusive = importPathName.endsWith(".*");
         if (isInclusive)
             importPathName = importPathName.substring(0, importPathName.length() - 2);
+        boolean isModule = anImportPathName.startsWith("module ");
+        if (isModule)
+            importPathName = importPathName.substring("module ".length()).trim();
 
         // Create/configure/add ImportDecl
         JImportDecl importDecl = new JImportDecl();
         importDecl.setName(importPathName);
         importDecl.setInclusive(isInclusive);
         importDecl.setStatic(isStatic);
+        importDecl.setModule(isModule);
         importDecl.setStartToken(PHANTOM_TOKEN);
         importDecl.setEndToken(PHANTOM_TOKEN);
         importDecl.getString();
