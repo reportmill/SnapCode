@@ -168,6 +168,15 @@ public class JFile extends JNode {
     }
 
     /**
+     * Returns whether file is compact source file.
+     */
+    public boolean isCompactSourceFile()
+    {
+        JClassDecl classDecl = getClassDecl();
+        return classDecl != null && classDecl.getStartToken().getString().isEmpty() && classDecl.hasMainMethod();
+    }
+
+    /**
      * Override to return this file node.
      */
     @Override

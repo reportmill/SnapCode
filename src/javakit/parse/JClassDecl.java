@@ -402,6 +402,14 @@ public class JClassDecl extends JMemberDecl implements WithVarDeclsX, WithTypePa
     }
 
     /**
+     * Returns whether class has main method.
+     */
+    public boolean hasMainMethod()
+    {
+        return ArrayUtils.findMatch(getMethodDecls(), meth -> meth.getName().equals("main")) != null;
+    }
+
+    /**
      * Returns the Java class.
      */
     public JavaClass getJavaClass()

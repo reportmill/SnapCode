@@ -170,7 +170,7 @@ class JavaSmartEditor {
             if (node.getStartToken().getString().equals("{") || node instanceof JClassDecl) {
 
                 // If node is implicit class decl from compact source file, just return false
-                if (node instanceof JClassDecl && node.getStartToken().getString().isEmpty())
+                if (node instanceof JClassDecl && node.getFile().isCompactSourceFile())
                     return false;
 
                 // If node end token isn't close bracket return unbalanced

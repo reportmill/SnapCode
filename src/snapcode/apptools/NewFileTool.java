@@ -1,24 +1,13 @@
 package snapcode.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JavaParser;
-import snap.util.ArrayUtils;
-import snap.util.FilePathUtils;
-import snap.util.ListUtils;
+import snap.util.*;
 import snap.view.*;
-import snap.viewx.DialogBox;
-import snap.viewx.FilePanel;
-import snap.viewx.FormBuilder;
-import snap.viewx.TransitionPane;
+import snap.viewx.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import snapcode.app.JavaPage;
-import snapcode.app.SnapCodeUtils;
-import snapcode.app.WorkspacePane;
-import snapcode.app.WorkspaceTool;
-import snapcode.project.JavaDeps;
-import snapcode.project.Project;
-import snapcode.project.ProjectUtils;
-import snapcode.project.Workspace;
+import snapcode.app.*;
+import snapcode.project.*;
 import snapcode.views.BlocksConsole;
 import snapcode.views.BlocksUtils;
 import java.util.List;
@@ -209,7 +198,9 @@ public class NewFileTool extends WorkspaceTool {
         // Handle Java
         else {
             String javaString = JavaPage.getJavaContentStringForPackageAndClassName(null, "JavaFiddle", true);
-            newJavaFileForString(javaString);
+            if (SnapUtils.getJavaVersionInt() >= 25)
+                javaString = "\n\nstatic void main(String[] args)\n{\n}\n";
+            newJavaFileForClassNameAndString("JavaFiddle", javaString);
         }
     }
 
@@ -266,7 +257,7 @@ public class NewFileTool extends WorkspaceTool {
         // Get Java class name
         JavaParser javaParser = JavaParser.getShared();
         JFile jfile = javaParser.parseFile(javaString, null);
-        String className = jfile.getName();
+        String className = !jfile.isCompactSourceFile() ? jfile.getName() : "JavaFiddle";
         if (className == null || className.isEmpty()) {
             String title = "New Java File from clipboard";
             String msg = "No class name found";
@@ -274,6 +265,14 @@ public class NewFileTool extends WorkspaceTool {
             return null;
         }
 
+        return newJavaFileForClassNameAndString(className, javaString);
+    }
+
+    /**
+     * Creates a new Java file from given class name and string.
+     */
+    public WebFile newJavaFileForClassNameAndString(String className, String javaString)
+    {
         // Get source dir
         WebSite selSite = getSelSiteOrFirst();
         Project proj = Project.getProjectForSite(selSite);
