@@ -1,5 +1,7 @@
 package snapcode.project;
 import snap.util.*;
+import snap.web.HTTPRequest;
+import snap.web.HTTPResponse;
 import snap.web.WebFile;
 import java.io.*;
 import java.net.*;
@@ -256,10 +258,18 @@ class MavenPackageHelper {
         // Clean up any stale download file
         Files.deleteIfExists(downloadPath);
 
+        // Download url bytes
+        HTTPRequest httpRequest = new HTTPRequest(remoteUrl);
+        HTTPResponse httpResp = httpRequest.getResponse();
+        if (httpResp.getCode() != HTTPResponse.OK || httpResp.getBytes() == null)
+            throw new IOException("Error downloading file: " + remoteUrl + ", " + httpResp.getMessage());
+
+        // Write bytes
+        try { Files.write(downloadPath, httpResp.getBytes()); }
+
         // Actual download (basic URL stream). Replace with HttpClient if you want timeouts/headers.
-        try (InputStream in = new BufferedInputStream(remoteUrl.openStream())) {
-            Files.copy(in, downloadPath, StandardCopyOption.REPLACE_EXISTING);
-        }
+        //try (InputStream in = new BufferedInputStream(remoteUrl.openStream())) {
+        //    Files.copy(in, downloadPath, StandardCopyOption.REPLACE_EXISTING); }
 
         // Best effort cleanup
         catch (IOException e) {
