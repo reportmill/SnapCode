@@ -46,22 +46,16 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     }
 
     /**
-     * Returns a JavaFleObject for given path (with option to provide file for efficiency).
+     * Returns whether a location is known to this file manager.
      */
-    public synchronized SnapCompilerJFO getJavaFileObject(WebFile aFile)
+    @Override
+    public boolean hasLocation(Location aLoc)
     {
-        // Get cached file for file path (just return if found)
-        String filePath = aFile.getPath();
-        SnapCompilerJFO javaFileObject = _javaFileObjects.get(filePath);
-        if (javaFileObject != null)
-            return javaFileObject;
-
-        // Create java file object and add to cache
-        javaFileObject = new SnapCompilerJFO(_proj, aFile, _compiler);
-        _javaFileObjects.put(filePath, javaFileObject);
-
-        // Return
-        return javaFileObject;
+        if (aLoc == StandardLocation.SOURCE_PATH || aLoc == StandardLocation.CLASS_PATH)
+            return true;
+        if (isSystemModule(aLoc) && !isBasicModule(aLoc))
+            return false;
+        return super.hasLocation(aLoc);
     }
 
     /**
@@ -152,89 +146,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
             locationsForModules.add(set2);
         }
 
-        // Return
         return locationsForModules;
-    }
-
-    /**
-     * Finds source files for package name.
-     */
-    private void findSourceFilesForPackageName(String aPkgName, List<JavaFileObject> filesList)
-    {
-        WebFile pkgDir = getSourceDir(aPkgName);
-        findFilesForDirFileAndType(pkgDir, "java", filesList);
-    }
-
-    /**
-     * Finds class files for package name.
-     */
-    private void findClassFilesForPackageName(String aPkgName, List<JavaFileObject> filesList)
-    {
-        WebFile pkgDir = getBuildDir(aPkgName);
-        findFilesForDirFileAndType(pkgDir, "class", filesList);
-    }
-
-    /**
-     * Override to return Project.CompilerClassLoader.
-     */
-    @Override
-    public ClassLoader getClassLoader(Location aLoc)
-    {
-        if (_classLoader != null) return _classLoader;
-        ClassLoader classLoader = _proj.createCompilerClassLoader();
-        return _classLoader = classLoader;
-    }
-
-    /**
-     * Return a FileObject for a given location from which compiler can obtain source or byte code.
-     */
-    @Override
-    public FileObject getFileForInput(Location aLoc, String aPkgName, String aRelName) throws IOException
-    {
-        System.err.println("SnapCompilerFM:getFileForInput: " + aPkgName + "." + aRelName + ", loc: " + aLoc.getName());
-        //FileObject o = _fileObjects.get(getURI(location, packageName, relativeName)); if(o!=null) return o;
-        return super.getFileForInput(aLoc, aPkgName, aRelName);
-    }
-
-    /**
-     * Return a FileObject for a given location from which compiler can obtain source or byte code.
-     */
-    @Override
-    public JavaFileObject getJavaFileForInput(Location aLoc, String aClassName, Kind aKind)
-    {
-        //System.err.println("getJavaFileForInput: " + aClassName + ", kind: " + aKind);
-        String sourceDirPath = _proj.getSourceDir().getDirPath();
-        String javaFilePath = sourceDirPath + aClassName.replace('.', '/') + ".java";
-        WebFile javaFile = _proj.getFileForPath(javaFilePath);
-        return javaFile != null ? getJavaFileObject(javaFile) : null;
-    }
-
-    /**
-     * Create a JavaFileObject for an output class file and store it in the classloader.
-     */
-    @Override
-    public JavaFileObject getJavaFileForOutput(Location aLoc, String aClassName, Kind kind, FileObject aSblg)
-    {
-        WebFile javaFile = ((SnapCompilerJFO) aSblg).getFile();
-        String classPath = "/" + aClassName.replace('.', '/') + ".class";
-        ProjectFiles projectFiles = _proj.getProjectFiles();
-        WebFile classFile = projectFiles.createBuildFileForPath(classPath, false);
-        SnapCompilerJFO jfo = getJavaFileObject(classFile);
-        jfo._javaFile = javaFile;
-        return jfo;
-    }
-
-    /**
-     * Returns whether we have location.
-     */
-    @Override
-    public boolean hasLocation(Location aLoc)
-    {
-        if (aLoc == StandardLocation.SOURCE_PATH || aLoc == StandardLocation.CLASS_PATH)
-            return true;
-        if (isSystemModule(aLoc) && !isBasicModule(aLoc))
-            return false;
-        return super.hasLocation(aLoc);
     }
 
     /**
@@ -262,29 +174,115 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     }
 
     /**
+     * Returns a JavaFleObject for given path (with option to provide file for efficiency).
+     */
+    synchronized SnapCompilerJFO getJavaFileObject(WebFile aFile)
+    {
+        // Get cached file for file path (just return if found)
+        String filePath = aFile.getPath();
+        SnapCompilerJFO javaFileObject = _javaFileObjects.get(filePath);
+        if (javaFileObject != null)
+            return javaFileObject;
+
+        // Create java file object and add to cache
+        javaFileObject = new SnapCompilerJFO(_proj, aFile, _compiler);
+        _javaFileObjects.put(filePath, javaFileObject);
+
+        return javaFileObject;
+    }
+
+    /**
+     * Override to return Project.CompilerClassLoader.
+     */
+    @Override
+    public ClassLoader getClassLoader(Location aLoc)
+    {
+        if (_classLoader != null) return _classLoader;
+        ClassLoader classLoader = _proj.createCompilerClassLoader();
+        return _classLoader = classLoader;
+    }
+
+    /**
+     * Return a FileObject for a given location from which compiler can obtain source or byte code.
+     */
+    @Override
+    public FileObject getFileForInput(Location aLoc, String packageName, String aRelName) throws IOException
+    {
+        System.err.println("SnapCompilerFM:getFileForInput: " + packageName + "." + aRelName + ", loc: " + aLoc.getName());
+        //FileObject o = _fileObjects.get(getURI(location, packageName, relativeName)); if(o!=null) return o;
+        return super.getFileForInput(aLoc, packageName, aRelName);
+    }
+
+    /**
+     * Return a FileObject for a given location from which compiler can obtain source or byte code.
+     */
+    @Override
+    public JavaFileObject getJavaFileForInput(Location aLoc, String aClassName, Kind aKind)
+    {
+        //System.err.println("getJavaFileForInput: " + aClassName + ", kind: " + aKind);
+        String sourceDirPath = _proj.getSourceDir().getDirPath();
+        String javaFilePath = sourceDirPath + aClassName.replace('.', '/') + ".java";
+        WebFile javaFile = _proj.getFileForPath(javaFilePath);
+        return javaFile != null ? getJavaFileObject(javaFile) : null;
+    }
+
+    /**
+     * Create a JavaFileObject for an output class file and store it in the classloader.
+     */
+    @Override
+    public JavaFileObject getJavaFileForOutput(Location aLoc, String aClassName, Kind kind, FileObject aSblg)
+    {
+        WebFile javaFile = ((SnapCompilerJFO) aSblg).getFile();
+        String classPath = "/" + aClassName.replace('.', '/') + ".class";
+        ProjectFiles projectFiles = _proj.getProjectFiles();
+        WebFile classFile = projectFiles.createBuildFileForPath(classPath, false);
+        SnapCompilerJFO javaFileObject = getJavaFileObject(classFile);
+        javaFileObject._javaFile = javaFile;
+        return javaFileObject;
+    }
+
+    /**
+     * Finds source files for package name.
+     */
+    private void findSourceFilesForPackageName(String packageName, List<JavaFileObject> filesList)
+    {
+        WebFile packageDir = getSourceDir(packageName);
+        findFilesForDirFileAndType(packageDir, "java", filesList);
+    }
+
+    /**
+     * Finds class files for package name.
+     */
+    private void findClassFilesForPackageName(String packageName, List<JavaFileObject> filesList)
+    {
+        WebFile packageDir = getBuildDir(packageName);
+        findFilesForDirFileAndType(packageDir, "class", filesList);
+    }
+
+    /**
      * Returns the WebFile (directory) for package name build files, if available.
      */
-    private WebFile getBuildDir(String aPackageName)
+    private WebFile getBuildDir(String packageName)
     {
         WebFile buildDir = _proj.getBuildDir();
-        if (aPackageName.isEmpty())
+        if (packageName.isEmpty())
             return buildDir;
 
-        String pkgPath = '/' + aPackageName.replace('.', '/');
-        return _proj.getProjectFiles().getBuildFileForPath(pkgPath);
+        String packagePath = '/' + packageName.replace('.', '/');
+        return _proj.getProjectFiles().getBuildFileForPath(packagePath);
     }
 
     /**
      * Returns the WebFile (directory) for package name source files, if available.
      */
-    private WebFile getSourceDir(String aPackageName)
+    private WebFile getSourceDir(String packageName)
     {
         WebFile sourceDir = _proj.getSourceDir();
-        if (aPackageName.isEmpty())
+        if (packageName.isEmpty())
             return sourceDir;
 
-        String pkgPath = '/' + aPackageName.replace('.', '/');
-        return _proj.getSourceFileForPath(pkgPath);
+        String packagePath = '/' + packageName.replace('.', '/');
+        return _proj.getSourceFileForPath(packagePath);
     }
 
     /**

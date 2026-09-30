@@ -198,8 +198,7 @@ public class NewFileTool extends WorkspaceTool {
         // Handle Java
         else {
             String javaString = JavaPage.getJavaContentStringForPackageAndClassName(null, "JavaFiddle", true);
-            if (SnapUtils.getJavaVersionInt() >= 25)
-                javaString = "\n\nstatic void main(String[] args)\n{\n}\n";
+            //if (SnapUtils.getJavaVersionInt() >= 25) javaString = "\n\nstatic void main(String[] args)\n{\n}\n";
             newJavaFileForClassNameAndString("JavaFiddle", javaString);
         }
     }

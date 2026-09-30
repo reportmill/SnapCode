@@ -228,26 +228,22 @@ public class JavaPage extends WebPage {
             sb.append("package ").append(packageName).append(";\n");
 
         // Append Comment
-        sb.append("\n/**\n * A custom class.\n */\n");
+        //sb.append("\n/**\n * A custom class.\n */\n");
 
         // Append class declaration: "public class <File-Name> extends Object {   }"
-        sb.append("public class ").append(className).append(" {\n\n");
+        sb.append("\npublic class ").append(className).append(" {\n\n");
 
         // Append standard main implementation
         if (includeMain) {
             sb.append("""
-                    /**
-                     * Standard main implementation.
-                     */
                     public static void main(String[] args)
                     {
                     }
-                
                 """);
         }
 
         // Append close
-        sb.append("}");
+        sb.append("\n}");
 
         // Return
         return sb.toString();

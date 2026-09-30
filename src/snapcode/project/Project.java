@@ -275,19 +275,16 @@ public class Project extends PropObject {
         // Get all project ClassPath URLs
         URL[] urls = FilePathUtils.getUrlsForPaths(classPaths);
 
-        // Get root ClassLoader
-        ClassLoader workspaceClassLoader = ClassLoader.getSystemClassLoader();
+        // Get platform ClassLoader
+        ClassLoader platformClassLoader = ClassLoader.getPlatformClassLoader();
 
-        // If IncludeSnapKitRuntime is set, use platform class loader instead
+        // If IncludeSnapKitRuntime is set, use system class loader instead to use local snapkit
         BuildFile buildFile = getBuildFile();
-        if (!buildFile.isIncludeSnapKitRuntime())
-            workspaceClassLoader = workspaceClassLoader.getParent();
+        if (buildFile.isIncludeSnapKitRuntime())
+            platformClassLoader = ClassLoader.getSystemClassLoader();
 
-        // Create special URLClassLoader subclass so when debugging SnapCode, we can ignore classes loaded by Project
-        ClassLoader urlClassLoader = new SnapCodeDebugClassLoader(urls, workspaceClassLoader);
-
-        // Return
-        return urlClassLoader;
+        // Return special URLClassLoader subclass so when debugging SnapCode, we can ignore classes loaded by Project
+        return new SnapCodeDebugClassLoader(urls, platformClassLoader);
     }
 
     /**
@@ -320,15 +317,9 @@ public class Project extends PropObject {
      */
     public ClassLoader createCompilerClassLoader()
     {
-        // Get CompilerClassPaths and ClassPathUrls
-        String[] classPaths = getCompileClassPaths();
-        URL[] classPathUrls = FilePathUtils.getUrlsForPaths(classPaths);
-
-        // Get System ClassLoader
-        ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader().getParent();
-
-        // Create/Return URLClassLoader for classPath
-        return new URLClassLoader(classPathUrls, systemClassLoader);
+        String[] compilerClassPaths = getCompileClassPaths();
+        URL[] compilerClassPathUrls = FilePathUtils.getUrlsForPaths(compilerClassPaths);
+        return new URLClassLoader(compilerClassPathUrls, ClassLoader.getPlatformClassLoader());
     }
 
     /**
