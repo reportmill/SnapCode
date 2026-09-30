@@ -15,16 +15,16 @@ import java.util.stream.Collectors;
 public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
 
     // The SnapCompiler
-    protected SnapCompiler  _compiler;
+    private SnapCompiler _compiler;
 
     // The project
-    private Project  _proj;
+    private Project _proj;
 
     // A map of previously accessed SnapFileObjects for paths
     private Map<String, SnapCompilerJFO> _javaFileObjects = new HashMap<>();
 
     // The class loader to find project lib classes
-    private ClassLoader  _classLoader;
+    private ClassLoader _classLoader;
 
     // The base modules
     private static List<String> BASE_MODULE_NAMES = List.of("java.base", "java.prefs", "java.datatransfer", "java.desktop");
@@ -43,6 +43,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         super(aFileManager);
         _compiler = aCompiler;
         _proj = _compiler._proj;
+        _classLoader = _proj.createCompilerClassLoader();
     }
 
     /**
@@ -53,8 +54,8 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     {
         //System.out.println("list: " + aLoc + ", kinds: " + kinds + ", recursive: " + recurse + ", package: " + packageName);
 
-        // Handle modules
-        if (aLoc.toString().startsWith("SYSTEM_MODULES["))
+        // Handle modules (WebVM has these for some reason)
+        if (isSystemModule(aLoc))
             return listModuleFiles(aLoc, packageName, kinds, recurse);
 
         // If not CLASS_PATH or SOURCE_PATH, just return normal version
@@ -88,7 +89,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     {
         // Get cache key and cache map for location
         String locStr = aLoc.toString();
-        String moduleName = locStr.substring("SYSTEM_MODULES[".length(), locStr.length() - "]".length());
+        String moduleName = locStr.substring("SYSTEM_MODULES[".length(), locStr.length() - 1);
         String cacheKey = packageName.isEmpty() ? moduleName : packageName;
         Map<String,List<JavaFileObject>> cacheMap = recurse ? _moduleFileObjects : _packageFileObjects;
 
@@ -99,7 +100,8 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
 
         // Do normal version
         Iterable<JavaFileObject> superFiles = super.list(aLoc, packageName, kinds, recurse);
-        moduleFiles = new ArrayList<>(); superFiles.forEach(moduleFiles::add);
+        moduleFiles = new ArrayList<>();
+        superFiles.forEach(moduleFiles::add);
 
         // If root package, remove module-info.class
         if (packageName.isEmpty() && recurse) {
@@ -126,7 +128,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         // Filter locations for modules to basic modules
         List<Set<Location>> locationsForModules = new ArrayList<>();
         for (Set<Location> set : superLocs) {
-            Set<Location> set2 = set.stream().filter(SnapCompilerFM::isBasicModule).collect(Collectors.toSet());
+            Set<Location> set2 = set.stream().filter(SnapCompilerFM::isBasicSystemModule).collect(Collectors.toSet());
             locationsForModules.add(set2);
         }
 
@@ -179,12 +181,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
      * Override to return Project.CompilerClassLoader.
      */
     @Override
-    public ClassLoader getClassLoader(Location aLoc)
-    {
-        if (_classLoader != null) return _classLoader;
-        ClassLoader classLoader = _proj.createCompilerClassLoader();
-        return _classLoader = classLoader;
-    }
+    public ClassLoader getClassLoader(Location aLoc)  { return _classLoader; }
 
     /**
      * Return a FileObject for a given location from which compiler can obtain source or byte code.
@@ -193,7 +190,6 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     public FileObject getFileForInput(Location aLoc, String packageName, String aRelName) throws IOException
     {
         System.err.println("SnapCompilerFM:getFileForInput: " + packageName + "." + aRelName + ", loc: " + aLoc.getName());
-        //FileObject o = _fileObjects.get(getURI(location, packageName, relativeName)); if(o!=null) return o;
         return super.getFileForInput(aLoc, packageName, aRelName);
     }
 
@@ -201,11 +197,11 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
      * Return a FileObject for a given location from which compiler can obtain source or byte code.
      */
     @Override
-    public JavaFileObject getJavaFileForInput(Location aLoc, String aClassName, Kind aKind)
+    public JavaFileObject getJavaFileForInput(Location aLoc, String className, Kind kind)
     {
         //System.err.println("getJavaFileForInput: " + aClassName + ", kind: " + aKind);
         String sourceDirPath = _proj.getSourceDir().getDirPath();
-        String javaFilePath = sourceDirPath + aClassName.replace('.', '/') + ".java";
+        String javaFilePath = sourceDirPath + className.replace('.', '/') + ".java";
         WebFile javaFile = _proj.getFileForPath(javaFilePath);
         return javaFile != null ? getJavaFileObject(javaFile) : null;
     }
@@ -214,10 +210,10 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
      * Create a JavaFileObject for an output class file and store it in the classloader.
      */
     @Override
-    public JavaFileObject getJavaFileForOutput(Location aLoc, String aClassName, Kind kind, FileObject aSblg)
+    public JavaFileObject getJavaFileForOutput(Location aLoc, String className, Kind kind, FileObject aSibling)
     {
-        WebFile javaFile = ((SnapCompilerJFO) aSblg).getFile();
-        String classPath = "/" + aClassName.replace('.', '/') + ".class";
+        WebFile javaFile = ((SnapCompilerJFO) aSibling).getFile();
+        String classPath = "/" + className.replace('.', '/') + ".class";
         ProjectFiles projectFiles = _proj.getProjectFiles();
         WebFile classFile = projectFiles.createBuildFileForPath(classPath, false);
         SnapCompilerJFO javaFileObject = getJavaFileObject(classFile);
@@ -287,14 +283,14 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     }
 
     /**
-     * Returns whether given location is system module.
+     * Returns whether given location is a system module.
      */
     private static boolean isSystemModule(Location aLoc)  { return aLoc.toString().startsWith("SYSTEM_MODULES["); }
 
     /**
-     * Returns whether given location is basic module.
+     * Returns whether given location is a basic system module.
      */
-    private static boolean isBasicModule(Location aLoc)
+    private static boolean isBasicSystemModule(Location aLoc)
     {
         if (!isSystemModule(aLoc))
             return false;
