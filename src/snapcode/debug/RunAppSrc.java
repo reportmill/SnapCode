@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 /**
@@ -204,15 +205,56 @@ public class RunAppSrc extends RunApp {
 
         // Get main method and invoke
         try {
-            Method mainMethod = mainClass.getMethod("main", String[].class);
+
+            // Get main method
+            Method mainMethod = getMainMethod(mainClass);
             mainMethod.setAccessible(true);
-            mainMethod.invoke(null, (Object) new String[0]);
+
+            // Set target for static or instance
+            Object target = null;
+            if (!Modifier.isStatic(mainMethod.getModifiers()))
+                target = mainClass.getConstructor().newInstance();
+
+            // Invoke with appropriate arg (none or String[])
+            if (mainMethod.getParameterTypes().length == 0)
+                mainMethod.invoke(target);
+            else mainMethod.invoke(target, (Object) new String[0]);
         }
 
         // Handle exception: Just print - goes to RunTool console
         catch (Throwable e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Returns the main method for given class, looking in order: static + args, static no-args, instance + args, instance no-args.
+     */
+    private static Method getMainMethod(Class<?> mainClass) throws NoSuchMethodException
+    {
+        // Try: static void main(String[])
+        Method mainWithArgs = null;
+        try { mainWithArgs = mainClass.getDeclaredMethod("main", String[].class); }
+        catch (NoSuchMethodException ignore) { }
+        if (mainWithArgs != null && Modifier.isStatic(mainWithArgs.getModifiers()) && mainWithArgs.getReturnType() == void.class)
+            return mainWithArgs;
+
+        // Try: static void main()
+        Method mainNoArgs = null;
+        try { mainNoArgs = mainClass.getDeclaredMethod("main"); }
+        catch (NoSuchMethodException ignore) { }
+        if (mainNoArgs != null && Modifier.isStatic(mainNoArgs.getModifiers()) && mainNoArgs.getReturnType() == void.class)
+            return mainNoArgs;
+
+        // Try: void main(String[])
+        if (mainWithArgs != null && mainWithArgs.getReturnType() == void.class)
+            return mainWithArgs;
+
+        // Try: void main()
+        if (mainNoArgs != null && mainNoArgs.getReturnType() == void.class)
+            return mainNoArgs;
+
+        throw new NoSuchMethodException(mainClass.getName() + ".main()");
     }
 
     /**
