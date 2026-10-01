@@ -75,7 +75,7 @@ public class RunAppLocal extends RunApp {
 
             // Set console
             Console.setShared(null);
-            Console.setConsoleCreatedHandler(this::consoleWasCreated);
+            Console.setConsoleCreatedHandler(this::handleConsoleCreated);
         }
 
         // Run code
@@ -278,7 +278,7 @@ public class RunAppLocal extends RunApp {
     /**
      * Called when Console is created.
      */
-    private void consoleWasCreated()
+    private void handleConsoleCreated()
     {
         View consoleView = Console.getShared().getConsoleView();
         setAltConsoleView(consoleView);
@@ -290,36 +290,24 @@ public class RunAppLocal extends RunApp {
      */
     private class ProxyPrintStream extends PrintStream {
 
-        /**
-         * Constructor.
-         */
+        /** Constructor. */
         public ProxyPrintStream(PrintStream printStream)
         {
             super(printStream);
         }
 
-        /**
-         * Override to send to local console.
-         */
+        /** Override to send to local console. */
         public void write(int b)
         {
-            // Do normal version
             super.write(b);
-
-            // Write char to console
             String str = String.valueOf(Character.valueOf((char) b));
             appendConsoleOutput(str, this == System.err);
         }
 
-        /**
-         * Override to send to local console.
-         */
+        /** Override to send to local console. */
         public void write(byte[] buf, int off, int len)
         {
-            // Do normal version
             super.write(buf, off, len);
-
-            // Write buff to console
             String str = new String(buf, off, len);
             appendConsoleOutput(str, this == System.err);
         }
@@ -412,7 +400,7 @@ public class RunAppLocal extends RunApp {
             if (n < k) {
                 k = n < 0 ? 0 : n;
             }
-            _readBytesIndex += k;
+            _readBytesIndex += (int) k;
             return k;
         }
 
@@ -429,6 +417,6 @@ public class RunAppLocal extends RunApp {
         public synchronized void reset() { _readBytesIndex = _markedIndex; }
 
         /** Closing a <tt>BytesArrayInputStream</tt> has no effect. */
-        public void close() throws IOException  { }
+        public void close()  { }
     }
 }
