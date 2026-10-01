@@ -236,7 +236,7 @@ public class JavaPage extends WebPage {
         // Append standard main implementation
         if (includeMain) {
             sb.append("""
-                    public static void main(String[] args)
+                    void main()
                     {
                     }
                 """);

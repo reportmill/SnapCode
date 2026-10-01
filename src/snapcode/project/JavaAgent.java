@@ -446,11 +446,7 @@ public class JavaAgent extends TextAgent {
 
         // Initialize imports
         List<String> imports = new ArrayList<>();
-        imports.add("java.util.*");
-        imports.add("java.util.function.*");
-        imports.add("java.util.stream.*");
-        imports.add("java.io.*");
-        imports.add("java.nio.file.*");
+        imports.add("module java.base");
         imports.add("snap.view.*");
         imports.add("snap.gfx.*");
         imports.add("snap.geom.*");
@@ -458,8 +454,6 @@ public class JavaAgent extends TextAgent {
         imports.add("snap.viewx.QuickDraw");
         imports.add("snap.viewx.QuickDrawPen");
         imports.add("static snap.viewx.ConsoleIO.*");
-        if (SnapUtils.getJavaVersionInt() < 23)
-            imports.add("static snap.viewx.ConsoleIOX.*");
         return _jeplImports = imports;
     }
 
