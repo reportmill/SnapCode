@@ -54,23 +54,25 @@ public class RunToolUtils {
      */
     public static boolean isRunLocal(WebFile mainFile)
     {
-        // Run local if (1) TempProj and (2) jepl file and (3) not swing and (4) not alt-key-down
         if (mainFile == null)
             return false;
+
         if (RunTool.isRunInSnapCodeProcess())
             return true;
+
         String fileType = mainFile.getFileType();
         if (fileType.equals("jmd"))
             return true;
+
+        // WebVM doesn't support writing to separate process yet
+        if (SnapEnv.isWebVM && mainFile.getText().contains("IO.readln("))
+            return true;
+
         if (!fileType.equals("jepl"))
             return false;
+
         Project proj = Project.getProjectForFile(mainFile);
         if (!proj.getName().equals("TempProj") && !proj.getName().equals("ScratchPad"))
-            return false;
-
-        // If BuildFile.EnableCompilePreview, return false
-        BuildFile buildFile = proj.getBuildFile();
-        if (buildFile.isEnableCompilePreview())
             return false;
 
         // If there are dependencies, return false
