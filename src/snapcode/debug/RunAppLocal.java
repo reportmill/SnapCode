@@ -49,7 +49,7 @@ public class RunAppLocal extends RunApp {
     }
 
     /**
-     * Override to run source app.
+     * Override to run local app.
      */
     @Override
     public void exec()
@@ -61,7 +61,7 @@ public class RunAppLocal extends RunApp {
     }
 
     /**
-     * Runs Java Code.
+     * Runs main file main method.
      */
     protected void runAppImpl()
     {
@@ -228,7 +228,25 @@ public class RunAppLocal extends RunApp {
     }
 
     /**
-     * Returns the main method for given class, looking in order: static + args, static no-args, instance + args, instance no-args.
+     * Returns the main class.
+     */
+    private Class<?> getMainClass()
+    {
+        String className = getMainClassName();
+        Project project = getMainFileProject();
+        ClassLoader classLoader = project.getRuntimeClassLoader();
+
+        // Do normal Class.forName
+        try { return Class.forName(className, false, classLoader); }
+
+        // Handle Exceptions
+        catch(ClassNotFoundException e) { return null; }
+        catch(NoClassDefFoundError t) { System.err.println("RunAppLocal.getMainClass: " + t); return null; }
+        catch(Throwable t) { System.err.println("RunAppLocal.getMainClass: Unknown error: " + t); return null; }
+    }
+
+    /**
+     * Returns the main method for given main class, using main() method conventions.
      */
     private static Method getMainMethod(Class<?> mainClass) throws NoSuchMethodException
     {
@@ -255,24 +273,6 @@ public class RunAppLocal extends RunApp {
             return mainNoArgs;
 
         throw new NoSuchMethodException(mainClass.getName() + ".main()");
-    }
-
-    /**
-     * Returns the main class.
-     */
-    private Class<?> getMainClass()
-    {
-        String className = getMainClassName();
-        Project project = getMainFileProject();
-        ClassLoader classLoader = project.getRuntimeClassLoader();
-
-        // Do normal Class.forName
-        try { return Class.forName(className, false, classLoader); }
-
-        // Handle Exceptions
-        catch(ClassNotFoundException e) { return null; }
-        catch(NoClassDefFoundError t) { System.err.println("RunAppSrc.getMainClass: " + t); return null; }
-        catch(Throwable t) { System.err.println("RunAppSrc.getMainClass: Unknown error: " + t); return null; }
     }
 
     /**

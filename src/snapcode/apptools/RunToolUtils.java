@@ -37,7 +37,7 @@ public class RunToolUtils {
         if (isDebug)
             return new DebugApp(runTool, runConfig);
 
-        // Handle RunLocal: Return new RunAppSrc
+        // Handle RunLocal: Return new RunAppLocal
         if (isRunLocal(runConfig.getMainJavaFile()))
             return new RunAppLocal(runTool, runConfig);
 
