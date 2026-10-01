@@ -345,9 +345,6 @@ public class RunAppSrc extends RunApp {
         // The number of bytes write bytes.
         private int _writeBytesLength;
 
-        // Whether waiting for more input
-        private boolean  _waiting;
-
         /** Constructor */
         public BytesInputStream()
         {
@@ -361,7 +358,7 @@ public class RunAppSrc extends RunApp {
         }
 
         /** Adds bytes to stream. */
-        public void addBytes(byte[] addBytes)
+        public synchronized void addBytes(byte[] addBytes)
         {
             // Add new bytes to write buffer
             int oldLength = _writeBytesBuffer.length;
@@ -369,13 +366,8 @@ public class RunAppSrc extends RunApp {
             System.arraycopy(addBytes, 0, _writeBytesBuffer, oldLength, addBytes.length);
             _writeBytesLength = _writeBytesBuffer.length;
 
-            // If waiting, wake up
-            if (_waiting) {
-                synchronized (this) {
-                    try { notifyAll(); _waiting = false; }
-                    catch(Exception e) { throw new RuntimeException(e); }
-                }
-            }
+            // Wake up any reader waiting for more input
+            notifyAll();
         }
 
         /** Reads the next byte of data from this input stream. */
@@ -388,13 +380,18 @@ public class RunAppSrc extends RunApp {
 
         /** Reads up to <code>len</code> bytes of data into an array of bytes from this input stream. */
         @Override
-        public int read(byte[] theBytes, int offset, int length)
+        public synchronized int read(byte[] theBytes, int offset, int length)
         {
+            // This should be impossible, but it is happening in Java 25
+            if (this != System.in) {
+                try { return System.in.read(theBytes, offset, length); }
+                catch (IOException e) { return -1; }
+            }
+
+            // Wait for input - condition test + wait must hold the same lock the writer uses to notify
             while (_readBytesIndex >= _writeBytesLength) {
-                synchronized (this) {
-                    try { _waiting = true; wait(); }
-                    catch(Exception ignore) { }
-                }
+                try { wait(); }
+                catch (InterruptedException e) { return -1; } // Let terminate() unblock a pending read
             }
 
             int availableBytesCount = _writeBytesLength - _readBytesIndex;
