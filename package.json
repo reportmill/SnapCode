@@ -7,7 +7,7 @@
     "main": "index.js",
     "preferGlobal": true,
     "scripts": {"test": "echo \"Error: no test specified\" && exit 1"},
-    "version": "2026.7.2",
+    "version": "2026.10.1",
     "jdeploy": {
         "jdk": true,
         "fallbackToUniversal": false,
@@ -22,7 +22,7 @@
             "extension": "java",
             "mimetype": "text/java"
         }],
-        "jar": "build/libs/SnapCodeAll-2026.07.jar",
+        "jar": "build/libs/SnapCodeAll-2026.10.jar",
         "title": "SnapCode",
         "downloadPage": {"platforms": ["all"]},
         "platformBundlesEnabled": false
