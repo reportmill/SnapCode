@@ -39,7 +39,7 @@ public class RunToolUtils {
 
         // Handle RunLocal: Return new RunAppSrc
         if (isRunLocal(runConfig.getMainJavaFile()))
-            return new RunAppSrc(runTool, runConfig);
+            return new RunAppLocal(runTool, runConfig);
 
         // Handle web: Create and return RunAppWeb for browser launch
         if (SnapEnv.isWebVM)

@@ -12,9 +12,9 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 /**
- * This RunApp subclass runs an app from source.
+ * This RunApp subclass runs an app in SnapCode process for various unfortunate reasons.
  */
-public class RunAppSrc extends RunApp {
+public class RunAppLocal extends RunApp {
 
     // The thread to reset views
     private Thread _runAppThread;
@@ -33,7 +33,7 @@ public class RunAppSrc extends RunApp {
     /**
      * Constructor.
      */
-    public RunAppSrc(RunTool runTool, RunConfig runConfig)
+    public RunAppLocal(RunTool runTool, RunConfig runConfig)
     {
         super(runTool, runConfig);
     }
@@ -66,7 +66,7 @@ public class RunAppSrc extends RunApp {
     protected void runAppImpl()
     {
         // Set shared resources
-        synchronized (RunAppSrc.class) {
+        synchronized (RunAppLocal.class) {
 
             // Replace System.in with proxy versions to allow input/output
             System.setIn(_standardInInputStream = new BytesInputStream());
@@ -145,7 +145,7 @@ public class RunAppSrc extends RunApp {
         if (_runAppThread == null) return;
 
         // Reset shared resources
-        synchronized (RunAppSrc.class) {
+        synchronized (RunAppLocal.class) {
 
             // If another app already set new values, just skip
             if (System.in == _standardInInputStream) {
