@@ -32,7 +32,7 @@ public class JavaTextPane extends TextPane {
     protected LineFootView  _lineFootView;
 
     // A runnable to check file for errors after delay
-    private Runnable _checkFileRun = this::checkFileForErrors;
+    private Runnable _checkFileForErrorsRun = this::checkFileForErrors;
 
     /**
      * Constructor.
@@ -422,7 +422,7 @@ public class JavaTextPane extends TextPane {
     protected void checkFileForErrorsAfterDelay()
     {
         // Register to call checkFileForErrors after delay
-        ViewUtils.runDelayedCancelPrevious(_checkFileRun, 1000);
+        ViewUtils.runDelayedCancelPrevious(_checkFileForErrorsRun, 1200);
 
         // Clear build issues
         JavaTextModel javaTextModel = getJavaTextModel();
@@ -510,7 +510,7 @@ public class JavaTextPane extends TextPane {
             label.addEventHandler(this::handleNodePathLabelMouseRelease, MouseRelease);
             if (jnode == selNode)
                 label.setFill(Color.LIGHTGRAY);
-            pathLabels.add(0, label);
+            pathLabels.addFirst(label);
 
             // If last part, break
             JNode parentNode = jnode.getParent();
@@ -519,7 +519,7 @@ public class JavaTextPane extends TextPane {
 
             // Add separator
             Label separator = labelBuilder.text(" • ").font(font).build();
-            pathLabels.add(0, separator);
+            pathLabels.addFirst(separator);
         }
 
         // Add Eval Type Name of selected node to end
