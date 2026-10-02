@@ -1,22 +1,13 @@
 package snapcode.debug;
 import snap.gfx.Color;
-import snap.util.ArrayUtils;
-import snap.util.FilePathUtils;
-import snap.util.ListUtils;
-import snap.util.SnapEnv;
-import snap.view.TextArea;
-import snap.view.View;
-import snap.view.ViewEnv;
-import snap.view.ViewUtils;
+import snap.util.*;
+import snap.view.*;
 import snap.web.WebFile;
 import snap.viewx.Console;
 import snapcode.apptools.RunTool;
 import snapcode.project.*;
-import snap.web.WebURL;
-
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * A class to run an external process.
@@ -66,10 +57,10 @@ public abstract class RunApp {
     protected boolean _terminated;
 
     // App listeners
-    protected AppListener[] _appLsnrs = new AppListener[0];
+    protected List<AppListener> _appLsnrs = new ArrayList<>(2);
 
     /**
-     * Creates a new RunApp for URL and args.
+     * Constructor.
      */
     public RunApp(RunTool runTool, RunConfig runConfig)
     {
@@ -200,15 +191,7 @@ public abstract class RunApp {
     /**
      * Sets the working directory.
      */
-    public void setWorkingDirectory(Object aDir)
-    {
-        if (aDir instanceof File)
-            _workDir = (File) aDir;
-        else {
-            WebURL url = WebURL.getUrl(aDir);
-            _workDir = url != null ? url.getJavaFile() : null;
-        }
-    }
+    public void setWorkingDirectory(File aDir)  { _workDir = aDir; }
 
     /**
      * Returns VM arguments.
@@ -390,8 +373,7 @@ public abstract class RunApp {
      */
     protected void notifyAppExited()
     {
-        for (AppListener lsnr : _appLsnrs)
-            lsnr.appExited(this);
+        _appLsnrs.forEach(lsnr -> lsnr.appExited(this));
     }
 
     /**
@@ -407,18 +389,12 @@ public abstract class RunApp {
     /**
      * Adds listener.
      */
-    public void addListener(AppListener aListener)
-    {
-        _appLsnrs = ArrayUtils.add(_appLsnrs, aListener);
-    }
+    public void addListener(AppListener aListener)  { _appLsnrs.add(aListener); }
 
     /**
      * Removes listener.
      */
-    public void removeListener(AppListener aListener)
-    {
-        _appLsnrs = ArrayUtils.removeId(_appLsnrs, aListener);
-    }
+    public void removeListener(AppListener aListener)  { _appLsnrs.remove(aListener); }
 
     /**
      * Prints a diagnostic.

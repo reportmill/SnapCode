@@ -177,8 +177,7 @@ public class RunAppLocal extends RunApp {
             setAltConsoleView(null);
 
         // Notify exited
-        for (AppListener appLsnr : _appLsnrs)
-            appLsnr.appExited(this);
+        _appLsnrs.forEach(lsnr -> lsnr.appExited(this));
     }
 
     /**

@@ -722,20 +722,17 @@ public class DebugApp extends RunAppBin {
      */
     protected void notifyAppStarted()
     {
-        for (AppListener appLsnr : _appLsnrs)
-            appLsnr.appStarted(this);
+        _appLsnrs.forEach(lsnr -> lsnr.appStarted(this));
     }
 
     protected void notifyAppPaused()
     {
-        for (AppListener appLsnr : _appLsnrs)
-            appLsnr.appPaused(this);
+        _appLsnrs.forEach(lsnr -> lsnr.appPaused(this));
     }
 
     protected void notifyAppResumed()
     {
-        for (AppListener appLsnr : _appLsnrs)
-            appLsnr.appResumed(this);
+        _appLsnrs.forEach(lsnr -> lsnr.appResumed(this));
     }
 
     /**
@@ -749,8 +746,7 @@ public class DebugApp extends RunAppBin {
      */
     protected void notifyFrameChanged()
     {
-        for (AppListener appLsnr : _appLsnrs)
-            appLsnr.frameChanged(this);
+        _appLsnrs.forEach(lsnr -> lsnr.frameChanged(this));
     }
 
     /**
@@ -839,8 +835,7 @@ public class DebugApp extends RunAppBin {
         }
 
         // Dispatch event to listener
-        for (AppListener appLsnr : _appLsnrs)
-            appLsnr.processDebugEvent(this, anEvent);
+        _appLsnrs.forEach(lsnr -> lsnr.processDebugEvent(this, anEvent));
     }
 
     /**
@@ -909,7 +904,7 @@ public class DebugApp extends RunAppBin {
         // If there is only one method to call, we'll just choose that without looking at the args.  If they aren't right
         // the invoke will return a better error message than we could generate here.
         if (overloads.size() == 1)
-            return overloads.get(0);
+            return overloads.getFirst();
 
         // Resolving overloads is beyond the scope of this exercise. So, we will look for a method that matches exactly the
         // types of the arguments.  If we can't find one, then if there is exactly one method whose param types are
