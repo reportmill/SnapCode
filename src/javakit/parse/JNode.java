@@ -355,6 +355,17 @@ public class JNode {
     }
 
     /**
+     * Returns whether given node is ancestor of this node.
+     */
+    public boolean isAncestor(JNode aNode)
+    {
+        for (JNode parent = getParent(); parent != null; parent = parent.getParent())
+            if (parent == aNode)
+                return true;
+        return false;
+    }
+
+    /**
      * Returns the Resolver.
      */
     public Resolver getResolver()
