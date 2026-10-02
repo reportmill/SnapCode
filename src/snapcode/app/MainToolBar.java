@@ -20,6 +20,9 @@ import java.util.*;
  */
 public class MainToolBar extends WorkspaceTool {
 
+    // The account tool
+    private AccountTool _accountTool;
+
     /**
      * Constructor.
      */
@@ -161,8 +164,17 @@ public class MainToolBar extends WorkspaceTool {
             case "GreenfootButton" -> WorkspacePaneUtils.selectGoodDefaultFile(_workspacePane, getSelProject());
 
             // Handle AccountButton
-            case "AccountButton" -> new AccountTool(_workspacePane).showAccountTool();
+            case "AccountButton" -> showAccountTool(anEvent);
         }
+    }
+
+    /**
+     * Shows the account tool.
+     */
+    private void showAccountTool(ViewEvent anEvent)
+    {
+        if (_accountTool == null) _accountTool = new AccountTool(_workspacePane);
+        _accountTool.showAccountTool(anEvent.getView());
     }
 
     /**

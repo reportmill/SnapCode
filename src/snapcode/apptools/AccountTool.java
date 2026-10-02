@@ -27,9 +27,6 @@ public class AccountTool extends ViewController {
 
     // Constants
     private static final int PREF_WIDTH = 400;
-    private static final int TOP_MARGIN = 48;
-    private static final int RIGHT_MARGIN = 36;
-    private static final int BOTTOM_MARGIN = 50;
 
     // Constants
     private static final String GITHUB_USER_KEY = "GithubUser";
@@ -47,14 +44,18 @@ public class AccountTool extends ViewController {
     /**
      * Shows the account tool.
      */
-    public void showAccountTool()
+    public void showAccountTool(View accountToolButton)
     {
+        if (_popupWindow != null && _popupWindow.isShowing()) {
+            _popupWindow.hide();
+            return;
+        }
+
         _popupWindow = new PopupWindow();
         _popupWindow.setFocusable(true);
         _popupWindow.setContent(getUI());
-        View workspacePaneUI = _workspacePane.getUI();
         _popupWindow.setPrefSize(PREF_WIDTH, getUI().getPrefHeight() + 80);
-        _popupWindow.show(workspacePaneUI, workspacePaneUI.getWidth() - PREF_WIDTH - RIGHT_MARGIN, TOP_MARGIN);
+        _popupWindow.show(accountToolButton, -PREF_WIDTH, accountToolButton.getHeight() + 20);
     }
 
     /**
