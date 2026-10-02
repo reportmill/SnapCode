@@ -4,12 +4,9 @@ import snap.viewx.Console;
 import snapcode.apptools.RunTool;
 import snapcode.project.Project;
 import snapcode.project.RunConfig;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 
 /**
  * This RunApp subclass runs an app in SnapCode process for various unfortunate reasons.
@@ -22,8 +19,11 @@ public class RunAppLocal extends RunApp {
     // Whether runAppThread is waiting for console app
     private boolean _runAppThreadWaiting;
 
+    // An output stream to write user input to
+    private PipedOutputStream _standardInOutputStream;
+
     // An input stream for standard in
-    private BytesInputStream _standardInInputStream;
+    private InputStream _standardInInputStream;
 
     // The real system in/out/err
     private static final InputStream REAL_SYSTEM_IN = System.in;
@@ -36,6 +36,9 @@ public class RunAppLocal extends RunApp {
     public RunAppLocal(RunTool runTool, RunConfig runConfig)
     {
         super(runTool, runConfig);
+        _standardInOutputStream = new PipedOutputStream();
+        try { _standardInInputStream = new ProxyPipedInputStream(_standardInOutputStream); }
+        catch (IOException e) { e.printStackTrace(); }
     }
 
     /**
@@ -69,7 +72,7 @@ public class RunAppLocal extends RunApp {
         synchronized (RunAppLocal.class) {
 
             // Replace System.in with proxy versions to allow input/output
-            System.setIn(_standardInInputStream = new BytesInputStream());
+            System.setIn(_standardInInputStream);
             System.setOut(new ProxyPrintStream(REAL_SYSTEM_OUT));
             System.setErr(new ProxyPrintStream(REAL_SYSTEM_ERR));
 
@@ -155,6 +158,10 @@ public class RunAppLocal extends RunApp {
                 System.setOut(REAL_SYSTEM_OUT);
                 System.setErr(REAL_SYSTEM_ERR);
 
+                // Close standard in output stream (here or before change out?)
+                try { _standardInOutputStream.close(); }
+                catch (IOException e) { e.printStackTrace(); }
+
                 // Reset Console
                 Console.setShared(null);
                 Console.setConsoleCreatedHandler(null);
@@ -189,7 +196,11 @@ public class RunAppLocal extends RunApp {
     @Override
     public void sendInput(String aString)
     {
-        _standardInInputStream.addString(aString);
+        try {
+            _standardInOutputStream.write(aString.getBytes());
+            _standardInOutputStream.flush();
+        }
+        catch (IOException e) { e.printStackTrace(); }
     }
 
     /**
@@ -314,109 +325,19 @@ public class RunAppLocal extends RunApp {
     }
 
     /**
-     * An InputStream that lets you add bytes on the fly.
+     * A PipedInputStream - because something weird is happening.
      */
-    private static class BytesInputStream extends InputStream {
+    private static class ProxyPipedInputStream extends PipedInputStream {
 
-        // The byte array to write to
-        private byte[] _writeBytesBuffer = new byte[0];
+        public ProxyPipedInputStream(PipedOutputStream out) throws IOException { super(out); }
 
-        // The byte array to read from
-        private byte[] _readBytesBuffer = new byte[1];
-
-        // The index of the next character to read
-        private int _readBytesIndex;
-
-        // The currently marked position
-        private int _markedIndex;
-
-        // The number of bytes write bytes.
-        private int _writeBytesLength;
-
-        /** Constructor */
-        public BytesInputStream()
-        {
-            super();
-        }
-
-        /** Adds string to stream. */
-        public void addString(String aStr)
-        {
-            addBytes(aStr.getBytes());
-        }
-
-        /** Adds bytes to stream. */
-        public synchronized void addBytes(byte[] addBytes)
-        {
-            // Add new bytes to write buffer
-            int oldLength = _writeBytesBuffer.length;
-            _writeBytesBuffer = Arrays.copyOf(_writeBytesBuffer, oldLength + addBytes.length);
-            System.arraycopy(addBytes, 0, _writeBytesBuffer, oldLength, addBytes.length);
-            _writeBytesLength = _writeBytesBuffer.length;
-
-            // Wake up any reader waiting for more input
-            notifyAll();
-        }
-
-        /** Reads the next byte of data from this input stream. */
         @Override
-        public int read()
-        {
-            int len = read(_readBytesBuffer, 0, 1);
-            return len > 0 ? _readBytesBuffer[0] : -1;
-        }
-
-        /** Reads up to <code>len</code> bytes of data into an array of bytes from this input stream. */
-        @Override
-        public synchronized int read(byte[] theBytes, int offset, int length)
+        public int read(byte[] theBytes, int offset, int length) throws IOException
         {
             // This should be impossible, but it is happening in Java 25
-            if (this != System.in) {
-                try { return System.in.read(theBytes, offset, length); }
-                catch (IOException e) { return -1; }
-            }
-
-            // Wait for input - condition test + wait must hold the same lock the writer uses to notify
-            while (_readBytesIndex >= _writeBytesLength) {
-                try { wait(); }
-                catch (InterruptedException e) { return -1; } // Let terminate() unblock a pending read
-            }
-
-            int availableBytesCount = _writeBytesLength - _readBytesIndex;
-            if (length > availableBytesCount)
-                length = availableBytesCount;
-            if (length <= 0)
-                return 0;
-            System.arraycopy(_writeBytesBuffer, _readBytesIndex, theBytes, offset, length);
-            _readBytesIndex += length;
-            return length;
+            if (this != System.in)
+                return System.in.read(theBytes, offset, length);
+            return super.read(theBytes, offset, length);
         }
-
-        /** Skips <code>n</code> bytes of input from this input stream. */
-        @Override
-        public synchronized long skip(long n)
-        {
-            long k = _writeBytesLength - _readBytesIndex;
-            if (n < k) {
-                k = n < 0 ? 0 : n;
-            }
-            _readBytesIndex += (int) k;
-            return k;
-        }
-
-        /** Returns the number of remaining bytes that can be read (or skipped over) from this input stream. */
-        public synchronized int available() { return _writeBytesLength - _readBytesIndex; }
-
-        /** Tests if this <code>InputStream</code> supports mark/reset. */
-        public boolean markSupported() { return true; }
-
-        /** Set the current marked position in the stream. */
-        public void mark(int readAheadLimit) { _markedIndex = _readBytesIndex; }
-
-        /** Resets the buffer to the marked position. */
-        public synchronized void reset() { _readBytesIndex = _markedIndex; }
-
-        /** Closing a <tt>BytesArrayInputStream</tt> has no effect. */
-        public void close()  { }
     }
 }
