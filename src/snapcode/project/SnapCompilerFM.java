@@ -29,12 +29,6 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     // The base modules
     private static List<String> BASE_MODULE_NAMES = List.of("java.base", "java.prefs", "java.datatransfer", "java.desktop");
 
-    // Cache of module JavaFileObjects
-    private static Map<String,List<JavaFileObject>> _moduleFileObjects = new HashMap<>();
-
-    // Cache of package JavaFileObjects
-    private static Map<String,List<JavaFileObject>> _packageFileObjects = new HashMap<>();
-
     /**
      * Constructor.
      */
@@ -56,7 +50,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
 
         // Handle modules (WebVM has these for some reason)
         if (isSystemModule(aLoc))
-            return listModuleFiles(aLoc, packageName, kinds, recurse);
+            return listSystemModule(aLoc, packageName, kinds, recurse);
 
         // If not CLASS_PATH or SOURCE_PATH, just return normal version
         if (aLoc != StandardLocation.CLASS_PATH && aLoc != StandardLocation.SOURCE_PATH)
@@ -83,34 +77,19 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     }
 
     /**
-     * Return JavaFileObjects for module location and package.
+     * Special support for WebVM for SYSTEM_MODULES to remove module-info.class.
      */
-    private List<JavaFileObject> listModuleFiles(Location aLoc, String packageName, Set<Kind> kinds, boolean recurse) throws IOException
+    private Iterable<JavaFileObject> listSystemModule(Location aLoc, String packageName, Set<Kind> kinds, boolean recurse) throws IOException
     {
-        // Get cache key and cache map for location
-        String locStr = aLoc.toString();
-        String moduleName = locStr.substring("SYSTEM_MODULES[".length(), locStr.length() - 1);
-        String cacheKey = packageName.isEmpty() ? moduleName : packageName;
-        Map<String,List<JavaFileObject>> cacheMap = recurse ? _moduleFileObjects : _packageFileObjects;
-
-        // If already cached, just return
-        List<JavaFileObject> moduleFiles = cacheMap.get(cacheKey);
-        if (moduleFiles != null)
-            return moduleFiles;
-
-        // Do normal version
+        // Do normal version - just return if not recursive
         Iterable<JavaFileObject> superFiles = super.list(aLoc, packageName, kinds, recurse);
-        moduleFiles = new ArrayList<>();
-        superFiles.forEach(moduleFiles::add);
+        if (!recurse)
+            return superFiles;
 
-        // If root package, remove module-info.class
-        if (packageName.isEmpty() && recurse) {
-            Iterable<JavaFileObject> moduleObject = super.list(aLoc, packageName, kinds, false);
-            moduleObject.forEach(moduleFiles::remove);
-        }
-
-        // Cache and return
-        cacheMap.put(packageName, moduleFiles);
+        // Create list copy and remove module-info.class
+        List<JavaFileObject> moduleFiles = new ArrayList<>(); superFiles.forEach(moduleFiles::add);
+        Iterable<JavaFileObject> moduleObject = super.list(aLoc, packageName, kinds, false);
+        moduleObject.forEach(moduleFiles::remove);
         return moduleFiles;
     }
 
