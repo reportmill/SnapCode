@@ -65,6 +65,7 @@ public class JavaTextArea extends TextArea {
 
     // Constants for colors
     private static final Color ERROR_TEXT_COLOR = Color.RED.brighter().brighter();
+    private static final Color TOKEN_HIGHLITE_COLOR = new Color("#FFF3AA");
     private static final Color PROGRAM_COUNTER_LINE_HIGHLITE_COLOR = new Color(199, 218, 175, 200);
     private static final Color PRINT_MARGIN_COLOR = Color.GRAY9;
     private static final Color METHOD_COLOR = Color.get("#FAFAB4");
@@ -319,17 +320,23 @@ public class JavaTextArea extends TextArea {
     @Override
     protected void paintFront(Painter aPntr)
     {
-        TextPainter.TOKEN_PAINTER.paintTextAdapter(aPntr, _textAdapter);
-    }
+        // Paint selected tokens highlight rects
+        TextToken[] selTokens = getSelTokens();
+        _selTokensBounds.setRect(0, 0, 0, 0);
+        if (selTokens.length > 0) {
+            aPntr.setColor(TOKEN_HIGHLITE_COLOR);
+            for (TextToken token : selTokens) {
+                double tokenX = Math.round(token.getTextX()) - 1;
+                double tokenY = Math.round(token.getTextY()) - 1;
+                double tokenW = Math.ceil(token.getTextMaxX()) - tokenX + 1;
+                double tokenH = Math.ceil(token.getTextMaxY()) - tokenY + 1;
+                aPntr.fillRect(tokenX, tokenY, tokenW, tokenH);
+                _selTokensBounds.union(tokenX, tokenY, tokenW, tokenH);
+            }
+        }
 
-    /**
-     * Override to draw print margin.
-     */
-    @Override
-    protected void paintBack(Painter aPntr)
-    {
-        // Do normal version
-        super.paintBack(aPntr);
+        // Paint text selection
+        TextPainter.TOKEN_PAINTER.paintTextAdapterTextSel(aPntr, _textAdapter);
 
         // Configure MarginLine
         if (isShowPrintMargin()) {
@@ -343,9 +350,6 @@ public class JavaTextArea extends TextArea {
         if (_showScopeBoxes)
             paintScopeBoxes(aPntr);
 
-        // Underline build issues
-        paintErrors(aPntr);
-
         // Paint program counter
         int progCounterLine = getProgramCounterLine();
         if (progCounterLine >= 0 && progCounterLine < getLineCount()) {
@@ -354,20 +358,8 @@ public class JavaTextArea extends TextArea {
             aPntr.fillRect(0, textLine.getTextY() - 1, getWidth(), textLine.getHeight() + 3);
         }
 
-        // Paint selected tokens highlight rects
-        TextToken[] selTokens = getSelTokens();
-        _selTokensBounds.setRect(0, 0, 0, 0);
-        if (selTokens.length > 0) {
-            aPntr.setColor(new Color("#FFF3AA"));
-            for (TextToken token : selTokens) {
-                double tokenX = Math.round(token.getTextX()) - 1;
-                double tokenY = Math.round(token.getTextY()) - 1;
-                double tokenW = Math.ceil(token.getTextMaxX()) - tokenX + 1;
-                double tokenH = Math.ceil(token.getTextMaxY()) - tokenY + 1;
-                aPntr.fillRect(tokenX, tokenY, tokenW, tokenH);
-                _selTokensBounds.union(tokenX, tokenY, tokenW, tokenH);
-            }
-        }
+        // Underline build issues
+        paintErrors(aPntr);
 
         // If HoverNode, underline
         if (_hoverNode != null) {
@@ -380,6 +372,9 @@ public class JavaTextArea extends TextArea {
                 aPntr.drawLine(tokenX, tokenY, tokenMaxX, tokenY);
             }
         }
+
+        // Paint text
+        TextPainter.TOKEN_PAINTER.paintTextLayout(aPntr, _textAdapter.getTextLayout());
     }
 
     /**
@@ -513,10 +508,10 @@ public class JavaTextArea extends TextArea {
             return;
 
         // Paint inner box (white)
-        JStmt startStmt = blockStmts.get(0);
+        JStmt startStmt = blockStmts.getFirst();
         while (blockStmt.getLineIndex() == startStmt.getLineIndex() && startStmt.getNextStatement() != null)
             startStmt = startStmt.getNextStatement();
-        JStmt endStmt = blockStmts.get(blockStmts.size() - 1);
+        JStmt endStmt = blockStmts.getLast();
         if (blockStmt.getLineIndex() == endStmt.getLineIndex())
             return;
         paintScopeBoxForNodes(aPntr, startStmt, endStmt, level + 1);

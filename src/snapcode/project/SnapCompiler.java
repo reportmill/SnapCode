@@ -2,8 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcode.project;
-import snap.util.FilePathUtils;
-import snap.util.SnapEnv;
+import snap.util.*;
 import snap.web.WebFile;
 import javax.tools.*;
 import javax.tools.JavaCompiler.CompilationTask;
@@ -237,8 +236,12 @@ public class SnapCompiler {
      */
     protected void addBuildIssueToWorkspace(BuildIssue buildIssue)
     {
+        // Get build issues - just return if error on given line is already present
         Workspace workspace = _proj.getWorkspace();
         BuildIssues buildIssues = workspace.getBuildIssues();
+        if (ListUtils.hasMatch(buildIssues.getBuildIssues(), issue -> issue.getLine() == buildIssue.getLine() && issue.isError()))
+            return;
+
         buildIssues.addBuildIssue(buildIssue);
         if (buildIssue.getKind() == BuildIssue.Kind.Error)
             _errorCount++;
