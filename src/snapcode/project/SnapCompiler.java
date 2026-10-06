@@ -336,7 +336,10 @@ public class SnapCompiler {
         if (message.endsWith(";"))
             message = message.substring(0, message.length() - 1).trim();
 
-        // Return
+        // Capitalize first char
+        if (!message.isEmpty() && Character.isLowerCase(message.charAt(0)))
+            message = Character.toUpperCase(message.charAt(0)) + message.substring(1);
+
         return message;
     }
 
