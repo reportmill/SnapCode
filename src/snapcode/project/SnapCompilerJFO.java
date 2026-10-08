@@ -4,10 +4,7 @@
 package snapcode.project;
 import snap.web.WebFile;
 import javax.tools.SimpleJavaFileObject;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URI;
 import java.util.Arrays;
 
@@ -36,7 +33,7 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
      */
     protected SnapCompilerJFO(Project aProject, WebFile aFile, SnapCompiler aCompiler)
     {
-        super(getFileURI(aFile), isJavaFile(aFile) ? Kind.SOURCE : Kind.CLASS);
+        super(getFileURI(aFile), JavaAgent.isJavaFile(aFile) ? Kind.SOURCE : Kind.CLASS);
         _file = aFile;
         _proj = aProject;
         _compiler = aCompiler;
@@ -58,16 +55,8 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
      */
     public String getBinaryName()
     {
-        // If already set, just return
         if (_binaryName != null) return _binaryName;
-
-        // Get binary name from file
-        String path = _file.getPath();
-        int index = path.lastIndexOf('.');
-        String binaryName = path.substring(1, index).replace('/', '.');
-
-        // Set, return
-        return _binaryName = binaryName;
+        return _binaryName = _proj.getClassNameForFile(_file);
     }
 
     /**
@@ -175,15 +164,6 @@ class SnapCompilerJFO extends SimpleJavaFileObject {
     public String toString()
     {
         return uri.toString();
-    }
-
-    /**
-     * Returns whether file is java file.
-     */
-    private static boolean isJavaFile(WebFile aFile)
-    {
-        String type = aFile.getFileType();
-        return type.equals("java") || type.equals("jepl") || type.equals("jmd");
     }
 
     /**

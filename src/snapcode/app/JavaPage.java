@@ -229,6 +229,7 @@ public class JavaPage extends WebPage {
 
         // Append Comment
         //sb.append("\n/**\n * A custom class.\n */\n");
+        sb.append("import module java.base;\n");
 
         // Append class declaration: "public class <File-Name> extends Object {   }"
         sb.append("\npublic class ").append(className).append(" {\n\n");

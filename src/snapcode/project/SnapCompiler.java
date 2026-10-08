@@ -95,7 +95,6 @@ public class SnapCompiler {
         // Create Options list, add debug flag and source/target flag for Java 1.5
         List<String> options = new ArrayList<>();
         options.add("-Xlint:all,-serial,-rawtypes,-unchecked,-fallthrough,-dep-ann");
-        //options.add("-warn:-serial,-raw,-unchecked"); options.add("-proceedOnError");
 
         // Handle CheckErrorsOnly (either set proc none or add debug)
         if (_checkErrorsOnly)
@@ -103,15 +102,14 @@ public class SnapCompiler {
         else options.add("-g");
 
         // Set release version - doesn't work in WebVM because of compiler jar packaging
-        if (!SnapEnv.isWebVM) {
-            BuildFile buildFile = _proj.getBuildFile();
-            int compileRelease = buildFile.getCompileRelease();
+        BuildFile buildFile = _proj.getBuildFile();
+        int compileRelease = buildFile.getCompileRelease();
+        if (compileRelease != SnapUtils.getJavaVersionInt() && !SnapEnv.isWebVM) {
             options.add("--release");
             options.add(Integer.toString(compileRelease));
         }
 
         // Handle BuildFile.EnableCompilePreview -enable-preview
-        BuildFile buildFile = _proj.getBuildFile();
         if (buildFile.isEnableCompilePreview())
             options.add("--enable-preview");
 

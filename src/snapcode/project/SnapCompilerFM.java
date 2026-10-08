@@ -176,8 +176,11 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
      * Return a FileObject for a given location from which compiler can obtain source or byte code.
      */
     @Override
-    public JavaFileObject getJavaFileForInput(Location aLoc, String className, Kind kind)
+    public JavaFileObject getJavaFileForInput(Location aLoc, String className, Kind kind) throws IOException
     {
+        if (aLoc != StandardLocation.CLASS_PATH && aLoc != StandardLocation.SOURCE_PATH)
+            return super.getJavaFileForInput(aLoc, className, kind);
+
         //System.err.println("getJavaFileForInput: " + aClassName + ", kind: " + aKind);
         String sourceDirPath = _proj.getSourceDir().getDirPath();
         String javaFilePath = sourceDirPath + className.replace('.', '/') + ".java";

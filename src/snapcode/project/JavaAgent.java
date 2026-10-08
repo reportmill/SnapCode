@@ -447,8 +447,6 @@ public class JavaAgent extends TextAgent {
         // Initialize imports
         List<String> imports = new ArrayList<>();
         imports.add("module java.base");
-        if (SnapEnv.isWebVM) // Just until there is a fix for module imports
-            imports.add("java.util.*");
         imports.add("snap.view.*");
         imports.add("snap.gfx.*");
         imports.add("snap.geom.*");
