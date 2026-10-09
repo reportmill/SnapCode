@@ -5,8 +5,7 @@ import snapcode.apptools.RunTool;
 import snapcode.project.Project;
 import snapcode.project.RunConfig;
 import java.io.*;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 
 /**
  * This RunApp subclass runs an app in SnapCode process for various unfortunate reasons.
@@ -222,8 +221,11 @@ public class RunAppLocal extends RunApp {
 
             // Set target for static or instance
             Object target = null;
-            if (!Modifier.isStatic(mainMethod.getModifiers()))
-                target = mainClass.getConstructor().newInstance();
+            if (!Modifier.isStatic(mainMethod.getModifiers())) {
+                Constructor<?> constructor = mainClass.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                target = constructor.newInstance();
+            }
 
             // Invoke with appropriate arg (none or String[])
             if (mainMethod.getParameterTypes().length == 0)
