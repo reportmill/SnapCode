@@ -91,6 +91,7 @@ public class RunAppLocal extends RunApp {
             try {
                 _runAppThreadWaiting = true;
                 wait();
+                _runAppThreadWaiting = false;
             }
             catch (Exception e) { throw new RuntimeException(e); }
         }
@@ -106,14 +107,16 @@ public class RunAppLocal extends RunApp {
     public void terminate()
     {
         // If already cancelled, just return
-        if (_runAppThread == null) return;
+        Thread runAppThread = _runAppThread;
+        if (runAppThread == null) return;
+
+        // Close standard in output stream
+        try { _standardInOutputStream.close(); _standardInOutputStream = null; }
+        catch (IOException e) { e.printStackTrace(); }
 
         // If RunAppThreadWaiting (console app), just activate thread
         if (_runAppThreadWaiting) {
-            synchronized (this) {
-                try { notifyAll(); }
-                catch (Exception e) { throw new RuntimeException(e); }
-            }
+            runAppThread.notifyAll();
             return;
         }
 
@@ -146,6 +149,12 @@ public class RunAppLocal extends RunApp {
         // If already called, just return (possible if soft interrupt somehow finishes after hard thread interrupt has been triggered)
         if (_runAppThread == null) return;
 
+        // Close standard in output stream
+        if (_standardInOutputStream != null) {
+            try { _standardInOutputStream.close(); _standardInOutputStream = null; }
+            catch (IOException e) { e.printStackTrace(); }
+        }
+
         // Reset shared resources
         synchronized (RunAppLocal.class) {
 
@@ -156,10 +165,6 @@ public class RunAppLocal extends RunApp {
                 System.setIn(REAL_SYSTEM_IN);
                 System.setOut(REAL_SYSTEM_OUT);
                 System.setErr(REAL_SYSTEM_ERR);
-
-                // Close standard in output stream (here or before change out?)
-                try { _standardInOutputStream.close(); }
-                catch (IOException e) { e.printStackTrace(); }
 
                 // Reset Console
                 Console.setShared(null);
@@ -172,8 +177,7 @@ public class RunAppLocal extends RunApp {
         _running = false;
 
         // If console app, clear console
-        if (_runAppThreadWaiting)
-            setAltConsoleView(null);
+        setAltConsoleView(null);
 
         // Notify exited
         _appLsnrs.forEach(lsnr -> lsnr.appExited(this));
