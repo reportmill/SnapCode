@@ -358,6 +358,9 @@ public abstract class RunApp {
      */
     public void appendConsoleOutput(String aString, boolean isError)
     {
+        if (SnapEnv.isWebVM && aString.startsWith("TODO: JVM_"))
+            return;
+
         if (!ViewEnv.getEnv().isEventThread())
             ViewUtils.runLater(() -> appendConsoleOutput(aString, isError));
         else _consoleTextArea.appendString(aString, isError);
