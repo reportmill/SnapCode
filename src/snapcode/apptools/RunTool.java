@@ -1,6 +1,5 @@
 package snapcode.apptools;
 import snap.props.PropChange;
-import snap.util.ListUtils;
 import snap.util.SnapEnv;
 import snap.util.TaskRunner;
 import snap.viewx.DialogBox;
@@ -99,7 +98,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
     /**
      * Adds a new app.
      */
-    public void addApp(RunApp runApp)
+    private void addApp(RunApp runApp)
     {
         // Remove procs that are terminated and procs beyond limit
         for (RunApp p : _apps.toArray(new RunApp[0]))
@@ -120,22 +119,11 @@ public class RunTool extends WorkspaceTool implements AppListener {
     }
 
     /**
-     * Removes the app at given index.
-     */
-    public void removeApp(int anIndex)
-    {
-        RunApp runApp = _apps.remove(anIndex);
-        runApp.removeListener(this);
-    }
-
-    /**
      * Removes the given app.
      */
-    public void removeApp(RunApp aProcess)
+    private void removeApp(RunApp aProcess)
     {
-        int index = ListUtils.indexOfId(_apps, aProcess);
-        if (index >= 0)
-            removeApp(index);
+        _apps.remove(aProcess);
     }
 
     /**
@@ -146,7 +134,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
     /**
      * Sets the selected app.
      */
-    public void setSelApp(RunApp aProc)
+    private void setSelApp(RunApp aProc)
     {
         if (aProc == _selApp) return;
         _selApp = aProc;
@@ -230,7 +218,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
         WorkspaceBuilder workspaceBuilder = _workspace.getBuilder();
         if (workspaceBuilder.isNeedsBuild() || workspaceBuilder.isBuilding()) {
             TaskRunner<Boolean> buildRunner = workspaceBuilder.buildWorkspace();
-            buildRunner.setOnSuccess(success -> runAppBuildFinished(runApp, success));
+            buildRunner.setOnSuccess(success -> handleRunAppBuildFinished(runApp, success));
         }
 
         // Otherwise, just launch
@@ -240,7 +228,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
     /**
      * Called after build finished.
      */
-    private void runAppBuildFinished(RunApp runApp, boolean noErrors)
+    private void handleRunAppBuildFinished(RunApp runApp, boolean noErrors)
     {
         // If no errors, just run app
         if (noErrors)
@@ -279,7 +267,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
     /**
      * Sets the console view.
      */
-    public void setConsoleView(View consoleView)
+    private void setConsoleView(View consoleView)
     {
         if (consoleView == getConsoleView()) return;
         _consoleView = consoleView;
@@ -293,7 +281,7 @@ public class RunTool extends WorkspaceTool implements AppListener {
     /**
      * Reset console view.
      */
-    protected void resetConsoleView()
+    private void resetConsoleView()
     {
         RunApp selApp = getSelApp();
         if (selApp != null)

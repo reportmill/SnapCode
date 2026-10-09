@@ -15,8 +15,11 @@ public class RunAppLocal extends RunApp {
     // The thread to reset views
     private Thread _runAppThread;
 
-    // Whether runAppThread is waiting for console app
+    // Whether runAppThread is parked at the final wait() (main returned, app kept alive)
     private boolean _runAppThreadWaiting;
+
+    // Whether termination has been requested
+    private boolean _terminating;
 
     // An output stream to write user input to
     private PipedOutputStream _standardInOutputStream;
@@ -86,76 +89,105 @@ public class RunAppLocal extends RunApp {
         // Check back after slight delay to terminate if no console was activated
         ViewUtils.runDelayed(this::terminateIfConsoleNotActivated, 200);
 
-        // Wait for explicit termination
+        // Wait for explicit termination (guard against lost/spurious wakeups)
         synchronized (this) {
-            try {
-                _runAppThreadWaiting = true;
-                wait();
-                _runAppThreadWaiting = false;
+            _runAppThreadWaiting = true;
+            while (!_terminating) {
+                try { wait(); }
+                catch (InterruptedException e) { break; }
             }
-            catch (Exception e) { throw new RuntimeException(e); }
+            _runAppThreadWaiting = false;
         }
 
-        // Process terminate
+        // Process terminate (run thread is the sole owner of finalization)
         finalizeTermination();
     }
 
     /**
      * Terminates the process.
+     *
+     * This only signals termination - the run thread is responsible for actually finalizing. This matters when main()
+     * is blocked reading System.in: closing the standard-in pipe returns EOF to that read, which lets main() unwind
+     * on its own thread so its final output still reaches the app console and finalization happens exactly once.
      */
     @Override
     public void terminate()
     {
-        // If already cancelled, just return
-        Thread runAppThread = _runAppThread;
-        if (runAppThread == null) return;
-
-        // Close standard in output stream
-        try { _standardInOutputStream.close(); _standardInOutputStream = null; }
-        catch (IOException e) { e.printStackTrace(); }
-
-        // If RunAppThreadWaiting (console app), just activate thread
-        if (_runAppThreadWaiting) {
-            runAppThread.notifyAll();
-            return;
-        }
-
-        // Otherwise, hard terminate
-        hardTerminate();
-    }
-
-    /**
-     * Called to really terminate run with thread interrupt, if in system code.
-     */
-    private void hardTerminate()
-    {
-        // If standard terminate worked, just return
+        // If already terminated, just return
         Thread runAppThread = _runAppThread;
         if (runAppThread == null)
             return;
 
-        // Interrupt thread
-        runAppThread.interrupt();
+        // Mark terminating and wake run thread if it is parked at the final wait()
+        synchronized (this) {
+            if (_terminating) return;
+            _terminating = true;
+            notifyAll();
+        }
 
-        // Process termination
-        finalizeTermination();
+        // Close standard-in output stream: unblocks a thread blocked reading System.in (read returns EOF)
+        closeStandardInOutputStream();
+
+        // If still executing main() (e.g. blocked in a non-IO call), interrupt as a fallback to unblock it
+        if (!_runAppThreadWaiting && runAppThread != Thread.currentThread())
+            runAppThread.interrupt();
+
+        // Fallback: if the thread never unwinds (e.g. infinite loop), finalize anyway so UI reflects termination.
+        // finalizeTermination() is idempotent, so this is a no-op once the run thread has finalized normally.
+        ViewUtils.runDelayed(this::finalizeTermination, 500);
+
+        // Sleep in case some output gets printed by closing system.in
+        try { Thread.sleep(200); }
+        catch (InterruptedException ignore) { }
     }
 
     /**
-     * Called to do cleanup when after app is terminated.
+     * Called to do cleanup after app is terminated. Idempotent: the first caller claims finalization by nulling
+     * _runAppThread; later callers (run thread vs. delayed fallback) just return.
      */
     private void finalizeTermination()
     {
-        // If already called, just return (possible if soft interrupt somehow finishes after hard thread interrupt has been triggered)
-        if (_runAppThread == null) return;
-
-        // Close standard in output stream
-        if (_standardInOutputStream != null) {
-            try { _standardInOutputStream.close(); _standardInOutputStream = null; }
-            catch (IOException e) { e.printStackTrace(); }
+        // Claim finalization atomically - if already claimed, just return
+        synchronized (this) {
+            if (_runAppThread == null) return;
+            _runAppThread = null;
         }
 
-        // Reset shared resources
+        // Close standard in output stream (if not already closed by terminate())
+        closeStandardInOutputStream();
+
+        // Reset system in/out
+        resetSystemIO();
+
+        // Reset run state
+        _running = false;
+        _terminated = true;
+
+        // If console app, clear console
+        setAltConsoleView(null);
+
+        // Notify exited
+        notifyAppExited();
+    }
+
+    /**
+     * Closes the standard-in output stream (null-safe and idempotent).
+     */
+    private void closeStandardInOutputStream()
+    {
+        PipedOutputStream standardInOutputStream = _standardInOutputStream;
+        if (standardInOutputStream == null)
+            return;
+        _standardInOutputStream = null;
+        try { standardInOutputStream.close(); }
+        catch (IOException e) { e.printStackTrace(); }
+    }
+
+    /**
+     * Resets System IO.
+     */
+    private void resetSystemIO()
+    {
         synchronized (RunAppLocal.class) {
 
             // If another app already set new values, just skip
@@ -171,16 +203,6 @@ public class RunAppLocal extends RunApp {
                 Console.setConsoleCreatedHandler(null);
             }
         }
-
-        // Reset thread
-        _runAppThread = null;
-        _running = false;
-
-        // If console app, clear console
-        setAltConsoleView(null);
-
-        // Notify exited
-        _appLsnrs.forEach(lsnr -> lsnr.appExited(this));
     }
 
     /**
@@ -239,7 +261,8 @@ public class RunAppLocal extends RunApp {
 
         // Handle exception: Just print - goes to RunTool console
         catch (Throwable e) {
-            e.printStackTrace();
+            if (_runTool.getSelApp() == this)
+                e.printStackTrace();
         }
     }
 
