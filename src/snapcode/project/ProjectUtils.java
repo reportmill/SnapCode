@@ -379,7 +379,7 @@ public class ProjectUtils {
     /**
      * Returns JavaFX dependencies.
      */
-    private static List<MavenDependency> getJavaFXDependencies()
+    public static List<MavenDependency> getJavaFXDependencies()
     {
         if (_javaFXDependencies != null) return _javaFXDependencies;
         String arch = getArchString();
@@ -389,7 +389,7 @@ public class ProjectUtils {
         MavenDependency dep3 = new MavenDependency("org.openjfx:javafx-controls:" + version + ':' + arch);
         MavenDependency dep4 = new MavenDependency("org.openjfx:javafx-fxml:" + version + ':' + arch);
         _javaFXDependencies = List.of(dep1, dep2, dep3, dep4);
-        _javaFXDependencies.forEach(MavenDependency::getClassPaths);
+        _javaFXDependencies.forEach(MavenDependency::preloadPackageFiles);
         return _javaFXDependencies;
     }
 

@@ -222,10 +222,25 @@ public class ProjectBuilder {
     /**
      * Checks project dependencies.
      */
-    public boolean checkBuildDependencies(ActivityMonitor activityMonitor)
+    private boolean checkBuildDependencies(ActivityMonitor activityMonitor)
     {
+        if (_proj.getBuildFile().isIncludeJavaFX() && !checkJavaFXBuildDependencies(activityMonitor))
+            return false;
         List<BuildDependency> buildDependencies = _proj.getBuildFile().getDependencies();
         List<MavenDependency> mavenDependencies = ListUtils.filterByClass(buildDependencies, MavenDependency.class);
         return MavenDependency.loadDependenciesDeep(mavenDependencies, activityMonitor);
+    }
+
+    /**
+     * Checks JavaFX dependencies.
+     */
+    private boolean checkJavaFXBuildDependencies(ActivityMonitor activityMonitor)
+    {
+        List<MavenDependency> mavenDependencies = ProjectUtils.getJavaFXDependencies();
+        for (MavenDependency mavenDependency : mavenDependencies) {
+            if (!MavenDependency.loadDependency(mavenDependency, activityMonitor))
+                return false;
+        }
+        return true;
     }
 }

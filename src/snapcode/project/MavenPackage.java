@@ -63,7 +63,7 @@ public class MavenPackage extends PropObject {
     private static Map<String, MavenPackage> _packages = new HashMap<>();
 
     // Constant for maven id validator pattern
-    private static Pattern MAVEN_ID_PATTERN = Pattern.compile("^[a-zA-Z0-9_.\\-]+:[a-zA-Z0-9_.\\-]+:[a-zA-Z0-9_.\\-]+$");
+    private static Pattern MAVEN_ID_PATTERN = Pattern.compile("[a-zA-Z0-9_.\\-]+:[a-zA-Z0-9_.\\-]+:[a-zA-Z0-9_.\\-]+");
 
     // Constants for properties
     public static final String Loaded_Prop = "Loaded";
@@ -294,7 +294,7 @@ public class MavenPackage extends PropObject {
         MavenPackage mavenPackage = _packages.get(mavenId);
         if (mavenPackage != null)
             return mavenPackage;
-        if (!MAVEN_ID_PATTERN.matcher(mavenId).matches())
+        if (!MAVEN_ID_PATTERN.matcher(mavenId).lookingAt())
             return null;
         mavenPackage = new MavenPackage(mavenId);
         _packages.put(mavenId, mavenPackage);

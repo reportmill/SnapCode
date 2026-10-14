@@ -299,7 +299,7 @@ public class MavenDependency extends BuildDependency {
     protected String[] getClassPathsImpl()
     {
         MavenPackage mavenPackage = getMavenPackage();
-        return mavenPackage != null ? new String[] { mavenPackage.getClassPath() } : null;
+        return mavenPackage != null ? new String[] { mavenPackage.getClassPath() } : new String[0];
     }
 
     /**
@@ -503,20 +503,32 @@ public class MavenDependency extends BuildDependency {
         for (MavenDependency mavenDependency : dependencies) {
 
             // Load dependency
-            if (!mavenDependency.isLoaded()) {
-                if (activityMonitor != null)
-                    activityMonitor.beginTask("Loading dependency: " + mavenDependency.getArtifactId(), 1);
-                mavenDependency.loadPackageFiles();
-                if (activityMonitor != null)
-                    activityMonitor.endTask();
-                if (!mavenDependency.isLoaded())
-                    return false;
-            }
+            if (!loadDependency(mavenDependency, activityMonitor))
+                return false;
 
             // Load child dependencies
             List<MavenDependency> childDependencies = mavenDependency.getDependencies();
             if (!childDependencies.isEmpty())
                 loadDependenciesDeep(childDependencies, activityMonitor);
+        }
+
+        return true;
+    }
+
+    /**
+     * Loads a dependency.
+     */
+    public static boolean loadDependency(MavenDependency mavenDependency, ActivityMonitor activityMonitor)
+    {
+        // Load dependency
+        if (!mavenDependency.isLoaded()) {
+            if (activityMonitor != null)
+                activityMonitor.beginTask("Loading dependency: " + mavenDependency.getArtifactId(), 1);
+            mavenDependency.loadPackageFiles();
+            if (activityMonitor != null)
+                activityMonitor.endTask();
+            if (!mavenDependency.isLoaded())
+                return false;
         }
 
         return true;

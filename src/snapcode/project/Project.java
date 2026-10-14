@@ -229,7 +229,7 @@ public class Project extends PropObject {
         List<BuildDependency> buildFileDependencies = buildFile.getAllDependencies();
         for (BuildDependency dependency : buildFileDependencies) {
             String[] classPaths = dependency.getClassPaths();
-            if (classPaths != null)
+            if (classPaths != null && classPaths.length > 0)
                 Collections.addAll(compileClassPaths, classPaths);
             else System.err.println("Project.getCompileClassPaths: Can't get class path for: " + dependency);
         }
@@ -247,12 +247,9 @@ public class Project extends PropObject {
         String buildPath = _buildFile.getBuildPathAbsolute(); // Will be null for Project with http site
         String[] runtimeClassPaths = buildPath != null ? new String[] { buildPath } : new String[0];
 
-        // Add CompileClassPaths
+        // Add CompileClassPaths and return
         String[] compileClassPaths = getCompileClassPaths();
-        runtimeClassPaths = ArrayUtils.addAll(runtimeClassPaths, compileClassPaths);
-
-        // Return
-        return runtimeClassPaths;
+        return ArrayUtils.addAll(runtimeClassPaths, compileClassPaths);
     }
 
     /**

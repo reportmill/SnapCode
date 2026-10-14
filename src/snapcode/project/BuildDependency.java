@@ -41,7 +41,7 @@ public abstract class BuildDependency extends PropObject {
     /**
      * Returns whether this dependency is resolved.
      */
-    public boolean isResolved()  { return getClassPaths() != null; }
+    public boolean isResolved()  { return getClassPaths() != null && getClassPaths().length > 0; }
 
     /**
      * Returns the class paths for this dependency.
