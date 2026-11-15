@@ -24,6 +24,11 @@ public class SnapBuilderPage extends WebPage {
     }
 
     /**
+     * Returns the EditorPane.
+     */
+    public EditorPane getEditorPane()  { return _editorPane; }
+
+    /**
      * Override to wrap ReportPage in pane with EditButton.
      */
     protected View createUI()

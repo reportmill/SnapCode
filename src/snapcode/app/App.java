@@ -41,6 +41,9 @@ public class App {
         DevPaneExceptions.setAppInfo("SnapCode Version " + version + ", Build Date: " + buildDate);
         DevPaneExceptions.setDefaultUncaughtExceptionHandler();
 
+        // Expose SnapCode features to AI agents in the browser via WebMCP (navigator.modelContext)
+        ViewUtils.runLater(snapcode.webmcp.WebMCP::install);
+
         // If Java string set, open Java string
         if (handleAppArgs())
             return;
