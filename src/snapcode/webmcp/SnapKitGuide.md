@@ -1,18 +1,20 @@
-# Building apps in SnapCode
+# Building UI with SnapKit
 
-SnapCode is a Java IDE that runs in the browser. Apps you build here use **SnapKit** (package
-`snap.view` and friends), a UI toolkit that runs both on the desktop and in the browser. It is not Swing
-or JavaFX. Read this before writing code, and use `lookup_class` / `find_classes` to check any API
-you are not sure of: don't guess method names.
+**SnapKit** (package `snap.view` and friends) is a Java UI toolkit. It is not Swing or JavaFX.
+Read this before writing UI code, and use `lookup_class` / `find_classes` to check any API you are not
+sure of: don't guess method names.
+
+SnapKit apps run inside SnapCode's browser IDE — for the project workflow (`create_project`,
+`builder_*`, `build`, `run_app`) and the browser runtime rules, see the **SnapCode guide**
+(`snapcode_guide` tool). A SnapKit UI layout lives in a `.snp` file (XML), edited with the
+`builder_*` tools.
 
 ## Files
 
-| File | What it is |
-|---|---|
-| `Foo.java` | A normal Java class. Runnable if it has `main`. |
-| `Foo.snp` | A SnapKit UI layout (XML), edited with the GUI builder (`builder_*` tools). |
-
-Java files go in the project's source folder (`/src`).
+| File | What it is                                                                           |
+|---|--------------------------------------------------------------------------------------|
+| `Foo.java` | A normal Java class. Runnable if it has `main`.                                      |
+| `Foo.snp` | A SnapKit UI layout (XML), edited with the SnapCode GUI builder (`builder_*` tools). |
 
 ## The usual workflow
 
@@ -24,9 +26,11 @@ Java files go in the project's source folder (`/src`).
 
 ## App structure: a ViewOwner and its .snp file
 
-A window app is a subclass of `snap.view.ViewOwner`. Its UI comes from `createUI()`, which by default
-loads the `.snp` file with the **same simple name as the class**, from the same folder (`MyApp.snp` next
-to `MyApp.java`). Override `createUI()` only if you build the UI in code instead.
+A window app is a subclass of `snap.view.ViewOwner`. Always include a `.snp` file with the
+**same simple name as the class**, from the same folder (`MyApp.snp` next to `MyApp.java`) to define the UI
+in SnapKit UI XML.
+The UI in the `.snp` file is loaded automatically with the `createUI()` method.
+Do not add a `createUI()` method - always define UI in the `.snp` file.
 
 ```java
 import snap.view.*;
@@ -39,7 +43,6 @@ public class MyApp extends ViewOwner {
     @Override
     protected void initUI()
     {
-        setViewValue("CountText", "0");
     }
 
     /** Updates the UI from your data. Called after every respondUI(), and whenever you call resetLater(). */
@@ -129,6 +132,9 @@ For a one-off delay use `runDelayed(runnable, millis)`. To animate a view's prop
 `view.getAnim(1000).setX(200).setRotate(360).play();` (also `setScale`, `setOpacity`, `setLoopCount(n)`,
 `setOnFinish(runnable)`). The `Animate UI` help section has examples.
 
+> Running in the browser, **never** use `ScheduledExecutorService` for timing — it freezes the tab when
+> stopped. Use `ViewTimer`. See the browser rules in the SnapCode guide (`snapcode_guide`).
+
 ## Custom drawing and input
 
 Subclass `View`, override `protected void paintFront(Painter aPntr)`, and call `repaint()` when the data
@@ -136,25 +142,3 @@ changes. `Painter` has `setColor(Color)`, `setFont(Font)`, `fillRect`, `drawRect
 `drawString`, `drawImage`, `fill(Shape)`, `draw(Shape)`. Colors: `Color.RED` or `new Color("#3366CC")`;
 fonts: `new Font("Arial", 14)`. For mouse input on a custom view, register in its constructor:
 `addEventHandler(this::handleMouse, MousePress, MouseDrag, MouseRelease);`.
-
-## Rules for the browser
-
-SnapCode runs apps on a Java VM inside the browser (CheerpJ). In this environment:
-
-- **Never use `ScheduledExecutorService`** (`Executors.newScheduledThreadPool`,
-  `newSingleThreadScheduledExecutor`, `ScheduledThreadPoolExecutor`). Stopping one with `shutdown()` or
-  `shutdownNow()` **freezes the whole browser tab**. Use `ViewTimer` instead.
-- Plain threads, `java.util.Timer` and ordinary thread pools do work, but **only touch views on the UI
-  thread**: from another thread, wrap UI changes in `ViewUtils.runLater(...)` (or `runLater` on the
-  `ViewOwner`). `ViewTimer` needs none of this.
-- Don't block the UI thread: no `Thread.sleep` or long loops in `respondUI`, `resetUI` or timer callbacks.
-  The whole UI stops responding until they return.
-- `build` and `run_app` report a warning if a source file uses a pattern known to break here.
-
-## Charts, scripts and help
-
-- For charts, enable SnapCharts on the project: `set_build_settings` with `include_snapcharts: true`. The
-  help sections `Define datasets` and `Create Chart` show how.
-- `help_list_sections` / `help_get_section` give tested examples for common tasks (Basic Java, Create UI,
-  Animate UI, Draw Vector Graphics, Create Chart, Create 3D, ...).
-- `lookup_class` returns a class's real constructors, methods and docs; `find_classes` searches class names.

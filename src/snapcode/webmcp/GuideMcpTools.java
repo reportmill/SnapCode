@@ -13,8 +13,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * WebMCP tools that teach an agent how to build SnapKit apps in SnapCode: the app-building guide (offered to
- * agent hosts as a skill) and API lookup grounded in the classes the project actually runs with.
+ * WebMCP tools that teach an agent how to build SnapKit apps in SnapCode: two guides offered to agent hosts
+ * as skills (one for driving the SnapCode IDE, one for the SnapKit UI framework) and API lookup grounded in
+ * the classes the project actually runs with.
  */
 public class GuideMcpTools {
 
@@ -45,11 +46,20 @@ public class GuideMcpTools {
     public static void addTools(McpToolRegistry reg)
     {
         reg.addTool(new McpTool("snapcode_guide",
-                "How to build apps in SnapCode with SnapKit: file types, the ViewOwner + .snp app structure, layout, " +
-                "events, timers and animation, custom drawing, and rules for code that runs in the browser (for " +
-                "example: use snap.view.ViewTimer, never ScheduledExecutorService, which freezes the tab when stopped). " +
-                "Read this before writing SnapCode app code.",
-                new Schema(), GuideMcpTools::guide)).readOnly().skill().title("Building apps in SnapCode");
+                "How to drive the SnapCode IDE: Java vs .snp file types, the tool workflow (create_project, builder_*, " +
+                "build, run_app), the rules for code that runs in the browser (for example: use snap.view.ViewTimer, " +
+                "never ScheduledExecutorService, which freezes the tab when stopped), and the charts/help/lookup tooling. " +
+                "Read this before working in a SnapCode project. For how to write the UI code itself, see snapkit_guide.",
+                new Schema(), (args, result) -> emitGuide(result, "SnapCodeGuide.md")))
+                .readOnly().skill().title("Using the SnapCode IDE");
+
+        reg.addTool(new McpTool("snapkit_guide",
+                "How to build a UI with SnapKit (package snap.view, not Swing or JavaFX): the ViewOwner + .snp app " +
+                "structure, initUI/resetUI/respondUI event flow, layout containers and controls, timers and animation " +
+                "(snap.view.ViewTimer), and custom drawing. Read this before writing SnapKit app code. For the IDE " +
+                "workflow and browser runtime rules, see snapcode_guide.",
+                new Schema(), (args, result) -> emitGuide(result, "SnapKitGuide.md")))
+                .readOnly().skill().title("Building UI with SnapKit");
 
         reg.addTool(new McpTool("lookup_class",
                 "Returns a Java class's real API as SnapCode's project sees it: superclasses, constructors, methods and " +
@@ -76,14 +86,14 @@ public class GuideMcpTools {
     }
 
     /**
-     * snapcode_guide
+     * Emits the text of a guide resource (bundled next to this class) as the tool result.
      */
-    private static void guide(McpArgs args, McpResult result)
+    private static void emitGuide(McpResult result, String resourceName)
     {
-        WebURL guideUrl = WebURL.getResourceUrl(GuideMcpTools.class, "AgentGuide.md");
+        WebURL guideUrl = WebURL.getResourceUrl(GuideMcpTools.class, resourceName);
         String text = guideUrl != null ? guideUrl.getText() : null;
         if (text == null)
-            throw new McpException("The SnapCode guide is not available in this build");
+            throw new McpException("The SnapCode guide is not available in this build: " + resourceName);
         result.text(text);
     }
 
