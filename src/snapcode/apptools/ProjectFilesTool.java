@@ -203,6 +203,13 @@ public class ProjectFilesTool extends WorkspaceTool {
         ProjectFile selProjectFile = getProjectFileForFile(selFile);
         _filesTree.setSelItem(selProjectFile);
         _filesList.setSelItem(selProjectFile);
+
+        // Make sure selected file parent is expanded (should be handled in TreeView.setSelItem)
+        if (selProjectFile != null) {
+            ProjectFile selParentFile = selProjectFile.getParent();
+            if (selParentFile != null && !_filesTree.isItemExpanded(selParentFile))
+                _filesTree.expandItem(selParentFile);
+        }
     }
 
     /**
@@ -333,7 +340,7 @@ public class ProjectFilesTool extends WorkspaceTool {
         // Show first project root dir
         else if (firstTreeLoad) {
             if (!rootFiles.isEmpty())
-                _filesTree.expandItem(rootFiles.get(0));
+                _filesTree.expandItem(rootFiles.getFirst());
             List<ProjectFile> filesTreeFiles = _filesTree.getItems();
             if (filesTreeFiles.size() > 1)
                 _filesTree.expandItem(filesTreeFiles.get(1));
@@ -365,16 +372,6 @@ public class ProjectFilesTool extends WorkspaceTool {
      */
     private void handleSelFileChange()
     {
-        if (_filesTree == null) return;
-
-        // If directory was selected, show all tree items for it
-        WebFile selFile = getSelFile();
-        if (selFile != null && selFile.isDir()) {
-            ProjectFile projectFile = getProjectFileForFile(selFile);
-            if (projectFile != null)
-                _filesTree.expandItem(projectFile);
-        }
-
         resetLater();
     }
 
