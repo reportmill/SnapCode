@@ -10,12 +10,9 @@ you are not sure of: don't guess method names.
 | File | What it is |
 |---|---|
 | `Foo.java` | A normal Java class. Runnable if it has `main`. |
-| `Foo.jepl` | A Java REPL script: top-level statements, no class or `main` boilerplate. `println(x)` prints; `show(view)` shows a view in the console. Good for quick experiments and charts. |
-| `Foo.jmd` | Java markdown: prose with runnable Java blocks. |
 | `Foo.snp` | A SnapKit UI layout (XML), edited with the GUI builder (`builder_*` tools). |
 
-Java-like files go in the project's source folder (`/src`). Don't create a `.java` and a `.jepl` with the
-same name.
+Java files go in the project's source folder (`/src`).
 
 ## The usual workflow
 
@@ -57,10 +54,10 @@ public class MyApp extends ViewOwner {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        if (anEvent.equals("AddButton"))
-            _count++;
-        else if (anEvent.equals("ResetButton"))
-            _count = 0;
+        switch (anEvent.getName()) {
+            case "AddButton" -> _count++;
+            case "ResetButton" -> _count = 0;
+        }
     }
 
     public static void main(String[] args)
@@ -77,6 +74,8 @@ Key points:
 - Change state in `respondUI()`, show state in `resetUI()`. You don't need to call `resetLater()` at the end
   of `respondUI()`; it happens automatically. Call `resetLater()` when state changes from somewhere else (a
   timer, a background thread via `runLater`).
+- `initUI()` is only neccessary for UI initialization that isn't handled in `resetUI()`
+- `initUI()` doesn't need to call `resetUI()`, which is called automatically before UI is first shown.
 - Changes made inside `resetUI()` don't fire `respondUI()`.
 - Useful `ViewOwner` helpers, all taking a view Name: `getView`, `getViewText` / `setViewText`,
   `getViewValue` / `setViewValue`, `getViewStringValue`, `getViewIntValue`, `getViewFloatValue`,
